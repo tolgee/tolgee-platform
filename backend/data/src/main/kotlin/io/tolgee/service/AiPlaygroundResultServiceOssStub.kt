@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.exceptions.NotImplementedInOss
 import org.springframework.stereotype.Service
 
 @Service
@@ -12,26 +13,26 @@ class AiPlaygroundResultServiceOssStub : AiPlaygroundResultService {
     translation: String?,
     contextDescription: String?
   ) {
-    throw UnsupportedOperationException("Not included in OSS")
+    throw NotImplementedInOss()
   }
 
   override fun removeResults(projectId: Long, userId: Long) {
-    throw UnsupportedOperationException("Not included in OSS")
+    throw NotImplementedInOss()
   }
 
   override fun deleteResultsByLanguage(languageId: Long) {
-    throw UnsupportedOperationException("Not included in OSS")
+    throw NotImplementedInOss()
   }
 
   override fun deleteResultsByProject(projectId: Long) {
-    throw UnsupportedOperationException("Not included in OSS")
+    throw NotImplementedInOss()
   }
 
   override fun deleteResultsByUser(userId: Long) {
-    throw UnsupportedOperationException("Not included in OSS")
+    throw NotImplementedInOss()
   }
 
   override fun deleteResultsByKeys(keys: Collection<Long>) {
-    throw UnsupportedOperationException("Not included in OSS")
+    throw NotImplementedInOss()
   }
 }

@@ -1,6 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.MtValueProvider
+import io.tolgee.exceptions.NotImplementedInOss
 import org.springframework.stereotype.Component
 
 @Component
@@ -9,7 +10,7 @@ class LlmTranslationProviderOssImpl : LlmTranslationProvider() {
     get() = false
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
-    throw UnsupportedOperationException("Not included in OSS")
+    throw NotImplementedInOss()
   }
 
   override val supportedLanguages: Array<String>?
