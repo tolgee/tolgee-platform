@@ -7,12 +7,6 @@ import io.tolgee.model.Prompt
 import io.tolgee.model.enums.LlmProviderPriority
 
 interface PromptService {
-  fun translateAndUpdateTranslation(
-      projectId: Long,
-      data: PromptRunDto,
-      priority: LlmProviderPriority?,
-  )
-
   fun translate(
       projectId: Long,
       data: PromptRunDto,

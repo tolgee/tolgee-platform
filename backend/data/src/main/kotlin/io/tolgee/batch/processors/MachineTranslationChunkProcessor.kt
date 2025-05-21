@@ -32,7 +32,6 @@ class MachineTranslationChunkProcessor(
       onProgress,
       useMachineTranslation = true,
       useTranslationMemory = false,
-      llmPrompt = getParams(job).llmPrompt,
     )
   }
 

@@ -3,6 +3,7 @@ package io.tolgee.service
 import io.tolgee.api.EeSubscriptionProvider
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties.LlmProvider
+import io.tolgee.exceptions.InvalidStateException
 import io.tolgee.model.enums.LlmProviderType
 import org.springframework.stereotype.Service
 
@@ -28,7 +29,7 @@ class LlmPropertiesService(
           LlmProvider(
             type = LlmProviderType.TOLGEE,
             name = "Tolgee",
-            apiUrl = eeSubscriptionProvider?.getLicensingUrl() ?: "http://app.tolgee.io"
+            apiUrl = eeSubscriptionProvider?.getLicensingUrl() ?: throw InvalidStateException()
           )
         )
       }

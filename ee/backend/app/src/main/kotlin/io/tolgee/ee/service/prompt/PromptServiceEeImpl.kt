@@ -359,17 +359,6 @@ class PromptServiceEeImpl(
     return getTranslationFromPromptResult(result)
   }
 
-  override fun translateAndUpdateTranslation(
-    projectId: Long,
-    data: PromptRunDto,
-    priority: LlmProviderPriority?,
-  ) {
-    val result = translate(projectId, data, priority)
-    val translation = translationService.getOrCreate(data.keyId, data.targetLanguageId)
-    translation.text = result.translated
-    translationService.save(translation)
-  }
-
   fun getDefaultPrompt(): PromptDto {
     return promptDefaultService.getDefaultPrompt()
   }
