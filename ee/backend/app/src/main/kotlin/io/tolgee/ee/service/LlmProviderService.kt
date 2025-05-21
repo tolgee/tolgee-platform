@@ -56,6 +56,8 @@ class LlmProviderService(
   ): LlmProviderDto {
     val customProviders = getAll(organizationId)
     val serverProviders = getAllServerProviders()
+
+    // if there is a provider of that name in custom providers, it overrides server provider(s)
     val providersOfTheName =
       if (customProviders.find { it.name == name } != null) {
         customProviders
@@ -65,6 +67,8 @@ class LlmProviderService(
         it.name == name
       }
 
+    // try to find the provider(s) with matching priority
+    // if none found, get all of them
     val providersWithPriority =
       if (providersOfTheName.find { it.priority == priority } != null) {
         providersOfTheName.filter { it.priority == priority }
