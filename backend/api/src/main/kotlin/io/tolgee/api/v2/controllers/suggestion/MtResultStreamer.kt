@@ -12,10 +12,7 @@ import io.tolgee.hateoas.machineTranslation.StreamedSuggestionInfo
 import io.tolgee.hateoas.machineTranslation.StreamedSuggestionItem
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.security.ProjectHolder
-import io.tolgee.service.machineTranslation.MachineTranslationParams
-import io.tolgee.service.machineTranslation.MtService
-import io.tolgee.service.machineTranslation.MtServiceInfo
-import io.tolgee.service.machineTranslation.MtTranslatorResult
+import io.tolgee.service.machineTranslation.*
 import io.tolgee.util.Logging
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.debug
@@ -53,7 +50,11 @@ class MtResultStreamer(
   }
 
   private fun getInfo(): StreamedSuggestionInfo {
-    return StreamedSuggestionInfo(servicesToUse.map { it.serviceType }, baseBlank)
+    return StreamedSuggestionInfo(
+      servicesToUse.map { it.serviceType },
+      servicesToUse.find { it.serviceType === MtServiceType.PROMPT }?.promptId,
+      baseBlank
+    )
   }
 
   private fun writeServiceResultsAsync() {
