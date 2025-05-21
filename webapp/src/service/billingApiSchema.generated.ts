@@ -858,13 +858,6 @@ export interface components {
        */
       limit: number;
     };
-    Metadata: {
-      closeItems: components["schemas"]["ExampleItem"][];
-      examples: components["schemas"]["ExampleItem"][];
-      keyDescription?: string;
-      languageDescription?: string;
-      projectDescription?: string;
-    };
     MtCreditsPriceModel: {
       /** Format: int64 */
       amount: number;
