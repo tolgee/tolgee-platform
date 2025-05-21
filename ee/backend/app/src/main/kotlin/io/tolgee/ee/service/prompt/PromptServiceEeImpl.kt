@@ -296,7 +296,7 @@ class PromptServiceEeImpl(
 
   fun getTranslationFromPromptResult(result: PromptService.Companion.PromptResult): MtValueProvider.MtResult {
     val json = result.parsedJson ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
-    val translation = json.get("output").asText() ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
+    val translation = json.get("output")?.asText() ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
 
     return MtValueProvider.MtResult(
       translation,

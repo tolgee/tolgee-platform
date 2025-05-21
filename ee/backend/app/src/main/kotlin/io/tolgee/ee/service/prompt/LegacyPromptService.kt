@@ -5,6 +5,7 @@ import com.github.jknack.handlebars.Handlebars
 import io.tolgee.component.machineTranslation.LegacyTolgeeTranslateParams
 import io.tolgee.dtos.LlmParams
 import io.tolgee.model.mtServiceConfig.Formality
+import io.tolgee.util.nullIfEmpty
 import org.springframework.stereotype.Service
 
 // max sum of lenghts of the examples and close items
@@ -85,10 +86,10 @@ class LegacyPromptService(
       {{/if}}
       The message will be formatted in JSON format with this structure: {"sourceString": string}.
       {{#if closeItems}}
-      You will respond with JSON formatted string with this structure: {"targetString": string, "contextDescription": string}.
+      You will respond with JSON formatted string with this structure: {"output": string, "contextDescription": string}.
       In "contextDescription" field describe the estimated context of the translation on the page (keep it in {{source}} language).
       {{else}}
-      You will respond with JSON formatted string with this structure: {"targetString": string}.
+      You will respond with JSON formatted string with this structure: {"output": string}.
       {{/if}}
 
       {{#if cjk}}
@@ -108,13 +109,14 @@ class LegacyPromptService(
   fun getVariables(params: LegacyTolgeeTranslateParams): MutableMap<String, Any?> {
     val result = mutableMapOf<String, Any?>()
 
-    result.set("input", params.text)
-    result.set("keyName", params.keyName)
-    result.set("contextDescription", params.metadata?.keyDescription)
-    result.set("source", params.sourceTag)
-    result.set("target", params.targetTag)
-    result.set("projectDescription", params.metadata?.projectDescription?.let { "```\n${it}\n```" })
-    result.set("languageNote", params.metadata?.languageDescription?.let { "```\n${it}\n```" })
+    result.set("keyName", Handlebars.SafeString(params.keyName))
+    result.set("contextDescription", params.metadata?.keyDescription?.let { Handlebars.SafeString(it) })
+    result.set("source", Handlebars.SafeString(params.sourceTag))
+    result.set("target", Handlebars.SafeString(params.targetTag))
+    result.set(
+      "projectDescription",
+      params.metadata?.projectDescription?.let { Handlebars.SafeString("```\n${it}\n```") })
+    result.set("languageNote", params.metadata?.languageDescription?.let { Handlebars.SafeString("```\n${it}\n```") })
     result.set("formal", params.formality == Formality.FORMAL)
     result.set("informal", params.formality == Formality.INFORMAL)
     result.set("cjk", promptVariablesService.cjkVariable(params.targetTag).value)
@@ -128,13 +130,18 @@ class LegacyPromptService(
       }
       ?.map {
         mutableMapOf(
-          it.key to "keyName",
-          it.source to "source",
-          it.target to "target",
+          "keyName" to it.key,
+          "source" to it.source,
+          "target" to it.target,
         )
       }
 
-    result.set("closeItems", closeItems?.map { jacksonObjectMapper().writeValueAsString(it) })
+    result.set(
+      "closeItems",
+      closeItems?.map {
+        jacksonObjectMapper().writeValueAsString(it)?.let { Handlebars.SafeString(it) }
+      }?.nullIfEmpty()
+    )
 
     val examples = params.metadata?.examples
       ?.filter {
@@ -143,26 +150,31 @@ class LegacyPromptService(
       }
       ?.map {
         mutableMapOf(
-          it.key to "keyName",
-          it.source to "source",
-          it.target to "target",
+          "keyName" to it.key,
+          "source" to it.source,
+          "target" to it.target,
         )
       }
 
-    result.set("examples", examples?.map { jacksonObjectMapper().writeValueAsString(it) })
+    result.set(
+      "examples",
+      examples?.map {
+        jacksonObjectMapper().writeValueAsString(it)?.let { Handlebars.SafeString(it) }
+      }?.nullIfEmpty()
+    )
 
     val pluralFormExamples = params.pluralFormExamples?.map {
       "${it.key} (e.g. ${it.value})"
     }?.joinToString("\n")
-    result.set("pluralFormExamples", pluralFormExamples)
+    result.set("pluralFormExamples", pluralFormExamples?.let { Handlebars.SafeString(it) })
 
     val exactForms = params.pluralFormExamples?.keys?.toList()
 
     val exactFormsString = exactForms?.joinToString(", ")
-    result.set("exactForms", exactFormsString)
+    result.set("exactForms", exactFormsString?.let { Handlebars.SafeString(it) })
 
     val exampleIcuPlural = exactForms?.let { "{count, plural, ${it.joinToString(" ") { form -> "$form {...}" }}" }
-    result.set("exampleIcuPlural", exampleIcuPlural)
+    result.set("exampleIcuPlural", exampleIcuPlural?.let { Handlebars.SafeString(it) })
 
     return result
   }
@@ -176,7 +188,10 @@ class LegacyPromptService(
 
     val prompt = renderedTemplate.apply(variables)
 
-    val input = jacksonObjectMapper().writeValueAsString(mapOf(params.text to "sourceString"))
+    val input = jacksonObjectMapper().writeValueAsString(mapOf("sourceString" to params.text))
+
+    System.out.println(prompt)
+    System.out.println(input)
 
     val messages = listOf(
       LlmParams.Companion.LlmMessage(
