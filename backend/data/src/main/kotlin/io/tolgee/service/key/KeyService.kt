@@ -295,6 +295,7 @@ class KeyService(
     screenshotService.deleteAllByKeyId(id)
     keyRepository.delete(key)
     namespaceService.deleteIfUnused(key.namespace)
+    aiPlaygroundResultService.deleteResultsByKeys(listOf(id))
   }
 
   @Transactional

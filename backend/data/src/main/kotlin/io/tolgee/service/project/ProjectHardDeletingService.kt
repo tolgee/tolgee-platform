@@ -8,6 +8,7 @@ import io.tolgee.model.Project
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
+import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
@@ -43,6 +44,7 @@ class ProjectHardDeletingService(
   private val mtServiceConfigService: MtServiceConfigService,
   @Lazy
   private val self: ProjectHardDeletingService,
+  private val aiPlaygroundResultService: AiPlaygroundResultService,
 ) : Logging {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
@@ -87,6 +89,7 @@ class ProjectHardDeletingService(
       avatarService.unlinkAvatarFiles(project)
       batchJobService.deleteAllByProjectId(project.id)
       bigMetaService.deleteAllByProjectId(project.id)
+      aiPlaygroundResultService.deleteResultsByProject(project.id)
       projectRepository.delete(project)
     }
   }
