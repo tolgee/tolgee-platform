@@ -120,7 +120,6 @@ class PromptVariablesService(
       ),
     )
 
-
     variables.add(target)
 
     val otherVar = Variable("other")
