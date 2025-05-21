@@ -123,7 +123,7 @@ class PromptServiceEeImpl(
   fun getPrompt(
     projectId: Long,
     template: String,
-    keyId: Long,
+    keyId: Long?,
     targetLanguageId: Long,
     provider: String,
     options: List<BasicPromptOption>?,
@@ -174,9 +174,9 @@ class PromptServiceEeImpl(
   @Transactional
   fun getLLMParamsFromPrompt(
     prompt: String,
-    keyId: Long,
+    keyId: Long?,
   ): LLMParams {
-    val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+    val key = keyId?.let { keyService.find(it) ?: throw NotFoundException(Message.KEY_NOT_FOUND) }
     var preparedPrompt = prompt
 
     val pattern = Regex("\\[\\[screenshot_(full|small)_(\\d+)]]")
@@ -194,7 +194,7 @@ class PromptServiceEeImpl(
           // Extract size and id from the match groups
           val size = match.groups[1]!!.value // full or small
           val id = match.groups[2]!!.value.toLong() // number
-          val screenshot = key.keyScreenshotReferences.find { it.screenshot.id == id }?.screenshot
+          val screenshot = key?.keyScreenshotReferences?.find { it.screenshot.id == id }?.screenshot
           if (screenshot == null) {
             null
           } else {
@@ -209,7 +209,7 @@ class PromptServiceEeImpl(
 
             lateinit var image: ByteArray
 
-            if (screenshot.keyScreenshotReferences.find { it.key.id == key.id } !== null) {
+            if (screenshot.keyScreenshotReferences.find { it.key.id == key?.id } !== null) {
               val converter =
                 ImageConverter(
                   ByteArrayInputStream(
