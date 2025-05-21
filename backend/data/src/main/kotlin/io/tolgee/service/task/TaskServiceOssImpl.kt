@@ -1,6 +1,5 @@
 package io.tolgee.service.task
 
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
