@@ -1,5 +1,6 @@
 package io.tolgee.component.contentStorageProvider
 
+import io.tolgee.exceptions.NotImplementedInOss
 import io.tolgee.model.contentDelivery.ContentStorage
 import org.springframework.stereotype.Component
 
@@ -9,6 +10,6 @@ class ContentStorageProviderOssImpl : ContentStorageProvider {
     projectId: Long,
     contentStorageId: Long,
   ): ContentStorage {
-    throw UnsupportedOperationException("Not included in OSS")
+    throw NotImplementedInOss()
   }
 }
