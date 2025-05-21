@@ -19,7 +19,7 @@ class PromptTestData : BaseTestData() {
   lateinit var czech: LanguageBuilder
   lateinit var keys: MutableList<KeyBuilder>
   lateinit var customPrompt: PromptBuilder
-  lateinit var llmProvider: LLMProviderBuilder
+  lateinit var llmProvider: LlmProviderBuilder
 
   init {
 
@@ -61,7 +61,7 @@ class PromptTestData : BaseTestData() {
         }
 
         llmProvider =
-          addLLMProvider {
+          addLlmProvider {
             name = "organization-provider"
           }
       }

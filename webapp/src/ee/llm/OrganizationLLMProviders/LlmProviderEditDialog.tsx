@@ -7,7 +7,7 @@ import {
   styled,
 } from '@mui/material';
 import { Formik } from 'formik';
-import { LLMProviderForm } from './LLMProviderEdit.tsx/LLMProviderForm';
+import { LlmProviderForm } from 'tg.ee.module/llm/OrganizationLLMProviders/LlmProviderEdit.tsx/LlmProviderForm';
 import { T, useTranslate } from '@tolgee/react';
 import { LoadingButton } from '@mui/lab';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -18,7 +18,7 @@ import {
   getValidationSchema,
   LlmProviderModel,
   LlmProviderType,
-} from './LLMProviderEdit.tsx/llmProvidersConfig';
+} from 'tg.ee.module/llm/OrganizationLLMProviders/LlmProviderEdit.tsx/llmProvidersConfig';
 import { useState } from 'react';
 
 const StyledDialogContent = styled(DialogContent)`
@@ -37,7 +37,7 @@ type Props = {
   provider: LlmProviderModel;
 };
 
-export const LLMProviderEditDialog = ({ onClose, provider }: Props) => {
+export const LlmProviderEditDialog = ({ onClose, provider }: Props) => {
   const { t } = useTranslate();
   const organization = useOrganization();
   const [type, setType] = useState<LlmProviderType>(provider.type);
@@ -80,7 +80,7 @@ export const LLMProviderEditDialog = ({ onClose, provider }: Props) => {
             <>
               <DialogTitle>{t('llm_provider_update_title')}</DialogTitle>
               <StyledDialogContent>
-                <LLMProviderForm type={type} onTypeChange={setType} />
+                <LlmProviderForm type={type} onTypeChange={setType} />
               </StyledDialogContent>
               <DialogActions>
                 <Button onClick={onClose}>{t('global_cancel_button')}</Button>

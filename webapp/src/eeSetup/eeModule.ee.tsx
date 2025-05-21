@@ -49,7 +49,7 @@ import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
 import { BillingMenuItemsProps } from './EeModuleType';
 import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
-import { OrganizationLLMProvidersView } from '../ee/llm/OrganizationLLMProviders/OrganizationLLMProvidersView';
+import { OrganizationLlmProvidersView } from '../ee/llm/OrganizationLLMProviders/OrganizationLlmProvidersView';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -150,7 +150,7 @@ export const routes = {
       <>
         {config.llm.enabled && (
           <PrivateRoute path={LINKS.ORGANIZATION_LLM_PROVIDERS.template}>
-            <OrganizationLLMProvidersView />
+            <OrganizationLlmProvidersView />
           </PrivateRoute>
         )}
         {config.billing.enabled && (

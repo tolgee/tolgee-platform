@@ -7,7 +7,7 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { messageService } from 'tg.service/MessageService';
-import { useLLMProviderTranslation } from 'tg.translationTools/useLLMProviderTranslation';
+import { useLlmProviderTranslation } from 'tg.translationTools/useLlmProviderTranslation';
 
 const StyledContainer = styled('div')`
   display: contents;
@@ -48,9 +48,9 @@ type Props = {
   onEdit?: () => void;
 };
 
-export const LLMProviderItem = ({ provider, onEdit }: Props) => {
+export const LlmProviderItem = ({ provider, onEdit }: Props) => {
   const isEditable = provider.id !== undefined;
-  const translateProviderType = useLLMProviderTranslation();
+  const translateProviderType = useLlmProviderTranslation();
   const organization = useOrganization();
   const { t } = useTranslate();
 

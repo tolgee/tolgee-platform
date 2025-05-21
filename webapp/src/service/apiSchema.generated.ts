@@ -2954,17 +2954,6 @@ export interface components {
       /** @description Provided languages data */
       selectedLanguages: components["schemas"]["LanguageModel"][];
     };
-    LLMProviderRequest: {
-      apiKey?: string;
-      apiUrl: string;
-      deployment?: string;
-      format?: string;
-      keepAlive?: string;
-      model?: string;
-      name: string;
-      priority?: "LOW" | "HIGH";
-      type: "OPENAI" | "OPENAI_AZURE";
-    };
     LanguageAiPromptCustomizationModel: {
       /**
        * @description The language description used in the  prompt that helps AI translator to fine tune results for specific language
@@ -3124,6 +3113,17 @@ export interface components {
       format?: string;
       /** Format: int64 */
       id: number;
+      keepAlive?: string;
+      model?: string;
+      name: string;
+      priority?: "LOW" | "HIGH";
+      type: "OPENAI" | "OPENAI_AZURE";
+    };
+    LlmProviderRequest: {
+      apiKey?: string;
+      apiUrl: string;
+      deployment?: string;
+      format?: string;
       keepAlive?: string;
       model?: string;
       name: string;
@@ -8285,7 +8285,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LLMProviderRequest"];
+        "application/json": components["schemas"]["LlmProviderRequest"];
       };
     };
   };
@@ -8432,7 +8432,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LLMProviderRequest"];
+        "application/json": components["schemas"]["LlmProviderRequest"];
       };
     };
   };

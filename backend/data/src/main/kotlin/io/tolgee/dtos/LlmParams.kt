@@ -1,6 +1,6 @@
 package io.tolgee.dtos
 
-class LLMParams(
+class LlmParams(
   val messages: List<LlmMessage>,
   val shouldOutputJson: Boolean,
 ) {

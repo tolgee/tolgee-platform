@@ -47,7 +47,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
     internalProperties.fakeMtProviders = true
     llmProperties.enabled = true
     llmProperties.providers.add(
-      LlmProperties.LLMProvider(
+      LlmProperties.LlmProvider(
       "default",
       type = LlmProviderType.OPENAI,
       apiUrl = "https://test.com",

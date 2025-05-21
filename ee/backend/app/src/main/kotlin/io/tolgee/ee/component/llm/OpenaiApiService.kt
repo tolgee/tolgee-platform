@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.configuration.tolgee.machineTranslation.LLMProviderInterface
-import io.tolgee.dtos.LLMParams
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
+import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.service.PromptService
@@ -24,12 +24,12 @@ import java.util.*
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class OpenaiApiService : AbstractLLMApiService(), Logging {
+class OpenaiApiService : AbstractLlmApiService(), Logging {
   override fun defaultAttempts(): List<Int> = listOf(30)
 
   override fun translate(
-    params: LLMParams,
-    config: LLMProviderInterface,
+    params: LlmParams,
+    config: LlmProviderInterface,
     restTemplate: RestTemplate,
   ): PromptService.Companion.PromptResult {
     val headers = HttpHeaders()
@@ -40,7 +40,7 @@ class OpenaiApiService : AbstractLLMApiService(), Logging {
 
     if (params.shouldOutputJson) {
       inputMessages.add(
-        LLMParams.Companion.LlmMessage(LLMParams.Companion.LlmMessageType.TEXT, "Return only valid json!"),
+        LlmParams.Companion.LlmMessage(LlmParams.Companion.LlmMessageType.TEXT, "Return only valid json!"),
       )
     }
 
@@ -48,12 +48,12 @@ class OpenaiApiService : AbstractLLMApiService(), Logging {
 
     inputMessages.forEach {
       if (
-        it.type == LLMParams.Companion.LlmMessageType.TEXT &&
+        it.type == LlmParams.Companion.LlmMessageType.TEXT &&
         it.text != null
       ) {
         messages.add(RequestMessage(role = "user", content = it.text!!))
       } else if (
-        it.type == LLMParams.Companion.LlmMessageType.IMAGE &&
+        it.type == LlmParams.Companion.LlmMessageType.IMAGE &&
         it.image != null
       ) {
         messages.add(

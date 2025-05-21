@@ -1,10 +1,10 @@
 package io.tolgee.ee.api.v2.controllers
 
-import io.tolgee.dtos.LLMProviderDto
-import io.tolgee.dtos.request.llmProvider.LLMProviderRequest
-import io.tolgee.ee.api.v2.hateoas.assemblers.LLMProviderModelAssembler
-import io.tolgee.ee.api.v2.hateoas.assemblers.LLMProviderSimpleModelAssembler
-import io.tolgee.ee.service.LLMProviderService
+import io.tolgee.dtos.LlmProviderDto
+import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
+import io.tolgee.ee.api.v2.hateoas.assemblers.LlmProviderModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.LlmProviderSimpleModelAssembler
+import io.tolgee.ee.service.LlmProviderService
 import io.tolgee.hateoas.llmProvider.*
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.openApiDocs.OpenApiOrderExtension
@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.*
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/organizations/{organizationId:[0-9]+}/llm-providers"])
 @OpenApiOrderExtension(6)
-class LLMProviderController(
-  private val providerService: LLMProviderService,
-  private val providerModelAssembler: LLMProviderModelAssembler,
-  private val providerSimpleModelAssembler: LLMProviderSimpleModelAssembler,
+class LlmProviderController(
+  private val providerService: LlmProviderService,
+  private val providerModelAssembler: LlmProviderModelAssembler,
+  private val providerSimpleModelAssembler: LlmProviderSimpleModelAssembler,
 ) {
   @GetMapping("all-available")
   @UseDefaultPermissions
@@ -31,7 +31,7 @@ class LLMProviderController(
     val serverProviders = providerService.getAllServerProviders()
     val customProviders = providerService.getAll(organizationId)
     val existing = mutableSetOf<String>()
-    val result = mutableListOf<LLMProviderDto>()
+    val result = mutableListOf<LlmProviderDto>()
     customProviders.forEach {
       if (!existing.contains(it.name)) {
         result.add(it)
@@ -69,7 +69,7 @@ class LLMProviderController(
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   fun createProvider(
     @PathVariable organizationId: Long,
-    @RequestBody @Valid dto: LLMProviderRequest,
+    @RequestBody @Valid dto: LlmProviderRequest,
   ): LlmProviderModel {
     val result = providerService.createProvider(organizationId, dto)
     return providerModelAssembler.toModel(result)
@@ -80,7 +80,7 @@ class LLMProviderController(
   fun updateProvider(
     @PathVariable organizationId: Long,
     @PathVariable providerId: Long,
-    @RequestBody @Valid dto: LLMProviderRequest,
+    @RequestBody @Valid dto: LlmProviderRequest,
   ): LlmProviderModel {
     val result = providerService.updateProvider(organizationId, providerId, dto)
     return providerModelAssembler.toModel(result)

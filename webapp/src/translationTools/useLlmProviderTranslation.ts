@@ -5,7 +5,7 @@ import { components } from 'tg.service/apiSchema.generated';
 export type LlmProviderModel = components['schemas']['LlmProviderModel'];
 export type LlmProviderType = LlmProviderModel['type'];
 
-export const useLLMProviderTranslation = () => {
+export const useLlmProviderTranslation = () => {
   const { t } = useTranslate();
   return (type: LlmProviderType) => {
     switch (type) {

@@ -1,13 +1,13 @@
 package io.tolgee.model
 
-import io.tolgee.dtos.LLMProviderDto
+import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 
 @Entity
-class LLMProvider(
+class LlmProvider(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long = 0L,
@@ -29,8 +29,8 @@ class LLMProvider(
   @JoinColumn(name = "organization_id")
   var organization: Organization,
 ) : AuditModel() {
-  fun toDto(): LLMProviderDto {
-    return LLMProviderDto(
+  fun toDto(): LlmProviderDto {
+    return LlmProviderDto(
       id = id,
       name = name,
       type = type,

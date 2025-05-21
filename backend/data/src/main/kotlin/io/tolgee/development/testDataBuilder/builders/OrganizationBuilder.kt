@@ -16,7 +16,7 @@ class OrganizationBuilder(
     var avatarFile: ClassPathResource? = null
     var slackWorkspaces: MutableList<OrganizationSlackWorkspaceBuilder> = mutableListOf()
     var tenant: SsoTenantBuilder? = null
-    var llmProviders: MutableList<LLMProviderBuilder> = mutableListOf()
+    var llmProviders: MutableList<LlmProviderBuilder> = mutableListOf()
   }
 
   var defaultOrganizationOfUser: UserAccount? = null
@@ -66,8 +66,8 @@ class OrganizationBuilder(
     return invitationBuilder
   }
 
-  fun addLLMProvider(ft: FT<LLMProvider>): LLMProviderBuilder {
-    val builder = LLMProviderBuilder(this)
+  fun addLlmProvider(ft: FT<LlmProvider>): LlmProviderBuilder {
+    val builder = LlmProviderBuilder(this)
     data.llmProviders.add(builder)
     ft(builder.self)
     return builder

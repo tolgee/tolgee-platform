@@ -25,7 +25,7 @@ class LlmTranslationProviderEeImpl(
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
     val metadata = params.metadata ?: throw Error("Metadata are required here")
-    val promptParams = promptService.getLLMParamsFromPrompt(metadata.prompt, metadata.keyId)
+    val promptParams = promptService.getLlmParamsFromPrompt(metadata.prompt, metadata.keyId)
     val result =
       promptService.runPrompt(
         metadata.organizationId,

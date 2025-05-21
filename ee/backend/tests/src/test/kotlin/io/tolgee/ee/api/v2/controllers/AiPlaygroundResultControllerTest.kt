@@ -18,7 +18,7 @@ class AiPlaygroundResultControllerTest : ProjectAuthControllerTest("/v2/projects
     llmProperties.enabled = true
     llmProperties.providers =
       mutableListOf(
-        LlmProperties.LLMProvider(
+        LlmProperties.LlmProvider(
           type = LlmProviderType.OPENAI,
           pricePerMillionInput = 2.0,
           pricePerMillionOutput = 2.0,

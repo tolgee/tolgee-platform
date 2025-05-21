@@ -10,7 +10,7 @@ import { Select } from 'tg.component/common/form/fields/Select';
 import { Select as MuiSelect } from 'tg.component/common/Select';
 
 import { Box, MenuItem, styled } from '@mui/material';
-import { useLLMProviderTranslation } from 'tg.translationTools/useLLMProviderTranslation';
+import { useLlmProviderTranslation } from 'tg.translationTools/useLlmProviderTranslation';
 import { LabelHint } from 'tg.component/common/LabelHint';
 
 const StyledEmpty = styled(Box)`
@@ -22,12 +22,12 @@ type Props = {
   onTypeChange: (value: LlmProviderType) => void;
 };
 
-export const LLMProviderForm = ({ type, onTypeChange }: Props) => {
+export const LlmProviderForm = ({ type, onTypeChange }: Props) => {
   const { t } = useTranslate();
   const defaults = llmProvidersDefaults(t);
   const globalConfig = llmProvidersConfig(t);
   const config = globalConfig[type];
-  const translateType = useLLMProviderTranslation();
+  const translateType = useLlmProviderTranslation();
   return (
     <>
       <MuiSelect

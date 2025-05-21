@@ -78,7 +78,7 @@ class TolgeeTranslatorWithBatchTest {
 //
 //    assertThrows<TranslationApiRateLimitException> {
 //      cloudTolgeeTranslateApiService.translate(
-//        LLMParams(
+//        LlmParams(
 //          "Helo",
 //          null,
 //          "en",

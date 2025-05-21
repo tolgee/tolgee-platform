@@ -4,7 +4,7 @@ import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
 
-interface LLMProviderInterface {
+interface LlmProviderInterface {
   @DocProperty(description = "Provider name")
   var name: String
 

@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 
 export type LlmProviderModel = components['schemas']['LlmProviderModel'];
 export type LlmProviderType = LlmProviderModel['type'];
-type LLMProviderRequest = components['schemas']['LLMProviderRequest'];
+type LlmProviderRequest = components['schemas']['LlmProviderRequest'];
 
 export type ProviderOptions = {
   label: string;
@@ -87,7 +87,7 @@ export const getInitialValues = (
   t: TranslateFunction,
   existingData?: LlmProviderModel
 ) => {
-  const result: LLMProviderRequest = {
+  const result: LlmProviderRequest = {
     type,
     name: '',
     apiUrl: '',
