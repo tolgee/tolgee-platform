@@ -2,9 +2,11 @@ package io.tolgee.ee.component.llm
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
+import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -91,7 +93,8 @@ class ClaudeApiService : AbstractLlmApiService(), Logging {
       )
 
     return PromptResult(
-      response.body?.content?.first()?.text ?: throw RuntimeException(response.toString()),
+      response.body?.content?.first()?.text
+        ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(response.toString())),
       usage =
         response.body?.usage?.let {
           PromptResponseUsageDto(

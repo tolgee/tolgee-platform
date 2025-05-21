@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
+import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -106,7 +108,8 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
       )
 
     return PromptResult(
-      response = response.body?.choices?.first()?.message?.content ?: throw RuntimeException(response.toString()),
+      response = response.body?.choices?.first()?.message?.content
+        ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(response.toString())),
       usage =
         response.body?.usage?.let {
           PromptResponseUsageDto(
@@ -116,13 +119,6 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
           )
         },
     )
-  }
-
-  private fun HttpClientErrorException.parse(): JsonNode? {
-    if (!this.responseBodyAsString.isNullOrBlank()) {
-      return jacksonObjectMapper().readValue(this.responseBodyAsString)
-    }
-    return null
   }
 
   /**

@@ -1,8 +1,10 @@
 package io.tolgee.ee.component.llm
 
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
+import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -66,7 +68,8 @@ class OllamaApiService : AbstractLlmApiService(), Logging {
       )
 
     return PromptResult(
-      response.body?.message?.content ?: throw RuntimeException(response.toString()),
+      response.body?.message?.content
+        ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(response.toString())),
       usage = null,
     )
   }
