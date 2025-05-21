@@ -2199,7 +2199,14 @@ export interface components {
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
         | "instance_not_using_license_key"
-        | "invalid_path";
+        | "invalid_path"
+        | "llm_provider_not_found"
+        | "llm_provider_error"
+        | "prompt_not_found"
+        | "llm_provider_not_returned_json"
+        | "llm_template_parsing_error"
+        | "llm_rate_limited"
+        | "llm_provider_timeout";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -3980,6 +3987,76 @@ export interface components {
       slug?: string;
       stats: components["schemas"]["ProjectStatistics"];
     };
+    PromptDto: {
+      name: string;
+      options?: (
+        | "KEY_INFO"
+        | "KEY_CONTEXT"
+        | "PROJECT_DESCRIPTION"
+        | "LANGUAGE_NOTES"
+        | "TM_SUGGESTIONS"
+        | "SCREENSHOT"
+      )[];
+      providerName: string;
+      template?: string;
+    };
+    PromptModel: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      options?: (
+        | "KEY_INFO"
+        | "KEY_CONTEXT"
+        | "PROJECT_DESCRIPTION"
+        | "LANGUAGE_NOTES"
+        | "TM_SUGGESTIONS"
+        | "SCREENSHOT"
+      )[];
+      /** Format: int64 */
+      projectId: number;
+      providerName: string;
+      template?: string;
+    };
+    PromptResponseDto: {
+      parsedJson?: components["schemas"]["JsonNode"];
+      /** Format: int32 */
+      price?: number;
+      prompt: string;
+      result: string;
+      usage?: components["schemas"]["PromptResponseUsageDto"];
+    };
+    PromptResponseUsageDto: {
+      /** Format: int64 */
+      cachedTokens?: number;
+      /** Format: int64 */
+      inputTokens?: number;
+      /** Format: int64 */
+      outputTokens?: number;
+    };
+    PromptRunDto: {
+      /** Format: int64 */
+      keyId: number;
+      options?: (
+        | "KEY_INFO"
+        | "KEY_CONTEXT"
+        | "PROJECT_DESCRIPTION"
+        | "LANGUAGE_NOTES"
+        | "TM_SUGGESTIONS"
+        | "SCREENSHOT"
+      )[];
+      provider: string;
+      /** Format: int64 */
+      targetLanguageId: number;
+      template?: string;
+    };
+    PromptVariableDto: {
+      description?: string;
+      name: string;
+      /** @description List of nested properties for this variable, allowing hierarchical structuring. */
+      props?: components["schemas"]["PromptVariableDto"][] | null;
+      type: "FRAGMENT" | "OBJECT" | "STRING";
+      value?: string;
+    };
     /** @description Modified fields */
     PropertyModification: {
       new?: { [key: string]: unknown };
@@ -4822,7 +4899,14 @@ export interface components {
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
         | "instance_not_using_license_key"
-        | "invalid_path";
+        | "invalid_path"
+        | "llm_provider_not_found"
+        | "llm_provider_error"
+        | "prompt_not_found"
+        | "llm_provider_not_returned_json"
+        | "llm_template_parsing_error"
+        | "llm_rate_limited"
+        | "llm_provider_timeout";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
