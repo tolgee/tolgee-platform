@@ -27,7 +27,10 @@ export const LlmProvidersCustom = () => {
     },
   });
 
-  if (providersLoadable.data?._embedded?.providers?.length === 0) {
+  if (
+    !providersLoadable.data?._embedded?.providers?.length &&
+    providersLoadable.isSuccess
+  ) {
     return (
       <EmptyListMessage>
         {t('llm_providers_custom_empty_message')}

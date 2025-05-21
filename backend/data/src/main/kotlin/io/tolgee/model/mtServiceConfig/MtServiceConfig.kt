@@ -40,10 +40,6 @@ class MtServiceConfig : StandardAuditModel() {
   @ColumnDefault("DEFAULT")
   var deeplFormality: Formality = Formality.DEFAULT
 
-  @Enumerated(EnumType.STRING)
-  @ColumnDefault("DEFAULT")
-  var promptFormality: Formality = Formality.DEFAULT
-
   @ManyToOne
   @JoinColumn(name = "prompt_id")
   var prompt: Prompt? = null
@@ -66,7 +62,6 @@ class MtServiceConfig : StandardAuditModel() {
         when (serviceType) {
           MtServiceType.AWS -> config.awsFormality
           MtServiceType.DEEPL -> config.deeplFormality
-          MtServiceType.PROMPT -> config.promptFormality
           else -> null
         }
       val promptId =

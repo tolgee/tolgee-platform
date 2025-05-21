@@ -157,7 +157,6 @@ class SuggestionTestData : BaseTestData() {
       this.targetLanguage = germanLanguage
       this.enabledServices = mutableSetOf(MtServiceType.PROMPT)
       this.primaryService = MtServiceType.PROMPT
-      this.promptFormality = formality
     }
   }
 
