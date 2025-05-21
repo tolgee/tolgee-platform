@@ -28,7 +28,10 @@ class MtTranslator(
     context.preparePossibleTargetLanguages(paramsList)
     val batchItems = expandParams(paramsList)
     val result = MtBatchTranslator(context).translate(batchItems)
-    publishAfterEvent(context.project, result.sumOf { it.actualPrice })
+    publishAfterEvent(
+      context.project,
+      result.sumOf { it.actualPrice }
+    )
     return result
   }
 
@@ -70,6 +73,7 @@ class MtTranslator(
               baseTranslationText = params.baseTranslationText ?: getBaseTranslation(params.keyId),
               targetLanguageId = targetLanguageId,
               service = serviceInfo.serviceType,
+              promptId = serviceInfo.promptId,
             ),
           )
         }

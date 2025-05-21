@@ -4203,4 +4203,137 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-1">
+        <createTable tableName="ai_playground_result">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="ai_playground_resultPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="context_description" type="VARCHAR(255)"/>
+            <column name="translation" type="VARCHAR(255)"/>
+            <column name="key_id" type="BIGINT"/>
+            <column name="language_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-2">
+        <createTable tableName="llm_provider">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="llm_providerPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="api_key" type="VARCHAR(255)"/>
+            <column name="api_url" type="VARCHAR(255)"/>
+            <column name="deployment" type="VARCHAR(255)"/>
+            <column name="format" type="VARCHAR(255)"/>
+            <column name="keep_alive" type="VARCHAR(255)"/>
+            <column name="model" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="priority" type="VARCHAR(255)"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="organization_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-3">
+        <createTable tableName="prompt">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="promptPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="options" type="VARCHAR[]"/>
+            <column name="provider_name" type="VARCHAR(255)"/>
+            <column name="template" type="TEXT"/>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-4">
+        <addColumn tableName="mt_service_config">
+            <column name="prompt_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-5">
+        <createIndex indexName="IDX3y1p4ky4k250lblg5xsmih5mj" tableName="ai_playground_result">
+            <column name="language_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-6">
+        <createIndex indexName="IDX6aay2d4dls0ma07ghj1xm3qkq" tableName="llm_provider">
+            <column name="organization_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-7">
+        <createIndex indexName="IDXb46d51ix1jfwjpxodb2ye6mk0" tableName="llm_provider">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-8">
+        <createIndex indexName="IDXhciyhicmo3qk5l69svo61nx9u" tableName="ai_playground_result">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-9">
+        <createIndex indexName="IDXhuukvou2svvmdhox1s1ypr5ck" tableName="prompt">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-10">
+        <createIndex indexName="IDXo90fm1uhwbgyv6yrluuu33ony" tableName="ai_playground_result">
+            <column name="key_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-11">
+        <createIndex indexName="IDXqoau1fyjfw3cpp8w3ag3q5vxv" tableName="ai_playground_result">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-12">
+        <addForeignKeyConstraint baseColumnNames="language_id" baseTableName="ai_playground_result" constraintName="FK4uqjckwgdycsmf5iotm0u86at" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-13">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="prompt" constraintName="FK596hug6yhk8qd0ba6pqvpgdj6" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-14">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="ai_playground_result" constraintName="FK5u8y4fsyys5gugxxafo7s0mf" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-15">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="ai_playground_result" constraintName="FK75olry8276x9p28o2yqxtt7wi" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-16">
+        <addForeignKeyConstraint baseColumnNames="prompt_id" baseTableName="mt_service_config" constraintName="FKh8ryv9e4bam7ixyepewxldn3h" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="prompt" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-17">
+        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="ai_playground_result" constraintName="FKjkuq1qx92i73y5nvme2uqpthh" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-18">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="llm_provider" constraintName="FKtky043854voywcr6m36rpiell" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-19">
+        <dropColumn columnName="primary_service_formality" tableName="mt_service_config"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-20">
+        <dropColumn columnName="tolgee_formality" tableName="mt_service_config"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748265031093-21">
+        <sql dbms="postgresql">
+            UPDATE mt_service_config SET primary_service = 'PROMPT' WHERE primary_service = 'TOLGEE';
+            UPDATE mt_service_config_enabled_services SET enabled_services = 'PROMPT' WHERE enabled_services = 'TOLGEE';
+        </sql>
+    </changeSet>
 </databaseChangeLog>

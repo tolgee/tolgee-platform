@@ -8,7 +8,9 @@ import io.tolgee.model.Project
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
+import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
+import io.tolgee.service.PromptService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
@@ -18,6 +20,7 @@ import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.Logging
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.context.annotation.Lazy
 import org.springframework.scheduling.annotation.Async
@@ -43,6 +46,8 @@ class ProjectHardDeletingService(
   private val mtServiceConfigService: MtServiceConfigService,
   @Lazy
   private val self: ProjectHardDeletingService,
+  private val aiPlaygroundResultService: AiPlaygroundResultService,
+  @Qualifier("promptServiceEeImpl") private val promptService: PromptService,
 ) : Logging {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
@@ -74,7 +79,11 @@ class ProjectHardDeletingService(
         screenshotService.deleteAllByProject(project.id)
       }
 
+      promptService.deleteAllByProjectId(project.id)
+
       mtServiceConfigService.deleteAllByProjectId(project.id)
+
+      aiPlaygroundResultService.deleteResultsByProject(project.id)
 
       traceLogMeasureTime("deleteProject: delete languages") {
         languageService.deleteAllByProject(project.id)

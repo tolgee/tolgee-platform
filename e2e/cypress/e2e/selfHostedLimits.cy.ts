@@ -106,7 +106,7 @@ describe('Self-hosted Limits', () => {
 
       openSuggestionPanel();
       assertPlanLimitPopoverWithUsageVisible();
-      cy.get('body').type('{esc}');
+      cy.gcy('plan-limit-dialog-close').click();
       assertPlanLimitPopoverNotExists();
       new E2TranslationsView().closeTranslationEdit();
       openSuggestionPanel();
@@ -124,7 +124,7 @@ describe('Self-hosted Limits', () => {
 
       openSuggestionPanel();
       assertSpendingLimitExceededPopoverVisible();
-      cy.get('body').type('{esc}');
+      cy.gcy('spending-limit-dialog-close').click();
       assertSpendingLimitExceededPopoverNotExists();
       new E2TranslationsView().closeTranslationEdit();
       openSuggestionPanel();

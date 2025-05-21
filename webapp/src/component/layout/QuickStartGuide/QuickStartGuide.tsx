@@ -1,7 +1,7 @@
 import { Box, IconButton, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useMemo } from 'react';
-import { ChevronUp } from '@untitled-ui/icons-react';
+import { X } from '@untitled-ui/icons-react';
 
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { RocketFilled } from 'tg.component/CustomIcons';
@@ -72,7 +72,7 @@ export const QuickStartGuide = ({ onClose }: Props) => {
           <T keyName="guide_title" />
         </Box>
         <IconButton onClick={() => onClose()}>
-          <ChevronUp />
+          <X />
         </IconButton>
       </StyledHeader>
       <Box />

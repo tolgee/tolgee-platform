@@ -1,6 +1,10 @@
 import clsx from 'clsx';
 
-import { TABLE_CENTERED, TABLE_DIVIDER, TABLE_TOP_ROW } from '../tableStyles';
+import {
+  TABLE_CENTERED,
+  TABLE_DIVIDER,
+  TABLE_TOP_ROW,
+} from '../../../../component/languages/tableStyles';
 import { LanguageRow } from './LanguageRow';
 import { LanguageCombinedSetting, OnMtChange } from './types';
 import { PrimaryServiceLabel } from './PrimaryServiceLabel';

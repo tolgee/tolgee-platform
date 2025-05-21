@@ -17,14 +17,17 @@ type TypedData = QueryProps<Url, Method, paths>;
 
 type ServiceOutput = {
   serviceType: string;
+  promptId: number | undefined;
   result?: { output: string; contextDescription?: string };
   errorMessage: string | null;
+  errorParams: string[] | undefined;
 };
 
 export type CombinedMTResponse = {
   servicesTypes: string[];
   result: Record<string, ServiceOutput | undefined>;
   baseBlank?: boolean;
+  promptId: number | undefined;
 };
 
 function combineChunks(meshedChunks: string): CombinedMTResponse {
@@ -38,11 +41,13 @@ function combineChunks(meshedChunks: string): CombinedMTResponse {
     servicesTypes: [],
     result: {},
     baseBlank: false,
+    promptId: undefined,
   };
   messages.forEach((message) => {
     if (message.servicesTypes) {
       result.servicesTypes = message.servicesTypes;
       result.baseBlank = message.baseBlank;
+      result.promptId = message.promptId;
     }
     if (message.serviceType) {
       result.result[message.serviceType] = message;

@@ -62,7 +62,7 @@ class MachineTranslationChunkProcessor(
     projectId ?: throw IllegalArgumentException("Project id is required")
     val languageIds = request.targetLanguageIds
     val services = mtServiceConfigService.getPrimaryServices(languageIds, projectId).values.toSet()
-    if (services.map { it?.serviceType }.contains(MtServiceType.TOLGEE)) {
+    if (services.map { it?.serviceType }.contains(MtServiceType.PROMPT)) {
       return 2
     }
     return 5
