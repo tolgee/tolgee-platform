@@ -4332,7 +4332,7 @@
     </changeSet>
     <changeSet author="stepangranat (generated)" id="1747832560304-21">
         <sql dbms="postgresql">
-            UPDATE mt_service_config SET primary_service = 'PROMPT' WHERE primary_serivce = 'TOLGEE';
+            UPDATE mt_service_config SET primary_service = 'PROMPT' WHERE primary_service = 'TOLGEE';
             UPDATE mt_service_config_enabled_services SET enabled_services = 'PROMPT' WHERE enabled_services = 'TOLGEE';
         </sql>
     </changeSet>
