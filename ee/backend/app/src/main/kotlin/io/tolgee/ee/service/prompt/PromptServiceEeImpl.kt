@@ -300,7 +300,7 @@ class PromptServiceEeImpl(
 
     return MtValueProvider.MtResult(
       translation,
-      contextDescription = json.get("contextDescription").asText(),
+      contextDescription = json.get("contextDescription")?.asText(),
       price = result.price,
       usage = result.usage,
     )
