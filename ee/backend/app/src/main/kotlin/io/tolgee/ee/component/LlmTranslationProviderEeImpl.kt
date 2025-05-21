@@ -35,6 +35,7 @@ class LlmTranslationProviderEeImpl(
     promptParams: LlmParams,
     organizationId: Long,
     provider: String,
+    attempts: List<Int>? = null,
   ): MtValueProvider.MtResult {
     val result =
       promptService.runPrompt(
