@@ -64,7 +64,8 @@ class PromptController(
   fun createPrompt(
     @RequestBody @Valid dto: PromptDto,
   ): PromptModel {
-    if (dto.template !== null) {
+    // ai-playground allows custom templates only as paid feature
+    if (dto.template != null) {
       enabledFeaturesProvider.checkFeatureEnabled(
         projectHolder.project.organizationOwnerId,
         Feature.AI_PROMPT_CUSTOMIZATION,
@@ -90,7 +91,8 @@ class PromptController(
     @PathVariable promptId: Long,
     @RequestBody @Valid dto: PromptDto,
   ): PromptModel {
-    if (dto.template !== null) {
+    // ai-playground allows custom templates only as paid feature
+    if (dto.template != null) {
       enabledFeaturesProvider.checkFeatureEnabled(
         projectHolder.project.organizationOwnerId,
         Feature.AI_PROMPT_CUSTOMIZATION,
@@ -113,7 +115,8 @@ class PromptController(
   fun run(
     @Valid @RequestBody data: PromptRunDto,
   ): PromptResponseDto {
-    if (data.template !== null) {
+    // ai-playground allows custom templates only as paid feature
+    if (data.template != null) {
       enabledFeaturesProvider.checkFeatureEnabled(
         projectHolder.project.organizationOwnerId,
         Feature.AI_PROMPT_CUSTOMIZATION,
