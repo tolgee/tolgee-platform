@@ -145,7 +145,7 @@ export function testTranslations({ project, languages }: ProjectInfo) {
         cy.gcy('comment-text').contains('test comment').should('be.visible');
       }
 
-      cy.gcy('translations-cell-cancel-button').click();
+      cy.gcy('translations-cell-cancel-button').scrollIntoView().click();
     }
   });
 }
