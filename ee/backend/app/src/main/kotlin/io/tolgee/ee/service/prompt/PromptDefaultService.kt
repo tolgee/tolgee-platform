@@ -27,7 +27,9 @@ class PromptDefaultService(private val llmProperties: LLMProperties) {
 
         {{fragment.translationMemory}}
 
-        {{fragment.keyInfo}}
+        {{fragment.keyName}}
+
+        {{fragment.keyDescription}}
 
         {{fragment.translationInfo}}
 
