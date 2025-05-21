@@ -10,6 +10,6 @@ class ContentStorageProviderOssImpl : ContentStorageProvider {
     projectId: Long,
     contentStorageId: Long,
   ): ContentStorage {
-    throw BadRequestException("Not implemented")
+    throw UnsupportedOperationException("Not included in OSS")
   }
 }

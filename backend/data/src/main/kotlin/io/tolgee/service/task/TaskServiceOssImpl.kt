@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 class TaskServiceOssImpl : ITaskService {
   override fun deleteAll(tasks: List<Task>) {
-    throw BadRequestException("Not implemented")
+    throw UnsupportedOperationException("Not included in OSS")
   }
 
   override fun findAssigneeById(
@@ -38,6 +38,6 @@ class TaskServiceOssImpl : ITaskService {
   }
 
   override fun getAgencyTasks(agencyId: Long): List<Task> {
-    throw BadRequestException("Not implemented")
+    throw UnsupportedOperationException("Not included in OSS")
   }
 }

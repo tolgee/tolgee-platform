@@ -97,6 +97,12 @@ export const LanguageSettingsDialog = ({
     config?.machineTranslationServices.services
   ).some(({ enabled }) => enabled);
 
+  const promptEnabled =
+    config?.machineTranslationServices.services &&
+    Object.entries(config?.machineTranslationServices.services).find(
+      ([service]) => service === 'PROMPT'
+    )?.[1]?.enabled;
+
   const { t } = useTranslate();
   const translateFormality = useFormalityTranslation();
   const primaryServiceInfo = settings.mtSettings?.primaryServiceInfo;
@@ -110,6 +116,9 @@ export const LanguageSettingsDialog = ({
     path: { projectId: project.id },
     query: {
       size: 1000,
+    },
+    options: {
+      enabled: Boolean(promptEnabled),
     },
   });
 
