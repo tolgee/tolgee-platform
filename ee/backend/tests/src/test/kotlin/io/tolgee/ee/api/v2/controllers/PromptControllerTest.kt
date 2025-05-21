@@ -30,8 +30,8 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       mutableListOf(
         LlmProperties.LlmProvider(
           type = LlmProviderType.OPENAI,
-          pricePerMillionInput = 2.0,
-          pricePerMillionOutput = 2.0,
+          tokenPriceInCreditsInput = 2.0,
+          tokenPriceInCreditsOutput = 2.0,
           apiUrl = "http://test.com"
         ),
       )
