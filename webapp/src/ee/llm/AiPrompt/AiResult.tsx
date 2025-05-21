@@ -1,6 +1,13 @@
-import { Box, IconButton, Skeleton, styled, Tooltip } from '@mui/material';
+import {
+  Alert,
+  Box,
+  IconButton,
+  Skeleton,
+  styled,
+  Tooltip,
+} from '@mui/material';
 import { Code02 } from '@untitled-ui/icons-react';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 import { Label } from './Label';
@@ -71,7 +78,16 @@ export const AiResult = ({ raw, json, isPlural, locale, loading }: Props) => {
           {t('ai_playground_result_empty')}
         </StyledDescription>
       ) : mode === 'raw' ? (
-        <StyledPre>{raw}</StyledPre>
+        <Box display="grid" gap={1}>
+          <StyledPre>{raw}</StyledPre>
+          {!json?.output && (
+            <Box display="grid">
+              <Alert color="warning" icon={false}>
+                <T keyName="ai_playground_result_not_json_warning" />
+              </Alert>
+            </Box>
+          )}
+        </Box>
       ) : (
         <Box display="grid" gap={1}>
           <AiPlaygroundPreview
