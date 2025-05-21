@@ -2,7 +2,7 @@ import { Box, Typography, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { useMachineTranslationSettings } from './useMachineTranslationSettings';
-import { StyledLanguageTable } from '../tableStyles';
+import { StyledLanguageTable } from '../../../../component/languages/tableStyles';
 import { SettingsTable } from './SettingsTable';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 

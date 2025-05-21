@@ -53,8 +53,8 @@ type Props = {
 export const QuickStartStep = ({ item, index, projectId, done }: Props) => {
   const projectRoute = useRouteMatch(LINKS.PROJECT.template);
   const { quickStartBegin, setQuickStartFloatingOpen } = useGlobalActions();
-  const rightPanelFloating = useGlobalContext(
-    (c) => c.layout.rightPanelFloating
+  const quickStartFloating = useGlobalContext(
+    (c) => c.layout.quickStartFloating
   );
 
   const isInProject = !isNaN(Number(projectRoute?.params[PARAMS.PROJECT_ID]));
@@ -96,7 +96,7 @@ export const QuickStartStep = ({ item, index, projectId, done }: Props) => {
                     ? () => {
                         if (action.highlightItems) {
                           quickStartBegin(item.step, action.highlightItems);
-                          if (rightPanelFloating) {
+                          if (quickStartFloating) {
                             setQuickStartFloatingOpen(false);
                           }
                         }

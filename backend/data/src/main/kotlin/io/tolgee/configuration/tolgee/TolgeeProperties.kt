@@ -6,6 +6,7 @@ package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.AdditionalDocsProperties
 import io.tolgee.configuration.annotations.DocProperty
+import io.tolgee.configuration.tolgee.machineTranslation.LLMProperties
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
 
@@ -130,4 +131,8 @@ open class TolgeeProperties(
     description = "Maximum amount of languages that can be selected in the Translations view",
   )
   var translationsViewLanguagesLimit: Int = 10,
+  @DocProperty(
+    description = "LLM Providers configuration",
+  )
+  var llmProperties: LLMProperties = LLMProperties(),
 )

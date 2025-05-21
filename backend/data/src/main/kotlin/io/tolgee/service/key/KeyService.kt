@@ -22,6 +22,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
@@ -52,6 +53,8 @@ class KeyService(
   private val languageRepository: LanguageRepository,
   private val bigMetaService: BigMetaService,
   private val activityHolder: ActivityHolder,
+  @Lazy
+  private val aiPlaygroundResultService: AiPlaygroundResultService,
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -307,6 +310,7 @@ class KeyService(
     traceLogMeasureTime("delete multiple keys: delete screenshots") {
       screenshotService.deleteAllByKeyId(ids)
     }
+    aiPlaygroundResultService.deleteResultsByKeys(ids)
 
     val keys =
       traceLogMeasureTime("delete multiple keys: fetch keys") {

@@ -65,7 +65,7 @@ export const PluralEditor = ({
           <EditorWrapper data-cy="translation-editor" data-cy-variant={variant}>
             <Editor
               mode={editorMode}
-              value={content}
+              value={content || ''}
               onChange={(value) => handleChange(value, variantOrOther)}
               onFocus={() => onActiveVariantChange?.(variantOrOther)}
               direction={getLanguageDirection(locale)}

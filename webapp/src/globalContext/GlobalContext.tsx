@@ -15,12 +15,17 @@ import { useWebsocketService } from './useWsClientService';
 import { useConfirmationDialogService } from './useConfirmationDialogService';
 import { useMessageService } from './useMessageService';
 import { useUserDraggingService } from './useUserDraggingService';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { QUERY } from 'tg.constants/links';
 
 export const [GlobalContext, useGlobalActions, useGlobalContext] =
   createProvider(() => {
     const [globalError, setGlobalError] = useState<GlobalError>();
     const initialData = useInitialDataService();
     const auth = useAuthService(initialData);
+    const [aiPlayground] = useUrlSearchState(QUERY.TRANSLATIONS_AI_PLAYGROUND, {
+      defaultVal: undefined,
+    });
     const isEmailVerified =
       initialData.state?.userInfo?.emailAwaitingVerification === null ||
       !initialData.state?.serverConfiguration.needsEmailVerification;
@@ -38,7 +43,10 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
         isEmailVerified,
     });
 
-    const layout = useLayoutService({ quickStart });
+    const layout = useLayoutService({
+      quickStart,
+      aiPlaygroundEnabled: Boolean(aiPlayground),
+    });
     const confirmationDialog = useConfirmationDialogService();
 
     const messages = useMessageService();
@@ -73,6 +81,7 @@ export const [GlobalContext, useGlobalActions, useGlobalContext] =
       wsClient,
       userIsDragging,
       isEmailVerified,
+      aiPlaygroundEnabled: Boolean(aiPlayground),
     };
 
     return [contextData, actions];

@@ -3,21 +3,18 @@ package io.tolgee.api.v2.controllers.translationSuggestionController
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.EeSubscriptionInfoProvider
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.component.machineTranslation.providers.tolgee.EeTolgeeTranslateApiService
-import io.tolgee.component.machineTranslation.providers.tolgee.TolgeeTranslateParams
+import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
+import io.tolgee.ee.component.LLMTranslationProviderEeImpl
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.mockito.kotlin.KArgumentCaptor
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -37,7 +34,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
 
   @Autowired
   @MockBean
-  lateinit var eeTolgeeTranslateApiService: EeTolgeeTranslateApiService
+  lateinit var llmTranslationProviderEeImpl: LLMTranslationProviderEeImpl
 
   @Autowired
   @MockBean
@@ -47,11 +44,11 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
   @Autowired
   override lateinit var cacheManager: CacheManager
 
-  lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<TolgeeTranslateParams>
+  lateinit var tolgeeTranslateParamsCaptor: KArgumentCaptor<ProviderTranslateParams>
 
   @BeforeEach
   fun setup() {
-    Mockito.clearInvocations(eeTolgeeTranslateApiService)
+    Mockito.clearInvocations(llmTranslationProviderEeImpl)
     setForcedDate(Date())
     initTestData()
     initMachineTranslationProperties(1000)
@@ -75,13 +72,13 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
     tolgeeTranslateParamsCaptor = argumentCaptor()
 
     whenever(
-      eeTolgeeTranslateApiService.translate(
+      llmTranslationProviderEeImpl.translate(
         tolgeeTranslateParamsCaptor.capture(),
       ),
     ).thenAnswer {
       MtValueProvider.MtResult(
         "Translated with Tolgee Translator",
-        ((it.arguments[0] as? TolgeeTranslateParams)?.text?.length ?: 0) * 100,
+        ((it.arguments[0] as? ProviderTranslateParams)?.text?.length ?: 0) * 100,
       )
     }
   }
@@ -95,7 +92,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
   @ProjectJWTAuthTestMethod
   fun `translating is optimized`() {
     mockDefaultMtBucketSize(6000)
-    testData.enableTolgee()
+    testData.enablePrompt()
     testData.addAiDescriptions()
     saveTestData()
 

@@ -4,6 +4,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { useProject } from 'tg.hooks/useProject';
+import { ProjectPage } from 'tg.views/projects/ProjectPage';
 
 export const ActivityDetailRedirect = () => {
   const project = useProject();
@@ -25,5 +26,9 @@ export const ActivityDetailRedirect = () => {
       history.replace(fullPath);
     }
   }, [project]);
-  return <BoxLoading />;
+  return (
+    <ProjectPage>
+      <BoxLoading />
+    </ProjectPage>
+  );
 };

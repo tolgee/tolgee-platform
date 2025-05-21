@@ -130,6 +130,10 @@ export const useTranslationsShortcuts = () => {
   };
 
   const getCancelHandler = () => {
+    if (cursorKeyId) {
+      setEdit(undefined);
+      return;
+    }
     const focused = getCurrentlyFocused(elementsRef.current);
     if (focused) {
       // @ts-ignore

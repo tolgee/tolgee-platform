@@ -6,12 +6,11 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 
 fun <T> withTimeoutRetrying(
-  timeout: Long,
-  retries: Int = 3,
+  attempts: List<Long>,
   fn: () -> T,
 ): T {
   var repeats = 0
-  for (it in 0..retries) {
+  for (timeout in attempts) {
     try {
       return runBlocking(Dispatchers.IO) {
         withTimeout(timeout) {

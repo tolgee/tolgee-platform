@@ -21,7 +21,7 @@ export const BottomLinks = ({ allCompleted }: Props) => {
       <Box display="flex" justifyContent="space-between">
         <Box display="flex" gap={2}>
           <StyledLink
-            href="https://tolgee.io/platform"
+            href="https://docs.tolgee.io/platform"
             target="_blank"
             rel="noreferrer noopener"
           >

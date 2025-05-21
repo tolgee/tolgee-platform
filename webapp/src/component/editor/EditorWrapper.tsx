@@ -1,6 +1,6 @@
-import { styled } from '@mui/material';
+import { Box, BoxProps, styled } from '@mui/material';
 
-const StyledEditorWrapper = styled('div')`
+const StyledEditorWrapper = styled(Box)`
   border: 1px solid
     ${({ theme }) => (theme.palette.mode === 'dark' ? '#535e6c' : '#bfbfbf')};
   border-radius: 4px;
@@ -24,7 +24,7 @@ const StyledEditorWrapper = styled('div')`
   }
 `;
 
-export const EditorWrapper: React.FC = ({ children, ...props }) => {
+export const EditorWrapper: React.FC<BoxProps> = ({ children, ...props }) => {
   const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
     const editor = (e.target as HTMLDivElement).querySelector('.cm-content') as
       | HTMLDivElement

@@ -17,8 +17,10 @@ type TypedData = QueryProps<Url, Method, paths>;
 
 type ServiceOutput = {
   serviceType: string;
+  promptId: number | undefined;
   result?: { output: string; contextDescription?: string };
   errorMessage: string | null;
+  errorParams: string[] | undefined;
 };
 
 export type CombinedMTResponse = {

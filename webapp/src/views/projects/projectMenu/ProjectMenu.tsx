@@ -18,7 +18,7 @@ import { SideMenuItem, SideMenuItemQuickStart } from './SideMenuItem';
 import { SideLogo } from './SideLogo';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { Integration } from 'tg.component/CustomIcons';
+import { Integration, Stars } from 'tg.component/CustomIcons';
 import { FC } from 'react';
 import { createAdder } from 'tg.fixtures/pluginAdder';
 import { useAddProjectMenuItems } from 'tg.ee';
@@ -123,6 +123,16 @@ export const ProjectMenu = ({ id }) => {
       text: t('project_menu_integrate'),
       dataCy: 'project-menu-item-integrate',
       quickStart: { itemKey: 'menu_integrate' },
+    },
+    {
+      id: 'ai',
+      condition: ({ satisfiesPermission }) =>
+        satisfiesPermission('prompts.view'),
+      link: LINKS.PROJECT_AI,
+      icon: Stars,
+      text: t('project_menu_ai'),
+      matchAsPrefix: true,
+      dataCy: 'project-menu-item-ai',
     },
     {
       id: 'settings',

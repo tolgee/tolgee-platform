@@ -37,6 +37,8 @@ enum class Scope(
   WEBHOOKS_MANAGE("webhooks.manage"),
   TASKS_VIEW("tasks.view"),
   TASKS_EDIT("tasks.edit"),
+  PROMPTS_VIEW("prompts.view"),
+  PROMPTS_EDIT("prompts.edit"),
   ;
 
   fun expand() = Scope.expand(this)
@@ -82,8 +84,9 @@ enum class Scope(
             ),
           ),
           HierarchyItem(TASKS_EDIT, listOf(tasksView)),
+          HierarchyItem(PROMPTS_EDIT, listOf(HierarchyItem(PROMPTS_VIEW))),
           HierarchyItem(ACTIVITY_VIEW),
-          HierarchyItem(LANGUAGES_EDIT),
+          HierarchyItem(LANGUAGES_EDIT, listOf(HierarchyItem(PROMPTS_VIEW))),
           HierarchyItem(PROJECT_EDIT),
           HierarchyItem(
             MEMBERS_EDIT,

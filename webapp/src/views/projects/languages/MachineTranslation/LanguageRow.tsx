@@ -3,12 +3,12 @@ import { Box, IconButton } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Settings01 } from '@untitled-ui/icons-react';
 
-import { LanguageItem } from '../LanguageItem';
+import { LanguageItem } from '../../../../component/languages/LanguageItem';
 import {
   TABLE_CENTERED,
   TABLE_FIRST_CELL,
   TABLE_LAST_CELL,
-} from '../tableStyles';
+} from '../../../../component/languages/tableStyles';
 import { ServiceAvatar } from './ServiceAvatar';
 import { LanguageSettingsDialog } from './LanguageSettingsDialog';
 import { RowData, ServiceType } from './types';

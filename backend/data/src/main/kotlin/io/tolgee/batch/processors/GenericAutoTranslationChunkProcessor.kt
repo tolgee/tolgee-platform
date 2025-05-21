@@ -7,11 +7,17 @@ import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.prompt.PromptDto
+import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.exceptions.FormalityNotSupportedException
 import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
 import io.tolgee.exceptions.limits.PlanSpendingLimitExceededStringsException
+import io.tolgee.exceptions.PlanTranslationLimitExceeded
+import io.tolgee.exceptions.TranslationSpendingLimitExceeded
+import io.tolgee.model.enums.LLMProviderPriority
+import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.AutoTranslationService
@@ -25,6 +31,7 @@ class GenericAutoTranslationChunkProcessor(
   private val keyService: KeyService,
   private val currentDateProvider: CurrentDateProvider,
   private val languageService: LanguageService,
+  private val promptService: PromptService,
 ) {
   fun process(
     job: BatchJobDto,
@@ -33,6 +40,7 @@ class GenericAutoTranslationChunkProcessor(
     onProgress: (Int) -> Unit,
     useTranslationMemory: Boolean,
     useMachineTranslation: Boolean,
+    llmPrompt: PromptDto? = null,
   ) {
     val languages = languageService.findByIdIn(chunk.map { it.languageId }.toSet()).associateBy { it.id }
     val keys = keyService.find(chunk.map { it.keyId }).associateBy { it.id }
@@ -41,13 +49,27 @@ class GenericAutoTranslationChunkProcessor(
       val (keyId, languageId) = item
       val languageTag = languages[languageId]?.tag ?: return@iterateCatching
       val key = keys[keyId] ?: return@iterateCatching
-      autoTranslationService.autoTranslateSync(
-        key = key,
-        forcedLanguageTags = listOf(languageTag),
-        useTranslationMemory = useTranslationMemory,
-        useMachineTranslation = useMachineTranslation,
-        isBatch = true,
-      )
+      if (llmPrompt == null) {
+        autoTranslationService.autoTranslateSync(
+          key = key,
+          forcedLanguageTags = listOf(languageTag),
+          useTranslationMemory = useTranslationMemory,
+          useMachineTranslation = useMachineTranslation,
+          isBatch = true,
+        )
+      } else {
+        promptService.translateAndUpdateTranslation(
+          job.projectId!!,
+          PromptRunDto(
+            template = llmPrompt.template,
+            keyId = key.id,
+            targetLanguageId = languageId,
+            provider = llmPrompt.providerName,
+            options = llmPrompt.options,
+          ),
+          priority = LLMProviderPriority.LOW,
+        )
+      }
     }
   }
 

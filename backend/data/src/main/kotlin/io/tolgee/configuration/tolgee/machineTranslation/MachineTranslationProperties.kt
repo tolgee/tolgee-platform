@@ -14,7 +14,6 @@ open class MachineTranslationProperties(
   var deepl: DeeplMachineTranslationProperties = DeeplMachineTranslationProperties(),
   var azure: AzureCognitiveTranslationProperties = AzureCognitiveTranslationProperties(),
   var baidu: BaiduMachineTranslationProperties = BaiduMachineTranslationProperties(),
-  var tolgee: TolgeeMachineTranslationProperties = TolgeeMachineTranslationProperties(),
   @DocProperty(
     description =
       "Amount of machine translations users of the Free tier can request per month. " +

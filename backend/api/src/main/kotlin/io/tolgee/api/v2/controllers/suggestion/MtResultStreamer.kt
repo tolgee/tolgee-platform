@@ -82,7 +82,7 @@ class MtResultStreamer(
         catchingOutOfCredits(project.organizationOwnerId) {
           val translated = getTranslatedValue(dto, service)
           translated?.exception?.let { throw it }
-          writeTranslatedValue(writer, service, translated)
+          writeTranslatedValue(writer, service, translated?.promptId, translated)
         }
       }
     } catch (e: Exception) {
@@ -98,13 +98,13 @@ class MtResultStreamer(
   private fun writeTranslatedValue(
     writer: OutputStreamWriter,
     service: MtServiceType,
+    promptId: Long?,
     translated: MtTranslatorResult?,
   ) {
     val model =
       translated
         ?.let { it.translatedText?.let { text -> TranslationItemModel(text, it.contextDescription) } }
-
-    val item = StreamedSuggestionItem(service, model)
+    val item = StreamedSuggestionItem(service, model, promptId)
 
     writer.writeJsonSync(item)
   }
