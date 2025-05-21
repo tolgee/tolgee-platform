@@ -42,7 +42,7 @@ class OllamaApiService : AbstractLlmApiService(), Logging {
         messages.add(
           RequestMessage(
             role = "user",
-            images = listOf("${Base64.getEncoder().encode(it.image)}"),
+            images = listOf("${it.image}"),
           ),
         )
       }

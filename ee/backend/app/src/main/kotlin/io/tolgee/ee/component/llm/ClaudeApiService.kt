@@ -56,7 +56,7 @@ class ClaudeApiService : AbstractLlmApiService(), Logging {
                   type = "image",
                   source =
                     RequestImage(
-                      data = Base64.getEncoder().encodeToString(it.image),
+                      data = it.image!!,
                     ),
                 ),
               ),

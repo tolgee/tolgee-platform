@@ -65,9 +65,7 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
                   type = "image_url",
                   image_url =
                     RequestImageUrl(
-                      "data:image/jpeg;base64,${
-                        Base64.getEncoder().encodeToString(it.image)
-                      }",
+                      "data:image/jpeg;base64,${it.image}",
                     ),
                 ),
               ),
