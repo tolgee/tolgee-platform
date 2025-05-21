@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.HandlebarsException
-import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.constants.Message
@@ -14,7 +13,6 @@ import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
-import io.tolgee.ee.data.prompt.PromptVariableDto
 import io.tolgee.ee.service.LlmProviderService
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
@@ -24,15 +22,11 @@ import io.tolgee.exceptions.TooManyRequestsException
 import io.tolgee.model.Prompt
 import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.LlmProviderPriority
-import io.tolgee.model.enums.PromptVariableType
 import io.tolgee.repository.PromptRepository
 import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
-import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.service.translation.TranslationService
-import io.tolgee.util.ImageConverter
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
@@ -41,25 +35,20 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestClientException
-import java.io.ByteArrayInputStream
-import java.util.*
-import kotlin.collections.AbstractMap
 
 @Primary
 @Service
 class PromptServiceEeImpl(
   private val keyService: KeyService,
   private val projectService: ProjectService,
-  private val translationService: TranslationService,
-  private val fileStorage: FileStorage,
-  private val screenshotService: ScreenshotService,
   private val promptRepository: PromptRepository,
   private val providerService: LlmProviderService,
   private val promptDefaultService: PromptDefaultService,
   private val promptVariablesService: PromptVariablesService,
   @Lazy
   private val mtServiceConfigService: MtServiceConfigService,
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
+  private val promptParamsService: PromptParamsService
 ) : PromptService {
   fun getAllPaged(
     projectId: Long,
@@ -175,12 +164,10 @@ class PromptServiceEeImpl(
     }
   }
 
-  fun createVariablesLazyMap(params: List<Variable>): LazyMap {
+  fun createVariablesLazyMap(params: List<PromptLazyMap.Companion.Variable>): PromptLazyMap {
     val mapParams =
-      params.map {
-        it.name to it
-      }.toMap()
-    val lazyMap = LazyMap()
+      params.associateBy { it.name }
+    val lazyMap = PromptLazyMap()
     lazyMap.setMap(mapParams)
     return lazyMap
   }
@@ -191,91 +178,11 @@ class PromptServiceEeImpl(
     keyId: Long?,
     priority: LlmProviderPriority,
   ): LlmParams {
-    val key = keyId?.let { keyService.find(it) ?: throw NotFoundException(Message.KEY_NOT_FOUND) }
-    var preparedPrompt = prompt
-
-    val pattern = Regex("\\[\\[screenshot_(full|small)_(\\d+)]]")
-
-    val shouldOutputJson = preparedPrompt.contains(PromptFragmentsService.LLM_MARK_JSON)
-    if (shouldOutputJson) {
-      preparedPrompt = preparedPrompt.replace(PromptFragmentsService.LLM_MARK_JSON, "")
+    val key = keyId?.let {
+      keyService.find(it)
+      ?: throw NotFoundException(Message.KEY_NOT_FOUND)
     }
-
-    val parts = pattern.splitWithMatches(preparedPrompt)
-    val messages =
-      parts.mapNotNull {
-        if (pattern.matches(it)) {
-          val match = pattern.matchEntire(it) ?: throw Error()
-          // Extract size and id from the match groups
-          val size = match.groups[1]!!.value // full or small
-          val id = match.groups[2]!!.value.toLong() // number
-          val screenshot = key?.keyScreenshotReferences?.find { it.screenshot.id == id }?.screenshot
-          if (screenshot == null) {
-            null
-          } else {
-            val file =
-              if (size == "full") {
-                screenshot.filename
-              } else {
-                screenshot.middleSizedFilename ?: screenshot.filename
-              }
-
-            val filePath = screenshotService.getScreenshotPath(file)
-
-            lateinit var image: ByteArray
-
-            if (screenshot.keyScreenshotReferences.find { it.key.id == key?.id } !== null) {
-              val converter =
-                ImageConverter(
-                  ByteArrayInputStream(
-                    fileStorage.readFile(filePath),
-                  ),
-                )
-              image = converter.highlightKeys(screenshot, listOf(key.id)).toByteArray()
-            } else {
-              image = fileStorage.readFile(filePath)
-            }
-
-            LlmParams.Companion.LlmMessage(
-              type = LlmParams.Companion.LlmMessageType.IMAGE,
-              image = Base64.getEncoder().encodeToString(image),
-            )
-          }
-        } else {
-          LlmParams.Companion.LlmMessage(
-            type = LlmParams.Companion.LlmMessageType.TEXT,
-            text = it,
-          )
-        }
-      }
-    return LlmParams(messages, shouldOutputJson, priority)
-  }
-
-  // Helper function to split and keep matches
-  fun Regex.splitWithMatches(input: String): List<String> {
-    val result = mutableListOf<String>()
-    var lastIndex = 0
-
-    this.findAll(input).forEach { match ->
-      // Add text before the match if exists
-      if (match.range.first > lastIndex) {
-        result.add(input.substring(lastIndex, match.range.first))
-      }
-      // Add the match itself
-      result.add(match.value)
-      lastIndex = match.range.last + 1
-    }
-
-    // Add remaining text after last match
-    if (lastIndex < input.length) {
-      result.add(input.substring(lastIndex))
-    }
-
-    if (result.size == 0) {
-      result.add("")
-    }
-
-    return result
+    return promptParamsService.getParamsFromPrompt(prompt, key, priority)
   }
 
   fun runPromptWithoutChargingCredits(
@@ -376,75 +283,5 @@ class PromptServiceEeImpl(
     applicationContext.publishEvent(
       OnAfterMachineTranslationEvent(this, organizationId, actualPriceInCents),
     )
-  }
-
-  companion object {
-    class LazyMap : AbstractMap<String, Any?>() {
-      private lateinit var internalMap: Map<String, Variable>
-
-      fun setMap(map: Map<String, Variable>) {
-        internalMap = map
-      }
-
-      override fun get(key: String): Any? {
-        val promptValue = internalMap.get(key)
-
-        if (!promptValue?.props.isNullOrEmpty()) {
-          val mapParams =
-            promptValue!!.props.map {
-              it.name to it
-            }.toMap()
-
-          val lazyMap = LazyMap()
-          lazyMap.setMap(mapParams)
-          return lazyMap
-        }
-
-        val stringValue = promptValue?.lazyValue?.let { it() } ?: promptValue?.value
-        return stringValue?.let { if (it is String) Handlebars.SafeString(it) else it }
-      }
-
-      override val entries: Set<Map.Entry<String, Any?>>
-        get() {
-          return internalMap.entries.map { (key) -> Entry(key) { get(key) } }.toSet()
-        }
-    }
-
-    private class Entry(override val key: String, val valGetter: () -> Any?) : Map.Entry<String, Any?> {
-      override val value: Any?
-        get() = valGetter()
-    }
-
-    class Variable(
-      val name: String,
-      var value: Any? = null,
-      var lazyValue: (() -> Any?)? = null,
-      val description: String? = null,
-      val props: MutableList<Variable> = mutableListOf(),
-      val type: PromptVariableType? = null,
-      val option: BasicPromptOption? = null,
-    ) {
-      fun toPromptVariableDto(): PromptVariableDto {
-        val computedType =
-          if (props.isNotEmpty()) {
-            PromptVariableType.OBJECT
-          } else {
-            type ?: PromptVariableType.STRING
-          }
-
-        return PromptVariableDto(
-          name = name,
-          description = description,
-          value = value?.toString(),
-          props =
-            if (props.isNotEmpty()) {
-              props.map { it.toPromptVariableDto() }.toMutableList()
-            } else {
-              null
-            },
-          type = computedType,
-        )
-      }
-    }
   }
 }

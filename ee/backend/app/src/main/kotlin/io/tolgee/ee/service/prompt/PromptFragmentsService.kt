@@ -1,6 +1,6 @@
 package io.tolgee.ee.service.prompt
 
-import io.tolgee.ee.service.prompt.PromptServiceEeImpl.Companion.Variable
+import io.tolgee.ee.service.prompt.PromptLazyMap.Companion.Variable
 import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.PromptVariableType
 import org.springframework.stereotype.Service

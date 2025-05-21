@@ -67,30 +67,30 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "tolgee")
 @DocProperty(description = "Configuration specific to Tolgee.", displayName = "Tolgee")
 open class TolgeeProperties(
-    var authentication: AuthenticationProperties = AuthenticationProperties(),
-    var smtp: SmtpProperties = SmtpProperties(),
-    var sentry: SentryProperties = SentryProperties(),
-    @DocProperty(hidden = true)
+  var authentication: AuthenticationProperties = AuthenticationProperties(),
+  var smtp: SmtpProperties = SmtpProperties(),
+  var sentry: SentryProperties = SentryProperties(),
+  @DocProperty(hidden = true)
   var chatwootToken: String? = null,
-    @DocProperty(hidden = true)
+  @DocProperty(hidden = true)
   var capterraTracker: String? = null,
-    @DocProperty(hidden = true)
+  @DocProperty(hidden = true)
   var ga4Tag: String? = null,
-    @DocProperty(hidden = true, description = "Ask user where did they found Tolgee in SignUp form")
+  @DocProperty(hidden = true, description = "Ask user where did they found Tolgee in SignUp form")
   var userSourceField: Boolean = false,
-    @DocProperty(hidden = true)
+  @DocProperty(hidden = true)
   var internal: InternalProperties = InternalProperties(),
-    @DocProperty(
+  @DocProperty(
     description = "Public base path where files are accessible. Used by the user interface.",
     defaultExplanation = "The root of the same origin.",
   )
   var fileStorageUrl: String = "",
-    @DocProperty(description = "Maximum size of uploaded files (in kilobytes).", defaultExplanation = "≈ 50MB")
+  @DocProperty(description = "Maximum size of uploaded files (in kilobytes).", defaultExplanation = "≈ 50MB")
   var maxUploadFileSize: Int = 51200,
-    @DocProperty(description = "Maximum amount of screenshots which can be uploaded per API key.")
+  @DocProperty(description = "Maximum amount of screenshots which can be uploaded per API key.")
   val maxScreenshotsPerKey: Int = 20,
-    var fileStorage: FileStorageProperties = FileStorageProperties(),
-    @DocProperty(
+  var fileStorage: FileStorageProperties = FileStorageProperties(),
+  @DocProperty(
     description =
       "Public URL where Tolgee is accessible. " +
         "Used to generate links to Tolgee (e.g. email confirmation link)." +
@@ -100,38 +100,38 @@ open class TolgeeProperties(
         "recommended especially if you are managing publicly accessible Tolgee instance. ",
   )
   var frontEndUrl: String? = null,
-    var websocket: WebsocketProperties = WebsocketProperties(),
-    @DocProperty(description = "Name of the application.", hidden = true)
+  var websocket: WebsocketProperties = WebsocketProperties(),
+  @DocProperty(description = "Name of the application.", hidden = true)
   var appName: String = "Tolgee",
-    @DocProperty(description = "Maximum length of translations.")
+  @DocProperty(description = "Maximum length of translations.")
   open var maxTranslationTextLength: Long = 10000,
-    @DocProperty(
+  @DocProperty(
     description = "Properties related to batch jobs",
     displayName = "Batch jobs",
   )
   open var batch: BatchProperties = BatchProperties(),
-    var cache: CacheProperties = CacheProperties(),
-    var recaptcha: ReCaptchaProperties = ReCaptchaProperties(),
-    var machineTranslation: MachineTranslationProperties = MachineTranslationProperties(),
-    var postgresAutostart: PostgresAutostartProperties = PostgresAutostartProperties(),
-    @DocProperty(hidden = true)
+  var cache: CacheProperties = CacheProperties(),
+  var recaptcha: ReCaptchaProperties = ReCaptchaProperties(),
+  var machineTranslation: MachineTranslationProperties = MachineTranslationProperties(),
+  var postgresAutostart: PostgresAutostartProperties = PostgresAutostartProperties(),
+  @DocProperty(hidden = true)
   var sendInBlue: SendInBlueProperties = SendInBlueProperties(),
-    @DocProperty(hidden = true)
+  @DocProperty(hidden = true)
   var mailjet: MailjetProperties = MailjetProperties(),
-    open var import: ImportProperties = ImportProperties(),
-    var rateLimit: RateLimitProperties = RateLimitProperties(),
-    @DocProperty(hidden = true)
+  open var import: ImportProperties = ImportProperties(),
+  var rateLimit: RateLimitProperties = RateLimitProperties(),
+  @DocProperty(hidden = true)
   var postHog: PostHogProperties = PostHogProperties(),
-    var telemetry: TelemetryProperties = TelemetryProperties(),
-    var contentDelivery: ContentDeliveryProperties = ContentDeliveryProperties(),
-    var slack: SlackProperties = SlackProperties(),
-    @DocProperty(hidden = true)
+  var telemetry: TelemetryProperties = TelemetryProperties(),
+  var contentDelivery: ContentDeliveryProperties = ContentDeliveryProperties(),
+  var slack: SlackProperties = SlackProperties(),
+  @DocProperty(hidden = true)
   var plausible: PlausibleProperties = PlausibleProperties(),
-    @DocProperty(
+  @DocProperty(
     description = "Maximum amount of languages that can be selected in the Translations view",
   )
   var translationsViewLanguagesLimit: Int = 10,
-    @DocProperty(
+  @DocProperty(
     description = "LLM Providers configuration",
   )
   var llmProperties: LlmProperties = LlmProperties(),

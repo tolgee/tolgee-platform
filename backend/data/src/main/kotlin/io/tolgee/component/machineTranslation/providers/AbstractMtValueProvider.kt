@@ -43,9 +43,8 @@ abstract class AbstractMtValueProvider : MtValueProvider {
     } catch (e: TranslationApiRateLimitException) {
       if (params.isBatch) {
         throw e
-      } else {
-        throw BadRequestException(Message.LLM_RATE_LIMITED)
       }
+      throw BadRequestException(Message.LLM_RATE_LIMITED)
     }
   }
 

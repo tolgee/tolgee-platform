@@ -3,9 +3,6 @@ package io.tolgee.batch.processors
 import io.tolgee.batch.MtProviderCatching
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
-import io.tolgee.dtos.request.prompt.PromptDto
-import io.tolgee.dtos.request.prompt.PromptRunDto
-import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService

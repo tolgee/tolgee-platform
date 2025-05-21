@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.constants.Message
-import io.tolgee.ee.service.prompt.PromptServiceEeImpl.Companion.Variable
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeyService
@@ -19,6 +18,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.jvm.optionals.getOrNull
+import io.tolgee.ee.service.prompt.PromptLazyMap.Companion.Variable
 
 @Service
 class PromptVariablesService(

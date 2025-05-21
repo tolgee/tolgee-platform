@@ -13,6 +13,7 @@ import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.ee.component.llm.*
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.InvalidStateException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.LlmProvider
 import io.tolgee.model.enums.LlmProviderPriority
@@ -40,15 +41,12 @@ class LlmProviderService(
   private val llmPropertiesService: LlmPropertiesService,
   private val openaiApiService: OpenaiApiService,
   private val tolgeeApiService: TolgeeApiService,
-  private val ollamaApiService: OllamaApiService,
   private val cacheManager: CacheManager,
   private val currentDateProvider: CurrentDateProvider,
-  private val claudeApiService: ClaudeApiService,
-  private val geminiApiService: GeminiApiService,
   private val restTemplateBuilder: RestTemplateBuilder,
   private val internalProperties: InternalProperties,
 ) {
-  private val cache: Cache by lazy { cacheManager.getCache(Caches.LLM_PROVIDERS) }
+  private val cache: Cache by lazy { cacheManager.getCache(Caches.LLM_PROVIDERS) ?: throw InvalidStateException() }
   private var lastUsedMap: MutableMap<String, Long> = mutableMapOf()
 
   fun getProviderByName(

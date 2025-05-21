@@ -9,7 +9,7 @@ class LlmTranslationProviderOssImpl : LlmTranslationProvider() {
     get() = false
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
-    TODO("Not yet implemented")
+    throw UnsupportedOperationException("Not included in OSS")
   }
 
   override val supportedLanguages: Array<String>?
