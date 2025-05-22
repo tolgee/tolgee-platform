@@ -2,7 +2,7 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
-import io.tolgee.ee.development.PromptTestData
+import io.tolgee.development.testDataBuilder.data.PromptTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.LlmProviderType
 import org.junit.jupiter.api.BeforeEach

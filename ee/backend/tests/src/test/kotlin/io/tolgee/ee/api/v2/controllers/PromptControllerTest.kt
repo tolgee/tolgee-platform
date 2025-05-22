@@ -6,7 +6,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.ee.development.PromptTestData
+import io.tolgee.development.testDataBuilder.data.PromptTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -74,7 +74,7 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `creates a prompt`() {
     performAuthPost(
       "/v2/projects/${testData.promptProject.self.id}/prompts",
-      PromptDto("My prompt", "Hi LLM", "default"),
+      PromptDto("My prompt", "default", "Hi LLM"),
     ).andIsOk.andAssertThatJson {
       node("name").isEqualTo("My prompt")
       node("providerName").isEqualTo("default")
@@ -87,7 +87,7 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     this.userAccount = testData.projectReviewer.self
     performAuthPost(
       "/v2/projects/${testData.promptProject.self.id}/prompts",
-      PromptDto("My prompt", "Hi LLM", "default"),
+      PromptDto("My prompt", "default", "Hi LLM"),
     ).andIsForbidden
   }
 
@@ -95,7 +95,7 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `updates prompt`() {
     performAuthPut(
       "/v2/projects/${testData.promptProject.self.id}/prompts/${testData.customPrompt.self.id}",
-      PromptDto("Updated prompt", "Hi LLM", "default"),
+      PromptDto("Updated prompt", "default", "Hi LLM"),
     ).andIsOk.andAssertThatJson {
       node("name").isEqualTo("Updated prompt")
       node("providerName").isEqualTo("default")

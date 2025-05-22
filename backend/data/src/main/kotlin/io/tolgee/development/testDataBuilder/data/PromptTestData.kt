@@ -1,7 +1,12 @@
-package io.tolgee.ee.development
+package io.tolgee.development.testDataBuilder.data
 
-import io.tolgee.development.testDataBuilder.builders.*
-import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.development.testDataBuilder.builders.KeyBuilder
+import io.tolgee.development.testDataBuilder.builders.LanguageBuilder
+import io.tolgee.development.testDataBuilder.builders.LlmProviderBuilder
+import io.tolgee.development.testDataBuilder.builders.OrganizationBuilder
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.development.testDataBuilder.builders.PromptBuilder
+import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType

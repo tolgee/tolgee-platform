@@ -2,7 +2,7 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
-import io.tolgee.ee.development.PromptTestData
+import io.tolgee.development.testDataBuilder.data.PromptTestData
 import io.tolgee.fixtures.*
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.testing.AuthorizedControllerTest
