@@ -280,7 +280,7 @@ class PromptVariablesService(
     list: List<String>,
     type: String,
   ): String {
-    return list.map { id -> encodeScreenshot(id.toLong(), type) }.joinToString("\n")
+    return list.joinToString("\n") { id -> encodeScreenshot(id.toLong(), type) }
   }
 
   companion object {
