@@ -152,7 +152,7 @@ export const TranslationWithPlaceholders = ({
               term={modifier.highlight?.value}
               languageTag={locale}
               targetLanguageTag={targetLocale}
-              showIcon
+              standalone
             />
           }
         >

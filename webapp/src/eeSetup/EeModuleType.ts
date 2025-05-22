@@ -52,5 +52,5 @@ export type GlossaryTermPreviewProps = {
   term: GlossaryTermModel;
   languageTag: string;
   targetLanguageTag?: string;
-  showIcon?: boolean;
+  standalone?: boolean;
 };

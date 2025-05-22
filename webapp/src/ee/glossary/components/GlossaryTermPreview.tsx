@@ -7,7 +7,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { GlossaryTermPreviewProps } from '../../../eeSetup/EeModuleType';
 import {
   ArrowNarrowRight,
@@ -64,9 +64,10 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
   term,
   languageTag,
   targetLanguageTag,
-  showIcon,
+  standalone,
 }) => {
   const theme = useTheme();
+  const [isHovering, setIsHovering] = useState(false);
   const realLanguageTag = term.flagNonTranslatable
     ? term.glossary.baseLanguageTag
     : languageTag;
@@ -80,9 +81,13 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
     ? languageInfo[targetLanguageTag]?.flags?.[0]
     : undefined;
   return (
-    <StyledContainer data-cy="glossary-term-preview-container">
+    <StyledContainer
+      data-cy="glossary-term-preview-container"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       <StyledTitleWrapper>
-        {showIcon && <BookClosed />}
+        {standalone && <BookClosed />}
         <StyledTitleTextWrapper>
           <StyledTitle
             variant="body2"
@@ -108,23 +113,26 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
             )}
         </StyledTitleTextWrapper>
         <StyledGap />
-        <Tooltip
-          title={<T keyName="glossary_term_preview_open_full_view_tooltip" />}
-        >
-          <IconButton
-            sx={{
-              margin: theme.spacing(-1),
-            }}
-            component={Link}
-            to={getGlossaryTermSearchUrl(
-              term.glossary.organizationOwner.slug,
-              term.glossary.id,
-              translation?.text || ''
-            )}
+        {(isHovering || standalone) && (
+          <Tooltip
+            title={<T keyName="glossary_term_preview_open_full_view_tooltip" />}
           >
-            <LinkExternal02 />
-          </IconButton>
-        </Tooltip>
+            <IconButton
+              sx={{
+                margin: theme.spacing(-0.8),
+              }}
+              component={Link}
+              to={getGlossaryTermSearchUrl(
+                term.glossary.organizationOwner.slug,
+                term.glossary.id,
+                translation?.text || ''
+              )}
+              size="small"
+            >
+              <LinkExternal02 width={20} height={20} />
+            </IconButton>
+          </Tooltip>
+        )}
       </StyledTitleWrapper>
       <GlossaryTermTags term={term} />
       <StyledInnerCard
