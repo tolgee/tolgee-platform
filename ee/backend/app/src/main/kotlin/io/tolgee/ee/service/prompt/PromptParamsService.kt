@@ -27,7 +27,7 @@ class PromptParamsService(private val screenshotService: ScreenshotService, priv
     if (shouldOutputJson) {
       preparedPrompt = preparedPrompt.replace(PromptFragmentsService.LLM_MARK_JSON, "")
     }
-    val parts = regexSplitAndMatch(pattern,preparedPrompt)
+    val parts = regexSplitAndMatch(pattern, preparedPrompt)
     val messages =
       parts.mapNotNull {
         if (pattern.matches(it)) {
