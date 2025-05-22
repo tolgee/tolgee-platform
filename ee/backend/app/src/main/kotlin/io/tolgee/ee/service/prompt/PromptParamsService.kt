@@ -39,7 +39,7 @@ class PromptParamsService(private val screenshotService: ScreenshotService, priv
           if (screenshot == null) {
             null
           } else {
-            val image = getHighlitedScreenshot(size, screenshot, key)
+            val image = getHighlightedScreenshot(size, screenshot, key)
 
             LlmParams.Companion.LlmMessage(
               type = LlmParams.Companion.LlmMessageType.IMAGE,
@@ -56,7 +56,7 @@ class PromptParamsService(private val screenshotService: ScreenshotService, priv
     return LlmParams(messages, shouldOutputJson, priority)
   }
 
-  fun getHighlitedScreenshot(
+  fun getHighlightedScreenshot(
     size: String,
     screenshot: io.tolgee.model.Screenshot,
     key: Key
