@@ -6,7 +6,6 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.formats.PluralForms
-import io.tolgee.service.PromptService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.PluralTranslationUtil.Companion.REPLACE_NUMBER_PLACEHOLDER
 import io.tolgee.service.project.ProjectService
@@ -186,13 +185,6 @@ class MtTranslatorContext(
     return languages[languageId] ?: throw IllegalStateException("Language $languageId not found")
   }
 
-  fun getMetadata(item: MtBatchItemParams): MetadataKey? {
-    val baseTranslationText =
-      item.baseTranslationText
-        ?: throw IllegalStateException("Base translation text not found")
-    return metadata[MetadataKey(item.keyId, baseTranslationText, item.targetLanguageId)]
-  }
-
   private fun needsMetadata(item: MtBatchItemParams): Boolean {
     val service = getServiceInfo(item.targetLanguageId, item.service)
     return service.serviceType.usesMetadata
@@ -220,10 +212,6 @@ class MtTranslatorContext(
     return get(key)
   }
 
-  fun getKey(keyId: Long?): KeyForMt? {
-    return keys[keyId]
-  }
-
   private val languageService: LanguageService by lazy {
     applicationContext.getBean(LanguageService::class.java)
   }
@@ -232,20 +220,12 @@ class MtTranslatorContext(
     applicationContext.getBean(ProjectService::class.java)
   }
 
-  private val promptService: PromptService by lazy {
-    applicationContext.getBean(PromptService::class.java)
-  }
-
   private val mtServiceConfigService: MtServiceConfigService by lazy {
     applicationContext.getBean(MtServiceConfigService::class.java)
   }
 
   private val entityManger by lazy {
     applicationContext.getBean(EntityManager::class.java)
-  }
-
-  private val metadataProvider by lazy {
-    MetadataProvider(this)
   }
 
   val mtServiceManager: MtServiceManager by lazy {
