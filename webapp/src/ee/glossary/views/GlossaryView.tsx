@@ -8,7 +8,6 @@ import {
 import React, { useMemo, useState } from 'react';
 import { GlossaryTermCreateUpdateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateUpdateDialog';
 import { GlossaryViewBody } from 'tg.ee.module/glossary/components/GlossaryViewBody';
-import { GlossaryEmptyListMessage } from 'tg.ee.module/glossary/components/GlossaryEmptyListMessage';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
@@ -157,29 +156,20 @@ export const GlossaryView = () => {
           onFinished={() => setCreateDialogOpen(false)}
         />
       )}
-      {(terms.length > 0 || search.length > 0) &&
-      preferredOrganization !== undefined ? (
-        <GlossaryViewBody
-          loading={termsLoadable.isLoading}
-          data={terms}
-          fetchDataIds={fetchAllTermsIds}
-          totalElements={totalTerms}
-          baseLanguage={glossary.baseLanguageTag}
-          selectedLanguages={selectedLanguages}
-          selectedLanguagesWithBaseLanguage={selectedLanguagesWithBaseLanguage}
-          updateSelectedLanguages={updateSelectedLanguages}
-          onFetchNextPage={onFetchNextPage}
-          onCreate={canCreate ? onCreate : undefined}
-          onSearch={setSearch}
-          search={search}
-        />
-      ) : (
-        <GlossaryEmptyListMessage
-          loading={termsLoadable.isLoading}
-          onCreate={canCreate ? onCreate : undefined}
-          onImport={undefined /* TODO */}
-        />
-      )}
+      <GlossaryViewBody
+        loading={termsLoadable.isLoading}
+        data={terms}
+        fetchDataIds={fetchAllTermsIds}
+        totalElements={totalTerms}
+        baseLanguage={glossary.baseLanguageTag}
+        selectedLanguages={selectedLanguages}
+        selectedLanguagesWithBaseLanguage={selectedLanguagesWithBaseLanguage}
+        updateSelectedLanguages={updateSelectedLanguages}
+        onFetchNextPage={onFetchNextPage}
+        onCreate={canCreate ? onCreate : undefined}
+        onSearch={setSearch}
+        search={search}
+      />
     </BaseOrganizationSettingsView>
   );
 };

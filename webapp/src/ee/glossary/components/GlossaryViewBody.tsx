@@ -18,6 +18,7 @@ import { useScrollStatus } from 'tg.component/common/useScrollStatus';
 import { GlossaryBatchToolbar } from 'tg.ee.module/glossary/components/GlossaryBatchToolbar';
 import { useSelectionService } from 'tg.service/useSelectionService';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { GlossaryEmptyListMessage } from 'tg.ee.module/glossary/components/GlossaryEmptyListMessage';
 
 type SimpleGlossaryTermWithTranslationsModel =
   components['schemas']['SimpleGlossaryTermWithTranslationsModel'];
@@ -305,19 +306,27 @@ export const GlossaryViewBody: React.VFC<Props> = ({
           </Portal>
         )}
         {data.length === 0 ? (
-          <EmptyListMessage
-            loading={loading}
-            hint={
-              <Button
-                onClick={clearSearchRef.current ?? undefined}
-                color="primary"
-              >
-                <T keyName="glossary_terms_nothing_found_action" />
-              </Button>
-            }
-          >
-            <T keyName="glossary_terms_nothing_found" />
-          </EmptyListMessage>
+          search !== undefined && search.length > 0 ? (
+            <EmptyListMessage
+              loading={loading}
+              hint={
+                <Button
+                  onClick={clearSearchRef.current ?? undefined}
+                  color="primary"
+                >
+                  <T keyName="glossary_terms_nothing_found_action" />
+                </Button>
+              }
+            >
+              <T keyName="glossary_terms_nothing_found" />
+            </EmptyListMessage>
+          ) : (
+            <GlossaryEmptyListMessage
+              loading={loading}
+              onCreate={onCreate}
+              onImport={undefined /* TODO */}
+            />
+          )
         ) : (
           <StyledVerticalScroll ref={verticalScrollRef}>
             <StyledContent>
