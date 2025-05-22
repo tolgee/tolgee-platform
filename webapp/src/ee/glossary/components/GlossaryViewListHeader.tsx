@@ -43,8 +43,8 @@ export const GlossaryViewListHeader: React.VFC<Props> = ({
     <StyledHeaderRow
       style={{
         gridTemplateColumns:
-          'minmax(350px, 1fr)' +
-          ' minmax(350px, 1fr)'.repeat(selectedLanguages?.length || 0),
+          'minmax(300px, 1fr)' +
+          ' minmax(200px, 1fr)'.repeat(selectedLanguages?.length || 0),
       }}
     >
       <StyledHeaderCell key={0}>

@@ -13,8 +13,9 @@ type SimpleGlossaryTermWithTranslationsModel =
 const StyledRow = styled('div')`
   display: grid;
   position: relative;
-  grid-auto-columns: minmax(350px, 1fr);
+  grid-auto-columns: minmax(200px, 1fr);
   grid-auto-flow: column;
+  grid-template-columns: minmax(300px, 1fr);
 
   &.deleted {
     text-decoration: line-through;
