@@ -348,10 +348,17 @@ class LanguageService(
 
   fun getPagedByOrganization(
     organizationId: Long,
+    projectIds: List<Long>?,
     pageable: Pageable,
     search: String?,
   ): Page<OrganizationLanguageDto> {
-    return this.languageRepository.findAllByOrganizationId(organizationId, pageable, search)
+    return this.languageRepository.findAllByOrganizationId(
+      organizationId,
+      projectIds ?: emptyList(),
+      projectIds == null,
+      pageable,
+      search
+    )
   }
 
   fun findByIdIn(ids: Iterable<Long>): List<Language> {

@@ -115,7 +115,7 @@ class OrganizationProjectController(
     @PathVariable("slug") organizationSlug: String,
   ): PagedModel<ProjectWithStatsModel> {
     return organizationService.findDto(organizationSlug)?.let { organization ->
-      return getAllWithStatistics(pageable, search, organization.id)
+      getAllWithStatistics(pageable, search, organization.id)
     } ?: throw NotFoundException()
   }
 
@@ -131,9 +131,10 @@ class OrganizationProjectController(
     @SortDefault("tag", direction = Sort.Direction.ASC)
     pageable: Pageable,
     @RequestParam("search") search: String?,
+    @RequestParam("projectIds") projectIds: List<Long>?,
     @PathVariable organizationId: Long,
   ): PagedModel<OrganizationLanguageModel> {
-    val languages = languageService.getPagedByOrganization(organizationId, pageable, search)
+    val languages = languageService.getPagedByOrganization(organizationId, projectIds, pageable, search)
     return pagedOrganizationLanguageAssembler.toModel(languages, organizationLanguageModelAssembler)
   }
 }

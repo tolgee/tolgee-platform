@@ -8951,6 +8951,7 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
+        projectIds?: number[];
       };
       path: {
         organizationId: number;

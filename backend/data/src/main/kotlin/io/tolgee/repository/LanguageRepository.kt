@@ -129,6 +129,8 @@ interface LanguageRepository : JpaRepository<Language, Long> {
   )
   fun findAllByOrganizationId(
     organizationId: Long?,
+    projectIds: List<Long>,
+    anyProject: Boolean,
     pageable: Pageable,
     search: String?,
   ): Page<OrganizationLanguageDto>
@@ -194,6 +196,7 @@ interface LanguageRepository : JpaRepository<Language, Long> {
     const val ORGANIZATION_FILTER = """
       (
         o.id = :organizationId
+        and (:anyProject or l.project_id in :projectIds)
         and o.deleted_at is null
         and p.deleted_at is null
         and l.deleted_at is null
