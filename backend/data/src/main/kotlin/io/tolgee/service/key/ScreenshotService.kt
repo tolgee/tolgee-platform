@@ -391,4 +391,8 @@ class ScreenshotService(
   ): List<KeyScreenshotReference> {
     return screenshotRepository.getKeyScreenshotReferences(importedKeys, locations)
   }
+
+  fun getAllKeyScreenshotReferences(key: Key): List<KeyScreenshotReference> {
+    return screenshotRepository.getAllKeyScreenshotReferences(key)
+  }
 }

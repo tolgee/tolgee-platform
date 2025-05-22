@@ -13,7 +13,10 @@ import java.io.ByteArrayInputStream
 import java.util.Base64
 
 @Component
-class PromptParamsHelper(private val screenshotService: ScreenshotService, private val fileStorage: FileStorage) {
+class PromptParamsHelper(
+  private val screenshotService: ScreenshotService,
+  private val fileStorage: FileStorage
+) {
   fun getParamsFromPrompt(
     prompt: String,
     key: Key?,
@@ -22,6 +25,8 @@ class PromptParamsHelper(private val screenshotService: ScreenshotService, priva
     val pattern = Regex("\\[\\[screenshot_(${ScreenshotSize.FULL.value}|${ScreenshotSize.SMALL.value})_(\\d+)]]")
 
     var preparedPrompt = prompt
+
+    val screenshotReferences = key?.let { screenshotService.getAllKeyScreenshotReferences(key) }
 
     val shouldOutputJson = preparedPrompt.contains(PromptFragmentsHelper.LLM_MARK_JSON)
     if (shouldOutputJson) {
@@ -35,7 +40,7 @@ class PromptParamsHelper(private val screenshotService: ScreenshotService, priva
           // Extract size and id from the match groups
           val size = match.groups[1]!!.value // full or small
           val id = match.groups[2]!!.value.toLong() // number
-          val screenshot = key?.keyScreenshotReferences?.find { it.screenshot.id == id }?.screenshot
+          val screenshot = screenshotReferences?.find { it.screenshot.id == id }?.screenshot
           if (screenshot == null) {
             null
           } else {

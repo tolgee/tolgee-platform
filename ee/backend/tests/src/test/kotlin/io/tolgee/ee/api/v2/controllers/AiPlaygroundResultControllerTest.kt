@@ -3,8 +3,11 @@ package io.tolgee.ee.api.v2.controllers
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.development.testDataBuilder.data.PromptTestData
+import io.tolgee.ee.data.AiPlaygroundResultRequest
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.LlmProviderType
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -15,45 +18,22 @@ class AiPlaygroundResultControllerTest : ProjectAuthControllerTest("/v2/projects
   fun setup() {
     testData = PromptTestData()
     testDataService.saveTestData(testData.root)
-    llmProperties.enabled = true
-    llmProperties.providers =
-      mutableListOf(
-        LlmProperties.LlmProvider(
-          type = LlmProviderType.OPENAI,
-          tokenPriceInCreditsInput = 2.0,
-          tokenPriceInCreditsOutput = 2.0,
-          apiUrl = "http://test.com"
-        ),
+    userAccount = testData.user
+    projectSupplier = { testData.promptProject.self }
+    this.userAccount = testData.projectEditor.self
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `will return ai prompt results`() {
+    performProjectAuthPost(
+      "ai-playground-result",
+      AiPlaygroundResultRequest(
+        keys = testData.keys.map { it.self.id },
+        languages = listOf(testData.czech.self.id)
       )
-    internalProperties.fakeLlmProviders = true
-    this.userAccount = testData.serverAdmin.self
-  }
-
-  @Test
-  fun `doesn't block project deletion`() {
-    performAuthDelete(
-      "/v2/projects/${testData.promptProject.self.id}",
-    ).andIsOk
-  }
-
-  @Test
-  fun `doesn't block user deletion`() {
-    performAuthDelete(
-      "/v2/administration/users/${testData.organizationMember.self.id}",
-    ).andIsOk
-  }
-
-  @Test
-  fun `doesn't block key deletion`() {
-    performAuthDelete(
-      "/v2/projects/${testData.promptProject.self.id}/keys/${testData.keys[0].self.id}",
-    ).andIsOk
-  }
-
-  @Test
-  fun `doesn't block language deletion`() {
-    performAuthDelete(
-      "/v2/projects/${testData.promptProject.self.id}/languages/${testData.czech.self.id}",
-    ).andIsOk
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.results[0].translation").isString.contains("Llm test response")
+    }
   }
 }

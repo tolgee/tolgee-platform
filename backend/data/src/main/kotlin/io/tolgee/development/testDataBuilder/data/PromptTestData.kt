@@ -105,10 +105,11 @@ class PromptTestData : BaseTestData() {
           }.toMutableList()
 
         addAiPlaygroundResult {
-          this.user = organizationMember.self
+          this.user = projectEditor.self
           this.language = czech.self
           this.project = this@build.self
           this.key = keys.get(0).self
+          this.translation = "Llm test response"
         }
 
         addPermission {
