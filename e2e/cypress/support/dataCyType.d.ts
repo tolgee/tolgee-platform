@@ -602,12 +602,14 @@ declare namespace DataCy {
         "project-settings-button" |
         "project-settings-delete-button" |
         "project-settings-description" |
+        "project-settings-label-item" |
         "project-settings-languages" |
         "project-settings-languages-add" |
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-name" |
         "project-settings-menu-advanced" |
         "project-settings-menu-general" |
+        "project-settings-menu-labels" |
         "project-settings-name" |
         "project-settings-transfer-button" |
         "project-settings-use-namespaces-checkbox" |
