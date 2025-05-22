@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
@@ -40,4 +41,12 @@ interface PromptRepository : JpaRepository<Prompt, Long> {
     projectId: Long,
     promptId: Long,
   ): Prompt?
+
+  @Modifying
+  @Query(
+    """
+      delete from Prompt p where p.project.id = :projectId
+    """
+  )
+  fun deleteAllByProjectId(projectId: Long)
 }

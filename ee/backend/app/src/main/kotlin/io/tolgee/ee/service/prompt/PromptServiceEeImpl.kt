@@ -99,6 +99,10 @@ class PromptServiceEeImpl(
     return promptRepository.findPrompt(projectId, promptId) ?: throw NotFoundException(Message.PROMPT_NOT_FOUND)
   }
 
+  override fun deleteAllByProjectId(projectId: Long) {
+    return promptRepository.deleteAllByProjectId(projectId)
+  }
+
   fun updatePrompt(
     projectId: Long,
     promptId: Long,

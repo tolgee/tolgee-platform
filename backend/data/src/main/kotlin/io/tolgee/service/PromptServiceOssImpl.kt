@@ -31,4 +31,8 @@ class PromptServiceOssImpl : PromptService {
   ): Prompt {
     throw NotImplementedInOss()
   }
+
+  override fun deleteAllByProjectId(projectId: Long) {
+    throw NotImplementedInOss()
+  }
 }

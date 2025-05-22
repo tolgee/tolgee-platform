@@ -22,4 +22,6 @@ interface PromptService {
     projectId: Long,
     promptId: Long,
   ): Prompt
+
+  fun deleteAllByProjectId(projectId: Long)
 }
