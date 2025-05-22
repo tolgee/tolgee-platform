@@ -33,19 +33,12 @@ abstract class AbstractMtValueProvider : MtValueProvider {
       )
     }
 
-    try {
-      return translateViaProvider(
-        params.apply {
-          sourceLanguageTag = suitableSourceTag
-          targetLanguageTag = suitableTargetTag
-        },
-      )
-    } catch (e: TranslationApiRateLimitException) {
-      if (params.isBatch) {
-        throw e
-      }
-      throw BadRequestException(Message.LLM_RATE_LIMITED)
-    }
+    return translateViaProvider(
+      params.apply {
+        sourceLanguageTag = suitableSourceTag
+        targetLanguageTag = suitableTargetTag
+      },
+    )
   }
 
   override fun getMetadata(

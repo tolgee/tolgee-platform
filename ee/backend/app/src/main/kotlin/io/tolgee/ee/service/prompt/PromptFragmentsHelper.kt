@@ -1,12 +1,12 @@
 package io.tolgee.ee.service.prompt
 
-import io.tolgee.ee.service.prompt.PromptLazyMap.Companion.Variable
+import io.tolgee.ee.component.PromptLazyMap.Companion.Variable
 import io.tolgee.model.enums.BasicPromptOption
 import io.tolgee.model.enums.PromptVariableType
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
-class PromptFragmentsService {
+@Component
+class PromptFragmentsHelper {
   fun getAllFragments(): MutableList<Variable> {
     val result = mutableListOf<Variable>()
 

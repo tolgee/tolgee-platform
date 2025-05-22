@@ -1,6 +1,6 @@
 package io.tolgee.ee.service.prompt
 
-import io.tolgee.ee.service.prompt.PromptVariablesService.Companion.ScreenshotSize
+import io.tolgee.ee.service.prompt.PromptVariablesHelper.Companion.ScreenshotSize
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.dtos.LlmParams
 import io.tolgee.model.enums.LlmProviderPriority
@@ -8,12 +8,12 @@ import io.tolgee.model.key.Key
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.util.ImageConverter
 import io.tolgee.util.regexSplitAndMatch
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import java.io.ByteArrayInputStream
 import java.util.Base64
 
-@Service
-class PromptParamsService(private val screenshotService: ScreenshotService, private val fileStorage: FileStorage) {
+@Component
+class PromptParamsHelper(private val screenshotService: ScreenshotService, private val fileStorage: FileStorage) {
   fun getParamsFromPrompt(
     prompt: String,
     key: Key?,
@@ -23,9 +23,9 @@ class PromptParamsService(private val screenshotService: ScreenshotService, priv
 
     var preparedPrompt = prompt
 
-    val shouldOutputJson = preparedPrompt.contains(PromptFragmentsService.LLM_MARK_JSON)
+    val shouldOutputJson = preparedPrompt.contains(PromptFragmentsHelper.LLM_MARK_JSON)
     if (shouldOutputJson) {
-      preparedPrompt = preparedPrompt.replace(PromptFragmentsService.LLM_MARK_JSON, "")
+      preparedPrompt = preparedPrompt.replace(PromptFragmentsHelper.LLM_MARK_JSON, "")
     }
     val parts = regexSplitAndMatch(pattern, preparedPrompt)
     val messages =

@@ -28,14 +28,14 @@ import { TranslationSortMenu } from 'tg.component/translation/translationSort/Tr
 import { Sort } from 'tg.component/CustomIcons';
 import { useProject } from 'tg.hooks/useProject';
 import { countFilters } from 'tg.views/projects/translations/TranslationFilters/summary';
+import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
-import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 const StyledLanguagesSelect = styled(LanguagesSelect)`
   & .MuiInputBase-root {

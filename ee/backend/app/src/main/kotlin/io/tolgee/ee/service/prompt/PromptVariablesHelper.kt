@@ -15,19 +15,19 @@ import io.tolgee.service.machineTranslation.PluralTranslationUtil
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
-import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.jvm.optionals.getOrNull
-import io.tolgee.ee.service.prompt.PromptLazyMap.Companion.Variable
+import io.tolgee.ee.component.PromptLazyMap.Companion.Variable
+import org.springframework.stereotype.Component
 
-@Service
-class PromptVariablesService(
+@Component
+class PromptVariablesHelper(
   private val keyService: KeyService,
   private val projectService: ProjectService,
   private val languageService: LanguageService,
   private val translationService: TranslationService,
   private val applicationContext: ApplicationContext,
-  private val promptFragmentsService: PromptFragmentsService,
+  private val promptFragmentsHelper: PromptFragmentsHelper,
 ) {
   /**
    * Determines if the given language tag corresponds to Chinese, Japanese, or Korean.
@@ -256,7 +256,7 @@ class PromptVariablesService(
 
     variables.add(screenshotsVar)
 
-    val fragments = Variable("fragment", props = promptFragmentsService.getAllFragments())
+    val fragments = Variable("fragment", props = promptFragmentsHelper.getAllFragments())
     variables.add(fragments)
 
     return variables

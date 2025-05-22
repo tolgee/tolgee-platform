@@ -2,10 +2,10 @@ package io.tolgee.ee.service.prompt
 
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.service.LlmPropertiesService
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
-class PromptDefaultService(
+@Component
+class DefaultPromptHelper(
   private val llmPropertiesService: LlmPropertiesService
 ) {
   fun getDefaultPrompt(): PromptDto {

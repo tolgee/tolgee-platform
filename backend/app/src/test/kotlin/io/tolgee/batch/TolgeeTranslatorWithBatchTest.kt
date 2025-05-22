@@ -57,7 +57,6 @@ class TolgeeTranslatorWithBatchTest {
       any<HttpEntity<*>>(),
       any<ParameterizedTypeReference<Any>>(),
     )
-
 //    assertThrows<TranslationApiRateLimitException> {
 //      llmTranslationProviderEeImpl.translate(
 //        ProviderTranslateParams(

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.HandlebarsException
+import io.tolgee.ee.component.PromptLazyMap
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.constants.Message
@@ -43,12 +44,12 @@ class PromptServiceEeImpl(
   private val projectService: ProjectService,
   private val promptRepository: PromptRepository,
   private val providerService: LlmProviderService,
-  private val promptDefaultService: PromptDefaultService,
-  private val promptVariablesService: PromptVariablesService,
+  private val defaultPromptHelper: DefaultPromptHelper,
+  private val promptVariablesHelper: PromptVariablesHelper,
   @Lazy
   private val mtServiceConfigService: MtServiceConfigService,
   private val applicationContext: ApplicationContext,
-  private val promptParamsService: PromptParamsService
+  private val promptParamsHelper: PromptParamsHelper
 ) : PromptService {
   fun getAllPaged(
     projectId: Long,
@@ -131,7 +132,7 @@ class PromptServiceEeImpl(
     options: List<BasicPromptOption>?,
   ): String {
     try {
-      val params = promptVariablesService.getVariables(projectId, keyId, targetLanguageId)
+      val params = promptVariablesHelper.getVariables(projectId, keyId, targetLanguageId)
 
       val handlebars = Handlebars()
 
@@ -181,7 +182,7 @@ class PromptServiceEeImpl(
       keyService.find(it)
       ?: throw NotFoundException(Message.KEY_NOT_FOUND)
     }
-    return promptParamsService.getParamsFromPrompt(prompt, key, priority)
+    return promptParamsHelper.getParamsFromPrompt(prompt, key, priority)
   }
 
   fun runPromptWithoutChargingCredits(
@@ -254,7 +255,7 @@ class PromptServiceEeImpl(
     val prompt =
       getPrompt(
         projectId,
-        data.template ?: promptDefaultService.getDefaultPrompt().template!!,
+        data.template ?: defaultPromptHelper.getDefaultPrompt().template!!,
         data.keyId,
         data.targetLanguageId,
         data.basicPromptOptions,
@@ -265,7 +266,7 @@ class PromptServiceEeImpl(
   }
 
   fun getDefaultPrompt(): PromptDto {
-    return promptDefaultService.getDefaultPrompt()
+    return defaultPromptHelper.getDefaultPrompt()
   }
 
   private fun publishBeforeEvent(organizationId: Long) {

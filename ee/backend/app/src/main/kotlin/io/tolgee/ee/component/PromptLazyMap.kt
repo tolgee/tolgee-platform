@@ -1,4 +1,4 @@
-package io.tolgee.ee.service.prompt
+package io.tolgee.ee.component
 
 import com.github.jknack.handlebars.Handlebars
 import io.tolgee.ee.data.prompt.PromptVariableDto
@@ -40,13 +40,13 @@ class PromptLazyMap : AbstractMap<String, Any?>() {
     }
 
     class Variable(
-      val name: String,
-      var value: Any? = null,
-      var lazyValue: (() -> Any?)? = null,
-      val description: String? = null,
-      val props: MutableList<Variable> = mutableListOf(),
-      val type: PromptVariableType? = null,
-      val option: BasicPromptOption? = null,
+        val name: String,
+        var value: Any? = null,
+        var lazyValue: (() -> Any?)? = null,
+        val description: String? = null,
+        val props: MutableList<Variable> = mutableListOf(),
+        val type: PromptVariableType? = null,
+        val option: BasicPromptOption? = null,
     ) {
       fun toPromptVariableDto(): PromptVariableDto {
         val computedType =

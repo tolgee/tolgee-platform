@@ -5,7 +5,7 @@ import io.tolgee.component.machineTranslation.metadata.MtMetadata
 import io.tolgee.component.machineTranslation.providers.LlmTranslationProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.dtos.LlmParams
-import io.tolgee.ee.service.prompt.PromptDefaultService
+import io.tolgee.ee.service.prompt.DefaultPromptHelper
 import io.tolgee.ee.service.prompt.PromptServiceEeImpl
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.service.LlmPropertiesService
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component
 class LlmTranslationProviderEeImpl(
   private val promptService: PromptServiceEeImpl,
   private val llmPropertiesService: LlmPropertiesService,
-  private val promptDefaultService: PromptDefaultService,
+  private val defaultPromptHelper: DefaultPromptHelper,
 ) : LlmTranslationProvider() {
   override val isEnabled: Boolean get() = llmPropertiesService.isEnabled()
 
@@ -58,7 +58,7 @@ class LlmTranslationProviderEeImpl(
     val prompt =
       promptService.getPrompt(
         projectId,
-        template = promptDto.template ?: promptDefaultService.getDefaultPrompt().template!!,
+        template = promptDto.template ?: defaultPromptHelper.getDefaultPrompt().template!!,
         keyId = keyId,
         targetLanguageId = targetLanguageId,
         options = promptDto.basicPromptOptions,
