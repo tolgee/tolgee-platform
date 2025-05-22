@@ -49,6 +49,9 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
     );
   };
 
+  const canManageOrganization =
+    preferredOrganization?.currentUserRole === 'OWNER' || isAdmin;
+
   const menuItems: SettingsMenuItem[] = [
     {
       link: LINKS.ORGANIZATION_PROFILE.build({
@@ -58,7 +61,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
     },
   ];
 
-  if (preferredOrganization?.currentUserRole === 'OWNER' || isAdmin) {
+  if (canManageOrganization) {
     menuItems.push({
       link: LINKS.ORGANIZATION_MEMBERS.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
@@ -71,6 +74,16 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       }),
       label: t('organization_menu_member_privileges'),
     });
+  }
+
+  menuItems.push({
+    link: LINKS.ORGANIZATION_GLOSSARIES.build({
+      [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+    }),
+    label: t('organization_menu_glossaries'),
+  });
+
+  if (canManageOrganization) {
     menuItems.push({
       link: LINKS.ORGANIZATION_APPS.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,

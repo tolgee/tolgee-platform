@@ -1,4 +1,4 @@
-import { Box, Tooltip, styled } from '@mui/material';
+import { Box, styled, Tooltip } from '@mui/material';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { components } from 'tg.service/apiSchema.generated';
 import {
@@ -6,7 +6,7 @@ import {
   CircledPill,
 } from 'tg.component/languages/CircledLanguageIcon';
 
-type ProjectWithStatsModel = components['schemas']['ProjectWithStatsModel'];
+type LanguageModel = components['schemas']['LanguageModel'];
 const StyledCircledLanguageIcon = styled(CircledLanguageIcon)`
   cursor: default;
 `;
@@ -19,12 +19,16 @@ const StyledCircledPill = styled(CircledPill)`
   }
 `;
 
-export const ProjectLanguages = ({ p }: { p: ProjectWithStatsModel }) => {
+export const CircledLanguageIconList = ({
+  languages,
+}: {
+  languages: LanguageModel[];
+}) => {
   const maxLangs = 10;
-  const showNumber = maxLangs < p.languages.length - 2;
+  const showNumber = maxLangs < languages.length - 2;
   const showingLanguages = showNumber
-    ? p.languages.slice(0, maxLangs)
-    : p.languages;
+    ? languages.slice(0, maxLangs)
+    : languages;
   return (
     <>
       {showingLanguages.map((l) => (
@@ -34,19 +38,19 @@ export const ProjectLanguages = ({ p }: { p: ProjectWithStatsModel }) => {
           onClick={stopBubble()}
           disableInteractive
         >
-          <Box data-cy="project-list-languages-item">
+          <Box data-cy="language-icon-list-item">
             <StyledCircledLanguageIcon size={20} flag={l.flagEmoji} />
           </Box>
         </Tooltip>
       ))}
       {showNumber && (
-        <Box data-cy="project-list-languages-item" onClick={stopBubble()}>
+        <Box data-cy="language-icon-list-item" onClick={stopBubble()}>
           <Tooltip
             disableInteractive
             title={
               <Box display="flex" flexWrap="wrap">
-                {p.languages.slice(maxLangs).map((l, i) => (
-                  <Box key={i} data-cy="project-list-languages-item">
+                {languages.slice(maxLangs).map((l, i) => (
+                  <Box key={i} data-cy="language-icon-list-item">
                     <StyledCircledLanguageIcon size={20} flag={l.flagEmoji} />
                   </Box>
                 ))}
@@ -61,7 +65,7 @@ export const ProjectLanguages = ({ p }: { p: ProjectWithStatsModel }) => {
                   className: 'wrapped',
                 }}
               >
-                +{p.languages.length - maxLangs}
+                +{languages.length - maxLangs}
               </StyledCircledPill>
             </div>
           </Tooltip>

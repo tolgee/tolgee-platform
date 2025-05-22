@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/v2/")
-@Suppress("MVCPathVariableInspection")
+@Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @Tag(name = "AI Customization")
 @OpenApiEeExtension
 class AiPromptCustomizationController(
