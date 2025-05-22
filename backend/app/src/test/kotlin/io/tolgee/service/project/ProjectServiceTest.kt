@@ -5,16 +5,13 @@
 package io.tolgee.service.project
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.development.testDataBuilder.data.PromptTestData
 import io.tolgee.development.testDataBuilder.data.TagsTestData
-import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.equalsPermissionType
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.assertions.Assertions.assertThat

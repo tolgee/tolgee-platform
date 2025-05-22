@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
     "logging.level.org.hibernate.engine.internal.StatisticalLoggingSessionEventListener=WARN",
   ],
 )
-class UserAccountServiceTest: AbstractSpringTest() {
+class UserAccountServiceTest : AbstractSpringTest() {
   @Test
   @Transactional
   fun `deletes language with ai results`() {

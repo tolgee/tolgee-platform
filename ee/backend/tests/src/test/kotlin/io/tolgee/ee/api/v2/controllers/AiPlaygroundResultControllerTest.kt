@@ -1,12 +1,10 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.development.testDataBuilder.data.PromptTestData
 import io.tolgee.ee.data.AiPlaygroundResultRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

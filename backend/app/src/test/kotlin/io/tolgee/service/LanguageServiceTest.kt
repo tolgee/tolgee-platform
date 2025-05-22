@@ -12,7 +12,6 @@ import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.dtos.cacheable.UserAccountDto
-import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.TolgeeAuthentication
