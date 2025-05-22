@@ -1,10 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.component.machineTranslation.metadata.MtMetadata
-import io.tolgee.constants.Message
-import io.tolgee.exceptions.BadRequestException
 
 abstract class AbstractMtValueProvider : MtValueProvider {
   private val String.toSuitableTag: String?
