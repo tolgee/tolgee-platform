@@ -1,0 +1,68 @@
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { components } from 'tg.service/apiSchema.generated';
+import { FC } from 'react';
+import { Box } from '@mui/material';
+import { TextField } from 'tg.component/common/form/fields/TextField';
+import { FieldLabel } from 'tg.component/FormField';
+import { T, useTranslate } from '@tolgee/react';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+
+type LabelModel = components['schemas']['LabelModel'];
+
+export type LabelFormValues = {
+  name: string;
+  color: string;
+  description: string | undefined;
+};
+
+const randomHex = () => `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+
+export const LabelForm: FC<{
+  label?: LabelModel;
+  submit: (values: LabelFormValues) => void;
+  cancel?: () => void;
+}> = ({ label, submit, cancel }) => {
+  const { t } = useTranslate();
+  const initValues = {
+    name: label?.name ?? '',
+    description: label?.description,
+    color: label?.color ?? randomHex(),
+  } satisfies LabelFormValues;
+  const onSubmit = (values: LabelFormValues) => {
+    submit({
+      ...values,
+    });
+  };
+
+  return (
+    <StandardForm
+      validationSchema={Validation.TRANSLATION_LABEL(t)}
+      initialValues={initValues}
+      onSubmit={onSubmit}
+      onCancel={cancel}
+    >
+      <Box mb={4}>
+        <Box display="flex" gap={2} mb={2}>
+          <Box display="grid" flexGrow={1}>
+            <FieldLabel>
+              <T keyName="project_settings_label_name" />
+            </FieldLabel>
+            <TextField size="small" name="name" required={true} />
+          </Box>
+          <Box display="grid">
+            <FieldLabel>
+              <T keyName="project_settings_label_color" />
+            </FieldLabel>
+            <TextField size="small" name="color" required={true} />
+          </Box>
+        </Box>
+        <Box display="grid">
+          <FieldLabel>
+            <T keyName="project_settings_label_description" />
+          </FieldLabel>
+          <TextField size="medium" name="description" required={false} />
+        </Box>
+      </Box>
+    </StandardForm>
+  );
+};

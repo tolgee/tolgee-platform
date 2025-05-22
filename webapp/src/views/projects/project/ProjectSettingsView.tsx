@@ -9,6 +9,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { BaseProjectView } from '../BaseProjectView';
 import { ProjectSettingsGeneral } from './ProjectSettingsGeneral';
 import { ProjectSettingsAdvanced } from './ProjectSettingsAdvanced';
+import { ProjectSettingsLabels } from 'tg.views/projects/project/ProjectSettingsLabels';
 
 const StyledTabs = styled(Tabs)`
   margin-bottom: -1px;
@@ -24,6 +25,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
 
   const pageGeneral = useRouteMatch(LINKS.PROJECT_EDIT.template);
   const pageAdvanced = useRouteMatch(LINKS.PROJECT_EDIT_ADVANCED.template);
+  const pageLabels = useRouteMatch(LINKS.PROJECT_EDIT_LABELS.template);
 
   return (
     <BaseProjectView
@@ -46,6 +48,8 @@ export const ProjectSettingsView: FunctionComponent = () => {
               ? 'general'
               : pageAdvanced?.isExact
               ? 'advanced'
+              : pageLabels?.isExact
+              ? 'labels'
               : null
           }
         >
@@ -67,12 +71,22 @@ export const ProjectSettingsView: FunctionComponent = () => {
             label={t('project_settings_menu_advanced')}
             data-cy="project-settings-menu-advanced"
           />
+          <Tab
+            value="labels"
+            component={Link}
+            to={LINKS.PROJECT_EDIT_LABELS.build({
+              [PARAMS.PROJECT_ID]: project.id,
+            })}
+            label={t('project_settings_menu_labels')}
+            data-cy="project-settings-menu-labels"
+          />
         </StyledTabs>
       </StyledTabWrapper>
 
       <Box data-cy="project-settings">
         {pageGeneral?.isExact && <ProjectSettingsGeneral />}
         {pageAdvanced?.isExact && <ProjectSettingsAdvanced />}
+        {pageLabels?.isExact && <ProjectSettingsLabels />}
       </Box>
     </BaseProjectView>
   );
