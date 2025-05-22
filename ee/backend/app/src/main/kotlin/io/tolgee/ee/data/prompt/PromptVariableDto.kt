@@ -21,5 +21,5 @@ class PromptVariableDto(
         ref = "#/components/schemas/PromptVariableDto",
       ),
   )
-  val props: MutableList<PromptVariableDto>? = null,
+  val props: List<PromptVariableDto>? = null,
 )

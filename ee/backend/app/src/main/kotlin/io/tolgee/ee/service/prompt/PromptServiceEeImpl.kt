@@ -68,7 +68,7 @@ class PromptServiceEeImpl(
         template = dto.template,
         project = projectService.get(projectId),
         providerName = dto.providerName,
-        options = dto.options?.toTypedArray(),
+        options = dto.basicPromptOptions?.toTypedArray(),
       )
     promptRepository.save(prompt)
     return prompt
@@ -84,7 +84,7 @@ class PromptServiceEeImpl(
         prompt.name,
         template = prompt.template,
         providerName = prompt.providerName,
-        options = prompt.options?.toList(),
+        basicPromptOptions = prompt.options?.toList(),
       )
     } else {
       return getDefaultPrompt()
@@ -107,7 +107,7 @@ class PromptServiceEeImpl(
     prompt.name = dto.name
     prompt.template = dto.template
     prompt.providerName = dto.providerName
-    prompt.options = dto.options?.toTypedArray()
+    prompt.options = dto.basicPromptOptions?.toTypedArray()
     promptRepository.save(prompt)
     return prompt
   }
@@ -257,7 +257,7 @@ class PromptServiceEeImpl(
         data.template ?: promptDefaultService.getDefaultPrompt().template!!,
         data.keyId,
         data.targetLanguageId,
-        data.options,
+        data.basicPromptOptions,
       )
     val params = getLlmParamsFromPrompt(prompt, data.keyId, priority ?: LlmProviderPriority.HIGH)
     val result = runPromptWithoutChargingCredits(project.organizationOwner.id, params, data.provider)

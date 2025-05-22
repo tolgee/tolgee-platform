@@ -61,7 +61,7 @@ class LlmTranslationProviderEeImpl(
         template = promptDto.template ?: promptDefaultService.getDefaultPrompt().template!!,
         keyId = keyId,
         targetLanguageId = targetLanguageId,
-        options = promptDto.options,
+        options = promptDto.basicPromptOptions,
       )
     return MtMetadata(prompt, promptDto.providerName, keyId, organizationId)
   }

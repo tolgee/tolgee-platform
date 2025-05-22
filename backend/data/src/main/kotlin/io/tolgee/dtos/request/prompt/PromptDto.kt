@@ -4,7 +4,7 @@ import io.tolgee.model.enums.BasicPromptOption
 
 data class PromptDto(
   val name: String,
-  val template: String? = null,
   val providerName: String,
-  var options: List<BasicPromptOption>? = null,
+  val template: String? = null,
+  var basicPromptOptions: List<BasicPromptOption>? = null,
 )

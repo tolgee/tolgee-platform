@@ -130,7 +130,7 @@ class PromptController(
         data.template ?: promptDefaultService.getDefaultPrompt().template!!,
         data.keyId,
         data.targetLanguageId,
-        data.options,
+        data.basicPromptOptions,
       )
     val params = promptService.getLlmParamsFromPrompt(prompt, data.keyId, LlmProviderPriority.HIGH)
     val organizationId = projectHolder.project.organizationOwnerId

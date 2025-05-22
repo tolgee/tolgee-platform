@@ -132,7 +132,7 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         keyId = testData.keys.first().self.id,
         targetLanguageId = testData.czech.self.id,
         provider = "default",
-        options = null
+        basicPromptOptions = null
       ),
     ).andIsOk.andAssertThatJson {
       node("prompt").isString.contains("Hi LLM")

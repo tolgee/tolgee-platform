@@ -6,6 +6,7 @@ import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.util.ImageConverter
+import io.tolgee.util.regexSplitAndMatch
 import org.springframework.stereotype.Service
 import java.io.ByteArrayInputStream
 import java.util.Base64
@@ -25,7 +26,7 @@ class PromptParamsService(private val screenshotService: ScreenshotService, priv
     if (shouldOutputJson) {
       preparedPrompt = preparedPrompt.replace(PromptFragmentsService.LLM_MARK_JSON, "")
     }
-    val parts = pattern.splitWithMatches(preparedPrompt)
+    val parts = regexSplitAndMatch(pattern,preparedPrompt)
     val messages =
       parts.mapNotNull {
         if (pattern.matches(it)) {
@@ -79,32 +80,5 @@ class PromptParamsService(private val screenshotService: ScreenshotService, priv
     } else {
       return fileStorage.readFile(filePath)
     }
-  }
-
-  // Helper function to split and keep matches
-  fun Regex.splitWithMatches(input: String): List<String> {
-    val result = mutableListOf<String>()
-    var lastIndex = 0
-
-    this.findAll(input).forEach { match ->
-      // Add text before the match if exists
-      if (match.range.first > lastIndex) {
-        result.add(input.substring(lastIndex, match.range.first))
-      }
-      // Add the match itself
-      result.add(match.value)
-      lastIndex = match.range.last + 1
-    }
-
-    // Add remaining text after last match
-    if (lastIndex < input.length) {
-      result.add(input.substring(lastIndex))
-    }
-
-    if (result.isEmpty()) {
-      result.add("")
-    }
-
-    return result
   }
 }

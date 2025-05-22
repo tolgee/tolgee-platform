@@ -50,7 +50,7 @@ class AiPlaygroundChunkProcessor(
           keyId = key.id,
           targetLanguageId = languageId,
           provider = llmPrompt.providerName,
-          options = llmPrompt.options,
+          basicPromptOptions = llmPrompt.basicPromptOptions,
         ),
         priority = LlmProviderPriority.LOW,
       )

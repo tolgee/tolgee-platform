@@ -7,5 +7,5 @@ data class PromptRunDto(
   var keyId: Long,
   var targetLanguageId: Long,
   var provider: String,
-  var options: List<BasicPromptOption>?,
+  var basicPromptOptions: List<BasicPromptOption>?,
 )
