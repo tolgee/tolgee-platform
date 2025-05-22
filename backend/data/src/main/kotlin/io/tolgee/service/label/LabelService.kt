@@ -1,6 +1,8 @@
 package io.tolgee.service.label
 
-import io.tolgee.dtos.request.label.CreateLabelDto
+import io.tolgee.constants.Message
+import io.tolgee.dtos.request.label.LabelRequest
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.translation.Label
 import io.tolgee.repository.LabelRepository
@@ -24,16 +26,20 @@ class LabelService(
     return labelRepository.findById(labelId)
   }
 
+  private fun getByProjectIdAndId(
+    projectId: Long,
+    labelId: Long,
+  ): Label {
+    return labelRepository.findByProjectIdAndId(projectId, labelId).orElseThrow { NotFoundException(Message.LABEL_NOT_FOUND) }
+  }
+
   @Transactional
   fun createLabel(
     projectId: Long,
-    dto: CreateLabelDto,
+    request: LabelRequest,
     ): Label {
     val label = Label()
-
-    label.name = dto.name
-    label.description = dto.description
-    label.color = dto.color
+    updateFromRequest(label, request)
     label.project = entityManager.getReference(Project::class.java, projectId)
 
     labelRepository.save(label)
@@ -42,20 +48,29 @@ class LabelService(
 
   @Transactional
   fun updateLabel(
+    projectId: Long,
     labelId: Long,
-    dto: CreateLabelDto,
+    request: LabelRequest,
   ): Label {
-    val label = labelRepository.getReferenceById(labelId)
-    label.name = dto.name
-    label.description = dto.description
-    label.color = dto.color
+    val label = getByProjectIdAndId(projectId, labelId)
+    updateFromRequest(label, request)
 
     labelRepository.save(label)
     return label
   }
 
+  private fun updateFromRequest(
+    label: Label,
+    request: LabelRequest,
+  ) {
+    label.name = request.name
+    label.description = request.description
+    label.color = request.color
+  }
+
   @Transactional
-  fun deleteLabel(label: Label) {
+  fun deleteLabel(projectId: Long, labelId: Long) {
+    val label = getByProjectIdAndId(projectId, labelId)
     labelRepository.delete(label)
   }
 }

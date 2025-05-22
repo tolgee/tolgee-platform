@@ -20,16 +20,16 @@ class Label : StandardAuditModel() {
 
   @field:NotEmpty
   @field:Size(max = 100)
-  @Column(length = 100)
+  @Column(length = 100, nullable = false)
   @ActivityLoggedProp
   @ActivityDescribingProp
-  var name: String = ""
+  lateinit var name: String
 
   @field:NotEmpty
   @field:Size(max = 7)
-  @Column(length = 7)
+  @Column(length = 7, nullable = false)
   @ActivityLoggedProp
-  var color: String? = null
+  lateinit var color: String
 
   @field:Size(max = 2000)
   @Column(length = 2000)

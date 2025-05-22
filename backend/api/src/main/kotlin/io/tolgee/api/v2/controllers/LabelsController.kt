@@ -1,9 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
-import io.tolgee.constants.Message
-import io.tolgee.dtos.request.label.CreateLabelDto
-import io.tolgee.exceptions.NotFoundException
+import io.tolgee.dtos.request.label.LabelRequest
 import io.tolgee.hateoas.label.LabelModel
 import io.tolgee.hateoas.label.LabelModelAssembler
 import io.tolgee.model.translation.Label
@@ -64,9 +62,9 @@ class LabelsController(
   @AllowApiAccess
   fun createLabel(
     @RequestBody @Valid
-    dto: CreateLabelDto
+    request: LabelRequest
   ): LabelModel {
-    return labelService.createLabel(projectHolder.project.id, dto).model
+    return labelService.createLabel(projectHolder.project.id, request).model
   }
 
   @PutMapping(value = ["labels/{labelId:\\d+}"])
@@ -77,10 +75,9 @@ class LabelsController(
     @PathVariable("labelId")
     labelId: Long,
     @RequestBody @Valid
-    dto: CreateLabelDto,
+    request: LabelRequest,
   ): LabelModel {
-    val label = labelService.updateLabel(labelId, dto)
-    return label.model
+    return labelService.updateLabel(projectHolder.project.id, labelId, request).model
   }
 
   @DeleteMapping(value = ["labels/{labelId:\\d+}"])
@@ -91,8 +88,7 @@ class LabelsController(
     @PathVariable("labelId")
     labelId: Long,
   ) {
-    val label = labelService.find(labelId).orElseThrow { NotFoundException(Message.LABEL_NOT_FOUND) }
-    labelService.deleteLabel(label)
+    labelService.deleteLabel(projectHolder.project.id, labelId)
   }
 
   private val Label.model: LabelModel
