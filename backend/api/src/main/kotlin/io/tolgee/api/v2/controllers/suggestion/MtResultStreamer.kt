@@ -52,7 +52,7 @@ class MtResultStreamer(
   private fun getInfo(): StreamedSuggestionInfo {
     return StreamedSuggestionInfo(
       servicesToUse.map { it.serviceType },
-      servicesToUse.find { it.serviceType === MtServiceType.PROMPT }?.promptId,
+      servicesToUse.find { it.serviceType == MtServiceType.PROMPT }?.promptId,
       baseBlank
     )
   }

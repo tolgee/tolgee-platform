@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.prompt
 
+import io.tolgee.ee.service.prompt.PromptVariablesService.Companion.ScreenshotSize
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.dtos.LlmParams
 import io.tolgee.model.enums.LlmProviderPriority
@@ -18,7 +19,7 @@ class PromptParamsService(private val screenshotService: ScreenshotService, priv
     key: Key?,
     priority: LlmProviderPriority,
   ): LlmParams {
-    val pattern = Regex("\\[\\[screenshot_(full|small)_(\\d+)]]")
+    val pattern = Regex("\\[\\[screenshot_(${ScreenshotSize.FULL.value}|${ScreenshotSize.SMALL.value})_(\\d+)]]")
 
     var preparedPrompt = prompt
 

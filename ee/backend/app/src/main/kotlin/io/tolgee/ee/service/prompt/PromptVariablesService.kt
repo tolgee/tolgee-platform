@@ -29,14 +29,18 @@ class PromptVariablesService(
   private val applicationContext: ApplicationContext,
   private val promptFragmentsService: PromptFragmentsService,
 ) {
-
+  /**
+   * Determines if the given language tag corresponds to Chinese, Japanese, or Korean.
+   *
+   * @param tag the language tag to be checked, which may be null.
+   * @return a `Variable` object indicating whether the tag represents Chinese, Japanese, or Korean.
+   */
   fun cjkVariable(tag: String?): Variable {
-    // language is Chinese, Japanese or Korean
     val isCJK = tag?.let { it.startsWith("zh") || it.startsWith("ja") || it.startsWith("ko") } ?: false
     return Variable("isCJK", isCJK, description = "Is Chinese, Japanese or Korean")
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   fun getVariables(
     projectId: Long,
     keyId: Long?,
@@ -225,28 +229,28 @@ class PromptVariablesService(
     screenshotsVar.props.add(
       Variable(
         "first",
-        screenshots?.let { encodeScreenshots(it.take(1), "small") },
+        screenshots?.let { encodeScreenshots(it.take(1), ScreenshotSize.SMALL.value) },
       ),
     )
 
     screenshotsVar.props.add(
       Variable(
         "firstFull",
-        screenshots?.let { encodeScreenshots(it.take(1), "full") },
+        screenshots?.let { encodeScreenshots(it.take(1), ScreenshotSize.FULL.value) },
       ),
     )
 
     screenshotsVar.props.add(
       Variable(
         "all",
-        screenshots?.let { encodeScreenshots(it, "small") },
+        screenshots?.let { encodeScreenshots(it, ScreenshotSize.SMALL.value) },
       ),
     )
 
     screenshotsVar.props.add(
       Variable(
         "allFull",
-        screenshots?.let { encodeScreenshots(it, "full") },
+        screenshots?.let { encodeScreenshots(it, ScreenshotSize.FULL.value) },
       ),
     )
 
@@ -277,5 +281,12 @@ class PromptVariablesService(
     type: String,
   ): String {
     return list.map { id -> encodeScreenshot(id.toLong(), type) }.joinToString("\n")
+  }
+
+  companion object {
+    enum class ScreenshotSize(val value: String) {
+      SMALL("small"),
+      FULL("full"),
+    }
   }
 }
