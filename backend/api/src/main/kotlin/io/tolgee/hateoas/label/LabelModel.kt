@@ -7,6 +7,6 @@ import org.springframework.hateoas.server.core.Relation
 open class LabelModel(
   val id: Long,
   val name: String,
-  val color: String?,
+  val color: String,
   val description: String?,
 ) : RepresentationModel<LabelModel>()
