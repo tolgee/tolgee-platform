@@ -1,15 +1,23 @@
-import { Box, Typography } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
+import { Box, Button, styled, Typography } from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { useState } from 'react';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { LabelItem } from 'tg.views/projects/project/components/LabelItem';
-import { LabelModal } from 'tg.views/projects/project/components/LabelModal';
-import { LabelFormValues } from 'tg.views/projects/project/components/LabelForm';
+import { LabelItem } from 'tg.views/projects/project/components/Labels/LabelItem';
+import { LabelModal } from 'tg.views/projects/project/components/Labels/LabelModal';
+import { LabelFormValues } from 'tg.views/projects/project/components/Labels/LabelForm';
 import { components } from 'tg.service/apiSchema.generated';
+import { Plus } from '@untitled-ui/icons-react';
+import { confirmation } from 'tg.hooks/confirmation';
 
 type LabelModel = components['schemas']['LabelModel'];
+
+const TableGrid = styled('div')`
+  display: grid;
+  padding: ${({ theme }) => theme.spacing(1)};
+  grid-template-columns: repeat(4, auto);
+`;
 
 export const ProjectSettingsLabels = () => {
   const { t } = useTranslate();
@@ -18,14 +26,28 @@ export const ProjectSettingsLabels = () => {
   const [page, setPage] = useState(0);
   const [modalOpened, setModalOpen] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState<LabelModel>();
+  const addLabel = () => {
+    setSelectedLabel(undefined);
+    setModalOpen(true);
+  };
   const editLabel = (label: LabelModel) => {
     setSelectedLabel(label);
     setModalOpen(true);
   };
+  const removeLabel = async (label: LabelModel) => {
+    confirmation({
+      message: <T keyName="project_settings_label_delete_confirmation" />,
+      async onConfirm() {
+        await removeMutation.mutateAsync({
+          path: { projectId: project.id, labelId: label.id },
+        });
+      },
+    });
+  };
   const submit = async (values: LabelFormValues) => {
     const label = selectedLabel;
     if (label) {
-      await updateLabel.mutateAsync({
+      await updateMutation.mutateAsync({
         path: { projectId: project.id, labelId: label.id },
         content: {
           'application/json': {
@@ -34,7 +56,7 @@ export const ProjectSettingsLabels = () => {
         },
       });
     } else {
-      await createLabel.mutateAsync({
+      await createMutation.mutateAsync({
         path: { projectId: project.id },
         content: {
           'application/json': {
@@ -59,15 +81,21 @@ export const ProjectSettingsLabels = () => {
     },
   });
 
-  const createLabel = useApiMutation({
+  const createMutation = useApiMutation({
     url: '/v2/projects/{projectId}/labels',
     method: 'post',
     invalidatePrefix: '/v2/projects/{projectId}/labels',
   });
 
-  const updateLabel = useApiMutation({
+  const updateMutation = useApiMutation({
     url: '/v2/projects/{projectId}/labels/{labelId}',
     method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/labels',
+  });
+
+  const removeMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/labels/{labelId}',
+    method: 'delete',
     invalidatePrefix: '/v2/projects/{projectId}/labels',
   });
 
@@ -87,20 +115,35 @@ export const ProjectSettingsLabels = () => {
             justifyContent="end"
             mb={1}
             alignItems="stretch"
-          ></Box>
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Plus width={19} height={19} />}
+              onClick={addLabel}
+              data-cy="project-settings-labels-add-button"
+            >
+              {t('add_label')}
+            </Button>
+          </Box>
         </Box>
         <PaginatedHateoasList
           loadable={labels}
           onPageChange={setPage}
+          listComponent={TableGrid}
           emptyPlaceholder={
-            <Box m={4} display="flex" justifyContent="center">
+            <Box m={2} display="flex" justifyContent="center">
               <Typography color="textSecondary">
-                {t('global_nothing_found')}
+                {t('project_settings_no_labels_yet')}
               </Typography>
             </Box>
           }
           renderItem={(l: LabelModel) => (
-            <LabelItem label={l} onLabelEdit={() => editLabel(l)} />
+            <LabelItem
+              label={l}
+              onLabelEdit={() => editLabel(l)}
+              onLabelRemove={() => removeLabel(l)}
+            />
           )}
         />
       </Box>
