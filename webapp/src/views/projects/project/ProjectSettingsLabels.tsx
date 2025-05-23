@@ -131,6 +131,7 @@ export const ProjectSettingsLabels = () => {
           loadable={labels}
           onPageChange={setPage}
           listComponent={TableGrid}
+          data-cy="project-settings-labels-list"
           emptyPlaceholder={
             <Box m={2} display="flex" justifyContent="center">
               <Typography color="textSecondary">
