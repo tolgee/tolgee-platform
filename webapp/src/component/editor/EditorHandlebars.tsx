@@ -94,7 +94,7 @@ const StyledEditor = styled('div')`
   }
 
   .cm-error-underline {
-    text-decoration: underline wavy red;
+    text-decoration: underline wavy ${({ theme }) => theme.palette.error.main};
     text-underline-offset: 4px;
   }
 `;
