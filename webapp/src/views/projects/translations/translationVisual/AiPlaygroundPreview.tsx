@@ -32,7 +32,7 @@ export const AiPlaygroundPreview = ({
 }: Props) => {
   const theme = useTheme();
   const content = (
-    <StyledAiPreview {...{ sx }}>
+    <StyledAiPreview {...{ sx }} data-cy="ai-playground-preview">
       <Stars width={20} height={20} color={theme.palette.secondary.main} />
       <StyledContent>
         <TranslationVisual

@@ -1,63 +1,58 @@
 import { login } from '../../common/apiCalls/common';
 import { prompt } from '../../common/apiCalls/testData/testData';
-import { waitForGlobalLoading } from '../../common/loading';
+import { openBasicAiPrompt } from '../../common/prompt';
+import { gcy } from '../../common/shared';
+import { createTag } from '../../common/tags';
 import {
-  getPromptEditor,
-  openBasicAiPrompt,
-  selectProvider,
-  toggleBasicOption,
-} from '../../common/prompt';
-import { assertMessage, gcy } from '../../common/shared';
-import { visitTranslations } from '../../common/translations';
+  selectLangsInLocalstorage,
+  visitTranslations,
+} from '../../common/translations';
 
-describe('basic prompt', () => {
+describe('preview batch', () => {
   beforeEach(() => {
     prompt.clean();
     prompt
       .generateStandard()
       .then((r) => r.body)
       .then((data) => {
+        const project = data.projects.find((p) => p.name === 'Prompt project');
         login(
           data.users.find((u) =>
             [u.username, u.name].includes('projectEditor@organization.com')
           )?.username
         );
-        visitTranslations(
-          data.projects.find((p) => p.name === 'Prompt project').id
-        );
+        selectLangsInLocalstorage(project.id, ['en', 'cs', 'de']);
+        visitTranslations(project.id);
       });
   });
 
-  it('saves custom prompt', () => {
+  it('previews batch on all items', () => {
     openBasicAiPrompt();
-    selectProvider('organization-provider');
-    toggleBasicOption('KEY_NAME');
-    gcy('ai-prompt-save-as-new-button').click();
-    gcy('ai-prompt-save-as-field-name').type('Custom prompt');
-    gcy('ai-prompt-save-dialog-save').click();
-    assertMessage('Prompt created');
+    gcy('ai-prompt-preview-more-button').click();
+    gcy('ai-prompt-preview-on-all').click();
+    gcy('ai-prompt-batch-dialog-run').click();
+    gcy('ai-playground-preview')
+      .should('contain', 'response from: server-provider')
+      .should('have.length', 8);
   });
 
-  it('loads existing prompt', () => {
+  it('previews batch on tagged', () => {
+    createTag('ai-playground');
     openBasicAiPrompt();
-    gcy('ai-prompt-open-existing-prompt-select').click();
-    gcy('ai-prompt-open-existing-prompt-item')
-      .contains('Custom prompt')
-      .click();
-    gcy('ai-prompt-provider-select').should('contain', 'organization-provider');
-    getPromptEditor().should('contain', 'Test prompt');
-    gcy('ai-prompt-name').should('contain', 'Custom prompt');
+    gcy('ai-prompt-preview-more-button').click();
+    gcy('ai-prompt-preview-on-dataset').click();
+    gcy('ai-prompt-dataset-run').click();
+    gcy('ai-playground-preview')
+      .should('contain', 'response from: server-provider')
+      .should('have.length', 2);
   });
 
-  it('loads existing prompt from prompts list', () => {
-    gcy('project-menu-item-ai').click();
-    gcy('ai-prompt-item-name')
-      .contains('Custom prompt')
-      .should('exist')
-      .click();
-    waitForGlobalLoading();
-    gcy('ai-prompt-provider-select').should('contain', 'organization-provider');
-    getPromptEditor().should('contain', 'Test prompt');
-    gcy('ai-prompt-name').should('contain', 'Custom prompt');
+  it('shows hint for user when nothing tagged', () => {
+    openBasicAiPrompt();
+    gcy('ai-prompt-preview-more-button').click();
+    gcy('ai-prompt-preview-on-dataset').click();
+    gcy('ai-prompt-dataset-no-tags-text')
+      .should('be.visible')
+      .should('contain', 'ai-playground');
   });
 });

@@ -141,7 +141,7 @@ export const PreviewDatasetDialog = ({
           </>
         ) : (
           <>
-            <Box>
+            <Box data-cy="ai-prompt-dataset-no-tags-text">
               <T
                 keyName="ai_prompt_dataset_no_tags"
                 params={{
@@ -169,13 +169,23 @@ export const PreviewDatasetDialog = ({
       <DialogActions>
         {keysLoadable.isLoading ? null : taggedKeys?.length ? (
           <>
-            <Button onClick={onClose}>{t('global_cancel_button')}</Button>
-            <Button onClick={handleRunBatch} color="primary">
+            <Button onClick={onClose} data-cy="ai-prompt-dataset-cancel">
+              {t('global_cancel_button')}
+            </Button>
+            <Button
+              onClick={handleRunBatch}
+              color="primary"
+              data-cy="ai-prompt-dataset-run"
+            >
               {t('ai_prompt_dataset_run')}
             </Button>
           </>
         ) : (
-          <Button color="primary" onClick={onClose}>
+          <Button
+            color="primary"
+            onClick={onClose}
+            data-cy="ai-prompt-dataset-got-it"
+          >
             {t('ai_prompt_dataset_got_it')}
           </Button>
         )}

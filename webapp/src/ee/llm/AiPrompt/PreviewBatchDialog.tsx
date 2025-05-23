@@ -115,8 +115,14 @@ export const PreviewBatchDialog = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t('global_cancel_button')}</Button>
-        <Button onClick={handleRunBatch} color="primary">
+        <Button onClick={onClose} data-cy="ai-prompt-batch-dialog-cancel">
+          {t('global_cancel_button')}
+        </Button>
+        <Button
+          onClick={handleRunBatch}
+          color="primary"
+          data-cy="ai-prompt-batch-dialog-run"
+        >
           {t('ai_prompt_batch_dialog_run')}
         </Button>
       </DialogActions>

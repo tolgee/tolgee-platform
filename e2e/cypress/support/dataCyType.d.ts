@@ -98,9 +98,16 @@ declare namespace DataCy {
         "ai-languages-description-edit" |
         "ai-menu-context-data" |
         "ai-menu-prompts" |
+        "ai-playground-preview" |
         "ai-playground-usage-cached-tokens" |
         "ai-playground-usage-mt-credits" |
         "ai-playground-usage-tokens" |
+        "ai-prompt-batch-dialog-cancel" |
+        "ai-prompt-batch-dialog-run" |
+        "ai-prompt-dataset-cancel" |
+        "ai-prompt-dataset-got-it" |
+        "ai-prompt-dataset-no-tags-text" |
+        "ai-prompt-dataset-run" |
         "ai-prompt-item-menu" |
         "ai-prompt-item-name" |
         "ai-prompt-name" |
