@@ -98,7 +98,9 @@ export const AiPromptItem = ({ prompt }: Props) => {
 
   return (
     <StyledContainer>
-      <StyledName {...linkProps}>{prompt.name}</StyledName>
+      <StyledName {...linkProps} data-cy="ai-prompt-item-name">
+        {prompt.name}
+      </StyledName>
       <StyledModel {...linkProps}>{prompt.providerName}</StyledModel>
       <StyledAction sx={{ pr: 1 }}>
         <IconButton
@@ -106,6 +108,8 @@ export const AiPromptItem = ({ prompt }: Props) => {
           color="inherit"
           ref={buttonRef}
           onClick={() => setMenuOpen(true)}
+          data-cy="ai-prompt-item-menu"
+          data-cy-name={prompt.name}
         >
           <DotsVertical />
         </IconButton>
@@ -119,8 +123,18 @@ export const AiPromptItem = ({ prompt }: Props) => {
           <MenuItem onClick={() => history.push(linkProps.to)}>
             {t('ai_prompts_open_in_playground')}
           </MenuItem>
-          <MenuItem onClick={handleRename}>{t('ai_prompts_rename')}</MenuItem>
-          <MenuItem onClick={handleDelete}>{t('ai_prompts_delete')}</MenuItem>
+          <MenuItem
+            onClick={handleRename}
+            data-cy="ai-prompts-menu-item-rename"
+          >
+            {t('ai_prompts_rename')}
+          </MenuItem>
+          <MenuItem
+            onClick={handleDelete}
+            data-cy="ai-prompts-menu-item-delete"
+          >
+            {t('ai_prompts_delete')}
+          </MenuItem>
         </Menu>
       )}
       {renameOpen && (

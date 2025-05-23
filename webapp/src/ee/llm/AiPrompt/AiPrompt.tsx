@@ -160,11 +160,14 @@ export const AiPrompt: React.FC<Props> = ({
         <StyledHeader>
           <StyledTitle>
             <StyledPromptName>
-              <StyledTitleText>{openPromptData?.name}</StyledTitleText>
+              <StyledTitleText data-cy="ai-prompt-name">
+                {openPromptData?.name}
+              </StyledTitleText>
               {canBeRenamed && openPromptData && (
                 <IconButton
                   onClick={() => setRenameOpen(true)}
                   className="editButton"
+                  data-cy="ai-prompt-provider-rename-button"
                 >
                   <Edit01 width={20} height={20} />
                 </IconButton>
@@ -182,6 +185,7 @@ export const AiPrompt: React.FC<Props> = ({
               />
 
               <IconButton
+                data-cy="ai-prompt-playground-close"
                 onClick={() =>
                   confirmUnsaved(() => {
                     setAiPlayground(undefined);
@@ -198,9 +202,14 @@ export const AiPrompt: React.FC<Props> = ({
             value={provider}
             onChange={(e) => setProvider(e.target.value)}
             sx={{ width: '50%' }}
+            data-cy="ai-prompt-provider-select"
           >
             {providers?._embedded?.providers?.map((i) => (
-              <MenuItem key={i.name} value={i.name}>
+              <MenuItem
+                key={i.name}
+                value={i.name}
+                data-cy="ai-prompt-provider-item"
+              >
                 {i.name}
               </MenuItem>
             ))}

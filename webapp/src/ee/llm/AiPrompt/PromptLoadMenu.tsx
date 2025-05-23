@@ -53,7 +53,11 @@ export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
   return (
     <Box>
       <Tooltip title={t('ai_prompt_open_existing_prompt')} disableInteractive>
-        <IconButton ref={buttonRef} onClick={() => setOpen(true)}>
+        <IconButton
+          ref={buttonRef}
+          onClick={() => setOpen(true)}
+          data-cy="ai-prompt-open-existing-prompt-select"
+        >
           <DotsVertical height={20} width={20} />
         </IconButton>
       </Tooltip>
@@ -69,6 +73,7 @@ export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
           </CompactListSubheader>
           {prompts?.map((item) => (
             <MenuItem
+              data-cy="ai-prompt-open-existing-prompt-item"
               key={item.id ?? -1}
               onClick={() => {
                 setOpen(false);

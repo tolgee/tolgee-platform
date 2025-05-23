@@ -101,6 +101,7 @@ export const PromptSaveMenu = ({
           ref={buttonRef}
           onClick={() => setCreateOpen(true)}
           disabled={disabled}
+          data-cy="ai-prompt-save-as-new-button"
         >
           {t('ai_prompt_save_as_new_label')}
         </LoadingButton>

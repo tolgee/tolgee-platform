@@ -1,16 +1,12 @@
 import { login } from '../../common/apiCalls/common';
-import { TestDataStandardResponse } from '../../common/apiCalls/testData/generator';
 import { prompt } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
+import { openAdvancedAiPlayground } from '../../common/prompt';
 import { gcy } from '../../common/shared';
-import {
-  getTranslationCell,
-  visitTranslations,
-} from '../../common/translations';
+import { visitTranslations } from '../../common/translations';
 import { buildXpath } from '../../common/XpathBuilder';
 
 describe('custom prompt', () => {
-  let testData: TestDataStandardResponse;
   beforeEach(() => {
     prompt.clean();
     prompt
@@ -25,7 +21,6 @@ describe('custom prompt', () => {
         visitTranslations(
           data.projects.find((p) => p.name === 'Prompt project').id
         );
-        testData = data;
       });
   });
 
@@ -189,13 +184,6 @@ describe('custom prompt', () => {
     results.forEach((result) => {
       gcy('ai-prompt-rendered').should('contain', result);
     });
-  }
-
-  function openAdvancedAiPlayground() {
-    visitTranslations(testData.projects[1].id);
-    getTranslationCell('Key 1', 'cs').click();
-    gcy('llm-machine-translation-customize').click();
-    gcy('ai-prompt-tab-advanced').click();
   }
 
   function getPromptEditor() {

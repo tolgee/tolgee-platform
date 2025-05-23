@@ -37,6 +37,7 @@ export const AiPromptsList = () => {
             component={Link}
             to={getAiPlaygroundUrl(project.id)}
             startIcon={<Plus width={19} height={19} />}
+            data-cy="ai-prompts-add-prompt"
           >
             {t('ai_prompts_add')}
           </Button>

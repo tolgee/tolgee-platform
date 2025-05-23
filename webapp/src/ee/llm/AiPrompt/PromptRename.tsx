@@ -62,16 +62,20 @@ export const PromptRename = ({ data, projectId, onClose }: Props) => {
                 name="name"
                 fullWidth
                 label={t('ai_prompt_rename_name_field')}
+                data-cy="ai-prompt-rename-name-field"
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={onClose}>{t('global_cancel_button')}</Button>
+              <Button onClick={onClose} data-cy="ai-prompt-rename-cancel">
+                {t('global_cancel_button')}
+              </Button>
               <LoadingButton
                 loading={updateLoadable.isLoading}
                 disabled={values.name === data.name}
                 onClick={() => handleSubmit()}
                 variant="contained"
                 color="primary"
+                data-cy="ai-prompt-rename-save"
               >
                 {t('global_form_save')}
               </LoadingButton>

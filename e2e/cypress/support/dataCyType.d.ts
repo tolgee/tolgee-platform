@@ -101,20 +101,39 @@ declare namespace DataCy {
         "ai-playground-usage-cached-tokens" |
         "ai-playground-usage-mt-credits" |
         "ai-playground-usage-tokens" |
+        "ai-prompt-item-menu" |
+        "ai-prompt-item-name" |
+        "ai-prompt-name" |
+        "ai-prompt-open-existing-prompt-item" |
+        "ai-prompt-open-existing-prompt-select" |
+        "ai-prompt-playground-close" |
         "ai-prompt-preview-button" |
         "ai-prompt-preview-more-button" |
         "ai-prompt-preview-on-all" |
         "ai-prompt-preview-on-dataset" |
+        "ai-prompt-provider-item" |
+        "ai-prompt-provider-rename-button" |
+        "ai-prompt-provider-select" |
+        "ai-prompt-rename-cancel" |
+        "ai-prompt-rename-name-field" |
+        "ai-prompt-rename-save" |
         "ai-prompt-rendered" |
         "ai-prompt-rendered-expand-button" |
         "ai-prompt-result-raw" |
         "ai-prompt-result-translation" |
+        "ai-prompt-save-as-field-name" |
+        "ai-prompt-save-as-field-use-as-default" |
         "ai-prompt-save-as-new-button" |
         "ai-prompt-save-button" |
+        "ai-prompt-save-dialog-cancel" |
+        "ai-prompt-save-dialog-save" |
         "ai-prompt-save-more-button" |
         "ai-prompt-show-result-toggle" |
         "ai-prompt-tab-advanced" |
         "ai-prompt-tab-basic" |
+        "ai-prompts-add-prompt" |
+        "ai-prompts-menu-item-delete" |
+        "ai-prompts-menu-item-rename" |
         "api-key-expiry-info" |
         "api-key-list-item" |
         "api-key-list-item-delete-button" |

@@ -77,21 +77,26 @@ export const PromptSaveDialog = ({
               <TextField
                 name="name"
                 label={t('ai_prompt_save_as_field_name')}
+                data-cy="ai-prompt-save-as-field-name"
               />
               {satisfiesPermission('languages.edit') && (
                 <FormControlLabel
                   control={<Checkbox name="useAsDefault" size="small" />}
                   label={t('ai_prompt_save_as_field_default')}
+                  data-cy="ai-prompt-save-as-field-use-as-default"
                 />
               )}
             </DialogContent>
             <DialogActions>
-              <Button onClick={onClose}>{t('global_cancel_button')}</Button>
+              <Button onClick={onClose} data-cy="ai-prompt-save-dialog-cancel">
+                {t('global_cancel_button')}
+              </Button>
               <LoadingButton
                 loading={createPrompt.isLoading}
                 onClick={() => handleSubmit()}
                 variant="contained"
                 color="primary"
+                data-cy="ai-prompt-save-dialog-save"
               >
                 {t('global_form_save')}
               </LoadingButton>
