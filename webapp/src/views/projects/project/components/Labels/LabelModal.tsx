@@ -4,7 +4,7 @@ import { useTranslate } from '@tolgee/react';
 import {
   LabelForm,
   LabelFormValues,
-} from 'tg.views/projects/project/components/LabelForm';
+} from 'tg.views/projects/project/components/Labels/LabelForm';
 import { components } from 'tg.service/apiSchema.generated';
 
 type LabelModel = components['schemas']['LabelModel'];
@@ -19,9 +19,20 @@ export const LabelModal: FC<{
   const { t } = useTranslate();
   return (
     <Dialog open={true} onClose={close}>
-      <DialogTitle>{t('project_settings_label_edit')}</DialogTitle>
+      <DialogTitle>
+        {t(
+          props.label
+            ? 'project_settings_label_edit'
+            : 'project_settings_label_add'
+        )}
+      </DialogTitle>
       <DialogContent sx={{ width: 500, maxWidth: '100%' }}>
-        <LabelForm label={props.label} submit={props.submit} cancel={close} />
+        <LabelForm
+          submitText={props.label ? undefined : t('global_add_button')}
+          label={props.label}
+          submit={props.submit}
+          cancel={close}
+        />
       </DialogContent>
     </Dialog>
   );

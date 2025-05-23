@@ -15,13 +15,17 @@ export type LabelFormValues = {
   description: string | undefined;
 };
 
-const randomHex = () => `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+const randomHex = () =>
+  `#${Math.floor(Math.random() * 16777215)
+    .toString(16)
+    .toUpperCase()}`;
 
 export const LabelForm: FC<{
   label?: LabelModel;
   submit: (values: LabelFormValues) => void;
   cancel?: () => void;
-}> = ({ label, submit, cancel }) => {
+  submitText?: string;
+}> = ({ label, submit, cancel, submitText }) => {
   const { t } = useTranslate();
   const initValues = {
     name: label?.name ?? '',
@@ -31,6 +35,7 @@ export const LabelForm: FC<{
   const onSubmit = (values: LabelFormValues) => {
     submit({
       ...values,
+      color: values.color.toUpperCase(),
     });
   };
 
@@ -40,6 +45,7 @@ export const LabelForm: FC<{
       initialValues={initValues}
       onSubmit={onSubmit}
       onCancel={cancel}
+      submitButtonInner={submitText}
     >
       <Box mb={4}>
         <Box display="flex" gap={2} mb={2}>
@@ -60,7 +66,12 @@ export const LabelForm: FC<{
           <FieldLabel>
             <T keyName="project_settings_label_description" />
           </FieldLabel>
-          <TextField size="medium" name="description" required={false} />
+          <TextField
+            size="medium"
+            multiline
+            name="description"
+            required={false}
+          />
         </Box>
       </Box>
     </StandardForm>

@@ -603,6 +603,9 @@ declare namespace DataCy {
         "project-settings-delete-button" |
         "project-settings-description" |
         "project-settings-label-item" |
+        "project-settings-labels-add-button" |
+        "project-settings-labels-edit-button" |
+        "project-settings-labels-remove-button" |
         "project-settings-languages" |
         "project-settings-languages-add" |
         "project-settings-languages-list-edit-button" |
