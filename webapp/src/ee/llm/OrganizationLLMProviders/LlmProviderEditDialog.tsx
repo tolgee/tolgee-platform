@@ -92,6 +92,7 @@ export const LlmProviderEditDialog = ({ onClose, provider }: Props) => {
                   disabled={!dirty && provider.type === type}
                   color="primary"
                   variant="contained"
+                  data-cy="llm-provider-create-dialog-update"
                 >
                   {t('llm_provider_update_button')}
                 </LoadingButton>

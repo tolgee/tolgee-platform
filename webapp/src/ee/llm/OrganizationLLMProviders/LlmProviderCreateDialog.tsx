@@ -86,6 +86,7 @@ export const LlmProviderCreateDialog = ({ onClose }: Props) => {
                   loading={createMutation.isLoading}
                   color="primary"
                   variant="contained"
+                  data-cy="llm-provider-create-dialog-submit"
                 >
                   {t('llm_provider_create_button')}
                 </LoadingButton>

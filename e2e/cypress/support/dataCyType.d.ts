@@ -383,6 +383,18 @@ declare namespace DataCy {
         "languages-modify-cancel-button" |
         "languages-prepared-language-box" |
         "llm-machine-translation-customize" |
+        "llm-provider-create-dialog-submit" |
+        "llm-provider-create-dialog-update" |
+        "llm-provider-form-priority-select" |
+        "llm-provider-form-select" |
+        "llm-provider-form-text-field" |
+        "llm-provider-form-type-select" |
+        "llm-provider-form-type-select-item" |
+        "llm-provider-item-menu" |
+        "llm-provider-item-name" |
+        "llm-provider-item-type" |
+        "llm-provider-menu-item-delete" |
+        "llm-provider-menu-item-edit" |
         "llm-providers-custom" |
         "llm-providers-server" |
         "login-button" |
@@ -448,6 +460,7 @@ declare namespace DataCy {
         "organization-invitation-cancel-button" |
         "organization-invitation-copy-button" |
         "organization-invitation-item" |
+        "organization-llm-providers-tab" |
         "organization-member-item" |
         "organization-member-leave-button" |
         "organization-members-remove-user-button" |

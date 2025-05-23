@@ -32,12 +32,17 @@ export const LlmProviderForm = ({ type, onTypeChange }: Props) => {
     <>
       <MuiSelect
         label={t('llm_provider_form_type')}
+        data-cy="llm-provider-form-type-select"
         value={type}
         onChange={(e) => onTypeChange(e.target.value as LlmProviderType)}
         size="small"
       >
         {(Object.keys(globalConfig) as LlmProviderType[]).map((type) => (
-          <MenuItem key={type} value={type}>
+          <MenuItem
+            key={type}
+            value={type}
+            data-cy="llm-provider-form-type-select-item"
+          >
             {translateType(type)}
           </MenuItem>
         ))}
@@ -57,6 +62,8 @@ export const LlmProviderForm = ({ type, onTypeChange }: Props) => {
               name={name}
               label={labelWithHint}
               displayEmpty={true}
+              data-cy="llm-provider-form-select"
+              data-cy-name={name}
             >
               {options.enum.map((i) => (
                 <MenuItem key={i} value={i}>
@@ -72,7 +79,15 @@ export const LlmProviderForm = ({ type, onTypeChange }: Props) => {
             </Select>
           );
         } else {
-          return <TextField key={name} name={name} label={labelWithHint} />;
+          return (
+            <TextField
+              key={name}
+              name={name}
+              label={labelWithHint}
+              data-cy="llm-provider-form-text-field"
+              data-cy-name={name}
+            />
+          );
         }
       })}
       <Select
@@ -82,6 +97,7 @@ export const LlmProviderForm = ({ type, onTypeChange }: Props) => {
             {t('llm_provider_form_priority')}
           </LabelHint>
         }
+        data-cy="llm-provider-form-priority-select"
         displayEmpty
       >
         <MenuItem value={undefined}>

@@ -95,12 +95,22 @@ export const LlmProviderItem = ({ provider, onEdit }: Props) => {
 
   return (
     <StyledContainer>
-      <StyledName {...actionProps}>{provider.name}</StyledName>
-      <StyledModel {...actionProps}>
+      <StyledName {...actionProps} data-cy="llm-provider-item-name">
+        {provider.name}
+      </StyledName>
+      <StyledModel
+        {...actionProps}
+        data-cy="llm-provider-item-type"
+        data-cy-name={provider.name}
+      >
         {translateProviderType(provider.type)}
       </StyledModel>
       {isEditable && (
-        <StyledAction sx={{ pr: 1 }}>
+        <StyledAction
+          sx={{ pr: 1 }}
+          data-cy="llm-provider-item-menu"
+          data-cy-name={provider.name}
+        >
           <IconButton
             size="small"
             color="inherit"
@@ -117,8 +127,15 @@ export const LlmProviderItem = ({ provider, onEdit }: Props) => {
           open
           onClose={() => setMenuOpen(false)}
         >
-          <MenuItem onClick={onEdit}>{t('llm_provider_edit')}</MenuItem>
-          <MenuItem onClick={handleDelete}>{t('llm_provider_delete')}</MenuItem>
+          <MenuItem onClick={onEdit} data-cy="llm-provider-menu-item-edit">
+            {t('llm_provider_edit')}
+          </MenuItem>
+          <MenuItem
+            onClick={handleDelete}
+            data-cy="llm-provider-menu-item-delete"
+          >
+            {t('llm_provider_delete')}
+          </MenuItem>
         </Menu>
       )}
     </StyledContainer>
