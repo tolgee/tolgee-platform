@@ -279,3 +279,10 @@ normalization {
         ignore '**/build-info.properties'
     }
 }
+
+// ===== Apply custom tasks, if exist, from gitignored .local directory =====
+def customTasksFile = rootProject.file('.local/gradle/backend-app.gradle')
+if (customTasksFile.exists()) {
+    logger.lifecycle("Applying custom local Gradle script: ${customTasksFile}")
+    apply from: customTasksFile
+}

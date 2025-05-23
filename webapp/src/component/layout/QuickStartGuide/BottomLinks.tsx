@@ -1,7 +1,9 @@
 import { Box, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
+
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { StyledLink } from './StyledComponents';
+import { DOCS_ROOT } from 'tg.constants/docLinks';
 
 const StyledContainer = styled(Box)`
   background: ${({ theme }) => theme.palette.quickStart.highlight};
@@ -21,7 +23,7 @@ export const BottomLinks = ({ allCompleted }: Props) => {
       <Box display="flex" justifyContent="space-between">
         <Box display="flex" gap={2}>
           <StyledLink
-            href="https://tolgee.io/platform"
+            href={`${DOCS_ROOT}/platform`}
             target="_blank"
             rel="noreferrer noopener"
           >

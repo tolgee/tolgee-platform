@@ -6,7 +6,7 @@ import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { LoadingCheckboxWithSkeleton } from 'tg.component/common/form/LoadingCheckboxWithSkeleton';
 import { HelpCircle } from '@untitled-ui/icons-react';
-import { DOC_LINKS } from '../../../../docLinks';
+import { DOCS_LINKS } from '../../../../constants/docLinks';
 
 type ImportSettingRequest = components['schemas']['ImportSettingsRequest'];
 type ImportSettingModel = components['schemas']['ImportSettingsModel'];
@@ -110,7 +110,7 @@ export const ImportSettingsPanel: FC = (props) => {
           checked={state?.convertPlaceholdersToIcu}
           {...additionalCheckboxProps}
           customHelpIcon={
-            <StyledLink href={DOC_LINKS.importingPlaceholders}>
+            <StyledLink href={DOCS_LINKS.importingPlaceholders}>
               <HelpCircle className="icon" />
             </StyledLink>
           }
@@ -126,7 +126,7 @@ export const ImportSettingsPanel: FC = (props) => {
         label={t('import_override_key_descriptions_label')}
         checked={state?.overrideKeyDescriptions}
         customHelpIcon={
-          <StyledLink href={DOC_LINKS.importOverridingDescriptions}>
+          <StyledLink href={DOCS_LINKS.importOverridingDescriptions}>
             <Box display="flex">
               <HelpCircle className="icon" />
             </Box>

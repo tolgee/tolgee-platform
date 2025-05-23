@@ -45,7 +45,6 @@ class Project(
   @ActivityLoggedProp
   @Column(length = 2000)
   override var description: String? = null,
-  @field:Size(max = 2000)
   @Column(columnDefinition = "text")
   @ActivityLoggedProp
   var aiTranslatorPromptDescription: String? = null,

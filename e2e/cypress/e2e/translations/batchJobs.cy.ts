@@ -112,7 +112,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     selectOperation('Machine translation');
     assertLanguagesSelected(['German']);
     executeBatchOperation();
-    getCell('en translated with GOOGLE from en to de').should('be.visible');
+    getCell('en translated with PROMPT from en to de').should('be.visible');
     cy.gcy('translations-auto-translated-indicator').should('exist');
   });
 

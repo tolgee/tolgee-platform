@@ -7,7 +7,11 @@ import { signUpService } from '../service/SignUpService';
 import { checkParamNameIsValid } from '@tginternal/editor';
 import { validateObject } from 'tg.fixtures/validateObject';
 
-type TranslateFunction = TFnType<DefaultParamType, string, TranslationKey>;
+export type TranslateFunction = TFnType<
+  DefaultParamType,
+  string,
+  TranslationKey
+>;
 
 type AccountType =
   components['schemas']['PrivateUserAccountModel']['accountType'];
@@ -468,6 +472,16 @@ export class Validation {
     Yup.object().shape({
       name: Yup.string().min(3).required(),
       email: Yup.string().min(3).required(),
+    });
+
+  static readonly PROMPT_RENAME = () =>
+    Yup.object().shape({
+      name: Yup.string().required(),
+    });
+
+  static readonly PROMPT_SAVE_AS = () =>
+    Yup.object().shape({
+      name: Yup.string().required(),
     });
 }
 

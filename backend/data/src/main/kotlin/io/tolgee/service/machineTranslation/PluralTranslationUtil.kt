@@ -53,6 +53,7 @@ class PluralTranslationUtil(
       service = item.service,
       targetLanguageId = item.targetLanguageId,
       baseBlank = false,
+      promptId = item.promptId,
       exception = result.firstOrNull { it.second.exception != null }?.second?.exception,
     )
   }

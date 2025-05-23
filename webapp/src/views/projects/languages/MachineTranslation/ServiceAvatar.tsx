@@ -2,7 +2,7 @@ import { AlertTriangle } from '@untitled-ui/icons-react';
 import { Box, styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import { useServiceImg } from 'tg.views/projects/translations/ToolsPanel/panels/MachineTranslation/useServiceImg';
+import { useServiceImg } from 'tg.hooks/useServiceImg';
 import { getServiceName } from './getServiceName';
 import { ServiceType } from './types';
 

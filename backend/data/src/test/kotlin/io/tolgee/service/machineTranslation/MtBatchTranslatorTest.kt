@@ -75,7 +75,7 @@ class MtBatchTranslatorTest {
             keyId = 1,
             baseTranslationText = preparedKey.baseTranslation,
             targetLanguageId = 1,
-            service = MtServiceType.TOLGEE,
+            service = MtServiceType.PROMPT,
           ),
         ),
       ).first()
@@ -116,7 +116,7 @@ class MtBatchTranslatorTest {
               "other" to "# psů",
             ),
           actualPrice = 100,
-          usedService = MtServiceType.TOLGEE,
+          usedService = MtServiceType.PROMPT,
         ),
       )
   }
@@ -231,7 +231,7 @@ class MtBatchTranslatorTest {
           formality = Formality.FORMAL,
         ),
         MtServiceInfo(
-          MtServiceType.TOLGEE,
+          MtServiceType.PROMPT,
           formality = Formality.FORMAL,
         ),
       )
