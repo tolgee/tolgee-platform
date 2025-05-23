@@ -92,9 +92,9 @@ describe('basic prompt', () => {
     gcy('organization-llm-providers-tab').contains('Server').click();
     gcy('llm-provider-item-name').should('contain', 'server-provider');
     gcyAdvanced({
-      value: 'llm-provider-item-menu',
+      value: 'llm-provider-item-type',
       name: 'server-provider',
-    }).should('contain', 'OpenAI');
+    }).should('have.text', 'OpenAI');
   });
 
   function visitLlmProviders(organizationSlug: string) {
