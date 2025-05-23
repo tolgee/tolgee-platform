@@ -26,7 +26,10 @@ export const LabelModal: FC<{
             : 'project_settings_label_add'
         )}
       </DialogTitle>
-      <DialogContent sx={{ width: 500, maxWidth: '100%' }}>
+      <DialogContent
+        sx={{ width: 500, maxWidth: '100%' }}
+        data-cy="label-modal"
+      >
         <LabelForm
           submitText={props.label ? undefined : t('global_add_button')}
           label={props.label}

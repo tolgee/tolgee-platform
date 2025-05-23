@@ -93,17 +93,22 @@ export const LabelItem: React.FC<Props> = ({
 }) => {
   return (
     <StyledListItem data-cy="project-settings-label-item">
-      <StyledItemText>
+      <StyledItemText data-cy="project-settings-label-item-name">
         <StyledLabel color={label.color}>{label.name}</StyledLabel>
       </StyledItemText>
-      <StyledItemText>
+      <StyledItemText data-cy="project-settings-label-item-description">
         {label.description && (
           <span style={{ fontSize: '0.8em', color: '#888' }}>
             {label.description}
           </span>
         )}
       </StyledItemText>
-      <StyledItemText color={label.color}>{label.color}</StyledItemText>
+      <StyledItemText
+        data-cy="project-settings-label-item-color"
+        color={label.color}
+      >
+        {label.color}
+      </StyledItemText>
       <StyledItemActions>
         <IconButton
           data-cy="project-settings-labels-edit-button"

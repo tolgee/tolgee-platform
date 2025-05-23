@@ -127,6 +127,8 @@ export const authProviderChange = generateTestDataObject(
   'auth-provider-change'
 );
 
+export const labelsTestData = generateTestDataObject('label');
+
 export const sensitiveOperationProtectionTestData = {
   ...generateTestDataObject('sensitive-operation-protection'),
   getOtp: () =>
