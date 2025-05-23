@@ -81,6 +81,7 @@ export const PromptPreviewMenu = ({
               startIcon={<Stars height={18} />}
               ref={buttonRef}
               onClick={onTestPrompt}
+              data-cy="ai-prompt-preview-button"
             >
               {t('ai_prompt_preview_label')}
             </LoadingButton>
@@ -90,6 +91,7 @@ export const PromptPreviewMenu = ({
           disabled={disabled}
           onClick={() => setOpen(true)}
           ref={buttonRef as any}
+          data-cy="ai-prompt-preview-more-button"
         >
           <ArrowDropDown />
         </StyledArrowButton>
@@ -109,6 +111,7 @@ export const PromptPreviewMenu = ({
               setOpen(false);
               setDatasetDialogOpen(true);
             }}
+            data-cy="ai-prompt-preview-on-dataset"
           >
             {t('ai_prompt_preview_on_dataset')}
           </MenuItem>
@@ -117,6 +120,7 @@ export const PromptPreviewMenu = ({
               setOpen(false);
               setBatchDialogOpen(true);
             }}
+            data-cy="ai-prompt-preview-on-all"
           >
             {t('ai_prompt_preview_on_all', { value: translationsTotal })}
           </MenuItem>

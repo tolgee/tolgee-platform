@@ -61,6 +61,7 @@ export const MachineTranslationPromptWrapper = ({
         <Box>
           {satisfiesPermission('prompts.edit') && (
             <Button
+              data-cy="llm-machine-translation-customize"
               color="primary"
               size="small"
               onClick={() => {

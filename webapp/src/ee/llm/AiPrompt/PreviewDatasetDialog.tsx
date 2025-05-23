@@ -90,7 +90,7 @@ export const PreviewDatasetDialog = ({
             llmPrompt: {
               name: '',
               template,
-              options,
+              basicPromptOptions: options,
               providerName,
             },
           },

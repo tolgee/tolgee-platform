@@ -62,6 +62,7 @@ export const PromptSaveMenu = ({
           <LoadingButton
             disabled={disabled || !unsavedChanges}
             loading={updatePrompt.isLoading}
+            data-cy="ai-prompt-save-button"
             onClick={() => {
               updatePrompt.mutate(
                 {
@@ -84,6 +85,7 @@ export const PromptSaveMenu = ({
             {t('ai_prompt_save_label')}
           </LoadingButton>
           <StyledArrowButton
+            data-cy="ai-prompt-save-more-button"
             disabled={disabled}
             onClick={() => setOpen(true)}
             ref={buttonRef as any}
@@ -117,6 +119,7 @@ export const PromptSaveMenu = ({
               setOpen(false);
               setCreateOpen(true);
             }}
+            data-cy="ai-prompt-save-as-new-button"
           >
             {t('ai_prompt_save_as_new_label')}
           </MenuItem>

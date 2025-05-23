@@ -23,7 +23,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 export type BasicPromptOption = NonNullable<
-  components['schemas']['PromptRunDto']['options']
+  components['schemas']['PromptRunDto']['basicPromptOptions']
 >[number];
 
 type PromptItem = {
@@ -137,6 +137,8 @@ export const TabBasic = ({ value, onChange }: Props) => {
               marginRight={1}
             >
               <FormControlLabel
+                data-cy="prompt-basic-option"
+                data-cy-option={id}
                 control={<Switch size="small" />}
                 label={label}
                 sx={{ marginLeft: 0, gap: 0.5 }}

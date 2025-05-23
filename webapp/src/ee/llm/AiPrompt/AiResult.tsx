@@ -61,6 +61,7 @@ export const AiResult = ({ raw, json, isPlural, locale, loading }: Props) => {
                 onClick={() =>
                   setMode(_mode === 'translation' ? 'raw' : 'translation')
                 }
+                data-cy="ai-prompt-show-result-toggle"
               >
                 <Code02 height={20} width={20} />
               </IconButton>
@@ -80,7 +81,7 @@ export const AiResult = ({ raw, json, isPlural, locale, loading }: Props) => {
         </StyledDescription>
       ) : mode === 'raw' ? (
         <Box display="grid" gap={1}>
-          <StyledPre>{raw}</StyledPre>
+          <StyledPre data-cy="ai-prompt-result-raw">{raw}</StyledPre>
           {!json?.output && (
             <Box display="grid">
               <Alert color="warning" icon={false}>
@@ -90,7 +91,7 @@ export const AiResult = ({ raw, json, isPlural, locale, loading }: Props) => {
           )}
         </Box>
       ) : (
-        <Box display="grid" gap={1}>
+        <Box display="grid" gap={1} data-cy="ai-prompt-result-translation">
           <AiPlaygroundPreview
             locale={locale}
             isPlural={isPlural}

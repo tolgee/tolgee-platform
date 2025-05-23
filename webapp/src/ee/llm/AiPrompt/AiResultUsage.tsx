@@ -31,7 +31,10 @@ export const AiResultUsage = ({ usage, price }: Props) => {
           <Tooltip title={t('ai_playground_usage_tokens_hint')}>
             <SpanUnderlined>{t('ai_playground_usage_tokens')}</SpanUnderlined>
           </Tooltip>
-          : {Number(usage?.inputTokens ?? 0) + Number(usage?.outputTokens ?? 0)}
+          :{' '}
+          <span data-cy="ai-playground-usage-tokens">
+            {Number(usage?.inputTokens ?? 0) + Number(usage?.outputTokens ?? 0)}
+          </span>
         </span>
       )}
 
@@ -42,7 +45,10 @@ export const AiResultUsage = ({ usage, price }: Props) => {
               {t('ai_playground_usage_cached_tokens')}
             </SpanUnderlined>
           </Tooltip>
-          : {usage?.cachedTokens}
+          :{' '}
+          <span data-cy="ai-playground-usage-cached-tokens">
+            {usage?.cachedTokens}
+          </span>
         </span>
       )}
 
@@ -51,7 +57,7 @@ export const AiResultUsage = ({ usage, price }: Props) => {
           <Tooltip title={t('ai_playground_mt_credits_hint')}>
             <SpanUnderlined>{t('ai_playground_mt_credits')}</SpanUnderlined>
           </Tooltip>
-          : {price / 100}
+          : <span data-cy="ai-playground-usage-mt-credits">{price / 100}</span>
         </span>
       )}
     </StyledContainer>

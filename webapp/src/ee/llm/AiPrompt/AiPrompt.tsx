@@ -206,8 +206,16 @@ export const AiPrompt: React.FC<Props> = ({
             ))}
           </Select>
           <StyledTabs value={tab} onChange={(_, value) => setTab(value)}>
-            <StyledTab label={t('ai_prompt_tab_basic')} value="basic" />
-            <StyledTab label={t('ai_prompt_tab_advanced')} value="advanced" />
+            <StyledTab
+              label={t('ai_prompt_tab_basic')}
+              value="basic"
+              data-cy="ai-prompt-tab-basic"
+            />
+            <StyledTab
+              label={t('ai_prompt_tab_advanced')}
+              value="advanced"
+              data-cy="ai-prompt-tab-advanced"
+            />
           </StyledTabs>
         </StyledHeader>
         {tab === 'advanced' ? (

@@ -178,8 +178,7 @@ class LlmProviderService(
       """.trimIndent()
     return PromptResult(
       response = json,
-      usage = PromptResponseUsageDto(inputTokens = 42, outputTokens = 42, cachedTokens = 21),
-      price = 400,
+      usage = PromptResponseUsageDto(inputTokens = 42, outputTokens = 21, cachedTokens = 1),
     )
   }
 

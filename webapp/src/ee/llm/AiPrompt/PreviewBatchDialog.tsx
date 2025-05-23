@@ -74,7 +74,7 @@ export const PreviewBatchDialog = ({
             llmPrompt: {
               name: '',
               template,
-              options,
+              basicPromptOptions: options,
               providerName,
             },
           },

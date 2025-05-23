@@ -15,7 +15,7 @@ import { usePromptUrlState } from 'tg.views/projects/translations/useUrlPromptSt
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type BasicPromptOption = NonNullable<
-  components['schemas']['PromptRunDto']['options']
+  components['schemas']['PromptRunDto']['basicPromptOptions']
 >[number];
 
 const DEFAULT_BASIC_OPTIONS: BasicPromptOption[] = [
@@ -90,7 +90,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
         return true;
       }
       if (type === 'basic') {
-        const lastOptions = new Set(openPromptData.options);
+        const lastOptions = new Set(openPromptData.basicPromptOptions);
         const newOptions = new Set(options);
         return !(
           lastOptions.size === newOptions.size &&
@@ -133,7 +133,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
     setOpenPrompt(item.id);
     setProvider(item.providerName);
     setValue(item.template || openPromptLoadable.defaultTemplate || '');
-    setOptions(item.options ?? DEFAULT_BASIC_OPTIONS);
+    setOptions(item.basicPromptOptions ?? DEFAULT_BASIC_OPTIONS);
     if (!tab || overrideTab) {
       if (item.id === undefined) {
         setTab('basic');
@@ -188,7 +188,7 @@ export const usePromptState = ({ language, keyData }: Props) => {
             keyId: keyData.keyId,
             targetLanguageId: language.id,
             provider,
-            options: tab === 'basic' ? options : undefined,
+            basicPromptOptions: tab === 'basic' ? options : undefined,
           },
         },
       },

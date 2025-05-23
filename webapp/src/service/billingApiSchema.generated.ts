@@ -808,6 +808,12 @@ export interface components {
         | "llm_provider_timeout";
       params?: { [key: string]: unknown }[];
     };
+    ExampleItem: {
+      key: string;
+      keyNamespace?: string;
+      source: string;
+      target: string;
+    };
     GetMySubscriptionDto: {
       instanceId: string;
       licenseKey: string;
@@ -849,6 +855,17 @@ export interface components {
       /** @description The Total amount with tax */
       total: number;
     };
+    LegacyTolgeeTranslateRequest: {
+      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
+      isBatch: boolean;
+      keyName?: string;
+      metadata?: components["schemas"]["Metadata"];
+      pluralFormExamples?: { [key: string]: string };
+      pluralForms?: { [key: string]: string };
+      sourceTag: string;
+      targetTag: string;
+      text: string;
+    };
     LimitModel: {
       /**
        * Format: int64
@@ -865,20 +882,19 @@ export interface components {
        */
       limit: number;
     };
+    Metadata: {
+      closeItems: components["schemas"]["ExampleItem"][];
+      examples: components["schemas"]["ExampleItem"][];
+      keyDescription?: string;
+      languageDescription?: string;
+      projectDescription?: string;
+    };
     MtCreditsPriceModel: {
       /** Format: int64 */
       amount: number;
       /** Format: int64 */
       id: number;
       price: number;
-    };
-    MtMetadata: {
-      /** Format: int64 */
-      keyId: number;
-      /** Format: int64 */
-      organizationId: number;
-      prompt: string;
-      provider: string;
     };
     MtResult: {
       contextDescription?: string;
@@ -1053,18 +1069,6 @@ export interface components {
       inputTokens?: number;
       /** Format: int64 */
       outputTokens?: number;
-    };
-    ProviderTranslateParams: {
-      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
-      isBatch: boolean;
-      keyName?: string;
-      metadata?: components["schemas"]["MtMetadata"];
-      pluralFormExamples?: { [key: string]: string };
-      pluralForms?: { [key: string]: string };
-      sourceLanguageTag: string;
-      targetLanguageTag: string;
-      text: string;
-      textRaw: string;
     };
     ReleaseKeyDto: {
       licenseKey: string;
@@ -4801,7 +4805,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["ProviderTranslateParams"];
+        "application/json": components["schemas"]["LegacyTolgeeTranslateRequest"];
       };
     };
   };

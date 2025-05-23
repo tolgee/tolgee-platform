@@ -41,6 +41,7 @@ export const AiRenderedPrompt = ({ data, loading }: Props) => {
           <IconButton
             sx={{ marginY: -1 }}
             onClick={() => setExpanded((val) => (val ? undefined : 'true'))}
+            data-cy="ai-prompt-rendered-expand-button"
           >
             {expanded ? (
               <ChevronUp height={20} width={20} />
@@ -62,7 +63,7 @@ export const AiRenderedPrompt = ({ data, loading }: Props) => {
             {t('ai_playground_rendered_prompt_empty')}
           </StyledDescription>
         ) : (
-          <StyledContent>{data}</StyledContent>
+          <StyledContent data-cy="ai-prompt-rendered">{data}</StyledContent>
         ))}
     </>
   );

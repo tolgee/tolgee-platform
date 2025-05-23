@@ -98,6 +98,23 @@ declare namespace DataCy {
         "ai-languages-description-edit" |
         "ai-menu-context-data" |
         "ai-menu-prompts" |
+        "ai-playground-usage-cached-tokens" |
+        "ai-playground-usage-mt-credits" |
+        "ai-playground-usage-tokens" |
+        "ai-prompt-preview-button" |
+        "ai-prompt-preview-more-button" |
+        "ai-prompt-preview-on-all" |
+        "ai-prompt-preview-on-dataset" |
+        "ai-prompt-rendered" |
+        "ai-prompt-rendered-expand-button" |
+        "ai-prompt-result-raw" |
+        "ai-prompt-result-translation" |
+        "ai-prompt-save-as-new-button" |
+        "ai-prompt-save-button" |
+        "ai-prompt-save-more-button" |
+        "ai-prompt-show-result-toggle" |
+        "ai-prompt-tab-advanced" |
+        "ai-prompt-tab-basic" |
         "api-key-expiry-info" |
         "api-key-list-item" |
         "api-key-list-item-delete-button" |
@@ -339,6 +356,7 @@ declare namespace DataCy {
         "languages-modify-apply-button" |
         "languages-modify-cancel-button" |
         "languages-prepared-language-box" |
+        "llm-machine-translation-customize" |
         "llm-providers-custom" |
         "llm-providers-server" |
         "login-button" |
@@ -520,6 +538,7 @@ declare namespace DataCy {
         "project-transfer-autocomplete-suggested-option" |
         "project-transfer-confirmation-field" |
         "project-transfer-dialog" |
+        "prompt-basic-option" |
         "quick-start-action" |
         "quick-start-dialog" |
         "quick-start-finish-action" |

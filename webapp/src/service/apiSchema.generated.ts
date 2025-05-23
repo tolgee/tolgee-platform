@@ -3126,7 +3126,6 @@ export interface components {
       format?: string;
       /** Format: int64 */
       id: number;
-      keepAlive?: string;
       model?: string;
       name: string;
       priority?: "LOW" | "HIGH";
@@ -4007,8 +4006,7 @@ export interface components {
       stats: components["schemas"]["ProjectStatistics"];
     };
     PromptDto: {
-      name: string;
-      options?: (
+      basicPromptOptions?: (
         | "KEY_NAME"
         | "KEY_DESCRIPTION"
         | "KEY_CONTEXT"
@@ -4017,6 +4015,7 @@ export interface components {
         | "TM_SUGGESTIONS"
         | "SCREENSHOT"
       )[];
+      name: string;
       providerName: string;
       template?: string;
     };
@@ -4062,9 +4061,7 @@ export interface components {
       usage?: components["schemas"]["PromptResponseUsageDto"];
     };
     PromptRunDto: {
-      /** Format: int64 */
-      keyId: number;
-      options?: (
+      basicPromptOptions?: (
         | "KEY_NAME"
         | "KEY_DESCRIPTION"
         | "KEY_CONTEXT"
@@ -4073,6 +4070,8 @@ export interface components {
         | "TM_SUGGESTIONS"
         | "SCREENSHOT"
       )[];
+      /** Format: int64 */
+      keyId: number;
       provider: string;
       /** Format: int64 */
       targetLanguageId: number;

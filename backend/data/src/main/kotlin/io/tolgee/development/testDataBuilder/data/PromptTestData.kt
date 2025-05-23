@@ -22,12 +22,13 @@ class PromptTestData : BaseTestData() {
   val projectReviewer: UserAccountBuilder
   lateinit var english: LanguageBuilder
   lateinit var czech: LanguageBuilder
+  lateinit var german: LanguageBuilder
+  lateinit var chinese: LanguageBuilder
   lateinit var keys: MutableList<KeyBuilder>
   lateinit var customPrompt: PromptBuilder
   lateinit var llmProvider: LlmProviderBuilder
 
   init {
-
     serverAdmin =
       root.addUserAccount {
         username = "admin@admin.com"
@@ -84,13 +85,31 @@ class PromptTestData : BaseTestData() {
       root.addProject {
         organizationOwner = organization.self
         name = "Prompt project"
+        aiTranslatorPromptDescription = "Project used for testing llms"
       }.build {
         english = addEnglish()
         czech = addCzech()
 
+        german = addLanguage {
+          name = "German"
+          originalName = "Deutsch"
+          tag = "de"
+        }
+
+        chinese = addLanguage {
+          name = "Chinese"
+          tag = "zh"
+        }
+
+        czech.self.apply {
+          aiTranslatorPromptDescription = "Language used for testing llms"
+        }
+
         keys =
           listOf(1, 2, 3, 4).map { i ->
-            addKey("Key $i").also {
+            addKey("Key $i") {
+              this.setDescription("Key $i description.")
+            }.also {
               addTranslation {
                 key = it.self
                 text = "English translation $i"
@@ -100,6 +119,16 @@ class PromptTestData : BaseTestData() {
                 key = it.self
                 text = "Czech translation $i"
                 language = czech.self
+              }
+              addTranslation {
+                key = it.self
+                text = "German translation $i"
+                language = german.self
+              }
+              addTranslation {
+                key = it.self
+                text = "Chinese translation $i"
+                language = chinese.self
               }
             }
           }.toMutableList()
