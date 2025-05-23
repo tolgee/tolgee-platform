@@ -65,7 +65,7 @@ class LabelService(
   ) {
     label.name = request.name
     label.description = request.description
-    label.color = request.color
+    label.color = request.color.uppercase()
   }
 
   @Transactional
