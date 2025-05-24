@@ -3,14 +3,15 @@ package io.tolgee.ee.service.prompt
 import io.tolgee.ee.service.prompt.PromptVariablesHelper.Companion.ScreenshotSize
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.dtos.LlmParams
+import io.tolgee.ee.service.prompt.PromptVariablesService.Companion.ScreenshotSize
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.ScreenshotService
-import io.tolgee.util.ImageConverter
+import io.tolgee.util.ScreenshotKeysHighlighter
 import io.tolgee.util.regexSplitAndMatch
 import org.springframework.stereotype.Component
 import java.io.ByteArrayInputStream
-import java.util.Base64
+import java.util.*
 
 @Component
 class PromptParamsHelper(
@@ -76,13 +77,13 @@ class PromptParamsHelper(
     val filePath = screenshotService.getScreenshotPath(file)
 
     if (screenshot.keyScreenshotReferences.find { it.key.id == key.id } !== null) {
-      val converter =
-        ImageConverter(
+      val highlighter =
+        ScreenshotKeysHighlighter(
           ByteArrayInputStream(
             fileStorage.readFile(filePath),
           ),
         )
-      return converter.highlightKeys(screenshot, listOf(key.id)).toByteArray()
+      return highlighter.highlightKeys(screenshot, listOf(key.id)).toByteArray()
     } else {
       return fileStorage.readFile(filePath)
     }
