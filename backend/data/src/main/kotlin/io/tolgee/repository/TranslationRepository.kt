@@ -125,7 +125,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
             target.text <> '' and
             target.text is not null
       where baseTranslation.language = p.baseLanguage and
-        baseTranslation.text = :baseTranslationText and
+        LOWER(TRIM(baseTranslation.text)) = LOWER(TRIM(:baseTranslationText)) and
         k <> :key
       """,
   )
