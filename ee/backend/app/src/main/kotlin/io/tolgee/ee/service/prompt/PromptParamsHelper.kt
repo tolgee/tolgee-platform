@@ -1,9 +1,8 @@
 package io.tolgee.ee.service.prompt
 
-import io.tolgee.ee.service.prompt.PromptVariablesHelper.Companion.ScreenshotSize
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.dtos.LlmParams
-import io.tolgee.ee.service.prompt.PromptVariablesService.Companion.ScreenshotSize
+import io.tolgee.ee.service.prompt.PromptVariablesHelper.Companion.ScreenshotSize
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.ScreenshotService
