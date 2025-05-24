@@ -25,8 +25,6 @@ class MtTranslatorContext(
     projectService.getDto(projectId)
   }
 
-  val metadata: MutableMap<MetadataKey, MetadataKey> = mutableMapOf()
-
   val keys: MutableMap<Long, KeyForMt> = mutableMapOf()
 
   private val possibleTargetLanguages = mutableSetOf<Long>()
@@ -166,28 +164,8 @@ class MtTranslatorContext(
       ?: throw IllegalStateException("Service $service not enabled for language $languageId")
   }
 
-  fun prepareMetadata(batch: List<MtBatchItemParams>) {
-    val newMetadataKeys =
-      batch.filter { needsMetadata(it) }.mapNotNull {
-        val baseTranslationText = it.baseTranslationText ?: return@mapNotNull null
-        MetadataKey(
-          it.keyId,
-          baseTranslationText,
-          it.targetLanguageId,
-        )
-      }.filter { !metadata.containsKey(it) }
-    newMetadataKeys.forEach {
-      metadata[it] = it
-    }
-  }
-
   fun getLanguage(languageId: Long): LanguageDto {
     return languages[languageId] ?: throw IllegalStateException("Language $languageId not found")
-  }
-
-  private fun needsMetadata(item: MtBatchItemParams): Boolean {
-    val service = getServiceInfo(item.targetLanguageId, item.service)
-    return service.serviceType.usesMetadata
   }
 
   private fun getEnabledServices(languageId: Long): Set<MtServiceInfo> {

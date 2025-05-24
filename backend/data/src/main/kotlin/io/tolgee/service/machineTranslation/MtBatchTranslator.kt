@@ -14,7 +14,6 @@ class MtBatchTranslator(
   fun translate(batch: List<MtBatchItemParams>): List<MtTranslatorResult> {
     val result = mutableListOf<MtTranslatorResult>()
     context.prepareKeys(batch)
-    context.prepareMetadata(batch)
 
     batch.forEach { item ->
       result.add(translateItem(item))
