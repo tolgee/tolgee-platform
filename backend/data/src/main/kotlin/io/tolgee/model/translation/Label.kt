@@ -1,7 +1,5 @@
 package io.tolgee.model.translation
 
-import io.tolgee.activity.annotation.ActivityDescribingProp
-import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import jakarta.persistence.Column
@@ -22,14 +20,11 @@ class Label : StandardAuditModel() {
   @field:NotEmpty
   @field:Size(max = 100)
   @Column(length = 100, nullable = false)
-  @ActivityLoggedProp
-  @ActivityDescribingProp
   lateinit var name: String
 
   @field:NotEmpty
   @field:Size(max = 7)
   @Column(length = 7, nullable = false)
-  @ActivityLoggedProp
   lateinit var color: String
 
   @field:Size(max = 2000)
@@ -44,6 +39,9 @@ class Label : StandardAuditModel() {
   var translations: MutableSet<Translation> = mutableSetOf()
 
   fun clearTranslations() {
-    translations.forEach { it.removeLabel(this) }
+    translations.forEach {
+      it.labels.remove(this)
+    }
+    translations.clear()
   }
 }

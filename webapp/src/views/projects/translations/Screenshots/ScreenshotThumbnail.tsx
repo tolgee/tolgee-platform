@@ -1,8 +1,6 @@
 import { FunctionComponent } from 'react';
-import { Box, IconButton, styled, SxProps, Tooltip } from '@mui/material';
-import { XClose } from '@untitled-ui/icons-react';
+import { Box, styled, SxProps } from '@mui/material';
 import { T } from '@tolgee/react';
-import clsx from 'clsx';
 
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -11,6 +9,7 @@ import {
   ScreenshotWithLabels,
 } from 'tg.component/ScreenshotWithLabels';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
+import { CloseButton } from 'tg.component/common/buttons/CloseButton';
 
 const StyledScreenshotWithLabels = styled(ScreenshotWithLabels)`
   width: 100%;
@@ -27,37 +26,6 @@ const StyledScreenshotBox = styled(Box)`
   justify-content: center;
   display: flex;
   cursor: pointer;
-
-  & .closeButton {
-    position: absolute;
-    z-index: 2;
-    top: -8px;
-    right: -8px;
-    width: 24px;
-    height: 24px;
-    background-color: ${({ theme }) =>
-      theme.palette.tokens.icon.backgroundDark};
-    color: ${({ theme }) => theme.palette.tokens.icon.onDark};
-    transition: visibility 0.1s linear, opacity 0.1s linear;
-    display: grid;
-    align-content: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-
-    &:hover {
-      background-color: ${({ theme }) =>
-        theme.palette.tokens.icon.backgroundDarkHover};
-      color: ${({ theme }) => theme.palette.tokens.icon.onDarkHover};
-      visibility: visible;
-    }
-  }
-
-  &:hover .closeButton,
-  &:focus-within .closeButton {
-    pointer-events: all;
-    opacity: 1;
-  }
 `;
 
 const StyledScreenshotOverflowWrapper = styled(Box)`
@@ -67,6 +35,7 @@ const StyledScreenshotOverflowWrapper = styled(Box)`
   height: 100%;
   border-radius: 4px;
   background: ${({ theme }) => theme.palette.tokens.text._states.selected};
+
   &::after {
     content: '';
     position: absolute;
@@ -103,28 +72,23 @@ export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
   };
 
   return (
-    <>
+    <CloseButton
+      onClose={
+        canDeleteScreenshots
+          ? (e) => {
+              stopAndPrevent()(e);
+              onDeleteClick();
+            }
+          : undefined
+      }
+      data-cy="screenshot-thumbnail-delete"
+    >
       <StyledScreenshotBox
         sx={props.sx}
         data-cy="screenshot-thumbnail"
         onMouseDown={stopAndPrevent()}
         onClick={stopAndPrevent()}
       >
-        {canDeleteScreenshots && (
-          <Tooltip
-            title={<T keyName="translations.screenshots.delete_tooltip" />}
-            disableInteractive
-          >
-            <IconButton
-              className={clsx('closeButton')}
-              onClick={onDeleteClick}
-              size="large"
-              data-cy="screenshot-thumbnail-delete"
-            >
-              <XClose width={20} height={20} />
-            </IconButton>
-          </Tooltip>
-        )}
         <StyledScreenshotOverflowWrapper
           key={props.screenshot.highlightedKeyId}
           onClick={props.onClick}
@@ -137,6 +101,6 @@ export const ScreenshotThumbnail: FunctionComponent<Props> = (props) => {
           />
         </StyledScreenshotOverflowWrapper>
       </StyledScreenshotBox>
-    </>
+    </CloseButton>
   );
 };

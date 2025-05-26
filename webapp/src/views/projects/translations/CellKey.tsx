@@ -96,7 +96,6 @@ const StyledTags = styled('div')`
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  overflow: hidden;
   & > * {
     margin: 0px 3px 3px 0px;
   }

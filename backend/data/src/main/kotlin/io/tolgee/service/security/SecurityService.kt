@@ -13,6 +13,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
+import io.tolgee.repository.LabelRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.language.LanguageService
@@ -28,6 +29,9 @@ class SecurityService(
   private val keyRepository: KeyRepository,
   private val projectHolder: ProjectHolder,
 ) {
+  @Autowired
+  private lateinit var labelRepository: LabelRepository
+
   @set:Autowired
   lateinit var apiKeyService: ApiKeyService
 
@@ -463,6 +467,19 @@ class SecurityService(
 
     if (firstProjectId != projectId) {
       throw PermissionException(Message.KEY_NOT_FROM_PROJECT)
+    }
+  }
+
+  fun checkLabelIdsExistAndIsFromProject(
+    labelIds: List<Long>,
+    projectId: Long,
+  ) {
+    val projectIds = labelRepository.getProjectIdsForLabelIds(labelIds)
+    if (projectIds.size != labelIds.size) {
+      throw NotFoundException(Message.LABEL_NOT_FOUND)
+    }
+    if (projectIds.any { it != projectId }) {
+      throw PermissionException(Message.MULTIPLE_PROJECTS_NOT_SUPPORTED)
     }
   }
 

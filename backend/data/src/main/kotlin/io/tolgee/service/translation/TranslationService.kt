@@ -524,4 +524,10 @@ class TranslationService(
       throw BadRequestException(Message.PLURAL_FORMS_DATA_LOSS, listOf(text))
     }
   }
+
+  @Transactional
+  fun getTranslationsWithLabels(keyIds: List<Long>, languageIds: List<Long>): List<Translation> {
+    return translationRepository
+      .getTranslationsWithLabels(keyIds, languageIds)
+  }
 }

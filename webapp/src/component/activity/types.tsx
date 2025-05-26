@@ -70,7 +70,8 @@ export type FieldTypeEnum =
   | 'language_tags'
   | 'date'
   | 'task_state'
-  | 'task_type';
+  | 'task_type'
+  | 'translation_labels';
 
 export type FieldOptionsObj = {
   label?: (params?: TranslateParams) => React.ReactElement;

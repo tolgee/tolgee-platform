@@ -54,6 +54,8 @@ enum class ActivityType(
   BATCH_TAG_KEYS(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_UNTAG_KEYS(true, paramsProvider = BatchActivityParamsProvider::class),
   BATCH_SET_KEYS_NAMESPACE(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_ASSIGN_TRANSLATION_LABEL(true, paramsProvider = BatchActivityParamsProvider::class),
+  BATCH_UNASSIGN_TRANSLATION_LABEL(true, paramsProvider = BatchActivityParamsProvider::class),
   AUTOMATION(onlyCountsInList = true, hideInList = true),
   CONTENT_DELIVERY_CONFIG_CREATE,
   CONTENT_DELIVERY_CONFIG_UPDATE,
@@ -74,4 +76,5 @@ enum class ActivityType(
   TASK_REOPEN,
   TASK_KEY_UPDATE(hideInList = true),
   ORDER_TRANSLATION,
+  TRANSLATION_LABELS_EDIT,
 }

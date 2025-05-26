@@ -19,6 +19,7 @@ import { getDefaultNamespaceChange } from './types/getDefaultNamespaceChange';
 import { getDateChange } from './types/getDateChange';
 import { getTaskStateChange } from './types/getTaskStateChange';
 import { getTaskTypeChange } from './types/getTaskTypeChange';
+import { getTranslationLabelChange } from 'tg.component/activity/types/getTranslationLabelsChange';
 
 type Props = {
   value: DiffValue<any>;
@@ -72,6 +73,8 @@ export const formatDiff = ({
       return getTaskStateChange(value);
     case 'task_type':
       return getTaskTypeChange(value);
+    case 'translation_labels':
+      return getTranslationLabelChange(value);
     default:
       return diffEnabled ? getGeneralChange(value) : getNoDiffChange(value);
   }
