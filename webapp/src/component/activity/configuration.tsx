@@ -391,4 +391,12 @@ export const actionsConfiguration: Partial<
       Task: true,
     },
   },
+  TRANSLATION_LABELS_EDIT: {
+    label(params) {
+      return <T keyName="activity_translation_labels_edit" params={params} />;
+    },
+    entities: {
+      Translation: true,
+    },
+  },
 };

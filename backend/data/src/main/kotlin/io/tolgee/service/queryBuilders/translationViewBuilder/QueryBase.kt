@@ -15,10 +15,7 @@ import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference_
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.keyBigMeta.KeysDistance_
-import io.tolgee.model.translation.Translation
-import io.tolgee.model.translation.TranslationComment
-import io.tolgee.model.translation.TranslationComment_
-import io.tolgee.model.translation.Translation_
+import io.tolgee.model.translation.*
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -98,6 +95,11 @@ class QueryBase<T>(
         language,
         resolvedCommentsExpression,
         unresolvedCommentsExpression,
+      )
+
+      queryTranslationFiltering.apply(
+        language,
+        translation,
       )
     }
 

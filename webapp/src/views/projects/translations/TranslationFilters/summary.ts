@@ -16,6 +16,11 @@ import {
   getTranslationFiltersLength,
   getTranslationFiltersName,
 } from './SubfilterTranslations';
+import {
+  getLabelFiltersLength,
+  getLabelFiltersName,
+} from 'tg.views/projects/translations/TranslationFilters/SubfilterLabels';
+import { FilterData } from 'tg.hooks/useFilterData';
 
 export function countFilters(value: FiltersInternal) {
   return (
@@ -23,16 +28,18 @@ export function countFilters(value: FiltersInternal) {
     getNamespaceFiltersLength(value) +
     getScreenshotFiltersLength(value) +
     getTagFiltersLength(value) +
-    getTranslationFiltersLength(value)
+    getTranslationFiltersLength(value) +
+    getLabelFiltersLength(value)
   );
 }
 
-export function getFilterName(value: FiltersInternal) {
+export function getFilterName(value: FiltersInternal, data: FilterData) {
   return (
     getCommentsFiltersName(value) ||
     getNamespaceFiltersName(value) ||
     getScreenshotFiltersName(value) ||
     getTagFiltersName(value) ||
-    getTranslationFiltersName(value)
+    getTranslationFiltersName(value) ||
+    getLabelFiltersName(value, data.labels)
   );
 }
