@@ -28,7 +28,7 @@ class LabelsTestData : BaseTestData() {
       }
       addProject {
         name = "Second project"
-      }.build secondProject@ {
+      }.build secondProject@{
         val key = addKey {
           name = "Second project key"
         }
