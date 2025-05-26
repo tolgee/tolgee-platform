@@ -40,5 +40,4 @@ class Label : StandardAuditModel() {
 
   @ManyToMany(mappedBy = "labels")
   var translations: MutableSet<Translation> = mutableSetOf()
-
 }
