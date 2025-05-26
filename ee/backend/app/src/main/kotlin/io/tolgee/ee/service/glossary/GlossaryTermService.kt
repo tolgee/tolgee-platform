@@ -245,7 +245,7 @@ class GlossaryTermService(
   }
 
   @Transactional
-  override fun glossaryTermsFor(
+  override fun getGlossaryTerms(
     project: ProjectDto,
     sourceLanguageTag: String,
     targetLanguageTag: String,

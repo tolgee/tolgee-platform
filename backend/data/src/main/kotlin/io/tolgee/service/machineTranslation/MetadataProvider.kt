@@ -35,7 +35,7 @@ class MetadataProvider(
           )
         } ?: listOf(),
       glossaryTerms =
-        mtGlossaryTermsProvider.glossaryTermsFor(
+        mtGlossaryTermsProvider.getGlossaryTerms(
           project = context.project,
           sourceLanguageTag = context.baseLanguage.tag,
           targetLanguageTag = targetLanguage.tag,

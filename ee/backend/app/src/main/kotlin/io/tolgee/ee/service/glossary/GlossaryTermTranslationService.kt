@@ -81,7 +81,7 @@ class GlossaryTermTranslationService(
   ): Set<GlossaryTermTranslation> {
     val locale = Locale.forLanguageTag(languageTag) ?: Locale.ROOT
     return glossaryTermTranslationRepository
-      .findByFirstWordLowercasedAndLanguageTagAndAssignedProjectIdAndOrganizationId(
+      .findByFirstWordLowercased(
         words.map { it.lowercase(locale) },
         languageTag,
         projectId,

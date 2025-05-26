@@ -115,7 +115,6 @@ export const GlossaryBatchToolbar: React.VFC<Props> = ({
       />
       <Typography>{`${selectionService.selected.length} / ${selectionService.total}`}</Typography>
       <Select variant="outlined" size="small" value={0} sx={{ minWidth: 250 }}>
-        {/* Only one possible operation for now */}
         <MenuItem value={0}>Delete terms</MenuItem>
       </Select>
       <LoadingButton

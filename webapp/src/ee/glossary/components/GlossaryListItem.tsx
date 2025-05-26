@@ -88,8 +88,6 @@ export const GlossaryListItem: React.VFC<Props> = ({ glossary }) => {
       originalName: languageData?.originalName || languageTag,
       tag: languageTag,
     },
-    // Future improvement - display all languages used in glossary
-    // not just base language
   ];
 
   return (

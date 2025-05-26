@@ -203,7 +203,7 @@ class MtBatchTranslatorTest {
     val mtGlossaryTermsProviderMock = mock<MtGlossaryTermsProvider>()
     whenever(applicationContextMock.getBean(MtGlossaryTermsProvider::class.java))
       .thenReturn(mtGlossaryTermsProviderMock)
-    whenever(mtGlossaryTermsProviderMock.glossaryTermsFor(any(), any(), any(), any()))
+    whenever(mtGlossaryTermsProviderMock.getGlossaryTerms(any(), any(), any(), any()))
       .thenReturn(emptySet())
     return applicationContextMock
   }

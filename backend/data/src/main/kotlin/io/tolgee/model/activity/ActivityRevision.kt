@@ -72,11 +72,6 @@ class ActivityRevision : java.io.Serializable {
    */
   var projectId: Long? = null
 
-//  /**
-//   * Glossary of the change
-//   */
-//  var glossaryId: Long? = null // TODO
-
   @OneToMany(mappedBy = "activityRevision")
   var describingRelations: MutableList<ActivityDescribingEntity> = mutableListOf()
 

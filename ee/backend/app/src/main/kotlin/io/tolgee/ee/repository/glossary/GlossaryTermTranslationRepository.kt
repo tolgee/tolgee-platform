@@ -62,7 +62,7 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
             gtt.term.glossary.deletedAt is null
     """,
   )
-  fun findByFirstWordLowercasedAndLanguageTagAndAssignedProjectIdAndOrganizationId(
+  fun findByFirstWordLowercased(
     texts: Collection<String>,
     languageTag: String,
     assignedProjectId: Long,

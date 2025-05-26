@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class MtGlossaryTermsProviderOssImpl : MtGlossaryTermsProvider {
-  override fun glossaryTermsFor(
+  override fun getGlossaryTerms(
     project: ProjectDto,
     sourceLanguageTag: String,
     targetLanguageTag: String,

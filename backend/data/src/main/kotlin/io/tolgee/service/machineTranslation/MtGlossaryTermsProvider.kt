@@ -4,7 +4,7 @@ import io.tolgee.component.machineTranslation.metadata.TranslationGlossaryItem
 import io.tolgee.dtos.cacheable.ProjectDto
 
 interface MtGlossaryTermsProvider {
-  fun glossaryTermsFor(
+  fun getGlossaryTerms(
     project: ProjectDto,
     sourceLanguageTag: String,
     targetLanguageTag: String,
