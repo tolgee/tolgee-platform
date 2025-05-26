@@ -40,4 +40,9 @@ class Label : StandardAuditModel() {
 
   @ManyToMany(mappedBy = "labels")
   var translations: MutableSet<Translation> = mutableSetOf()
+
+  fun clearTranslations() {
+    translations.forEach { it.removeLabel(this) }
+    translations.clear()
+  }
 }
