@@ -4,6 +4,7 @@ import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Label
 
 class BatchJobsTestData : BaseTestData() {
   val anotherUser = root.addUserAccount { username = "anotherUser" }.self
@@ -19,6 +20,7 @@ class BatchJobsTestData : BaseTestData() {
 
   fun addTranslationOperationData(keyCount: Int = 100): List<Key> {
     addAKey()
+    addLabels(2)
     return (1..keyCount).map {
       this.projectBuilder.addKey {
         name = "key$it"
@@ -104,5 +106,35 @@ class BatchJobsTestData : BaseTestData() {
       (1..500).map {
         this.projectBuilder.addKey(keyName = "key-without-namespace-$it").self
       }
+  }
+
+  fun addLabels(count: Int): List<Label> {
+    return (1..count).map {
+      projectBuilder.addLabel {
+        name = "Label $it"
+        color = ("#${"%06x".format((0..0xFFFFFF).random())}")
+        project = projectBuilder.self
+      }.self
+    }
+  }
+
+  fun addKeysWithLanguages(count: Int, labels: List<Label>? = listOf()): List<Key> {
+    val languages = projectBuilder.data.languages.map { it.self }
+
+    return (1..count).map {
+      this.projectBuilder.addKey {
+        name = "key$it"
+      }.build {
+        languages.forEach { language ->
+          addTranslation {
+            this.language = language
+            text = "text$it"
+            labels?.forEach { label ->
+              addLabel(label)
+            }
+          }
+        }
+      }.self
+    }
   }
 }

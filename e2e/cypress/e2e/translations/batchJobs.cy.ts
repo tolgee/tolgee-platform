@@ -1,7 +1,7 @@
 import { getCell, visitTranslations } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
 import { batchJobs } from '../../common/apiCalls/testData/testData';
-import { dismissMenu, gcy } from '../../common/shared';
+import { dismissMenu, gcy, gcyAdvanced } from '../../common/shared';
 import {
   executeBatchOperation,
   executeBatchOperationWithConfirmation,
@@ -75,6 +75,34 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     cy.gcy('tag-autocomplete-option').contains('new-tag').click();
     executeBatchOperation();
     cy.gcy('translations-tag').should('not.exist');
+  });
+
+  it('will assign and unassign label to translations', () => {
+    selectAll();
+    selectOperation('Assign labels');
+    chooseLabelInSelector('Label 1');
+    executeBatchOperation();
+    gcyAdvanced({
+      value: 'translations-table-cell-translation',
+      lang: 'en',
+    }).each(($cell) => {
+      cy.wrap($cell).within(() => {
+        gcy('translation-label').contains('Label 1').should('be.visible');
+      });
+    });
+
+    selectAll();
+    selectOperation('Unassign labels');
+    chooseLabelInSelector('Label 1');
+    executeBatchOperation();
+    gcyAdvanced({
+      value: 'translations-table-cell-translation',
+      lang: 'en',
+    }).each(($cell) => {
+      cy.wrap($cell).within(() => {
+        gcy('translation-label').contains('Label 1').should('not.exist');
+      });
+    });
   });
 
   it('will clear translations', () => {
@@ -155,6 +183,20 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
 
   const visit = () => {
     visitTranslations(project.id);
+  };
+
+  const chooseLabelInSelector = (label: string) => {
+    selectLanguage('English');
+    gcy('batch-operations-section').within(() => {
+      gcy('translation-label-control').click();
+    });
+    gcy('search-select-search').type(label);
+    gcy('label-autocomplete-option')
+      .contains(label)
+      .should('be.visible')
+      .click();
+    dismissMenu();
+    gcy('translation-label').contains(label).should('be.visible');
   };
 });
 

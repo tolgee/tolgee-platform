@@ -391,4 +391,36 @@ export const actionsConfiguration: Partial<
       Task: true,
     },
   },
+  TRANSLATION_LABEL_ASSIGN: {
+    label(params) {
+      return <T keyName="activity_translation_labels_edit" params={params} />;
+    },
+    entities: {
+      Translation: true,
+    },
+  },
+  TRANSLATION_LABEL_CREATE: {
+    label(params) {
+      return <T keyName="activity_translation_label_create" params={params} />;
+    },
+    entities: {
+      Label: true,
+    },
+  },
+  TRANSLATION_LABEL_UPDATE: {
+    label(params) {
+      return <T keyName="activity_translation_label_update" params={params} />;
+    },
+    entities: {
+      Label: true,
+    },
+  },
+  TRANSLATION_LABEL_DELETE: {
+    label(params) {
+      return <T keyName="activity_translation_label_delete" params={params} />;
+    },
+    entities: {
+      Label: true,
+    },
+  },
 };

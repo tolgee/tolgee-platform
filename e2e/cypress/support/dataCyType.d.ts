@@ -412,7 +412,9 @@ declare namespace DataCy {
         "key-plural-checkbox" |
         "key-plural-checkbox-expand" |
         "key-plural-variable-name" |
+        "label-autocomplete-option" |
         "label-modal" |
+        "label-selector-autocomplete" |
         "language-ai-prompt-dialog-description-input" |
         "language-ai-prompt-dialog-save" |
         "language-delete-button" |
@@ -764,6 +766,10 @@ declare namespace DataCy {
         "translation-editor" |
         "translation-field-label" |
         "translation-history-item" |
+        "translation-label" |
+        "translation-label-add" |
+        "translation-label-control" |
+        "translation-label-delete" |
         "translation-panel" |
         "translation-panel-content" |
         "translation-panel-toggle" |

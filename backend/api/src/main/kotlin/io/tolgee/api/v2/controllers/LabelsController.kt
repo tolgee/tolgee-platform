@@ -1,13 +1,17 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.request.label.LabelRequest
 import io.tolgee.hateoas.label.LabelModel
 import io.tolgee.hateoas.label.LabelModelAssembler
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Label
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.label.LabelService
 import jakarta.validation.Valid
@@ -16,15 +20,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
@@ -50,15 +46,31 @@ class LabelsController(
   @UseDefaultPermissions
   @AllowApiAccess
   fun getAll(
-    @SortDefault("name") @ParameterObject pageable: Pageable,
+    @RequestParam
+    search: String? = null,
+    @SortDefault("name")
+    @ParameterObject pageable: Pageable,
   ): PagedModel<LabelModel> {
-    val data = labelService.getProjectLabels(projectHolder.project.id, pageable)
+    val data = labelService.getProjectLabels(projectHolder.project.id, pageable, search)
     return pagedResourcesAssembler.toModel(data, labelModelAssembler)
+  }
+
+  @GetMapping(value = ["labels/ids"])
+  @Operation(summary = "Get labels by ids")
+  @UseDefaultPermissions
+  @AllowApiAccess
+  fun getLabelsByIds(
+    @RequestParam("id")
+    ids: List<Long>,
+  ): List<LabelModel> {
+    val labels = labelService.getProjectLabelsByIds(projectHolder.project.id, ids)
+    return labels.map { it.model }
   }
 
   @PostMapping(value = ["labels"])
   @Operation(summary = "Create label")
-  @UseDefaultPermissions
+  @RequestActivity(ActivityType.TRANSLATION_LABEL_CREATE)
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_MANAGE])
   @AllowApiAccess
   fun createLabel(
     @RequestBody @Valid
@@ -69,7 +81,8 @@ class LabelsController(
 
   @PutMapping(value = ["labels/{labelId:\\d+}"])
   @Operation(summary = "Update label")
-  @UseDefaultPermissions
+  @RequestActivity(ActivityType.TRANSLATION_LABEL_UPDATE)
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_MANAGE])
   @AllowApiAccess
   fun updateLabel(
     @PathVariable("labelId")
@@ -82,13 +95,42 @@ class LabelsController(
 
   @DeleteMapping(value = ["labels/{labelId:\\d+}"])
   @Operation(summary = "Delete label")
-  @UseDefaultPermissions
+  @RequestActivity(ActivityType.TRANSLATION_LABEL_DELETE)
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_MANAGE])
   @AllowApiAccess
   fun deleteLabel(
     @PathVariable("labelId")
     labelId: Long,
   ) {
     labelService.deleteLabel(projectHolder.project.id, labelId)
+  }
+
+  @PutMapping(value = ["translations/{translationId:\\d+}/label/{labelId:\\d+}"])
+  @Operation(summary = "Add label to translation")
+  @RequestActivity(ActivityType.TRANSLATION_LABEL_ASSIGN)
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_ASSIGN])
+  @AllowApiAccess
+  fun assignLabel(
+    @PathVariable("translationId")
+    translationId: Long,
+    @PathVariable("labelId")
+    labelId: Long
+  ): LabelModel {
+    return labelService.assignLabel(projectHolder.project.id, translationId, labelId).model
+  }
+
+  @DeleteMapping(value = ["translations/{translationId:\\d+}/label/{labelId:\\d+}"])
+  @Operation(summary = "Remove label from translation")
+  @RequestActivity(ActivityType.TRANSLATION_LABEL_ASSIGN)
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_ASSIGN])
+  @AllowApiAccess
+  fun unassignLabel(
+    @PathVariable("translationId")
+    translationId: Long,
+    @PathVariable("labelId")
+    labelId: Long
+  ) {
+    labelService.unassignLabel(projectHolder.project.id, translationId, labelId)
   }
 
   private val Label.model: LabelModel

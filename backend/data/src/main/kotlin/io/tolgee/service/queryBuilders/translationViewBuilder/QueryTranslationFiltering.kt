@@ -1,13 +1,16 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.request.translation.TranslationFilterByLabel
 import io.tolgee.dtos.request.translation.TranslationFilterByState
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.enums.TranslationState
-import jakarta.persistence.criteria.CriteriaBuilder
-import jakarta.persistence.criteria.Expression
-import jakarta.persistence.criteria.Path
-import jakarta.persistence.criteria.Predicate
+import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Label
+import io.tolgee.model.translation.Label_
+import io.tolgee.model.translation.Translation
+import io.tolgee.model.translation.Translation_
+import jakarta.persistence.criteria.*
 
 class QueryTranslationFiltering(
   private val params: TranslationFilters,
@@ -78,6 +81,32 @@ class QueryTranslationFiltering(
     }
   }
 
+  fun apply(
+    language: LanguageDto,
+    translation: ListJoin<Key, Translation>,
+  ) {
+    filterByLabelMap?.get(language.tag)?.let { labelIds ->
+      if (labelIds.isNotEmpty()) {
+        val subquery = this.queryBase.query.subquery(Long::class.java)
+        val subqueryRoot = subquery.from(Label::class.java)
+        subquery.select(subqueryRoot.get(Label_.id))
+        val conditions = labelIds.map { label ->
+          cb.equal(subqueryRoot.get(Label_.id), label.labelId)
+        }
+        subquery.where(
+          cb.and(
+            cb.or(*conditions.toTypedArray()),
+            cb.equal(
+              subqueryRoot.join(Label_.translations).get(Translation_.id),
+              translation.get(Translation_.id),
+            ),
+          ),
+        )
+        queryBase.translationConditions.add(cb.exists(subquery))
+      }
+    }
+  }
+
   private val filterByStateMap: Map<String, List<TranslationState>>? by lazy {
     params.filterState
       ?.let { filterStateStrings -> TranslationFilterByState.parseList(filterStateStrings) }
@@ -92,5 +121,22 @@ class QueryTranslationFiltering(
         }
         return@lazy filterByStateMap
       }
+  }
+
+  private val filterByLabelMap: Map<String, List<TranslationFilterByLabel>>? by lazy {
+    params.filterLabel?.let { filterLabels ->
+      TranslationFilterByLabel.parseList(filterLabels)
+        .let { filterLabelsParsed ->
+          val filterByLabelMap = mutableMapOf<String, MutableList<TranslationFilterByLabel>>()
+
+          filterLabelsParsed.forEach {
+            if (!filterByLabelMap.containsKey(it.languageTag)) {
+              filterByLabelMap[it.languageTag] = mutableListOf()
+            }
+            filterByLabelMap[it.languageTag]!!.add(it)
+          }
+          return@lazy filterByLabelMap
+        }
+    }
   }
 }

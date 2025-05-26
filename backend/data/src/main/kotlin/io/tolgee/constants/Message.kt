@@ -296,6 +296,7 @@ enum class Message {
   LLM_CONTENT_FILTER,
   LLM_PROVIDER_EMPTY_RESPONSE,
   LABEL_NOT_FOUND,
+  LABEL_NOT_FROM_PROJECT,
   ;
 
   val code: String
