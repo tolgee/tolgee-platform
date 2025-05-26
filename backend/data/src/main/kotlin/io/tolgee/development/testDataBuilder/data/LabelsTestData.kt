@@ -4,10 +4,11 @@ import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
 
 class LabelsTestData : BaseTestData() {
-  private lateinit var firstTranslation: Translation
-  private lateinit var secondTranslation: Translation
+  lateinit var labeledTranslation: Translation
   lateinit var firstLabel: Label
   lateinit var secondLabel: Label
+  lateinit var unassignedTranslation: Translation
+  lateinit var unassignedLabel: Label
 
   init {
     root.apply {
@@ -15,16 +16,25 @@ class LabelsTestData : BaseTestData() {
         addKey {
           name = "first key"
         }.build {
-          firstTranslation = addTranslation("en", "first key translation").self
+          labeledTranslation = addTranslation("en", "first key translation").self
+        }.build {
+          addCzech()
+          unassignedTranslation = addTranslation("cs", "first key second translation").self
         }.build {
           firstLabel = addLabel {
             name = "First label"
             color = "#FF0000"
             description = "This is a description"
-            translations = mutableSetOf(firstTranslation)
-            firstTranslation.labels.add(this)
+            translations.add(labeledTranslation)
             project = projectBuilder.self
           }.self
+          unassignedLabel = addLabel {
+            name = "Unassigned label"
+            color = "#00FF00"
+            description = "This is a description for unassigned label"
+            project = projectBuilder.self
+          }.self
+          labeledTranslation.labels.add(firstLabel)
         }
       }
       addProject {
@@ -34,7 +44,7 @@ class LabelsTestData : BaseTestData() {
           name = "Second project key"
         }
         val en = addEnglish()
-        secondTranslation = addTranslation {
+        val translation = addTranslation {
           language = en.self
           text = "second project key translation"
           this.key = key.self
@@ -43,7 +53,7 @@ class LabelsTestData : BaseTestData() {
           name = "Second project label"
           color = "#FF0000"
           description = "This is a description"
-          translations = mutableSetOf(secondTranslation)
+          translations = mutableSetOf(translation)
           project = this@secondProject.self
         }.self
         for (i in 1..25) {
@@ -51,7 +61,7 @@ class LabelsTestData : BaseTestData() {
             name = "Label $i"
             color = "#FF0000"
             description = "This is a description for label $i"
-            translations = mutableSetOf(secondTranslation)
+            translations = mutableSetOf(translation)
             project = this@secondProject.self
           }
         }

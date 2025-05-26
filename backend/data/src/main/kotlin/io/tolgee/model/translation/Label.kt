@@ -43,6 +43,5 @@ class Label : StandardAuditModel() {
 
   fun clearTranslations() {
     translations.forEach { it.removeLabel(this) }
-    translations.clear()
   }
 }

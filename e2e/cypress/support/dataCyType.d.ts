@@ -654,6 +654,7 @@ declare namespace DataCy {
         "translation-editor" |
         "translation-field-label" |
         "translation-history-item" |
+        "translation-label" |
         "translation-panel" |
         "translation-panel-content" |
         "translation-panel-toggle" |

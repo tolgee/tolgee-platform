@@ -741,6 +741,10 @@ export interface paths {
     /** Sorting is not supported for supported. It is automatically sorted from newest to oldest. */
     get: operations["getTranslationHistory"];
   };
+  "/v2/projects/{projectId}/translations/{translationId}/label/{labelId}": {
+    put: operations["assignLabel"];
+    delete: operations["unassignLabel"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/set-outdated-flag/{state}": {
     /** Set's "outdated" flag indicating the base translation was changed without updating current translation. */
     put: operations["setOutdated"];
@@ -4921,6 +4925,8 @@ export interface components {
        * @description Id of translation record
        */
       id: number;
+      /** @description Labels assigned to this translation */
+      labels: components["schemas"]["LabelModel"][];
       /** @description Which machine translation service was used to auto translate this */
       mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "TOLGEE";
       /** @description Whether base language translation was changed after this translation was updated */
@@ -17221,6 +17227,96 @@ export interface operations {
           "application/json": components["schemas"]["PagedModelTranslationHistoryModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  assignLabel: {
+    parameters: {
+      path: {
+        translationId: number;
+        labelId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  unassignLabel: {
+    parameters: {
+      path: {
+        translationId: number;
+        labelId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
       /** Bad Request */
       400: {
         content: {

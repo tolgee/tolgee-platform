@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.LabelsTestData
 import io.tolgee.fixtures.*
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import jakarta.transaction.Transactional
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.Pageable
@@ -26,13 +27,13 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `get labels`() {
     performProjectAuthGet("labels").andAssertThatJson {
       node("_embedded.labels") {
-        isArray.hasSize(1)
+        isArray.hasSize(2)
         node("[0].id").isValidId
         node("[0].name").isString.isEqualTo("First label")
         node("[0].color").isString.isEqualTo("#FF0000")
         node("[0].description").isString.isEqualTo("This is a description")
       }
-      node("page.totalElements").isNumber.isEqualTo(1.toBigDecimal())
+      node("page.totalElements").isNumber.isEqualTo(2.toBigDecimal())
     }
   }
 
@@ -51,7 +52,7 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("color").isString.isEqualTo("#00FF00")
     }
     val labels = labelService.getProjectLabels(testData.projectBuilder.self.id, Pageable.unpaged())
-    assert(labels.totalElements == 2.toLong())
+    assert(labels.totalElements == 3.toLong())
     assert(labels.content.any { it.name == "New label" && it.color == "#00FF00" })
   }
 
@@ -70,7 +71,7 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("color").isString.isEqualTo("#0000FF")
     }
     val labels = labelService.getProjectLabels(testData.projectBuilder.self.id, Pageable.unpaged())
-    assert(labels.totalElements == 1.toLong())
+    assert(labels.totalElements == 2.toLong())
     assert(labels.content.any { it.name == "Updated label" && it.color == "#0000FF" })
   }
 
@@ -120,5 +121,39 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     projectSupplier = { testData.project }
     performProjectAuthDelete("labels/${testData.secondLabel.id}").andIsNotFound
     labelService.find(testData.secondLabel.id).orElse(null).assert.isNotNull()
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `assigns label to translation`() {
+    assert(testData.unassignedTranslation.labels.size == 0)
+    assert(testData.unassignedLabel.translations.size == 0)
+    performProjectAuthPut(
+      "translations/${testData.unassignedTranslation.id}/label/${testData.unassignedLabel.id}",
+    ).andIsOk
+
+    val translation = translationService.get(testData.unassignedTranslation.id)
+    val label = labelService.find(testData.unassignedLabel.id).get()
+    assert(translation.labels.size == 1)
+    assert(label.translations.size == 1)
+    assert(translation.labels.first().id == label.id)
+    assert(label.translations.first().id == translation.id)
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `unassign label from translation`() {
+    assert(testData.labeledTranslation.labels.size == 1)
+    assert(testData.firstLabel.translations.size == 1)
+    performProjectAuthDelete(
+      "translations/${testData.labeledTranslation.id}/label/${testData.firstLabel.id}",
+    ).andIsOk
+
+    val translation = translationService.get(testData.labeledTranslation.id)
+    val label = labelService.find(testData.firstLabel.id).get()
+    assert(translation.labels.size == 0)
+    assert(label.translations.size == 0)
   }
 }
