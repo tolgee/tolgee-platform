@@ -6,6 +6,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.translation.Label
 import io.tolgee.repository.LabelRepository
+import io.tolgee.repository.TranslationRepository
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
@@ -17,6 +18,7 @@ import java.util.Optional
 class LabelService(
   private val labelRepository: LabelRepository,
   private val entityManager: EntityManager,
+  private val translationRepository: TranslationRepository,
   ) {
   fun getProjectLabels(projectId: Long, pageable: Pageable): Page<Label> {
     return labelRepository.findByProjectId(projectId, pageable)
@@ -24,6 +26,21 @@ class LabelService(
 
   fun find(labelId: Long): Optional<Label> {
     return labelRepository.findById(labelId)
+  }
+
+  fun findByTranslationIds(translationIds: List<Long>): List<Label> {
+    return labelRepository.findByTranslationsIdIn(translationIds)
+  }
+
+  fun getByTranslationIdsIndexed(
+    translationIds: List<Long>,
+  ): Map<Long, List<Label>> {
+    return findByTranslationIds(translationIds)
+      .asSequence()
+      .flatMap { label ->
+        label.translations.asSequence().map { it.id to label }
+      }
+      .groupBy({ it.first }, { it.second })
   }
 
   private fun getByProjectIdAndId(
@@ -76,5 +93,27 @@ class LabelService(
     val label = getByProjectIdAndId(projectId, labelId)
     label.clearTranslations()
     labelRepository.delete(label)
+  }
+
+  @Transactional
+  fun assignLabel(projectId: Long, translationId: Long, labelId: Long) {
+    val label = getByProjectIdAndId(projectId, labelId)
+    val translation = translationRepository.find(
+      projectId,
+      translationId
+    ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+    translation.addLabel(label)
+    labelRepository.save(label)
+  }
+
+  @Transactional
+  fun unassignLabel(projectId: Long, translationId: Long, labelId: Long) {
+    val label = getByProjectIdAndId(projectId, labelId)
+    val translation = translationRepository.find(
+      projectId,
+      translationId
+    ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+    translation.removeLabel(label)
+    labelRepository.save(label)
   }
 }

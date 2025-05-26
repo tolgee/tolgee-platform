@@ -124,6 +124,11 @@ class Translation(
       !this.auto
   }
 
+  fun addLabel(label: Label) {
+    labels.add(label)
+    label.translations.add(this)
+  }
+
   fun removeLabel(label: Label) {
     labels.remove(label)
     label.translations.remove(this)

@@ -2,37 +2,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { IconButton, styled } from '@mui/material';
 import React from 'react';
 import { Edit01, XClose } from '@untitled-ui/icons-react';
-
-function adjustColorBrightness(hex: string, amount: number): string {
-  let color = hex.replace('#', '');
-  if (color.length === 3) {
-    color = color
-      .split('')
-      .map((c) => c + c)
-      .join('');
-  }
-  const num = parseInt(color, 16);
-  let r = (num >> 16) + amount;
-  let g = ((num >> 8) & 0x00ff) + amount;
-  let b = (num & 0x0000ff) + amount;
-
-  r = Math.max(Math.min(255, r), 0);
-  g = Math.max(Math.min(255, g), 0);
-  b = Math.max(Math.min(255, b), 0);
-
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
-}
-
-function getShadeFromLabelColor(color: string): string {
-  const hex = color.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  return brightness > 128
-    ? adjustColorBrightness(color, -120)
-    : adjustColorBrightness(color, 120);
-}
+import { TranslationLabel } from 'tg.component/TranslationLabel';
 
 const StyledListItem = styled('div')`
   display: contents;
@@ -62,14 +32,6 @@ const StyledItemActions = styled(StyledListItemColumn)`
   padding: 0;
 `;
 
-const StyledLabel = styled('div')<{ color: string }>`
-  background-color: ${({ color }) => color || 'transparent'};
-  border-radius: 8px;
-  color: ${({ color }) => getShadeFromLabelColor(color)};
-  padding: 2px 7px;
-  font-size: 12px;
-`;
-
 type LabelModel = components['schemas']['LabelModel'];
 
 type Props = {
@@ -86,12 +48,11 @@ export const LabelItem: React.FC<Props> = ({
   return (
     <StyledListItem data-cy="project-settings-label-item">
       <StyledItemText data-cy="project-settings-label-item-name">
-        <StyledLabel
+        <TranslationLabel
           color={label.color}
           data-cy="project-settings-label-item-label"
-        >
-          {label.name}
-        </StyledLabel>
+        >{label.name}
+        </TranslationLabel>
       </StyledItemText>
       <StyledItemText data-cy="project-settings-label-item-description">
         <span style={{ fontSize: '0.8em', color: '#888' }}>

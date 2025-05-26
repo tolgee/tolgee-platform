@@ -91,6 +91,32 @@ class LabelsController(
     labelService.deleteLabel(projectHolder.project.id, labelId)
   }
 
+  @PutMapping(value = ["translations/{translationId:\\d+}/label/{labelId:\\d+}"])
+  @Operation(summary = "Add label to translation")
+  @UseDefaultPermissions
+  @AllowApiAccess
+  fun assignLabel(
+    @PathVariable("translationId")
+    translationId: Long,
+    @PathVariable("labelId")
+    labelId: Long
+  ) {
+    labelService.assignLabel(projectHolder.project.id, translationId, labelId)
+  }
+
+  @DeleteMapping(value = ["translations/{translationId:\\d+}/label/{labelId:\\d+}"])
+  @Operation(summary = "Remove label from translation")
+  @UseDefaultPermissions
+  @AllowApiAccess
+  fun unassignLabel(
+    @PathVariable("translationId")
+    translationId: Long,
+    @PathVariable("labelId")
+    labelId: Long
+  ) {
+    labelService.unassignLabel(projectHolder.project.id, translationId, labelId)
+  }
+
   private val Label.model: LabelModel
     get() = labelModelAssembler.toModel(this)
 }
