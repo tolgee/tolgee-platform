@@ -30,7 +30,10 @@ class LabelService(
     projectId: Long,
     labelId: Long,
   ): Label {
-    return labelRepository.findByProjectIdAndId(projectId, labelId).orElseThrow { NotFoundException(Message.LABEL_NOT_FOUND) }
+    return labelRepository.findByProjectIdAndId(
+      projectId,
+      labelId
+    ).orElseThrow { NotFoundException(Message.LABEL_NOT_FOUND) }
   }
 
   @Transactional
