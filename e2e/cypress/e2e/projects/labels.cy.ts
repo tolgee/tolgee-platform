@@ -67,4 +67,47 @@ describe('Projects Settings - Labels', () => {
           .contains('test-label');
       });
   });
+
+  it('edit project label', () => {
+    gcy('project-settings-label-item')
+      .first()
+      .within(() => {
+        gcy('project-settings-labels-edit-button').click();
+      });
+    gcy('label-modal')
+      .should('be.visible')
+      .within(() => {
+        cy.get('input[name="name"]').clear().type('Edited label');
+        cy.get('input[name="color"]').clear().type('#00FF00');
+        cy.get('textarea[name="description"]')
+          .clear()
+          .type('Edited label description');
+        gcy('global-form-save-button').click();
+      });
+    gcy('project-settings-label-item')
+      .first()
+      .within(() => {
+        gcy('project-settings-label-item-name')
+          .should('be.visible')
+          .contains('Edited label');
+        gcy('project-settings-label-item-color')
+          .should('have.css', 'color', 'rgb(0, 255, 0)')
+          .contains('#00FF00');
+        gcy('project-settings-label-item-description')
+          .should('be.visible')
+          .contains('Edited label description');
+      });
+  });
+
+  it('remove project label', () => {
+    gcy('project-settings-label-item')
+      .first()
+      .within(() => {
+        gcy('project-settings-labels-remove-button').click();
+      });
+    gcy('global-confirmation-dialog').within(() => {
+      gcy('global-confirmation-confirm').click();
+    });
+    gcy('project-settings-label-item').should('have.length', 0);
+  });
 });
