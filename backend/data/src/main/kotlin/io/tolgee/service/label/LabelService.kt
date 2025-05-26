@@ -74,6 +74,7 @@ class LabelService(
   @Transactional
   fun deleteLabel(projectId: Long, labelId: Long) {
     val label = getByProjectIdAndId(projectId, labelId)
+    label.clearTranslations()
     labelRepository.delete(label)
   }
 }

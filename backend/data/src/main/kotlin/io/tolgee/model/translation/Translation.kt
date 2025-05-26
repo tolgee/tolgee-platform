@@ -124,6 +124,10 @@ class Translation(
       !this.auto
   }
 
+  fun removeLabel(label: Label) {
+    labels.remove(label)
+  }
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (javaClass != other?.javaClass) return false

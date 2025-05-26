@@ -22,6 +22,7 @@ class LabelsTestData : BaseTestData() {
             color = "#FF0000"
             description = "This is a description"
             translations = mutableSetOf(firstTranslation)
+            firstTranslation.labels.add(this)
             project = projectBuilder.self
           }.self
         }

@@ -96,6 +96,7 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `deletes label`() {
     performProjectAuthDelete("labels/${testData.firstLabel.id}").andIsOk
     labelService.find(testData.firstLabel.id).orElse(null).assert.isNull()
+    translationService.find(testData.firstLabel.translations.first().id).assert.isNotNull()
   }
 
   @Test
