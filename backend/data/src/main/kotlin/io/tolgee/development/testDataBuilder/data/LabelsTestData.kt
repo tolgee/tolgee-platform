@@ -46,6 +46,15 @@ class LabelsTestData : BaseTestData() {
           translations = mutableSetOf(secondTranslation)
           project = this@secondProject.self
         }.self
+        for (i in 1..25) {
+          addLabel {
+            name = "Label $i"
+            color = "#FF0000"
+            description = "This is a description for label $i"
+            translations = mutableSetOf(secondTranslation)
+            project = this@secondProject.self
+          }
+        }
       }
     }
   }
