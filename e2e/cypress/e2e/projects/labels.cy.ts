@@ -3,23 +3,33 @@ import { labelsTestData } from '../../common/apiCalls/testData/testData';
 import { HOST } from '../../common/constants';
 import { gcy } from '../../common/shared';
 
-let testLabelsAccess = true;
+let projectId = null;
+let secondProjectId = null;
+
+function visitProjectLabels() {
+  cy.visit(`${HOST}/projects/${projectId}/manage/edit/labels`);
+}
+
+function visitSecondProjectLabels() {
+  cy.visit(`${HOST}/projects/${secondProjectId}/manage/edit/labels`);
+}
+
+function visitProjectSettings() {
+  cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
+}
 
 describe('Projects Settings - Labels', () => {
   beforeEach(() => {
     labelsTestData.clean();
     labelsTestData.generate().then((data) => {
       login('test_username');
-      const projectId = data.body.projects[0].id;
-      if (testLabelsAccess) {
-        cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
-      } else {
-        cy.visit(`${HOST}/projects/${projectId}/manage/edit/labels`);
-      }
+      projectId = data.body.projects[0].id;
+      secondProjectId = data.body.projects[1].id;
     });
   });
 
   it('list project labels', () => {
+    visitProjectSettings();
     gcy('project-settings-menu-labels').should('be.visible').click();
     gcy('project-settings-label-item')
       .first()
@@ -35,10 +45,10 @@ describe('Projects Settings - Labels', () => {
           .should('be.visible')
           .contains('This is a description');
       });
-    testLabelsAccess = false;
   });
 
   it('create project label', () => {
+    visitProjectLabels();
     gcy('project-settings-labels-add-button')
       .click()
       .then(() => {
@@ -69,6 +79,7 @@ describe('Projects Settings - Labels', () => {
   });
 
   it('edit project label', () => {
+    visitProjectLabels();
     gcy('project-settings-label-item')
       .first()
       .within(() => {
@@ -100,6 +111,7 @@ describe('Projects Settings - Labels', () => {
   });
 
   it('remove project label', () => {
+    visitProjectLabels();
     gcy('project-settings-label-item')
       .first()
       .within(() => {
@@ -109,5 +121,16 @@ describe('Projects Settings - Labels', () => {
       gcy('global-confirmation-confirm').click();
     });
     gcy('project-settings-label-item').should('have.length', 0);
+  });
+
+  it('shows paginated list of labels', () => {
+    visitSecondProjectLabels();
+    cy.visit(`${HOST}/projects/${secondProjectId}/manage/edit/labels`);
+    gcy('global-list-pagination').should('be.visible');
+    gcy('project-settings-label-item').should('have.length', 20);
+    gcy('global-list-pagination').within(() => {
+      cy.get('button').contains('2').click();
+    });
+    gcy('project-settings-label-item').should('have.length', 6);
   });
 });
