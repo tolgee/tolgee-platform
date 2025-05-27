@@ -87,6 +87,10 @@ const StyledCell = styled(Box)`
   height: 60px;
 `;
 
+const StyledSelect = styled(Select)`
+  width: 200px;
+`;
+
 const FORMALITY_VALUES = ['DEFAULT', 'FORMAL', 'INFORMAL'] as const;
 
 type Props = {
@@ -165,7 +169,7 @@ export const LanguageSettingsForm = ({
                   isSupported={languageSupported}
                 />
                 {type === 'PROMPT' && (
-                  <Select
+                  <StyledSelect
                     size="small"
                     value={values.promptId ?? null}
                     onChange={(e) => setFieldValue('promptId', e.target.value)}
@@ -180,7 +184,7 @@ export const LanguageSettingsForm = ({
                         </MenuItem>
                       );
                     })}
-                  </Select>
+                  </StyledSelect>
                 )}
               </StyledLabelCell>
               <StyledCell>
