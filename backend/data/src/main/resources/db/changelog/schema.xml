@@ -4336,4 +4336,12 @@
             UPDATE mt_service_config_enabled_services SET enabled_services = 'PROMPT' WHERE enabled_services = 'TOLGEE';
         </sql>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748360474387-1">
+        <addColumn tableName="prompt">
+            <column name="basic_prompt_options" type="VARCHAR[]"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1748360474387-2">
+        <dropColumn columnName="options" tableName="prompt"/>
+    </changeSet>
 </databaseChangeLog>

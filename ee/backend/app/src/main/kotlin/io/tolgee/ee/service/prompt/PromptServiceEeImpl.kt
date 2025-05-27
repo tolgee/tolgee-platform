@@ -69,7 +69,7 @@ class PromptServiceEeImpl(
         template = dto.template,
         project = projectService.get(projectId),
         providerName = dto.providerName,
-        options = dto.basicPromptOptions?.toTypedArray(),
+        basicPromptOptions = dto.basicPromptOptions?.toTypedArray(),
       )
     promptRepository.save(prompt)
     return prompt
@@ -85,7 +85,7 @@ class PromptServiceEeImpl(
         prompt.name,
         template = prompt.template,
         providerName = prompt.providerName,
-        basicPromptOptions = prompt.options?.toList(),
+        basicPromptOptions = prompt.basicPromptOptions?.toList(),
       )
     } else {
       return getDefaultPrompt()
@@ -112,7 +112,7 @@ class PromptServiceEeImpl(
     prompt.name = dto.name
     prompt.template = dto.template
     prompt.providerName = dto.providerName
-    prompt.options = dto.basicPromptOptions?.toTypedArray()
+    prompt.basicPromptOptions = dto.basicPromptOptions?.toTypedArray()
     promptRepository.save(prompt)
     return prompt
   }

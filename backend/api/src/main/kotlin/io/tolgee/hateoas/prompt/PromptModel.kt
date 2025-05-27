@@ -11,5 +11,5 @@ open class PromptModel(
   val template: String?,
   val projectId: Long,
   val providerName: String,
-  val options: List<BasicPromptOption>?,
+  val basicPromptOptions: List<BasicPromptOption>?,
 ) : RepresentationModel<PromptModel>()

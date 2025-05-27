@@ -286,7 +286,7 @@ export const AiPrompt: React.FC<Props> = ({
           data={{
             providerName: provider,
             template: tab === 'advanced' ? value : undefined,
-            options: tab === 'basic' ? options : undefined,
+            basicPromptOptions: tab === 'basic' ? options : undefined,
           }}
           existingPrompt={openPromptData}
           unsavedChanges={unsavedChanges}

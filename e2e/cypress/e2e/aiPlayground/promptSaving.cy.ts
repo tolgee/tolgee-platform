@@ -2,6 +2,7 @@ import { login } from '../../common/apiCalls/common';
 import { prompt } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
 import {
+  getBasicOption,
   getPromptEditor,
   openBasicAiPrompt,
   selectProvider,
@@ -91,5 +92,16 @@ describe('prompt saving and editing', () => {
       'contain',
       'English translation 1 translated with PROMPT from en to cs'
     );
+  });
+
+  it('saves basic prompt with options', () => {
+    openBasicAiPrompt();
+    toggleBasicOption('SCREENSHOT');
+    gcy('ai-prompt-save-as-new-button').click();
+    gcy('ai-prompt-save-as-field-name').type('New prompt');
+    gcy('ai-prompt-save-as-field-use-as-default').click();
+    gcy('ai-prompt-save-dialog-save').click();
+    assertMessage('Prompt created');
+    getBasicOption('SCREENSHOT').find('input').should('not.be.checked');
   });
 });

@@ -4020,10 +4020,7 @@ export interface components {
       template?: string;
     };
     PromptModel: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      options?: (
+      basicPromptOptions?: (
         | "KEY_NAME"
         | "KEY_DESCRIPTION"
         | "KEY_CONTEXT"
@@ -4032,6 +4029,9 @@ export interface components {
         | "TM_SUGGESTIONS"
         | "SCREENSHOT"
       )[];
+      /** Format: int64 */
+      id: number;
+      name: string;
       /** Format: int64 */
       projectId: number;
       providerName: string;

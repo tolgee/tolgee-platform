@@ -18,7 +18,7 @@ class PromptModelAssembler : RepresentationModelAssemblerSupport<Prompt, PromptM
       template = entity.template,
       projectId = entity.project.id,
       providerName = entity.providerName,
-      options = entity.options?.toList(),
+      basicPromptOptions = entity.basicPromptOptions?.toList(),
     )
   }
 }

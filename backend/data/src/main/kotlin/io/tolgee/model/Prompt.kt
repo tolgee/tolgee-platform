@@ -33,7 +33,7 @@ class Prompt(
     ],
   )
   @Column(columnDefinition = "varchar[]")
-  var options: Array<BasicPromptOption>? = null,
+  var basicPromptOptions: Array<BasicPromptOption>? = null,
   @ManyToOne
   @JoinColumn(name = "project_id")
   var project: Project,
