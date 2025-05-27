@@ -105,10 +105,10 @@ export const LlmProviderForm = ({ type, onTypeChange }: Props) => {
             <T keyName="llm_provider_form_select_priority_none" />
           </StyledEmpty>
         </MenuItem>
-        <MenuItem value="high">
+        <MenuItem value="HIGH">
           <T keyName="llm_provider_form_select_priority_high" />
         </MenuItem>
-        <MenuItem value="low">
+        <MenuItem value="LOW">
           <T keyName="llm_provider_form_select_priority_low" />
         </MenuItem>
       </Select>
