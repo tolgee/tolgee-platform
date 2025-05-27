@@ -6,19 +6,15 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import { FieldLabel } from 'tg.component/FormField';
 import { T, useTranslate } from '@tolgee/react';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { ColorPaletteField } from 'tg.component/common/form/fields/ColorPaletteField';
 
 type LabelModel = components['schemas']['LabelModel'];
 
 export type LabelFormValues = {
   name: string;
-  color: string;
+  color: string | undefined;
   description: string | undefined;
 };
-
-const randomHex = () =>
-  `#${Math.floor(Math.random() * 16777215)
-    .toString(16)
-    .toUpperCase()}`;
 
 export const LabelForm: FC<{
   label?: LabelModel;
@@ -30,12 +26,12 @@ export const LabelForm: FC<{
   const initValues = {
     name: label?.name ?? '',
     description: label?.description,
-    color: label?.color ?? randomHex(),
+    color: label?.color || undefined,
   } satisfies LabelFormValues;
   const onSubmit = (values: LabelFormValues) => {
     submit({
       ...values,
-      color: values.color.toUpperCase(),
+      color: values.color?.toUpperCase(),
     });
   };
 
@@ -59,7 +55,7 @@ export const LabelForm: FC<{
             <FieldLabel>
               <T keyName="project_settings_label_color" />
             </FieldLabel>
-            <TextField size="small" name="color" required={true} />
+            <ColorPaletteField name="color" required={true} />
           </Box>
         </Box>
         <Box display="grid">
