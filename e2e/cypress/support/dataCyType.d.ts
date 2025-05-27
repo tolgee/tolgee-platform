@@ -210,6 +210,9 @@ declare namespace DataCy {
         "cell-key-screenshot-dropzone" |
         "cell-key-screenshot-file-input" |
         "checkbox-group-multiselect" |
+        "color-palette-field" |
+        "color-palette-popover" |
+        "color-preview" |
         "comment" |
         "comment-menu" |
         "comment-menu-delete" |
@@ -522,6 +525,7 @@ declare namespace DataCy {
         "organization-switch-item" |
         "organization-switch-new" |
         "organization-switch-search" |
+        "palette-color" |
         "pat-expiry-info" |
         "pat-list-item" |
         "pat-list-item-alert" |
