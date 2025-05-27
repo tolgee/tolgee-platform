@@ -61,6 +61,11 @@ describe('Projects Settings - Labels', () => {
                 .invoke('val')
                 .should('match', new RegExp('^#[A-Fa-f0-9]{6}$'));
               cy.wrap($input).clear().type('#FF0055');
+              gcy('color-preview').should(
+                'have.css',
+                'background-color',
+                'rgb(255, 0, 85)'
+              );
             });
             cy.get('textarea[name="description"]').type(
               'New label description'
@@ -90,6 +95,11 @@ describe('Projects Settings - Labels', () => {
       .within(() => {
         cy.get('input[name="name"]').clear().type('Edited label');
         cy.get('input[name="color"]').clear().type('#00FF00');
+        gcy('color-preview').should(
+          'have.css',
+          'background-color',
+          'rgb(0, 255, 0)'
+        );
         cy.get('textarea[name="description"]')
           .clear()
           .type('Edited label description');
@@ -108,6 +118,45 @@ describe('Projects Settings - Labels', () => {
           .should('be.visible')
           .contains('Edited label description');
       });
+  });
+
+  it('edit project label - set predefined color', () => {
+    visitProjectLabels();
+    gcy('project-settings-label-item')
+      .first()
+      .within(() => {
+        gcy('project-settings-labels-edit-button').click();
+      });
+    gcy('label-modal').should('be.visible');
+    gcy('color-preview')
+      .click()
+      .then(() => {
+        gcy('color-palette-popover')
+          .should('be.visible')
+          .within(() => {
+            gcy('palette-color')
+              .eq(3)
+              .click()
+              .then(($colorPad) => {
+                const color = $colorPad.css('background');
+                cy.wrap(color).as('selectedColor');
+              });
+          });
+      });
+    cy.get('@selectedColor').then((color) => {
+      cy.get('input[name="color"]').should(
+        'have.value',
+        rgbToHex(color as string)
+      );
+      gcy('global-form-save-button').click();
+      gcy('project-settings-label-item')
+        .first()
+        .within(() => {
+          gcy('project-settings-label-item-color')
+            .should('have.css', 'color', color)
+            .contains(rgbToHex(color as string));
+        });
+    });
   });
 
   it('remove project label', () => {
@@ -134,3 +183,15 @@ describe('Projects Settings - Labels', () => {
     gcy('project-settings-label-item').should('have.length', 6);
   });
 });
+
+function rgbToHex(rgb: string): string {
+  const result = rgb.match(/\d+/g);
+  if (!result) return '';
+  return (
+    '#' +
+    result
+      .slice(0, 3)
+      .map((x) => (+x).toString(16).padStart(2, '0').toUpperCase())
+      .join('')
+  );
+}
