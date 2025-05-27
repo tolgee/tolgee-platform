@@ -7,7 +7,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import React, { useState } from 'react';
 import { confirmation } from 'tg.hooks/confirmation';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
 import {
   GlossaryTermCreateEditForm,
   CreateOrUpdateGlossaryTermRequest,

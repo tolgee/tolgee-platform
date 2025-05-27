@@ -9,7 +9,7 @@ import { languageInfo } from '@tginternal/language-util/lib/generated/languageIn
 import { InfiniteMultiSearchSelect } from 'tg.component/searchSelect/InfiniteMultiSearchSelect';
 import { MultiselectItem } from 'tg.component/searchSelect/MultiselectItem';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
 
 type OrganizationLanguageModel =
   components['schemas']['OrganizationLanguageModel'];

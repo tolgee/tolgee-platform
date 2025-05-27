@@ -1,9 +1,9 @@
-import { createProvider } from 'tg.fixtures/createProvider';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { GlobalError } from 'tg.error/GlobalError';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
+import React from 'react';
 
 type Props = {
   organizationId?: number;
@@ -14,40 +14,54 @@ type ContextData = {
   glossary: components['schemas']['GlossaryModel'];
 };
 
-export const [GlossaryContext, useGlossaryActions, useGlossaryContext] =
-  createProvider(({ organizationId, glossaryId }: Props) => {
-    const dataAvailable =
-      organizationId !== undefined && glossaryId !== undefined;
+const ContextHolder = React.createContext<ContextData>(null as any);
 
-    const glossary = useApiQuery({
-      url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}',
-      method: 'get',
-      path: { organizationId: organizationId!, glossaryId: glossaryId! },
-      options: {
-        enabled: dataAvailable,
-      },
-    });
+export const useGlossaryContext = () => React.useContext(ContextHolder);
+export const useGlossary = () => useGlossaryContext().glossary;
 
-    const isLoading = glossary.isLoading;
+export const GlossaryContext: React.FC<Props> = ({
+  children,
+  organizationId,
+  glossaryId,
+}) => {
+  const dataAvailable =
+    organizationId !== undefined && glossaryId !== undefined;
 
-    useGlobalLoading(isLoading || !dataAvailable);
-
-    if (isLoading || !dataAvailable) {
-      return <DashboardPage />;
-    }
-
-    if (glossary.error || !glossary.data) {
-      throw new GlobalError(
-        'Unexpected error occurred',
-        glossary.error?.code || 'Loadable error'
-      );
-    }
-
-    const contextData: ContextData = {
-      glossary: glossary.data,
-    };
-
-    const actions = {};
-
-    return [contextData, actions];
+  const glossary = useApiQuery({
+    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}',
+    method: 'get',
+    path: {
+      organizationId: organizationId ?? -1,
+      glossaryId: glossaryId ?? -1,
+    },
+    options: {
+      enabled: dataAvailable,
+    },
   });
+
+  const isLoading = glossary.isLoading;
+  const isWaiting = isLoading || !dataAvailable;
+
+  useGlobalLoading(isWaiting);
+
+  if (isWaiting) {
+    return <DashboardPage />;
+  }
+
+  if (glossary.error || !glossary.data) {
+    throw new GlobalError(
+      'Unexpected error occurred',
+      glossary.error?.code || 'Loadable error'
+    );
+  }
+
+  const result: ContextData = {
+    glossary: glossary.data,
+  };
+
+  return (
+    <ContextHolder.Provider value={result as ContextData}>
+      {children}
+    </ContextHolder.Provider>
+  );
+};

@@ -10,7 +10,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import Box from '@mui/material/Box';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
 
 type GlossaryTermTranslationModel =
   components['schemas']['GlossaryTermTranslationModel'];

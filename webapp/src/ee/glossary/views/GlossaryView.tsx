@@ -9,7 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { GlossaryTermCreateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateDialog';
 import { GlossaryViewBody } from 'tg.ee.module/glossary/components/GlossaryViewBody';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
 export const GlossaryView = () => {
