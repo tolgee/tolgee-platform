@@ -261,7 +261,6 @@ export const AiPrompt: React.FC<Props> = ({
         {!featureEnabled && (
           <Box sx={{ margin: '20px', display: 'grid' }}>
             <DisabledFeatureBanner
-              actionOnBottom
               customMessage={t('ai_customization_not_enabled_message')}
             />
           </Box>

@@ -1,17 +1,40 @@
-import { Alert, AlertTitle, Box, Button } from '@mui/material';
+import {
+  Alert,
+  alertClasses,
+  AlertTitle,
+  Box,
+  Button,
+  styled,
+} from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useFeatureMissingExplanation } from './useFeatureMissingExplanation';
+
+const StyledContainer = styled(Box)`
+  display: grid;
+  container-type: inline-size;
+`;
+
+const StyledAlert = styled(Alert)`
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+
+  @container (max-width: 500px) {
+    grid-template-columns: auto 1fr;
+    & .${alertClasses.action} {
+      grid-column: 1 / -1;
+      justify-self: end;
+    }
+  }
+`;
 
 type Props = {
   customTitle?: string;
   customMessage?: string;
-  actionOnBottom?: boolean;
 };
 
 export const DisabledFeatureBanner = ({
   customMessage,
   customTitle,
-  actionOnBottom,
 }: Props) => {
   const { message, actionTitle, link } = useFeatureMissingExplanation();
   const action =
@@ -30,16 +53,13 @@ export const DisabledFeatureBanner = ({
     ) : undefined;
 
   return (
-    <Alert severity="info" action={!actionOnBottom ? action : undefined}>
-      <AlertTitle sx={{ mb: customMessage ? undefined : 0, pb: 0 }}>
-        {customTitle ?? message}
-      </AlertTitle>
-      {customMessage && <Box>{customMessage}</Box>}
-      {actionOnBottom && action && (
-        <Box display="flex" mt={1} justifyContent="end">
-          {action}
-        </Box>
-      )}
-    </Alert>
+    <StyledContainer>
+      <StyledAlert severity="info" action={action}>
+        <AlertTitle sx={{ mb: customMessage ? undefined : 0, pb: 0 }}>
+          {customTitle ?? message}
+        </AlertTitle>
+        {customMessage && <Box>{customMessage}</Box>}
+      </StyledAlert>
+    </StyledContainer>
   );
 };
