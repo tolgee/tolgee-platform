@@ -2,7 +2,6 @@ package io.tolgee.ee.component.llm
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
@@ -108,7 +107,6 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
               ),
           ),
         )
-
       }
     }
 
