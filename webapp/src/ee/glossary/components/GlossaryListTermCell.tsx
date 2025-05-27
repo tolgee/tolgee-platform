@@ -5,7 +5,7 @@ import React from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import Box from '@mui/material/Box';
-import { GlossaryTermCreateUpdateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateUpdateDialog';
+import { GlossaryTermEditDialog } from 'tg.ee.module/glossary/views/GlossaryTermEditDialog';
 import { GlossaryTermTags } from 'tg.ee.module/glossary/components/GlossaryTermTags';
 import { SelectionService } from 'tg.service/useSelectionService';
 
@@ -98,11 +98,11 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
         <GlossaryTermTags term={item} />
       </StyledTags>
       {editEnabled && isEditingTerm && (
-        <GlossaryTermCreateUpdateDialog
+        <GlossaryTermEditDialog
           open={isEditingTerm}
           onClose={() => setIsEditingTerm(false)}
           onFinished={() => setIsEditingTerm(false)}
-          editTermId={item.id}
+          termId={item.id}
         />
       )}
     </StyledRowTermCell>

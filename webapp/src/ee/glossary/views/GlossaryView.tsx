@@ -6,7 +6,7 @@ import {
   useApiMutation,
 } from 'tg.service/http/useQueryApi';
 import React, { useMemo, useState } from 'react';
-import { GlossaryTermCreateUpdateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateUpdateDialog';
+import { GlossaryTermCreateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateDialog';
 import { GlossaryViewBody } from 'tg.ee.module/glossary/components/GlossaryViewBody';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
@@ -150,7 +150,7 @@ export const GlossaryView = () => {
       allCentered={false}
     >
       {canCreate && createDialogOpen && preferredOrganization !== undefined && (
-        <GlossaryTermCreateUpdateDialog
+        <GlossaryTermCreateDialog
           open={createDialogOpen}
           onClose={() => setCreateDialogOpen(false)}
           onFinished={() => setCreateDialogOpen(false)}
