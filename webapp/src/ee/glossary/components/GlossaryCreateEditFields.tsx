@@ -10,7 +10,7 @@ type Props = {
   withAssignedProjects?: boolean;
 };
 
-export const GlossaryCreateForm: VFC<Props> = ({
+export const GlossaryCreateEditFields: VFC<Props> = ({
   disabled,
   withAssignedProjects = false,
 }) => {

@@ -8,7 +8,7 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { GlossaryCreateEditDialog } from 'tg.ee.module/glossary/views/GlossaryCreateEditDialog';
+import { GlossaryEditDialog } from 'tg.ee.module/glossary/views/GlossaryEditDialog';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
 type SimpleGlossaryModel = components['schemas']['SimpleGlossaryModel'];
@@ -115,11 +115,11 @@ export const GlossaryListItemMenu: FC<Props> = ({ glossary }) => {
       </Menu>
 
       {isEditing && (
-        <GlossaryCreateEditDialog
+        <GlossaryEditDialog
           open={isEditing}
           onClose={() => setIsEditing(false)}
           onFinished={() => setIsEditing(false)}
-          editGlossaryId={glossary.id}
+          glossaryId={glossary.id}
         />
       )}
     </>

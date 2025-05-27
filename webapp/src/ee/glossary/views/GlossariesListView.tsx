@@ -4,7 +4,7 @@ import { BaseOrganizationSettingsView } from 'tg.views/organizations/components/
 import { useTranslate } from '@tolgee/react';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { GlossaryCreateEditDialog } from 'tg.ee.module/glossary/views/GlossaryCreateEditDialog';
+import { GlossaryCreateDialog } from 'tg.ee.module/glossary/views/GlossaryCreateDialog';
 import { GlossaryListItem } from 'tg.ee.module/glossary/components/GlossaryListItem';
 import { Box, styled } from '@mui/material';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
@@ -84,7 +84,7 @@ export const GlossariesListView = () => {
         addLabel={t('glossaries_add_button')}
       >
         {canCreate && createDialogOpen && (
-          <GlossaryCreateEditDialog
+          <GlossaryCreateDialog
             open={createDialogOpen}
             onClose={() => setCreateDialogOpen(false)}
             onFinished={() => setCreateDialogOpen(false)}
