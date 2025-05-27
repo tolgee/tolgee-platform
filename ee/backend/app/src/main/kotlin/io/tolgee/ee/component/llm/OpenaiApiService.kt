@@ -1,6 +1,8 @@
 package io.tolgee.ee.component.llm
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
@@ -20,7 +22,7 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class OpenaiApiService : AbstractLlmApiService(), Logging {
+class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : AbstractLlmApiService(), Logging {
   override fun defaultAttempts(): List<Int> = listOf(30)
 
   override fun translate(
@@ -30,9 +32,12 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
   ): PromptResult {
     val headers = HttpHeaders()
     headers.set("content-type", "application/json")
+    headers.set("Authorization", "Bearer ${config.apiKey}")
     headers.set("api-key", config.apiKey)
 
-    val messages = getMessages(params)
+    val content = getContent(params)
+
+    val messages = listOf(RequestMessage(role = "user", content = content))
 
     val requestBody =
       RequestBody(
@@ -81,45 +86,39 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
     )
   }
 
-  fun getMessages(params: LlmParams): MutableList<RequestMessage> {
-    val messages = mutableListOf<RequestMessage>()
+  fun getContent(params: LlmParams): MutableList<RequestMessageContent> {
+    val content = mutableListOf<RequestMessageContent>()
 
     params.messages.forEach {
       if (
         it.type == LlmParams.Companion.LlmMessageType.TEXT &&
         it.text != null
       ) {
-        messages.add(RequestMessage(role = "user", content = it.text!!))
+        content.add(RequestMessageContent("text", text = it.text!!))
       } else if (
         it.type == LlmParams.Companion.LlmMessageType.IMAGE &&
         it.image != null
       ) {
-        messages.add(
-          RequestMessage(
-            role = "user",
-            content =
-              listOf(
-                RequestMessageContent(
-                  type = "image_url",
-                  image_url =
-                    RequestImageUrl(
-                      "data:image/jpeg;base64,${it.image}",
-                    ),
-                ),
+        content.add(
+          RequestMessageContent(
+            type = "image_url",
+            image_url =
+              RequestImageUrl(
+                "data:image/jpeg;base64,${it.image}",
               ),
           ),
         )
+
       }
     }
 
     if (params.shouldOutputJson) {
-      messages.add(
-        // LlmParams.Companion.LlmMessage(LlmParams.Companion.LlmMessageType.TEXT, "Return only valid json!"),
-        RequestMessage(role = "user", content = "Strictly return only valid json!")
+      content.add(
+        RequestMessageContent(type = "text", text = "Strictly return only valid json!")
       )
     }
 
-    return messages
+    return content
   }
 
   /**
@@ -132,7 +131,6 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
       val stream: Boolean = false,
       @JsonInclude(JsonInclude.Include.NON_NULL)
       val response_format: RequestResponseFormat? = null,
-      val stop: Boolean? = null,
       val messages: List<RequestMessage>,
       val model: String?,
       val temperature: Long? = 0,
@@ -145,7 +143,10 @@ class OpenaiApiService : AbstractLlmApiService(), Logging {
 
     class RequestMessageContent(
       val type: String,
-      val image_url: RequestImageUrl,
+      @JsonInclude(JsonInclude.Include.NON_NULL)
+      val image_url: RequestImageUrl? = null,
+      @JsonInclude(JsonInclude.Include.NON_NULL)
+      val text: String? = null,
     )
 
     class RequestImageUrl(
