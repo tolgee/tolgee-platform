@@ -3,7 +3,7 @@ import { Box, styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useServiceImg } from 'tg.hooks/useServiceImg';
-import { getServiceName } from './getServiceName';
+import { useServiceName } from 'tg.hooks/useServiceName';
 import { ServiceType } from './types';
 
 const StyledWarning = styled(AlertTriangle)`
@@ -31,6 +31,7 @@ export const ServiceAvatar = ({
   ...other
 }: Props) => {
   const getServiceImg = useServiceImg();
+  const getServiceName = useServiceName();
   const { t } = useTranslate();
 
   return (

@@ -30,7 +30,7 @@ import { Select } from 'tg.component/common/Select';
 import { useFormalityTranslation } from 'tg.translationTools/useFormalityTranslation';
 import { components } from 'tg.service/apiSchema.generated';
 
-import { getServiceName } from '../getServiceName';
+import { useServiceName } from 'tg.hooks/useServiceName';
 
 type PromptModel = components['schemas']['PromptModel'];
 
@@ -102,6 +102,7 @@ export const LanguageSettingsForm = ({
 }: Props) => {
   const { t } = useTranslate();
   const getServiceImg = useServiceImg();
+  const getServiceName = useServiceName();
   const translateFormality = useFormalityTranslation();
 
   const { setFieldValue, values } = useFormikContext<FormType>();

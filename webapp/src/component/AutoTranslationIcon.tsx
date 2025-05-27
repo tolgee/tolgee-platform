@@ -3,7 +3,7 @@ import { useTranslate } from '@tolgee/react';
 import { Mt, TranslationMemory } from 'tg.component/CustomIcons';
 import { useServiceImg } from 'tg.hooks/useServiceImg';
 import { TranslationFlagIcon } from './TranslationFlagIcon';
-import { getServiceName } from 'tg.views/projects/languages/MachineTranslation/getServiceName';
+import { useServiceName } from 'tg.hooks/useServiceName';
 import { ServiceType } from 'tg.views/projects/languages/MachineTranslation/types';
 
 const StyledImgWrapper = styled('div')`
@@ -29,6 +29,7 @@ export const AutoTranslationIcon: React.FC<Props> = ({
   noTooltip,
 }) => {
   const getProviderImg = useServiceImg();
+  const getServiceName = useServiceName();
   const providerImg = getProviderImg(provider, false);
   const providerName = provider && getServiceName(provider);
   const { t } = useTranslate();

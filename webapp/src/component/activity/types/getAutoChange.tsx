@@ -2,7 +2,7 @@ import { styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { AutoTranslationIcon } from 'tg.component/AutoTranslationIcon';
 import { DiffValue } from '../types';
-import { getServiceName } from 'tg.views/projects/languages/MachineTranslation/getServiceName';
+import { useServiceName } from 'tg.hooks/useServiceName';
 import { ServiceType } from 'tg.views/projects/languages/MachineTranslation/types';
 
 const StyledWrapper = styled('div')`
@@ -19,8 +19,13 @@ const StyledRemoved = styled(StyledWrapper)`
   text-decoration: line-through;
 `;
 
-const getContent = (auto: boolean | string) => {
+type Props = {
+  auto: string | true;
+};
+
+const AutoChange = ({ auto }: Props) => {
   const provider = typeof auto === 'string' ? (auto as ServiceType) : undefined;
+  const getServiceName = useServiceName();
   const providerName = provider && getServiceName(provider);
 
   return (
@@ -42,8 +47,16 @@ const getContent = (auto: boolean | string) => {
 
 export const getAutoChange = (input?: DiffValue<boolean | string>) => {
   if (input?.new) {
-    return <StyledWrapper>{getContent(input.new)}</StyledWrapper>;
+    return (
+      <StyledWrapper>
+        <AutoChange auto={input.new} />
+      </StyledWrapper>
+    );
   } else if (input?.old) {
-    return <StyledRemoved>{getContent(input.old)}</StyledRemoved>;
+    return (
+      <StyledRemoved>
+        <AutoChange auto={input.old} />
+      </StyledRemoved>
+    );
   }
 };
