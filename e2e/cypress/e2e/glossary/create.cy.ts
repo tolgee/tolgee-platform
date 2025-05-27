@@ -30,9 +30,9 @@ describe('Glossary', () => {
   });
 
   it('Creates a new glossary from empty state', () => {
-    login('Bystander');
+    login('Unaffiliated');
     const view = new E2GlossariesView();
-    view.findAndVisit(data, 'Bystander');
+    view.findAndVisit(data, 'Unaffiliated');
 
     const dialog = view.openCreateGlossaryDialog(true);
     fillOutDialog(dialog, false);

@@ -24,13 +24,13 @@ class GlossaryTestData {
 
   lateinit var emptyGlossary: Glossary
 
-  lateinit var userBystander: UserAccount
+  lateinit var userUnaffiliated: UserAccount
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     addUserAccount {
-      username = "Bystander"
+      username = "Unaffiliated"
     }.build {
-      userBystander = self
+      userUnaffiliated = self
 
       addProject(defaultOrganizationBuilder.self) {
         name = "TheEmptyProject"

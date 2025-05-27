@@ -82,8 +82,8 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `bystander cannot get all glossary terms`() {
-    userAccount = testData.userBystander
+  fun `unaffiliated cannot get all glossary terms`() {
+    userAccount = testData.userUnaffiliated
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms")
       .andIsNotFound
   }
@@ -125,8 +125,8 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `bystander cannot get single glossary term`() {
-    userAccount = testData.userBystander
+  fun `unaffiliated cannot get single glossary term`() {
+    userAccount = testData.userUnaffiliated
     performAuthGet(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
     )
@@ -175,8 +175,8 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `bystander cannot create glossary term`() {
-    userAccount = testData.userBystander
+  fun `unaffiliated cannot create glossary term`() {
+    userAccount = testData.userUnaffiliated
     val request = CreateGlossaryTermWithTranslationRequest().apply {
       description = "New Term"
       text = "New Translation"
@@ -236,8 +236,8 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `bystander cannot update glossary term`() {
-    userAccount = testData.userBystander
+  fun `unaffiliated cannot update glossary term`() {
+    userAccount = testData.userUnaffiliated
     val request = UpdateGlossaryTermWithTranslationRequest().apply {
       description = "Updated Term"
       text = "Updated Translation"
@@ -287,8 +287,8 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `bystander cannot delete glossary term`() {
-    userAccount = testData.userBystander
+  fun `unaffiliated cannot delete glossary term`() {
+    userAccount = testData.userUnaffiliated
     performAuthDelete(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
     )
@@ -336,8 +336,8 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `bystander cannot delete multiple glossary terms`() {
-    userAccount = testData.userBystander
+  fun `unaffiliated cannot delete multiple glossary terms`() {
+    userAccount = testData.userUnaffiliated
     val request = DeleteMultipleGlossaryTermsRequest().apply {
       termIds = setOf(testData.term.id)
     }

@@ -81,8 +81,8 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `bystander cannot get all glossaries`() {
-    userAccount = testData.userBystander
+  fun `unaffiliated cannot get all glossaries`() {
+    userAccount = testData.userUnaffiliated
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries")
       .andIsNotFound
   }
@@ -121,8 +121,8 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `bystander cannot get single glossary`() {
-    userAccount = testData.userBystander
+  fun `unaffiliated cannot get single glossary`() {
+    userAccount = testData.userUnaffiliated
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}")
       .andIsNotFound
   }
@@ -172,8 +172,8 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `bystander cannot create glossary`() {
-    userAccount = testData.userBystander
+  fun `unaffiliated cannot create glossary`() {
+    userAccount = testData.userUnaffiliated
     val request = CreateGlossaryRequest().apply {
       name = "New Glossary"
       baseLanguageTag = "en"
@@ -225,8 +225,8 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `bystander cannot update glossary`() {
-    userAccount = testData.userBystander
+  fun `unaffiliated cannot update glossary`() {
+    userAccount = testData.userUnaffiliated
     val request = UpdateGlossaryRequest().apply {
       name = "Updated Glossary"
       baseLanguageTag = "de"
@@ -263,8 +263,8 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `bystander cannot delete glossary`() {
-    userAccount = testData.userBystander
+  fun `unaffiliated cannot delete glossary`() {
+    userAccount = testData.userUnaffiliated
     performAuthDelete("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}")
       .andIsNotFound
   }

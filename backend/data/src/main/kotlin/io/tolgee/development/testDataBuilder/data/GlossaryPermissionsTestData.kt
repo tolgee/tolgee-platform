@@ -14,7 +14,7 @@ class GlossaryPermissionsTestData {
   lateinit var userOwner: UserAccount
   lateinit var userMaintainer: UserAccount
   lateinit var userMember: UserAccount
-  lateinit var userBystander: UserAccount
+  lateinit var userUnaffiliated: UserAccount
   lateinit var userProjectTranslator: UserAccount
 
   lateinit var organization: Organization
@@ -63,8 +63,8 @@ class GlossaryPermissionsTestData {
           type = OrganizationRoleType.MEMBER
         }
 
-        userBystander = addUserAccount {
-          username = "Bystander"
+        userUnaffiliated = addUserAccount {
+          username = "Unaffiliated"
         }.self
 
         glossary = addGlossary {
