@@ -41,6 +41,9 @@ describe('basic prompt', () => {
       value: 'llm-provider-form-text-field',
       name: 'model',
     }).type('some model');
+    gcy('llm-provider-form-priority-select').click();
+    gcy('llm-provider-form-priority-select-item').contains('High').click();
+
     gcy('llm-provider-create-dialog-submit').click();
     gcy('llm-provider-item-name').should('contain', 'new-provider');
   });

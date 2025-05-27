@@ -387,6 +387,7 @@ declare namespace DataCy {
         "llm-provider-create-dialog-submit" |
         "llm-provider-create-dialog-update" |
         "llm-provider-form-priority-select" |
+        "llm-provider-form-priority-select-item" |
         "llm-provider-form-select" |
         "llm-provider-form-text-field" |
         "llm-provider-form-type-select" |

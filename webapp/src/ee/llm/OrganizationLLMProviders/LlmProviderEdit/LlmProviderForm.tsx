@@ -100,15 +100,18 @@ export const LlmProviderForm = ({ type, onTypeChange }: Props) => {
         data-cy="llm-provider-form-priority-select"
         displayEmpty
       >
-        <MenuItem value={undefined}>
+        <MenuItem
+          value={undefined}
+          data-cy="llm-provider-form-priority-select-item"
+        >
           <StyledEmpty>
             <T keyName="llm_provider_form_select_priority_none" />
           </StyledEmpty>
         </MenuItem>
-        <MenuItem value="HIGH">
+        <MenuItem value="HIGH" data-cy="llm-provider-form-priority-select-item">
           <T keyName="llm_provider_form_select_priority_high" />
         </MenuItem>
-        <MenuItem value="LOW">
+        <MenuItem value="LOW" data-cy="llm-provider-form-priority-select-item">
           <T keyName="llm_provider_form_select_priority_low" />
         </MenuItem>
       </Select>
