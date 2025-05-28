@@ -26,7 +26,6 @@ fun updateStringsInJson(node: JsonNode?, fn: (t: String) -> String): JsonNode? {
     }
 
     node.isTextual -> {
-      // Replace \u0000 in string values
       TextNode(fn(node.asText()))
     }
 
