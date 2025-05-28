@@ -1,17 +1,21 @@
 import { FunctionComponent, useEffect, useState } from 'react';
 import { TextField as TolgeeTextField } from 'tg.component/common/TextField';
-import { useField } from 'formik';
+import { FieldValidator, useField } from 'formik';
 
 interface PGTextFieldProps {
   name: string;
   onValueChange?: (newValue: string) => void;
+  validate?: FieldValidator;
 }
 
 type Props = PGTextFieldProps & React.ComponentProps<typeof TolgeeTextField>;
 
 export const TextField: FunctionComponent<Props> = (props) => {
   const [field, meta] = useField(props.name);
-  const [oldValue, setOldValue] = useState(field.value);
+  const [oldValue, setOldValue] = useState({
+    name: field.value,
+    validate: props.validate,
+  });
 
   const { onValueChange: _, ...otherProps } = props;
 

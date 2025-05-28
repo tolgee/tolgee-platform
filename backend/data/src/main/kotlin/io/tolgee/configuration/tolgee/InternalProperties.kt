@@ -8,6 +8,7 @@ class InternalProperties {
   var fakeThirdPartyLogin = false
   var showVersion: Boolean = false
   var fakeMtProviders: Boolean = false
+  var fakeLlmProviders: Boolean = false
 
   /**
    * When true it fakes checking user sso token for validity

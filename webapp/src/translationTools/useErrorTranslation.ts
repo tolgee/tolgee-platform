@@ -177,6 +177,22 @@ export function useErrorTranslation() {
         return t('free_self_hosted_seat_limit_exceeded');
       case 'plan_seat_limit_exceeded':
         return t('plan_seat_limit_exceeded');
+      case 'llm_provider_not_found':
+        return t('llm_provider_not_found', { value: params?.[0] || '' });
+      case 'llm_provider_error':
+        return t('llm_provider_error', { value: params?.[0] || '' });
+      case 'llm_template_parsing_error':
+        return t('llm_template_parsing_error', {
+          value: params?.[0] || '',
+          line: params?.[1] || '',
+          column: params?.[2] || '',
+        });
+      case 'llm_rate_limited':
+        return t('llm_rate_limited');
+      case 'llm_provider_not_returned_json':
+        return t('llm_provider_not_returned_json');
+      case 'prompt_not_found':
+        return t('prompt_not_found');
       default:
         return code;
     }

@@ -398,6 +398,7 @@ export const useTranslationsService = (props: Props) => {
     selectedLanguages,
     translationsLanguages,
     data: translations.data,
+    dataUpdatedAt: translations.dataUpdatedAt,
     fixedTranslations,
     totalCount:
       totalCount !== undefined ? totalCount + manuallyInserted : undefined,

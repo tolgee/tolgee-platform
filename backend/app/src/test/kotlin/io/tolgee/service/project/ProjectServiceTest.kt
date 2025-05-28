@@ -5,6 +5,7 @@
 package io.tolgee.service.project
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.development.testDataBuilder.data.PromptTestData
 import io.tolgee.development.testDataBuilder.data.TagsTestData
 import io.tolgee.fixtures.equalsPermissionType
 import io.tolgee.fixtures.generateUniqueString
@@ -140,6 +141,17 @@ class ProjectServiceTest : AbstractSpringTest() {
       println(time)
       assertThat(time).isLessThan(30000)
       assertThat(tagService.find(testData.existingTag.id)).isNull()
+    }
+  }
+
+  @Test
+  fun testDeleteProjectWithAiResults() {
+    executeInNewTransaction(platformTransactionManager) {
+      val testData = PromptTestData()
+      testDataService.saveTestData(testData.root)
+      projectHardDeletingService.hardDeleteProject(testData.promptProject.self)
+      entityManager.flush()
+      entityManager.clear()
     }
   }
 }

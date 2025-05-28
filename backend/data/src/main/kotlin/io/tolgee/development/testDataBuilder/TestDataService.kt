@@ -189,6 +189,15 @@ class TestDataService(
     saveAllMtCreditBuckets(builder)
     saveSlackWorkspaces(builder)
     saveOrganizationTenants(builder)
+    saveLlmProviders(builder)
+  }
+
+  private fun saveLlmProviders(builder: TestDataBuilder) {
+    builder.data.organizations.forEach { organizationBuilder ->
+      organizationBuilder.data.llmProviders.map { it.self }.forEach {
+        entityManager.persist(it)
+      }
+    }
   }
 
   private fun saveSlackWorkspaces(builder: TestDataBuilder) {
@@ -249,6 +258,8 @@ class TestDataService(
     saveBatchJobs(builder)
     saveTasks(builder)
     saveTaskKeys(builder)
+    savePrompts(builder)
+    saveAiPlaygroundResults(builder)
   }
 
   private fun saveImportSettings(builder: ProjectBuilder) {
@@ -516,6 +527,18 @@ class TestDataService(
 
   private fun saveTaskKeys(builder: ProjectBuilder) {
     builder.data.taskKeys.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun savePrompts(builder: ProjectBuilder) {
+    builder.data.prompts.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveAiPlaygroundResults(builder: ProjectBuilder) {
+    builder.data.aiPlaygroundResults.forEach {
       entityManager.persist(it.self)
     }
   }

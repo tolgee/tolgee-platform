@@ -1,8 +1,9 @@
-import { FunctionComponent } from 'react';
+import React from 'react';
 import { styled } from '@mui/material';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useProject } from 'tg.hooks/useProject';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 import { ProjectMenu } from './projectMenu/ProjectMenu';
 
@@ -11,7 +12,14 @@ const StyledContent = styled('div')`
   max-width: 100%;
 `;
 
-export const ProjectPage: FunctionComponent = ({ children }) => {
+type Props = {
+  rightPanelContent?: (width: number) => React.ReactNode;
+};
+
+export const ProjectPage: React.FC<Props> = ({
+  children,
+  rightPanelContent,
+}) => {
   const project = useProject();
 
   const isAdminAccess = project.computedPermission.origin === 'SERVER_ADMIN';
@@ -20,8 +28,11 @@ export const ProjectPage: FunctionComponent = ({ children }) => {
     <DashboardPage
       isAdminAccess={isAdminAccess}
       fixedContent={<ProjectMenu id={project.id} />}
+      rightPanelContent={rightPanelContent}
     >
-      <StyledContent>{children}</StyledContent>
+      <React.Suspense fallback={<FullPageLoading />}>
+        <StyledContent>{children}</StyledContent>
+      </React.Suspense>
     </DashboardPage>
   );
 };

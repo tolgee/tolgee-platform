@@ -4,6 +4,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.sso.SsoTenantConfig
 import io.tolgee.dtos.sso.SsoTenantDto
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.NotImplementedInOss
 import io.tolgee.model.Organization
 import io.tolgee.model.SsoTenant
 import org.springframework.stereotype.Service
@@ -24,14 +25,14 @@ class TenantServiceOssStub : TenantService {
 
   override fun save(tenant: SsoTenant): SsoTenant {
     // no-op
-    throw UnsupportedOperationException("Not included in OSS")
+    throw NotImplementedInOss()
   }
 
   override fun saveAll(tenants: Iterable<SsoTenant>): List<SsoTenant> {
     // no-op
     if (tenants.any { true }) {
       // isn't empty
-      throw UnsupportedOperationException("Not included in OSS")
+      throw NotImplementedInOss()
     }
     return emptyList()
   }
@@ -48,7 +49,7 @@ class TenantServiceOssStub : TenantService {
 
   override fun getTenant(organizationId: Long): SsoTenant {
     // no-op
-    throw UnsupportedOperationException("Not included in OSS")
+    throw NotImplementedInOss()
   }
 
   override fun createOrUpdate(
@@ -57,6 +58,6 @@ class TenantServiceOssStub : TenantService {
     allowChangeDomain: Boolean,
   ): SsoTenant {
     // no-op
-    throw UnsupportedOperationException("Not included in OSS")
+    throw NotImplementedInOss()
   }
 }
