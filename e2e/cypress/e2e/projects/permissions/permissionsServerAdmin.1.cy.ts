@@ -50,6 +50,7 @@ describe('Server admin 1', { retries: { runMode: 5 } }, () => {
         'project-menu-item-export': SKIP,
         'project-menu-item-developer': SKIP,
         'project-menu-item-integrate': SKIP,
+        'project-menu-item-ai': SKIP,
       });
     });
   });

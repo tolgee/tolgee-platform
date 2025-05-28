@@ -56,6 +56,8 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.BATCH_MACHINE_TRANSLATE,
       Scope.BATCH_JOBS_VIEW,
       Scope.TASKS_VIEW,
+      Scope.PROMPTS_VIEW,
+      Scope.PROMPTS_EDIT,
     ),
   ),
   MANAGE(

@@ -134,6 +134,17 @@ export const usePermissionsStructure = (options?: Scope[]) => {
         ],
       },
       {
+        label: t('permissions_prompts'),
+        children: [
+          {
+            value: 'prompts.view',
+          },
+          {
+            value: 'prompts.edit',
+          },
+        ],
+      },
+      {
         value: 'webhooks.manage',
       },
       {

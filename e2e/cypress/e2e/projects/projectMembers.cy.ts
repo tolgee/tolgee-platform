@@ -122,7 +122,6 @@ describe('Project members', () => {
         {
           scopes: ['activity.view'],
         },
-        true,
         'admin@admin.com'
       ).then((infoData) => {
         info = infoData;
