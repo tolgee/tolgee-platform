@@ -191,7 +191,15 @@ class LlmProviderService(
     if (internalProperties.fakeLlmProviders) {
       return getFakedResponse(config)
     }
-    return providerService.translate(params, config, restTemplate)
+    val result = providerService.translate(params, config, restTemplate)
+    return PromptResult(
+      // gpt-4.1 is returning null characters sometimes which cause trouble when saving to db
+      // so let's make sure these characters are removed
+      result.response.replace("\\u0000", ""),
+      result.usage,
+      result.parsedJson,
+      result.price
+    )
   }
 
   fun getProviderService(providerType: LlmProviderType): AbstractLlmApiService {
