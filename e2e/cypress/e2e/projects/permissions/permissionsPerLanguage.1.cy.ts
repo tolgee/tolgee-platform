@@ -6,13 +6,10 @@ import {
 
 describe('Permissions per language 1', () => {
   it('translations.view', () => {
-    visitProjectWithPermissions(
-      {
-        scopes: ['translations.view'],
-        viewLanguageTags: ['en', 'de'],
-      },
-      true
-    ).then((projectInfo) => {
+    visitProjectWithPermissions({
+      scopes: ['translations.view'],
+      viewLanguageTags: ['en', 'de'],
+    }).then((projectInfo) => {
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
         'project-menu-item-translations': RUN,
@@ -23,13 +20,10 @@ describe('Permissions per language 1', () => {
   });
 
   it('translations.edit', () => {
-    visitProjectWithPermissions(
-      {
-        scopes: ['translations.edit'],
-        translateLanguageTags: ['de'],
-      },
-      true
-    ).then((projectInfo) => {
+    visitProjectWithPermissions({
+      scopes: ['translations.edit'],
+      translateLanguageTags: ['de'],
+    }).then((projectInfo) => {
       checkPermissions(projectInfo, {
         'project-menu-item-dashboard': RUN,
         'project-menu-item-translations': RUN,

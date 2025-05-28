@@ -86,4 +86,16 @@ interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
     keys: List<Key>,
     locations: List<String?>,
   ): List<KeyScreenshotReference>
+
+  @Query(
+    """
+    from KeyScreenshotReference ksr
+    join fetch ksr.key k
+    join fetch ksr.screenshot s
+    where k = :key
+  """,
+  )
+  fun getAllKeyScreenshotReferences(
+    key: Key,
+  ): List<KeyScreenshotReference>
 }

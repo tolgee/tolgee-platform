@@ -79,6 +79,7 @@ export const useMachineTranslationSettings = () => {
       formality: supportsFormality(langInfo, service.serviceType)
         ? service.formality
         : undefined,
+      promptId: service.serviceType === 'PROMPT' ? service.promptId : undefined,
     };
   }
 

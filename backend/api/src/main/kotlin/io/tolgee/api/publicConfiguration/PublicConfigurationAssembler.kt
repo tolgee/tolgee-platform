@@ -12,6 +12,8 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.constants.MtServiceType
+import io.tolgee.dtos.response.PublicLlmConfigurationDTO
+import io.tolgee.service.LlmPropertiesService
 import io.tolgee.util.VersionProvider
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
@@ -23,6 +25,7 @@ class PublicConfigurationAssembler(
   private val publicBillingConfProvider: PublicBillingConfProvider,
   private val versionProvider: VersionProvider,
   private val contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider,
+  private val llmPropertiesService: LlmPropertiesService,
 ) {
   fun toDto(): PublicConfigurationDTO {
     return PublicConfigurationDTO(
@@ -70,6 +73,7 @@ class PublicConfigurationAssembler(
       allowRegistrations = properties.authentication.registrationsAllowed,
       authMethods = properties.authentication.asAuthMethodsDTO(),
       translationsViewLanguagesLimit = properties.translationsViewLanguagesLimit,
+      llm = PublicLlmConfigurationDTO(llmPropertiesService.isEnabled()),
     )
   }
 
@@ -116,7 +120,7 @@ class PublicConfigurationAssembler(
         .associateWith {
           PublicConfigurationDTO.MtServiceDTO(
             applicationContext.getBean(it.providerClass).isEnabled,
-            applicationContext.getBean(it.propertyClass).defaultEnabled,
+            it.propertyClass?.let { applicationContext.getBean(it).defaultEnabled } ?: true,
           )
         }
     return mtServices

@@ -26,6 +26,7 @@ const StyledContainer = styled('div')`
   flex-grow: 1;
   flex-direction: column;
   align-items: stretch;
+  z-index: 4;
 `;
 
 type Props = {

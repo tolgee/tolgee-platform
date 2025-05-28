@@ -7,6 +7,7 @@ package io.tolgee.service
 import io.tolgee.AbstractSpringTest
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
+import io.tolgee.development.testDataBuilder.data.PromptTestData
 import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
@@ -69,6 +70,14 @@ class LanguageServiceTest : AbstractSpringTest() {
     entityManager.flush()
     languageService.hardDeleteLanguage(testData.englishLanguage.id)
     languageService.findEntity(testData.englishLanguage.id).assert.isNull()
+  }
+
+  @Test
+  @Transactional
+  fun `deletes language with ai results`() {
+    val testData = PromptTestData()
+    testDataService.saveTestData(testData.root)
+    languageService.hardDeleteLanguage(testData.czech.self.id)
   }
 
   @Test

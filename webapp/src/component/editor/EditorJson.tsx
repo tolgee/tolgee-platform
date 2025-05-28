@@ -183,6 +183,7 @@ export const EditorJson: React.FC<EditorProps> = ({
     <>
       {globalStyles}
       <StyledEditor
+        key={theme.palette.mode}
         ref={ref}
         style={{
           minHeight,

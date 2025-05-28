@@ -1,17 +1,13 @@
 import { Box, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-import { useServiceImg } from 'tg.views/projects/translations/ToolsPanel/panels/MachineTranslation/useServiceImg';
-import { getServiceName } from './getServiceName';
-import { ServiceType } from './types';
-
 type Props = {
-  service: ServiceType;
   isSupported: boolean;
+  icon: string | undefined;
+  name: string;
 };
 
-export const ServiceLabel = ({ service, isSupported }: Props) => {
-  const getServiceImg = useServiceImg();
+export const ServiceLabel = ({ isSupported, icon, name }: Props) => {
   const { t } = useTranslate();
   return (
     <Tooltip
@@ -24,8 +20,8 @@ export const ServiceLabel = ({ service, isSupported }: Props) => {
         sx={{ opacity: isSupported ? 1 : 0.5 }}
         data-cy="mt-language-dialog-service-label"
       >
-        <img src={getServiceImg(service, false)} width={20} />
-        <div>{getServiceName(service)}</div>
+        <img src={icon} width={20} />
+        <div>{name}</div>
       </Box>
     </Tooltip>
   );

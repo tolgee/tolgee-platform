@@ -3,17 +3,10 @@ package io.tolgee.model.mtServiceConfig
 import io.tolgee.constants.MtServiceType
 import io.tolgee.model.Language
 import io.tolgee.model.Project
+import io.tolgee.model.Prompt
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.service.machineTranslation.MtServiceInfo
-import jakarta.persistence.ElementCollection
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
-import jakarta.persistence.Index
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToOne
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
@@ -36,9 +29,6 @@ class MtServiceConfig : StandardAuditModel() {
   var primaryService: MtServiceType? = null
 
   @Enumerated(EnumType.STRING)
-  var primaryServiceFormality: Formality? = null
-
-  @Enumerated(EnumType.STRING)
   @ElementCollection(targetClass = MtServiceType::class)
   var enabledServices: MutableSet<MtServiceType> = mutableSetOf()
 
@@ -50,14 +40,12 @@ class MtServiceConfig : StandardAuditModel() {
   @ColumnDefault("DEFAULT")
   var deeplFormality: Formality = Formality.DEFAULT
 
-  @Enumerated(EnumType.STRING)
-  @ColumnDefault("DEFAULT")
-  var tolgeeFormality: Formality = Formality.DEFAULT
+  @ManyToOne
+  @JoinColumn(name = "prompt_id")
+  var prompt: Prompt? = null
 
   val primaryServiceInfo: MtServiceInfo?
-    get() {
-      return MtServiceInfo(primaryService ?: return null, primaryServiceFormality)
-    }
+    get() = primaryService?.let { getServiceInfo(this, it) }
 
   val enabledServicesInfo
     get() = enabledServices.mapNotNull { getServiceInfo(this, it) }
@@ -74,10 +62,14 @@ class MtServiceConfig : StandardAuditModel() {
         when (serviceType) {
           MtServiceType.AWS -> config.awsFormality
           MtServiceType.DEEPL -> config.deeplFormality
-          MtServiceType.TOLGEE -> config.tolgeeFormality
           else -> null
         }
-      return MtServiceInfo(serviceType, formality)
+      val promptId =
+        when (serviceType) {
+          MtServiceType.PROMPT -> config.prompt?.id
+          else -> null
+        }
+      return MtServiceInfo(serviceType, formality, promptId)
     }
   }
 }

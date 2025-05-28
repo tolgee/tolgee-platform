@@ -6,8 +6,8 @@ import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
-import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.dtos.PromptResult
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.fixtures.HttpClientMocker
@@ -18,12 +18,15 @@ import io.tolgee.testing.assert
 import io.tolgee.util.addDays
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.spy
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
@@ -33,10 +36,6 @@ import org.springframework.web.client.RestTemplate
 class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
-
-  @Autowired
-  @MockBean
-  private lateinit var restTemplate: RestTemplate
 
   private lateinit var testData: TestData
 
@@ -50,67 +49,77 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
   @SpyBean
   override lateinit var tolgeeProperties: TolgeeProperties
 
+  @MockBean
+  @Autowired
+  lateinit var restTemplateBuilder: RestTemplateBuilder
+
+  @Autowired
+  @MockBean
+  private lateinit var restTemplate: RestTemplate
+
   @BeforeEach
   fun setup() {
     saveTestDataAndPrepare()
     httpClientMocker = HttpClientMocker(restTemplate)
     initMachineTranslationProperties(
       freeCreditsAmount = -1,
-      enabledServices = setOf(MtServiceType.TOLGEE),
     )
     whenever(internalProperties.fakeMtProviders).thenReturn(false)
+    whenever(restTemplateBuilder.setReadTimeout(any())).thenReturn(restTemplateBuilder)
+    whenever(restTemplateBuilder.build()).thenReturn(restTemplate)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `correctly propagates credit spending limit exceeded`() {
+    testPropagatesError(Message.CREDIT_SPENDING_LIMIT_EXCEEDED.code)
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `correctly propagates out of credits errors`() {
-    testPropagatesError(Message.CREDIT_SPENDING_LIMIT_EXCEEDED.code)
     testPropagatesError(Message.OUT_OF_CREDITS.code)
   }
 
-  private fun testPropagatesError(errorCode: String) {
+  fun testPropagatesError(errorCode: String) {
     saveSubscription()
+    whenever(
+      restTemplate.exchange(
+        anyString(),
+        eq(POST),
+        any(),
+        eq(PromptResult::class.java)
+      )
+    ).thenThrow(
+      mockBadRequest(errorCode)
+    )
 
-    httpClientMocker.apply {
-      whenReq {
-        method = { it == POST }
-        url = { it.contains("/v2/public/translator/translate") }
-      }
-
-      thenThrow(mockBadRequest(errorCode))
-
-      verify {
-        val response =
-          performProjectAuthPost(
-            "suggest/machine-translations-streaming",
-            mapOf(
-              "targetLanguageId" to testData.czechLanguage.id,
-              "baseText" to "text",
-            ),
-          )
-            .andDo {
-              it.getAsyncResult(10000)
-            }
-            .andIsOk.andReturn().response.contentAsString
-        val parsed = NdJsonParser(objectMapper).parse(response)
-        parsed.assert.hasSize(2)
-        (parsed[1] as Map<*, *>)["errorMessage"].assert.isEqualTo(errorCode)
-      }
-    }
+    val response =
+      performProjectAuthPost(
+        "suggest/machine-translations-streaming",
+        mapOf(
+          "targetLanguageId" to testData.czechLanguage.id,
+          "baseText" to "text",
+        ),
+      )
+        .andDo {
+          it.getAsyncResult(10000)
+        }
+        .andIsOk.andReturn().response.contentAsString
+    val parsed = NdJsonParser(objectMapper).parse(response)
+    parsed.assert.hasSize(3)
+    (parsed[1] as Map<*, *>)["errorMessage"].assert.isEqualTo(errorCode)
   }
 
   private fun mockBadRequest(errorCode: String): HttpClientErrorException {
     val badRequestMock =
-      spy(
-        HttpClientErrorException.create(
-          HttpStatus.BAD_REQUEST,
-          "Mocked response",
-          null,
-          null,
-          null,
-        ),
+      HttpClientErrorException.create(
+        HttpStatus.BAD_REQUEST,
+        "Mocked response",
+        null,
+        """{"code": "$errorCode"}""".toByteArray(),
+        null,
       )
-    whenever(badRequestMock.message).thenReturn(errorCode)
     return badRequestMock
   }
 
