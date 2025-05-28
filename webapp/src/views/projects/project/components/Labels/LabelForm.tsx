@@ -12,7 +12,7 @@ type LabelModel = components['schemas']['LabelModel'];
 
 export type LabelFormValues = {
   name: string;
-  color: string | undefined;
+  color: string;
   description: string | undefined;
 };
 
@@ -26,7 +26,7 @@ export const LabelForm: FC<{
   const initValues = {
     name: label?.name ?? '',
     description: label?.description,
-    color: label?.color || undefined,
+    color: label?.color ?? '',
   } satisfies LabelFormValues;
   const onSubmit = (values: LabelFormValues) => {
     submit({
