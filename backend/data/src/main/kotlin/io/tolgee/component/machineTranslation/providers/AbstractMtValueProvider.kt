@@ -1,6 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.MtValueProvider
+import io.tolgee.component.machineTranslation.metadata.MtMetadata
 
 abstract class AbstractMtValueProvider : MtValueProvider {
   private val String.toSuitableTag: String?
@@ -36,6 +37,14 @@ abstract class AbstractMtValueProvider : MtValueProvider {
       },
     )
   }
+
+  override fun getMetadata(
+    organizationId: Long,
+    projectId: Long,
+    keyId: Long?,
+    targetLanguageId: Long,
+    promptId: Long?,
+  ): MtMetadata? = null
 
   /**
    * Translates the text via provider.

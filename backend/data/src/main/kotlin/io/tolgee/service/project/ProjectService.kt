@@ -1,6 +1,7 @@
 package io.tolgee.service.project
 
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.batch.BatchJobService
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -25,14 +26,24 @@ import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
+import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
+import io.tolgee.service.security.SecurityService
+import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import io.tolgee.util.SlugGenerator
 import jakarta.persistence.EntityManager
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.ApplicationContext
@@ -62,7 +73,42 @@ class ProjectService(
   private val slugGenerator: SlugGenerator,
   @Lazy
   private val organizationService: OrganizationService,
+  private val screenshotService: ScreenshotService,
+  @Lazy
+  private val batchJobService: BatchJobService
 ) : Logging {
+  @set:Autowired
+  @set:Lazy
+  lateinit var keyService: KeyService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var translationService: TranslationService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var importService: ImportService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var mtServiceConfigService: MtServiceConfigService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var securityService: SecurityService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var apiKeyService: ApiKeyService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var bigMetaService: BigMetaService
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var aiPlaygroundResultService: AiPlaygroundResultService
+
   @Transactional
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
   fun findDto(id: Long): ProjectDto? {

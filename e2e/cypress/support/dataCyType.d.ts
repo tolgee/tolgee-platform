@@ -96,6 +96,52 @@ declare namespace DataCy {
         "ai-customization-project-description-edit" |
         "ai-languages-description" |
         "ai-languages-description-edit" |
+        "ai-menu-context-data" |
+        "ai-menu-prompts" |
+        "ai-playground-preview" |
+        "ai-playground-usage-cached-tokens" |
+        "ai-playground-usage-mt-credits" |
+        "ai-playground-usage-tokens" |
+        "ai-prompt-batch-dialog-cancel" |
+        "ai-prompt-batch-dialog-run" |
+        "ai-prompt-dataset-cancel" |
+        "ai-prompt-dataset-got-it" |
+        "ai-prompt-dataset-no-tags-text" |
+        "ai-prompt-dataset-run" |
+        "ai-prompt-item-menu" |
+        "ai-prompt-item-name" |
+        "ai-prompt-name" |
+        "ai-prompt-open-existing-prompt-item" |
+        "ai-prompt-open-existing-prompt-select" |
+        "ai-prompt-playground-close" |
+        "ai-prompt-preview-button" |
+        "ai-prompt-preview-more-button" |
+        "ai-prompt-preview-on-all" |
+        "ai-prompt-preview-on-dataset" |
+        "ai-prompt-provider-item" |
+        "ai-prompt-provider-rename-button" |
+        "ai-prompt-provider-select" |
+        "ai-prompt-rename-cancel" |
+        "ai-prompt-rename-name-field" |
+        "ai-prompt-rename-save" |
+        "ai-prompt-rendered" |
+        "ai-prompt-rendered-expand-button" |
+        "ai-prompt-result-raw" |
+        "ai-prompt-result-translation" |
+        "ai-prompt-save-as-field-name" |
+        "ai-prompt-save-as-field-use-as-default" |
+        "ai-prompt-save-as-new-button" |
+        "ai-prompt-save-button" |
+        "ai-prompt-save-dialog-cancel" |
+        "ai-prompt-save-dialog-save" |
+        "ai-prompt-save-more-button" |
+        "ai-prompt-show-result-toggle" |
+        "ai-prompt-tab-advanced" |
+        "ai-prompt-tab-basic" |
+        "ai-prompts-add-prompt" |
+        "ai-prompts-menu-item-delete" |
+        "ai-prompts-menu-item-rename" |
+        "ai-prompts-open-playground-button" |
         "api-key-expiry-info" |
         "api-key-list-item" |
         "api-key-list-item-delete-button" |
@@ -249,6 +295,7 @@ declare namespace DataCy {
         "global-plus-button" |
         "global-search-field" |
         "global-user-menu-button" |
+        "handlebars-editor" |
         "import-conflict-resolution-dialog" |
         "import-conflicts-not-resolved-dialog" |
         "import-conflicts-not-resolved-dialog-cancel-button" |
@@ -331,12 +378,27 @@ declare namespace DataCy {
         "languages-create-cancel-prepared-button" |
         "languages-create-customize-button" |
         "languages-flag-selector-open-button" |
-        "languages-menu-ai-prompt-customization" |
         "languages-menu-machine-translation" |
         "languages-menu-project-languages" |
         "languages-modify-apply-button" |
         "languages-modify-cancel-button" |
         "languages-prepared-language-box" |
+        "llm-machine-translation-customize" |
+        "llm-provider-create-dialog-submit" |
+        "llm-provider-create-dialog-update" |
+        "llm-provider-form-priority-select" |
+        "llm-provider-form-priority-select-item" |
+        "llm-provider-form-select" |
+        "llm-provider-form-text-field" |
+        "llm-provider-form-type-select" |
+        "llm-provider-form-type-select-item" |
+        "llm-provider-item-menu" |
+        "llm-provider-item-name" |
+        "llm-provider-item-type" |
+        "llm-provider-menu-item-delete" |
+        "llm-provider-menu-item-edit" |
+        "llm-providers-custom" |
+        "llm-providers-server" |
         "login-button" |
         "login-provider" |
         "machine-translations-settings-language-enabled-service" |
@@ -400,6 +462,7 @@ declare namespace DataCy {
         "organization-invitation-cancel-button" |
         "organization-invitation-copy-button" |
         "organization-invitation-item" |
+        "organization-llm-providers-tab" |
         "organization-member-item" |
         "organization-member-leave-button" |
         "organization-members-remove-user-button" |
@@ -436,6 +499,7 @@ declare namespace DataCy {
         "permissions-menu-inherited-message" |
         "permissions-menu-reset-to-organization" |
         "permissions-menu-save" |
+        "plan-limit-dialog-close" |
         "plan-limit-exceeded-popover" |
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
@@ -476,6 +540,7 @@ declare namespace DataCy {
         "project-member-revoke-button" |
         "project-members-invitation-item" |
         "project-menu-item" |
+        "project-menu-item-ai" |
         "project-menu-item-dashboard" |
         "project-menu-item-developer" |
         "project-menu-item-export" |
@@ -514,6 +579,8 @@ declare namespace DataCy {
         "project-transfer-autocomplete-suggested-option" |
         "project-transfer-confirmation-field" |
         "project-transfer-dialog" |
+        "prompt-basic-option" |
+        "prompt-basic-option-edit" |
         "quick-start-action" |
         "quick-start-dialog" |
         "quick-start-finish-action" |
@@ -542,6 +609,7 @@ declare namespace DataCy {
         "signup-error-free-seat-limit" |
         "signup-error-plan-seat-limit" |
         "signup-error-seats-spending-limit" |
+        "spending-limit-dialog-close" |
         "spending-limit-exceeded-popover" |
         "sso-migration-info-text" |
         "storage-add-item-button" |
@@ -648,6 +716,7 @@ declare namespace DataCy {
         "translation-state-button" |
         "translation-text" |
         "translation-tools-machine-translation-item" |
+        "translation-tools-machine-translation-item-prompt" |
         "translation-tools-translation-memory-item" |
         "translations-add-button" |
         "translations-auto-translated-clear-button" |

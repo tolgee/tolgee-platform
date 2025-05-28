@@ -7,6 +7,7 @@ data class MtTranslatorResult(
   val actualPrice: Int,
   val contextDescription: String? = null,
   val service: MtServiceType,
+  val promptId: Long?,
   val targetLanguageId: Long,
   val baseBlank: Boolean,
   val exception: Exception?,

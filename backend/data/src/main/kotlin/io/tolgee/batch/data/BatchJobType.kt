@@ -19,6 +19,10 @@ enum class BatchJobType(
    */
   val exclusive: Boolean = true,
 ) {
+  AI_PLAYGROUND_TRANSLATE(
+    maxRetries = 3,
+    processor = AiPlaygroundChunkProcessor::class,
+  ),
   PRE_TRANSLATE_BT_TM(
     activityType = ActivityType.BATCH_PRE_TRANSLATE_BY_TM,
     maxRetries = 3,

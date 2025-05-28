@@ -19,6 +19,7 @@ describe('Permissions admin 3', () => {
         'project-menu-item-export': RUN,
         'project-menu-item-developer': RUN,
         'project-menu-item-integrate': RUN,
+        'project-menu-item-ai': RUN,
       });
     });
   });

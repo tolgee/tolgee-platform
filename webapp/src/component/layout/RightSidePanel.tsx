@@ -1,11 +1,7 @@
 import { Box, ClickAwayListener, styled } from '@mui/material';
 import { useRef } from 'react';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useDebounce } from 'use-debounce';
-import { QuickStartGuide } from './QuickStartGuide/QuickStartGuide';
 
 const StyledPanel = styled(Box)`
   position: fixed;
@@ -25,37 +21,34 @@ const StyledPanel = styled(Box)`
   }
 `;
 
-export const RightSidePanel = () => {
+type Props = {
+  children?: React.ReactNode;
+  floating?: boolean;
+  open?: boolean;
+  onClose?: () => void;
+  width: number;
+};
+
+export const RightSidePanel = ({
+  children,
+  floating,
+  open = true,
+  onClose,
+  width,
+}: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
   const topBannerHeight = useGlobalContext((c) => c.layout.topBannerHeight);
   const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
-  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
-  const rightPanelFloating = useGlobalContext(
-    (c) => c.layout.rightPanelFloating
-  );
-  const shouldFloat = useGlobalContext((c) => c.layout.rightPanelShouldFloat);
-  const { setQuickStartFloatingOpen, setQuickStartOpen } = useGlobalActions();
-
-  const open = rightPanelWidth || rightPanelFloating;
 
   const [openedDebounced] = useDebounce(open, 100);
 
   const handleClickAway = () => {
-    if (openedDebounced && shouldFloat) {
-      setQuickStartFloatingOpen(false);
+    if (openedDebounced && floating) {
+      onClose?.();
     }
   };
 
-  function handleClose() {
-    if (rightPanelFloating) {
-      setQuickStartFloatingOpen(false);
-    } else {
-      setQuickStartOpen(false);
-    }
-  }
-
-  if (!quickStartEnabled) {
+  if (!width) {
     return null;
   }
 
@@ -66,14 +59,14 @@ export const RightSidePanel = () => {
           top: topBannerHeight,
           transform: `translate(0px, ${topBarHeight}px)`,
           paddingBottom: topBarHeight + 'px',
-          width: rightPanelWidth || 400,
+          width,
         }}
         style={{
           right: open ? '0%' : '-105%',
         }}
         ref={containerRef}
       >
-        <QuickStartGuide onClose={handleClose} />
+        {children}
       </StyledPanel>
     </ClickAwayListener>
   );
