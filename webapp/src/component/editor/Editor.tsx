@@ -230,6 +230,7 @@ export const Editor: React.FC<EditorProps> = ({
     <StyledEditorWrapper
       data-cy="global-editor"
       ref={ref}
+      key={theme.palette.mode}
       dir={direction}
       style={{
         minHeight,

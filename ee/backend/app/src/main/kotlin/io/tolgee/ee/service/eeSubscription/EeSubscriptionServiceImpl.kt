@@ -57,6 +57,10 @@ class EeSubscriptionServiceImpl(
     return this.findSubscriptionEntity()?.toDto()
   }
 
+  override fun getLicensingUrl(): String? {
+    return eeProperties.licenseServer
+  }
+
   fun findSubscriptionEntity(): EeSubscription? {
     return eeSubscriptionRepository.findById(1).orElse(null)
   }

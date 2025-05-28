@@ -190,6 +190,19 @@ class PermissionsTestData {
     }
   }
 
+  fun addPrompt() {
+    projectBuilder.apply {
+      addPrompt {
+        name = "Custom prompt"
+        template =
+          """
+          Test prompt
+          {{fragment.intro}}
+          """.trimIndent()
+      }
+    }
+  }
+
   private fun getLanguagesByTags(tags: List<String>?) =
     tags?.map { tag ->
       projectBuilder.data.languages.find { it.self.tag == tag }?.self ?: throw NotFoundException(

@@ -33,7 +33,7 @@ export function usePosthog() {
           if (!cancelled) {
             posthog.init(postHogAPIKey, {
               api_host: config?.postHogHost || undefined,
-              disable_session_recording: true,
+              disable_session_recording: false,
             });
             posthog.identify(userData.id.toString(), {
               name: userData.username,

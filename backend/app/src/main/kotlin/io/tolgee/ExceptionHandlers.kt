@@ -236,6 +236,7 @@ class ExceptionHandlers : Logging {
 
   @ExceptionHandler(RateLimitedException::class)
   fun handleRateLimited(ex: RateLimitedException): ResponseEntity<RateLimitResponseBody> {
+    logger.debug("Rate limited", ex)
     return ResponseEntity(
       RateLimitResponseBody(Message.RATE_LIMITED, ex.retryAfter, ex.global),
       HttpStatus.TOO_MANY_REQUESTS,

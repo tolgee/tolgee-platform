@@ -44,6 +44,7 @@ export type Props = {
   enableEmpty?: boolean;
   placeholder?: string;
   placement?: 'top';
+  className?: string;
 };
 
 export const LanguagesSelect: FunctionComponent<Props> = (props) => {
@@ -70,6 +71,7 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
       data-cy="translations-language-select-form-control"
       variant="outlined"
       size="small"
+      className={props.className}
     >
       {props.placeholder && props.value.length === 0 && (
         <InputLabel focused={false} shrink={false}>

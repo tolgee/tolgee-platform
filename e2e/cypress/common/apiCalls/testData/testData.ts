@@ -119,6 +119,8 @@ export const namespaces = generateTestDataObject('namespaces');
 
 export const tasks = generateTestDataObject('task');
 
+export const prompt = generateTestDataObject('prompt');
+
 export const batchJobs = generateTestDataObject('batch-jobs');
 
 export const notificationTestData = generateTestDataObject('notification');

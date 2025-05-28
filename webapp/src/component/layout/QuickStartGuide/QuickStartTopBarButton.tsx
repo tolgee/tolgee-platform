@@ -22,8 +22,8 @@ export const QuickStartTopBarButton = () => {
   const guideFloatingOpen = useGlobalContext(
     (c) => c.quickStartGuide.floatingOpen
   );
-  const rightPanelShouldFloat = useGlobalContext(
-    (c) => c.layout.rightPanelShouldFloat
+  const quickStartFloating = useGlobalContext(
+    (c) => c.layout.quickStartFloating
   );
   const completedSteps = useGlobalContext(
     (c) => c.quickStartGuide.completed.length
@@ -32,7 +32,7 @@ export const QuickStartTopBarButton = () => {
   const { setQuickStartOpen, setQuickStartFloatingOpen } = useGlobalActions();
 
   const handleClick = () => {
-    rightPanelShouldFloat
+    quickStartFloating
       ? setQuickStartFloatingOpen(!guideFloatingOpen)
       : setQuickStartOpen(!guideOpen);
   };

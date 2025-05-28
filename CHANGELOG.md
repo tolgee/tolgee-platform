@@ -1,3 +1,10 @@
+## [3.119.1](https://github.com/tolgee/tolgee-platform/compare/v3.119.0...v3.119.1) (2025-05-20)
+
+
+### Bug Fixes
+
+* enable session recording in PostHog initialization ([#3080](https://github.com/tolgee/tolgee-platform/issues/3080)) ([ac65138](https://github.com/tolgee/tolgee-platform/commit/ac651388b1f51578bd37c6355b8876abd2861315))
+
 # [3.119.0](https://github.com/tolgee/tolgee-platform/compare/v3.118.1...v3.119.0) (2025-05-12)
 
 

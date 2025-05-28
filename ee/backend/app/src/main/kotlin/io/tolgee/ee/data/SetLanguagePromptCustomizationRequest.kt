@@ -1,7 +1,6 @@
 package io.tolgee.ee.data
 
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.validation.constraints.Size
 
 class SetLanguagePromptCustomizationRequest(
   @Schema(
@@ -13,6 +12,5 @@ class SetLanguagePromptCustomizationRequest(
         "Paper -> ورقة\n" +
         "Office -> مكتب\n",
   )
-  @field:Size(max = 2000)
   var description: String? = null,
 )
