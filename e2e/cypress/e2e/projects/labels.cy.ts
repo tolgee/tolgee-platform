@@ -138,7 +138,7 @@ describe('Projects Settings - Labels', () => {
               .eq(3)
               .click()
               .then(($colorPad) => {
-                const color = $colorPad.css('background');
+                const color: string = $colorPad.css('background-color');
                 cy.wrap(color).as('selectedColor');
               });
           });
@@ -146,7 +146,7 @@ describe('Projects Settings - Labels', () => {
     cy.get('@selectedColor').then((color) => {
       cy.get('input[name="color"]').should(
         'have.value',
-        rgbToHex(color as string)
+        rgbToHex(color as unknown as string)
       );
       gcy('global-form-save-button').click();
       gcy('project-settings-label-item')
@@ -154,7 +154,7 @@ describe('Projects Settings - Labels', () => {
         .within(() => {
           gcy('project-settings-label-item-color')
             .should('have.css', 'color', color)
-            .contains(rgbToHex(color as string));
+            .contains(rgbToHex(color as unknown as string));
         });
     });
   });
