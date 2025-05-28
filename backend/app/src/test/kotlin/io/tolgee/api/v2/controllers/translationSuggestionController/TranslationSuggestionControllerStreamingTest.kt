@@ -48,7 +48,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
     llmProperties.enabled = true
     llmProperties.providers = mutableListOf(
       LlmProperties.LlmProvider(
-        "default",
+        name = "default",
         type = LlmProviderType.OPENAI,
         apiUrl = "https://test.com",
       )
