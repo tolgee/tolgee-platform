@@ -45,8 +45,8 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
       format: {
         hint: t('llm_provider_form_openai_format_hint'),
         optional: true,
-        enum: [undefined, 'json_object', 'json_schema'],
-        defaultValue: 'json_object',
+        enum: [undefined, 'json_schema'],
+        defaultValue: 'json_schema',
       },
     },
     OPENAI_AZURE: {
@@ -57,7 +57,8 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
       format: {
         hint: t('llm_provider_form_openai_format_hint'),
         optional: true,
-        enum: [undefined, 'json_object'],
+        enum: [undefined, 'json_schema'],
+        defaultValue: 'json_schema',
       },
     },
   };

@@ -44,7 +44,6 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
         response_format =
           if (params.shouldOutputJson) {
             when (config.format) {
-              "json_object" -> RequestResponseFormat(type = "json_object", json_schema = null)
               "json_schema" -> RequestResponseFormat()
               else -> null
             }
@@ -60,7 +59,7 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
       if (config.type === LlmProviderType.OPENAI) {
         "${config.apiUrl}/v1/chat/completions"
       } else {
-        "${config.apiUrl}/openai/deployments/${config.deployment}/chat/completions?api-version=2024-12-01-preview"
+        "${config.apiUrl}/openai/deployments/${config.deployment}/chat/completions?api-version=2025-01-01-preview"
       }
 
     val response: ResponseEntity<ResponseBody> =
