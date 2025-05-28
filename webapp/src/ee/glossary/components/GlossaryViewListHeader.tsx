@@ -44,7 +44,7 @@ export const GlossaryViewListHeader: React.VFC<Props> = ({
       style={{
         gridTemplateColumns:
           'minmax(300px, 1fr)' +
-          ' minmax(200px, 1fr)'.repeat(selectedLanguages?.length || 0),
+          ' minmax(200px, 1fr)'.repeat((selectedLanguages?.length || 1) - 1),
       }}
     >
       <StyledHeaderCell key={0}>
@@ -59,7 +59,7 @@ export const GlossaryViewListHeader: React.VFC<Props> = ({
           <T keyName="glossary_grid_term_text" />
         </Box>
       </StyledHeaderCell>
-      {selectedLanguages?.map((tag, i) => {
+      {selectedLanguages?.slice(1)?.map((tag, i) => {
         const languageData = languageInfo[tag];
         const language: CellLanguageModel = {
           base: false,

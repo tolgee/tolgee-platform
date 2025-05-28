@@ -6,6 +6,7 @@ import { GlossaryListTermCell } from 'tg.ee.module/glossary/components/GlossaryL
 import { SelectionService } from 'tg.service/useSelectionService';
 import { T } from '@tolgee/react';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
 
 type SimpleGlossaryTermWithTranslationsModel =
   components['schemas']['SimpleGlossaryTermWithTranslationsModel'];
@@ -25,7 +26,6 @@ const StyledRow = styled('div')`
 
 type Props = {
   item: SimpleGlossaryTermWithTranslationsModel;
-  baseLanguage: string | undefined;
   editingTranslation: [number | undefined, string | undefined];
   onEditTranslation: (termId?: number, languageTag?: string) => void;
   selectedLanguages: string[] | undefined;
@@ -34,13 +34,13 @@ type Props = {
 
 export const GlossaryViewListRow: React.VFC<Props> = ({
   item,
-  baseLanguage,
   editingTranslation,
   onEditTranslation,
   selectedLanguages,
   selectionService,
 }) => {
   const { preferredOrganization } = usePreferredOrganization();
+  const glossary = useGlossary();
 
   const editEnabled = ['OWNER', 'MAINTAINER'].includes(
     preferredOrganization?.currentUserRole || ''
@@ -53,11 +53,12 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
       <GlossaryListTermCell
         item={item}
         editEnabled={editEnabled}
-        baseLanguage={baseLanguage}
         selectionService={selectionService}
       />
-      {selectedLanguages?.map((tag, i) => {
-        const realTag = item.flagNonTranslatable ? baseLanguage : tag;
+      {selectedLanguages?.slice(1)?.map((tag, i) => {
+        const realTag = item.flagNonTranslatable
+          ? glossary.baseLanguageTag
+          : tag;
         const translation = item.translations?.find(
           (t) => t.languageTag === realTag
         );

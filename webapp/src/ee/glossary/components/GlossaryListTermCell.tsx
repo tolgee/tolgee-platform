@@ -8,6 +8,7 @@ import Box from '@mui/material/Box';
 import { GlossaryTermEditDialog } from 'tg.ee.module/glossary/views/GlossaryTermEditDialog';
 import { GlossaryTermTags } from 'tg.ee.module/glossary/components/GlossaryTermTags';
 import { SelectionService } from 'tg.service/useSelectionService';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
 
 type SimpleGlossaryTermWithTranslationsModel =
   components['schemas']['SimpleGlossaryTermWithTranslationsModel'];
@@ -51,20 +52,19 @@ const StyledTags = styled(Box)`
 type Props = {
   item: SimpleGlossaryTermWithTranslationsModel;
   editEnabled: boolean;
-  baseLanguage: string | undefined;
   selectionService: SelectionService<number>;
 };
 
 export const GlossaryListTermCell: React.VFC<Props> = ({
   item,
   editEnabled,
-  baseLanguage,
   selectionService,
 }) => {
+  const glossary = useGlossary();
   const [isEditingTerm, setIsEditingTerm] = React.useState(false);
 
   const baseTranslation = item.translations?.find(
-    (t) => t.languageTag === baseLanguage
+    (t) => t.languageTag === glossary.baseLanguageTag
   );
 
   return (
