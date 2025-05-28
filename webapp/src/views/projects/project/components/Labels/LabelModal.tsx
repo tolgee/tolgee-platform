@@ -20,11 +20,9 @@ export const LabelModal: FC<{
   return (
     <Dialog open={true} onClose={close}>
       <DialogTitle>
-        {t(
-          props.label
-            ? 'project_settings_label_edit'
-            : 'project_settings_label_add'
-        )}
+        {props.label
+          ? t('project_settings_label_edit')
+          : t('project_settings_label_add')}
       </DialogTitle>
       <DialogContent
         sx={{ width: 500, maxWidth: '100%' }}
