@@ -28,6 +28,7 @@ import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.util.updateStringsInJson
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
@@ -204,13 +205,21 @@ class PromptServiceEeImpl(
         throw BadRequestException(Message.LLM_RATE_LIMITED, listOf(e.message), e)
       }
 
-    result.parsedJson =
-      try {
-        jacksonObjectMapper().readValue<JsonNode>(result.response)
-      } catch (e: JsonProcessingException) {
-        null
-      }
+    result.parsedJson = parseJsonSafely(result.response)
     return result
+  }
+
+  fun parseJsonSafely(content: String): JsonNode? {
+    return try {
+      val result = jacksonObjectMapper().readValue<JsonNode>(content)
+      updateStringsInJson(result) {
+          // gpt-4.1 sometimes includes NIL,
+          // which is invalid utf-8 character breaking DB saving
+          it.replace("\u0000", "")
+      }
+    } catch (_: JsonProcessingException) {
+      null
+    }
   }
 
   fun runPromptAndChargeCredits(

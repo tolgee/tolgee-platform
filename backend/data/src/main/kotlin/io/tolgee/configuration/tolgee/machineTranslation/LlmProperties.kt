@@ -30,7 +30,9 @@ class LlmProperties {
     override var format: String? = null,
     @DocProperty("Load-balancing instruction HIGH = used for suggestions, LOW = used for batch operations")
     override var priority: LlmProviderPriority? = null,
-    @DocProperty("Specify attempts timeout(s) (Example: [30, 30] - Tolgee will make two attempts, each with timeout of 30s)")
+    @DocProperty(
+      "Specify attempts timeout(s) (Example: [30, 30] - Tolgee will make two attempts, each with timeout of 30s)"
+    )
     override var attempts: List<Int>? = null,
     @DocProperty(hidden = true)
     override var tokenPriceInCreditsInput: Double? = null,
