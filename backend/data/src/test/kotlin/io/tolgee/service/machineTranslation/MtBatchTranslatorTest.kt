@@ -199,6 +199,12 @@ class MtBatchTranslatorTest {
       .thenReturn(projectServiceMock)
     val projectDtoMock = mock(ProjectDto::class.java)
     whenever(projectServiceMock.getDto(any())).thenReturn(projectDtoMock)
+
+    val mtGlossaryTermsProviderMock = mock<MtGlossaryTermsProvider>()
+    whenever(applicationContextMock.getBean(MtGlossaryTermsProvider::class.java))
+      .thenReturn(mtGlossaryTermsProviderMock)
+    whenever(mtGlossaryTermsProviderMock.getGlossaryTerms(any(), any(), any(), any()))
+      .thenReturn(emptySet())
     return applicationContextMock
   }
 

@@ -5,7 +5,7 @@ import clsx from 'clsx';
 
 import { ScreenshotDetail } from './ScreenshotDetail';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
-import { useScrollStatus } from '../TranslationsTable/useScrollStatus';
+import { useScrollStatus } from 'tg.component/common/useScrollStatus';
 import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
 import { ScreenshotsList } from './ScreenshotsList';
 import { useTranslationsActions } from '../context/TranslationsContext';

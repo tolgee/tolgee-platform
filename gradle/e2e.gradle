@@ -87,6 +87,7 @@ task runE2e(type: Exec, group: "e2e") {
     dependsOn "runDockerE2e", "installE2eDeps"
     def specs = getE2eTestsToRun().join(",")
 
+    environment     "CYPRESS_HOST", "http://localhost:8201"
     commandLine npmCommandName, "run", "cy:run", "--", "--spec", specs
 
     workingDir E2E_DIR
