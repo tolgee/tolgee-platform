@@ -12659,6 +12659,8 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter key translations with labels */
+        filterLabel?: string[];
       };
       path: {
         projectId: number;
@@ -13367,6 +13369,7 @@ export interface operations {
   getAll_3: {
     parameters: {
       query: {
+        search?: string;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -16450,6 +16453,8 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter key translations with labels */
+        filterLabel?: string[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -16733,6 +16738,8 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter key translations with labels */
+        filterLabel?: string[];
       };
       path: {
         projectId: number;

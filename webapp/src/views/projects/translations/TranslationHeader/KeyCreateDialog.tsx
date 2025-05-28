@@ -42,6 +42,7 @@ export const KeyCreateDialog: React.FC<Props> = ({
         commentCount: 0,
         unresolvedCommentCount: 0,
         fromTranslationMemory: false,
+        labels: [],
       };
     });
 

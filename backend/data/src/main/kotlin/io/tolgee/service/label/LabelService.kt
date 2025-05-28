@@ -20,8 +20,8 @@ class LabelService(
   private val entityManager: EntityManager,
   private val translationRepository: TranslationRepository,
   ) {
-  fun getProjectLabels(projectId: Long, pageable: Pageable): Page<Label> {
-    return labelRepository.findByProjectId(projectId, pageable)
+  fun getProjectLabels(projectId: Long, pageable: Pageable, search: String? = null): Page<Label> {
+    return labelRepository.findByProjectId(projectId, pageable, search)
   }
 
   fun find(labelId: Long): Optional<Label> {

@@ -13,6 +13,7 @@ import {
 import { SubfilterTranslations } from './SubfilterTranslations';
 import { SubfilterScreenshots } from './SubfilterScreenshots';
 import { SubfilterComments } from './SubfilterComments';
+import { SubfilterLabels } from 'tg.views/projects/translations/TranslationFilters/SubfilterLabels';
 
 type Props = {
   value: FiltersType;
@@ -75,6 +76,12 @@ export const TranslationFiltersPopup = ({
               value={value}
               actions={actions}
               projectId={projectId}
+            />
+            <SubfilterLabels
+              value={value}
+              actions={actions}
+              projectId={projectId}
+              selectedLanguages={selectedLanguages}
             />
           </>
         )}
