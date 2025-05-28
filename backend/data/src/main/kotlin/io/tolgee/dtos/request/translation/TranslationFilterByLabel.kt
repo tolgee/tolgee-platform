@@ -2,19 +2,18 @@ package io.tolgee.dtos.request.translation
 
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.model.enums.TranslationState
 
-data class TranslationFilterByState(
+data class TranslationFilterByLabel(
   val languageTag: String,
-  val state: TranslationState,
+  val labelId: Long,
 ) {
   companion object {
-    fun parseList(strings: List<String>): List<TranslationFilterByState> {
+    fun parseList(strings: List<String>): List<TranslationFilterByLabel> {
       return BaseFilterByKeyValue.parseList(
         strings,
-        { TranslationState.valueOf(it) },
+        { it.toLong() },
         { BadRequestException(Message.FILTER_BY_VALUE_STATE_NOT_VALID) }
-      ).map { TranslationFilterByState(it.first, it.second) }
+      ).map { TranslationFilterByLabel(it.first, it.second) }
     }
   }
 }
