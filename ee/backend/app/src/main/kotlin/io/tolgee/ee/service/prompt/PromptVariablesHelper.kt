@@ -142,7 +142,7 @@ class PromptVariablesHelper(
     val pluralFormsWithReplacedParam =
       if (key != null && key.isPlural && sTranslation != null && tLanguage?.tag != null) {
         context.getPluralFormsReplacingReplaceParam(
-          escapeAsJson(sTranslation.text) ?: "",
+          sTranslation.text ?: "",
         )
       } else {
         null
@@ -270,7 +270,7 @@ class PromptVariablesHelper(
 
     val target = Variable("target")
     target.props.addAll(getStandardLanguageVars(tLanguage, tTranslation))
-    target.props.addAll(getPluralVariables(projectId, tLanguage, tTranslation, key))
+    target.props.addAll(getPluralVariables(projectId, tLanguage, sTranslation, key))
     variables.add(target)
 
     val otherVar = Variable("other")
