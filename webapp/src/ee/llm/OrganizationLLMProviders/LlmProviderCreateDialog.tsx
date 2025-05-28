@@ -1,11 +1,8 @@
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
-  Link,
   styled,
 } from '@mui/material';
 import { Formik } from 'formik';
@@ -21,7 +18,6 @@ import {
   LlmProviderType,
 } from 'tg.ee.module/llm/OrganizationLLMProviders/LlmProviderEdit/llmProvidersConfig';
 import { useState } from 'react';
-import { DOCS_LINKS, DOCS_ROOT } from 'tg.constants/docLinks';
 import { LlmDialogTitleWithLink } from './LlmDialogTitleWithLink';
 
 const StyledDialogContent = styled(DialogContent)`
