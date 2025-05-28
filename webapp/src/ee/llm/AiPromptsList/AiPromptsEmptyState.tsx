@@ -28,7 +28,12 @@ export const AiPromptsEmptyState = () => {
           <T
             keyName="ai_prompts_empty_description"
             params={{
-              link: <MuiLink href={DOCS_ROOT} target="_blank" />,
+              link: (
+                <MuiLink
+                  href={`${DOCS_ROOT}/platform/projects_and_organizations/ai-settings`}
+                  target="_blank"
+                />
+              ),
             }}
           />
         </Typography>

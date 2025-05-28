@@ -41,7 +41,10 @@ export const TabAdvanced = ({
     <Box sx={{ margin: '20px 20px' }}>
       <Label
         rightContent={
-          <Link href={DOCS_ROOT} target="_blank">
+          <Link
+            href={`${DOCS_ROOT}/platform/translation_process/ai-playground`}
+            target="_blank"
+          >
             {t('ai_prompt_learn_more')}
           </Link>
         }

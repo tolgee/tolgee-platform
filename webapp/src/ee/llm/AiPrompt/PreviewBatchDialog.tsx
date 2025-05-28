@@ -108,7 +108,12 @@ export const PreviewBatchDialog = ({
               params={{
                 highlight: (value) => <Chip label={value} size="small" />,
                 tagName: AI_PLAYGROUND_TAG,
-                link: <Link href={DOCS_ROOT} target="_blank" />,
+                link: (
+                  <Link
+                    href={`${DOCS_ROOT}/platform/translation_process/ai-playground#preview-on-selected-dataset`}
+                    target="_blank"
+                  />
+                ),
               }}
             />
           </Alert>
