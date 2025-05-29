@@ -2,6 +2,7 @@ package io.tolgee.component.machineTranslation.providers.tolgee
 
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
+import io.tolgee.exceptions.NotImplementedInOss
 import org.springframework.stereotype.Component
 
 @Component
@@ -13,7 +14,7 @@ class TolgeeTranslationProviderOssImpl : TolgeeTranslationProvider {
   override val formalitySupportingLanguages: Array<String> = emptyArray()
 
   override fun translateViaProvider(params: ProviderTranslateParams): MtValueProvider.MtResult {
-    throw IllegalStateException("Not implemented")
+    throw NotImplementedInOss()
   }
 
   override fun isLanguageSupported(tag: String): Boolean {
@@ -25,6 +26,6 @@ class TolgeeTranslationProviderOssImpl : TolgeeTranslationProvider {
   }
 
   override fun translate(params: ProviderTranslateParams): MtValueProvider.MtResult {
-    throw IllegalStateException("Not implemented")
+    throw NotImplementedInOss()
   }
 }

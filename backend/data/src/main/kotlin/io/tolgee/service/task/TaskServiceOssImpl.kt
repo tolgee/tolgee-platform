@@ -1,6 +1,6 @@
 package io.tolgee.service.task
 
-import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotImplementedInOss
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 class TaskServiceOssImpl : ITaskService {
   override fun deleteAll(tasks: List<Task>) {
-    throw BadRequestException("Not implemented")
+    throw NotImplementedInOss()
   }
 
   override fun findAssigneeById(
@@ -38,6 +38,6 @@ class TaskServiceOssImpl : ITaskService {
   }
 
   override fun getAgencyTasks(agencyId: Long): List<Task> {
-    throw BadRequestException("Not implemented")
+    throw NotImplementedInOss()
   }
 }

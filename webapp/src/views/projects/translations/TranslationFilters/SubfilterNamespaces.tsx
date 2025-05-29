@@ -94,7 +94,7 @@ export const SubfilterNamespaces = ({ value, actions, projectId }: Props) => {
   };
 
   const handleFetchMore = () => {
-    if (dataLoadable.hasNextPage && dataLoadable.isFetching) {
+    if (dataLoadable.hasNextPage && !dataLoadable.isFetching) {
       dataLoadable.fetchNextPage();
     }
   };
