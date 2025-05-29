@@ -72,9 +72,10 @@ export const AiResult = ({ raw, json, isPlural, locale, loading }: Props) => {
         {t('ai_prompt_result_label')}
       </Label>
       {loading ? (
-        <StyledDescription>
-          <Skeleton variant="text" />
-        </StyledDescription>
+        <>
+          <Skeleton variant="text" sx={{ fontSize: 36 }} />
+          <Skeleton variant="text" sx={{ width: '75%' }} />
+        </>
       ) : !raw && !json ? (
         <StyledDescription sx={{ fontStyle: 'italic' }}>
           {t('ai_playground_result_empty')}

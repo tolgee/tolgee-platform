@@ -250,7 +250,7 @@ export const AiPrompt: React.FC<Props> = ({
               locale={language?.tag}
               loading={runIsLoading}
             />
-            <AiResultUsage usage={usage} price={runData?.price} />
+            {usage && <AiResultUsage usage={usage} price={runData?.price} />}
           </Box>
         )}
         {featureEnabled && (
