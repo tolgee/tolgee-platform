@@ -46,7 +46,7 @@ class LlmProperties {
         type = type,
         priority = priority,
         apiKey = apiKey,
-        apiUrl = apiUrl,
+        rawApiUrl = apiUrl,
         model = model,
         deployment = deployment,
         format = format,
