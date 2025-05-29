@@ -110,7 +110,7 @@ export const PreviewBatchDialog = ({
                 tagName: AI_PLAYGROUND_TAG,
                 link: (
                   <Link
-                    href={`${DOCS_ROOT}/platform/translation_process/ai-playground#preview-on-selected-dataset`}
+                    href={`${DOCS_ROOT}/platform/translation_process/ai-playground#preview-of-selected-dataset`}
                     target="_blank"
                   />
                 ),
