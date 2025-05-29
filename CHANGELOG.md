@@ -1,3 +1,10 @@
+## [3.119.2](https://github.com/tolgee/tolgee-platform/compare/v3.119.1...v3.119.2) (2025-05-29)
+
+
+### Bug Fixes
+
+* fetch all namespaces in filters ([#3078](https://github.com/tolgee/tolgee-platform/issues/3078)) ([450d4a5](https://github.com/tolgee/tolgee-platform/commit/450d4a5e7cbbac12484edf738eaa5dfa7ce1dbba))
+
 ## [3.119.1](https://github.com/tolgee/tolgee-platform/compare/v3.119.0...v3.119.1) (2025-05-20)
 
 
