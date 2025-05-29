@@ -28,11 +28,8 @@ class MetadataProvider(
       where source.language.id = :sourceLanguageId 
           and key.id in :closeKeyIds 
           and key.id <> :excludeKeyId 
-          and (
-            (source.text is not null and source.text <> '')
-            or
-            (target.text is not null and target.text <> '')
-          )
+          and source.text is not null 
+          and source.text <> ''
     """,
       ExampleItem::class.java,
     )
