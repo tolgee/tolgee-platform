@@ -24,6 +24,13 @@ class LabelService(
     return labelRepository.findByProjectId(projectId, pageable, search)
   }
 
+  fun getProjectLabelsByIds(
+    projectId: Long,
+    ids: List<Long>,
+  ): List<Label> {
+    return labelRepository.findAllByProjectIdAndIdIn(projectId, ids)
+  }
+
   fun find(labelId: Long): Optional<Label> {
     return labelRepository.findById(labelId)
   }

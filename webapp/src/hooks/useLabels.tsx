@@ -1,0 +1,127 @@
+import { useEffect, useState } from 'react';
+import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useDebounce } from 'use-debounce';
+import { components } from 'tg.service/apiSchema.generated';
+
+type LabelModel = components['schemas']['LabelModel'];
+
+export const useLabels = (projectId: number) => {
+  const [search, setSearch] = useState('');
+  const [totalItems, setTotalItems] = useState<number | undefined>(undefined);
+  const [searchDebounced] = useDebounce(search, 500);
+  const [labels, setLabels] = useState<LabelModel[]>([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [enabledList, setEnabledList] = useState<boolean>(false);
+  const [enabledSelected, setEnabledSelected] = useState<boolean>(false);
+
+  const query = {
+    search: searchDebounced,
+    size: 20,
+  };
+
+  const loadableList = useApiInfiniteQuery({
+    url: '/v2/projects/{projectId}/labels',
+    method: 'get',
+    path: {
+      projectId,
+    },
+    query,
+    options: {
+      enabled: enabledList,
+      keepPreviousData: true,
+      refetchOnMount: true,
+      noGlobalLoading: true,
+      onSuccess(data) {
+        if (
+          totalItems === undefined &&
+          data.pages[0]?.page?.totalElements !== undefined
+        ) {
+          setTotalItems(data.pages[0].page.totalElements);
+        }
+      },
+      getNextPageParam: (lastPage) => {
+        if (
+          lastPage.page &&
+          lastPage.page.number! < lastPage.page.totalPages! - 1
+        ) {
+          return {
+            path: {
+              projectId,
+            },
+            query: {
+              ...query,
+              page: lastPage.page!.number! + 1,
+            },
+          };
+        } else {
+          return null;
+        }
+      },
+    },
+  });
+
+  const loadableSelected = useApiQuery({
+    url: '/v2/projects/{projectId}/labels/ids',
+    method: 'get',
+    path: {
+      projectId,
+    },
+    query: {
+      id: selectedIds,
+    },
+    options: {
+      enabled: enabledSelected,
+    },
+  });
+
+  function fetchList() {
+    setEnabledList(true);
+  }
+
+  function fetchSelected(ids: number[]) {
+    // get list of ids which are missing in labels
+    const missingIds = ids.filter((id) => !labels.find((l) => l.id === id));
+    if (missingIds.length === 0) {
+      setEnabledSelected(false);
+      return;
+    }
+    setSelectedIds(ids);
+    setEnabledSelected(true);
+  }
+
+  // Merge selected labels into the all labels list, avoiding duplicates
+  useEffect(() => {
+    const allLabels: LabelModel[] = [];
+    // Gather all paginated labels
+    if (loadableList.data?.pages) {
+      loadableList.data.pages.forEach((page) => {
+        if (page._embedded?.labels) {
+          allLabels.push(...page._embedded.labels);
+        }
+      });
+    }
+
+    // Add selected labels if not already present
+    if (loadableSelected.data) {
+      loadableSelected.data.forEach((selected) => {
+        if (!allLabels.find((l) => l.id === selected.id)) {
+          allLabels.push(selected);
+        }
+      });
+    }
+    setLabels(allLabels);
+  }, [loadableList.data, loadableSelected.data]);
+
+  return {
+    labels,
+    loadableList,
+    loadableSelected,
+    setSearch,
+    totalItems,
+    search,
+    searchDebounced,
+    setSelectedIds,
+    fetchList,
+    fetchSelected,
+  };
+};

@@ -39,6 +39,35 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `get labels with search`() {
+    performProjectAuthGet("labels?search=First").andAssertThatJson {
+      node("_embedded.labels") {
+        isArray.hasSize(1)
+        node("[0].id").isValidId
+        node("[0].name").isString.isEqualTo("First label")
+      }
+      node("page.totalElements").isNumber.isEqualTo(1.toBigDecimal())
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `get labels by ids`() {
+    performProjectAuthGet("labels/ids?id=${testData.firstLabel.id}&id=${testData.unassignedLabel.id}").andAssertThatJson {
+      isArray.hasSize(2)
+      node("[0].id").isValidId
+      node("[0].name").isString.isEqualTo("First label")
+      node("[0].color").isString.isEqualTo("#FF0000")
+      node("[0].description").isString.isEqualTo("This is a description")
+      node("[1].id").isValidId
+      node("[1].name").isString.isEqualTo("Unassigned label")
+      node("[1].color").isString.isEqualTo("#00FF00")
+      node("[1].description").isString.isEqualTo("This is a description for unassigned label")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `creates label`() {
     val requestBody = mapOf<String, Any>(
       "name" to "New label",
