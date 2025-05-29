@@ -137,7 +137,14 @@ export const MachineTranslationItem = ({
           <TranslatedError code={error} params={errorParams} />
         </StyledError>
       ) : !data && isFetching ? (
-        <LoadingSkeletonFadingIn variant="text" />
+        <StyledValue>
+          <LoadingSkeletonFadingIn variant="text" />
+          {provider === 'PROMPT' && (
+            <StyledDescription>
+              <LoadingSkeletonFadingIn variant="text" sx={{ width: '50%' }} />
+            </StyledDescription>
+          )}
+        </StyledValue>
       ) : null}
     </StyledItem>
   );
