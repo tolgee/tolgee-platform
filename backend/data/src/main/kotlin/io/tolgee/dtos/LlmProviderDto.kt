@@ -26,5 +26,7 @@ data class LlmProviderDto(
 
   override var apiUrl: String?
     get() = rawApiUrl?.removeSuffix("/")
-    set(value) { rawApiUrl = value }
+    set(value) {
+      rawApiUrl = value
+    }
 }
