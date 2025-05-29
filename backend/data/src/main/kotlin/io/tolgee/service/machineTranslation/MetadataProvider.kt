@@ -24,14 +24,15 @@ class MetadataProvider(
       from Translation source
       join source.key key on key.id <> :excludeKeyId
       left join key.namespace ns
-      join key.translations target on target.language.id = :targetLanguageId
+      left join key.translations target on target.language.id = :targetLanguageId
       where source.language.id = :sourceLanguageId 
           and key.id in :closeKeyIds 
           and key.id <> :excludeKeyId 
-          and source.text is not null 
-          and source.text <> '' 
-          and target.text is not null 
-          and target.text <> ''
+          and (
+            (source.text is not null and source.text <> '')
+            or
+            (target.text is not null and target.text <> '')
+          )
     """,
       ExampleItem::class.java,
     )
