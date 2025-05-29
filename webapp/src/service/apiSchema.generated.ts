@@ -533,6 +533,9 @@ export interface paths {
     get: operations["getAll_3"];
     post: operations["createLabel"];
   };
+  "/v2/projects/{projectId}/labels/ids": {
+    get: operations["getLabelsByIds"];
+  };
   "/v2/projects/{projectId}/labels/{labelId}": {
     put: operations["updateLabel"];
     delete: operations["deleteLabel"];
@@ -13471,6 +13474,56 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["LabelRequest"];
+      };
+    };
+  };
+  getLabelsByIds: {
+    parameters: {
+      query: {
+        id: number[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LabelModel"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };

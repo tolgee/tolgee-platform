@@ -5,8 +5,9 @@ const StyledLabel = styled('div')<{ color: string }>`
   background-color: ${({ color }) => color || 'transparent'};
   border-radius: 8px;
   color: ${({ color }) => getShadeFromLabelColor(color)};
-  padding: 2px 7px;
-  font-size: 12px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
 `;
 
 function adjustColorBrightness(hex: string, amount: number): string {

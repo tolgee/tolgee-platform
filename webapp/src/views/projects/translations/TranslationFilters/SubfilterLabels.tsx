@@ -1,11 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { Box, Menu, MenuItem } from '@mui/material';
-import { useDebounce } from 'use-debounce';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { SubmenuItem } from 'tg.component/SubmenuItem';
-import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { InfiniteSearchSelectContent } from 'tg.component/searchSelect/InfiniteSearchSelectContent';
 
 import { FiltersInternal, FilterActions, LanguageModel } from './tools';
@@ -14,6 +12,7 @@ import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { TranslationLabel } from 'tg.component/TranslationLabel';
 import { CompactListSubheader } from 'tg.component/ListComponents';
 import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
+import { useLabels } from 'tg.hooks/useLabels';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -30,10 +29,15 @@ export const SubfilterLabels = ({
   projectId,
   selectedLanguages,
 }: Props) => {
-  const [search, setSearch] = useState('');
-  const [totalItems, setTotalItems] = useState<number | undefined>(undefined);
-  const [searchDebounced] = useDebounce(search, 500);
-
+  const {
+    labels,
+    totalItems,
+    setSearch,
+    searchDebounced,
+    search,
+    loadableList,
+    fetchList,
+  } = useLabels(projectId);
   const [expanded, setExpanded] = useState(
     value.filterTranslationLanguage !== undefined
   );
@@ -48,57 +52,9 @@ export const SubfilterLabels = ({
     });
   }
 
-  const query = {
-    search: searchDebounced,
-    size: 30,
-  };
-  const dataLoadable = useApiInfiniteQuery({
-    url: '/v2/projects/{projectId}/labels',
-    method: 'get',
-    path: {
-      projectId,
-    },
-    query,
-    options: {
-      keepPreviousData: true,
-      refetchOnMount: true,
-      noGlobalLoading: true,
-      onSuccess(data) {
-        if (
-          totalItems === undefined &&
-          data.pages[0]?.page?.totalElements !== undefined
-        ) {
-          setTotalItems(data.pages[0].page.totalElements);
-        }
-      },
-      getNextPageParam: (lastPage) => {
-        if (
-          lastPage.page &&
-          lastPage.page.number! < lastPage.page.totalPages! - 1
-        ) {
-          return {
-            path: {
-              projectId,
-            },
-            query: {
-              ...query,
-              page: lastPage.page!.number! + 1,
-            },
-          };
-        } else {
-          return null;
-        }
-      },
-    },
-  });
-
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
   const anchorEl = useRef<HTMLElement>(null);
-
-  const data = dataLoadable.data?.pages.flatMap(
-    (p) => p._embedded?.labels ?? []
-  );
 
   const handleToggleLabel = (id: string) => {
     if (value.filterLabel?.includes(id)) {
@@ -108,9 +64,13 @@ export const SubfilterLabels = ({
     }
   };
 
+  useEffect(() => {
+    fetchList();
+  });
+
   const handleFetchMore = async () => {
-    if (dataLoadable.hasNextPage && !dataLoadable.isFetching) {
-      await dataLoadable.fetchNextPage();
+    if (loadableList.hasNextPage && !loadableList.isFetching) {
+      await loadableList.fetchNextPage();
     }
   };
 
@@ -152,7 +112,7 @@ export const SubfilterLabels = ({
         >
           <SmoothProgress
             loading={Boolean(
-              dataLoadable.isFetching &&
+              loadableList.isFetching &&
                 (searchDebounced || totalItems === undefined)
             )}
             sx={{ position: 'absolute', top: 0, left: 0, right: 0 }}
@@ -161,7 +121,7 @@ export const SubfilterLabels = ({
             <Box display="grid">
               <InfiniteSearchSelectContent
                 open={true}
-                items={data}
+                items={labels}
                 maxWidth={400}
                 onSearch={setSearch}
                 search={search}
@@ -234,11 +194,15 @@ export function getLabelFiltersLength(value: FiltersInternal) {
   return value.filterLabel?.length ?? 0;
 }
 
-export function getLabelFiltersName(value: FiltersInternal) {
+export function getLabelFiltersName(
+  value: FiltersInternal,
+  labels: LabelModel[] | undefined
+) {
   if (value.filterLabel?.length) {
     const labelId = value.filterLabel[0];
-    return labelId ? (
-      <TranslationLabel color={'FF0000'}>{labelId}</TranslationLabel>
+    const label = labels?.find((l) => l.id.toString() === labelId);
+    return label ? (
+      <TranslationLabel color={label.color}>{label.name}</TranslationLabel>
     ) : (
       <T keyName="translations_filters_labels_without_labels" />
     );

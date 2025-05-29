@@ -51,6 +51,18 @@ class LabelsController(
     return pagedResourcesAssembler.toModel(data, labelModelAssembler)
   }
 
+  @GetMapping(value = ["labels/ids"])
+  @Operation(summary = "Get labels by ids")
+  @UseDefaultPermissions
+  @AllowApiAccess
+  fun getLabelsByIds(
+    @RequestParam("id")
+    ids: List<Long>,
+  ): List<LabelModel> {
+    val labels = labelService.getProjectLabelsByIds(projectHolder.project.id, ids)
+    return labels.map { it.model }
+  }
+
   @PostMapping(value = ["labels"])
   @Operation(summary = "Create label")
   @UseDefaultPermissions
