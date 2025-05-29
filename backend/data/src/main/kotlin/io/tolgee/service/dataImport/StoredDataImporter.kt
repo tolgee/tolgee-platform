@@ -20,6 +20,7 @@ import io.tolgee.service.key.TagService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.flushAndClear
+import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 
@@ -32,6 +33,7 @@ class StoredDataImporter(
   // for single step import, we provide import data manager
   private val _importDataManager: ImportDataManager? = null,
   private val isSingleStepImport: Boolean = false,
+  private val namespaces: List<String>? = null,
 ) {
   private val importDataManager by lazy {
     if (_importDataManager != null) {
@@ -146,8 +148,12 @@ class StoredDataImporter(
 
   private fun deleteOtherKeys() {
     if ((importSettings as? SingleStepImportRequest)?.removeOtherKeys == true) {
-      val existingKeys = importDataManager.existingKeys.entries
-      val importedKeys = importDataManager.storedKeys.entries.map { (pair) -> Pair(pair.first.namespace, pair.second) }
+      val existingKeys = importDataManager.existingKeys.entries.filter {
+        namespaces == null || namespaces.contains(it.key.first.orEmpty())
+      }
+      val importedKeys = importDataManager.storedKeys.entries.filter {
+        namespaces == null || namespaces.contains(it.key.first.namespace.orEmpty())
+      }.map { (pair) -> Pair(pair.first.namespace, pair.second) }
       val otherKeys = existingKeys.filter { existing -> !importedKeys.contains(existing.key) }
       if (otherKeys.isNotEmpty()) {
         keyService.deleteMultiple(otherKeys.map { it.value.id })
@@ -249,6 +255,9 @@ class StoredDataImporter(
   private fun addAllKeys() {
     importDataManager.storedKeys.map { (fileNamePair, importKey) ->
       if (!importKey.shouldBeImported) {
+        return@map
+      }
+      if (namespaces != null && !namespaces.contains(fileNamePair.first.namespace.orEmpty())) {
         return@map
       }
       addKeyToSave(importKey.file.namespace, importKey.name)

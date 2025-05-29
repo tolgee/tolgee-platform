@@ -1,9 +1,15 @@
 {
   "$schema": "https://tolgee.io/cli-schema.json",
-  "projectId": 1,
+  "apiUrl": "http://localhost:8081",
+  "projectId": 3,
   "patterns": ["./src/**/*.ts?(x)"],
   "strictNamespace": false,
   "pull": {
     "path": "./src/i18n"
+  },
+  "push": {
+    "filesTemplate": ["./src/i18n/{languageTag}.json"],
+    "namespaces": [""],
+    "removeOtherKeys": true
   }
 }
