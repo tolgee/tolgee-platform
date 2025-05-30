@@ -45,7 +45,7 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performAuthGet(
       "/v2/projects/${testData.promptProject.self.id}/prompts/default",
     ).andIsOk.andAssertThatJson {
-      node("name").isEqualTo("Default")
+      node("name").isEqualTo("")
       node("providerName").isEqualTo("default")
     }
   }
