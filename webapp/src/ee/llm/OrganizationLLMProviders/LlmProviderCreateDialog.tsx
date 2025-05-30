@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   styled,
 } from '@mui/material';
 import { Formik } from 'formik';
@@ -19,6 +18,7 @@ import {
   LlmProviderType,
 } from 'tg.ee.module/llm/OrganizationLLMProviders/LlmProviderEdit/llmProvidersConfig';
 import { useState } from 'react';
+import { LlmDialogTitleWithLink } from './LlmDialogTitleWithLink';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
@@ -75,7 +75,7 @@ export const LlmProviderCreateDialog = ({ onClose }: Props) => {
         {({ submitForm }) => {
           return (
             <>
-              <DialogTitle>{t('llm_provider_create_title')}</DialogTitle>
+              <LlmDialogTitleWithLink title={t('llm_provider_create_title')} />
               <StyledDialogContent>
                 <LlmProviderForm type={type} onTypeChange={setType} />
               </StyledDialogContent>

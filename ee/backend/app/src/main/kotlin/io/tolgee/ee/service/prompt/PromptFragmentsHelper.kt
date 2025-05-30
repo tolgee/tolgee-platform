@@ -174,7 +174,7 @@ class PromptFragmentsHelper {
       Variable(
         "translateJson",
         """
-        Return translation output and also describe a context in a few words.
+        Return translation output and briefly describe the translation context (just a few words).
         Follow this json format:
         ```
         {

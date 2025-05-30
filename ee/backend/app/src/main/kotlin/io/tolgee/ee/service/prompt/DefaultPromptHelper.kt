@@ -10,7 +10,7 @@ class DefaultPromptHelper(
 ) {
   fun getDefaultPrompt(): PromptDto {
     return PromptDto(
-      name = "Default",
+      name = "",
       template =
         """
         {{fragment.intro}}

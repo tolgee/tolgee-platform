@@ -80,7 +80,7 @@ export const PromptLoadMenu = ({ onSelect, projectId }: Props) => {
                 onSelect(item);
               }}
             >
-              {item.name}
+              {item.id !== undefined ? item.name : t('ai_prompt_default_name')}
             </MenuItem>
           ))}
         </Menu>
