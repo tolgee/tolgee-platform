@@ -10,7 +10,9 @@ export type FilterData = {
 };
 
 export const useFilterData = (value: FiltersType, projectId: number) => {
-  const { labels, fetchSelected: fetchSelectedLabels } = useLabels(projectId);
+  const { labels, fetchSelected: fetchSelectedLabels } = useLabels({
+    projectId,
+  });
   const filterData: FilterData = {};
 
   useEffect(() => {

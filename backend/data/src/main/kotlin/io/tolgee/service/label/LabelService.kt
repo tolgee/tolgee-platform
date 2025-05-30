@@ -103,7 +103,7 @@ class LabelService(
   }
 
   @Transactional
-  fun assignLabel(projectId: Long, translationId: Long, labelId: Long) {
+  fun assignLabel(projectId: Long, translationId: Long, labelId: Long): Label {
     val label = getByProjectIdAndId(projectId, labelId)
     val translation = translationRepository.find(
       projectId,
@@ -111,6 +111,7 @@ class LabelService(
     ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
     translation.addLabel(label)
     labelRepository.save(label)
+    return label
   }
 
   @Transactional

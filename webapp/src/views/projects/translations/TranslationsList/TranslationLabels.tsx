@@ -1,6 +1,7 @@
 import { styled } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationLabel } from 'tg.component/TranslationLabel';
+import { LabelControl } from 'tg.views/projects/translations/TranslationsList/Label/LabelControl';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -15,9 +16,10 @@ const StyledLabels = styled('div')`
 type Props = {
   labels: LabelModel[] | undefined;
   className: string;
+  onSelect?: (labelId: number) => void;
 };
 
-export const TranslationLabels = ({ labels, className }: Props) => {
+export const TranslationLabels = ({ labels, className, onSelect }: Props) => {
   return (
     <StyledLabels className={className}>
       {labels &&
@@ -30,6 +32,7 @@ export const TranslationLabels = ({ labels, className }: Props) => {
             {label.name}
           </TranslationLabel>
         ))}
+      <LabelControl className="clickable" onSelect={onSelect} />
     </StyledLabels>
   );
 };

@@ -37,7 +37,7 @@ export const SubfilterLabels = ({
     search,
     loadableList,
     fetchList,
-  } = useLabels(projectId);
+  } = useLabels({ projectId });
   const [expanded, setExpanded] = useState(
     value.filterTranslationLanguage !== undefined
   );

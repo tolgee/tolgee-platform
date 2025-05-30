@@ -107,8 +107,8 @@ class LabelsController(
     translationId: Long,
     @PathVariable("labelId")
     labelId: Long
-  ) {
-    labelService.assignLabel(projectHolder.project.id, translationId, labelId)
+  ): LabelModel {
+    return labelService.assignLabel(projectHolder.project.id, translationId, labelId).model
   }
 
   @DeleteMapping(value = ["translations/{translationId:\\d+}/label/{labelId:\\d+}"])

@@ -1,11 +1,25 @@
 import { useEffect, useState } from 'react';
-import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
+import {
+  invalidateUrlPrefix,
+  useApiInfiniteQuery,
+  useApiQuery,
+} from 'tg.service/http/useQueryApi';
 import { useDebounce } from 'use-debounce';
 import { components } from 'tg.service/apiSchema.generated';
+import { useProject } from 'tg.hooks/useProject';
+import { usePutLabel } from 'tg.service/TranslationHooks';
+import { useQueryClient } from 'react-query';
+import { useTranslationsService } from 'tg.views/projects/translations/context/services/useTranslationsService';
+import { AddLabel } from 'tg.views/projects/translations/context/types';
 
 type LabelModel = components['schemas']['LabelModel'];
 
-export const useLabels = (projectId: number) => {
+type Props = {
+  projectId?: number;
+  translations?: ReturnType<typeof useTranslationsService>;
+};
+
+export const useLabels = ({ projectId, translations }: Props) => {
   const [search, setSearch] = useState('');
   const [totalItems, setTotalItems] = useState<number | undefined>(undefined);
   const [searchDebounced] = useDebounce(search, 500);
@@ -13,6 +27,10 @@ export const useLabels = (projectId: number) => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [enabledList, setEnabledList] = useState<boolean>(false);
   const [enabledSelected, setEnabledSelected] = useState<boolean>(false);
+  const putLabel = usePutLabel();
+  const queryClient = useQueryClient();
+
+  projectId = projectId || useProject().id;
 
   const query = {
     search: searchDebounced,
@@ -89,6 +107,30 @@ export const useLabels = (projectId: number) => {
     setEnabledSelected(true);
   }
 
+  const addLabel = (data: AddLabel) => {
+    putLabel
+      .mutateAsync({
+        path: {
+          projectId: projectId,
+          translationId: data.translationId,
+          labelId: data.labelId,
+        },
+      })
+      .then((response: LabelModel) => {
+        translations?.mergeTranslation({
+          keyId: data.keyId,
+          language: data.language,
+          value: {
+            labels: [response],
+          },
+        });
+        invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/labels');
+      })
+      .catch((e) => {
+        return new Promise(() => {});
+      });
+  };
+
   // Merge selected labels into the all labels list, avoiding duplicates
   useEffect(() => {
     const allLabels: LabelModel[] = [];
@@ -123,5 +165,6 @@ export const useLabels = (projectId: number) => {
     setSelectedIds,
     fetchList,
     fetchSelected,
+    addLabel,
   };
 };

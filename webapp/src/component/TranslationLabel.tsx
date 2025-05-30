@@ -1,10 +1,11 @@
 import { styled, Tooltip } from '@mui/material';
 import React from 'react';
 
-const StyledLabel = styled('div')<{ color: string }>`
+const StyledLabel = styled('div')<{ color?: string }>`
   background-color: ${({ color }) => color || 'transparent'};
   border-radius: 8px;
-  color: ${({ color }) => getShadeFromLabelColor(color)};
+  color: ${({ color, theme }) =>
+    color ? getShadeFromLabelColor(color) : theme.palette.tooltip.text};
   padding: 2px 6px;
   font-size: 11px;
   font-weight: 600;
@@ -42,12 +43,17 @@ function getShadeFromLabelColor(color: string): string {
 }
 
 export const TranslationLabel: React.FC<{
-  color: string;
+  color?: string;
   tooltip?: string;
   children: React.ReactNode;
-}> = ({ children, tooltip, color }) => {
+  className?: string;
+}> = ({ children, tooltip, color, className }) => {
   const content = (
-    <StyledLabel data-cy="translation-label" color={color}>
+    <StyledLabel
+      data-cy="translation-label"
+      color={color}
+      className={className}
+    >
       {children}
     </StyledLabel>
   );
