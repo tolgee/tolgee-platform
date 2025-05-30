@@ -72,6 +72,7 @@ export const TranslationRead: React.FC<Props> = ({
     keyData,
     editEnabled,
     setAssignedTaskState,
+    addLabel,
   } = tools;
 
   const toggleEdit = () => {
@@ -102,7 +103,11 @@ export const TranslationRead: React.FC<Props> = ({
         inactive
       />
 
-      <TranslationLabels labels={translation?.labels} className="labels" />
+      <TranslationLabels
+        labels={translation?.labels}
+        className="labels"
+        onSelect={(labelId) => addLabel(labelId)}
+      />
 
       <ControlsTranslation
         onEdit={() => handleOpen()}

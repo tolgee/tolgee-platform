@@ -67,6 +67,7 @@ export const TranslationRead: React.FC<Props> = ({
     editEnabled,
     keyData,
     setAssignedTaskState,
+    addLabel,
   } = tools;
 
   const toggleEdit = () => {
@@ -99,7 +100,11 @@ export const TranslationRead: React.FC<Props> = ({
           isPlural={keyData.keyIsPlural}
         />
       </StyledTranslation>
-      <TranslationLabels labels={translation?.labels} className="labels" />
+      <TranslationLabels
+        labels={translation?.labels}
+        className="labels"
+        onSelect={(labelId) => addLabel(labelId)}
+      />
       <TranslationFlags
         className="flags"
         keyData={keyData}

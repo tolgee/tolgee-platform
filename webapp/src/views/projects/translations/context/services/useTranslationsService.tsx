@@ -378,6 +378,53 @@ export const useTranslationsService = (props: Props) => {
     });
   };
 
+  const mergeTranslation = (data: {
+    keyId: number;
+    language: string;
+    value: Partial<TranslationModel> | undefined;
+  }) => {
+    setFixedTranslations((fixedTranslations) => {
+      let result = fixedTranslations;
+      result = result?.map((k) => {
+        if (k.keyId === data.keyId) {
+          return {
+            ...k,
+            translations: {
+              ...k.translations,
+              [data.language]: data.value
+                ? Object.entries(data.value).reduce(
+                    (acc, [prop, newVal]) => {
+                      const oldVal = k.translations[data.language]?.[prop];
+                      // If both old and new are arrays, merge and deduplicate
+                      if (Array.isArray(oldVal) && Array.isArray(newVal)) {
+                        acc[prop] = [
+                          ...oldVal,
+                          ...newVal.filter(
+                            (item) =>
+                              !oldVal.some(
+                                (oldItem) =>
+                                  JSON.stringify(oldItem) ===
+                                  JSON.stringify(item)
+                              )
+                          ),
+                        ];
+                      } else {
+                        acc[prop] = newVal;
+                      }
+                      return acc;
+                    },
+                    { ...k.translations[data.language] }
+                  )
+                : (undefined as any),
+            },
+          };
+        }
+        return k;
+      });
+      return result;
+    });
+  };
+
   const updateTranslation = (data: UpdateTranslation) =>
     changeTranslations([
       { keyId: data.keyId, language: data.lang, value: data.data },
@@ -418,5 +465,6 @@ export const useTranslationsService = (props: Props) => {
     addFilter,
     removeFilter,
     setFilters,
+    mergeTranslation,
   };
 };

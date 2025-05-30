@@ -9,6 +9,7 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useUrlSearchArray } from 'tg.hooks/useUrlSearch';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import {
+  AddLabel,
   AddTag,
   AddTranslation,
   CellPosition,
@@ -38,6 +39,7 @@ import { usePositionService } from './services/usePositionService';
 import { useLayoutService } from './services/useLayoutService';
 import { AddParams } from '../TranslationFilters/tools';
 import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/tools';
+import { useLabels } from 'tg.hooks/useLabels';
 
 type Props = {
   projectId: number;
@@ -136,6 +138,10 @@ export const [
   });
 
   const tagsService = useTagsService({
+    translations: translationService,
+  });
+
+  const labelService = useLabels({
     translations: translationService,
   });
 
@@ -294,6 +300,9 @@ export const [
     },
     setSidePanelOpen,
     setEventBlockers,
+    addTranslationLabel(data: AddLabel) {
+      return labelService.addLabel(data);
+    },
   };
 
   const dataReady = Boolean(

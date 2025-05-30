@@ -65,6 +65,7 @@ const StyledControls = styled(Box)`
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+
   .controls-main {
     flex-grow: 1;
     justify-content: end;
@@ -89,6 +90,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     editEnabled,
     disabled,
     setAssignedTaskState,
+    addLabel,
   } = tools;
   const { t } = useTranslate();
   const editVal = tools.editVal!;
@@ -153,7 +155,11 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
         language={language}
         className="language"
       />
-      <TranslationLabels labels={translation?.labels} className="labels" />
+      <TranslationLabels
+        labels={translation?.labels}
+        onSelect={(labelId) => addLabel(labelId)}
+        className="labels"
+      />
       <ControlsEditorSmall
         controlsProps={{
           onMouseDown: (e) => e.preventDefault(),
