@@ -1,3 +1,10 @@
+## [3.119.3](https://github.com/tolgee/tolgee-platform/compare/v3.119.2...v3.119.3) (2025-05-30)
+
+
+### Bug Fixes
+
+* Configure YAML ObjectMapper with custom settings: disable doc start markers and line splitting, enable literal block style ([#3094](https://github.com/tolgee/tolgee-platform/issues/3094)) ([4f279e5](https://github.com/tolgee/tolgee-platform/commit/4f279e5e844be6394be8683e774672bc806f753a)), closes [#3020](https://github.com/tolgee/tolgee-platform/issues/3020)
+
 ## [3.119.2](https://github.com/tolgee/tolgee-platform/compare/v3.119.1...v3.119.2) (2025-05-29)
 
 
