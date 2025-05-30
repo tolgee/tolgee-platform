@@ -176,7 +176,9 @@ export const LanguageSettingsForm = ({
                     displayEmpty
                     minHeight={false}
                   >
-                    <MenuItem value={null as any}>Default</MenuItem>
+                    <MenuItem value={null as any}>
+                      {t('ai_prompt_default_name')}
+                    </MenuItem>
                     {prompts?.map((item) => {
                       return (
                         <MenuItem key={item.id} value={item.id}>
