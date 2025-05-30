@@ -80,6 +80,10 @@ export const AiPromptItem = ({ prompt }: Props) => {
   function handleDelete() {
     setMenuOpen(false);
     confirmation({
+      message: (
+        <T keyName="ai_prompts_delete_message" params={{ name: prompt.name }} />
+      ),
+      confirmButtonText: <T keyName="ai_prompt_delete_confirm" />,
       onConfirm() {
         deleteLoadable.mutate(
           {
