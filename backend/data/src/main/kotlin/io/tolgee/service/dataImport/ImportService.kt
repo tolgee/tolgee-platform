@@ -156,6 +156,7 @@ class ImportService(
       importSettings = params,
       _importDataManager = fileProcessor.importDataManager,
       isSingleStepImport = true,
+      namespaces = params.namespaces,
     ).doImport()
   }
 
