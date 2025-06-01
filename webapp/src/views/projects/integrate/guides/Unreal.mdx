@@ -22,22 +22,48 @@ To enable the Tolgee plugin inside Unreal, perform the following steps:
 1. Find the Tolgee plugin and tick the checkbox next to it
 1. Press `Restart now` or restart your project manually.
 
-## Setting up the plugin
+## Localization Provider setup
 
-After installing the plugin, you need to enable it and set the following properties in the Project Settings → Localization → Tolgee section:
+Open the Unreal Engine Localization Dashboard (located at Tools → Localization Dashboard) and have the `Localization Service Provider` tab open.
 
-API key:
+Set the `Localization Service Provider` to `Tolgee` via the dropdown.
+
+This will spawn 2 additional fields, set their values to:
+
+1. `Api Url`:
 
 ```sh
 {{{apiKey}}}
 ```
 
-If you are using the self-hosted version, you can change the URL to your instance.
-
-API URL:
+2. `Api Key`:
 
 ```sh
 {{{apiUrl}}}
 ```
 
-Then you are now ready to start translating using the plugin!
+## Localization Target setup
+
+For each Localization Target of your game you want to connect to Tolgee, go under the `Languages` section you should have 3 additional buttons on the actions toobar.
+
+1. `Toglee Pull`
+2. `Tolgee Push`
+3. `Tolgee Settings`
+
+Press `Tolgee Settings` and set the `Project Id` to:
+
+```sh
+{{{projectId}}}
+```
+
+## Workflow explained:
+
+To make the initial push (or to update it after creating/deleting/updating keys):
+
+1. Run Unreal's `Gather Text` follow by `Tolgee Push`
+2. Go inside the Tolgee web dashboard and translate
+3. Run `Tolgee Pull` to get the latest data from your dashboard
+
+Extra resources:
+- [Unreal Engine Localization Tools documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/localization-tools-in-unreal-engine)
+- [Unreal Engine Localization In-Depth](https://dev.epicgames.com/community/learning/tutorials/zwPJ/unreal-engine-localization-in-depth)
