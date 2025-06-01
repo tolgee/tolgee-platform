@@ -18,9 +18,9 @@ Alternatively, you can clone the plugin from [GitHub](https://github.com/tolgee/
 To enable the Tolgee plugin inside Unreal, perform the following steps:
 
 1. Navigate to the Toolbar `Edit` menu
-1. Open the `Plugins` windows
-1. Find the Tolgee plugin and tick the checkbox next to it
-1. Press `Restart now` or restart your project manually.
+2. Open the `Plugins` window
+3. Find the Tolgee plugin and tick the checkbox next to it
+4. Press `Restart now` or restart your project manually.
 
 ## Localization Provider setup
 
@@ -33,20 +33,20 @@ This will spawn 2 additional fields, set their values to:
 1. `Api Url`:
 
 ```sh
-{{{apiKey}}}
+{{{apiUrl}}}
 ```
 
 2. `Api Key`:
 
 ```sh
-{{{apiUrl}}}
+{{{apiKey}}}
 ```
 
 ## Localization Target setup
 
-For each Localization Target of your game you want to connect to Tolgee, go under the `Languages` section you should have 3 additional buttons on the actions toobar.
+For each Localization Target of your game you want to connect to Tolgee, go under the `Languages` section and you should have 3 additional buttons on the actions toolbar.
 
-1. `Toglee Pull`
+1. `Tolgee Pull`
 2. `Tolgee Push`
 3. `Tolgee Settings`
 
@@ -60,7 +60,7 @@ Press `Tolgee Settings` and set the `Project Id` to:
 
 To make the initial push (or to update it after creating/deleting/updating keys):
 
-1. Run Unreal's `Gather Text` follow by `Tolgee Push`
+1. Run Unreal's `Gather Text` followed by `Tolgee Push`
 2. Go inside the Tolgee web dashboard and translate
 3. Run `Tolgee Pull` to get the latest data from your dashboard
 
