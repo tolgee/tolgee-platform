@@ -48,7 +48,7 @@ export const GlossaryCreateDialog = ({ open, onClose, onFinished }: Props) => {
     const data: CreateGlossaryRequest = {
       name: values.name,
       baseLanguageTag: values.baseLanguage!.tag,
-      assignedProjects: values.assignedProjects?.map(({ id }) => id),
+      assignedProjectIds: values.assignedProjects?.map(({ id }) => id),
     };
 
     mutation.mutate(

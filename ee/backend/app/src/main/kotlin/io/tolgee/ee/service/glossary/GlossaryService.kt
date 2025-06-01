@@ -59,7 +59,7 @@ class GlossaryService(
         organizationOwner = organization
         baseLanguageTag = dto.baseLanguageTag
 
-        updateAssignedProjects(this, dto.assignedProjects ?: emptySet())
+        updateAssignedProjects(this, dto.assignedProjectIds ?: emptySet())
       }
     return glossaryRepository.save(glossary)
   }
@@ -80,7 +80,7 @@ class GlossaryService(
       )
     }
     glossary.baseLanguageTag = dto.baseLanguageTag
-    val newAssignedProjects = dto.assignedProjects
+    val newAssignedProjects = dto.assignedProjectIds
     if (newAssignedProjects != null) {
       updateAssignedProjects(glossary, newAssignedProjects)
     }

@@ -20,5 +20,5 @@ class UpdateGlossaryRequest {
 
   @Schema(description = "Projects assigned to glossary; when null, assigned projects will be kept unchanged.")
   @field:Nullable
-  var assignedProjects: MutableSet<Long>? = null
+  var assignedProjectIds: MutableSet<Long>? = null
 }

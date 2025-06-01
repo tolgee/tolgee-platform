@@ -133,7 +133,7 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
     val request = CreateGlossaryRequest().apply {
       name = "New Glossary"
       baseLanguageTag = "en"
-      assignedProjects = mutableSetOf(testData.project.id)
+      assignedProjectIds = mutableSetOf(testData.project.id)
     }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
       .andIsOk.andAssertThatJson {
@@ -149,7 +149,7 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
     val request = CreateGlossaryRequest().apply {
       name = "New Glossary"
       baseLanguageTag = "en"
-      assignedProjects = mutableSetOf(testData.project.id)
+      assignedProjectIds = mutableSetOf(testData.project.id)
     }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
       .andIsOk.andAssertThatJson {
@@ -165,7 +165,7 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
     val request = CreateGlossaryRequest().apply {
       name = "New Glossary"
       baseLanguageTag = "en"
-      assignedProjects = mutableSetOf(testData.project.id)
+      assignedProjectIds = mutableSetOf(testData.project.id)
     }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
       .andIsForbidden
@@ -177,7 +177,7 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
     val request = CreateGlossaryRequest().apply {
       name = "New Glossary"
       baseLanguageTag = "en"
-      assignedProjects = mutableSetOf(testData.project.id)
+      assignedProjectIds = mutableSetOf(testData.project.id)
     }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
       .andIsNotFound

@@ -1668,7 +1668,7 @@ export interface components {
     };
     CreateGlossaryRequest: {
       /** @description Projects assigned to glossary */
-      assignedProjects: number[];
+      assignedProjectIds: number[];
       /**
        * @description Language tag according to BCP 47 definition
        * @example cs-CZ
@@ -5130,7 +5130,7 @@ export interface components {
     };
     UpdateGlossaryRequest: {
       /** @description Projects assigned to glossary; when null, assigned projects will be kept unchanged. */
-      assignedProjects?: number[];
+      assignedProjectIds?: number[];
       /**
        * @description Language tag according to BCP 47 definition
        * @example cs-CZ

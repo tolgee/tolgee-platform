@@ -20,5 +20,5 @@ class CreateGlossaryRequest {
 
   @Schema(description = "Projects assigned to glossary")
   @field:NotNull
-  var assignedProjects: MutableSet<Long>? = null
+  var assignedProjectIds: MutableSet<Long>? = null
 }

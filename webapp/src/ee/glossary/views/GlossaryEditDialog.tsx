@@ -47,7 +47,7 @@ export const GlossaryEditDialog = ({
     const data: UpdateGlossaryRequest = {
       name: values.name,
       baseLanguageTag: values.baseLanguage!.tag,
-      assignedProjects: values.assignedProjects?.map(({ id }) => id) || [],
+      assignedProjectIds: values.assignedProjects?.map(({ id }) => id) || [],
     };
 
     mutation.mutate(
