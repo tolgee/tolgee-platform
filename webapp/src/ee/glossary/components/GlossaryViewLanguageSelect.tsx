@@ -14,6 +14,13 @@ import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
 type OrganizationLanguageModel =
   components['schemas']['OrganizationLanguageModel'];
 
+function toSortedBaseFirst<T extends { base: boolean }>(list: T[]): T[] {
+  return list.toSorted((a, b) => {
+    if (a.base === b.base) return 0;
+    return a.base ? -1 : 1;
+  });
+}
+
 type Props = {
   disabled?: boolean;
   value: string[] | undefined;
@@ -34,7 +41,7 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
   const [search, setSearch] = useState('');
   const [searchDebounced] = useDebounce(search, 500);
 
-  const priorityDataLoadable = useApiQuery({
+  const glossaryLanguagesLoadable = useApiQuery({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/languages',
     method: 'get',
     path: {
@@ -53,7 +60,7 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
         : assignedProjectsIds,
     size: 30,
   };
-  const dataLoadable = useApiInfiniteQuery({
+  const organizationLanguagesLoadable = useApiInfiniteQuery({
     url: '/v2/organizations/{organizationId}/languages',
     method: 'get',
     path: { organizationId: preferredOrganization!.id },
@@ -81,61 +88,85 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
     },
   });
 
-  useEffect(() => {
-    if (value === undefined && priorityDataLoadable.data && dataLoadable.data) {
-      const langs =
-        priorityDataLoadable.data._embedded?.glossaryLanguageDtoList?.map(
-          (l) => l.tag
-        ) ?? [];
-      const extraLangs =
-        dataLoadable.data.pages[0]?._embedded?.languages?.map((l) => l.tag) ??
-        [];
-      extraLangs.forEach((l) => {
-        if (!langs.includes(l)) {
-          langs.push(l);
-        }
-      });
-      onValueChange(langs);
-    }
-  }, [value, priorityDataLoadable.data, dataLoadable.data]);
+  const getGlossaryLanguageTags = () => {
+    const languages =
+      glossaryLanguagesLoadable.data?._embedded?.glossaryLanguageDtoList;
+    return languages?.map((l) => l.tag) ?? [];
+  };
 
-  const dataExtra = useMemo(() => {
-    return dataLoadable.data?.pages.flatMap(
+  const getFirstPageOfOrganizationLanguageTags = () => {
+    const firstPageOfOrganizationLanguages =
+      organizationLanguagesLoadable.data?.pages[0]?._embedded?.languages;
+    return firstPageOfOrganizationLanguages?.map((l) => l.tag) ?? [];
+  };
+
+  useEffect(() => {
+    if (
+      value === undefined &&
+      glossaryLanguagesLoadable.data &&
+      organizationLanguagesLoadable.data
+    ) {
+      // Calculate and set default value
+      const glossaryLanguageTags = getGlossaryLanguageTags();
+      const organizationLanguageTags = getFirstPageOfOrganizationLanguageTags();
+      const uniqueOrganizationLanguageTags = organizationLanguageTags.filter(
+        (l) => !glossaryLanguageTags.includes(l)
+      );
+      onValueChange([
+        ...glossaryLanguageTags,
+        ...uniqueOrganizationLanguageTags,
+      ]);
+    }
+  }, [
+    value,
+    glossaryLanguagesLoadable.data,
+    organizationLanguagesLoadable.data,
+  ]);
+
+  const organizationLanguages = useMemo(() => {
+    const organizationLanguagesPages =
+      organizationLanguagesLoadable.data?.pages ?? [];
+    return organizationLanguagesPages.flatMap(
       (p) => p._embedded?.languages ?? []
     );
-  }, [dataLoadable.data]);
+  }, [organizationLanguagesLoadable.data]);
 
-  const data: OrganizationLanguageModel[] = useMemo(() => {
-    const priorityLangs =
-      priorityDataLoadable.data?._embedded?.glossaryLanguageDtoList
-        ?.toSorted((a, b) => {
-          if (a.base === b.base) return 0;
-          return a.base ? -1 : 1;
-        })
-        ?.map((l) => {
-          const languageData = languageInfo[l.tag];
-          return {
-            base: l.base,
-            tag: l.tag,
-            flagEmoji: languageData?.flags?.[0] || '',
-            originalName: languageData?.originalName || l.tag,
-            name: languageData?.englishName || l.tag,
-          };
-        }) || [];
-    const extraLangs =
-      dataExtra
-        ?.filter((l) => !priorityLangs.some((pl) => pl.tag === l.tag))
-        ?.toSorted((a, b) => {
-          if (a.base === b.base) return 0;
-          return a.base ? -1 : 1;
-        })
-        ?.map((l) => ({ ...l, base: false })) || [];
-    return [...priorityLangs, ...extraLangs];
-  }, [priorityDataLoadable.data, dataExtra]);
+  const languages: OrganizationLanguageModel[] = useMemo(() => {
+    // List of all glossary and organization languages
+
+    const glossaryLanguages =
+      glossaryLanguagesLoadable.data?._embedded?.glossaryLanguageDtoList ?? [];
+    const glossaryLanguagesBaseFirst = toSortedBaseFirst(glossaryLanguages);
+    const glossaryLanguagesValue = glossaryLanguagesBaseFirst.map((l) => {
+      const languageData = languageInfo[l.tag];
+      return {
+        base: l.base,
+        tag: l.tag,
+        flagEmoji: languageData?.flags?.[0] || '',
+        originalName: languageData?.originalName || l.tag,
+        name: languageData?.englishName || l.tag,
+      };
+    });
+
+    const uniqueOrganizationLanguages = organizationLanguages.filter(
+      (l) => !glossaryLanguages.some((pl) => pl.tag === l.tag)
+    );
+    const organizationLanguagesBaseFirst = toSortedBaseFirst(
+      uniqueOrganizationLanguages
+    );
+    const organizationLanguagesValue = organizationLanguagesBaseFirst.map(
+      (l) => ({ ...l, base: false })
+    );
+
+    return [...glossaryLanguagesValue, ...organizationLanguagesValue];
+  }, [glossaryLanguagesLoadable.data, organizationLanguages]);
 
   const handleFetchMore = () => {
-    if (dataLoadable.hasNextPage && !dataLoadable.isFetching) {
-      dataLoadable.fetchNextPage();
+    if (
+      organizationLanguagesLoadable.hasNextPage &&
+      !organizationLanguagesLoadable.isFetching
+    ) {
+      organizationLanguagesLoadable.fetchNextPage();
     }
   };
 
@@ -172,9 +203,9 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
     <Box {...boxProps}>
       <InfiniteMultiSearchSelect
         data-cy="glossary-view-language-select"
-        items={data}
+        items={languages}
         selected={value}
-        queryResult={dataLoadable}
+        queryResult={organizationLanguagesLoadable}
         itemKey={(item) => item.tag}
         search={search}
         onClearSelected={() => onValueChange([])}

@@ -20,6 +20,7 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
       and t.term.glossary.deletedAt is null
       and t.term.glossary.organizationOwner.id = :organizationId
       and t.term.glossary.organizationOwner.deletedAt is null
+    order by t.languageTag asc
     """,
   )
   fun findDistinctLanguageTagsByGlossary(
