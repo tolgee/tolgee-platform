@@ -10,11 +10,13 @@ import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
+import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
 import jakarta.validation.constraints.Size
@@ -22,6 +24,12 @@ import java.util.Date
 
 @Entity
 @ActivityLoggedEntity
+@Table(
+  indexes = [
+    Index(columnList = "base_language_tag"),
+    Index(columnList = "organization_owner_id"),
+  ],
+)
 class Glossary(
   @field:Size(min = 3, max = 50)
   @ActivityLoggedProp

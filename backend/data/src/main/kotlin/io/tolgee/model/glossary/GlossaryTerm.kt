@@ -7,6 +7,11 @@ import jakarta.persistence.*
 
 @Entity
 @ActivityLoggedEntity
+@Table(
+  indexes = [
+    Index(columnList = "glossary_id"),
+  ],
+)
 class GlossaryTerm(
   @Column(columnDefinition = "text")
   @ActivityLoggedProp

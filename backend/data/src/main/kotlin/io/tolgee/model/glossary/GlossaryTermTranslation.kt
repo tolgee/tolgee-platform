@@ -13,6 +13,7 @@ import java.util.*
 @Table(
   indexes = [
     Index(columnList = "first_word_lowercased"),
+    Index(columnList = "term_id"),
   ],
   uniqueConstraints = [
     UniqueConstraint(columnNames = ["term_id", "language_tag"]),

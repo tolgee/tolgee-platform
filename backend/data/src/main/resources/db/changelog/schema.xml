@@ -4304,4 +4304,24 @@
     <changeSet author="anty (generated)" id="1746535895543-12">
         <addForeignKeyConstraint baseColumnNames="organization_owner_id" baseTableName="glossary" constraintName="FKtiuusr7urs46e15gjy94jhdfm" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
     </changeSet>
+    <changeSet author="anty (generated)" id="1748816439736-1">
+        <createIndex indexName="IDXakvwueteonn5i0658tt6ud49a" tableName="glossary_term">
+            <column name="glossary_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1748816439736-2">
+        <createIndex indexName="IDXcytjvn87s4ueuoh70o0u0own5" tableName="glossary">
+            <column name="base_language_tag"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1748816439736-3">
+        <createIndex indexName="IDXg9t00r97qewj8rvv311yx8995" tableName="glossary">
+            <column name="organization_owner_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1748816439736-4">
+        <createIndex indexName="IDXrr658b7qo5xulylxj5o0pha8x" tableName="glossary_term_translation">
+            <column name="term_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
