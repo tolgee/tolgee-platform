@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
-import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermModelAssembler
-import io.tolgee.ee.data.glossary.GlossaryTermHighlightDto
+import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermHighlightModelAssembler
+import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryTermHighlightModel
 import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 class GlossaryTermHighlightsController(
   private val projectHolder: ProjectHolder,
   private val glossaryTermService: GlossaryTermService,
-  private val modelAssembler: GlossaryTermModelAssembler,
+  private val modelAssembler: GlossaryTermHighlightModelAssembler,
   private val organizationHolder: OrganizationHolder,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
@@ -40,19 +40,18 @@ class GlossaryTermHighlightsController(
     text: String,
     @RequestParam("languageTag")
     languageTag: String,
-  ): CollectionModel<GlossaryTermHighlightDto> {
+  ): CollectionModel<GlossaryTermHighlightModel> {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
     )
 
-    return glossaryTermService.getHighlights(
+    val highlights = glossaryTermService.getHighlights(
       organizationHolder.organization.id,
       projectHolder.project.id,
       text,
       languageTag,
-    ).map {
-      GlossaryTermHighlightDto(it.position, modelAssembler.toModel(it.value.term))
-    }.let { CollectionModel.of(it) }
+    )
+    return modelAssembler.toCollectionModel(highlights)
   }
 }

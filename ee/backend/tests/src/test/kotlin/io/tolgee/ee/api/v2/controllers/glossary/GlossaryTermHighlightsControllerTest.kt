@@ -50,7 +50,7 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
     )
 
     result.andIsOk.andAssertThatJson {
-      node("_embedded.glossaryTermHighlightDtoList") {
+      node("_embedded.glossaryHighlights") {
         isArray.hasSize(1)
         node("[0].position.start").isNumber.isEqualTo(BigDecimal(10))
         node("[0].position.end").isNumber.isEqualTo(BigDecimal(14))
@@ -68,7 +68,7 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
       "/v2/projects/${testData.project.id}/glossary-highlights?text=$text&languageTag=en"
     )
       .andIsOk.andAssertThatJson {
-        node("_embedded.glossaryTermHighlightDtoList").isArray.hasSize(2)
+        node("_embedded.glossaryHighlights").isArray.hasSize(2)
       }
   }
 
@@ -81,7 +81,7 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
     )
       .andIsOk.andAssertThatJson {
         node("_embedded") {
-          node("glossaryTermHighlightDtoList") {
+          node("glossaryHighlights") {
             isArray.hasSize(1)
             node("[0].position.start").isNumber.isEqualTo(BigDecimal(7))
             node("[0].position.end").isNumber.isEqualTo(BigDecimal(12))
@@ -112,7 +112,7 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
       "/v2/projects/${testData.project.id}/glossary-highlights?text=$text&languageTag=en"
     )
       .andIsOk.andAssertThatJson {
-        node("_embedded.glossaryTermHighlightDtoList") {
+        node("_embedded.glossaryHighlights") {
           isArray.hasSize(1)
           node("[0].position.start").isNumber.isEqualTo(BigDecimal(10))
           node("[0].position.end").isNumber.isEqualTo(BigDecimal(14))
@@ -132,7 +132,7 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
     )
 
     result.andIsOk.andAssertThatJson {
-      node("_embedded.glossaryTermHighlightDtoList") {
+      node("_embedded.glossaryHighlights") {
         isArray.hasSize(1)
         node("[0].position.start").isNumber.isEqualTo(BigDecimal(14))
         node("[0].position.end").isNumber.isEqualTo(BigDecimal(23))

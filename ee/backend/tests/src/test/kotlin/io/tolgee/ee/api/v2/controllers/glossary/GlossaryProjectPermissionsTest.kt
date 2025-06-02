@@ -52,7 +52,7 @@ class GlossaryProjectPermissionsTest : AuthorizedControllerTest() {
       "/v2/projects/${testData.project.id}/glossary-highlights?text=$text&languageTag=en",
     )
       .andIsOk.andAssertThatJson {
-        node("_embedded.glossaryTermHighlightDtoList") {
+        node("_embedded.glossaryHighlights") {
           isArray.hasSize(1)
           node("[0].position.start").isNumber.isEqualTo(BigDecimal(10))
           node("[0].position.end").isNumber.isEqualTo(BigDecimal(14))

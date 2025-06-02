@@ -1183,9 +1183,9 @@ export interface components {
         glossaryLanguageDtoList?: components["schemas"]["GlossaryLanguageDto"][];
       };
     };
-    CollectionModelGlossaryTermHighlightDto: {
+    CollectionModelGlossaryTermHighlightModel: {
       _embedded?: {
-        glossaryTermHighlightDtoList?: components["schemas"]["GlossaryTermHighlightDto"][];
+        glossaryHighlights?: components["schemas"]["GlossaryTermHighlightModel"][];
       };
     };
     CollectionModelImportNamespaceModel: {
@@ -2336,7 +2336,7 @@ export interface components {
       name: string;
       organizationOwner: components["schemas"]["SimpleOrganizationModel"];
     };
-    GlossaryTermHighlightDto: {
+    GlossaryTermHighlightModel: {
       position: components["schemas"]["Position"];
       value: components["schemas"]["GlossaryTermModel"];
     };
@@ -12224,7 +12224,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["CollectionModelGlossaryTermHighlightDto"];
+          "application/json": components["schemas"]["CollectionModelGlossaryTermHighlightModel"];
         };
       };
       /** Bad Request */

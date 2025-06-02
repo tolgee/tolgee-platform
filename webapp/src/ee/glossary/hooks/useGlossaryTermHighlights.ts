@@ -4,14 +4,14 @@ import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
-type GlossaryTermHighlightDto =
-  components['schemas']['GlossaryTermHighlightDto'];
+type GlossaryTermHighlightModel =
+  components['schemas']['GlossaryTermHighlightModel'];
 
 export const useGlossaryTermHighlights = ({
   text,
   languageTag,
   enabled = true,
-}: GlossaryTermHighlightsProps): GlossaryTermHighlightDto[] => {
+}: GlossaryTermHighlightsProps): GlossaryTermHighlightModel[] => {
   const { isEnabled } = useEnabledFeatures();
   const glossaryFeature = isEnabled('GLOSSARY');
   const project = useProject();
@@ -37,5 +37,5 @@ export const useGlossaryTermHighlights = ({
     return [];
   }
 
-  return highlights.data._embedded?.glossaryTermHighlightDtoList ?? [];
+  return highlights.data._embedded?.glossaryHighlights ?? [];
 };
