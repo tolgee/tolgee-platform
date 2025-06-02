@@ -18,13 +18,17 @@ export const useGlossaryTermHighlights = ({
   const hasText = text !== undefined && text !== null && text.length > 0;
   const highlights = useApiQuery({
     url: '/v2/projects/{projectId}/glossary-highlights',
-    method: 'get',
+    method: 'post',
     path: {
       projectId: project!.id,
     },
     query: {
-      text: text ?? '',
       languageTag,
+    },
+    content: {
+      'application/json': {
+        text: text ?? '',
+      },
     },
     options: {
       enabled: glossaryFeature && hasText && enabled,

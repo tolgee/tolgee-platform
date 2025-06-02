@@ -421,7 +421,7 @@ export interface paths {
     post: operations["exportPost"];
   };
   "/v2/projects/{projectId}/glossary-highlights": {
-    get: operations["getHighlights"];
+    post: operations["getHighlights"];
   };
   "/v2/projects/{projectId}/import": {
     /** Prepares provided files to import. */
@@ -2333,6 +2333,9 @@ export interface components {
       keys: components["schemas"]["KeyDefinitionDto"][];
       /** @description Tags to return language translations in */
       languageTags: string[];
+    };
+    GlossaryHighlightsRequest: {
+      text: string;
     };
     GlossaryLanguageDto: {
       /**
@@ -12388,7 +12391,6 @@ export interface operations {
   getHighlights: {
     parameters: {
       query: {
-        text: string;
         languageTag: string;
       };
       path: {
@@ -12433,6 +12435,11 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GlossaryHighlightsRequest"];
       };
     };
   };
