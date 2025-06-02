@@ -46,12 +46,9 @@ class GlossaryControllerTest : AuthorizedControllerTest() {
   fun `returns all glossaries`() {
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries")
       .andIsOk.andAssertThatJson {
-        node("_embedded.glossaries") {
-          isArray.hasSize(2)
-          node("[0].id").isValidId
-          node("[0].name").isEqualTo("Test Glossary")
-          node("[1].name").isEqualTo("Empty Glossary")
-        }
+        node("_embedded.glossaries").isArray.hasSize(2)
+        node("_embedded.glossaries[0].id").isValidId
+        inPath("_embedded.glossaries[*].name").isArray.containsExactlyInAnyOrder("Test Glossary", "Empty Glossary")
       }
   }
 

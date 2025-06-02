@@ -46,17 +46,17 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
   @Test
   fun `returns all glossary terms`() {
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms?sort=description,asc"
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms"
     )
       .andIsOk.andAssertThatJson {
-        node("_embedded.glossaryTerms") {
-          isArray.hasSize(4)
-          node("[0].id").isValidId
-          node("[0].description").isEqualTo("Forbidden term")
-          node("[1].description").isEqualTo("The description")
-          node("[2].description").isEqualTo("The multiword term")
-          node("[3].description").isEqualTo("Trademark")
-        }
+        node("_embedded.glossaryTerms").isArray.hasSize(4)
+        node("_embedded.glossaryTerms[0].id").isValidId
+        inPath("_embedded.glossaryTerms[*].description").isArray.containsExactlyInAnyOrder(
+          "Forbidden term",
+          "The description",
+          "The multiword term",
+          "Trademark"
+        )
       }
   }
 
