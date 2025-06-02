@@ -26,7 +26,6 @@ const StyledCard = styled(Card)`
   gap: ${({ theme }) => theme.spacing(1.5)};
   padding: ${({ theme }) => theme.spacing(1, 1.5)};
   margin: ${({ theme }) => theme.spacing(2, 1)};
-  // FIXME: The help button in corner is in a way when on small screen
   margin-left: ${({ theme }) => theme.spacing(5)};
   border-radius: ${({ theme }) => theme.spacing(1)};
   background-color: ${({ theme }) =>
