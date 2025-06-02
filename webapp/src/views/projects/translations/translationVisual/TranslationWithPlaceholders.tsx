@@ -5,22 +5,16 @@ import {
   Placeholder,
   Position,
 } from '@tginternal/editor';
-import { styled, Tooltip, useTheme } from '@mui/material';
+import { styled, useTheme } from '@mui/material';
 import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { placeholderToElement } from './placeholderToElement';
 import { useProject } from 'tg.hooks/useProject';
-import { GlossaryTermPreview, useGlossaryTermHighlights } from 'tg.ee';
+import { useGlossaryTermHighlights } from 'tg.ee';
 import { GlossaryTermHighlightDto } from '../../../../eeSetup/EeModuleType';
-import { TooltipCard } from 'tg.component/common/TooltipCard';
+import { GlossaryHighlight } from 'tg.views/projects/translations/translationVisual/GlossaryHighlight';
 
 const StyledWrapper = styled('div')`
   white-space: pre-wrap;
-`;
-
-const StyledHighlight = styled('span')`
-  text-decoration: underline;
-  text-decoration-style: dashed;
-  text-underline-offset: ${({ theme }) => theme.spacing(0.5)};
 `;
 
 type Props = {
@@ -142,24 +136,13 @@ export const TranslationWithPlaceholders = ({
         modifier.position.end
       );
       chunks.push(
-        <Tooltip
+        <GlossaryHighlight
           key={index}
-          placement="bottom-start"
-          enterDelay={200}
-          components={{ Tooltip: TooltipCard }}
-          title={
-            <GlossaryTermPreview
-              term={modifier.highlight?.value}
-              languageTag={locale}
-              targetLanguageTag={targetLocale}
-              standalone
-            />
-          }
-        >
-          <StyledHighlight data-cy="glossary-term-highlight">
-            {text}
-          </StyledHighlight>
-        </Tooltip>
+          text={text}
+          term={modifier.highlight.value}
+          languageTag={locale}
+          targetLanguageTag={targetLocale}
+        />
       );
     }
   }
