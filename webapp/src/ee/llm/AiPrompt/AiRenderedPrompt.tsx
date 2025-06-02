@@ -56,7 +56,7 @@ export const AiRenderedPrompt = ({ data, loading }: Props) => {
       {Boolean(expanded) &&
         (loading ? (
           <StyledDescription>
-            <Skeleton variant="text" />
+            <Skeleton variant="text" sx={{ fontSize: 72 }} />
           </StyledDescription>
         ) : !data ? (
           <StyledDescription>

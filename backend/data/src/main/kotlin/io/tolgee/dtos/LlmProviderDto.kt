@@ -11,7 +11,7 @@ data class LlmProviderDto(
   override var type: LlmProviderType,
   override var priority: LlmProviderPriority?,
   override var apiKey: String?,
-  override var apiUrl: String?,
+  private var rawApiUrl: String?,
   override var model: String?,
   override var deployment: String?,
   override var format: String?,
@@ -23,4 +23,10 @@ data class LlmProviderDto(
   fun setType(type: String) {
     this.type = LlmProviderType.valueOf(type.uppercase())
   }
+
+  override var apiUrl: String?
+    get() = rawApiUrl?.removeSuffix("/")
+    set(value) {
+      rawApiUrl = value
+    }
 }

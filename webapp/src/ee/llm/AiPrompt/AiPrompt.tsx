@@ -161,7 +161,9 @@ export const AiPrompt: React.FC<Props> = ({
           <StyledTitle>
             <StyledPromptName>
               <StyledTitleText data-cy="ai-prompt-name">
-                {openPromptData?.name}
+                {openPromptData?.id === undefined
+                  ? t('ai_prompt_default_name')
+                  : openPromptData.name}
               </StyledTitleText>
               {canBeRenamed && openPromptData && (
                 <IconButton
@@ -250,7 +252,7 @@ export const AiPrompt: React.FC<Props> = ({
               locale={language?.tag}
               loading={runIsLoading}
             />
-            <AiResultUsage usage={usage} price={runData?.price} />
+            {usage && <AiResultUsage usage={usage} price={runData?.price} />}
           </Box>
         )}
         {featureEnabled && (

@@ -62,7 +62,7 @@ describe('ai prompts list', () => {
 
   it('opens default prompt when creating new prompt', () => {
     gcy('ai-prompts-add-prompt').click();
-    gcy('ai-prompt-name').should('contain', 'Default');
+    gcy('ai-prompt-name').should('contain', 'Default prompt');
     gcy('ai-prompt-provider-select').should('contain', 'server-provider');
   });
 });
