@@ -19,6 +19,9 @@ class GlossaryTestData {
   lateinit var term: GlossaryTerm
   lateinit var translation: GlossaryTermTranslation
 
+  lateinit var anotherProject: Project
+  lateinit var anotherProject2: Project
+
   lateinit var trademarkTerm: GlossaryTerm
   lateinit var forbiddenTerm: GlossaryTerm
 
@@ -47,10 +50,7 @@ class GlossaryTestData {
       }.build {
         val english = addEnglish()
         val french = addFrench()
-        val czech = addLanguage {
-          tag = "cs"
-          name = "Czech"
-        }
+        val czech = addCzech()
 
         self.baseLanguage = english.self
 
@@ -87,6 +87,22 @@ class GlossaryTestData {
             text = "Toto je text"
           }
         }
+      }.self
+
+      anotherProject = addProject(defaultOrganizationBuilder.self) {
+        name = "Another1"
+      }.build {
+        self.baseLanguage = addCzech().self
+        addEnglish()
+        addGerman()
+      }.self
+
+      anotherProject2 = addProject(defaultOrganizationBuilder.self) {
+        name = "Another2"
+      }.build {
+        self.baseLanguage = addEnglish().self
+        addCzech()
+        addGerman()
       }.self
 
       defaultOrganizationBuilder.build {

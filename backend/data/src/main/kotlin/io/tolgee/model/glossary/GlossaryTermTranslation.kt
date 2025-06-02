@@ -28,7 +28,7 @@ class GlossaryTermTranslation(
   @ManyToOne
   lateinit var term: GlossaryTerm
 
-  @Column(name = "first_word_lowercased", columnDefinition = "text", nullable = false)
+  @Column(name = "first_word_lowercased", columnDefinition = "varchar(127)", nullable = false)
   var firstWordLowercased: String? = null
 
   companion object {
@@ -39,7 +39,11 @@ class GlossaryTermTranslation(
       @PreUpdate
       fun updateFirstWordLowercased(translation: GlossaryTermTranslation) {
         val locale = Locale.forLanguageTag(translation.languageTag) ?: Locale.ROOT
-        translation.firstWordLowercased = translation.text?.lowercase(locale)?.find(WORD_REGEX)
+        var firstWordLowercased = translation.text?.lowercase(locale)?.find(WORD_REGEX)
+        if (firstWordLowercased != null && firstWordLowercased.length > 127) {
+          firstWordLowercased = firstWordLowercased.substring(0, 127)
+        }
+        translation.firstWordLowercased = firstWordLowercased
       }
     }
   }
