@@ -146,19 +146,14 @@ class GlossaryControllerTest : AuthorizedControllerTest() {
         node("id").isValidId
         node("name").isEqualTo(testData.glossary.name)
         node("baseLanguageTag").isEqualTo(testData.glossary.baseLanguageTag)
-        node("assignedProjects._embedded.projects").isArray.hasSize(2)
-        node("assignedProjects._embedded.projects[0].id").isEqualTo(testData.anotherProject2.id)
-        node("assignedProjects._embedded.projects[1].id").isEqualTo(testData.anotherProject.id)
       }
 
-    performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}")
+    performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/assigned-projects")
       .andIsOk.andAssertThatJson {
-        node("id").isValidId
-        node("name").isEqualTo(testData.glossary.name)
-        node("baseLanguageTag").isEqualTo(testData.glossary.baseLanguageTag)
-        node("assignedProjects._embedded.projects").isArray.hasSize(2)
-        node("assignedProjects._embedded.projects[0].id").isEqualTo(testData.anotherProject2.id)
-        node("assignedProjects._embedded.projects[1].id").isEqualTo(testData.anotherProject.id)
+        node("_embedded.projects").isArray.hasSize(2)
+        inPath(
+          "_embedded.projects[*].id"
+        ).isArray.containsExactlyInAnyOrder(testData.anotherProject.id, testData.anotherProject2.id)
       }
   }
 
