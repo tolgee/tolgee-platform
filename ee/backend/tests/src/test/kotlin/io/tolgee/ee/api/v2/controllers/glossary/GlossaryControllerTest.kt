@@ -118,7 +118,6 @@ class GlossaryControllerTest : AuthorizedControllerTest() {
     val request = UpdateGlossaryRequest().apply {
       name = "Updated Glossary"
       baseLanguageTag = "de"
-//      assignedProjects TODO test too
     }
     performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
       .andIsOk.andAssertThatJson {
@@ -132,6 +131,34 @@ class GlossaryControllerTest : AuthorizedControllerTest() {
         node("id").isValidId
         node("name").isEqualTo("Updated Glossary")
         node("baseLanguageTag").isEqualTo("de")
+      }
+  }
+
+  @Test
+  fun `updates glossary assigned projects`() {
+    val request = UpdateGlossaryRequest().apply {
+      name = testData.glossary.name
+      baseLanguageTag = testData.glossary.baseLanguageTag
+      assignedProjectIds = mutableSetOf(testData.anotherProject.id, testData.anotherProject2.id)
+    }
+    performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
+      .andIsOk.andAssertThatJson {
+        node("id").isValidId
+        node("name").isEqualTo(testData.glossary.name)
+        node("baseLanguageTag").isEqualTo(testData.glossary.baseLanguageTag)
+        node("assignedProjects._embedded.projects").isArray.hasSize(2)
+        node("assignedProjects._embedded.projects[0].id").isEqualTo(testData.anotherProject2.id)
+        node("assignedProjects._embedded.projects[1].id").isEqualTo(testData.anotherProject.id)
+      }
+
+    performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}")
+      .andIsOk.andAssertThatJson {
+        node("id").isValidId
+        node("name").isEqualTo(testData.glossary.name)
+        node("baseLanguageTag").isEqualTo(testData.glossary.baseLanguageTag)
+        node("assignedProjects._embedded.projects").isArray.hasSize(2)
+        node("assignedProjects._embedded.projects[0].id").isEqualTo(testData.anotherProject2.id)
+        node("assignedProjects._embedded.projects[1].id").isEqualTo(testData.anotherProject.id)
       }
   }
 
