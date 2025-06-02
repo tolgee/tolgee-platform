@@ -1,5 +1,6 @@
 package io.tolgee.ee.repository.glossary
 
+import io.tolgee.ee.data.glossary.GlossaryWithStats
 import io.tolgee.model.glossary.Glossary
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
@@ -51,6 +52,28 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     pageable: Pageable,
     search: String?,
   ): Page<Glossary>
+
+  @Query(
+    """
+    select g.id as id,
+      g.name as name,
+      g.baseLanguageTag as baseLanguageTag,
+      ap.name as firstAssignedProjectName,
+      count(ap) as assignedProjectsCount
+    from Glossary g
+    left join g.assignedProjects ap
+    where g.organizationOwner.id = :organizationId
+      and g.organizationOwner.deletedAt is null
+      and g.deletedAt is null
+      and (lower(g.name) like lower(concat('%', coalesce(:search, ''), '%')) or :search is null)
+    group by g.id
+  """,
+  )
+  fun findByOrganizationIdWithStatsPaged(
+    organizationId: Long,
+    pageable: Pageable,
+    search: String?,
+  ): Page<GlossaryWithStats>
 
   @Query(
     """

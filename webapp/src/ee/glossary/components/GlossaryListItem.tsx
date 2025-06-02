@@ -9,7 +9,8 @@ import { languageInfo } from '@tginternal/language-util/lib/generated/languageIn
 import { GlossaryListItemMenu } from 'tg.ee.module/glossary/components/GlossaryListItemMenu';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
-type SimpleGlossaryModel = components['schemas']['SimpleGlossaryModel'];
+type SimpleGlossaryWithStatsModel =
+  components['schemas']['SimpleGlossaryWithStatsModel'];
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -69,14 +70,13 @@ const StyledNameText = styled(Typography)`
 `;
 
 type Props = {
-  glossary: SimpleGlossaryModel;
+  glossary: SimpleGlossaryWithStatsModel;
 };
 
 export const GlossaryListItem: React.VFC<Props> = ({ glossary }) => {
   const { preferredOrganization } = usePreferredOrganization();
 
   const history = useHistory();
-  const assignedProjects = glossary.assignedProjects._embedded?.projects;
   const languageTag = glossary.baseLanguageTag!;
   const languageData = languageInfo[languageTag];
   const languages = [
@@ -108,15 +108,15 @@ export const GlossaryListItem: React.VFC<Props> = ({ glossary }) => {
       </StyledName>
       <StyledProjects>
         <Typography variant="body1">
-          {assignedProjects?.length === 1 ? (
-            assignedProjects[0].name
-          ) : (assignedProjects?.length || 0) === 0 ? (
+          {glossary.assignedProjectsCount === 1 ? (
+            glossary.firstAssignedProjectName
+          ) : glossary.assignedProjectsCount === 0 ? (
             <T keyName="glossary_list_assigned_projects_empty" />
           ) : (
             <T
               keyName="glossary_list_assigned_projects_count"
               params={{
-                count: (assignedProjects?.length || 0).toString(),
+                count: glossary.assignedProjectsCount.toString(),
               }}
             />
           )}

@@ -1,7 +1,7 @@
 import React from 'react';
 import type {
   BillingMenuItemsProps,
-  GlossaryTermHighlightDto,
+  GlossaryTermHighlightModel,
   GlossaryTermHighlightsProps,
   GlossaryTermPreviewProps,
 } from './EeModuleType';
@@ -64,7 +64,7 @@ export const CriticalUsageCircle = Empty;
 
 export const useGlossaryTermHighlights = (
   props: GlossaryTermHighlightsProps
-): GlossaryTermHighlightDto[] => [];
+): GlossaryTermHighlightModel[] => [];
 
 export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
   NotIncludedInOss('Glossaries');

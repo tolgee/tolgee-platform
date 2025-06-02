@@ -37,8 +37,8 @@ export type PrefilterTaskProps = {
   taskNumber: number;
 };
 
-export type GlossaryTermHighlightDto =
-  components['schemas']['GlossaryTermHighlightDto'];
+export type GlossaryTermHighlightModel =
+  components['schemas']['GlossaryTermHighlightModel'];
 
 export type GlossaryTermModel = components['schemas']['GlossaryTermModel'];
 

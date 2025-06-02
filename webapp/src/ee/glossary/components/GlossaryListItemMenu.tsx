@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { GlossaryEditDialog } from 'tg.ee.module/glossary/views/GlossaryEditDialog';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { GlossaryContext } from 'tg.ee.module/glossary/hooks/GlossaryContext';
 
 type SimpleGlossaryModel = components['schemas']['SimpleGlossaryModel'];
 
@@ -115,12 +116,17 @@ export const GlossaryListItemMenu: FC<Props> = ({ glossary }) => {
       </Menu>
 
       {isEditing && (
-        <GlossaryEditDialog
-          open={isEditing}
-          onClose={() => setIsEditing(false)}
-          onFinished={() => setIsEditing(false)}
+        <GlossaryContext
+          organizationId={preferredOrganization?.id}
           glossaryId={glossary.id}
-        />
+          fallback={null}
+        >
+          <GlossaryEditDialog
+            open={isEditing}
+            onClose={() => setIsEditing(false)}
+            onFinished={() => setIsEditing(false)}
+          />
+        </GlossaryContext>
       )}
     </>
   );

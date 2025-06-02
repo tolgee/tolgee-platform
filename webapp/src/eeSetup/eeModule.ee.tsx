@@ -49,7 +49,7 @@ import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
 import {
   BillingMenuItemsProps,
-  GlossaryTermHighlightDto,
+  GlossaryTermHighlightModel,
   GlossaryTermHighlightsProps,
   GlossaryTermPreviewProps,
 } from './EeModuleType';
@@ -413,7 +413,7 @@ export const useAddAdministrationMenuItems = () => {
 
 export const useGlossaryTermHighlights = (
   props: GlossaryTermHighlightsProps
-): GlossaryTermHighlightDto[] => useGlossaryTermHighlightsInternal(props);
+): GlossaryTermHighlightModel[] => useGlossaryTermHighlightsInternal(props);
 
 export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
   GlossaryTermPreviewInternal;

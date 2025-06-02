@@ -191,10 +191,16 @@ export interface paths {
     get: operations["getAll_11"];
     post: operations["create_13"];
   };
+  "/v2/organizations/{organizationId}/glossaries-with-stats": {
+    get: operations["getAllWithStats"];
+  };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}": {
     get: operations["get_20"];
     put: operations["update_8"];
     delete: operations["delete_11"];
+  };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}/assigned-projects": {
+    get: operations["getAssignedProjects"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/languages": {
     get: operations["getLanguages"];
@@ -2329,7 +2335,6 @@ export interface components {
       tag: string;
     };
     GlossaryModel: {
-      assignedProjects: components["schemas"]["CollectionModelSimpleProjectModel"];
       baseLanguageTag?: string;
       /** Format: int64 */
       id: number;
@@ -2337,7 +2342,7 @@ export interface components {
       organizationOwner: components["schemas"]["SimpleOrganizationModel"];
     };
     GlossaryTermHighlightModel: {
-      position: components["schemas"]["Position"];
+      position: components["schemas"]["PositionModel"];
       value: components["schemas"]["GlossaryTermModel"];
     };
     GlossaryTermModel: {
@@ -3460,6 +3465,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelSimpleGlossaryWithStatsModel: {
+      _embedded?: {
+        glossaries?: components["schemas"]["SimpleGlossaryWithStatsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelSimpleUserAccountModel: {
       _embedded?: {
         users?: components["schemas"]["SimpleUserAccountModel"][];
@@ -3711,7 +3722,7 @@ export interface components {
       scriptUrl: string;
       url: string;
     };
-    Position: {
+    PositionModel: {
       /** Format: int32 */
       end: number;
       /** Format: int32 */
@@ -4440,7 +4451,6 @@ export interface components {
       userSource?: string;
     };
     SimpleGlossaryModel: {
-      assignedProjects: components["schemas"]["CollectionModelSimpleProjectModel"];
       baseLanguageTag?: string;
       /** Format: int64 */
       id: number;
@@ -4464,6 +4474,15 @@ export interface components {
       /** Format: int64 */
       id: number;
       translations: components["schemas"]["GlossaryTermTranslationModel"][];
+    };
+    SimpleGlossaryWithStatsModel: {
+      /** Format: int64 */
+      assignedProjectsCount: number;
+      baseLanguageTag?: string;
+      firstAssignedProjectName?: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
     };
     SimpleOrganizationModel: {
       avatar?: components["schemas"]["Avatar"];
@@ -8178,6 +8197,62 @@ export interface operations {
       };
     };
   };
+  getAllWithStats: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelSimpleGlossaryWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   get_20: {
     parameters: {
       path: {
@@ -8289,6 +8364,54 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getAssignedProjects: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelSimpleProjectModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

@@ -6,11 +6,16 @@ import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.SimpleGlossaryModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.SimpleGlossaryWithStatsModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.glossary.GlossaryModel
 import io.tolgee.ee.api.v2.hateoas.model.glossary.SimpleGlossaryModel
+import io.tolgee.ee.api.v2.hateoas.model.glossary.SimpleGlossaryWithStatsModel
 import io.tolgee.ee.data.glossary.CreateGlossaryRequest
+import io.tolgee.ee.data.glossary.GlossaryWithStats
 import io.tolgee.ee.data.glossary.UpdateGlossaryRequest
 import io.tolgee.ee.service.glossary.GlossaryService
+import io.tolgee.hateoas.project.SimpleProjectModel
+import io.tolgee.hateoas.project.SimpleProjectModelAssembler
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.security.OrganizationHolder
@@ -22,6 +27,7 @@ import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -36,17 +42,20 @@ import org.springframework.web.bind.annotation.RestController
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
-@RequestMapping("/v2/organizations/{organizationId:[0-9]+}/glossaries")
+@RequestMapping("/v2/organizations/{organizationId:[0-9]+}")
 @Tag(name = "Glossary")
 class GlossaryController(
   private val glossaryService: GlossaryService,
   private val glossaryModelAssembler: GlossaryModelAssembler,
   private val simpleGlossaryModelAssembler: SimpleGlossaryModelAssembler,
+  private val simpleGlossaryWithStatsModelAssembler: SimpleGlossaryWithStatsModelAssembler,
   private val pagedAssembler: PagedResourcesAssembler<Glossary>,
+  private val pagedWithStatsAssembler: PagedResourcesAssembler<GlossaryWithStats>,
+  private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
   private val organizationHolder: OrganizationHolder,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
-  @PostMapping
+  @PostMapping("/glossaries")
   @Operation(summary = "Create glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
@@ -66,7 +75,7 @@ class GlossaryController(
     return glossaryModelAssembler.toModel(glossary)
   }
 
-  @PutMapping("/{glossaryId:[0-9]+}")
+  @PutMapping("/glossaries/{glossaryId:[0-9]+}")
   @Operation(summary = "Update glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
@@ -89,7 +98,7 @@ class GlossaryController(
     return glossaryModelAssembler.toModel(glossary)
   }
 
-  @DeleteMapping("/{glossaryId:[0-9]+}")
+  @DeleteMapping("/glossaries/{glossaryId:[0-9]+}")
   @Operation(summary = "Delete glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
@@ -108,7 +117,7 @@ class GlossaryController(
     glossaryService.delete(organizationHolder.organization.id, glossaryId)
   }
 
-  @GetMapping("/{glossaryId:[0-9]+}")
+  @GetMapping("/glossaries/{glossaryId:[0-9]+}")
   @Operation(summary = "Get glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
@@ -128,7 +137,7 @@ class GlossaryController(
     return glossaryModelAssembler.toModel(glossary)
   }
 
-  @GetMapping()
+  @GetMapping("/glossaries")
   @Operation(summary = "Get all organization glossaries")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
@@ -146,5 +155,45 @@ class GlossaryController(
     val organization = organizationHolder.organization
     val glossaries = glossaryService.findAllPaged(organization.id, pageable, search)
     return pagedAssembler.toModel(glossaries, simpleGlossaryModelAssembler)
+  }
+
+  @GetMapping("/glossaries-with-stats")
+  @Operation(summary = "Get all organization glossaries with some additional statistics")
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @UseDefaultPermissions
+  fun getAllWithStats(
+    @PathVariable
+    organizationId: Long,
+    @ParameterObject pageable: Pageable,
+    @RequestParam("search") search: String?,
+  ): PagedModel<SimpleGlossaryWithStatsModel> {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationHolder.organization.id,
+      Feature.GLOSSARY,
+    )
+
+    val organization = organizationHolder.organization
+    val glossaries = glossaryService.findAllWithStatsPaged(organization.id, pageable, search)
+    return pagedWithStatsAssembler.toModel(glossaries, simpleGlossaryWithStatsModelAssembler)
+  }
+
+  @GetMapping("/glossaries/{glossaryId:[0-9]+}/assigned-projects")
+  @Operation(summary = "Get all projects assigned to glossary")
+  @AllowApiAccess(AuthTokenType.ONLY_PAT)
+  @UseDefaultPermissions
+  fun getAssignedProjects(
+    @PathVariable
+    organizationId: Long,
+    @PathVariable
+    glossaryId: Long,
+  ): CollectionModel<SimpleProjectModel> {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      organizationHolder.organization.id,
+      Feature.GLOSSARY,
+    )
+
+    val organization = organizationHolder.organization
+    val glossary = glossaryService.get(organization.id, glossaryId)
+    return simpleProjectModelAssembler.toCollectionModel(glossary.assignedProjects)
   }
 }

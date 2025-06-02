@@ -20,6 +20,7 @@ import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
 import jakarta.validation.constraints.Size
+import org.hibernate.annotations.SQLRestriction
 import java.util.Date
 
 @Entity
@@ -50,6 +51,7 @@ class Glossary(
     joinColumns = [JoinColumn(name = "project_id")],
     inverseJoinColumns = [JoinColumn(name = "glossary_id")],
   )
+  @SQLRestriction("deleted_at is null")
   var assignedProjects: MutableSet<Project> = mutableSetOf()
 
   @Temporal(TemporalType.TIMESTAMP)

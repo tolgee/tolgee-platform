@@ -2,19 +2,20 @@ import { Dialog, DialogTitle } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 import {
   useEnabledFeatures,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 import { messageService } from 'tg.service/MessageService';
-import { useState } from 'react';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import {
   GlossaryCreateEditForm,
   CreateEditGlossaryFormValues,
 } from 'tg.ee.module/glossary/components/GlossaryCreateEditForm';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
+import { useMemo } from 'react';
 
 type UpdateGlossaryRequest = components['schemas']['UpdateGlossaryRequest'];
 
@@ -22,16 +23,11 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onFinished: () => void;
-  glossaryId: number;
 };
 
-export const GlossaryEditDialog = ({
-  open,
-  onClose,
-  onFinished,
-  glossaryId,
-}: Props) => {
+export const GlossaryEditDialog = ({ open, onClose, onFinished }: Props) => {
   const { t } = useTranslate();
+  const glossary = useGlossary();
 
   const { preferredOrganization } = usePreferredOrganization();
 
@@ -54,7 +50,7 @@ export const GlossaryEditDialog = ({
       {
         path: {
           organizationId: preferredOrganization!.id,
-          glossaryId,
+          glossaryId: glossary.id,
         },
         content: {
           'application/json': data,
@@ -69,43 +65,25 @@ export const GlossaryEditDialog = ({
     );
   };
 
-  const [initialValues, setInitialValues] = useState(
-    undefined as CreateEditGlossaryFormValues | undefined
-  );
-
-  useApiQuery({
-    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}',
-    method: 'get',
-    path: {
-      organizationId: preferredOrganization!.id,
-      glossaryId,
-    },
-    options: {
-      onSuccess(data) {
-        const language = data.baseLanguageTag
-          ? {
-              tag: data.baseLanguageTag,
-              flagEmoji: languageInfo[data.baseLanguageTag]?.flags?.[0] || '',
-              name:
-                languageInfo[data.baseLanguageTag]?.englishName ||
-                data.baseLanguageTag,
-            }
-          : undefined;
-        setInitialValues?.({
-          name: data.name,
-          baseLanguage: language,
-          assignedProjects:
-            data.assignedProjects._embedded?.projects?.map((p) => ({
-              id: p.id,
-              name: p.name,
-            })) || [],
-        });
-      },
-      onError(e) {
-        onClose();
-      },
-    },
-  });
+  const initialValues: CreateEditGlossaryFormValues = useMemo(() => {
+    const language = glossary.baseLanguageTag
+      ? {
+          tag: glossary.baseLanguageTag,
+          flagEmoji: languageInfo[glossary.baseLanguageTag]?.flags?.[0] || '',
+          name:
+            languageInfo[glossary.baseLanguageTag]?.englishName ||
+            glossary.baseLanguageTag,
+        }
+      : undefined;
+    return {
+      name: glossary.name,
+      baseLanguage: language,
+      assignedProjects: glossary.assignedProjects.map((p) => ({
+        id: p.id,
+        name: p.name,
+      })),
+    };
+  }, [glossary]);
 
   return (
     <Dialog

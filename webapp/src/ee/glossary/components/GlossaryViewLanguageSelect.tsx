@@ -50,8 +50,7 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
     },
   });
 
-  const assignedProjectsIds =
-    glossary.assignedProjects._embedded?.projects?.map((p) => p.id);
+  const assignedProjectsIds = glossary.assignedProjects.map((p) => p.id);
   const query = {
     search: searchDebounced,
     projectIds:

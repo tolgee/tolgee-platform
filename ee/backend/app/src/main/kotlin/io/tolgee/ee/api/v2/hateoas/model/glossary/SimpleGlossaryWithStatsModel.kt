@@ -1,13 +1,13 @@
 package io.tolgee.ee.api.v2.hateoas.model.glossary
 
-import io.tolgee.hateoas.organization.SimpleOrganizationModel
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
 @Relation(collectionRelation = "glossaries", itemRelation = "glossary")
-class GlossaryModel(
+class SimpleGlossaryWithStatsModel(
   val id: Long,
   val name: String,
   val baseLanguageTag: String?,
-  val organizationOwner: SimpleOrganizationModel,
-) : RepresentationModel<GlossaryModel>()
+  val firstAssignedProjectName: String?,
+  val assignedProjectsCount: Long,
+) : RepresentationModel<SimpleGlossaryWithStatsModel>()

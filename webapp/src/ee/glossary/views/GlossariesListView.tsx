@@ -35,7 +35,7 @@ export const GlossariesListView = () => {
   const { t } = useTranslate();
 
   const glossaries = useApiQuery({
-    url: '/v2/organizations/{organizationId}/glossaries',
+    url: '/v2/organizations/{organizationId}/glossaries-with-stats',
     method: 'get',
     path: { organizationId: organization!.id },
     query: {

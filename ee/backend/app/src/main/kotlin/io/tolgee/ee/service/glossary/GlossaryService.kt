@@ -3,6 +3,7 @@ package io.tolgee.ee.service.glossary
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.glossary.CreateGlossaryRequest
+import io.tolgee.ee.data.glossary.GlossaryWithStats
 import io.tolgee.ee.data.glossary.UpdateGlossaryRequest
 import io.tolgee.ee.repository.glossary.GlossaryRepository
 import io.tolgee.exceptions.NotFoundException
@@ -31,6 +32,14 @@ class GlossaryService(
     search: String?,
   ): Page<Glossary> {
     return glossaryRepository.findByOrganizationIdPaged(organizationId, pageable, search)
+  }
+
+  fun findAllWithStatsPaged(
+    organizationId: Long,
+    pageable: Pageable,
+    search: String?,
+  ): Page<GlossaryWithStats> {
+    return glossaryRepository.findByOrganizationIdWithStatsPaged(organizationId, pageable, search)
   }
 
   fun find(
