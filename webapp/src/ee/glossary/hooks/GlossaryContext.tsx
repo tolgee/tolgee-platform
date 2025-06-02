@@ -57,6 +57,19 @@ export const GlossaryContext: React.FC<Props> = ({
     },
   });
 
+  const result: ContextData = useMemo(() => {
+    if (!glossary.data || !assignedProjects.data) {
+      return undefined;
+    }
+
+    return {
+      glossary: {
+        ...glossary.data,
+        assignedProjects: assignedProjects.data._embedded?.projects || [],
+      },
+    };
+  }, [glossary.data, assignedProjects.data]);
+
   const isLoading = glossary.isLoading || assignedProjects.isLoading;
   const isWaiting = isLoading || !dataAvailable;
 
@@ -80,15 +93,6 @@ export const GlossaryContext: React.FC<Props> = ({
       glossary.error?.code || assignedProjects.error?.code || 'Server error'
     );
   }
-
-  const result: ContextData = useMemo(() => {
-    return {
-      glossary: {
-        ...glossary.data,
-        assignedProjects: assignedProjects.data._embedded?.projects || [],
-      },
-    };
-  }, [glossary.data, assignedProjects.data]);
 
   return (
     <ContextHolder.Provider value={result as ContextData}>
