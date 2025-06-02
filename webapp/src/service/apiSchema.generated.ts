@@ -1673,7 +1673,7 @@ export interface components {
       scopes: string[];
     };
     CreateGlossaryRequest: {
-      /** @description Projects assigned to glossary */
+      /** @description IDs of projects to be assigned to glossary */
       assignedProjectIds: number[];
       /**
        * @description Language tag according to BCP 47 definition
@@ -1688,13 +1688,17 @@ export interface components {
     };
     CreateGlossaryTermWithTranslationRequest: {
       /**
-       * @description Glossary term description
+       * @description A detailed explanation or definition of the glossary term
        * @example It's trademark
        */
       description?: string;
+      /** @description Specifies whether the term represents a shortened form of a word or phrase */
       flagAbbreviation: boolean;
+      /** @description When true, the term matching considers uppercase and lowercase characters as distinct */
       flagCaseSensitive: boolean;
+      /** @description When true, marks this term as prohibited or not recommended for use in translations */
       flagForbiddenTerm: boolean;
+      /** @description When true, this term will have the same translation across all target languages */
       flagNonTranslatable: boolean;
       text: string;
     };
@@ -2331,10 +2335,22 @@ export interface components {
       languageTags: string[];
     };
     GlossaryLanguageDto: {
+      /**
+       * @description Indicates if this is the base (main) language of the glossary
+       * @example true
+       */
       base: boolean;
+      /**
+       * @description The language code (e.g., 'en' for English)
+       * @example en
+       */
       tag: string;
     };
     GlossaryModel: {
+      /**
+       * @description Language tag for default translations for terms
+       * @example en
+       */
       baseLanguageTag?: string;
       /** Format: int64 */
       id: number;
@@ -2347,9 +2363,13 @@ export interface components {
     };
     GlossaryTermModel: {
       description?: string;
+      /** @description Specifies whether the term represents a shortened form of a word or phrase */
       flagAbbreviation: boolean;
+      /** @description When true, the term matching considers uppercase and lowercase characters as distinct */
       flagCaseSensitive: boolean;
+      /** @description When true, marks this term as prohibited or not recommended for use in translations */
       flagForbiddenTerm: boolean;
+      /** @description When true, this term has the same translation across all target languages */
       flagNonTranslatable: boolean;
       glossary: components["schemas"]["GlossaryModel"];
       /** Format: int64 */
@@ -4451,6 +4471,10 @@ export interface components {
       userSource?: string;
     };
     SimpleGlossaryModel: {
+      /**
+       * @description Language tag for default translations for terms
+       * @example en
+       */
       baseLanguageTag?: string;
       /** Format: int64 */
       id: number;
@@ -4458,27 +4482,51 @@ export interface components {
     };
     SimpleGlossaryTermModel: {
       description?: string;
+      /** @description Specifies whether the term represents a shortened form of a word or phrase */
       flagAbbreviation: boolean;
+      /** @description When true, the term matching considers uppercase and lowercase characters as distinct */
       flagCaseSensitive: boolean;
+      /** @description When true, marks this term as prohibited or not recommended for use in translations */
       flagForbiddenTerm: boolean;
+      /** @description When true, this term has the same translation across all target languages */
       flagNonTranslatable: boolean;
       /** Format: int64 */
       id: number;
     };
     SimpleGlossaryTermWithTranslationsModel: {
+      /**
+       * @description A detailed explanation or definition of the glossary term
+       * @example It's trademark
+       */
       description?: string;
+      /** @description Specifies whether the term represents a shortened form of a word or phrase */
       flagAbbreviation: boolean;
+      /** @description When true, the term matching considers uppercase and lowercase characters as distinct */
       flagCaseSensitive: boolean;
+      /** @description When true, marks this term as prohibited or not recommended for use in translations */
       flagForbiddenTerm: boolean;
+      /** @description When true, this term has the same translation across all target languages */
       flagNonTranslatable: boolean;
       /** Format: int64 */
       id: number;
       translations: components["schemas"]["GlossaryTermTranslationModel"][];
     };
     SimpleGlossaryWithStatsModel: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Total number of projects currently using this glossary
+       * @example 69
+       */
       assignedProjectsCount: number;
+      /**
+       * @description The primary language code used for terms (e.g., 'en' for English)
+       * @example en
+       */
       baseLanguageTag?: string;
+      /**
+       * @description The name of one project using this glossary (can be shown as a preview)
+       * @example My Project
+       */
       firstAssignedProjectName?: string;
       /** Format: int64 */
       id: number;
@@ -5175,9 +5223,13 @@ export interface components {
     };
     UpdateGlossaryTermWithTranslationRequest: {
       description?: string;
+      /** @description Specifies whether the term represents a shortened form of a word or phrase */
       flagAbbreviation?: boolean;
+      /** @description When true, the term matching considers uppercase and lowercase characters as distinct */
       flagCaseSensitive?: boolean;
+      /** @description When true, marks this term as prohibited or not recommended for use in translations */
       flagForbiddenTerm?: boolean;
+      /** @description When true, this term will have the same translation across all target languages */
       flagNonTranslatable?: boolean;
       text?: string;
     };

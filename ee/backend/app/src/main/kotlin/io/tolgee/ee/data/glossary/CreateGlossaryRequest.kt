@@ -18,7 +18,7 @@ class CreateGlossaryRequest {
   @field:Pattern(regexp = "^[^,]*$", message = "can not contain coma")
   var baseLanguageTag: String? = null
 
-  @Schema(description = "Projects assigned to glossary")
+  @Schema(description = "IDs of projects to be assigned to glossary")
   @field:NotNull
   var assignedProjectIds: MutableSet<Long>? = null
 }
