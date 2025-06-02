@@ -288,6 +288,7 @@ enum class Message {
   LLM_TEMPLATE_PARSING_ERROR,
   LLM_RATE_LIMITED,
   LLM_PROVIDER_TIMEOUT,
+  NO_LLM_PROVIDER_CONFIGURED,
   ;
 
   val code: String
