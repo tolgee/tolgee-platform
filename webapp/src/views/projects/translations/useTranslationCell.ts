@@ -49,6 +49,7 @@ export const useTranslationCell = ({
     setTaskState,
     updateEdit,
     addTranslationLabel,
+    removeTranslationLabel,
   } = useTranslationsActions();
 
   const { satisfiesLanguageAccess } = useProjectPermissions();
@@ -190,6 +191,18 @@ export const useTranslationCell = ({
     });
   };
 
+  const removeLabel = (labelId: number) => {
+    if (!translation) {
+      return;
+    }
+    removeTranslationLabel({
+      labelId,
+      keyId: keyData.keyId,
+      translationId: translation.id,
+      language: langTag,
+    });
+  };
+
   function setVariant(activeVariant: string | undefined) {
     updateEdit({ activeVariant });
   }
@@ -229,5 +242,6 @@ export const useTranslationCell = ({
     baseValue,
     baseText,
     addLabel,
+    removeLabel,
   };
 };

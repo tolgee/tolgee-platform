@@ -19,6 +19,7 @@ import {
   EditorProps,
   KeyElement,
   KeyUpdateData,
+  RemoveLabel,
   RemoveTag,
   SetTaskTranslationState,
   SetTranslationState,
@@ -302,6 +303,9 @@ export const [
     setEventBlockers,
     addTranslationLabel(data: AddLabel) {
       return labelService.addLabel(data);
+    },
+    removeTranslationLabel(data: RemoveLabel) {
+      return labelService.removeLabel(data);
     },
   };
 

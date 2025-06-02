@@ -5,6 +5,8 @@ import { Autocomplete, MenuItem, styled } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
 import { CloseButton } from 'tg.views/projects/translations/Tags/CloseButton';
 import { useLabels } from 'tg.hooks/useLabels';
+import { useTranslate } from '@tolgee/react';
+import { CustomPopper } from 'tg.views/projects/translations/Tags/CustomPopper';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -28,13 +30,18 @@ const StyledInputWrapper = styled('div')`
   overflow: hidden;
 `;
 
+const StyledOption = styled('div')`
+  overflow: hidden;
+  white-space: nowrap;
+`;
+
 export const LabelSelector: React.FC<{
   existing?: LabelModel[];
   onClose?: () => void;
   onSelect?: (labelId: number) => void;
 }> = ({ existing, onClose, onSelect }) => {
+  const { t } = useTranslate();
   const [value, setValue] = useState<string>();
-  const [inputValue, setInputValue] = useState<string>('');
   const project = useProject();
   const { labels, loadableList, setSearch, fetchList } = useLabels({
     projectId: project.id,
@@ -44,7 +51,7 @@ export const LabelSelector: React.FC<{
   useEffect(() => {
     fetchList();
     setSearch(debouncedValue || '');
-  }, [debouncedValue, setSearch]);
+  }, [debouncedValue]);
 
   const handleScroll = async (event: React.UIEvent<HTMLUListElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
@@ -58,9 +65,8 @@ export const LabelSelector: React.FC<{
   };
 
   const options = labels
-    .concat(existing || [])
-    .filter((value, index, self) => {
-      return self.indexOf(value) === index;
+    .filter((label) => {
+      return !(existing && existing.some((l) => l.id === label.id));
     })
     .map((label) => ({
       label: label.name,
@@ -70,11 +76,10 @@ export const LabelSelector: React.FC<{
   return (
     <Autocomplete
       className="label-autocomplete"
-      inputValue={inputValue}
       onInputChange={(_, value) => {
         setValue(value);
-        setInputValue(value);
       }}
+      PopperComponent={CustomPopper}
       ListboxProps={{
         onScroll: handleScroll,
         style: { maxHeight: 300, overflow: 'auto' },
@@ -88,6 +93,8 @@ export const LabelSelector: React.FC<{
             {...params.inputProps}
             data-cy="tag-autocomplete-input"
             size={0}
+            value={value || ''}
+            placeholder={t('translations_filters_labels_search_placeholder')}
             onClick={(e) => {
               e.stopPropagation();
               if (params.inputProps.onClick) {
@@ -102,12 +109,22 @@ export const LabelSelector: React.FC<{
         if (newValue) {
           onSelect?.(newValue.value);
         }
-        setInputValue('');
+        setValue('');
       }}
       renderOption={(attrs, option) => {
         return (
-          <MenuItem {...attrs}>
-            <div data-cy="label-autocomplete-option">{option.label}</div>
+          <MenuItem
+            {...attrs}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (attrs.onClick) {
+                attrs.onClick(e);
+              }
+            }}
+          >
+            <StyledOption data-cy="label-autocomplete-option">
+              {option.label}
+            </StyledOption>
           </MenuItem>
         );
       }}

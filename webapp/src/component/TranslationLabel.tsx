@@ -9,6 +9,8 @@ const StyledLabel = styled('div')<{ color?: string }>`
   padding: 2px 6px;
   font-size: 11px;
   font-weight: 600;
+  display: flex;
+  cursor: default;
 `;
 
 function adjustColorBrightness(hex: string, amount: number): string {

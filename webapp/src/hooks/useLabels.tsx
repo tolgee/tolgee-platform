@@ -7,10 +7,13 @@ import {
 import { useDebounce } from 'use-debounce';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
-import { usePutLabel } from 'tg.service/TranslationHooks';
+import { useRemoveLabel, usePutLabel } from 'tg.service/TranslationHooks';
 import { useQueryClient } from 'react-query';
 import { useTranslationsService } from 'tg.views/projects/translations/context/services/useTranslationsService';
-import { AddLabel } from 'tg.views/projects/translations/context/types';
+import {
+  AddLabel,
+  RemoveLabel,
+} from 'tg.views/projects/translations/context/types';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -28,6 +31,7 @@ export const useLabels = ({ projectId, translations }: Props) => {
   const [enabledList, setEnabledList] = useState<boolean>(false);
   const [enabledSelected, setEnabledSelected] = useState<boolean>(false);
   const putLabel = usePutLabel();
+  const deleteLabel = useRemoveLabel();
   const queryClient = useQueryClient();
 
   projectId = projectId || useProject().id;
@@ -108,6 +112,9 @@ export const useLabels = ({ projectId, translations }: Props) => {
   }
 
   const addLabel = (data: AddLabel) => {
+    if (!translations) {
+      return;
+    }
     putLabel
       .mutateAsync({
         path: {
@@ -117,11 +124,46 @@ export const useLabels = ({ projectId, translations }: Props) => {
         },
       })
       .then((response: LabelModel) => {
-        translations?.mergeTranslation({
+        const previousLabels =
+          translations.fixedTranslations?.find(
+            (key) => key.keyId === data.keyId
+          )?.translations[data.language]?.labels || [];
+        translations?.updateTranslation({
           keyId: data.keyId,
-          language: data.language,
-          value: {
-            labels: [response],
+          lang: data.language,
+          data: {
+            labels: [...previousLabels, response],
+          },
+        });
+        invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/labels');
+      })
+      .catch((e) => {
+        return new Promise(() => {});
+      });
+  };
+
+  const removeLabel = (data: RemoveLabel) => {
+    if (!translations) {
+      return;
+    }
+    deleteLabel
+      .mutateAsync({
+        path: {
+          projectId: projectId,
+          translationId: data.translationId,
+          labelId: data.labelId,
+        },
+      })
+      .then(() => {
+        const previousLabels =
+          translations.fixedTranslations?.find(
+            (key) => key.keyId === data.keyId
+          )?.translations[data.language]?.labels || [];
+        translations?.updateTranslation({
+          keyId: data.keyId,
+          lang: data.language,
+          data: {
+            labels: previousLabels.filter((l) => l.id !== data.labelId),
           },
         });
         invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/labels');
@@ -166,5 +208,6 @@ export const useLabels = ({ projectId, translations }: Props) => {
     fetchList,
     fetchSelected,
     addLabel,
+    removeLabel,
   };
 };

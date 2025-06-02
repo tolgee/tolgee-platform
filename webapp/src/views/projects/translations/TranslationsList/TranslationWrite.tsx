@@ -91,6 +91,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     disabled,
     setAssignedTaskState,
     addLabel,
+    removeLabel,
   } = tools;
   const { t } = useTranslate();
   const editVal = tools.editVal!;
@@ -158,6 +159,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
       <TranslationLabels
         labels={translation?.labels}
         onSelect={(labelId) => addLabel(labelId)}
+        onDelete={(labelId) => removeLabel(labelId)}
         className="labels"
       />
       <ControlsEditorSmall

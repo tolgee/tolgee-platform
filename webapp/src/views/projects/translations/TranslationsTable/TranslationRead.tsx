@@ -68,6 +68,7 @@ export const TranslationRead: React.FC<Props> = ({
     keyData,
     setAssignedTaskState,
     addLabel,
+    removeLabel,
   } = tools;
 
   const toggleEdit = () => {
@@ -104,6 +105,7 @@ export const TranslationRead: React.FC<Props> = ({
         labels={translation?.labels}
         className="labels"
         onSelect={(labelId) => addLabel(labelId)}
+        onDelete={(labelId) => removeLabel(labelId)}
       />
       <TranslationFlags
         className="flags"

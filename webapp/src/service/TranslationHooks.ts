@@ -67,3 +67,10 @@ export const usePutLabel = () =>
     url: '/v2/projects/{projectId}/translations/{translationId}/label/{labelId}',
     method: 'put',
   });
+
+export const useRemoveLabel = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/label/{labelId}',
+    method: 'delete',
+    invalidatePrefix: '/v2/projects/{projectId}/translations/{translationId}',
+  });

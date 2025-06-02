@@ -5,6 +5,7 @@ import { T } from '@tolgee/react';
 const Wrap = styled('div')`
   display: flex;
   align-items: center;
+  white-space: nowrap;
 `;
 
 const StyledLabel = styled('div')`
