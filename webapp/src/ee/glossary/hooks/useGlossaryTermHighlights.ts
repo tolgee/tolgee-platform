@@ -22,11 +22,9 @@ export const useGlossaryTermHighlights = ({
     path: {
       projectId: project!.id,
     },
-    query: {
-      languageTag,
-    },
     content: {
       'application/json': {
+        languageTag,
         text: text ?? '',
       },
     },

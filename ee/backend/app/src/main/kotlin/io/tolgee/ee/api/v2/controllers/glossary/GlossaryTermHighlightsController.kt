@@ -19,7 +19,6 @@ import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -41,8 +40,6 @@ class GlossaryTermHighlightsController(
   fun getHighlights(
     @RequestBody @Valid
     dto: GlossaryHighlightsRequest,
-    @RequestParam("languageTag")
-    languageTag: String,
   ): CollectionModel<GlossaryTermHighlightModel> {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
@@ -53,7 +50,7 @@ class GlossaryTermHighlightsController(
       organizationHolder.organization.id,
       projectHolder.project.id,
       dto.text,
-      languageTag,
+      dto.languageTag,
     )
     return modelAssembler.toCollectionModel(highlights)
   }

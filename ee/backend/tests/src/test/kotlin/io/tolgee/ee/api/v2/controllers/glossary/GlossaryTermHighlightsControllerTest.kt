@@ -45,8 +45,12 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
     // Text contains "Term" which is in the glossary
     val text = "This is a Term that should be highlighted"
 
-    val result = performAuthGet(
-      "/v2/projects/${testData.project.id}/glossary-highlights?text=$text&languageTag=en"
+    val result = performAuthPost(
+      "/v2/projects/${testData.project.id}/glossary-highlights",
+      mapOf(
+        "languageTag" to "en",
+        "text" to text,
+      )
     )
 
     result.andIsOk.andAssertThatJson {
@@ -64,8 +68,13 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
   fun `gets highlights for text containing multiple glossary terms`() {
     // Text contains "Term" and "fun" which are in the glossary
     val text = "This is a Term that is fun to use"
-    performAuthGet(
-      "/v2/projects/${testData.project.id}/glossary-highlights?text=$text&languageTag=en"
+
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/glossary-highlights",
+      mapOf(
+        "languageTag" to "en",
+        "text" to text,
+      )
     )
       .andIsOk.andAssertThatJson {
         node("_embedded.glossaryHighlights").isArray.hasSize(2)
@@ -76,8 +85,13 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
   fun `gets highlights for text containing case sensitive glossary terms`() {
     // Text contains "Apple", which is case-sensitive in the glossary
     val text = "I like Apple products"
-    performAuthGet(
-      "/v2/projects/${testData.project.id}/glossary-highlights?text=$text&languageTag=en"
+
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/glossary-highlights",
+      mapOf(
+        "languageTag" to "en",
+        "text" to text,
+      )
     )
       .andIsOk.andAssertThatJson {
         node("_embedded") {
@@ -96,8 +110,12 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
   fun `does not highlight case-sensitive terms with wrong case`() {
     // Text contains "apple" (lowercase) which should not match "Apple" (case-sensitive)
     val text = "I like apple products"
-    performAuthGet(
-      "/v2/projects/${testData.project.id}/glossary-highlights?text=$text&languageTag=en"
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/glossary-highlights",
+      mapOf(
+        "languageTag" to "en",
+        "text" to text,
+      )
     )
       .andIsOk.andAssertThatJson {
         node("_embedded").isAbsent()
@@ -108,8 +126,12 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
   fun `highlights noncase-sensitive terms with different case`() {
     // Text contains "Term" which is in the glossary, but with a different case
     val text = "This is a term that should be highlighted"
-    performAuthGet(
-      "/v2/projects/${testData.project.id}/glossary-highlights?text=$text&languageTag=en"
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/glossary-highlights",
+      mapOf(
+        "languageTag" to "en",
+        "text" to text,
+      )
     )
       .andIsOk.andAssertThatJson {
         node("_embedded.glossaryHighlights") {
@@ -127,8 +149,12 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
     // Text contains "Term" which is in the glossary
     val text = "Lets work for A.B.C Inc!"
 
-    val result = performAuthGet(
-      "/v2/projects/${testData.project.id}/glossary-highlights?text=$text&languageTag=en"
+    val result = performAuthPost(
+      "/v2/projects/${testData.project.id}/glossary-highlights",
+      mapOf(
+        "languageTag" to "en",
+        "text" to text,
+      )
     )
 
     result.andIsOk.andAssertThatJson {
@@ -145,8 +171,12 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
   @Test
   fun `gets empty response for text without glossary terms`() {
     val text = "This text does not contain any glossary terms"
-    performAuthGet(
-      "/v2/projects/${testData.project.id}/glossary-highlights?text=$text&languageTag=en"
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/glossary-highlights",
+      mapOf(
+        "languageTag" to "en",
+        "text" to text,
+      )
     )
       .andIsOk.andAssertThatJson {
         node("_embedded").isAbsent()
@@ -157,8 +187,12 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
   fun `does not get highlights when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     val text = "This is a Term that should be highlighted"
-    performAuthGet(
-      "/v2/projects/${testData.project.id}/glossary-highlights?text=$text&languageTag=en"
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/glossary-highlights",
+      mapOf(
+        "languageTag" to "en",
+        "text" to text,
+      )
     )
       .andIsBadRequest
   }

@@ -2339,6 +2339,11 @@ export interface components {
       languageTags: string[];
     };
     GlossaryHighlightsRequest: {
+      /**
+       * @description Language tag according to BCP 47 definition
+       * @example cs-CZ
+       */
+      languageTag: string;
       text: string;
     };
     GlossaryLanguageDto: {
@@ -12452,9 +12457,6 @@ export interface operations {
   };
   getHighlights: {
     parameters: {
-      query: {
-        languageTag: string;
-      };
       path: {
         projectId: number;
       };

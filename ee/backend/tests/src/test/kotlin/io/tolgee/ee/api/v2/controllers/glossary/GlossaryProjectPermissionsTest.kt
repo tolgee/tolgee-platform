@@ -48,8 +48,12 @@ class GlossaryProjectPermissionsTest : AuthorizedControllerTest() {
     userAccount = testData.userProjectTranslator
     val text = "This is a Term that should be highlighted"
 
-    performAuthGet(
-      "/v2/projects/${testData.project.id}/glossary-highlights?text=$text&languageTag=en",
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/glossary-highlights",
+      mapOf(
+        "languageTag" to "en",
+        "text" to text,
+      )
     )
       .andIsOk.andAssertThatJson {
         node("_embedded.glossaryHighlights") {
