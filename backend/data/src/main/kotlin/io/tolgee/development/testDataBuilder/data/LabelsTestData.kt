@@ -36,6 +36,14 @@ class LabelsTestData : BaseTestData() {
             project = projectBuilder.self
           }.self
           labeledTranslation.labels.add(firstLabel)
+          for (i in 1..3) {
+            addLabel {
+              name = "Label to assign $i"
+              color = "#FF00FF"
+              description = "This is a freshly new label $i"
+              project = projectBuilder.self
+            }
+          }
         }
       }
       addProject {

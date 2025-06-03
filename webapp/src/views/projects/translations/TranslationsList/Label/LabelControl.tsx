@@ -3,14 +3,14 @@ import React, { useState } from 'react';
 import clsx from 'clsx';
 import { AddLabel } from 'tg.views/projects/translations/TranslationsList/Label/AddLabel';
 import { CELL_SHOW_ON_HOVER } from 'tg.views/projects/translations/cell/styles';
-import { TranslationLabel } from 'tg.component/TranslationLabel';
+import { StyledTranslationLabel } from 'tg.component/TranslationLabel';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { LabelSelector } from 'tg.views/projects/translations/TranslationsList/Label/LabelSelector';
 import { components } from 'tg.service/apiSchema.generated';
 
 type LabelModel = components['schemas']['LabelModel'];
 
-const StyledControl = styled(TranslationLabel)`
+const StyledControl = styled(StyledTranslationLabel)`
   background-color: ${({ theme }) => theme.palette.tooltip.background};
   border: 1px solid ${({ theme }) => theme.palette.primary.main};
   color: ${({ theme }) => theme.palette.text.primary};
@@ -37,6 +37,7 @@ export const LabelControl: React.FC<{
   return (
     <StyledControl
       className={clsx(!selectMode && 'hover', CELL_SHOW_ON_HOVER, className)}
+      data-cy="translation-label-control"
     >
       {selectMode ? (
         <LabelSelector
@@ -45,7 +46,11 @@ export const LabelControl: React.FC<{
           existing={existing}
         />
       ) : (
-        <AddLabel onClick={stopBubble(enterSelectMode)} className="clickable" />
+        <AddLabel
+          onClick={stopBubble(enterSelectMode)}
+          className="clickable"
+          data-cy="translation-label-add"
+        />
       )}
     </StyledControl>
   );

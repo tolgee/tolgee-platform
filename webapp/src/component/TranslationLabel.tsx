@@ -1,7 +1,7 @@
 import { styled, Tooltip } from '@mui/material';
 import React from 'react';
 
-const StyledLabel = styled('div')<{ color?: string }>`
+export const StyledTranslationLabel = styled('div')<{ color?: string }>`
   background-color: ${({ color }) => color || 'transparent'};
   border-radius: 8px;
   color: ${({ color, theme }) =>
@@ -49,15 +49,11 @@ export const TranslationLabel: React.FC<{
   tooltip?: string;
   children: React.ReactNode;
   className?: string;
-}> = ({ children, tooltip, color, className }) => {
+}> = ({ children, tooltip, color, className, ...rest }) => {
   const content = (
-    <StyledLabel
-      data-cy="translation-label"
-      color={color}
-      className={className}
-    >
+    <StyledTranslationLabel color={color} className={className} {...rest}>
       {children}
-    </StyledLabel>
+    </StyledTranslationLabel>
   );
   return tooltip ? (
     <Tooltip disableInteractive title={tooltip}>

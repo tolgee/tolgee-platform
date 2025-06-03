@@ -75,6 +75,7 @@ export const LabelSelector: React.FC<{
 
   return (
     <Autocomplete
+      data-cy="label-selector-autocomplete"
       className="label-autocomplete"
       onInputChange={(_, value) => {
         setValue(value);
@@ -91,7 +92,7 @@ export const LabelSelector: React.FC<{
         >
           <StyledInput
             {...params.inputProps}
-            data-cy="tag-autocomplete-input"
+            data-cy="autocomplete-label-input"
             size={0}
             value={value || ''}
             placeholder={t('translations_filters_labels_search_placeholder')}

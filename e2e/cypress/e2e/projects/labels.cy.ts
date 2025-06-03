@@ -2,6 +2,7 @@ import { login } from '../../common/apiCalls/common';
 import { labelsTestData } from '../../common/apiCalls/testData/testData';
 import { HOST } from '../../common/constants';
 import { gcy } from '../../common/shared';
+import { rgbToHex } from '../../common/helpers';
 
 let projectId = null;
 let secondProjectId = null;
@@ -70,13 +71,9 @@ describe('Projects Settings - Labels', () => {
           });
       });
     gcy('project-settings-label-item')
-      .should('have.length', 2)
-      .last()
-      .within(() => {
-        gcy('project-settings-label-item-name')
-          .should('be.visible')
-          .contains('test-label');
-      });
+      .should('have.length', 6)
+      .contains('test-label')
+      .should('be.visible');
   });
 
   it('edit project label', () => {
@@ -153,7 +150,7 @@ describe('Projects Settings - Labels', () => {
     gcy('global-confirmation-dialog').within(() => {
       gcy('global-confirmation-confirm').click();
     });
-    gcy('project-settings-label-item').should('have.length', 0);
+    gcy('project-settings-label-item').should('have.length', 4);
   });
 
   it('shows paginated list of labels', () => {

@@ -68,6 +68,7 @@ export const TranslationLabels = ({
           labels.map((label) => (
             <TranslationLabel
               className="translation-label"
+              data-cy="translation-label"
               color={label.color}
               key={label.id}
               tooltip={label.description}
@@ -83,6 +84,7 @@ export const TranslationLabels = ({
                   width={16}
                   height={16}
                   className={'close-button'}
+                  data-cy={`translation-label-delete`}
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete(label.id);
