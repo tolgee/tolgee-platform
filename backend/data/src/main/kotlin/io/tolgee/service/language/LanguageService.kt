@@ -361,6 +361,21 @@ class LanguageService(
     )
   }
 
+  fun getBasePagedByOrganization(
+    organizationId: Long,
+    projectIds: List<Long>?,
+    pageable: Pageable,
+    search: String?,
+  ): Page<OrganizationLanguageDto> {
+    return this.languageRepository.findAllBaseByOrganizationId(
+      organizationId,
+      projectIds ?: emptyList(),
+      projectIds == null,
+      pageable,
+      search
+    )
+  }
+
   fun findByIdIn(ids: Iterable<Long>): List<Language> {
     return languageRepository.findAllById(ids)
   }

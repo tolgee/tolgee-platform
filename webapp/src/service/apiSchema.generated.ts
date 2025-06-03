@@ -187,6 +187,10 @@ export interface paths {
     /** Returns all users in organization. The result also contains users who are only members of projects in the organization. */
     get: operations["getAllUsers_1"];
   };
+  "/v2/organizations/{organizationId}/base-languages": {
+    /** Returns all base languages in use by projects owned by specified organization */
+    get: operations["getAllBaseLanguagesInUse"];
+  };
   "/v2/organizations/{organizationId}/glossaries": {
     get: operations["getAll_11"];
     post: operations["create_13"];
@@ -8108,6 +8112,64 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  /** Returns all base languages in use by projects owned by specified organization */
+  getAllBaseLanguagesInUse: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+        projectIds?: number[];
+      };
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelOrganizationLanguageModel"];
         };
       };
       /** Bad Request */

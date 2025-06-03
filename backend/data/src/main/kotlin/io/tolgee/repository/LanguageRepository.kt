@@ -113,21 +113,44 @@ interface LanguageRepository : JpaRepository<Language, Long> {
     countQuery = """
     with base_distinct_tags AS $DISTINCT_TAGS_BASE_SUBQUERY,
     non_base_distinct_tags AS $DISTINCT_TAGS_NON_BASE_SUBQUERY
-    select count(*)
-    from (
-      select l.id
-      from language l
-      where l.id in (
-          select id from base_distinct_tags
-        )
-        or l.id in (
-          select id from non_base_distinct_tags
-        )
+    select (
+      (select count(*) from base_distinct_tags) +
+      (select count(*) from non_base_distinct_tags)
     ) as result
     """,
     nativeQuery = true,
   )
   fun findAllByOrganizationId(
+    organizationId: Long?,
+    projectIds: List<Long>,
+    anyProject: Boolean,
+    pageable: Pageable,
+    search: String?,
+  ): Page<OrganizationLanguageDto>
+
+  @Query(
+    value = """
+    with base_distinct_tags AS $DISTINCT_TAGS_BASE_SUBQUERY
+    select *
+    from (
+      select
+        l.name as name,
+        l.tag as tag,
+        l.original_name as originalName,
+        l.flag_emoji as flagEmoji,
+        true as base
+      from language l
+      where l.id in (select id from base_distinct_tags)
+    ) as result
+    """,
+    countQuery = """
+    with base_distinct_tags AS $DISTINCT_TAGS_BASE_SUBQUERY
+    select count(id)
+    from base_distinct_tags
+    """,
+    nativeQuery = true,
+  )
+  fun findAllBaseByOrganizationId(
     organizationId: Long?,
     projectIds: List<Long>,
     anyProject: Boolean,

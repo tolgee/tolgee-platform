@@ -20,11 +20,13 @@ type SelectedLanguageModel = {
 
 type Props = {
   name: string;
+  assignedProjectsName?: string;
   disabled?: boolean;
 } & Omit<ComponentProps<typeof Box>, 'children'>;
 
 export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
   name,
+  assignedProjectsName,
   disabled,
   ...boxProps
 }) => {
@@ -39,12 +41,19 @@ export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
   const [search, setSearch] = useState('');
   const [searchDebounced] = useDebounce(search, 500);
 
+  // For filtering available languages by assigned projects
+  const assignedProjects = assignedProjectsName
+    ? context.getFieldProps(assignedProjectsName)?.value
+    : undefined;
+  const assignedProjectIds = assignedProjects?.map((p) => p.id);
+
   const query = {
+    projectIds: assignedProjectIds,
     search: searchDebounced,
     size: 30,
   };
   const dataLoadable = useApiInfiniteQuery({
-    url: '/v2/organizations/{organizationId}/languages',
+    url: '/v2/organizations/{organizationId}/base-languages',
     method: 'get',
     path: { organizationId: preferredOrganization!.id },
     query,

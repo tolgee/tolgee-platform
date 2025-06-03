@@ -30,7 +30,13 @@ export const GlossaryCreateEditFields: VFC<Props> = ({
       {withAssignedProjects && (
         <AssignedProjectsSelect name="assignedProjects" disabled={disabled} />
       )}
-      <GlossaryBaseLanguageSelect name="baseLanguage" disabled={disabled} />
+      <GlossaryBaseLanguageSelect
+        name="baseLanguage"
+        assignedProjectsName={
+          withAssignedProjects ? 'assignedProjects' : undefined
+        }
+        disabled={disabled}
+      />
       <Alert severity="info">
         <Box>
           <T keyName="create_edit_glossary_languages_note" />

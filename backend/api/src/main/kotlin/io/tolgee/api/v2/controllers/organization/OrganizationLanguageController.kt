@@ -48,4 +48,22 @@ class OrganizationLanguageController(
     val languages = languageService.getPagedByOrganization(organizationId, projectIds, pageable, search)
     return pagedOrganizationLanguageAssembler.toModel(languages, organizationLanguageModelAssembler)
   }
+
+  @Operation(
+    summary = "Get all base languages in use by projects owned by specified organization",
+    description = "Returns all base languages in use by projects owned by specified organization",
+  )
+  @GetMapping("/base-languages")
+  @UseDefaultPermissions
+  fun getAllBaseLanguagesInUse(
+    @ParameterObject
+    @SortDefault("tag", direction = Sort.Direction.ASC)
+    pageable: Pageable,
+    @RequestParam("search") search: String?,
+    @RequestParam("projectIds") projectIds: List<Long>?,
+    @PathVariable organizationId: Long,
+  ): PagedModel<OrganizationLanguageModel> {
+    val languages = languageService.getBasePagedByOrganization(organizationId, projectIds, pageable, search)
+    return pagedOrganizationLanguageAssembler.toModel(languages, organizationLanguageModelAssembler)
+  }
 }

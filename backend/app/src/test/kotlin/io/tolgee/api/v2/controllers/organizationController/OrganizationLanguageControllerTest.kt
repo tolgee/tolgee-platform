@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest
 @AutoConfigureMockMvc
 class OrganizationLanguageControllerTest : AuthorizedControllerTest() {
   @Test
-  fun `get all languages in use`() {
+  fun `gets all languages in use`() {
     val testData = PermissionsTestData()
     val organization = testData.organizationBuilder.self
     testDataService.saveTestData(testData.root)
@@ -32,6 +32,23 @@ class OrganizationLanguageControllerTest : AuthorizedControllerTest() {
         node("_embedded.languages[2].name").isEqualTo("German")
         node("_embedded.languages[2].tag").isEqualTo("de")
         node("_embedded.languages[2].base").isEqualTo(false)
+      }
+  }
+
+  @Test
+  fun `gets all base languages in use`() {
+    val testData = PermissionsTestData()
+    val organization = testData.organizationBuilder.self
+    testDataService.saveTestData(testData.root)
+    loginAsUser("member@member.com")
+
+    performAuthGet("/v2/organizations/${organization.id}/base-languages")
+      .andIsOk.andPrettyPrint.andAssertThatJson {
+        node("_embedded.languages").isArray.hasSize(3)
+        // Order is important
+        node("_embedded.languages[0].name").isEqualTo("English")
+        node("_embedded.languages[0].tag").isEqualTo("en")
+        node("_embedded.languages[0].base").isEqualTo(true)
       }
   }
 }
