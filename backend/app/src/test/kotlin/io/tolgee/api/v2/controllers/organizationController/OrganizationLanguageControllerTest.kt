@@ -44,7 +44,7 @@ class OrganizationLanguageControllerTest : AuthorizedControllerTest() {
 
     performAuthGet("/v2/organizations/${organization.id}/base-languages")
       .andIsOk.andPrettyPrint.andAssertThatJson {
-        node("_embedded.languages").isArray.hasSize(3)
+        node("_embedded.languages").isArray.hasSize(1)
         // Order is important
         node("_embedded.languages[0].name").isEqualTo("English")
         node("_embedded.languages[0].tag").isEqualTo("en")
