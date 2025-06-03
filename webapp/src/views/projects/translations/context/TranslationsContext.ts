@@ -209,6 +209,10 @@ export const [
       setSidePanelOpen(true);
       editService.setEditValueString(value);
     },
+    async appendEditValueString(value: string) {
+      setSidePanelOpen(true);
+      editService.appendEditValueString(value);
+    },
     setEditForce(edit: EditorProps | undefined) {
       return positionService.setPositionAndFocus(edit);
     },

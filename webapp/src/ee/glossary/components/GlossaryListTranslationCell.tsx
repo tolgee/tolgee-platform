@@ -7,10 +7,9 @@ import { TextField } from 'tg.component/common/TextField';
 import { T } from '@tolgee/react';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import Box from '@mui/material/Box';
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
 type GlossaryTermTranslationModel =
   components['schemas']['GlossaryTermTranslationModel'];
@@ -28,6 +27,12 @@ const StyledRowTranslationCell = styled(GlossaryListStyledRowCell)`
         ? '0px 0px 7px rgba(0, 0, 0, 1)'
         : '0px 0px 10px rgba(0, 0, 0, 0.2)'} !important;
   }
+`;
+
+const StyledPreviewBox = styled('div')`
+  grid-area: text;
+  overflow: hidden;
+  margin-top: ${({ theme }) => theme.spacing(-0.25)};
 `;
 
 const StyledEditBox = styled('div')`
@@ -137,11 +142,11 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
         data-cy="glossary-translation-cell"
       >
         {!isEditing ? (
-          <Box overflow="hidden" gridArea="text">
+          <StyledPreviewBox>
             <LimitedHeightText maxLines={3}>
               {translation?.text}
             </LimitedHeightText>
-          </Box>
+          </StyledPreviewBox>
         ) : (
           <StyledEditBox>
             <TextField

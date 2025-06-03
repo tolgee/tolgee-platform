@@ -16,7 +16,7 @@ import { SelectionService } from 'tg.service/useSelectionService';
 import { messageService } from 'tg.service/MessageService';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
 const StyledCard = styled(Card)`
   display: flex;

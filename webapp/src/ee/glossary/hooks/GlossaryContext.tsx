@@ -2,27 +2,14 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { GlobalError } from 'tg.error/GlobalError';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { components } from 'tg.service/apiSchema.generated';
-import React, { useMemo } from 'react';
+import React from 'react';
+import { GlossaryProvider } from 'tg.ee.module/glossary/hooks/GlossaryProvider';
 
 type Props = {
   organizationId?: number;
   glossaryId?: number;
   fallback?: React.ReactNode;
 };
-
-type AssignedProjects = {
-  assignedProjects: components['schemas']['SimpleProjectModel'][];
-};
-
-type ContextData = {
-  glossary: components['schemas']['GlossaryModel'] & AssignedProjects;
-};
-
-const ContextHolder = React.createContext<ContextData>(null as any);
-
-export const useGlossaryContext = () => React.useContext(ContextHolder);
-export const useGlossary = () => useGlossaryContext().glossary;
 
 export const GlossaryContext: React.FC<Props> = ({
   children,
@@ -57,19 +44,6 @@ export const GlossaryContext: React.FC<Props> = ({
     },
   });
 
-  const result: ContextData = useMemo(() => {
-    if (!glossary.data || !assignedProjects.data) {
-      return undefined;
-    }
-
-    return {
-      glossary: {
-        ...glossary.data,
-        assignedProjects: assignedProjects.data._embedded?.projects || [],
-      },
-    };
-  }, [glossary.data, assignedProjects.data]);
-
   const isLoading = glossary.isLoading || assignedProjects.isLoading;
   const isWaiting = isLoading || !dataAvailable;
 
@@ -95,8 +69,11 @@ export const GlossaryContext: React.FC<Props> = ({
   }
 
   return (
-    <ContextHolder.Provider value={result as ContextData}>
+    <GlossaryProvider
+      glossary={glossary.data}
+      assignedProjects={assignedProjects.data._embedded?.projects ?? []}
+    >
       {children}
-    </ContextHolder.Provider>
+    </GlossaryProvider>
   );
 };

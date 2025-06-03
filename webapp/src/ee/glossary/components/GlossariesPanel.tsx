@@ -6,11 +6,10 @@ import {
 import { useGlossaryTermHighlights } from '../hooks/useGlossaryTermHighlights';
 import { TabMessage } from 'tg.views/projects/translations/ToolsPanel/common/TabMessage';
 import { T } from '@tolgee/react';
-import { Box, Button, styled, Tooltip } from '@mui/material';
-import { LinkExternal02 } from '@untitled-ui/icons-react';
-import { Link } from 'react-router-dom';
+import { Box, Link, styled } from '@mui/material';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { GlossaryTermPreview } from './GlossaryTermPreview';
+import { Link as RouterLink } from 'react-router-dom';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -24,8 +23,7 @@ const StyledContent = styled(Box)`
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: ${({ theme }) => theme.spacing(2)};
-  margin: ${({ theme }) => theme.spacing(0, 1.5)};
+  margin: ${({ theme }) => theme.spacing(0, 0.5)};
 `;
 
 const fetchTermsHighlights = ({ keyData, baseLanguage }: PanelContentData) => {
@@ -36,37 +34,27 @@ const fetchTermsHighlights = ({ keyData, baseLanguage }: PanelContentData) => {
 };
 
 export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
-  const { language, baseLanguage, project } = data;
+  const { language, baseLanguage, project, appendValue } = data;
   const terms = fetchTermsHighlights(data);
 
   if (terms.length === 0) {
     return (
       <StyledContainer data-cy="glossary-panel-container-empty">
         <TabMessage>
-          <T keyName="translation_tools_glossary_no_terms" />
+          <T
+            keyName="translation_tools_glossary_no_terms"
+            params={{
+              glossariesLink: (
+                <Link
+                  component={RouterLink}
+                  to={LINKS.ORGANIZATION_GLOSSARIES.build({
+                    [PARAMS.ORGANIZATION_SLUG]: project.organizationOwner!.slug,
+                  })}
+                />
+              ),
+            }}
+          />
         </TabMessage>
-        <StyledContent>
-          <Box>
-            <Tooltip
-              title={
-                <T keyName="translation_tools_glossary_open_glossaries_tooltip" />
-              }
-            >
-              <Button
-                color="primary"
-                variant="outlined"
-                size="small"
-                startIcon={<LinkExternal02 />}
-                component={Link}
-                to={LINKS.ORGANIZATION_GLOSSARIES.build({
-                  [PARAMS.ORGANIZATION_SLUG]: project.organizationOwner!.slug,
-                })}
-              >
-                <T keyName="translation_tools_glossary_open_glossaries" />
-              </Button>
-            </Tooltip>
-          </Box>
-        </StyledContent>
       </StyledContainer>
     );
   }
@@ -88,6 +76,8 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
           term={term}
           languageTag={baseLanguage.tag}
           targetLanguageTag={language.tag}
+          appendValue={appendValue}
+          slim
         />
       );
     });

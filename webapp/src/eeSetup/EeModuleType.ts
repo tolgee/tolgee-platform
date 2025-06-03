@@ -52,5 +52,7 @@ export type GlossaryTermPreviewProps = {
   term: GlossaryTermModel;
   languageTag: string;
   targetLanguageTag?: string;
+  appendValue?: (val: string) => void;
   standalone?: boolean;
+  slim?: boolean;
 };

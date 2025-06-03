@@ -4,7 +4,7 @@ import {
 } from 'tg.service/http/useQueryApi';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useMemo } from 'react';
-import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
 type Props = {

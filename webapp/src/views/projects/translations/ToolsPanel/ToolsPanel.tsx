@@ -43,7 +43,8 @@ export const ToolsPanel = () => {
   const activeVariant = useTranslationsSelector((c) => c.cursor?.activeVariant);
   const translations = useTranslationsSelector((c) => c.translations);
   const languages = useTranslationsSelector((c) => c.languages);
-  const { setEditValueString, setSidePanelOpen } = useTranslationsActions();
+  const { setEditValueString, appendEditValueString, setSidePanelOpen } =
+    useTranslationsActions();
 
   const [openPanels, setOpenPanels] = useOpenPanels();
 
@@ -72,6 +73,7 @@ export const ToolsPanel = () => {
     baseLanguage: baseLanguage!,
     activeVariant: keyData?.keyIsPlural ? activeVariant! : undefined,
     setValue: setEditValueString,
+    appendValue: appendEditValueString,
     editEnabled: language
       ? (projectPermissions.satisfiesLanguageAccess(
           'translations.edit',

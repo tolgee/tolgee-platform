@@ -5,7 +5,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import React from 'react';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 import {
   GlossaryTermCreateEditForm,
   CreateOrUpdateGlossaryTermRequest,

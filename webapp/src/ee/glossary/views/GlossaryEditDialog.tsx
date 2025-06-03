@@ -14,7 +14,7 @@ import {
   GlossaryCreateEditForm,
   CreateEditGlossaryFormValues,
 } from 'tg.ee.module/glossary/components/GlossaryCreateEditForm';
-import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 import { useMemo } from 'react';
 
 type UpdateGlossaryRequest = components['schemas']['UpdateGlossaryRequest'];

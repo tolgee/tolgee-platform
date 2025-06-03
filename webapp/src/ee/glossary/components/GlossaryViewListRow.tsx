@@ -6,7 +6,7 @@ import { GlossaryListTermCell } from 'tg.ee.module/glossary/components/GlossaryL
 import { SelectionService } from 'tg.service/useSelectionService';
 import { T } from '@tolgee/react';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
-import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
 type SimpleGlossaryTermWithTranslationsModel =
   components['schemas']['SimpleGlossaryTermWithTranslationsModel'];

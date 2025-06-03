@@ -1,9 +1,10 @@
 import { VFC } from 'react';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import Box from '@mui/material/Box';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { AssignedProjectsSelect } from 'tg.ee.module/glossary/components/AssignedProjectsSelect';
 import { GlossaryBaseLanguageSelect } from 'tg.ee.module/glossary/components/GlossaryBaseLanguageSelect';
+import { Alert } from '@mui/material';
 
 type Props = {
   disabled?: boolean;
@@ -26,10 +27,15 @@ export const GlossaryCreateEditFields: VFC<Props> = ({
         data-cy="create-glossary-field-name"
         disabled={disabled}
       />
-      <GlossaryBaseLanguageSelect name="baseLanguage" disabled={disabled} />
       {withAssignedProjects && (
         <AssignedProjectsSelect name="assignedProjects" disabled={disabled} />
       )}
+      <GlossaryBaseLanguageSelect name="baseLanguage" disabled={disabled} />
+      <Alert severity="info">
+        <Box>
+          <T keyName="create_edit_glossary_languages_note" />
+        </Box>
+      </Alert>
     </Box>
   );
 };

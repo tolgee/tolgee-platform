@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
 export const useSelectedGlossaryLanguages = () => {
   const glossary = useGlossary();

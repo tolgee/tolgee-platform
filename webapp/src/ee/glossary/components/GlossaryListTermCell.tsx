@@ -8,7 +8,7 @@ import Box from '@mui/material/Box';
 import { GlossaryTermEditDialog } from 'tg.ee.module/glossary/views/GlossaryTermEditDialog';
 import { GlossaryTermTags } from 'tg.ee.module/glossary/components/GlossaryTermTags';
 import { SelectionService } from 'tg.service/useSelectionService';
-import { useGlossary } from 'tg.ee.module/glossary/hooks/GlossaryContext';
+import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
 type SimpleGlossaryTermWithTranslationsModel =
   components['schemas']['SimpleGlossaryTermWithTranslationsModel'];
@@ -32,6 +32,7 @@ const StyledCheckbox = styled(Checkbox)`
 const StyledText = styled(Box)`
   grid-area: text;
   overflow: hidden;
+  margin-top: ${({ theme }) => theme.spacing(-0.25)};
   margin-bottom: ${({ theme }) => theme.spacing(0.5)};
 `;
 

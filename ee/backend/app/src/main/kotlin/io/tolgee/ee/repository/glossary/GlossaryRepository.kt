@@ -58,7 +58,7 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     select g.id as id,
       g.name as name,
       g.baseLanguageTag as baseLanguageTag,
-      ap.name as firstAssignedProjectName,
+      min(ap.name) as firstAssignedProjectName,
       count(ap) as assignedProjectsCount
     from Glossary g
     left join g.assignedProjects ap
