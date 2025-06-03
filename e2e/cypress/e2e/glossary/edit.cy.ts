@@ -15,7 +15,7 @@ describe('Glossary editing', () => {
       view = new E2GlossariesView();
       view.findAndVisit(res.body, 'Owner');
 
-      dialog = view.openEditGlossaryDialog('Test Glossary');
+      dialog = view.openEditGlossaryDialog('Empty Glossary');
     });
   });
 
@@ -33,11 +33,11 @@ describe('Glossary editing', () => {
   });
 
   it('Edits glossary base language', () => {
-    dialog.setBaseLanguage('French');
+    dialog.setBaseLanguage('English');
     dialog.submit();
 
-    const dialogAfterEdit = view.openEditGlossaryDialog('Test Glossary');
-    dialogAfterEdit.checkBaseLanguage('French');
+    const dialogAfterEdit = view.openEditGlossaryDialog('Empty Glossary');
+    dialogAfterEdit.checkBaseLanguage('English');
     dialogAfterEdit.cancel();
   });
 
@@ -45,7 +45,7 @@ describe('Glossary editing', () => {
     dialog.toggleAssignedProject('TheProject');
     dialog.submit();
 
-    const dialogAfterEdit = view.openEditGlossaryDialog('Test Glossary');
+    const dialogAfterEdit = view.openEditGlossaryDialog('Empty Glossary');
     cy.should('not.contain', 'TheProject');
     dialogAfterEdit.cancel();
   });

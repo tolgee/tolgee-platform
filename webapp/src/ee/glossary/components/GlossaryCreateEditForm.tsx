@@ -73,6 +73,7 @@ export const GlossaryCreateEditForm = ({
   return (
     <Formik
       initialValues={initialValues}
+      enableReinitialize
       validationSchema={Validation.GLOSSARY_CREATE_FORM(t)}
       onSubmit={onSave}
     >
