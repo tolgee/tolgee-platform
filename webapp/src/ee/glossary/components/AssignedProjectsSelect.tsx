@@ -96,7 +96,7 @@ export const AssignedProjectsSelect: React.VFC<Props> = ({
     setValue([itemSelected, ...value]);
   };
 
-  function renderItem(props: any, item: SimpleProjectModel) {
+  function renderItem(props: object, item: SimpleProjectModel) {
     const selected = value.some((v) => v.id === item.id);
     return (
       <MultiselectItem
@@ -104,6 +104,7 @@ export const AssignedProjectsSelect: React.VFC<Props> = ({
         selected={selected}
         label={item.name}
         onClick={() => toggleSelected(item)}
+        {...props}
       />
     );
   }
