@@ -70,22 +70,25 @@ export const ColorPaletteField = ({
   const theme = useTheme();
   const { t } = useTranslate();
   const isDarkMode = theme.palette.mode === 'dark';
-  const colorsMap = (
+
+  const palette = (
     typeof colors === 'object' ? new Map(Object.entries(colors)) : colors
   ) as Map<string, string>;
-  const darkColorsMap = (
+
+  const darkPalette = (
     typeof darkColors === 'object'
       ? new Map(Object.entries(darkColors))
       : darkColors
   ) as Map<string, string>;
-  const palette = isDarkMode && darkColorsMap ? darkColorsMap : colorsMap;
+
+  const activePalette = isDarkMode && darkPalette ? darkPalette : palette;
 
   const setInputValue = (color: string) => {
     helpers.setValue(color.toUpperCase());
   };
 
   function getReferenceColor(key: string) {
-    const color = colorsMap.get(key);
+    const color = palette.get(key);
     if (!color) {
       throw new Error(`Color key "${key}" not found in palette.`);
     }
@@ -93,11 +96,13 @@ export const ColorPaletteField = ({
   }
 
   function getSelectedColor() {
-    return pickedColorKey ? palette.get(pickedColorKey) : field.value;
+    return pickedColorKey ? activePalette.get(pickedColorKey) : field.value;
   }
 
   const getRandomColorKey = () => {
-    return [...palette.keys()][Math.floor(Math.random() * palette.size)];
+    return [...activePalette.keys()][
+      Math.floor(Math.random() * activePalette.size)
+    ];
   };
 
   const defaultFilled = useRef(false);
@@ -178,7 +183,7 @@ export const ColorPaletteField = ({
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
       >
         <PaletteGrid data-cy="color-palette-popover">
-          {[...palette].map(([key, color]) => (
+          {[...activePalette].map(([key, color]) => (
             <PaletteColor
               key={key}
               color={color}
