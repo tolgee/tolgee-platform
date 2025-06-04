@@ -28,8 +28,9 @@ export class E2GlossaryView {
   }
 
   toggleTermChecked(termDefaultTranslationOrDescription: string) {
+    const escaped = Cypress._.escapeRegExp(termDefaultTranslationOrDescription);
     gcy('glossary-term-list-item')
-      .filter(`:contains(${termDefaultTranslationOrDescription})`)
+      .filter(`:contains(${escaped})`)
       .find('input[type="checkbox"]')
       .click();
   }
