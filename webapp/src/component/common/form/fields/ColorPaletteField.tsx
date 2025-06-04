@@ -44,6 +44,8 @@ type Props = {
   name: string;
   label?: string;
   helperText?: string;
+  colors: Map<string, string> | object;
+  darkColors?: Map<string, string> | object;
   disabled?: boolean;
   minHeight?: boolean;
   randomDefaultColor?: boolean;
@@ -55,23 +57,47 @@ export const ColorPaletteField = ({
   label,
   helperText,
   disabled,
+  colors,
+  darkColors,
   minHeight = true,
   randomDefaultColor = true,
   required = false,
 }: Props) => {
   const [field, meta, helpers] = useField(name);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [pickedColorKey, setPickedColorKey] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const theme = useTheme();
   const { t } = useTranslate();
+  const isDarkMode = theme.palette.mode === 'dark';
+  const colorsMap = (
+    typeof colors === 'object' ? new Map(Object.entries(colors)) : colors
+  ) as Map<string, string>;
+  const darkColorsMap = (
+    typeof darkColors === 'object'
+      ? new Map(Object.entries(darkColors))
+      : darkColors
+  ) as Map<string, string>;
+  const palette = isDarkMode && darkColorsMap ? darkColorsMap : colorsMap;
 
   const setInputValue = (color: string) => {
     helpers.setValue(color.toUpperCase());
   };
 
-  const getRandomColor = () => {
-    const colors = Object.values(theme.palette.paletteField);
-    return colors[Math.floor(Math.random() * colors.length)];
+  function getReferenceColor(key: string) {
+    const color = colorsMap.get(key);
+    if (!color) {
+      throw new Error(`Color key "${key}" not found in palette.`);
+    }
+    return color;
+  }
+
+  function getSelectedColor() {
+    return pickedColorKey ? palette.get(pickedColorKey) : field.value;
+  }
+
+  const getRandomColorKey = () => {
+    return [...palette.keys()][Math.floor(Math.random() * palette.size)];
   };
 
   const defaultFilled = useRef(false);
@@ -81,18 +107,29 @@ export const ColorPaletteField = ({
     !meta.initialValue &&
     !defaultFilled.current
   ) {
-    setInputValue(getRandomColor());
+    const key = getRandomColorKey();
+    setInputValue(getReferenceColor(key));
+    setPickedColorKey(key);
     defaultFilled.current = true;
   }
 
   const showError = meta.touched && Boolean(meta.error);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPickedColorKey(findColorKey(e.target.value) || null);
     setInputValue(e.target.value);
   };
 
-  const handleColorClick = (color: string) => {
-    setInputValue(color);
+  const findColorKey = (color: string) => {
+    const colorLower = color.toLowerCase();
+    return [...palette].find(
+      ([, value]) => value.toLowerCase() === colorLower
+    )?.[0];
+  };
+
+  const handleColorClick = (key: string) => {
+    setInputValue(getReferenceColor(key));
+    setPickedColorKey(key);
     setAnchorEl(null);
   };
 
@@ -113,7 +150,7 @@ export const ColorPaletteField = ({
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Tooltip title={t('choose_color')}>
             <ColorPreview
-              color={/^#[0-9A-F]{6}$/i.test(field.value) ? field.value : '#fff'}
+              color={getSelectedColor()}
               onClick={(e) => !disabled && setAnchorEl(e.currentTarget)}
               data-cy="color-preview"
             />
@@ -141,12 +178,12 @@ export const ColorPaletteField = ({
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
       >
         <PaletteGrid data-cy="color-palette-popover">
-          {Object.values(theme.palette.paletteField).map((color) => (
+          {[...palette].map(([key, color]) => (
             <PaletteColor
-              key={color}
+              key={key}
               color={color}
-              selected={field.value?.toLowerCase() === color}
-              onClick={() => handleColorClick(color)}
+              selected={pickedColorKey === key}
+              onClick={() => handleColorClick(key)}
               data-cy={`palette-color`}
             />
           ))}
