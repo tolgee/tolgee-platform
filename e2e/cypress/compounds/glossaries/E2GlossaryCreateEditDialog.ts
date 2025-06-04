@@ -6,7 +6,7 @@ export class E2GlossaryCreateEditDialog {
     if (name !== undefined) {
       chain.type(name);
     }
-    this.checkName(name);
+    this.checkName(name || '');
   }
 
   checkName(name: string) {
@@ -26,8 +26,7 @@ export class E2GlossaryCreateEditDialog {
   toggleAssignedProject(projectName: string) {
     gcy('assigned-projects-select').click();
     gcy('assigned-projects-select-item').contains(projectName).click();
-    cy.wait(50);
-    cy.get('body').click(0, 0); // Close the dropdown
+    cy.get('body').type('{esc}'); // Close the dropdown
   }
 
   cancel() {
