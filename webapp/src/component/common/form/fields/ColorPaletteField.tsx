@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useField } from 'formik';
 import {
   Popover,
@@ -67,9 +67,24 @@ export const ColorPaletteField = ({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [pickedColorKey, setPickedColorKey] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const defaultFilled = useRef(false);
   const theme = useTheme();
   const { t } = useTranslate();
   const isDarkMode = theme.palette.mode === 'dark';
+
+  useEffect(() => {
+    if (
+      randomDefaultColor &&
+      !field.value &&
+      !meta.initialValue &&
+      !defaultFilled.current
+    ) {
+      const key = getRandomColorKey();
+      setInputValue(getReferenceColor(key));
+      setPickedColorKey(key);
+      defaultFilled.current = true;
+    }
+  }, [randomDefaultColor, field.value, meta.initialValue]);
 
   const palette = (
     typeof colors === 'object' ? new Map(Object.entries(colors)) : colors
@@ -104,19 +119,6 @@ export const ColorPaletteField = ({
       Math.floor(Math.random() * activePalette.size)
     ];
   };
-
-  const defaultFilled = useRef(false);
-  if (
-    randomDefaultColor &&
-    !field.value &&
-    !meta.initialValue &&
-    !defaultFilled.current
-  ) {
-    const key = getRandomColorKey();
-    setInputValue(getReferenceColor(key));
-    setPickedColorKey(key);
-    defaultFilled.current = true;
-  }
 
   const showError = meta.touched && Boolean(meta.error);
 

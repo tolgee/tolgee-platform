@@ -32,7 +32,7 @@ export const LabelForm: FC<{
   const onSubmit = (values: LabelFormValues) => {
     submit({
       ...values,
-      color: values.color?.toUpperCase(),
+      color: values.color.toUpperCase(),
     });
   };
 

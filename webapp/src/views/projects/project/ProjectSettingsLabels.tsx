@@ -147,14 +147,12 @@ export const ProjectSettingsLabels = () => {
           )}
         />
       </Box>
-      {modalOpened && (
-        <LabelModal
-          open={modalOpened}
-          label={selectedLabel}
-          close={() => setModalOpen(false)}
-          submit={submit}
-        />
-      )}
+      <LabelModal
+        open={modalOpened}
+        label={selectedLabel}
+        close={() => setModalOpen(false)}
+        submit={submit}
+      />
     </>
   );
 };
