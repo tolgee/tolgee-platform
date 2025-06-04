@@ -106,17 +106,27 @@ export type Placeholders = {
   inactive: Placeholder;
 };
 
-export type PaletteField = {
-  color1: string;
-  color2: string;
-  color3: string;
-  color4: string;
-  color5: string;
-  color6: string;
-  color7: string;
-  color8: string;
-  color9: string;
-  color10: string;
+export type Label = {
+  lightSkyBlue: string;
+  skyBlue: string;
+  lightBlue: string;
+  blue: string;
+  lightPurple: string;
+  purple: string;
+  lightPink: string;
+  pink: string;
+  lightRed: string;
+  red: string;
+  lightGrey: string;
+  grey: string;
+  lightTeal: string;
+  teal: string;
+  lightGreen: string;
+  green: string;
+  lightYellow: string;
+  yellow: string;
+  lightOrange: string;
+  orange: string;
 };
 
 export type QuickStart = {
@@ -253,18 +263,6 @@ export const colors = {
     input: {
       background: '#ffffff00',
     } satisfies Input,
-    paletteField: {
-      color1: '#ff6995',
-      color2: '#aed5ff',
-      color3: '#ffb6c1',
-      color4: '#90ee90',
-      color5: '#ffffe0',
-      color6: '#d3d3d3',
-      color7: '#ffa07a',
-      color8: '#dda0dd',
-      color9: '#ffcccb',
-      color10: '#dcdcdc',
-    } satisfies PaletteField,
   },
   dark: {
     white: '#dddddd',
@@ -389,17 +387,5 @@ export const colors = {
     input: {
       background: '#ffffff08',
     } satisfies Input,
-    paletteField: {
-      color1: '#ff6995',
-      color2: '#aed5ff',
-      color3: '#ffb6c1',
-      color4: '#90ee90',
-      color5: '#ffffe0',
-      color6: '#d3d3d3',
-      color7: '#ffa07a',
-      color8: '#dda0dd',
-      color9: '#ffcccb',
-      color10: '#dcdcdc',
-    } satisfies PaletteField,
   },
 } as const;

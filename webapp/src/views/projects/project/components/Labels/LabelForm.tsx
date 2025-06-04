@@ -7,6 +7,7 @@ import { FieldLabel } from 'tg.component/FormField';
 import { T, useTranslate } from '@tolgee/react';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { ColorPaletteField } from 'tg.component/common/form/fields/ColorPaletteField';
+import { tolgeePalette } from '../../../../../figmaTheme';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -55,7 +56,12 @@ export const LabelForm: FC<{
             <FieldLabel>
               <T keyName="project_settings_label_color" />
             </FieldLabel>
-            <ColorPaletteField name="color" required={true} />
+            <ColorPaletteField
+              name="color"
+              colors={tolgeePalette.Light.label}
+              darkColors={tolgeePalette.Dark.label}
+              required={true}
+            />
           </Box>
         </Box>
         <Box display="grid">
