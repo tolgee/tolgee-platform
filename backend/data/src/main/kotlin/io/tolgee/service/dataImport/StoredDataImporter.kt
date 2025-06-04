@@ -20,6 +20,7 @@ import io.tolgee.service.key.TagService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.flushAndClear
+import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 
@@ -146,7 +147,11 @@ class StoredDataImporter(
 
   private fun deleteOtherKeys() {
     if ((importSettings as? SingleStepImportRequest)?.removeOtherKeys == true) {
-      val existingKeys = importDataManager.existingKeys.entries
+      val namespaces = import.files.map { getSafeNamespace(it.namespace) }.toSet()
+      val existingKeys = importDataManager.existingKeys.entries.filter {
+        // taking only keys from namespaces that are included in the import
+        namespaces.contains(getSafeNamespace(it.value.namespace?.name))
+      }
       val importedKeys = importDataManager.storedKeys.entries.map { (pair) -> Pair(pair.first.namespace, pair.second) }
       val otherKeys = existingKeys.filter { existing -> !importedKeys.contains(existing.key) }
       if (otherKeys.isNotEmpty()) {

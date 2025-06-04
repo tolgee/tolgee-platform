@@ -46,7 +46,8 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
   var tagNewKeys: List<String> = listOf()
 
   @get:Schema(
-    description = "If yes, keys from project that were not included in import will be deleted.",
+    description = "If yes, keys from project that were not included in import will be deleted " +
+      "(only within namespaces which are included in the import).",
   )
   var removeOtherKeys: Boolean? = false
 }

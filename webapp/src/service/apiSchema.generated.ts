@@ -4312,7 +4312,7 @@ export interface components {
       languageMappings?: components["schemas"]["LanguageMapping"][];
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
-      /** @description If yes, keys from project that were not included in import will be deleted. */
+      /** @description If yes, keys from project that were not included in import will be deleted (only within namespaces which are included in the import). */
       removeOtherKeys?: boolean;
       /**
        * @description When importing files in structured formats (e.g., JSON, YAML), this field defines the delimiter which will be used in names of imported keys.
