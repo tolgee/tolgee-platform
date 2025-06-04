@@ -20,7 +20,6 @@ import io.tolgee.service.key.TagService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.flushAndClear
-import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 
