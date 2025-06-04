@@ -9,7 +9,7 @@ export class E2GlossaryTermCreateEditDialog {
     if (translation !== undefined) {
       chain.type(translation);
     }
-    this.checkDefaultTranslation(translation);
+    this.checkDefaultTranslation(translation || '');
   }
 
   checkDefaultTranslation(translation: string) {
@@ -26,7 +26,7 @@ export class E2GlossaryTermCreateEditDialog {
     if (description !== undefined) {
       chain.type(description);
     }
-    this.checkDescription(description);
+    this.checkDescription(description || '');
   }
 
   checkDescription(description: string) {
