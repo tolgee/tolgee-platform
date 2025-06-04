@@ -249,6 +249,7 @@ class TestDataService(
     saveBatchJobs(builder)
     saveTasks(builder)
     saveTaskKeys(builder)
+    saveLabels(builder)
   }
 
   private fun saveImportSettings(builder: ProjectBuilder) {
@@ -516,6 +517,12 @@ class TestDataService(
 
   private fun saveTaskKeys(builder: ProjectBuilder) {
     builder.data.taskKeys.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveLabels(builder: ProjectBuilder) {
+    builder.data.labels.forEach {
       entityManager.persist(it.self)
     }
   }

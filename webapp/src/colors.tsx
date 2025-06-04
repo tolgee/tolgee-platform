@@ -106,6 +106,29 @@ export type Placeholders = {
   inactive: Placeholder;
 };
 
+export type Label = {
+  lightSkyBlue: string;
+  skyBlue: string;
+  lightBlue: string;
+  blue: string;
+  lightPurple: string;
+  purple: string;
+  lightPink: string;
+  pink: string;
+  lightRed: string;
+  red: string;
+  lightGrey: string;
+  grey: string;
+  lightTeal: string;
+  teal: string;
+  lightGreen: string;
+  green: string;
+  lightYellow: string;
+  yellow: string;
+  lightOrange: string;
+  orange: string;
+};
+
 export type QuickStart = {
   highlight: string;
   circleNormal: string;

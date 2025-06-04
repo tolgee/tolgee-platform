@@ -162,6 +162,9 @@ declare namespace DataCy {
         "cell-key-screenshot-dropzone" |
         "cell-key-screenshot-file-input" |
         "checkbox-group-multiselect" |
+        "color-palette-field" |
+        "color-palette-popover" |
+        "color-preview" |
         "comment" |
         "comment-menu" |
         "comment-menu-delete" |
@@ -320,6 +323,7 @@ declare namespace DataCy {
         "key-plural-checkbox" |
         "key-plural-checkbox-expand" |
         "key-plural-variable-name" |
+        "label-modal" |
         "language-ai-prompt-dialog-description-input" |
         "language-ai-prompt-dialog-save" |
         "language-delete-button" |
@@ -415,6 +419,7 @@ declare namespace DataCy {
         "organization-switch-item" |
         "organization-switch-new" |
         "organization-switch-search" |
+        "palette-color" |
         "pat-expiry-info" |
         "pat-list-item" |
         "pat-list-item-alert" |
@@ -495,12 +500,21 @@ declare namespace DataCy {
         "project-settings-button" |
         "project-settings-delete-button" |
         "project-settings-description" |
+        "project-settings-label-item" |
+        "project-settings-label-item-description" |
+        "project-settings-label-item-label" |
+        "project-settings-label-item-name" |
+        "project-settings-labels-add-button" |
+        "project-settings-labels-edit-button" |
+        "project-settings-labels-list" |
+        "project-settings-labels-remove-button" |
         "project-settings-languages" |
         "project-settings-languages-add" |
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-name" |
         "project-settings-menu-advanced" |
         "project-settings-menu-general" |
+        "project-settings-menu-labels" |
         "project-settings-name" |
         "project-settings-transfer-button" |
         "project-settings-use-namespaces-checkbox" |

@@ -469,6 +469,15 @@ export class Validation {
       name: Yup.string().min(3).required(),
       email: Yup.string().min(3).required(),
     });
+
+  static readonly TRANSLATION_LABEL = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string().required().min(3).max(100),
+      description: Yup.string().nullable().min(3).max(2000),
+      color: Yup.string()
+        .required()
+        .matches(/^#[0-9A-F]{6}$/i, t('validation_invalid_hex_color')),
+    });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;
