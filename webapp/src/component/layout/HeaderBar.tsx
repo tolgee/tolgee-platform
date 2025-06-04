@@ -26,7 +26,7 @@ export type HeaderBarProps = {
   addLinkTo?: string;
   addLabel?: string;
   addComponent?: React.ReactNode;
-  onSearch?: (string) => void;
+  onSearch?: (value: string) => void;
   searchPlaceholder?: string;
   customHeader?: ReactNode;
   switcher?: ReactNode;
