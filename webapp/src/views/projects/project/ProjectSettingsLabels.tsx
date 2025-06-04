@@ -15,8 +15,7 @@ type LabelModel = components['schemas']['LabelModel'];
 
 const TableGrid = styled('div')`
   display: grid;
-  padding: ${({ theme }) => theme.spacing(1)};
-  grid-template-columns: repeat(4, auto);
+  grid-template-columns: auto 1fr auto;
 `;
 
 export const ProjectSettingsLabels = () => {
