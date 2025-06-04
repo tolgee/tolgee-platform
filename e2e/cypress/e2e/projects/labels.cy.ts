@@ -37,10 +37,6 @@ describe('Projects Settings - Labels', () => {
         gcy('project-settings-label-item-name')
           .should('be.visible')
           .contains('First label');
-        gcy('project-settings-label-item-color')
-          .should('be.visible')
-          .should('have.css', 'color', 'rgb(255, 0, 0)')
-          .contains('#FF0000');
         gcy('project-settings-label-item-description')
           .should('be.visible')
           .contains('This is a description');
@@ -111,9 +107,6 @@ describe('Projects Settings - Labels', () => {
         gcy('project-settings-label-item-name')
           .should('be.visible')
           .contains('Edited label');
-        gcy('project-settings-label-item-color')
-          .should('have.css', 'color', 'rgb(0, 255, 0)')
-          .contains('#00FF00');
         gcy('project-settings-label-item-description')
           .should('be.visible')
           .contains('Edited label description');
@@ -134,29 +127,20 @@ describe('Projects Settings - Labels', () => {
         gcy('color-palette-popover')
           .should('be.visible')
           .within(() => {
-            gcy('palette-color')
-              .eq(3)
-              .click()
-              .then(($colorPad) => {
-                const color: string = $colorPad.css('background-color');
-                cy.wrap(color).as('selectedColor');
-              });
+            gcy('palette-color').eq(3).click();
           });
       });
-    cy.get('@selectedColor').then((color) => {
-      cy.get('input[name="color"]').should(
-        'have.value',
-        rgbToHex(color as unknown as string)
-      );
-      gcy('global-form-save-button').click();
-      gcy('project-settings-label-item')
-        .first()
-        .within(() => {
-          gcy('project-settings-label-item-color')
-            .should('have.css', 'color', color)
-            .contains(rgbToHex(color as unknown as string));
-        });
-    });
+    cy.get('input[name="color"]').should('have.value', '#1188FF');
+    gcy('global-form-save-button').click();
+    gcy('project-settings-label-item')
+      .first()
+      .within(() => {
+        gcy('project-settings-label-item-label').should(
+          'have.css',
+          'background-color',
+          'rgb(17, 136, 255)'
+        );
+      });
   });
 
   it('remove project label', () => {
@@ -183,15 +167,3 @@ describe('Projects Settings - Labels', () => {
     gcy('project-settings-label-item').should('have.length', 6);
   });
 });
-
-function rgbToHex(rgb: string): string {
-  const result = rgb.match(/\d+/g);
-  if (!result) return '';
-  return (
-    '#' +
-    result
-      .slice(0, 3)
-      .map((x) => (+x).toString(16).padStart(2, '0').toUpperCase())
-      .join('')
-  );
-}

@@ -36,23 +36,15 @@ function getShadeFromLabelColor(color: string): string {
 
 const StyledListItem = styled('div')`
   display: contents;
-  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
-  &:last-child {
-    border-bottom: 0;
-  }
-  position: relative;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
 `;
 
 const StyledListItemColumn = styled('div')`
-  margin: 5px 0;
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
 `;
 
 const StyledItemText = styled(StyledListItemColumn)<{ color?: string }>`
   flex-grow: 1;
-  padding: ${({ theme }) => theme.spacing(1)};
+  padding: ${({ theme }) => theme.spacing(1.5)};
   display: flex;
   align-items: center;
   gap: 4px;
@@ -94,20 +86,17 @@ export const LabelItem: React.FC<Props> = ({
   return (
     <StyledListItem data-cy="project-settings-label-item">
       <StyledItemText data-cy="project-settings-label-item-name">
-        <StyledLabel color={label.color}>{label.name}</StyledLabel>
+        <StyledLabel
+          color={label.color}
+          data-cy="project-settings-label-item-label"
+        >
+          {label.name}
+        </StyledLabel>
       </StyledItemText>
       <StyledItemText data-cy="project-settings-label-item-description">
-        {label.description && (
-          <span style={{ fontSize: '0.8em', color: '#888' }}>
-            {label.description}
-          </span>
-        )}
-      </StyledItemText>
-      <StyledItemText
-        data-cy="project-settings-label-item-color"
-        color={label.color}
-      >
-        {label.color}
+        <span style={{ fontSize: '0.8em', color: '#888' }}>
+          {label.description}
+        </span>
       </StyledItemText>
       <StyledItemActions>
         <IconButton
