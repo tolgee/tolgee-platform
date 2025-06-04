@@ -28,7 +28,7 @@ type Props = MenuItemProps & {
   selected: boolean;
 };
 
-export const SelectItem = React.forwardRef(function MultiselectItem(
+export const SelectItem = React.forwardRef(function SelectItem(
   { label, selected, ...other }: Props,
   ref
 ) {
