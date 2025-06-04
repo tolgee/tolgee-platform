@@ -30,8 +30,12 @@ export const AssignedProjectsSelect: React.VFC<Props> = ({
   const { t } = useTranslate();
   const [field, meta] = useField(name);
   const value = field.value as SelectedProjectModel[];
-  // Formik returns error as object - schema is incorrect...
-  const error = (meta.error as any)?.id;
+  // Formik returns an error as object - schema is incorrect...
+  // Already reported by someone else here: https://github.com/jaredpalmer/formik/issues/3994
+  const error =
+    typeof meta.error === 'object' && meta.error !== null && 'id' in meta.error
+      ? (meta.error as { id?: string }).id
+      : undefined;
 
   const [search, setSearch] = useState('');
   const [searchDebounced] = useDebounce(search, 500);
