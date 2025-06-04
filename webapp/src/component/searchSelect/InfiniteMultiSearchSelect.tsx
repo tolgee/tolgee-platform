@@ -84,7 +84,7 @@ export function InfiniteMultiSearchSelect<T, S>({
   const anchorEl = useRef<HTMLElement>(null);
 
   const selectedItemsLabel = useMemo(() => {
-    return selected?.map((v) => v && labelItem(v))?.join(', ');
+    return selected?.map((v) => labelItem(v))?.join(', ');
   }, [selected]);
 
   const close = () => {
