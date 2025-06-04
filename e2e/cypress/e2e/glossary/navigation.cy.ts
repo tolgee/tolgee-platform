@@ -28,7 +28,7 @@ describe('Glossaries navigation', () => {
   });
 
   it('Member can navigate from organization to glossary', () => {
-    login('Owner');
+    login('Member');
     testItself();
   });
 
