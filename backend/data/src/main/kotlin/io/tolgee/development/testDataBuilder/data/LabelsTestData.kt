@@ -5,7 +5,6 @@ import io.tolgee.model.translation.Translation
 
 class LabelsTestData : BaseTestData() {
   private lateinit var firstTranslation: Translation
-  private lateinit var secondTranslation: Translation
   lateinit var firstLabel: Label
   lateinit var secondLabel: Label
 
@@ -34,7 +33,7 @@ class LabelsTestData : BaseTestData() {
           name = "Second project key"
         }
         val en = addEnglish()
-        secondTranslation = addTranslation {
+        val secondTranslation = addTranslation {
           language = en.self
           text = "second project key translation"
           this.key = key.self
@@ -49,9 +48,10 @@ class LabelsTestData : BaseTestData() {
         for (i in 1..25) {
           addLabel {
             name = "Label $i"
-            color = "#FF0000"
+            color = listOf("#8995A5", "#FF921E", "#35C4B0", "#9154FB", "#1188FF", "#FF2E2E").random()
             description = "This is a description for label $i"
             translations = mutableSetOf(secondTranslation)
+            secondTranslation.labels.add(this)
             project = this@secondProject.self
           }
         }

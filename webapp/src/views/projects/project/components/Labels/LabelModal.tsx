@@ -14,13 +14,12 @@ export const LabelModal: FC<{
   open: boolean;
   close: () => void;
   submit: (values: LabelFormValues) => void;
-}> = (props) => {
-  const { close } = props;
+}> = ({ open, close, label, submit }) => {
   const { t } = useTranslate();
   return (
-    <Dialog open={true} onClose={close}>
+    <Dialog open={open} onClose={close}>
       <DialogTitle>
-        {props.label
+        {label
           ? t('project_settings_label_edit')
           : t('project_settings_label_add')}
       </DialogTitle>
@@ -29,9 +28,9 @@ export const LabelModal: FC<{
         data-cy="label-modal"
       >
         <LabelForm
-          submitText={props.label ? undefined : t('global_add_button')}
-          label={props.label}
-          submit={props.submit}
+          submitText={label ? undefined : t('global_add_button')}
+          label={label}
+          submit={submit}
           cancel={close}
         />
       </DialogContent>

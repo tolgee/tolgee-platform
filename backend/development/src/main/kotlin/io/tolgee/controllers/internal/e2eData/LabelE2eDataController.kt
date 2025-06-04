@@ -27,14 +27,6 @@ class LabelE2eDataController(
     return generatingService.getStandardResult(data.root)
   }
 
-  @GetMapping(value = ["/generate-pageable"])
-  @Transactional
-  fun generatePageableTestData(): StandardTestDataResult {
-    val data = LabelsTestData()
-    testDataService.saveTestData(data.root)
-    return generatingService.getStandardResult(data.root)
-  }
-
   override val testData: TestDataBuilder
     get() = LabelsTestData().root
 }
