@@ -82,7 +82,6 @@ class ImportDataManager(
   }
 
   val existingKeys: MutableMap<Pair<String?, String>, Key> by lazy {
-    val namespaces = import.files.map { getSafeNamespace(it.namespace) }.toSet()
     keyService.getAll(import.project.id)
       .asSequence()
       .map { (it.namespace?.name to it.name) to it }
