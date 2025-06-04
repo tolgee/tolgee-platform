@@ -4482,7 +4482,7 @@
             <column name="organization_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="daniels (generated)" id="1747905620198-1">
+    <changeSet author="daniels (generated)" id="1749049826107-1">
         <createTable tableName="label">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="labelPK"/>
@@ -4500,10 +4500,12 @@
             <column name="name" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
-            <column name="project_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
-    <changeSet author="daniels (generated)" id="1747905620198-2">
+    <changeSet author="daniels (generated)" id="1749049826107-2">
         <createTable tableName="translation_label">
             <column name="translation_id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="translation_labelPK"/>
@@ -4513,16 +4515,16 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="daniels (generated)" id="1747905620198-3">
+    <changeSet author="daniels (generated)" id="1749049826107-3">
         <addUniqueConstraint columnNames="project_id, name" constraintName="UKo8irvuytfr0q29yc3f5c14eva" tableName="label"/>
     </changeSet>
-    <changeSet author="daniels (generated)" id="1747905620198-4">
+    <changeSet author="daniels (generated)" id="1749049826107-4">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="label" constraintName="FK4nf623d0nwyd4aqje3d3cxx1b" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
-    <changeSet author="daniels (generated)" id="1747905620198-5">
+    <changeSet author="daniels (generated)" id="1749049826107-5">
         <addForeignKeyConstraint baseColumnNames="label_id" baseTableName="translation_label" constraintName="FKhsmhl9wvgjb5mxlmj7o2hnmkl" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="label" validate="true"/>
     </changeSet>
-    <changeSet author="daniels (generated)" id="1747905620198-6">
+    <changeSet author="daniels (generated)" id="1749049826107-6">
         <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="translation_label" constraintName="FKl33hmnchdjvyqy91m3g1l6w1r" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="translation" validate="true"/>
     </changeSet>
 </databaseChangeLog>

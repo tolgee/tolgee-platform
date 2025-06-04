@@ -126,6 +126,7 @@ class Translation(
 
   fun removeLabel(label: Label) {
     labels.remove(label)
+    label.translations.remove(this)
   }
 
   override fun equals(other: Any?): Boolean {
