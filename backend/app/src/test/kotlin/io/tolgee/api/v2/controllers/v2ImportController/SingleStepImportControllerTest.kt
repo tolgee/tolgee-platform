@@ -72,8 +72,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     saveAndPrepare()
 
     executeInNewTransaction {
-      getGermanTestTranslation().state
-        .assert.isEqualTo(TranslationState.REVIEWED)
+      getGermanTestTranslation().state.assert.isEqualTo(TranslationState.REVIEWED)
     }
 
     performImport(
@@ -83,14 +82,11 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     )
 
     executeInNewTransaction {
-      getGermanTestTranslation().state
-        .assert.isEqualTo(TranslationState.TRANSLATED)
+      getGermanTestTranslation().state.assert.isEqualTo(TranslationState.TRANSLATED)
     }
   }
 
-  private fun getGermanTestTranslation() =
-    getTestKeyTranslations()
-      .single { it.language.tag == "de" }
+  private fun getGermanTestTranslation() = getTestKeyTranslations().single { it.language.tag == "de" }
 
   @Test
   @ProjectJWTAuthTestMethod
@@ -354,6 +350,40 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `doesn't remove other keys in different namespaces`() {
+    testData.addReviewedTranslation()
+    testData.addTranslationInDifferentNamespace()
+    saveAndPrepare()
+    val params = getFileMappings(jsonFileName)
+    params["removeOtherKeys"] = true
+
+    executeInNewTransaction {
+      keyService.find(testData.project.id, "test", null).assert.isNotNull()
+      keyService.find(
+        testData.project.id,
+        "test_in_different_namespace",
+        "different_namespace"
+      ).assert.isNotNull()
+    }
+
+    executeInNewTransaction {
+      performImport(
+        projectId = testData.project.id,
+        files = listOf(Pair(jsonFileName, newJson)),
+        params,
+      ).andIsOk
+    }
+
+    executeInNewTransaction {
+      // import with "new" key removes "test" key
+      keyService.find(testData.project.id, "new", null).assert.isNotNull()
+      keyService.find(testData.project.id, "test", null).assert.isNull()
+      keyService.find(testData.project.id, "test_in_different_namespace", "different_namespace").assert.isNotNull()
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `doesn't allow deletion when no permission to do so`() {
     testData.addConflictTranslation()
     testData.setUserScopes(arrayOf(Scope.TRANSLATIONS_VIEW, Scope.KEYS_CREATE, Scope.KEYS_VIEW))
@@ -411,15 +441,14 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   ): MutableMap<String, Any?> {
     return mutableMapOf(
       "languageMappings" to requestLanguageMappings,
-      "fileMappings" to
-        listOf(
-          mapOf(
-            "fileName" to fileName,
-            "namespace" to namespace,
-            "languageTag" to languageTag,
-            "format" to format,
-          ),
+      "fileMappings" to listOf(
+        mapOf(
+          "fileName" to fileName,
+          "namespace" to namespace,
+          "languageTag" to languageTag,
+          "format" to format,
         ),
+      ),
     )
   }
 
