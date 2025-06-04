@@ -1,3 +1,10 @@
+# [3.120.0](https://github.com/tolgee/tolgee-platform/compare/v3.119.4...v3.120.0) (2025-06-04)
+
+
+### Features
+
+* scope namespaces when importing (support is needed for the CLI) ([#3093](https://github.com/tolgee/tolgee-platform/issues/3093)) ([ed4639f](https://github.com/tolgee/tolgee-platform/commit/ed4639f0d612282e1fe40a97d511ccd0084a8b48))
+
 ## [3.119.4](https://github.com/tolgee/tolgee-platform/compare/v3.119.3...v3.119.4) (2025-06-04)
 
 
