@@ -13,7 +13,8 @@ export const usePanelData = () => {
   const activeVariant = useTranslationsSelector((c) => c.cursor?.activeVariant);
   const translations = useTranslationsSelector((c) => c.translations);
   const languages = useTranslationsSelector((c) => c.languages);
-  const { setEditValueString } = useTranslationsActions();
+  const { setEditValueString, appendEditValueString } =
+    useTranslationsActions();
 
   const keyData = useMemo(() => {
     return translations?.find((t) => t.keyId === keyId);
@@ -39,6 +40,7 @@ export const usePanelData = () => {
     baseLanguage: baseLanguage!,
     activeVariant: keyData?.keyIsPlural ? activeVariant! : undefined,
     setValue: setEditValueString,
+    appendValue: appendEditValueString,
     editEnabled: language
       ? (projectPermissions.satisfiesLanguageAccess(
           'translations.edit',

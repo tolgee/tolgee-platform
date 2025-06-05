@@ -7,16 +7,21 @@ import { LanguageValue } from 'tg.component/languages/LanguageValue';
 import { components } from 'tg.service/apiSchema.generated';
 import { FieldLabel } from 'tg.component/FormField';
 
+type LanguageModel = components['schemas']['LanguageModel'];
+
 export const BaseLanguageSelect: FC<{
-  languages: Partial<components['schemas']['LanguageModel']>[];
+  languages: Partial<LanguageModel>[];
   label?: ReactNode;
   name: string;
-  valueKey?: keyof components['schemas']['LanguageModel'];
+  valueKey?: React.KeyOf<LanguageModel>;
+  minHeight?: boolean;
+  disabled?: boolean;
 }> = (props) => {
   const availableLanguages = props.languages.filter((l) => !!l);
   const context = useFormikContext();
   const value = context.getFieldProps(props.name).value;
   const valueKey = props.valueKey || 'id';
+  const minHeight = props.minHeight || false;
 
   useEffect(() => {
     if (value) {
@@ -39,7 +44,8 @@ export const BaseLanguageSelect: FC<{
         sx={{ mt: 0 }}
         name={props.name}
         size="small"
-        minHeight={false}
+        minHeight={minHeight}
+        disabled={props.disabled}
         renderValue={(v) => {
           const language = availableLanguages.find(
             (lang) => lang![valueKey] === v
@@ -48,7 +54,7 @@ export const BaseLanguageSelect: FC<{
         }}
       >
         {availableLanguages.map((l, index) => (
-          <MenuItem key={index} value={l![valueKey] as string | number}>
+          <MenuItem key={index} value={l![valueKey] as React.Key}>
             <LanguageValue language={l!} />
           </MenuItem>
         ))}

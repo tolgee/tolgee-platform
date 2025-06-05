@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.*
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType.VIEW
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import org.springframework.core.io.ClassPathResource
 
@@ -14,6 +15,7 @@ class OrganizationBuilder(
   class DATA {
     var roles: MutableList<OrganizationRoleBuilder> = mutableListOf()
     var avatarFile: ClassPathResource? = null
+    val glossaries = mutableListOf<GlossaryBuilder>()
     var slackWorkspaces: MutableList<OrganizationSlackWorkspaceBuilder> = mutableListOf()
     var tenant: SsoTenantBuilder? = null
     var llmProviders: MutableList<LlmProviderBuilder> = mutableListOf()
@@ -73,4 +75,6 @@ class OrganizationBuilder(
     return builder
   }
   val projects get() = testDataBuilder.data.projects.filter { it.self.organizationOwner.id == self.id }
+
+  fun addGlossary(ft: FT<Glossary>) = addOperation(data.glossaries, ft)
 }

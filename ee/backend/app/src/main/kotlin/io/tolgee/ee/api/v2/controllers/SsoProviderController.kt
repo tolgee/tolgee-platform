@@ -3,7 +3,6 @@ package io.tolgee.ee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.sso.SsoTenantDto
@@ -24,6 +23,7 @@ import io.tolgee.service.organization.OrganizationService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/organizations/{organizationId:[0-9]+}/sso"])
@@ -34,7 +34,6 @@ class SsoProviderController(
   private val ssoTenantAssembler: SsoTenantAssembler,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val organizationService: OrganizationService,
-  private val properties: TolgeeProperties,
 ) {
   @RequiresOrganizationRole(role = OrganizationRoleType.OWNER)
   @PutMapping("")

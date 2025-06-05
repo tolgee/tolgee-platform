@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { StrictMode, Suspense } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { StyledEngineProvider } from '@mui/material/styles';
 import {
@@ -104,7 +104,12 @@ const MainWrapper = () => {
   );
 };
 
-ReactDOM.render(<MainWrapper />, document.getElementById('root'));
+ReactDOM.render(
+  <StrictMode>
+    <MainWrapper />
+  </StrictMode>,
+  document.getElementById('root')
+);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

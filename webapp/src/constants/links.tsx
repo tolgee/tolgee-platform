@@ -59,6 +59,7 @@ export enum PARAMS {
   USER_ID = 'userID',
   VERIFICATION_CODE = 'verificationCode',
   ORGANIZATION_SLUG = 'slug',
+  GLOSSARY_ID = 'glossaryId',
   TRANSLATION_ID = 'translationId',
   PLAN_ID = 'planId',
   TA_ID = 'taId',
@@ -70,8 +71,6 @@ export class LINKS {
   /**
    * Authentication
    */
-
-  static MY_TASKS = Link.ofRoot('my-tasks');
 
   static LOGIN = Link.ofRoot('login');
 
@@ -176,6 +175,8 @@ export class LINKS {
     LINKS.USER_ACCOUNT_SECURITY,
     'disable-mfa'
   );
+
+  static MY_TASKS = Link.ofRoot('my-tasks');
 
   /**
    * Administration
@@ -306,6 +307,18 @@ export class LINKS {
     LINKS.ORGANIZATION_LLM_PROVIDERS,
     'server'
   );
+
+  static ORGANIZATION_GLOSSARIES = Link.ofParent(
+    LINKS.ORGANIZATION,
+    'glossaries'
+  );
+
+  static ORGANIZATION_GLOSSARY = Link.ofParent(
+    LINKS.ORGANIZATION_GLOSSARIES,
+    p(PARAMS.GLOSSARY_ID)
+  );
+
+  static ORGANIZATION_GLOSSARY_VIEW = LINKS.ORGANIZATION_GLOSSARY;
 
   /**
    * Slack
@@ -452,4 +465,16 @@ export const getAiPlaygroundUrl = (
     link += `&${QUERY.TRANSLATIONS_VIEW}=${view}`;
   }
   return link;
+};
+
+export const getGlossaryTermSearchUrl = (
+  organizationSlug: string,
+  glossaryId: number,
+  search: string
+) => {
+  const encodedSearch = encodeURIComponent(search.toString());
+  return `${LINKS.ORGANIZATION_GLOSSARY.build({
+    [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+    [PARAMS.GLOSSARY_ID]: glossaryId,
+  })}?search=${encodedSearch}`;
 };

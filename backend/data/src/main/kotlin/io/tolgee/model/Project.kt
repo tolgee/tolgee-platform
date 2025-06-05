@@ -6,6 +6,7 @@ import io.tolgee.api.ISimpleProject
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
@@ -18,6 +19,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.ColumnDefault
+import org.hibernate.annotations.Filter
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
@@ -91,6 +93,13 @@ class Project(
   @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   @ActivityLoggedProp
   var defaultNamespace: Namespace? = null
+
+  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "assignedProjects")
+  @field:Filter(
+    name = "deletedFilter",
+    condition = "(deleted_at IS NULL)",
+  )
+  var glossaries: MutableSet<Glossary> = mutableSetOf()
 
   @ActivityLoggedProp
   override var avatarHash: String? = null

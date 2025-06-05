@@ -131,7 +131,7 @@ class ProjectService(
     return projectRepository.find(id)
   }
 
-  fun findAll(ids: List<Long>): List<Project> {
+  fun findAll(ids: Iterable<Long>): List<Project> {
     return projectRepository.findAllById(ids)
   }
 

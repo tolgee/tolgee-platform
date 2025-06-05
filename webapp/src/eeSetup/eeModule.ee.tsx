@@ -2,7 +2,7 @@
 import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoView';
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { T, useTranslate } from '@tolgee/react';
-import { ClipboardCheck } from '@untitled-ui/icons-react';
+import { BookClosed, ClipboardCheck } from '@untitled-ui/icons-react';
 import { Link, Route, Switch } from 'react-router-dom';
 import { Badge, Box, MenuItem } from '@mui/material';
 
@@ -47,9 +47,22 @@ import { addProjectMenuItems } from '../views/projects/projectMenu/ProjectMenu';
 import { addAdministrationMenuItems } from '../views/administration/components/BaseAdministrationView';
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
-import { BillingMenuItemsProps } from './EeModuleType';
+import {
+  BillingMenuItemsProps,
+  GlossaryTermHighlightModel,
+  GlossaryTermHighlightsProps,
+  GlossaryTermPreviewProps,
+} from './EeModuleType';
 import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
 import { OrganizationLlmProvidersView } from '../ee/llm/OrganizationLLMProviders/OrganizationLlmProvidersView';
+import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
+import { useGlossaryTermHighlights as useGlossaryTermHighlightsInternal } from '../ee/glossary/hooks/useGlossaryTermHighlights';
+import { GlossaryTermPreview as GlossaryTermPreviewInternal } from '../ee/glossary/components/GlossaryTermPreview';
+import {
+  useGlossariesCount,
+  GlossariesPanel,
+} from '../ee/glossary/components/GlossariesPanel';
+import { GlossaryRouter } from '../ee/glossary/views/GlossaryRouter';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -176,6 +189,12 @@ export const routes = {
         <PrivateRoute path={LINKS.ORGANIZATION_SSO.template}>
           <OrganizationSsoView />
         </PrivateRoute>
+        <PrivateRoute exact path={LINKS.ORGANIZATION_GLOSSARIES.template}>
+          <GlossariesListView />
+        </PrivateRoute>
+        <PrivateRoute exact path={LINKS.ORGANIZATION_GLOSSARY.template}>
+          <GlossaryRouter />
+        </PrivateRoute>
       </>
     );
   },
@@ -256,6 +275,20 @@ export const translationPanelAdder = addPanel(
     },
   ],
   { position: 'after', value: 'history' }
+);
+
+export const glossaryPanelAdder = addPanel(
+  [
+    {
+      id: 'glossaries',
+      icon: <BookClosed />,
+      name: <T keyName="translation_tools_glossaries" />,
+      component: GlossariesPanel,
+      itemsCountFunction: useGlossariesCount,
+      displayPanel: ({ editEnabled }) => editEnabled,
+    },
+  ],
+  { position: 'after', value: 'translation_memory' }
 );
 
 export const useAddDeveloperViewItems = () => {
@@ -386,3 +419,10 @@ export const useAddAdministrationMenuItems = () => {
     { position: 'after', value: 'users' }
   );
 };
+
+export const useGlossaryTermHighlights = (
+  props: GlossaryTermHighlightsProps
+): GlossaryTermHighlightModel[] => useGlossaryTermHighlightsInternal(props);
+
+export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
+  GlossaryTermPreviewInternal;
