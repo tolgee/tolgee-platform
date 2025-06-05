@@ -122,17 +122,21 @@ interface LanguageRepository : JpaRepository<Language, Long> {
 
   @Query(
     value = """
-      select distinct on (l.tag)
-        l.name as name,
-        l.tag as tag,
-        l.original_name as originalName,
-        l.flag_emoji as flagEmoji,
-        true as base
-      from language l
-      join project p on p.base_language_id = l.id
-      join organization o on o.id = p.organization_owner_id
-      where $ORGANIZATION_FILTER
-        and $SEARCH_FILTER
+      select *
+      from (
+        select distinct on (l.tag)
+          l.name as name,
+          l.tag as tag,
+          l.original_name as originalName,
+          l.flag_emoji as flagEmoji,
+          true as base
+        from language l
+        join project p on p.base_language_id = l.id
+        join organization o on o.id = p.organization_owner_id
+        where $ORGANIZATION_FILTER
+          and $SEARCH_FILTER
+        order by l.tag, l.id
+      ) as result
     """,
     countQuery = """
       select count(distinct l.tag) as result
