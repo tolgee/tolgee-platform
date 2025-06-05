@@ -86,37 +86,29 @@ interface LanguageRepository : JpaRepository<Language, Long> {
 
   @Query(
     value = """
-    with base_distinct_tags AS $DISTINCT_TAGS_BASE_SUBQUERY,
-    non_base_distinct_tags AS $DISTINCT_TAGS_NON_BASE_SUBQUERY
-    select *
-    from (
-      select
-        l.name as name,
-        l.tag as tag,
-        l.original_name as originalName,
-        l.flag_emoji as flagEmoji,
-        (
-          CASE
-            WHEN l.id IN (SELECT id FROM base_distinct_tags) THEN true
-            ELSE false
-          END
-        ) as base
-      from language l
-      where l.id in (
-          select id from base_distinct_tags
-        )
-        or l.id in (
-          select id from non_base_distinct_tags
-        )
-    ) as result
+      select *
+      from (
+        select distinct on (l.tag)
+          l.name as name,
+          l.tag as tag,
+          l.original_name as originalName,
+          l.flag_emoji as flagEmoji,
+          (l.id = p.base_language_id) as base
+        from language l
+        join project p on p.id = l.project_id
+        join organization o on o.id = p.organization_owner_id
+        where $ORGANIZATION_FILTER
+          and $SEARCH_FILTER
+        order by l.tag, (l.id = p.base_language_id) desc, l.id
+      ) as result
     """,
     countQuery = """
-    with base_distinct_tags AS $DISTINCT_TAGS_BASE_SUBQUERY,
-    non_base_distinct_tags AS $DISTINCT_TAGS_NON_BASE_SUBQUERY
-    select (
-      (select count(*) from base_distinct_tags) +
-      (select count(*) from non_base_distinct_tags)
-    ) as result
+      select count(distinct l.tag) as result
+      from language l
+      join project p on p.id = l.project_id
+      join organization o on o.id = p.organization_owner_id
+        where $ORGANIZATION_FILTER
+          and $SEARCH_FILTER
     """,
     nativeQuery = true,
   )
@@ -130,23 +122,25 @@ interface LanguageRepository : JpaRepository<Language, Long> {
 
   @Query(
     value = """
-    with base_distinct_tags AS $DISTINCT_TAGS_BASE_SUBQUERY
-    select *
-    from (
-      select
+      select distinct on (l.tag)
         l.name as name,
         l.tag as tag,
         l.original_name as originalName,
         l.flag_emoji as flagEmoji,
         true as base
       from language l
-      where l.id in (select id from base_distinct_tags)
-    ) as result
+      join project p on p.base_language_id = l.id
+      join organization o on o.id = p.organization_owner_id
+      where $ORGANIZATION_FILTER
+        and $SEARCH_FILTER
     """,
     countQuery = """
-    with base_distinct_tags AS $DISTINCT_TAGS_BASE_SUBQUERY
-    select count(id)
-    from base_distinct_tags
+      select count(distinct l.tag) as result
+      from language l
+      join project p on p.base_language_id = l.id
+      join organization o on o.id = p.organization_owner_id
+        where $ORGANIZATION_FILTER
+          and $SEARCH_FILTER
     """,
     nativeQuery = true,
   )
@@ -223,36 +217,6 @@ interface LanguageRepository : JpaRepository<Language, Long> {
         and o.deleted_at is null
         and p.deleted_at is null
         and l.deleted_at is null
-      )
-"""
-
-    const val DISTINCT_TAGS_BASE_SUBQUERY = """
-      (
-        select min(l.id) as id, l.tag as tag
-        from language l
-        join project p on p.id = l.project_id
-        join organization o on p.organization_owner_id = o.id
-        where $ORGANIZATION_FILTER
-        and l.id = p.base_language_id
-        and $SEARCH_FILTER
-        group by l.tag
-      )
-"""
-
-    const val DISTINCT_TAGS_NON_BASE_SUBQUERY = """
-      (
-        select min(l.id) as id, l.tag as tag
-        from language l
-        join project p on p.id = l.project_id
-        join organization o on p.organization_owner_id = o.id
-        where $ORGANIZATION_FILTER
-        and l.id != p.base_language_id
-        and $SEARCH_FILTER
-        and l.tag not in (
-          select tag
-          from base_distinct_tags
-        )
-        group by l.tag
       )
 """
   }

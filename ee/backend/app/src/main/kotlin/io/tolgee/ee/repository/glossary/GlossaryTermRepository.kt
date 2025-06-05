@@ -98,9 +98,8 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
 
   @Query(
     """
-    select distinct te
     from GlossaryTerm te
-    join fetch te.translations
+    left join fetch te.translations
     where te.id in :ids
   """,
   )

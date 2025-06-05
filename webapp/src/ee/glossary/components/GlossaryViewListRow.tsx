@@ -55,7 +55,7 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
         editEnabled={editEnabled}
         selectionService={selectionService}
       />
-      {selectedLanguages?.slice(1)?.map((tag, i) => {
+      {selectedLanguages?.slice(1)?.map((tag) => {
         const realTag = item.flagNonTranslatable
           ? glossary.baseLanguageTag
           : tag;
@@ -64,7 +64,7 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
         );
         return (
           <GlossaryListTranslationCell
-            key={i + 1}
+            key={`${item.id}-${tag}`}
             termId={item.id}
             translation={translation}
             languageTag={tag}

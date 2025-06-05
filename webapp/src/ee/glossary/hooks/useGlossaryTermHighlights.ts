@@ -1,11 +1,10 @@
-import type { GlossaryTermHighlightsProps } from '../../../eeSetup/EeModuleType';
+import type {
+  GlossaryTermHighlightsProps,
+  GlossaryTermHighlightModel,
+} from '../../../eeSetup/EeModuleType';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { components } from 'tg.service/apiSchema.generated';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
-
-type GlossaryTermHighlightModel =
-  components['schemas']['GlossaryTermHighlightModel'];
 
 export const useGlossaryTermHighlights = ({
   text,

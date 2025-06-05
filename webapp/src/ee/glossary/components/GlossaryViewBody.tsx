@@ -23,7 +23,7 @@ export const GlossaryViewBody: React.VFC<Props> = ({
   const [selectedLanguages, setSelectedLanguages] =
     useSelectedGlossaryLanguages();
 
-  const { terms, total, loading, onFetchNextPage, getAllTermsIds } =
+  const { terms, total, loading, onFetchNextPageHint, getAllTermsIds } =
     useGlossaryTerms({
       search,
       languageTags: selectedLanguages,
@@ -53,7 +53,7 @@ export const GlossaryViewBody: React.VFC<Props> = ({
         selectedLanguages={selectedLanguages}
         selectionService={selectionService}
         onCreate={onCreate}
-        onFetchNextPage={onFetchNextPage}
+        onFetchNextPageHint={onFetchNextPageHint}
         clearSearchRef={clearSearchRef}
         verticalScrollRef={verticalScrollRef}
         search={search}

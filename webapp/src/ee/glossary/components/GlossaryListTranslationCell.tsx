@@ -80,8 +80,6 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
   const [value, setValue] = React.useState(translation?.text || '');
   const [replacementText, setReplacementText] = React.useState('');
 
-  const isSaveLoading = false;
-
   const saveMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations',
     method: 'post',
@@ -175,7 +173,7 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
                 color="primary"
                 size="small"
                 variant="contained"
-                loading={isSaveLoading}
+                loading={saveMutation.isLoading}
                 data-cy="glossary-translation-save-button"
               >
                 <T keyName="translate_glossary_term_cell_save" />

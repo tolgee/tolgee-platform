@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
 import React, { useState } from 'react';
 import { useScrollStatus } from 'tg.component/common/useScrollStatus';
 import { useResizeObserver } from 'usehooks-ts';
+import { useTranslate } from '@tolgee/react';
 
 const ARROW_SIZE = 50;
 
@@ -12,7 +13,7 @@ const StyledScrollArrow = styled('div')`
   top: 50vh;
   width: ${ARROW_SIZE / 2}px;
   height: ${ARROW_SIZE}px;
-  z-index: 5;
+  z-index: ${({ theme }) => theme.zIndex.fab};
   cursor: pointer;
   border: 1px solid ${({ theme }) => theme.palette.divider1};
   background: ${({ theme }) => theme.palette.background.default};
@@ -45,6 +46,10 @@ const StyledScrollArrow = styled('div')`
     opacity: 1;
     pointer-events: all;
   }
+
+  &:focus {
+    outline: 0.1px solid ${({ theme }) => theme.palette.primary.main};
+  }
 `;
 
 type Props = {
@@ -58,6 +63,8 @@ export const ScrollArrows = ({
   verticalScrollRef,
   deps = [],
 }: Props) => {
+  const { t } = useTranslate();
+
   const hasMinimalHeight = useMediaQuery('(min-height: 400px)');
   const [tablePosition, setTablePosition] = useState({ left: 0, right: 0 });
 
@@ -95,6 +102,8 @@ export const ScrollArrows = ({
   return (
     <Portal>
       <StyledScrollArrow
+        aria-label={t('scroll_right')}
+        tabIndex={scrollRight ? 0 : -1}
         className={clsx('right', { scrollRight })}
         style={{
           right: tablePosition?.right,
@@ -104,6 +113,8 @@ export const ScrollArrows = ({
         <ChevronRight width={20} height={20} />
       </StyledScrollArrow>
       <StyledScrollArrow
+        aria-label={t('scroll_left')}
+        tabIndex={scrollLeft ? 0 : -1}
         className={clsx('left', { scrollLeft })}
         style={{
           left: tablePosition?.left,

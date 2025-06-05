@@ -1,5 +1,5 @@
 import { Box, Checkbox, styled } from '@mui/material';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
 import {
   CellLanguage,
@@ -39,6 +39,8 @@ export const GlossaryViewListHeader: React.VFC<Props> = ({
   selectedLanguages,
   selectionService,
 }) => {
+  const { t } = useTranslate();
+
   return (
     <StyledHeaderRow
       style={{
@@ -47,13 +49,14 @@ export const GlossaryViewListHeader: React.VFC<Props> = ({
           ' minmax(200px, 1fr)'.repeat((selectedLanguages?.length || 1) - 1),
       }}
     >
-      <StyledHeaderCell key={0}>
+      <StyledHeaderCell key={0} role="columnheader">
         <Checkbox
           size="small"
           checked={selectionService.isAllSelected}
           onChange={selectionService.toggleSelectAll}
           indeterminate={selectionService.isSomeSelected}
           disabled={selectionService.isLoading}
+          aria-label={t('glossary_grid_terms_select_all')}
         />
         <Box>
           <T keyName="glossary_grid_term_text" />
@@ -67,7 +70,7 @@ export const GlossaryViewListHeader: React.VFC<Props> = ({
           name: languageData?.englishName || tag,
         };
         return (
-          <StyledHeaderLanguageCell key={i + 1}>
+          <StyledHeaderLanguageCell key={i + 1} role="columnheader">
             <CellLanguage language={language} />
           </StyledHeaderLanguageCell>
         );

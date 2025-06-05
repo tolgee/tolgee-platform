@@ -77,7 +77,7 @@ export const GlossaryListItem: React.VFC<Props> = ({ glossary }) => {
   const { preferredOrganization } = usePreferredOrganization();
 
   const history = useHistory();
-  const languageTag = glossary.baseLanguageTag!;
+  const languageTag = glossary.baseLanguageTag;
   const languageData = languageInfo[languageTag];
   const languages = [
     {

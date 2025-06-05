@@ -78,7 +78,7 @@ type Props = {
   selectedLanguages?: string[];
   selectionService: SelectionService<number>;
   onCreate?: () => void;
-  onFetchNextPage?: () => void;
+  onFetchNextPageHint?: () => void;
   clearSearchRef: React.RefObject<(() => void) | undefined>;
   verticalScrollRef: React.MutableRefObject<HTMLDivElement | null>;
   search?: string;
@@ -91,7 +91,7 @@ export const GlossaryTermsList = ({
   selectedLanguages,
   selectionService,
   onCreate,
-  onFetchNextPage,
+  onFetchNextPageHint,
   clearSearchRef,
   verticalScrollRef,
   search,
@@ -107,7 +107,7 @@ export const GlossaryTermsList = ({
     const row = terms[index];
     const isLast = index === terms.length - 1;
     if (isLast) {
-      onFetchNextPage?.();
+      onFetchNextPageHint?.();
     }
 
     return (

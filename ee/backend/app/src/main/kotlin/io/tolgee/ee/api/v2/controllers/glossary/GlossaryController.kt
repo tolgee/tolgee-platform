@@ -145,7 +145,7 @@ class GlossaryController(
     @PathVariable
     organizationId: Long,
     @ParameterObject pageable: Pageable,
-    @RequestParam("search") search: String?,
+    @RequestParam("search", required = false) search: String?,
   ): PagedModel<SimpleGlossaryModel> {
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,

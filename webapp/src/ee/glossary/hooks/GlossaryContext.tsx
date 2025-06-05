@@ -24,8 +24,8 @@ export const GlossaryContext: React.FC<Props> = ({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}',
     method: 'get',
     path: {
-      organizationId: organizationId ?? -1,
-      glossaryId: glossaryId ?? -1,
+      organizationId: organizationId!,
+      glossaryId: glossaryId!,
     },
     options: {
       enabled: dataAvailable,

@@ -62,7 +62,7 @@ export const useGlossaryTerms = ({ search, languageTags }: Props) => {
 
   const total = loadable.data?.pages?.[0]?.page?.totalElements;
 
-  const onFetchNextPage = async () => {
+  const onFetchNextPageHint = async () => {
     if (!loadable.isFetching && loadable.hasNextPage) {
       await loadable.fetchNextPage();
     }
@@ -84,7 +84,7 @@ export const useGlossaryTerms = ({ search, languageTags }: Props) => {
     terms,
     total,
     loading: loadable.isLoading,
-    onFetchNextPage,
+    onFetchNextPageHint,
     getAllTermsIds,
   };
 };

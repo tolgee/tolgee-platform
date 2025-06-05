@@ -39,6 +39,7 @@ class OrganizationLanguageController(
   fun getAllLanguagesInUse(
     @ParameterObject
     @SortDefault("base", direction = Sort.Direction.DESC)
+    @SortDefault("name", direction = Sort.Direction.ASC)
     @SortDefault("tag", direction = Sort.Direction.ASC)
     pageable: Pageable,
     @RequestParam("search") search: String?,
@@ -57,6 +58,7 @@ class OrganizationLanguageController(
   @UseDefaultPermissions
   fun getAllBaseLanguagesInUse(
     @ParameterObject
+    @SortDefault("name", direction = Sort.Direction.ASC)
     @SortDefault("tag", direction = Sort.Direction.ASC)
     pageable: Pageable,
     @RequestParam("search") search: String?,
