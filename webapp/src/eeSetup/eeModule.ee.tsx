@@ -58,7 +58,7 @@ import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
 import { useGlossaryTermHighlights as useGlossaryTermHighlightsInternal } from '../ee/glossary/hooks/useGlossaryTermHighlights';
 import { GlossaryTermPreview as GlossaryTermPreviewInternal } from '../ee/glossary/components/GlossaryTermPreview';
 import {
-  glossariesCount,
+  useGlossariesCount,
   GlossariesPanel,
 } from '../ee/glossary/components/GlossariesPanel';
 import { GlossaryRouter } from '../ee/glossary/views/GlossaryRouter';
@@ -275,7 +275,7 @@ export const glossaryPanelAdder = addPanel(
       icon: <BookClosed />,
       name: <T keyName="translation_tools_glossaries" />,
       component: GlossariesPanel,
-      itemsCountFunction: glossariesCount,
+      itemsCountFunction: useGlossariesCount,
       displayPanel: ({ editEnabled }) => editEnabled,
     },
   ],

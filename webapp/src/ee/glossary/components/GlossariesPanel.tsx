@@ -26,7 +26,10 @@ const StyledContent = styled(Box)`
   margin: ${({ theme }) => theme.spacing(0, 0.5)};
 `;
 
-const fetchTermsHighlights = ({ keyData, baseLanguage }: PanelContentData) => {
+const useGlossaryTermsHighlightsForPanel = ({
+  keyData,
+  baseLanguage,
+}: PanelContentData) => {
   const languageTag = baseLanguage.tag;
   const text = keyData.translations[languageTag]?.text;
 
@@ -35,7 +38,7 @@ const fetchTermsHighlights = ({ keyData, baseLanguage }: PanelContentData) => {
 
 export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
   const { language, baseLanguage, project, appendValue } = data;
-  const terms = fetchTermsHighlights(data);
+  const terms = useGlossaryTermsHighlightsForPanel(data);
 
   if (terms.length === 0) {
     return (
@@ -88,5 +91,5 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
   );
 };
 
-export const glossariesCount = (data: PanelContentData) =>
-  fetchTermsHighlights(data).length;
+export const useGlossariesCount = (data: PanelContentData) =>
+  useGlossaryTermsHighlightsForPanel(data).length;
