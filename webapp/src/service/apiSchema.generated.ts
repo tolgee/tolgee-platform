@@ -3714,7 +3714,8 @@ export interface components {
         | "TASK_CLOSE"
         | "TASK_REOPEN"
         | "TASK_KEY_UPDATE"
-        | "ORDER_TRANSLATION";
+        | "ORDER_TRANSLATION"
+        | "TRANSLATION_LABELS_EDIT";
     };
     ProjectAiPromptCustomizationModel: {
       /**

@@ -11,7 +11,7 @@ export const StyledTranslationLabel = styled('div')<{ color?: string }>`
   padding: 2px 7px;
   font-size: 13px;
   font-weight: 600;
-  display: flex;
+  display: inline-flex;
   cursor: default;
 `;
 

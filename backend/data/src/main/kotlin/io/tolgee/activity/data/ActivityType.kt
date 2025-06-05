@@ -74,4 +74,5 @@ enum class ActivityType(
   TASK_REOPEN,
   TASK_KEY_UPDATE(hideInList = true),
   ORDER_TRANSLATION,
+  TRANSLATION_LABELS_EDIT,
 }

@@ -1,6 +1,8 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.request.label.LabelRequest
 import io.tolgee.hateoas.label.LabelModel
 import io.tolgee.hateoas.label.LabelModelAssembler
@@ -100,6 +102,7 @@ class LabelsController(
 
   @PutMapping(value = ["translations/{translationId:\\d+}/label/{labelId:\\d+}"])
   @Operation(summary = "Add label to translation")
+  @RequestActivity(ActivityType.TRANSLATION_LABELS_EDIT)
   @UseDefaultPermissions
   @AllowApiAccess
   fun assignLabel(
@@ -113,6 +116,7 @@ class LabelsController(
 
   @DeleteMapping(value = ["translations/{translationId:\\d+}/label/{labelId:\\d+}"])
   @Operation(summary = "Remove label from translation")
+  @RequestActivity(ActivityType.TRANSLATION_LABELS_EDIT)
   @UseDefaultPermissions
   @AllowApiAccess
   fun unassignLabel(

@@ -23,6 +23,14 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
         compute: ({ auto, mtProvider }) => mtProvider || auto || undefined,
       },
       outdated: { type: 'outdated' },
+      labels: {
+        type: 'translation_labels',
+        label(params) {
+          return (
+            <T keyName="activity_entity_translation.labels" params={params} />
+          );
+        },
+      },
     },
     references: ({ relations }) => {
       const result: Reference[] = [];
