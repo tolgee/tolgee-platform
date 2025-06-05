@@ -32,7 +32,14 @@ class TestDataGeneratingService(
         },
       organizations =
         data.data.organizations.map {
-          StandardTestDataResult.OrganizationModel(id = it.self.id, name = it.self.name, slug = it.self.slug)
+          StandardTestDataResult.OrganizationModel(
+            id = it.self.id,
+            name = it.self.name,
+            slug = it.self.slug,
+            glossaries = it.data.glossaries.map {
+              StandardTestDataResult.GlossaryModel(id = it.self.id, name = it.self.name)
+            },
+          )
         },
       invitations =
         data.data.invitations.map {

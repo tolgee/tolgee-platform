@@ -190,6 +190,7 @@ class TestDataService(
     saveSlackWorkspaces(builder)
     saveOrganizationTenants(builder)
     saveLlmProviders(builder)
+    saveGlossaryData(builder)
   }
 
   private fun saveLlmProviders(builder: TestDataBuilder) {
@@ -222,6 +223,47 @@ class TestDataService(
 
   private fun saveOrganizationTenants(builder: TestDataBuilder) {
     tenantService.saveAll(builder.data.organizations.mapNotNull { it.data.tenant?.self })
+  }
+
+  private fun saveGlossaryData(builder: TestDataBuilder) {
+    val builders = saveGlossaries(builder)
+    saveGlossariesDependants(builders)
+  }
+
+  private fun saveGlossaries(builder: TestDataBuilder): List<GlossaryBuilder> {
+    val builders = builder.data.organizations.flatMap { it.data.glossaries }
+    builders.forEach {
+      entityManager.persist(it.self)
+    }
+    return builders
+  }
+
+  private fun saveGlossariesDependants(builders: List<GlossaryBuilder>) {
+    saveGlossaryTermData(builders)
+  }
+
+  private fun saveGlossaryTermData(builders: List<GlossaryBuilder>) {
+    val builders = saveGlossaryTerms(builders)
+    saveGlossaryTermsDependants(builders)
+  }
+
+  private fun saveGlossaryTerms(builders: List<GlossaryBuilder>): List<GlossaryTermBuilder> {
+    val builders = builders.flatMap { it.data.terms }
+    builders.forEach {
+      entityManager.persist(it.self)
+    }
+    return builders
+  }
+
+  private fun saveGlossaryTermsDependants(builders: List<GlossaryTermBuilder>) {
+    saveGlossaryTranslations(builders)
+  }
+
+  private fun saveGlossaryTranslations(builders: List<GlossaryTermBuilder>) {
+    val builders = builders.flatMap { it.data.translations }
+    builders.forEach {
+      entityManager.persist(it.self)
+    }
   }
 
   private fun finalize() {

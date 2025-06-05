@@ -12,4 +12,9 @@ open class LanguageFilters {
     description = """Filter languages without id""",
   )
   var filterNotId: List<Long>? = null
+
+  @field:Parameter(
+    description = """Filter languages by name or tag""",
+  )
+  var search: String? = null
 }

@@ -7,18 +7,20 @@ const StyledBox = styled(Box)`
 
 type Props = React.ComponentProps<typeof Box> & {
   noBorder?: boolean;
+  reducedSpacing?: boolean;
 };
 
 export const SecondaryBar: FunctionComponent<Props> = ({
   noBorder,
+  reducedSpacing,
   ...props
 }) => (
   <StyledBox
-    m={3}
+    m={reducedSpacing ? 0 : 3}
     mb={0}
     mt={0}
     pb={2}
-    pt={2}
+    pt={reducedSpacing ? 0 : 2}
     {...props}
     sx={{ borderBottom: noBorder ? 0 : undefined }}
   >

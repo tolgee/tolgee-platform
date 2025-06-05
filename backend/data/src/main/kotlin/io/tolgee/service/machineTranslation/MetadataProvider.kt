@@ -73,4 +73,8 @@ class MetadataProvider(
   private val translationMemoryService: TranslationMemoryService by lazy {
     context.applicationContext.getBean(TranslationMemoryService::class.java)
   }
+
+  private val mtGlossaryTermsProvider by lazy {
+    context.applicationContext.getBean(MtGlossaryTermsProvider::class.java)
+  }
 }

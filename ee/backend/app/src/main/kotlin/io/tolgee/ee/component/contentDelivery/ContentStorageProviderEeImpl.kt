@@ -9,6 +9,7 @@ import io.tolgee.service.project.ProjectService
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
 @Primary
 class ContentStorageProviderEeImpl(

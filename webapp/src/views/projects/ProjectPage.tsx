@@ -27,7 +27,7 @@ export const ProjectPage: React.FC<Props> = ({
   return (
     <DashboardPage
       isAdminAccess={isAdminAccess}
-      fixedContent={<ProjectMenu id={project.id} />}
+      fixedContent={<ProjectMenu />}
       rightPanelContent={rightPanelContent}
     >
       <React.Suspense fallback={<FullPageLoading />}>

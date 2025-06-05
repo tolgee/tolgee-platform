@@ -17,9 +17,9 @@ import { TranslationStatesBar } from 'tg.views/projects/TranslationStatesBar';
 import { ProjectListItemMenu } from 'tg.views/projects/ProjectListItemMenu';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import { ProjectLanguages } from './ProjectLanguages';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { CircledLanguageIconList } from 'tg.component/languages/CircledLanguageIconList';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -172,7 +172,7 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
         </StyledStats>
         <StyledLanguages data-cy="project-list-languages">
           <Grid container>
-            <ProjectLanguages p={p} />
+            <CircledLanguageIconList languages={p.languages} />
           </Grid>
         </StyledLanguages>
         <StyledControls>

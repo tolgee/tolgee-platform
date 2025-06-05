@@ -151,6 +151,8 @@ declare namespace DataCy {
         "api-key-list-item-regenerate-button" |
         "api-keys-create-edit-dialog" |
         "api-keys-project-select-item" |
+        "assigned-projects-select" |
+        "assigned-projects-select-item" |
         "assignee-search-select-popover" |
         "assignee-select" |
         "auto-avatar-img" |
@@ -230,6 +232,19 @@ declare namespace DataCy {
         "content-delivery-storage-selector" |
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |
+        "create-edit-glossary-cancel" |
+        "create-edit-glossary-dialog" |
+        "create-edit-glossary-submit" |
+        "create-glossary-field-name" |
+        "create-glossary-term-cancel" |
+        "create-glossary-term-dialog" |
+        "create-glossary-term-field-description" |
+        "create-glossary-term-field-text" |
+        "create-glossary-term-flag-abbreviation" |
+        "create-glossary-term-flag-case-sensitive" |
+        "create-glossary-term-flag-forbidden" |
+        "create-glossary-term-flag-non-translatable" |
+        "create-glossary-term-submit" |
         "create-task-field-description" |
         "create-task-field-languages" |
         "create-task-field-languages-item" |
@@ -295,6 +310,33 @@ declare namespace DataCy {
         "global-plus-button" |
         "global-search-field" |
         "global-user-menu-button" |
+        "glossaries-empty-add-button" |
+        "glossaries-list-more-button" |
+        "glossary-base-language-select" |
+        "glossary-base-language-select-item" |
+        "glossary-batch-delete-button" |
+        "glossary-delete-button" |
+        "glossary-edit-button" |
+        "glossary-empty-add-term-button" |
+        "glossary-empty-import-terms-button" |
+        "glossary-list-item" |
+        "glossary-list-languages" |
+        "glossary-panel-container" |
+        "glossary-panel-container-empty" |
+        "glossary-term-highlight" |
+        "glossary-term-list-item" |
+        "glossary-term-preview-container" |
+        "glossary-term-preview-description" |
+        "glossary-term-preview-description-card" |
+        "glossary-term-preview-empty-description" |
+        "glossary-term-preview-source-text" |
+        "glossary-term-preview-target-text" |
+        "glossary-translation-cancel-button" |
+        "glossary-translation-cell" |
+        "glossary-translation-edit-field" |
+        "glossary-translation-save-button" |
+        "glossary-view-button" |
+        "glossary-view-language-select" |
         "handlebars-editor" |
         "import-conflict-resolution-dialog" |
         "import-conflicts-not-resolved-dialog" |
@@ -370,6 +412,7 @@ declare namespace DataCy {
         "language-ai-prompt-dialog-description-input" |
         "language-ai-prompt-dialog-save" |
         "language-delete-button" |
+        "language-icon-list-item" |
         "language-modify-form" |
         "language-select-popover" |
         "languages-add-dialog-submit" |
@@ -533,7 +576,6 @@ declare namespace DataCy {
         "project-delete-button" |
         "project-leave-button" |
         "project-list-languages" |
-        "project-list-languages-item" |
         "project-list-more-button" |
         "project-list-translations-button" |
         "project-member-item" |

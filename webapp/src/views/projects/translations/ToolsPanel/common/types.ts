@@ -20,6 +20,7 @@ export type PanelContentData = {
 export type PanelContentProps = PanelContentData & {
   setItemsCount: (value: number | undefined) => void;
   setValue: (value: string) => void;
+  appendValue: (value: string) => void;
 };
 
 export type PanelConfig = {

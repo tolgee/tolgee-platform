@@ -23,6 +23,7 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.util.Logging
 import org.springframework.web.bind.annotation.*
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/slack"])
