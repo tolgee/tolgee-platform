@@ -182,10 +182,11 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
     onValueChange([item.tag, ...value]);
   };
 
-  function renderItem(props: any, item: OrganizationLanguageModel) {
+  function renderItem(props: object, item: OrganizationLanguageModel) {
     const selected = value?.includes(item.tag) || false;
     return (
       <MultiselectItem
+        {...props}
         disabled={item.base}
         selected={selected}
         label={<LanguageValue language={item} />}

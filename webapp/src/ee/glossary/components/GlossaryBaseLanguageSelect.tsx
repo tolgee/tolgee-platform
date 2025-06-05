@@ -101,10 +101,11 @@ export const GlossaryBaseLanguageSelect: React.VFC<Props> = ({
     setValue(itemSelected);
   };
 
-  function renderItem(props: any, item: OrganizationLanguageModel) {
+  function renderItem(props: object, item: OrganizationLanguageModel) {
     const selected = value?.tag === item.tag;
     return (
       <SelectItem
+        {...props}
         data-cy="glossary-base-language-select-item"
         selected={selected}
         label={<LanguageValue language={item} />}
