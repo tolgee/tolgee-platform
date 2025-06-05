@@ -6,6 +6,7 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { gcy } from '../../common/shared';
+import { isDarkMode } from '../../common/helpers';
 
 let projectId = null;
 
@@ -47,7 +48,11 @@ describe('Projects Settings - Labels', () => {
   it('see translation label', () => {
     getTranslationCell('first key', 'en').within(() => {
       gcy('translation-label')
-        .should('have.css', 'background-color', 'rgb(255, 0, 0)')
+        .should(
+          'have.css',
+          'background-color',
+          isDarkMode ? 'rgba(255, 0, 0, 0.85)' : 'rgb(255, 0, 0)'
+        )
         .contains('First label');
     });
   });
@@ -74,7 +79,7 @@ describe('Projects Settings - Labels', () => {
       'first key',
       'en',
       'Label to assign 1',
-      'rgb(255, 0, 255)'
+      isDarkMode ? 'rgba(255, 0, 255, 0.85)' : 'rgb(255, 0, 255)'
     );
 
     // refresh the page to ensure the label is saved
@@ -86,7 +91,7 @@ describe('Projects Settings - Labels', () => {
       'first key',
       'en',
       'Label to assign 1',
-      'rgb(255, 0, 255)'
+      isDarkMode ? 'rgba(255, 0, 255, 0.85)' : 'rgb(255, 0, 255)'
     );
   });
 

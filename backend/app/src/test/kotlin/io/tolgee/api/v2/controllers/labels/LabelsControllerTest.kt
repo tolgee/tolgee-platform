@@ -27,13 +27,13 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `get labels`() {
     performProjectAuthGet("labels").andAssertThatJson {
       node("_embedded.labels") {
-        isArray.hasSize(2)
+        isArray.hasSize(5)
         node("[0].id").isValidId
         node("[0].name").isString.isEqualTo("First label")
         node("[0].color").isString.isEqualTo("#FF0000")
         node("[0].description").isString.isEqualTo("This is a description")
       }
-      node("page.totalElements").isNumber.isEqualTo(2.toBigDecimal())
+      node("page.totalElements").isNumber.isEqualTo(5.toBigDecimal())
     }
   }
 
@@ -81,7 +81,7 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("color").isString.isEqualTo("#00FF00")
     }
     val labels = labelService.getProjectLabels(testData.projectBuilder.self.id, Pageable.unpaged())
-    assert(labels.totalElements == 3.toLong())
+    assert(labels.totalElements == 6.toLong())
     assert(labels.content.any { it.name == "New label" && it.color == "#00FF00" })
   }
 
@@ -100,7 +100,7 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("color").isString.isEqualTo("#0000FF")
     }
     val labels = labelService.getProjectLabels(testData.projectBuilder.self.id, Pageable.unpaged())
-    assert(labels.totalElements == 2.toLong())
+    assert(labels.totalElements == 5.toLong())
     assert(labels.content.any { it.name == "Updated label" && it.color == "#0000FF" })
   }
 

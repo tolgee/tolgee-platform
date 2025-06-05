@@ -9,3 +9,7 @@ export const rgbToHex = (rgb: string): string => {
       .join('')
   );
 };
+
+export const isDarkMode = window.matchMedia(
+  '(prefers-color-scheme: dark)'
+).matches;

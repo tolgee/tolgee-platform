@@ -2,7 +2,7 @@ import { login } from '../../common/apiCalls/common';
 import { labelsTestData } from '../../common/apiCalls/testData/testData';
 import { HOST } from '../../common/constants';
 import { gcy } from '../../common/shared';
-import { rgbToHex } from '../../common/helpers';
+import { isDarkMode } from '../../common/helpers';
 
 let projectId = null;
 let secondProjectId = null;
@@ -135,7 +135,7 @@ describe('Projects Settings - Labels', () => {
         gcy('project-settings-label-item-label').should(
           'have.css',
           'background-color',
-          'rgb(17, 136, 255)'
+          isDarkMode ? 'rgba(17, 136, 255, 0.85)' : 'rgb(17, 136, 255)'
         );
       });
   });

@@ -4,7 +4,6 @@ import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
 
 class LabelsTestData : BaseTestData() {
-  private lateinit var firstTranslation: Translation
   lateinit var labeledTranslation: Translation
   lateinit var firstLabel: Label
   lateinit var secondLabel: Label
