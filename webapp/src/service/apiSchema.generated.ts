@@ -1695,7 +1695,7 @@ export interface components {
        * @description A detailed explanation or definition of the glossary term
        * @example It's trademark
        */
-      description?: string;
+      description: string;
       /** @description Specifies whether the term represents a shortened form of a word or phrase */
       flagAbbreviation: boolean;
       /** @description When true, the term matching considers uppercase and lowercase characters as distinct */
@@ -2363,7 +2363,7 @@ export interface components {
        * @description Language tag for default translations for terms
        * @example en
        */
-      baseLanguageTag?: string;
+      baseLanguageTag: string;
       /** Format: int64 */
       id: number;
       name: string;
@@ -2374,7 +2374,7 @@ export interface components {
       value: components["schemas"]["GlossaryTermModel"];
     };
     GlossaryTermModel: {
-      description?: string;
+      description: string;
       /** @description Specifies whether the term represents a shortened form of a word or phrase */
       flagAbbreviation: boolean;
       /** @description When true, the term matching considers uppercase and lowercase characters as distinct */
@@ -4487,13 +4487,13 @@ export interface components {
        * @description Language tag for default translations for terms
        * @example en
        */
-      baseLanguageTag?: string;
+      baseLanguageTag: string;
       /** Format: int64 */
       id: number;
       name: string;
     };
     SimpleGlossaryTermModel: {
-      description?: string;
+      description: string;
       /** @description Specifies whether the term represents a shortened form of a word or phrase */
       flagAbbreviation: boolean;
       /** @description When true, the term matching considers uppercase and lowercase characters as distinct */
@@ -4510,7 +4510,7 @@ export interface components {
        * @description A detailed explanation or definition of the glossary term
        * @example It's trademark
        */
-      description?: string;
+      description: string;
       /** @description Specifies whether the term represents a shortened form of a word or phrase */
       flagAbbreviation: boolean;
       /** @description When true, the term matching considers uppercase and lowercase characters as distinct */
@@ -4534,7 +4534,7 @@ export interface components {
        * @description The primary language code used for terms (e.g., 'en' for English)
        * @example en
        */
-      baseLanguageTag?: string;
+      baseLanguageTag: string;
       /**
        * @description The name of one project using this glossary (can be shown as a preview)
        * @example My Project

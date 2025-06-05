@@ -12,6 +12,7 @@ import java.util.*
 @ActivityLoggedEntity
 @Table(
   indexes = [
+    Index(columnList = "language_tag"),
     Index(columnList = "first_word_lowercased"),
     Index(columnList = "term_id"),
   ],
@@ -23,12 +24,12 @@ class GlossaryTermTranslation(
   var languageTag: String,
   @Column(columnDefinition = "text", nullable = false)
   @ActivityLoggedProp
-  var text: String? = null,
+  var text: String = "",
 ) : StandardAuditModel() {
-  @ManyToOne
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var term: GlossaryTerm
 
-  @Column(name = "first_word_lowercased", columnDefinition = "varchar(127)", nullable = false)
+  @Column(name = "first_word_lowercased", columnDefinition = "varchar(127)", nullable = true)
   var firstWordLowercased: String? = null
 
   companion object {
@@ -39,11 +40,7 @@ class GlossaryTermTranslation(
       @PreUpdate
       fun updateFirstWordLowercased(translation: GlossaryTermTranslation) {
         val locale = Locale.forLanguageTag(translation.languageTag) ?: Locale.ROOT
-        var firstWordLowercased = translation.text?.lowercase(locale)?.find(WORD_REGEX)
-        if (firstWordLowercased != null && firstWordLowercased.length > 127) {
-          firstWordLowercased = firstWordLowercased.substring(0, 127)
-        }
-        translation.firstWordLowercased = firstWordLowercased
+        translation.firstWordLowercased = translation.text.lowercase(locale).find(WORD_REGEX)?.take(127)
       }
     }
   }

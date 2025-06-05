@@ -13,9 +13,9 @@ import jakarta.persistence.*
   ],
 )
 class GlossaryTerm(
-  @Column(columnDefinition = "text")
+  @Column(columnDefinition = "text", nullable = false)
   @ActivityLoggedProp
-  var description: String? = null,
+  var description: String = "",
 ) : StandardAuditModel() {
   @ManyToOne
   lateinit var glossary: Glossary

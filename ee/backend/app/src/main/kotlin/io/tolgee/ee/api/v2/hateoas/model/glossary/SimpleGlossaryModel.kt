@@ -12,5 +12,5 @@ class SimpleGlossaryModel(
     description = "Language tag for default translations for terms",
     example = "en"
   )
-  val baseLanguageTag: String?,
+  val baseLanguageTag: String,
 ) : RepresentationModel<SimpleGlossaryModel>()

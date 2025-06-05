@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
-import java.util.Date
 
 @Repository
 @Lazy
@@ -20,7 +19,6 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     where organizationOwner.id = :organizationId
       and organizationOwner.deletedAt is null
       and id = :glossaryId
-      and deletedAt is null
   """,
   )
   fun find(
@@ -33,7 +31,6 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     from Glossary
     where organizationOwner.id = :organizationId
       and organizationOwner.deletedAt is null
-      and deletedAt is null
   """,
   )
   fun findByOrganizationId(organizationId: Long): List<Glossary>
@@ -43,7 +40,6 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     from Glossary
     where organizationOwner.id = :organizationId
       and organizationOwner.deletedAt is null
-      and deletedAt is null
       and (lower(name) like lower(concat('%', coalesce(:search, ''), '%')) or :search is null)
   """,
   )
@@ -64,7 +60,6 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     left join g.assignedProjects ap
     where g.organizationOwner.id = :organizationId
       and g.organizationOwner.deletedAt is null
-      and g.deletedAt is null
       and (lower(g.name) like lower(concat('%', coalesce(:search, ''), '%')) or :search is null)
     group by g.id
   """,
@@ -92,21 +87,5 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     organizationId: Long,
     glossaryId: Long,
     projectId: Long,
-  ): Int
-
-  @Query(
-    """
-    update Glossary
-    set deletedAt = :deletedAt
-    where organizationOwner.id = :organizationId
-      and id = :glossaryId
-      and deletedAt is null
-    """,
-  )
-  @Modifying
-  fun softDelete(
-    organizationId: Long,
-    glossaryId: Long,
-    deletedAt: Date,
   ): Int
 }

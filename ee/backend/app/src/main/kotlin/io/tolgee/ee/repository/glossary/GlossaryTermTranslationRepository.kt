@@ -17,7 +17,6 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
     select distinct t.languageTag
     from GlossaryTermTranslation t
     where t.term.glossary.id = :glossaryId
-      and t.term.glossary.deletedAt is null
       and t.term.glossary.organizationOwner.id = :organizationId
       and t.term.glossary.organizationOwner.deletedAt is null
     order by t.languageTag asc
@@ -59,8 +58,7 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
             gtt.firstWordLowercased in :texts and
             (gtt.languageTag = :languageTag or gtt.term.flagNonTranslatable) and
             ap.id = :assignedProjectId and
-            gtt.term.glossary.organizationOwner.id = :organizationId and
-            gtt.term.glossary.deletedAt is null
+            gtt.term.glossary.organizationOwner.id = :organizationId
     """,
   )
   fun findByFirstWordLowercased(

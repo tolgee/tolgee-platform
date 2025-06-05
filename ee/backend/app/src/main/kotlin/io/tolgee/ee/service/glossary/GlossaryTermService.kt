@@ -61,7 +61,9 @@ class GlossaryTermService(
     languageTags: Set<String>?,
   ): Page<GlossaryTerm> {
     val glossary = glossaryService.get(organizationId, glossaryId)
-    return glossaryTermRepository.findByGlossaryWithTranslationsPaged(glossary, pageable, search, languageTags)
+    val termIds = glossaryTermRepository.findByGlossaryIdsPaged(glossary, pageable, search, languageTags)
+    val terms = glossaryTermRepository.findByIdsWithTranslations(termIds.content).associateBy { it.id }
+    return termIds.map { terms[it] }
   }
 
   fun findAllIds(
@@ -83,6 +85,7 @@ class GlossaryTermService(
       ?: throw NotFoundException(Message.GLOSSARY_TERM_NOT_FOUND)
   }
 
+  @Transactional
   fun create(
     organizationId: Long,
     glossaryId: Long,
@@ -104,6 +107,7 @@ class GlossaryTermService(
     return glossaryTermRepository.save(glossaryTerm)
   }
 
+  @Transactional
   fun createWithTranslation(
     organizationId: Long,
     glossaryId: Long,
@@ -113,7 +117,7 @@ class GlossaryTermService(
     val glossaryTerm = create(organizationId, glossaryId, request)
     val translation =
       UpdateGlossaryTermTranslationRequest().apply {
-        languageTag = glossary.baseLanguageTag!!
+        languageTag = glossary.baseLanguageTag
         text = request.text
       }
     return glossaryTerm to
@@ -123,6 +127,7 @@ class GlossaryTermService(
       )
   }
 
+  @Transactional
   fun update(
     organizationId: Long,
     glossaryId: Long,
@@ -134,7 +139,7 @@ class GlossaryTermService(
       glossaryTermTranslationService.deleteAllNonBaseTranslations(glossaryTerm)
     }
     glossaryTerm.apply {
-      description = dto.description
+      description = dto.description ?: description
       flagNonTranslatable = dto.flagNonTranslatable ?: flagNonTranslatable
       flagCaseSensitive = dto.flagCaseSensitive ?: flagCaseSensitive
       flagAbbreviation = dto.flagAbbreviation ?: flagAbbreviation
@@ -143,6 +148,7 @@ class GlossaryTermService(
     return glossaryTermRepository.save(glossaryTerm)
   }
 
+  @Transactional
   fun updateWithTranslation(
     organizationId: Long,
     glossaryId: Long,
@@ -156,13 +162,13 @@ class GlossaryTermService(
       return glossaryTerm to
         glossaryTermTranslationService.find(
           glossaryTerm,
-          glossary.baseLanguageTag!!,
+          glossary.baseLanguageTag,
         )
     }
 
     val translation =
       UpdateGlossaryTermTranslationRequest().apply {
-        languageTag = glossary.baseLanguageTag!!
+        languageTag = glossary.baseLanguageTag
         text = translationText
       }
     return glossaryTerm to
@@ -172,6 +178,7 @@ class GlossaryTermService(
       )
   }
 
+  @Transactional
   fun delete(
     organizationId: Long,
     glossaryId: Long,
@@ -181,10 +188,12 @@ class GlossaryTermService(
     delete(glossaryTerm)
   }
 
+  @Transactional
   fun delete(glossaryTerm: GlossaryTerm) {
     glossaryTermRepository.delete(glossaryTerm)
   }
 
+  @Transactional
   fun deleteMultiple(
     organizationId: Long,
     glossaryId: Long,
@@ -194,6 +203,7 @@ class GlossaryTermService(
     deleteMultiple(glossary, termIds)
   }
 
+  @Transactional
   fun deleteMultiple(
     glossary: Glossary,
     termIds: Collection<Long>,
@@ -226,7 +236,7 @@ class GlossaryTermService(
     translation: GlossaryTermTranslation,
     locale: Locale,
   ): Sequence<Position> {
-    val term = translation.text ?: return emptySequence()
+    val term = translation.text
     if (translation.term.flagCaseSensitive) {
       return findPositions(textOriginal, term)
     }
@@ -252,12 +262,12 @@ class GlossaryTermService(
     text: String,
   ): Set<TranslationGlossaryItem> =
     getHighlights(project.organizationOwnerId, project.id, text, sourceLanguageTag)
-      .filter { !it.value.text.isNullOrEmpty() }
-      .map {
-        val term = it.value.term
+      .filter { it.value.text.isNotEmpty() }
+      .map { highlight ->
+        val term = highlight.value.term
         val targetTranslation = term.translations.find { it.languageTag == targetLanguageTag }
         TranslationGlossaryItem(
-          source = it.value.text ?: "",
+          source = highlight.value.text,
           target = targetTranslation?.text,
           description = term.description,
           isNonTranslatable = term.flagNonTranslatable,

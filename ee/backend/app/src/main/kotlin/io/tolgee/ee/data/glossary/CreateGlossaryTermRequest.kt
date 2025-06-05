@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size
 open class CreateGlossaryTermRequest {
   @Schema(example = "It's trademark", description = "A detailed explanation or definition of the glossary term")
   @field:Size(max = 500)
-  var description: String? = null
+  var description: String = ""
 
   @Schema(description = "When true, this term will have the same translation across all target languages")
   var flagNonTranslatable: Boolean = false

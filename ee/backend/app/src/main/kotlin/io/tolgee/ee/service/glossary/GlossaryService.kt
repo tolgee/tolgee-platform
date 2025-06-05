@@ -64,9 +64,9 @@ class GlossaryService(
     val glossary =
       Glossary(
         name = dto.name,
+        baseLanguageTag = dto.baseLanguageTag,
       ).apply {
         organizationOwner = organization
-        baseLanguageTag = dto.baseLanguageTag
 
         updateAssignedProjects(this, dto.assignedProjectIds ?: emptySet())
       }
@@ -116,9 +116,11 @@ class GlossaryService(
     organizationId: Long,
     glossaryId: Long,
   ) {
-    glossaryRepository.softDelete(organizationId, glossaryId, currentDateProvider.date)
+    val glossary = get(organizationId, glossaryId)
+    glossaryRepository.delete(glossary)
   }
 
+  @Transactional
   fun assignProject(
     organizationId: Long,
     glossaryId: Long,
@@ -134,6 +136,7 @@ class GlossaryService(
     glossaryRepository.save(glossary)
   }
 
+  @Transactional
   fun unassignProject(
     organizationId: Long,
     glossaryId: Long,

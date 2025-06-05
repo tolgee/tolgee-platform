@@ -12,7 +12,7 @@ class SimpleGlossaryWithStatsModel(
     description = "The primary language code used for terms (e.g., 'en' for English)",
     example = "en"
   )
-  val baseLanguageTag: String?,
+  val baseLanguageTag: String,
   @Schema(
     description = "The name of one project using this glossary (can be shown as a preview)",
     example = "My Project"

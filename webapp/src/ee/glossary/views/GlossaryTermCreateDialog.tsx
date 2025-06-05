@@ -19,7 +19,7 @@ type Props = {
 
 const termInitialValues: CreateOrUpdateGlossaryTermRequest = {
   text: '',
-  description: undefined,
+  description: '',
   flagNonTranslatable: false,
   flagCaseSensitive: false,
   flagAbbreviation: false,

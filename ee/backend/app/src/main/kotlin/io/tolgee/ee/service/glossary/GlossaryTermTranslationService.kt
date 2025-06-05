@@ -8,6 +8,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -22,6 +23,7 @@ class GlossaryTermTranslationService(
     return glossaryTermTranslationRepository.findDistinctLanguageTagsByGlossary(organizationId, glossaryId)
   }
 
+  @Transactional
   fun create(
     term: GlossaryTerm,
     dto: UpdateGlossaryTermTranslationRequest,
@@ -40,6 +42,7 @@ class GlossaryTermTranslationService(
     return glossaryTermTranslationRepository.save(translation)
   }
 
+  @Transactional
   fun updateOrCreate(
     term: GlossaryTerm,
     dto: UpdateGlossaryTermTranslationRequest,
@@ -63,7 +66,7 @@ class GlossaryTermTranslationService(
   }
 
   fun deleteAllNonBaseTranslations(term: GlossaryTerm) {
-    glossaryTermTranslationRepository.deleteAllByTermAndLanguageTagIsNot(term, term.glossary.baseLanguageTag!!)
+    glossaryTermTranslationRepository.deleteAllByTermAndLanguageTagIsNot(term, term.glossary.baseLanguageTag)
   }
 
   fun find(
@@ -96,6 +99,7 @@ class GlossaryTermTranslationService(
     return find(term, languageTag) ?: throw NotFoundException(Message.GLOSSARY_TERM_TRANSLATION_NOT_FOUND)
   }
 
+  @Transactional
   fun updateBaseLanguage(
     glossary: Glossary,
     oldBaseLanguageTag: String?,

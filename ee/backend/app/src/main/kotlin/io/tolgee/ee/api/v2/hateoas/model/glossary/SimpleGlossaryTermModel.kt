@@ -7,7 +7,7 @@ import org.springframework.hateoas.server.core.Relation
 @Relation(collectionRelation = "glossaryTerms", itemRelation = "glossaryTerm")
 class SimpleGlossaryTermModel(
   val id: Long,
-  val description: String?,
+  val description: String,
   @Schema(description = "When true, this term has the same translation across all target languages")
   val flagNonTranslatable: Boolean,
   @Schema(description = "When true, the term matching considers uppercase and lowercase characters as distinct")

@@ -14,9 +14,9 @@ class CreateGlossaryRequest {
 
   @Schema(example = "cs-CZ", description = "Language tag according to BCP 47 definition")
   @field:NotBlank
-  @field:Size(max = 20)
+  @field:Size(min = 1, max = 20)
   @field:Pattern(regexp = "^[^,]*$", message = "can not contain coma")
-  var baseLanguageTag: String? = null
+  var baseLanguageTag: String = ""
 
   @Schema(description = "IDs of projects to be assigned to glossary")
   @field:NotNull

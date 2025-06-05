@@ -18,7 +18,6 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
     where glossary.organizationOwner.id = :organizationId
       and glossary.organizationOwner.deletedAt is null
       and glossary.id = :glossaryId
-      and glossary.deletedAt is null
       and id = :id
   """,
   )
@@ -39,7 +38,6 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
     where te.glossary.organizationOwner.id = :organizationId
       and te.glossary.organizationOwner.deletedAt is null
       and te.glossary.id = :glossaryId
-      and te.glossary.deletedAt is null
       and (
         lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or
         lower(tr.text) like lower(concat('%', coalesce(:search, '') , '%')) or
@@ -78,8 +76,8 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
 
   @Query(
     """
+    select te.id
     from GlossaryTerm te
-    join fetch te.translations
     left join GlossaryTermTranslation tr on tr.term.id = te.id
       and tr.languageTag = te.glossary.baseLanguageTag
       and (:languageTags is null or tr.languageTag in :languageTags)
@@ -91,12 +89,22 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
       )
   """,
   )
-  fun findByGlossaryWithTranslationsPaged(
+  fun findByGlossaryIdsPaged(
     glossary: Glossary,
     pageable: Pageable,
     search: String?,
     languageTags: Set<String>?,
-  ): Page<GlossaryTerm>
+  ): Page<Long>
+
+  @Query(
+    """
+    select distinct te
+    from GlossaryTerm te
+    join fetch te.translations
+    where te.id in :ids
+  """,
+  )
+  fun findByIdsWithTranslations(ids: Collection<Long>): List<GlossaryTerm>
 
   @Query(
     """
