@@ -10,7 +10,6 @@ import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
-import io.tolgee.util.executeInNewTransaction
 import org.springframework.core.io.ClassPathResource
 
 class PromptTestData : BaseTestData() {
