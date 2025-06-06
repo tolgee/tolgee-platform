@@ -36,7 +36,6 @@ export const SubfilterLabels = ({
     searchDebounced,
     search,
     loadableList,
-    fetchList,
   } = useLabels({ projectId });
   const [expanded, setExpanded] = useState(
     value.filterTranslationLanguage !== undefined
@@ -63,10 +62,6 @@ export const SubfilterLabels = ({
       actions.addFilter('filterLabel', id);
     }
   };
-
-  useEffect(() => {
-    fetchList();
-  });
 
   const handleFetchMore = async () => {
     if (loadableList.hasNextPage && !loadableList.isFetching) {

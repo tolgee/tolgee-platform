@@ -7,6 +7,7 @@ import { StyledTranslationLabel } from 'tg.component/TranslationLabel';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { LabelSelector } from 'tg.views/projects/translations/TranslationsList/Label/LabelSelector';
 import { components } from 'tg.service/apiSchema.generated';
+import { useLabels } from 'tg.hooks/useLabels';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -26,6 +27,13 @@ export const LabelControl: React.FC<{
   onSelect?: (labelId: number) => void;
 }> = ({ className, onSelect, existing }) => {
   const [selectMode, setSelectMode] = useState<boolean>(false);
+  const { labels: availableLabels } = useLabels({});
+
+  // Only render the component if available labels exist
+  if (!availableLabels || availableLabels.length === 0) {
+    return null;
+  }
+
   const enterSelectMode = () => {
     setSelectMode(true);
     stopBubble();

@@ -28,7 +28,6 @@ export const useLabels = ({ projectId, translations }: Props) => {
   const [searchDebounced] = useDebounce(search, 500);
   const [labels, setLabels] = useState<LabelModel[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [enabledList, setEnabledList] = useState<boolean>(false);
   const [enabledSelected, setEnabledSelected] = useState<boolean>(false);
   const putLabel = usePutLabel();
   const deleteLabel = useRemoveLabel();
@@ -49,7 +48,6 @@ export const useLabels = ({ projectId, translations }: Props) => {
     },
     query,
     options: {
-      enabled: enabledList,
       keepPreviousData: true,
       refetchOnMount: true,
       noGlobalLoading: true,
@@ -96,10 +94,6 @@ export const useLabels = ({ projectId, translations }: Props) => {
     },
   });
 
-  function fetchList() {
-    setEnabledList(true);
-  }
-
   function fetchSelected(ids: number[]) {
     // get list of ids which are missing in labels
     const missingIds = ids.filter((id) => !labels.find((l) => l.id === id));
@@ -135,7 +129,6 @@ export const useLabels = ({ projectId, translations }: Props) => {
             labels: [...previousLabels, response],
           },
         });
-        invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/labels');
       })
       .catch((e) => {
         return new Promise(() => {});
@@ -205,7 +198,6 @@ export const useLabels = ({ projectId, translations }: Props) => {
     search,
     searchDebounced,
     setSelectedIds,
-    fetchList,
     fetchSelected,
     addLabel,
     removeLabel,

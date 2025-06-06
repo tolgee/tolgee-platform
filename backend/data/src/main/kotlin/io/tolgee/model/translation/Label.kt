@@ -39,6 +39,9 @@ class Label : StandardAuditModel() {
   var translations: MutableSet<Translation> = mutableSetOf()
 
   fun clearTranslations() {
-    translations.forEach { it.removeLabel(this) }
+    translations.forEach {
+      it.labels.remove(this)
+    }
+    translations.clear()
   }
 }

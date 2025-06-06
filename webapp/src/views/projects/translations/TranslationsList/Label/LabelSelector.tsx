@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { useDebounce } from 'use-debounce';
+import React, { useState } from 'react';
 import { useProject } from 'tg.hooks/useProject';
 import { Autocomplete, MenuItem, styled } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
@@ -43,15 +42,9 @@ export const LabelSelector: React.FC<{
   const { t } = useTranslate();
   const [value, setValue] = useState<string>();
   const project = useProject();
-  const { labels, loadableList, setSearch, fetchList } = useLabels({
+  const { labels, loadableList, setSearch } = useLabels({
     projectId: project.id,
   });
-  const [debouncedValue] = useDebounce(value, 500);
-
-  useEffect(() => {
-    fetchList();
-    setSearch(debouncedValue || '');
-  }, [debouncedValue]);
 
   const handleScroll = async (event: React.UIEvent<HTMLUListElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
@@ -78,6 +71,7 @@ export const LabelSelector: React.FC<{
       data-cy="label-selector-autocomplete"
       className="label-autocomplete"
       onInputChange={(_, value) => {
+        setSearch(value);
         setValue(value);
       }}
       PopperComponent={CustomPopper}
@@ -111,6 +105,7 @@ export const LabelSelector: React.FC<{
           onSelect?.(newValue.value);
         }
         setValue('');
+        setSearch('');
       }}
       renderOption={(attrs, option) => {
         return (
