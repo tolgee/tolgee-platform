@@ -8,4 +8,5 @@ enum class BasicPromptOption {
   LANGUAGE_NOTES,
   TM_SUGGESTIONS,
   SCREENSHOT,
+  GLOSSARY,
 }

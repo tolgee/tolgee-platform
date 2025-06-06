@@ -18,7 +18,7 @@ class DefaultPromptHelper(
         {{fragment.styleInfo}}
 
         {{fragment.projectDescription}}
-        
+
         {{fragment.languageNotes}}
 
         {{fragment.icuInfo}}
@@ -28,6 +28,8 @@ class DefaultPromptHelper(
         {{fragment.relatedKeys}}
 
         {{fragment.translationMemory}}
+
+        {{fragment.glossary}}
 
         {{fragment.keyName}}
 

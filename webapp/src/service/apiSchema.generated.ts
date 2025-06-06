@@ -4243,6 +4243,7 @@ export interface components {
         | "LANGUAGE_NOTES"
         | "TM_SUGGESTIONS"
         | "SCREENSHOT"
+        | "GLOSSARY"
       )[];
       name: string;
       providerName: string;
@@ -4257,6 +4258,7 @@ export interface components {
         | "LANGUAGE_NOTES"
         | "TM_SUGGESTIONS"
         | "SCREENSHOT"
+        | "GLOSSARY"
       )[];
       /** Format: int64 */
       id: number;
@@ -4298,6 +4300,7 @@ export interface components {
         | "LANGUAGE_NOTES"
         | "TM_SUGGESTIONS"
         | "SCREENSHOT"
+        | "GLOSSARY"
       )[];
       /** Format: int64 */
       keyId: number;

@@ -3,8 +3,10 @@ package io.tolgee.ee.service.prompt
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.component.machineTranslation.metadata.TranslationGlossaryItem
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeyService
@@ -18,6 +20,7 @@ import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.annotation.Transactional
 import io.tolgee.ee.component.PromptLazyMap.Companion.Variable
+import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.ScreenshotService
 import org.springframework.stereotype.Component
@@ -31,6 +34,7 @@ class PromptVariablesHelper(
   private val applicationContext: ApplicationContext,
   private val promptFragmentsHelper: PromptFragmentsHelper,
   private val screenshotService: ScreenshotService,
+  private val glossaryTermService: GlossaryTermService,
 ) {
   /**
    * Determines if the given language tag corresponds to Chinese, Japanese, or Korean.
@@ -117,6 +121,68 @@ class PromptVariablesHelper(
       ),
     )
     return translationMemory
+  }
+
+  private fun getGlossaryVar(
+    project: ProjectDto,
+    sourceLanguageTag: String,
+    targetLanguageTag: String?,
+    sourceText: String?,
+  ): Variable {
+    val glossary = Variable("glossary")
+
+    val glossaryTerms by lazy {
+      if (targetLanguageTag != null && sourceText != null) {
+        glossaryTermService.getGlossaryTerms(
+          project,
+          sourceLanguageTag,
+          targetLanguageTag,
+          sourceText,
+        )
+      } else {
+        emptySet()
+      }
+    }
+
+    glossary.props.add(
+      Variable("json", description = "Glossary items", lazyValue = {
+        if (glossaryTerms.isNotEmpty()) {
+          glossaryTerms.joinToString("\n") {
+            val mapper = ObjectMapper()
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            mapper.writeValueAsString(removeUnnecessaryFields(it))
+          }
+        } else {
+          null
+        }
+      })
+    )
+
+    glossary.props.add(
+      Variable("hasCaseSensitive", description = "Glossary items contain some caseSensitive item", lazyValue = {
+        glossaryTerms.any { it.isCaseSensitive ?: false }
+      })
+    )
+
+    glossary.props.add(
+      Variable("hasAbbreviation", description = "Glossary items contain some abbreviation item", lazyValue = {
+        glossaryTerms.any { it.isAbbreviation ?: false }
+      })
+    )
+
+    glossary.props.add(
+      Variable("hasForbiddenTerm", description = "Glossary items contain some forbidden item", lazyValue = {
+        glossaryTerms.any { it.isForbiddenTerm ?: false }
+      })
+    )
+
+    glossary.props.add(
+      Variable("hasNonTranslatable", description = "Glossary items contain some caseSensitive item", lazyValue = {
+        glossaryTerms.any { it.isNonTranslatable ?: false }
+      })
+    )
+
+    return glossary
   }
 
   private fun getStandardLanguageVars(language: LanguageDto?, translation: Translation?): MutableList<Variable> {
@@ -247,6 +313,7 @@ class PromptVariablesHelper(
     }
 
     val project = projectService.get(projectId)
+    val projectDto = ProjectDto.fromEntity(project)
 
     val languages = languageService.getProjectLanguages(projectId)
 
@@ -294,6 +361,15 @@ class PromptVariablesHelper(
 
     variables.add(getTranslationMemoryVar(projectId, tLanguage, sTranslation, key))
 
+    variables.add(
+      getGlossaryVar(
+      projectDto,
+      sLanguage.tag,
+      tLanguage?.tag,
+      sTranslation?.text
+    )
+    )
+
     variables.add(getScreenshotVar(key))
 
     val fragments = Variable("fragment", props = promptFragmentsHelper.getAllFragments())
@@ -321,6 +397,19 @@ class PromptVariablesHelper(
     type: String,
   ): String {
     return list.joinToString("\n") { id -> encodeScreenshot(id.toLong(), type) }
+  }
+
+  fun removeUnnecessaryFields(item: TranslationGlossaryItem): TranslationGlossaryItem {
+    return TranslationGlossaryItem(
+      source = item.source,
+      // set empty items null for JSON stringification
+      target = item.target?.takeIf { it.isNotBlank() },
+      description = item.description?.takeIf { it.isNotBlank() },
+      isNonTranslatable = item.isNonTranslatable?.takeIf { it },
+      isCaseSensitive = item.isCaseSensitive?.takeIf { it },
+      isAbbreviation = item.isAbbreviation?.takeIf { it },
+      isForbiddenTerm = item.isForbiddenTerm?.takeIf { it },
+    )
   }
 
   companion object {
