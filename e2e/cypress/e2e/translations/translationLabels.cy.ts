@@ -9,31 +9,7 @@ import { gcy } from '../../common/shared';
 import { isDarkMode } from '../../common/helpers';
 
 let projectId = null;
-
-const verifyLabelInTranslationCell = (
-  key: string,
-  lang: string,
-  label: string,
-  expectedColor: string
-) => {
-  getTranslationCell(key, lang).within(() => {
-    gcy('translation-label')
-      .contains(label)
-      .parent('[data-cy="translation-label"]')
-      .should('be.visible')
-      .should('have.css', 'background-color', expectedColor);
-  });
-};
-
-const verifyLabelsCountInTranslationCell = (
-  key: string,
-  lang: string,
-  expectedCount: number
-) => {
-  getTranslationCell(key, lang).within(() => {
-    gcy('translation-label').should('have.length', expectedCount);
-  });
-};
+let emptyProjectId = null;
 
 describe('Projects Settings - Labels', () => {
   beforeEach(() => {
@@ -41,11 +17,12 @@ describe('Projects Settings - Labels', () => {
     labelsTestData.generate().then((data) => {
       login('test_username');
       projectId = data.body.projects[0].id;
-      visitTranslations(projectId);
+      emptyProjectId = data.body.projects[2].id;
     });
   });
 
   it('see translation label', () => {
+    visitTranslations(projectId);
     getTranslationCell('first key', 'en').within(() => {
       gcy('translation-label')
         .should(
@@ -58,6 +35,7 @@ describe('Projects Settings - Labels', () => {
   });
 
   it('search and add label to translation', () => {
+    visitTranslations(projectId);
     getTranslationCell('first key', 'en').within(($cell) => {
       gcy('translation-label-control')
         .should('not.be.visible')
@@ -96,6 +74,7 @@ describe('Projects Settings - Labels', () => {
   });
 
   it('remove label from translation', () => {
+    visitTranslations(projectId);
     getTranslationCell('first key', 'en').within(() => {
       gcy('translation-label').should('have.length', 1).contains('First label');
       gcy('translation-label')
@@ -113,4 +92,55 @@ describe('Projects Settings - Labels', () => {
     cy.reload();
     verifyLabelsCountInTranslationCell('first key', 'en', 0);
   });
+
+  it('filters by label', () => {
+    visitTranslations(projectId);
+    gcy('translations-row').should('have.length', 2);
+    gcy('translations-filter-select').click();
+    cy.waitForDom();
+    gcy('submenu-item').contains('Labels').should('exist').click();
+    gcy('filter-item').contains('First label').click();
+    gcy('translations-filter-select').contains('First label');
+    gcy('translations-row').should('have.length', 0);
+    gcy('translations-filter-apply-for-expand').click();
+    gcy('translations-filter-apply-for-all').click();
+    gcy('translations-row').contains('first key').should('be.visible');
+    gcy('translations-row').should('have.length', 1);
+    gcy('translations-filter-apply-for-language').contains('English').click();
+    gcy('translations-row').should('have.length', 1);
+    gcy('translations-filter-apply-for-language').contains('Czech').click();
+    gcy('translations-row').should('have.length', 0);
+  });
+
+  it('filters has not labels when no labels exists', () => {
+    visitTranslations(emptyProjectId);
+    cy.gcy('translations-filter-select').click();
+    cy.waitForDom();
+    cy.gcy('submenu-item').contains('Labels').should('not.exist');
+  });
 });
+
+const verifyLabelInTranslationCell = (
+  key: string,
+  lang: string,
+  label: string,
+  expectedColor: string
+) => {
+  getTranslationCell(key, lang).within(() => {
+    gcy('translation-label')
+      .contains(label)
+      .parent('[data-cy="translation-label"]')
+      .should('be.visible')
+      .should('have.css', 'background-color', expectedColor);
+  });
+};
+
+const verifyLabelsCountInTranslationCell = (
+  key: string,
+  lang: string,
+  expectedCount: number
+) => {
+  getTranslationCell(key, lang).within(() => {
+    gcy('translation-label').should('have.length', expectedCount);
+  });
+};

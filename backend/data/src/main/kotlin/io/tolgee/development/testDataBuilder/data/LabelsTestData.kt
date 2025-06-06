@@ -13,12 +13,12 @@ class LabelsTestData : BaseTestData() {
   init {
     root.apply {
       projectBuilder.apply {
+        addCzech()
         addKey {
           name = "first key"
         }.build {
           labeledTranslation = addTranslation("en", "first key translation").self
         }.build {
-          addCzech()
           unassignedTranslation = addTranslation("cs", "first key second translation").self
         }.build {
           firstLabel = addLabel {
@@ -43,6 +43,13 @@ class LabelsTestData : BaseTestData() {
               project = projectBuilder.self
             }
           }
+        }
+        addKey {
+          name = "second key"
+        }.build {
+          addTranslation("en", "second key translation").self
+        }.build {
+          addTranslation("cs", "second key second translation").self
         }
       }
       addProject {
@@ -75,6 +82,7 @@ class LabelsTestData : BaseTestData() {
           }
         }
       }
+      addProject { name = "Project without labels" }
     }
   }
 }
