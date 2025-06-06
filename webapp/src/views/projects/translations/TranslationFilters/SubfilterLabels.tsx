@@ -40,6 +40,14 @@ export const SubfilterLabels = ({
   const [expanded, setExpanded] = useState(
     value.filterTranslationLanguage !== undefined
   );
+  const { t } = useTranslate();
+  const [open, setOpen] = useState(false);
+  const anchorEl = useRef<HTMLElement>(null);
+
+  // Only render the component if available labels exist
+  if (!labels || labels.length === 0) {
+    return null;
+  }
 
   function toggleFilterLanguage(
     newValue: FiltersInternal['filterTranslationLanguage']
@@ -50,10 +58,6 @@ export const SubfilterLabels = ({
         newValue === value.filterTranslationLanguage ? undefined : newValue,
     });
   }
-
-  const { t } = useTranslate();
-  const [open, setOpen] = useState(false);
-  const anchorEl = useRef<HTMLElement>(null);
 
   const handleToggleLabel = (id: string) => {
     if (value.filterLabel?.includes(id)) {
