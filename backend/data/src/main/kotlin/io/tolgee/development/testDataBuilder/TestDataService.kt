@@ -106,6 +106,7 @@ class TestDataService(
 
     executeInNewTransaction(transactionManager) {
       saveProjectData(builder)
+      saveGlossaryData(builder)
       saveNotifications(builder)
       finalize()
     }
@@ -189,6 +190,15 @@ class TestDataService(
     saveAllMtCreditBuckets(builder)
     saveSlackWorkspaces(builder)
     saveOrganizationTenants(builder)
+    saveLlmProviders(builder)
+  }
+
+  private fun saveLlmProviders(builder: TestDataBuilder) {
+    builder.data.organizations.forEach { organizationBuilder ->
+      organizationBuilder.data.llmProviders.map { it.self }.forEach {
+        entityManager.persist(it)
+      }
+    }
   }
 
   private fun saveSlackWorkspaces(builder: TestDataBuilder) {
@@ -213,6 +223,47 @@ class TestDataService(
 
   private fun saveOrganizationTenants(builder: TestDataBuilder) {
     tenantService.saveAll(builder.data.organizations.mapNotNull { it.data.tenant?.self })
+  }
+
+  private fun saveGlossaryData(builder: TestDataBuilder) {
+    val builders = saveGlossaries(builder)
+    saveGlossariesDependants(builders)
+  }
+
+  private fun saveGlossaries(builder: TestDataBuilder): List<GlossaryBuilder> {
+    val builders = builder.data.organizations.flatMap { it.data.glossaries }
+    builders.forEach {
+      entityManager.persist(it.self)
+    }
+    return builders
+  }
+
+  private fun saveGlossariesDependants(builders: List<GlossaryBuilder>) {
+    saveGlossaryTermData(builders)
+  }
+
+  private fun saveGlossaryTermData(builders: List<GlossaryBuilder>) {
+    val builders = saveGlossaryTerms(builders)
+    saveGlossaryTermsDependants(builders)
+  }
+
+  private fun saveGlossaryTerms(builders: List<GlossaryBuilder>): List<GlossaryTermBuilder> {
+    val builders = builders.flatMap { it.data.terms }
+    builders.forEach {
+      entityManager.persist(it.self)
+    }
+    return builders
+  }
+
+  private fun saveGlossaryTermsDependants(builders: List<GlossaryTermBuilder>) {
+    saveGlossaryTranslations(builders)
+  }
+
+  private fun saveGlossaryTranslations(builders: List<GlossaryTermBuilder>) {
+    val builders = builders.flatMap { it.data.translations }
+    builders.forEach {
+      entityManager.persist(it.self)
+    }
   }
 
   private fun finalize() {
@@ -249,6 +300,8 @@ class TestDataService(
     saveBatchJobs(builder)
     saveTasks(builder)
     saveTaskKeys(builder)
+    savePrompts(builder)
+    saveAiPlaygroundResults(builder)
   }
 
   private fun saveImportSettings(builder: ProjectBuilder) {
@@ -430,10 +483,8 @@ class TestDataService(
   private fun saveAllProjects(builder: TestDataBuilder) {
     val projectBuilders = builder.data.projects
     projectBuilders.forEach { projectBuilder ->
-      executeInNewTransaction(transactionManager) {
-        projectService.save(projectBuilder.self)
-        saveAllProjectDependants(projectBuilder)
-      }
+      projectService.save(projectBuilder.self)
+      saveAllProjectDependants(projectBuilder)
     }
   }
 
@@ -516,6 +567,18 @@ class TestDataService(
 
   private fun saveTaskKeys(builder: ProjectBuilder) {
     builder.data.taskKeys.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun savePrompts(builder: ProjectBuilder) {
+    builder.data.prompts.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveAiPlaygroundResults(builder: ProjectBuilder) {
+    builder.data.aiPlaygroundResults.forEach {
       entityManager.persist(it.self)
     }
   }

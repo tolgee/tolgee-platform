@@ -12,14 +12,14 @@ import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 
-import { LanguageItem } from './LanguageItem';
+import { LanguageItem } from '../../../component/languages/LanguageItem';
 import {
   StyledLanguageTable,
   TABLE_CENTERED,
   TABLE_FIRST_CELL,
   TABLE_LAST_CELL,
   TABLE_TOP_ROW,
-} from './tableStyles';
+} from '../../../component/languages/tableStyles';
 import { Plus } from '@untitled-ui/icons-react';
 import { LanguagesAddDialog } from 'tg.component/languages/LanguagesAddDialog';
 

@@ -232,6 +232,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       /**
        * Format: int64
@@ -346,6 +347,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -381,6 +383,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       forOrganizationIds: number[];
       free: boolean;
@@ -798,7 +801,19 @@ export interface components {
         | "keys_spending_limit_exceeded"
         | "plan_seat_limit_exceeded"
         | "instance_not_using_license_key"
-        | "invalid_path";
+        | "invalid_path"
+        | "llm_provider_not_found"
+        | "llm_provider_error"
+        | "prompt_not_found"
+        | "llm_provider_not_returned_json"
+        | "llm_template_parsing_error"
+        | "llm_rate_limited"
+        | "llm_provider_timeout"
+        | "no_llm_provider_configured"
+        | "glossary_not_found"
+        | "glossary_term_not_found"
+        | "glossary_term_translation_not_found"
+        | "glossary_non_translatable_term_cannot_be_translated";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -848,6 +863,17 @@ export interface components {
       /** @description The Total amount with tax */
       total: number;
     };
+    LegacyTolgeeTranslateRequest: {
+      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
+      isBatch: boolean;
+      keyName?: string;
+      metadata?: components["schemas"]["Metadata"];
+      pluralFormExamples?: { [key: string]: string };
+      pluralForms?: { [key: string]: string };
+      sourceTag: string;
+      targetTag: string;
+      text: string;
+    };
     LimitModel: {
       /**
        * Format: int64
@@ -883,6 +909,7 @@ export interface components {
       /** Format: int32 */
       price: number;
       translated?: string;
+      usage?: components["schemas"]["PromptResponseUsageDto"];
     };
     OrganizationWithSubscriptionsModel: {
       cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
@@ -971,6 +998,8 @@ export interface components {
         | "webhooks.manage"
         | "tasks.view"
         | "tasks.edit"
+        | "prompts.view"
+        | "prompts.edit"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1041,6 +1070,14 @@ export interface components {
       /** Format: int64 */
       seats: number;
     };
+    PromptResponseUsageDto: {
+      /** Format: int64 */
+      cachedTokens?: number;
+      /** Format: int64 */
+      inputTokens?: number;
+      /** Format: int64 */
+      outputTokens?: number;
+    };
     ReleaseKeyDto: {
       licenseKey: string;
     };
@@ -1089,6 +1126,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       /**
        * Format: int64
@@ -1128,6 +1166,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -1162,6 +1201,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       forOrganizationIds: number[];
       free: boolean;
@@ -1311,17 +1351,6 @@ export interface components {
       translationsCount: number;
       /** Format: int64 */
       usersCount: number;
-    };
-    TolgeeTranslateParams: {
-      formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
-      isBatch: boolean;
-      keyName?: string;
-      metadata?: components["schemas"]["Metadata"];
-      pluralFormExamples?: { [key: string]: string };
-      pluralForms?: { [key: string]: string };
-      sourceTag: string;
-      targetTag: string;
-      text: string;
     };
     TranslationAgencyModel: {
       avatar?: components["schemas"]["Avatar"];
@@ -1836,6 +1865,7 @@ export interface operations {
             | "TASKS"
             | "SSO"
             | "ORDER_TRANSLATION"
+            | "GLOSSARY"
           )[];
         };
       };
@@ -4787,7 +4817,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["TolgeeTranslateParams"];
+        "application/json": components["schemas"]["LegacyTolgeeTranslateRequest"];
       };
     };
   };

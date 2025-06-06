@@ -18,12 +18,14 @@ import { SideMenuItem, SideMenuItemQuickStart } from './SideMenuItem';
 import { SideLogo } from './SideLogo';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { Integration } from 'tg.component/CustomIcons';
+import { Integration, Stars } from 'tg.component/CustomIcons';
 import { FC } from 'react';
 import { createAdder } from 'tg.fixtures/pluginAdder';
 import { useAddProjectMenuItems } from 'tg.ee';
+import { useProject } from 'tg.hooks/useProject';
 
-export const ProjectMenu = ({ id }) => {
+export const ProjectMenu = () => {
+  const project = useProject();
   const { satisfiesPermission } = useProjectPermissions();
   const config = useConfig();
   const canPublishCd = satisfiesPermission('content-delivery.publish');
@@ -113,7 +115,9 @@ export const ProjectMenu = ({ id }) => {
       text: t('project_menu_developer'),
       dataCy: 'project-menu-item-developer',
       quickStart: { itemKey: 'menu_developer' },
-      matchAsPrefix: LINKS.PROJECT_DEVELOPER.build({ [PARAMS.PROJECT_ID]: id }),
+      matchAsPrefix: LINKS.PROJECT_DEVELOPER.build({
+        [PARAMS.PROJECT_ID]: project.id,
+      }),
     },
     {
       id: 'integrate',
@@ -123,6 +127,16 @@ export const ProjectMenu = ({ id }) => {
       text: t('project_menu_integrate'),
       dataCy: 'project-menu-item-integrate',
       quickStart: { itemKey: 'menu_integrate' },
+    },
+    {
+      id: 'ai',
+      condition: ({ satisfiesPermission }) =>
+        satisfiesPermission('prompts.view') && config.llm.enabled,
+      link: LINKS.PROJECT_AI,
+      icon: Stars,
+      text: t('project_menu_ai'),
+      matchAsPrefix: true,
+      dataCy: 'project-menu-item-ai',
     },
     {
       id: 'settings',
@@ -150,7 +164,10 @@ export const ProjectMenu = ({ id }) => {
         return (
           <SideMenuItem
             key={item.id}
-            linkTo={link.build({ [PARAMS.PROJECT_ID]: id })}
+            linkTo={link.build({
+              [PARAMS.PROJECT_ID]: project.id,
+              [PARAMS.ORGANIZATION_SLUG]: project.organizationOwner?.slug || '',
+            })}
             {...rest}
             icon={<Icon />}
             data-cy={dataCy}

@@ -2,6 +2,14 @@ spring:
   jpa:
     show-sql: true
 tolgee:
+  llm:
+    enabled: true
+    providers:
+      - name: "server-provider"
+        type: "OPENAI"
+        api-url: "https://mock.test"
+        token-price-in-credits-input: 2.0
+        token-price-in-credits-output: 1.5
   billing:
     enabled: false
   frontend-url: http://localhost:8202
@@ -46,6 +54,7 @@ tolgee:
     fake-third-party-login: true
     fake-mt-providers: true
     verify-sso-account-available-bypass: true
+    fake-llm-providers: true
   smtp:
     host: localhost
     port: 21025

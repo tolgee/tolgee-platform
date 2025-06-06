@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -54,6 +55,13 @@ class Organization(
     condition = "(deleted_at IS NULL)",
   )
   var projects: MutableList<Project> = mutableListOf()
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "organizationOwner")
+  @field:Filter(
+    name = "deletedFilter",
+    condition = "(deleted_at IS NULL)",
+  )
+  var glossaries: MutableSet<Glossary> = mutableSetOf()
 
   @OneToMany(mappedBy = "preferredOrganization")
   var preferredBy: MutableList<UserPreferences> = mutableListOf()

@@ -21,6 +21,7 @@ describe('Permissions project', () => {
         checkPermissions(projectInfo, {
           'project-menu-item-dashboard': RUN,
           'project-menu-item-languages': RUN,
+          'project-menu-item-ai': RUN,
         });
       }
     );

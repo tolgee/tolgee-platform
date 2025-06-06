@@ -119,7 +119,11 @@ export const namespaces = generateTestDataObject('namespaces');
 
 export const tasks = generateTestDataObject('task');
 
+export const prompt = generateTestDataObject('prompt');
+
 export const batchJobs = generateTestDataObject('batch-jobs');
+
+export const glossaryTestData = generateTestDataObject('glossary');
 
 export const notificationTestData = generateTestDataObject('notification');
 
@@ -170,6 +174,22 @@ export function getOrganizationByNameFromTestData(
   name: string
 ) {
   return data.organizations.find((organization) => organization.name === name);
+}
+
+export function getGlossaryByNameFromOrganizationData(
+  data: TestDataStandardResponse['organizations'][number],
+  name: string
+) {
+  return data.glossaries.find((glossary) => glossary.name === name);
+}
+
+export function getGlossaryByNameFromTestData(
+  data: TestDataStandardResponse,
+  orgName: string,
+  name: string
+) {
+  const organization = getOrganizationByNameFromTestData(data, orgName);
+  return getGlossaryByNameFromOrganizationData(organization, name);
 }
 
 export function getProjectByNameFromTestData(

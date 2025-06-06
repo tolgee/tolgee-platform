@@ -5,6 +5,7 @@ import { useTranslationCell } from '../useTranslationCell';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationLanguage } from './TranslationLanguage';
+import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -34,10 +35,13 @@ const StyledContainer = styled('div')`
 `;
 
 const StyledTranslation = styled('div')`
+  display: grid;
+  grid-auto-rows: max-content;
   grid-area: translation;
   min-height: 23px;
   margin: 0px 12px 16px 16px;
   position: relative;
+  gap: 8px;
 `;
 
 type Props = {
@@ -58,6 +62,8 @@ export const TranslationRead: React.FC<Props> = ({
 }) => {
   const {
     isEditing,
+    isEditingRow,
+    editingLanguageTag,
     handleOpen,
     handleClose,
     setState: handleStateChange,
@@ -65,8 +71,12 @@ export const TranslationRead: React.FC<Props> = ({
     language,
     canChangeState,
     keyData,
-    editEnabled,
+    cellClickable,
     setAssignedTaskState,
+    aiPlaygroundData,
+    aiPlaygroundEnabled,
+    editable,
+    disabled,
   } = tools;
 
   const toggleEdit = () => {
@@ -79,16 +89,13 @@ export const TranslationRead: React.FC<Props> = ({
 
   const state = translation?.state || 'UNTRANSLATED';
 
-  const disabled = state === 'DISABLED';
-  const editable = editEnabled && !disabled;
-
   return (
     <StyledContainer
       className={clsx(className)}
       data-cy="translations-table-cell"
       data-cy-language={language.tag}
       data-cy-key={keyData.keyName}
-      onClick={editable && !isEditing ? () => toggleEdit() : undefined}
+      onClick={cellClickable ? () => toggleEdit() : undefined}
     >
       <TranslationLanguage
         language={language}
@@ -97,30 +104,42 @@ export const TranslationRead: React.FC<Props> = ({
         inactive
       />
 
-      <ControlsTranslation
-        onEdit={() => handleOpen()}
-        onComments={() => handleOpen('comments')}
-        commentsCount={translation?.commentCount}
-        tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
-        onTaskStateChange={setAssignedTaskState}
-        unresolvedCommentCount={translation?.unresolvedCommentCount}
-        stateChangeEnabled={canChangeState}
-        editEnabled={editable}
-        state={state}
-        onStateChange={handleStateChange}
-        active={active}
-        lastFocusable={lastFocusable}
-        className="controls-t"
-      />
+      {!aiPlaygroundEnabled && (
+        <ControlsTranslation
+          onEdit={() => handleOpen()}
+          onComments={() => handleOpen('comments')}
+          commentsCount={translation?.commentCount}
+          tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
+          onTaskStateChange={setAssignedTaskState}
+          unresolvedCommentCount={translation?.unresolvedCommentCount}
+          stateChangeEnabled={canChangeState}
+          editEnabled={editable}
+          state={state}
+          onStateChange={handleStateChange}
+          active={active}
+          lastFocusable={lastFocusable}
+          className="controls-t"
+        />
+      )}
 
       <StyledTranslation>
         <TranslationVisual
           width={width}
           text={translation?.text}
           locale={language.tag}
+          targetLocale={editingLanguageTag}
           disabled={disabled}
+          showHighlights={isEditingRow && language.base}
           isPlural={keyData.keyIsPlural}
         />
+        {aiPlaygroundData && (
+          <AiPlaygroundPreview
+            translation={aiPlaygroundData.translation}
+            tooltip={aiPlaygroundData.contextDescription}
+            isPlural={keyData.keyIsPlural}
+            locale={language.tag}
+          />
+        )}
       </StyledTranslation>
     </StyledContainer>
   );
