@@ -177,7 +177,7 @@ class PromptVariablesHelper(
     )
 
     glossary.props.add(
-      Variable("hasNonTranslatable", description = "Glossary items contain some caseSensitive item", lazyValue = {
+      Variable("hasNonTranslatable", description = "Glossary items contain some non-translatable item", lazyValue = {
         glossaryTerms.any { it.isNonTranslatable ?: false }
       })
     )
