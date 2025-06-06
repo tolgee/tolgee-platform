@@ -36,8 +36,8 @@ type LabelModel = components['schemas']['LabelModel'];
 
 type Props = {
   label: LabelModel;
-  onLabelEdit: () => void;
-  onLabelRemove: () => void;
+  onLabelEdit?: () => void;
+  onLabelRemove?: () => void;
 };
 
 export const LabelItem: React.FC<Props> = ({
@@ -51,7 +51,8 @@ export const LabelItem: React.FC<Props> = ({
         <TranslationLabel
           color={label.color}
           data-cy="project-settings-label-item-label"
-        >{label.name}
+        >
+          {label.name}
         </TranslationLabel>
       </StyledItemText>
       <StyledItemText data-cy="project-settings-label-item-description">
@@ -60,20 +61,24 @@ export const LabelItem: React.FC<Props> = ({
         </span>
       </StyledItemText>
       <StyledItemActions>
-        <IconButton
-          data-cy="project-settings-labels-edit-button"
-          size="small"
-          onClick={onLabelEdit}
-        >
-          <Edit01 width={20} height={20} />
-        </IconButton>
-        <IconButton
-          data-cy="project-settings-labels-remove-button"
-          size="small"
-          onClick={onLabelRemove}
-        >
-          <XClose />
-        </IconButton>
+        {onLabelEdit && (
+          <IconButton
+            data-cy="project-settings-labels-edit-button"
+            size="small"
+            onClick={onLabelEdit}
+          >
+            <Edit01 width={20} height={20} />
+          </IconButton>
+        )}
+        {onLabelRemove && (
+          <IconButton
+            data-cy="project-settings-labels-remove-button"
+            size="small"
+            onClick={onLabelRemove}
+          >
+            <XClose />
+          </IconButton>
+        )}
       </StyledItemActions>
     </StyledListItem>
   );

@@ -37,6 +37,8 @@ enum class Scope(
   WEBHOOKS_MANAGE("webhooks.manage"),
   TASKS_VIEW("tasks.view"),
   TASKS_EDIT("tasks.edit"),
+  TRANSLATION_LABEL_MANAGE("translation-labels.manage"),
+  TRANSLATION_LABEL_ASSIGN("translation-labels.assign"),
   ;
 
   fun expand() = Scope.expand(this)
@@ -95,6 +97,14 @@ enum class Scope(
           ),
           HierarchyItem(
             TRANSLATIONS_COMMENTS_ADD,
+            listOf(translationsView),
+          ),
+          HierarchyItem(
+            TRANSLATION_LABEL_MANAGE,
+            listOf(translationsView),
+          ),
+          HierarchyItem(
+            TRANSLATION_LABEL_ASSIGN,
             listOf(translationsView),
           ),
           HierarchyItem(

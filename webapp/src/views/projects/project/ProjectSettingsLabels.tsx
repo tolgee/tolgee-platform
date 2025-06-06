@@ -10,6 +10,7 @@ import { LabelFormValues } from 'tg.views/projects/project/components/Labels/Lab
 import { components } from 'tg.service/apiSchema.generated';
 import { Plus } from '@untitled-ui/icons-react';
 import { confirmation } from 'tg.hooks/confirmation';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -25,6 +26,9 @@ export const ProjectSettingsLabels = () => {
   const [page, setPage] = useState(0);
   const [modalOpened, setModalOpen] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState<LabelModel>();
+  const { satisfiesPermission } = useProjectPermissions();
+  const canManageLabels = satisfiesPermission('translation-labels.manage');
+
   const addLabel = () => {
     setSelectedLabel(undefined);
     setModalOpen(true);
@@ -115,15 +119,17 @@ export const ProjectSettingsLabels = () => {
             mb={1}
             alignItems="stretch"
           >
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<Plus width={19} height={19} />}
-              onClick={addLabel}
-              data-cy="project-settings-labels-add-button"
-            >
-              {t('add_label')}
-            </Button>
+            {canManageLabels && (
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<Plus width={19} height={19} />}
+                onClick={addLabel}
+                data-cy="project-settings-labels-add-button"
+              >
+                {t('add_label')}
+              </Button>
+            )}
           </Box>
         </Box>
         <PaginatedHateoasList
@@ -141,8 +147,8 @@ export const ProjectSettingsLabels = () => {
           renderItem={(l: LabelModel) => (
             <LabelItem
               label={l}
-              onLabelEdit={() => editLabel(l)}
-              onLabelRemove={() => removeLabel(l)}
+              onLabelEdit={canManageLabels ? () => editLabel(l) : undefined}
+              onLabelRemove={canManageLabels ? () => removeLabel(l) : undefined}
             />
           )}
         />

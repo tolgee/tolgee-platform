@@ -4,6 +4,7 @@ import { TranslationLabel } from 'tg.component/TranslationLabel';
 import { LabelControl } from 'tg.views/projects/translations/TranslationsList/Label/LabelControl';
 import React from 'react';
 import { XClose } from '@untitled-ui/icons-react';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -61,6 +62,9 @@ export const TranslationLabels = ({
   onSelect,
   onDelete,
 }: Props) => {
+  const { satisfiesPermission } = useProjectPermissions();
+  const canAssignLabels = satisfiesPermission('translation-labels.assign');
+
   return (
     <StyledLabels className={className}>
       <StyledList>
@@ -79,7 +83,7 @@ export const TranslationLabels = ({
               >
                 {label.name}
               </div>
-              {onDelete && (
+              {onDelete && canAssignLabels && (
                 <StyledClose
                   width={16}
                   height={16}
@@ -94,11 +98,13 @@ export const TranslationLabels = ({
             </TranslationLabel>
           ))}
       </StyledList>
-      <LabelControl
-        className="clickable"
-        onSelect={onSelect}
-        existing={labels}
-      />
+      {canAssignLabels && (
+        <LabelControl
+          className="clickable"
+          onSelect={onSelect}
+          existing={labels}
+        />
+      )}
     </StyledLabels>
   );
 };

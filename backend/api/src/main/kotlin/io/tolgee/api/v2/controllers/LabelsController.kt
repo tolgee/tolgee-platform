@@ -6,10 +6,12 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.request.label.LabelRequest
 import io.tolgee.hateoas.label.LabelModel
 import io.tolgee.hateoas.label.LabelModelAssembler
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.translation.Label
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.label.LabelService
 import jakarta.validation.Valid
@@ -67,7 +69,7 @@ class LabelsController(
 
   @PostMapping(value = ["labels"])
   @Operation(summary = "Create label")
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_MANAGE])
   @AllowApiAccess
   fun createLabel(
     @RequestBody @Valid
@@ -78,7 +80,7 @@ class LabelsController(
 
   @PutMapping(value = ["labels/{labelId:\\d+}"])
   @Operation(summary = "Update label")
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_MANAGE])
   @AllowApiAccess
   fun updateLabel(
     @PathVariable("labelId")
@@ -91,7 +93,7 @@ class LabelsController(
 
   @DeleteMapping(value = ["labels/{labelId:\\d+}"])
   @Operation(summary = "Delete label")
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_MANAGE])
   @AllowApiAccess
   fun deleteLabel(
     @PathVariable("labelId")
@@ -103,7 +105,7 @@ class LabelsController(
   @PutMapping(value = ["translations/{translationId:\\d+}/label/{labelId:\\d+}"])
   @Operation(summary = "Add label to translation")
   @RequestActivity(ActivityType.TRANSLATION_LABELS_EDIT)
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_ASSIGN])
   @AllowApiAccess
   fun assignLabel(
     @PathVariable("translationId")
@@ -117,7 +119,7 @@ class LabelsController(
   @DeleteMapping(value = ["translations/{translationId:\\d+}/label/{labelId:\\d+}"])
   @Operation(summary = "Remove label from translation")
   @RequestActivity(ActivityType.TRANSLATION_LABELS_EDIT)
-  @UseDefaultPermissions
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_ASSIGN])
   @AllowApiAccess
   fun unassignLabel(
     @PathVariable("translationId")

@@ -1327,6 +1327,8 @@ export interface components {
         | "webhooks.manage"
         | "tasks.view"
         | "tasks.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -2271,7 +2273,9 @@ export interface components {
         | "content-delivery.publish"
         | "webhooks.manage"
         | "tasks.view"
-        | "tasks.edit";
+        | "tasks.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign";
     };
     IdentifyRequest: {
       anonymousUserId: string;
@@ -3467,6 +3471,8 @@ export interface components {
         | "webhooks.manage"
         | "tasks.view"
         | "tasks.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -3529,6 +3535,8 @@ export interface components {
         | "webhooks.manage"
         | "tasks.view"
         | "tasks.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -18469,6 +18477,8 @@ export interface operations {
               | "webhooks.manage"
               | "tasks.view"
               | "tasks.edit"
+              | "translation-labels.manage"
+              | "translation-labels.assign"
             )[];
           };
         };

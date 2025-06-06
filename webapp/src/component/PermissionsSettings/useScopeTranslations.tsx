@@ -41,6 +41,12 @@ export const useScopeTranslations = () => {
     'content-delivery.publish': t('permissions_item_content_delivery_publish'),
     'tasks.view': t('permissions_item_tasks_view'),
     'tasks.edit': t('permissions_item_tasks_edit'),
+    'translation-labels.manage': t(
+      'permissions_item_translation_labels_manage'
+    ),
+    'translation-labels.assign': t(
+      'permissions_item_translation_labels_assign'
+    ),
   };
 
   return {
