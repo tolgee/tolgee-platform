@@ -91,6 +91,11 @@ export const TabBasic = ({ value, onChange }: Props) => {
       hint: t('ai_prompt_item_key_context_hint'),
     },
     {
+      id: 'GLOSSARY',
+      label: t('ai_prompt_item_glossary'),
+      hint: t('ai_prompt_item_glossary_hint'),
+    },
+    {
       id: 'SCREENSHOT',
       label: t('ai_prompt_item_screenshot'),
       hint: t('ai_prompt_item_screenshot_hint'),

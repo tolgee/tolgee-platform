@@ -106,6 +106,7 @@ class TestDataService(
 
     executeInNewTransaction(transactionManager) {
       saveProjectData(builder)
+      saveGlossaryData(builder)
       saveNotifications(builder)
       finalize()
     }
@@ -190,7 +191,6 @@ class TestDataService(
     saveSlackWorkspaces(builder)
     saveOrganizationTenants(builder)
     saveLlmProviders(builder)
-    saveGlossaryData(builder)
   }
 
   private fun saveLlmProviders(builder: TestDataBuilder) {
@@ -483,10 +483,8 @@ class TestDataService(
   private fun saveAllProjects(builder: TestDataBuilder) {
     val projectBuilders = builder.data.projects
     projectBuilders.forEach { projectBuilder ->
-      executeInNewTransaction(transactionManager) {
-        projectService.save(projectBuilder.self)
-        saveAllProjectDependants(projectBuilder)
-      }
+      projectService.save(projectBuilder.self)
+      saveAllProjectDependants(projectBuilder)
     }
   }
 

@@ -164,6 +164,21 @@ describe('custom prompt', () => {
     });
   });
 
+  it('prompt glossary variables work', () => {
+    openAdvancedAiPlayground();
+    testVariables({
+      '{{glossary.json}}': 'překlad',
+      '{{#if glossary.hasCaseSensitive}} hasCaseSensitive {{else}} noCaseSensitive {{/if}}':
+        'hasCaseSensitive',
+      '{{#if glossary.hasAbbreviation}} hasAbbreviation {{else}} noAbbreviation {{/if}}':
+        'hasAbbreviation',
+      '{{#if glossary.hasForbiddenTerm}} hasForbiddenTerm {{else}} noForbiddenTerm {{/if}}':
+        'noForbiddenTerm',
+      '{{#if glossary.hasNonTranslatable}} hasNonTranslatable {{else}} noNonTranslatable {{/if}}':
+        'noNonTranslatable',
+    });
+  });
+
   it('prompt screenshots work', () => {
     openAdvancedAiPlayground();
     testVariables({

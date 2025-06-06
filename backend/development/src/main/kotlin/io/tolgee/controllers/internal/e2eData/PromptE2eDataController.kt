@@ -15,5 +15,9 @@ import org.springframework.web.bind.annotation.RestController
 @Transactional
 class PromptE2eDataController : AbstractE2eDataController() {
   override val testData: TestDataBuilder
-    get() = PromptTestData().root
+    get() {
+      val data = PromptTestData()
+      data.addGlossary()
+      return data.root
+    }
 }

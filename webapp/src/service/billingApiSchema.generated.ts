@@ -232,6 +232,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       /**
        * Format: int64
@@ -346,6 +347,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -381,6 +383,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       forOrganizationIds: number[];
       free: boolean;
@@ -805,7 +808,12 @@ export interface components {
         | "llm_provider_not_returned_json"
         | "llm_template_parsing_error"
         | "llm_rate_limited"
-        | "llm_provider_timeout";
+        | "llm_provider_timeout"
+        | "no_llm_provider_configured"
+        | "glossary_not_found"
+        | "glossary_term_not_found"
+        | "glossary_term_translation_not_found"
+        | "glossary_non_translatable_term_cannot_be_translated";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -1118,6 +1126,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       /**
        * Format: int64
@@ -1157,6 +1166,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -1191,6 +1201,7 @@ export interface components {
         | "TASKS"
         | "SSO"
         | "ORDER_TRANSLATION"
+        | "GLOSSARY"
       )[];
       forOrganizationIds: number[];
       free: boolean;
@@ -1854,6 +1865,7 @@ export interface operations {
             | "TASKS"
             | "SSO"
             | "ORDER_TRANSLATION"
+            | "GLOSSARY"
           )[];
         };
       };

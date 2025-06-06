@@ -87,6 +87,28 @@ class PromptFragmentsHelper {
 
     result.add(
       Variable(
+        "glossary",
+        """
+        {{#if glossary.json}}
+        These are some glossary entries that you should strictly follow when translating:
+        {{glossary.json}}
+        
+        {{#if glossary.hasForbiddenTerm}}
+        isForbidden = Do not use it in the resulting translation.
+        {{/if}}
+        {{#if glossary.hasNonTranslatable}}
+        isNonTranslatable = Do not translate this term to {{target.languageName}}, keep it as it is in {{source.languageName}}.
+        {{/if}}
+        
+        {{/if}}
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+        option = BasicPromptOption.GLOSSARY,
+      ),
+    )
+
+    result.add(
+      Variable(
         "relatedKeys",
         """
         {{#if relatedKeys.json}}

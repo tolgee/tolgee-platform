@@ -87,92 +87,118 @@ class PromptTestData : BaseTestData() {
         organizationOwner = organization.self
         name = "Prompt project"
         aiTranslatorPromptDescription = "Project used for testing llms"
-      }.build {
-        english = addEnglish()
-        czech = addCzech()
+      }
 
-        german = addLanguage {
-          name = "German"
-          originalName = "Deutsch"
-          tag = "de"
-        }
+    promptProject.build {
+      english = addEnglish()
+      czech = addCzech()
 
-        chinese = addLanguage {
-          name = "Chinese"
-          tag = "zh"
-        }
+      german = addLanguage {
+        name = "German"
+        originalName = "Deutsch"
+        tag = "de"
+      }
 
-        czech.self.apply {
-          aiTranslatorPromptDescription = "Language used for testing llms"
-        }
+      chinese = addLanguage {
+        name = "Chinese"
+        tag = "zh"
+      }
 
-        keys =
-          listOf(1, 2, 3, 4).map { i ->
-            addKey("Key $i") {}.also {
-              addTranslation {
-                key = it.self
-                text = "English translation $i"
-                language = english.self
-              }
-              addTranslation {
-                key = it.self
-                text = "Czech translation $i"
-                language = czech.self
-              }
-              addTranslation {
-                key = it.self
-                text = "German translation $i"
-                language = german.self
-              }
-              addTranslation {
-                key = it.self
-                text = "Chinese translation $i"
-                language = chinese.self
-              }
+      czech.self.apply {
+        aiTranslatorPromptDescription = "Language used for testing llms"
+      }
+
+      keys =
+        listOf(1, 2, 3, 4).map { i ->
+          addKey("Key $i") {}.also {
+            addTranslation {
+              key = it.self
+              text = "English translation $i"
+              language = english.self
             }
-          }.toMutableList()
+            addTranslation {
+              key = it.self
+              text = "Czech translation $i"
+              language = czech.self
+            }
+            addTranslation {
+              key = it.self
+              text = "German translation $i"
+              language = german.self
+            }
+            addTranslation {
+              key = it.self
+              text = "Chinese translation $i"
+              language = chinese.self
+            }
+          }
+        }.toMutableList()
 
-        keys[0].apply {
-          val screenshotResource =
-            ClassPathResource("development/testScreenshot.png", this::class.java.getClassLoader())
-          addScreenshot(screenshotResource) {}
-          setDescription("Key 1 description.")
-        }
-        addKeysDistance(keys[0].self, keys[1].self) {
-          distance = 2.0
-        }
-        addKeysDistance(keys[0].self, keys[2].self) {
-          distance = 2.0
-        }
+      keys[0].apply {
+        val screenshotResource =
+          ClassPathResource("development/testScreenshot.png", this::class.java.getClassLoader())
+        addScreenshot(screenshotResource) {}
+        setDescription("Key 1 description.")
+      }
+      addKeysDistance(keys[0].self, keys[1].self) {
+        distance = 2.0
+      }
+      addKeysDistance(keys[0].self, keys[2].self) {
+        distance = 2.0
+      }
 
-        addAiPlaygroundResult {
-          this.user = projectEditor.self
-          this.language = czech.self
-          this.project = this@build.self
-          this.key = keys.get(0).self
-          this.translation = "Llm test response"
-        }
+      addAiPlaygroundResult {
+        this.user = projectEditor.self
+        this.language = czech.self
+        this.project = this@build.self
+        this.key = keys.get(0).self
+        this.translation = "Llm test response"
+      }
 
-        addPermission {
-          user = projectEditor.self
-          type = ProjectPermissionType.EDIT
-        }
+      addPermission {
+        user = projectEditor.self
+        type = ProjectPermissionType.EDIT
+      }
 
-        addPermission {
-          user = projectReviewer.self
-          type = ProjectPermissionType.REVIEW
-        }
+      addPermission {
+        user = projectReviewer.self
+        type = ProjectPermissionType.REVIEW
+      }
 
-        customPrompt =
-          addPrompt {
-            name = "Custom prompt"
-            providerName = "organization-provider"
-            template =
-              """
+      customPrompt =
+        addPrompt {
+          name = "Custom prompt"
+          providerName = "organization-provider"
+          template =
+            """
               Test prompt
               {{fragment.intro}}
               """.trimIndent()
-          }
+        }
+    }
+  }
+
+  fun addGlossary() {
+    organization.addGlossary {
+      name = "Test Glossary"
+      baseLanguageTag = "en"
+    }.build {
+      assignProject(promptProject.self)
+      addTerm {
+        description = "The description"
+        flagCaseSensitive = true
+        flagAbbreviation = true
+      }.build {
+        this.addTranslation {
+          languageTag = "en"
+          text = "translation"
+        }
+
+        this.addTranslation {
+          languageTag = "cs"
+          text = "překlad"
+        }
       }
+    }
   }
 }
