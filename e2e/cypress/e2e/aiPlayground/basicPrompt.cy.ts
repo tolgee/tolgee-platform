@@ -41,7 +41,7 @@ describe('basic prompt', () => {
       'KEY_CONTEXT',
       'Here is list of translations used in the same context'
     );
-    testOption('GLOSSARY', 'These are some glossary entries');
+    testOption('GLOSSARY', 'These glossary terms should be strictly used');
     testOption('SCREENSHOT', '[[screenshot_small_');
   });
 
