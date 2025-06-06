@@ -90,9 +90,10 @@ class PromptFragmentsHelper {
         "glossary",
         """
         {{#if glossary.json}}
-        These are some glossary entries that you should strictly follow when translating:
+        These glossary terms should be strictly used, adjust form to fit into the context:
         {{glossary.json}}
         
+        isCaseSensitive: If true, strictly follow the term casing, otherwise adjust casing to fit the context
         {{#if glossary.hasForbiddenTerm}}
         isForbidden = Do not use it in the resulting translation.
         {{/if}}

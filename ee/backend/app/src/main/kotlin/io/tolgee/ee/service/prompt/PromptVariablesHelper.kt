@@ -402,11 +402,11 @@ class PromptVariablesHelper(
   fun removeUnnecessaryFields(item: TranslationGlossaryItem): TranslationGlossaryItem {
     return TranslationGlossaryItem(
       source = item.source,
+      isCaseSensitive = item.isCaseSensitive ?: false,
       // set empty items null for JSON stringification
       target = item.target?.takeIf { it.isNotBlank() },
       description = item.description?.takeIf { it.isNotBlank() },
       isNonTranslatable = item.isNonTranslatable?.takeIf { it },
-      isCaseSensitive = item.isCaseSensitive?.takeIf { it },
       isAbbreviation = item.isAbbreviation?.takeIf { it },
       isForbiddenTerm = item.isForbiddenTerm?.takeIf { it },
     )
