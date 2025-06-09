@@ -58,10 +58,10 @@ class AutoTranslateChunkProcessor(
     val languageIds = request.target.map { it.languageId }.distinct()
     val project = projectService.getDto(projectId)
     val services = mtServiceConfigService.getPrimaryServices(languageIds, project.id).values.toSet()
-    if (!services.mapNotNull { it?.serviceType }.contains(MtServiceType.PROMPT)) {
-      return 5
+    if (services.mapNotNull { it?.serviceType }.contains(MtServiceType.PROMPT)) {
+      return 1
     }
-    return 2
+    return 5
   }
 
   override fun getTargetItemType(): Class<BatchTranslationTargetItem> {

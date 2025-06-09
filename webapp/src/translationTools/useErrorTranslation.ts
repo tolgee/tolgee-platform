@@ -193,6 +193,8 @@ export function useErrorTranslation() {
         return t('llm_provider_not_returned_json');
       case 'prompt_not_found':
         return t('prompt_not_found');
+      case 'llm_content_filter':
+        return t('llm_content_filter');
       default:
         return code;
     }

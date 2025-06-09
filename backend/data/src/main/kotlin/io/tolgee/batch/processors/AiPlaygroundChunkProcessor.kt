@@ -89,7 +89,7 @@ class AiPlaygroundChunkProcessor(
     request: MachineTranslationRequest,
     projectId: Long?,
   ): Int {
-    return 5
+    return 1
   }
 
   override fun getTargetItemType(): Class<BatchTranslationTargetItem> {

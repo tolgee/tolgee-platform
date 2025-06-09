@@ -1,13 +1,28 @@
 package io.tolgee.ee.component.llm
 
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.swagger.v3.core.util.Json
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
+import io.tolgee.ee.component.llm.OpenaiApiService.Companion.ResponseBody
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.ErrorResponse
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
 val DEFAULT_ATTEMPTS = listOf(30)
 
 abstract class AbstractLlmApiService {
+
+  private val logger = LoggerFactory.getLogger(AbstractLlmApiService::class.java)
+
   abstract fun translate(
     params: LlmParams,
     config: LlmProviderInterface,
@@ -18,4 +33,22 @@ abstract class AbstractLlmApiService {
    * specify how many times and with what timeouts service should be called
    */
   open fun defaultAttempts(): List<Int> = DEFAULT_ATTEMPTS
+
+  open fun parseErrorBody(ex: HttpClientErrorException): JsonNode? {
+    val errorBody: String? = ex.responseBodyAsString
+    if (!errorBody.isNullOrEmpty()) {
+      val objectMapper = ObjectMapper()
+      try {
+        val errorResponse: JsonNode = objectMapper.readValue(errorBody)
+        return errorResponse
+      } catch (jsonEx: JsonProcessingException) {
+        logger.debug("Failed to parse error body: ${jsonEx.message}")
+        return null
+      }
+    } else {
+      // No error body available
+      logger.debug("Bad request with no error body")
+      return null
+    }
+  }
 }

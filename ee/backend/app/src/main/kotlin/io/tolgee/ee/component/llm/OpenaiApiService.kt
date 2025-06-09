@@ -8,6 +8,7 @@ import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.LlmContentFilterException
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -15,8 +16,10 @@ import org.springframework.context.annotation.Scope
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
 @Component
@@ -53,6 +56,7 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
         model = config.model,
       )
 
+
     val request = HttpEntity(requestBody, headers)
 
     val url =
@@ -62,13 +66,22 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
         "${config.apiUrl}/openai/deployments/${config.deployment}/chat/completions?api-version=2025-01-01-preview"
       }
 
-    val response: ResponseEntity<ResponseBody> =
+    val response: ResponseEntity<ResponseBody> = try {
       restTemplate.exchange(
         url,
         HttpMethod.POST,
         request,
         ResponseBody::class.java
       )
+    } catch (e: HttpClientErrorException) {
+      if (e.statusCode == HttpStatus.BAD_REQUEST) {
+        val body = parseErrorBody(e)
+        if (body?.get("error")?.get("code")?.asText() == "content_filter") {
+          throw LlmContentFilterException(config.name)
+        }
+      }
+      throw e
+    }
 
     return PromptResult(
       response = response.body?.choices?.first()?.message?.content
