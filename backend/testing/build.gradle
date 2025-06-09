@@ -14,7 +14,6 @@ plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
     id "kotlin-jpa"
-    id "org.jetbrains.kotlin.kapt"
     id "kotlin-allopen"
 }
 
@@ -39,19 +38,20 @@ apply plugin: 'idea'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "kotlin-allopen"
-apply plugin: "kotlin-kapt"
 
 repositories {
     mavenCentral()
 }
 
-kotlin {
-    jvmToolchain(21)
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
-idea {
-    module {
-        generatedSourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
     }
 }
 
@@ -75,11 +75,9 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation('org.springframework.boot:spring-boot-starter-test') {
-    }
-    kapt "org.springframework.boot:spring-boot-configuration-processor"
-    implementation "org.springframework.boot:spring-boot-configuration-processor"
+    implementation('org.springframework.boot:spring-boot-starter-test')
     api "org.springframework.boot:spring-boot-starter-actuator"
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
      * Testing
