@@ -30,7 +30,8 @@ import java.util.regex.Pattern
  * Cannot be written as a subclass of ICUReloadableResourceBundleMessageSource as its `getMessage` methods are final.
  */
 class EmailMessageSource(
-	private val provider: ICUMessageSource
+	private val provider: ICUMessageSource,
+	private val emailTemplateUtils: EmailTemplateUtils
 ) : ICUMessageSource {
 	private var counter = 0L
 
@@ -103,14 +104,7 @@ class EmailMessageSource(
 	private fun makeRef(): String = "intl-ref-${count()}"
 
 	private fun String.postProcessMessage(code: String): String {
-		var str = this.replace("\n", "<br/>")
-			// Prevent Thymeleaf injection (for the second pass)
-			.replace("{", "&#123;")
-			.replace("[", "&#91;")
-			.replace("$", "&#36;")
-			.replace("*", "&#42;")
-			.replace("#", "&#35;")
-			.replace("~", "&#126;")
+		var str = emailTemplateUtils.escape(this).replace("\n", "<br/>")
 
 		// Dumb heuristic to skip XML parsing for trivial cases, to improve performance.
 		if (contains('<') && contains('>')) {
@@ -123,7 +117,9 @@ class EmailMessageSource(
 					stack.add(m.group(2))
 
 					val ref = makeRef()
-					val replacement = "<div th:ref=\"$ref\" th:replace=\"~{::intl-${stack.joinToString("--")}(~{:: $ref/content})}\"><content th:remove=\"tag\">"
+					val replacement = "<div th:ref=\"$ref\" th:replace=\"~{::intl-${stack.joinToString(
+            "--"
+          )}(~{:: $ref/content})}\"><content th:remove=\"tag\">"
 					str = str.replaceRange(delta + m.start(), delta + m.end(), replacement)
 					delta += replacement.length - (m.end() - m.start())
 				} else {
