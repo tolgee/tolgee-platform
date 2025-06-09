@@ -31,11 +31,12 @@ import If from '../If';
 import ImgResource from '../ImgResource';
 import LocalizedText from '../LocalizedText';
 import LayoutCore from './LayoutCore';
+import t, { TranslatedText } from '../translate';
 
 type Props = {
   children: React.ReactNode;
-  subject: React.ReactElement | string;
-  sendReason: React.ReactElement | string;
+  subject: TranslatedText | string;
+  sendReason: TranslatedText | string;
 };
 
 type SocialLinkProps = {
@@ -78,7 +79,9 @@ export default function ClassicLayout({
                 />
               </Column>
               <Column className="text-right">
-                <Heading className="text-xl text-brand m-0">{subject}</Heading>
+                <Heading className="text-xl text-brand m-0">
+                  {t.render(subject)}
+                </Heading>
               </Column>
             </Row>
           </Section>
@@ -87,10 +90,10 @@ export default function ClassicLayout({
           </Section>
           <Hr className="hidden" />
           <Section className="p-[10px] text-xs text-gray-600 text-center">
-            <Text className="text-xs m-0 mb-2">{sendReason}</Text>
+            <Text className="text-xs m-0 mb-2">{t.render(sendReason)}</Text>
             <Container>
-              <Column>
-                <Row>
+              <Row>
+                <Column>
                   <If condition="${isCloud}">
                     <Container>
                       <Row>
@@ -178,8 +181,8 @@ export default function ClassicLayout({
                       />
                     </Text>
                   </If>
-                </Row>
-              </Column>
+                </Column>
+              </Row>
             </Container>
           </Section>
         </Container>

@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "jsx": "preserve"
+  },
+  "include": ["components", "emails", "env.d.ts"]
+}
