@@ -31,15 +31,19 @@ export default function If({
 
   if (process.env.NODE_ENV === 'production') {
     const trueCase = React.cloneElement(children[0], {
-      'data-th-if': condition,
+      key: 'true-case',
+      'th:if': condition,
     });
 
     const falseCase =
       children.length === 2
-        ? React.cloneElement(children[1], { 'data-th-unless': condition })
+        ? React.cloneElement(children[1], {
+            key: 'false-case',
+            'th:unless': condition,
+          })
         : null;
 
-    return React.createElement(React.Fragment, {}, trueCase, falseCase);
+    return [trueCase, falseCase];
   }
 
   if (demoValue === false) return children[1];
