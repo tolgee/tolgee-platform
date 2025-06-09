@@ -15,24 +15,24 @@
  */
 
 import * as React from 'react';
-import { renderToString } from 'react-dom/server';
 import { convert } from 'html-to-text';
 
 import { Head, Html, Tailwind } from '@react-email/components';
+import { TranslatedText } from '../translate';
 
 type Props = {
   children: React.ReactNode;
-  subject: React.ReactElement | string;
+  subject: TranslatedText | string;
 };
 
 export default function LayoutCore({ children, subject }: Props) {
-  const subjectPlainText = convert(renderToString(subject));
-  const thText = typeof subject === 'object' ? subject.props['th:text'] : null;
+  const subjectPlain = typeof subject === 'object' ? subject.text : subject;
+  const thText = typeof subject === 'object' ? subject.expr : null;
 
   return (
     <Html>
       <Head>
-        <title {...{ 'th:text': thText }}>{subjectPlainText}</title>
+        <title {...{ 'th:text': thText }}>{convert(subjectPlain)}</title>
         {process.env.NODE_ENV !== 'production' && (
           // This is a hack to get line returns to behave as line returns.
           // The Kotlin renderer will handle these cases, but this is for the browser preview.

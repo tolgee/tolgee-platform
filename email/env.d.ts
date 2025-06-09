@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2024 Tolgee s.r.o. and contributors
+ * Copyright (C) 2025 Tolgee s.r.o. and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-import _t from './translate.js';
+import 'react';
 
-type Props = {
-  keyName: string;
-  defaultValue: string;
-  demoParams?: Record<string, any>;
-};
-
-export default function LocalizedText(props: Props) {
-  return _t(props.keyName, props.defaultValue, props.demoParams);
+declare module 'react' {
+  interface Attributes {
+    [k: `th:${string}`]: unknown;
+  }
 }
