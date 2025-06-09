@@ -122,7 +122,7 @@ function processMessageElements(
           React.cloneElement(
             demoParams[node.value](
               React.createElement('th:block', {
-                'th:utext': '\'<div th:replace="${_children}"></div>\'',
+                'th:utext': '\'<div th:replace="${_children} ?: ~{}"></div>\'',
               })
             ),
             { key: templateId }
