@@ -45,6 +45,7 @@ export const GlossariesListView = () => {
       sort: ['id,desc'],
     },
     options: {
+      enabled: glossaryFeature,
       keepPreviousData: true,
     },
   });
@@ -76,7 +77,7 @@ export const GlossariesListView = () => {
             }),
           ],
         ]}
-        loading={glossaries.isLoading}
+        loading={glossaryFeature && glossaries.isLoading}
         hideChildrenOnLoading={false}
         maxWidth={1000}
         allCentered
