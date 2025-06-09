@@ -813,7 +813,8 @@ export interface components {
         | "glossary_not_found"
         | "glossary_term_not_found"
         | "glossary_term_translation_not_found"
-        | "glossary_non_translatable_term_cannot_be_translated";
+        | "glossary_non_translatable_term_cannot_be_translated"
+        | "llm_content_filter";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {

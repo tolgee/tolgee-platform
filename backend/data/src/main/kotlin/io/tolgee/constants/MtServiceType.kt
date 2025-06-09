@@ -37,7 +37,7 @@ enum class MtServiceType(
     order = 5,
   ),
   PROMPT(
-    propertyClass = null,
+    propertyClass = LlmProperties::class.java,
     providerClass = LlmTranslationProvider::class.java,
     usesMetadata = true,
     order = -1,

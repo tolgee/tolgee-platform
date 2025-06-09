@@ -7,9 +7,15 @@ import io.tolgee.model.enums.LlmProviderType
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.llm")
-class LlmProperties {
+class LlmProperties: MachineTranslationServiceProperties {
   @DocProperty("Enable/disable AI translator (default: enabled if there is at least one provider)")
   var enabled: Boolean? = null
+
+  @DocProperty(description = "Whether llm-powered machine translation is enabled.")
+  override var defaultEnabled: Boolean = true
+  @DocProperty(description = "Whether to use llm machine translation as a primary translation engine.")
+  override var defaultPrimary: Boolean = true
+  
   var providers: MutableList<LlmProvider> = mutableListOf()
 
   open class LlmProvider(

@@ -71,7 +71,6 @@ class PublicConfigurationDTO(
   )
 
   data class MtServicesDTO(
-    val defaultPrimaryService: MtServiceType?,
     val services: Map<MtServiceType, MtServiceDTO>,
   )
 

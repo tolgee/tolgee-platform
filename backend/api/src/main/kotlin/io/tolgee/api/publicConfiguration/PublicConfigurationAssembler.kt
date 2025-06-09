@@ -32,7 +32,6 @@ class PublicConfigurationAssembler(
     return PublicConfigurationDTO(
       machineTranslationServices =
         PublicConfigurationDTO.MtServicesDTO(
-          defaultPrimaryService = getPrimaryMtService(),
           services = getMtServices(),
         ),
       billing = publicBillingConfProvider(),
@@ -104,18 +103,6 @@ class PublicConfigurationAssembler(
         ssoOrganizations.enabled,
       ),
     )
-  }
-
-  private fun getPrimaryMtService(): MtServiceType? {
-    try {
-    val primaryMtService =
-      MtServiceType.entries.find {
-        applicationContext.getBean(it.propertyClass).defaultPrimary
-      }
-      return primaryMtService
-    } catch (e: Throwable) {
-      return null
-    }
   }
 
   private fun getMtServices(): Map<MtServiceType, PublicConfigurationDTO.MtServiceDTO> {

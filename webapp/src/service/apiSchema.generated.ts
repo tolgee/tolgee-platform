@@ -2338,7 +2338,8 @@ export interface components {
         | "glossary_not_found"
         | "glossary_term_not_found"
         | "glossary_term_translation_not_found"
-        | "glossary_non_translatable_term_cannot_be_translated";
+        | "glossary_non_translatable_term_cannot_be_translated"
+        | "llm_content_filter";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -3393,13 +3394,6 @@ export interface components {
       serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
     };
     MtServicesDTO: {
-      defaultPrimaryService?:
-        | "GOOGLE"
-        | "AWS"
-        | "DEEPL"
-        | "AZURE"
-        | "BAIDU"
-        | "PROMPT";
       services: { [key: string]: components["schemas"]["MtServiceDTO"] };
     };
     MtSupportedService: {
@@ -5235,7 +5229,8 @@ export interface components {
         | "glossary_not_found"
         | "glossary_term_not_found"
         | "glossary_term_translation_not_found"
-        | "glossary_non_translatable_term_cannot_be_translated";
+        | "glossary_non_translatable_term_cannot_be_translated"
+        | "llm_content_filter";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
