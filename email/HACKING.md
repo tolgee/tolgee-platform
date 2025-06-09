@@ -43,6 +43,10 @@ fine to send and what isn't; basically the [Can I Use](https://caniuse.com/) of 
 This also applies to the layout; always prefer React Email's `Container`, `Row` and `Column` elements for layout.
 They'll get turned into ugly HTML tables to do the layout - just like in the good ol' HTML days...
 
+> [!TIP]
+> Recent versions of React Email have an embedded linter in preview mode, that checks for compatibility and other
+> helpful things.
+
 ## Layouts
 The core shell of emails is provided by `components/layouts/LayoutCore.tsx`. It is not expected to be used as-is, but
 instead to serve as a shared base for more complete layouts such as `ClassicLayout.tsx`. All emails should use a layout,
@@ -54,7 +58,7 @@ The classic layout (`ClassicLayout.tsx`) takes 3 properties:
   - Is it because they have an account? Is it because they enabled notifications? ...
 - `extra` (optional): displayed at the very bottom, useful to insert an unsubscribe link if necessary
 
-These three properties are generally expected to receive output from the `t()` function documented below. The core
+These three properties are generally expected to receive output from the `t.raw()` function documented below. The core
 layout only requires the subject.
 
 ## Utility components
@@ -71,7 +75,10 @@ Shared parts are found in `components/parts`.
 
 ### `<LocalizedText />` and `t()`
 Most if not all text in emails are expected to be wrapped in `<LocalizedText />` (or `t()` when more appropriate).
-They are equivalent as `<LocalizedText />` is simply a JSX wrapper for calling `t()`.
+They are equivalent : `<LocalizedText />` is simply a JSX wrapper for calling `t()`.
+
+There is also `t.raw()`, which works exactly like `t()` but enforces the translation to be plaintext (no HTML). It's
+mainly used for the subject part and the send reason.
 
 The strings are written using a format similar to the familiar Tolgee ICU, via [ICU4J](https://github.com/unicode-org/icu/tree/main/icu4j)
 (see [MessageFormat](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/MessageFormat.html)).
@@ -90,8 +97,9 @@ The `<LocalizedText />` takes the following properties:
 
 The `t()` function takes the same properties, instead it takes them as arguments in the order they're described here.
 
-When using the development environment, only the default value locally provided will be considered. Strings are not
-pulled from Tolgee to test directly within the dev environment. (At least, at this time).
+> [!WARNING]
+> When using the development environment, only the default value locally provided will be considered. Strings are not
+> pulled from Tolgee to test directly within the dev environment. (At least, at this time).
 
 ```tsx
 <LocalizedText
