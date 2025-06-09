@@ -20,6 +20,8 @@ import { convert } from 'html-to-text';
 import { Head, Html, Tailwind } from '@react-email/components';
 import { TranslatedText } from '../translate';
 
+import tailwindConfig from '../../tailwind.config.js';
+
 type Props = {
   children: React.ReactNode;
   subject: TranslatedText | string;
@@ -33,28 +35,8 @@ export default function LayoutCore({ children, subject }: Props) {
     <Html>
       <Head>
         <title {...{ 'th:text': thText }}>{convert(subjectPlain)}</title>
-        {process.env.NODE_ENV !== 'production' && (
-          // This is a hack to get line returns to behave as line returns.
-          // The Kotlin renderer will handle these cases, but this is for the browser preview.
-          // white-space is poorly supported in email clients anyway.
-          <style
-            dangerouslySetInnerHTML={{ __html: 'p { white-space: pre-line; }' }}
-          />
-        )}
       </Head>
-      <Tailwind
-        config={{
-          theme: {
-            extend: {
-              colors: {
-                brand: '#ec407a',
-              },
-            },
-          },
-        }}
-      >
-        {children}
-      </Tailwind>
+      <Tailwind config={tailwindConfig}>{children}</Tailwind>
     </Html>
   );
 }
