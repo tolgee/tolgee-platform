@@ -118,11 +118,11 @@ class EmailServiceTest {
 
 		val email = emailCaptor.value
 		email.assertContents()
-			.contains("Plain test: <span>Name #1</span>")
+			.contains("Plain test: <span>Name &#35;1</span>")
 			.contains("<span>ICU test: Name &#35;1</span>")
-			.contains("Plain test: <span>Name #2</span>")
+			.contains("Plain test: <span>Name &#35;2</span>")
 			.contains("<span>ICU test: Name &#35;2</span>")
-			.contains("Plain test: <span>Name #3</span>")
+			.contains("Plain test: <span>Name &#35;3</span>")
 			.contains("<span>ICU test: Name &#35;3</span>")
 	}
 
