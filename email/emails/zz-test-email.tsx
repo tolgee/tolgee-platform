@@ -23,7 +23,7 @@ import Var from '../components/Var';
 import If from '../components/If';
 import For from '../components/For';
 
-export default function RegistrationConfirmEmail() {
+export default function TestEmail() {
   return (
     <ClassicLayout
       subject="Test email (written with React Email)"

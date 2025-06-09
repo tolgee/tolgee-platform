@@ -24,7 +24,7 @@ type Props = {
 
 export default function For({ each, demoIterations, children }: Props) {
   if (process.env.NODE_ENV === 'production') {
-    return React.cloneElement(children, { 'data-th-each': each });
+    return React.cloneElement(children, { 'th:each': each });
   }
 
   return React.createElement(
