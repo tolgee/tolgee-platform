@@ -19,16 +19,19 @@ package io.tolgee.email
 import io.tolgee.configuration.tolgee.SmtpProperties
 import io.tolgee.dtos.misc.EmailAttachment
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.ApplicationContext
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
+import org.thymeleaf.spring6.expression.ThymeleafEvaluationContext
 import java.util.*
 
 @Service
 class EmailService(
+	private val applicationContext: ApplicationContext,
   private val smtpProperties: SmtpProperties,
   private val mailSender: JavaMailSender,
 	private val emailGlobalVariablesProvider: EmailGlobalVariablesProvider,
@@ -50,15 +53,17 @@ class EmailService(
     properties: Map<String, Any> = mapOf(),
     attachments: List<EmailAttachment> = listOf(),
   ) {
-    val context = Context(locale, properties)
 		val globalVariables = emailGlobalVariablesProvider()
+		val context = Context(locale, properties)
 		context.setVariables(globalVariables)
 
-		// Do two passes, so Thymeleaf expressions rendered by messages can get processed
-		context.setVariable("isSecondPass", false)
-    val firstPass = templateEngine.process(template, context)
+		// Required because we're outside of Spring MVC here
+		// Otherwise, bean resolution does not work for some reason
+		val tec = ThymeleafEvaluationContext(applicationContext, null)
+		context.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME, tec)
 
-		context.setVariable("isSecondPass", true)
+		// Do two passes, so Thymeleaf expressions rendered by messages can get processed
+    val firstPass = templateEngine.process(template, context)
 		val html = templateEngine.process(firstPass, context)
 
     val subject = extractEmailTitle(html)

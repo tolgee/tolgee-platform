@@ -31,36 +31,41 @@ import java.util.*
 
 @Configuration
 class EmailTemplateConfig {
-  @Bean("emailTemplateResolver")
-  fun templateResolver(): ClassLoaderTemplateResolver {
-    val templateResolver = ClassLoaderTemplateResolver()
-    templateResolver.characterEncoding = "UTF-8"
-    templateResolver.prefix = "/email-templates/"
-    templateResolver.suffix = ".html"
-    return templateResolver
-  }
+	@Bean("emailTemplateResolver")
+	fun templateResolver(): ClassLoaderTemplateResolver {
+		val templateResolver = ClassLoaderTemplateResolver()
+		templateResolver.characterEncoding = "UTF-8"
+		templateResolver.prefix = "/email-templates/"
+		templateResolver.suffix = ".html"
+		return templateResolver
+	}
 
-  @Bean("emailMessageSource")
-  fun messageSource(): ICUMessageSource {
-    val messageSource = ICUReloadableResourceBundleMessageSource()
-    messageSource.setBasenames("email-i18n/messages", "email-i18n-test/messages")
-    messageSource.setDefaultEncoding("UTF-8")
-    messageSource.setDefaultLocale(Locale.ENGLISH)
-    return EmailMessageSource(messageSource)
-  }
+	@Bean("emailMessageSource")
+	fun messageSource(emailTemplateUtils: EmailTemplateUtils): ICUMessageSource {
+		val messageSource = ICUReloadableResourceBundleMessageSource()
+		messageSource.setBasenames("email-i18n/messages", "email-i18n-test/messages")
+		messageSource.setDefaultEncoding("UTF-8")
+		messageSource.setDefaultLocale(Locale.ENGLISH)
+		return EmailMessageSource(messageSource, emailTemplateUtils)
+	}
 
-  @Bean("emailTemplateEngine")
-  fun templateEngine(
-    @Qualifier("emailTemplateResolver") templateResolver: ITemplateResolver,
-    @Qualifier("emailMessageSource") messageSource: MessageSource,
-  ): TemplateEngine {
+	@Bean("emailTemplateEngine")
+	fun templateEngine(
+		@Qualifier("emailTemplateResolver") templateResolver: ITemplateResolver,
+		@Qualifier("emailMessageSource") messageSource: MessageSource,
+	): TemplateEngine {
 		val stringTemplateResolver = StringTemplateResolver()
 		stringTemplateResolver.resolvablePatternSpec.addPattern("<!DOCTYPE*")
 
-    val templateEngine = SpringTemplateEngine()
-    templateEngine.enableSpringELCompiler = true
-    templateEngine.templateResolvers = setOf(stringTemplateResolver, templateResolver)
-    templateEngine.setTemplateEngineMessageSource(messageSource)
-    return templateEngine
-  }
+		val templateEngine = SpringTemplateEngine()
+		templateEngine.enableSpringELCompiler = true
+		templateEngine.templateResolvers = setOf(stringTemplateResolver, templateResolver)
+		templateEngine.setTemplateEngineMessageSource(messageSource)
+		return templateEngine
+	}
+
+	@Bean("emailTemplateUtils")
+	fun emailTemplateUtils(): EmailTemplateUtils {
+		return EmailTemplateUtils()
+	}
 }
