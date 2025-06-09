@@ -15,7 +15,6 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.response.PublicLlmConfigurationDTO
 import io.tolgee.service.LlmPropertiesService
 import io.tolgee.util.VersionProvider
-import io.tolgee.util.logger
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
