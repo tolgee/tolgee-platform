@@ -47,6 +47,9 @@ class EmailServiceTest {
 	@MockBean
 	private lateinit var mailSender: JavaMailSender
 
+	@MockBean
+	private lateinit var emailGlobalVariablesProvider: EmailGlobalVariablesProvider
+
 	@Autowired
 	private lateinit var emailService: EmailService
 
@@ -61,6 +64,14 @@ class EmailServiceTest {
 			val msg = sender.createMimeMessage()
 			it.thenReturn(msg)
 		}
+
+		whenever(emailGlobalVariablesProvider.invoke()).thenReturn(
+			mapOf(
+				"isCloud" to true,
+				"instanceQualifier" to "Tolgee",
+				"instanceUrl" to "https://tolgee.test",
+			)
+		)
 	}
 
 	@Test

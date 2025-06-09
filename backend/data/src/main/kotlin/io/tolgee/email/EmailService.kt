@@ -31,6 +31,7 @@ import java.util.*
 class EmailService(
   private val smtpProperties: SmtpProperties,
   private val mailSender: JavaMailSender,
+	private val emailGlobalVariablesProvider: EmailGlobalVariablesProvider,
   @Qualifier("emailTemplateEngine") private val templateEngine: TemplateEngine,
 ) {
   private val smtpFrom
@@ -50,12 +51,12 @@ class EmailService(
     attachments: List<EmailAttachment> = listOf(),
   ) {
     val context = Context(locale, properties)
+		val globalVariables = emailGlobalVariablesProvider()
+		context.setVariables(globalVariables)
 
 		// Do two passes, so Thymeleaf expressions rendered by messages can get processed
 		context.setVariable("isSecondPass", false)
     val firstPass = templateEngine.process(template, context)
-
-		println(firstPass)
 
 		context.setVariable("isSecondPass", true)
 		val html = templateEngine.process(firstPass, context)
