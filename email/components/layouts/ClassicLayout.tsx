@@ -69,7 +69,7 @@ export default function ClassicLayout({
   return (
     <LayoutCore subject={subject}>
       <Body className="bg-white my-auto mx-auto font-sans">
-        <Container className="border border-solid border-[#eaeaea] rounded my-[40px] mx-auto w-[610px]">
+        <Container className="mx-auto my-[40px] max-w-[465px] rounded border border-[#eaeaea] border-solid">
           <Section className="p-[20px]">
             <Row>
               <Column>

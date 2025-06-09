@@ -81,21 +81,24 @@ There is also `t.raw()`, which works exactly like `t()` but enforces the transla
 mainly used for the subject part and the send reason.
 
 The strings are written using a format similar to the familiar Tolgee ICU, via [ICU4J](https://github.com/unicode-org/icu/tree/main/icu4j)
-(see [MessageFormat](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/MessageFormat.html)).
+(see [MessageFormat](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/MessageFormat.html)). A simple but working post-processing step by the custom message source adds support for
+FormatJS-like XML within the message.
 
 ICU arguments are pulled from the template variables. To access a dotted key, such as `item.name` use a double
 underscore: `item__name`.
 
 The `<LocalizedText />` takes the following properties:
 - `keyName` (required): String key name
-- `defaultValue` (optional): Default string to use
-  - Will be used by the CLI to push default values when pushing new keys, and when previewing
+- `defaultValue` (required): Default string to use
+  - Will be used by the CLI to push default values when pushing new keys, and during preview
+  - Used to detect which XML tags and variables the message expects, to build the Thymeleaf template accordingly
 - `demoProps` (required¹): Demo properties to use when rendering the string
   - When previewing, the ICU string will be rendered using these values, so it is representative of a "real" email
-  - If demo props are not specified, the preview will fail to render
+  - If demo props are not specified, the email will fail to render both in preview and at build-time
   - ¹It can be unset if there are no props in the string
 
-The `t()` function takes the same properties, instead it takes them as arguments in the order they're described here.
+The `t()` function (and `t.raw()`) takes the same properties, taking them as arguments in the order they're described
+here.
 
 > [!WARNING]
 > When using the development environment, only the default value locally provided will be considered. Strings are not
@@ -117,7 +120,8 @@ t('hello', 'Hello {name}!', { name: 'Bob' })
 Newlines are handled as if there was an explicit `<br />`. This is handled by the previewer, and must be correctly
 handled by the renderer (by replacing all newlines from ICU format output by `<br />`).
 
-The ICU renderer **MUST** sanitize the strings, to prevent HTML injection attacks.
+HTML injection attacks are prevented by Thymeleaf and the template pre-processing, by making sure variables are always
+escaped by default (via `Var` or an ICU string).
 
 ### `<Var />`
 Injects a variable as plaintext. Easy, simple. Only useful when a variable is used outside an ICU string.

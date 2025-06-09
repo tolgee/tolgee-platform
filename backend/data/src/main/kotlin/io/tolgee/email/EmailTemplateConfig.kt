@@ -26,6 +26,7 @@ import org.thymeleaf.TemplateEngine
 import org.thymeleaf.spring6.SpringTemplateEngine
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.thymeleaf.templateresolver.ITemplateResolver
+import org.thymeleaf.templateresolver.StringTemplateResolver
 import java.util.*
 
 @Configuration
@@ -45,7 +46,7 @@ class EmailTemplateConfig {
     messageSource.setBasenames("email-i18n/messages", "email-i18n-test/messages")
     messageSource.setDefaultEncoding("UTF-8")
     messageSource.setDefaultLocale(Locale.ENGLISH)
-    return messageSource
+    return EmailMessageSource(messageSource)
   }
 
   @Bean("emailTemplateEngine")
@@ -53,9 +54,12 @@ class EmailTemplateConfig {
     @Qualifier("emailTemplateResolver") templateResolver: ITemplateResolver,
     @Qualifier("emailMessageSource") messageSource: MessageSource,
   ): TemplateEngine {
+		val stringTemplateResolver = StringTemplateResolver()
+		stringTemplateResolver.resolvablePatternSpec.addPattern("<!DOCTYPE*")
+
     val templateEngine = SpringTemplateEngine()
     templateEngine.enableSpringELCompiler = true
-    templateEngine.templateResolvers = setOf(templateResolver)
+    templateEngine.templateResolvers = setOf(stringTemplateResolver, templateResolver)
     templateEngine.setTemplateEngineMessageSource(messageSource)
     return templateEngine
   }
