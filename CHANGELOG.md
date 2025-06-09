@@ -1,3 +1,10 @@
+# [3.121.0](https://github.com/tolgee/tolgee-platform/compare/v3.120.0...v3.121.0) (2025-06-09)
+
+
+### Features
+
+* playground + glossaries ([#3109](https://github.com/tolgee/tolgee-platform/issues/3109)) ([fba6e9b](https://github.com/tolgee/tolgee-platform/commit/fba6e9bb0c439f69cf2b952228dde7ba58405feb))
+
 # [3.120.0](https://github.com/tolgee/tolgee-platform/compare/v3.119.4...v3.120.0) (2025-06-04)
 
 
