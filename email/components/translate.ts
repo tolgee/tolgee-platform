@@ -15,14 +15,25 @@
  */
 
 import * as React from 'react';
-import { TYPE } from '@formatjs/icu-messageformat-parser';
+import { ReactElement } from 'react';
+import { MessageFormatElement, TYPE } from '@formatjs/icu-messageformat-parser';
 import { IntlMessageFormat } from 'intl-messageformat';
+
+declare const TranslatedTextSymbol: unique symbol;
+
+export type TranslatedText = {
+  [TranslatedTextSymbol]?: true;
+  expr: string;
+  text: string;
+};
 
 const GLOBALS = {
   isCloud: true,
   instanceQualifier: 'Tolgee',
   instanceUrl: 'https://app.tolgee.io',
 };
+
+const SeenIcuXmlIds = new Set<string>();
 
 function formatDev(string?: string, demoParams?: Record<string, any>) {
   const formatted = new IntlMessageFormat(string, 'en-US').format({
@@ -39,37 +50,128 @@ function formatDev(string?: string, demoParams?: Record<string, any>) {
   return formatted;
 }
 
-export default function t(
-  key: string,
-  defaultString?: string,
+function processMessageElements(
+  id: string,
+  elements: MessageFormatElement[],
   demoParams?: Record<string, any>
-) {
-  const intl = new IntlMessageFormat(defaultString, 'en-US');
-  const ast = intl.getAst();
+): [ReactElement[], Set<string>] {
+  const fragments: ReactElement[] = [];
+  const stringArguments = new Set<string>();
 
-  const stringArguments: string[] = [];
-
-  for (const node of ast) {
+  for (const node of elements) {
     if (node.type === TYPE.literal || node.type === TYPE.pound) {
+      // Text and what misc ICU syntax; not interesting
       continue;
     }
 
     if (node.type === TYPE.tag) {
-      // TODO: find a way to process the tag
+      // Tag: needs to be converted to a Thymeleaf fragment
+      const templateId = `${id}-${node.value}`;
+      const [tagFrags, tagArgs] = processMessageElements(
+        templateId,
+        node.children
+      );
+
+      tagArgs.forEach((a) => stringArguments.add(a));
+      if (!SeenIcuXmlIds.has(templateId)) {
+        SeenIcuXmlIds.add(templateId);
+        fragments.push(
+          ...tagFrags,
+          React.createElement(
+            'th:block',
+            {
+              key: templateId,
+              'th:fragment': `${templateId} (_children)`,
+            },
+            demoParams[node.value](
+              React.createElement('div', { 'th:replace': '${_children}' })
+            )
+          )
+        );
+      }
+
       continue;
     }
 
-    stringArguments.push(`${node.value}: ${node.value.replace(/__/g, '.')}`);
+    // Everything else is some form of variable: keep track of them
+    stringArguments.add(node.value);
   }
+
+  return [fragments, stringArguments];
+}
+
+function renderTranslatedText(
+  key: string,
+  defaultString: string,
+  demoParams?: Record<string, any>
+) {
+  const id = `intl-${key.replace(/\./g, '__')}`;
+  const intl = new IntlMessageFormat(defaultString, 'en-US');
+  const ast = intl.getAst();
+
+  const [fragments, stringArguments] = processMessageElements(
+    id,
+    ast,
+    demoParams
+  );
 
   const text =
     process.env.NODE_ENV === 'production'
       ? defaultString
       : formatDev(defaultString, demoParams);
 
-  const messageExpression = stringArguments.length
-    ? `#{${key}(\${ { ${stringArguments.join(', ')} } })}`
+  const stringArgs = Array.from(stringArguments);
+  const stringArgsMap = stringArgs.map((a) => `${a}: ${a.replace(/__/g, '.')}`);
+
+  const messageExpression = stringArgsMap.length
+    ? `#{${key}(\${ { ${stringArgsMap.join(', ')} } })}`
     : `#{${key}}`;
 
-  return React.createElement('span', { 'th:utext': messageExpression }, text);
+  return { fragments, text, messageExpression };
 }
+
+export default function t(
+  key: string,
+  defaultString: string,
+  demoParams?: Record<string, unknown>
+) {
+  const { fragments, text, messageExpression } = renderTranslatedText(
+    key,
+    defaultString,
+    demoParams
+  );
+
+  return [
+    ...fragments,
+    React.createElement(
+      'span',
+      { key: 'render-el', 'th:utext': messageExpression },
+      text
+    ),
+  ];
+}
+
+t.raw = function (
+  key: string,
+  defaultString: string,
+  demoParams?: Record<string, any>
+): TranslatedText {
+  const { fragments, text, messageExpression } = renderTranslatedText(
+    key,
+    defaultString,
+    demoParams
+  );
+
+  if (fragments.length)
+    throw new Error('Invalid raw translation: cannot contain components.');
+
+  return {
+    expr: messageExpression,
+    text,
+  };
+};
+
+t.render = function (text: TranslatedText | string) {
+  if (typeof text === 'string') return text;
+  return React.createElement('span', { 'th:utext': text.expr }, text.text);
+};
