@@ -56,7 +56,6 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
         model = config.model,
       )
 
-
     val request = HttpEntity(requestBody, headers)
 
     val url =
