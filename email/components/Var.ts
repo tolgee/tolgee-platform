@@ -23,6 +23,16 @@ type Props = {
 };
 
 export default function Var({ variable, demoValue, injectHtml }: Props) {
+  const attr = injectHtml ? 'th:utext' : 'th:text';
+
+  if (process.env.NODE_ENV === 'production') {
+    // This is rendered using the same two-pass trick used in translate.ts
+    // It's done to prevent this from being a potential vector of injection
+    return React.createElement('th:block', {
+      'th:utext': `'<span ${attr}="\${${variable}}"></span>'`,
+    });
+  }
+
   return React.createElement(
     'span',
     { [injectHtml ? 'th:utext' : 'th:text']: `\${${variable}}` },

@@ -50,9 +50,17 @@ class EmailService(
     attachments: List<EmailAttachment> = listOf(),
   ) {
     val context = Context(locale, properties)
-    val html = templateEngine.process(template, context)
-    val subject = extractEmailTitle(html)
 
+		// Do two passes, so Thymeleaf expressions rendered by messages can get processed
+		context.setVariable("isSecondPass", false)
+    val firstPass = templateEngine.process(template, context)
+
+		println(firstPass)
+
+		context.setVariable("isSecondPass", true)
+		val html = templateEngine.process(firstPass, context)
+
+    val subject = extractEmailTitle(html)
     sendEmail(recipient, subject, html, attachments)
   }
 
