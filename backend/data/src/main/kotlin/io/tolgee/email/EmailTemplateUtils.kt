@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2024 Tolgee s.r.o. and contributors
+ * Copyright (C) 2025 Tolgee s.r.o. and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-import * as React from 'react';
+package io.tolgee.email
 
-type Props = {
-  variable: string;
-  demoValue: string;
-  injectHtml?: boolean;
-};
-
-export default function Var({ variable, demoValue, injectHtml }: Props) {
-  return React.createElement(
-    'span',
-    {
-      'th:utext': injectHtml
-        ? `\${${variable}}`
-        : `\${@emailTemplateUtils.escape(#strings.escapeXml(${variable}))}`,
-    },
-    demoValue
-  );
+class EmailTemplateUtils {
+	fun escape(str: String): String {
+		// Prevent Thymeleaf injection (for the second pass)
+		return str.replace("{", "&#123;")
+			.replace("[", "&#91;")
+			.replace("$", "&#36;")
+			.replace("*", "&#42;")
+			.replace("#", "&#35;")
+			.replace("~", "&#126;")
+	}
 }
