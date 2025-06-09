@@ -25,8 +25,8 @@ import LocalizedText from '../components/LocalizedText';
 export default function RegistrationConfirmEmail() {
   return (
     <ClassicLayout
-      subject={t('registration-confirm-subject', 'Confirm your account')}
-      sendReason={t(
+      subject={t.raw('registration-confirm-subject', 'Confirm your account')}
+      sendReason={t.raw(
         'send-reason-created-account',
         "You're receiving this email because you've created an account on {instanceQualifier}",
         { instanceQualifier: 'Tolgee' }
