@@ -54,7 +54,7 @@ class AzureContentStorageConfigCachePurgingTest() {
     val credentialMck: ClientSecretCredential =
       Mockito.mock(ClientSecretCredential::class.java, Mockito.RETURNS_DEEP_STUBS)
     whenever(azureCredentialProviderMock.get(config)).thenReturn(credentialMck)
-    whenever(credentialMck.getToken(any()).block().token).thenReturn("token")
+    whenever(credentialMck.getToken(any()).block()!!.token).thenReturn("token")
 
     val contentDeliveryConfig = mock<ContentDeliveryConfig>()
     whenever(contentDeliveryConfig.slug).thenReturn("fake-slug")
@@ -66,7 +66,7 @@ class AzureContentStorageConfigCachePurgingTest() {
     val httpEntity = invocation.arguments[2] as HttpEntity<*>
     val headers = httpEntity.headers
     headers["Authorization"].assert.isEqualTo(listOf("Bearer token"))
-    assertThatJson(httpEntity.body) {
+    assertThatJson(httpEntity.body!!) {
       node("contentPaths").isArray.containsExactly("/fake-content-root/fake-slug/*")
     }
     url.assert.isEqualTo(

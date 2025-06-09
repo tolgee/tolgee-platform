@@ -51,7 +51,7 @@ class RedisPubSubReceiverConfiguration(
   @Bean
   fun redisPubsubContainer(): RedisMessageListenerContainer {
     val container = RedisMessageListenerContainer()
-    container.connectionFactory = connectionFactory
+    container.setConnectionFactory(connectionFactory)
     if (tolgeeProperties.websocket.useRedis) {
       container.addMessageListener(redisWebsocketPubsubListenerAdapter(), PatternTopic(WEBSOCKET_TOPIC))
     }
