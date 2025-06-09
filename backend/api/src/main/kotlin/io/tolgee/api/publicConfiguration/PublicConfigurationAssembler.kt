@@ -13,6 +13,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.constants.MtServiceType
 import io.tolgee.util.VersionProvider
+import io.tolgee.util.logger
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
@@ -102,11 +103,15 @@ class PublicConfigurationAssembler(
   }
 
   private fun getPrimaryMtService(): MtServiceType? {
+    try {
     val primaryMtService =
       MtServiceType.entries.find {
         applicationContext.getBean(it.propertyClass).defaultPrimary
       }
-    return primaryMtService
+      return primaryMtService
+    } catch (e: Throwable) {
+      return null
+    }
   }
 
   private fun getMtServices(): Map<MtServiceType, PublicConfigurationDTO.MtServiceDTO> {
