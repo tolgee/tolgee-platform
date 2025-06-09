@@ -19,7 +19,9 @@ import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
+import io.tolgee.model.key.KeyMeta
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.util.Logging
 import io.tolgee.util.filterFiles
@@ -44,6 +46,9 @@ class CoreImportFilesProcessor(
   }
   private val tolgeeProperties: TolgeeProperties by lazy { applicationContext.getBean(TolgeeProperties::class.java) }
   private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
+  private val keyMetaService: KeyMetaService by lazy {
+    applicationContext.getBean(KeyMetaService::class.java)
+  }
 
   private val existingLanguages by lazy {
     languageService.getProjectLanguages(projectId = import.project.id)
@@ -292,13 +297,22 @@ class CoreImportFilesProcessor(
     importDataManager.storedTranslations[translation.language]!!.let { it[translation.key]!!.add(translation) }
   }
 
+  fun saveKeyMeta(keyMeta: KeyMeta) {
+    keyMeta.disableActivityLogging = true
+    keyMetaService.save(keyMeta)
+    keyMetaService.saveAllComments(keyMeta.comments)
+    keyMetaService.saveAllCodeReferences(keyMeta.codeReferences)
+  }
+
   private fun FileProcessorContext.getOrCreateKey(name: String): ImportKey {
     return importDataManager.storedKeys.computeIfAbsent(this.fileEntity to name) {
       this.keys.computeIfAbsent(name) {
         ImportKey(name = name, this.fileEntity)
       }.also {
+        it.keyMeta?.also(importDataManager::prepareKeyMeta)
         if (saveData) {
           importService.saveKey(it)
+          it.keyMeta?.also(this@CoreImportFilesProcessor::saveKeyMeta)
         }
       }
     }
@@ -312,10 +326,7 @@ class CoreImportFilesProcessor(
       }
       keyEntity.shouldBeImported = shouldImportKey(keyEntity.name)
     }
-    importDataManager.prepareKeyMetas()
     if (saveData) {
-      importDataManager.saveAllStoredKeys()
-      importDataManager.saveAllKeyMetas()
       importDataManager.saveAllStoredTranslations()
     }
   }
