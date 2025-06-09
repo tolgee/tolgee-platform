@@ -2,6 +2,8 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.component.reporting.BusinessEventPublisher
+import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
@@ -17,6 +19,7 @@ import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -42,6 +45,8 @@ class PromptController(
   private val promptVariablesHelper: PromptVariablesHelper,
   private val defaultPromptHelper: DefaultPromptHelper,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val businessEventPublisher: BusinessEventPublisher,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   @GetMapping("")
   @RequiresProjectPermissions([Scope.PROMPTS_VIEW])
@@ -64,6 +69,13 @@ class PromptController(
   fun createPrompt(
     @RequestBody @Valid dto: PromptDto,
   ): PromptModel {
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "AI_PROMPT_CREATE",
+        userAccountDto = authenticationFacade.authenticatedUser,
+      ),
+    )
+
     // ai-playground allows custom templates only as paid feature
     if (dto.template != null) {
       enabledFeaturesProvider.checkFeatureEnabled(
@@ -91,6 +103,13 @@ class PromptController(
     @PathVariable promptId: Long,
     @RequestBody @Valid dto: PromptDto,
   ): PromptModel {
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "AI_PROMPT_UPDATE",
+        userAccountDto = authenticationFacade.authenticatedUser,
+      ),
+    )
+
     // ai-playground allows custom templates only as paid feature
     if (dto.template != null) {
       enabledFeaturesProvider.checkFeatureEnabled(
@@ -107,6 +126,13 @@ class PromptController(
   fun deletePrompt(
     @PathVariable promptId: Long,
   ) {
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "AI_PROMPT_DELETE",
+        userAccountDto = authenticationFacade.authenticatedUser,
+      ),
+    )
+
     promptService.deletePrompt(projectHolder.project.id, promptId)
   }
 
@@ -115,6 +141,13 @@ class PromptController(
   fun run(
     @Valid @RequestBody data: PromptRunDto,
   ): PromptResponseDto {
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "AI_PROMPT_RUN",
+        userAccountDto = authenticationFacade.authenticatedUser,
+      ),
+    )
+
     // ai-playground allows custom templates only as paid feature
     if (data.template != null) {
       enabledFeaturesProvider.checkFeatureEnabled(

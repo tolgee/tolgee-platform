@@ -3,6 +3,8 @@ package io.tolgee.ee.api.v2.controllers.glossary
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.component.reporting.BusinessEventPublisher
+import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.SimpleGlossaryModelAssembler
@@ -21,6 +23,7 @@ import io.tolgee.model.glossary.Glossary
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import jakarta.validation.Valid
@@ -54,6 +57,8 @@ class GlossaryController(
   private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
   private val organizationHolder: OrganizationHolder,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val businessEventPublisher: BusinessEventPublisher,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   @PostMapping("/glossaries")
   @Operation(summary = "Create glossary")
@@ -69,6 +74,13 @@ class GlossaryController(
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
+    )
+
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "GLOSSARY_CREATE",
+        userAccountDto = authenticationFacade.authenticatedUser,
+      ),
     )
 
     val glossary = glossaryService.create(organizationHolder.organizationEntity, dto)
@@ -88,6 +100,13 @@ class GlossaryController(
     @RequestBody @Valid
     dto: UpdateGlossaryRequest,
   ): GlossaryModel {
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "GLOSSARY_UPDATE",
+        userAccountDto = authenticationFacade.authenticatedUser,
+      ),
+    )
+
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
@@ -109,6 +128,13 @@ class GlossaryController(
     @PathVariable
     glossaryId: Long,
   ) {
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "GLOSSARY_DELETE",
+        userAccountDto = authenticationFacade.authenticatedUser,
+      ),
+    )
+
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
