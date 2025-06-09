@@ -33,7 +33,35 @@ const GLOBALS = {
   instanceUrl: 'https://app.tolgee.io',
 };
 
+let Counter = 0;
 const SeenIcuXmlIds = new Set<string>();
+
+// https://stackoverflow.com/a/55387306
+const interleave = (arr: any[], thing: any): any[] =>
+  [].concat(...arr.map((n) => [n, thing])).slice(0, -1);
+
+function addBrToTranslations(
+  arg: string | ReactElement | (string | ReactElement)[]
+) {
+  if (typeof arg === 'string') {
+    return interleave(
+      arg.split('\n'),
+      React.createElement('br', { key: `br-${++Counter}` })
+    );
+  }
+
+  if (Array.isArray(arg)) {
+    return arg.map((a) => addBrToTranslations(a));
+  }
+
+  if (arg.props && typeof arg.props === 'object' && 'children' in arg.props) {
+    return React.cloneElement(arg as any, {
+      children: addBrToTranslations(arg.props.children as any),
+    });
+  }
+
+  return arg;
+}
 
 function formatDev(string?: string, demoParams?: Record<string, any>) {
   const formatted = new IntlMessageFormat(string, 'en-US').format({
@@ -65,8 +93,11 @@ function processMessageElements(
     }
 
     if (node.type === TYPE.tag) {
-      // Tag: needs to be converted to a Thymeleaf fragment
-      const templateId = `${id}-${node.value}`;
+      // The easy case: it's not a fancy tag - nothing to do
+      if (!(node.value in demoParams)) continue;
+
+      // It's a fancy tag (sigh): make a fragment
+      const templateId = `${id}--${node.value}`;
       const [tagFrags, tagArgs] = processMessageElements(
         templateId,
         node.children
@@ -75,18 +106,31 @@ function processMessageElements(
       tagArgs.forEach((a) => stringArguments.add(a));
       if (!SeenIcuXmlIds.has(templateId)) {
         SeenIcuXmlIds.add(templateId);
+
+        // The template will be rendered twice.
+        // First time for the main template rendering
+        // Second time for rendering th:replace of messages
+        // This use of utext allows to trick Thymeleaf to create the fragment
+        // during the first pass such that it exists in the result html, and to
+        // use it during the second pass as the messages will reference it.
         fragments.push(
           ...tagFrags,
-          React.createElement(
-            'th:block',
-            {
-              key: templateId,
-              'th:fragment': `${templateId} (_children)`,
-            },
+          React.createElement('th:block', {
+            key: `tag-before-${templateId}`,
+            'th:utext': `'<th:block th:fragment="${templateId}(_children)"><th:block th:if="\${_children}">'`,
+          }),
+          React.cloneElement(
             demoParams[node.value](
-              React.createElement('div', { 'th:replace': '${_children}' })
-            )
-          )
+              React.createElement('th:block', {
+                'th:utext': '\'<div th:replace="${_children}"></div>\'',
+              })
+            ),
+            { key: templateId }
+          ),
+          React.createElement('th:block', {
+            key: `tag-after-${templateId}`,
+            'th:utext': `'</th:block></th:block>'`,
+          })
         );
       }
 
@@ -109,25 +153,30 @@ function renderTranslatedText(
   const intl = new IntlMessageFormat(defaultString, 'en-US');
   const ast = intl.getAst();
 
-  const [fragments, stringArguments] = processMessageElements(
-    id,
-    ast,
-    demoParams
-  );
+  if (process.env.NODE_ENV === 'production') {
+    const [fragments, stringArguments] = processMessageElements(
+      id,
+      ast,
+      demoParams
+    );
 
-  const text =
-    process.env.NODE_ENV === 'production'
-      ? defaultString
-      : formatDev(defaultString, demoParams);
+    const stringArgs = Array.from(stringArguments);
+    const stringArgsMap = stringArgs.map(
+      (a) => `${a}: #strings.escapeXml(${a.replace(/__/g, '.')})`
+    );
 
-  const stringArgs = Array.from(stringArguments);
-  const stringArgsMap = stringArgs.map((a) => `${a}: ${a.replace(/__/g, '.')}`);
+    const messageExpression = stringArgsMap.length
+      ? `#{${key}(\${ { ${stringArgsMap.join(', ')} } })}`
+      : `#{${key}}`;
 
-  const messageExpression = stringArgsMap.length
-    ? `#{${key}(\${ { ${stringArgsMap.join(', ')} } })}`
-    : `#{${key}}`;
+    return { fragments, text: defaultString, messageExpression };
+  }
 
-  return { fragments, text, messageExpression };
+  return {
+    fragments: [],
+    text: formatDev(defaultString, demoParams),
+    messageExpression: '',
+  };
 }
 
 export default function t(
@@ -146,7 +195,7 @@ export default function t(
     React.createElement(
       'span',
       { key: 'render-el', 'th:utext': messageExpression },
-      text
+      addBrToTranslations(text)
     ),
   ];
 }
