@@ -10,10 +10,21 @@ import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';
 import { MachineTranslationItem } from './MachineTranslationItem';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
+import { MachineTranslationPromptWrapper } from './MachineTranslationPromptWrapper';
 
 const StyledContainer = styled('div')`
   display: flex;
   flex-direction: column;
+  .promptWrapper {
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  .promptWrapper + * {
+    margin-top: 12px;
+  }
+  * + .promptWrapper {
+    margin-top: 12px;
+  }
 `;
 
 const StyledValue = styled('div')`
@@ -136,19 +147,40 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
         <TabMessage>{t('translation_tools_base_empty')}</TabMessage>
       ) : (
         !nothingFetched &&
-        results?.map(([provider, data]) => {
-          return (
-            <MachineTranslationItem
-              key={provider}
-              data={data}
-              provider={provider}
-              isFetching={machineLoadable.isFetching}
-              languageTag={language.tag}
-              setValue={setValue}
-              contextPresent={contextPresent}
-              pluralVariant={activeVariant}
-            />
-          );
+        results?.map(([provider, result]) => {
+          const props = {
+            data: result,
+            provider: provider,
+            isFetching: machineLoadable.isFetching,
+            languageTag: language.tag,
+            setValue: setValue,
+            contextPresent: contextPresent,
+            pluralVariant: activeVariant,
+          };
+          if (provider === 'PROMPT') {
+            return (
+              <MachineTranslationPromptWrapper
+                key={provider}
+                className="promptWrapper"
+                promptId={data?.promptId}
+              >
+                <MachineTranslationItem
+                  {...props}
+                  data-cy="translation-tools-machine-translation-item-prompt"
+                  showIcon={false}
+                  sx={{ margin: 0, padding: '8px' }}
+                />
+              </MachineTranslationPromptWrapper>
+            );
+          } else {
+            return (
+              <MachineTranslationItem
+                key={provider}
+                {...props}
+                data-cy="translation-tools-machine-translation-item"
+              />
+            );
+          }
         })
       )}
     </StyledContainer>

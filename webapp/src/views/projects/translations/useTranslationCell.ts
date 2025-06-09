@@ -56,9 +56,7 @@ export const useTranslationCell = ({
   const langTag = language.tag;
 
   const cursor = useTranslationsSelector((v) => {
-    return v.cursor?.keyId === keyId && v.cursor.language === language.tag
-      ? v.cursor
-      : undefined;
+    return v.cursor?.keyId === keyId ? v.cursor : undefined;
   });
 
   const baseLanguage = useTranslationsSelector((c) =>
@@ -190,6 +188,17 @@ export const useTranslationCell = ({
     ((assignedTask?.userAssigned && assignedTask.type === 'TRANSLATE') ||
       satisfiesLanguageAccess('translations.edit', language.id)) &&
     !disabled;
+  const aiPlaygroundData = useTranslationsSelector(
+    (c) => c.aiPlaygroundData?.[keyId]?.[language.id]
+  );
+
+  const aiPlaygroundEnabled = useTranslationsSelector(
+    (c) => c.aiPlaygroundEnabled
+  );
+
+  const editable = editEnabled && !disabled;
+
+  const cellClickable = (editable && !isEditing) || aiPlaygroundEnabled;
 
   return {
     keyId,
@@ -207,6 +216,7 @@ export const useTranslationCell = ({
     editVal: isEditing ? cursor : undefined,
     isEditing,
     isEditingRow,
+    editingLanguageTag: cursor?.language,
     autofocus: true,
     keyData,
     canChangeState,
@@ -215,5 +225,9 @@ export const useTranslationCell = ({
     disabled,
     baseValue,
     baseText,
+    aiPlaygroundData,
+    aiPlaygroundEnabled,
+    cellClickable,
+    editable,
   };
 };

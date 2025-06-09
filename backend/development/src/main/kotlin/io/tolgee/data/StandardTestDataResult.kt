@@ -21,6 +21,12 @@ data class StandardTestDataResult(
     val id: Long,
     val slug: String,
     val name: String,
+    val glossaries: List<GlossaryModel>,
+  )
+
+  data class GlossaryModel(
+    val id: Long,
+    val name: String,
   )
 
   data class InvitationModel(

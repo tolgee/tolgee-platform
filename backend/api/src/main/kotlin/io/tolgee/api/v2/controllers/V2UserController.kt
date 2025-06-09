@@ -42,6 +42,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @RequestMapping("/v2/user")
 @Tag(name = "User", description = "Manipulates currently authenticated user")

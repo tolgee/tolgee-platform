@@ -19,6 +19,7 @@ import io.tolgee.service.organization.OrganizationRoleService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.web.bind.annotation.*
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @RequestMapping("/v2/")
 @Tag(name = "Advanced permissions")

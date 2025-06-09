@@ -18,6 +18,10 @@ package io.tolgee.security.authentication
 
 enum class AuthTokenType {
   ANY,
+
+  /** Personal Access Token */
   ONLY_PAT,
+
+  /** Project Api Key */
   ONLY_PAK,
 }

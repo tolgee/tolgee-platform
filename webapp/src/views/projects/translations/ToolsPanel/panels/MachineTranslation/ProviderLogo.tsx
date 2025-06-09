@@ -1,6 +1,6 @@
 import { styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { useServiceImg } from './useServiceImg';
+import { useServiceImg } from '../../../../../../hooks/useServiceImg';
 
 const StyledSource = styled('div')`
   margin-top: 3px;

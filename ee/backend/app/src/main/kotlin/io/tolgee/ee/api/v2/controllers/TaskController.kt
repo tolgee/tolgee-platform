@@ -40,7 +40,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@Suppress("MVCPathVariableInspection")
+@Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [

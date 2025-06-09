@@ -24,7 +24,12 @@ export const generateStandardTestData = (resource: string) => {
 export type TestDataStandardResponse = {
   projects: { name: string; id: number }[];
   users: { username: string; name: string; id: number }[];
-  organizations: { id: number; name: string; slug: string }[];
+  organizations: {
+    id: number;
+    name: string;
+    slug: string;
+    glossaries: { id: number; name: string }[];
+  }[];
   invitations: { code: string; projectId: number; organizationId: number }[];
 };
 

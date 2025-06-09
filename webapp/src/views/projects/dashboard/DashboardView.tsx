@@ -120,11 +120,8 @@ export const DashboardView = () => {
     dailyActivityLoadable.isLoading;
 
   return (
-    <ProjectLanguagesProvider>
-      <BaseProjectView
-        windowTitle={t('project_dashboard_title')}
-        maxWidth="wide"
-      >
+    <BaseProjectView windowTitle={t('project_dashboard_title')} maxWidth="wide">
+      <ProjectLanguagesProvider>
         {anythingLoading ? (
           <EmptyListMessage loading={true} />
         ) : (
@@ -167,7 +164,7 @@ export const DashboardView = () => {
             )}
           </StyledContainer>
         )}
-      </BaseProjectView>
-    </ProjectLanguagesProvider>
+      </ProjectLanguagesProvider>
+    </BaseProjectView>
   );
 };

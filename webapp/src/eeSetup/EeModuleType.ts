@@ -36,3 +36,23 @@ export type TranslationTaskIndicatorProps = {
 export type PrefilterTaskProps = {
   taskNumber: number;
 };
+
+export type GlossaryTermHighlightModel =
+  components['schemas']['GlossaryTermHighlightModel'];
+
+export type GlossaryTermModel = components['schemas']['GlossaryTermModel'];
+
+export type GlossaryTermHighlightsProps = {
+  text: string | null | undefined;
+  languageTag: string;
+  enabled?: boolean;
+};
+
+export type GlossaryTermPreviewProps = {
+  term: GlossaryTermModel;
+  languageTag: string;
+  targetLanguageTag?: string;
+  appendValue?: (val: string) => void;
+  standalone?: boolean;
+  slim?: boolean;
+};

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import ReactList from 'react-list';
 import { TolgeeFormat } from '@tginternal/editor';
 
@@ -38,6 +38,9 @@ import { usePositionService } from './services/usePositionService';
 import { useLayoutService } from './services/useLayoutService';
 import { AddParams } from '../TranslationFilters/tools';
 import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/tools';
+import { useAiPlaygroundService } from './services/useAiPlaygroundService';
+import { usePreventPageLeave } from 'tg.hooks/usePreventPageLeave';
+import { QUERY } from 'tg.constants/links';
 
 type Props = {
   projectId: number;
@@ -48,6 +51,7 @@ type Props = {
   updateLocalStorageLanguages?: boolean;
   pageSize?: number;
   prefilter?: PrefilterType;
+  aiPlayground: boolean;
 };
 
 export const [
@@ -55,9 +59,13 @@ export const [
   useTranslationsActions,
   useTranslationsSelector,
 ] = createProvider((props: Props) => {
-  const [view, setView] = useUrlSearchState('view', { defaultVal: 'LIST' });
+  const [view, setView] = useUrlSearchState(QUERY.TRANSLATIONS_VIEW, {
+    defaultVal: 'LIST',
+  });
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
-  const layout = useLayoutService({ sidePanelOpen });
+  const layout = useLayoutService({
+    sidePanelOpen: sidePanelOpen && !props.aiPlayground,
+  });
   const urlLanguages = useUrlSearchArray().languages;
   const requiredLanguages = urlLanguages?.length
     ? urlLanguages
@@ -112,6 +120,14 @@ export const [
     prefilter: props.prefilter,
   });
 
+  const aiPlaygroundService = useAiPlaygroundService({
+    translationService,
+    allLanguages: allowedLanguages ?? [],
+    translationsLanguages: translationService.translationsLanguages ?? [],
+    projectId: props.projectId,
+    enabled: props.aiPlayground,
+  });
+
   const { setEventBlockers } = useWebsocketService(translationService);
 
   const viewRefs = useRefsService();
@@ -148,17 +164,8 @@ export const [
     selectionService.clear();
   };
 
-  useEffect(() => {
-    // prevent leaving the page when there are unsaved changes
-    if (positionService.position?.changed) {
-      const handler = (e) => {
-        e.preventDefault();
-        e.returnValue = '';
-      };
-      window.addEventListener('beforeunload', handler);
-      return () => window.removeEventListener('beforeunload', handler);
-    }
-  }, [positionService.position?.changed]);
+  // warn user when unsaved changes
+  usePreventPageLeave(Boolean(positionService.position?.changed));
 
   // actions
 
@@ -209,6 +216,10 @@ export const [
       setSidePanelOpen(true);
       editService.setEditValueString(value);
     },
+    async appendEditValueString(value: string) {
+      setSidePanelOpen(true);
+      editService.appendEditValueString(value);
+    },
     setEditForce(edit: EditorProps | undefined) {
       return positionService.setPositionAndFocus(edit);
     },
@@ -226,6 +237,9 @@ export const [
     async selectAll() {
       const allItems = await translationService.getAllIds();
       return selectionService.select(allItems.ids);
+    },
+    async getAllIds() {
+      return (await translationService.getAllIds()).ids;
     },
     selectionClear() {
       return selectionService.clear();
@@ -335,6 +349,8 @@ export const [
     prefilter: props.prefilter,
     prefilteredTask: prefilteredTaskLoadable.data,
     layout,
+    aiPlaygroundData: aiPlaygroundService.data,
+    aiPlaygroundEnabled: props.aiPlayground,
   };
 
   return [state, actions];

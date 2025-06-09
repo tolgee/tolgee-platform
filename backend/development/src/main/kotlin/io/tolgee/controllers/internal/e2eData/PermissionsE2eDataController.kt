@@ -43,6 +43,7 @@ class PermissionsE2eDataController() : AbstractE2eDataController() {
     this.permissionsTestData.addTasks(
       mutableSetOf(user, permissionsTestData.serverAdmin.self),
     )
+    this.permissionsTestData.addPrompt()
     return generate()
   }
 
