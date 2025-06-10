@@ -3298,7 +3298,7 @@ export interface components {
       model?: string;
       name: string;
       priority?: "LOW" | "HIGH";
-      type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE";
+      type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE" | "ANTHROPIC" | "GOOGLE_AI";
     };
     LlmProviderRequest: {
       apiKey?: string;
@@ -3309,12 +3309,12 @@ export interface components {
       model?: string;
       name: string;
       priority?: "LOW" | "HIGH";
-      type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE";
+      type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE" | "ANTHROPIC" | "GOOGLE_AI";
     };
     LlmProviderSimpleModel: {
       name: string;
       source?: string;
-      type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE";
+      type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE" | "ANTHROPIC" | "GOOGLE_AI";
     };
     LoginRequest: {
       otp?: string;

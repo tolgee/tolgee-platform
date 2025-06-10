@@ -9,7 +9,7 @@ import {
 import { Select } from 'tg.component/common/form/fields/Select';
 import { Select as MuiSelect } from 'tg.component/common/Select';
 
-import { Box, MenuItem, styled } from '@mui/material';
+import { Box, MenuItem, styled, useTheme } from '@mui/material';
 import { useLlmProviderTranslation } from 'tg.translationTools/useLlmProviderTranslation';
 import { LabelHint } from 'tg.component/common/LabelHint';
 
@@ -23,6 +23,7 @@ type Props = {
 };
 
 export const LlmProviderForm = ({ type, onTypeChange }: Props) => {
+  const theme = useTheme();
   const { t } = useTranslate();
   const defaults = llmProvidersDefaults(t);
   const globalConfig = llmProvidersConfig(t);
@@ -90,31 +91,46 @@ export const LlmProviderForm = ({ type, onTypeChange }: Props) => {
           );
         }
       })}
-      <Select
-        name="priority"
-        label={
-          <LabelHint title={t('llm_provider_form_priority_hint')}>
-            {t('llm_provider_form_priority')}
-          </LabelHint>
-        }
-        data-cy="llm-provider-form-priority-select"
-        displayEmpty
-      >
-        <MenuItem
-          value={undefined}
-          data-cy="llm-provider-form-priority-select-item"
+
+      <Box
+        gridColumn="1 / -1"
+        height="1px"
+        sx={{ backgroundColor: theme.palette.divider }}
+        mb={2}
+      />
+      <Box>
+        <Select
+          name="priority"
+          label={
+            <LabelHint title={t('llm_provider_form_priority_hint')}>
+              {t('llm_provider_form_priority')}
+            </LabelHint>
+          }
+          data-cy="llm-provider-form-priority-select"
+          displayEmpty
         >
-          <StyledEmpty>
-            <T keyName="llm_provider_form_select_priority_none" />
-          </StyledEmpty>
-        </MenuItem>
-        <MenuItem value="HIGH" data-cy="llm-provider-form-priority-select-item">
-          <T keyName="llm_provider_form_select_priority_high" />
-        </MenuItem>
-        <MenuItem value="LOW" data-cy="llm-provider-form-priority-select-item">
-          <T keyName="llm_provider_form_select_priority_low" />
-        </MenuItem>
-      </Select>
+          <MenuItem
+            value={undefined}
+            data-cy="llm-provider-form-priority-select-item"
+          >
+            <StyledEmpty>
+              <T keyName="llm_provider_form_select_priority_none" />
+            </StyledEmpty>
+          </MenuItem>
+          <MenuItem
+            value="HIGH"
+            data-cy="llm-provider-form-priority-select-item"
+          >
+            <T keyName="llm_provider_form_select_priority_high" />
+          </MenuItem>
+          <MenuItem
+            value="LOW"
+            data-cy="llm-provider-form-priority-select-item"
+          >
+            <T keyName="llm_provider_form_select_priority_low" />
+          </MenuItem>
+        </Select>
+      </Box>
     </>
   );
 };
