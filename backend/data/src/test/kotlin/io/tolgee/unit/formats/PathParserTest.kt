@@ -1,5 +1,6 @@
 package io.tolgee.unit.formats
 
+import io.tolgee.formats.path.ObjectPathItem
 import io.tolgee.formats.path.buildPath
 import io.tolgee.formats.path.getPathItems
 import io.tolgee.testing.assert
@@ -82,6 +83,19 @@ class PathParserTest {
           "18",
         ),
       )
+  }
+
+  /**
+   * When escape character is used in key and is unrelated to a path in their keys,
+   * we need to keep the escape character in the path. Otherwise, this can cause unexpected bugs.
+   */
+  @Test
+  fun `the escape char is not removed when not used`() {
+    val shouldStayTheSamePath = """hello\.\[]\'hello"""
+    val pathItem = getPathItems(shouldStayTheSamePath, arraySupport = false, structureDelimiter = null)
+      .single() as ObjectPathItem
+      // the path should stay the same
+      pathItem.key.assert.isEqualTo(shouldStayTheSamePath)
   }
 
   fun testSameBothWays(pathString: String) {

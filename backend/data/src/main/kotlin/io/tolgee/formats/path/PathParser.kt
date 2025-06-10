@@ -69,6 +69,9 @@ class PathParser(
       }
 
       State.IN_ESCAPE -> {
+        if(!wasCharacterEscaped(ch)){
+          buffer.append('\\', index)
+        }
         buffer.append(ch, index)
         state = State.NORMAL
       }
@@ -137,6 +140,14 @@ class PathParser(
     if (ch != structureDelimiter || maybeIndex == null) {
       handleChar(ch, index)
     }
+  }
+
+  private fun wasCharacterEscaped(ch: Char): Boolean {
+    if (arraySupport && ch in arrayOf('[', ']')) {
+      return true
+    }
+
+    return structureDelimiter != null && ch == structureDelimiter
   }
 }
 
