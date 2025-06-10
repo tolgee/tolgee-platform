@@ -60,7 +60,7 @@ export const GlossaryCreateEditForm = ({
   const { t } = useTranslate();
 
   const { isEnabled } = useEnabledFeatures();
-  const glossaryFeature = isEnabled('GLOSSARY');
+  const glossaryFeatureEnabled = isEnabled('GLOSSARY');
 
   if (initialValues === undefined) {
     return (
@@ -81,7 +81,7 @@ export const GlossaryCreateEditForm = ({
         return (
           <StyledContainer>
             <GlossaryCreateEditFields
-              disabled={!glossaryFeature}
+              disabled={!glossaryFeatureEnabled}
               withAssignedProjects
             />
             <StyledActions>
@@ -89,7 +89,7 @@ export const GlossaryCreateEditForm = ({
                 {t('global_cancel_button')}
               </Button>
               <LoadingButton
-                disabled={!glossaryFeature}
+                disabled={!glossaryFeatureEnabled}
                 onClick={submitForm}
                 color="primary"
                 variant="contained"

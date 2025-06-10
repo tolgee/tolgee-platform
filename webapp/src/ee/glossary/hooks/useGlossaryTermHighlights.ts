@@ -12,7 +12,7 @@ export const useGlossaryTermHighlights = ({
   enabled = true,
 }: GlossaryTermHighlightsProps): GlossaryTermHighlightModel[] => {
   const { isEnabled } = useEnabledFeatures();
-  const glossaryFeature = isEnabled('GLOSSARY');
+  const glossaryFeatureEnabled = isEnabled('GLOSSARY');
   const project = useProject();
   const hasText = text !== undefined && text !== null && text.length > 0;
   const highlights = useApiQuery({
@@ -28,13 +28,13 @@ export const useGlossaryTermHighlights = ({
       },
     },
     options: {
-      enabled: glossaryFeature && hasText && enabled,
+      enabled: glossaryFeatureEnabled && hasText && enabled,
       keepPreviousData: true,
       noGlobalLoading: true,
     },
   });
 
-  if (!glossaryFeature || !hasText || !enabled || !highlights.data) {
+  if (!glossaryFeatureEnabled || !hasText || !enabled || !highlights.data) {
     return [];
   }
 
