@@ -258,3 +258,8 @@ ktlint {
         exclude("**/PluralData.kt")
     }
 }
+
+hibernate {
+    // Block is required for Bytecode Enhancement to happen
+    enhancement {}
+}
