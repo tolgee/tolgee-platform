@@ -4,4 +4,6 @@ enum class LlmProviderType {
   OPENAI,
   OPENAI_AZURE,
   TOLGEE,
+  ANTHROPIC,
+  GOOGLE_AI,
 }

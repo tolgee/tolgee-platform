@@ -45,6 +45,8 @@ class LlmProviderService(
   private val currentDateProvider: CurrentDateProvider,
   private val restTemplateBuilder: RestTemplateBuilder,
   private val internalProperties: InternalProperties,
+  private val anthropicApiService: AnthropicApiService,
+  private val googleAiApiService: GoogleAiApiService,
 ) {
   private val cache: Cache by lazy { cacheManager.getCache(Caches.LLM_PROVIDERS) ?: throw InvalidStateException() }
   private var lastUsedMap: MutableMap<String, Long> = mutableMapOf()
@@ -199,6 +201,8 @@ class LlmProviderService(
       LlmProviderType.OPENAI -> openaiApiService
       LlmProviderType.OPENAI_AZURE -> openaiApiService
       LlmProviderType.TOLGEE -> tolgeeApiService
+      LlmProviderType.ANTHROPIC -> anthropicApiService
+      LlmProviderType.GOOGLE_AI -> googleAiApiService
     }
   }
 

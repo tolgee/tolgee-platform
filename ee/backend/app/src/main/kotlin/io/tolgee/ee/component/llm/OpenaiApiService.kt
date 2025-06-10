@@ -193,7 +193,7 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
     )
 
     class ResponseMessage(
-      val content: String,
+      val content: String?,
     )
 
     class ResponseUsage(

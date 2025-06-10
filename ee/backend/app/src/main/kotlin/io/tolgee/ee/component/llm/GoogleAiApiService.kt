@@ -17,11 +17,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
-import java.util.*
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class GeminiApiService : AbstractLlmApiService(), Logging {
+class GoogleAiApiService : AbstractLlmApiService(), Logging {
   override fun translate(
     params: LlmParams,
     config: LlmProviderInterface,
@@ -151,7 +150,6 @@ class GeminiApiService : AbstractLlmApiService(), Logging {
     class ResponseUsageMetadata(
       val promptTokenCount: Long,
       val candidatesTokenCount: Long,
-      val totalTokenCount: Long,
     )
   }
 }
