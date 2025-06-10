@@ -101,7 +101,7 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `cannot updates label of another project`() {
+  fun `cannot update label of another project`() {
     val requestBody = mapOf<String, Any>(
       "name" to "Updated label",
       "description" to "This is an updated label",
