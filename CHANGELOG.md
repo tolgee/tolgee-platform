@@ -1,3 +1,11 @@
+## [3.121.1](https://github.com/tolgee/tolgee-platform/compare/v3.121.0...v3.121.1) (2025-06-10)
+
+
+### Bug Fixes
+
+* conditional glossaries load only if the feature is available ([#3115](https://github.com/tolgee/tolgee-platform/issues/3115)) ([bbbff24](https://github.com/tolgee/tolgee-platform/commit/bbbff24a16dabc79f47e705481d279c0552e9e58))
+* Removing escape characters in the key name can lead to errors ([#3119](https://github.com/tolgee/tolgee-platform/issues/3119)) ([5ed1dfe](https://github.com/tolgee/tolgee-platform/commit/5ed1dfeaff36423552b0316d7caa7b49012e0de3))
+
 # [3.121.0](https://github.com/tolgee/tolgee-platform/compare/v3.120.0...v3.121.0) (2025-06-09)
 
 
