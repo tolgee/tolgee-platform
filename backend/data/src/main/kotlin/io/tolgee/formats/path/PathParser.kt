@@ -77,7 +77,7 @@ class PathParser(
       }
 
       State.IN_ESCAPE -> {
-        if(!wasCharacterEscaped(ch)){
+        if (!wasCharacterEscaped(ch)) {
           buffer.append('\\', index)
         }
         buffer.append(ch, index)
