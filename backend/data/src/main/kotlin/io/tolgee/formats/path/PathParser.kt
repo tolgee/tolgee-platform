@@ -151,7 +151,7 @@ class PathParser(
   }
 
   private fun wasCharacterEscaped(ch: Char): Boolean {
-    if (arraySupport && ch in arrayOf('[')) {
+    if (arraySupport && ch == '[') {
       return true
     }
 
