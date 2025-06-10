@@ -50,7 +50,7 @@ class GoogleAiApiService : AbstractLlmApiService(), Logging {
     return PromptResult(
       response =
         response.body?.candidates?.first()?.content?.parts?.first()?.text
-          ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(response.toString())),
+          ?: throw BadRequestException(Message.LLM_PROVIDER_EMPTY_RESPONSE),
       usage =
         response.body?.usageMetadata?.let {
           PromptResponseUsageDto(

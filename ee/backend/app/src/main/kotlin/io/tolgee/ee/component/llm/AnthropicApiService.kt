@@ -46,7 +46,7 @@ class AnthropicApiService : AbstractLlmApiService(), Logging {
 
     return PromptResult(
       response.body?.content?.first()?.text
-        ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(response.toString())),
+        ?: throw BadRequestException(Message.LLM_PROVIDER_EMPTY_RESPONSE),
       usage =
         response.body?.usage?.let {
           PromptResponseUsageDto(

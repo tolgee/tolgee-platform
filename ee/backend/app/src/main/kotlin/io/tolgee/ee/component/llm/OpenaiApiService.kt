@@ -84,7 +84,7 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
 
     return PromptResult(
       response = response.body?.choices?.first()?.message?.content
-        ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(response.toString())),
+        ?: throw BadRequestException(Message.LLM_PROVIDER_EMPTY_RESPONSE),
       usage =
         response.body?.usage?.let {
           PromptResponseUsageDto(

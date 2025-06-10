@@ -46,7 +46,7 @@ class OllamaApiService : AbstractLlmApiService(), Logging {
 
     return PromptResult(
       response.body?.message?.content
-        ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(response.toString())),
+        ?: throw BadRequestException(Message.LLM_PROVIDER_EMPTY_RESPONSE),
       usage = null,
     )
   }
