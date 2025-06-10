@@ -113,7 +113,7 @@ class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
     val signature = httpEntity.headers["Tolgee-Signature"]
     signature.assert.isNotNull
     verifyWebhookSignatureHeader(
-      httpEntity.body,
+      httpEntity.body!!,
       signature!!.single(),
       secret,
       300000,
