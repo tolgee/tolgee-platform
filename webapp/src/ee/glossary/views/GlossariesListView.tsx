@@ -28,7 +28,7 @@ export const GlossariesListView = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const { isEnabled } = useEnabledFeatures();
-  const glossaryFeature = isEnabled('GLOSSARY');
+  const glossaryFeatureEnabled = isEnabled('GLOSSARY');
 
   const organization = useOrganization();
 
@@ -45,7 +45,7 @@ export const GlossariesListView = () => {
       sort: ['id,desc'],
     },
     options: {
-      enabled: glossaryFeature,
+      enabled: glossaryFeatureEnabled,
       keepPreviousData: true,
     },
   });
@@ -77,7 +77,7 @@ export const GlossariesListView = () => {
             }),
           ],
         ]}
-        loading={glossaryFeature && glossaries.isLoading}
+        loading={glossaryFeatureEnabled && glossaries.isLoading}
         hideChildrenOnLoading={false}
         maxWidth={1000}
         allCentered
@@ -91,7 +91,7 @@ export const GlossariesListView = () => {
             onFinished={() => setCreateDialogOpen(false)}
           />
         )}
-        {glossaryFeature ? (
+        {glossaryFeatureEnabled ? (
           <PaginatedHateoasList
             wrapperComponentProps={{ className: 'listWrapper' }}
             onPageChange={setPage}

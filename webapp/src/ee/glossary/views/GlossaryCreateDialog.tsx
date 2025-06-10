@@ -37,7 +37,7 @@ export const GlossaryCreateDialog = ({ open, onClose, onFinished }: Props) => {
   const { preferredOrganization } = usePreferredOrganization();
 
   const { isEnabled } = useEnabledFeatures();
-  const glossaryFeature = isEnabled('GLOSSARY');
+  const glossaryFeatureEnabled = isEnabled('GLOSSARY');
 
   const mutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/glossaries',
@@ -85,7 +85,7 @@ export const GlossaryCreateDialog = ({ open, onClose, onFinished }: Props) => {
       maxWidth="sm"
       onClick={(e) => e.stopPropagation()}
     >
-      {!glossaryFeature && (
+      {!glossaryFeatureEnabled && (
         <DisabledFeatureBanner
           customMessage={t('glossaries_feature_description')}
         />
