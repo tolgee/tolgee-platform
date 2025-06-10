@@ -20,7 +20,8 @@ class LlmProperties : MachineTranslationServiceProperties {
   @DocProperty(description = "Whether to use llm machine translation as a primary translation engine.")
   override var defaultPrimary: Boolean = true
 
-  @DocProperty(description = """
+  @DocProperty(
+    description = """
     List of llm providers. Example:
     
     ```
@@ -33,8 +34,9 @@ class LlmProperties : MachineTranslationServiceProperties {
         format: "json_schema"
     ```
     
-    Check [llm providers documentation](/platform/projects_and_organizations/llm-providers) for more information.
-  """)
+    Check [llm providers documentation](/platform/projects_and_organizations/llm-providers#self-hosted-server-configuration) for more information.
+  """
+  )
   var providers: MutableList<LlmProvider> = mutableListOf()
 
   open class LlmProvider(
