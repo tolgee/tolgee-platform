@@ -214,12 +214,11 @@ class PromptServiceEeImpl(
   }
 
   fun extractJsonFromResponse(content: String): JsonNode? {
-
     // attempting different strategies to find a json in the response
     val attempts = listOf<(String) -> String>(
-      {it},
-      {getJsonLike(it)},
-      {getJsonLike(it.substringAfter("```").substringBefore("```"))},
+      { it },
+      { getJsonLike(it) },
+      { getJsonLike(it.substringAfter("```").substringBefore("```")) },
     )
     for (attempt in attempts) {
       val result = parseJsonSafely(attempt.invoke(content))
