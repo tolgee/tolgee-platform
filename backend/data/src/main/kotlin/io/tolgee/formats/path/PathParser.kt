@@ -60,7 +60,15 @@ class PathParser(
             buffer.append('[', index)
           }
 
-          '\\' -> state = State.IN_ESCAPE
+          '\\' -> {
+            when (isEscapingSupported) {
+              true -> state = State.IN_ESCAPE
+              false -> {
+                state = State.NORMAL
+                buffer.append('\\', index)
+              }
+            }
+          }
           else -> {
             state = State.NORMAL
             buffer.append(ch, index)
@@ -143,12 +151,22 @@ class PathParser(
   }
 
   private fun wasCharacterEscaped(ch: Char): Boolean {
-    if (arraySupport && ch in arrayOf('[', ']')) {
+    if (arraySupport && ch in arrayOf('[')) {
       return true
     }
 
-    return structureDelimiter != null && ch == structureDelimiter
+    if (structureDelimiter != null && ch == structureDelimiter) {
+      return true
+    }
+
+    if (ch == '\\') {
+      return true
+    }
+
+    return false
   }
+
+  val isEscapingSupported = arraySupport || structureDelimiter != null
 }
 
 private class StringBuilderWithIndexes(

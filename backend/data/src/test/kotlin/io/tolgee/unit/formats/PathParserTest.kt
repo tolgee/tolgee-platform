@@ -98,6 +98,29 @@ class PathParserTest {
       pathItem.key.assert.isEqualTo(shouldStayTheSamePath)
   }
 
+  @Test
+  fun `the escape char is supported when we use array support but not structuring`() {
+    val keyName = """hello\.\[]\'hello"""
+    val pathItem = getPathItems(keyName, arraySupport = true, structureDelimiter = null)
+      .single() as ObjectPathItem
+    // the path should stay the same
+    pathItem.key.assert.isEqualTo("""hello\.[]\'hello""")
+  }
+
+  @Test
+  fun `the escape char is at the beginning (array)`() {
+    val keyName = """\[1]"""
+    val pathItem = getPathItems(keyName, arraySupport = true, structureDelimiter = null).single() as ObjectPathItem
+    pathItem.key.assert.isEqualTo("""[1]""")
+  }
+
+  @Test
+  fun `the escape char is at the beginning (non-escapable)`() {
+    val keyName = """\hey"""
+    val pathItem = getPathItems(keyName, arraySupport = true, structureDelimiter = null).single() as ObjectPathItem
+    pathItem.key.assert.isEqualTo("""\hey""")
+  }
+
   fun testSameBothWays(pathString: String) {
     getRebuiltPath(pathString).assert.isEqualTo(pathString)
   }
