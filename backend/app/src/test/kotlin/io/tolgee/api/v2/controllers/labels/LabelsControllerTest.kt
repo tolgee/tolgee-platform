@@ -76,7 +76,7 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `update label with invalid color`() {
+  fun `does not update label with invalid color`() {
     val requestBody = mapOf<String, Any>(
       "name" to "Updated label",
       "description" to "This is an updated label",
