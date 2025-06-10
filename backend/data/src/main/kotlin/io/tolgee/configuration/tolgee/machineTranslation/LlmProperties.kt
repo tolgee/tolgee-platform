@@ -22,7 +22,7 @@ class LlmProperties : MachineTranslationServiceProperties {
 
   @DocProperty(
     description = """
-    List of llm providers. Example:
+    List of LLM providers. Example:
     
     ```
     providers:
