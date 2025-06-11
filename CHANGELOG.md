@@ -1,3 +1,10 @@
+## [3.122.1](https://github.com/tolgee/tolgee-platform/compare/v3.122.0...v3.122.1) (2025-06-11)
+
+
+### Bug Fixes
+
+* Fixed plan's unlimited metrics showed as critical ([#3123](https://github.com/tolgee/tolgee-platform/issues/3123)) ([f01d47f](https://github.com/tolgee/tolgee-platform/commit/f01d47f37d07ff8b8a8ceabc342f0176daa7676b))
+
 # [3.122.0](https://github.com/tolgee/tolgee-platform/compare/v3.121.1...v3.122.0) (2025-06-11)
 
 

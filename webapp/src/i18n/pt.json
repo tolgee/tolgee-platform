@@ -116,6 +116,11 @@
   "activity_entity_translation": "Tradução",
   "activity_entity_translation_comment": "Comentário",
   "activity_entity_translation.flag_emoji": "bandeira",
+  "activity_entity_translation_label": {
+    "color": "cor",
+    "description": "Descrição",
+    "name": "nome"
+  },
   "activity_entity_translation.labels": "rótulos",
   "activity_entity_translation.name": "nome",
   "activity_entity_translation.tag": "etiqueta",
@@ -144,7 +149,10 @@
   "activity_translation_comment_set_state": "Estado do comentário alterado",
   "activity_translation_history_add": "Tradução criada",
   "activity_translation_history_modify": "Tradução modificada",
+  "activity_translation_label_create": "Rótulo criado",
+  "activity_translation_label_delete": "Rótulo excluído",
   "activity_translation_labels_edit": "Etiquetas de tradução atualizadas",
+  "activity_translation_label_update": "Rótulo editado",
   "activity_translation_not_outdated": "Não desatualizado",
   "activity_translation_outdated": "Desatualizado",
   "activity_webhook_config_create": "Webhook criado",

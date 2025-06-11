@@ -116,6 +116,11 @@
   "activity_entity_translation": "Fordítás",
   "activity_entity_translation_comment": "Megjegyzés",
   "activity_entity_translation.flag_emoji": "zászló",
+  "activity_entity_translation_label": {
+    "color": "Szín",
+    "description": "leírás",
+    "name": "Név"
+  },
   "activity_entity_translation.labels": "címkék",
   "activity_entity_translation.name": "név",
   "activity_entity_translation.tag": "címke",
@@ -144,7 +149,10 @@
   "activity_translation_comment_set_state": "Megjegyzés állapota megváltozott",
   "activity_translation_history_add": "Fordítás létrehozva",
   "activity_translation_history_modify": "Fordítás módosítva",
+  "activity_translation_label_create": "Címke létrehozva",
+  "activity_translation_label_delete": "Törölt címke",
   "activity_translation_labels_edit": "A fordítás címkék frissítve lettek",
+  "activity_translation_label_update": "Címke szerkesztve",
   "activity_translation_not_outdated": "Nem elavult",
   "activity_translation_outdated": "Elavult",
   "activity_webhook_config_create": "Webhook létrehozva",

@@ -116,6 +116,11 @@
   "activity_entity_translation": "Oversettelse",
   "activity_entity_translation_comment": "Kommentar",
   "activity_entity_translation.flag_emoji": "flagg",
+  "activity_entity_translation_label": {
+    "color": "farge",
+    "description": "Beskrivelse",
+    "name": "navn"
+  },
   "activity_entity_translation.labels": "etiketter",
   "activity_entity_translation.name": "navn",
   "activity_entity_translation.tag": "tagg",
@@ -144,7 +149,10 @@
   "activity_translation_comment_set_state": "Tilstand for kommentar endret",
   "activity_translation_history_add": "Oversettelse opprettet",
   "activity_translation_history_modify": "Oversettelse endret",
+  "activity_translation_label_create": "Opprettet etikett",
+  "activity_translation_label_delete": "Slettet etikett",
   "activity_translation_labels_edit": "Oversettelsesetiketter oppdatert",
+  "activity_translation_label_update": "Redigert etikett",
   "activity_translation_not_outdated": "Ikke utdatert",
   "activity_translation_outdated": "Utdatert",
   "activity_webhook_config_create": "Webhook opprettet",

@@ -116,6 +116,11 @@
   "activity_entity_translation": "翻訳",
   "activity_entity_translation_comment": "コメント",
   "activity_entity_translation.flag_emoji": "国旗",
+  "activity_entity_translation_label": {
+    "color": "カラー",
+    "description": "説明",
+    "name": "名前"
+  },
   "activity_entity_translation.labels": "ラベル",
   "activity_entity_translation.name": "名前",
   "activity_entity_translation.tag": "タグ",
@@ -145,7 +150,10 @@
   "activity_translation_comment_set_state": "コメントの状態を変更",
   "activity_translation_history_add": "翻訳を作成",
   "activity_translation_history_modify": "翻訳を変更",
+  "activity_translation_label_create": "ラベルを作成",
+  "activity_translation_label_delete": "ラベルを削除",
   "activity_translation_labels_edit": "翻訳ラベルを更新",
+  "activity_translation_label_update": "ラベルを編集",
   "activity_translation_not_outdated": "古くない",
   "activity_translation_outdated": "古い",
   "activity_webhook_config_create": "Webhookを作成",

@@ -116,6 +116,11 @@
   "activity_entity_translation": "翻译了",
   "activity_entity_translation_comment": "发表了评论",
   "activity_entity_translation.flag_emoji": "旗帜",
+  "activity_entity_translation_label": {
+    "color": "颜色",
+    "description": "描述",
+    "name": "名称"
+  },
   "activity_entity_translation.labels": "标签",
   "activity_entity_translation.name": "名称",
   "activity_entity_translation.tag": "标签",
@@ -144,7 +149,10 @@
   "activity_translation_comment_set_state": "更改了评论状态",
   "activity_translation_history_add": "创建了翻译",
   "activity_translation_history_modify": "修改了翻译",
+  "activity_translation_label_create": "创建了标签",
+  "activity_translation_label_delete": "删除了标签",
   "activity_translation_labels_edit": "更新了译文标签",
+  "activity_translation_label_update": "编辑了标签",
   "activity_translation_not_outdated": "未过时",
   "activity_translation_outdated": "已过时",
   "activity_webhook_config_create": "创建了 Webhook",

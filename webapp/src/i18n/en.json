@@ -116,6 +116,11 @@
   "activity_entity_translation": "Translation",
   "activity_entity_translation_comment": "Comment",
   "activity_entity_translation.flag_emoji": "flag",
+  "activity_entity_translation_label": {
+    "color": "color",
+    "description": "description",
+    "name": "name"
+  },
   "activity_entity_translation.labels": "labels",
   "activity_entity_translation.name": "name",
   "activity_entity_translation.tag": "tag",
@@ -145,7 +150,10 @@
   "activity_translation_comment_set_state": "Comment state changed",
   "activity_translation_history_add": "Translation created",
   "activity_translation_history_modify": "Translation modified",
+  "activity_translation_label_create": "Created label",
+  "activity_translation_label_delete": "Deleted label",
   "activity_translation_labels_edit": "Translation labels updated",
+  "activity_translation_label_update": "Edited label",
   "activity_translation_not_outdated": "Not outdated",
   "activity_translation_outdated": "Outdated",
   "activity_webhook_config_create": "Webhook created",

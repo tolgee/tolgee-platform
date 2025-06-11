@@ -116,6 +116,11 @@
   "activity_entity_translation": "Traducere",
   "activity_entity_translation_comment": "Comentariu",
   "activity_entity_translation.flag_emoji": "steag",
+  "activity_entity_translation_label": {
+    "color": "culoare",
+    "description": "Descriere",
+    "name": "nume"
+  },
   "activity_entity_translation.labels": "etichete",
   "activity_entity_translation.name": "nume",
   "activity_entity_translation.tag": "etichetă",
@@ -145,7 +150,10 @@
   "activity_translation_comment_set_state": "Starea comentariului a fost schimbată",
   "activity_translation_history_add": "Traducere creată",
   "activity_translation_history_modify": "Traducere modificată",
+  "activity_translation_label_create": "Etichetă creată",
+  "activity_translation_label_delete": "Etichetă ștearsă",
   "activity_translation_labels_edit": "Etichete de traducere actualizate",
+  "activity_translation_label_update": "Etichetă editată",
   "activity_translation_not_outdated": "Actualizat",
   "activity_translation_outdated": "Depășit",
   "activity_webhook_config_create": "Webhook creat",
