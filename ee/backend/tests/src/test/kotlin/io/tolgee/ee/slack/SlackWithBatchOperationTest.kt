@@ -89,10 +89,11 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
       performUpdateTranslation(it.name)
     }
 
-    waitForNotThrowing(timeout = 120_000) {
+    waitForNotThrowing(timeout = 20_000) {
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(3)
-      mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
     }
+
+		mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
 
     mockedSlackClient.clearInvocations()
     performBatchOperation(keyIds)

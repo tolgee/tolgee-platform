@@ -44,7 +44,6 @@ class TaskControllerActivityTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   private lateinit var activityUtil: ActivityTestUtil
 
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   private lateinit var sessionFactory: SessionFactory
 
