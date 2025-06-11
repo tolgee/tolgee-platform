@@ -1,5 +1,6 @@
 package io.tolgee.model.activity
 
+import jakarta.persistence.Transient
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.CurrentDateProvider
@@ -105,11 +106,9 @@ class ActivityRevision : java.io.Serializable {
    * This flag is set to true when the instance is initialized by the interceptor.
    */
   @Transient
-  @Column(insertable = false, updatable = false)
   var isInitializedByInterceptor: Boolean = false
 
   @Transient
-  @Column(insertable = false, updatable = false)
   var cancelledBatchJobExecutionCount: Int? = null
 
   companion object {

@@ -1,6 +1,6 @@
 package io.tolgee.model
 
-import jakarta.persistence.Column
+import jakarta.persistence.Transient
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -27,7 +27,6 @@ abstract class StandardAuditModel : AuditModel(), EntityWithId {
   override var id: Long = 0
 
   @Transient
-  @Column(insertable = false, updatable = false)
   override var disableActivityLogging = false
 
   override fun equals(other: Any?): Boolean {

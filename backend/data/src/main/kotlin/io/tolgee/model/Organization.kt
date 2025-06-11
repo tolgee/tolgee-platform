@@ -20,6 +20,7 @@ import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Filter
 import java.util.*
 
+import jakarta.persistence.Transient
 @Entity
 @Table(
   uniqueConstraints = [
@@ -77,6 +78,5 @@ class Organization(
   var organizationSlackWorkspace: MutableList<OrganizationSlackWorkspace> = mutableListOf()
 
   @Transient
-  @Column(insertable = false, updatable = false)
   override var disableActivityLogging: Boolean = false
 }

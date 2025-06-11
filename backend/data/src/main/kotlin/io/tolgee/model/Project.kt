@@ -24,7 +24,7 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import java.util.*
-import kotlin.jvm.Transient
+import jakarta.persistence.Transient
 
 @Entity
 @Table(
@@ -105,7 +105,6 @@ class Project(
   override var avatarHash: String? = null
 
   @Transient
-  @Column(insertable = false, updatable = false)
   override var disableActivityLogging = false
 
   @OneToMany(orphanRemoval = true, mappedBy = "project")

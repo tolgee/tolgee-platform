@@ -11,6 +11,7 @@ import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
+import jakarta.persistence.Transient
 import jakarta.persistence.TemporalType
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
@@ -52,7 +53,6 @@ class ApiKey(
    * Encoded key with project id
    */
   @Transient
-  @Column(insertable = false, updatable = false)
   var encodedKey: String? = null
 
   @ManyToOne
