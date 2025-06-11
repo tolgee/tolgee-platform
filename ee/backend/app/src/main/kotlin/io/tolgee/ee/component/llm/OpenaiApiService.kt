@@ -9,6 +9,7 @@ import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.LlmContentFilterException
+import io.tolgee.exceptions.LlmProviderEmptyResponseException
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -84,7 +85,7 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
 
     return PromptResult(
       response = response.body?.choices?.first()?.message?.content
-        ?: throw BadRequestException(Message.LLM_PROVIDER_EMPTY_RESPONSE),
+        ?: throw LlmProviderEmptyResponseException(),
       usage =
         response.body?.usage?.let {
           PromptResponseUsageDto(

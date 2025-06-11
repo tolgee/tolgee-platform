@@ -7,6 +7,7 @@ import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.LlmProviderEmptyResponseException
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -50,7 +51,7 @@ class GoogleAiApiService : AbstractLlmApiService(), Logging {
     return PromptResult(
       response =
         response.body?.candidates?.first()?.content?.parts?.first()?.text
-          ?: throw BadRequestException(Message.LLM_PROVIDER_EMPTY_RESPONSE),
+          ?: throw LlmProviderEmptyResponseException(),
       usage =
         response.body?.usageMetadata?.let {
           PromptResponseUsageDto(

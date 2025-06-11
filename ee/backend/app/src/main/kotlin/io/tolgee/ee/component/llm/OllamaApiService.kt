@@ -5,6 +5,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.LlmProviderEmptyResponseException
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -46,7 +47,7 @@ class OllamaApiService : AbstractLlmApiService(), Logging {
 
     return PromptResult(
       response.body?.message?.content
-        ?: throw BadRequestException(Message.LLM_PROVIDER_EMPTY_RESPONSE),
+        ?: throw LlmProviderEmptyResponseException(),
       usage = null,
     )
   }

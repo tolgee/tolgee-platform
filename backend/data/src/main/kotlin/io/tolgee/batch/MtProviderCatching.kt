@@ -7,6 +7,7 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.FormalityNotSupportedException
 import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.exceptions.LlmContentFilterException
+import io.tolgee.exceptions.LlmProviderEmptyResponseException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
 import io.tolgee.exceptions.limits.PlanSpendingLimitExceededStringsException
@@ -34,6 +35,8 @@ class MtProviderCatching(
         throw FailedDontRequeueException(Message.OUT_OF_CREDITS, successfulTargets, e)
       } catch (e: LlmContentFilterException) {
         throw FailedDontRequeueException(Message.LLM_CONTENT_FILTER, successfulTargets, e)
+      } catch (e: LlmProviderEmptyResponseException) {
+        throw FailedDontRequeueException(Message.LLM_PROVIDER_EMPTY_RESPONSE, successfulTargets, e)
       } catch (e: TranslationApiRateLimitException) {
         throw RequeueWithDelayException(
           Message.TRANSLATION_API_RATE_LIMIT,
