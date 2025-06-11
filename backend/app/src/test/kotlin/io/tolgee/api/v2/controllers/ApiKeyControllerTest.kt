@@ -318,7 +318,6 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   @Test
   fun `regenerate works (never expiring key)`() {
     val oldKeyHash = testData.usersKey.keyHash
-
     testData.usersKey.expiresAt.assert.isNull()
 
     performAuthPut(
