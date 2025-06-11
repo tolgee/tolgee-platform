@@ -40,13 +40,13 @@ class ApiKey(
   @NotNull
   @NotEmpty
   @Enumerated(EnumType.STRING)
-  @field:ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
   var scopesEnum: MutableSet<Scope?>,
 ) : StandardAuditModel() {
-  @field:NotBlank
+  @NotBlank
   var description: String = ""
 
-  @field:NotBlank
+  @NotBlank
   var keyHash: String = ""
 
   /**

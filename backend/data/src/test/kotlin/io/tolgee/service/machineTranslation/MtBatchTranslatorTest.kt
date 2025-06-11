@@ -3,6 +3,8 @@ package io.tolgee.service.machineTranslation
 import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.component.machineTranslation.metadata.ExampleItem
+import io.tolgee.component.machineTranslation.providers.GoogleTranslationProvider
+import io.tolgee.component.machineTranslation.providers.LlmTranslationProvider
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -10,6 +12,7 @@ import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.TranslationMemoryService
 import io.tolgee.testing.assert
 import jakarta.persistence.EntityManager
@@ -24,6 +27,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import kotlin.reflect.KClass
 
 class MtBatchTranslatorTest {
   private lateinit var preparedKey: KeyForMt
@@ -147,22 +151,20 @@ class MtBatchTranslatorTest {
       )
   }
 
-  @Suppress("SqlSourceToSinkFlow")
   private fun mockApplicationContext(): ApplicationContext {
-    val applicationContextMock = mock<ApplicationContext>()
-    val entityManagerMock = mock(EntityManager::class.java)
-    whenever(applicationContextMock.getBean(EntityManager::class.java)).thenReturn(entityManagerMock)
-    mockQueryResult(entityManagerMock, mutableListOf(preparedKey)) {
+    val appContextMock = mock<ApplicationContext>()
+    val entityManagerMock = EntityManager::class.mockIntoAppContext(appContextMock)
+
+		mockQueryResult(entityManagerMock, mutableListOf(preparedKey)) {
       this.contains("new io.tolgee.service.machineTranslation.KeyForMt")
     }
-    val mtServiceManagerMock = mock(MtServiceManager::class.java)
-    whenever(applicationContextMock.getBean(MtServiceManager::class.java)).thenReturn(mtServiceManagerMock)
+
+    val mtServiceManagerMock = MtServiceManager::class.mockIntoAppContext(appContextMock)
     val firstResult = mtServiceManagerResults.firstOrNull()
     val rest = mtServiceManagerResults.drop(1)
     whenever(mtServiceManagerMock.translate(any())).thenReturn(firstResult, *rest.toTypedArray())
 
-    val languageServiceMock = mock(LanguageService::class.java)
-    whenever(applicationContextMock.getBean(LanguageService::class.java)).thenReturn(languageServiceMock)
+    val languageServiceMock = LanguageService::class.mockIntoAppContext(appContextMock)
     whenever(languageServiceMock.getProjectLanguages(any())).thenReturn(
       listOf(
         LanguageDto(0, tag = "en", base = true),
@@ -174,10 +176,8 @@ class MtBatchTranslatorTest {
       this.contains("io.tolgee.component.machineTranslation.metadata.ExampleItem")
     }
 
-    val translationMemoryServiceMock = mock(TranslationMemoryService::class.java)
-    whenever(
-      applicationContextMock.getBean(TranslationMemoryService::class.java),
-    ).thenReturn(translationMemoryServiceMock)
+    val translationMemoryServiceMock = TranslationMemoryService::class.mockIntoAppContext(appContextMock)
+
     doAnswer {
       Page.empty<TranslationMemoryItemView>()
     }
@@ -190,22 +190,23 @@ class MtBatchTranslatorTest {
         any<LanguageDto>(),
         any<Pageable>(),
       )
-    val bigMetaServiceMock = mock<BigMetaService>()
-    whenever(applicationContextMock.getBean(BigMetaService::class.java)).thenReturn(bigMetaServiceMock)
+
+    val bigMetaServiceMock = BigMetaService::class.mockIntoAppContext(appContextMock)
     whenever(bigMetaServiceMock.getCloseKeyIds(any())).thenReturn(emptyList())
 
-    val projectServiceMock = mock(io.tolgee.service.project.ProjectService::class.java)
-    whenever(applicationContextMock.getBean(io.tolgee.service.project.ProjectService::class.java))
-      .thenReturn(projectServiceMock)
+    val projectServiceMock = ProjectService::class.mockIntoAppContext(appContextMock)
     val projectDtoMock = mock(ProjectDto::class.java)
     whenever(projectServiceMock.getDto(any())).thenReturn(projectDtoMock)
 
-    val mtGlossaryTermsProviderMock = mock<MtGlossaryTermsProvider>()
-    whenever(applicationContextMock.getBean(MtGlossaryTermsProvider::class.java))
-      .thenReturn(mtGlossaryTermsProviderMock)
+    val mtGlossaryTermsProviderMock = MtGlossaryTermsProvider::class.mockIntoAppContext(appContextMock)
     whenever(mtGlossaryTermsProviderMock.getGlossaryTerms(any(), any(), any(), any()))
       .thenReturn(emptySet())
-    return applicationContextMock
+
+		// Add them so we don't trigger NPE during bean lookups
+		GoogleTranslationProvider::class.mockIntoAppContext(appContextMock)
+		LlmTranslationProvider::class.mockIntoAppContext(appContextMock)
+
+    return appContextMock
   }
 
   @Suppress("SqlSourceToSinkFlow")
@@ -243,4 +244,10 @@ class MtBatchTranslatorTest {
       )
     return context
   }
+
+	private inline fun <reified T : Any> KClass<T>.mockIntoAppContext(appContext: ApplicationContext): T {
+		val mock = mock<T>()
+		whenever(appContext.getBean(T::class.java)).thenReturn(mock)
+		return mock
+	}
 }

@@ -25,11 +25,11 @@ import jakarta.persistence.Transient
   ],
 )
 class Pat(
-  @field:NotEmpty
-  @field:NotNull
+  @NotEmpty
+  @NotNull
   var tokenHash: String = "",
-  @field:NotEmpty
-  @field:NotNull
+  @NotEmpty
+  @NotNull
   var description: String = "",
   @Temporal(value = TemporalType.TIMESTAMP)
   var expiresAt: Date? = null,
