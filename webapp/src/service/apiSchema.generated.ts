@@ -1040,7 +1040,8 @@ export interface components {
         | "FEATURE_AI_CUSTOMIZATION"
         | "FEATURE_VISUAL_EDITOR"
         | "FEATURE_CLI_2"
-        | "FEATURE_TASKS";
+        | "FEATURE_TASKS"
+        | "FEATURE_LLM_PROVIDERS_AND_PLAYGROUND";
     };
     ApiKeyModel: {
       /** @description Description */
@@ -2339,7 +2340,8 @@ export interface components {
         | "glossary_term_not_found"
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
-        | "llm_content_filter";
+        | "llm_content_filter"
+        | "llm_provider_empty_response";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -5230,7 +5232,8 @@ export interface components {
         | "glossary_term_not_found"
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
-        | "llm_content_filter";
+        | "llm_content_filter"
+        | "llm_provider_empty_response";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
