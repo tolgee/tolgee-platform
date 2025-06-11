@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { Box, Menu, MenuItem } from '@mui/material';
 
