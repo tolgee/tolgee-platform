@@ -44,7 +44,7 @@ class AnthropicApiService : AbstractLlmApiService(), Logging {
       )
 
     return PromptResult(
-      response.body?.content?.first()?.text
+      response.body?.content?.firstOrNull()?.text
         ?: throw LlmProviderEmptyResponseException(),
       usage =
         response.body?.usage?.let {

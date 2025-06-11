@@ -48,7 +48,7 @@ class GoogleAiApiService : AbstractLlmApiService(), Logging {
 
     return PromptResult(
       response =
-        response.body?.candidates?.first()?.content?.parts?.first()?.text
+        response.body?.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
           ?: throw LlmProviderEmptyResponseException(),
       usage =
         response.body?.usageMetadata?.let {

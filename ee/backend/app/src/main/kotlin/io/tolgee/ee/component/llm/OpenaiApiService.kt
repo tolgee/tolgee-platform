@@ -82,7 +82,7 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
     }
 
     return PromptResult(
-      response = response.body?.choices?.first()?.message?.content
+      response = response.body?.choices?.firstOrNull()?.message?.content
         ?: throw LlmProviderEmptyResponseException(),
       usage =
         response.body?.usage?.let {
