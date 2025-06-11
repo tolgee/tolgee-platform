@@ -1,10 +1,8 @@
 package io.tolgee.ee.component.llm
 
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
-import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.LlmProviderEmptyResponseException
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
