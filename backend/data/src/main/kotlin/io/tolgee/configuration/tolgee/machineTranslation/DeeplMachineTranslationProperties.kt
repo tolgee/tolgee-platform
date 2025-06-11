@@ -15,6 +15,6 @@ open class DeeplMachineTranslationProperties(
   override var defaultPrimary: Boolean = false,
   @DocProperty(description = "DeepL auth key. Both key types (commercial and free) are supported.")
   var authKey: String? = null,
-  @DocProperty(description = "DeepL glossaryId (Optional)")
-  var glossaryId: String? = null,
+  @DocProperty(description = "DeepL parameters which should be set for deepl api usage (Optional)")
+  var optionalParameters: Map<String, String>? = null,
 ) : MachineTranslationServiceProperties

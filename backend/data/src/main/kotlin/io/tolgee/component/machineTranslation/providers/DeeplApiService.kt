@@ -34,8 +34,8 @@ class DeeplApiService(
     requestBody.add("text", text)
     requestBody.add("source_lang", sourceTag.uppercase())
     requestBody.add("target_lang", targetTag.uppercase())
-    deeplMachineTranslationProperties.glossaryId?.let {
-      requestBody.add("glossary_id", it)
+    deeplMachineTranslationProperties.optionalParameters?.map {
+      requestBody.add(it.key, it.value)
     }
     addFormality(requestBody, formality)
 
