@@ -10,5 +10,5 @@ interface LabelRepository : JpaRepository<Label, Long> {
 
   fun findByProjectId(projectId: Long, pageable: Pageable): Page<Label>
 
-  fun findByProjectIdAndId(projectId: Long, labelId: Long): Optional<Label>
+  fun findByProjectIdAndId(projectId: Long, labelId: Long): Label?
 }

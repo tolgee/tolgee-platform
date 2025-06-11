@@ -33,7 +33,7 @@ class LabelService(
     return labelRepository.findByProjectIdAndId(
       projectId,
       labelId
-    ).orElseThrow { NotFoundException(Message.LABEL_NOT_FOUND) }
+    ) ?: throw NotFoundException(Message.LABEL_NOT_FOUND)
   }
 
   @Transactional
