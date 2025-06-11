@@ -3,6 +3,7 @@ import { styled, SxProps } from '@mui/material';
 import { Wrapper } from './Wrapper';
 import clsx from 'clsx';
 import { CloseButton } from 'tg.component/common/buttons/CloseButton';
+import { MouseEvent } from 'react';
 
 const StyledTag = styled('div')`
   margin-left: 6px;
@@ -23,7 +24,7 @@ const StyledWrapper = styled(Wrapper)`
 
 type Props = {
   name: string;
-  onDelete?: React.MouseEventHandler<SVGElement>;
+  onDelete?: (e: MouseEvent) => void;
   onClick?: (name: string) => void;
   selected?: boolean;
   className?: string;
