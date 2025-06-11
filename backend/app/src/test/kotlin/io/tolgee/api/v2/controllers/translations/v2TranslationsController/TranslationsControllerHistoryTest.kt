@@ -119,7 +119,7 @@ class TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/project
         translationService.find(emptyKey, lang).get()
       }
 
-    performProjectAuthGet("/translations/${translation.id}/history").andPrettyPrint.andAssertThatJson {
+    performProjectAuthGet("/translations/${translation!!.id}/history").andPrettyPrint.andAssertThatJson {
       node("page.totalElements").isEqualTo(0)
     }
   }
