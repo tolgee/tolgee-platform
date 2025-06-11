@@ -205,8 +205,28 @@ class PromptServiceEeImpl(
         throw BadRequestException(Message.LLM_RATE_LIMITED, listOf(e.message), e)
       }
 
-    result.parsedJson = parseJsonSafely(result.response)
+    result.parsedJson = extractJsonFromResponse(result.response)
     return result
+  }
+
+  fun getJsonLike(content: String): String {
+    return "{${content.substringAfter("{").substringBeforeLast("}")}}"
+  }
+
+  fun extractJsonFromResponse(content: String): JsonNode? {
+    // attempting different strategies to find a json in the response
+    val attempts = listOf<(String) -> String>(
+      { it },
+      { getJsonLike(it) },
+      { getJsonLike(it.substringAfter("```").substringBefore("```")) },
+    )
+    for (attempt in attempts) {
+      val result = parseJsonSafely(attempt.invoke(content))
+      if (result != null) {
+        return result
+      }
+    }
+    return null
   }
 
   fun parseJsonSafely(content: String): JsonNode? {

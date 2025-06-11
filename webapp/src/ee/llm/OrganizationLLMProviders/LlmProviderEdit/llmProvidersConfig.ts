@@ -37,11 +37,15 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
   return {
     OPENAI: {
       name: {},
-      apiUrl: {},
+      apiUrl: {
+        defaultValue: 'https://api.openai.com',
+      },
       apiKey: {
         optional: true,
       },
-      model: {},
+      model: {
+        hint: t('llm_provider_form_openai_model_hint'),
+      },
       format: {
         hint: t('llm_provider_form_openai_format_hint'),
         optional: true,
@@ -53,12 +57,34 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
       name: {},
       apiUrl: {},
       apiKey: {},
-      deployment: {},
+      deployment: {
+        hint: t('llm_provider_form_azure_openai_deployment_hint'),
+      },
       format: {
         hint: t('llm_provider_form_openai_format_hint'),
         optional: true,
         enum: [undefined, 'json_schema'],
         defaultValue: 'json_schema',
+      },
+    },
+    ANTHROPIC: {
+      name: {},
+      apiUrl: {
+        defaultValue: 'https://api.anthropic.com',
+      },
+      apiKey: {},
+      model: {
+        hint: t('llm_provider_form_anthropic_model_hint'),
+      },
+    },
+    GOOGLE_AI: {
+      name: {},
+      apiUrl: {
+        defaultValue: 'https://generativelanguage.googleapis.com',
+      },
+      apiKey: {},
+      model: {
+        hint: t('llm_provider_form_google_ai_model_hint'),
       },
     },
   };

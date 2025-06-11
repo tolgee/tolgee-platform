@@ -15,6 +15,10 @@ export const useLlmProviderTranslation = () => {
         return t('llm_provider_type_openai_azure');
       case 'TOLGEE':
         return t('llm_provider_type_tolgee');
+      case 'ANTHROPIC':
+        return t('llm_provider_type_anthropic');
+      case 'GOOGLE_AI':
+        return t('llm_provider_type_google_ai');
       default:
         return assertUnreachable(type);
     }

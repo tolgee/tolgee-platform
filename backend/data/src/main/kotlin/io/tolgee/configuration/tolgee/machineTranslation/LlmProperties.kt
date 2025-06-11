@@ -7,6 +7,9 @@ import io.tolgee.model.enums.LlmProviderType
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.llm")
+@DocProperty(
+  displayName = "LLM Providers",
+)
 class LlmProperties : MachineTranslationServiceProperties {
   @DocProperty("Enable/disable AI translator (default: enabled if there is at least one provider)")
   var enabled: Boolean? = null
@@ -17,6 +20,23 @@ class LlmProperties : MachineTranslationServiceProperties {
   @DocProperty(description = "Whether to use llm machine translation as a primary translation engine.")
   override var defaultPrimary: Boolean = true
 
+  @DocProperty(
+    description = """
+    List of LLM providers. Example:
+    
+    ```
+    providers:
+      - name: openai-gpt-4o-mini
+        type: OPENAI
+        api-key: "<api key>"
+        api-url: "https://api.openai.com"
+        model: gpt-4o-mini
+        format: "json_schema"
+    ```
+    
+    Check [llm providers documentation](/platform/projects_and_organizations/llm-providers#self-hosted-server-configuration) for more information.
+  """
+  )
   var providers: MutableList<LlmProvider> = mutableListOf()
 
   open class LlmProvider(

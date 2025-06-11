@@ -1,5 +1,5 @@
 import { T, useTranslate } from '@tolgee/react';
-import { assertUnreachable } from 'tg.fixtures/assertUnreachable';
+import { assertUnreachableReturnNull } from 'tg.fixtures/assertUnreachable';
 import { components } from 'tg.service/apiSchema.generated';
 import { Announcement } from './Announcement';
 import { BannerLink } from './BannerLink';
@@ -83,8 +83,27 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_LLM_PROVIDERS_AND_PLAYGROUND':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_llm_providers_and_playground"
+                params={{
+                  linkPlayground: (
+                    <BannerLink href="https://docs.tolgee.io/platform/translation_process/ai-playground" />
+                  ),
+                  linkProviders: (
+                    <BannerLink href="https://docs.tolgee.io/platform/projects_and_organizations/llm-providers" />
+                  ),
+                }}
+              />
+            }
+          />
+        );
+
       default:
-        assertUnreachable(value);
+        return assertUnreachableReturnNull(value);
     }
   };
 }

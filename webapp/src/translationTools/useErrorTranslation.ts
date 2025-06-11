@@ -195,6 +195,8 @@ export function useErrorTranslation() {
         return t('prompt_not_found');
       case 'llm_content_filter':
         return t('llm_content_filter');
+      case 'llm_provider_empty_response':
+        return t('llm_provider_empty_response');
       default:
         return code;
     }

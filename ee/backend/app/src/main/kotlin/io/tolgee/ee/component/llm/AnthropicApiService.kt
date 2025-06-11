@@ -1,6 +1,5 @@
 package io.tolgee.ee.component.llm
 
-import com.fasterxml.jackson.annotation.JsonInclude
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
@@ -20,7 +19,7 @@ import org.springframework.web.client.exchange
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class ClaudeApiService : AbstractLlmApiService(), Logging {
+class AnthropicApiService : AbstractLlmApiService(), Logging {
   override fun translate(
     params: LlmParams,
     config: LlmProviderInterface,
@@ -33,16 +32,6 @@ class ClaudeApiService : AbstractLlmApiService(), Logging {
     val requestBody =
       RequestBody(
         messages = messages,
-        response_format =
-          if (params.shouldOutputJson) {
-            when (config.format) {
-              "json_object" -> ResponseFormat(type = "json_object", json_schema = null)
-              "json_schema" -> ResponseFormat()
-              else -> null
-            }
-          } else {
-            null
-          },
         model = config.model,
       )
 
@@ -57,7 +46,7 @@ class ClaudeApiService : AbstractLlmApiService(), Logging {
 
     return PromptResult(
       response.body?.content?.first()?.text
-        ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(response.toString())),
+        ?: throw BadRequestException(Message.LLM_PROVIDER_EMPTY_RESPONSE),
       usage =
         response.body?.usage?.let {
           PromptResponseUsageDto(
@@ -105,7 +94,7 @@ class ClaudeApiService : AbstractLlmApiService(), Logging {
 
     if (params.shouldOutputJson) {
       messages.add(
-        RequestMessage(role = "user", content = "Strictly return only valid json!")
+        RequestMessage(role = "user", content = "Return valid JSON and only JSON! Output message is parsed by machine!")
       )
     }
     return messages
@@ -119,7 +108,6 @@ class ClaudeApiService : AbstractLlmApiService(), Logging {
     class RequestBody(
       val max_tokens: Long = 1000,
       val stream: Boolean = false,
-      @JsonInclude(JsonInclude.Include.NON_NULL) val response_format: ResponseFormat? = null,
       val messages: List<RequestMessage>,
       val model: String?,
       val temperature: Long? = 0,
@@ -139,26 +127,6 @@ class ClaudeApiService : AbstractLlmApiService(), Logging {
       val type: String = "base64",
       val media_type: String = "image/png",
       val data: String,
-    )
-
-    class ResponseFormat(
-      val type: String = "json_schema",
-      @JsonInclude(JsonInclude.Include.NON_NULL) val json_schema: Map<String, Any>? =
-        mapOf(
-          "name" to "simple_response",
-          "schema" to
-            mapOf(
-              "type" to "object",
-              "properties" to
-                mapOf(
-                  "output" to mapOf("type" to "string"),
-                  "contextDescription" to mapOf("type" to "string"),
-                ),
-              "required" to listOf("output", "contextDescription"),
-              "additionalProperties" to false,
-            ),
-          "strict" to true,
-        ),
     )
 
     class ResponseBody(
