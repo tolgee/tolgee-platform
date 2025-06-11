@@ -1,3 +1,10 @@
+# [3.122.0](https://github.com/tolgee/tolgee-platform/compare/v3.121.1...v3.122.0) (2025-06-11)
+
+
+### Features
+
+* more llm providers ([#3118](https://github.com/tolgee/tolgee-platform/issues/3118)) ([ea1507b](https://github.com/tolgee/tolgee-platform/commit/ea1507b0add2e3abad046a0ac38c449b568f1cbf))
+
 ## [3.121.1](https://github.com/tolgee/tolgee-platform/compare/v3.121.0...v3.121.1) (2025-06-10)
 
 

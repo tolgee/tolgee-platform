@@ -352,6 +352,7 @@
   "announcement_feature_mt_formality": "Les traductions automatiques prennent désormais en charge la formalité",
   "announcement_feature_tasks": "Nous avons lancé une nouvelle fonctionnalité : Tâches !",
   "announcement_general_link_text": "Afficher plus",
+  "announcement_llm_providers_and_playground": "Nous avons lancé <linkPlayground>AI Playground</linkPlayground> et <linkProviders>Fournisseurs LLM Personnalisés</linkProviders> !",
   "announcement_new_pricing": "Tolgee introduit de nouveaux tarifs pour les instances auto-hébergées",
   "announcement_visual_editor_and_formats_support": "Nouvel Éditeur visuel avec supports de formats pour iOS, Android, Flutter and d'autre outils ",
   "api-key-delete-button": "Supprimer",

@@ -352,6 +352,7 @@
   "announcement_feature_mt_formality": "Die maschinelle Übersetzung unterstützt jetzt die Formalität",
   "announcement_feature_tasks": "Wir haben eine neue Funktion veröffentlicht: Aufgaben!",
   "announcement_general_link_text": "Mehr anzeigen",
+  "announcement_llm_providers_and_playground": "Wir haben <linkPlayground>AI Playground</linkPlayground> und <linkProviders>Custom LLM Providers</linkProviders> veröffentlicht!",
   "announcement_new_pricing": "Tolgee führt neue Preise für selbst gehostete Instanzen ein",
   "announcement_visual_editor_and_formats_support": "Visual Editor und Unterstützung für iOS, Android, Flutter und andere veröffentlicht",
   "api-key-delete-button": "Löschen",

@@ -353,6 +353,7 @@
   "announcement_feature_mt_formality": "機械翻訳は現在、フォーマリティをサポートしています",
   "announcement_feature_tasks": "新しい機能「タスク」をリリースしました！",
   "announcement_general_link_text": "もっと見る",
+  "announcement_llm_providers_and_playground": "<linkPlayground>AI Playground</linkPlayground> と <linkProviders>カスタム LLM プロバイダー</linkProviders> をリリースしました！",
   "announcement_new_pricing": "Tolgee はセルフホストインスタンスの新しい価格設定を導入しています",
   "announcement_visual_editor_and_formats_support": "ビジュアルエディタをリリースし、iOS、Android、Flutterなどをサポートしました",
   "api-key-delete-button": "削除",
