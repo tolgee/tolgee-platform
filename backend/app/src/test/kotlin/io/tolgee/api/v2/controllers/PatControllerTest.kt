@@ -129,7 +129,7 @@ class PatControllerTest : AuthorizedControllerTest() {
       node("description").isString.isEqualTo(description)
     }
 
-		patService.get(testData.expiredPat.id).description.assert.isNotEqualTo(description)
+		patService.get(testData.expiredPat.id).description.assert.isEqualTo(description)
   }
 
   @Test
