@@ -126,7 +126,7 @@ export const SubfilterLabels = ({
                 search={search}
                 displaySearch={(totalItems ?? 0) > 10}
                 renderOption={renderItem}
-                getOptionLabel={(o) => o.name}
+                itemKey={(o) => o.name}
                 ListboxProps={{
                   style: { maxHeight: 400, overflow: 'auto' },
                 }}
