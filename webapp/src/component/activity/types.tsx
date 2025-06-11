@@ -47,7 +47,8 @@ export type EntityEnum =
   | 'ContentDeliveryConfig'
   | 'WebhookConfig'
   | 'ContentStorage'
-  | 'Task';
+  | 'Task'
+  | 'Label';
 
 export type FieldTypeEnum =
   | 'text'
