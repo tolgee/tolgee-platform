@@ -26,12 +26,13 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import org.springframework.test.web.servlet.ResultActions
 import java.math.BigDecimal
-import java.util.function.Consumer
 
+@SpringBootTest
 class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: BaseTestData
 
@@ -140,7 +141,7 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
       },
     ).andIsOk
 
-    var params: Map<String, Any?>? = null
+    var params: Map<String, Any?> = emptyMap()
     waitForNotThrowing(timeout = 10000) {
       verify(postHog, times(1)).capture(
         any(),
@@ -151,9 +152,9 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
         },
       )
     }
-    params!!["utm_hello"].assert.isEqualTo("hello")
-    params!!["sdkType"].assert.isEqualTo("Unreal")
-    params!!["sdkVersion"].assert.isEqualTo("1.0.0")
+    params["utm_hello"].assert.isEqualTo("hello")
+    params["sdkType"].assert.isEqualTo("Unreal")
+    params["sdkVersion"].assert.isEqualTo("1.0.0")
   }
 
   @Test
@@ -235,13 +236,11 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private fun ResultActions.waitForJobCompleted() =
     andAssertThatJson {
-      node("id").isNumber.satisfies(
-        Consumer {
-          waitFor(pollTime = 2000) {
-            val job = batchJobService.findJobDto(it.toLong())
-            job?.status?.completed == true
-          }
-        },
-      )
-    }
+      node("id").isNumber.satisfies {
+				waitFor(pollTime = 2000) {
+					val job = batchJobService.findJobDto(it.toLong())
+					job?.status?.completed == true
+				}
+			}
+		}
 }

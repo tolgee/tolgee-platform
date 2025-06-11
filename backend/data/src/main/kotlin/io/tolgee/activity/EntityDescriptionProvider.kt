@@ -8,9 +8,10 @@ import io.tolgee.model.EntityWithId
 import io.tolgee.util.EntityUtil
 import org.hibernate.proxy.HibernateProxy
 import org.springframework.stereotype.Component
+import kotlin.reflect.KProperty
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.superclasses
+import kotlin.reflect.jvm.javaField
 
 @Component
 class EntityDescriptionProvider(
@@ -53,7 +54,7 @@ class EntityDescriptionProvider(
 
     val fieldValues =
       entityClass.kotlin.members.filter { member ->
-        member.hasAnnotation<ActivityDescribingProp>()
+        member is KProperty<*> && member.javaField?.isAnnotationPresent(ActivityDescribingProp::class.java) ?: false
       }.associateTo(HashMap()) { it.name to it.call(entity) }
 
     return EntityDescription(
