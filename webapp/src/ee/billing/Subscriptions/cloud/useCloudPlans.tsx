@@ -35,7 +35,6 @@ export const useCloudPlans = () => {
     name: 'Enterprise',
     enabledFeatures: [
       'ACCOUNT_MANAGER',
-      'AI_PROMPT_CUSTOMIZATION',
       'DEDICATED_SLACK_CHANNEL',
       'SLACK_INTEGRATION',
       'GRANULAR_PERMISSIONS',
@@ -48,6 +47,8 @@ export const useCloudPlans = () => {
       'TASKS',
       'ORDER_TRANSLATION',
       'SSO',
+      'AI_PROMPT_CUSTOMIZATION',
+      'GLOSSARY',
     ] as const satisfies PlanType['enabledFeatures'],
     free: false,
     hasYearlyPrice: false,

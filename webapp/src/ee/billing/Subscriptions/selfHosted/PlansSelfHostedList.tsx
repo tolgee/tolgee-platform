@@ -42,7 +42,6 @@ export const PlansSelfHostedList: FC<BillingPlansProps> = ({
       'ASSISTED_UPDATES',
       'BACKUP_CONFIGURATION',
       'TEAM_TRAINING',
-      'AI_PROMPT_CUSTOMIZATION',
       'GRANULAR_PERMISSIONS',
       'MULTIPLE_CONTENT_DELIVERY_CONFIGS',
       'PRIORITIZED_FEATURE_REQUESTS',
@@ -52,6 +51,8 @@ export const PlansSelfHostedList: FC<BillingPlansProps> = ({
       'TASKS',
       'ORDER_TRANSLATION',
       'SSO',
+      'AI_PROMPT_CUSTOMIZATION',
+      'GLOSSARY',
     ] as const satisfies SelfHostedEePlanModel['enabledFeatures'],
     includedUsage: {
       seats: -2,
