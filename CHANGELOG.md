@@ -1,3 +1,46 @@
+## [3.121.1](https://github.com/tolgee/tolgee-platform/compare/v3.121.0...v3.121.1) (2025-06-10)
+
+
+### Bug Fixes
+
+* conditional glossaries load only if the feature is available ([#3115](https://github.com/tolgee/tolgee-platform/issues/3115)) ([bbbff24](https://github.com/tolgee/tolgee-platform/commit/bbbff24a16dabc79f47e705481d279c0552e9e58))
+* Removing escape characters in the key name can lead to errors ([#3119](https://github.com/tolgee/tolgee-platform/issues/3119)) ([5ed1dfe](https://github.com/tolgee/tolgee-platform/commit/5ed1dfeaff36423552b0316d7caa7b49012e0de3))
+
+# [3.121.0](https://github.com/tolgee/tolgee-platform/compare/v3.120.0...v3.121.0) (2025-06-09)
+
+
+### Features
+
+* playground + glossaries ([#3109](https://github.com/tolgee/tolgee-platform/issues/3109)) ([fba6e9b](https://github.com/tolgee/tolgee-platform/commit/fba6e9bb0c439f69cf2b952228dde7ba58405feb))
+
+# [3.120.0](https://github.com/tolgee/tolgee-platform/compare/v3.119.4...v3.120.0) (2025-06-04)
+
+
+### Features
+
+* scope namespaces when importing (support is needed for the CLI) ([#3093](https://github.com/tolgee/tolgee-platform/issues/3093)) ([ed4639f](https://github.com/tolgee/tolgee-platform/commit/ed4639f0d612282e1fe40a97d511ccd0084a8b48))
+
+## [3.119.4](https://github.com/tolgee/tolgee-platform/compare/v3.119.3...v3.119.4) (2025-06-04)
+
+
+### Bug Fixes
+
+* unreal Engine documentation update ([#3095](https://github.com/tolgee/tolgee-platform/issues/3095)) ([54eb77e](https://github.com/tolgee/tolgee-platform/commit/54eb77eb6dcd53f5d2911f40227d43e187219ffe))
+
+## [3.119.3](https://github.com/tolgee/tolgee-platform/compare/v3.119.2...v3.119.3) (2025-05-30)
+
+
+### Bug Fixes
+
+* Configure YAML ObjectMapper with custom settings: disable doc start markers and line splitting, enable literal block style ([#3094](https://github.com/tolgee/tolgee-platform/issues/3094)) ([4f279e5](https://github.com/tolgee/tolgee-platform/commit/4f279e5e844be6394be8683e774672bc806f753a)), closes [#3020](https://github.com/tolgee/tolgee-platform/issues/3020)
+
+## [3.119.2](https://github.com/tolgee/tolgee-platform/compare/v3.119.1...v3.119.2) (2025-05-29)
+
+
+### Bug Fixes
+
+* fetch all namespaces in filters ([#3078](https://github.com/tolgee/tolgee-platform/issues/3078)) ([450d4a5](https://github.com/tolgee/tolgee-platform/commit/450d4a5e7cbbac12484edf738eaa5dfa7ce1dbba))
+
 ## [3.119.1](https://github.com/tolgee/tolgee-platform/compare/v3.119.0...v3.119.1) (2025-05-20)
 
 

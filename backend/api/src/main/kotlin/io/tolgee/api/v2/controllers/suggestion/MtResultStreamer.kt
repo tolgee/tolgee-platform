@@ -12,10 +12,7 @@ import io.tolgee.hateoas.machineTranslation.StreamedSuggestionInfo
 import io.tolgee.hateoas.machineTranslation.StreamedSuggestionItem
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.security.ProjectHolder
-import io.tolgee.service.machineTranslation.MachineTranslationParams
-import io.tolgee.service.machineTranslation.MtService
-import io.tolgee.service.machineTranslation.MtServiceInfo
-import io.tolgee.service.machineTranslation.MtTranslatorResult
+import io.tolgee.service.machineTranslation.*
 import io.tolgee.util.Logging
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.debug
@@ -53,7 +50,11 @@ class MtResultStreamer(
   }
 
   private fun getInfo(): StreamedSuggestionInfo {
-    return StreamedSuggestionInfo(servicesToUse.map { it.serviceType }, baseBlank)
+    return StreamedSuggestionInfo(
+      servicesToUse.map { it.serviceType },
+      servicesToUse.find { it.serviceType == MtServiceType.PROMPT }?.promptId,
+      baseBlank
+    )
   }
 
   private fun writeServiceResultsAsync() {
@@ -82,7 +83,7 @@ class MtResultStreamer(
         catchingOutOfCredits(project.organizationOwnerId) {
           val translated = getTranslatedValue(dto, service)
           translated?.exception?.let { throw it }
-          writeTranslatedValue(writer, service, translated)
+          writeTranslatedValue(writer, service, translated?.promptId, translated)
         }
       }
     } catch (e: Exception) {
@@ -98,13 +99,13 @@ class MtResultStreamer(
   private fun writeTranslatedValue(
     writer: OutputStreamWriter,
     service: MtServiceType,
+    promptId: Long?,
     translated: MtTranslatorResult?,
   ) {
     val model =
       translated
         ?.let { it.translatedText?.let { text -> TranslationItemModel(text, it.contextDescription) } }
-
-    val item = StreamedSuggestionItem(service, model)
+    val item = StreamedSuggestionItem(service, model, promptId)
 
     writer.writeJsonSync(item)
   }

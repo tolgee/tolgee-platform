@@ -1,6 +1,7 @@
 package io.tolgee.security.thirdParty
 
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.exceptions.NotImplementedInOss
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -21,6 +22,6 @@ class SsoDelegateOssStub : SsoDelegate {
     domain: String?,
   ): JwtAuthenticationResponse {
     // no-op
-    throw UnsupportedOperationException("Not included in OSS")
+    throw NotImplementedInOss()
   }
 }

@@ -5,6 +5,7 @@ import {
 } from '../apiCalls/testData/testData';
 import { visitProjectDashboard } from '../shared';
 import { selectLangsInLocalstorage } from '../translations';
+import { testAi } from './ai';
 import { testBatchOperations } from './batchOperations';
 import { testDashboard } from './dashboard';
 import { testDeveloper } from './developer';
@@ -73,6 +74,9 @@ export function checkPermissions(projectInfo: ProjectInfo, settings: Settings) {
         case 'project-menu-item-integrate':
           testIntegration(projectInfo);
           break;
+        case 'project-menu-item-ai':
+          testAi(projectInfo);
+          break;
       }
     }
   });
@@ -88,13 +92,12 @@ export function loginAndGetInfo(user: UserMail, projectId: number) {
 
 export function visitProjectWithPermissions(
   options: Partial<PermissionsOptions>,
-  useNamespaces = false,
   user: UserMail = 'me@me.me'
 ): Promise<ProjectInfo> {
   return new Cypress.Promise<ProjectInfo>((resolve) => {
     generatePermissionsData
       .clean()
-      .then(() => generatePermissionsData.generate(options, useNamespaces))
+      .then(() => generatePermissionsData.generate(options, true))
       .then((res) => {
         return res.body.projects[0].id;
       })

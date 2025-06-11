@@ -165,6 +165,7 @@ const getTheme = (mode: PaletteMode) => {
       login: c.login,
       input: c.input,
       revisionFilterBanner: c.revisionFilterBanner,
+      label: tPalette.label,
     },
     mixins: {
       toolbar: {
@@ -226,6 +227,12 @@ const getTheme = (mode: PaletteMode) => {
             borderRadius: 3,
             padding: '6px 16px',
             minHeight: 40,
+            '&.Mui-disabled.MuiButton-containedPrimary': {
+              backgroundColor: tPalette.primary.disabled,
+            },
+            '&.Mui-disabled.MuiButton-containedSecondary': {
+              backgroundColor: tPalette.secondary.disabled,
+            },
           },
           sizeSmall: {
             minHeight: 32,

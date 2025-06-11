@@ -12,6 +12,7 @@ import {
   Login,
   Marker,
   Navbar,
+  Label,
   Placeholders,
   QuickStart,
   RevisionFilterBanner,
@@ -60,6 +61,7 @@ declare module '@mui/material/styles/createPalette' {
     login: Login;
     input: Input;
     revisionFilterBanner: RevisionFilterBanner;
+    label: Label;
   }
 
   interface PaletteOptions {
@@ -87,6 +89,7 @@ declare module '@mui/material/styles/createPalette' {
     login: Login;
     input: Input;
     revisionFilterBanner: RevisionFilterBanner;
+    label: Label;
   }
 }
 
@@ -106,4 +109,8 @@ declare module 'react' {
   interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
     webkitdirectory?: boolean;
   }
+
+  type KeyOf<T> = {
+    [K in keyof T]-?: T[K] extends Key ? K : never;
+  }[keyof T];
 }

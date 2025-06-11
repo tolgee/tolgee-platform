@@ -57,7 +57,8 @@ class KeyBuilder(
   ): ScreenshotBuilder {
     val converter = file?.let { ImageConverter(file.inputStream) }
     val image = converter?.getImage()
-    val thumbnail = converter?.getThumbnail()
+    val middleSized = converter?.getThumbnail(600)
+    val thumbnail = converter?.getThumbnail(200)
 
     val screenshotBuilder =
       projectBuilder.addScreenshot {
@@ -67,6 +68,7 @@ class KeyBuilder(
 
     screenshotBuilder.image = image
     screenshotBuilder.thumbnail = thumbnail
+    screenshotBuilder.middleSized = middleSized
 
     val reference =
       projectBuilder.addScreenshotReference {

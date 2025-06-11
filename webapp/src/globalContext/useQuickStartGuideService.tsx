@@ -15,6 +15,7 @@ export const useQuickStartGuideService = (
   const [active, setActive] = useState<HighlightItem[]>([]);
   const [activeStep, setActiveStep] = useState<ItemStep>();
   const [floatingOpen, setFloatingOpen] = useState(false);
+  const [floatingForced, setFloatingForced] = useState(false);
   const match = useRouteMatch(LINKS.PROJECT.template);
   const projectIdParam = match?.params[PARAMS.PROJECT_ID];
   const projectId = isNaN(projectIdParam) ? undefined : projectIdParam;
@@ -90,12 +91,14 @@ export const useQuickStartGuideService = (
     lastProjectId,
     completed: allCompleted,
     floatingOpen,
+    floatingForced,
   };
 
   const actions = {
     quickStartFinish: initialData.actions.finishGuide,
     setQuickStartOpen: initialData.actions.setQuickStartOpen,
     setQuickStartFloatingOpen: setFloatingOpen,
+    setQuickStartFloatingForced: setFloatingForced,
     quickStartBegin,
     quickStartVisited,
     quickStartCompleteStep,

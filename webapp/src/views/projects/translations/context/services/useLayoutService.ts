@@ -9,10 +9,8 @@ type Props = {
 export const useLayoutService = ({ sidePanelOpen }: Props) => {
   const bodyWidth = useGlobalContext((c) => c.layout.bodyWidth);
   const isSmall = bodyWidth < 800;
-  const sidePanelWidth =
-    sidePanelOpen && !isSmall
-      ? Math.min(Math.max(0.24 * bodyWidth, 300), 500)
-      : 0;
+  const size = Math.min(Math.max(0.24 * bodyWidth, 300), 500);
+  const sidePanelWidth = sidePanelOpen && !isSmall ? size : 0;
   const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const mainContentWidth =
     bodyWidth -

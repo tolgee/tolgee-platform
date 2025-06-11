@@ -19,6 +19,22 @@ class SingleStepImportTestData : BaseTestData() {
     }
   }
 
+  fun addTranslationInDifferentNamespace() {
+    val namespace = projectBuilder.addNamespace {
+      this.name = "different_namespace"
+    }
+    val key =
+      projectBuilder.addKey {
+        this.name = "test_in_different_namespace"
+        this.namespace = namespace.self
+      }
+    projectBuilder.addTranslation {
+      this.key = key.self
+      this.language = englishLanguage
+      this.text = "Test in different namespace"
+    }
+  }
+
   fun addReviewedTranslation() {
     val key =
       projectBuilder.addKey {

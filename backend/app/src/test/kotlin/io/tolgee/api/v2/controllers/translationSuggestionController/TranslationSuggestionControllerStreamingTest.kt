@@ -3,12 +3,14 @@ package io.tolgee.api.v2.controllers.translationSuggestionController
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.EeSubscriptionInfoProvider
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.NdJsonParser
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.model.Language
+import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -39,10 +41,18 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
   fun setup() {
     initMachineTranslationProperties(
       freeCreditsAmount = -1,
-      enabledServices = setOf(MtServiceType.GOOGLE, MtServiceType.TOLGEE, MtServiceType.DEEPL),
+      enabledServices = setOf(MtServiceType.GOOGLE, MtServiceType.PROMPT, MtServiceType.DEEPL),
     )
     Mockito.clearInvocations(mtService)
     internalProperties.fakeMtProviders = true
+    llmProperties.enabled = true
+    llmProperties.providers = mutableListOf(
+      LlmProperties.LlmProvider(
+        name = "default",
+        type = LlmProviderType.OPENAI,
+        apiUrl = "https://test.com",
+      )
+    )
 
     testData =
       BaseTestData().apply {

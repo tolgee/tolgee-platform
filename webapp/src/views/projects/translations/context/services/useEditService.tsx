@@ -176,10 +176,21 @@ export const useEditService = ({
     }
   };
 
+  const appendEditValueString = (value: string) => {
+    if (!position) {
+      return;
+    }
+
+    const activeVariant = position.activeVariant ?? 'other';
+    const currentValue = position.value.variants[activeVariant] ?? '';
+    setEditValueString(currentValue + value);
+  };
+
   return {
     changeField,
     setEditValue,
     setEditValueString,
+    appendEditValueString,
     isLoading:
       putKey.isLoading ||
       putTranslation.isLoading ||

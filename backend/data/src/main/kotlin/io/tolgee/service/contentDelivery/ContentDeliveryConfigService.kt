@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import kotlin.random.Random
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Service
 class ContentDeliveryConfigService(
   private val contentDeliveryConfigRepository: ContentDeliveryConfigRepository,

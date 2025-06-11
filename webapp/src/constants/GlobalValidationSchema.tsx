@@ -7,7 +7,11 @@ import { signUpService } from '../service/SignUpService';
 import { checkParamNameIsValid } from '@tginternal/editor';
 import { validateObject } from 'tg.fixtures/validateObject';
 
-type TranslateFunction = TFnType<DefaultParamType, string, TranslationKey>;
+export type TranslateFunction = TFnType<
+  DefaultParamType,
+  string,
+  TranslationKey
+>;
 
 type AccountType =
   components['schemas']['PrivateUserAccountModel']['accountType'];
@@ -468,6 +472,50 @@ export class Validation {
     Yup.object().shape({
       name: Yup.string().min(3).required(),
       email: Yup.string().min(3).required(),
+    });
+
+  static readonly PROMPT_RENAME = () =>
+    Yup.object().shape({
+      name: Yup.string().required(),
+    });
+
+  static readonly PROMPT_SAVE_AS = () =>
+    Yup.object().shape({
+      name: Yup.string().required(),
+    });
+
+  static readonly GLOSSARY_CREATE_FORM = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string().min(3).required(),
+      baseLanguage: Yup.object()
+        .required()
+        .shape({
+          tag: Yup.string().min(1).required(),
+        }),
+      assignedProjects: Yup.array().of(
+        Yup.object().shape({
+          id: Yup.number().required(),
+        })
+      ),
+    });
+
+  static readonly GLOSSARY_TERM_CREATE_FORM = (t: TranslateFunction) =>
+    Yup.object().shape({
+      text: Yup.string().optional(),
+      description: Yup.string().optional().nullable(),
+      nonTranslatable: Yup.boolean(),
+      caseSensitive: Yup.boolean(),
+      abbreviation: Yup.boolean(),
+      forbidden: Yup.boolean(),
+    });
+
+  static readonly TRANSLATION_LABEL = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string().required().min(3).max(100),
+      description: Yup.string().nullable().min(3).max(2000),
+      color: Yup.string()
+        .required()
+        .matches(/^#[0-9A-F]{6}$/i, t('validation_invalid_hex_color')),
     });
 }
 

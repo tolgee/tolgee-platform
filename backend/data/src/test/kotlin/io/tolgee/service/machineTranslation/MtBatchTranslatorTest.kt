@@ -75,7 +75,7 @@ class MtBatchTranslatorTest {
             keyId = 1,
             baseTranslationText = preparedKey.baseTranslation,
             targetLanguageId = 1,
-            service = MtServiceType.TOLGEE,
+            service = MtServiceType.PROMPT,
           ),
         ),
       ).first()
@@ -116,7 +116,7 @@ class MtBatchTranslatorTest {
               "other" to "# psů",
             ),
           actualPrice = 100,
-          usedService = MtServiceType.TOLGEE,
+          usedService = MtServiceType.PROMPT,
         ),
       )
   }
@@ -199,6 +199,12 @@ class MtBatchTranslatorTest {
       .thenReturn(projectServiceMock)
     val projectDtoMock = mock(ProjectDto::class.java)
     whenever(projectServiceMock.getDto(any())).thenReturn(projectDtoMock)
+
+    val mtGlossaryTermsProviderMock = mock<MtGlossaryTermsProvider>()
+    whenever(applicationContextMock.getBean(MtGlossaryTermsProvider::class.java))
+      .thenReturn(mtGlossaryTermsProviderMock)
+    whenever(mtGlossaryTermsProviderMock.getGlossaryTerms(any(), any(), any(), any()))
+      .thenReturn(emptySet())
     return applicationContextMock
   }
 
@@ -231,7 +237,7 @@ class MtBatchTranslatorTest {
           formality = Formality.FORMAL,
         ),
         MtServiceInfo(
-          MtServiceType.TOLGEE,
+          MtServiceType.PROMPT,
           formality = Formality.FORMAL,
         ),
       )

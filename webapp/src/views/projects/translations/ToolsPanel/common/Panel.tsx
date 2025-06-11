@@ -14,6 +14,7 @@ const StyledHeader = styled(Box)`
   grid-template-columns: auto auto auto 1fr;
   top: -1px;
   padding: 8px;
+  padding-left: 16px;
   gap: 8px;
   align-items: center;
   background: ${({ theme }) => theme.palette.background.default};
@@ -48,6 +49,7 @@ const StyledContent = styled(Box)`
   min-height: 60px;
   padding-top: 0px;
   padding-bottom: 16px;
+  padding-left: 8px;
 `;
 
 const StyledToggle = styled(Box)`

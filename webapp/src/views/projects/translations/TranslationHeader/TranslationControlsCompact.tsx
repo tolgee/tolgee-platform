@@ -4,9 +4,9 @@ import {
   XClose,
   FilterLines,
   SearchSm,
-  Globe02,
   LayoutGrid02,
   LayoutLeft,
+  Globe02,
 } from '@untitled-ui/icons-react';
 import {
   Badge,
@@ -15,11 +15,12 @@ import {
   IconButton,
   styled,
   Tooltip,
+  useMediaQuery,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
+import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
 import { TranslationFiltersPopup } from 'tg.views/projects/translations/TranslationFilters/TranslationFiltersPopup';
@@ -27,12 +28,21 @@ import { TranslationSortMenu } from 'tg.component/translation/translationSort/Tr
 import { Sort } from 'tg.component/CustomIcons';
 import { useProject } from 'tg.hooks/useProject';
 import { countFilters } from 'tg.views/projects/translations/TranslationFilters/summary';
+import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 import {
   useTranslationsActions,
   useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { ViewMode } from '../context/types';
+
+const StyledLanguagesSelect = styled(LanguagesSelect)`
+  & .MuiInputBase-root {
+    height: 35px;
+    width: 200px;
+  }
+`;
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -92,6 +102,10 @@ type Props = {
 export const TranslationControlsCompact: React.FC<Props> = ({
   onDialogOpen,
 }) => {
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
+  const isSuperSmall = useMediaQuery(
+    `@media(max-width: ${rightPanelWidth + 600}px)`
+  );
   const projectPermissions = useProjectPermissions();
   const [searchOpen, setSearchOpen] = useState(false);
   const search = useTranslationsSelector((v) => v.search);
@@ -216,20 +230,31 @@ export const TranslationControlsCompact: React.FC<Props> = ({
           </StyledSpaced>
 
           <StyledSpaced>
-            <StyledIconButton
-              size="small"
-              onClick={(e) => setAnchorLanguagesEl(e.currentTarget)}
-            >
-              <Globe02 />
-            </StyledIconButton>
+            {isSuperSmall ? (
+              <>
+                <StyledIconButton
+                  size="small"
+                  onClick={(e) => setAnchorLanguagesEl(e.currentTarget)}
+                >
+                  <Globe02 />
+                </StyledIconButton>
 
-            <LanguagesMenu
-              anchorEl={anchorLanguagesEl}
-              onClose={() => setAnchorLanguagesEl(null)}
-              onChange={handleLanguageChange}
-              value={selectedLanguages}
-              languages={languages}
-            />
+                <LanguagesMenu
+                  anchorEl={anchorLanguagesEl}
+                  onClose={() => setAnchorLanguagesEl(null)}
+                  onChange={handleLanguageChange}
+                  value={selectedLanguages}
+                  languages={languages}
+                />
+              </>
+            ) : (
+              <StyledLanguagesSelect
+                onChange={selectLanguages}
+                value={selectedLanguages || []}
+                languages={languages || []}
+                context="translations"
+              />
+            )}
 
             <ButtonGroup>
               <StyledToggleButton
