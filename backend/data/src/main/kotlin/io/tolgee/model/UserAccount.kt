@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import jakarta.persistence.Transient
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.api.IUserAccount
@@ -172,6 +173,5 @@ data class UserAccount(
   }
 
   @Transient
-  @Column(insertable = false, updatable = false)
   override var disableActivityLogging: Boolean = false
 }

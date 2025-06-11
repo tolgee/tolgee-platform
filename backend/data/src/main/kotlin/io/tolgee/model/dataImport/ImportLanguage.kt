@@ -1,5 +1,6 @@
 package io.tolgee.model.dataImport
 
+import jakarta.persistence.Transient
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
 import jakarta.persistence.Column
@@ -34,7 +35,6 @@ class ImportLanguage(
    * When true, this language and it's translations will be ignored
    * Useful when we want to avoid "EXISTING_LANGUAGE_NOT_SELECTED" error
    */
-  @Column(insertable = false, updatable = false)
   @Transient
   var ignored = false
 }
