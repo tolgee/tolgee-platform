@@ -442,6 +442,46 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
       return result;
     },
   },
+  Label: {
+    label(params) {
+      return <T keyName="activity_entity_translation_label" params={params} />;
+    },
+    fields: {
+      name: {
+        type: 'text',
+        label(params) {
+          return (
+            <T
+              keyName="activity_entity_translation_label.name"
+              params={params}
+            />
+          );
+        },
+      },
+      color: {
+        type: 'text',
+        label(params) {
+          return (
+            <T
+              keyName="activity_entity_translation_label.color"
+              params={params}
+            />
+          );
+        },
+      },
+      description: {
+        type: 'text',
+        label(params) {
+          return (
+            <T
+              keyName="activity_entity_translation_label.description"
+              params={params}
+            />
+          );
+        },
+      },
+    },
+  },
 };
 
 const getKeyWithLanguages = (relations: any): KeyReferenceData | undefined => {

@@ -69,6 +69,7 @@ class LabelsController(
 
   @PostMapping(value = ["labels"])
   @Operation(summary = "Create label")
+  @RequestActivity(ActivityType.TRANSLATION_LABEL_CREATE)
   @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_MANAGE])
   @AllowApiAccess
   fun createLabel(
@@ -80,6 +81,7 @@ class LabelsController(
 
   @PutMapping(value = ["labels/{labelId:\\d+}"])
   @Operation(summary = "Update label")
+  @RequestActivity(ActivityType.TRANSLATION_LABEL_UPDATE)
   @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_MANAGE])
   @AllowApiAccess
   fun updateLabel(
@@ -93,6 +95,7 @@ class LabelsController(
 
   @DeleteMapping(value = ["labels/{labelId:\\d+}"])
   @Operation(summary = "Delete label")
+  @RequestActivity(ActivityType.TRANSLATION_LABEL_DELETE)
   @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_MANAGE])
   @AllowApiAccess
   fun deleteLabel(
@@ -104,7 +107,7 @@ class LabelsController(
 
   @PutMapping(value = ["translations/{translationId:\\d+}/label/{labelId:\\d+}"])
   @Operation(summary = "Add label to translation")
-  @RequestActivity(ActivityType.TRANSLATION_LABELS_EDIT)
+  @RequestActivity(ActivityType.TRANSLATION_LABEL_ASSIGN)
   @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_ASSIGN])
   @AllowApiAccess
   fun assignLabel(
@@ -118,7 +121,7 @@ class LabelsController(
 
   @DeleteMapping(value = ["translations/{translationId:\\d+}/label/{labelId:\\d+}"])
   @Operation(summary = "Remove label from translation")
-  @RequestActivity(ActivityType.TRANSLATION_LABELS_EDIT)
+  @RequestActivity(ActivityType.TRANSLATION_LABEL_ASSIGN)
   @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_ASSIGN])
   @AllowApiAccess
   fun unassignLabel(
