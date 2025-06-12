@@ -55,7 +55,9 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `get labels by ids`() {
-    performProjectAuthGet("labels/ids?id=${testData.firstLabel.id}&id=${testData.unassignedLabel.id}").andAssertThatJson {
+    performProjectAuthGet(
+      "labels/ids?id=${testData.firstLabel.id}&id=${testData.unassignedLabel.id}"
+    ).andAssertThatJson {
       isArray.hasSize(2)
       node("[0].id").isValidId
       node("[0].name").isString.isEqualTo("First label")

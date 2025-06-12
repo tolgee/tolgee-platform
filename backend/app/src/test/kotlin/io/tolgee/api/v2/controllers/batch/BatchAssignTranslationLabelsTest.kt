@@ -178,6 +178,4 @@ class BatchAssignTranslationLabelsTest : ProjectAuthControllerTest("/v2/projects
       ),
     ).andIsBadRequest
   }
-
 }
-

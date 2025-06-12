@@ -24,6 +24,6 @@ class LabelPropChangesProvider : PropChangesProvider {
       "name" to label?.name,
       "color" to label?.color,
       "description" to label?.description,
-    );
+    )
   }
 }
