@@ -11,17 +11,11 @@ import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.propChangesProvider.PropChangesProvider
 import io.tolgee.component.ActivityHolderProvider
-import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
-import io.tolgee.security.OrganizationHolder
-import io.tolgee.security.OrganizationNotSelectedException
-import io.tolgee.security.ProjectHolder
-import io.tolgee.security.ProjectNotSelectedException
-import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCause
 import org.hibernate.Transaction

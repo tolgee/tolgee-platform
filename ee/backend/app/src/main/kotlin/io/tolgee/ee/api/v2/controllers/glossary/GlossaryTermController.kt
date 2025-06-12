@@ -5,8 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
-import io.tolgee.component.reporting.BusinessEventPublisher
-import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermTranslationModelAssembler
@@ -25,7 +23,6 @@ import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import jakarta.validation.Valid

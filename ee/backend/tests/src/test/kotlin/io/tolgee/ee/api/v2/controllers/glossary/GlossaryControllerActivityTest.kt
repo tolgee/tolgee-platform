@@ -6,9 +6,7 @@ import io.tolgee.development.testDataBuilder.data.GlossaryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.glossary.CreateGlossaryRequest
 import io.tolgee.ee.data.glossary.UpdateGlossaryRequest
-import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.isValidId
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
@@ -67,7 +65,6 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
       latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_CREATE)
     }
   }
-
 
   @Test
   fun `stores activity on update`() {
@@ -180,5 +177,4 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
       .createQuery("from ActivityRevision ar order by ar.timestamp desc ", ActivityRevision::class.java)
       .setMaxResults(1)
       .singleResult
-
 }

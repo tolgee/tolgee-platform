@@ -1,11 +1,9 @@
 package io.tolgee.model.glossary
 
 import io.tolgee.activity.annotation.ActivityDescribingProp
-import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.propChangesProvider.GlossaryAssignedProjectsPropChangesProvider
-import io.tolgee.activity.propChangesProvider.TagsPropChangesProvider
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel

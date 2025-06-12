@@ -10,12 +10,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
-import io.tolgee.model.activity.ActivityRevision
-import io.tolgee.model.glossary.Glossary
-import io.tolgee.model.glossary.GlossaryTerm
-import io.tolgee.model.glossary.GlossaryTermTranslation
 import io.tolgee.testing.AuthorizedControllerTest
-import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -2,7 +2,6 @@ package io.tolgee.activity.propChangesProvider
 
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.model.Project
-import io.tolgee.model.key.Tag
 import org.springframework.stereotype.Service
 
 @Service
