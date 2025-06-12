@@ -73,7 +73,7 @@ class JakartaTransientInEntities :
 
   companion object {
     val RULE_ID = RuleId(RULE_ID_STR)
-    const val ERROR_MESSAGE = "Unexpected Kotlin-native @Transient in MyEntity. Import `jakarta.persistence.Transient`."
+    const val ERROR_MESSAGE = "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`."
     const val RULE_ID_STR = "tolgee:jakarta-transient-in-entities"
   }
 }

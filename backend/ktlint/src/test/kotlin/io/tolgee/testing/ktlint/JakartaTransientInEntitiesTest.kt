@@ -37,7 +37,7 @@ class JakartaTransientInEntitiesTest {
       .hasLintViolationWithoutAutoCorrect(
         3,
         3,
-        "Unexpected Kotlin-native @Transient in MyEntity. Import `jakarta.persistence.Transient`."
+        "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`."
       )
       // .isFormattedAs("""
       //   import jakarta.persistence.Transient
@@ -64,7 +64,7 @@ class JakartaTransientInEntitiesTest {
       .hasLintViolationWithoutAutoCorrect(
         3,
         3,
-        "Unexpected Kotlin-native @Transient in MyEntity. Import `jakarta.persistence.Transient`."
+        "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`."
       )
       // .isFormattedAs("""
       //   import jakarta.persistence.Transient
@@ -91,7 +91,7 @@ class JakartaTransientInEntitiesTest {
       .hasLintViolationWithoutAutoCorrect(
         3,
         3,
-        "Unexpected Kotlin-native @Transient in MyEntity. Import `jakarta.persistence.Transient`."
+        "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`."
       )
       // .isFormattedAs("""
       //   import jakarta.persistence.Transient

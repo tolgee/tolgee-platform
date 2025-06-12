@@ -21,7 +21,6 @@ repositories {
 
 java {
     toolchain {
-        // Required for Ktlint compatibility
         languageVersion = JavaLanguageVersion.of(17)
     }
 }
@@ -35,9 +34,13 @@ kotlin {
 dependencies {
     implementation "com.pinterest.ktlint:ktlint-cli-ruleset-core:${ktlintVersion}"
     implementation "com.pinterest.ktlint:ktlint-rule-engine-core:${ktlintVersion}"
-
-    testImplementation libs.assertJCore
     testImplementation "com.pinterest.ktlint:ktlint-test:${ktlintVersion}"
+
+    // Not ideal, but doesn't work without, so there it is.
+    // It brings stuff in the classpath that makes test work, and at least that way there's no version drift issues
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+
+    ktlint sourceSets.main.output
 }
 
 test {
