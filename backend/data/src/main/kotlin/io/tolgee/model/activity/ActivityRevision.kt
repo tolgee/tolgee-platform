@@ -34,6 +34,7 @@ import java.util.*
     Index(columnList = "projectId"),
     Index(columnList = "authorId"),
     Index(columnList = "type"),
+    Index(columnList = "organizationId")
   ],
 )
 @EntityListeners(ActivityRevision.Companion.ActivityRevisionListener::class)
@@ -71,6 +72,11 @@ class ActivityRevision : java.io.Serializable {
    * Project of the change
    */
   var projectId: Long? = null
+    set(value) {
+      field = value
+    }
+
+  var organizationId: Long? = null
 
   @OneToMany(mappedBy = "activityRevision")
   var describingRelations: MutableList<ActivityDescribingEntity> = mutableListOf()

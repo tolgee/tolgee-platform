@@ -1,5 +1,6 @@
 package io.tolgee.model.glossary
 
+import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.StandardAuditModel
@@ -20,6 +21,7 @@ import java.util.*
     UniqueConstraint(columnNames = ["term_id", "language_tag"]),
   ],
 )
+@ActivityEntityDescribingPaths(paths = ["term.glossary", "term"])
 class GlossaryTermTranslation(
   var languageTag: String,
   @Column(columnDefinition = "text", nullable = false)

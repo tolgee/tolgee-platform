@@ -2,6 +2,8 @@ package io.tolgee.ee.api.v2.controllers.glossary
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
@@ -64,6 +66,7 @@ class GlossaryController(
   @Operation(summary = "Create glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequestActivity(ActivityType.GLOSSARY_CREATE)
   @Transactional
   fun create(
     @PathVariable
@@ -76,13 +79,6 @@ class GlossaryController(
       Feature.GLOSSARY,
     )
 
-    businessEventPublisher.publish(
-      OnBusinessEventToCaptureEvent(
-        eventName = "GLOSSARY_CREATE",
-        userAccountDto = authenticationFacade.authenticatedUser,
-      ),
-    )
-
     val glossary = glossaryService.create(organizationHolder.organizationEntity, dto)
     return glossaryModelAssembler.toModel(glossary)
   }
@@ -91,6 +87,7 @@ class GlossaryController(
   @Operation(summary = "Update glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequestActivity(ActivityType.GLOSSARY_UPDATE)
   @Transactional
   fun update(
     @PathVariable
@@ -100,13 +97,6 @@ class GlossaryController(
     @RequestBody @Valid
     dto: UpdateGlossaryRequest,
   ): GlossaryModel {
-    businessEventPublisher.publish(
-      OnBusinessEventToCaptureEvent(
-        eventName = "GLOSSARY_UPDATE",
-        userAccountDto = authenticationFacade.authenticatedUser,
-      ),
-    )
-
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
@@ -121,6 +111,7 @@ class GlossaryController(
   @Operation(summary = "Delete glossary")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
+  @RequestActivity(ActivityType.GLOSSARY_DELETE)
   @Transactional
   fun delete(
     @PathVariable

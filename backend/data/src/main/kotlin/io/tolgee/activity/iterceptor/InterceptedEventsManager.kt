@@ -11,15 +11,11 @@ import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.propChangesProvider.PropChangesProvider
 import io.tolgee.component.ActivityHolderProvider
-import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
-import io.tolgee.security.ProjectHolder
-import io.tolgee.security.ProjectNotSelectedException
-import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCause
 import org.hibernate.Transaction
@@ -273,15 +269,7 @@ class InterceptedEventsManager(
 
   private fun initializeActivityRevision() {
     activityHolder.activityRevision.also { revision ->
-      revision.isInitializedByInterceptor = true
-      revision.authorId = userAccount?.id
-      try {
-        revision.projectId = projectHolder.project.id
-        activityHolder.organizationId = projectHolder.project.organizationOwnerId
-      } catch (e: ProjectNotSelectedException) {
-        logger.debug("Project is not set in ProjectHolder. Activity will be stored without projectId.")
-      }
-      revision.type = activityHolder.activity
+      ActivityRevisionInitializer(applicationContext, revision, activityHolder).initialize()
     }
   }
 
@@ -317,7 +305,6 @@ class InterceptedEventsManager(
       OnProjectActivityEvent(
         activityRevision,
         activityHolder.modifiedEntities,
-        activityHolder.organizationId,
         activityHolder.utmData,
         activityHolder.businessEventData,
       ),
@@ -326,14 +313,6 @@ class InterceptedEventsManager(
 
   private val entityManager: EntityManager by lazy {
     applicationContext.getBean(EntityManager::class.java)
-  }
-
-  private val authenticationFacade: AuthenticationFacade by lazy {
-    applicationContext.getBean(AuthenticationFacade::class.java)
-  }
-
-  private val projectHolder: ProjectHolder by lazy {
-    applicationContext.getBean(ProjectHolder::class.java)
   }
 
   private val activityService: ActivityService by lazy {
@@ -346,7 +325,4 @@ class InterceptedEventsManager(
 
   private val activityHolder
     get() = activityHolderProvider.getActivityHolder()
-
-  private val userAccount: UserAccountDto?
-    get() = authenticationFacade.authenticatedUserOrNull
 }
