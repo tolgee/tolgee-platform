@@ -1,6 +1,5 @@
 package io.tolgee.model.activity
 
-import jakarta.persistence.Transient
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.CurrentDateProvider
@@ -23,6 +22,7 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
+import jakarta.persistence.Transient
 import org.hibernate.annotations.Type
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import jakarta.persistence.Transient
 import io.hypersistence.utils.hibernate.type.array.ListArrayType
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.api.IUserAccount
@@ -23,6 +22,7 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.OrderBy
+import jakarta.persistence.Transient
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type

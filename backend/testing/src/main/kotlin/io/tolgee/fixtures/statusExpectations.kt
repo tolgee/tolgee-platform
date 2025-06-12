@@ -9,6 +9,7 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.MvcResultAssert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
+import org.assertj.core.api.AbstractAssert
 import org.assertj.core.api.BigDecimalAssert
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status

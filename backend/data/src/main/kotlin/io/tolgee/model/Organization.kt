@@ -13,6 +13,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
@@ -20,7 +21,6 @@ import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Filter
 import java.util.*
 
-import jakarta.persistence.Transient
 @Entity
 @Table(
   uniqueConstraints = [

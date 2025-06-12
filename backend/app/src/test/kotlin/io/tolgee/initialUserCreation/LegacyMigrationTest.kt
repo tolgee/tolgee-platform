@@ -10,6 +10,7 @@ import io.tolgee.CleanDbBeforeClass
 import io.tolgee.commandLineRunners.InitialUserCreatorCommandLineRunner
 import io.tolgee.development.testDataBuilder.data.ImplicitUserLegacyData
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.fixtures.satisfies
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.repository.UserAccountRepository
