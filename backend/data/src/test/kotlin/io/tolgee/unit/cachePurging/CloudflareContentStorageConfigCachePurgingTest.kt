@@ -86,7 +86,7 @@ class CloudflareContentStorageConfigCachePurgingTest() {
     fn: JsonAssert.() -> Unit,
   ) {
     val httpEntity = getHttpEntity(invocation)
-    assertThatJson(httpEntity.body) {
+    assertThatJson(httpEntity.body!!) {
       node("files") {
         fn()
       }

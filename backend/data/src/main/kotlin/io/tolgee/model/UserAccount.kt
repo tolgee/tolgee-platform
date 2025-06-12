@@ -22,6 +22,7 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.OrderBy
+import jakarta.persistence.Transient
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
@@ -172,6 +173,5 @@ data class UserAccount(
   }
 
   @Transient
-  @Column(insertable = false, updatable = false)
   override var disableActivityLogging: Boolean = false
 }

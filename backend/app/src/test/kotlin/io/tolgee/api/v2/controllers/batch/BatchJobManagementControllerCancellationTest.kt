@@ -30,10 +30,12 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
+@SpringBootTest
 class BatchJobManagementControllerCancellationTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
   lateinit var testData: BatchJobsTestData
 

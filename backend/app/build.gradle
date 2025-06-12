@@ -14,7 +14,6 @@ plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
     id "kotlin-jpa"
-    id "org.jetbrains.kotlin.kapt"
     id "kotlin-allopen"
     id "io.sentry.jvm.gradle"
     id "org.gradle.test-retry"
@@ -32,6 +31,9 @@ configurations {
     developmentOnly
     runtimeClasspath {
         extendsFrom developmentOnly
+    }
+    compileOnly {
+        extendsFrom annotationProcessor
     }
 }
 
@@ -64,8 +66,16 @@ allOpen {
     annotation("org.springframework.boot.test.context.SpringBootTest")
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 kotlin {
-    jvmToolchain(21)
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
 
 dependencies {
@@ -79,11 +89,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation "org.springframework.boot:spring-boot-starter-hateoas"
-    implementation "org.springframework.boot:spring-boot-configuration-processor"
-    kapt "org.springframework.boot:spring-boot-configuration-processor"
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-actuator"
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
      * TESTING
@@ -102,21 +111,25 @@ dependencies {
     testImplementation(libs.azureBlob)
     testImplementation('io.netty:netty-codec-http:4.1.118.Final')
     testImplementation('io.netty:netty-codec-http2:4.1.118.Final')
+    ktlint(project(":ktlint"))
 
 
     /**
      * MISC
      */
     implementation libs.commonsCodec
+    implementation libs.commonsLang
     implementation libs.amazonS3
     implementation libs.amazonSTS
     implementation libs.icu4j
+    implementation libs.jacksonKotlin
     implementation libs.jacksonModuleKotlin
     implementation libs.jacksonDataFormatXml
-    api 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
 
     implementation "org.springframework.boot:spring-boot-properties-migrator"
 
+    implementation libs.springDocOpenApiCommon
     testApi libs.redissonSpringBootStarter
 
     /**

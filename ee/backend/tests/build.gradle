@@ -60,10 +60,19 @@ dependencies {
     testImplementation libs.mockito
     testImplementation libs.stripe
     testImplementation libs.jacksonModuleKotlin
+    ktlint(project(":ktlint"))
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 kotlin {
-    jvmToolchain(21)
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
 
 dependencyManagement {

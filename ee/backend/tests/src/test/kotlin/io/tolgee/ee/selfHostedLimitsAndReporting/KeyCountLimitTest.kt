@@ -9,15 +9,20 @@ import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.exceptions.limits.PlanLimitExceededKeysException
 import io.tolgee.exceptions.limits.PlanSpendingLimitExceededKeysException
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
-@SpringBootTest()
+@SpringBootTest
 class KeyCountLimitTest : AbstractSpringTest() {
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
@@ -25,6 +30,14 @@ class KeyCountLimitTest : AbstractSpringTest() {
   @Autowired
   @MockBean
   private lateinit var restTemplate: RestTemplate
+
+	@BeforeEach
+	fun initMocks() {
+		val mockAny = mock<Any>()
+		val mockResp = mock<ResponseEntity<Any>>()
+		whenever(restTemplate.exchange(any<String>(), any(), any(), any<Class<Any>>())).thenReturn(mockResp)
+		whenever(mockResp.body).thenReturn(mockAny)
+	}
 
   @Test
   fun `throws when over the limit`() {

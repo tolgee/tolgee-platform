@@ -13,6 +13,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
@@ -77,6 +78,5 @@ class Organization(
   var organizationSlackWorkspace: MutableList<OrganizationSlackWorkspace> = mutableListOf()
 
   @Transient
-  @Column(insertable = false, updatable = false)
   override var disableActivityLogging: Boolean = false
 }

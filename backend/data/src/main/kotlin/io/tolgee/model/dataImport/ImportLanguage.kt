@@ -8,6 +8,7 @@ import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import jakarta.validation.constraints.Size
 
 @Entity
@@ -34,7 +35,6 @@ class ImportLanguage(
    * When true, this language and it's translations will be ignored
    * Useful when we want to avoid "EXISTING_LANGUAGE_NOT_SELECTED" error
    */
-  @Column(insertable = false, updatable = false)
   @Transient
   var ignored = false
 }

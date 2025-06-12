@@ -1,10 +1,16 @@
-[*.{kt, kts}]
+root = true
+
+# WARNING: the patterns MUST NOT contain spaces, or they might be IGNORED by ktlint!
+# See: https://pinterest.github.io/ktlint/latest/rules/configuration-ktlint/
+# See: https://github.com/editorconfig/editorconfig/issues/148
+
+[*.{kt,kts}] # WARNING!! THERE MUST NOT BE ANY SPACE INSIDE THE BRACKETS!
 ktlint_code_style = intellij_idea
 ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_filename = disabled
-ij_kotlin_name_count_to_use_star_import = 5
+
 indent_size = 2
-insert_final_newline = true
+indent_style = space # Ensure editors apply consistent spacings
 # possible values: number (e.g. 120) (package name, imports & comments are ignored), "off"
 # it's automatically set to 100 on `ktlint --android ...` (per Android Kotlin Style Guide)
 max_line_length = 120
@@ -12,13 +18,13 @@ max_line_length = 120
 [backend/data/src/main/kotlin/io/tolgee/service/dataImport/processors/messageFormat/data/PluralData.kt]
 max_line_length = 500
 
-[**/in/**/*.{kt, kts}]
+[**/in/**/*.{kt,kts}] # WARNING!! THERE MUST NOT BE ANY SPACE INSIDE THE BRACKETS!
 ktlint_standard_package-name = disabled
 
 # Update to kotlin 2.1.* required update to ktlint 1.5.0
 # This version is not backwards compatible, despite "ktlint_code_style = intellij_idea" 
 # Disabling conflicting checks, should be enabled by a senior core developer.
-[*.{kt, kts}]
+[*.{kt,kts}] # WARNING!! THERE MUST NOT BE ANY SPACE INSIDE THE BRACKETS!
 ktlint_standard_function-signature = disabled
 ktlint_standard_function-expression-body = disabled
 ktlint_standard_trailing-comma-on-declaration-site = disabled

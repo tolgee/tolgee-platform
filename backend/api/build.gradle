@@ -29,8 +29,16 @@ repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 kotlin {
-    jvmToolchain(21)
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
 
 allOpen {
@@ -64,14 +72,19 @@ dependencies {
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
     implementation("com.github.ben-manes.caffeine:caffeine:3.0.5")
-    api libs.postHog
     implementation libs.kotlinReflect
     implementation libs.jacksonModuleKotlin
+    api libs.postHog
 
     /**
      * SLACK SDK
      */
     api libs.slackApiClient
+
+    /**
+     * TESTING
+     */
+    ktlint(project(":ktlint"))
 }
 
 sourceSets {

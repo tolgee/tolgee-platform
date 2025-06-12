@@ -22,13 +22,22 @@ repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 kotlin {
-    jvmToolchain(21)
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
 
 dependencies {
     implementation libs.kotlinCoroutines
     implementation libs.jacksonModuleKotlin
+    ktlint(project(":ktlint"))
 }
 
 sourceSets {
