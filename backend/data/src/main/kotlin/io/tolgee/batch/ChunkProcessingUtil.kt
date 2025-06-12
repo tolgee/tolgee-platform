@@ -30,8 +30,8 @@ open class ChunkProcessingUtil(
   open fun processChunk() {
     val time =
       measureTimeMillis {
-        handleActivity()
         try {
+          handleActivity()
           processor.process(job, toProcess, coroutineContext) {
             if (it != toProcess.size) {
               progressManager.publishSingleChunkProgress(job.id, it)
