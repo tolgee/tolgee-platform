@@ -38,8 +38,6 @@ class JakartaTransientInEntities :
           // Imported, nothing to do
           return stopTraversalOfAST()
         }
-
-        return
       }
 
       ElementType.CLASS -> {
@@ -69,6 +67,7 @@ class JakartaTransientInEntities :
   override fun afterVisitChildNodes(node: ASTNode, emit: (Int, String, Boolean) -> AutocorrectDecision) {
     if (node == exploringClass) {
       exploringClass = null
+      seenEntityAnnotation = false
     }
   }
 
