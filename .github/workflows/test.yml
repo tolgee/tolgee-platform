@@ -118,6 +118,7 @@ jobs:
           tar -xzf ~/backend-misc.tgz ./backend/misc/build
           tar -xzf ~/backend-security.tgz ./backend/security/build
           tar -xzf ~/backend-testing.tgz ./backend/testing/build
+          tar -xzf ~/backend-ktlint.tgz ./backend/ktlint/build
           tar -xzf ~/backend-development.tgz ./backend/development/build
           tar -xzf ~/ee-backend-app.tgz ./ee/backend/app/build
           tar -xzf ~/ee-backend-tests.tgz ./ee/backend/tests/build
@@ -203,6 +204,7 @@ jobs:
           name: backend
           path: ~/
 
+      # Not extracting ktlint and testing stuff: not needed here
       - name: Un-tar build results
         run: |
           tar -xzf ~/backend-api.tgz ./backend/api/build
@@ -210,10 +212,8 @@ jobs:
           tar -xzf ~/backend-data.tgz ./backend/data/build
           tar -xzf ~/backend-misc.tgz ./backend/misc/build
           tar -xzf ~/backend-security.tgz ./backend/security/build
-          tar -xzf ~/backend-testing.tgz ./backend/testing/build
           tar -xzf ~/backend-development.tgz ./backend/development/build
           tar -xzf ~/ee-backend-app.tgz ./ee/backend/app/build
-          tar -xzf ~/ee-backend-tests.tgz ./ee/backend/tests/build
 
       - name: Download frontend build result
         uses: actions/download-artifact@v4
