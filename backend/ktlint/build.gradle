@@ -1,0 +1,45 @@
+/*
+ * Copyright (c) 2020. Tolgee
+ */
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+group = 'io.tolgee.testing.ktlint'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        // Required for Ktlint compatibility
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
+}
+
+dependencies {
+    implementation "com.pinterest.ktlint:ktlint-cli-ruleset-core:${ktlintVersion}"
+    implementation "com.pinterest.ktlint:ktlint-rule-engine-core:${ktlintVersion}"
+
+    testImplementation libs.assertJCore
+    testImplementation "com.pinterest.ktlint:ktlint-test:${ktlintVersion}"
+}
+
+test {
+    useJUnitPlatform()
+}

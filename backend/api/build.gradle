@@ -80,6 +80,11 @@ dependencies {
      * SLACK SDK
      */
     api libs.slackApiClient
+
+    /**
+     * TESTING
+     */
+    ktlint(project(":ktlint"))
 }
 
 sourceSets {

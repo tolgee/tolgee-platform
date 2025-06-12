@@ -104,6 +104,8 @@ dependencies {
      * HANDLEBARS
      */
     implementation('com.github.jknack:handlebars:4.4.0')
+
+    ktlint(project(":ktlint"))
 }
 
 java {

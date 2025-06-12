@@ -142,6 +142,7 @@ dependencies {
     testImplementation libs.mockito
     implementation libs.jsonUnitAssert
     testImplementation(project(":testing"))
+    ktlint(project(":ktlint"))
 
     /**
      * Kotlin

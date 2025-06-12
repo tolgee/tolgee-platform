@@ -47,17 +47,12 @@ class JakartaTransientInEntities :
       }
 
       ElementType.ANNOTATION_ENTRY -> {
-        println(node.children().toList())
-        println(node.children().find { it.elementType == ElementType.CONSTRUCTOR_CALLEE }?.children()?.toList())
         node.children()
           .find { it.elementType == ElementType.CONSTRUCTOR_CALLEE }
           ?.children()
           ?.toList()
           ?.find { it.elementType == ElementType.TYPE_REFERENCE }
           ?.let {
-            println(exploringClass)
-            println(seenEntityAnnotation)
-            println(it.text)
             if (it.text == "Entity") {
               seenEntityAnnotation = true
             }

@@ -111,6 +111,7 @@ dependencies {
     testImplementation(libs.azureBlob)
     testImplementation('io.netty:netty-codec-http:4.1.118.Final')
     testImplementation('io.netty:netty-codec-http2:4.1.118.Final')
+    ktlint(project(":ktlint"))
 
 
     /**
