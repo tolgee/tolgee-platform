@@ -7,7 +7,7 @@ import io.tolgee.testing.assertions.Assertions
 import org.assertj.core.api.ObjectArrayAssert
 
 fun ObjectArrayAssert<Scope>.equalsPermissionType(permissionType: ProjectPermissionType): ObjectArrayAssert<Scope>? {
-  return this.satisfies {
+  return satisfies({
     Assertions.assertThat(it.unpack()).containsExactlyInAnyOrder(*permissionType.availableScopes.unpack())
-  }
+  })
 }

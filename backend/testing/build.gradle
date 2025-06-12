@@ -86,6 +86,9 @@ dependencies {
     implementation libs.springmockk
     implementation libs.mockito
     implementation libs.jsonUnitAssert
+    implementation "com.pinterest.ktlint:ktlint-cli-ruleset-core:${ktlintVersion}"
+    implementation "com.pinterest.ktlint:ktlint-rule-engine-core:${ktlintVersion}"
+    testImplementation "com.pinterest.ktlint:ktlint-test:${ktlintVersion}"
 
     /**
      * Kotlin

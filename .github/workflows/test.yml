@@ -80,6 +80,7 @@ jobs:
             "ee-test:test",
             "data:test",
             "security:test",
+            "testing:test",
           ]
     steps:
       - uses: actions/checkout@v3
