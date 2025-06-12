@@ -275,27 +275,7 @@ class InterceptedEventsManager(
 
   private fun initializeActivityRevision() {
     activityHolder.activityRevision.also { revision ->
-      revision.isInitializedByInterceptor = true
-      revision.authorId = userAccount?.id
-
-      val organizationIdFromHolder = try {
-        organizationHolder.organization.id
-      } catch (e: OrganizationNotSelectedException) {
-        logger.debug("Organization is not set in OrganizationHolder. Activity will be stored without organizationId.")
-        null
-      }
-
-      revision.organizationId = organizationIdFromHolder
-      activityHolder.organizationId = organizationIdFromHolder
-
-      try {
-        revision.projectId = projectHolder.project.id
-        activityHolder.organizationId = organizationIdFromHolder ?: projectHolder.project.organizationOwnerId
-        revision.organizationId = organizationIdFromHolder ?: projectHolder.project.organizationOwnerId
-      } catch (e: ProjectNotSelectedException) {
-        logger.debug("Project is not set in ProjectHolder. Activity will be stored without projectId.")
-      }
-      revision.type = activityHolder.activity
+      ActivityRevisionInitializer(applicationContext, revision, activityHolder).initialize()
     }
   }
 
@@ -331,7 +311,6 @@ class InterceptedEventsManager(
       OnProjectActivityEvent(
         activityRevision,
         activityHolder.modifiedEntities,
-        activityHolder.organizationId,
         activityHolder.utmData,
         activityHolder.businessEventData,
       ),
@@ -341,19 +320,6 @@ class InterceptedEventsManager(
   private val entityManager: EntityManager by lazy {
     applicationContext.getBean(EntityManager::class.java)
   }
-
-  private val authenticationFacade: AuthenticationFacade by lazy {
-    applicationContext.getBean(AuthenticationFacade::class.java)
-  }
-
-  private val projectHolder: ProjectHolder by lazy {
-    applicationContext.getBean(ProjectHolder::class.java)
-  }
-
-  private val organizationHolder: OrganizationHolder by lazy {
-    applicationContext.getBean(OrganizationHolder::class.java)
-  }
-
 
   private val activityService: ActivityService by lazy {
     applicationContext.getBean(ActivityService::class.java)
@@ -365,7 +331,4 @@ class InterceptedEventsManager(
 
   private val activityHolder
     get() = activityHolderProvider.getActivityHolder()
-
-  private val userAccount: UserAccountDto?
-    get() = authenticationFacade.authenticatedUserOrNull
 }
