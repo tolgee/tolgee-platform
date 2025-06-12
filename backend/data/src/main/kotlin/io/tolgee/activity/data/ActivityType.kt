@@ -80,5 +80,6 @@ enum class ActivityType(
   GLOSSARY_DELETE(restrictEntitiesInList = arrayOf(Glossary::class)),
   GLOSSARY_TERM_CREATE,
   GLOSSARY_TERM_UPDATE,
-  GLOSSARY_TERM_DELETE,
+  GLOSSARY_TERM_DELETE(onlyCountsInList = true),
+  GLOSSARY_TERM_TRANSLATION_UPDATE,
 }

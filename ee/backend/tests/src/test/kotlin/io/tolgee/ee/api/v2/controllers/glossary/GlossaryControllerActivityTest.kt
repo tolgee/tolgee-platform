@@ -1,5 +1,6 @@
 package io.tolgee.ee.api.v2.controllers.glossary
 
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.GlossaryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
@@ -62,6 +63,8 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
       val modifications = modifiedEntities.single().modifications
       modifications["name"]!!.new.assert.isEqualTo("New Glossary")
       modifications["baseLanguageTag"]!!.new.assert.isEqualTo("en")
+
+      latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_CREATE)
     }
   }
 
@@ -85,6 +88,9 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
       modifications["baseLanguageTag"]!!.old.assert.isEqualTo("en")
       modifications["baseLanguageTag"]!!.new.assert.isEqualTo("de")
       latestActivityRevision.organizationId.assert.isEqualTo(testData.organization.id)
+
+      // Verify activity type
+      latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_UPDATE)
     }
   }
 
@@ -97,6 +103,9 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
       val latestActivityRevision = getLatestActivityRevision()
       val modifiedEntities = latestActivityRevision.modifiedEntities
       modifiedEntities.size.assert.isEqualTo(11)
+
+      // Verify activity type
+      latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_DELETE)
 
       val modifications = modifiedEntities.find { it.entityClass == Glossary::class.simpleName }!!.modifications
       modifications["name"]!!.old.assert.isEqualTo("Test Glossary")
@@ -136,6 +145,9 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
       val latestActivityRevision = getLatestActivityRevision()
       val modifiedEntities = latestActivityRevision.modifiedEntities
       modifiedEntities.size.assert.isEqualTo(1)
+
+      // Verify activity type
+      latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_UPDATE)
 
       val modifications = modifiedEntities.single().modifications
       val assignedProjectsModification = modifications["assignedProjects"]

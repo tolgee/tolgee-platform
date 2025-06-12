@@ -1,11 +1,10 @@
 package io.tolgee.ee.api.v2.controllers.glossary
 
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.GlossaryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermTranslationRequest
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.glossary.GlossaryTermTranslation
@@ -59,6 +58,9 @@ class GlossaryTermTranslationControllerActivityTest : AuthorizedControllerTest()
       // Verify that activity was recorded
       latestActivityRevision.assert.isNotNull()
 
+      // Verify activity type
+      latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_TERM_TRANSLATION_UPDATE)
+
       // Verify organization ID
       latestActivityRevision.organizationId.assert.isEqualTo(testData.organization.id)
 
@@ -76,16 +78,16 @@ class GlossaryTermTranslationControllerActivityTest : AuthorizedControllerTest()
 
       // Verify that the entity was created (has new values but no old values)
       translationModifications.values.any { it.new != null }.assert.isTrue()
-      
+
       // Verify that the right fields were stored in modifications according to annotations
       translationModifications["text"]?.new.assert.isEqualTo("Neuer Begriff")
-      
+
       // Verify that we can find the glossary and term in the describingRelations
       val describingRelations = latestActivityRevision.describingRelations
       val glossaryRelation = describingRelations.find { it.entityClass == "Glossary" }
       glossaryRelation.assert.isNotNull()
       glossaryRelation!!.entityId.assert.isEqualTo(testData.glossary.id)
-      
+
       val termRelation = describingRelations.find { it.entityClass == "GlossaryTerm" }
       termRelation.assert.isNotNull()
       termRelation!!.entityId.assert.isEqualTo(testData.term.id)
@@ -121,6 +123,9 @@ class GlossaryTermTranslationControllerActivityTest : AuthorizedControllerTest()
       // Verify that activity was recorded
       latestActivityRevision.assert.isNotNull()
 
+      // Verify activity type
+      latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_TERM_TRANSLATION_UPDATE)
+
       // Verify organization ID
       latestActivityRevision.organizationId.assert.isEqualTo(testData.organization.id)
 
@@ -138,17 +143,17 @@ class GlossaryTermTranslationControllerActivityTest : AuthorizedControllerTest()
 
       // Verify that the entity was updated (has both old and new values)
       translationModifications.values.any { it.old != null && it.new != null }.assert.isTrue()
-      
+
       // Verify that the right fields were stored in modifications according to annotations
       translationModifications["text"]?.old.assert.isEqualTo("Pojem")
       translationModifications["text"]?.new.assert.isEqualTo("Aktualizovaný pojem")
-      
+
       // Verify that we can find the glossary and term in the describingRelations
       val describingRelations = latestActivityRevision.describingRelations
       val glossaryRelation = describingRelations.find { it.entityClass == "Glossary" }
       glossaryRelation.assert.isNotNull()
       glossaryRelation!!.entityId.assert.isEqualTo(testData.glossary.id)
-      
+
       val termRelation = describingRelations.find { it.entityClass == "GlossaryTerm" }
       termRelation.assert.isNotNull()
       termRelation!!.entityId.assert.isEqualTo(testData.term.id)

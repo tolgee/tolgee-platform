@@ -2,6 +2,8 @@ package io.tolgee.ee.api.v2.controllers.glossary
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermTranslationModelAssembler
@@ -36,6 +38,7 @@ class GlossaryTermTranslationController(
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
   @Transactional
+  @RequestActivity(ActivityType.GLOSSARY_TERM_TRANSLATION_UPDATE)
   fun update(
     @PathVariable
     organizationId: Long,

@@ -1,17 +1,13 @@
 package io.tolgee.ee.api.v2.controllers.glossary
 
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.GlossaryTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.glossary.CreateGlossaryTermWithTranslationRequest
 import io.tolgee.ee.data.glossary.DeleteMultipleGlossaryTermsRequest
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermWithTranslationRequest
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.isValidId
-import io.tolgee.fixtures.node
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.testing.AuthorizedControllerTest
@@ -62,6 +58,9 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
 
       // Verify that activity was recorded
       latestActivityRevision.assert.isNotNull()
+
+      // Verify activity type
+      latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_TERM_CREATE)
 
       // Verify organization ID
       latestActivityRevision.organizationId.assert.isEqualTo(testData.organization.id)
@@ -114,6 +113,9 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
       // Verify that activity was recorded
       latestActivityRevision.assert.isNotNull()
 
+      // Verify activity type
+      latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_TERM_UPDATE)
+
       // Verify organization ID
       latestActivityRevision.organizationId.assert.isEqualTo(testData.organization.id)
 
@@ -153,6 +155,9 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
 
     executeInNewTransaction {
       val latestActivityRevision = getLatestActivityRevision()
+
+      // Verify activity type
+      latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_TERM_DELETE)
 
       val modifiedEntities = latestActivityRevision.modifiedEntities
       modifiedEntities.filter { it.entityClass == GlossaryTerm::class.simpleName }.assert.hasSize(1)
@@ -194,6 +199,10 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
 
     executeInNewTransaction {
       val latestActivityRevision = getLatestActivityRevision()
+
+      // Verify activity type
+      latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_TERM_DELETE)
+
       val modifiedEntities = latestActivityRevision.modifiedEntities
 
       // Verify that two GlossaryTerm entities were deleted
