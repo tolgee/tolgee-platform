@@ -17,6 +17,8 @@ import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.security.OrganizationHolder
+import io.tolgee.security.OrganizationNotSelectedException
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -275,9 +277,21 @@ class InterceptedEventsManager(
     activityHolder.activityRevision.also { revision ->
       revision.isInitializedByInterceptor = true
       revision.authorId = userAccount?.id
+
+      val organizationIdFromHolder = try {
+        organizationHolder.organization.id
+      } catch (e: OrganizationNotSelectedException) {
+        logger.debug("Organization is not set in OrganizationHolder. Activity will be stored without organizationId.")
+        null
+      }
+
+      revision.organizationId = organizationIdFromHolder
+      activityHolder.organizationId = organizationIdFromHolder
+
       try {
         revision.projectId = projectHolder.project.id
-        activityHolder.organizationId = projectHolder.project.organizationOwnerId
+        activityHolder.organizationId = organizationIdFromHolder ?: projectHolder.project.organizationOwnerId
+        revision.organizationId = organizationIdFromHolder ?: projectHolder.project.organizationOwnerId
       } catch (e: ProjectNotSelectedException) {
         logger.debug("Project is not set in ProjectHolder. Activity will be stored without projectId.")
       }
@@ -335,6 +349,11 @@ class InterceptedEventsManager(
   private val projectHolder: ProjectHolder by lazy {
     applicationContext.getBean(ProjectHolder::class.java)
   }
+
+  private val organizationHolder: OrganizationHolder by lazy {
+    applicationContext.getBean(OrganizationHolder::class.java)
+  }
+
 
   private val activityService: ActivityService by lazy {
     applicationContext.getBean(ActivityService::class.java)

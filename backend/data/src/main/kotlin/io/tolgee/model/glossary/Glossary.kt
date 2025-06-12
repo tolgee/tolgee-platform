@@ -1,7 +1,11 @@
 package io.tolgee.model.glossary
 
+import io.tolgee.activity.annotation.ActivityDescribingProp
+import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.activity.propChangesProvider.GlossaryAssignedProjectsPropChangesProvider
+import io.tolgee.activity.propChangesProvider.TagsPropChangesProvider
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
@@ -30,8 +34,10 @@ import org.hibernate.annotations.SQLRestriction
 class Glossary(
   @field:Size(min = 3, max = 50)
   @ActivityLoggedProp
+  @property:ActivityDescribingProp
   var name: String = "",
   @ActivityLoggedProp
+  @property:ActivityDescribingProp
   @Column(nullable = false)
   var baseLanguageTag: String = "",
 ) : StandardAuditModel() {
@@ -48,5 +54,6 @@ class Glossary(
     inverseJoinColumns = [JoinColumn(name = "project_id")],
   )
   @SQLRestriction("deleted_at is null")
+  @ActivityLoggedProp(GlossaryAssignedProjectsPropChangesProvider::class)
   var assignedProjects: MutableSet<Project> = mutableSetOf()
 }

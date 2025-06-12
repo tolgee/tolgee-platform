@@ -4,6 +4,7 @@ import io.tolgee.activity.PublicParamsProvider
 import io.tolgee.batch.BatchActivityParamsProvider
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.Language
+import io.tolgee.model.glossary.Glossary
 import kotlin.reflect.KClass
 
 enum class ActivityType(
@@ -74,4 +75,10 @@ enum class ActivityType(
   TASK_REOPEN,
   TASK_KEY_UPDATE(hideInList = true),
   ORDER_TRANSLATION,
+  GLOSSARY_CREATE,
+  GLOSSARY_UPDATE,
+  GLOSSARY_DELETE(restrictEntitiesInList = arrayOf(Glossary::class)),
+  GLOSSARY_TERM_CREATE,
+  GLOSSARY_TERM_UPDATE,
+  GLOSSARY_TERM_DELETE,
 }

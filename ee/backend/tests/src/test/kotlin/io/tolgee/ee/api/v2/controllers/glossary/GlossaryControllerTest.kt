@@ -10,8 +10,12 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
-import io.tolgee.fixtures.node
+import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.glossary.Glossary
+import io.tolgee.model.glossary.GlossaryTerm
+import io.tolgee.model.glossary.GlossaryTermTranslation
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -180,4 +184,85 @@ class GlossaryControllerTest : AuthorizedControllerTest() {
     performAuthDelete("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}")
       .andIsBadRequest
   }
+
+  @Test
+  fun `stores activity on creation`() {
+    val request = CreateGlossaryRequest().apply {
+      name = "New Glossary"
+      baseLanguageTag = "en"
+      assignedProjectIds = mutableSetOf(testData.project.id)
+    }
+    performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
+      .andIsOk
+
+    executeInNewTransaction {
+      val latestActivityRevision = getLatestActivityRevision()
+
+      val modifiedEntities = latestActivityRevision.modifiedEntities
+      modifiedEntities.size.assert.isEqualTo(1)
+      val modifications = modifiedEntities.single().modifications
+      modifications["name"]!!.new.assert.isEqualTo("New Glossary")
+      modifications["baseLanguageTag"]!!.new.assert.isEqualTo("en")
+    }
+  }
+
+
+  @Test
+  fun `stores activity on update`() {
+    val request = UpdateGlossaryRequest().apply {
+      name = "Updated Glossary"
+      baseLanguageTag = "de"
+    }
+    performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
+      .andIsOk
+
+    executeInNewTransaction {
+      val latestActivityRevision = getLatestActivityRevision()
+      val modifiedEntities = latestActivityRevision.modifiedEntities
+      modifiedEntities.size.assert.isEqualTo(1)
+      val modifications = modifiedEntities.single().modifications
+      modifications["name"]!!.old.assert.isEqualTo("Test Glossary")
+      modifications["name"]!!.new.assert.isEqualTo("Updated Glossary")
+      modifications["baseLanguageTag"]!!.old.assert.isEqualTo("en")
+      modifications["baseLanguageTag"]!!.new.assert.isEqualTo("de")
+      latestActivityRevision.organizationId.assert.isEqualTo(testData.organization.id)
+    }
+  }
+
+  @Test
+  fun `stores activity on deletion`() {
+    performAuthDelete("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}")
+      .andIsOk
+
+    executeInNewTransaction {
+      val latestActivityRevision = getLatestActivityRevision()
+      val modifiedEntities = latestActivityRevision.modifiedEntities
+      modifiedEntities.size.assert.isEqualTo(11)
+
+      val modifications = modifiedEntities.find { it.entityClass == Glossary::class.simpleName }!!.modifications
+      modifications["name"]!!.old.assert.isEqualTo("Test Glossary")
+      modifications["baseLanguageTag"]!!.old.assert.isEqualTo("en")
+      latestActivityRevision.organizationId.assert.isEqualTo(testData.organization.id)
+
+      modifiedEntities.filter { it.entityClass == GlossaryTerm::class.simpleName }.assert.hasSize(4)
+      modifiedEntities.filter { it.entityClass == GlossaryTermTranslation::class.simpleName }.assert.hasSize(6)
+
+      val glossaryRelation =
+        latestActivityRevision.describingRelations.find { it.entityClass == Glossary::class.simpleName }
+      glossaryRelation?.data["name"].assert.isEqualTo("Test Glossary")
+      glossaryRelation?.data["baseLanguageTag"].assert.isEqualTo("en")
+
+      // we need to have the term relation stored to transitively find the id of the glossary
+      latestActivityRevision.describingRelations.filter { it.entityClass == GlossaryTerm::class.simpleName }
+        .assert.hasSize(4)
+
+    }
+  }
+
+  private fun getLatestActivityRevision(): ActivityRevision =
+    entityManager
+      .createQuery("from ActivityRevision ar order by ar.timestamp desc ", ActivityRevision::class.java)
+      .setMaxResults(1)
+      .singleResult
+
 }

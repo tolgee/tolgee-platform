@@ -1,5 +1,6 @@
 package io.tolgee.model.glossary
 
+import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.StandardAuditModel
@@ -12,6 +13,7 @@ import jakarta.persistence.*
     Index(columnList = "glossary_id"),
   ],
 )
+@ActivityEntityDescribingPaths(paths = ["glossary"])
 class GlossaryTerm(
   @Column(columnDefinition = "text", nullable = false)
   @ActivityLoggedProp
