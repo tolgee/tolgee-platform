@@ -18,6 +18,9 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
   @Value("classpath:import/po/example.po")
   lateinit var poFile: Resource
 
+  @Value("classpath:import/po/simplePoWithSingleKeyMeta.po")
+  lateinit var simplePoWithSingleKeyMeta: Resource
+
   @Value("classpath:import/android/strings_params_everywhere.xml")
   lateinit var androidFile: Resource
 
@@ -44,7 +47,7 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
       "Willkommen zurück, {0}! Dein letzter Besuch war am {1}",
     )
 
-    applySettings(overrideKeyDescriptions = false, convertPlaceholdersToIcu = false)
+    applySettings(overrideKeyDescriptions = false, convertPlaceholdersToIcu = false, createNewKeys = true)
     assertTranslation(
       "%d page read.",
       "{value, plural,\none {Eine Seite gelesen wurde.}\nother {%d Seiten gelesen wurden.}\n}",
@@ -73,7 +76,7 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
       "Second item {0, number}",
     )
     assertTranslation("with_params", "{0, number} {3} {2, number, .00} {3, number, scientific} %+d")
-    applySettings(overrideKeyDescriptions = false, convertPlaceholdersToIcu = false)
+    applySettings(overrideKeyDescriptions = false, convertPlaceholdersToIcu = false, createNewKeys = true)
     assertTranslation(
       "dogs_count",
       "{value, plural,\none {%d dog %s}\nother {%d dogs %s}\n}",
@@ -107,7 +110,7 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
         "}",
     )
 
-    applySettings(overrideKeyDescriptions = false, convertPlaceholdersToIcu = false)
+    applySettings(overrideKeyDescriptions = false, convertPlaceholdersToIcu = false, createNewKeys = true)
 
     assertTranslation(
       "Hi %lld",
@@ -120,6 +123,18 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
         "one {Order %lld Ticket}\n" +
         "other {Order %lld Tickets}\n" +
         "}",
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `(gh-3000) import with createNewKeys=false when first key has meta`() {
+    saveAndPrepare()
+    applySettings(overrideKeyDescriptions = false, convertPlaceholdersToIcu = false, createNewKeys = false)
+    performImport(project.id, listOf("simplePoWithSingleKeyMeta.po" to simplePoWithSingleKeyMeta))
+    assertTranslation(
+      "simple message",
+      "einfache Nachricht",
     )
   }
 
@@ -160,7 +175,11 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
 
   private fun performImportWithSettings(overrideKeyDescriptions: Boolean) {
     performImport(project.id, listOf("example.po" to poFile))
-    applySettings(overrideKeyDescriptions = overrideKeyDescriptions, convertPlaceholdersToIcu = true)
+    applySettings(
+      overrideKeyDescriptions = overrideKeyDescriptions,
+      convertPlaceholdersToIcu = true,
+      createNewKeys = true
+    )
     performProjectAuthPut("import/apply?forceMode=OVERRIDE", null).andIsOk
   }
 
@@ -180,12 +199,14 @@ class ImportSettingsControllerApplicationTest : ProjectAuthControllerTest("/v2/p
   private fun applySettings(
     overrideKeyDescriptions: Boolean,
     convertPlaceholdersToIcu: Boolean,
+    createNewKeys: Boolean,
   ) {
     performProjectAuthPut(
       "import-settings",
       mapOf(
         "overrideKeyDescriptions" to overrideKeyDescriptions,
         "convertPlaceholdersToIcu" to convertPlaceholdersToIcu,
+        "createNewKeys" to createNewKeys,
       ),
     ).andIsOk
   }
