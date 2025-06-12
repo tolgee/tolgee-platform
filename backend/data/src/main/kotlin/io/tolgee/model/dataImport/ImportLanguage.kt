@@ -1,6 +1,5 @@
 package io.tolgee.model.dataImport
 
-import jakarta.persistence.Transient
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
 import jakarta.persistence.Column
@@ -9,6 +8,7 @@ import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import jakarta.validation.constraints.Size
 
 @Entity

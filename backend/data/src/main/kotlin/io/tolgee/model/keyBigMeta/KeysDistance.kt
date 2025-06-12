@@ -1,6 +1,5 @@
 package io.tolgee.model.keyBigMeta
 
-import jakarta.persistence.Transient
 import io.tolgee.model.AuditModel
 import io.tolgee.model.Project
 import jakarta.persistence.Entity
@@ -10,6 +9,7 @@ import jakarta.persistence.IdClass
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import org.hibernate.annotations.ColumnDefault
 import org.springframework.data.domain.Persistable
 
