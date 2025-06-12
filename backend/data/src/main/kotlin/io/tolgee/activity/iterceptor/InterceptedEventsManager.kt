@@ -29,7 +29,9 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KCallable
+import kotlin.reflect.KProperty
 import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.jvm.javaField
 
 @Component
 @Scope(SCOPE_SINGLETON)
@@ -233,8 +235,9 @@ class InterceptedEventsManager(
 
   private fun getEntityAnnotatedMembers(entity: Any): Map<String, ActivityLoggedProp> {
     return annotatedMembersCache.computeIfAbsent(entity::class.java) {
-      entity::class.java.declaredFields.mapNotNull {
-        val annotation = it.getAnnotation(ActivityLoggedProp::class.java) ?: return@mapNotNull null
+      entity::class.members.mapNotNull {
+				if (it !is KProperty<*>) return@mapNotNull null
+        val annotation = it.javaField?.getAnnotation(ActivityLoggedProp::class.java) ?: return@mapNotNull null
         it.name to annotation
       }.toMap()
     }
@@ -242,8 +245,8 @@ class InterceptedEventsManager(
 
   private fun getEntityIgnoredMembers(entity: Any): Set<String> {
     return ignoredMembersCache.computeIfAbsent(entity::class.java) {
-      entity::class.java.declaredFields.filter {
-        it.isAnnotationPresent(ActivityIgnoredProp::class.java)
+      entity::class.members.filter {
+				it is KProperty<*> && (it.javaField?.isAnnotationPresent(ActivityIgnoredProp::class.java) ?: false)
       }.map { it.name }.toSet()
     }
   }
