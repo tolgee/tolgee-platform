@@ -45,6 +45,7 @@ jobs:
           tar -czf ~/backend-misc.tgz ./backend/misc/build
           tar -czf ~/backend-security.tgz ./backend/security/build
           tar -czf ~/backend-testing.tgz ./backend/testing/build
+          tar -czf ~/backend-ktlint.tgz ./backend/ktlint/build
           tar -czf ~/backend-development.tgz ./backend/development/build
           tar -czf ~/ee-backend-app.tgz ./ee/backend/app/build
           tar -czf ~/ee-backend-tests.tgz ./ee/backend/tests/build
@@ -60,6 +61,7 @@ jobs:
             ~/backend-misc.tgz
             ~/backend-security.tgz
             ~/backend-testing.tgz
+            ~/backend-ktlint.tgz
             ~/backend-development.tgz
             ~/ee-backend-app.tgz
             ~/ee-backend-tests.tgz
