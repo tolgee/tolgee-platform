@@ -26,10 +26,10 @@ class ActivityRevisionInitializer(
 
   fun initialize() {
     revision.isInitializedByInterceptor = true
-    revision.authorId = userAccount?.id
-    revision.organizationId = organizationId
-    revision.projectId = project?.id
-    revision.type = activityHolder.activity
+    revision.authorId = userAccount?.id ?: revision.authorId
+    revision.organizationId = organizationId ?: revision.organizationId
+    revision.projectId = project?.id ?: revision.projectId
+    revision.type = activityHolder.activity ?: revision.type
   }
 
   /**
@@ -55,8 +55,13 @@ class ActivityRevisionInitializer(
     try {
       organizationHolder.organization.id
     } catch (e: OrganizationNotSelectedException) {
-      logger.debug("Organization is not set in OrganizationHolder. Activity will be stored without organizationId.", e)
-      project?.organizationOwnerId
+      project?.organizationOwnerId ?: let {
+        logger.debug(
+          "Organization is not set in OrganizationHolder. Activity will be stored without organizationId.",
+          e
+        )
+        null
+      }
     }
   }
 

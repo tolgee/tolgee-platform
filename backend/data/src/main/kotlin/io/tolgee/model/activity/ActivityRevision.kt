@@ -72,6 +72,9 @@ class ActivityRevision : java.io.Serializable {
    * Project of the change
    */
   var projectId: Long? = null
+    set(value) {
+      field = value
+    }
 
   var organizationId: Long? = null
 
