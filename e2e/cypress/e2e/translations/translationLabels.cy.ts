@@ -7,6 +7,11 @@ import {
 } from '../../common/translations';
 import { gcy } from '../../common/shared';
 import { isDarkMode } from '../../common/helpers';
+import {
+  assignLabelToTranslation,
+  verifyLabelInTranslationCell,
+  verifyLabelsCountInTranslationCell,
+} from '../../common/label';
 
 let projectId = null;
 let emptyProjectId = null;
@@ -36,20 +41,7 @@ describe('Projects Settings - Labels', () => {
 
   it('search and add label to translation', () => {
     visitTranslations(projectId);
-    getTranslationCell('first key', 'en').within(($cell) => {
-      gcy('translation-label-control')
-        .should('not.be.visible')
-        .click()
-        .should('be.visible');
-      gcy('autocomplete-label-input').should('be.visible').click();
-      gcy('label-selector-autocomplete').should('be.visible');
-    });
-    gcy('label-autocomplete-option')
-      .should('have.length', 4)
-      .first()
-      .contains('Label to assign 1')
-      .should('be.visible')
-      .click();
+    assignLabelToTranslation('first key', 'en', 'Label to assign 1', 4);
 
     // Verify label after assigning
     verifyLabelsCountInTranslationCell('first key', 'en', 2);
@@ -116,28 +108,3 @@ describe('Projects Settings - Labels', () => {
     cy.gcy('submenu-item').contains('Labels').should('not.exist');
   });
 });
-
-const verifyLabelInTranslationCell = (
-  key: string,
-  lang: string,
-  label: string,
-  expectedColor: string
-) => {
-  getTranslationCell(key, lang).within(() => {
-    gcy('translation-label')
-      .contains(label)
-      .parent('[data-cy="translation-label"]')
-      .should('be.visible')
-      .should('have.css', 'background-color', expectedColor);
-  });
-};
-
-const verifyLabelsCountInTranslationCell = (
-  key: string,
-  lang: string,
-  expectedCount: number
-) => {
-  getTranslationCell(key, lang).within(() => {
-    gcy('translation-label').should('have.length', expectedCount);
-  });
-};
