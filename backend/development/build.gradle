@@ -63,18 +63,20 @@ dependencies {
     /**
      * SPRING
      */
-    api 'org.springframework.boot:spring-boot-starter-web'
-    api 'org.springframework.boot:spring-boot-starter-data-jpa'
-    api "org.springframework.boot:spring-boot-configuration-processor"
-    api project(":data")
-    api libs.springDocOpenApiCommon
-    api libs.springDocWebmvcApi
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation "org.springframework.boot:spring-boot-configuration-processor"
+    implementation project(":data")
+    implementation libs.springDocOpenApiCommon
+    implementation libs.springDocWebmvcApi
     implementation libs.kotlinReflect
     implementation libs.kotlinCoroutines
 
     if (gradle.ext.eeAppDirectoryExists) {
-        api project(":ee-app")
+        implementation project(":ee-app")
     }
+
+    ktlint(project(":ktlint"))
 }
 
 sourceSets {

@@ -123,3 +123,6 @@ project(':api').projectDir = new File('backend/api')
 
 include ':security'
 project(':security').projectDir = new File('backend/security')
+
+include ':ktlint'
+project(':ktlint').projectDir = new File('backend/ktlint')

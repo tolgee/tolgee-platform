@@ -79,6 +79,7 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     // implementation libs.springmockk
     testImplementation libs.mockito
+    ktlint(project(":ktlint"))
 }
 
 test {

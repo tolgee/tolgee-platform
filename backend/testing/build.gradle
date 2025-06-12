@@ -76,7 +76,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation('org.springframework.boot:spring-boot-starter-test')
-    api "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
@@ -86,9 +86,6 @@ dependencies {
     implementation libs.springmockk
     implementation libs.mockito
     implementation libs.jsonUnitAssert
-    implementation "com.pinterest.ktlint:ktlint-cli-ruleset-core:${ktlintVersion}"
-    implementation "com.pinterest.ktlint:ktlint-rule-engine-core:${ktlintVersion}"
-    testImplementation "com.pinterest.ktlint:ktlint-test:${ktlintVersion}"
 
     /**
      * Kotlin
@@ -110,13 +107,13 @@ dependencies {
     /**
      * DATA MODULE
      */
-    implementation(project(':data'))
+    implementation project(':data')
 
 
     /**
      * MISC
      */
-    implementation(project(':misc'))
+    implementation project(':misc')
     implementation 'org.postgresql:postgresql'
 
     /**

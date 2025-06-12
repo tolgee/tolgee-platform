@@ -60,6 +60,7 @@ dependencies {
     testImplementation libs.mockito
     testImplementation libs.stripe
     testImplementation libs.jacksonModuleKotlin
+    ktlint(project(":ktlint"))
 }
 
 java {
