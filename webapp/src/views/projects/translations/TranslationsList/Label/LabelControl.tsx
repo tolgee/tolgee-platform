@@ -10,17 +10,21 @@ import { useLabels } from 'tg.hooks/useLabels';
 type LabelModel = components['schemas']['LabelModel'];
 
 const StyledControl = styled('div')`
-  color: ${({ theme }) => theme.palette.text.primary};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.palette.tokens.icon.secondary};
   border-radius: 12px;
-  border: 1px solid ${({ theme }) => theme.palette.tokens.border.primary};
+  border: 1px solid ${({ theme }) => theme.palette.tokens.icon.secondary};
   height: 24px;
   min-width: 24px;
-  padding: 0 2px;
+  font-size: 14px;
 
   &:hover,
   &:focus-within {
     cursor: pointer;
     border: 1px solid ${({ theme }) => theme.palette.primary.main};
+    color: ${({ theme }) => theme.palette.primary.main};
   }
 `;
 
