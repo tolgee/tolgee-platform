@@ -12,7 +12,7 @@ const StyledLanguage = styled('div')`
   grid-area: language;
   gap: 8px;
   align-items: center;
-  font-size: 13px;
+  font-size: 14px;
 `;
 
 const StyledLanguageName = styled('div')`

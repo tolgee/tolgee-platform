@@ -18,7 +18,6 @@ const StyledInput = styled('input')`
   outline: 0;
   min-width: 0;
   width: 100%;
-  font-size: 14px;
   flex-shrink: 1;
   color: ${({ theme }) => theme.palette.text.primary};
 `;
@@ -28,6 +27,7 @@ const StyledInputWrapper = styled('div')`
   align-items: center;
   width: 150px;
   overflow: hidden;
+  padding: 0 6px;
 `;
 
 const StyledOption = styled('div')`

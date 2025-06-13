@@ -13,7 +13,11 @@ const PaletteColor = styled('div')<{ color: string; selected: boolean }>`
   height: 32px;
   border-radius: 4px;
   background: ${({ color }) => color};
-  border: 2px solid ${({ selected }) => (selected ? '#000' : '#fff')};
+  border: 2px solid
+    ${({ selected, theme }) =>
+      selected
+        ? theme.palette.tokens.icon.primary
+        : theme.palette.tokens.primary.contrast};
   cursor: pointer;
   box-shadow: 0 0 2px #aaa;
 `;

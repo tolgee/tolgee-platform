@@ -13,7 +13,7 @@ export const StyledTranslationLabel = styled('div')<{ color?: string }>`
   background-color: ${({ color, theme }) => getBackgroundColor(theme, color)};
   border-radius: 12px;
   color: ${({ color, theme }) => getTextColor(theme, color)};
-  padding: 0 8px;
+  padding: 0 10px;
   font-size: 14px;
   line-height: 18px;
   display: inline-flex;

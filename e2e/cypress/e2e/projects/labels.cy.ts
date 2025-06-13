@@ -51,12 +51,12 @@ describe('Projects Settings - Labels', () => {
     projectLabels.visit(projectId);
 
     const labelModal = projectLabels.openEditLabelModal('First label');
-    labelModal.fillAndSave('Edited label', { index: 3, hex: '#1188FF' });
+    labelModal.fillAndSave('Edited label', { index: 3, hex: '#FFBDDC' });
 
     projectLabels.assertLabelExists(
       'Edited label',
       null,
-      isDarkMode ? 'rgba(17, 136, 255, 0.85)' : 'rgb(17, 136, 255)'
+      isDarkMode ? 'rgba(255, 189, 220, 0.85)' : 'rgb(255, 189, 220)'
     );
   });
 

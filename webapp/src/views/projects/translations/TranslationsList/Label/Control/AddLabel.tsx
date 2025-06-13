@@ -1,16 +1,22 @@
 import { Plus } from '@untitled-ui/icons-react';
 import { styled } from '@mui/material';
 import { T } from '@tolgee/react';
+import clsx from 'clsx';
 
 const Wrap = styled('div')`
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
-`;
+  font-size: 14px;
 
-const StyledLabel = styled('div')`
-  margin-right: 6px;
+  &.with-label {
+    padding: 3px 6px;
+    & > .control-text {
+      padding: 0 4px;
+      margin-top: 1px;
+    }
+  }
 `;
 
 type Props = {
@@ -23,14 +29,14 @@ export const AddLabel: React.FC<Props> = ({ onClick, className, showText }) => {
   return (
     <Wrap
       onClick={onClick}
-      className={className}
+      className={clsx(showText && 'with-label', className)}
       data-cy="translation-label-add"
     >
-      <Plus width={18} height={18} />
+      <Plus width={16} height={16} />
       {showText && (
-        <StyledLabel>
+        <div className="control-text">
           <T keyName="translations_add_label" />
-        </StyledLabel>
+        </div>
       )}
     </Wrap>
   );

@@ -17,7 +17,7 @@ const StyledWrapper = styled('div')`
       ? theme.palette.emphasis[100]
       : theme.palette.emphasis[200]};
   border: 1px solid transparent;
-  max-width: 100%;
+  min-width: 24px;
   box-sizing: border-box;
 
   & input {
@@ -38,8 +38,24 @@ const StyledWrapper = styled('div')`
     }
   }
 
+  &.input {
+    padding: 4px 6px;
+  }
+
   &.clickable {
     cursor: pointer;
+  }
+
+  &.tag-add {
+    width: 24px;
+    &.full-label {
+      padding: 0 6px;
+      width: initial;
+      & > .translations-tag-label {
+        margin-top: 1px;
+      }
+    }
+    justify-content: center;
   }
 `;
 
@@ -61,7 +77,13 @@ export const Wrapper: React.FC<Props> = ({
         <StyledWrapper
           as="button"
           data-cy="translations-tag-add"
-          className={clsx('preview', 'clickable', 'hover', className)}
+          className={clsx(
+            'preview',
+            'clickable',
+            'hover',
+            'tag-add',
+            className
+          )}
           onClick={stopBubble(onClick)}
         >
           {children}
@@ -71,7 +93,7 @@ export const Wrapper: React.FC<Props> = ({
       return (
         <StyledWrapper
           data-cy="translations-tag-input"
-          className={clsx('preview', 'hover', className)}
+          className={clsx('preview', 'hover', 'input', className)}
           onClick={stopBubble(onClick)}
         >
           {children}
