@@ -19,7 +19,7 @@ jobs:
       # Don't build test classes here; they'll only be used once during the test run anyway.
       # This amortizes the cost of compilation across each test job, rather than paying it upfront.
       - name: Build backend
-        run: ./gradlew bootJar --parallel
+        run: ./gradlew classes bootJar --parallel
 
       - name: Upload backend build result
         uses: ./.github/actions/upload-backend-build
