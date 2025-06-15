@@ -1,4 +1,5 @@
 name: Upload backend build
+description: Compress and upload backend build result to GitHub artifacts
 
 runs:
   using: composite
@@ -18,7 +19,6 @@ runs:
         tar --zstd -cf ~/ee-backend-tests.tar.zst ./ee/backend/tests/build
 
     - uses: actions/upload-artifact@v4
-      if: always()
       with:
         name: backend
         path: |

@@ -51,6 +51,8 @@ jobs:
 
       - name: Setup environment
         uses: ./.github/actions/setup-env
+        with:
+          node: 'false'
 
       - name: Download backend build result
         uses: ./.github/actions/download-backend-build
@@ -111,12 +113,6 @@ jobs:
 
       - name: Download backend build result
         uses: ./.github/actions/download-backend-build
-
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
 
       - name: Download frontend build result
         uses: actions/download-artifact@v4
@@ -185,12 +181,6 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
 
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-
       - name: Build webapp
         run: ./gradlew buildWebapp
         env:
@@ -209,15 +199,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: 'false'
+
       - name: Install dependencies
         run: npm ci
         working-directory: ./webapp
-
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
 
       - name: Typescript
         run: npm run tsc
@@ -259,16 +248,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup node
-        uses: actions/setup-node@v4
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
         with:
-          node-version: "22.x"
-
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          java: 'false'
 
       - name: Install dependencies
         run: npm ci
@@ -288,16 +271,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup node
-        uses: actions/setup-node@v4
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
         with:
-          node-version: 22
-
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          java: 'false'
 
       - name: Install dependencies
         run: npm ci
@@ -327,6 +304,8 @@ jobs:
 
       - name: Setup environment
         uses: ./.github/actions/setup-env
+        with:
+          node: 'false'
 
       - name: Run ktlint
         run: ./gradlew ktlintCheck

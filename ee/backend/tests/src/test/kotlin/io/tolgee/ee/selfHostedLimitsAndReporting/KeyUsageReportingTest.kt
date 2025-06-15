@@ -45,6 +45,7 @@ class KeyUsageReportingTest : AbstractSpringTest() {
 
   @BeforeEach
   fun setup() {
+    tolgeeCloudLicencingClientStub.enableReporting = false
     eeLicenseMockRequestUtil = EeLicensingMockRequestUtil(restTemplate)
     usageToReportService.delete()
   }
@@ -128,7 +129,7 @@ class KeyUsageReportingTest : AbstractSpringTest() {
     val testData = BaseTestData()
     testDataService.saveTestData(testData.root)
 
-    tolgeeCloudLicencingClientStub.disableStub = true
+    tolgeeCloudLicencingClientStub.enableReporting = true
     eeLicenseMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }

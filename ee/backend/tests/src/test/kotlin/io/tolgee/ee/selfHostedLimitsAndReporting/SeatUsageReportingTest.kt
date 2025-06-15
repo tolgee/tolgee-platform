@@ -38,13 +38,14 @@ class SeatUsageReportingTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     eeLicenseMockRequestUtil = EeLicensingMockRequestUtil(restTemplate)
+    tolgeeCloudLicencingClientStub.enableReporting = false
   }
 
   @Test
   fun `it reports seat usage`() {
     saveSubscription()
 
-    tolgeeCloudLicencingClientStub.disableStub = true
+    tolgeeCloudLicencingClientStub.enableReporting = true
     eeLicenseMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }

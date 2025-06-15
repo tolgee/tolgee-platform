@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class TolgeeCloudLicencingClientStub(httpClient: HttpClient, eeProperties: EeProperties) :
   TolgeeCloudLicencingClient(httpClient, eeProperties) {
-  var disableStub = false
+  var enableReporting = false
 
   override fun reportUsageRemote(
     subscription: EeSubscriptionDto,
@@ -19,7 +19,7 @@ class TolgeeCloudLicencingClientStub(httpClient: HttpClient, eeProperties: EePro
     seats: Long?
   ) {
     // no-op reporting unless told otherwise
-    if (disableStub) {
+    if (enableReporting) {
       super.reportUsageRemote(subscription, keys, seats)
     }
   }

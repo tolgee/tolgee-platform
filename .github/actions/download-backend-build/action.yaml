@@ -1,4 +1,5 @@
 name: Download backend build
+description: Download backend build from GitHub artifacts and decompress them
 
 runs:
   using: composite

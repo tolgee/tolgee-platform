@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpMethod
@@ -32,6 +33,7 @@ import java.time.Duration
 import java.util.*
 import kotlin.reflect.jvm.javaMethod
 
+@SpringBootTest
 @TestMethodOrder(OrderAnnotation::class)
 @TestPropertySource(
   properties = [
@@ -77,6 +79,7 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
   @AfterEach
   fun cleanup() {
     Mockito.reset(scheduledReportingManager)
+    tolgeeCloudLicencingClientStub.enableReporting = false
   }
 
   /**
@@ -102,7 +105,7 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     saveSubscription()
 
-    tolgeeCloudLicencingClientStub.disableStub = true
+    tolgeeCloudLicencingClientStub.enableReporting = true
     eeLicenseMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }
