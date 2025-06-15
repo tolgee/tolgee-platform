@@ -1,0 +1,18 @@
+name: Setup environment
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: temurin
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4

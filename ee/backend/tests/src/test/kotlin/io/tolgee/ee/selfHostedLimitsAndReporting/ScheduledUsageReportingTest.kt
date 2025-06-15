@@ -10,6 +10,7 @@ import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.ee.service.eeSubscription.usageReporting.ScheduledReportingManager
 import io.tolgee.ee.service.eeSubscription.usageReporting.UsageToReportService
+import io.tolgee.ee.stubs.TolgeeCloudLicencingClientStub
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.assert
@@ -55,6 +56,9 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
   @Autowired
   private lateinit var eeSubscriptionServiceImpl: EeSubscriptionServiceImpl
 
+  @Autowired
+  private lateinit var tolgeeCloudLicencingClientStub: TolgeeCloudLicencingClientStub
+
   @MockBean
   @Autowired
   lateinit var restTemplate: RestTemplate
@@ -97,6 +101,8 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
     val testData = BaseTestData()
     testDataService.saveTestData(testData.root)
     saveSubscription()
+
+    tolgeeCloudLicencingClientStub.disableStub = true
     eeLicenseMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }
