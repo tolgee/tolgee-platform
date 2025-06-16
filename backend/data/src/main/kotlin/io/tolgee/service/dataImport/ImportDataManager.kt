@@ -207,20 +207,9 @@ class ImportDataManager(
     this.importService.saveAllKeys(this.storedKeys.values)
   }
 
-  fun prepareKeyMetas() {
-    this.storedKeys.mapNotNull { it.value.keyMeta }.forEach { meta ->
-      meta.comments.onEach { comment -> comment.author = comment.author ?: import.author }
-      meta.codeReferences.onEach { ref -> ref.author = ref.author ?: import.author }
-    }
-  }
-
-  fun saveAllKeyMetas() {
-    this.storedKeys.mapNotNull { it.value.keyMeta }.forEach { meta ->
-      meta.disableActivityLogging = true
-      keyMetaService.save(meta)
-      keyMetaService.saveAllComments(meta.comments)
-      keyMetaService.saveAllCodeReferences(meta.codeReferences)
-    }
+  fun prepareKeyMeta(keyMeta: KeyMeta) {
+    keyMeta.comments.onEach { comment -> comment.author = comment.author ?: import.author }
+    keyMeta.codeReferences.onEach { ref -> ref.author = ref.author ?: import.author }
   }
 
   private fun resetConflicts(importLanguage: ImportLanguage) {
