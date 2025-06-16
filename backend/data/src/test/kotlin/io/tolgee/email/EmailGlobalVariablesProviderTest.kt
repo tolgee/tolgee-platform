@@ -22,17 +22,12 @@ import io.tolgee.dtos.response.PublicBillingConfigurationDTO
 import io.tolgee.email.EmailGlobalVariablesProvider.Companion.SELF_HOSTED_DEFAULT_QUALIFIER
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.annotation.Import
-import org.springframework.stereotype.Component
-import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 
-@Component
-@ExtendWith(SpringExtension::class)
-@Import(EmailGlobalVariablesProvider::class)
+@SpringJUnitConfig(EmailGlobalVariablesProvider::class)
 class EmailGlobalVariablesProviderTest {
   @MockBean
   private lateinit var publicBillingConfProvider: PublicBillingConfProvider
