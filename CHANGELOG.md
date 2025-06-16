@@ -1,3 +1,10 @@
+## [3.123.2](https://github.com/tolgee/tolgee-platform/compare/v3.123.1...v3.123.2) (2025-06-16)
+
+
+### Bug Fixes
+
+* import with meta without creating new keys  ([#3000](https://github.com/tolgee/tolgee-platform/issues/3000)) ([#3113](https://github.com/tolgee/tolgee-platform/issues/3113)) ([d266ce3](https://github.com/tolgee/tolgee-platform/commit/d266ce3418b8f4a1fd81acc4b6f32eb52ecdf6b4)), closes [/github.com/tolgee/tolgee-platform/issues/3000#issuecomment-2865753203](https://github.com//github.com/tolgee/tolgee-platform/issues/3000/issues/issuecomment-2865753203)
+
 ## [3.123.1](https://github.com/tolgee/tolgee-platform/compare/v3.123.0...v3.123.1) (2025-06-16)
 
 
