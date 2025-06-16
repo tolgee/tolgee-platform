@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.LanguageBuilder
 import io.tolgee.development.testDataBuilder.builders.LlmProviderBuilder
@@ -199,6 +200,14 @@ class PromptTestData : BaseTestData() {
           text = "překlad"
         }
       }
+    }
+  }
+
+  fun addLanguageConfig() {
+    promptProject.addMtServiceConfig {
+      this.targetLanguage = czech.self
+      this.primaryService = MtServiceType.PROMPT
+      this.prompt = customPrompt.self
     }
   }
 }
