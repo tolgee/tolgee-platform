@@ -31,13 +31,13 @@ class KeyCountLimitTest : AbstractSpringTest() {
   @MockBean
   private lateinit var restTemplate: RestTemplate
 
-	@BeforeEach
-	fun initMocks() {
-		val mockAny = mock<Any>()
-		val mockResp = mock<ResponseEntity<Any>>()
-		whenever(restTemplate.exchange(any<String>(), any(), any(), any<Class<Any>>())).thenReturn(mockResp)
-		whenever(mockResp.body).thenReturn(mockAny)
-	}
+  @BeforeEach
+  fun initMocks() {
+    val mockAny = mock<Any>()
+    val mockResp = mock<ResponseEntity<Any>>()
+    whenever(restTemplate.exchange(any<String>(), any(), any(), any<Class<Any>>())).thenReturn(mockResp)
+    whenever(mockResp.body).thenReturn(mockAny)
+  }
 
   @Test
   fun `throws when over the limit`() {

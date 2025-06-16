@@ -237,10 +237,10 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun ResultActions.waitForJobCompleted() =
     andAssertThatJson {
       node("id").isNumber.satisfies({
-				waitFor(pollTime = 2000) {
-					val job = batchJobService.findJobDto(it.toLong())
-					job?.status?.completed == true
-				}
-			})
-		}
+        waitFor(pollTime = 2000) {
+          val job = batchJobService.findJobDto(it.toLong())
+          job?.status?.completed == true
+        }
+      })
+    }
 }

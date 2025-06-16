@@ -155,7 +155,7 @@ class MtBatchTranslatorTest {
     val appContextMock = mock<ApplicationContext>()
     val entityManagerMock = EntityManager::class.mockIntoAppContext(appContextMock)
 
-		mockQueryResult(entityManagerMock, mutableListOf(preparedKey)) {
+    mockQueryResult(entityManagerMock, mutableListOf(preparedKey)) {
       this.contains("new io.tolgee.service.machineTranslation.KeyForMt")
     }
 
@@ -202,9 +202,9 @@ class MtBatchTranslatorTest {
     whenever(mtGlossaryTermsProviderMock.getGlossaryTerms(any(), any(), any(), any()))
       .thenReturn(emptySet())
 
-		// Add them so we don't trigger NPE during bean lookups
-		GoogleTranslationProvider::class.mockIntoAppContext(appContextMock)
-		LlmTranslationProvider::class.mockIntoAppContext(appContextMock)
+    // Add them so we don't trigger NPE during bean lookups
+    GoogleTranslationProvider::class.mockIntoAppContext(appContextMock)
+    LlmTranslationProvider::class.mockIntoAppContext(appContextMock)
 
     return appContextMock
   }
@@ -245,9 +245,9 @@ class MtBatchTranslatorTest {
     return context
   }
 
-	private inline fun <reified T : Any> KClass<T>.mockIntoAppContext(appContext: ApplicationContext): T {
-		val mock = mock<T>()
-		whenever(appContext.getBean(T::class.java)).thenReturn(mock)
-		return mock
-	}
+  private inline fun <reified T : Any> KClass<T>.mockIntoAppContext(appContext: ApplicationContext): T {
+    val mock = mock<T>()
+    whenever(appContext.getBean(T::class.java)).thenReturn(mock)
+    return mock
+  }
 }

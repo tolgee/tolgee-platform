@@ -93,7 +93,7 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(3)
     }
 
-		mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
+    mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
 
     mockedSlackClient.clearInvocations()
     performBatchOperation(keyIds)

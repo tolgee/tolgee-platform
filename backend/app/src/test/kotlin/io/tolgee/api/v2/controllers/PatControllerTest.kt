@@ -102,7 +102,7 @@ class PatControllerTest : AuthorizedControllerTest() {
   @Test
   fun `regenerate works (never expires)`() {
     val oldToken = testData.pat.tokenHash
-		testData.pat.expiresAt.assert.isNull()
+    testData.pat.expiresAt.assert.isNull()
 
     performAuthPut(
       "/v2/pats/${testData.pat.id}/regenerate",
@@ -129,7 +129,7 @@ class PatControllerTest : AuthorizedControllerTest() {
       node("description").isString.isEqualTo(description)
     }
 
-		patService.get(testData.expiredPat.id).description.assert.isEqualTo(description)
+    patService.get(testData.expiredPat.id).description.assert.isEqualTo(description)
   }
 
   @Test
