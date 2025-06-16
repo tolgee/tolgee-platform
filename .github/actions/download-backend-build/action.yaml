@@ -11,7 +11,7 @@ runs:
         path: ~/
 
     - name: Un-tar build results
-      shell: sh
+      shell: bash
       run: |
         tar --zstd -xf ~/backend-api.tar.zst ./backend/api/build
         tar --zstd -xf ~/backend-app.tar.zst ./backend/app/build
@@ -23,3 +23,4 @@ runs:
         tar --zstd -xf ~/backend-development.tar.zst ./backend/development/build
         tar --zstd -xf ~/ee-backend-app.tar.zst ./ee/backend/app/build
         tar --zstd -xf ~/ee-backend-tests.tar.zst ./ee/backend/tests/build
+        tar --zstd -xf ~/backend-emails.tar.zst ./emails/dist

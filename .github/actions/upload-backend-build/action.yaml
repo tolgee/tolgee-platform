@@ -5,7 +5,7 @@ runs:
   using: composite
   steps:
     - name: Compress build assets
-      shell: sh
+      shell: bash
       run: |
         tar --zstd -cf ~/backend-api.tar.zst ./backend/api/build
         tar --zstd -cf ~/backend-app.tar.zst ./backend/app/build
@@ -17,6 +17,7 @@ runs:
         tar --zstd -cf ~/backend-development.tar.zst ./backend/development/build
         tar --zstd -cf ~/ee-backend-app.tar.zst ./ee/backend/app/build
         tar --zstd -cf ~/ee-backend-tests.tar.zst ./ee/backend/tests/build
+        tar --zstd -cf ~/backend-emails.tar.zst ./emails/dist
 
     - uses: actions/upload-artifact@v4
       with:
@@ -32,3 +33,4 @@ runs:
           ~/backend-development.tar.zst
           ~/ee-backend-app.tar.zst
           ~/ee-backend-tests.tar.zst
+          ~/backend-emails.tar.zst
