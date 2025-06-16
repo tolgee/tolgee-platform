@@ -58,6 +58,7 @@ jobs:
           ./gradlew ${{ matrix.command.run }};
         env:
           SKIP_SERVER_BUILD: true
+          SKIP_EMAIL_BUILD: true
 
       - name: Get report name
         id: reportName
@@ -135,6 +136,7 @@ jobs:
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
           SKIP_WEBAPP_BUILD: true
           SKIP_SERVER_BUILD: true
+          SKIP_EMAIL_BUILD: true
           SKIP_INSTALL_E2E_DEPS: true
           E2E_TOTAL_JOBS: ${{matrix.total_jobs}}
           E2E_JOB_INDEX: ${{matrix.job_index}}
