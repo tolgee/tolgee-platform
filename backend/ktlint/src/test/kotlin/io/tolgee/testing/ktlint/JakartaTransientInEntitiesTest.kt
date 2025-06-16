@@ -39,15 +39,6 @@ class JakartaTransientInEntitiesTest {
         3,
         "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`."
       )
-      // .isFormattedAs("""
-      //   import jakarta.persistence.Transient
-      //
-      //   @Entity
-      //   class MyEntity {
-      //     @Transient
-      //     var transientField: String? = null
-      //   }
-      // """.trimIndent())
   }
 
   @Test
@@ -66,15 +57,6 @@ class JakartaTransientInEntitiesTest {
         3,
         "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`."
       )
-      // .isFormattedAs("""
-      //   import jakarta.persistence.Transient
-      //
-      //   @Entity
-      //   class MyEntity(
-      //     @Transient
-      //     var transientField: String? = null
-      //   )
-      // """.trimIndent())
   }
 
   @Test
@@ -93,15 +75,6 @@ class JakartaTransientInEntitiesTest {
         3,
         "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`."
       )
-      // .isFormattedAs("""
-      //   import jakarta.persistence.Transient
-      //
-      //   @Entity
-      //   class MyEntity {
-      //     @Transient
-      //     var transientField: String? = null
-      //   }
-      // """.trimIndent())
   }
 
   @Test

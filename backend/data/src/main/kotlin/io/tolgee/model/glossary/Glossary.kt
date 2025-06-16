@@ -32,10 +32,10 @@ import org.hibernate.annotations.SQLRestriction
 class Glossary(
   @field:Size(min = 3, max = 50)
   @ActivityLoggedProp
-  @property:ActivityDescribingProp
+  @ActivityDescribingProp
   var name: String = "",
   @ActivityLoggedProp
-  @property:ActivityDescribingProp
+  @ActivityDescribingProp
   @Column(nullable = false)
   var baseLanguageTag: String = "",
 ) : StandardAuditModel() {
