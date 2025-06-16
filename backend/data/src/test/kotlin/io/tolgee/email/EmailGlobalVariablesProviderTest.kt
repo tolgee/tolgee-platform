@@ -34,65 +34,65 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @Import(EmailGlobalVariablesProvider::class)
 class EmailGlobalVariablesProviderTest {
-	@MockBean
-	private lateinit var publicBillingConfProvider: PublicBillingConfProvider
+  @MockBean
+  private lateinit var publicBillingConfProvider: PublicBillingConfProvider
 
-	@MockBean
-	private lateinit var tolgeeProperties: TolgeeProperties
+  @MockBean
+  private lateinit var tolgeeProperties: TolgeeProperties
 
-	@Autowired
-	private lateinit var emailGlobalVariablesProvider: EmailGlobalVariablesProvider
+  @Autowired
+  private lateinit var emailGlobalVariablesProvider: EmailGlobalVariablesProvider
 
-	@Test
-	fun `it returns the correct properties based on config in cloud`() {
-		whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(true))
-		whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
-		whenever(tolgeeProperties.frontEndUrl).thenReturn("https://tolgee.test")
+  @Test
+  fun `it returns the correct properties based on config in cloud`() {
+    whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(true))
+    whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
+    whenever(tolgeeProperties.frontEndUrl).thenReturn("https://tolgee.test")
 
-		emailGlobalVariablesProvider().assert
-			.containsEntry("isCloud", true)
-			.containsEntry("instanceQualifier", "Tolgee Test Edition")
-			.containsEntry("instanceUrl", "https://tolgee.test")
-			.hasSize(3)
-	}
+    emailGlobalVariablesProvider().assert
+      .containsEntry("isCloud", true)
+      .containsEntry("instanceQualifier", "Tolgee Test Edition")
+      .containsEntry("instanceUrl", "https://tolgee.test")
+      .hasSize(3)
+  }
 
-	@Test
-	fun `it returns the correct properties based on config in self-hosted`() {
-		whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(false))
-		whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
-		whenever(tolgeeProperties.frontEndUrl).thenReturn("https://tolgee.test")
+  @Test
+  fun `it returns the correct properties based on config in self-hosted`() {
+    whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(false))
+    whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
+    whenever(tolgeeProperties.frontEndUrl).thenReturn("https://tolgee.test")
 
-		emailGlobalVariablesProvider().assert
-			.containsEntry("isCloud", false)
-			.containsEntry("instanceQualifier", "tolgee.test")
-			.containsEntry("instanceUrl", "https://tolgee.test")
-			.hasSize(3)
-	}
+    emailGlobalVariablesProvider().assert
+      .containsEntry("isCloud", false)
+      .containsEntry("instanceQualifier", "tolgee.test")
+      .containsEntry("instanceUrl", "https://tolgee.test")
+      .hasSize(3)
+  }
 
-	@Test
-	fun `it gracefully handles bad frontend url configuration`() {
-		whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(false))
-		whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
-		whenever(tolgeeProperties.frontEndUrl).thenReturn("https:/tolgee.test")
+  @Test
+  fun `it gracefully handles bad frontend url configuration`() {
+    whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(false))
+    whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
+    whenever(tolgeeProperties.frontEndUrl).thenReturn("https:/tolgee.test")
 
-		emailGlobalVariablesProvider().assert
-			.containsEntry("isCloud", false)
-			.containsEntry("instanceQualifier", SELF_HOSTED_DEFAULT_QUALIFIER)
-			.containsEntry("instanceUrl", "https:/tolgee.test")
-			.hasSize(3)
-	}
+    emailGlobalVariablesProvider().assert
+      .containsEntry("isCloud", false)
+      .containsEntry("instanceQualifier", SELF_HOSTED_DEFAULT_QUALIFIER)
+      .containsEntry("instanceUrl", "https:/tolgee.test")
+      .hasSize(3)
+  }
 
-	@Test
-	fun `it gracefully handles missing frontend url configuration`() {
-		// That's a pathological situation to be in... but it can happen... :shrug:
-		whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(false))
-		whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
-		whenever(tolgeeProperties.frontEndUrl).thenReturn(null)
+  @Test
+  fun `it gracefully handles missing frontend url configuration`() {
+    // That's a pathological situation to be in... but it can happen... :shrug:
+    whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(false))
+    whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
+    whenever(tolgeeProperties.frontEndUrl).thenReturn(null)
 
-		emailGlobalVariablesProvider().assert
-			.containsEntry("isCloud", false)
-			.containsEntry("instanceQualifier", SELF_HOSTED_DEFAULT_QUALIFIER)
-			.containsEntry("instanceUrl", null)
-			.hasSize(3)
-	}
+    emailGlobalVariablesProvider().assert
+      .containsEntry("isCloud", false)
+      .containsEntry("instanceQualifier", SELF_HOSTED_DEFAULT_QUALIFIER)
+      .containsEntry("instanceUrl", null)
+      .hasSize(3)
+  }
 }
