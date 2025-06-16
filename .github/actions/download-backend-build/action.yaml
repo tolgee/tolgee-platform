@@ -23,4 +23,4 @@ runs:
         tar --zstd -xf ~/backend-development.tar.zst ./backend/development/build
         tar --zstd -xf ~/ee-backend-app.tar.zst ./ee/backend/app/build
         tar --zstd -xf ~/ee-backend-tests.tar.zst ./ee/backend/tests/build
-        tar --zstd -xf ~/backend-emails.tar.zst ./emails/dist
+        tar --zstd -xf ~/backend-email.tar.zst ./email/dist
