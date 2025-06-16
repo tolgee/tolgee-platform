@@ -75,7 +75,7 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
       if (e.statusCode == HttpStatus.BAD_REQUEST) {
         val body = parseErrorBody(e)
         if (body?.get("error")?.get("code")?.asText() == "content_filter") {
-          throw LlmContentFilterException(config.name)
+          throw LlmContentFilterException()
         }
       }
       throw e

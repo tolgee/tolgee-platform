@@ -93,7 +93,7 @@ class LlmProviderService(
         }
       }
 
-    if (providers.isEmpty() && providerInfo?.suspendMap?.isNotEmpty() != null) {
+    if (providers.isEmpty() && providerInfo?.suspendMap?.isNotEmpty() == true) {
       val closestUnsuspend = providerInfo.suspendMap.map { (_, time) -> time }.min()
       throw LlmRateLimitedException(closestUnsuspend)
     }
@@ -132,7 +132,7 @@ class LlmProviderService(
         }
       }
     }
-    throw LlmRateLimitedException(params = listOf(lastError!!.message), cause = lastError)
+    throw LlmRateLimitedException(params = lastError?.message?.let { listOf(it) }, cause = lastError)
   }
 
   fun <T> repeatWithTimeouts(
