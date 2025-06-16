@@ -168,7 +168,7 @@ class MtBatchTranslator(
 
     val provider = context.applicationContext.getBean(item.service.providerClass)
     val metadata =
-      provider?.getMetadata(
+      provider.getMetadata(
         context.project.organizationOwnerId,
         context.project.id,
         item.keyId,

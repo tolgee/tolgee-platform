@@ -22,6 +22,7 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
+import jakarta.persistence.Transient
 import org.hibernate.annotations.Type
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -105,11 +106,9 @@ class ActivityRevision : java.io.Serializable {
    * This flag is set to true when the instance is initialized by the interceptor.
    */
   @Transient
-  @Column(insertable = false, updatable = false)
   var isInitializedByInterceptor: Boolean = false
 
   @Transient
-  @Column(insertable = false, updatable = false)
   var cancelledBatchJobExecutionCount: Int? = null
 
   companion object {

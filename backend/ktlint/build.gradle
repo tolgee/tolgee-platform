@@ -1,0 +1,48 @@
+/*
+ * Copyright (c) 2020. Tolgee
+ */
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+group = 'io.tolgee.testing.ktlint'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
+}
+
+dependencies {
+    implementation "com.pinterest.ktlint:ktlint-cli-ruleset-core:${ktlintVersion}"
+    implementation "com.pinterest.ktlint:ktlint-rule-engine-core:${ktlintVersion}"
+    testImplementation "com.pinterest.ktlint:ktlint-test:${ktlintVersion}"
+
+    // Not ideal, but doesn't work without, so there it is.
+    // It brings stuff in the classpath that makes test work, and at least that way there's no version drift issues
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+
+    ktlint sourceSets.main.output
+}
+
+test {
+    useJUnitPlatform()
+}

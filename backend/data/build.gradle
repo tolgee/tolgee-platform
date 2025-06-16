@@ -17,7 +17,7 @@ plugins {
     id 'org.liquibase.gradle'
     id 'org.jetbrains.kotlin.jvm'
     id "kotlin-jpa"
-    id "org.jetbrains.kotlin.kapt"
+    id "org.jetbrains.kotlin.kapt" // kapt still needed for Hibernate -- https://hibernate.atlassian.net/browse/HHH-15376
     id "kotlin-allopen"
     id "org.hibernate.orm"
     id "io.sentry.jvm.gradle"
@@ -32,11 +32,14 @@ if (System.getenv().containsKey("VERSION")) {
 }
 
 configurations {
+    ktlint
     developmentOnly
     runtimeClasspath {
         extendsFrom developmentOnly
     }
-    ktlint
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 apply plugin: 'java'
@@ -46,7 +49,7 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
 apply plugin: "kotlin-allopen"
-apply plugin: "kotlin-kapt"
+apply plugin: "kotlin-kapt" // kapt still needed for Hibernate -- https://hibernate.atlassian.net/browse/HHH-15376
 apply plugin: 'kotlin'
 apply plugin: 'org.hibernate.orm'
 
@@ -77,8 +80,16 @@ configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/d
 diff.dependsOn compileKotlin
 diffChangelog.dependsOn compileKotlin
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 kotlin {
-    jvmToolchain(21)
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
 
 dependencies {
@@ -93,10 +104,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     testImplementation('org.springframework.boot:spring-boot-starter-test')
-    kapt "org.springframework.boot:spring-boot-configuration-processor"
-    implementation "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
+	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     /**
      * DB
@@ -132,6 +142,7 @@ dependencies {
     testImplementation libs.mockito
     implementation libs.jsonUnitAssert
     testImplementation(project(":testing"))
+    ktlint(project(":ktlint"))
 
     /**
      * Kotlin
@@ -173,8 +184,8 @@ dependencies {
      * Table formats
      */
     implementation("com.opencsv:opencsv:5.9")
-    implementation 'org.apache.poi:poi:5.3.0'
-    implementation 'org.apache.poi:poi-ooxml:5.3.0'
+    implementation 'org.apache.poi:poi:5.4.0'
+    implementation 'org.apache.poi:poi-ooxml:5.4.0'
 
     /**
      * Google translation API
@@ -250,9 +261,6 @@ ktlint {
 }
 
 hibernate {
-    enhancement {
-        enableDirtyTracking = false
-        enableAssociationManagement = false
-        enableExtendedEnhancement = false
-    }
+    // Block is required for Bytecode Enhancement to happen
+    enhancement {}
 }

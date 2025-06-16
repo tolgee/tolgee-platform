@@ -9,53 +9,16 @@ jobs:
     name: Build backend 🏗️
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
-        with:
-          java-version: 21
-          distribution: adopt
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "22.x"
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-
-      - name: Compile kotlin
-        run: ./gradlew compileTestKotlin --parallel
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
 
       - name: Build backend
-        run: ./gradlew bootJar --parallel
+        run: ./gradlew classes jar bootJar
 
-      - name: Tar App build
-        run: tar -czf ~/backend-app.tgz ./backend/app/build
-
-      - name: Tar Data build
-        run: tar -czf ~/backend-data.tgz ./backend/data/build
-
-      - name: Tar Testing build
-        run: tar -czf ~/backend-testing.tgz ./backend/testing/build
-
-      - name: Tar Deployment build
-        run: tar -czf ~/backend-development.tgz ./backend/development/build
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: backend
-          path: |
-            ~/backend-app.tgz
-            ~/backend-data.tgz 
-            ~/backend-testing.tgz
-            ~/backend-development.tgz
+      - name: Upload backend build result
+        uses: ./.github/actions/upload-backend-build
 
   backend-test:
     name: BT ‍🔎
@@ -76,38 +39,15 @@ jobs:
           - run: "data:test"
             clean: "data:cleanTest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
         with:
-          java-version: 21
-          distribution: adopt
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "22.x"
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          node: 'false'
 
       - name: Download backend build result
-        uses: actions/download-artifact@v4
-        with:
-          name: backend
-          path: ~/
-
-      - name: Untar it
-        run: |
-          tar -xzf ~/backend-app.tgz ./backend/app/build
-          tar -xzf ~/backend-data.tgz ./backend/data/build
-          tar -xzf ~/backend-testing.tgz ./backend/testing/build
-          tar -xzf ~/backend-development.tgz ./backend/development/build
+        uses: ./.github/actions/download-backend-build
 
       - name: Run backend tests
         run: |
@@ -152,40 +92,13 @@ jobs:
         total_jobs: [15]
         job_index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
-        with:
-          java-version: 21
-          distribution: adopt
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "22.x"
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
 
       - name: Download backend build result
-        uses: actions/download-artifact@v4
-        with:
-          name: backend
-          path: ~/
-
-      - name: Untar it
-        run: tar -xzf ~/backend-app.tgz ./backend/app/build
+        uses: ./.github/actions/download-backend-build
 
       - name: Download frontend build result
         uses: actions/download-artifact@v4
@@ -201,7 +114,7 @@ jobs:
 
       - name: Untar node modules
         run: |
-          tar -xzf ~/node_modules.tgz ./e2e/node_modules
+          tar --zstd -xf ~/node_modules.tar.zst ./e2e/node_modules
 
       - name: Create cache directory
         run: |
@@ -209,7 +122,7 @@ jobs:
 
       - name: Untar Cypress cache
         run: |
-          tar -xzf ~/cypress_cache.tgz
+          tar --zstd -xf ~/cypress_cache.tar.zst
         working-directory: /home/runner/.cache/
 
       - name: Run e2e test
@@ -238,31 +151,10 @@ jobs:
     name: Build frontend 🏗️
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
-        with:
-          java-version: 21
-          distribution: adopt
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "22.x"
-
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
 
       - name: Build webapp
         run: ./gradlew buildWebapp
@@ -280,18 +172,12 @@ jobs:
     name: Install E2E dependencies ⬇️
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup node
-        uses: actions/setup-node@v3
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
         with:
-          node-version: "22.x"
-
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          java: 'false'
 
       - name: Install dependencies
         run: npm ci
@@ -299,11 +185,11 @@ jobs:
 
       - name: Tar node modules
         run: |
-          tar -czf ~/node_modules.tgz ./e2e/node_modules
+          tar --zstd -cf ~/node_modules.tar.zst ./e2e/node_modules
 
       - name: Tar Cypress cache
         run: |
-          tar -czf ~/cypress_cache.tgz ./Cypress
+          tar --zstd -cf ~/cypress_cache.tar.zst ./Cypress
         working-directory: /home/runner/.cache/
 
       - uses: actions/upload-artifact@v4
@@ -311,8 +197,8 @@ jobs:
         with:
           name: e2e_deps
           path: |
-            ~/node_modules.tgz
-            ~/cypress_cache.tgz
+            ~/node_modules.tar.zst
+            ~/cypress_cache.tar.zst
 
   cleanup:
     if: always()

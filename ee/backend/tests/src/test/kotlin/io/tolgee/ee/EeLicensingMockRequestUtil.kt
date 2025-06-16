@@ -3,7 +3,11 @@ package io.tolgee.ee
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.fixtures.HttpClientMocker
-import io.tolgee.hateoas.ee.*
+import io.tolgee.hateoas.ee.PlanIncludedUsageModel
+import io.tolgee.hateoas.ee.PlanPricesModel
+import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
+import io.tolgee.hateoas.ee.SelfHostedEePlanModel
+import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
 import io.tolgee.hateoas.ee.uasge.proportional.AverageProportionalUsageItemModel
 import io.tolgee.hateoas.ee.uasge.proportional.UsageModel
 import io.tolgee.hateoas.limits.LimitModel

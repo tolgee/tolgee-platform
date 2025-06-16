@@ -11,6 +11,7 @@ import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
+import jakarta.persistence.Transient
 import jakarta.persistence.TemporalType
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotBlank
@@ -39,20 +40,19 @@ class ApiKey(
   @NotNull
   @NotEmpty
   @Enumerated(EnumType.STRING)
-  @field:ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
+  @ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
   var scopesEnum: MutableSet<Scope?>,
 ) : StandardAuditModel() {
-  @field:NotBlank
+  @NotBlank
   var description: String = ""
 
-  @field:NotBlank
+  @NotBlank
   var keyHash: String = ""
 
   /**
    * Encoded key with project id
    */
   @Transient
-  @Column(insertable = false, updatable = false)
   var encodedKey: String? = null
 
   @ManyToOne

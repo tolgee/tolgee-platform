@@ -9,6 +9,7 @@ import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.service.eeSubscription.usageReporting.UsageReportingService
 import io.tolgee.ee.service.eeSubscription.usageReporting.UsageToReportService
+import io.tolgee.ee.stubs.TolgeeCloudLicencingClientStub
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,6 +34,9 @@ class KeyUsageReportingTest : AbstractSpringTest() {
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
 
+  @Autowired
+  private lateinit var tolgeeCloudLicencingClientStub: TolgeeCloudLicencingClientStub
+
   @MockBean
   @Autowired
   lateinit var restTemplate: RestTemplate
@@ -41,6 +45,7 @@ class KeyUsageReportingTest : AbstractSpringTest() {
 
   @BeforeEach
   fun setup() {
+    tolgeeCloudLicencingClientStub.enableReporting = false
     eeLicenseMockRequestUtil = EeLicensingMockRequestUtil(restTemplate)
     usageToReportService.delete()
   }
@@ -124,6 +129,7 @@ class KeyUsageReportingTest : AbstractSpringTest() {
     val testData = BaseTestData()
     testDataService.saveTestData(testData.root)
 
+    tolgeeCloudLicencingClientStub.enableReporting = true
     eeLicenseMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }

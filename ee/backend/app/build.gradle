@@ -97,17 +97,27 @@ dependencies {
     /**
      * Excel file generation
      */
-    implementation 'org.apache.poi:poi-ooxml:5.3.0'
+    implementation 'org.apache.poi:poi-ooxml:5.4.0'
     implementation 'org.apache.commons:commons-collections4:4.4'
 
     /**
      * HANDLEBARS
      */
     implementation('com.github.jknack:handlebars:4.4.0')
+
+    ktlint(project(":ktlint"))
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 kotlin {
-    jvmToolchain(21)
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
 
 dependencyManagement {

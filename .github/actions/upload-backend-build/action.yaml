@@ -1,0 +1,34 @@
+name: Upload backend build
+description: Compress and upload backend build result to GitHub artifacts
+
+runs:
+  using: composite
+  steps:
+    - name: Compress build assets
+      shell: sh
+      run: |
+        tar --zstd -cf ~/backend-api.tar.zst ./backend/api/build
+        tar --zstd -cf ~/backend-app.tar.zst ./backend/app/build
+        tar --zstd -cf ~/backend-data.tar.zst ./backend/data/build
+        tar --zstd -cf ~/backend-misc.tar.zst ./backend/misc/build
+        tar --zstd -cf ~/backend-security.tar.zst ./backend/security/build
+        tar --zstd -cf ~/backend-testing.tar.zst ./backend/testing/build
+        tar --zstd -cf ~/backend-ktlint.tar.zst ./backend/ktlint/build
+        tar --zstd -cf ~/backend-development.tar.zst ./backend/development/build
+        tar --zstd -cf ~/ee-backend-app.tar.zst ./ee/backend/app/build
+        tar --zstd -cf ~/ee-backend-tests.tar.zst ./ee/backend/tests/build
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: backend
+        path: |
+          ~/backend-api.tar.zst
+          ~/backend-app.tar.zst
+          ~/backend-data.tar.zst
+          ~/backend-misc.tar.zst
+          ~/backend-security.tar.zst
+          ~/backend-testing.tar.zst
+          ~/backend-ktlint.tar.zst
+          ~/backend-development.tar.zst
+          ~/ee-backend-app.tar.zst
+          ~/ee-backend-tests.tar.zst

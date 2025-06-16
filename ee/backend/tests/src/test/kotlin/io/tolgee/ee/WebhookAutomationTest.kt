@@ -20,6 +20,7 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -28,6 +29,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
+@SpringBootTest
 class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var webhookConfigService: WebhookConfigService
@@ -113,7 +115,7 @@ class WebhookAutomationTest : ProjectAuthControllerTest("/v2/projects/") {
     val signature = httpEntity.headers["Tolgee-Signature"]
     signature.assert.isNotNull
     verifyWebhookSignatureHeader(
-      httpEntity.body,
+      httpEntity.body!!,
       signature!!.single(),
       secret,
       300000,

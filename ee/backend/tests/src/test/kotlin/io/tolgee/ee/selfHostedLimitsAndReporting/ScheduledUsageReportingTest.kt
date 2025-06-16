@@ -10,6 +10,7 @@ import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.ee.service.eeSubscription.usageReporting.ScheduledReportingManager
 import io.tolgee.ee.service.eeSubscription.usageReporting.UsageToReportService
+import io.tolgee.ee.stubs.TolgeeCloudLicencingClientStub
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.assert
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpMethod
@@ -31,6 +33,7 @@ import java.time.Duration
 import java.util.*
 import kotlin.reflect.jvm.javaMethod
 
+@SpringBootTest
 @TestMethodOrder(OrderAnnotation::class)
 @TestPropertySource(
   properties = [
@@ -55,6 +58,9 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
   @Autowired
   private lateinit var eeSubscriptionServiceImpl: EeSubscriptionServiceImpl
 
+  @Autowired
+  private lateinit var tolgeeCloudLicencingClientStub: TolgeeCloudLicencingClientStub
+
   @MockBean
   @Autowired
   lateinit var restTemplate: RestTemplate
@@ -73,6 +79,7 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
   @AfterEach
   fun cleanup() {
     Mockito.reset(scheduledReportingManager)
+    tolgeeCloudLicencingClientStub.enableReporting = false
   }
 
   /**
@@ -97,6 +104,8 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
     val testData = BaseTestData()
     testDataService.saveTestData(testData.root)
     saveSubscription()
+
+    tolgeeCloudLicencingClientStub.enableReporting = true
     eeLicenseMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }

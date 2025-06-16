@@ -27,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
@@ -116,7 +117,7 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
       HttpClientErrorException.create(
         HttpStatus.BAD_REQUEST,
         "Mocked response",
-        null,
+        HttpHeaders(),
         """{"code": "$errorCode"}""".toByteArray(),
         null,
       )

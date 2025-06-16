@@ -33,7 +33,10 @@ class RateLimitService(
   private val currentDateProvider: CurrentDateProvider,
   private val rateLimitProperties: RateLimitProperties,
 ) {
-  private val cache: Cache by lazy { cacheManager.getCache(Caches.RATE_LIMITS) }
+  private val cache: Cache by lazy {
+    cacheManager.getCache(Caches.RATE_LIMITS)
+    ?: throw RuntimeException("Could not initialize cache!")
+  }
 
   /**
    * Consumes a token from the provided rate limit policy.

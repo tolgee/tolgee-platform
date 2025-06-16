@@ -50,7 +50,7 @@ class Translation(
   var text: String? = null,
 ) : StandardAuditModel() {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
-  @field:NotNull
+  @NotNull
   lateinit var key: Key
 
   @ManyToOne
@@ -83,7 +83,7 @@ class Translation(
   var characterCount: Int? = null
 
   @ActivityLoggedProp
-  @field:ColumnDefault("false")
+  @ColumnDefault("false")
   var outdated: Boolean = false
 
   val isUntranslated: Boolean

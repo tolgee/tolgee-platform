@@ -1,11 +1,11 @@
 package io.tolgee.model
 
-import jakarta.persistence.Column
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Transient
 import org.springframework.data.util.ProxyUtils
 
 const val SEQUENCE_NAME = "hibernate_sequence"
@@ -27,7 +27,6 @@ abstract class StandardAuditModel : AuditModel(), EntityWithId {
   override var id: Long = 0
 
   @Transient
-  @Column(insertable = false, updatable = false)
   override var disableActivityLogging = false
 
   override fun equals(other: Any?): Boolean {

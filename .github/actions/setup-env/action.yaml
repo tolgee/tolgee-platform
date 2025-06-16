@@ -1,0 +1,42 @@
+name: Setup environment
+description: Setup the required tooling and apply relevant cache configurations
+
+inputs:
+  java:
+    description: Whether to setup Java or not. Will also setup Gradle.
+    default: "true"
+  node:
+    description: Whether to setup Node.js or not.
+    default: "true"
+  npm-cache:
+    description: Whether to setup npm cache or not.
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Java
+      if: "${{ inputs.java == 'true' }}"
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: temurin
+
+    - name: Setup Gradle
+      if: "${{ inputs.java == 'true' }}"
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Setup Node
+      if: "${{ inputs.node == 'true' }}"
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Cache node modules
+      if: "${{ inputs.node == 'true' && inputs.npm-cache == 'true' }}"
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          cache-node-modules-${{ runner.os }}-

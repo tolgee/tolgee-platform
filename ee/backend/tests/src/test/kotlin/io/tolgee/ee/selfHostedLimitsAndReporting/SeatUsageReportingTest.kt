@@ -6,6 +6,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.ee.EeLicensingMockRequestUtil
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
+import io.tolgee.ee.stubs.TolgeeCloudLicencingClientStub
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -25,6 +26,9 @@ class SeatUsageReportingTest : AbstractSpringTest() {
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository
 
+  @Autowired
+  private lateinit var tolgeeCloudLicencingClientStub: TolgeeCloudLicencingClientStub
+
   @MockBean
   @Autowired
   lateinit var restTemplate: RestTemplate
@@ -34,12 +38,14 @@ class SeatUsageReportingTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     eeLicenseMockRequestUtil = EeLicensingMockRequestUtil(restTemplate)
+    tolgeeCloudLicencingClientStub.enableReporting = false
   }
 
   @Test
   fun `it reports seat usage`() {
     saveSubscription()
 
+    tolgeeCloudLicencingClientStub.enableReporting = true
     eeLicenseMockRequestUtil.mock {
       whenReq {
         this.method = { it == HttpMethod.POST }

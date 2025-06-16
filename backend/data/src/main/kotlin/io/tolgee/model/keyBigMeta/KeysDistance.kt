@@ -2,7 +2,6 @@ package io.tolgee.model.keyBigMeta
 
 import io.tolgee.model.AuditModel
 import io.tolgee.model.Project
-import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Id
@@ -10,6 +9,7 @@ import jakarta.persistence.IdClass
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import org.hibernate.annotations.ColumnDefault
 import org.springframework.data.domain.Persistable
 
@@ -70,6 +70,5 @@ class KeysDistance(
   }
 
   @Transient
-  @Column(insertable = false, updatable = false)
   var new = false
 }

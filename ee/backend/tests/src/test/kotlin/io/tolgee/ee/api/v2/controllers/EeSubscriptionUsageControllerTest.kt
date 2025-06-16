@@ -96,7 +96,7 @@ class EeSubscriptionUsageControllerTest : AuthorizedControllerTest() {
             node("isPayAsYouGo").isEqualTo(true)
           }
 
-        val body = this.captor.allValues.single().body
+        val body = this.captor.allValues.single().body!!
         assertThatJson(body) {
           node("licenseKey").isEqualTo("mock")
         }
