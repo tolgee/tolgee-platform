@@ -20,9 +20,13 @@ import { readdirSync, readFileSync } from 'fs';
 import { Img, ImgProps } from '@react-email/components';
 
 let root = __dirname;
-while (!readdirSync(root).includes('resources') && root !== '/') {
-  root = join(root, '..');
-}
+
+// Variant update is just inlined within the loop condition
+// noinspection StatementWithEmptyBodyJS
+while (
+  !readdirSync(root).includes('resources') &&
+  root !== (root = join(root, '..'))
+);
 
 const RESOURCES_FOLDER = join(root, 'resources');
 
