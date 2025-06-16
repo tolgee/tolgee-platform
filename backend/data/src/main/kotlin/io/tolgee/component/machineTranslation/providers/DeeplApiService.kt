@@ -34,7 +34,9 @@ class DeeplApiService(
     requestBody.add("text", text)
     requestBody.add("source_lang", sourceTag.uppercase())
     requestBody.add("target_lang", targetTag.uppercase())
-
+    deeplMachineTranslationProperties.optionalParameters?.forEach {
+      requestBody.add(it.key, it.value)
+    }
     addFormality(requestBody, formality)
 
     val response =
