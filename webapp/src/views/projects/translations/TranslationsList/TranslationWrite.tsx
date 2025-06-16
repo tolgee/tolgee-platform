@@ -35,6 +35,7 @@ const StyledContainer = styled('div')`
 
   .labels {
     padding: 6px 0 0 0;
+    min-width: 0;
   }
 
   .editor {

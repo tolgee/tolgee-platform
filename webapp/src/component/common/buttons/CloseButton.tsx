@@ -6,6 +6,7 @@ import clsx from 'clsx';
 const CloseButtonWrapperContainer = styled('div')<{ xs?: boolean }>(
   ({ theme, xs }) => ({
     position: 'relative',
+    width: 'min-content',
 
     '& .closeButton': {
       position: 'absolute',

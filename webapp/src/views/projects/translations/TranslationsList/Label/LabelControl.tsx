@@ -1,5 +1,5 @@
 import { styled } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useEffect } from 'react';
 import clsx from 'clsx';
 import { AddLabel } from 'tg.views/projects/translations/TranslationsList/Label/Control/AddLabel';
 import { stopBubble } from 'tg.fixtures/eventHandler';
@@ -17,8 +17,11 @@ const StyledControl = styled('div')`
   border-radius: 12px;
   border: 1px solid ${({ theme }) => theme.palette.tokens.icon.secondary};
   height: 24px;
-  min-width: 24px;
   font-size: 14px;
+
+  &.shrank {
+    width: 24px;
+  }
 
   &:hover,
   &:focus-within {
@@ -28,54 +31,75 @@ const StyledControl = styled('div')`
   }
 `;
 
-export const LabelControl: React.FC<{
+type LabelControlProps = {
   className?: string;
   existing?: LabelModel[];
   onSelect?: (labelId: number) => void;
   onSelectLabel?: (labelModel: LabelModel) => void;
-}> = ({ className, onSelect, onSelectLabel, existing }) => {
-  const [selectMode, setSelectMode] = useState<boolean>(false);
-  const { labels: availableLabels } = useLabels({});
-
-  // Only render the component if available labels exist
-  if (!availableLabels || availableLabels.length === 0) {
-    return null;
-  }
-
-  const enterSelectMode = () => {
-    setSelectMode(true);
-    stopBubble();
-  };
-  const exitSelectMode = () => {
-    setSelectMode(false);
-    stopBubble();
-  };
-  return (
-    <StyledControl
-      className={clsx(!selectMode && 'hover', className)}
-      data-cy="translation-label-control"
-    >
-      {selectMode ? (
-        <LabelSelector
-          onClose={stopBubble(exitSelectMode)}
-          onSelect={(labelId: number) => {
-            onSelect?.(labelId);
-            onSelectLabel?.(
-              availableLabels.find(
-                (label) => label.id === labelId
-              ) as LabelModel
-            );
-          }}
-          existing={existing}
-        />
-      ) : (
-        <AddLabel
-          onClick={stopBubble(enterSelectMode)}
-          showText={existing?.length === 0}
-          className="clickable"
-          data-cy="translation-label-add"
-        />
-      )}
-    </StyledControl>
-  );
+  onSelectModeChange?: (selectMode: boolean) => void;
 };
+
+export const LabelControl = forwardRef<HTMLDivElement, LabelControlProps>(
+  (props, ref) => {
+    const { className, existing, onSelect, onSelectLabel, onSelectModeChange } =
+      props;
+    const [selectMode, setSelectMode] = useState<boolean>(false);
+    const { labels: availableLabels } = useLabels({});
+
+    useEffect(() => {
+      onSelectModeChange?.(selectMode);
+    }, [selectMode]);
+
+    // Only render the component if available labels exist
+    if (!availableLabels || availableLabels.length === 0) {
+      return null;
+    }
+
+    const enterSelectMode = () => {
+      setSelectMode(true);
+      stopBubble();
+    };
+    const exitSelectMode = () => {
+      setSelectMode(false);
+      stopBubble();
+    };
+
+    const extendedAddLabelControl = existing?.length === 0;
+
+    return (
+      <StyledControl
+        ref={ref}
+        className={clsx(
+          !selectMode && 'hover',
+          !selectMode && !extendedAddLabelControl && 'shrank',
+          className
+        )}
+        data-cy="translation-label-control"
+      >
+        {selectMode ? (
+          <LabelSelector
+            onClose={stopBubble(exitSelectMode)}
+            onSelect={(labelId: number) => {
+              onSelect?.(labelId);
+              onSelectLabel?.(
+                availableLabels.find(
+                  (label) => label.id === labelId
+                ) as LabelModel
+              );
+            }}
+            existing={existing}
+          />
+        ) : (
+          <AddLabel
+            onClick={stopBubble(enterSelectMode)}
+            showText={extendedAddLabelControl}
+            className="clickable"
+            data-cy="translation-label-add"
+          />
+        )}
+      </StyledControl>
+    );
+  }
+);
+
+LabelControl.displayName = 'LabelControl'; // Optional but useful for debugging

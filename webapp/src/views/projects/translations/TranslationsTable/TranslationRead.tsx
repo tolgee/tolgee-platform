@@ -25,6 +25,7 @@ const StyledContainer = styled('div')`
 
   .labels {
     padding: 0 0 3px 0;
+    min-width: 0;
   }
 
   .controls {

@@ -24,6 +24,10 @@ export const StyledTranslationLabel = styled('div')<{ color?: string }>`
   height: 24px;
 `;
 
+const ToolTipWrapper = styled('div')`
+  display: flex;
+`;
+
 function adjustColorBrightness(hex: string, amount: number): string {
   let color = hex.replace('#', '');
   if (color.length === 3) {
@@ -151,9 +155,11 @@ export const TranslationLabel: React.FC<{
   );
 
   return tooltip ? (
-    <Tooltip title={tooltip}>
-      <div>{content}</div>
-    </Tooltip>
+    <ToolTipWrapper>
+      <Tooltip title={tooltip}>
+        <div>{content}</div>
+      </Tooltip>
+    </ToolTipWrapper>
   ) : (
     content
   );
