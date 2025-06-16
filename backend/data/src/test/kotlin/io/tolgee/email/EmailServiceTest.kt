@@ -26,20 +26,18 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.annotation.Import
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
-import org.springframework.stereotype.Component
-import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 import java.util.*
 
-@Component
-@ExtendWith(SpringExtension::class)
-@Import(EmailService::class, EmailTemplateConfig::class)
+@ExtendWith(MockitoExtension::class)
+@SpringJUnitConfig(EmailService::class, EmailTemplateConfig::class)
 class EmailServiceTest {
   @MockBean
   private lateinit var smtpProperties: SmtpProperties

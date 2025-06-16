@@ -19,13 +19,23 @@ apply from: "$rootDir/gradle/utils.gradle"
 def emailPath = "${rootDir}/email"
 
 tasks.register('copyEmailResources', Copy) {
-    def fromDir = "${emailPath}/resources"
-    def toDir = "${project.projectDir}/build/dependency/BOOT-INF/classes/static/emails/."
-    from fromDir
-    into toDir
-    inputs.dir(fromDir)
-    outputs.dir(toDir)
-    mustRunAfter unpack
+    from "${emailPath}/resources"
+    // Not a typo: static so Spring picks it up, then static so the url is /static/emails
+    into "${project.projectDir}/build/generated/resources/static/static/emails/."
+}
+
+tasks.register('copyEmailTemplates', Copy) {
+    dependsOn 'buildEmails'
+
+    from "${emailPath}/dist/email-templates"
+    into "${project.projectDir}/build/generated/resources/email-templates"
+}
+
+tasks.register('copyEmailLocaleData', Copy) {
+    dependsOn 'updateEmailTranslations'
+
+    from "${emailPath}/i18n"
+    into "${project.projectDir}/build/generated/resources/email-i18n"
 }
 
 tasks.register('installEmailDeps', Exec) {
@@ -40,7 +50,7 @@ tasks.register('installEmailDeps', Exec) {
 }
 
 tasks.register('buildEmails', Exec) {
-    dependsOn "installEmailDeps", "updateEmailTranslations"
+    dependsOn 'installEmailDeps'
     onlyIf { System.getenv("SKIP_EMAIL_BUILD") != "true" }
 
     workingDir = emailPath

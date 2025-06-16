@@ -16,11 +16,13 @@
 
 package io.tolgee.email
 
-class EmailTemplateUtils {
+object EmailTemplateUtils {
   fun escape(str: String): String {
     // Prevent Thymeleaf injection (for the second pass)
     return str.replace("{", "&#123;")
+      .replace("}", "&#125;")
       .replace("[", "&#91;")
+      .replace("]", "&#93;")
       .replace("$", "&#36;")
       .replace("*", "&#42;")
       .replace("#", "&#35;")

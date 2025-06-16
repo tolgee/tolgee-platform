@@ -19,10 +19,14 @@ import * as React from 'react';
 type Props = {
   variable: string;
   demoValue: string;
-  injectHtml?: boolean;
+  dangerouslyInjectValueAsHtmlWithoutSanitization?: boolean;
 };
 
-export default function Var({ variable, demoValue, injectHtml }: Props) {
+export default function Var({
+  variable,
+  demoValue,
+  dangerouslyInjectValueAsHtmlWithoutSanitization: injectHtml,
+}: Props) {
   return React.createElement(
     'span',
     {

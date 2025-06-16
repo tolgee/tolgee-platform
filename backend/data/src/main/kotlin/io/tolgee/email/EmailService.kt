@@ -90,7 +90,8 @@ class EmailService(
   }
 
   private fun extractEmailTitle(html: String): String {
-    return REGEX_TITLE.find(html)!!.groupValues[1]
+    return REGEX_TITLE.find(html)?.groupValues?.get(1)
+      ?: throw IllegalStateException("Email template must have a title tag!")
   }
 
   companion object {
