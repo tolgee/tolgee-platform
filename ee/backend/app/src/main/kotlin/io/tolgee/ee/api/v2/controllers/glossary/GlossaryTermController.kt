@@ -2,9 +2,9 @@ package io.tolgee.ee.api.v2.controllers.glossary
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
-import io.tolgee.component.reporting.BusinessEventPublisher
-import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.glossary.GlossaryTermTranslationModelAssembler
@@ -23,7 +23,6 @@ import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import jakarta.validation.Valid
@@ -48,14 +47,13 @@ class GlossaryTermController(
   private val pagedAssembler: PagedResourcesAssembler<GlossaryTerm>,
   private val organizationHolder: OrganizationHolder,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
-  private val businessEventPublisher: BusinessEventPublisher,
-  private val authenticationFacade: AuthenticationFacade,
 ) {
   @PostMapping("/terms")
   @Operation(summary = "Create a new glossary term")
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
   @Transactional
+  @RequestActivity(ActivityType.GLOSSARY_TERM_CREATE)
   fun create(
     @PathVariable
     organizationId: Long,
@@ -68,14 +66,6 @@ class GlossaryTermController(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
     )
-
-    businessEventPublisher.publish(
-      OnBusinessEventToCaptureEvent(
-        eventName = "GLOSSARY_TERM_CREATE",
-        userAccountDto = authenticationFacade.authenticatedUser,
-      ),
-    )
-
     val (term, translation) = glossaryTermService.createWithTranslation(organizationId, glossaryId, dto)
     return CreateUpdateGlossaryTermResponse(
       term = simpleGlossaryTermModelAssembler.toModel(term),
@@ -88,6 +78,7 @@ class GlossaryTermController(
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
   @Transactional
+  @RequestActivity(ActivityType.GLOSSARY_TERM_DELETE)
   fun deleteMultiple(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,
@@ -98,13 +89,6 @@ class GlossaryTermController(
       Feature.GLOSSARY,
     )
 
-    businessEventPublisher.publish(
-      OnBusinessEventToCaptureEvent(
-        eventName = "GLOSSARY_TERM_DELETE",
-        userAccountDto = authenticationFacade.authenticatedUser,
-      ),
-    )
-
     glossaryTermService.deleteMultiple(organizationId, glossaryId, dto.termIds)
   }
 
@@ -113,6 +97,7 @@ class GlossaryTermController(
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
   @Transactional
+  @RequestActivity(ActivityType.GLOSSARY_TERM_UPDATE)
   fun update(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,
@@ -122,13 +107,6 @@ class GlossaryTermController(
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
-    )
-
-    businessEventPublisher.publish(
-      OnBusinessEventToCaptureEvent(
-        eventName = "GLOSSARY_TERM_UPDATE",
-        userAccountDto = authenticationFacade.authenticatedUser,
-      ),
     )
 
     val (term, translation) = glossaryTermService.updateWithTranslation(organizationId, glossaryId, termId, dto)
@@ -143,6 +121,7 @@ class GlossaryTermController(
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @RequiresOrganizationRole(OrganizationRoleType.MAINTAINER)
   @Transactional
+  @RequestActivity(ActivityType.GLOSSARY_TERM_DELETE)
   fun delete(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,
@@ -151,13 +130,6 @@ class GlossaryTermController(
     enabledFeaturesProvider.checkFeatureEnabled(
       organizationHolder.organization.id,
       Feature.GLOSSARY,
-    )
-
-    businessEventPublisher.publish(
-      OnBusinessEventToCaptureEvent(
-        eventName = "GLOSSARY_TERM_DELETE",
-        userAccountDto = authenticationFacade.authenticatedUser,
-      ),
     )
 
     glossaryTermService.delete(organizationId, glossaryId, termId)

@@ -10,7 +10,6 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
-import io.tolgee.fixtures.node
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

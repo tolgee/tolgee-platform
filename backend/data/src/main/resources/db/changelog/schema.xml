@@ -4472,4 +4472,14 @@
     <changeSet author="anty (generated)" id="1749122876835-16">
         <addForeignKeyConstraint baseColumnNames="organization_owner_id" baseTableName="glossary" constraintName="FKtiuusr7urs46e15gjy94jhdfm" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1749651750836-1">
+        <addColumn tableName="activity_revision">
+            <column name="organization_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1749707135132-1">
+        <createIndex indexName="IDXap0ps5tn0jl23nssur72nydku" tableName="activity_revision">
+            <column name="organization_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
