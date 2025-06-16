@@ -1,7 +1,6 @@
 package io.tolgee.ee.service
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.constants.Caches
@@ -13,7 +12,9 @@ import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.ee.component.llm.*
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.FailedDependencyException
 import io.tolgee.exceptions.InvalidStateException
+import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.LlmProvider
 import io.tolgee.model.enums.LlmProviderPriority
@@ -92,9 +93,9 @@ class LlmProviderService(
         }
       }
 
-    if (providers.isEmpty() && providerInfo?.suspendMap?.isNotEmpty() != null) {
+    if (providers.isEmpty() && providerInfo?.suspendMap?.isNotEmpty() == true) {
       val closestUnsuspend = providerInfo.suspendMap.map { (_, time) -> time }.min()
-      throw TranslationApiRateLimitException(closestUnsuspend)
+      throw LlmRateLimitedException(closestUnsuspend)
     }
 
     var lastUsed = lastUsedMap.get(name)
@@ -131,7 +132,7 @@ class LlmProviderService(
         }
       }
     }
-    throw BadRequestException(Message.LLM_RATE_LIMITED, listOf(lastError!!.message), lastError)
+    throw LlmRateLimitedException(params = lastError?.message?.let { listOf(it) }, cause = lastError)
   }
 
   fun <T> repeatWithTimeouts(
@@ -147,7 +148,7 @@ class LlmProviderService(
         lastError = e
       }
     }
-    throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(lastError!!.message), lastError)
+    throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(lastError!!.message), lastError)
   }
 
   fun callProvider(

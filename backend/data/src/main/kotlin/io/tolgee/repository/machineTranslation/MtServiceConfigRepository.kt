@@ -3,6 +3,7 @@ package io.tolgee.repository.machineTranslation
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
@@ -25,7 +26,13 @@ interface MtServiceConfigRepository : JpaRepository<MtServiceConfig, Long> {
 
   fun deleteAllByTargetLanguageId(targetLanguageId: Long)
 
-  fun deleteAllByProjectId(projectId: Long)
+  @Modifying
+  @Query(
+    """
+    delete from MtServiceConfig c where c.project.id = :projectId
+  """
+  )
+  fun deleteAllByProjectId(projectId: Long): Int
 
   @Query(
     """

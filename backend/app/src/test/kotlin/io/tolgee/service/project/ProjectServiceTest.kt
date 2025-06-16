@@ -148,6 +148,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   fun testDeleteProjectWithAiResults() {
     executeInNewTransaction(platformTransactionManager) {
       val testData = PromptTestData()
+      testData.addLanguageConfig()
       testDataService.saveTestData(testData.root)
       projectHardDeletingService.hardDeleteProject(testData.promptProject.self)
       entityManager.flush()

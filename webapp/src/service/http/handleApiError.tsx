@@ -103,7 +103,7 @@ export const handleApiError = (
     return;
   }
 
-  if (r.status == 400 && !options.disableErrorNotification) {
+  if (r.status >= 400 && r.status < 500 && !options.disableErrorNotification) {
     const handledByAction = errorAction(resObject.code);
 
     if (handledByAction) {

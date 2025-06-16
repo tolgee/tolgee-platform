@@ -79,9 +79,9 @@ class ProjectHardDeletingService(
         screenshotService.deleteAllByProject(project.id)
       }
 
-      promptService.deleteAllByProjectId(project.id)
-
       mtServiceConfigService.deleteAllByProjectId(project.id)
+
+      promptService.deleteAllByProjectId(project.id)
 
       aiPlaygroundResultService.deleteResultsByProject(project.id)
 

@@ -3,12 +3,11 @@ package io.tolgee.ee.component.llm
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
-import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.LlmContentFilterException
+import io.tolgee.exceptions.LlmEmptyResponseException
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -76,15 +75,15 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
       if (e.statusCode == HttpStatus.BAD_REQUEST) {
         val body = parseErrorBody(e)
         if (body?.get("error")?.get("code")?.asText() == "content_filter") {
-          throw LlmContentFilterException(config.name)
+          throw LlmContentFilterException()
         }
       }
       throw e
     }
 
     return PromptResult(
-      response = response.body?.choices?.first()?.message?.content
-        ?: throw BadRequestException(Message.LLM_PROVIDER_EMPTY_RESPONSE),
+      response = response.body?.choices?.firstOrNull()?.message?.content
+        ?: throw LlmEmptyResponseException(),
       usage =
         response.body?.usage?.let {
           PromptResponseUsageDto(
