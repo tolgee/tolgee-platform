@@ -33,4 +33,4 @@ runs:
           ~/backend-development.tar.zst
           ~/ee-backend-app.tar.zst
           ~/ee-backend-tests.tar.zst
-          ~/backend-emails.tar.zst
+          ~/backend-email.tar.zst
