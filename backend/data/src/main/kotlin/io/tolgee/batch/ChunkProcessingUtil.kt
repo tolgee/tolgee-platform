@@ -4,8 +4,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.exceptions.ExceptionWithMessage
+import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecution
@@ -87,7 +87,7 @@ open class ChunkProcessingUtil(
     val knownCauses =
       listOf(
         OutOfCreditsException::class.java,
-        TranslationApiRateLimitException::class.java,
+        LlmRateLimitedException::class.java,
       )
 
     val isKnownCause = knownCauses.any { ExceptionUtils.indexOfType(exception, it) > -1 }

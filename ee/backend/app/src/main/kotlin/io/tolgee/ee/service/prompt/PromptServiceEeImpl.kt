@@ -8,7 +8,6 @@ import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.HandlebarsException
 import io.tolgee.ee.component.PromptLazyMap
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
@@ -18,6 +17,9 @@ import io.tolgee.ee.service.LlmProviderService
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.FailedDependencyException
+import io.tolgee.exceptions.LlmProviderNotReturnedJsonException
+import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.TooManyRequestsException
 import io.tolgee.model.Prompt
@@ -200,9 +202,7 @@ class PromptServiceEeImpl(
       try {
         providerService.callProvider(organizationId, provider, params, attempts)
       } catch (e: RestClientException) {
-        throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf(e.message), e)
-      } catch (e: TranslationApiRateLimitException) {
-        throw BadRequestException(Message.LLM_RATE_LIMITED, listOf(e.message), e)
+        throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(e.message), e)
       }
 
     result.parsedJson = extractJsonFromResponse(result.response)
@@ -257,17 +257,13 @@ class PromptServiceEeImpl(
   fun <T> rateLimitToStatus(func: () -> T): T {
     return try {
       func()
-    } catch (e: BadRequestException) {
-      if (e.tolgeeMessage == Message.LLM_RATE_LIMITED) {
-        throw TooManyRequestsException(Message.TOO_MANY_REQUESTS, cause = e)
-      } else {
-        throw e
-      }
+    } catch (e: LlmRateLimitedException) {
+      throw TooManyRequestsException(Message.TOO_MANY_REQUESTS, cause = e)
     }
   }
 
   fun getTranslationFromPromptResult(result: PromptResult): MtValueProvider.MtResult {
-    val json = result.parsedJson ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
+    val json = result.parsedJson ?: throw LlmProviderNotReturnedJsonException()
     val translation = json.get("output")?.asText() ?: throw BadRequestException(Message.LLM_PROVIDER_NOT_RETURNED_JSON)
 
     return MtValueProvider.MtResult(

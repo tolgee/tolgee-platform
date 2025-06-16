@@ -2,12 +2,13 @@ package io.tolgee.batch
 
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.component.machineTranslation.TranslationApiRateLimitException
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.FormalityNotSupportedException
 import io.tolgee.exceptions.LanguageNotSupportedException
 import io.tolgee.exceptions.LlmContentFilterException
-import io.tolgee.exceptions.LlmProviderEmptyResponseException
+import io.tolgee.exceptions.LlmEmptyResponseException
+import io.tolgee.exceptions.LlmProviderNotReturnedJsonException
+import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
 import io.tolgee.exceptions.limits.PlanSpendingLimitExceededStringsException
@@ -35,14 +36,16 @@ class MtProviderCatching(
         throw FailedDontRequeueException(Message.OUT_OF_CREDITS, successfulTargets, e)
       } catch (e: LlmContentFilterException) {
         throw FailedDontRequeueException(Message.LLM_CONTENT_FILTER, successfulTargets, e)
-      } catch (e: LlmProviderEmptyResponseException) {
+      } catch (e: LlmEmptyResponseException) {
         throw FailedDontRequeueException(Message.LLM_PROVIDER_EMPTY_RESPONSE, successfulTargets, e)
-      } catch (e: TranslationApiRateLimitException) {
+      } catch (e: LlmProviderNotReturnedJsonException) {
+        throw FailedDontRequeueException(Message.LLM_PROVIDER_NOT_RETURNED_JSON, successfulTargets, e)
+      } catch (e: LlmRateLimitedException) {
         throw RequeueWithDelayException(
-          Message.TRANSLATION_API_RATE_LIMIT,
+          Message.LLM_RATE_LIMITED,
           successfulTargets,
           e,
-          (e.retryAt - currentDateProvider.date.time).toInt(),
+          e.retryAt?.let { (e.retryAt - currentDateProvider.date.time).toInt() } ?: 100,
           increaseFactor = 1,
           maxRetries = -1,
         )

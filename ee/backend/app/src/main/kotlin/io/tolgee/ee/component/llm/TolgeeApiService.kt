@@ -8,6 +8,7 @@ import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.FailedDependencyException
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -51,7 +52,7 @@ class TolgeeApiService(
       extractTolgeeErrorOrThrow(e)
     }
 
-    return response?.body ?: throw BadRequestException(Message.LLM_PROVIDER_ERROR, listOf("Empty response body"))
+    return response?.body ?: throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf("Empty response body"))
   }
 
   fun extractTolgeeErrorOrThrow(e: BadRequest): Nothing {
@@ -62,7 +63,7 @@ class TolgeeApiService(
       val eCode = json?.get("code")?.runCatching { this.asText() }?.getOrNull()
       val eParams = json?.get("params")?.runCatching { this.asIterable().map { it.asText() } }?.getOrNull()
       val message = eCode?.runCatching { Message.valueOf(this.uppercase()) }?.getOrNull()
-      message?.let { throw BadRequestException(message, params = eParams, e) }
+      message?.let { throw FailedDependencyException(message, params = eParams, e) }
     }
     throw e
   }

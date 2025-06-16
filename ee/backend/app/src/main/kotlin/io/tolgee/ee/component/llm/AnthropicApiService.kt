@@ -4,7 +4,7 @@ import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
-import io.tolgee.exceptions.LlmProviderEmptyResponseException
+import io.tolgee.exceptions.LlmEmptyResponseException
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
@@ -45,7 +45,7 @@ class AnthropicApiService : AbstractLlmApiService(), Logging {
 
     return PromptResult(
       response.body?.content?.firstOrNull()?.text
-        ?: throw LlmProviderEmptyResponseException(),
+        ?: throw LlmEmptyResponseException(),
       usage =
         response.body?.usage?.let {
           PromptResponseUsageDto(
