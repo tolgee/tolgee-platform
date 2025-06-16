@@ -48,6 +48,7 @@ tasks.register('buildEmails', Exec) {
 
     inputs.dir("${emailPath}/emails")
     inputs.dir("${emailPath}/components")
+    inputs.file("${emailPath}/tailwind.config.ts")
     inputs.file("${emailPath}/package.json")
     inputs.file("${emailPath}/package-lock.json")
     outputs.dir("${emailPath}/dist")
