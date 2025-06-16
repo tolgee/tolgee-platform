@@ -24,32 +24,32 @@ import java.net.URISyntaxException
 
 @Component
 class EmailGlobalVariablesProvider(
-	// Used to identify whether we're Tolgee Cloud or not
-	private val billingConfigProvider: PublicBillingConfProvider,
-	private val tolgeeProperties: TolgeeProperties,
+  // Used to identify whether we're Tolgee Cloud or not
+  private val billingConfigProvider: PublicBillingConfProvider,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
-	operator fun invoke(): Map<String, Any?> {
-		val isCloud = billingConfigProvider().enabled
+  operator fun invoke(): Map<String, Any?> {
+    val isCloud = billingConfigProvider().enabled
 
-		return mapOf(
-			"isCloud" to isCloud,
-			"instanceQualifier" to if (isCloud) tolgeeProperties.appName else tolgeeProperties.frontEndUrl.intoQualifier(),
-			"instanceUrl" to tolgeeProperties.frontEndUrl,
-		)
-	}
+    return mapOf(
+      "isCloud" to isCloud,
+      "instanceQualifier" to if (isCloud) tolgeeProperties.appName else tolgeeProperties.frontEndUrl.intoQualifier(),
+      "instanceUrl" to tolgeeProperties.frontEndUrl,
+    )
+  }
 
-	private fun String?.intoQualifier(): String {
-		return this?.let {
-			try {
-				return@let URI(it).host
-			} catch (_: URISyntaxException) {
-				return@let null
-			}
-		} ?: SELF_HOSTED_DEFAULT_QUALIFIER
-	}
+  private fun String?.intoQualifier(): String {
+    return this?.let {
+      try {
+        return@let URI(it).host
+      } catch (_: URISyntaxException) {
+        return@let null
+      }
+    } ?: SELF_HOSTED_DEFAULT_QUALIFIER
+  }
 
-	companion object {
-		// Not ideal because not translated... But shouldn't show up on properly configured instances :)
-		const val SELF_HOSTED_DEFAULT_QUALIFIER = "a self-hosted instance"
-	}
+  companion object {
+    // Not ideal because not translated... But shouldn't show up on properly configured instances :)
+    const val SELF_HOSTED_DEFAULT_QUALIFIER = "a self-hosted instance"
+  }
 }

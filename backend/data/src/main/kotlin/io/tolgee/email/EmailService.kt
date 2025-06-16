@@ -31,10 +31,10 @@ import java.util.*
 
 @Service
 class EmailService(
-	private val applicationContext: ApplicationContext,
+  private val applicationContext: ApplicationContext,
   private val smtpProperties: SmtpProperties,
   private val mailSender: JavaMailSender,
-	private val emailGlobalVariablesProvider: EmailGlobalVariablesProvider,
+  private val emailGlobalVariablesProvider: EmailGlobalVariablesProvider,
   @Qualifier("emailTemplateEngine") private val templateEngine: TemplateEngine,
 ) {
   private val smtpFrom
@@ -53,18 +53,18 @@ class EmailService(
     properties: Map<String, Any> = mapOf(),
     attachments: List<EmailAttachment> = listOf(),
   ) {
-		val globalVariables = emailGlobalVariablesProvider()
-		val context = Context(locale, properties)
-		context.setVariables(globalVariables)
+    val globalVariables = emailGlobalVariablesProvider()
+    val context = Context(locale, properties)
+    context.setVariables(globalVariables)
 
-		// Required because we're outside of Spring MVC here
-		// Otherwise, bean resolution does not work for some reason
-		val tec = ThymeleafEvaluationContext(applicationContext, null)
-		context.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME, tec)
+    // Required because we're outside of Spring MVC here
+    // Otherwise, bean resolution does not work for some reason
+    val tec = ThymeleafEvaluationContext(applicationContext, null)
+    context.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME, tec)
 
-		// Do two passes, so Thymeleaf expressions rendered by messages can get processed
+    // Do two passes, so Thymeleaf expressions rendered by messages can get processed
     val firstPass = templateEngine.process(template, context)
-		val html = templateEngine.process(firstPass, context)
+    val html = templateEngine.process(firstPass, context)
 
     val subject = extractEmailTitle(html)
     sendEmail(recipient, subject, html, attachments)
