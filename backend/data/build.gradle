@@ -112,7 +112,6 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
     implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
-    implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     implementation 'com.github.transferwise:spring-icu:0.3.0'
@@ -244,6 +243,8 @@ test {
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
+
+    main.resources.srcDirs += 'build/generated/resources'
 }
 
 dependencyManagement {
@@ -265,8 +266,8 @@ tasks.named('compileJava') {
     inputs.files(tasks.named('processResources'))
 }
 
-tasks.named('compileKotlin') {
-    dependsOn 'buildEmails'
+tasks.named('processResources') {
+    dependsOn 'copyEmailResources', 'copyEmailTemplates', 'copyEmailLocaleData'
 }
 
 ktlint {
