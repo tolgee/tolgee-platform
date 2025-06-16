@@ -31,7 +31,6 @@ export const verifyLabelInTranslationCell = (
   getTranslationCell(key, lang).within(() => {
     gcy('translation-label')
       .contains(label)
-      .parent('[data-cy="translation-label"]')
       .should('be.visible')
       .should('have.css', 'background-color', expectedColor);
   });

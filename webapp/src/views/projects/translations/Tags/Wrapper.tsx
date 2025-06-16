@@ -51,9 +51,6 @@ const StyledWrapper = styled('div')`
     &.full-label {
       padding: 0 6px;
       width: initial;
-      & > .translations-tag-label {
-        margin-top: 1px;
-      }
     }
     justify-content: center;
   }

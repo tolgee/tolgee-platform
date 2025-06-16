@@ -76,7 +76,7 @@ export const SubfilterLabels = ({
   function renderItem(props: any, item: LabelModel) {
     return (
       <FilterItem
-        label={item.name}
+        label={<TranslationLabel label={item} tooltip={item.description} />}
         selected={Boolean(value.filterLabel?.includes(item.id.toString()))}
         onClick={() => handleToggleLabel(item.id.toString())}
       />

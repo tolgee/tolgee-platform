@@ -39,7 +39,9 @@ export const ProjectSettingsLabels = () => {
   };
   const removeLabel = async (label: LabelModel) => {
     confirmation({
+      title: <T keyName="project_settings_label_delete_confirmation_title" />,
       message: <T keyName="project_settings_label_delete_confirmation" />,
+      confirmButtonText: <T keyName="confirmation_dialog_delete" />,
       async onConfirm() {
         await removeMutation.mutateAsync({
           path: { projectId: project.id, labelId: label.id },

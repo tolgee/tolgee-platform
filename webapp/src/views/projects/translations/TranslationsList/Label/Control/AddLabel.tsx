@@ -14,7 +14,6 @@ const Wrap = styled('div')`
     padding: 3px 6px;
     & > .control-text {
       padding: 0 4px;
-      margin-top: 1px;
     }
   }
 `;

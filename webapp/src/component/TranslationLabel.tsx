@@ -123,35 +123,36 @@ export const TranslationLabel: React.FC<{
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onDelete?: (labelId: number) => void;
 }> = ({ label, children, tooltip, className, onClick, onDelete, ...rest }) => {
-  const content = (
+  const labelContent = (
+    <StyledTranslationLabel
+      color={label.color}
+      data-cy="translation-label"
+      className={clsx(className, 'translation-label')}
+      onClick={onClick}
+      {...rest}
+    >
+      {children || label.name}
+    </StyledTranslationLabel>
+  );
+
+  const content = onDelete ? (
     <CloseButton
       data-cy="translation-label-delete"
-      onClose={
-        onDelete
-          ? (e) => {
-              e.stopPropagation();
-              onDelete?.(label.id);
-            }
-          : undefined
-      }
+      onClose={(e) => {
+        e.stopPropagation();
+        onDelete(label.id);
+      }}
       xs
     >
-      <StyledTranslationLabel
-        color={label.color}
-        className={clsx(className, 'translation-label')}
-        data-cy="translation-label"
-        {...rest}
-        translation-label-delete
-      >
-        <div className="translation-label-content" onClick={onClick}>
-          {children || label.name}
-        </div>
-      </StyledTranslationLabel>
+      {labelContent}
     </CloseButton>
+  ) : (
+    labelContent
   );
+
   return tooltip ? (
-    <Tooltip disableInteractive title={tooltip}>
-      {content}
+    <Tooltip title={tooltip}>
+      <div>{content}</div>
     </Tooltip>
   ) : (
     content
