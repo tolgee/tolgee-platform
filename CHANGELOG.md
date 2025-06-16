@@ -1,3 +1,15 @@
+# [3.123.0](https://github.com/tolgee/tolgee-platform/compare/v3.122.1...v3.123.0) (2025-06-16)
+
+
+### Bug Fixes
+
+* Store activity for glossaries ([#3128](https://github.com/tolgee/tolgee-platform/issues/3128)) ([8e7c1fb](https://github.com/tolgee/tolgee-platform/commit/8e7c1fbe265cc5d8ae43bc9176639097227cf98d))
+
+
+### Features
+
+* add glossary_id for deepl usage ([#3122](https://github.com/tolgee/tolgee-platform/issues/3122)) ([e22ddb4](https://github.com/tolgee/tolgee-platform/commit/e22ddb4569fec57678dd1df060c9c4818fa24f76))
+
 ## [3.122.1](https://github.com/tolgee/tolgee-platform/compare/v3.122.0...v3.122.1) (2025-06-11)
 
 
