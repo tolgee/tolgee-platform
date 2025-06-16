@@ -19,9 +19,11 @@ package io.tolgee.email
 import com.transferwise.icu.ICUMessageSource
 import com.transferwise.icu.ICUReloadableResourceBundleMessageSource
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Scope
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.spring6.SpringTemplateEngine
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
@@ -65,7 +67,8 @@ class EmailTemplateConfig {
   }
 
   @Bean("emailTemplateUtils")
+  @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
   fun emailTemplateUtils(): EmailTemplateUtils {
-    return EmailTemplateUtils()
+    return EmailTemplateUtils
   }
 }
