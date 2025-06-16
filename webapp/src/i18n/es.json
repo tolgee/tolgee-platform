@@ -1906,7 +1906,7 @@
   "translations_key_edit_placeholder": "Añadir etiqueta...",
   "translations_key_edit_title": "Editar clave",
   "translations_languages_limit_reached": "No se pueden seleccionar más de {max} idiomas",
-  "translations_list_labels_more_label": "+ {count} más",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "Faltante:",
   "translations_new_key_discard_button": "Descartar",
   "translations_new_key_discard_message": "¿Descartar cambios no guardados?",

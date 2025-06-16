@@ -1906,7 +1906,7 @@
   "translations_key_edit_placeholder": "Címke hozzáadása...",
   "translations_key_edit_title": "Kulcs szerkesztése",
   "translations_languages_limit_reached": "Nem lehet több, mint {max} nyelvet kiválasztani",
-  "translations_list_labels_more_label": "+ {count} további",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "Hiányzik:",
   "translations_new_key_discard_button": "Elvetés",
   "translations_new_key_discard_message": "Elveti a mentetlen változtatásokat?",

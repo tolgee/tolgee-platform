@@ -1922,7 +1922,7 @@
   "translations_key_edit_placeholder": "Add tag...",
   "translations_key_edit_title": "Edit key",
   "translations_languages_limit_reached": "Cannot select more than {max} languages",
-  "translations_list_labels_more_label": "+ {count} more",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "Missing:",
   "translations_new_key_discard_button": "Discard",
   "translations_new_key_discard_message": "Discard unsaved changes?",

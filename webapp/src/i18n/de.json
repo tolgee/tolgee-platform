@@ -1917,7 +1917,7 @@
   "translations_key_edit_placeholder": "Tag hinzufügen...",
   "translations_key_edit_title": "Schlüssel bearbeiten",
   "translations_languages_limit_reached": "Es können nicht mehr als {max} Sprachen ausgewählt werden",
-  "translations_list_labels_more_label": "+ {count} mehr",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "Fehlend:",
   "translations_new_key_discard_button": "Verwerfen",
   "translations_new_key_discard_message": "Nicht gespeicherte Änderungen verwerfen?",

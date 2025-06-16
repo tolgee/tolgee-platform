@@ -1910,7 +1910,7 @@
   "translations_key_edit_placeholder": "Přidat tag...",
   "translations_key_edit_title": "Upravit klíč",
   "translations_languages_limit_reached": "Nelze vybrat více než {max} jazyků",
-  "translations_list_labels_more_label": "+ {count} více",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "Chybí:",
   "translations_new_key_discard_button": "Zahodit",
   "translations_new_key_discard_message": "Zahodit neuložené změny?",

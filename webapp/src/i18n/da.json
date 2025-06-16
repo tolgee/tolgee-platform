@@ -1911,7 +1911,7 @@
   "translations_key_edit_placeholder": "Tilføj tag...",
   "translations_key_edit_title": "Rediger nøgle",
   "translations_languages_limit_reached": "Kan ikke vælge mere end {max} sprog",
-  "translations_list_labels_more_label": "+ {count} mere",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "Mangler:",
   "translations_new_key_discard_button": "Kassér",
   "translations_new_key_discard_message": "Vil du kassere ikke-gemte ændringer?",

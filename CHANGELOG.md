@@ -1,3 +1,10 @@
+## [3.123.1](https://github.com/tolgee/tolgee-platform/compare/v3.123.0...v3.123.1) (2025-06-16)
+
+
+### Bug Fixes
+
+* improve error handling + project deletion error ([#3124](https://github.com/tolgee/tolgee-platform/issues/3124)) ([a0630ba](https://github.com/tolgee/tolgee-platform/commit/a0630ba59e9a6c54de5f2839d4433a62aa8d4b8c))
+
 # [3.123.0](https://github.com/tolgee/tolgee-platform/compare/v3.122.1...v3.123.0) (2025-06-16)
 
 

@@ -1862,7 +1862,7 @@
   "translations_key_edit_placeholder": "Aggiungi tag...",
   "translations_key_edit_title": "Modifica chiave",
   "translations_languages_limit_reached": "Non è possibile selezionare più di {max} lingue",
-  "translations_list_labels_more_label": "+ {count} in più",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "Mancante:",
   "translations_new_key_discard_button": "Scarta",
   "translations_new_key_discard_message": "Scartare le modifiche non salvate?",

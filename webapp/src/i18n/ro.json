@@ -1911,7 +1911,7 @@
   "translations_key_edit_placeholder": "Adaugă etichetă...",
   "translations_key_edit_title": "Editare cheie",
   "translations_languages_limit_reached": "Nu se pot selecta mai mult de {max} limbi",
-  "translations_list_labels_more_label": "+ {count} mai multe",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "Lipsă:",
   "translations_new_key_discard_button": "Renunță",
   "translations_new_key_discard_message": "Renunțați la modificările nesalvate?",

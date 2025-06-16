@@ -1922,7 +1922,7 @@
   "translations_key_edit_placeholder": "タグを追加...",
   "translations_key_edit_title": "キーを編集",
   "translations_languages_limit_reached": "{max} を超える言語を選択することはできません",
-  "translations_list_labels_more_label": "+ {count} 件 以上",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "Missing:",
   "translations_new_key_discard_button": "破棄",
   "translations_new_key_discard_message": "保存していない変更を破棄しますか?",

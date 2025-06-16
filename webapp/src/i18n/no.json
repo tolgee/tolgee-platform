@@ -1906,7 +1906,7 @@
   "translations_key_edit_placeholder": "Legg til tagg...",
   "translations_key_edit_title": "Rediger nøkkel",
   "translations_languages_limit_reached": "Kan ikke velge mer enn {max} språk",
-  "translations_list_labels_more_label": "+ {count} mer",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "Mangler:",
   "translations_new_key_discard_button": "Forkast",
   "translations_new_key_discard_message": "Forkast ulagrede endringer?",

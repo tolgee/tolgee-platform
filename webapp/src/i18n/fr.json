@@ -1909,7 +1909,7 @@
   "translations_key_edit_placeholder": "Ajouter une étiquette...",
   "translations_key_edit_title": "Modifier la clé",
   "translations_languages_limit_reached": "Impossible de sélectionner plus de {max} langues",
-  "translations_list_labels_more_label": "+ {count} de plus",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "Manquant :",
   "translations_new_key_discard_button": "Abandonner",
   "translations_new_key_discard_message": "Abandonner les modifications non enregistrées?",

@@ -1906,7 +1906,7 @@
   "translations_key_edit_placeholder": "添加标签...",
   "translations_key_edit_title": "编辑词条",
   "translations_languages_limit_reached": "无法选择超过 {max} 种语言",
-  "translations_list_labels_more_label": "+ {count} 个更多",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "缺少：",
   "translations_new_key_discard_button": "放弃",
   "translations_new_key_discard_message": "放弃未保存的更改？",

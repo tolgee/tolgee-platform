@@ -1907,7 +1907,7 @@
   "translations_key_edit_placeholder": "Tag toevoegen...",
   "translations_key_edit_title": "Sleutel bewerken",
   "translations_languages_limit_reached": "Kan niet meer dan {max} talen selecteren",
-  "translations_list_labels_more_label": "+ {count} meer",
+  "translations_list_labels_more_label": "+ {count}",
   "translations_missing_placeholders_label": "Ontbreekt:",
   "translations_new_key_discard_button": "Verwijderen",
   "translations_new_key_discard_message": "Niet-opgeslagen wijzigingen negeren?",
