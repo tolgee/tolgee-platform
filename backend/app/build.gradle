@@ -46,11 +46,6 @@ apply plugin: "kotlin-allopen"
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
 apply plugin: "org.gradle.test-retry"
 
-repositories {
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
-}
-
 dependencyManagement {
     applyMavenExclusions = false
 }

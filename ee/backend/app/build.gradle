@@ -2,7 +2,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {}
 }
 
 plugins {
@@ -29,11 +28,6 @@ allOpen {
     annotation("org.springframework.transaction.annotation.Transactional")
     annotation("org.springframework.beans.factory.annotation.Configurable")
     annotation("org.springframework.boot.test.context.SpringBootTest")
-}
-
-repositories {
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
 }
 
 test {

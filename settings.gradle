@@ -75,6 +75,31 @@ dependencyResolutionManagement {
             library('slackApiModelKotlinExtension', "com.slack.api:slack-api-model-kotlin-extension:$slackSdkVersion")
             library('slackApiClientKotlinExtension', "com.slack.api:slack-api-client-kotlin-extension:$slackSdkVersion")
             library('jakartaMail', 'org.eclipse.angus', 'jakarta.mail').version('2.0.4')
+            library('vaadinJson', "com.vaadin.external.google:android-json:0.0.20131108.vaadin1")
+        }
+    }
+
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        def jitpackDependencies = [
+            "com.github.transferwise"
+        ]
+
+        mavenCentral() {
+            content {
+                jitpackDependencies.forEach {
+                    excludeGroup(it)
+                }
+            }
+        }
+
+        maven {
+            url 'https://jitpack.io'
+            content {
+                jitpackDependencies.forEach {
+                    includeGroup(it)
+                }
+            }
         }
     }
 }

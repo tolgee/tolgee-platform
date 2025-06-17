@@ -2,8 +2,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-    }
 }
 
 plugins {
@@ -29,11 +27,6 @@ allOpen {
     annotation("org.springframework.boot.test.context.SpringBootTest")
 }
 
-repositories {
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
-}
-
 test {
     useJUnitPlatform()
     maxHeapSize = "4096m"
@@ -50,6 +43,7 @@ dependencies {
     implementation libs.jjwtJackson
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
     testImplementation(project(":testing"))
     testImplementation(project(":security"))
     testImplementation(project(":ee-app"))
