@@ -2,7 +2,7 @@ apply from: './gradle/utils.gradle'
 
 def webappPath = "${project.projectDir}/webapp"
 
-task copyDist(type: Copy) {
+tasks.register('copyDist', Copy) {
     def fromDir = "${webappPath}/dist"
     def toDir = "${project.projectDir}/build/dependency/BOOT-INF/classes/static/."
     from fromDir
@@ -11,7 +11,7 @@ task copyDist(type: Copy) {
     dependsOn "buildWebapp"
 }
 
-task installWebappDeps(type: Exec) {
+tasks.register('installWebappDeps', Exec) {
     onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
     commandLine npmCommandName, "ci"
     workingDir = webappPath
@@ -20,7 +20,7 @@ task installWebappDeps(type: Exec) {
     outputs.dir("${project.projectDir}/webapp/node_modules")
 }
 
-task buildWebapp(type: Exec) {
+tasks.register('buildWebapp', Exec) {
     onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
     commandLine npmCommandName, "run", "build"
     workingDir = webappPath
@@ -29,14 +29,14 @@ task buildWebapp(type: Exec) {
     dependsOn "installWebappDeps", "updateStaticTranslations"
 }
 
-task createBuildDir() {
+tasks.register('createBuildDir') {
     File directory = new File(buildDir as String)
     if (!directory.exists()) {
         directory.mkdir()
     }
 }
 
-task updateStaticTranslations(type: Exec) {
+tasks.register('updateStaticTranslations', Exec) {
     onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
     def tolgeeApiUrl = System.env.TOLGEE_API_URL
     onlyIf { tolgeeApiUrl != null && tolgeeApiUrl != "" }

@@ -2,7 +2,7 @@ ext {
     dockerPath = buildDir.absolutePath + "/docker"
 }
 
-task dockerPrepare {
+tasks.register('dockerPrepare') {
     doLast {
         copy {
             from(tasks.unpack.outputs, 'docker/app')
@@ -17,7 +17,7 @@ task dockerPrepare {
     dependsOn("unpack", "copyDist", "copyDockerIgnore", "addVersionFile")
 }
 
-task docker {
+tasks.register('docker') {
     doLast {
         exec {
             workingDir dockerPath
@@ -28,7 +28,7 @@ task docker {
 }
 
 void createDockerBuildxTask(String taskName, boolean isPush) {
-    task(taskName) {
+    tasks.register(taskName) {
         doLast {
             if (project.hasProperty('dockerImageTag')) {
                 def commandParams = ["docker", "buildx", "build", ".", "-t", project.property('dockerImageTag'), "--platform", "linux/arm64,linux/amd64"]
@@ -50,16 +50,16 @@ void createDockerBuildxTask(String taskName, boolean isPush) {
 createDockerBuildxTask("dockerBuildxPush", true)
 createDockerBuildxTask("dockerBuildx", false)
 
-task cleanDocker{
+tasks.register('cleanDocker') {
     delete(dockerPath)
 }
 
 if (tasks.findByName("wrapper") == null) {
-    task wrapper(type: Wrapper) {
+    tasks.register('wrapper', Wrapper) {
     }
 }
 
-task copyDockerIgnore(type: Copy) {
+tasks.register('copyDockerIgnore', Copy) {
     from "docker/app/.dockerignore"
     into "build/docker"
 }
