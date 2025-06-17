@@ -18,12 +18,13 @@ jobs:
 
       # Don't build test classes here; they'll only be used once during the test run anyway.
       # This amortizes the cost of compilation across each test job, rather than paying it upfront.
+      # Test emails are built nonetheless, as they may be used by multiple subprojects...
       #
       # Note: seems like running in parallel has the weird side effect of causing Spring dependency management to hang
       # It's very occasional, and doesn't seem to occur locally, but parallel being the issue is possible
       # See: https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/370
       - name: Build backend
-        run: ./gradlew classes jar bootJar
+        run: ./gradlew classes jar bootJar buildTestEmails
 
       - name: Upload backend build result
         uses: ./.github/actions/upload-backend-build
