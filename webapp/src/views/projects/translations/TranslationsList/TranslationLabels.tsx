@@ -75,8 +75,6 @@ export const TranslationLabels = ({
   const canAssignLabels = satisfiesPermission('translation-labels.assign');
   const theme = useTheme();
   const { t } = useTranslate();
-  const [labelControlSelectMode, setLabelControlSelectMode] =
-    useState<boolean>(false);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const labelControlRef = useRef<HTMLDivElement | null>(null);
@@ -115,7 +113,7 @@ export const TranslationLabels = ({
     }
 
     if (fit !== visibleCount) setVisibleCount(fit);
-  }, [labels, canAssignLabels, visibleCount, labelControlSelectMode]);
+  }, [labels, canAssignLabels, visibleCount]);
 
   useLayoutEffect(() => {
     recalculate();
@@ -182,7 +180,6 @@ export const TranslationLabels = ({
             className={clsx('clickable', CELL_SHOW_ON_HOVER)}
             ref={labelControlRef}
             onSelect={onSelect}
-            onSelectModeChange={setLabelControlSelectMode}
             existing={labels}
           />
         )}

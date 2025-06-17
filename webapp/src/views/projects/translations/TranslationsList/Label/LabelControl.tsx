@@ -1,5 +1,5 @@
-import { styled } from '@mui/material';
-import React, { useState, forwardRef, useEffect } from 'react';
+import { Menu, PopoverOrigin, styled } from '@mui/material';
+import React, { useState, forwardRef } from 'react';
 import clsx from 'clsx';
 import { AddLabel } from 'tg.views/projects/translations/TranslationsList/Label/Control/AddLabel';
 import { stopBubble } from 'tg.fixtures/eventHandler';
@@ -10,6 +10,7 @@ import { useLabels } from 'tg.hooks/useLabels';
 type LabelModel = components['schemas']['LabelModel'];
 
 const StyledControl = styled('div')`
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,15 +20,16 @@ const StyledControl = styled('div')`
   height: 24px;
   font-size: 14px;
 
-  &.shrank {
-    width: 24px;
-  }
-
   &:hover,
+  &.active,
   &:focus-within {
     cursor: pointer;
     border: 1px solid ${({ theme }) => theme.palette.primary.main};
     color: ${({ theme }) => theme.palette.primary.main};
+  }
+
+  &.active {
+    opacity: 1;
   }
 `;
 
@@ -36,32 +38,40 @@ type LabelControlProps = {
   existing?: LabelModel[];
   onSelect?: (labelId: number) => void;
   onSelectLabel?: (labelModel: LabelModel) => void;
-  onSelectModeChange?: (selectMode: boolean) => void;
+  menuAnchorOrigin?: PopoverOrigin;
+  menuStyle?: React.CSSProperties;
 };
 
 export const LabelControl = forwardRef<HTMLDivElement, LabelControlProps>(
   (props, ref) => {
-    const { className, existing, onSelect, onSelectLabel, onSelectModeChange } =
-      props;
-    const [selectMode, setSelectMode] = useState<boolean>(false);
+    const {
+      className,
+      existing,
+      onSelect,
+      onSelectLabel,
+      menuAnchorOrigin,
+      menuStyle,
+    } = props;
     const { labels: availableLabels } = useLabels({});
-
-    useEffect(() => {
-      onSelectModeChange?.(selectMode);
-    }, [selectMode]);
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
     // Only render the component if available labels exist
     if (!availableLabels || availableLabels.length === 0) {
       return null;
     }
 
-    const enterSelectMode = () => {
-      setSelectMode(true);
-      stopBubble();
+    const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+      setAnchorEl(event.currentTarget);
     };
-    const exitSelectMode = () => {
-      setSelectMode(false);
-      stopBubble();
+
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
+
+    const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      }
     };
 
     const extendedAddLabelControl = existing?.length === 0;
@@ -69,34 +79,44 @@ export const LabelControl = forwardRef<HTMLDivElement, LabelControlProps>(
     return (
       <StyledControl
         ref={ref}
-        className={clsx(
-          !selectMode && 'hover',
-          !selectMode && !extendedAddLabelControl && 'shrank',
-          className
-        )}
+        className={clsx(Boolean(anchorEl) && 'active', className)}
         data-cy="translation-label-control"
       >
-        {selectMode ? (
+        <AddLabel
+          onClick={stopBubble(handleOpen)}
+          showText={extendedAddLabelControl}
+          className="clickable"
+          data-cy="translation-label-add"
+        />
+        <Menu
+          open={Boolean(anchorEl)}
+          onClose={stopBubble(handleClose)}
+          anchorEl={anchorEl}
+          anchorOrigin={
+            menuAnchorOrigin
+              ? menuAnchorOrigin
+              : {
+                  vertical: 'bottom',
+                  horizontal: 'left',
+                }
+          }
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+          slotProps={{
+            paper: { style: menuStyle ? menuStyle : { marginTop: 8 } },
+          }}
+          onKeyUp={handleKeyUp}
+        >
           <LabelSelector
-            onClose={stopBubble(exitSelectMode)}
-            onSelect={(labelId: number) => {
-              onSelect?.(labelId);
-              onSelectLabel?.(
-                availableLabels.find(
-                  (label) => label.id === labelId
-                ) as LabelModel
-              );
+            onSelect={(label: LabelModel) => {
+              onSelect?.(label.id);
+              onSelectLabel?.(label);
             }}
             existing={existing}
           />
-        ) : (
-          <AddLabel
-            onClick={stopBubble(enterSelectMode)}
-            showText={extendedAddLabelControl}
-            className="clickable"
-            data-cy="translation-label-add"
-          />
-        )}
+        </Menu>
       </StyledControl>
     );
   }

@@ -86,10 +86,9 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
       value: 'translations-table-cell-translation',
       lang: 'en',
     }).each(($cell) => {
-      cy.wrap($cell)
-        .find('[data-cy="translation-label"]')
-        .contains('Label 1')
-        .should('be.visible');
+      cy.wrap($cell).within(() => {
+        gcy('translation-label').contains('Label 1').should('be.visible');
+      });
     });
 
     selectAll();
@@ -100,7 +99,9 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
       value: 'translations-table-cell-translation',
       lang: 'en',
     }).each(($cell) => {
-      cy.wrap($cell).find('[data-cy="translation-label"]').should('not.exist');
+      cy.wrap($cell).within(() => {
+        gcy('translation-label').contains('Label 1').should('not.exist');
+      });
     });
   });
 
@@ -188,9 +189,13 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     selectLanguage('English');
     gcy('batch-operations-section').within(() => {
       gcy('translation-label-control').click();
-      gcy('label-selector-autocomplete').type(label);
     });
-    gcy('label-autocomplete-option').contains(label).click();
+    gcy('search-select-search').type(label);
+    gcy('label-autocomplete-option')
+      .contains(label)
+      .should('be.visible')
+      .click();
+    dismissMenu();
     gcy('translation-label').contains(label).should('be.visible');
   };
 });

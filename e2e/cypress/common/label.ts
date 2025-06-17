@@ -8,14 +8,14 @@ export function assignLabelToTranslation(
   label: string,
   expectLabelCount?: number | undefined
 ) {
-  getTranslationCell(key, languageTag).within(() => {
+  getTranslationLabels(key, languageTag).within(() => {
     gcy('translation-label-control')
       .should('not.be.visible')
       .click()
       .should('be.visible');
-    gcy('autocomplete-label-input').should('be.visible').click();
-    gcy('label-selector-autocomplete').should('be.visible');
   });
+  gcy('search-select-search').should('be.visible').click();
+  gcy('label-selector-autocomplete').should('be.visible');
   if (expectLabelCount !== undefined) {
     gcy('label-autocomplete-option').should('have.length', expectLabelCount);
   }
@@ -28,7 +28,7 @@ export const verifyLabelInTranslationCell = (
   label: string,
   expectedColor: string
 ) => {
-  getTranslationCell(key, lang).within(() => {
+  getTranslationLabels(key, lang).within(() => {
     gcy('translation-label')
       .contains(label)
       .should('be.visible')
@@ -41,7 +41,7 @@ export const verifyLabelsCountInTranslationCell = (
   lang: string,
   expectedCount: number
 ) => {
-  getTranslationCell(key, lang).within(() => {
+  getTranslationLabels(key, lang).within(() => {
     gcy('translation-label').should('have.length', expectedCount);
   });
 };
@@ -51,4 +51,8 @@ export const createLabel = (labelName: string, color?: string) => {
   projectLabels.visitFromProjectSettings();
   const labelModal = projectLabels.openCreateLabelModal();
   labelModal.fillAndSave(labelName, color);
+};
+
+const getTranslationLabels = (key: string, lang: string) => {
+  return getTranslationCell(key, lang).find('.translation-labels-list');
 };

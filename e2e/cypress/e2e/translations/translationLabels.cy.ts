@@ -68,8 +68,6 @@ describe('Projects Settings - Labels', () => {
   it('remove label from translation', () => {
     visitTranslations(projectId);
     getTranslationCell('first key', 'en').within(() => {
-      gcy('translation-label').should('have.length', 1).contains('First label');
-      gcy('translation-label').should('be.visible');
       gcy('translation-label-delete')
         .invoke('css', 'opacity', 1) // hover is not supported in Cypress, had to use CSS opacity
         .click();

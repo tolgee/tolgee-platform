@@ -156,7 +156,6 @@ declare namespace DataCy {
         "assignee-search-select-popover" |
         "assignee-select" |
         "auto-avatar-img" |
-        "autocomplete-label-input" |
         "avatar-image" |
         "avatar-menu-open-button" |
         "avatar-remove-button" |

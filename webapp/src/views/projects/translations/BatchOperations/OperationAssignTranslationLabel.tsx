@@ -18,8 +18,8 @@ const StyledLabels = styled('div')`
   flex-wrap: wrap;
   align-items: center;
   overflow: hidden;
-  gap: 4px;
-  margin: 6px 6px;
+  gap: 6px;
+  padding: 6px 6px;
   position: relative;
   max-width: 450px;
 `;
@@ -91,7 +91,12 @@ export const OperationAssignTranslationLabel = ({
             onDelete={() => handleDelete(label)}
           />
         ))}
-        <LabelControl onSelectLabel={handleAddTag} existing={labels} />
+        <LabelControl
+          onSelectLabel={handleAddTag}
+          existing={labels}
+          menuAnchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          menuStyle={{ marginLeft: 8 }}
+        />
       </StyledLabels>
       <BatchOperationsSubmit
         loading={batchLoadable.isLoading}
