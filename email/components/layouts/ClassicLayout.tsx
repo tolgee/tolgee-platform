@@ -95,91 +95,95 @@ export default function ClassicLayout({
               <Row>
                 <Column>
                   <If condition="${isCloud}">
-                    <Container>
-                      <Row>
-                        <Column>
-                          <Text className="text-xs m-0">
-                            <LocalizedText
-                              keyName="footer-cloud-sent-by"
-                              defaultValue="🐭 Sent by Tolgee - Check out our <link>blog</link> and our socials! 🧀"
-                              demoParams={{
-                                link: (c) => (
-                                  <Link
-                                    className="text-inherit underline"
-                                    href="https://tolgee.io/blog"
-                                  >
-                                    {c}
-                                  </Link>
-                                ),
-                              }}
+                    <If.Then>
+                      <Container>
+                        <Row>
+                          <Column>
+                            <Text className="text-xs m-0">
+                              <LocalizedText
+                                keyName="footer-cloud-sent-by"
+                                defaultValue="🐭 Sent by Tolgee - Check out our <link>blog</link> and our socials! 🧀"
+                                demoParams={{
+                                  link: (c) => (
+                                    <Link
+                                      className="text-inherit underline"
+                                      href="https://tolgee.io/blog"
+                                    >
+                                      {c}
+                                    </Link>
+                                  ),
+                                }}
+                              />
+                            </Text>
+                          </Column>
+                        </Row>
+                        <Row className="w-3/4 mx-auto my-3">
+                          <Column>
+                            <SocialLink
+                              social="Twitter (X)"
+                              link="https://twitter.com/tolgee_i18n"
+                              resourceName="twitter-x.png"
                             />
-                          </Text>
-                        </Column>
-                      </Row>
-                      <Row className="w-3/4 mx-auto my-3">
-                        <Column>
-                          <SocialLink
-                            social="Twitter (X)"
-                            link="https://twitter.com/tolgee_i18n"
-                            resourceName="twitter-x.png"
-                          />
-                        </Column>
-                        <Column>
-                          <SocialLink
-                            social="Facebook"
-                            link="https://www.facebook.com/Tolgee.i18n"
-                            resourceName="facebook.png"
-                          />
-                        </Column>
-                        <Column>
-                          <SocialLink
-                            social="GitHub"
-                            link="https://github.com/tolgee"
-                            resourceName="github.png"
-                          />
-                        </Column>
-                        <Column>
-                          <SocialLink
-                            social="Slack community"
-                            link="https://tolg.ee/slack"
-                            resourceName="slack.png"
-                          />
-                        </Column>
-                        <Column>
-                          <SocialLink
-                            social="LinkedIn"
-                            link="https://www.linkedin.com/company/tolgee"
-                            resourceName="linkedin.png"
-                          />
-                        </Column>
-                      </Row>
-                      <Row>
-                        <Column>
-                          <Text className="text-xs m-0">
-                            <LocalizedText
-                              keyName="footer-cloud-address"
-                              defaultValue="Letovická 1421/22, Řečkovice, 621 00 Brno, Czech Republic"
+                          </Column>
+                          <Column>
+                            <SocialLink
+                              social="Facebook"
+                              link="https://www.facebook.com/Tolgee.i18n"
+                              resourceName="facebook.png"
                             />
-                          </Text>
-                        </Column>
-                      </Row>
-                    </Container>
-                    <Text className="text-xs m-0">
-                      <LocalizedText
-                        keyName="powered-by"
-                        defaultValue="Powered by <link>Tolgee</link> 🐁"
-                        demoParams={{
-                          link: (c) => (
-                            <Link
-                              href="https://tolgee.io"
-                              className="text-inherit underline"
-                            >
-                              {c}
-                            </Link>
-                          ),
-                        }}
-                      />
-                    </Text>
+                          </Column>
+                          <Column>
+                            <SocialLink
+                              social="GitHub"
+                              link="https://github.com/tolgee"
+                              resourceName="github.png"
+                            />
+                          </Column>
+                          <Column>
+                            <SocialLink
+                              social="Slack community"
+                              link="https://tolg.ee/slack"
+                              resourceName="slack.png"
+                            />
+                          </Column>
+                          <Column>
+                            <SocialLink
+                              social="LinkedIn"
+                              link="https://www.linkedin.com/company/tolgee"
+                              resourceName="linkedin.png"
+                            />
+                          </Column>
+                        </Row>
+                        <Row>
+                          <Column>
+                            <Text className="text-xs m-0">
+                              <LocalizedText
+                                keyName="footer-cloud-address"
+                                defaultValue="Letovická 1421/22, Řečkovice, 621 00 Brno, Czech Republic"
+                              />
+                            </Text>
+                          </Column>
+                        </Row>
+                      </Container>
+                    </If.Then>
+                    <If.Else>
+                      <Text className="text-xs m-0">
+                        <LocalizedText
+                          keyName="powered-by"
+                          defaultValue="Powered by <link>Tolgee</link> 🐁"
+                          demoParams={{
+                            link: (c) => (
+                              <Link
+                                href="https://tolgee.io"
+                                className="text-inherit underline"
+                              >
+                                {c}
+                              </Link>
+                            ),
+                          }}
+                        />
+                      </Text>
+                    </If.Else>
                   </If>
                 </Column>
               </Row>

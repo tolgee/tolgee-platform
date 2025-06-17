@@ -16,16 +16,15 @@
 
 package io.tolgee.email
 
-import com.transferwise.icu.ICUMessageSource
 import com.transferwise.icu.ICUReloadableResourceBundleMessageSource
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.ApplicationContext
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Scope
 import org.thymeleaf.TemplateEngine
-import org.thymeleaf.spring6.SpringTemplateEngine
+import org.thymeleaf.messageresolver.IMessageResolver
+import org.thymeleaf.spring6.messageresolver.SpringMessageResolver
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.thymeleaf.templateresolver.ITemplateResolver
 import org.thymeleaf.templateresolver.StringTemplateResolver
@@ -42,33 +41,37 @@ class EmailTemplateConfig {
     return templateResolver
   }
 
-  @Bean("emailMessageSource")
-  fun messageSource(emailTemplateUtils: EmailTemplateUtils): ICUMessageSource {
+  @Bean("emailIcuMessageSource")
+  fun messageSource(): MessageSource {
     val messageSource = ICUReloadableResourceBundleMessageSource()
     messageSource.setBasenames("email-i18n/messages", "email-i18n-test/messages")
     messageSource.setDefaultEncoding("UTF-8")
     messageSource.setDefaultLocale(Locale.ENGLISH)
-    return EmailMessageSource(messageSource, emailTemplateUtils)
+    return messageSource
+  }
+
+  @Bean("emailMessageResolver")
+  fun messageResolver(
+    @Qualifier("emailIcuMessageSource") messageSource: MessageSource,
+    applicationContext: ApplicationContext // This is certainly not ideal, but cyclic dependencies otherwise...
+  ): IMessageResolver {
+    val messageResolver = SpringMessageResolver()
+    messageResolver.messageSource = messageSource
+
+    return EmailMessageResolver(messageResolver, applicationContext)
   }
 
   @Bean("emailTemplateEngine")
   fun templateEngine(
     @Qualifier("emailTemplateResolver") templateResolver: ITemplateResolver,
-    @Qualifier("emailMessageSource") messageSource: MessageSource,
+    @Qualifier("emailMessageResolver") messageResolver: IMessageResolver,
   ): TemplateEngine {
     val stringTemplateResolver = StringTemplateResolver()
-    stringTemplateResolver.resolvablePatternSpec.addPattern("<!DOCTYPE*")
+    stringTemplateResolver.resolvablePatternSpec.addPattern("<!--@frag-->*")
 
-    val templateEngine = SpringTemplateEngine()
+    val templateEngine = EmailTemplateEngine(messageResolver)
     templateEngine.enableSpringELCompiler = true
     templateEngine.templateResolvers = setOf(stringTemplateResolver, templateResolver)
-    templateEngine.setTemplateEngineMessageSource(messageSource)
     return templateEngine
-  }
-
-  @Bean("emailTemplateUtils")
-  @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-  fun emailTemplateUtils(): EmailTemplateUtils {
-    return EmailTemplateUtils
   }
 }
