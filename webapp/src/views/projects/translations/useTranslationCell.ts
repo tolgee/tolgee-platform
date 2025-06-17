@@ -20,6 +20,7 @@ type LanguageModel = components['schemas']['LanguageModel'];
 
 export type SaveProps = {
   preventTaskResolution?: boolean;
+  suggestionOnly?: boolean;
   after?: AfterCommand;
 };
 
@@ -85,10 +86,12 @@ export const useTranslationCell = ({
     });
   };
 
-  const handleSave = ({ after, preventTaskResolution }: SaveProps) => {
+  const handleSave = (props?: SaveProps) => {
+    const { after, preventTaskResolution, suggestionOnly } = props || {};
     changeField({
       after,
       preventTaskResolution,
+      suggestionOnly,
       onSuccess: () => onSaveSuccess?.(value),
     });
   };
@@ -161,7 +164,7 @@ export const useTranslationCell = ({
   };
 
   const setState = () => {
-    if (!translation) {
+    if (!translation?.id) {
       return;
     }
     const nextState = TRANSLATION_STATES[translation.state]?.next;
@@ -169,7 +172,7 @@ export const useTranslationCell = ({
       setTranslationState({
         state: nextState,
         keyId,
-        translationId: translation!.id,
+        translationId: translation!.id!,
         language: langTag!,
       });
     }
@@ -184,10 +187,24 @@ export const useTranslationCell = ({
     satisfiesLanguageAccess('translations.state-edit', language.id);
 
   const disabled = translation?.state === 'DISABLED';
+
+  const canSuggest = satisfiesLanguageAccess(
+    'translations.suggest',
+    language.id
+  );
+
+  const hasEditPermission =
+    satisfiesLanguageAccess('translations.edit', language.id) ||
+    (assignedTask?.userAssigned && assignedTask.type === 'TRANSLATE');
+
+  const canEditReviewedTranslation =
+    project.suggestionsMode === 'ENFORCED'
+      ? translation?.state !== 'REVIEWED' || canSuggest
+      : true;
+
   const editEnabled =
-    ((assignedTask?.userAssigned && assignedTask.type === 'TRANSLATE') ||
-      satisfiesLanguageAccess('translations.edit', language.id)) &&
-    !disabled;
+    hasEditPermission && canEditReviewedTranslation && !disabled;
+
   const aiPlaygroundData = useTranslationsSelector(
     (c) => c.aiPlaygroundData?.[keyId]?.[language.id]
   );
@@ -196,9 +213,16 @@ export const useTranslationCell = ({
     (c) => c.aiPlaygroundEnabled
   );
 
-  const editable = editEnabled && !disabled;
+  const cellClickable =
+    ((editEnabled || canSuggest) && !isEditing) || aiPlaygroundEnabled;
 
-  const cellClickable = (editable && !isEditing) || aiPlaygroundEnabled;
+  const prefilteredTask = useTranslationsSelector((c) =>
+    c.prefilteredTask?.language.id === language.id
+      ? c.prefilteredTask
+      : undefined
+  );
+
+  const tasks = keyData.tasks?.filter((t) => t.languageTag === language.tag);
 
   return {
     keyId,
@@ -221,6 +245,7 @@ export const useTranslationCell = ({
     keyData,
     canChangeState,
     editEnabled,
+    canSuggest,
     translation,
     disabled,
     baseValue,
@@ -228,6 +253,7 @@ export const useTranslationCell = ({
     aiPlaygroundData,
     aiPlaygroundEnabled,
     cellClickable,
-    editable,
+    prefilteredTask,
+    tasks,
   };
 };

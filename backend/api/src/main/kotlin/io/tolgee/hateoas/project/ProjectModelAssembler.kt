@@ -60,6 +60,7 @@ class ProjectModelAssembler(
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
       icuPlaceholders = view.icuPlaceholders,
+      suggestionsMode = view.suggestionsMode,
     )
   }
 

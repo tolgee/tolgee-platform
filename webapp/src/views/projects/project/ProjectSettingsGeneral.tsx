@@ -107,6 +107,7 @@ export const ProjectSettingsGeneral = () => {
               ? undefined
               : data.defaultNamespaceId,
           icuPlaceholders: project.icuPlaceholders,
+          suggestionsMode: project.suggestionsMode,
         },
       },
     });

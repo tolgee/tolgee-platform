@@ -176,6 +176,10 @@ class LanguageService(
     return self.getProjectLanguages(projectId).singleOrNull { it.id == languageId }
   }
 
+  fun findEntity(projectId: Long, tag: String): Language? {
+    return languageRepository.find(projectId, tag)
+  }
+
   fun findEntity(id: Long): Language? {
     return languageRepository.find(id)
   }

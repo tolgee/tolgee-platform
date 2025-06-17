@@ -62,9 +62,10 @@ class SetTranslationTextUtil(
     key: Key,
     language: Language,
     text: String?,
-  ): Translation {
+    state: TranslationState? = null,
+    ): Translation {
     val translation = translationService.getOrCreate(key, language)
-    setTranslationText(translation, text)
+    setTranslationText(translation, text, state)
     key.translations.add(translation)
     return translation
   }
@@ -72,14 +73,16 @@ class SetTranslationTextUtil(
   fun setTranslationText(
     translation: Translation,
     text: String?,
-  ): Translation {
-    setTranslationTextNoSave(translation, text)
+    state: TranslationState? = null,
+    ): Translation {
+    setTranslationTextNoSave(translation, text, state)
     return translationService.save(translation)
   }
 
   fun setTranslationTextNoSave(
     translation: Translation,
     text: String?,
+    state: TranslationState? = null,
   ) {
     val hasTextChanged = translation.text != text
 
@@ -94,9 +97,10 @@ class SetTranslationTextUtil(
     translation.state =
       when {
         translation.state == TranslationState.DISABLED -> TranslationState.DISABLED
+        text.isNullOrEmpty() -> TranslationState.UNTRANSLATED
+        state != null -> state
         translation.isUntranslated && hasText -> TranslationState.TRANSLATED
         hasTextChanged -> TranslationState.TRANSLATED
-        text.isNullOrEmpty() -> TranslationState.UNTRANSLATED
         else -> translation.state
       }
   }
