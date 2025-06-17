@@ -62,10 +62,7 @@ class EmailService(
     val tec = ThymeleafEvaluationContext(applicationContext, null)
     context.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME, tec)
 
-    // Do two passes, so Thymeleaf expressions rendered by messages can get processed
-    val firstPass = templateEngine.process(template, context)
-    val html = templateEngine.process(firstPass, context)
-
+    val html = templateEngine.process(template, context)
     val subject = extractEmailTitle(html)
     sendEmail(recipient, subject, html, attachments)
   }

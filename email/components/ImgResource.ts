@@ -30,16 +30,16 @@ while (
 
 const RESOURCES_FOLDER = join(root, 'resources');
 
-type Props = Omit<ImgProps, 'src'> & {
-  resourceName: string;
-  src?: string;
-};
+type Props = Omit<ImgProps, 'src' | 'srcSet'> &
+  React.Attributes & {
+    resourceName: string;
+    src?: string;
+  };
 
 export default function ImgResource(props: Props) {
   const file = join(RESOURCES_FOLDER, props.resourceName);
 
-  const newProps = { ...props } as Props;
-  delete newProps.resourceName;
+  const { resourceName: _a, ...newProps } = props as Props;
   delete newProps.src;
 
   if (process.env.NODE_ENV === 'production') {

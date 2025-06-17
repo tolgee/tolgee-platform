@@ -21,21 +21,29 @@ def emailPath = "${rootDir}/email"
 tasks.register('copyEmailResources', Copy) {
     from "${emailPath}/resources"
     // Not a typo: static so Spring picks it up, then static so the url is /static/emails
-    into "${project.projectDir}/build/generated/resources/static/static/emails/."
+    into "${project.projectDir}/build/generated/resources/main/static/static/emails"
 }
 
 tasks.register('copyEmailTemplates', Copy) {
     dependsOn 'buildEmails'
 
-    from "${emailPath}/dist/email-templates"
-    into "${project.projectDir}/build/generated/resources/email-templates"
+    from "${emailPath}/out/html"
+    into "${project.projectDir}/build/generated/resources/main/email-templates"
+    exclude "__tests__"
+}
+
+tasks.register('copyTestEmailTemplates', Copy) {
+    dependsOn 'buildTestEmails'
+
+    from "${emailPath}/out/__tests__"
+    into "${project.projectDir}/build/generated/resources/test/email-templates"
 }
 
 tasks.register('copyEmailLocaleData', Copy) {
     dependsOn 'updateEmailTranslations'
 
     from "${emailPath}/i18n"
-    into "${project.projectDir}/build/generated/resources/email-i18n"
+    into "${project.projectDir}/build/generated/resources/main/email-i18n"
 }
 
 tasks.register('installEmailDeps', Exec) {
@@ -61,7 +69,22 @@ tasks.register('buildEmails', Exec) {
     inputs.file("${emailPath}/tailwind.config.ts")
     inputs.file("${emailPath}/package.json")
     inputs.file("${emailPath}/package-lock.json")
-    outputs.dir("${emailPath}/dist")
+    outputs.dir("${emailPath}/out/html")
+}
+
+tasks.register('buildTestEmails', Exec) {
+    dependsOn 'installEmailDeps'
+    onlyIf { System.getenv("SKIP_EMAIL_BUILD") != "true" }
+
+    workingDir = emailPath
+    commandLine npmCommandName, "run", "export:test"
+
+    inputs.dir("${emailPath}/emails")
+    inputs.dir("${emailPath}/components")
+    inputs.file("${emailPath}/tailwind.config.ts")
+    inputs.file("${emailPath}/package.json")
+    inputs.file("${emailPath}/package-lock.json")
+    outputs.dir("${emailPath}/out/__tests__")
 }
 
 tasks.register('updateEmailTranslations', Exec) {
@@ -73,4 +96,6 @@ tasks.register('updateEmailTranslations', Exec) {
 
     workingDir = emailPath
     commandLine npmCommandName, "run", "tg:pull"
+
+    outputs.dir("${emailPath}/i18n")
 }

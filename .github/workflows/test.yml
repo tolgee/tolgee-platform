@@ -346,12 +346,36 @@ jobs:
       - name: Run ktlint
         run: ./gradlew ktlintCheck
 
+  email-code-checks:
+    name: Email templates static check 🪲
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: 'false'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./email
+
+      - name: TypeScript
+        run: npm run tsc
+        working-directory: ./email
+
+      - name: ESLint
+        run: npm run eslint
+        working-directory: ./email
+
   everything-passed:
     name: Everything passed 🎉
     needs:
       - backend-build
       - backend-test
       - backend-code-checks
+      - email-code-checks
       - frontend-build
       - frontend-code-check
       - e2e
