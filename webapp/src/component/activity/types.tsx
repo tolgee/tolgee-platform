@@ -47,7 +47,8 @@ export type EntityEnum =
   | 'ContentDeliveryConfig'
   | 'WebhookConfig'
   | 'ContentStorage'
-  | 'Task';
+  | 'Task'
+  | 'TranslationSuggestion';
 
 export type FieldTypeEnum =
   | 'text'
@@ -166,7 +167,7 @@ export type Activity = {
 
 export type ActivityOptions = {
   label: (params?: TranslateParams) => React.ReactElement;
-  description?: (data: ProjectActivityModel) => string;
+  description?: (data: ProjectActivityModel) => string | undefined;
   entities?: Partial<Record<EntityEnum, boolean | string[]>>;
   titleReferences?: string[];
   compactFieldCount?: number;

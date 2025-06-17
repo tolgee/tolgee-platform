@@ -62,6 +62,7 @@ class ProjectBuilder(
     val taskKeys = mutableListOf<TaskKeyBuilder>()
     val prompts = mutableListOf<PromptBuilder>()
     val aiPlaygroundResults = mutableListOf<AiPlaygroundResultBuilder>()
+    val suggestions = mutableListOf<SuggestionBuilder>()
   }
 
   var data = DATA()

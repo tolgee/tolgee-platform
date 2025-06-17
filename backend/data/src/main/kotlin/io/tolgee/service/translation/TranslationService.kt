@@ -191,8 +191,9 @@ class TranslationService(
     key: Key,
     language: Language,
     text: String?,
+    state: TranslationState? = null,
   ): Translation {
-    return SetTranslationTextUtil(applicationContext).setTranslationText(key, language, text)
+    return SetTranslationTextUtil(applicationContext).setTranslationText(key, language, text, state)
   }
 
   fun setTranslationText(

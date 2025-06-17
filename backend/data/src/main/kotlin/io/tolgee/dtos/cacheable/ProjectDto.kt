@@ -2,6 +2,7 @@ package io.tolgee.dtos.cacheable
 
 import io.tolgee.api.ISimpleProject
 import io.tolgee.model.Project
+import io.tolgee.model.enums.SuggestionsMode
 import java.io.Serializable
 
 data class ProjectDto(
@@ -14,6 +15,7 @@ data class ProjectDto(
   override var avatarHash: String? = null,
   override var icuPlaceholders: Boolean,
   var useNamespaces: Boolean,
+  var suggestionsMode: SuggestionsMode,
 ) : Serializable, ISimpleProject {
   companion object {
     fun fromEntity(entity: Project) =
@@ -27,6 +29,7 @@ data class ProjectDto(
         avatarHash = entity.avatarHash,
         icuPlaceholders = entity.icuPlaceholders,
         useNamespaces = entity.useNamespaces,
+        suggestionsMode = entity.suggestionsMode,
       )
   }
 }

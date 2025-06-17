@@ -25,7 +25,7 @@ export const RoleLanguages: React.FC<Props> = ({
   allLangs,
   disabled,
 }) => {
-  const show = ['REVIEW', 'TRANSLATE'].includes(state.role!);
+  const show = ['SUGGEST', 'REVIEW', 'TRANSLATE'].includes(state.role!);
 
   const handleSelect = (values: number[]) => {
     onChange({

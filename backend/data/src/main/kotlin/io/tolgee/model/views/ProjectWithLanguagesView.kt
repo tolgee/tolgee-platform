@@ -3,6 +3,7 @@ package io.tolgee.model.views
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.key.Namespace
 
 open class ProjectWithLanguagesView(
@@ -17,6 +18,7 @@ open class ProjectWithLanguagesView(
   override val organizationRole: OrganizationRoleType?,
   override val directPermission: Permission?,
   override var icuPlaceholders: Boolean,
+  override var suggestionsMode: SuggestionsMode,
   val permittedLanguageIds: List<Long>?,
 ) : ProjectView {
   companion object {
@@ -37,6 +39,7 @@ open class ProjectWithLanguagesView(
         directPermission = view.directPermission,
         permittedLanguageIds = permittedLanguageIds,
         icuPlaceholders = view.icuPlaceholders,
+        suggestionsMode = view.suggestionsMode,
       )
     }
   }
