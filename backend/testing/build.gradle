@@ -39,11 +39,6 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "kotlin-allopen"
 
-repositories {
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
-}
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)

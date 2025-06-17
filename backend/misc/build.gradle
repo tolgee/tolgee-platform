@@ -18,10 +18,6 @@ group = 'io.tolgee'
 apply plugin: 'java'
 apply plugin: 'idea'
 
-repositories {
-    mavenCentral()
-}
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
