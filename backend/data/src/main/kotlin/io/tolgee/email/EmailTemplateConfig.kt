@@ -53,7 +53,8 @@ class EmailTemplateConfig {
   @Bean("emailMessageResolver")
   fun messageResolver(
     @Qualifier("emailIcuMessageSource") messageSource: MessageSource,
-    applicationContext: ApplicationContext // This is certainly not ideal, but cyclic dependencies otherwise...
+    // This is certainly not ideal, but cyclic dependencies otherwise...
+    applicationContext: ApplicationContext
   ): IMessageResolver {
     val messageResolver = SpringMessageResolver()
     messageResolver.messageSource = messageSource
