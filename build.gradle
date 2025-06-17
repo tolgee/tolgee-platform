@@ -38,10 +38,6 @@ if (System.getenv().containsKey("VERSION")) {
 
 apply plugin: 'idea'
 
-repositories {
-    mavenCentral()
-}
-
 def unpackTarget = "${project.buildDir}/dependency"
 
 project(':server-app').afterEvaluate {
@@ -66,7 +62,6 @@ project(':server-app').afterEvaluate {
         }
     }
 
-    apply from: "./gradle/email.gradle"
     apply from: "./gradle/webapp.gradle"
     apply from: "./gradle/docker.gradle"
     apply from: "./gradle/e2e.gradle"

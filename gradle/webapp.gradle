@@ -8,8 +8,6 @@ task copyDist(type: Copy) {
     def toDir = "${project.projectDir}/build/dependency/BOOT-INF/classes/static/."
     from fromDir
     into toDir
-    inputs.dir(fromDir)
-    outputs.dir(toDir)
     mustRunAfter unpack
     dependsOn "buildWebapp"
 }

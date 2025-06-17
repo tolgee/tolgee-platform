@@ -6,8 +6,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-    }
 }
 
 plugins {
@@ -52,11 +50,6 @@ apply plugin: "kotlin-allopen"
 apply plugin: "kotlin-kapt" // kapt still needed for Hibernate -- https://hibernate.atlassian.net/browse/HHH-15376
 apply plugin: 'kotlin'
 apply plugin: 'org.hibernate.orm'
-
-repositories {
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
-}
 
 idea {
     module {
@@ -114,7 +107,10 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-    implementation 'com.github.transferwise:spring-icu:0.3.0'
+    implementation('com.github.transferwise:spring-icu:0.3.0') {
+        exclude group: 'org.springframework', module: 'spring-context'
+        exclude group: 'com.ibm.icu', module: 'icu4j'
+    }
 
     /**
      * DB
@@ -176,7 +172,11 @@ dependencies {
     implementation libs.jacksonModuleKotlin
     implementation 'net.datafaker:datafaker:2.4.4'
     implementation 'jaxen:jaxen:1.2.0'
-    implementation(libs.mailjet)
+    implementation(libs.mailjet) {
+        // (Formerly) not OSS, still unclear licensing status, conflicts with Vaadin used by Spring
+        exclude group: "org.json", module: "json"
+    }
+    implementation libs.vaadinJson
     implementation libs.hibernateTypes
     liquibaseRuntime libs.hibernateTypes
     implementation 'com.eatthepath:java-otp:0.4.0'
@@ -261,10 +261,6 @@ dependencyManagement {
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
-}
-
-tasks.named('compileJava') {
-    inputs.files(tasks.named('processResources'))
 }
 
 tasks.named('processResources') {
