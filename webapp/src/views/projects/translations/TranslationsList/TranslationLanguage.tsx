@@ -15,9 +15,7 @@ const StyledLanguage = styled('div')`
   font-size: 14px;
 `;
 
-const StyledLanguageName = styled('div')`
-  padding-right: 8px;
-`;
+const StyledLanguageName = styled('div')``;
 
 type Props = {
   language: LanguageModel;
