@@ -27,6 +27,13 @@ export type TranslatedText = {
   text: string;
 };
 
+type ValidNode = Exclude<React.ReactNode, React.ReactPortal | Promise<unknown>>;
+
+export type MessageProps = Record<
+  string,
+  string | number | bigint | boolean | object | ((c: ValidNode) => ValidNode)
+>;
+
 const GLOBALS = {
   isCloud: true,
   instanceQualifier: 'Tolgee',
@@ -38,11 +45,16 @@ const SeenIcuXmlIds = new Set<string>();
 
 // https://stackoverflow.com/a/55387306
 const interleave = (arr: any[], thing: any): any[] =>
-  [].concat(...arr.map((n) => [n, thing])).slice(0, -1);
+  ([] as any[]).concat(...arr.map((n) => [n, thing])).slice(0, -1);
 
-function addBrToTranslations(
-  arg: string | ReactElement | (string | ReactElement)[]
-) {
+function addBrToTranslations(arg: ValidNode): ValidNode {
+  // noinspection SuspiciousTypeOfGuard -- React.Fragment gate
+  if (
+    arg == null ||
+    ['string', 'number', 'boolean', 'bigint'].includes(typeof arg)
+  )
+    return arg;
+
   if (typeof arg === 'string') {
     return interleave(
       arg.split('\n'),
@@ -54,7 +66,13 @@ function addBrToTranslations(
     return arg.map((a) => addBrToTranslations(a));
   }
 
-  if (arg.props && typeof arg.props === 'object' && 'children' in arg.props) {
+  if (
+    typeof arg === 'object' &&
+    'props' in arg &&
+    arg.props &&
+    typeof arg.props === 'object' &&
+    'children' in arg.props
+  ) {
     return React.cloneElement(arg as any, {
       children: addBrToTranslations(arg.props.children as any),
     });
@@ -63,7 +81,7 @@ function addBrToTranslations(
   return arg;
 }
 
-function formatDev(string?: string, demoParams?: Record<string, any>) {
+function formatDev(string: string, demoParams?: Record<string, any>) {
   const formatted = new IntlMessageFormat(string, 'en-US').format({
     ...GLOBALS,
     ...demoParams,
@@ -94,43 +112,30 @@ function processMessageElements(
 
     if (node.type === TYPE.tag) {
       // The easy case: it's not a fancy tag - nothing to do
-      if (!(node.value in demoParams)) continue;
+      if (!demoParams || !(node.value in demoParams)) continue;
 
       // It's a fancy tag (sigh): make a fragment
-      const templateId = `${id}--${node.value}`;
+      const fragmentId = `${id}--${node.value}`;
       const [tagFrags, tagArgs] = processMessageElements(
-        templateId,
+        fragmentId,
         node.children
       );
 
       tagArgs.forEach((a) => stringArguments.add(a));
-      if (!SeenIcuXmlIds.has(templateId)) {
-        SeenIcuXmlIds.add(templateId);
+      if (!SeenIcuXmlIds.has(fragmentId)) {
+        SeenIcuXmlIds.add(fragmentId);
 
-        // The template will be rendered twice.
-        // First time for the main template rendering
-        // Second time for rendering th:replace of messages
-        // This use of utext allows to trick Thymeleaf to create the fragment
-        // during the first pass such that it exists in the result html, and to
-        // use it during the second pass as the messages will reference it.
         fragments.push(
           ...tagFrags,
-          React.createElement('th:block', {
-            key: `tag-before-${templateId}`,
-            'th:utext': `'<th:block th:fragment="${templateId}(_children)"><th:block th:if="\${_children}">'`,
-          }),
-          React.cloneElement(
+          React.createElement(
+            'th:block',
+            { key: fragmentId, 'th:fragment': `${fragmentId}(_children)` },
             demoParams[node.value](
               React.createElement('th:block', {
-                'th:utext': '\'<div th:replace="${_children} ?: ~{}"></div>\'',
+                'th:replace': '${_children} ?: ~{}',
               })
-            ),
-            { key: templateId }
-          ),
-          React.createElement('th:block', {
-            key: `tag-after-${templateId}`,
-            'th:utext': `'</th:block></th:block>'`,
-          })
+            )
+          )
         );
       }
 
@@ -149,7 +154,7 @@ function renderTranslatedText(
   defaultString: string,
   demoParams?: Record<string, any>
 ) {
-  const id = `intl-${key.replace(/\./g, '__')}`;
+  const id = `intl-${key.replace(/\./g, '--')}`;
   const intl = new IntlMessageFormat(defaultString, 'en-US');
   const ast = intl.getAst();
 

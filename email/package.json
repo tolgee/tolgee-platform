@@ -4,20 +4,25 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "tsc": "tsc --noEmit",
     "dev": "email dev",
     "build": "email build",
-    "export": "cross-env NODE_ENV=production email export --outDir dist/email-templates",
+    "export": "cross-env NODE_ENV=production email export --outDir out/html",
     "prettier": "prettier --write ./emails ./components ./.config",
     "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives ./emails ./components ./.config",
     "tg:pull": "tolgee pull",
     "tg:push": "tolgee push",
-    "tg:sync": "tolgee sync"
+    "tg:sync": "tolgee sync",
+    "dev:test": "email dev --dir emails/__tests__",
+    "build:test": "email build --dir emails/__tests__",
+    "export:test": "cross-env NODE_ENV=production email export --dir emails/__tests__ --outDir out/__tests__"
   },
   "devDependencies": {
     "@formatjs/icu-messageformat-parser": "^2.11.2",
     "@react-email/components": "0.0.41",
     "@swc/core": "^1.11.31",
     "@tolgee/cli": "^2.12.1",
+    "@types/html-to-text": "^9.0.4",
     "@types/node": "^22.15.30",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.6",

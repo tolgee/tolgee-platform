@@ -29,23 +29,53 @@ export default function If({
 }: Props) {
   const children = Array.isArray(_children) ? _children : [_children];
 
+  if (children[0].type !== If.Then) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      'Warning: not using <If.Then /> as first child of <If /> is discouraged.'
+    );
+  }
+
+  if (children[1].type !== If.Else) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      'Warning: not using <If.Else /> as second child of <If /> is discouraged.'
+    );
+  }
+
   if (process.env.NODE_ENV === 'production') {
-    const trueCase = React.cloneElement(children[0], {
-      key: 'true-case',
-      'th:if': condition,
-    });
+    const trueCase = React.createElement(
+      'th:block',
+      {
+        key: 'true-case',
+        'th:if': condition,
+      },
+      children[0]
+    );
 
-    const falseCase =
-      children.length === 2
-        ? React.cloneElement(children[1], {
-            key: 'false-case',
-            'th:unless': condition,
-          })
-        : null;
+    const falseCase = React.createElement(
+      'th:block',
+      {
+        key: 'false-case',
+        'th:unless': condition,
+      },
+      children[1]
+    );
 
-    return [trueCase, falseCase];
+    return [trueCase, children.length === 2 ? falseCase : null];
   }
 
   if (demoValue === false) return children[1];
   return children[0];
 }
+
+function IfThen(props: React.Attributes) {
+  return React.createElement(React.Fragment, props);
+}
+
+function IfElse(props: React.Attributes) {
+  return React.createElement(React.Fragment, props);
+}
+
+If.Then = IfThen;
+If.Else = IfElse;

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import type { MessageProps } from './translate.js';
+
 import _t from './translate.js';
 
 type Props = {
   keyName: string;
   defaultValue: string;
-  demoParams?: Record<string, any>;
+  demoParams?: MessageProps;
 };
 
 export default function LocalizedText(props: Props) {

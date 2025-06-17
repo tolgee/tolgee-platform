@@ -16,12 +16,12 @@
 
 import * as React from 'react';
 import { Hr, Link, Text } from '@react-email/components';
-import ClassicLayout from '../components/layouts/ClassicLayout';
-import TolgeeLink from '../components/atoms/TolgeeLink';
-import _LocalizedText from '../components/LocalizedText';
-import Var from '../components/Var';
-import If from '../components/If';
-import For from '../components/For';
+import ClassicLayout from '../../components/layouts/ClassicLayout';
+import TolgeeLink from '../../components/atoms/TolgeeLink';
+import _LocalizedText from '../../components/LocalizedText';
+import Var from '../../components/Var';
+import If from '../../components/If';
+import For from '../../components/For';
 
 export default function TestEmail() {
   return (
@@ -40,7 +40,7 @@ export default function TestEmail() {
           keyName="email-test-string"
           defaultValue="Testing ICU strings -- {testVar}"
           demoParams={{
-            link: (c: string) => (
+            link: (c) => (
               <TolgeeLink href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
                 {c}
               </TolgeeLink>
@@ -55,8 +55,12 @@ export default function TestEmail() {
       <Text>
         <span>Was `testVar` equal to "meow" : </span>
         <If condition="${testVar == 'meow'}">
-          <span>yes</span>
-          <span>no</span>
+          <If.Then>
+            <span>yes</span>
+          </If.Then>
+          <If.Else>
+            <span>no</span>
+          </If.Else>
         </If>
       </Text>
       <ul className="text-sm">

@@ -19,5 +19,6 @@ import 'react';
 declare module 'react' {
   interface Attributes {
     [k: `th:${string}`]: unknown;
+    [k: `data-th-${string}`]: unknown;
   }
 }
