@@ -17,7 +17,7 @@ runs:
         tar --zstd -cf ~/backend-development.tar.zst ./backend/development/build
         tar --zstd -cf ~/ee-backend-app.tar.zst ./ee/backend/app/build
         tar --zstd -cf ~/ee-backend-tests.tar.zst ./ee/backend/tests/build
-        tar --zstd -cf ~/backend-email.tar.zst ./email/dist
+        tar --zstd -cf ~/backend-email.tar.zst ./email/out
 
     - uses: actions/upload-artifact@v4
       with:
