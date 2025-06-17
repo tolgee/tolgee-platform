@@ -257,7 +257,7 @@ bootJar {
 
 def unpackTarget = "build/dependency"
 
-task unpack(type: Copy) {
+tasks.register('unpack', Copy) {
     from(zipTree(project.tasks.findByName("bootJar").outputs.files.singleFile))
     into(unpackTarget)
     if (System.getenv("SKIP_SERVER_BUILD") != "true") {
@@ -265,7 +265,7 @@ task unpack(type: Copy) {
     }
 }
 
-task addVersionFile(type: Task) {
+tasks.register('addVersionFile', Task) {
     mustRunAfter unpack
     doLast {
         def file = new File("${project.buildDir}/dependency/BOOT-INF/classes/.VERSION")
