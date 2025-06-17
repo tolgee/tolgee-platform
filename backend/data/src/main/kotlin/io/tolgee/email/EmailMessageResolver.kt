@@ -46,55 +46,44 @@ class EmailMessageResolver(
     return postProcessMessage(message, context, key)
   }
 
-  // The likelihood of overflowing a 64-bit number is virtually zero
-  // Don't really care if some dupes happen across threads, it'll be good enough
-  private var counter = 0L
-  private fun makeRef(): String = "intl-ref-${++counter}"
-
   private fun postProcessMessage(message: String, context: ITemplateContext, code: String): String {
-    val templateId = context.templateData.templateResource.baseName
-    var str = message
-
-    // Dumb heuristic to skip XML parsing for trivial cases, to improve performance.
-    if (str.contains('<') && str.contains('>')) {
-      var delta = 0
-      var found = false
+    // Dumb heuristic to skip XML parsing for trivial cases, to (hopefully) improve performance.
+    if (message.contains('<') && message.contains('>')) {
+      var counter = 0L
 
       val stack = mutableListOf(code.replace(".", "--"))
-      val m = XML_PATTERN.matcher(str)
+      val m = XML_PATTERN.matcher(message)
 
-      while (m.find()) {
-        found = true
-        if (m.group(1) == null) {
+      // Does not contain lightweight XML references. Skip.
+      if (!m.find()) message.replace("\n", "<br/>")
+
+      val template = m.replaceAll {
+        if (it.group(1) == null) {
+          // Opening tag
           stack.add(m.group(2))
 
-          val ref = makeRef()
+          val ref = "intl-ref-${++counter}"
           val fragName = "intl-${stack.joinToString("--")}"
-          val fragExpr = "~{ $templateId :: $fragName (~{ :: $ref }) }"
-          val replacement =
-            "<th:block th:replace=\"$fragExpr\">" +
-            "<th:block th:ref=\"$ref\">"
+          val fragExpr = "~{ :: $fragName (~{ :: $ref }) }"
 
-          str = str.replaceRange(delta + m.start(), delta + m.end(), replacement)
-          delta += replacement.length - (m.end() - m.start())
+          "<th:block th:replace=\"$fragExpr\"><th:block th:ref=\"$ref\">"
         } else {
+          // Closing tag
           stack.removeLast()
 
-          val replacement = "</th:block></th:block>"
-          str = str.replaceRange(delta + m.start(), delta + m.end(), replacement)
-          delta += replacement.length - (m.end() - m.start())
+          "</th:block></th:block>"
         }
       }
 
-      if (found) {
-        return templateEngine.process("<!--@frag--> $str", context).replace("\n", "<br/>")
-      }
+      return templateEngine.process("<!--@frag--> $template", context).replace("\n", "<br/>")
     }
 
-    return str.replace("\n", "<br/>")
+    return message.replace("\n", "<br/>")
   }
 
   companion object {
+    // KISS. Matches attribute-less, non-self-closing tags.
+    // Reference: https://formatjs.github.io/docs/core-concepts/icu-syntax#rich-text-formatting
     private val XML_PATTERN = Pattern.compile("<(/)?([a-zA-Z-]+)>")
   }
 }
