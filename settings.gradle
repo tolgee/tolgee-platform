@@ -88,6 +88,31 @@ dependencyResolutionManagement {
             library('opentelemetryApi', 'io.opentelemetry', 'opentelemetry-api').version(opentelemetryApiVersion)
             library('opentelemetryContext', 'io.opentelemetry', 'opentelemetry-context').version(opentelemetryApiVersion)
             library('opentelemetryExtensionKotlin', 'io.opentelemetry', 'opentelemetry-extension-kotlin').version(opentelemetryApiVersion)
+            library('vaadinJson', "com.vaadin.external.google:android-json:0.0.20131108.vaadin1")
+        }
+    }
+
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        def jitpackDependencies = [
+            "com.github.transferwise"
+        ]
+
+        mavenCentral() {
+            content {
+                jitpackDependencies.forEach {
+                    excludeGroup(it)
+                }
+            }
+        }
+
+        maven {
+            url 'https://jitpack.io'
+            content {
+                jitpackDependencies.forEach {
+                    includeGroup(it)
+                }
+            }
         }
     }
 }
