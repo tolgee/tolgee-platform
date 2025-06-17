@@ -84,6 +84,9 @@ The strings are written using a format similar to the familiar Tolgee ICU, via [
 (see [MessageFormat](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/MessageFormat.html)). A simple but working post-processing step by the custom message source adds support for
 FormatJS-like XML within the message.
 
+> [!TIP]
+> `b`, `i`, `u`, `em`, and `strong` tags are pre-configured and will work out-of-the-box without special config.
+
 ICU arguments are pulled from the template variables. To access a dotted key, such as `item.name` use a double
 underscore: `item__name`.
 
@@ -92,9 +95,9 @@ The `<LocalizedText />` takes the following properties:
 - `defaultValue` (required): Default string to use
   - Will be used by the CLI to push default values when pushing new keys, and during preview
   - Used to detect which XML tags and variables the message expects, to build the Thymeleaf template accordingly
-- `demoProps` (required¹): Demo properties to use when rendering the string
+- `demoParams` (required¹): Demo properties to use when rendering the string
   - When previewing, the ICU string will be rendered using these values, so it is representative of a "real" email
-  - If demo props are not specified, the email will fail to render both in preview and at build-time
+  - If demo props and tag renderers are not specified, the email will fail to render both in preview and at build-time
   - ¹It can be unset if there are no props in the string
 
 The `t()` function (and `t.raw()`) takes the same properties, taking them as arguments in the order they're described
@@ -108,7 +111,7 @@ here.
 <LocalizedText
   keyName="hello"
   defaultValue="Hello {name}!"
-  demoProps={{
+  demoParams={{
     name: 'Bob'
   }}
 />
@@ -159,7 +162,7 @@ The component must have exactly one child; to render multiple nodes make sure to
 
 This component receives the following properties:
 - `each` (required): The [Thymeleaf iterator expression](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#using-theach)
-- `demoIterations` (required): An array of elements used for the preview
+- `demoIterations` (required): Number of times the children should be rendered in development preview
 
 ## Global variables
 The following global variables are available:

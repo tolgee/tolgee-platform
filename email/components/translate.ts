@@ -29,6 +29,8 @@ export type TranslatedText = {
 
 type ValidNode = Exclude<React.ReactNode, React.ReactPortal | Promise<unknown>>;
 
+type Renderers = Record<string, (c: ValidNode) => ValidNode>;
+
 export type MessageProps = Record<
   string,
   string | number | bigint | boolean | object | ((c: ValidNode) => ValidNode)
@@ -42,6 +44,14 @@ const GLOBALS = {
 
 let Counter = 0;
 const SeenIcuXmlIds = new Set<string>();
+
+const DEFAULT_RENDERERS: Renderers = {
+  b: (c) => React.createElement('b', {}, c),
+  i: (c) => React.createElement('i', {}, c),
+  u: (c) => React.createElement('u', {}, c),
+  em: (c) => React.createElement('em', {}, c),
+  strong: (c) => React.createElement('strong', {}, c),
+};
 
 // https://stackoverflow.com/a/55387306
 const interleave = (arr: any[], thing: any): any[] =>
@@ -84,6 +94,7 @@ function addBrToTranslations(arg: ValidNode): ValidNode {
 function formatDev(string: string, demoParams?: Record<string, any>) {
   const formatted = new IntlMessageFormat(string, 'en-US').format({
     ...GLOBALS,
+    ...DEFAULT_RENDERERS,
     ...demoParams,
   });
 
@@ -111,10 +122,15 @@ function processMessageElements(
     }
 
     if (node.type === TYPE.tag) {
-      // The easy case: it's not a fancy tag - nothing to do
-      if (!demoParams || !(node.value in demoParams)) continue;
+      const renderer =
+        demoParams?.[node.value] || DEFAULT_RENDERERS[node.value];
 
-      // It's a fancy tag (sigh): make a fragment
+      if (!renderer) {
+        throw new Error(
+          `It is required to provide a render logic for XML tags! (in ${id} for tag ${node.value})`
+        );
+      }
+
       const fragmentId = `${id}--${node.value}`;
       const [tagFrags, tagArgs] = processMessageElements(
         fragmentId,
@@ -130,7 +146,7 @@ function processMessageElements(
           React.createElement(
             'th:block',
             { key: fragmentId, 'th:fragment': `${fragmentId}(_children)` },
-            demoParams[node.value](
+            renderer(
               React.createElement('th:block', {
                 'th:replace': '${_children} ?: ~{}',
               })
