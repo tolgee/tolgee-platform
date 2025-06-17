@@ -2,7 +2,7 @@ ext {
     dockerPath = buildDir.absolutePath + "/docker"
 }
 
-task dockerPrepare {
+tasks.register('dockerPrepare') {
     doLast {
         copy {
             from(tasks.unpack.outputs, 'docker/app')
@@ -19,7 +19,7 @@ task dockerPrepare {
 
 // Builds Docker image for local development.
 // Single platform, no push, tagged as tolgee/tolgee.
-task docker {
+tasks.register('docker') {
     doLast {
         exec {
             workingDir dockerPath
@@ -68,16 +68,16 @@ task dockerPublish {
     dependsOn("dockerPrepare")
 }
 
-task cleanDocker{
+tasks.register('cleanDocker') {
     delete(dockerPath)
 }
 
 if (tasks.findByName("wrapper") == null) {
-    task wrapper(type: Wrapper) {
+    tasks.register('wrapper', Wrapper) {
     }
 }
 
-task copyDockerIgnore(type: Copy) {
+tasks.register('copyDockerIgnore', Copy) {
     from "docker/app/.dockerignore"
     into "build/docker"
 }

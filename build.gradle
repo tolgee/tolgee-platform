@@ -41,7 +41,7 @@ apply plugin: 'idea'
 def unpackTarget = "${project.buildDir}/dependency"
 
 project(':server-app').afterEvaluate {
-    task unpack(type: Copy) {
+    tasks.register('unpack', Copy) {
         // cleanup the unpackTarget first so we don't have duplicated dependencies or other files, which
         // can be there from previous builds
         doFirst {
@@ -54,7 +54,7 @@ project(':server-app').afterEvaluate {
         }
     }
 
-    task addVersionFile(type: Task) {
+    tasks.register('addVersionFile', Task) {
         mustRunAfter unpack
         doLast {
             def file = new File("${unpackTarget}/BOOT-INF/classes/.VERSION")
@@ -68,7 +68,7 @@ project(':server-app').afterEvaluate {
 
     project.tasks.findByName("docker").mustRunAfter(copyDist)
 
-    task packResources(type: Zip) {
+    tasks.register('packResources', Zip) {
         dependsOn "unpack"
         dependsOn "copyDist"
         dependsOn "addVersionFile"
@@ -78,21 +78,21 @@ project(':server-app').afterEvaluate {
         entryCompression ZipEntryCompression.STORED
     }
 
-    task build {
+    tasks.register('build') {
         dependsOn project(':server-app').tasks.findByName("build")
         dependsOn runE2e
     }
 
-    task check {
+    tasks.register('check') {
         dependsOn project(':server-app').tasks.findByName("check")
         dependsOn ktlint
     }
 
-    task bootJar {
+    tasks.register('bootJar') {
         dependsOn project(':server-app').tasks.findByName("bootJar")
     }
 
-    task startDbChangelogContainer {
+    tasks.register('startDbChangelogContainer') {
         doLast {
             exec {
                 ignoreExitValue = true
@@ -105,7 +105,7 @@ project(':server-app').afterEvaluate {
         }
     }
 
-    task stopDbChangelogContainer(type: Exec) {
+    tasks.register('stopDbChangelogContainer', Exec) {
         commandLine "docker", "rm", "--force", "--volumes", dbSchemaContainerName
         mustRunAfter project(':data').tasks.findByName("diffChangelog")
         if (gradle.ext.eeAppDirectoryExists) {
@@ -113,7 +113,7 @@ project(':server-app').afterEvaluate {
         }
     }
 
-    task diffChangeLog {
+    tasks.register('diffChangeLog') {
         subprojects.forEach({
             it.tasks.findByName("diffChangelog")?.mustRunAfter(project(':server-app').tasks.findByName("bootRun"))
         })
@@ -169,7 +169,7 @@ rootProject.subprojects {
 }
 
 subprojects {
-    task allDeps(type: DependencyReportTask) {}
+    tasks.register('allDeps', DependencyReportTask) {}
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
     ext['jackson.version'] = jacksonVersion

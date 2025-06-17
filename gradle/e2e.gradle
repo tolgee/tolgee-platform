@@ -60,7 +60,7 @@ def getE2eSpecsOverride() {
     return trimmed.isEmpty() ? null : trimmed
 }
 
-task waitForRunningContainer(type: Task, group: "e2e") {
+tasks.register('waitForRunningContainer', Task) {
     doLast {
         while (true) {
             def pb = new ProcessBuilder("docker", "compose", "logs", "-f")
@@ -82,7 +82,8 @@ task waitForRunningContainer(type: Task, group: "e2e") {
     timeout = Duration.ofSeconds(120)
 }
 
-task installE2eDeps(type: Exec, group: "e2e") {
+tasks.register('installE2eDeps', Exec) {
+    group = 'e2e'
     onlyIf { System.getenv("SKIP_INSTALL_E2E_DEPS") != "true" }
     inputs.file("$E2E_DIR/package.json")
     inputs.file("$E2E_DIR/package-lock.json")
@@ -92,7 +93,8 @@ task installE2eDeps(type: Exec, group: "e2e") {
     workingDir E2E_DIR
 }
 
-task runE2e(type: Exec, group: "e2e") {
+tasks.register('runE2e', Exec) {
+    group = 'e2e'
     dependsOn "runDockerE2e", "installE2eDeps"
     def overrideSpecs = getE2eSpecsOverride()
     def specs = overrideSpecs != null ? overrideSpecs : getE2eTestsToRun().join(",")
@@ -105,7 +107,7 @@ task runE2e(type: Exec, group: "e2e") {
     finalizedBy "saveServerLogs", "stopDockerE2e", "cleanupDockerE2e"
 }
 
-task printE2eGroups() {
+tasks.register('printE2eGroups') {
     doLast {
         getE2eChunks().indexed().forEach { index, chunk ->
             println("Chunk: $index")
@@ -114,12 +116,14 @@ task printE2eGroups() {
     }
 }
 
-task saveServerLogs(type: Exec, group: "e2E") {
+tasks.register('saveServerLogs', Exec) {
+    group = 'e2e'
     commandLine "bash", "-c", "docker compose logs > server.log"
     workingDir E2E_DIR
 }
 
-task openE2e(type: Exec, group: "e2e") {
+tasks.register('openE2e', Exec) {
+    group = 'e2e'
     dependsOn "runDockerE2e", "installE2eDeps"
 
     def overrideSpecs = getE2eSpecsOverride()
@@ -134,7 +138,7 @@ task openE2e(type: Exec, group: "e2e") {
     finalizedBy "stopDockerE2e", "cleanupDockerE2e"
 }
 
-task openE2eDev(type: Exec, group: "e2e") {
+tasks.register('openE2eDev', Exec) {
     def overrideSpecs = getE2eSpecsOverride()
     if (overrideSpecs != null) {
         commandLine npmCommandName, "run", "cy:open", "--", "--spec", overrideSpecs
@@ -147,29 +151,34 @@ task openE2eDev(type: Exec, group: "e2e") {
     workingDir E2E_DIR
 }
 
-task runDockerE2e(type: Exec, group: "e2e") {
+tasks.register('runDockerE2e', Exec) {
+    group = 'e2e'
     dependsOn "tagDockerLocal"
     commandLine "docker", "compose", "up", "-d"
     workingDir E2E_DIR
     finalizedBy "waitForRunningContainer"
 }
 
-task runDockerE2eDev(type: Exec, group: "e2e") {
+tasks.register('runDockerE2eDev', Exec) {
+    group = 'e2e'
     commandLine "docker", "compose", "up", "-d", "fakesmtp"
     workingDir E2E_DIR
 }
 
-task stopDockerE2e(type: Exec, group: "e2e") {
+tasks.register('stopDockerE2e', Exec) {
+    group = 'e2e'
     commandLine "docker", "compose", "stop"
     workingDir E2E_DIR
 }
 
-task cleanupDockerE2e(type: Exec, group: "e2e") {
+tasks.register('cleanupDockerE2e', Exec) {
+    group = 'e2e'
     commandLine "docker", "compose", "rm", "-f"
     workingDir E2E_DIR
 }
 
-task tagDockerLocal(type: Exec) {
+tasks.register('tagDockerLocal', Exec) {
+    group = 'e2e'
     dependsOn "docker"
     commandLine "docker", "tag", "tolgee/tolgee", "tolgee/tolgee:local"
 }
