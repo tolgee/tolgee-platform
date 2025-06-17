@@ -1,3 +1,4 @@
+import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
 import { AddParams, FiltersInternal, FiltersType } from './tools';
 
 function remove<T extends string>(list: T[] | undefined, value: T) {
@@ -95,6 +96,20 @@ export const useTranslationFilters = ({
           ...filters,
           filterLabel: add(filters.filterLabel, value),
         });
+      case 'filterHasSuggestions':
+        return setFilters({
+          ...filters,
+          filterHasSuggestions: true,
+          filterHasNoSuggestions: undefined,
+        });
+      case 'filterHasNoSuggestions':
+        return setFilters({
+          ...filters,
+          filterHasNoSuggestions: true,
+          filterHasSuggestions: undefined,
+        });
+      default:
+        exhaustiveMatchingGuard(type);
     }
   }
 
@@ -151,6 +166,18 @@ export const useTranslationFilters = ({
           ...filters,
           filterLabel: remove(filters.filterLabel, value),
         });
+      case 'filterHasSuggestions':
+        return setFilters({
+          ...filters,
+          filterHasSuggestions: undefined,
+        });
+      case 'filterHasNoSuggestions':
+        return setFilters({
+          ...filters,
+          filterHasNoSuggestions: undefined,
+        });
+      default:
+        exhaustiveMatchingGuard(type);
     }
   }
 
@@ -178,7 +205,6 @@ export const useTranslationFilters = ({
           tag
         );
       }
-      return tag;
     });
     selectedLanguages
       .filter((tag) => {
@@ -216,6 +242,32 @@ export const useTranslationFilters = ({
             `${tag},${id.toString()}`
           );
         });
+      });
+
+    selectedLanguages
+      .filter((tag) => {
+        switch (filters.filterSuggestionLanguage) {
+          case undefined:
+            return tag !== baseLang;
+          case true:
+            return true;
+          default:
+            return tag === filters.filterSuggestionLanguage;
+        }
+      })
+      .forEach((tag) => {
+        if (filters.filterHasSuggestions) {
+          filtersQuery.filterHasSuggestionsInLang = add(
+            filtersQuery.filterHasSuggestionsInLang,
+            tag
+          );
+        }
+        if (filters.filterHasNoSuggestions) {
+          filtersQuery.filterHasNoSuggestionsInLang = add(
+            filtersQuery.filterHasNoSuggestionsInLang,
+            tag
+          );
+        }
       });
   }
 

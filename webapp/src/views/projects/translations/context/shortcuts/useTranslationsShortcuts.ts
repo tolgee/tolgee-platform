@@ -163,13 +163,13 @@ export const useTranslationsShortcuts = () => {
       const newState =
         translation?.state && TRANSLATION_STATES[translation.state]?.next;
 
-      if (translation && newState) {
+      if (translation?.id && newState) {
         return (e: KeyboardEvent) => {
           e.preventDefault();
           setTranslationState({
             keyId: focused.keyId,
             language: focused.language as string,
-            translationId: translation.id,
+            translationId: translation.id!,
             state: newState,
           });
         };

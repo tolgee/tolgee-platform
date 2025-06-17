@@ -242,7 +242,7 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
       CreateProjectInvitationParams(
         project = project,
         type = ProjectPermissionType.TRANSLATE,
-        languagePermissions = LanguagePermissions(translate = project.languages, view = null, stateChange = null),
+        languagePermissions = LanguagePermissions(translate = project.languages, view = null, stateChange = null, null),
         name = "Franta",
         email = "a@a.a",
         scopes = null,

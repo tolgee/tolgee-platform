@@ -41,7 +41,7 @@ describe('Translation disabled', () => {
     cy.gcy('permissions-language-menu-button').click();
     cy.gcy('search-select-item').contains('English').click();
     cy.focused().type('{esc}');
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
 
     gcyAdvanced({ value: 'translations-table-cell-translation', lang: 'en' })
       .contains('<disabled>')

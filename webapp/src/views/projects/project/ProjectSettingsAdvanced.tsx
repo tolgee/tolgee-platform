@@ -1,4 +1,10 @@
-import { Box, Checkbox, FormControlLabel, Typography } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  MenuItem,
+  Typography,
+} from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { DangerButton } from 'tg.component/DangerZone/DangerButton';
 import { DangerZone } from 'tg.component/DangerZone/DangerZone';
@@ -11,6 +17,14 @@ import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog'
 import { messageService } from 'tg.service/MessageService';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
+import { Select } from 'tg.component/common/Select';
+import { components } from 'tg.service/apiSchema.generated';
+
+type EditProjectRequest = components['schemas']['EditProjectRequest'];
+type SuggestionsMode =
+  components['schemas']['EditProjectRequest']['suggestionsMode'];
+type TranslationProtection =
+  components['schemas']['EditProjectRequest']['translationProtection'];
 
 export const ProjectSettingsAdvanced = () => {
   const project = useProject();
@@ -28,16 +42,13 @@ export const ProjectSettingsAdvanced = () => {
     invalidatePrefix: '/v2/projects',
   });
 
-  const handleToggleTUIP = (value: boolean) => {
+  const updateSettings = (values: Partial<EditProjectRequest>) => {
     updateLoadable.mutate({
       path: { projectId: project.id },
       content: {
         'application/json': {
-          icuPlaceholders: value,
-          name: project.name,
-          description: project.description,
-          baseLanguageId: project.baseLanguage!.id,
-          useNamespaces: project.useNamespaces,
+          ...project,
+          ...values,
         },
       },
     });
@@ -79,7 +90,7 @@ export const ProjectSettingsAdvanced = () => {
             <Checkbox
               disabled={updateLoadable.isLoading}
               checked={project.icuPlaceholders}
-              onChange={(_, val) => handleToggleTUIP(val)}
+              onChange={(_, val) => updateSettings({ icuPlaceholders: val })}
             />
           }
           label={t('project_settings_use_tolgee_placeholders_label')}
@@ -87,6 +98,56 @@ export const ProjectSettingsAdvanced = () => {
         />
         <Typography variant="caption">
           {t('project_settings_tolgee_placeholders_hint')}
+        </Typography>
+      </Box>
+
+      <Box mt={2} display="grid" justifyItems="start">
+        <Select
+          label={t('project_settings_suggestions_mode_label')}
+          value={project.suggestionsMode}
+          data-cy="project-settings-suggestions-mode-select"
+          minHeight={false}
+          onChange={(e) =>
+            updateSettings({
+              suggestionsMode: e.target.value as SuggestionsMode,
+            })
+          }
+          sx={{ paddingBottom: 1 }}
+        >
+          <MenuItem value="DISABLED">{t('suggestions_mode_disabled')}</MenuItem>
+          <MenuItem value="ENABLED">{t('suggestions_mode_enabled')}</MenuItem>
+        </Select>
+        <Typography variant="caption">
+          <T
+            keyName="project_settings_suggestions_mode_hint"
+            params={{ b: <b />, li: <li />, ul: <ul /> }}
+          />
+        </Typography>
+      </Box>
+
+      <Box mt={2} display="grid" justifyItems="start">
+        <Select
+          label={t('project_settings_translation_protection_label')}
+          value={project.translationProtection}
+          data-cy="project-settings-translation-protection-select"
+          minHeight={false}
+          onChange={(e) =>
+            updateSettings({
+              translationProtection: e.target.value as TranslationProtection,
+            })
+          }
+          sx={{ paddingBottom: 1 }}
+        >
+          <MenuItem value="NONE">{t('translation_protection_none')}</MenuItem>
+          <MenuItem value="PROTECT_REVIEWED">
+            {t('translation_protection_protect_reviewed')}
+          </MenuItem>
+        </Select>
+        <Typography variant="caption">
+          <T
+            keyName="project_settings_translation_protection_hint"
+            params={{ b: <b />, li: <li />, ul: <ul /> }}
+          />
         </Typography>
       </Box>
 

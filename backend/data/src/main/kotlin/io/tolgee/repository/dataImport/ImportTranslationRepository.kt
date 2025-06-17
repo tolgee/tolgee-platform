@@ -44,7 +44,7 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
   @Query(
     """ select it.id as id, it.text as text, ik.name as keyName, ik.id as keyId,
         itc.id as conflictId, itc.text as conflictText, it.override as override, it.resolvedHash as resolvedHash,
-        it.isPlural as plural, ek.isPlural as existingKeyPlural,
+        it.isPlural as plural, ek.isPlural as existingKeyPlural, it.conflictType as conflictType,
         (case when is.overrideKeyDescriptions or (ekm.description is null or ekm.description = '')
             then ikm.description else ikm.description end) as keyDescription,
         ekm.description as existingKeyDescription

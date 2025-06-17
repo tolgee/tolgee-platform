@@ -20,6 +20,10 @@ import {
   getLabelFiltersLength,
   getLabelFiltersName,
 } from 'tg.views/projects/translations/TranslationFilters/SubfilterLabels';
+import {
+  getSuggestionsFiltersLength,
+  getSuggestionsFiltersName,
+} from './SubfilterSuggestions';
 
 export function countFilters(value: FiltersInternal) {
   return (
@@ -28,7 +32,8 @@ export function countFilters(value: FiltersInternal) {
     getScreenshotFiltersLength(value) +
     getTagFiltersLength(value) +
     getTranslationFiltersLength(value) +
-    getLabelFiltersLength(value)
+    getLabelFiltersLength(value) +
+    getSuggestionsFiltersLength(value)
   );
 }
 
@@ -39,6 +44,7 @@ export function getFilterName(value: FiltersInternal) {
     getScreenshotFiltersName(value) ||
     getTagFiltersName(value) ||
     getTranslationFiltersName(value) ||
-    getLabelFiltersName(value)
+    getLabelFiltersName(value) ||
+    getSuggestionsFiltersName(value)
   );
 }

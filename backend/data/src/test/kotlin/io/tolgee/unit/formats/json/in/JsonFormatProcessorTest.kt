@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.ImportFileMapping
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.formats.importCommon.ImportFormat
-import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
@@ -206,6 +205,6 @@ class JsonFormatProcessorTest {
   }
 
   private fun processFile() {
-    JsonFileProcessor(mockUtil.fileProcessorContext, jacksonObjectMapper()).process()
+    KeysProcessor(mockUtil.fileProcessorContext, jacksonObjectMapper()).process()
   }
 }

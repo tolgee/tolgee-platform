@@ -4,16 +4,35 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.IImportSettings
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.service.dataImport.ForceMode
+import io.tolgee.service.dataImport.OverrideMode
 
 class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
   @Schema(
     description =
       "Whether to override existing translation data.\n\n" +
-        "When set to `KEEP`, existing translations will be kept.\n\n" +
-        "When set to `OVERRIDE`, existing translations will be overwrote.\n\n" +
-        "When set to `NO_FORCE`, error will be thrown on conflict.",
+        "When set to `KEEP`, existing translations will be kept.\n" +
+        "When set to `NO_FORCE`, error will be thrown on conflict.\n" +
+        "When set to `OVERRIDE`, existing translations will be overwritten"
   )
-  val forceMode: ForceMode = ForceMode.NO_FORCE
+  var forceMode: ForceMode = ForceMode.NO_FORCE
+
+  @Schema(
+    description =
+      "Some translations are forbidden or protected:\n\n" +
+        "When set to `RECOMMENDED` it will fail for DISABLED translations " +
+          "and protected REVIEWED translations.\n" +
+        "When set to `ALL` it will fail for DISABLED translations, " +
+          "but will try to update protected REVIEWED translations (fails only if user has no permission)\n"
+  )
+  var overrideMode: OverrideMode = OverrideMode.RECOMMENDED
+
+  @Schema(
+    description =
+      "If `false`, import will apply all `non-failed` overrides and reports `failedKeys`\n." +
+      "If `true`, import will fail completely on failed override and won't apply any changes. " +
+        "Failed keys are reported in the `params` of the error response"
+  )
+  var errorOnFailedKey: Boolean? = null
 
   @Schema(
     description =
@@ -23,7 +42,7 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
         "Example: In xliff files, there are `source-language` and `target-language` attributes defined on `file` " +
         "element. Using this field you can map source and target values to languages stored in the Tolgee Platform.",
   )
-  val languageMappings: List<LanguageMapping>? = null
+  var languageMappings: List<LanguageMapping>? = null
 
   override var overrideKeyDescriptions: Boolean = false
   override var convertPlaceholdersToIcu: Boolean = true

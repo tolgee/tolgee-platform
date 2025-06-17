@@ -81,20 +81,23 @@ export const ActivityCompact = ({ data, diffEnabled, onDetailOpen }: Props) => {
 
   let fieldsNum = 0;
 
-  activity.entities.forEach((e) => {
-    fieldsNum += e.fields.length;
-  });
+  const description = activity.options.description?.(data);
 
   const limitedFields: Field[] = [];
 
   const maxFields =
     actionsConfiguration[data.type]?.compactFieldCount || MAX_FIELDS;
 
-  activity.entities.slice(0, MAX_ENTITIES).forEach((e) => {
-    e.fields.slice(0, maxFields).forEach((f) => {
-      limitedFields.push(f);
+  if (!description) {
+    activity.entities.forEach((e) => {
+      fieldsNum += e.fields.length;
     });
-  });
+    activity.entities.slice(0, MAX_ENTITIES).forEach((e) => {
+      e.fields.slice(0, maxFields).forEach((f) => {
+        limitedFields.push(f);
+      });
+    });
+  }
 
   return (
     <StyledContainer data-cy="activity-compact">
@@ -103,7 +106,11 @@ export const ActivityCompact = ({ data, diffEnabled, onDetailOpen }: Props) => {
       </StyledUser>
       <StyledContent>
         <ActivityTitle activity={activity} />
-        <ActivityFields fields={limitedFields} diffEnabled={diffEnabled} />
+        {description ? (
+          description
+        ) : (
+          <ActivityFields fields={limitedFields} diffEnabled={diffEnabled} />
+        )}
         {fieldsNum > maxFields && (
           <StyledMoreIndicator onClick={() => onDetailOpen(data)}>
             ...

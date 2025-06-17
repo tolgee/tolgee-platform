@@ -6,6 +6,7 @@ import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.dtos.PathDTO
+import io.tolgee.dtos.SimpleKeyResult
 import io.tolgee.events.OnKeyPrePersist
 import io.tolgee.events.OnKeyPreRemove
 import io.tolgee.model.Project
@@ -113,5 +114,9 @@ class Key(
 
   override fun hashCode(): Int {
     return id.hashCode() * name.hashCode()
+  }
+
+  fun toSimpleKey(): SimpleKeyResult {
+    return SimpleKeyResult(id, name, namespace?.name)
   }
 }

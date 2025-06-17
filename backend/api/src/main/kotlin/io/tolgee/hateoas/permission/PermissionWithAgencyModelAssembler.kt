@@ -17,6 +17,7 @@ class PermissionWithAgencyModelAssembler(
       translateLanguageIds = entity.translateLanguageIds,
       stateChangeLanguageIds = entity.stateChangeLanguageIds,
       viewLanguageIds = entity.viewLanguageIds,
+      suggestLanguageIds = entity.suggestLanguageIds,
       type = entity.type,
       agency = entity.agency?.let { translationAgencySimpleModelAssembler.toModel(it) },
     )

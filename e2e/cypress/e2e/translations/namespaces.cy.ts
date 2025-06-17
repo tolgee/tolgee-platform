@@ -107,7 +107,7 @@ describe('namespaces in translations', () => {
 
     selectNamespace('new-ns');
 
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
 
     waitForGlobalLoading();
 

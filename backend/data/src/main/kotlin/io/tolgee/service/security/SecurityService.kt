@@ -11,6 +11,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TaskType
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
@@ -18,6 +19,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.task.ITaskService
+import io.tolgee.service.translation.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
@@ -29,6 +31,9 @@ class SecurityService(
   private val keyRepository: KeyRepository,
   private val projectHolder: ProjectHolder,
 ) {
+  @Autowired
+  private lateinit var translationService: TranslationService
+
   @set:Autowired
   lateinit var apiKeyService: ApiKeyService
 
@@ -207,6 +212,17 @@ class SecurityService(
     ) { data, languageIds -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
   }
 
+  fun checkSuggestPermissionByTag(
+    projectId: Long,
+    languageTags: Collection<String>,
+  ) {
+    checkProjectPermission(projectId, Scope.TRANSLATIONS_SUGGEST)
+    checkLanguagePermissionByTag(
+      projectId,
+      languageTags,
+    ) { data, languageIds -> data.checkSuggestPermitted(*languageIds.toLongArray()) }
+  }
+
   fun checkLanguageViewPermission(
     projectId: Long,
     languageIds: Collection<Long>,
@@ -245,15 +261,30 @@ class SecurityService(
     languageIds: Collection<Long>,
     keyId: Long? = null,
   ) {
-    try {
-      checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
-      checkLanguagePermission(
-        projectId,
-      ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
-    } catch (e: PermissionException) {
-      if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
-        throw e
+    tryPermissions(
+      {
+        checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
+        checkLanguagePermission(
+          projectId,
+        ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+      },
+      {
+        if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
+          throw PermissionException(Message.OPERATION_NOT_PERMITTED)
+        }
       }
+    )
+  }
+
+  fun canEditReviewedTranslation(projectId: Long, languageId: Long, keyId: Long? = null): Boolean {
+    if (projectHolder.project.translationProtection != TranslationProtection.PROTECT_REVIEWED) {
+      return true
+    }
+    try {
+      checkLanguageStateChangePermission(projectId, listOf(languageId), keyId)
+      return true
+    } catch (e: PermissionException) {
+      return false
     }
   }
 
@@ -480,6 +511,29 @@ class SecurityService(
     }
     if (projectIds.any { it != projectId }) {
       throw PermissionException(Message.MULTIPLE_PROJECTS_NOT_SUPPORTED)
+    }
+  }
+
+  
+  /**
+   * Perform multiple permission checks
+   * if any of them pass, pass the whole check
+   * if all fail, return error from the first one
+   */
+  private fun tryPermissions(vararg tests: () -> Unit) {
+    var error: PermissionException? = null
+    for (test in tests) {
+      try {
+        test()
+        return
+      } catch (e: PermissionException) {
+        if (error == null) {
+          error = e
+        }
+      }
+    }
+    if (error != null) {
+      throw error
     }
   }
 

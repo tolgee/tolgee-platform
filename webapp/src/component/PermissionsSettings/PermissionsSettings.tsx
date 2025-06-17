@@ -71,6 +71,7 @@ export const PermissionsSettings: React.FC<Props> = ({
         viewLanguages: permissions.viewLanguageIds || [],
         translateLanguages: permissions.translateLanguageIds || [],
         stateChangeLanguages: permissions.stateChangeLanguageIds || [],
+        suggestLanguages: permissions.suggestLanguageIds || [],
       });
     }
   }, [dependenciesLoadable.data, rolesLoadable.data, advancedState]);

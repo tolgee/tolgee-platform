@@ -12,13 +12,17 @@ import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
+import io.tolgee.model.enums.ConflictType
+import io.tolgee.model.enums.TranslationProtection
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.translation.Translation
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
-import io.tolgee.service.language.LanguageService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import io.tolgee.util.getSafeNamespace
@@ -36,7 +40,9 @@ class ImportDataManager(
 
   private val namespaceService: NamespaceService by lazy { applicationContext.getBean(NamespaceService::class.java) }
 
-  private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
+  private val projectHolder: ProjectHolder by lazy { applicationContext.getBean(ProjectHolder::class.java) }
+
+  private val securityService: SecurityService by lazy { applicationContext.getBean(SecurityService::class.java) }
 
   private val collisionHandlers by lazy {
     applicationContext.getBeansOfType(CollisionHandler::class.java).values
@@ -167,6 +173,26 @@ class ImportDataManager(
     return this.storedTranslations.computeIfAbsent(language) { mutableMapOf() }
   }
 
+  private fun detectConflictType(translation: Translation): ConflictType? {
+    if (translation.state === TranslationState.DISABLED) {
+      return ConflictType.CANNOT_EDIT_DISABLED
+    }
+
+    if (
+      translation.state == TranslationState.REVIEWED &&
+      projectHolder.project.translationProtection == TranslationProtection.PROTECT_REVIEWED
+    ) {
+      if (
+        !securityService.canEditReviewedTranslation(projectHolder.project.id, translation.language.id)
+      ) {
+        return ConflictType.CANNOT_EDIT_REVIEWED
+      } else {
+        return ConflictType.SHOULD_NOT_EDIT_REVIEWED
+      }
+    }
+    return null
+  }
+
   /**
    * @param removeEqual Whether translations with equal texts should be removed
    */
@@ -185,9 +211,11 @@ class ImportDataManager(
               toRemove.add(importedTranslation)
             } else {
               importedTranslation.conflict = existingTranslation
+              importedTranslation.conflictType = detectConflictType(existingTranslation)
             }
           } else {
             importedTranslation.conflict = null
+            importedTranslation.conflictType = null
           }
         }
       }
@@ -236,7 +264,7 @@ class ImportDataManager(
         (
           (editedLanguage.existingLanguage == it.existingLanguage && it.existingLanguage != null) ||
             (oldExistingLanguage == it.existingLanguage && it.existingLanguage != null)
-        ) &&
+          ) &&
           it != editedLanguage
       }
         .sortedBy { it.id } + listOf(editedLanguage)

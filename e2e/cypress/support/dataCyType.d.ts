@@ -626,7 +626,9 @@ declare namespace DataCy {
         "project-settings-menu-general" |
         "project-settings-menu-labels" |
         "project-settings-name" |
+        "project-settings-suggestions-mode-select" |
         "project-settings-transfer-button" |
+        "project-settings-translation-protection-select" |
         "project-settings-use-namespaces-checkbox" |
         "project-settings-use-tolgee-placeholders-checkbox" |
         "project-states-bar-bar" |
@@ -777,6 +779,7 @@ declare namespace DataCy {
         "translation-plural-parameter" |
         "translation-plural-variant" |
         "translation-state-button" |
+        "translation-suggestion" |
         "translation-text" |
         "translation-tools-machine-translation-item" |
         "translation-tools-machine-translation-item-prompt" |
@@ -788,7 +791,7 @@ declare namespace DataCy {
         "translations-cell-comments-button" |
         "translations-cell-edit-button" |
         "translations-cell-insert-base-button" |
-        "translations-cell-save-button" |
+        "translations-cell-main-action-button" |
         "translations-cell-screenshots-button" |
         "translations-cell-switch-mode" |
         "translations-cell-task-button" |
