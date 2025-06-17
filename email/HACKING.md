@@ -129,7 +129,7 @@ Injects a variable as plaintext. Easy, simple. Only useful when a variable is us
 It takes the following arguments:
 - `variable` (required): name of the variable
 - `demoValue` (required): value used for the preview
-- `injectHtml` (optional): whether to inject this variable as raw HTML. Defaults to `false`
+- `dangerouslyInjectValueAsHtmlWithoutSanitization` (optional): whether to inject this variable as raw HTML. **VERY DANGEROUS. WILL LEAD TO <abbr title="Remote Code Execution">RCE</abbr> IF MISUSED.** Defaults to `false`
 
 ### `<ImgResource />`
 If you want to use images, images should be placed in the `resources` folder and then this component should be used.
@@ -144,9 +144,8 @@ previously sent emails, by modifying images shown when opening them or leading t
 
 ### `<If />`
 This allows for a conditionally showing a part of the email (and optionally showing something else instead).
-This component takes exactly one or two children: the `true` case and the `false` case. They MUST render to a real
-HTML node with the properties it received set to the HTML element. That's a lot of words to say they must NOT be
-Fragments, but real nodes such as a `<div />` or a `<Container />` etc. 
+This component takes exactly one or two children: the `true` case and the `false` case. You should always use
+`<If.Then />` and `<If.Else />` for the sake of clarity.
 
 It receives the following properties:
 - `condition` (required): the [Thymeleaf conditional expression](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#simple-conditionals-if-and-unless)
@@ -155,6 +154,8 @@ It receives the following properties:
 ### `<For />`
 When dealing with a list of items, this component allows iterating over each element of the array and produce the
 inner HTML for each element of the array.
+
+The component must have exactly one child; to render multiple nodes make sure to use a fragment.
 
 This component receives the following properties:
 - `each` (required): The [Thymeleaf iterator expression](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#using-theach)

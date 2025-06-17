@@ -74,7 +74,7 @@ class EmailServiceTest {
 
   @Test
   fun `it sends a rendered email with variables and ICU strings processed`() {
-    emailService.sendEmailTemplate("test@tolgee.text", "zz-test-email", Locale.ENGLISH, TEST_PROPERTIES)
+    emailService.sendEmailTemplate("test@tolgee.text", "test-email", Locale.ENGLISH, TEST_PROPERTIES)
     verify(mailSender).send(emailCaptor.capture())
 
     val email = emailCaptor.value
@@ -90,6 +90,8 @@ class EmailServiceTest {
         "Powered by <a href=\"https://tolgee.io\" style=\"color:inherit;text-decoration-line:underline\" " +
           "target=\"_blank\">Tolgee</a>",
       )
+      // Makes sure resources have been added as expected
+      .contains("<img aria-hidden=\"true\" src=\"https://tolgee.test/static/emails/")
       // Might be a bit brittle but does the trick for now.
       .doesNotContain(" th:")
       .doesNotContain(" data-th")
@@ -98,7 +100,7 @@ class EmailServiceTest {
   @Test
   fun `it correctly processes conditional blocks`() {
     // FWIW this is very close to just testing Thymeleaf itself, but it serves as a sanity check for the template itself
-    emailService.sendEmailTemplate("test@tolgee.text", "zz-test-email", Locale.ENGLISH, TEST_PROPERTIES_MEOW)
+    emailService.sendEmailTemplate("test@tolgee.text", "test-email", Locale.ENGLISH, TEST_PROPERTIES_MEOW)
     verify(mailSender).send(emailCaptor.capture())
 
     val email = emailCaptor.value
@@ -111,28 +113,30 @@ class EmailServiceTest {
   @Test
   fun `it correctly processes foreach blocks`() {
     // FWIW this is very close to just testing Thymeleaf itself, but it serves as a sanity check for the template itself
-    emailService.sendEmailTemplate("test@tolgee.text", "zz-test-email", Locale.ENGLISH, TEST_PROPERTIES_MEOW)
+    emailService.sendEmailTemplate("test@tolgee.text", "test-email", Locale.ENGLISH, TEST_PROPERTIES_MEOW)
     verify(mailSender).send(emailCaptor.capture())
 
     val email = emailCaptor.value
     email.assertContents()
-      .contains("Plain test: <span>Name &#35;1</span>")
-      .contains("<span>ICU test: Name &#35;1</span>")
-      .contains("Plain test: <span>Name &#35;2</span>")
-      .contains("<span>ICU test: Name &#35;2</span>")
-      .contains("Plain test: <span>Name &#35;3</span>")
-      .contains("<span>ICU test: Name &#35;3</span>")
+      .contains("Plain test: <span>Name #1</span>")
+      .contains("<span>ICU test: Name #1</span>")
+      .contains("Plain test: <span>Name #2</span>")
+      .contains("<span>ICU test: Name #2</span>")
+      .contains("Plain test: <span>Name #3</span>")
+      .contains("<span>ICU test: Name #3</span>")
   }
 
   @Test
   fun `it is not vulnerable to injection`() {
-    emailService.sendEmailTemplate("test@tolgee.text", "zz-test-email", Locale.ENGLISH, TEST_PROPERTIES_INJECT)
+    emailService.sendEmailTemplate("test@tolgee.text", "test-email", Locale.ENGLISH, TEST_PROPERTIES_INJECT)
     verify(mailSender).send(emailCaptor.capture())
 
     val email = emailCaptor.value
     email.assertContents()
       .doesNotContain("<a href=\"https://pwned.example.com\">")
       .contains("&lt;a href=&quot;https://pwned.example.com&quot;")
+      .doesNotContain("pwn49")
+      .contains("pwn[[\${7*7}]]")
   }
 
   private fun MimeMessage.assertContents(): AbstractStringAssert<*> {
@@ -168,7 +172,7 @@ class EmailServiceTest {
 
     private val TEST_PROPERTIES_INJECT =
       mapOf(
-        "testVar" to "<a href=\"https://pwned.example.com\">totally legit text</a>",
+        "testVar" to "<a href=\"https://pwned.example.com\">totally legit text</a>pwn[[\${7*7}]]",
         "testList" to emptyList<Void>(),
       )
   }
