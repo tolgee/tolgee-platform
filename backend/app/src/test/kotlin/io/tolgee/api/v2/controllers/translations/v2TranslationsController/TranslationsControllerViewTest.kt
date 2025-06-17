@@ -71,7 +71,15 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
             node("fromTranslationMemory").isEqualTo(false)
             node("commentCount").isEqualTo(1)
           }
-          node("translations").isObject.doesNotContainKey("en")
+          node("translations.en") {
+            node("id").isNull()
+            node("text").isNull()
+            node("state").isEqualTo("UNTRANSLATED")
+            node("auto").isEqualTo(false)
+            node("mtProvider").isNull()
+            node("fromTranslationMemory").isEqualTo(false)
+            node("commentCount").isEqualTo(0)
+          }
         }
         node("[1]") {
           node("translations.en.auto").isEqualTo(true)

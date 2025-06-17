@@ -3,6 +3,7 @@ package io.tolgee.hateoas.translations
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.constants.MtServiceType
 import io.tolgee.hateoas.label.LabelModel
+import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionSimpleModel
 import io.tolgee.model.enums.TranslationState
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -11,7 +12,7 @@ import org.springframework.hateoas.server.core.Relation
 @Relation(collectionRelation = "translations", itemRelation = "translation")
 open class TranslationViewModel(
   @Schema(description = "Id of translation record")
-  val id: Long,
+  val id: Long?,
   @Schema(description = "Translation text")
   val text: String?,
   @Schema(description = "State of translation")
@@ -28,6 +29,12 @@ open class TranslationViewModel(
   val unresolvedCommentCount: Long,
   @Schema(description = "Labels assigned to this translation")
   val labels: List<LabelModel>?,
+  @Schema(description = "Number of active suggestions")
+  val activeSuggestionCount: Long,
+  @Schema(description = "Number of all suggestions")
+  val totalSuggestionCount: Long,
+  @get:Schema(description = "First suggestion")
+  val suggestions: List<TranslationSuggestionSimpleModel>? = null
 ) : RepresentationModel<TranslationViewModel>() {
   @get:Schema(description = "Was translation memory used to translate this?")
   val fromTranslationMemory: Boolean

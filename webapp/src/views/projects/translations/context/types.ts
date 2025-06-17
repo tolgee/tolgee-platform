@@ -34,7 +34,7 @@ export type AddTranslation = KeyWithTranslationsModel;
 export type UpdateTranslation = {
   keyId: number;
   lang: string;
-  data: Partial<TranslationViewModel>;
+  data: ValueUpdate<Partial<TranslationViewModel>>;
 };
 
 export type RemoveTag = {
@@ -67,6 +67,7 @@ export type AfterCommand = 'EDIT_NEXT';
 export type ChangeValue = {
   after?: AfterCommand;
   preventTaskResolution?: boolean;
+  suggestionOnly?: boolean;
   onSuccess?: () => void;
 };
 

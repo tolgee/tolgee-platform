@@ -7,6 +7,7 @@ import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationLanguage } from './TranslationLanguage';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
+import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -82,7 +83,8 @@ export const TranslationRead: React.FC<Props> = ({
     setAssignedTaskState,
     aiPlaygroundData,
     aiPlaygroundEnabled,
-    editable,
+    editEnabled,
+    canSuggest,
     disabled,
     addLabel,
     removeLabel,
@@ -129,7 +131,7 @@ export const TranslationRead: React.FC<Props> = ({
           onTaskStateChange={setAssignedTaskState}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
           stateChangeEnabled={canChangeState}
-          editEnabled={editable}
+          editEnabled={editEnabled || canSuggest}
           state={state}
           onStateChange={handleStateChange}
           active={active}
@@ -148,6 +150,14 @@ export const TranslationRead: React.FC<Props> = ({
           showHighlights={isEditingRow && language.base}
           isPlural={keyData.keyIsPlural}
         />
+        {Boolean(translation?.suggestions?.length) && (
+          <SuggestionsFirst
+            suggestions={translation!.suggestions!}
+            count={translation!.activeSuggestionCount}
+            isPlural={keyData.keyIsPlural}
+            locale={language.tag}
+          />
+        )}
         {aiPlaygroundData && (
           <AiPlaygroundPreview
             translation={aiPlaygroundData.translation}

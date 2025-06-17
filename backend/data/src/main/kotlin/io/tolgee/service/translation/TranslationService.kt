@@ -13,6 +13,7 @@ import io.tolgee.model.ILanguage
 import io.tolgee.model.Language
 import io.tolgee.model.Language_
 import io.tolgee.model.Project
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -21,6 +22,7 @@ import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
@@ -49,6 +51,9 @@ class TranslationService(
   private val entityManager: EntityManager,
   private val translationCommentService: TranslationCommentService,
 ) {
+  @Autowired
+  private lateinit var projectHolder: ProjectHolder
+
   @set:Autowired
   @set:Lazy
   lateinit var languageService: LanguageService
@@ -197,7 +202,9 @@ class TranslationService(
     translations: Map<Language, String?>,
     oldTranslations: Map<Language, String?>,
   ): Map<Language, Translation> {
-    return SetTranslationTextUtil(applicationContext).setForKey(key, translations, oldTranslations)
+    return SetTranslationTextUtil(
+      applicationContext
+    ).setForKey(key, translations, oldTranslations)
   }
 
   fun setTranslationText(
@@ -205,7 +212,9 @@ class TranslationService(
     language: Language,
     text: String?,
   ): Translation {
-    return SetTranslationTextUtil(applicationContext).setTranslationText(key, language, text)
+    return SetTranslationTextUtil(
+      applicationContext
+    ).setTranslationText(key, language, text)
   }
 
   fun setTranslationText(
@@ -219,7 +228,9 @@ class TranslationService(
     translation: Translation,
     text: String?,
   ) {
-    return SetTranslationTextUtil(applicationContext).setTranslationTextNoSave(translation, text)
+    return SetTranslationTextUtil(
+      applicationContext,
+    ).setTranslationTextNoSave(translation, text)
   }
 
   fun save(translation: Translation): Translation {
@@ -348,8 +359,11 @@ class TranslationService(
       val isExcluded = excludeTranslationIds.contains(it.id)
 
       if (!isBase && !isEmpty && !isExcluded) {
+        val project = projectHolder.projectOrNull
         it.outdated = true
-        it.state = TranslationState.TRANSLATED
+        if (project?.translationProtection != TranslationProtection.PROTECT_REVIEWED) {
+          it.state = TranslationState.TRANSLATED
+        }
         save(it)
       }
     }

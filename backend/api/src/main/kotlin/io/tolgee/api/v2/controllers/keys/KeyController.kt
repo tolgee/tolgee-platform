@@ -225,10 +225,15 @@ class KeyController(
     keyService.importKeys(dto.keys, projectHolder.projectEntity)
   }
 
+
   @PostMapping("/import-resolvable")
   @Operation(
     summary = "Import keys (resolvable)",
-    description = "Import's new keys with translations. Translations can be updated, when specified.",
+    description = """
+      Import's new keys with translations. Translations can be updated, when specified.
+      DEPRECATED: Use /v2/projects/single-step-import-resolvable instead.
+    """,
+    deprecated = true
   )
   @RequestActivity(ActivityType.IMPORT)
   @UseDefaultPermissions // Security: permissions are handled in service

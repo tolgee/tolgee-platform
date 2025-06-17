@@ -19,5 +19,7 @@ class ProjectWithStatsView(
     view.organizationRole,
     view.directPermission,
     view.icuPlaceholders,
+    view.suggestionsMode,
+    view.translationProtection,
     view.permittedLanguageIds,
   )

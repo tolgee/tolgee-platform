@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Encoding
 import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.dtos.ImportResult
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.model.enums.Scope
@@ -69,7 +70,7 @@ class SingleStepImportController(
     files: Array<MultipartFile>,
     @RequestPart
     @Valid params: SingleStepImportRequest,
-  ) {
+  ): ImportResult {
     val filteredFiles = filterFiles(files.map { (it.originalFilename ?: "") to it })
     val fileDtos =
       filteredFiles.map {
@@ -80,11 +81,11 @@ class SingleStepImportController(
       securityService.checkProjectPermission(projectHolder.project.id, Scope.KEYS_DELETE)
     }
 
-    importService.singleStepImport(
+    return importService.singleStepImport(
       files = fileDtos,
       project = projectHolder.projectEntity,
       userAccount = authenticationFacade.authenticatedUserEntity,
       params = params,
-    ) {}
+    )
   }
 }

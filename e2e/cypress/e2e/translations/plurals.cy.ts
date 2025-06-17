@@ -31,7 +31,7 @@ describe('Translations Base', () => {
 
     getCell('Test key').click();
     cy.gcy('key-plural-checkbox').click();
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
     getTranslationCell('Test key', 'en')
       .contains("Translated key with '{' stuff to escape")
@@ -51,7 +51,7 @@ describe('Translations Base', () => {
     cy.gcy('key-plural-variable-name')
       .find('input')
       .should('have.value', 'testValue');
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
     cy.waitForDom();
     getTranslationCell('Test key', 'en')
@@ -97,7 +97,7 @@ describe('Translations Base', () => {
     getCell('Test key').click();
     cy.gcy('key-plural-checkbox-expand').click();
     cy.gcy('key-plural-variable-name').clear().type('testVariable');
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
   });
 
@@ -116,7 +116,7 @@ describe('Translations Base', () => {
 
     getCell('Test key').click();
     cy.gcy('key-plural-checkbox').click();
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
 
     cy.gcy('global-confirmation-dialog').should('be.visible');

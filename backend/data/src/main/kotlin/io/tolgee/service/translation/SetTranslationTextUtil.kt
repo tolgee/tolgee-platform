@@ -3,11 +3,16 @@ package io.tolgee.service.translation
 import io.tolgee.constants.Message
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Language
+import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.security.SecurityService
 import org.springframework.context.ApplicationContext
 
 class SetTranslationTextUtil(
@@ -82,6 +87,16 @@ class SetTranslationTextUtil(
     text: String?,
   ) {
     val hasTextChanged = translation.text != text
+    val project = projectHolder.projectOrNull
+
+    if (
+      hasTextChanged &&
+      project !== null &&
+      translation.state == TranslationState.REVIEWED &&
+      !securityService.canEditReviewedTranslation(project.id, translation.language.id, translation.key.id)
+    ) {
+      throw PermissionException(missingScopes = listOf(Scope.TRANSLATIONS_STATE_EDIT))
+    }
 
     if (hasTextChanged) {
       translation.resetFlags()
@@ -94,9 +109,14 @@ class SetTranslationTextUtil(
     translation.state =
       when {
         translation.state == TranslationState.DISABLED -> TranslationState.DISABLED
-        translation.isUntranslated && hasText -> TranslationState.TRANSLATED
-        hasTextChanged -> TranslationState.TRANSLATED
         text.isNullOrEmpty() -> TranslationState.UNTRANSLATED
+        translation.isUntranslated && hasText -> TranslationState.TRANSLATED
+        hasTextChanged ->
+          if (project?.translationProtection == TranslationProtection.PROTECT_REVIEWED) {
+            translation.state
+          } else {
+            TranslationState.TRANSLATED
+          }
         else -> translation.state
       }
   }
@@ -107,6 +127,14 @@ class SetTranslationTextUtil(
 
   private val languageService by lazy {
     applicationContext.getBean(LanguageService::class.java)
+  }
+
+  private val securityService by lazy {
+    applicationContext.getBean(SecurityService::class.java)
+  }
+
+  private val projectHolder: ProjectHolder by lazy {
+    applicationContext.getBean(ProjectHolder::class.java)
   }
 
   private fun languageByIdFromLanguages(

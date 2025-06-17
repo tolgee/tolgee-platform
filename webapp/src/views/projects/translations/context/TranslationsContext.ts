@@ -154,6 +154,7 @@ export const [
     translationService,
     viewRefs,
     taskService,
+    allLanguages: languagesLoadable.data?._embedded?.languages ?? [],
   });
 
   const tagsService = useTagsService({

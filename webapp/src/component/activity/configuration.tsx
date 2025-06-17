@@ -445,4 +445,53 @@ export const actionsConfiguration: Partial<
     },
     entities: { Params: true },
   },
+  CREATE_SUGGESTION: {
+    label(params) {
+      return <T keyName="activity_create_suggestion" params={params} />;
+    },
+    entities: {
+      TranslationSuggestion: true,
+    },
+    description(data) {
+      return data.modifiedEntities?.TranslationSuggestion?.[0]?.modifications
+        ?.translation?.new as any as string;
+    },
+  },
+  ACCEPT_SUGGESTION: {
+    label(params) {
+      return <T keyName="activity_accept_suggestion" params={params} />;
+    },
+    entities: {
+      TranslationSuggestion: true,
+      Translation: true,
+    },
+    description(data) {
+      return data.modifiedEntities?.TranslationSuggestion?.[0]?.description
+        ?.translation as any as string;
+    },
+  },
+  DECLINE_SUGGESTION: {
+    label(params) {
+      return <T keyName="activity_decline_suggestion" params={params} />;
+    },
+    entities: {
+      TranslationSuggestion: true,
+    },
+    description(data) {
+      return data.modifiedEntities?.TranslationSuggestion?.[0]?.description
+        ?.translation as any as string;
+    },
+  },
+  DELETE_SUGGESTION: {
+    label(params) {
+      return <T keyName="activity_delete_suggestion" params={params} />;
+    },
+    entities: {
+      TranslationSuggestion: true,
+    },
+    description(data) {
+      return data.modifiedEntities?.TranslationSuggestion?.[0]?.description
+        ?.translation as any as string;
+    },
+  },
 };
