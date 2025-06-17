@@ -16,16 +16,13 @@
 
 package io.tolgee.email
 
-object EmailTemplateUtils {
-  fun escape(str: String): String {
-    // Prevent Thymeleaf injection (for the second pass)
-    return str.replace("{", "&#123;")
-      .replace("}", "&#125;")
-      .replace("[", "&#91;")
-      .replace("]", "&#93;")
-      .replace("$", "&#36;")
-      .replace("*", "&#42;")
-      .replace("#", "&#35;")
-      .replace("~", "&#126;")
+import org.thymeleaf.messageresolver.IMessageResolver
+import org.thymeleaf.spring6.SpringTemplateEngine
+
+class EmailTemplateEngine(
+  private val provider: IMessageResolver,
+) : SpringTemplateEngine() {
+  override fun initializeSpringSpecific() {
+    setMessageResolver(provider)
   }
 }
