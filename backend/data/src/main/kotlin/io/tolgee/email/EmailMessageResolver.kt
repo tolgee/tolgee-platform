@@ -16,7 +16,6 @@
 
 package io.tolgee.email
 
-import org.springframework.context.ApplicationContext
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.ITemplateContext
 import org.thymeleaf.messageresolver.IMessageResolver
@@ -28,12 +27,8 @@ import java.util.regex.Pattern
  */
 class EmailMessageResolver(
   private val provider: IMessageResolver,
-  applicationContext: ApplicationContext,
+  private val templateEngine: TemplateEngine,
 ) : IMessageResolver by provider {
-  private val templateEngine by lazy {
-    applicationContext.getBean("emailTemplateEngine", TemplateEngine::class.java)
-  }
-
   override fun resolveMessage(
     context: ITemplateContext?,
     origin: Class<*>?,
@@ -55,12 +50,12 @@ class EmailMessageResolver(
       val m = XML_PATTERN.matcher(message)
 
       // Does not contain lightweight XML references. Skip.
-      if (!m.find()) message.replace("\n", "<br/>")
+      if (!m.find()) return message.replace("\n", "<br/>")
 
       val template = m.replaceAll {
         if (it.group(1) == null) {
           // Opening tag
-          stack.add(m.group(2))
+          stack.add(it.group(2))
 
           val ref = "intl-ref-${++counter}"
           val fragName = "intl-${stack.joinToString("--")}"
