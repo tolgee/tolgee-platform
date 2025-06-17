@@ -13,6 +13,7 @@ class KeyWithTranslationsModelAssembler(
   private val tagModelAssembler: TagModelAssembler,
   private val screenshotModelAssembler: ScreenshotModelAssembler,
   private val translationTaskViewModelAssembler: KeyTaskViewModelAssembler,
+  private val translationSuggestionModelAssembler: TranslationSuggestionModelAssembler,
 ) : RepresentationModelAssemblerSupport<KeyWithTranslationsView, KeyWithTranslationsModel>(
     TranslationsController::class.java,
     KeyWithTranslationsModel::class.java,
@@ -42,5 +43,9 @@ class KeyWithTranslationsModelAssembler(
         view.tasks?.map {
           translationTaskViewModelAssembler.toModel(it)
         },
+      suggestions =
+        view.suggestions?.map {
+          translationSuggestionModelAssembler.toModel(it)
+        }
     )
 }

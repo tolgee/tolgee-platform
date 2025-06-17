@@ -4482,4 +4482,54 @@
             <column name="organization_id"/>
         </createIndex>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750079042575-1">
+        <createTable tableName="translation_suggestion">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="translation_suggestionPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="translation" type="VARCHAR(255)"/>
+            <column name="key_id" type="BIGINT"/>
+            <column name="language_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750079042575-2">
+        <createIndex indexName="IDX1fh2t9b58jikbk3vd14wsj22y" tableName="translation_suggestion">
+            <column name="key_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750079042575-3">
+        <createIndex indexName="IDX96rwqki3vrus914tttra2hj8o" tableName="translation_suggestion">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750079042575-4">
+        <createIndex indexName="IDXmsbvp4v96sxw3t553ip3wmyd0" tableName="translation_suggestion">
+            <column name="language_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750079042575-5">
+        <createIndex indexName="IDXnq78f0xifv9q1khnt6ajs5jhn" tableName="translation_suggestion">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750079042575-6">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="translation_suggestion" constraintName="FKb9ytu8f51rtb6yqteo9aj9dpd" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750079042575-7">
+        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="translation_suggestion" constraintName="FKg53r94stb7kkuwj76eh5qbhw6" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750079042575-8">
+        <addForeignKeyConstraint baseColumnNames="language_id" baseTableName="translation_suggestion" constraintName="FKlmklls7m68qcavm158uhg33dt" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750079042575-9">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="translation_suggestion" constraintName="FKni0hqfsfr866yr62dg0t82c75" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
 </databaseChangeLog>
