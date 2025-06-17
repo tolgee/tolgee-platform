@@ -20,6 +20,7 @@ type LanguageModel = components['schemas']['LanguageModel'];
 
 export type SaveProps = {
   preventTaskResolution?: boolean;
+  suggestionOnly?: boolean;
   after?: AfterCommand;
 };
 
@@ -85,10 +86,15 @@ export const useTranslationCell = ({
     });
   };
 
-  const handleSave = ({ after, preventTaskResolution }: SaveProps) => {
+  const handleSave = ({
+    after,
+    preventTaskResolution,
+    suggestionOnly,
+  }: SaveProps) => {
     changeField({
       after,
       preventTaskResolution,
+      suggestionOnly,
       onSuccess: () => onSaveSuccess?.(value),
     });
   };
@@ -148,6 +154,10 @@ export const useTranslationCell = ({
   const firstTask = keyData.tasks?.find((t) => t.languageTag === language.tag);
   const assignedTask = keyData.tasks?.find(
     (t) => t.languageTag === language.tag && t.userAssigned
+  );
+
+  const suggestions = keyData.suggestions?.filter(
+    (s) => s.languageId === language.id
   );
 
   const setAssignedTaskState = (done: boolean) => {
@@ -229,5 +239,6 @@ export const useTranslationCell = ({
     aiPlaygroundEnabled,
     cellClickable,
     editable,
+    suggestions,
   };
 };

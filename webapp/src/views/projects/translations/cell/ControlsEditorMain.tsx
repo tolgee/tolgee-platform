@@ -17,6 +17,8 @@ const StyledContainer = styled('div')`
   gap: 12px;
 `;
 
+const SUGGESTIONS_ON = true;
+
 const StyledButton = styled(Button)`
   min-width: 0px !important;
   padding: 0px 2px;
@@ -78,6 +80,49 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
               }}
             >
               <T keyName="translations_cell_save_and_done" />
+            </LoadingButton>
+            <StyledButton
+              color="primary"
+              variant="contained"
+              onClick={() => setOpen(true)}
+            >
+              <ArrowDropDown />
+            </StyledButton>
+          </ButtonGroup>
+          <Menu
+            id="basic-menu"
+            anchorEl={anchorEl.current}
+            open={open}
+            onClose={withClose()}
+            MenuListProps={{
+              'aria-labelledby': 'basic-button',
+            }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          >
+            <MenuItem
+              onClick={withClose(() =>
+                onSave?.({ preventTaskResolution: true })
+              )}
+            >
+              <T keyName="translations_cell_save_only" />
+            </MenuItem>
+          </Menu>
+        </>
+      ) : SUGGESTIONS_ON ? (
+        <>
+          <ButtonGroup size="small" ref={anchorEl as any}>
+            <LoadingButton
+              onClick={() => onSave?.({ suggestionOnly: true })}
+              color="primary"
+              variant="contained"
+              loading={isEditLoading}
+              data-cy="translations-cell-save-button"
+              sx={{
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <T keyName="translations_cell_save_as_suggestion" />
             </LoadingButton>
             <StyledButton
               color="primary"

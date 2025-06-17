@@ -7,11 +7,13 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion, Long> {
-  @Query("""
+  @Query(
+    """
     from TranslationSuggestion ts
     where
         ts.key.id in :keyIds
         and ts.project.id = :projectId
-  """)
+  """
+  )
   fun getByKeyId(projectId: Long, keyIds: List<Long>): List<TranslationSuggestion>
 }

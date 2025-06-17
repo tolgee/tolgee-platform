@@ -61,3 +61,9 @@ export const usePutTaskTranslation = () =>
     url: '/v2/projects/{projectId}/tasks/{taskNumber}/keys/{keyId}',
     method: 'put',
   });
+
+export const usePostTranslationSuggestion = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/translation-suggestion',
+    method: 'post',
+  });

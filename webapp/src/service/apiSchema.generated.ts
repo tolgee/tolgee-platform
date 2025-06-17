@@ -789,6 +789,9 @@ export interface paths {
     /** Transfers project's ownership to organization */
     put: operations["transferProjectToOrganization"];
   };
+  "/v2/projects/{projectId}/translation-suggestion": {
+    post: operations["createSuggestion"];
+  };
   "/v2/projects/{projectId}/translations": {
     get: operations["getTranslations"];
     /** Sets translations for existing key */
@@ -1924,6 +1927,13 @@ export interface components {
       languageId: number;
       name?: string;
       type: "TRANSLATE" | "REVIEW";
+    };
+    CreateTranslationSuggestionRequest: {
+      /** Format: int64 */
+      keyId: number;
+      /** Format: int64 */
+      languageId: number;
+      translation: string;
     };
     CreateUpdateGlossaryTermResponse: {
       term: components["schemas"]["SimpleGlossaryTermModel"];
@@ -3086,6 +3096,7 @@ export interface components {
       screenshotCount: number;
       /** @description Key screenshots. Not provided when API key hasn't screenshots.view scope permission. */
       screenshots?: components["schemas"]["ScreenshotModel"][];
+      suggestions?: components["schemas"]["TranslationSuggestionModel"][];
       /** @description Tasks related to this key */
       tasks?: components["schemas"]["KeyTaskViewModel"][];
       /**
@@ -4101,7 +4112,14 @@ export interface components {
         | "TASK_CLOSE"
         | "TASK_REOPEN"
         | "TASK_KEY_UPDATE"
-        | "ORDER_TRANSLATION";
+        | "ORDER_TRANSLATION"
+        | "GLOSSARY_CREATE"
+        | "GLOSSARY_UPDATE"
+        | "GLOSSARY_DELETE"
+        | "GLOSSARY_TERM_CREATE"
+        | "GLOSSARY_TERM_UPDATE"
+        | "GLOSSARY_TERM_DELETE"
+        | "GLOSSARY_TERM_TRANSLATION_UPDATE";
     };
     ProjectAiPromptCustomizationModel: {
       /**
@@ -5451,6 +5469,18 @@ export interface components {
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
       /** @description Translation text */
       text?: string;
+    };
+    TranslationSuggestionModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      keyId: number;
+      /** Format: int64 */
+      languageId: number;
+      state: "ACTIVE" | "ACCEPTED" | "DECLINED";
+      translation?: string;
+      /** Format: int64 */
+      userId: number;
     };
     /**
      * @description Translations object
@@ -18750,6 +18780,58 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
+      };
+    };
+  };
+  createSuggestion: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateTranslationSuggestionRequest"];
       };
     };
   };

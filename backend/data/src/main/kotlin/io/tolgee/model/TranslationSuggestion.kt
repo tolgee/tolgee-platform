@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.key.Key
 import jakarta.persistence.*
 
@@ -22,4 +23,6 @@ class TranslationSuggestion(
   @ManyToOne
   var user: UserAccount? = null,
   var translation: String? = null,
+  @Enumerated(EnumType.STRING)
+  var state: TranslationSuggestionState = TranslationSuggestionState.ACTIVE,
 ) : StandardAuditModel()
