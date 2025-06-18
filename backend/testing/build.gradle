@@ -127,7 +127,7 @@ dependencies {
     implementation libs.amazonTranslate
 }
 
-test {
+tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
 }
@@ -147,6 +147,6 @@ dependencyManagement {
     }
 }
 
-jar {
+tasks.named('jar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }

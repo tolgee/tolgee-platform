@@ -41,6 +41,6 @@ sourceSets {
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-jar {
+tasks.named('jar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
