@@ -11,11 +11,25 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.TASKS_VIEW,
     ),
   ),
+  SUGGEST(
+    arrayOf(
+      Scope.KEYS_VIEW,
+      Scope.TRANSLATIONS_VIEW,
+      Scope.TRANSLATIONS_EDIT_UNREVIEWED,
+      Scope.TRANSLATIONS_SUGGEST,
+      Scope.SCREENSHOTS_VIEW,
+      Scope.ACTIVITY_VIEW,
+      Scope.TRANSLATIONS_COMMENTS_ADD,
+      Scope.TRANSLATIONS_COMMENTS_SET_STATE,
+      Scope.TASKS_VIEW,
+    ),
+  ),
   TRANSLATE(
     arrayOf(
       Scope.KEYS_VIEW,
       Scope.TRANSLATIONS_VIEW,
       Scope.TRANSLATIONS_EDIT,
+      Scope.TRANSLATIONS_SUGGEST,
       Scope.SCREENSHOTS_VIEW,
       Scope.ACTIVITY_VIEW,
       Scope.TRANSLATIONS_COMMENTS_ADD,
@@ -28,6 +42,7 @@ enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
       Scope.KEYS_VIEW,
       Scope.TRANSLATIONS_VIEW,
       Scope.TRANSLATIONS_EDIT,
+      Scope.TRANSLATIONS_SUGGEST,
       Scope.SCREENSHOTS_VIEW,
       Scope.ACTIVITY_VIEW,
       Scope.TRANSLATIONS_COMMENTS_ADD,

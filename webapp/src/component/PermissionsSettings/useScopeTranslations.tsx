@@ -8,6 +8,10 @@ export const useScopeTranslations = () => {
     admin: t('permissions_item_admin'),
     'translations.view': t('permissions_item_translations_view'),
     'translations.edit': t('permissions_item_translations_edit'),
+    'translations.edit-unreviewed': t(
+      'permissions_item_translations_edit_unreviewed'
+    ),
+    'translations.suggest': t('permissions_item_translations_suggest'),
     'translation-comments.add': t('permissions_item_translations_comments_add'),
     'translation-comments.edit': t(
       'permissions_item_translations_comments_edit'

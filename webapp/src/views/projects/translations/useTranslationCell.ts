@@ -51,7 +51,8 @@ export const useTranslationCell = ({
     updateEdit,
   } = useTranslationsActions();
 
-  const { satisfiesLanguageAccess } = useProjectPermissions();
+  const { satisfiesLanguageAccess, satisfiesPermission } =
+    useProjectPermissions();
 
   const keyId = keyData.keyId;
   const langTag = language.tag;
@@ -196,8 +197,11 @@ export const useTranslationCell = ({
   const disabled = translation?.state === 'DISABLED';
   const editEnabled =
     ((assignedTask?.userAssigned && assignedTask.type === 'TRANSLATE') ||
-      satisfiesLanguageAccess('translations.edit', language.id)) &&
+      satisfiesLanguageAccess('translations.edit', language.id) ||
+      (satisfiesPermission('translations.edit-unreviewed') &&
+        translation?.state !== 'REVIEWED')) &&
     !disabled;
+  const suggestEnabled = satisfiesPermission('translations.suggest');
   const aiPlaygroundData = useTranslationsSelector(
     (c) => c.aiPlaygroundData?.[keyId]?.[language.id]
   );
@@ -206,9 +210,8 @@ export const useTranslationCell = ({
     (c) => c.aiPlaygroundEnabled
   );
 
-  const editable = editEnabled && !disabled;
-
-  const cellClickable = (editable && !isEditing) || aiPlaygroundEnabled;
+  const cellClickable =
+    ((editEnabled || suggestEnabled) && !isEditing) || aiPlaygroundEnabled;
 
   return {
     keyId,
@@ -231,6 +234,7 @@ export const useTranslationCell = ({
     keyData,
     canChangeState,
     editEnabled,
+    suggestEnabled,
     translation,
     disabled,
     baseValue,
@@ -238,7 +242,6 @@ export const useTranslationCell = ({
     aiPlaygroundData,
     aiPlaygroundEnabled,
     cellClickable,
-    editable,
     suggestions,
   };
 };

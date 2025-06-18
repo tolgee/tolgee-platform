@@ -26,7 +26,7 @@ export function limitStructureToOptions(
   return result;
 }
 
-export const usePermissionsStructure = (options?: Scope[]) => {
+export const usePermissionsStructure = () => {
   const { t } = useTranslate();
 
   return {
@@ -56,10 +56,16 @@ export const usePermissionsStructure = (options?: Scope[]) => {
             value: 'translations.view',
           },
           {
+            value: 'translations.edit-unreviewed',
+          },
+          {
             value: 'translations.edit',
           },
           {
             value: 'translations.state-edit',
+          },
+          {
+            value: 'translations.suggest',
           },
           {
             label: t('permissions_item_translations_comments'),

@@ -75,7 +75,8 @@ export const TranslationRead: React.FC<Props> = ({
     setAssignedTaskState,
     aiPlaygroundData,
     aiPlaygroundEnabled,
-    editable,
+    editEnabled,
+    suggestEnabled,
     disabled,
   } = tools;
 
@@ -113,7 +114,7 @@ export const TranslationRead: React.FC<Props> = ({
           onTaskStateChange={setAssignedTaskState}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
           stateChangeEnabled={canChangeState}
-          editEnabled={editable}
+          editEnabled={editEnabled || suggestEnabled}
           state={state}
           onStateChange={handleStateChange}
           active={active}

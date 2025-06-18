@@ -34,7 +34,7 @@ class SuggestionController(
   @PostMapping("")
   @Operation(summary = "Create translation suggestion")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_SUGGEST])
   fun createSuggestion(
     @RequestBody @Valid
     dto: CreateTranslationSuggestionRequest,

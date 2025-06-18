@@ -11,12 +11,14 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TaskType
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.task.ITaskService
+import io.tolgee.service.translation.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
@@ -28,6 +30,9 @@ class SecurityService(
   private val keyRepository: KeyRepository,
   private val projectHolder: ProjectHolder,
 ) {
+  @Autowired
+  private lateinit var translationService: TranslationService
+
   @set:Autowired
   lateinit var apiKeyService: ApiKeyService
 
@@ -240,17 +245,23 @@ class SecurityService(
     projectId: Long,
     languageIds: Collection<Long>,
     keyId: Long? = null,
+    translations: List<Translation>? = null
   ) {
-    try {
+    tryPermissions({
       checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
       checkLanguagePermission(
         projectId,
       ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
-    } catch (e: PermissionException) {
+    }, {
       if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
-        throw e
+        throw PermissionException(Message.OPERATION_NOT_PERMITTED)
       }
-    }
+    }, {
+      checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT_UNREVIEWED)
+      if (translations?.find { it.state == TranslationState.REVIEWED } != null) {
+        throw PermissionException(Message.OPERATION_NOT_PERMITTED)
+      }
+    })
   }
 
   fun checkLanguageStateChangePermission(
@@ -336,7 +347,7 @@ class SecurityService(
 
   fun checkLanguageTranslatePermission(translation: Translation) {
     val language = translation.language
-    checkLanguageTranslatePermission(language.project.id, listOf(language.id), translation.key.id)
+    checkLanguageTranslatePermission(language.project.id, listOf(language.id), translation.key.id, listOf(translation))
   }
 
   fun checkStateChangePermission(translation: Translation) {
@@ -350,7 +361,10 @@ class SecurityService(
     keyId: Long?,
   ) {
     val languages = languageService.findByTags(tags, projectId)
-    this.checkLanguageTranslatePermission(projectId, languages.map { it.id }, keyId)
+    val translations = keyId
+      ?.let { translationService.getTranslations(listOf(it), languages.map { it.id }) }
+      ?: emptyList()
+    this.checkLanguageTranslatePermission(projectId, languages.map { it.id }, keyId, translations)
   }
 
   fun checkLanguageTranslatePermissionsByLanguageId(
@@ -358,7 +372,10 @@ class SecurityService(
     projectId: Long,
     keyId: Long? = null,
   ) {
-    this.checkLanguageTranslatePermission(projectId, languageIds, keyId)
+    val translations = keyId
+      ?.let { translationService.getTranslations(listOf(it), languageIds.toList()) }
+      ?: emptyList()
+    this.checkLanguageTranslatePermission(projectId, languageIds, keyId, translations)
   }
 
   fun checkLanguageStateChangePermissionsByTag(
@@ -463,6 +480,28 @@ class SecurityService(
 
     if (firstProjectId != projectId) {
       throw PermissionException(Message.KEY_NOT_FROM_PROJECT)
+    }
+  }
+
+  /**
+   * Perform multiple permission checks
+   * if any of them pass, pass the whole check
+   * if all fail, return error from the first one
+   */
+  private fun tryPermissions(vararg tests: () -> Unit) {
+    var error: PermissionException? = null
+    for (test in tests) {
+      try {
+        test()
+        return
+      } catch (e: PermissionException) {
+        if (error == null) {
+          error = e
+        }
+      }
+    }
+    if (error != null) {
+      throw error
     }
   }
 

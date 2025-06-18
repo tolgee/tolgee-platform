@@ -1095,6 +1095,8 @@ export interface components {
       scopes: (
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
+        | "translations.edit-unreviewed"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1135,7 +1137,14 @@ export interface components {
        */
       translateLanguageIds?: number[];
       /** @description The user's permission type. This field is null if user has assigned granular permissions or if returning API key's permissions */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      type?:
+        | "NONE"
+        | "VIEW"
+        | "SUGGEST"
+        | "TRANSLATE"
+        | "REVIEW"
+        | "EDIT"
+        | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
@@ -1498,6 +1507,8 @@ export interface components {
       scopes: (
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
+        | "translations.edit-unreviewed"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1538,7 +1549,14 @@ export interface components {
        */
       translateLanguageIds?: number[];
       /** @description The user's permission type. This field is null if uses granular permissions */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      type?:
+        | "NONE"
+        | "VIEW"
+        | "SUGGEST"
+        | "TRANSLATE"
+        | "REVIEW"
+        | "EDIT"
+        | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
@@ -2557,6 +2575,8 @@ export interface components {
       scope:
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
+        | "translations.edit-unreviewed"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3828,6 +3848,8 @@ export interface components {
       scopes: (
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
+        | "translations.edit-unreviewed"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3868,7 +3890,14 @@ export interface components {
        */
       translateLanguageIds?: number[];
       /** @description The user's permission type. This field is null if uses granular permissions */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      type?:
+        | "NONE"
+        | "VIEW"
+        | "SUGGEST"
+        | "TRANSLATE"
+        | "REVIEW"
+        | "EDIT"
+        | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
@@ -3892,6 +3921,8 @@ export interface components {
       scopes: (
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
+        | "translations.edit-unreviewed"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3932,7 +3963,14 @@ export interface components {
        */
       translateLanguageIds?: number[];
       /** @description The user's permission type. This field is null if uses granular permissions */
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      type?:
+        | "NONE"
+        | "VIEW"
+        | "SUGGEST"
+        | "TRANSLATE"
+        | "REVIEW"
+        | "EDIT"
+        | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
@@ -4139,7 +4177,14 @@ export interface components {
       invitedUserName?: string;
       permission: components["schemas"]["PermissionWithAgencyModel"];
       permittedLanguageIds?: number[];
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      type?:
+        | "NONE"
+        | "VIEW"
+        | "SUGGEST"
+        | "TRANSLATE"
+        | "REVIEW"
+        | "EDIT"
+        | "MANAGE";
     };
     ProjectInviteUserDto: {
       /**
@@ -4171,7 +4216,14 @@ export interface components {
        * @description Languages user can translate to
        */
       translateLanguages?: number[];
-      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
+      type?:
+        | "NONE"
+        | "VIEW"
+        | "SUGGEST"
+        | "TRANSLATE"
+        | "REVIEW"
+        | "EDIT"
+        | "MANAGE";
       /**
        * @deprecated
        * @description Languages user can view
@@ -10070,6 +10122,7 @@ export interface operations {
         permissionType:
           | "NONE"
           | "VIEW"
+          | "SUGGEST"
           | "TRANSLATE"
           | "REVIEW"
           | "EDIT"
@@ -20078,6 +20131,7 @@ export interface operations {
         permissionType:
           | "NONE"
           | "VIEW"
+          | "SUGGEST"
           | "TRANSLATE"
           | "REVIEW"
           | "EDIT"
@@ -20793,6 +20847,8 @@ export interface operations {
             [key: string]: (
               | "translations.view"
               | "translations.edit"
+              | "translations.suggest"
+              | "translations.edit-unreviewed"
               | "keys.edit"
               | "screenshots.upload"
               | "screenshots.delete"
