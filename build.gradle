@@ -166,7 +166,7 @@ subprojects {
     }
 
     tasks.matching {
-        name in [
+        it.name in [
             "classes",
             "compileJava",
             "compileKotlin",
@@ -178,7 +178,7 @@ subprojects {
             "bootJar"
         ]
     }.configureEach {
-        onlyIf { System.getenv("SKIP_SERVER_BUILD") == "true" }
+        onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
     }
 }
 
