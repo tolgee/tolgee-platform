@@ -195,7 +195,7 @@ dependencies {
 
 }
 
-test {
+tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
     testLogging {
@@ -248,13 +248,6 @@ springBoot {
     }
 }
 
-bootJar {
-    archiveFileName = "tolgee-${project.version}.jar"
-    manifest {
-        attributes('Implementation-Version': project.version)
-    }
-}
-
 def unpackTarget = "build/dependency"
 
 tasks.register('unpack', Copy) {
@@ -278,12 +271,17 @@ sourceSets {
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-jar {
+tasks.named('jar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
 
-bootJar {
+tasks.named('bootJar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+    archiveFileName = "tolgee-${project.version}.jar"
+    manifest {
+        attributes('Implementation-Version': project.version)
+    }
 }
 
 normalization {
