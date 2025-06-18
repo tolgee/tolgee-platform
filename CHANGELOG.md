@@ -1,3 +1,10 @@
+## [3.123.3](https://github.com/tolgee/tolgee-platform/compare/v3.123.2...v3.123.3) (2025-06-18)
+
+
+### Bug Fixes
+
+* update opencsv library to 5.11.1 ([#3133](https://github.com/tolgee/tolgee-platform/issues/3133)) ([d98fd6c](https://github.com/tolgee/tolgee-platform/commit/d98fd6cb341a5093e1d034f3965489a12c955956))
+
 ## [3.123.2](https://github.com/tolgee/tolgee-platform/compare/v3.123.1...v3.123.2) (2025-06-16)
 
 
