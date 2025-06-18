@@ -42,7 +42,9 @@ def unpackTarget = "${project.buildDir}/dependency"
 
 project(':server-app').afterEvaluate {
     tasks.register('unpack', Copy) {
-        from tasks.named('bootJar').map { it.outputs.files.singleFile }
+        from project(':server-app').tasks.named('bootJar').map {
+            zipTree(it.outputs.files.singleFile)
+        }
         into unpackTarget
         if (System.getenv("SKIP_SERVER_BUILD") != "true") {
             dependsOn "bootJar"
