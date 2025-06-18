@@ -31,4 +31,6 @@ interface LabelRepository : JpaRepository<Label, Long> {
   """,
   )
   fun getProjectIdsForLabelIds(labelIds: List<Long>): List<Long>
+
+  fun findAllByProjectId(projectId: Long): List<Label>
 }

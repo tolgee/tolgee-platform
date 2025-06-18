@@ -64,7 +64,7 @@ class LabelService(
   fun createLabel(
     projectId: Long,
     request: LabelRequest,
-    ): Label {
+  ): Label {
     val label = Label()
     updateFromRequest(label, request)
     label.project = entityManager.getReference(Project::class.java, projectId)
@@ -177,5 +177,13 @@ class LabelService(
     }
 
     translationRepository.saveAll(translations)
+  }
+
+  fun deleteLabelsByProjectId(projectId: Long) {
+    val labels = labelRepository.findAllByProjectId(projectId)
+    labels.forEach { label ->
+      label.clearTranslations()
+    }
+    labelRepository.deleteAll(labels)
   }
 }

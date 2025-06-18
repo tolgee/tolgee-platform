@@ -1,4 +1,4 @@
-import { styled, useTheme, Tooltip } from '@mui/material';
+import { styled, Tooltip } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
 import {
   StyledTranslationLabel,
@@ -79,7 +79,6 @@ export const TranslationLabels = ({
 }: Props) => {
   const { satisfiesPermission } = useProjectPermissions();
   const canAssignLabels = satisfiesPermission('translation-labels.assign');
-  const theme = useTheme();
   const { t } = useTranslate();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
