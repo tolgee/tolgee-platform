@@ -54,11 +54,6 @@ tasks.register('cleanDocker') {
     delete(dockerPath)
 }
 
-if (tasks.findByName("wrapper") == null) {
-    tasks.register('wrapper', Wrapper) {
-    }
-}
-
 tasks.register('copyDockerIgnore', Copy) {
     from "docker/app/.dockerignore"
     into "build/docker"
