@@ -12,6 +12,7 @@ import {
   Login,
   Marker,
   Navbar,
+  Label,
   Placeholders,
   QuickStart,
   RevisionFilterBanner,
@@ -60,6 +61,7 @@ declare module '@mui/material/styles/createPalette' {
     login: Login;
     input: Input;
     revisionFilterBanner: RevisionFilterBanner;
+    label: Label;
   }
 
   interface PaletteOptions {
@@ -87,6 +89,7 @@ declare module '@mui/material/styles/createPalette' {
     login: Login;
     input: Input;
     revisionFilterBanner: RevisionFilterBanner;
+    label: Label;
   }
 }
 

@@ -18,6 +18,9 @@ import jakarta.persistence.EntityListeners
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PrePersist
@@ -86,6 +89,14 @@ class Translation(
   @ColumnDefault("false")
   var outdated: Boolean = false
 
+  @ManyToMany
+  @JoinTable(
+    name = "translation_label",
+    joinColumns = [JoinColumn(name = "translation_id")],
+    inverseJoinColumns = [JoinColumn(name = "label_id")]
+  )
+  var labels: MutableSet<Label> = mutableSetOf()
+
   val isUntranslated: Boolean
     get() = state == TranslationState.UNTRANSLATED
 
@@ -111,6 +122,11 @@ class Translation(
       !this.outdated &&
       this.mtProvider == null &&
       !this.auto
+  }
+
+  fun removeLabel(label: Label) {
+    labels.remove(label)
+    label.translations.remove(this)
   }
 
   override fun equals(other: Any?): Boolean {
