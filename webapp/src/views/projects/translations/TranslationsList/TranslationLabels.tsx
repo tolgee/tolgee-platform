@@ -58,6 +58,12 @@ const HiddenMeasure = styled(StyledList)`
   overflow: hidden;
 `;
 
+const StyledMoreTranslationLabel = styled(StyledTranslationLabel)`
+  background-color: ${({ theme }) =>
+    theme.palette.tokens._components.chip.defaultFill};
+  color: ${({ theme }) => theme.palette.text.primary};
+`;
+
 type Props = {
   labels: LabelModel[] | undefined;
   className: string;
@@ -164,15 +170,12 @@ export const TranslationLabels = ({
               </TooltipStyledList>
             }
             placement="bottom"
-            arrow
           >
-            <StyledTranslationLabel
-              color={theme.palette.tokens.background['paper-elevation-1']}
-            >
+            <StyledMoreTranslationLabel>
               {t('translations_list_labels_more_label', {
                 count: overflowCount,
               })}
-            </StyledTranslationLabel>
+            </StyledMoreTranslationLabel>
           </Tooltip>
         )}
         {canAssignLabels && (

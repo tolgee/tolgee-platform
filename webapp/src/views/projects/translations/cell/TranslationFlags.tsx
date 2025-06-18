@@ -18,8 +18,6 @@ type KeyWithTranslationsModel =
 
 const StyledWrapper = styled('div')`
   display: flex;
-  gap: 6px;
-  padding-left: 4px;
 `;
 
 const ActiveFlagCircle = styled(Flag02)`
@@ -30,9 +28,14 @@ export const StyledTranslationFlagsContainer = styled(Box)`
   display: inline-flex;
   flex-grow: 0;
   align-items: center;
-  height: 20px;
+  height: 24px;
   border: 1px solid transparent;
   border-radius: 10px;
+  padding: 3px 8px;
+
+  &:hover {
+    border: 1px solid ${({ theme }) => theme.palette.tokens.border.secondary};
+  }
 
   &.clickDisabled {
     cursor: default;
@@ -110,9 +113,7 @@ export const TranslationFlags: React.FC<Props> = ({
       });
   };
 
-  const shouldRender = task || translation?.auto || translation?.outdated;
-
-  return shouldRender ? (
+  return (
     <StyledWrapper className={className}>
       {task && <TranslationTaskIndicator task={task} />}
       {translation?.auto && (
@@ -149,5 +150,5 @@ export const TranslationFlags: React.FC<Props> = ({
         </CloseButton>
       )}
     </StyledWrapper>
-  ) : null;
+  );
 };

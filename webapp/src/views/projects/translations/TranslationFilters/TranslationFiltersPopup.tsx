@@ -72,16 +72,16 @@ export const TranslationFiltersPopup = ({
               projectId={projectId}
               selectedLanguages={selectedLanguages}
             />
-            <SubfilterComments
-              value={value}
-              actions={actions}
-              projectId={projectId}
-            />
             <SubfilterLabels
               value={value}
               actions={actions}
               projectId={projectId}
               selectedLanguages={selectedLanguages}
+            />
+            <SubfilterComments
+              value={value}
+              actions={actions}
+              projectId={projectId}
             />
           </>
         )}

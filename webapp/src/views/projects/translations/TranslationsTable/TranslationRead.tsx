@@ -17,10 +17,13 @@ const StyledContainer = styled('div')`
     'flags       labels      controls  ';
 
   .flags {
-    padding: 0px 12px 4px 16px;
+    padding: 0 8px 4px 4px;
     grid-area: flags;
     display: flex;
     align-items: center;
+    & > div:first-child {
+      margin-left: 2px;
+    }
   }
 
   .labels {
@@ -122,16 +125,16 @@ export const TranslationRead: React.FC<Props> = ({
           />
         )}
       </StyledTranslation>
+      <TranslationFlags
+        className="flags"
+        keyData={keyData}
+        lang={language.tag}
+      />
       <TranslationLabels
         labels={translation?.labels}
         className="labels"
         onSelect={(labelId) => addLabel(labelId)}
         onDelete={(labelId) => removeLabel(labelId)}
-      />
-      <TranslationFlags
-        className="flags"
-        keyData={keyData}
-        lang={language.tag}
       />
       {!aiPlaygroundEnabled && (
         <ControlsTranslation
