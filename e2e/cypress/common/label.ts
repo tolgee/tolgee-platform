@@ -1,5 +1,5 @@
 import { getTranslationCell } from './translations';
-import { gcy } from './shared';
+import { dismissMenu, gcy } from './shared';
 import { E2ProjectLabelsSection } from '../compounds/projectSettings/labels/E2ProjectLabelsSection';
 
 export function assignLabelToTranslation(
@@ -20,6 +20,7 @@ export function assignLabelToTranslation(
     gcy('label-autocomplete-option').should('have.length', expectLabelCount);
   }
   gcy('label-autocomplete-option').contains(label).should('be.visible').click();
+  dismissMenu();
 }
 
 export const verifyLabelInTranslationCell = (
