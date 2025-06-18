@@ -15,6 +15,7 @@ import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
+import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.security.ApiKeyService
@@ -48,6 +49,7 @@ class ProjectHardDeletingService(
   private val self: ProjectHardDeletingService,
   private val aiPlaygroundResultService: AiPlaygroundResultService,
   @Qualifier("promptServiceEeImpl") private val promptService: PromptService,
+  private val labelService: LabelService
 ) : Logging {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
@@ -84,6 +86,8 @@ class ProjectHardDeletingService(
       promptService.deleteAllByProjectId(project.id)
 
       aiPlaygroundResultService.deleteResultsByProject(project.id)
+
+      labelService.deleteLabelsByProjectId(project.id)
 
       traceLogMeasureTime("deleteProject: delete languages") {
         languageService.deleteAllByProject(project.id)
