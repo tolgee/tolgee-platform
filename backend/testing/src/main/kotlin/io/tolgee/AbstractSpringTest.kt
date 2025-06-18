@@ -31,6 +31,7 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
+import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
@@ -227,6 +228,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var schedulingManager: SchedulingManager
+
+  @Autowired
+  lateinit var labelService: LabelService
 
   @BeforeEach
   fun clearCaches() {

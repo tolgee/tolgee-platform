@@ -18,6 +18,7 @@ import io.tolgee.model.mtServiceConfig.MtServiceConfig
 import io.tolgee.model.slackIntegration.SlackConfig
 import io.tolgee.model.task.Task
 import io.tolgee.model.task.TaskKey
+import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.webhook.WebhookConfig
 import org.springframework.core.io.ClassPathResource
@@ -62,6 +63,7 @@ class ProjectBuilder(
     val taskKeys = mutableListOf<TaskKeyBuilder>()
     val prompts = mutableListOf<PromptBuilder>()
     val aiPlaygroundResults = mutableListOf<AiPlaygroundResultBuilder>()
+    val labels = mutableListOf<LabelBuilder>()
   }
 
   var data = DATA()
@@ -79,6 +81,8 @@ class ProjectBuilder(
   fun addTask(ft: FT<Task>) = addOperation(data.tasks, ft)
 
   fun addTaskKey(ft: FT<TaskKey>) = addOperation(data.taskKeys, ft)
+
+  fun addLabel(ft: FT<Label>) = addOperation(data.labels, ft)
 
   fun inviteUser(buildPermission: PermissionBuilder.() -> Unit = {}): InvitationBuilder {
     val invitationBuilder = InvitationBuilder()

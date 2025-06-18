@@ -162,7 +162,7 @@ export interface paths {
   };
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
-    get: operations["getAll_10"];
+    get: operations["getAll_12"];
     post: operations["create_12"];
   };
   "/v2/organizations/{id}": {
@@ -196,7 +196,7 @@ export interface paths {
     get: operations["getAllBaseLanguagesInUse"];
   };
   "/v2/organizations/{organizationId}/glossaries": {
-    get: operations["getAll_12"];
+    get: operations["getAll_14"];
     post: operations["create_13"];
   };
   "/v2/organizations/{organizationId}/glossaries-with-stats": {
@@ -214,7 +214,7 @@ export interface paths {
     get: operations["getLanguages"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms": {
-    get: operations["getAll_13"];
+    get: operations["getAll_15"];
     post: operations["create_14"];
     delete: operations["deleteMultiple"];
   };
@@ -243,7 +243,7 @@ export interface paths {
     get: operations["getAllLanguagesInUse"];
   };
   "/v2/organizations/{organizationId}/llm-providers": {
-    get: operations["getAll_11"];
+    get: operations["getAll_13"];
     post: operations["createProvider"];
   };
   "/v2/organizations/{organizationId}/llm-providers/all-available": {
@@ -317,7 +317,7 @@ export interface paths {
     get: operations["getAllWithStatistics_1"];
   };
   "/v2/pats": {
-    get: operations["getAll_9"];
+    get: operations["getAll_11"];
     post: operations["create_11"];
   };
   "/v2/pats/current": {
@@ -525,7 +525,7 @@ export interface paths {
     put: operations["inviteUser"];
   };
   "/v2/projects/{projectId}/keys": {
-    get: operations["getAll_7"];
+    get: operations["getAll_9"];
     post: operations["create_6"];
     /** Delete one or multiple keys by their IDs in request body. Useful for larger requests esxceeding allowed URL length. */
     delete: operations["delete_6"];
@@ -601,11 +601,19 @@ export interface paths {
     /** Removes tag with provided id from key with provided id */
     delete: operations["removeTag"];
   };
+  "/v2/projects/{projectId}/labels": {
+    get: operations["getAll_3"];
+    post: operations["createLabel"];
+  };
+  "/v2/projects/{projectId}/labels/{labelId}": {
+    put: operations["updateLabel"];
+    delete: operations["deleteLabel"];
+  };
   "/v2/projects/{projectId}/language-ai-prompt-customizations": {
     get: operations["getLanguagePromptCustomizations"];
   };
   "/v2/projects/{projectId}/languages": {
-    get: operations["getAll_5"];
+    get: operations["getAll_7"];
     post: operations["createLanguage"];
   };
   "/v2/projects/{projectId}/languages/{languageId}": {
@@ -810,7 +818,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
     /** Returns translation comments of translation */
-    get: operations["getAll_3"];
+    get: operations["getAll_5"];
     post: operations["create_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
@@ -2341,7 +2349,8 @@ export interface components {
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
         | "llm_content_filter"
-        | "llm_provider_empty_response";
+        | "llm_provider_empty_response"
+        | "label_not_found";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -3128,6 +3137,22 @@ export interface components {
       /** @description Provided languages data */
       selectedLanguages: components["schemas"]["LanguageModel"][];
     };
+    LabelModel: {
+      color: string;
+      description?: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
+    };
+    LabelRequest: {
+      /**
+       * @description Hex color in format #RRGGBB.
+       * @example #FF5733
+       */
+      color: string;
+      description?: string;
+      name: string;
+    };
     LanguageAiPromptCustomizationModel: {
       /**
        * @description The language description used in the  prompt that helps AI translator to fine tune results for specific language
@@ -3603,6 +3628,12 @@ export interface components {
     PagedModelKeyWithTranslationsModel: {
       _embedded?: {
         keys?: components["schemas"]["KeyWithTranslationsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelLabelModel: {
+      _embedded?: {
+        labels?: components["schemas"]["LabelModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -4101,7 +4132,14 @@ export interface components {
         | "TASK_CLOSE"
         | "TASK_REOPEN"
         | "TASK_KEY_UPDATE"
-        | "ORDER_TRANSLATION";
+        | "ORDER_TRANSLATION"
+        | "GLOSSARY_CREATE"
+        | "GLOSSARY_UPDATE"
+        | "GLOSSARY_DELETE"
+        | "GLOSSARY_TERM_CREATE"
+        | "GLOSSARY_TERM_UPDATE"
+        | "GLOSSARY_TERM_DELETE"
+        | "GLOSSARY_TERM_TRANSLATION_UPDATE";
     };
     ProjectAiPromptCustomizationModel: {
       /**
@@ -5233,7 +5271,8 @@ export interface components {
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
         | "llm_content_filter"
-        | "llm_provider_empty_response";
+        | "llm_provider_empty_response"
+        | "label_not_found";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -7942,7 +7981,7 @@ export interface operations {
     };
   };
   /** Returns all organizations, which is current user allowed to view */
-  getAll_10: {
+  getAll_12: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -8557,7 +8596,7 @@ export interface operations {
       };
     };
   };
-  getAll_12: {
+  getAll_14: {
     parameters: {
       path: {
         organizationId: number;
@@ -8962,7 +9001,7 @@ export interface operations {
       };
     };
   };
-  getAll_13: {
+  getAll_15: {
     parameters: {
       path: {
         organizationId: number;
@@ -9589,7 +9628,7 @@ export interface operations {
       };
     };
   };
-  getAll_11: {
+  getAll_13: {
     parameters: {
       path: {
         organizationId: number;
@@ -10677,7 +10716,7 @@ export interface operations {
       };
     };
   };
-  getAll_9: {
+  getAll_11: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -14239,7 +14278,7 @@ export interface operations {
       };
     };
   };
-  getAll_7: {
+  getAll_9: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -15443,6 +15482,210 @@ export interface operations {
       };
     };
   };
+  getAll_3: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelLabelModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  createLabel: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LabelModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LabelRequest"];
+      };
+    };
+  };
+  updateLabel: {
+    parameters: {
+      path: {
+        labelId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LabelModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LabelRequest"];
+      };
+    };
+  };
+  deleteLabel: {
+    parameters: {
+      path: {
+        labelId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   getLanguagePromptCustomizations: {
     parameters: {
       path: {
@@ -15490,7 +15733,7 @@ export interface operations {
       };
     };
   };
-  getAll_5: {
+  getAll_7: {
     parameters: {
       path: {
         projectId: number;
@@ -19224,7 +19467,7 @@ export interface operations {
     };
   };
   /** Returns translation comments of translation */
-  getAll_3: {
+  getAll_5: {
     parameters: {
       path: {
         translationId: number;
