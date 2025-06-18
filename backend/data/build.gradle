@@ -183,7 +183,7 @@ dependencies {
     /**
      * Table formats
      */
-    implementation("com.opencsv:opencsv:5.9")
+    implementation("com.opencsv:opencsv:5.11.1")
     implementation 'org.apache.poi:poi:5.4.0'
     implementation 'org.apache.poi:poi-ooxml:5.4.0'
 
