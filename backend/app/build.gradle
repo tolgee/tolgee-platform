@@ -195,7 +195,7 @@ dependencies {
 
 }
 
-test {
+tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
     testLogging {
@@ -261,12 +261,17 @@ sourceSets {
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-jar {
+tasks.named('jar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
 
-bootJar {
+tasks.named('bootJar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+    archiveFileName = "tolgee-${project.version}.jar"
+    manifest {
+        attributes('Implementation-Version': project.version)
+    }
 }
 
 normalization {

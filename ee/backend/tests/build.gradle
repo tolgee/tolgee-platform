@@ -27,7 +27,7 @@ allOpen {
     annotation("org.springframework.boot.test.context.SpringBootTest")
 }
 
-test {
+tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
     rootProject.setTestRetry(it)

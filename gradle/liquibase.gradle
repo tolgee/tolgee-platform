@@ -40,7 +40,13 @@ ext {
                 }
             }
         }
-        diff.dependsOn compileKotlin
-        diffChangelog.dependsOn compileKotlin
+
+        tasks.named('diff') {
+            dependsOn 'compileKotlin'
+        }
+
+        tasks.register('diffChangeLog') {
+            dependsOn 'compileKotlin'
+        }
     }
 }

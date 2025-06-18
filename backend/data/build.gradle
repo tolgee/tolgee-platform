@@ -72,9 +72,6 @@ apply from: "$rootDir/gradle/liquibase.gradle"
 
 configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/db/changelog/schema.xml')
 
-diff.dependsOn compileKotlin
-diffChangelog.dependsOn compileKotlin
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -235,7 +232,7 @@ dependencies {
     implementation('com.github.jknack:handlebars:4.4.0')
 }
 
-test {
+tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
 }
@@ -259,7 +256,7 @@ dependencyManagement {
     }
 }
 
-jar {
+tasks.named('jar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
 
@@ -272,8 +269,6 @@ tasks.named('processTestResources') {
 }
 
 ktlint {
-    debug = true
-    verbose = true
     filter {
         exclude("**/PluralData.kt")
     }
