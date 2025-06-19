@@ -19,7 +19,6 @@ package io.tolgee.security.authorization
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.OrganizationDto
-import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.security.OrganizationHolder
 import org.junit.jupiter.api.AfterEach
