@@ -1,9 +1,9 @@
-FROM postgres:13.20-alpine3.21
+FROM postgres:13.21-alpine3.22
 
 ENTRYPOINT []
 
 RUN apk --no-cache add openjdk21
-RUN apk --no-cache add "libxml2>=2.13.4-r5"
+RUN apk --no-cache add libxml2
 
 #############
 ### Tolgee  #
