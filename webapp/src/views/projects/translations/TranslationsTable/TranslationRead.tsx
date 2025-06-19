@@ -133,7 +133,7 @@ export const TranslationRead: React.FC<Props> = ({
       <TranslationLabels
         labels={translation?.labels}
         className="labels"
-        onSelect={(labelId) => addLabel(labelId)}
+        onSelect={translation && ((label) => addLabel(label.id))}
         onDelete={(labelId) => removeLabel(labelId)}
       />
       {!aiPlaygroundEnabled && (

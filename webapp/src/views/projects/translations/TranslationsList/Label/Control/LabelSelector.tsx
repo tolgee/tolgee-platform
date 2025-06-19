@@ -15,8 +15,8 @@ const StyledOption = styled('div')`
 `;
 
 type LabelSelectorProps = {
+  onSelect: (label: LabelModel) => void;
   existing?: LabelModel[];
-  onSelect?: (label: LabelModel) => void;
 };
 
 export const LabelSelector = ({ existing, onSelect }: LabelSelectorProps) => {

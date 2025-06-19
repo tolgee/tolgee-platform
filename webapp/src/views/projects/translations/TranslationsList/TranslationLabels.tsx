@@ -67,7 +67,7 @@ const StyledMoreTranslationLabel = styled(StyledTranslationLabel)`
 type Props = {
   labels: LabelModel[] | undefined;
   className: string;
-  onSelect?: (labelId: number) => void;
+  onSelect?: (label: LabelModel) => void;
   onDelete?: (labelId: number) => void;
 };
 
@@ -177,7 +177,7 @@ export const TranslationLabels = ({
             </StyledMoreTranslationLabel>
           </Tooltip>
         )}
-        {canAssignLabels && (
+        {canAssignLabels && onSelect && (
           <LabelControl
             className={clsx('clickable', CELL_SHOW_ON_HOVER)}
             ref={labelControlRef}

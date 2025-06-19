@@ -36,22 +36,15 @@ const StyledControl = styled('div')`
 type LabelControlProps = {
   className?: string;
   existing?: LabelModel[];
-  onSelect?: (labelId: number) => void;
-  onSelectLabel?: (labelModel: LabelModel) => void;
+  onSelect?: (labelModel: LabelModel) => void;
   menuAnchorOrigin?: PopoverOrigin;
   menuStyle?: React.CSSProperties;
 };
 
 export const LabelControl = forwardRef<HTMLDivElement, LabelControlProps>(
   (props, ref) => {
-    const {
-      className,
-      existing,
-      onSelect,
-      onSelectLabel,
-      menuAnchorOrigin,
-      menuStyle,
-    } = props;
+    const { className, existing, onSelect, menuAnchorOrigin, menuStyle } =
+      props;
     const { labels: availableLabels } = useLabels({});
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
@@ -111,8 +104,7 @@ export const LabelControl = forwardRef<HTMLDivElement, LabelControlProps>(
         >
           <LabelSelector
             onSelect={(label: LabelModel) => {
-              onSelect?.(label.id);
-              onSelectLabel?.(label);
+              onSelect?.(label);
             }}
             existing={existing}
           />

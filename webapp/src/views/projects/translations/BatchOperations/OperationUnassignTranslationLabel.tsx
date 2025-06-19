@@ -92,7 +92,7 @@ export const OperationUnassignTranslationLabel = ({
           />
         ))}
         <LabelControl
-          onSelectLabel={handleAddTag}
+          onSelect={handleAddTag}
           existing={labels}
           menuAnchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           menuStyle={{ marginLeft: 8 }}
