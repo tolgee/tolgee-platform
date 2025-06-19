@@ -35,6 +35,7 @@ import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.IsGlobalRoute
+import io.tolgee.security.authorization.NoFeaturesRequired
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.ImageUploadService
@@ -99,6 +100,7 @@ class OrganizationController(
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @IsGlobalRoute
   @OpenApiOrderExtension(1)
+  @NoFeaturesRequired
   fun create(
     @RequestBody @Valid
     dto: OrganizationDto,
@@ -126,6 +128,7 @@ class OrganizationController(
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
   @OpenApiOrderExtension(2)
+  @NoFeaturesRequired
   fun get(
     @PathVariable("id") id: Long,
   ): OrganizationModel? {
@@ -139,6 +142,7 @@ class OrganizationController(
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @UseDefaultPermissions
   @OpenApiOrderExtension(3)
+  @NoFeaturesRequired
   fun get(
     @PathVariable("slug") slug: String,
   ): OrganizationModel {
@@ -155,6 +159,7 @@ class OrganizationController(
   @AllowApiAccess(AuthTokenType.ONLY_PAT)
   @IsGlobalRoute
   @OpenApiOrderExtension(4)
+  @NoFeaturesRequired
   fun getAll(
     @ParameterObject
     @SortDefault(sort = ["id"])
@@ -171,6 +176,7 @@ class OrganizationController(
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
   @OpenApiOrderExtension(5)
+  @NoFeaturesRequired
   fun update(
     @PathVariable("id")
     id: Long,
@@ -185,6 +191,7 @@ class OrganizationController(
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
   @OpenApiOrderExtension(6)
+  @NoFeaturesRequired
   fun delete(
     @PathVariable("id") id: Long,
   ) {
@@ -201,6 +208,7 @@ class OrganizationController(
   )
   @RequiresOrganizationRole
   @RequiresSuperAuthentication
+  @NoFeaturesRequired
   fun getAllUsers(
     @PathVariable("id") id: Long,
     @ParameterObject
@@ -225,6 +233,7 @@ class OrganizationController(
   @Operation(summary = "Leave organization", description = "Remove current user from organization")
   @UseDefaultPermissions
   @RequiresSuperAuthentication
+  @NoFeaturesRequired
   fun leaveOrganization(
     @PathVariable("id") id: Long,
   ) {
@@ -240,6 +249,7 @@ class OrganizationController(
   @Operation(summary = "Set user role", description = "Sets user role in organization. Owner or Member.")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
+  @NoFeaturesRequired
   fun setUserRole(
     @PathVariable("organizationId") organizationId: Long,
     @PathVariable("userId") userId: Long,
@@ -255,6 +265,7 @@ class OrganizationController(
   @Operation(summary = "Remove user from organization")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
+  @NoFeaturesRequired
   fun removeUser(
     @PathVariable("organizationId") organizationId: Long,
     @PathVariable("userId") userId: Long,
@@ -266,6 +277,7 @@ class OrganizationController(
   @Operation(summary = "Upload organizations avatar")
   @ResponseStatus(HttpStatus.OK)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @NoFeaturesRequired
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
     @PathVariable id: Long,
@@ -281,6 +293,7 @@ class OrganizationController(
   @Operation(summary = "Delete organization avatar")
   @ResponseStatus(HttpStatus.OK)
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @NoFeaturesRequired
   fun removeAvatar(
     @PathVariable id: Long,
   ): OrganizationModel {
@@ -296,6 +309,7 @@ class OrganizationController(
     description = "Sets default (level-based) permission for organization",
   )
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @NoFeaturesRequired
   fun setBasePermissions(
     @PathVariable organizationId: Long,
     @PathVariable permissionType: ProjectPermissionType,
@@ -306,6 +320,7 @@ class OrganizationController(
   @GetMapping(value = ["/{organizationId:[0-9]+}/usage"])
   @Operation(summary = "Get current organization usage")
   @RequiresOrganizationRole
+  @NoFeaturesRequired
   fun getUsage(
     @PathVariable organizationId: Long,
   ): PublicUsageModel {

@@ -32,6 +32,7 @@ import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.NoFeaturesRequired
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeySearchResultView
@@ -85,6 +86,7 @@ class KeyController(
   @RequiresProjectPermissions([Scope.KEYS_CREATE])
   @AllowApiAccess
   @OpenApiOrderExtension(1)
+  @NoFeaturesRequired
   @OpenApiHideFromPublicDocs(
     paths = [
       // inconsistent REST path
@@ -111,6 +113,7 @@ class KeyController(
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
   @OpenApiOrderExtension(2)
+  @NoFeaturesRequired
   fun get(
     @PathVariable
     id: Long,
@@ -125,6 +128,7 @@ class KeyController(
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
   @OpenApiOrderExtension(3)
+  @NoFeaturesRequired
   fun getAll(
     @ParameterObject
     @SortDefault("id")
@@ -140,6 +144,7 @@ class KeyController(
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
   @OpenApiOrderExtension(4)
+  @NoFeaturesRequired
   fun edit(
     @PathVariable
     id: Long,
@@ -161,6 +166,7 @@ class KeyController(
   @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
   @OpenApiOrderExtension(5)
+  @NoFeaturesRequired
   fun delete(
     @PathVariable ids: Set<Long>,
   ) {
@@ -175,6 +181,7 @@ class KeyController(
   )
   @UseDefaultPermissions // Security: key permissions are checked separately in method body
   @AllowApiAccess
+  @NoFeaturesRequired
   fun complexEdit(
     @PathVariable
     id: Long,
@@ -196,6 +203,7 @@ class KeyController(
   @RequestActivity(ActivityType.KEY_DELETE)
   @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
+  @NoFeaturesRequired
   fun delete(
     @RequestBody @Valid
     dto: DeleteKeysDto,
@@ -213,6 +221,7 @@ class KeyController(
   @RequestActivity(ActivityType.IMPORT)
   @RequiresProjectPermissions([Scope.KEYS_CREATE]) // Security: language translate permissions are handled in service
   @AllowApiAccess
+  @NoFeaturesRequired
   fun importKeys(
     @RequestBody @Valid
     dto: ImportKeysDto,
@@ -233,6 +242,7 @@ class KeyController(
   @RequestActivity(ActivityType.IMPORT)
   @UseDefaultPermissions // Security: permissions are handled in service
   @AllowApiAccess
+  @NoFeaturesRequired
   fun importKeys(
     @RequestBody @Valid
     dto: ImportKeysResolvableDto,
@@ -263,6 +273,7 @@ class KeyController(
   )
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
+  @NoFeaturesRequired
   fun searchForKey(
     @RequestParam
     @Parameter(description = "Search query")
@@ -291,6 +302,7 @@ class KeyController(
   )
   @RequiresProjectPermissions([Scope.KEYS_VIEW, Scope.SCREENSHOTS_VIEW, Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
+  @NoFeaturesRequired
   fun getInfo(
     @RequestBody
     @Valid
@@ -307,6 +319,7 @@ class KeyController(
     summary = "Get disabled languages",
     description = "Returns languages, in which key is disabled",
   )
+  @NoFeaturesRequired
   fun getDisabledLanguages(
     @PathVariable id: Long,
   ): CollectionModel<LanguageModel> {
@@ -321,6 +334,7 @@ class KeyController(
     summary = "Set disabled languages",
     description = "Sets languages, in which key is disabled",
   )
+  @NoFeaturesRequired
   fun setDisabledLanguages(
     @PathVariable id: Long,
     @RequestBody @Valid

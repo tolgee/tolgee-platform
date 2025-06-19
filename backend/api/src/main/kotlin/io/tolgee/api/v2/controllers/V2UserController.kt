@@ -23,6 +23,7 @@ import io.tolgee.hateoas.userAccount.PrivateUserAccountModelAssembler
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.authentication.*
+import io.tolgee.security.authorization.NoFeaturesRequired
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
@@ -70,6 +71,7 @@ class V2UserController(
   )
   @PostMapping("/send-email-verification")
   @BypassEmailVerification
+  @NoFeaturesRequired
   fun sendEmailVerification(request: HttpServletRequest) {
     val user = authenticationFacade.authenticatedUserEntity
     emailVerificationService.resendEmailVerification(user, request)
@@ -84,6 +86,7 @@ class V2UserController(
   @BypassForcedSsoAuthentication
   @AllowApiAccess
   @OpenApiOrderExtension(1)
+  @NoFeaturesRequired
   fun getInfo(): PrivateUserAccountModel {
     val userAccount = authenticationFacade.authenticatedUserView
     return privateUserAccountModelAssembler.toModel(userAccount)
@@ -92,6 +95,7 @@ class V2UserController(
   @PutMapping("")
   @Operation(summary = "Update user", description = "Updates current user's profile information.")
   @OpenApiOrderExtension(2)
+  @NoFeaturesRequired
   fun updateUser(
     @RequestBody @Valid
     dto: UserUpdateRequestDto?,
@@ -110,6 +114,7 @@ class V2UserController(
     description = "Updates current user's password. Invalidates all previous sessions upon success.",
   )
   @OpenApiOrderExtension(3)
+  @NoFeaturesRequired
   fun updateUserPassword(
     @RequestBody @Valid
     dto: UserUpdatePasswordRequestDto?,
@@ -124,6 +129,7 @@ class V2UserController(
   @Operation(summary = "Upload avatar")
   @OpenApiOrderExtension(4)
   @ResponseStatus(HttpStatus.OK)
+  @NoFeaturesRequired
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
   ): PrivateUserAccountModel {
@@ -140,6 +146,7 @@ class V2UserController(
   @Operation(summary = "Delete avatar")
   @ResponseStatus(HttpStatus.OK)
   @OpenApiOrderExtension(5)
+  @NoFeaturesRequired
   fun removeAvatar(): PrivateUserAccountModel {
     val entity = authenticationFacade.authenticatedUserEntity
     userAccountService.removeAvatar(entity)
@@ -153,6 +160,7 @@ class V2UserController(
   @DeleteMapping("")
   @RequiresSuperAuthentication
   @OpenApiOrderExtension(6)
+  @NoFeaturesRequired
   fun delete() {
     userAccountService.delete(authenticationFacade.authenticatedUserEntity)
   }
@@ -189,6 +197,7 @@ class V2UserController(
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
   @AllowApiAccess
+  @NoFeaturesRequired
   fun getSso(): ResponseEntity<PublicSsoTenantModel> {
     val userAccount = authenticationFacade.authenticatedUser
     val domain = userAccount.domain ?: return ResponseEntity.noContent().build()
@@ -228,6 +237,7 @@ class V2UserController(
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
   @OpenApiHideFromPublicDocs
+  @NoFeaturesRequired
   fun getManagedBy(): ResponseEntity<PrivateOrganizationModel> {
     val userAccount = authenticationFacade.authenticatedUser
     val org = organizationRoleService.getManagedBy(userId = userAccount.id) ?: return ResponseEntity.noContent().build()
@@ -245,6 +255,7 @@ class V2UserController(
   @PostMapping("")
   @Operation(summary = "Updates current user's data.", deprecated = true)
   @OpenApiHideFromPublicDocs
+  @NoFeaturesRequired
   fun updateUserOld(
     @RequestBody @Valid
     dto: UserUpdateRequestDto?,
@@ -257,6 +268,7 @@ class V2UserController(
     description = "Returns all organizations owned only by current user",
   )
   @ResponseStatus(HttpStatus.OK)
+  @NoFeaturesRequired
   fun getAllSingleOwnedOrganizations(): CollectionModel<SimpleOrganizationModel> {
     val organizations = organizationService.getAllSingleOwnedByUser(authenticationFacade.authenticatedUserEntity)
     return simpleOrganizationModelAssembler.toCollectionModel(organizations)
@@ -266,6 +278,7 @@ class V2UserController(
   @Operation(summary = "Get super JWT", description = "Generates new JWT token permitted to sensitive operations")
   @BypassEmailVerification
   @BypassForcedSsoAuthentication
+  @NoFeaturesRequired
   fun getSuperToken(
     @RequestBody @Valid
     req: SuperTokenRequest,
