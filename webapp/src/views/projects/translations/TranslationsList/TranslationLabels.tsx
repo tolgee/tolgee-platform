@@ -84,7 +84,7 @@ export const TranslationLabels = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const labelControlRef = useRef<HTMLDivElement | null>(null);
   const measureRef = useRef<HTMLDivElement | null>(null);
-  const [visibleCount, setVisibleCount] = useState(labels.length);
+  const [visibleCount, setVisibleCount] = useState(labels?.length || 0);
 
   const recalculate = useCallback(() => {
     if (!labels) return;
@@ -98,7 +98,7 @@ export const TranslationLabels = ({
     const measured = Array.from(measureRef.current.children) as HTMLElement[];
     if (!measured.length) return;
 
-    const moreWidth = measured[labels.length]?.offsetWidth || 0;
+    const moreWidth = labels ? measured[labels.length]?.offsetWidth : 0;
 
     let used = 0;
     let fit = labels.length;
@@ -131,12 +131,12 @@ export const TranslationLabels = ({
     return () => ro.disconnect();
   }, [recalculate]);
 
-  const overflowCount = labels.length - visibleCount;
+  const overflowCount = labels?.length - visibleCount;
 
   return (
     <StyledLabels className={className}>
       <StyledList className="translation-labels-list" ref={containerRef}>
-        {labels.slice(0, visibleCount).map((label) => (
+        {labels?.slice(0, visibleCount).map((label) => (
           <TranslationLabel
             label={label}
             key={label.id}
@@ -153,7 +153,7 @@ export const TranslationLabels = ({
             onClick={(e) => stopBubble<HTMLElement>(() => {})(e)}
             title={
               <TooltipStyledList>
-                {labels.slice(visibleCount).map((hiddenLabel) => (
+                {labels?.slice(visibleCount).map((hiddenLabel) => (
                   <TranslationLabel
                     label={hiddenLabel}
                     key={hiddenLabel.id}
@@ -187,7 +187,7 @@ export const TranslationLabels = ({
         )}
       </StyledList>
       <HiddenMeasure ref={measureRef} className="hidden-measure">
-        {labels.map((label) => (
+        {labels?.map((label) => (
           <TranslationLabel
             label={label}
             key={label.id}
