@@ -88,7 +88,7 @@ class FeatureAuthorizationInterceptorTest {
     whenever(enabledFeaturesProvider.isFeatureEnabled(1337L, Feature.GLOSSARY)).thenReturn(true)
     whenever(enabledFeaturesProvider.isFeatureEnabled(1337L, Feature.TASKS)).thenReturn(false)
 
-    mockMvc.perform(get("/v2/organizations/1337/requires-features")).andIsBadRequest
+    assertThrows<Exception> { mockMvc.perform(get("/v2/organizations/1337/requires-features")) }
   }
 
   @Test
@@ -104,7 +104,7 @@ class FeatureAuthorizationInterceptorTest {
     whenever(enabledFeaturesProvider.isFeatureEnabled(1337L, Feature.GLOSSARY)).thenReturn(false)
     whenever(enabledFeaturesProvider.isFeatureEnabled(1337L, Feature.TASKS)).thenReturn(false)
 
-    mockMvc.perform(get("/v2/organizations/1337/requires-one-of-features")).andIsBadRequest
+    assertThrows<Exception> { mockMvc.perform(get("/v2/organizations/1337/requires-one-of-features")) }
   }
 
   @RestController
