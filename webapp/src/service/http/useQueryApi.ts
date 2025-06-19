@@ -326,26 +326,39 @@ export const useNdJsonStreamedMutation = <
       ...fetchOptions,
     })(request);
     const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
     const result: any[] = [];
+
+    const handleLine = (text: string) => {
+      const parsed = getParsedJsonOrNull(text);
+      if (!parsed) {
+        // eslint-disable-next-line no-console
+        console.warn('Invalid json', text);
+        return;
+      }
+      if (parsed['error']) {
+        const error = parsed['error'];
+        throw new ApiError('Api error', error);
+      }
+      result.push(parsed);
+      onData(parsed);
+    };
+
     while (reader) {
       const { done, value } = await reader.read();
-      const text = new TextDecoder().decode(value);
-      if (text) {
-        const parsed = getParsedJsonOrNull(text);
-        if (!parsed) {
-          continue;
-        }
-        if (parsed['error']) {
-          const error = parsed['error'];
-          throw new ApiError('Api error', error);
-        }
-        result.push(parsed);
-        onData(parsed);
+      buffer += decoder.decode(value);
+      const splitPos = buffer.indexOf('\n');
+      if (splitPos > -1) {
+        const text = buffer.substring(0, splitPos);
+        buffer = buffer.substring(splitPos + 1);
+        handleLine(text);
       }
       if (done) {
         break;
       }
     }
+    handleLine(buffer);
     return result;
   }, customOptions(options as any) as any);
 
