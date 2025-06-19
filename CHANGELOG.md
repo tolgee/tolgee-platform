@@ -1,3 +1,10 @@
+## [3.123.5](https://github.com/tolgee/tolgee-platform/compare/v3.123.4...v3.123.5) (2025-06-19)
+
+
+### Bug Fixes
+
+* properly parse incoming chunks of data in useNdJsonStreamedMutation ([#3135](https://github.com/tolgee/tolgee-platform/issues/3135)) ([9c090f8](https://github.com/tolgee/tolgee-platform/commit/9c090f8e7ed03896607e7e6230f00ebdaac69a93))
+
 ## [3.123.4](https://github.com/tolgee/tolgee-platform/compare/v3.123.3...v3.123.4) (2025-06-19)
 
 
