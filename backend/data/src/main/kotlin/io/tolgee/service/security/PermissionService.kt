@@ -22,7 +22,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.translationAgency.TranslationAgency
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService

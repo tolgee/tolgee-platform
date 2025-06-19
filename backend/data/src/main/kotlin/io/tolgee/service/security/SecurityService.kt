@@ -253,7 +253,8 @@ class SecurityService(
         checkLanguagePermission(
           projectId,
         ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
-      }, {
+      },
+      {
         if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
           throw PermissionException(Message.OPERATION_NOT_PERMITTED)
         }
