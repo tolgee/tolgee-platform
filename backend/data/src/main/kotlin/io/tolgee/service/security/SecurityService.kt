@@ -10,6 +10,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
@@ -245,23 +246,29 @@ class SecurityService(
     projectId: Long,
     languageIds: Collection<Long>,
     keyId: Long? = null,
-    translations: List<Translation>? = null
   ) {
-    tryPermissions({
-      checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
-      checkLanguagePermission(
-        projectId,
-      ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
-    }, {
-      if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
-        throw PermissionException(Message.OPERATION_NOT_PERMITTED)
+    tryPermissions(
+      {
+        checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
+        checkLanguagePermission(
+          projectId,
+        ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+      }, {
+        if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
+          throw PermissionException(Message.OPERATION_NOT_PERMITTED)
+        }
       }
-    }, {
-      checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT_UNREVIEWED)
-      if (translations?.find { it.state == TranslationState.REVIEWED } != null) {
-        throw PermissionException(Message.OPERATION_NOT_PERMITTED)
+    )
+    if (keyId != null) {
+      val project = permissionService.getProjectPermissionData(projectId, authenticationFacade.authenticatedUser.id)
+      if (project.suggestionsMode == SuggestionsMode.ENFORCED) {
+        val existingTranslations = translationService.getTranslations(listOf(keyId), languageIds.toList())
+        // for translations in REVIEWED state user also needs state change permission
+        for (translation in existingTranslations.filter { it.state == TranslationState.REVIEWED }) {
+          checkLanguageStateChangePermission(projectId, listOf(translation.language.id))
+        }
       }
-    })
+    }
   }
 
   fun checkLanguageStateChangePermission(
@@ -347,7 +354,7 @@ class SecurityService(
 
   fun checkLanguageTranslatePermission(translation: Translation) {
     val language = translation.language
-    checkLanguageTranslatePermission(language.project.id, listOf(language.id), translation.key.id, listOf(translation))
+    checkLanguageTranslatePermission(language.project.id, listOf(language.id), translation.key.id)
   }
 
   fun checkStateChangePermission(translation: Translation) {
@@ -361,10 +368,7 @@ class SecurityService(
     keyId: Long?,
   ) {
     val languages = languageService.findByTags(tags, projectId)
-    val translations = keyId
-      ?.let { translationService.getTranslations(listOf(it), languages.map { it.id }) }
-      ?: emptyList()
-    this.checkLanguageTranslatePermission(projectId, languages.map { it.id }, keyId, translations)
+    this.checkLanguageTranslatePermission(projectId, languages.map { it.id }, keyId)
   }
 
   fun checkLanguageTranslatePermissionsByLanguageId(
@@ -372,10 +376,7 @@ class SecurityService(
     projectId: Long,
     keyId: Long? = null,
   ) {
-    val translations = keyId
-      ?.let { translationService.getTranslations(listOf(it), languageIds.toList()) }
-      ?: emptyList()
-    this.checkLanguageTranslatePermission(projectId, languageIds, keyId, translations)
+    this.checkLanguageTranslatePermission(projectId, languageIds, keyId)
   }
 
   fun checkLanguageStateChangePermissionsByTag(

@@ -4540,4 +4540,25 @@
     <changeSet author="stepangranat (generated)" id="1750157929325-1">
         <modifyDataType columnName="structure_delimiter" newDataType="char(1)" tableName="content_delivery_config"/>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750322363373-1">
+        <createTable tableName="permission_suggest_languages">
+            <column name="permission_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="permission_suggest_languagesPK"/>
+            </column>
+            <column name="suggest_languages_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="permission_suggest_languagesPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750322363373-2">
+        <addForeignKeyConstraint baseColumnNames="suggest_languages_id" baseTableName="permission_suggest_languages" constraintName="FKj3gcw8m1yfe6qw7xe7boo7q5l" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750322363373-3">
+        <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="permission_suggest_languages" constraintName="FKn6g9k1qo8y0k6lnqsygcs21dt" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="permission" validate="true"/>
+    </changeSet>
+    <changeSet author="stepangranat (generated)" id="1750323175604-1">
+        <addColumn tableName="project">
+            <column defaultValue="DISABLED" name="suggestions_mode" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

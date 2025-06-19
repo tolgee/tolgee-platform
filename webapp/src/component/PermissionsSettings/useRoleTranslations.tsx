@@ -15,10 +15,6 @@ export const useRoleTranslations = () => {
       label: t('permission_type_view'),
       hint: t('permission_type_view_hint'),
     },
-    SUGGEST: {
-      label: t('permission_type_suggest'),
-      hint: t('permission_type_suggest_hint'),
-    },
     TRANSLATE: {
       label: t('permission_type_translate'),
       hint: t('permission_type_translate_hint'),

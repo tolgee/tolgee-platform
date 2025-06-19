@@ -56,9 +56,6 @@ export const usePermissionsStructure = () => {
             value: 'translations.view',
           },
           {
-            value: 'translations.edit-unreviewed',
-          },
-          {
             value: 'translations.edit',
           },
           {

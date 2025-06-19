@@ -76,6 +76,7 @@ export const useUpdatePermissions = ({ userId, projectId }: Props) => {
         } else if (role === 'TRANSLATE') {
           languagePermissions = {
             translateLanguages: settingsState.basicState.languages,
+            suggestLanguages: settingsState.basicState.languages,
           };
         }
 

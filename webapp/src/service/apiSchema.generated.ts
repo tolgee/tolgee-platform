@@ -1096,7 +1096,6 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
-        | "translations.edit-unreviewed"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1137,14 +1136,7 @@ export interface components {
        */
       translateLanguageIds?: number[];
       /** @description The user's permission type. This field is null if user has assigned granular permissions or if returning API key's permissions */
-      type?:
-        | "NONE"
-        | "VIEW"
-        | "SUGGEST"
-        | "TRANSLATE"
-        | "REVIEW"
-        | "EDIT"
-        | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
@@ -1508,7 +1500,6 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
-        | "translations.edit-unreviewed"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1549,14 +1540,7 @@ export interface components {
        */
       translateLanguageIds?: number[];
       /** @description The user's permission type. This field is null if uses granular permissions */
-      type?:
-        | "NONE"
-        | "VIEW"
-        | "SUGGEST"
-        | "TRANSLATE"
-        | "REVIEW"
-        | "EDIT"
-        | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
@@ -2025,6 +2009,8 @@ export interface components {
       icuPlaceholders: boolean;
       name: string;
       slug?: string;
+      /** @description Suggestions can be disabled (hidden from UI) or optional (visible in the UI) or enforced (force user to use them instead of editing reviewed translations) */
+      suggestionsMode: "DISABLED" | "OPTIONAL" | "ENFORCED";
       useNamespaces: boolean;
     };
     EeSubscriptionModel: {
@@ -2576,7 +2562,6 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
-        | "translations.edit-unreviewed"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3849,7 +3834,6 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
-        | "translations.edit-unreviewed"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3890,14 +3874,7 @@ export interface components {
        */
       translateLanguageIds?: number[];
       /** @description The user's permission type. This field is null if uses granular permissions */
-      type?:
-        | "NONE"
-        | "VIEW"
-        | "SUGGEST"
-        | "TRANSLATE"
-        | "REVIEW"
-        | "EDIT"
-        | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
@@ -3922,7 +3899,6 @@ export interface components {
         | "translations.view"
         | "translations.edit"
         | "translations.suggest"
-        | "translations.edit-unreviewed"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3963,14 +3939,7 @@ export interface components {
        */
       translateLanguageIds?: number[];
       /** @description The user's permission type. This field is null if uses granular permissions */
-      type?:
-        | "NONE"
-        | "VIEW"
-        | "SUGGEST"
-        | "TRANSLATE"
-        | "REVIEW"
-        | "EDIT"
-        | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
        * @example 200001,200004
@@ -4177,14 +4146,7 @@ export interface components {
       invitedUserName?: string;
       permission: components["schemas"]["PermissionWithAgencyModel"];
       permittedLanguageIds?: number[];
-      type?:
-        | "NONE"
-        | "VIEW"
-        | "SUGGEST"
-        | "TRANSLATE"
-        | "REVIEW"
-        | "EDIT"
-        | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
     };
     ProjectInviteUserDto: {
       /**
@@ -4213,17 +4175,15 @@ export interface components {
       stateChangeLanguages?: number[];
       /**
        * @deprecated
+       * @description Languages user can suggest translation
+       */
+      suggestLanguages?: number[];
+      /**
+       * @deprecated
        * @description Languages user can translate to
        */
       translateLanguages?: number[];
-      type?:
-        | "NONE"
-        | "VIEW"
-        | "SUGGEST"
-        | "TRANSLATE"
-        | "REVIEW"
-        | "EDIT"
-        | "MANAGE";
+      type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
        * @deprecated
        * @description Languages user can view
@@ -4245,6 +4205,8 @@ export interface components {
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       slug?: string;
+      /** @description Translators can either edit translations directly, only suggest or both. */
+      suggestionsMode: "DISABLED" | "OPTIONAL" | "ENFORCED";
       useNamespaces: boolean;
     };
     ProjectStatistics: {
@@ -10122,7 +10084,6 @@ export interface operations {
         permissionType:
           | "NONE"
           | "VIEW"
-          | "SUGGEST"
           | "TRANSLATE"
           | "REVIEW"
           | "EDIT"
@@ -20085,6 +20046,7 @@ export interface operations {
         translateLanguages?: number[];
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
+        suggestLanguages?: number[];
       };
     };
     responses: {
@@ -20131,7 +20093,6 @@ export interface operations {
         permissionType:
           | "NONE"
           | "VIEW"
-          | "SUGGEST"
           | "TRANSLATE"
           | "REVIEW"
           | "EDIT"
@@ -20143,6 +20104,7 @@ export interface operations {
         translateLanguages?: number[];
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
+        suggestLanguages?: number[];
       };
     };
     responses: {
@@ -20848,7 +20810,6 @@ export interface operations {
               | "translations.view"
               | "translations.edit"
               | "translations.suggest"
-              | "translations.edit-unreviewed"
               | "keys.edit"
               | "screenshots.upload"
               | "screenshots.delete"

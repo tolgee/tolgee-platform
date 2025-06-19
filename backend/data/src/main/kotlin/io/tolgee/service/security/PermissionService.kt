@@ -22,6 +22,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.translationAgency.TranslationAgency
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.service.CachedPermissionService
@@ -122,6 +123,7 @@ class PermissionService(
       organizationBasePermissions = organizationBasePermission,
       computedPermissions = computed,
       directPermissions = projectPermission,
+      suggestionsMode = project.suggestionsMode,
     )
   }
 
@@ -350,10 +352,12 @@ class PermissionService(
     permission.translateLanguages = languagePermissions.translate.standardize()
     permission.stateChangeLanguages = languagePermissions.stateChange.standardize()
     permission.viewLanguages = languagePermissions.view.standardize()
+    permission.suggestLanguages = languagePermissions.suggest.standardize()
 
     if (permission.viewLanguages.isNotEmpty()) {
       permission.viewLanguages.addAll(permission.translateLanguages)
       permission.viewLanguages.addAll(permission.stateChangeLanguages)
+      permission.viewLanguages.addAll(permission.suggestLanguages)
     }
   }
 
