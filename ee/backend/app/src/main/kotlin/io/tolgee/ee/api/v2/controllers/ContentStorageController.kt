@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.contentDelivery.ContentStorageRequest
 import io.tolgee.ee.api.v2.hateoas.assemblers.ContentStorageModelAssemblerEeImpl
@@ -16,6 +15,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiEeExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -39,21 +39,17 @@ class ContentStorageController(
   private val projectHolder: ProjectHolder,
   private val contentStorageModelAssemblerEeImpl: ContentStorageModelAssemblerEeImpl,
   private val pageModelAssembler: PagedResourcesAssembler<ContentStorage>,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping("")
   @Operation(summary = "Create Content Storage")
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @RequestActivity(ActivityType.CONTENT_STORAGE_CREATE)
   @AllowApiAccess
+  @RequiresFeatures(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
   fun create(
     @Valid @RequestBody
     dto: ContentStorageRequest,
   ): ContentStorageModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = projectHolder.project.organizationOwnerId,
-      Feature.PROJECT_LEVEL_CONTENT_STORAGES,
-    )
     val contentStorage = contentStorageService.create(projectHolder.project.id, dto)
     return contentStorageModelAssemblerEeImpl.toModel(contentStorage)
   }
@@ -63,15 +59,12 @@ class ContentStorageController(
   @RequiresProjectPermissions([Scope.CONTENT_DELIVERY_MANAGE])
   @AllowApiAccess
   @RequestActivity(ActivityType.CONTENT_STORAGE_UPDATE)
+  @RequiresFeatures(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
   fun update(
     @PathVariable contentStorageId: Long,
     @Valid @RequestBody
     dto: ContentStorageRequest,
   ): ContentStorageModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = projectHolder.project.organizationOwnerId,
-      Feature.PROJECT_LEVEL_CONTENT_STORAGES,
-    )
     val contentStorage = contentStorageService.update(projectHolder.project.id, contentStorageId, dto)
     return contentStorageModelAssemblerEeImpl.toModel(contentStorage)
   }
@@ -113,14 +106,11 @@ class ContentStorageController(
   @PostMapping("/test")
   @Operation(summary = "Test Content Storage settings")
   @AllowApiAccess
+  @RequiresFeatures(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
   fun test(
     @Valid @RequestBody
     dto: ContentStorageRequest,
   ): StorageTestResult {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = projectHolder.project.organizationOwnerId,
-      Feature.PROJECT_LEVEL_CONTENT_STORAGES,
-    )
     return contentStorageService.testStorage(dto)
   }
 
@@ -133,15 +123,12 @@ class ContentStorageController(
         " (Uses existing secrets, if nulls provided)",
   )
   @AllowApiAccess
+  @RequiresFeatures(Feature.PROJECT_LEVEL_CONTENT_STORAGES)
   fun testExisting(
     @Valid @RequestBody
     dto: ContentStorageRequest,
     @PathVariable id: Long,
   ): StorageTestResult {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId = projectHolder.project.organizationOwnerId,
-      Feature.PROJECT_LEVEL_CONTENT_STORAGES,
-    )
     return contentStorageService.testStorage(dto, id)
   }
 }

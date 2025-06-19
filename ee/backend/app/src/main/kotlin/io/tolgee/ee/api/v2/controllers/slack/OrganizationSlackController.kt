@@ -6,7 +6,6 @@ package io.tolgee.ee.api.v2.controllers.slack
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
@@ -19,12 +18,12 @@ import io.tolgee.hateoas.organization.slack.WorkspaceModelAssembler
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.*
 
-@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/organizations/{organizationId:[0-9]+}/slack"])
@@ -35,7 +34,6 @@ class OrganizationSlackController(
   private val slackWorkspaceService: OrganizationSlackWorkspaceService,
   private val authenticationFacade: AuthenticationFacade,
   private val workspaceModelAssembler: WorkspaceModelAssembler,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @GetMapping("get-connect-url")
   @Operation(
@@ -64,16 +62,11 @@ class OrganizationSlackController(
       "This endpoint allows the owner of an organization to connect a Slack workspace to their organization.\n" +
         "Checks if the Slack integration feature is enabled for the organization and proceeds with the connection.",
   )
+  @RequiresFeatures(Feature.SLACK_INTEGRATION)
   fun connectWorkspace(
     @RequestBody data: ConnectToSlackDto,
     @PathVariable organizationId: Long,
   ) {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      organizationId =
-        organizationHolder.organization.id,
-      Feature.SLACK_INTEGRATION,
-    )
-
     try {
       slackWorkspaceService.connect(
         data = data,
