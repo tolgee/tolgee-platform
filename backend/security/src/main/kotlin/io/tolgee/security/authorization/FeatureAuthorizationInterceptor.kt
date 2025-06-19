@@ -19,6 +19,7 @@ import org.springframework.web.method.HandlerMethod
  */
 @Component
 class FeatureAuthorizationInterceptor(
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val organizationHolder: OrganizationHolder,
 ) : AbstractAuthorizationInterceptor() {
@@ -31,17 +32,35 @@ class FeatureAuthorizationInterceptor(
   ): Boolean {
     val requiresFeatures = AnnotationUtils.getAnnotation(handler.method, RequiresFeatures::class.java)
     val requiresOneOfFeatures = AnnotationUtils.getAnnotation(handler.method, RequiresOneOfFeatures::class.java)
+    val noFeaturesRequired = AnnotationUtils.getAnnotation(handler.method, NoFeaturesRequired::class.java)
+    val customFeaturesHandling = AnnotationUtils.getAnnotation(handler.method, CustomFeaturesHandling::class.java)
 
-    if (requiresFeatures == null && requiresOneOfFeatures == null) {
-      // No feature requirements, continue
-      return true
+    if (requiresFeatures == null && requiresOneOfFeatures == null &&
+        noFeaturesRequired == null && customFeaturesHandling == null) {
+      throw RuntimeException(
+        "No feature annotation (@RequiresFeatures, @RequiresOneOfFeatures, " +
+        "@NoFeaturesRequired, or @CustomFeaturesHandling) " +
+        "has been set for this endpoint!"
+      )
     }
 
-    if (requiresFeatures != null && requiresOneOfFeatures != null) {
-      // Policy doesn't make sense
+    val annotationCount = listOf(
+      requiresFeatures != null,
+      requiresOneOfFeatures != null,
+      noFeaturesRequired != null,
+      customFeaturesHandling != null
+    ).count { it }
+
+    if (annotationCount > 1) {
       throw RuntimeException(
-        "Both `@RequiresFeatures` and `@RequiresOneOfFeatures` have been set for this endpoint!",
+        "Multiple feature annotations have been set for this endpoint! " +
+        "Only one of @RequiresFeatures, @RequiresOneOfFeatures, @NoFeaturesRequired, " +
+          "or @CustomFeaturesHandling should be used."
       )
+    }
+
+    if (noFeaturesRequired != null || customFeaturesHandling != null) {
+      return true
     }
 
     if (requiresFeatures != null) {

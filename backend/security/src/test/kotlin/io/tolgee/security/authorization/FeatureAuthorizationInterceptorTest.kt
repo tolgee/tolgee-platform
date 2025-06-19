@@ -66,13 +66,23 @@ class FeatureAuthorizationInterceptorTest {
   }
 
   @Test
-  fun `it has no effect on endpoints without feature requirements`() {
-    mockMvc.perform(get("/v2/organizations/1337/no-features")).andIsOk
+  fun `it fails on endpoints without feature annotations`() {
+    assertThrows<Exception> { mockMvc.perform(get("/v2/organizations/1337/no-annotations")) }
+  }
+
+  @Test
+  fun `it allows access to endpoints with NoFeaturesRequired annotation`() {
+    mockMvc.perform(get("/v2/organizations/1337/no-features-required")).andIsOk
+  }
+
+  @Test
+  fun `it allows access to endpoints with CustomFeaturesHandling annotation`() {
+    mockMvc.perform(get("/v2/organizations/1337/custom-features-handling")).andIsOk
   }
 
   @Test
   fun `it does not allow both annotations to be present`() {
-    assertThrows<Exception> { mockMvc.perform(get("/v2/organizations/1337/both-annotations")) }
+    assertThrows<Exception> { mockMvc.perform(get("/v2/organizations/1337/multiple-annotations")) }
   }
 
   @Test
@@ -109,10 +119,22 @@ class FeatureAuthorizationInterceptorTest {
 
   @RestController
   class TestController {
-    @GetMapping("/v2/organizations/{id}/no-features")
-    fun noFeatures(
+    @GetMapping("/v2/organizations/{id}/no-annotations")
+    fun noAnnotations(
+      @PathVariable id: Long,
+    ) = "No annotations for org #$id! This should fail."
+
+    @GetMapping("/v2/organizations/{id}/no-features-required")
+    @NoFeaturesRequired
+    fun noFeaturesRequired(
       @PathVariable id: Long,
     ) = "No features required for org #$id!"
+
+    @GetMapping("/v2/organizations/{id}/custom-features-handling")
+    @CustomFeaturesHandling
+    fun customFeaturesHandling(
+      @PathVariable id: Long,
+    ) = "Custom features handling for org #$id!"
 
     @GetMapping("/v2/organizations/{id}/requires-features")
     @RequiresFeatures(features = [Feature.GLOSSARY, Feature.TASKS])
@@ -126,10 +148,10 @@ class FeatureAuthorizationInterceptorTest {
       @PathVariable id: Long,
     ) = "Requires either GLOSSARY or TASKS feature for org #$id!"
 
-    @GetMapping("/v2/organizations/{id}/both-annotations")
+    @GetMapping("/v2/organizations/{id}/multiple-annotations")
     @RequiresFeatures(features = [Feature.GLOSSARY])
     @RequiresOneOfFeatures(features = [Feature.TASKS])
-    fun bothAnnotations(
+    fun multipleAnnotations(
       @PathVariable id: Long,
     ) = "This should throw an exception!"
   }
