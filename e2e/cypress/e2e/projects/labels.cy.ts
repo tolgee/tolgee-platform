@@ -2,6 +2,7 @@ import { login } from '../../common/apiCalls/common';
 import { labelsTestData } from '../../common/apiCalls/testData/testData';
 import { gcy } from '../../common/shared';
 import { E2ProjectLabelsSection } from '../../compounds/projectSettings/labels/E2ProjectLabelsSection';
+import { isDarkMode } from '../../common/helpers';
 
 let projectId = null;
 let secondProjectId = null;
@@ -29,7 +30,7 @@ describe('Projects Settings - Labels', () => {
     labelModal.assertDefaultColorIsFilled();
     labelModal.fillAndSave('test-label', '#FF0055', 'New label description');
 
-    projectLabels.assertLabelsCount(2);
+    projectLabels.assertLabelsCount(6);
     projectLabels.assertLabelExists('test-label', 'New label description');
   });
 
@@ -50,16 +51,20 @@ describe('Projects Settings - Labels', () => {
     projectLabels.visit(projectId);
 
     const labelModal = projectLabels.openEditLabelModal('First label');
-    labelModal.fillAndSave('Edited label', { index: 3, hex: '#1188FF' });
+    labelModal.fillAndSave('Edited label', { index: 3, hex: '#FFBDDC' });
 
-    projectLabels.assertLabelExists('Edited label', null, 'rgb(17, 136, 255)');
+    projectLabels.assertLabelExists(
+      'Edited label',
+      null,
+      isDarkMode ? 'rgba(255, 189, 220, 0.85)' : 'rgb(255, 189, 220)'
+    );
   });
 
   it('should delete a label', () => {
     projectLabels.visit(projectId);
 
     projectLabels.deleteLabel('First label');
-    projectLabels.assertLabelsCount(0);
+    projectLabels.assertLabelsCount(4);
   });
 
   it('shows paginated list of labels', () => {

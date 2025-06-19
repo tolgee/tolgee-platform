@@ -224,4 +224,16 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query("select max(coalesce(t.updatedAt, t.createdAt)) from Translation t where t.language.id = :languageId")
   fun getLastModifiedDate(languageId: Long): Date?
+
+  @Query(
+    """
+    SELECT t FROM Translation t
+    LEFT JOIN FETCH t.labels 
+    WHERE t.key.id IN :keyIds AND t.language.id IN :languageIds
+    """
+  )
+  fun getTranslationsWithLabels(
+    keyIds: Collection<Long>,
+    languageIds: Collection<Long>,
+  ): List<Translation>
 }

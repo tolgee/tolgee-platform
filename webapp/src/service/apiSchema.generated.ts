@@ -605,6 +605,9 @@ export interface paths {
     get: operations["getAll_3"];
     post: operations["createLabel"];
   };
+  "/v2/projects/{projectId}/labels/ids": {
+    get: operations["getLabelsByIds"];
+  };
   "/v2/projects/{projectId}/labels/{labelId}": {
     put: operations["updateLabel"];
     delete: operations["deleteLabel"];
@@ -685,6 +688,9 @@ export interface paths {
   "/v2/projects/{projectId}/start-batch-job/ai-playground-translate": {
     post: operations["aiPlaygroundTranslate"];
   };
+  "/v2/projects/{projectId}/start-batch-job/assign-translation-label": {
+    post: operations["assignTranslationLabel"];
+  };
   "/v2/projects/{projectId}/start-batch-job/clear-translations": {
     /** Clear translation values for provided keys in selected languages. */
     post: operations["clearTranslations"];
@@ -712,6 +718,9 @@ export interface paths {
   };
   "/v2/projects/{projectId}/start-batch-job/tag-keys": {
     post: operations["tagKeys"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/unassign-translation-label": {
+    post: operations["unassignTranslationLabel"];
   };
   "/v2/projects/{projectId}/start-batch-job/untag-keys": {
     post: operations["untagKeys"];
@@ -836,6 +845,10 @@ export interface paths {
   "/v2/projects/{projectId}/translations/{translationId}/history": {
     /** Sorting is not supported for supported. It is automatically sorted from newest to oldest. */
     get: operations["getTranslationHistory"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/label/{labelId}": {
+    put: operations["assignLabel"];
+    delete: operations["unassignLabel"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/set-outdated-flag/{state}": {
     /** Set's "outdated" flag indicating the base translation was changed without updating current translation. */
@@ -1128,6 +1141,8 @@ export interface components {
         | "tasks.edit"
         | "prompts.view"
         | "prompts.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1274,7 +1289,9 @@ export interface components {
         | "UNTAG_KEYS"
         | "SET_KEYS_NAMESPACE"
         | "AUTOMATION"
-        | "BILLING_TRIAL_EXPIRATION_NOTICE";
+        | "BILLING_TRIAL_EXPIRATION_NOTICE"
+        | "ASSIGN_TRANSLATION_LABEL"
+        | "UNASSIGN_TRANSLATION_LABEL";
       /**
        * Format: int64
        * @description The time when the job was last updated (status change)
@@ -1531,6 +1548,8 @@ export interface components {
         | "tasks.edit"
         | "prompts.view"
         | "prompts.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -2350,7 +2369,8 @@ export interface components {
         | "glossary_non_translatable_term_cannot_be_translated"
         | "llm_content_filter"
         | "llm_provider_empty_response"
-        | "label_not_found";
+        | "label_not_found"
+        | "label_not_from_project";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2583,7 +2603,9 @@ export interface components {
         | "tasks.view"
         | "tasks.edit"
         | "prompts.view"
-        | "prompts.edit";
+        | "prompts.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign";
     };
     IdentifyRequest: {
       anonymousUserId: string;
@@ -3152,6 +3174,11 @@ export interface components {
       color: string;
       description?: string;
       name: string;
+    };
+    LabelTranslationsRequest: {
+      keyIds: number[];
+      labelIds: number[];
+      languageIds: number[];
     };
     LanguageAiPromptCustomizationModel: {
       /**
@@ -3876,6 +3903,8 @@ export interface components {
         | "tasks.edit"
         | "prompts.view"
         | "prompts.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -3940,6 +3969,8 @@ export interface components {
         | "tasks.edit"
         | "prompts.view"
         | "prompts.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -4113,6 +4144,8 @@ export interface components {
         | "BATCH_TAG_KEYS"
         | "BATCH_UNTAG_KEYS"
         | "BATCH_SET_KEYS_NAMESPACE"
+        | "BATCH_ASSIGN_TRANSLATION_LABEL"
+        | "BATCH_UNASSIGN_TRANSLATION_LABEL"
         | "AUTOMATION"
         | "CONTENT_DELIVERY_CONFIG_CREATE"
         | "CONTENT_DELIVERY_CONFIG_UPDATE"
@@ -4139,7 +4172,12 @@ export interface components {
         | "GLOSSARY_TERM_CREATE"
         | "GLOSSARY_TERM_UPDATE"
         | "GLOSSARY_TERM_DELETE"
-        | "GLOSSARY_TERM_TRANSLATION_UPDATE";
+        | "GLOSSARY_TERM_TRANSLATION_UPDATE"
+        | "TRANSLATION_LABELS_EDIT"
+        | "TRANSLATION_LABEL_ASSIGN"
+        | "TRANSLATION_LABEL_CREATE"
+        | "TRANSLATION_LABEL_UPDATE"
+        | "TRANSLATION_LABEL_DELETE";
     };
     ProjectAiPromptCustomizationModel: {
       /**
@@ -5272,7 +5310,8 @@ export interface components {
         | "glossary_non_translatable_term_cannot_be_translated"
         | "llm_content_filter"
         | "llm_provider_empty_response"
-        | "label_not_found";
+        | "label_not_found"
+        | "label_not_from_project";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -5518,6 +5557,8 @@ export interface components {
        * @description Id of translation record
        */
       id: number;
+      /** @description Labels assigned to this translation */
+      labels: components["schemas"]["LabelModel"][];
       /** @description Which machine translation service was used to auto translate this */
       mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
       /** @description Whether base language translation was changed after this translation was updated */
@@ -14777,6 +14818,8 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter key translations with labels */
+        filterLabel?: string[];
       };
       path: {
         projectId: number;
@@ -15485,6 +15528,7 @@ export interface operations {
   getAll_3: {
     parameters: {
       query: {
+        search?: string;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -15586,6 +15630,56 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["LabelRequest"];
+      };
+    };
+  };
+  getLabelsByIds: {
+    parameters: {
+      query: {
+        id: number[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LabelModel"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
@@ -17146,6 +17240,58 @@ export interface operations {
       };
     };
   };
+  assignTranslationLabel: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LabelTranslationsRequest"];
+      };
+    };
+  };
   /** Clear translation values for provided keys in selected languages. */
   clearTranslations: {
     parameters: {
@@ -17563,6 +17709,58 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["TagKeysRequest"];
+      };
+    };
+  };
+  unassignTranslationLabel: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LabelTranslationsRequest"];
       };
     };
   };
@@ -19069,6 +19267,8 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter key translations with labels */
+        filterLabel?: string[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -19352,6 +19552,8 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter key translations with labels */
+        filterLabel?: string[];
       };
       path: {
         projectId: number;
@@ -19846,6 +20048,100 @@ export interface operations {
           "application/json": components["schemas"]["PagedModelTranslationHistoryModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  assignLabel: {
+    parameters: {
+      path: {
+        translationId: number;
+        labelId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LabelModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  unassignLabel: {
+    parameters: {
+      path: {
+        translationId: number;
+        labelId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -20982,6 +21278,8 @@ export interface operations {
               | "tasks.edit"
               | "prompts.view"
               | "prompts.edit"
+              | "translation-labels.manage"
+              | "translation-labels.assign"
             )[];
           };
         };

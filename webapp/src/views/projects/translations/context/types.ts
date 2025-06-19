@@ -47,6 +47,20 @@ export type AddTag = {
   onSuccess?: () => void;
 };
 
+export type AddLabel = {
+  keyId: number;
+  translationId: number;
+  language: string;
+  labelId: number;
+};
+
+export type RemoveLabel = {
+  keyId: number;
+  translationId: number;
+  language: string;
+  labelId: number;
+};
+
 export type AfterCommand = 'EDIT_NEXT';
 
 export type ChangeValue = {

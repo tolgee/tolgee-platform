@@ -12,12 +12,10 @@ const StyledLanguage = styled('div')`
   grid-area: language;
   gap: 8px;
   align-items: center;
-  font-size: 13px;
+  font-size: 14px;
 `;
 
-const StyledLanguageName = styled('div')`
-  padding-right: 8px;
-`;
+const StyledLanguageName = styled('div')``;
 
 type Props = {
   language: LanguageModel;

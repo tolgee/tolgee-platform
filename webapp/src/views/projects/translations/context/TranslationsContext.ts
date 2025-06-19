@@ -9,6 +9,7 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useUrlSearchArray } from 'tg.hooks/useUrlSearch';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import {
+  AddLabel,
   AddTag,
   AddTranslation,
   CellPosition,
@@ -18,6 +19,7 @@ import {
   EditorProps,
   KeyElement,
   KeyUpdateData,
+  RemoveLabel,
   RemoveTag,
   SetTaskTranslationState,
   SetTranslationState,
@@ -41,6 +43,7 @@ import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/t
 import { useAiPlaygroundService } from './services/useAiPlaygroundService';
 import { usePreventPageLeave } from 'tg.hooks/usePreventPageLeave';
 import { QUERY } from 'tg.constants/links';
+import { useLabels } from 'tg.hooks/useLabels';
 
 type Props = {
   projectId: number;
@@ -152,6 +155,10 @@ export const [
   });
 
   const tagsService = useTagsService({
+    translations: translationService,
+  });
+
+  const labelService = useLabels({
     translations: translationService,
   });
 
@@ -308,6 +315,12 @@ export const [
     },
     setSidePanelOpen,
     setEventBlockers,
+    addTranslationLabel(data: AddLabel) {
+      return labelService.addLabel(data);
+    },
+    removeTranslationLabel(data: RemoveLabel) {
+      return labelService.removeLabel(data);
+    },
   };
 
   const dataReady = Boolean(
