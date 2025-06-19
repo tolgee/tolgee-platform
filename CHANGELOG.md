@@ -1,3 +1,10 @@
+## [3.123.4](https://github.com/tolgee/tolgee-platform/compare/v3.123.3...v3.123.4) (2025-06-19)
+
+
+### Bug Fixes
+
+* update base docker image ([#3130](https://github.com/tolgee/tolgee-platform/issues/3130)) ([14ea36b](https://github.com/tolgee/tolgee-platform/commit/14ea36b6d2ecc5d17b90b3b9397b8681e2f5218a))
+
 ## [3.123.3](https://github.com/tolgee/tolgee-platform/compare/v3.123.2...v3.123.3) (2025-06-18)
 
 
