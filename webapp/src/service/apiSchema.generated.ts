@@ -1131,6 +1131,11 @@ export interface components {
        */
       stateChangeLanguageIds?: number[];
       /**
+       * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
+       * @example 200001,200004
+       */
+      suggestLanguageIds?: number[];
+      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -1534,6 +1539,11 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
+       * @example 200001,200004
+       */
+      suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
@@ -3869,6 +3879,11 @@ export interface components {
        */
       stateChangeLanguageIds?: number[];
       /**
+       * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
+       * @example 200001,200004
+       */
+      suggestLanguageIds?: number[];
+      /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
        */
@@ -3933,6 +3948,11 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
+       * @example 200001,200004
+       */
+      suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
