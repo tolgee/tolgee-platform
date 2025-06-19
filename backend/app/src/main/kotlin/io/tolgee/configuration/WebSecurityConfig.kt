@@ -135,6 +135,7 @@ class WebSecurityConfig(
     registry.addInterceptor(projectAuthorizationInterceptor)
       .addPathPatterns("/v2/projects/**", "/api/project/**", "/api/repository/**")
     registry.addInterceptor(featureAuthorizationInterceptor)
+      .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)
   }
 
   @Bean
