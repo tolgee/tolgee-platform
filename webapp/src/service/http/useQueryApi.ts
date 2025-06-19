@@ -348,8 +348,8 @@ export const useNdJsonStreamedMutation = <
     while (reader) {
       const { done, value } = await reader.read();
       buffer += decoder.decode(value);
-      const splitPos = buffer.indexOf('\n');
-      if (splitPos > -1) {
+      let splitPos;
+      while ((splitPos = buffer.indexOf('\n')) > -1) {
         const text = buffer.substring(0, splitPos);
         buffer = buffer.substring(splitPos + 1);
         handleLine(text);
@@ -358,7 +358,9 @@ export const useNdJsonStreamedMutation = <
         break;
       }
     }
-    handleLine(buffer);
+    if (buffer) {
+      handleLine(buffer);
+    }
     return result;
   }, customOptions(options as any) as any);
 
