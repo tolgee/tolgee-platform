@@ -423,4 +423,26 @@ export const actionsConfiguration: Partial<
       Label: true,
     },
   },
+  BATCH_ASSIGN_TRANSLATION_LABEL: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_batch_operation_assign_translation_label"
+          params={params}
+        />
+      );
+    },
+    entities: { Params: true },
+  },
+  BATCH_UNASSIGN_TRANSLATION_LABEL: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_batch_operation_unassign_translation_label"
+          params={params}
+        />
+      );
+    },
+    entities: { Params: true },
+  },
 };
