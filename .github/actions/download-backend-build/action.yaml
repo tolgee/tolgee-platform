@@ -2,8 +2,8 @@ name: Download backend build
 description: Download backend build from GitHub artifacts and decompress them
 
 inputs:
-  source-directory:
-    description: Directory where the backend is. Defaults to current working directory.
+  target-directory:
+    description: Directory where the backend should be extracted to. Defaults to current working directory.
     default: .
 
 runs:
@@ -18,16 +18,16 @@ runs:
     - name: Decompress build results
       shell: bash
       env:
-        SRC_DIR: ${{ inputs.source-directory }}
+        DEST_DIR: ${{ inputs.target-directory }}
       run: |
-        tar --zstd -xf ~/backend-api.tar.zst $SRC_DIR/backend/api/build
-        tar --zstd -xf ~/backend-app.tar.zst $SRC_DIR/backend/app/build
-        tar --zstd -xf ~/backend-data.tar.zst $SRC_DIR/backend/data/build
-        tar --zstd -xf ~/backend-misc.tar.zst $SRC_DIR/backend/misc/build
-        tar --zstd -xf ~/backend-security.tar.zst $SRC_DIR/backend/security/build
-        tar --zstd -xf ~/backend-testing.tar.zst $SRC_DIR/backend/testing/build
-        tar --zstd -xf ~/backend-ktlint.tar.zst $SRC_DIR/backend/ktlint/build
-        tar --zstd -xf ~/backend-development.tar.zst $SRC_DIR/backend/development/build
-        tar --zstd -xf ~/ee-backend-app.tar.zst $SRC_DIR/ee/backend/app/build
-        tar --zstd -xf ~/ee-backend-tests.tar.zst $SRC_DIR/ee/backend/tests/build
-        tar --zstd -xf ~/backend-email.tar.zst $SRC_DIR/email/out
+        tar --zstd -xf ~/backend-api.tar.zst $DEST_DIR/backend/api/build
+        tar --zstd -xf ~/backend-app.tar.zst $DEST_DIR/backend/app/build
+        tar --zstd -xf ~/backend-data.tar.zst $DEST_DIR/backend/data/build
+        tar --zstd -xf ~/backend-misc.tar.zst $DEST_DIR/backend/misc/build
+        tar --zstd -xf ~/backend-security.tar.zst $DEST_DIR/backend/security/build
+        tar --zstd -xf ~/backend-testing.tar.zst $DEST_DIR/backend/testing/build
+        tar --zstd -xf ~/backend-ktlint.tar.zst $DEST_DIR/backend/ktlint/build
+        tar --zstd -xf ~/backend-development.tar.zst $DEST_DIR/backend/development/build
+        tar --zstd -xf ~/ee-backend-app.tar.zst $DEST_DIR/ee/backend/app/build
+        tar --zstd -xf ~/ee-backend-tests.tar.zst $DEST_DIR/ee/backend/tests/build
+        tar --zstd -xf ~/backend-email.tar.zst $DEST_DIR/email/out
