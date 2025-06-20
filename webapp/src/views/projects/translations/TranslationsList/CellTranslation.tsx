@@ -13,6 +13,8 @@ import { useTranslationCell } from '../useTranslationCell';
 import { CellStateBar } from '../cell/CellStateBar';
 import { TranslationRead } from './TranslationRead';
 import { TranslationWrite } from './TranslationWrite';
+import { Box } from '@mui/material';
+import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -86,6 +88,25 @@ export const CellTranslation: React.FC<Props> = ({
           width={width}
           colIndex={colIndex}
         />
+      )}
+      {tools.suggestions && (
+        <Box
+          sx={{
+            display: 'grid',
+            paddingLeft: '8px',
+            paddingBottom: '4px',
+            gap: '4px',
+          }}
+        >
+          {tools.suggestions.map((suggestion) => (
+            <AiPlaygroundPreview
+              key={suggestion.id}
+              isPlural={data.keyIsPlural}
+              locale={language.tag}
+              translation={suggestion.translation}
+            />
+          ))}
+        </Box>
       )}
     </StyledCell>
   );

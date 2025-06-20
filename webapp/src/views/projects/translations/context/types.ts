@@ -52,6 +52,7 @@ export type AfterCommand = 'EDIT_NEXT';
 export type ChangeValue = {
   after?: AfterCommand;
   preventTaskResolution?: boolean;
+  suggestionOnly?: boolean;
   onSuccess?: () => void;
 };
 

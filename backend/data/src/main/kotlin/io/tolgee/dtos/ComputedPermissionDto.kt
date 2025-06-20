@@ -94,6 +94,8 @@ class ComputedPermissionDto(
           get() = null
         override val stateChangeLanguageIds: Set<Long>?
           get() = null
+        override val suggestLanguageIds: Set<Long>?
+          get() = null
         override val type: ProjectPermissionType
           get() = type
         override val granular: Boolean?

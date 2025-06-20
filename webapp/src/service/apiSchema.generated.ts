@@ -789,6 +789,9 @@ export interface paths {
     /** Transfers project's ownership to organization */
     put: operations["transferProjectToOrganization"];
   };
+  "/v2/projects/{projectId}/translation-suggestion": {
+    post: operations["createSuggestion"];
+  };
   "/v2/projects/{projectId}/translations": {
     get: operations["getTranslations"];
     /** Sets translations for existing key */
@@ -1092,6 +1095,7 @@ export interface components {
       scopes: (
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1126,6 +1130,11 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
+       * @example 200001,200004
+       */
+      suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
@@ -1495,6 +1504,7 @@ export interface components {
       scopes: (
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1529,6 +1539,11 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
+       * @example 200001,200004
+       */
+      suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
@@ -1925,6 +1940,13 @@ export interface components {
       name?: string;
       type: "TRANSLATE" | "REVIEW";
     };
+    CreateTranslationSuggestionRequest: {
+      /** Format: int64 */
+      keyId: number;
+      /** Format: int64 */
+      languageId: number;
+      translation: string;
+    };
     CreateUpdateGlossaryTermResponse: {
       term: components["schemas"]["SimpleGlossaryTermModel"];
       translation?: components["schemas"]["GlossaryTermTranslationModel"];
@@ -1997,6 +2019,8 @@ export interface components {
       icuPlaceholders: boolean;
       name: string;
       slug?: string;
+      /** @description Suggestions can be disabled (hidden from UI) or optional (visible in the UI) or enforced (force user to use them instead of editing reviewed translations) */
+      suggestionsMode: "DISABLED" | "OPTIONAL" | "ENFORCED";
       useNamespaces: boolean;
     };
     EeSubscriptionModel: {
@@ -2547,6 +2571,7 @@ export interface components {
       scope:
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3086,6 +3111,7 @@ export interface components {
       screenshotCount: number;
       /** @description Key screenshots. Not provided when API key hasn't screenshots.view scope permission. */
       screenshots?: components["schemas"]["ScreenshotModel"][];
+      suggestions?: components["schemas"]["TranslationSuggestionModel"][];
       /** @description Tasks related to this key */
       tasks?: components["schemas"]["KeyTaskViewModel"][];
       /**
@@ -3817,6 +3843,7 @@ export interface components {
       scopes: (
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3851,6 +3878,11 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
+       * @example 200001,200004
+       */
+      suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
@@ -3881,6 +3913,7 @@ export interface components {
       scopes: (
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3915,6 +3948,11 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
+       * @example 200001,200004
+       */
+      suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
@@ -4101,7 +4139,14 @@ export interface components {
         | "TASK_CLOSE"
         | "TASK_REOPEN"
         | "TASK_KEY_UPDATE"
-        | "ORDER_TRANSLATION";
+        | "ORDER_TRANSLATION"
+        | "GLOSSARY_CREATE"
+        | "GLOSSARY_UPDATE"
+        | "GLOSSARY_DELETE"
+        | "GLOSSARY_TERM_CREATE"
+        | "GLOSSARY_TERM_UPDATE"
+        | "GLOSSARY_TERM_DELETE"
+        | "GLOSSARY_TERM_TRANSLATION_UPDATE";
     };
     ProjectAiPromptCustomizationModel: {
       /**
@@ -4150,6 +4195,11 @@ export interface components {
       stateChangeLanguages?: number[];
       /**
        * @deprecated
+       * @description Languages user can suggest translation
+       */
+      suggestLanguages?: number[];
+      /**
+       * @deprecated
        * @description Languages user can translate to
        */
       translateLanguages?: number[];
@@ -4175,6 +4225,8 @@ export interface components {
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       slug?: string;
+      /** @description Translators can either edit translations directly, only suggest or both. */
+      suggestionsMode: "DISABLED" | "OPTIONAL" | "ENFORCED";
       useNamespaces: boolean;
     };
     ProjectStatistics: {
@@ -5451,6 +5503,18 @@ export interface components {
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
       /** @description Translation text */
       text?: string;
+    };
+    TranslationSuggestionModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      keyId: number;
+      /** Format: int64 */
+      languageId: number;
+      state: "ACTIVE" | "ACCEPTED" | "DECLINED";
+      translation?: string;
+      /** Format: int64 */
+      userId: number;
     };
     /**
      * @description Translations object
@@ -18753,6 +18817,58 @@ export interface operations {
       };
     };
   };
+  createSuggestion: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateTranslationSuggestionRequest"];
+      };
+    };
+  };
   getTranslations: {
     parameters: {
       query: {
@@ -19950,6 +20066,7 @@ export interface operations {
         translateLanguages?: number[];
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
+        suggestLanguages?: number[];
       };
     };
     responses: {
@@ -20007,6 +20124,7 @@ export interface operations {
         translateLanguages?: number[];
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
+        suggestLanguages?: number[];
       };
     };
     responses: {
@@ -20711,6 +20829,7 @@ export interface operations {
             [key: string]: (
               | "translations.view"
               | "translations.edit"
+              | "translations.suggest"
               | "keys.edit"
               | "screenshots.upload"
               | "screenshots.delete"

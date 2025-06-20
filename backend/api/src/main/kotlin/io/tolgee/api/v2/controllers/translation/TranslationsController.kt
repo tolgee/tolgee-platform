@@ -16,6 +16,7 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.ProjectTranslationLastModifiedManager
+import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
@@ -45,6 +46,7 @@ import io.tolgee.service.queryBuilders.CursorUtil
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.task.ITaskService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translation.TranslationSuggestionService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.beans.propertyeditors.CustomCollectionEditor
@@ -103,6 +105,7 @@ class TranslationsController(
   private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager,
   private val createOrUpdateTranslationsFacade: CreateOrUpdateTranslationsFacade,
   private val taskService: ITaskService,
+  private val translationSuggestionService: TranslationSuggestionService,
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(
@@ -267,6 +270,7 @@ When null, resulting file will be a flat key-value object.
 
     addScreenshotsToResponse(data)
     addTasksToResponse(data)
+    addSuggestionsToResponse(projectHolder.project.id, data)
 
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
     return pagedAssembler.toTranslationModel(data, languages, cursor)
@@ -302,6 +306,14 @@ When null, resulting file will be a flat key-value object.
             it.taskType,
           )
         }
+    }
+  }
+
+  private fun addSuggestionsToResponse(projectId: Long, data: Page<KeyWithTranslationsView>) {
+    val keyIds = data.content.map { key -> key.keyId }
+    val keysWithSuggestions = translationSuggestionService.getKeysWithSuggestions(projectId, keyIds)
+    data.content.forEach { key ->
+      key.suggestions = keysWithSuggestions[key.keyId]
     }
   }
 
@@ -371,7 +383,7 @@ When null, resulting file will be a flat key-value object.
 
   private fun Translation.checkFromProject() {
     if (this.key.project.id != projectHolder.project.id) {
-      throw BadRequestException(io.tolgee.constants.Message.TRANSLATION_NOT_FROM_PROJECT)
+      throw BadRequestException(Message.TRANSLATION_NOT_FROM_PROJECT)
     }
   }
 
