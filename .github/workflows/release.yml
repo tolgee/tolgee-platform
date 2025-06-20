@@ -11,20 +11,18 @@ jobs:
   main:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     steps:
-      - uses: actions/checkout@v3
-        with:
-          token: "${{ secrets.TOLGEE_MACHINE_PAT }}"
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v3
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
         with:
-          java-version: 21
-          distribution: adopt
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "22.x"
+          docker: true
+          docker-hub: true
 
       - name: Install node modules
         run: npm ci
@@ -47,12 +45,8 @@ jobs:
         run: ./gradlew bootJar
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-
-      - name: Login to docker
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
+          TOLGEE_API_KEY: ${{ secrets.TOLGEE_API_KEY }}
+          TOLGEE_API_URL: ${{ secrets.TOLGEE_API_URL }}
 
       - name: Prepare for docker build
         if: ${{ steps.version.outputs.VERSION != '' }}
@@ -62,21 +56,44 @@ jobs:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
-      - name: Create docker image
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        run: |
-          docker buildx create --use
-          docker buildx build . -t tolgee/tolgee:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --cache-from type=registry,ref=tolgee/tolgee:latest --cache-to type=inline --push
-          docker buildx build . -t tolgee/tolgee:latest --platform linux/arm64,linux/amd64 --cache-from type=registry,ref=tolgee/tolgee:latest --cache-to type=inline --push
-        working-directory: build/docker
+      - name: Prepare Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: tolgee/tolgee
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        id: docker-push
+        with:
+          context: build/docker
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=tolgee/tolgee:buildcache
+          cache-to: type=registry,ref=tolgee/tolgee:buildcache,mode=max
+          push: true
+          sbom: true
+          provenance: mode=max
+
+      - name: Publish attestation to GitHub
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: docker.io/tolgee/tolgee
+          subject-digest: ${{ steps.docker-push.outputs.digest }}
+          push-to-registry: true
 
       - name: Pack with webapp
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: ./gradlew packResources
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+          TOLGEE_API_KEY: ${{ secrets.TOLGEE_API_KEY }}
+          TOLGEE_API_URL: ${{ secrets.TOLGEE_API_URL }}
 
       - name: Run npm release
         if: ${{ steps.version.outputs.VERSION != '' }}
@@ -93,7 +110,7 @@ jobs:
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: "npm run tag-keys"
         env:
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_KEY: ${{ secrets.TOLGEE_API_KEY }}
         working-directory: ./webapp
 
       - uses: actions/upload-artifact@v4
@@ -107,10 +124,13 @@ jobs:
 
       - name: Trigger Billing repo tests & testing deploy
         if: ${{ steps.version.outputs.VERSION != '' }}
+        env:
+          TOKEN: ${{ secrets.TOLGEE_MACHINE_PAT }}
+          VERSION: ${{ steps.version.outputs.VERSION }}
         run: |
           curl \
             -X POST \
             -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${{ secrets.TOLGEE_MACHINE_PAT }}" \
+            -H "Authorization: token $TOKEN" \
             https://api.github.com/repos/tolgee/billing/actions/workflows/test.yml/dispatches \
-            -d '{"ref":"main","inputs":{"releaseVersion":"${{ steps.version.outputs.VERSION }}"}}'
+            -d '{"ref":"main","inputs":{"release-version":"$VERSION"}}'
