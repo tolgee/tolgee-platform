@@ -1,25 +1,33 @@
 name: Upload backend build
 description: Compress and upload backend build result to GitHub artifacts
 
+inputs:
+  target-directory:
+    description: Directory where the backend should be extracted to. Defaults to current working directory.
+    default: .
+
 runs:
   using: composite
   steps:
-    - name: Compress build assets
+    - name: Compress build results
       shell: bash
+      env:
+        DEST_DIR: ${{ inputs.target-directory }}
       run: |
-        tar --zstd -cf ~/backend-api.tar.zst ./backend/api/build
-        tar --zstd -cf ~/backend-app.tar.zst ./backend/app/build
-        tar --zstd -cf ~/backend-data.tar.zst ./backend/data/build
-        tar --zstd -cf ~/backend-misc.tar.zst ./backend/misc/build
-        tar --zstd -cf ~/backend-security.tar.zst ./backend/security/build
-        tar --zstd -cf ~/backend-testing.tar.zst ./backend/testing/build
-        tar --zstd -cf ~/backend-ktlint.tar.zst ./backend/ktlint/build
-        tar --zstd -cf ~/backend-development.tar.zst ./backend/development/build
-        tar --zstd -cf ~/ee-backend-app.tar.zst ./ee/backend/app/build
-        tar --zstd -cf ~/ee-backend-tests.tar.zst ./ee/backend/tests/build
-        tar --zstd -cf ~/backend-email.tar.zst ./email/out
+        tar --zstd -cf ~/backend-api.tar.zst $DEST_DIR/backend/api/build
+        tar --zstd -cf ~/backend-app.tar.zst $DEST_DIR/backend/app/build
+        tar --zstd -cf ~/backend-data.tar.zst $DEST_DIR/backend/data/build
+        tar --zstd -cf ~/backend-misc.tar.zst $DEST_DIR/backend/misc/build
+        tar --zstd -cf ~/backend-security.tar.zst $DEST_DIR/backend/security/build
+        tar --zstd -cf ~/backend-testing.tar.zst $DEST_DIR/backend/testing/build
+        tar --zstd -cf ~/backend-ktlint.tar.zst $DEST_DIR/backend/ktlint/build
+        tar --zstd -cf ~/backend-development.tar.zst $DEST_DIR/backend/development/build
+        tar --zstd -cf ~/ee-backend-app.tar.zst $DEST_DIR/ee/backend/app/build
+        tar --zstd -cf ~/ee-backend-tests.tar.zst $DEST_DIR/ee/backend/tests/build
+        tar --zstd -cf ~/backend-email.tar.zst $DEST_DIR/email/out
 
-    - uses: actions/upload-artifact@v4
+    - name: Upload backend build result
+      uses: actions/upload-artifact@v4
       with:
         name: backend
         path: |
