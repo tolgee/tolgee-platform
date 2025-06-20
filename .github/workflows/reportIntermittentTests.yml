@@ -202,7 +202,7 @@ jobs:
 
   cleanup:
     if: always()
-    needs: [e2e]
+    needs: [e2e, frontend-build, backend-build, e2e-install-deps]
     name: Delete artifacts 🧹
     runs-on: ubuntu-24.04
     steps:
