@@ -116,6 +116,7 @@ class LanguageServiceTest : AbstractSpringTest() {
   @Test
   fun `hard deletes language with conflicts`() {
     val testData = ImportTestData()
+    testData.useCzechBaseLanguage()
     testDataService.saveTestData(testData.root)
 
     executeInNewTransaction {

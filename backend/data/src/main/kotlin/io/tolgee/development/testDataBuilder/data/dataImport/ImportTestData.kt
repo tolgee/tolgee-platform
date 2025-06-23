@@ -190,7 +190,6 @@ class ImportTestData {
               }
             }
           import = importBuilder.self
-          self.baseLanguage = czech
         }.self
     }
 
@@ -455,6 +454,10 @@ class ImportTestData {
         language = importEnglish
       }
     }
+  }
+
+  fun useCzechBaseLanguage() {
+    project.baseLanguage = czech
   }
 
   data class AddFilesWithNamespacesResult(
