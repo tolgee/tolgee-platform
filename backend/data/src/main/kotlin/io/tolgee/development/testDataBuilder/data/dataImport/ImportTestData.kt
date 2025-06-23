@@ -190,6 +190,7 @@ class ImportTestData {
               }
             }
           import = importBuilder.self
+          self.baseLanguage = czech
         }.self
     }
 

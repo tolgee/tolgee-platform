@@ -1,5 +1,6 @@
 package io.tolgee.repository.dataImport
 
+import io.tolgee.model.Language
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
@@ -34,6 +35,11 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
   @Transactional
   @Query("update ImportTranslation it set it.conflict = null where it.conflict.id in :translationIds")
   fun removeExistingTranslationConflictReferences(translationIds: Collection<Long>)
+
+  @Modifying
+  @Transactional
+  @Query("update ImportTranslation it set it.conflict = null where it.language.existingLanguage = :language")
+  fun removeExistingLanguageConflictReferences(language: Language)
 
   @Query(
     """ select it.id as id, it.text as text, ik.name as keyName, ik.id as keyId,
