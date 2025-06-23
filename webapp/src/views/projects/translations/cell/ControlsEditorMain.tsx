@@ -109,7 +109,7 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
         </>
       ) : (
         <LoadingButton
-          onClick={() => onSave?.({})}
+          onClick={() => onSave?.({ suggestionOnly: true })}
           color="primary"
           size="small"
           variant="contained"

@@ -20,6 +20,7 @@ class TranslationViewModelAssembler() : RepresentationModelAssemblerSupport<Tran
       mtProvider = view.mtProvider,
       commentCount = view.commentCount,
       unresolvedCommentCount = view.unresolvedCommentCount,
+      suggestionCount = view.suggestionCount,
     )
   }
 }

@@ -6,6 +6,8 @@ import io.tolgee.model.Language_
 import io.tolgee.model.Project_
 import io.tolgee.model.Screenshot
 import io.tolgee.model.Screenshot_
+import io.tolgee.model.TranslationSuggestion
+import io.tolgee.model.TranslationSuggestion_
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -93,12 +95,15 @@ class QueryBase<T>(
       this.querySelection[language to TranslationView::mtProvider] = translation.get(Translation_.mtProvider)
       val resolvedCommentsExpression = addComments(translation, language)
       val unresolvedCommentsExpression = addUnresolvedComments(translation, language)
+      val suggestionCountExpression = addSuggestionsCount(language)
 
       queryTranslationFiltering.apply(
         language,
         resolvedCommentsExpression,
         unresolvedCommentsExpression,
       )
+
+      queryTranslationFiltering.apply(language, suggestionCountExpression)
     }
 
     queryTranslationFiltering.apply(outdatedFieldMap)
@@ -137,6 +142,28 @@ class QueryBase<T>(
       ),
     )
     this.querySelection[language to TranslationView::commentCount] = subquery
+    return subquery
+  }
+
+  private fun addSuggestionsCount(
+    language: LanguageDto,
+  ): Expression<Long> {
+    val subquery = this.query.subquery(Long::class.java)
+    val subqueryRoot = subquery.from(TranslationSuggestion::class.java)
+
+    subquery.select(cb.count(subqueryRoot.get(TranslationSuggestion_.id)))
+    subquery.where(
+      cb.and(
+        cb.equal(
+          subqueryRoot.get(TranslationSuggestion_.key).get(Key_.id),
+          this.root.get(Key_.id),
+        ), cb.equal(
+          subqueryRoot.get(TranslationSuggestion_.language).get(Language_.id),
+          cb.literal(language.id),
+        )
+      )
+    )
+    this.querySelection[language to TranslationView::suggestionCount] = subquery
     return subquery
   }
 

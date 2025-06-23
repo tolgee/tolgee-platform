@@ -141,4 +141,14 @@ To filter default namespace, set to empty string.
     description = "Filter keys with any comments in lang",
   )
   var filterHasCommentsInLang: List<String>? = null
+
+  @field:Parameter(
+    description = "Filter keys with any suggestions in lang",
+  )
+  var filterHasSuggestionsInLang: List<String>? = null
+
+  @field:Parameter(
+    description = "Filter keys with no suggestions in lang",
+  )
+  var filterHasNoSuggestionsInLang: List<String>? = null
 }

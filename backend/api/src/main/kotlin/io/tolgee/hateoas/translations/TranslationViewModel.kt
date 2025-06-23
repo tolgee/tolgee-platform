@@ -10,7 +10,7 @@ import org.springframework.hateoas.server.core.Relation
 @Relation(collectionRelation = "translations", itemRelation = "translation")
 open class TranslationViewModel(
   @Schema(description = "Id of translation record")
-  val id: Long,
+  val id: Long?,
   @Schema(description = "Translation text")
   val text: String?,
   @Schema(description = "State of translation")
@@ -25,7 +25,9 @@ open class TranslationViewModel(
   val commentCount: Long,
   @Schema(description = "Count of unresolved translation comments")
   val unresolvedCommentCount: Long,
-) : RepresentationModel<TranslationViewModel>() {
+  @Schema(description = "Number of active suggestions")
+  val suggestionCount: Long,
+  ) : RepresentationModel<TranslationViewModel>() {
   @get:Schema(description = "Was translation memory used to translate this?")
   val fromTranslationMemory: Boolean
     get() = auto && mtProvider == null

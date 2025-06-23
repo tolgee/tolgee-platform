@@ -5542,13 +5542,18 @@ export interface components {
        * Format: int64
        * @description Id of translation record
        */
-      id: number;
+      id?: number;
       /** @description Which machine translation service was used to auto translate this */
       mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
       /** @description Whether base language translation was changed after this translation was updated */
       outdated: boolean;
       /** @description State of translation */
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+      /**
+       * Format: int64
+       * @description Number of active suggestions
+       */
+      suggestionCount: number;
       /** @description Translation text */
       text?: string;
       /**

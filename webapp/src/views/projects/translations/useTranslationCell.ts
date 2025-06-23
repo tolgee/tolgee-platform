@@ -171,7 +171,7 @@ export const useTranslationCell = ({
   };
 
   const setState = () => {
-    if (!translation) {
+    if (!translation?.id) {
       return;
     }
     const nextState = TRANSLATION_STATES[translation.state]?.next;
@@ -179,7 +179,7 @@ export const useTranslationCell = ({
       setTranslationState({
         state: nextState,
         keyId,
-        translationId: translation!.id,
+        translationId: translation!.id!,
         language: langTag!,
       });
     }
@@ -195,21 +195,22 @@ export const useTranslationCell = ({
 
   const disabled = translation?.state === 'DISABLED';
 
+  const canSuggest = satisfiesLanguageAccess(
+    'translations.suggest',
+    language.id
+  );
+
   const hasEditPermission =
     satisfiesLanguageAccess('translations.edit', language.id) ||
     (assignedTask?.userAssigned && assignedTask.type === 'TRANSLATE');
 
   const canEditReviewedTranslation =
     project.suggestionsMode === 'ENFORCED'
-      ? translation?.state !== 'REVIEWED' || canChangeState
+      ? translation?.state !== 'REVIEWED' || canSuggest
       : true;
 
   const editEnabled =
     hasEditPermission && canEditReviewedTranslation && !disabled;
-  const suggestEnabled = satisfiesLanguageAccess(
-    'translations.suggest',
-    language.id
-  );
 
   const aiPlaygroundData = useTranslationsSelector(
     (c) => c.aiPlaygroundData?.[keyId]?.[language.id]
@@ -220,7 +221,7 @@ export const useTranslationCell = ({
   );
 
   const cellClickable =
-    ((editEnabled || suggestEnabled) && !isEditing) || aiPlaygroundEnabled;
+    ((editEnabled || canSuggest) && !isEditing) || aiPlaygroundEnabled;
 
   return {
     keyId,
@@ -243,7 +244,7 @@ export const useTranslationCell = ({
     keyData,
     canChangeState,
     editEnabled,
-    suggestEnabled,
+    canSuggest,
     translation,
     disabled,
     baseValue,
