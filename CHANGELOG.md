@@ -1,3 +1,10 @@
+## [3.123.6](https://github.com/tolgee/tolgee-platform/compare/v3.123.5...v3.123.6) (2025-06-23)
+
+
+### Bug Fixes
+
+* formality not supported error ([#3145](https://github.com/tolgee/tolgee-platform/issues/3145)) ([0e064a9](https://github.com/tolgee/tolgee-platform/commit/0e064a989aea84310a472284cc950e27d2b9557f))
+
 ## [3.123.5](https://github.com/tolgee/tolgee-platform/compare/v3.123.4...v3.123.5) (2025-06-19)
 
 
