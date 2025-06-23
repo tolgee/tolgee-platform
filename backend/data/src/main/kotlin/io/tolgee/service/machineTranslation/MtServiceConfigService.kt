@@ -379,11 +379,15 @@ class MtServiceConfigService(
 
   fun makeFormalityValid(config: MtServiceConfig): MtServiceConfig {
     if (config.targetLanguage != null) {
-      if (!(getServiceProcessor(MtServiceType.AWS)?.isLanguageSupported(config.targetLanguage!!.tag) ?: false)) {
+      val awsProcessor = getServiceProcessor(MtServiceType.AWS)
+      val deeplProcessor = getServiceProcessor(MtServiceType.DEEPL)
+      val languageTag = config.targetLanguage!!.tag
+
+      if (!(awsProcessor?.isLanguageSupported(languageTag) ?: false)) {
         config.awsFormality = Formality.DEFAULT
       }
 
-      if (!(getServiceProcessor(MtServiceType.DEEPL)?.isLanguageSupported(config.targetLanguage!!.tag) ?: false)) {
+      if (!(deeplProcessor?.isLanguageSupported(languageTag) ?: false)) {
         config.deeplFormality = Formality.DEFAULT
       }
     }
