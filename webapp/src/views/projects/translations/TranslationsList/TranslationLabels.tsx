@@ -203,9 +203,11 @@ export const TranslationLabels = ({
             tooltip={label.description}
           />
         ))}
-        <TranslationLabel
-          label={{ name: `+99`, color: 'gray' } as LabelModel}
-        />
+        <StyledMoreTranslationLabel>
+          {t('translations_list_labels_more_label', {
+            count: 99,
+          })}
+        </StyledMoreTranslationLabel>
       </HiddenMeasure>
     </StyledLabels>
   );

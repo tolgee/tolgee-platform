@@ -1,14 +1,9 @@
 import { useEffect, useState } from 'react';
-import {
-  invalidateUrlPrefix,
-  useApiInfiniteQuery,
-  useApiQuery,
-} from 'tg.service/http/useQueryApi';
+import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useDebounce } from 'use-debounce';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { useRemoveLabel, usePutLabel } from 'tg.service/TranslationHooks';
-import { useQueryClient } from 'react-query';
 import { useTranslationsService } from 'tg.views/projects/translations/context/services/useTranslationsService';
 import { LabelOperation } from 'tg.views/projects/translations/context/types';
 
@@ -28,7 +23,6 @@ export const useLabels = ({ projectId, translations }: Props) => {
   const [enabledSelected, setEnabledSelected] = useState<boolean>(false);
   const putLabel = usePutLabel();
   const deleteLabel = useRemoveLabel();
-  const queryClient = useQueryClient();
 
   projectId = projectId || useProject().id;
 
@@ -153,7 +147,6 @@ export const useLabels = ({ projectId, translations }: Props) => {
             labels: previousLabels.filter((l) => l.id !== data.labelId),
           },
         });
-        invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/labels');
       });
   };
 

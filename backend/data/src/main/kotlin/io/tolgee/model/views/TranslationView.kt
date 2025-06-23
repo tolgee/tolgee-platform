@@ -13,6 +13,5 @@ data class TranslationView(
   val commentCount: Long,
   val unresolvedCommentCount: Long,
   val outdated: Boolean,
-) {
-  lateinit var labels: List<Label>
-}
+  var labels: List<Label> = emptyList()
+)
