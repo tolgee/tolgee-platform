@@ -121,6 +121,16 @@ class PathParserTest {
     pathItem.key.assert.isEqualTo("""\hey""")
   }
 
+  @Test
+  fun `the escape char is at the end`() {
+    getRebuiltPath("""hey\""").assert.isEqualTo("""hey\""")
+  }
+
+  @Test
+  fun `there is only escape char`() {
+    getRebuiltPath("""\""").assert.isEqualTo("""\""")
+  }
+
   fun testSameBothWays(pathString: String) {
     getRebuiltPath(pathString).assert.isEqualTo(pathString)
   }
