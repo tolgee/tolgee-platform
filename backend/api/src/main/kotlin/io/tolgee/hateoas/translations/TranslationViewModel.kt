@@ -27,7 +27,7 @@ open class TranslationViewModel(
   @Schema(description = "Count of unresolved translation comments")
   val unresolvedCommentCount: Long,
   @Schema(description = "Labels assigned to this translation")
-  val labels: List<LabelModel>,
+  val labels: List<LabelModel>?,
 ) : RepresentationModel<TranslationViewModel>() {
   @get:Schema(description = "Was translation memory used to translate this?")
   val fromTranslationMemory: Boolean

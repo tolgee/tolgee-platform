@@ -73,7 +73,10 @@ export const SubfilterLabels = ({
     }
   };
 
-  function renderItem(props: any, item: LabelModel) {
+  function renderItem(
+    props: React.HTMLAttributes<HTMLLIElement>,
+    item: LabelModel
+  ) {
     return (
       <FilterItem
         label={<TranslationLabel label={item} tooltip={item.description} />}
@@ -86,7 +89,7 @@ export const SubfilterLabels = ({
   return (
     <>
       <SubmenuItem
-        ref={anchorEl as any}
+        ref={anchorEl}
         label={t('translations_filters_heading_labels')}
         onClick={() => setOpen(true)}
         selected={Boolean(getLabelFiltersLength(value))}

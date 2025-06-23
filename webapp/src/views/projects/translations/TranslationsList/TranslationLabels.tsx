@@ -1,4 +1,4 @@
-import { styled, Tooltip } from '@mui/material';
+import { debounce, styled, Tooltip } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
 import {
   StyledTranslationLabel,
@@ -9,6 +9,7 @@ import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -120,6 +121,11 @@ export const TranslationLabels = ({
     if (fit !== visibleCount) setVisibleCount(fit);
   }, [labels, canAssignLabels, visibleCount]);
 
+  const debouncedRecalculate = useMemo(
+    () => debounce(recalculate, 100),
+    [recalculate]
+  );
+
   useLayoutEffect(() => {
     recalculate();
   }, [labels, recalculate]);
@@ -128,8 +134,11 @@ export const TranslationLabels = ({
     if (!containerRef.current) return;
     const ro = new ResizeObserver(recalculate);
     ro.observe(containerRef.current);
-    return () => ro.disconnect();
-  }, [recalculate]);
+    return () => {
+      ro.disconnect();
+      debouncedRecalculate.clear();
+    };
+  }, [debouncedRecalculate]);
 
   const overflowCount = labels?.length - visibleCount;
 

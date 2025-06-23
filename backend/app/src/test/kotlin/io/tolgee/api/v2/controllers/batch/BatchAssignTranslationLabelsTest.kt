@@ -139,8 +139,9 @@ class BatchAssignTranslationLabelsTest : ProjectAuthControllerTest("/v2/projects
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
       translationService.getTranslationsWithLabels(keyIds, languageIds).forEach { translation: Translation ->
-        translation.labels.map { it.id }.assert.doesNotContainSequence(unassignLabelsIds)
-        translation.labels.map { it.id }.containsAll(assignedLabelsIds).assert.isTrue
+        val actualLabelIds = translation.labels.map { it.id }
+        actualLabelIds.assert.doesNotContainSequence(unassignLabelsIds)
+        actualLabelIds.containsAll(assignedLabelsIds).assert.isTrue
       }
     }
   }

@@ -1,6 +1,6 @@
 package io.tolgee.model.batch.params
 
 data class TranslationLabelParams(
-  var languageIds: List<Long> = listOf(),
-  var labelIds: List<Long> = listOf()
+  val languageIds: List<Long> = listOf(),
+  val labelIds: List<Long> = listOf()
 )

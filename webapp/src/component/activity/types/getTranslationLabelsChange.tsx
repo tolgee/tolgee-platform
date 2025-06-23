@@ -38,16 +38,16 @@ export const getTranslationLabelChange = (input?: DiffValue<LabelModel[]>) => {
   return (
     <>
       {removed.map((label) => (
-        <>
+        <div key={label.id}>
           <StyledRemoved>-</StyledRemoved>
           <TranslationLabel key={label.id} label={label} />
-        </>
+        </div>
       ))}
       {added.map((label) => (
-        <>
+        <div key={label.id}>
           <StyledAdded>+</StyledAdded>
           <TranslationLabel key={label.id} label={label} />
-        </>
+        </div>
       ))}
     </>
   );

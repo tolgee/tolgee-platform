@@ -9,7 +9,7 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useUrlSearchArray } from 'tg.hooks/useUrlSearch';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import {
-  AddLabel,
+  LabelOperation,
   AddTag,
   AddTranslation,
   CellPosition,
@@ -19,7 +19,6 @@ import {
   EditorProps,
   KeyElement,
   KeyUpdateData,
-  RemoveLabel,
   RemoveTag,
   SetTaskTranslationState,
   SetTranslationState,
@@ -315,10 +314,10 @@ export const [
     },
     setSidePanelOpen,
     setEventBlockers,
-    addTranslationLabel(data: AddLabel) {
+    addTranslationLabel(data: LabelOperation) {
       return labelService.addLabel(data);
     },
-    removeTranslationLabel(data: RemoveLabel) {
+    removeTranslationLabel(data: LabelOperation) {
       return labelService.removeLabel(data);
     },
   };

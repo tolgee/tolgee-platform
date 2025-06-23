@@ -10,10 +10,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { useRemoveLabel, usePutLabel } from 'tg.service/TranslationHooks';
 import { useQueryClient } from 'react-query';
 import { useTranslationsService } from 'tg.views/projects/translations/context/services/useTranslationsService';
-import {
-  AddLabel,
-  RemoveLabel,
-} from 'tg.views/projects/translations/context/types';
+import { LabelOperation } from 'tg.views/projects/translations/context/types';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -105,7 +102,7 @@ export const useLabels = ({ projectId, translations }: Props) => {
     setEnabledSelected(true);
   }
 
-  const addLabel = (data: AddLabel) => {
+  const addLabel = (data: LabelOperation) => {
     if (!translations) {
       return;
     }
@@ -129,13 +126,10 @@ export const useLabels = ({ projectId, translations }: Props) => {
             labels: [...previousLabels, response],
           },
         });
-      })
-      .catch((e) => {
-        return new Promise(() => {});
       });
   };
 
-  const removeLabel = (data: RemoveLabel) => {
+  const removeLabel = (data: LabelOperation) => {
     if (!translations) {
       return;
     }
@@ -160,9 +154,6 @@ export const useLabels = ({ projectId, translations }: Props) => {
           },
         });
         invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/labels');
-      })
-      .catch((e) => {
-        return new Promise(() => {});
       });
   };
 

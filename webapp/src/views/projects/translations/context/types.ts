@@ -47,14 +47,7 @@ export type AddTag = {
   onSuccess?: () => void;
 };
 
-export type AddLabel = {
-  keyId: number;
-  translationId: number;
-  language: string;
-  labelId: number;
-};
-
-export type RemoveLabel = {
+export type LabelOperation = {
   keyId: number;
   translationId: number;
   language: string;

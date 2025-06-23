@@ -86,12 +86,10 @@ export const LabelControl = forwardRef<HTMLDivElement, LabelControlProps>(
           onClose={stopBubble(handleClose)}
           anchorEl={anchorEl}
           anchorOrigin={
-            menuAnchorOrigin
-              ? menuAnchorOrigin
-              : {
-                  vertical: 'bottom',
-                  horizontal: 'left',
-                }
+            menuAnchorOrigin || {
+              vertical: 'bottom',
+              horizontal: 'left',
+            }
           }
           transformOrigin={{
             vertical: 'top',

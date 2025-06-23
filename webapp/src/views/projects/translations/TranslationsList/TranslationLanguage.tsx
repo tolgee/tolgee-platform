@@ -15,8 +15,6 @@ const StyledLanguage = styled('div')`
   font-size: 14px;
 `;
 
-const StyledLanguageName = styled('div')``;
-
 type Props = {
   language: LanguageModel;
   keyData: KeyWithTranslationsModel;
@@ -34,7 +32,7 @@ export const TranslationLanguage = ({
   return (
     <StyledLanguage className={className}>
       <FlagImage flagEmoji={language.flagEmoji!} height={16} />
-      <StyledLanguageName
+      <div
         data-cy="translations-table-cell-language"
         style={{
           fontWeight: language.base ? 'bold' : 'normal',
@@ -44,7 +42,7 @@ export const TranslationLanguage = ({
         }}
       >
         {language.name}
-      </StyledLanguageName>
+      </div>
       <TranslationFlags keyData={keyData} lang={language.tag} />
     </StyledLanguage>
   );

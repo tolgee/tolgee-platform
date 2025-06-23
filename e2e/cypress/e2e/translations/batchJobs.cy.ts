@@ -77,7 +77,7 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     cy.gcy('translations-tag').should('not.exist');
   });
 
-  it('will assign and unassign label to translations', () => {
+  it('assigns and unassigns label to translations', () => {
     selectAll();
     selectOperation('Assign labels');
     chooseLabelInSelector('Label 1');
