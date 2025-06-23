@@ -1,6 +1,6 @@
 import { login } from '../../common/apiCalls/common';
 import { labelsTestData } from '../../common/apiCalls/testData/testData';
-import { gcy } from '../../common/shared';
+import { gcy, selectInProjectMenu } from '../../common/shared';
 import { E2ProjectLabelsSection } from '../../compounds/projectSettings/labels/E2ProjectLabelsSection';
 import { isDarkMode } from '../../common/helpers';
 
@@ -75,5 +75,73 @@ describe('Projects Settings - Labels', () => {
       cy.get('button').contains('2').click();
     });
     projectLabels.assertLabelsCount(6);
+  });
+
+  it('creates activity when new label is created', () => {
+    projectLabels.visit(projectId);
+
+    const labelModal = projectLabels.openCreateLabelModal();
+    labelModal.fillAndSave('test-label', '#FF0055', 'New label description');
+
+    selectInProjectMenu('Project Dashboard');
+    cy.waitForDom();
+
+    gcy('activity-compact').contains('Created label').should('be.visible');
+
+    gcy('activity-compact')
+      .contains('Created label')
+      .closest('[data-cy="activity-compact"]')
+      .find('[data-cy="activity-compact-detail-button"]')
+      .click({ force: true });
+
+    gcy('activity-detail-dialog').within(() => {
+      cy.contains('Created label').should('be.visible');
+      cy.contains('test-label').should('be.visible');
+      cy.contains('New label description').should('be.visible');
+    });
+  });
+
+  it('creates activity when label is updated', () => {
+    projectLabels.visit(projectId);
+
+    const labelModal = projectLabels.openEditLabelModal('First label');
+    labelModal.fillAndSave('Edited label', '#00FF00', 'Totally new text');
+
+    selectInProjectMenu('Project Dashboard');
+    cy.waitForDom();
+
+    gcy('activity-compact').contains('Edited label').should('be.visible');
+
+    gcy('activity-compact')
+      .contains('Edited label')
+      .closestDcy('activity-compact')
+      .find('[data-cy="activity-compact-detail-button"]')
+      .click({ force: true });
+
+    gcy('activity-detail-dialog').within(() => {
+      cy.contains('Edited label').should('be.visible');
+    });
+  });
+
+  it('creates activity when label is deleted', () => {
+    projectLabels.visit(projectId);
+
+    projectLabels.deleteLabel('First label');
+
+    selectInProjectMenu('Project Dashboard');
+    cy.waitForDom();
+
+    gcy('activity-compact').contains('Deleted label').should('be.visible');
+
+    gcy('activity-compact')
+      .contains('Deleted label')
+      .closestDcy('activity-compact')
+      .find('[data-cy="activity-compact-detail-button"]')
+      .click({ force: true });
+
+    gcy('activity-detail-dialog').within(() => {
+      cy.contains('Deleted label').should('be.visible');
+      cy.contains('This is a description').should('be.visible');
+    });
   });
 });

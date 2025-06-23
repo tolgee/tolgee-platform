@@ -1,22 +1,19 @@
 import { login } from '../../common/apiCalls/common';
 import { labelsTestData } from '../../common/apiCalls/testData/testData';
-
 import {
   getTranslationCell,
   visitTranslations,
 } from '../../common/translations';
 import { gcy } from '../../common/shared';
 import { isDarkMode } from '../../common/helpers';
-import {
-  assignLabelToTranslation,
-  verifyLabelInTranslationCell,
-  verifyLabelsCountInTranslationCell,
-} from '../../common/label';
+import { E2TranslationLabel } from '../../compounds/E2TranslationLabel';
 
 let projectId = null;
 let emptyProjectId = null;
 
 describe('Projects Settings - Labels', () => {
+  const translationLabel = new E2TranslationLabel();
+
   beforeEach(() => {
     labelsTestData.clean();
     labelsTestData.generate().then((data) => {
@@ -41,11 +38,16 @@ describe('Projects Settings - Labels', () => {
 
   it('search and add label to translation', () => {
     visitTranslations(projectId);
-    assignLabelToTranslation('first key', 'en', 'Label to assign 1', 4);
+    translationLabel.assignLabelToTranslation(
+      'first key',
+      'en',
+      'Label to assign 1',
+      4
+    );
 
     // Verify label after assigning
-    verifyLabelsCountInTranslationCell('first key', 'en', 2);
-    verifyLabelInTranslationCell(
+    translationLabel.verifyLabelsCountInTranslationCell('first key', 'en', 2);
+    translationLabel.verifyLabelInTranslationCell(
       'first key',
       'en',
       'Label to assign 1',
@@ -56,8 +58,8 @@ describe('Projects Settings - Labels', () => {
     cy.reload();
 
     // verify label after page reload
-    verifyLabelsCountInTranslationCell('first key', 'en', 2);
-    verifyLabelInTranslationCell(
+    translationLabel.verifyLabelsCountInTranslationCell('first key', 'en', 2);
+    translationLabel.verifyLabelInTranslationCell(
       'first key',
       'en',
       'Label to assign 1',
@@ -74,10 +76,10 @@ describe('Projects Settings - Labels', () => {
     });
 
     // verify the label is removed
-    verifyLabelsCountInTranslationCell('first key', 'en', 0);
+    translationLabel.verifyLabelsCountInTranslationCell('first key', 'en', 0);
     // refresh the page to ensure the removal persists
     cy.reload();
-    verifyLabelsCountInTranslationCell('first key', 'en', 0);
+    translationLabel.verifyLabelsCountInTranslationCell('first key', 'en', 0);
   });
 
   it('filters by label', () => {

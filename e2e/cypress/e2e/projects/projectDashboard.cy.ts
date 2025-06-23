@@ -11,12 +11,11 @@ import { gcy, selectInProjectMenu } from '../../common/shared';
 import { getCell } from '../../common/state';
 import { createTag } from '../../common/tags';
 import { createTranslation } from '../../common/translations';
-import {
-  assignLabelToTranslation,
-  createLabel as createLabelCommon,
-} from '../../common/label';
+import { E2TranslationLabel } from '../../compounds/E2TranslationLabel';
 
 describe('Project stats', () => {
+  const translationLabel = new E2TranslationLabel();
+
   beforeEach(() => {
     projectListData.clean();
     projectListData.generate();
@@ -31,7 +30,8 @@ describe('Project stats', () => {
 
   it('Activity', () => {
     createProject('Project with activity', 'test_username');
-    createLabel('Project with activity', 'test-label', '#FF1234');
+    enterProjectSettings('Project with activity');
+    translationLabel.createLabel('test-label', '#FF1234');
     enterProject('Project with activity');
     createTranslation({
       key: 'new translation',
@@ -39,7 +39,11 @@ describe('Project stats', () => {
       tag: 'en',
     });
     createTag('new tag');
-    assignLabelToTranslation('new translation', 'en', 'test-label');
+    translationLabel.assignLabelToTranslation(
+      'new translation',
+      'en',
+      'test-label'
+    );
     setStateToReviewed('english translation');
     createComment('new comment', 'new translation', 'en');
     resolveComment('new comment');
@@ -149,9 +153,4 @@ const setStateToReviewed = (translationText: string) => {
     .trigger('mouseover')
     .findDcy('translation-state-button')
     .click();
-};
-
-const createLabel = (projectName: string, label: string, color?: string) => {
-  enterProjectSettings(projectName);
-  createLabelCommon(label, color);
 };
