@@ -25,7 +25,7 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
         u.deleted_at as authorDeletedAt
       from translation_suggestion ts
         left join language l on l.id = ts.language_id
-        left join user_account u on u.id = ts.user_id
+        left join user_account u on u.id = ts.author_id
       where ts.key_id in :keyIds
         and ts.project_id = :projectId
         and ts.language_id in :languageIds

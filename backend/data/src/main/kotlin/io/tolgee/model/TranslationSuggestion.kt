@@ -10,7 +10,7 @@ import jakarta.persistence.*
     Index(columnList = "project_id"),
     Index(columnList = "key_id"),
     Index(columnList = "language_id"),
-    Index(columnList = "user_id"),
+    Index(columnList = "author_id"),
   ],
 )
 class TranslationSuggestion(
