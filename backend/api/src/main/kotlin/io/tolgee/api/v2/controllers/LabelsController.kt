@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.request.label.LabelRequest
+import io.tolgee.dtos.request.translation.label.TranslationLabelRequest
 import io.tolgee.hateoas.label.LabelModel
 import io.tolgee.hateoas.label.LabelModelAssembler
 import io.tolgee.model.enums.Scope
@@ -14,6 +15,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.label.LabelService
+import io.tolgee.service.translation.TranslationService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -39,6 +41,7 @@ class LabelsController(
   private val labelService: LabelService,
   private val labelModelAssembler: LabelModelAssembler,
   private val pagedResourcesAssembler: PagedResourcesAssembler<Label>,
+  private val translationService: TranslationService,
 ) : IController {
 
   @GetMapping(value = ["labels"])
@@ -103,6 +106,22 @@ class LabelsController(
     labelId: Long,
   ) {
     labelService.deleteLabel(projectHolder.project.id, labelId)
+  }
+
+  @PutMapping(value = ["translations/label"])
+  @Operation(summary = "Add label to translation by key and language id")
+  @RequestActivity(ActivityType.TRANSLATION_LABEL_ASSIGN)
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_ASSIGN])
+  @AllowApiAccess
+  fun assignLabel(
+    @RequestBody @Valid
+    request: TranslationLabelRequest
+  ): LabelModel {
+    val translation = translationService.getOrCreate(
+      projectHolder.project.id, request.keyId, request.languageId
+    )
+    val label = labelService.assignLabel(projectHolder.project.id, translation, request.labelId).model
+    return label
   }
 
   @PutMapping(value = ["translations/{translationId:\\d+}/label/{labelId:\\d+}"])

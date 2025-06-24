@@ -110,13 +110,20 @@ class TranslationService(
   }
 
   fun getOrCreate(
+    projectId: Long,
     keyId: Long,
     languageId: Long,
   ): Translation {
-    return translationRepository.findOneByKeyIdAndLanguageId(keyId, languageId)
+    return translationRepository.findOneByProjectIdAndKeyIdAndLanguageId(projectId, keyId, languageId)
       ?: let {
         val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
+        if (key.project.id != projectId) {
+          throw BadRequestException(Message.KEY_NOT_FROM_PROJECT)
+        }
         val language = languageService.getEntity(languageId)
+        if (key.project.id != language.project.id) {
+          throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
+        }
         Translation().apply {
           this.key = key
           this.language = language

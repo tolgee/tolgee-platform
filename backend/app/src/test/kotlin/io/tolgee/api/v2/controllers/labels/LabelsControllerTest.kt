@@ -281,4 +281,23 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     assert(translation.labels.size == 1)
     assert(label.translations.size == 1)
   }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.TRANSLATION_LABEL_ASSIGN]
+  )
+  fun `assign label to empty translation`() {
+    val requestBody = mapOf<String, Any>(
+      "keyId" to testData.keyWithoutCzTranslation.id,
+      "languageId" to testData.czechLanguage.id,
+      "labelId" to testData.firstLabel.id
+    )
+    performProjectAuthPut("translations/label", requestBody).andIsOk
+    executeInNewTransaction {
+      val translation = translationService.find(testData.keyWithoutCzTranslation, testData.czechLanguage).get()
+      translation.assert.isNotNull
+      translation.labels.assert.hasSize(1)
+      translation.labels.first().assert.isEqualTo(testData.firstLabel)
+    }
+  }
 }

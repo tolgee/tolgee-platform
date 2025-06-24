@@ -73,3 +73,9 @@ export const useRemoveLabel = () =>
     url: '/v2/projects/{projectId}/translations/{translationId}/label/{labelId}',
     method: 'delete',
   });
+
+export const usePutLabelWithoutTranslation = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/translations/label',
+    method: 'put',
+  });

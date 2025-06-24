@@ -5,6 +5,7 @@ import io.tolgee.dtos.request.label.LabelRequest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.translation.Label
+import io.tolgee.model.translation.Translation
 import io.tolgee.repository.LabelRepository
 import io.tolgee.repository.TranslationRepository
 import jakarta.persistence.EntityManager
@@ -110,6 +111,15 @@ class LabelService(
       translationId
     ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
     translation.addLabel(label)
+    labelRepository.save(label)
+    return label
+  }
+
+  @Transactional
+  fun assignLabel(projectId: Long, translation: Translation, labelId: Long): Label {
+    val label = getByProjectIdAndId(projectId, labelId)
+    translation.addLabel(label)
+    translationRepository.save(translation)
     labelRepository.save(label)
     return label
   }

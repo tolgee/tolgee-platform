@@ -12,6 +12,7 @@ export type DeletableKeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'] & { deleted?: boolean };
 
 type ScreenshotModel = components['schemas']['ScreenshotModel'];
+type LanguageModel = components['schemas']['LanguageModel'];
 
 export interface CellPosition {
   keyId: number;
@@ -49,9 +50,16 @@ export type AddTag = {
 
 export type LabelOperation = {
   keyId: number;
-  translationId: number;
-  language: string;
+  language: LanguageModel;
   labelId: number;
+};
+
+export type AddLabel = LabelOperation & {
+  translationId?: number;
+};
+
+export type RemoveLabel = LabelOperation & {
+  translationId: number;
 };
 
 export type AfterCommand = 'EDIT_NEXT';

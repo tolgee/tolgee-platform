@@ -178,14 +178,11 @@ export const useTranslationCell = ({
   };
 
   const addLabel = (labelId: number) => {
-    if (!translation) {
-      return;
-    }
     addTranslationLabel({
       labelId,
       keyId: keyData.keyId,
-      translationId: translation.id,
-      language: langTag,
+      translationId: translation?.id,
+      language: language,
     });
   };
 
@@ -197,7 +194,7 @@ export const useTranslationCell = ({
       labelId,
       keyId: keyData.keyId,
       translationId: translation.id,
-      language: langTag,
+      language: language,
     });
   };
 

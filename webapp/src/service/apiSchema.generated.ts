@@ -817,6 +817,9 @@ export interface paths {
     /** Creates a translation comment. Empty translation is stored, when not exists. */
     post: operations["create_3"];
   };
+  "/v2/projects/{projectId}/translations/label": {
+    put: operations["assignLabel_2"];
+  };
   "/v2/projects/{projectId}/translations/select-all": {
     /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
     get: operations["selectKeys"];
@@ -5506,6 +5509,14 @@ export interface components {
       contextDescription?: string;
       output: string;
     };
+    TranslationLabelRequest: {
+      /** Format: int64 */
+      keyId: number;
+      /** Format: int64 */
+      labelId: number;
+      /** Format: int64 */
+      languageId: number;
+    };
     TranslationMemoryItemModel: {
       baseText: string;
       keyName: string;
@@ -5558,7 +5569,7 @@ export interface components {
        */
       id: number;
       /** @description Labels assigned to this translation */
-      labels: components["schemas"]["LabelModel"][];
+      labels?: components["schemas"]["LabelModel"][];
       /** @description Which machine translation service was used to auto translate this */
       mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
       /** @description Whether base language translation was changed after this translation was updated */
@@ -19477,6 +19488,58 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["TranslationCommentWithLangKeyDto"];
+      };
+    };
+  };
+  assignLabel_2: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LabelModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TranslationLabelRequest"];
       };
     };
   };

@@ -159,7 +159,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
       />
       <TranslationLabels
         labels={translation?.labels}
-        onSelect={translation && ((label) => addLabel(label.id))}
+        onSelect={(label) => addLabel(label.id)}
         onDelete={(labelId) => removeLabel(labelId)}
         className="labels"
       />

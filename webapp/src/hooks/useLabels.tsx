@@ -3,9 +3,16 @@ import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useDebounce } from 'use-debounce';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
-import { useRemoveLabel, usePutLabel } from 'tg.service/TranslationHooks';
+import {
+  useRemoveLabel,
+  usePutLabel,
+  usePutLabelWithoutTranslation,
+} from 'tg.service/TranslationHooks';
 import { useTranslationsService } from 'tg.views/projects/translations/context/services/useTranslationsService';
-import { LabelOperation } from 'tg.views/projects/translations/context/types';
+import {
+  AddLabel,
+  RemoveLabel,
+} from 'tg.views/projects/translations/context/types';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -23,6 +30,7 @@ export const useLabels = ({ projectId, translations }: Props) => {
   const [enabledSelected, setEnabledSelected] = useState<boolean>(false);
   const putLabel = usePutLabel();
   const deleteLabel = useRemoveLabel();
+  const putLabelWithoutTranslation = usePutLabelWithoutTranslation();
 
   projectId = projectId || useProject().id;
 
@@ -96,34 +104,63 @@ export const useLabels = ({ projectId, translations }: Props) => {
     setEnabledSelected(true);
   }
 
-  const addLabel = (data: LabelOperation) => {
+  const addLabel = (data: AddLabel) => {
     if (!translations) {
       return;
     }
-    putLabel
-      .mutateAsync({
-        path: {
-          projectId: projectId,
-          translationId: data.translationId,
-          labelId: data.labelId,
-        },
-      })
-      .then((response: LabelModel) => {
-        const previousLabels =
-          translations.fixedTranslations?.find(
-            (key) => key.keyId === data.keyId
-          )?.translations[data.language]?.labels || [];
-        translations?.updateTranslation({
-          keyId: data.keyId,
-          lang: data.language,
-          data: {
-            labels: [...previousLabels, response],
+    if (data.translationId) {
+      putLabel
+        .mutateAsync({
+          path: {
+            projectId: projectId,
+            translationId: data.translationId,
+            labelId: data.labelId,
           },
+        })
+        .then((response: LabelModel) => {
+          const previousLabels =
+            translations.fixedTranslations?.find(
+              (key) => key.keyId === data.keyId
+            )?.translations[data.language.tag]?.labels || [];
+          translations?.updateTranslation({
+            keyId: data.keyId,
+            lang: data.language.tag,
+            data: {
+              labels: [...previousLabels, response],
+            },
+          });
         });
-      });
+    } else {
+      putLabelWithoutTranslation
+        .mutateAsync({
+          path: {
+            projectId: projectId,
+          },
+          content: {
+            'application/json': {
+              labelId: data.labelId,
+              languageId: data.language.id,
+              keyId: data.keyId,
+            },
+          },
+        })
+        .then((response: LabelModel) => {
+          const previousLabels =
+            translations.fixedTranslations?.find(
+              (key) => key.keyId === data.keyId
+            )?.translations[data.language.tag]?.labels || [];
+          translations?.updateTranslation({
+            keyId: data.keyId,
+            lang: data.language.tag,
+            data: {
+              labels: [...previousLabels, response],
+            },
+          });
+        });
+    }
   };
 
-  const removeLabel = (data: LabelOperation) => {
+  const removeLabel = (data: RemoveLabel) => {
     if (!translations) {
       return;
     }
@@ -139,10 +176,10 @@ export const useLabels = ({ projectId, translations }: Props) => {
         const previousLabels =
           translations.fixedTranslations?.find(
             (key) => key.keyId === data.keyId
-          )?.translations[data.language]?.labels || [];
+          )?.translations[data.language.tag]?.labels || [];
         translations?.updateTranslation({
           keyId: data.keyId,
-          lang: data.language,
+          lang: data.language.tag,
           data: {
             labels: previousLabels.filter((l) => l.id !== data.labelId),
           },

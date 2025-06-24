@@ -1,5 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.model.Language
+import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
 
@@ -9,11 +11,15 @@ class LabelsTestData : BaseTestData() {
   lateinit var secondLabel: Label
   lateinit var unassignedTranslation: Translation
   lateinit var unassignedLabel: Label
+  lateinit var czechLanguage: Language
+  lateinit var keyWithoutCzTranslation: Key
 
   init {
     root.apply {
       projectBuilder.apply {
-        addCzech()
+        addCzech().build {
+          czechLanguage = this.self
+        }
         addKey {
           name = "first key"
         }.build {
@@ -50,6 +56,12 @@ class LabelsTestData : BaseTestData() {
           addTranslation("en", "second key translation").self
         }.build {
           addTranslation("cs", "second key second translation").self
+        }
+        addKey {
+          name = "third key (without czech translations)"
+        }.build {
+          addTranslation("en", "third key translation").self
+          keyWithoutCzTranslation = this.self
         }
       }
       addProject {

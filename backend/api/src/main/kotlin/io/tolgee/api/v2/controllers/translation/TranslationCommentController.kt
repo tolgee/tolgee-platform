@@ -191,19 +191,7 @@ class TranslationCommentController(
       dto.languageId,
       dto.keyId,
     )
-    val translation = translationService.getOrCreate(dto.keyId, dto.languageId)
-    if (translation.key.project.id != projectHolder.project.id) {
-      throw BadRequestException(io.tolgee.constants.Message.KEY_NOT_FROM_PROJECT)
-    }
-
-    if (translation.language.project.id != projectHolder.project.id) {
-      throw BadRequestException(io.tolgee.constants.Message.LANGUAGE_NOT_FROM_PROJECT)
-    }
-
-    // Translation was just created
-    if (translation.id == 0L) {
-      translation.state = TranslationState.UNTRANSLATED
-    }
+    val translation = translationService.getOrCreate(projectHolder.project.id, dto.keyId, dto.languageId)
 
     translationService.save(translation)
 
