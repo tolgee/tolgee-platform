@@ -31,6 +31,21 @@ export class E2TranslationLabel {
     dismissMenu();
   }
 
+  unassignLabelFromTranslation(
+    key: string,
+    languageTag: string,
+    label: string
+  ) {
+    this.getTranslationLabels(key, languageTag).within(() => {
+      gcy('translation-label')
+        .contains(label)
+        .should('be.visible')
+        .siblingDcy('translation-label-delete')
+        .invoke('css', 'opacity', 1) // hover is not supported in Cypress, had to use CSS opacity
+        .click();
+    });
+  }
+
   verifyLabelInTranslationCell(
     key: string,
     lang: string,
@@ -53,12 +68,5 @@ export class E2TranslationLabel {
     this.getTranslationLabels(key, lang).within(() => {
       gcy('translation-label').should('have.length', expectedCount);
     });
-  }
-
-  createLabel(labelName: string, color?: string) {
-    const projectLabels = new E2ProjectLabelsSection();
-    projectLabels.visitFromProjectSettings();
-    const labelModal = projectLabels.openCreateLabelModal();
-    labelModal.fillAndSave(labelName, color);
   }
 }

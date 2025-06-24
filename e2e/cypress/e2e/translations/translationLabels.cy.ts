@@ -7,12 +7,14 @@ import {
 import { gcy } from '../../common/shared';
 import { isDarkMode } from '../../common/helpers';
 import { E2TranslationLabel } from '../../compounds/E2TranslationLabel';
+import { E2ActivityChecker } from '../../compounds/E2ActivityChecker';
 
 let projectId = null;
 let emptyProjectId = null;
 
 describe('Projects Settings - Labels', () => {
   const translationLabel = new E2TranslationLabel();
+  const activityChecker = new E2ActivityChecker();
 
   beforeEach(() => {
     labelsTestData.clean();
@@ -69,11 +71,12 @@ describe('Projects Settings - Labels', () => {
 
   it('remove label from translation', () => {
     visitTranslations(projectId);
-    getTranslationCell('first key', 'en').within(() => {
-      gcy('translation-label-delete')
-        .invoke('css', 'opacity', 1) // hover is not supported in Cypress, had to use CSS opacity
-        .click();
-    });
+
+    translationLabel.unassignLabelFromTranslation(
+      'first key',
+      'en',
+      'First label'
+    );
 
     // verify the label is removed
     translationLabel.verifyLabelsCountInTranslationCell('first key', 'en', 0);
@@ -106,5 +109,40 @@ describe('Projects Settings - Labels', () => {
     cy.gcy('translations-filter-select').click();
     cy.waitForDom();
     cy.gcy('submenu-item').contains('Labels').should('not.exist');
+  });
+
+  it('creates activity when translation labels are updated', () => {
+    visitTranslations(projectId);
+
+    // Add a label to translation
+    translationLabel.assignLabelToTranslation(
+      'first key',
+      'en',
+      'Label to assign 1',
+      4
+    );
+
+    activityChecker
+      .checkActivity('Translation labels updated')
+      .assertActivityDetails([
+        'Translation labels updated',
+        'first key',
+        'Label to assign 1',
+      ]);
+  });
+
+  it('creates activity when translation labels are removed', () => {
+    visitTranslations(projectId);
+
+    // Remove the label and verify activity
+    translationLabel.unassignLabelFromTranslation(
+      'first key',
+      'en',
+      'First label'
+    );
+
+    activityChecker
+      .checkActivity('Translation labels updated')
+      .assertActivityDetails(['Translation labels updated', 'first key']);
   });
 });

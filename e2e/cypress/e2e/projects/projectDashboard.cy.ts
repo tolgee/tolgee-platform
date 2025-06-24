@@ -2,20 +2,13 @@ import { login } from '../../common/apiCalls/common';
 import { projectListData } from '../../common/apiCalls/testData/testData';
 import { createComment, resolveComment } from '../../common/comments';
 import { HOST } from '../../common/constants';
-import {
-  createProject,
-  enterProject,
-  enterProjectSettings,
-} from '../../common/projects';
+import { createProject, enterProject } from '../../common/projects';
 import { gcy, selectInProjectMenu } from '../../common/shared';
 import { getCell } from '../../common/state';
 import { createTag } from '../../common/tags';
 import { createTranslation } from '../../common/translations';
-import { E2TranslationLabel } from '../../compounds/E2TranslationLabel';
 
 describe('Project stats', () => {
-  const translationLabel = new E2TranslationLabel();
-
   beforeEach(() => {
     projectListData.clean();
     projectListData.generate();
@@ -30,20 +23,12 @@ describe('Project stats', () => {
 
   it('Activity', () => {
     createProject('Project with activity', 'test_username');
-    enterProjectSettings('Project with activity');
-    translationLabel.createLabel('test-label', '#FF1234');
     enterProject('Project with activity');
     createTranslation({
       key: 'new translation',
       translation: 'english translation',
-      tag: 'en',
     });
     createTag('new tag');
-    translationLabel.assignLabelToTranslation(
-      'new translation',
-      'en',
-      'test-label'
-    );
     setStateToReviewed('english translation');
     createComment('new comment', 'new translation', 'en');
     resolveComment('new comment');
@@ -62,10 +47,6 @@ describe('Project stats', () => {
       .should('be.visible');
     cy.gcy('activity-compact').contains('Created key').should('be.visible');
     cy.gcy('activity-compact').contains('Created project').should('be.visible');
-    cy.gcy('activity-compact').contains('Created label').should('be.visible');
-    cy.gcy('activity-compact')
-      .contains('Translation labels updated')
-      .should('be.visible');
 
     openActivityDetail('Created key');
 
