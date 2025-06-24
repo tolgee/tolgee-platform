@@ -1,3 +1,10 @@
+## [3.123.7](https://github.com/tolgee/tolgee-platform/compare/v3.123.6...v3.123.7) (2025-06-24)
+
+
+### Bug Fixes
+
+* PathParser: properly handle escape character at the end of the string ([#3143](https://github.com/tolgee/tolgee-platform/issues/3143)) ([7accc7f](https://github.com/tolgee/tolgee-platform/commit/7accc7f40af5de33c2371a5b9573e15b0db47acb))
+
 ## [3.123.6](https://github.com/tolgee/tolgee-platform/compare/v3.123.5...v3.123.6) (2025-06-23)
 
 
