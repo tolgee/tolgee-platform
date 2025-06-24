@@ -32,6 +32,12 @@ class PathParser(
         items.add(ObjectPathItem(itemValue, buffer.originalString()))
       }
 
+      State.IN_ESCAPE -> {
+        buffer.append('\\', path.length - 1)
+        itemValue = buffer.toString()
+        items.add(ObjectPathItem(itemValue, buffer.originalString()))
+      }
+
       else -> {}
     }
 
