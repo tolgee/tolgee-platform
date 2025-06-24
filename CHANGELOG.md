@@ -1,3 +1,10 @@
+## [3.123.8](https://github.com/tolgee/tolgee-platform/compare/v3.123.7...v3.123.8) (2025-06-24)
+
+
+### Bug Fixes
+
+* properly remove related import conflicts when deleting language ([#3140](https://github.com/tolgee/tolgee-platform/issues/3140)) ([38dc8cd](https://github.com/tolgee/tolgee-platform/commit/38dc8cd1a26cf12caf9fdf34e333630dafd14c5e))
+
 ## [3.123.7](https://github.com/tolgee/tolgee-platform/compare/v3.123.6...v3.123.7) (2025-06-24)
 
 
