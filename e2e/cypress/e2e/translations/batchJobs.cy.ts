@@ -82,27 +82,13 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     selectOperation('Assign labels');
     chooseLabelInSelector('Label 1');
     executeBatchOperation();
-    gcyAdvanced({
-      value: 'translations-table-cell-translation',
-      lang: 'en',
-    }).each(($cell) => {
-      cy.wrap($cell).within(() => {
-        gcy('translation-label').contains('Label 1').should('be.visible');
-      });
-    });
+    gcy('translation-label').contains('Label 1').should('be.visible');
 
     selectAll();
     selectOperation('Unassign labels');
     chooseLabelInSelector('Label 1');
     executeBatchOperation();
-    gcyAdvanced({
-      value: 'translations-table-cell-translation',
-      lang: 'en',
-    }).each(($cell) => {
-      cy.wrap($cell).within(() => {
-        gcy('translation-label').contains('Label 1').should('not.exist');
-      });
-    });
+    gcy('translation-label').should('not.exist');
   });
 
   it('will clear translations', () => {

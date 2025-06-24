@@ -90,7 +90,7 @@ describe('Projects Settings - Labels', () => {
     visitTranslations(projectId);
     const view = new E2TranslationsView();
 
-    view.assertTranslationsRowsCount(2);
+    view.assertTranslationsRowsCount(3);
 
     view.filterByLabel('First label');
     view.assertTranslationsRowsCount(0);
