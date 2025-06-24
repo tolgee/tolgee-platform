@@ -63,7 +63,7 @@ class ImportFile(
     return ImportFileIssue(file = this, type = type).apply {
       this.params =
         params.map {
-          ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis())
+          ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis().withEmptyPlaceholder())
         }.toMutableList()
     }
   }
@@ -126,6 +126,13 @@ class ImportFile(
   private fun String.shortenWithEllipsis(): String {
     if (this.length > 255) {
       return this.substring(0..100) + "..."
+    }
+    return this
+  }
+
+  private fun String.withEmptyPlaceholder(): String {
+    if (this.isEmpty()) {
+      return "<empty>"
     }
     return this
   }
