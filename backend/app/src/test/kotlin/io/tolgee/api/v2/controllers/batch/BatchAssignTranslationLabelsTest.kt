@@ -179,10 +179,10 @@ class BatchAssignTranslationLabelsTest : ProjectAuthControllerTest("/v2/projects
       ),
     ).andIsBadRequest
   }
-  
+
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it assings labels to empty translations`() {
+  fun `it assigns labels to empty translations`() {
     val labelCount = 5
     val keyCount = 100
     val labels = testData.addLabels(labelCount)

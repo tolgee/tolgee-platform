@@ -118,7 +118,9 @@ class LabelsController(
     request: TranslationLabelRequest
   ): LabelModel {
     val translation = translationService.getOrCreate(
-      projectHolder.project.id, request.keyId, request.languageId
+      projectHolder.project.id,
+      request.keyId,
+      request.languageId
     )
     val label = labelService.assignLabel(projectHolder.project.id, translation, request.labelId).model
     return label

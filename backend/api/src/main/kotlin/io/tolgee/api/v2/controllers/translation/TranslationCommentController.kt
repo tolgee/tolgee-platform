@@ -19,7 +19,6 @@ import io.tolgee.hateoas.translations.comments.TranslationCommentModelAssembler
 import io.tolgee.hateoas.translations.comments.TranslationWithCommentModel
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationCommentState
-import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.TranslationComment
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
