@@ -179,4 +179,38 @@ class BatchAssignTranslationLabelsTest : ProjectAuthControllerTest("/v2/projects
       ),
     ).andIsBadRequest
   }
+  
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it assings labels to empty translations`() {
+    val labelCount = 5
+    val keyCount = 100
+    val labels = testData.addLabels(labelCount)
+    val keys = testData.addEmptyKeys(keyCount)
+    batchJobTestBase.saveAndPrepare(this)
+
+    val allKeyIds = keys.map { it.id }.toList()
+    val allLanguageIds = testData.projectBuilder.data.languages.map { it.self.id }
+
+    val keyIds = allKeyIds.take(50)
+    val languageIds = allLanguageIds.take(2)
+    val labelIds = labels.map { it.id }
+
+    performProjectAuthPost(
+      "start-batch-job/assign-translation-label",
+      mapOf(
+        "keyIds" to keyIds,
+        "languageIds" to languageIds,
+        "labelIds" to labelIds,
+      ),
+    ).andIsOk
+
+    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      val translations = translationService.getTranslationsWithLabels(keyIds, languageIds)
+      translations.assert.hasSize(keyIds.size * languageIds.size)
+      translations.forEach {
+        it.labels.map { it.id }.containsAll(labelIds).assert.isTrue
+      }
+    }
+  }
 }

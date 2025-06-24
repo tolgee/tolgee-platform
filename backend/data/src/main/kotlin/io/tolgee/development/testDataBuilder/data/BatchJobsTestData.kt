@@ -137,4 +137,12 @@ class BatchJobsTestData : BaseTestData() {
       }.self
     }
   }
+
+  fun addEmptyKeys(count: Int): List<Key> {
+    return (1..count).map {
+      this.projectBuilder.addKey {
+        name = "key$it"
+      }.self
+    }
+  }
 }

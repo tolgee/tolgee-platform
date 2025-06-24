@@ -8,8 +8,10 @@ import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.LabelRepository
 import io.tolgee.repository.TranslationRepository
+import io.tolgee.service.translation.TranslationService
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -20,6 +22,7 @@ class LabelService(
   private val labelRepository: LabelRepository,
   private val entityManager: EntityManager,
   private val translationRepository: TranslationRepository,
+  @Lazy private val translationService: TranslationService,
   ) {
   fun getProjectLabels(projectId: Long, pageable: Pageable, search: String? = null): Page<Label> {
     return labelRepository.findByProjectId(projectId, pageable, search)
@@ -146,12 +149,26 @@ class LabelService(
       throw NotFoundException(Message.LABEL_NOT_FOUND)
     }
 
-    val translations = translationRepository.findAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
-    if (translations.isEmpty()) {
-      throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+    val existingTranslations = translationRepository.findAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
+
+    val existingTranslationsMap = existingTranslations.groupBy {
+      Pair(it.key.id, it.language.id)
     }
 
-    translations.forEach { translation ->
+    val allTranslations = mutableListOf<Translation>()
+    allTranslations.addAll(existingTranslations)
+
+    for (keyId in keyIds) {
+      for (languageId in languageIds) {
+        val key = Pair(keyId, languageId)
+        if (!existingTranslationsMap.containsKey(key)) {
+          val translation = translationService.createEmpty(keyId, languageId)
+          allTranslations.add(translation)
+        }
+      }
+    }
+
+    allTranslations.forEach { translation ->
       labels.forEach { label ->
         if (!translation.labels.contains(label)) {
           translation.addLabel(label)
@@ -159,7 +176,7 @@ class LabelService(
       }
     }
 
-    translationRepository.saveAll(translations)
+    translationRepository.saveAll(allTranslations)
   }
 
   @Transactional

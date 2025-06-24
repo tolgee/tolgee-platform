@@ -115,20 +115,26 @@ class TranslationService(
     languageId: Long,
   ): Translation {
     return translationRepository.findOneByProjectIdAndKeyIdAndLanguageId(projectId, keyId, languageId)
-      ?: let {
-        val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
-        if (key.project.id != projectId) {
-          throw BadRequestException(Message.KEY_NOT_FROM_PROJECT)
-        }
-        val language = languageService.getEntity(languageId)
-        if (key.project.id != language.project.id) {
-          throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
-        }
-        Translation().apply {
-          this.key = key
-          this.language = language
-        }
-      }
+      ?: this.createEmpty(keyId, languageId, projectId)
+  }
+
+  fun createEmpty(
+    keyId: Long,
+    languageId: Long,
+    projectId: Long? = null,
+    ): Translation {
+    val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
+    if (projectId != null && key.project.id != projectId) {
+      throw BadRequestException(Message.KEY_NOT_FROM_PROJECT)
+    }
+    val language = languageService.getEntity(languageId)
+    if (key.project.id != language.project.id) {
+      throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
+    }
+    return Translation().apply {
+      this.key = key
+      this.language = language
+    }
   }
 
   fun find(

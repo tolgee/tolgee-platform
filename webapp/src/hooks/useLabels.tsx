@@ -108,56 +108,41 @@ export const useLabels = ({ projectId, translations }: Props) => {
     if (!translations) {
       return;
     }
+    let promise: Promise<LabelModel>;
     if (data.translationId) {
-      putLabel
-        .mutateAsync({
-          path: {
-            projectId: projectId,
-            translationId: data.translationId,
-            labelId: data.labelId,
-          },
-        })
-        .then((response: LabelModel) => {
-          const previousLabels =
-            translations.fixedTranslations?.find(
-              (key) => key.keyId === data.keyId
-            )?.translations[data.language.tag]?.labels || [];
-          translations?.updateTranslation({
-            keyId: data.keyId,
-            lang: data.language.tag,
-            data: {
-              labels: [...previousLabels, response],
-            },
-          });
-        });
+      promise = putLabel.mutateAsync({
+        path: {
+          projectId: projectId,
+          translationId: data.translationId,
+          labelId: data.labelId,
+        },
+      });
     } else {
-      putLabelWithoutTranslation
-        .mutateAsync({
-          path: {
-            projectId: projectId,
-          },
-          content: {
-            'application/json': {
-              labelId: data.labelId,
-              languageId: data.language.id,
-              keyId: data.keyId,
-            },
-          },
-        })
-        .then((response: LabelModel) => {
-          const previousLabels =
-            translations.fixedTranslations?.find(
-              (key) => key.keyId === data.keyId
-            )?.translations[data.language.tag]?.labels || [];
-          translations?.updateTranslation({
+      promise = putLabelWithoutTranslation.mutateAsync({
+        path: {
+          projectId: projectId,
+        },
+        content: {
+          'application/json': {
+            labelId: data.labelId,
+            languageId: data.language.id,
             keyId: data.keyId,
-            lang: data.language.tag,
-            data: {
-              labels: [...previousLabels, response],
-            },
-          });
-        });
+          },
+        },
+      });
     }
+    promise.then((response: LabelModel) => {
+      const previousLabels =
+        translations.fixedTranslations?.find((key) => key.keyId === data.keyId)
+          ?.translations[data.language.tag]?.labels || [];
+      translations?.updateTranslation({
+        keyId: data.keyId,
+        lang: data.language.tag,
+        data: {
+          labels: [...previousLabels, response],
+        },
+      });
+    });
   };
 
   const removeLabel = (data: RemoveLabel) => {
