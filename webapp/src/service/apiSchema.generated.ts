@@ -3111,7 +3111,6 @@ export interface components {
       screenshotCount: number;
       /** @description Key screenshots. Not provided when API key hasn't screenshots.view scope permission. */
       screenshots?: components["schemas"]["ScreenshotModel"][];
-      suggestions?: components["schemas"]["TranslationSuggestionModel"][];
       /** @description Tasks related to this key */
       tasks?: components["schemas"]["KeyTaskViewModel"][];
       /**
@@ -5516,6 +5515,15 @@ export interface components {
       /** Format: int64 */
       userId: number;
     };
+    /** @description First suggestion */
+    TranslationSuggestionSimpleModel: {
+      /** Format: int64 */
+      id: number;
+      state: "ACTIVE" | "ACCEPTED" | "DECLINED";
+      translation?: string;
+      /** Format: int64 */
+      userId: number;
+    };
     /**
      * @description Translations object
      * @example
@@ -5554,6 +5562,8 @@ export interface components {
        * @description Number of active suggestions
        */
       suggestionCount: number;
+      /** @description First suggestion */
+      suggestions?: components["schemas"]["TranslationSuggestionSimpleModel"][];
       /** @description Translation text */
       text?: string;
       /**
@@ -14807,6 +14817,10 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter keys with any suggestions in lang */
+        filterHasSuggestionsInLang?: string[];
+        /** Filter keys with no suggestions in lang */
+        filterHasNoSuggestionsInLang?: string[];
       };
       path: {
         projectId: number;
@@ -18947,6 +18961,10 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter keys with any suggestions in lang */
+        filterHasSuggestionsInLang?: string[];
+        /** Filter keys with no suggestions in lang */
+        filterHasNoSuggestionsInLang?: string[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -19230,6 +19248,10 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter keys with any suggestions in lang */
+        filterHasSuggestionsInLang?: string[];
+        /** Filter keys with no suggestions in lang */
+        filterHasNoSuggestionsInLang?: string[];
       };
       path: {
         projectId: number;

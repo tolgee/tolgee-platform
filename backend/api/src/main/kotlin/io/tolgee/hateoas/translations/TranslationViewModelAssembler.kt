@@ -6,7 +6,9 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class TranslationViewModelAssembler() : RepresentationModelAssemblerSupport<TranslationView, TranslationViewModel>(
+class TranslationViewModelAssembler(
+  private val translationSuggestionSimpleModelAssembler: TranslationSuggestionSimpleModelAssembler
+) : RepresentationModelAssemblerSupport<TranslationView, TranslationViewModel>(
   TranslationsController::class.java,
   TranslationViewModel::class.java,
 ) {
@@ -21,6 +23,7 @@ class TranslationViewModelAssembler() : RepresentationModelAssemblerSupport<Tran
       commentCount = view.commentCount,
       unresolvedCommentCount = view.unresolvedCommentCount,
       suggestionCount = view.suggestionCount,
+      suggestions = view.suggestions?.map { translationSuggestionSimpleModelAssembler.toModel(it) }
     )
   }
 }

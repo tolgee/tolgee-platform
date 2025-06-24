@@ -157,7 +157,8 @@ class QueryBase<T>(
         cb.equal(
           subqueryRoot.get(TranslationSuggestion_.key).get(Key_.id),
           this.root.get(Key_.id),
-        ), cb.equal(
+        ),
+          cb.equal(
           subqueryRoot.get(TranslationSuggestion_.language).get(Language_.id),
           cb.literal(language.id),
         )

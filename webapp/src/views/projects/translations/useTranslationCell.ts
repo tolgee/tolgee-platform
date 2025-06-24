@@ -156,10 +156,6 @@ export const useTranslationCell = ({
     (t) => t.languageTag === language.tag && t.userAssigned
   );
 
-  const suggestions = keyData.suggestions?.filter(
-    (s) => s.languageId === language.id
-  );
-
   const setAssignedTaskState = (done: boolean) => {
     if (firstTask) {
       setTaskState({
@@ -252,6 +248,5 @@ export const useTranslationCell = ({
     aiPlaygroundData,
     aiPlaygroundEnabled,
     cellClickable,
-    suggestions,
   };
 };

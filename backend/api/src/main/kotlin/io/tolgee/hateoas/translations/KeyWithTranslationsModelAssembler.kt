@@ -43,9 +43,5 @@ class KeyWithTranslationsModelAssembler(
         view.tasks?.map {
           translationTaskViewModelAssembler.toModel(it)
         },
-      suggestions =
-        view.suggestions?.map {
-          translationSuggestionModelAssembler.toModel(it)
-        }
     )
 }

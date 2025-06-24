@@ -89,7 +89,7 @@ export const CellTranslation: React.FC<Props> = ({
           colIndex={colIndex}
         />
       )}
-      {tools.suggestions && (
+      {tools.translation?.suggestions && (
         <Box
           sx={{
             display: 'grid',
@@ -98,7 +98,7 @@ export const CellTranslation: React.FC<Props> = ({
             gap: '4px',
           }}
         >
-          {tools.suggestions.map((suggestion) => (
+          {tools.translation?.suggestions.map((suggestion) => (
             <AiPlaygroundPreview
               key={suggestion.id}
               isPlural={data.keyIsPlural}

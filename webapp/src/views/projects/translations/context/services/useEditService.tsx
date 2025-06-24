@@ -125,18 +125,24 @@ export const useEditService = ({
         value,
       });
 
-      if (result)
-        translationService.updateTranslationKeys([
-          {
-            keyId,
-            value(data) {
+      const language = allLanguages.find(
+        (lang) => lang.id === result?.languageId
+      );
+
+      if (result && language) {
+        if (language) {
+          translationService.updateTranslation({
+            keyId: result.keyId,
+            lang: language.tag,
+            data(value) {
               return {
-                ...data,
-                suggestions: [result, ...(data.suggestions ?? [])],
+                suggestions: [result],
+                suggestionCount: (value.suggestionCount ?? 0) + 1,
               };
             },
-          },
-        ]);
+          });
+        }
+      }
     } else if (language) {
       // update translation
       const result = await mutateTranslation(

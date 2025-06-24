@@ -6,6 +6,7 @@ import io.tolgee.ee.repository.TranslationSuggestionRepository
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.TranslationSuggestion
+import io.tolgee.model.views.TranslationSuggestionView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
@@ -23,16 +24,18 @@ class TranslationSuggestionServiceEeImpl(
   private val entityManager: EntityManager,
   private val authenticationFacade: AuthenticationFacade,
 ) : TranslationSuggestionService {
-  override fun getKeysWithSuggestions(projectId: Long, keyIds: List<Long>): Map<Long, List<TranslationSuggestion>> {
-    val data = translationSuggestionRepository.getByKeyId(projectId, keyIds)
-    val result = mutableMapOf<Long, MutableList<TranslationSuggestion>>()
+  override fun getKeysWithSuggestions(
+    projectId: Long,
+    keyIds: List<Long>,
+    languageIds: List<Long>
+  ): Map<Long, List<TranslationSuggestionView>> {
+    val data = translationSuggestionRepository.getByKeyId(projectId, keyIds, languageIds)
+    val result = mutableMapOf<Long, MutableList<TranslationSuggestionView>>()
     data.forEach {
-      val keyId = it.key?.id
-      if (keyId != null) {
-        val existing = result[keyId] ?: mutableListOf()
-        existing.add(it)
-        result.set(keyId, existing)
-      }
+      val keyId = it.keyId
+      val existing = result[keyId] ?: mutableListOf()
+      existing.add(it)
+      result.set(keyId, existing)
     }
     return result
   }

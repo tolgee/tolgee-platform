@@ -3,7 +3,6 @@ package io.tolgee.model.views
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.model.Screenshot
-import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Tag
 import io.tolgee.service.queryBuilders.Cursorable
@@ -25,7 +24,6 @@ data class KeyWithTranslationsView(
   lateinit var keyTags: List<Tag>
   var screenshots: Collection<Screenshot>? = null
   var tasks: List<KeyTaskView>? = null
-  var suggestions: List<TranslationSuggestion>? = null
 
   companion object {
     fun of(
@@ -56,9 +54,13 @@ data class KeyWithTranslationsView(
             id = id,
             text = data[i + 1] as String?,
             state =
-              (data[i + 2] ?:
-                if (id == null) TranslationState.UNTRANSLATED
-                else TranslationState.TRANSLATED
+              (
+                data[i + 2]
+                ?: if (id == null) {
+                  TranslationState.UNTRANSLATED
+                } else {
+                  TranslationState.TRANSLATED
+                }
               ) as TranslationState,
             outdated = (data[i + 3] ?: false) as Boolean,
             auto = (data[i + 4] ?: false) as Boolean,

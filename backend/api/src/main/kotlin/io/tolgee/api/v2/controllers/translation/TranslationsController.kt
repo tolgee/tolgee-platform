@@ -270,7 +270,7 @@ When null, resulting file will be a flat key-value object.
 
     addScreenshotsToResponse(data)
     addTasksToResponse(data)
-    addSuggestionsToResponse(projectHolder.project.id, data)
+    addSuggestionsToResponse(projectHolder.project.id, data, languages.map { it.id })
 
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
     return pagedAssembler.toTranslationModel(data, languages, cursor)
@@ -309,11 +309,21 @@ When null, resulting file will be a flat key-value object.
     }
   }
 
-  private fun addSuggestionsToResponse(projectId: Long, data: Page<KeyWithTranslationsView>) {
+  private fun addSuggestionsToResponse(
+    projectId: Long,
+    data: Page<KeyWithTranslationsView>,
+    languageIds: Collection<Long>
+  ) {
     val keyIds = data.content.map { key -> key.keyId }
-    val keysWithSuggestions = translationSuggestionService.getKeysWithSuggestions(projectId, keyIds)
+    val keysWithSuggestions = translationSuggestionService.getKeysWithSuggestions(
+      projectId,
+      keyIds,
+      languageIds.toList()
+    )
     data.content.forEach { key ->
-      key.suggestions = keysWithSuggestions[key.keyId]
+      key.translations.forEach { (tag, translation) ->
+        translation.suggestions = keysWithSuggestions[key.keyId]?.filter { it.languageTag == tag }
+      }
     }
   }
 

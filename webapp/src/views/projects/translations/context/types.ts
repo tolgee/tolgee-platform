@@ -33,7 +33,7 @@ export type AddTranslation = KeyWithTranslationsModel;
 export type UpdateTranslation = {
   keyId: number;
   lang: string;
-  data: Partial<TranslationViewModel>;
+  data: ValueUpdate<Partial<TranslationViewModel>>;
 };
 
 export type RemoveTag = {

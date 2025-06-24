@@ -14,6 +14,7 @@ data class TranslationView(
   val outdated: Boolean,
   val suggestionCount: Long,
 ) {
+  var suggestions: List<TranslationSuggestionView>? = null
   companion object {
     val FIELD_COUNT = 9
   }
