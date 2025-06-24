@@ -21,7 +21,7 @@ class TranslationSuggestion(
   @ManyToOne
   var language: Language? = null,
   @ManyToOne
-  var user: UserAccount? = null,
+  var author: UserAccount? = null,
   var translation: String? = null,
   @Enumerated(EnumType.STRING)
   var state: TranslationSuggestionState = TranslationSuggestionState.ACTIVE,

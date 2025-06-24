@@ -54,7 +54,7 @@ class TranslationSuggestionServiceEeImpl(
       key = key,
       project = entityManager.getReference(Project::class.java, projectId),
       language = language,
-      user = authenticationFacade.authenticatedUserEntity,
+      author = authenticationFacade.authenticatedUserEntity,
       translation = dto.translation,
     )
 

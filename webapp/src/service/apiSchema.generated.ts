@@ -5504,6 +5504,7 @@ export interface components {
       text?: string;
     };
     TranslationSuggestionModel: {
+      author: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
       /** Format: int64 */
@@ -5512,17 +5513,14 @@ export interface components {
       languageId: number;
       state: "ACTIVE" | "ACCEPTED" | "DECLINED";
       translation?: string;
-      /** Format: int64 */
-      userId: number;
     };
     /** @description First suggestion */
     TranslationSuggestionSimpleModel: {
+      author: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
       state: "ACTIVE" | "ACCEPTED" | "DECLINED";
       translation?: string;
-      /** Format: int64 */
-      userId: number;
     };
     /**
      * @description Translations object

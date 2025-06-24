@@ -19,6 +19,7 @@ import { AfterCommand, ChangeValue, SetEdit } from '../types';
 import { useTaskService } from './useTaskService';
 import { composeValue, taskEditControlsShouldBeVisible } from './utils';
 import { usePositionService } from './usePositionService';
+import { TranslationViewModel } from '../../ToolsPanel/common/types';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -138,7 +139,7 @@ export const useEditService = ({
               return {
                 suggestions: [result],
                 suggestionCount: (value.suggestionCount ?? 0) + 1,
-              };
+              } satisfies Partial<TranslationViewModel>;
             },
           });
         }
