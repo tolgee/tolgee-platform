@@ -8,6 +8,7 @@ import { gcy } from '../../common/shared';
 import { isDarkMode } from '../../common/helpers';
 import { E2TranslationLabel } from '../../compounds/E2TranslationLabel';
 import { E2ActivityChecker } from '../../compounds/E2ActivityChecker';
+import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 
 let projectId = null;
 let emptyProjectId = null;
@@ -87,21 +88,23 @@ describe('Projects Settings - Labels', () => {
 
   it('filters by label', () => {
     visitTranslations(projectId);
-    gcy('translations-row').should('have.length', 2);
-    gcy('translations-filter-select').click();
-    cy.waitForDom();
-    gcy('submenu-item').contains('Labels').should('exist').click();
-    gcy('filter-item').contains('First label').click();
-    gcy('translations-filter-select').contains('First label');
-    gcy('translations-row').should('have.length', 0);
-    gcy('translations-filter-apply-for-expand').click();
-    gcy('translations-filter-apply-for-all').click();
-    gcy('translations-row').contains('first key').should('be.visible');
-    gcy('translations-row').should('have.length', 1);
-    gcy('translations-filter-apply-for-language').contains('English').click();
-    gcy('translations-row').should('have.length', 1);
-    gcy('translations-filter-apply-for-language').contains('Czech').click();
-    gcy('translations-row').should('have.length', 0);
+    const view = new E2TranslationsView();
+
+    view.assertTranslationsRowsCount(2);
+
+    view.filterByLabel('First label');
+    view.assertTranslationsRowsCount(0);
+
+    view.applyFilterForExpand().applyFilterForAll();
+
+    view.getTranslationsRows().contains('first key').should('be.visible');
+    view.assertTranslationsRowsCount(1);
+
+    view.applyFilterForLanguage('English');
+    view.assertTranslationsRowsCount(1);
+
+    view.applyFilterForLanguage('Czech');
+    view.assertTranslationsRowsCount(0);
   });
 
   it('filters has not labels when no labels exists', () => {
