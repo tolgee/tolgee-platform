@@ -8,20 +8,24 @@ import io.tolgee.ee.data.glossary.UpdateGlossaryRequest
 import io.tolgee.ee.repository.glossary.GlossaryRepository
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
+import io.tolgee.model.Project
 import io.tolgee.model.glossary.Glossary
+import io.tolgee.service.GlossaryCleanupService
 import io.tolgee.service.project.ProjectService
 import jakarta.transaction.Transactional
+import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
+@Primary
 @Service
 class GlossaryService(
   private val glossaryRepository: GlossaryRepository,
   private val glossaryTermTranslationService: GlossaryTermTranslationService,
   private val projectService: ProjectService,
   private val currentDateProvider: CurrentDateProvider,
-) {
+) : GlossaryCleanupService {
   fun findAll(organizationId: Long): List<Glossary> {
     return glossaryRepository.findByOrganizationId(organizationId)
   }
@@ -143,5 +147,9 @@ class GlossaryService(
     projectId: Long,
   ) {
     glossaryRepository.unassignProject(organizationId, glossaryId, projectId)
+  }
+
+  override fun unassignProjectFromAll(project: Project) {
+    glossaryRepository.unassignProjectFromAll(project.id)
   }
 }

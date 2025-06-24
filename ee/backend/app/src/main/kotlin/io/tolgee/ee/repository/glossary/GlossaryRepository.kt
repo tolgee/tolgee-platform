@@ -78,7 +78,6 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
       and gp.project_id = :projectId 
       and gp.glossary_id = g.id
       and g.organization_owner_id = :organizationId
-      and g.deleted_at is null
     """,
     nativeQuery = true,
   )
@@ -86,6 +85,20 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
   fun unassignProject(
     organizationId: Long,
     glossaryId: Long,
+    projectId: Long,
+  ): Int
+
+  @Query(
+    """
+    delete from glossary_project gp
+    using glossary g
+    where gp.glossary_id = :glossaryId
+      and gp.project_id = :projectId
+    """,
+    nativeQuery = true,
+  )
+  @Modifying
+  fun unassignProjectFromAll(
     projectId: Long,
   ): Int
 }

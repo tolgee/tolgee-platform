@@ -10,9 +10,11 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
+import io.tolgee.service.GlossaryCleanupService
 import io.tolgee.service.PromptService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.dataImport.ImportSettingsService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
@@ -48,6 +50,8 @@ class ProjectHardDeletingService(
   private val self: ProjectHardDeletingService,
   private val aiPlaygroundResultService: AiPlaygroundResultService,
   @Qualifier("promptServiceEeImpl") private val promptService: PromptService,
+  private val importSettingsService: ImportSettingsService,
+  private val glossaryCleanupService: GlossaryCleanupService
 ) : Logging {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
@@ -57,6 +61,14 @@ class ProjectHardDeletingService(
         projectHolder.project
       } catch (e: ProjectNotSelectedException) {
         projectHolder.project = ProjectDto.fromEntity(project)
+      }
+
+      traceLogMeasureTime("deleteProject: unassign glossaries") {
+        glossaryCleanupService.unassignProjectFromAll(project)
+      }
+
+      traceLogMeasureTime("deleteProject: delete project import settings") {
+        importSettingsService.deleteAllByProject(project.id)
       }
 
       importService.getAllByProject(project.id).forEach {
