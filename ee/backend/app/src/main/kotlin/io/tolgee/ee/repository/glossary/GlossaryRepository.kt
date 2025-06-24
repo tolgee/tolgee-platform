@@ -91,9 +91,7 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
   @Query(
     """
     delete from glossary_project gp
-    using glossary g
-    where gp.glossary_id = :glossaryId
-      and gp.project_id = :projectId
+    where gp.project_id = :projectId
     """,
     nativeQuery = true,
   )
