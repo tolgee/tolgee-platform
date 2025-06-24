@@ -325,6 +325,7 @@ class ImportService(
   }
 
   fun onExistingLanguageRemoved(language: Language) {
+    this.importTranslationRepository.removeExistingLanguageConflictReferences(language)
     this.importLanguageRepository.removeExistingLanguageReference(language)
   }
 

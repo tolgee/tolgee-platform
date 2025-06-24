@@ -28,8 +28,8 @@ class LanguageHardDeleter(
     val tasks = getAllTasks(languageWithData)
     translationRepository.deleteAll(allTranslations)
     taskService.deleteAll(tasks)
-    languageRepository.delete(languageWithData)
     aiPlaygroundResultService.deleteResultsByLanguage(language.id)
+    languageRepository.delete(languageWithData)
     entityManager.flush()
   }
 

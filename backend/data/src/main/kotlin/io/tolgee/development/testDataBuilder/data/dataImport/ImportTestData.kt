@@ -456,6 +456,10 @@ class ImportTestData {
     }
   }
 
+  fun useCzechBaseLanguage() {
+    project.baseLanguage = czech
+  }
+
   data class AddFilesWithNamespacesResult(
     val importFrenchInNs: ImportLanguage,
   )

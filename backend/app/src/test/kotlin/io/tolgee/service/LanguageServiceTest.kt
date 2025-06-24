@@ -13,6 +13,8 @@ import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.Language
+import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.testing.assert
@@ -54,6 +56,19 @@ class LanguageServiceTest : AbstractSpringTest() {
 
   @Test
   @Transactional
+  fun `remove of language removes existing translation conflict references from import translations`() {
+    val testData = ImportTestData()
+    testDataService.saveTestData(testData.root)
+
+    assertThat(importService.findTranslation(testData.translationWithConflict.id)!!.conflict).isNotNull()
+    languageService.deleteLanguage(testData.english.id)
+    entityManager.flush()
+    entityManager.clear()
+    assertThat(importService.findTranslation(testData.translationWithConflict.id)!!.conflict).isNull()
+  }
+
+  @Test
+  @Transactional
   fun `deletes language with MT Service Config`() {
     val testData = MtSettingsTestData()
     testDataService.saveTestData(testData.root)
@@ -86,14 +101,32 @@ class LanguageServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
 
     executeInNewTransaction {
-      setAuthentication(testData)
+      setAuthentication(testData.user)
       languageService.deleteLanguage(testData.germanLanguage.id)
     }
 
     executeInNewTransaction {
       waitForNotThrowing(timeout = 10000, pollTime = 100) {
-        assertLanguageDeleted(testData)
+        assertLanguageDeleted(testData.germanLanguage)
         assertActivityCreated()
+      }
+    }
+  }
+
+  @Test
+  fun `hard deletes language with conflicts`() {
+    val testData = ImportTestData()
+    testData.useCzechBaseLanguage()
+    testDataService.saveTestData(testData.root)
+
+    executeInNewTransaction {
+      setAuthentication(testData.userAccount)
+      languageService.deleteLanguage(testData.english.id)
+    }
+
+    executeInNewTransaction {
+      waitForNotThrowing(timeout = 10000, pollTime = 100) {
+        assertLanguageDeleted(testData.english)
       }
     }
   }
@@ -106,29 +139,29 @@ class LanguageServiceTest : AbstractSpringTest() {
 
     sessionFactory.statistics.clear()
     executeInNewTransaction {
-      setAuthentication(testData)
+      setAuthentication(testData.user)
       languageService.hardDeleteLanguage(testData.germanLanguage.id)
     }
     val count = sessionFactory.statistics.prepareStatementCount
     count.assert.isLessThan(20)
 
     executeInNewTransaction {
-      assertLanguageDeleted(testData)
+      assertLanguageDeleted(testData.germanLanguage)
     }
   }
 
-  private fun setAuthentication(testData: TranslationsTestData) {
+  private fun setAuthentication(user: UserAccount) {
     SecurityContextHolder.getContext().authentication =
       TolgeeAuthentication(
         null,
-        UserAccountDto.fromEntity(testData.user),
+        UserAccountDto.fromEntity(user),
         null,
       )
   }
 
-  private fun assertLanguageDeleted(testData: TranslationsTestData) {
+  private fun assertLanguageDeleted(language: Language) {
     entityManager.createQuery("select 1 from Language l where l.id = :id")
-      .setParameter("id", testData.germanLanguage.id)
+      .setParameter("id", language.id)
       .resultList.assert.isEmpty()
   }
 
