@@ -3,7 +3,7 @@ package io.tolgee.api.v2.controllers.suggestion
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
-import io.tolgee.dtos.request.suggestion.SuggestRequestDto
+import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.hateoas.machineTranslation.SuggestResultModel

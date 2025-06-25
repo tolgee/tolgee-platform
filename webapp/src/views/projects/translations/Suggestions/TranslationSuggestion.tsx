@@ -23,6 +23,7 @@ type Props = {
   suggestion: TranslationSuggestionSimpleModel;
   isPlural: boolean;
   locale: string;
+  maxLines?: number;
   sx?: SxProps;
 };
 
@@ -30,6 +31,7 @@ export const TranslationSuggestion = ({
   suggestion,
   isPlural,
   locale,
+  maxLines = 3,
   sx,
 }: Props) => {
   return (
@@ -40,7 +42,7 @@ export const TranslationSuggestion = ({
           text={suggestion.translation}
           isPlural={isPlural}
           locale={locale}
-          maxLines={3}
+          maxLines={maxLines}
           extraPadding={false}
         />
       </StyledContent>

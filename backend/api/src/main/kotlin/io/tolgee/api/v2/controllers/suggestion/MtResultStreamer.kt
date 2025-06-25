@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.sentry.Sentry
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.ProjectDto
-import io.tolgee.dtos.request.suggestion.SuggestRequestDto
+import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ExceptionWithMessage
 import io.tolgee.exceptions.NotFoundException

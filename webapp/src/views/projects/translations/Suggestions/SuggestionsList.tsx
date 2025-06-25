@@ -25,6 +25,17 @@ const StyledHeader = styled('div')`
   justify-content: space-between;
 `;
 
+const StyledScrollWrapper = styled('div')`
+  display: grid;
+  max-height: 400px;
+  overflow: auto;
+`;
+
+const StyledItemsWrapper = styled('div')`
+  display: grid;
+  gap: 8px;
+`;
+
 type Props = {
   countContent: React.ReactNode;
   suggestions: TranslationSuggestionSimpleModel[];
@@ -74,17 +85,22 @@ export const SuggestionsList = ({
           open={!hidden}
         />
       </StyledHeader>
-      {!hidden &&
-        (suggestionsLoadable.data?._embedded?.suggestions || suggestions).map(
-          (item) => (
-            <TranslationSuggestion
-              key={item.id}
-              suggestion={item}
-              isPlural={false}
-              locale={'en'}
-            />
-          )
-        )}
+      {!hidden && (
+        <StyledScrollWrapper>
+          <StyledItemsWrapper>
+            {(
+              suggestionsLoadable.data?._embedded?.suggestions || suggestions
+            ).map((item) => (
+              <TranslationSuggestion
+                key={item.id}
+                suggestion={item}
+                isPlural={false}
+                locale={'en'}
+              />
+            ))}
+          </StyledItemsWrapper>
+        </StyledScrollWrapper>
+      )}
     </StyledContainer>
   );
 };

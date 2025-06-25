@@ -12,7 +12,7 @@ import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
-import io.tolgee.dtos.request.suggestion.SuggestRequestDto
+import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.fixtures.*
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod

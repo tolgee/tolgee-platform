@@ -52,6 +52,7 @@ export const SuggestionsFirst = ({
             suggestion={s}
             isPlural={isPlural}
             locale={locale}
+            maxLines={2}
           />
         ))}
       </StyledWrapper>
