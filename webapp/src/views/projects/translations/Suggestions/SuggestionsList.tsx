@@ -12,6 +12,9 @@ const OPEN_SUGGESTIONS_KEY = '__tolgee_suggestions_hidden';
 type TranslationSuggestionSimpleModel =
   components['schemas']['TranslationSuggestionSimpleModel'];
 
+type TranslationSuggestionModel =
+  components['schemas']['TranslationSuggestionModel'];
+
 const StyledContainer = styled('div')`
   display: grid;
   padding: 6px 8px;
@@ -41,6 +44,8 @@ type Props = {
   suggestions: TranslationSuggestionSimpleModel[];
   keyId: number;
   languageId: number;
+  isPlural: boolean;
+  locale: string;
 };
 
 export const SuggestionsList = ({
@@ -48,6 +53,8 @@ export const SuggestionsList = ({
   suggestions,
   keyId,
   languageId,
+  isPlural,
+  locale,
 }: Props) => {
   const project = useProject();
   const { t } = useTranslate();
@@ -90,14 +97,18 @@ export const SuggestionsList = ({
           <StyledItemsWrapper>
             {(
               suggestionsLoadable.data?._embedded?.suggestions || suggestions
-            ).map((item) => (
-              <TranslationSuggestion
-                key={item.id}
-                suggestion={item}
-                isPlural={false}
-                locale={'en'}
-              />
-            ))}
+            ).map((item) => {
+              const itemWithDate = item as Partial<TranslationSuggestionModel>;
+              return (
+                <TranslationSuggestion
+                  key={item.id}
+                  suggestion={item}
+                  isPlural={isPlural}
+                  locale={locale}
+                  lastUpdated={itemWithDate.updatedAt ?? itemWithDate.createdAt}
+                />
+              );
+            })}
           </StyledItemsWrapper>
         </StyledScrollWrapper>
       )}

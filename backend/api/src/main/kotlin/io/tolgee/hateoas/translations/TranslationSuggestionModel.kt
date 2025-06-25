@@ -4,6 +4,7 @@ import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.model.enums.TranslationSuggestionState
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
+import java.util.Date
 
 @Relation(collectionRelation = "suggestions", itemRelation = "suggestion")
 class TranslationSuggestionModel(
@@ -13,4 +14,6 @@ class TranslationSuggestionModel(
   val translation: String?,
   val state: TranslationSuggestionState,
   val author: SimpleUserAccountModel,
+  val updatedAt: Date,
+  val createdAt: Date,
 ) : RepresentationModel<TranslationSuggestionModel>()

@@ -235,6 +235,8 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
             languageId={language.id}
             countContent={translation?.suggestionCount || 0}
             suggestions={translation?.suggestions || []}
+            isPlural={keyData.keyIsPlural}
+            locale={language.tag}
           />
         </StyledSuggestions>
       )}

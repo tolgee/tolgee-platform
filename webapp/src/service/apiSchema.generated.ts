@@ -5512,6 +5512,8 @@ export interface components {
     };
     TranslationSuggestionModel: {
       author: components["schemas"]["SimpleUserAccountModel"];
+      /** Format: date-time */
+      createdAt: string;
       /** Format: int64 */
       id: number;
       /** Format: int64 */
@@ -5520,6 +5522,8 @@ export interface components {
       languageId: number;
       state: "ACTIVE" | "ACCEPTED" | "DECLINED";
       translation?: string;
+      /** Format: date-time */
+      updatedAt: string;
     };
     /** @description First suggestion */
     TranslationSuggestionSimpleModel: {
