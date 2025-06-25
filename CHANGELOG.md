@@ -1,3 +1,10 @@
+## [3.123.10](https://github.com/tolgee/tolgee-platform/compare/v3.123.9...v3.123.10) (2025-06-25)
+
+
+### Bug Fixes
+
+* project hard delete must also remove import settings and unlink glossaries ([#3147](https://github.com/tolgee/tolgee-platform/issues/3147)) ([77cb6cd](https://github.com/tolgee/tolgee-platform/commit/77cb6cd693c575072dca5e357bcf1b9b898b343f))
+
 ## [3.123.9](https://github.com/tolgee/tolgee-platform/compare/v3.123.8...v3.123.9) (2025-06-25)
 
 
