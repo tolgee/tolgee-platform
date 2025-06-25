@@ -149,7 +149,7 @@ class GlossaryService(
     glossaryRepository.unassignProject(organizationId, glossaryId, projectId)
   }
 
-  override fun unassignProjectFromAll(project: Project) {
+  override fun unassignFromAllProjects(project: Project) {
     glossaryRepository.unassignProjectFromAll(project.id)
   }
 }

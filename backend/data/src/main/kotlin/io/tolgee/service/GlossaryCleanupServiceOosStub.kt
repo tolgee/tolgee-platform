@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class GlossaryCleanupServiceOosStub : GlossaryCleanupService {
-  override fun unassignProjectFromAll(project: Project) {
+  override fun unassignFromAllProjects(project: Project) {
     // no-op
   }
 }

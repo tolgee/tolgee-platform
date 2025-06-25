@@ -64,7 +64,7 @@ class ProjectHardDeletingService(
       }
 
       traceLogMeasureTime("deleteProject: unassign glossaries") {
-        glossaryCleanupService.unassignProjectFromAll(project)
+        glossaryCleanupService.unassignFromAllProjects(project)
       }
 
       traceLogMeasureTime("deleteProject: delete project import settings") {
