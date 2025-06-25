@@ -1,3 +1,10 @@
+## [3.123.9](https://github.com/tolgee/tolgee-platform/compare/v3.123.8...v3.123.9) (2025-06-25)
+
+
+### Bug Fixes
+
+* organizations administration: properly detect search param type when search is null ([#3148](https://github.com/tolgee/tolgee-platform/issues/3148)) ([316674b](https://github.com/tolgee/tolgee-platform/commit/316674b261eaee073dd747a58197d022f188aeee))
+
 ## [3.123.8](https://github.com/tolgee/tolgee-platform/compare/v3.123.7...v3.123.8) (2025-06-24)
 
 
