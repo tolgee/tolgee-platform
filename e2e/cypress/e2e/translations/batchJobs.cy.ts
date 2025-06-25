@@ -1,7 +1,7 @@
 import { getCell, visitTranslations } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
 import { batchJobs } from '../../common/apiCalls/testData/testData';
-import { dismissMenu, gcy, gcyAdvanced } from '../../common/shared';
+import { dismissMenu, gcy } from '../../common/shared';
 import {
   executeBatchOperation,
   executeBatchOperationWithConfirmation,

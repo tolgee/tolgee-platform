@@ -1,6 +1,5 @@
 import { getTranslationCell } from '../common/translations';
 import { dismissMenu, gcy } from '../common/shared';
-import { E2ProjectLabelsSection } from './projectSettings/labels/E2ProjectLabelsSection';
 
 export class E2TranslationLabel {
   private getTranslationLabels(key: string, lang: string) {
