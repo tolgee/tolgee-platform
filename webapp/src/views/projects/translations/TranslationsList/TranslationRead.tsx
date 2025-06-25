@@ -6,7 +6,7 @@ import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationLanguage } from './TranslationLanguage';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
-import { TranslationSuggestion } from '../translationVisual/TranslationSuggestion';
+import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -134,15 +134,14 @@ export const TranslationRead: React.FC<Props> = ({
           showHighlights={isEditingRow && language.base}
           isPlural={keyData.keyIsPlural}
         />
-        {translation?.suggestions &&
-          translation.suggestions.map((suggestion) => (
-            <TranslationSuggestion
-              key={suggestion.id}
-              suggestion={suggestion}
-              isPlural={keyData.keyIsPlural}
-              locale={language.tag}
-            />
-          ))}
+        {Boolean(translation?.suggestions?.length) && (
+          <SuggestionsFirst
+            suggestions={translation!.suggestions!}
+            count={translation!.suggestionCount}
+            isPlural={keyData.keyIsPlural}
+            locale={language.tag}
+          />
+        )}
         {aiPlaygroundData && (
           <AiPlaygroundPreview
             translation={aiPlaygroundData.translation}

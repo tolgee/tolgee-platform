@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers.translationSuggestionController
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
-import io.tolgee.dtos.request.SuggestRequestDto
+import io.tolgee.dtos.request.suggestion.SuggestRequestDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint

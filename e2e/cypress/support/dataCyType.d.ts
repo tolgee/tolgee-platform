@@ -757,6 +757,7 @@ declare namespace DataCy {
         "translation-plural-parameter" |
         "translation-plural-variant" |
         "translation-state-button" |
+        "translation-suggestion" |
         "translation-text" |
         "translation-tools-machine-translation-item" |
         "translation-tools-machine-translation-item-prompt" |

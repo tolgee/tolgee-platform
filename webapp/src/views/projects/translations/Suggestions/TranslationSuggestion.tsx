@@ -1,5 +1,5 @@
-import { Box, styled, SxProps, Tooltip } from '@mui/material';
-import { TranslationVisual } from './TranslationVisual';
+import { Box, styled, SxProps } from '@mui/material';
+import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -8,11 +8,9 @@ type TranslationSuggestionSimpleModel =
 
 const StyledContainer = styled(Box)`
   display: grid;
-  background: ${({ theme }) => theme.palette.tokens.text._states.hover};
   grid-template-columns: auto 1fr;
   gap: 8px;
   padding: 6px 8px;
-  border-radius: 8px;
   align-items: start;
 `;
 
@@ -23,7 +21,6 @@ const StyledContent = styled('div')`
 
 type Props = {
   suggestion: TranslationSuggestionSimpleModel;
-  tooltip?: React.ReactNode;
   isPlural: boolean;
   locale: string;
   sx?: SxProps;
@@ -31,13 +28,12 @@ type Props = {
 
 export const TranslationSuggestion = ({
   suggestion,
-  tooltip,
   isPlural,
   locale,
   sx,
 }: Props) => {
-  const content = (
-    <StyledContainer {...{ sx }} data-cy="ai-playground-preview">
+  return (
+    <StyledContainer {...{ sx }} data-cy="translation-suggestion">
       <AvatarImg owner={{ ...suggestion.author, type: 'USER' }} size={24} />
       <StyledContent>
         <TranslationVisual
@@ -50,5 +46,4 @@ export const TranslationSuggestion = ({
       </StyledContent>
     </StyledContainer>
   );
-  return tooltip ? <Tooltip title={tooltip}>{content}</Tooltip> : content;
 };

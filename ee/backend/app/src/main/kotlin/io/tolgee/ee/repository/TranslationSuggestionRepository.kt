@@ -1,7 +1,10 @@
 package io.tolgee.ee.repository
 
+import io.tolgee.dtos.request.suggestion.SuggestionFilters
 import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.views.TranslationSuggestionView
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -30,7 +33,28 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
         and ts.project_id = :projectId
         and ts.language_id in :languageIds
     """,
-  nativeQuery = true
+    nativeQuery = true
   )
   fun getByKeyId(projectId: Long, keyIds: List<Long>, languageIds: List<Long>): List<TranslationSuggestionView>
+
+  @Query(
+    """
+      from TranslationSuggestion ts
+        left join fetch ts.language
+        left join fetch ts.author
+      where ts.project.id = :projectId
+        and (
+            :#{#filters.filterKeyId} is null
+            or ts.key.id in :#{#filters.filterKeyId}
+        )
+        and (
+            :#{#filters.filterLanguageId} is null
+            or ts.language.id in :#{#filters.filterLanguageId}
+        )
+
+    """
+  )
+  fun getAll(
+    pageable: Pageable, projectId: Long, filters: SuggestionFilters,
+  ): Page<TranslationSuggestion>
 }

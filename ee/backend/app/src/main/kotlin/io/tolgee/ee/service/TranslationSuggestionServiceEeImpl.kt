@@ -1,6 +1,7 @@
 package io.tolgee.ee.service
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.suggestion.SuggestionFilters
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
 import io.tolgee.ee.repository.TranslationSuggestionRepository
 import io.tolgee.exceptions.NotFoundException
@@ -14,51 +15,63 @@ import io.tolgee.service.translation.TranslationSuggestionService
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 import jakarta.persistence.EntityManager
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 
 @Primary
 @Component
 class TranslationSuggestionServiceEeImpl(
-  private val translationSuggestionRepository: TranslationSuggestionRepository,
-  private val keyService: KeyService,
-  private val languageService: LanguageService,
-  private val entityManager: EntityManager,
-  private val authenticationFacade: AuthenticationFacade,
+    private val translationSuggestionRepository: TranslationSuggestionRepository,
+    private val keyService: KeyService,
+    private val languageService: LanguageService,
+    private val entityManager: EntityManager,
+    private val authenticationFacade: AuthenticationFacade,
 ) : TranslationSuggestionService {
-  override fun getKeysWithSuggestions(
-    projectId: Long,
-    keyIds: List<Long>,
-    languageIds: List<Long>
-  ): Map<Long, List<TranslationSuggestionView>> {
-    val data = translationSuggestionRepository.getByKeyId(projectId, keyIds, languageIds)
-    val result = mutableMapOf<Long, MutableList<TranslationSuggestionView>>()
-    data.forEach {
-      val keyId = it.keyId
-      val existing = result[keyId] ?: mutableListOf()
-      existing.add(it)
-      result.set(keyId, existing)
+    override fun getKeysWithSuggestions(
+        projectId: Long,
+        keyIds: List<Long>,
+        languageIds: List<Long>
+    ): Map<Long, List<TranslationSuggestionView>> {
+        val data = translationSuggestionRepository.getByKeyId(projectId, keyIds, languageIds)
+        val result = mutableMapOf<Long, MutableList<TranslationSuggestionView>>()
+        data.forEach {
+            val keyId = it.keyId
+            val existing = result[keyId] ?: mutableListOf()
+            existing.add(it)
+            result.set(keyId, existing)
+        }
+        return result
     }
-    return result
-  }
 
-  fun createSuggestion(
-    projectId: Long,
-    dto: CreateTranslationSuggestionRequest,
-  ): TranslationSuggestion {
-    val key = keyService.find(dto.keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-    keyService.checkInProject(key, projectId)
+    fun createSuggestion(
+        projectId: Long,
+        dto: CreateTranslationSuggestionRequest,
+    ): TranslationSuggestion {
+        val key = keyService.find(dto.keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+        keyService.checkInProject(key, projectId)
 
-    val language =
-      languageService.findEntity(dto.languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+        val language =
+            languageService.findEntity(dto.languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
-    val suggestion = TranslationSuggestion(
-      key = key,
-      project = entityManager.getReference(Project::class.java, projectId),
-      language = language,
-      author = authenticationFacade.authenticatedUserEntity,
-      translation = dto.translation,
-    )
+        val suggestion = TranslationSuggestion(
+            key = key,
+            project = entityManager.getReference(Project::class.java, projectId),
+            language = language,
+            author = authenticationFacade.authenticatedUserEntity,
+            translation = dto.translation,
+        )
 
-    translationSuggestionRepository.save(suggestion)
-    return suggestion
-  }
+        translationSuggestionRepository.save(suggestion)
+        return suggestion
+    }
+
+    fun getSuggestions(
+        pageable: Pageable, projectId: Long, filters: SuggestionFilters,
+    ): Page<TranslationSuggestion> {
+        return translationSuggestionRepository.getAll(
+            pageable,
+            projectId,
+            filters,
+        )
+    }
 }

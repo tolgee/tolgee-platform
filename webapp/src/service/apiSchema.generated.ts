@@ -790,6 +790,7 @@ export interface paths {
     put: operations["transferProjectToOrganization"];
   };
   "/v2/projects/{projectId}/translation-suggestion": {
+    get: operations["getSuggestions"];
     post: operations["createSuggestion"];
   };
   "/v2/projects/{projectId}/translations": {
@@ -3760,6 +3761,12 @@ export interface components {
     PagedModelTranslationMemoryItemModel: {
       _embedded?: {
         translationMemoryItems?: components["schemas"]["TranslationMemoryItemModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTranslationSuggestionModel: {
+      _embedded?: {
+        suggestions?: components["schemas"]["TranslationSuggestionModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -18800,6 +18807,65 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getSuggestions: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /** Filter by key id */
+        filterKeyId?: number[];
+        /** Filter by language id */
+        filterLanguageId?: number[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelTranslationSuggestionModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
