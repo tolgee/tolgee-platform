@@ -32,7 +32,7 @@ class TranslationSuggestionServiceEeImpl(
         keyIds: List<Long>,
         languageIds: List<Long>
     ): Map<Long, List<TranslationSuggestionView>> {
-        val data = translationSuggestionRepository.getByKeyId(projectId, keyIds, languageIds)
+        val data = translationSuggestionRepository.getByKeyId(projectId, languageIds, keyIds,)
         val result = mutableMapOf<Long, MutableList<TranslationSuggestionView>>()
         data.forEach {
             val keyId = it.keyId
@@ -45,13 +45,15 @@ class TranslationSuggestionServiceEeImpl(
 
     fun createSuggestion(
         projectId: Long,
+        keyId: Long,
+        languageId: Long,
         dto: CreateTranslationSuggestionRequest,
     ): TranslationSuggestion {
-        val key = keyService.find(dto.keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+        val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
         keyService.checkInProject(key, projectId)
 
         val language =
-            languageService.findEntity(dto.languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+            languageService.findEntity(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
         val suggestion = TranslationSuggestion(
             key = key,
@@ -66,12 +68,13 @@ class TranslationSuggestionServiceEeImpl(
     }
 
     fun getSuggestionsPaged(
-        pageable: Pageable, projectId: Long, filters: SuggestionFilters,
+        pageable: Pageable, projectId: Long, languageId: Long, keyId: Long, filters: SuggestionFilters,
     ): Page<TranslationSuggestion> {
         return translationSuggestionRepository.getPaged(
             pageable,
             projectId,
-            filters,
+            languageId,
+            keyId,
         )
     }
 }

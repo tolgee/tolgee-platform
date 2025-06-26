@@ -64,6 +64,6 @@ export const usePutTaskTranslation = () =>
 
 export const usePostTranslationSuggestion = () =>
   useApiMutation({
-    url: '/v2/projects/{projectId}/translation-suggestion',
+    url: '/v2/projects/{projectId}/translation-suggestion/language/{languageId}/key/{keyId}',
     method: 'post',
   });

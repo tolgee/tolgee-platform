@@ -74,19 +74,21 @@ export const SuggestionsList = ({
   const { t } = useTranslate();
 
   const query = {
-    filterKeyId: [keyId],
-    filterLanguageId: [languageId],
     sort: ['createdAt,desc'],
   };
+
   const projectId = project.id;
+  const path = {
+    languageId,
+    keyId,
+    projectId,
+  };
 
   const suggestionsLoadable = useApiInfiniteQuery({
-    url: '/v2/projects/{projectId}/translation-suggestion',
+    url: '/v2/projects/{projectId}/translation-suggestion/language/{languageId}/key/{keyId}',
     method: 'get',
     query,
-    path: {
-      projectId,
-    },
+    path,
     options: {
       getNextPageParam: (lastPage) => {
         if (
@@ -94,7 +96,7 @@ export const SuggestionsList = ({
           lastPage.page.number! < lastPage.page.totalPages! - 1
         ) {
           return {
-            path: { projectId },
+            path,
             query: {
               ...query,
               page: lastPage.page!.number! + 1,
@@ -136,7 +138,10 @@ export const SuggestionsList = ({
           sx={{ height: 'unset', padding: 0, background: 'unset' }}
           icon={null}
           name={t('translation_tools_suggestions')}
-          countContent={countContent}
+          countContent={
+            suggestionsLoadable.data?.pages?.[0]?.page?.totalElements ??
+            countContent
+          }
           onToggle={() => {
             setHidden((value) => (value ? undefined : 'true'));
           }}

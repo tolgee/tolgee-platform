@@ -789,7 +789,7 @@ export interface paths {
     /** Transfers project's ownership to organization */
     put: operations["transferProjectToOrganization"];
   };
-  "/v2/projects/{projectId}/translation-suggestion": {
+  "/v2/projects/{projectId}/translation-suggestion/language/{languageId}/key/{keyId}": {
     get: operations["getSuggestions"];
     post: operations["createSuggestion"];
   };
@@ -1942,10 +1942,6 @@ export interface components {
       type: "TRANSLATE" | "REVIEW";
     };
     CreateTranslationSuggestionRequest: {
-      /** Format: int64 */
-      keyId: number;
-      /** Format: int64 */
-      languageId: number;
       translation: string;
     };
     CreateUpdateGlossaryTermResponse: {
@@ -18854,12 +18850,12 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
-        /** Filter by key id */
-        filterKeyId?: number[];
-        /** Filter by language id */
-        filterLanguageId?: number[];
+        /** Filter by suggestion state */
+        filterState?: ("ACTIVE" | "ACCEPTED" | "DECLINED")[];
       };
       path: {
+        languageId: number;
+        keyId: number;
         projectId: number;
       };
     };
@@ -18907,6 +18903,8 @@ export interface operations {
   createSuggestion: {
     parameters: {
       path: {
+        languageId: number;
+        keyId: number;
         projectId: number;
       };
     };

@@ -36,7 +36,7 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
     """,
     nativeQuery = true
   )
-  fun getByKeyId(projectId: Long, keyIds: List<Long>, languageIds: List<Long>): List<TranslationSuggestionView>
+  fun getByKeyId(projectId: Long, languageIds: List<Long>, keyIds: List<Long>): List<TranslationSuggestionView>
 
   @Query(
     """
@@ -44,18 +44,12 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
         left join fetch ts.language
         left join fetch ts.author
       where ts.project.id = :projectId
-        and (
-            :#{#filters.filterKeyId} is null
-            or ts.key.id in :#{#filters.filterKeyId}
-        )
-        and (
-            :#{#filters.filterLanguageId} is null
-            or ts.language.id in :#{#filters.filterLanguageId}
-        )
+        and ts.key.id = :keyId
+        and ts.language.id = :languageId
 
     """
   )
   fun getPaged(
-    pageable: Pageable, projectId: Long, filters: SuggestionFilters,
+    pageable: Pageable, projectId: Long, languageId: Long, keyId: Long
   ): Page<TranslationSuggestion>
 }

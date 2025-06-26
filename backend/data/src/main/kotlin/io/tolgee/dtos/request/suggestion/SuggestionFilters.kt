@@ -1,15 +1,11 @@
 package io.tolgee.dtos.request.suggestion
 
 import io.swagger.v3.oas.annotations.Parameter
+import io.tolgee.model.enums.TranslationSuggestionState
 
 open class SuggestionFilters {
   @field:Parameter(
-    description = """Filter by key id""",
+    description = """Filter by suggestion state""",
   )
-  var filterKeyId: List<Long>? = null
-
-  @field:Parameter(
-    description = """Filter by language id""",
-  )
-  var filterLanguageId: List<Long>? = null
+  var filterState: List<TranslationSuggestionState>? = null
 }
