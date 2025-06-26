@@ -21,6 +21,8 @@ import { BaseAdministrationView } from 'tg.views/administration/components/BaseA
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/billingApiSchema.generated';
+import { PlanSubscriptionCount } from 'tg.ee.module/billing/component/Plan/PlanSubscriptionCount';
+import { PlanListPriceInfo } from 'tg.ee.module/billing/component/Plan/PlanListPriceInfo';
 
 type SelfHostedEePlanModel = components['schemas']['SelfHostedEePlanModel'];
 
@@ -95,24 +97,35 @@ export const AdministrationEePlansView = () => {
                     />
                   )}
                 </Box>
-                <Box>
-                  <Button
-                    size="small"
-                    component={Link}
-                    to={LINKS.ADMINISTRATION_BILLING_EE_PLAN_EDIT.build({
-                      [PARAMS.PLAN_ID]: plan.id,
-                    })}
-                    data-cy="administration-ee-plans-item-edit"
-                  >
-                    {t('administration_ee_plan_edit_button')}
-                  </Button>
-                  <IconButton
-                    size="small"
-                    onClick={() => deletePlan(plan)}
-                    data-cy="administration-ee-plans-item-delete"
-                  >
-                    <X />
-                  </IconButton>
+                <Box display="flex">
+                  <Box display="flex" gap={2} alignItems="center">
+                    <PlanSubscriptionCount count={plan.subscriptionCount} />
+                    <PlanListPriceInfo prices={plan.prices} period="MONTHLY" />
+                    <PlanListPriceInfo
+                      prices={plan.prices}
+                      period="YEARLY"
+                      bold
+                    />
+                  </Box>
+                  <Box>
+                    <Button
+                      size="small"
+                      component={Link}
+                      to={LINKS.ADMINISTRATION_BILLING_EE_PLAN_EDIT.build({
+                        [PARAMS.PLAN_ID]: plan.id,
+                      })}
+                      data-cy="administration-ee-plans-item-edit"
+                    >
+                      {t('administration_ee_plan_edit_button')}
+                    </Button>
+                    <IconButton
+                      size="small"
+                      onClick={() => deletePlan(plan)}
+                      data-cy="administration-ee-plans-item-delete"
+                    >
+                      <X />
+                    </IconButton>
+                  </Box>
                 </Box>
               </Box>
             </ListItem>

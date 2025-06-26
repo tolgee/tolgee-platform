@@ -40,6 +40,8 @@ declare namespace DataCy {
         "administration-cloud-plan-field-type" |
         "administration-cloud-plan-field-type-item" |
         "administration-cloud-plans-item" |
+        "administration-cloud-plans-item-archive" |
+        "administration-cloud-plans-item-archived-badge" |
         "administration-cloud-plans-item-delete" |
         "administration-cloud-plans-item-edit" |
         "administration-cloud-plans-item-public-badge" |
@@ -52,6 +54,7 @@ declare namespace DataCy {
         "administration-ee-license-release-key-button" |
         "administration-ee-plan-cancel-button" |
         "administration-ee-plans-item" |
+        "administration-ee-plans-item-archive" |
         "administration-ee-plans-item-delete" |
         "administration-ee-plans-item-edit" |
         "administration-ee-plans-item-public-badge" |
@@ -65,6 +68,7 @@ declare namespace DataCy {
         "administration-organizations-list-item" |
         "administration-organizations-projects-button" |
         "administration-organizations-settings-button" |
+        "administration-plan-field-archived" |
         "administration-plan-field-feature" |
         "administration-plan-field-name" |
         "administration-plan-field-non-commercial" |
@@ -210,9 +214,6 @@ declare namespace DataCy {
         "cell-key-screenshot-dropzone" |
         "cell-key-screenshot-file-input" |
         "checkbox-group-multiselect" |
-        "color-palette-field" |
-        "color-palette-popover" |
-        "color-preview" |
         "comment" |
         "comment-menu" |
         "comment-menu-delete" |
@@ -261,7 +262,6 @@ declare namespace DataCy {
         "developer-menu-content-delivery" |
         "developer-menu-storage" |
         "developer-menu-webhooks" |
-        "disabled-feature-banner" |
         "dropzone" |
         "dropzone-inner" |
         "edit-pat-dialog-content" |
@@ -413,9 +413,6 @@ declare namespace DataCy {
         "key-plural-checkbox" |
         "key-plural-checkbox-expand" |
         "key-plural-variable-name" |
-        "label-autocomplete-option" |
-        "label-modal" |
-        "label-selector-autocomplete" |
         "language-ai-prompt-dialog-description-input" |
         "language-ai-prompt-dialog-save" |
         "language-delete-button" |
@@ -528,7 +525,6 @@ declare namespace DataCy {
         "organization-switch-item" |
         "organization-switch-new" |
         "organization-switch-search" |
-        "palette-color" |
         "pat-expiry-info" |
         "pat-list-item" |
         "pat-list-item-alert" |
@@ -610,21 +606,12 @@ declare namespace DataCy {
         "project-settings-button" |
         "project-settings-delete-button" |
         "project-settings-description" |
-        "project-settings-label-item" |
-        "project-settings-label-item-description" |
-        "project-settings-label-item-label" |
-        "project-settings-label-item-name" |
-        "project-settings-labels-add-button" |
-        "project-settings-labels-edit-button" |
-        "project-settings-labels-list" |
-        "project-settings-labels-remove-button" |
         "project-settings-languages" |
         "project-settings-languages-add" |
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-name" |
         "project-settings-menu-advanced" |
         "project-settings-menu-general" |
-        "project-settings-menu-labels" |
         "project-settings-name" |
         "project-settings-suggestions-mode-switch" |
         "project-settings-transfer-button" |
@@ -772,10 +759,6 @@ declare namespace DataCy {
         "translation-editor" |
         "translation-field-label" |
         "translation-history-item" |
-        "translation-label" |
-        "translation-label-add" |
-        "translation-label-control" |
-        "translation-label-delete" |
         "translation-panel" |
         "translation-panel-content" |
         "translation-panel-items-count" |
