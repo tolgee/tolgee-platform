@@ -4,10 +4,13 @@ import { useTranslate } from '@tolgee/react';
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationSuggestion } from './TranslationSuggestion';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
+import { useMemo } from 'react';
 
 const OPEN_SUGGESTIONS_KEY = '__tolgee_suggestions_hidden';
+
+const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 220;
 
 type TranslationSuggestionSimpleModel =
   components['schemas']['TranslationSuggestionSimpleModel'];
@@ -17,8 +20,6 @@ type TranslationSuggestionModel =
 
 const StyledContainer = styled('div')`
   display: grid;
-  padding: 6px 8px;
-  gap: 8px;
   border-radius: 8px;
   background: ${({ theme }) => theme.palette.tokens.text._states.hover};
 `;
@@ -26,17 +27,30 @@ const StyledContainer = styled('div')`
 const StyledHeader = styled('div')`
   display: flex;
   justify-content: space-between;
+  padding: 6px 12px;
 `;
 
 const StyledScrollWrapper = styled('div')`
   display: grid;
-  max-height: 400px;
+  max-height: 300px;
   overflow: auto;
+  padding-bottom: 6px;
+  border-radius: 0px 0px 8px 8px;
 `;
 
 const StyledItemsWrapper = styled('div')`
   display: grid;
   gap: 8px;
+`;
+
+const StyledTranslationSuggestion = styled(TranslationSuggestion)`
+  padding-left: 12px;
+  padding-right: 12px;
+  transition: background-color 0.1s ease-in-out;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.palette.divider};
+  }
 `;
 
 type Props = {
@@ -59,17 +73,55 @@ export const SuggestionsList = ({
   const project = useProject();
   const { t } = useTranslate();
 
-  const suggestionsLoadable = useApiQuery({
+  const query = {
+    filterKeyId: [keyId],
+    filterLanguageId: [languageId],
+    sort: ['createdAt,desc'],
+  };
+  const projectId = project.id;
+
+  const suggestionsLoadable = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/translation-suggestion',
     method: 'get',
-    query: {
-      filterKeyId: [keyId],
-      filterLanguageId: [languageId],
-    },
+    query,
     path: {
-      projectId: project.id,
+      projectId,
+    },
+    options: {
+      getNextPageParam: (lastPage) => {
+        if (
+          lastPage.page &&
+          lastPage.page.number! < lastPage.page.totalPages! - 1
+        ) {
+          return {
+            path: { projectId },
+            query: {
+              ...query,
+              page: lastPage.page!.number! + 1,
+            },
+          };
+        } else {
+          return null;
+        }
+      },
     },
   });
+
+  const handleFetchMore = () => {
+    if (suggestionsLoadable.hasNextPage && !suggestionsLoadable.isFetching) {
+      suggestionsLoadable.fetchNextPage();
+    }
+  };
+
+  const suggestionsList = useMemo(() => {
+    const result: TranslationSuggestionModel[] = [];
+    suggestionsLoadable.data?.pages.forEach((page) =>
+      page._embedded?.suggestions?.forEach((suggestion) => {
+        result.push(suggestion);
+      })
+    );
+    return result.length ? result : undefined;
+  }, [suggestionsLoadable.data]);
 
   const [hidden, setHidden] = useLocalStorageState({
     key: OPEN_SUGGESTIONS_KEY,
@@ -93,14 +145,22 @@ export const SuggestionsList = ({
         />
       </StyledHeader>
       {!hidden && (
-        <StyledScrollWrapper>
+        <StyledScrollWrapper
+          onScroll={(event) => {
+            const target = event.target as HTMLDivElement;
+            if (
+              target.scrollHeight - target.clientHeight - target.scrollTop <
+              FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS
+            ) {
+              handleFetchMore();
+            }
+          }}
+        >
           <StyledItemsWrapper>
-            {(
-              suggestionsLoadable.data?._embedded?.suggestions || suggestions
-            ).map((item) => {
+            {(suggestionsList || suggestions).map((item) => {
               const itemWithDate = item as Partial<TranslationSuggestionModel>;
               return (
-                <TranslationSuggestion
+                <StyledTranslationSuggestion
                   key={item.id}
                   suggestion={item}
                   isPlural={isPlural}

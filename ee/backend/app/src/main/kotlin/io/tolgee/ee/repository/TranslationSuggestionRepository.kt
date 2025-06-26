@@ -32,6 +32,7 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
       where ts.key_id in :keyIds
         and ts.project_id = :projectId
         and ts.language_id in :languageIds
+      order by ts.language_id, ts.key_id, ts.created_at DESC
     """,
     nativeQuery = true
   )
@@ -54,7 +55,7 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
 
     """
   )
-  fun getAll(
+  fun getPaged(
     pageable: Pageable, projectId: Long, filters: SuggestionFilters,
   ): Page<TranslationSuggestion>
 }

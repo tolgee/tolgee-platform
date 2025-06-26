@@ -21,7 +21,7 @@ const StyledContent = styled('div')`
 `;
 
 const StyledDate = styled('div')`
-  font-size: 15px;
+  font-size: 12px;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
@@ -32,6 +32,7 @@ type Props = {
   maxLines?: number;
   lastUpdated?: number | string;
   sx?: SxProps;
+  className?: string;
 };
 
 export const TranslationSuggestion = ({
@@ -41,10 +42,11 @@ export const TranslationSuggestion = ({
   maxLines = 3,
   lastUpdated,
   sx,
+  className,
 }: Props) => {
   const formatDate = useTimeDistance();
   return (
-    <StyledContainer {...{ sx }} data-cy="translation-suggestion">
+    <StyledContainer {...{ sx, className }} data-cy="translation-suggestion">
       <AvatarImg owner={{ ...suggestion.author, type: 'USER' }} size={24} />
       <StyledContent>
         <TranslationVisual

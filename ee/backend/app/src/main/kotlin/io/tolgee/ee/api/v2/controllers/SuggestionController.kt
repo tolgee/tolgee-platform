@@ -63,7 +63,7 @@ class SuggestionController(
     filters: SuggestionFilters,
   ): PagedModel<TranslationSuggestionModel> {
     val projectId = projectHolder.project.id
-    val suggestions = translationSuggestionService.getSuggestions(pageable, projectId, filters)
+    val suggestions = translationSuggestionService.getSuggestionsPaged(pageable, projectId, filters)
     return arrayResourcesAssembler.toModel(
       suggestions,
       translationSuggestionModelAssembler

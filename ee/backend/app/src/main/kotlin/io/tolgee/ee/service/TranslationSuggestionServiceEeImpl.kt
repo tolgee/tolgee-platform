@@ -65,10 +65,10 @@ class TranslationSuggestionServiceEeImpl(
         return suggestion
     }
 
-    fun getSuggestions(
+    fun getSuggestionsPaged(
         pageable: Pageable, projectId: Long, filters: SuggestionFilters,
     ): Page<TranslationSuggestion> {
-        return translationSuggestionRepository.getAll(
+        return translationSuggestionRepository.getPaged(
             pageable,
             projectId,
             filters,
