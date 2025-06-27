@@ -1,3 +1,10 @@
+## [3.123.12](https://github.com/tolgee/tolgee-platform/compare/v3.123.11...v3.123.12) (2025-06-27)
+
+
+### Bug Fixes
+
+* ai-playground usability fixes ([#3153](https://github.com/tolgee/tolgee-platform/issues/3153)) ([7a21bf2](https://github.com/tolgee/tolgee-platform/commit/7a21bf2c6f54ef67f0932d8b5c5a7f2a40645f9f))
+
 ## [3.123.11](https://github.com/tolgee/tolgee-platform/compare/v3.123.10...v3.123.11) (2025-06-27)
 
 
