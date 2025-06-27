@@ -10,7 +10,6 @@ import io.tolgee.model.Project
 import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.key.Key
-import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.TranslationSuggestionView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.KeyService
@@ -100,7 +99,9 @@ class TranslationSuggestionServiceEeImpl(
         translationSuggestionRepository.save(suggestion)
         val declined = if (declineOther) {
             translationSuggestionRepository.declineOther(projectId, languageId, keyId, suggestionId)
-        } else emptyList()
+        } else {
+          emptyList()
+        }
         translationService.setTranslationText(
             entityManager.getReference(Key::class.java, keyId),
             entityManager.getReference(Language::class.java, languageId),

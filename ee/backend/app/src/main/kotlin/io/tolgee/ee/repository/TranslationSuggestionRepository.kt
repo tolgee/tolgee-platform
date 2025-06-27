@@ -2,7 +2,6 @@ package io.tolgee.ee.repository
 
 import io.tolgee.dtos.request.suggestion.SuggestionFilters
 import io.tolgee.model.TranslationSuggestion
-import io.tolgee.model.dataImport.issues.ImportFileIssueParam_.value
 import io.tolgee.model.views.TranslationSuggestionView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -10,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
-
 
 @Repository
 interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion, Long> {
