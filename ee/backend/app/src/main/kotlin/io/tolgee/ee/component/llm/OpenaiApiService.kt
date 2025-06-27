@@ -141,7 +141,8 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
       val response_format: RequestResponseFormat? = null,
       val messages: List<RequestMessage>,
       val model: String?,
-      val temperature: Long? = 0,
+      @JsonInclude(JsonInclude.Include.NON_NULL)
+      val temperature: Long? = null,
     )
 
     class RequestMessage(
