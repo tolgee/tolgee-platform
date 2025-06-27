@@ -35,6 +35,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 import org.springframework.web.multipart.support.MissingServletRequestPartException
 import org.springframework.web.servlet.resource.NoResourceFoundException
+import java.io.IOException
 import java.io.Serializable
 import java.util.Arrays
 import java.util.Collections
@@ -252,8 +253,22 @@ class ExceptionHandlers : Logging {
     )
   }
 
+  fun handleBrokenPipe(ex: Throwable): ResponseEntity<ErrorResponseBody> {
+    logger.debug("Client aborted: ${ex.javaClass.simpleName}}: ${ex.message}")
+    return ResponseEntity(HttpStatus.BAD_GATEWAY)
+  }
+
   @ExceptionHandler(Throwable::class)
   fun handleOtherExceptions(ex: Throwable): ResponseEntity<ErrorResponseBody> {
+    if (ex is IOException && ex.message?.contains("Broken pipe") == true) {
+      return handleBrokenPipe(ex)
+    }
+
+    val rootCause = ExceptionUtils.getRootCause(ex)
+    if (rootCause is IOException && rootCause.message?.contains("Broken pipe") == true) {
+      return handleBrokenPipe(ex)
+    }
+
     Sentry.captureException(ex)
     logger.error(ex.stackTraceToString())
     return ResponseEntity(
