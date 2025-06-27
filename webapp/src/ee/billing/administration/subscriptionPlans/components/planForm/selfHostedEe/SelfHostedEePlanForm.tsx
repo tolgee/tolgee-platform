@@ -13,6 +13,8 @@ import { SelfHostedEePlanTypeSelectField } from './fields/SelfHostedEePlanTypeSe
 import { PlanSaveButton } from '../genericFields/PlanSaveButton';
 import { SelfHostedEePlanPricesAndLimits } from './fields/SelfHostedEePlanPricesAndLimits';
 import { PlanArchivedSwitch } from 'tg.ee.module/billing/administration/subscriptionPlans/components/planForm/genericFields/PlanArchivedSwitch';
+import { PlanNewStripeProductSwitch } from 'tg.ee.module/billing/administration/subscriptionPlans/components/planForm/genericFields/PlanNewStripeProductSwitch';
+import { PlanStripeProductNameField } from 'tg.ee.module/billing/administration/subscriptionPlans/components/planForm/genericFields/PlanStripeProductNameField';
 
 type Props = {
   initialData: SelfHostedEePlanFormData;
@@ -54,10 +56,24 @@ export function SelfHostedEePlanForm({
               display: 'grid',
               gap: 2,
               mt: 2,
+              mb: 4,
               gridTemplateColumns: '1fr 1fr',
             }}
           >
             <SelfHostedEePlanTypeSelectField />
+          </Box>
+
+          <PlanNewStripeProductSwitch isUpdate={isUpdate} />
+
+          <Box
+            sx={{
+              display: 'grid',
+              gap: 2,
+              mt: 2,
+              gridTemplateColumns: '1fr 1fr',
+            }}
+          >
+            <PlanStripeProductNameField />
             <PlanStripeProductSelectField />
           </Box>
           <SelfHostedEePlanPricesAndLimits canEditPrices={canEditPrices} />

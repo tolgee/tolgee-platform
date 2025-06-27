@@ -21,6 +21,7 @@ export function getSelfHostedPlanInitialValues(
       isPayAsYouGo: planData.isPayAsYouGo,
       canEditPrices: planData.canEditPrices,
       archived: planData.archivedAt != null,
+      newStripeProduct: planData.stripeProductId === null,
     };
   }
 
@@ -47,5 +48,6 @@ export function getSelfHostedPlanInitialValues(
     isPayAsYouGo: true,
     archived: false,
     canEditPrices: true,
+    newStripeProduct: false,
   };
 }

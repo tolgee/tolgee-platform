@@ -49,6 +49,6 @@ export const getCloudPlanInitialValues = (
     free: false,
     nonCommercial: false,
     archived: false,
-    newStripeProduct: true,
+    newStripeProduct: false,
   } as CloudPlanFormData;
 };
