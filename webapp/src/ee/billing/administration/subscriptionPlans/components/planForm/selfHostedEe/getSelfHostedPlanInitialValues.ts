@@ -16,6 +16,7 @@ export function getSelfHostedPlanInitialValues(
       free: planData.free,
       nonCommercial: planData.nonCommercial,
       isPayAsYouGo: planData.isPayAsYouGo,
+      newStripeProduct: planData.stripeProductId === null,
     };
   }
 
@@ -40,5 +41,6 @@ export function getSelfHostedPlanInitialValues(
     free: false,
     nonCommercial: false,
     isPayAsYouGo: true,
+    newStripeProduct: false,
   };
 }
