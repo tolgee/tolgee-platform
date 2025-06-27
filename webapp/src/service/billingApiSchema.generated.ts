@@ -390,12 +390,14 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
       metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
+      newStripeProduct: boolean;
       nonCommercial: boolean;
       /** Format: date-time */
       notAvailableBefore?: string;
       prices: components["schemas"]["PlanPricesRequest"];
       public: boolean;
       stripeProductId: string;
+      stripeProductName?: string;
       type: "PAY_AS_YOU_GO" | "FIXED";
       /** Format: date-time */
       usableUntil?: string;
@@ -814,7 +816,9 @@ export interface components {
         | "glossary_term_not_found"
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
-        | "llm_content_filter";
+        | "llm_content_filter"
+        | "llm_provider_empty_response"
+        | "stripe_product_creation_failed";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -1209,6 +1213,7 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
       isPayAsYouGo: boolean;
       name: string;
+      newStripeProduct: boolean;
       nonCommercial: boolean;
       /** Format: date-time */
       notAvailableBefore?: string;
@@ -1216,6 +1221,7 @@ export interface components {
       prices: components["schemas"]["PlanPricesRequest"];
       public: boolean;
       stripeProductId?: string;
+      stripeProductName?: string;
       /** Format: date-time */
       usableUntil?: string;
     };
