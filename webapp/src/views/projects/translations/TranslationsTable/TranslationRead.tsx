@@ -106,10 +106,10 @@ export const TranslationRead: React.FC<Props> = ({
           showHighlights={isEditingRow && language.base}
           isPlural={keyData.keyIsPlural}
         />
-        {Boolean(translation?.suggestions?.length) && (
+        {Boolean(translation?.totalSuggestionCount) && (
           <SuggestionsFirst
-            suggestions={translation!.suggestions!}
-            count={translation!.suggestionCount}
+            suggestions={translation!.suggestions ?? []}
+            count={translation!.activeSuggestionCount}
             isPlural={keyData.keyIsPlural}
             locale={language.tag}
           />

@@ -22,7 +22,8 @@ class TranslationViewModelAssembler(
       mtProvider = view.mtProvider,
       commentCount = view.commentCount,
       unresolvedCommentCount = view.unresolvedCommentCount,
-      suggestionCount = view.suggestionCount,
+      activeSuggestionCount = view.activeSuggestionCount,
+      totalSuggestionCount = view.totalSuggestionCount,
       suggestions = view.suggestions?.map { translationSuggestionSimpleModelAssembler.toModel(it) }
     )
   }

@@ -26,7 +26,9 @@ open class TranslationViewModel(
   @Schema(description = "Count of unresolved translation comments")
   val unresolvedCommentCount: Long,
   @Schema(description = "Number of active suggestions")
-  val suggestionCount: Long,
+  val activeSuggestionCount: Long,
+  @Schema(description = "Number of all suggestions")
+  val totalSuggestionCount: Long,
   @get:Schema(description = "First suggestion")
   val suggestions: List<TranslationSuggestionSimpleModel>? = null
 ) : RepresentationModel<TranslationViewModel>() {

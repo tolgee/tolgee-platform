@@ -67,7 +67,8 @@ data class KeyWithTranslationsView(
             mtProvider = data[i + 5] as MtServiceType?,
             commentCount = (data[i + 6] ?: 0L) as Long,
             unresolvedCommentCount = (data[i + 7] ?: 0L) as Long,
-            suggestionCount = (data[i + 8] ?: 0L) as Long,
+            activeSuggestionCount = (data[i + 8] ?: 0L) as Long,
+            totalSuggestionCount = (data[i + 9] ?: 0L) as Long,
           )
       }
 

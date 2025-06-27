@@ -7,6 +7,7 @@ import io.tolgee.ee.repository.TranslationSuggestionRepository
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.TranslationSuggestion
+import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.views.TranslationSuggestionView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.KeyService
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component
 import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import kotlin.jvm.optionals.getOrNull
 
 @Primary
 @Component
@@ -32,7 +34,7 @@ class TranslationSuggestionServiceEeImpl(
         keyIds: List<Long>,
         languageIds: List<Long>
     ): Map<Long, List<TranslationSuggestionView>> {
-        val data = translationSuggestionRepository.getByKeyId(projectId, languageIds, keyIds,)
+        val data = translationSuggestionRepository.getByKeyId(projectId, languageIds, keyIds)
         val result = mutableMapOf<Long, MutableList<TranslationSuggestionView>>()
         data.forEach {
             val keyId = it.keyId
@@ -45,8 +47,8 @@ class TranslationSuggestionServiceEeImpl(
 
     fun createSuggestion(
         projectId: Long,
-        keyId: Long,
         languageId: Long,
+        keyId: Long,
         dto: CreateTranslationSuggestionRequest,
     ): TranslationSuggestion {
         val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
@@ -67,6 +69,27 @@ class TranslationSuggestionServiceEeImpl(
         return suggestion
     }
 
+    fun getSuggestion(projectId: Long, keyId: Long, suggestionId: Long): TranslationSuggestion {
+        val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+        keyService.checkInProject(key, projectId)
+        return translationSuggestionRepository.findById(suggestionId).getOrNull()
+            ?: throw NotFoundException(Message.SUGGESTION_NOT_FOUND)
+    }
+
+    fun declineSuggestion(projectId: Long, keyId: Long, suggestionId: Long): TranslationSuggestion {
+        val suggestion = getSuggestion(projectId, keyId, suggestionId)
+        suggestion.state = TranslationSuggestionState.DECLINED
+        translationSuggestionRepository.save(suggestion)
+        return suggestion
+    }
+
+    fun acceptSuggestion(projectId: Long, keyId: Long, suggestionId: Long): TranslationSuggestion {
+        val suggestion = getSuggestion(projectId, keyId, suggestionId)
+        suggestion.state = TranslationSuggestionState.ACCEPTED
+        translationSuggestionRepository.save(suggestion)
+        return suggestion
+    }
+
     fun getSuggestionsPaged(
         pageable: Pageable, projectId: Long, languageId: Long, keyId: Long, filters: SuggestionFilters,
     ): Page<TranslationSuggestion> {
@@ -75,6 +98,7 @@ class TranslationSuggestionServiceEeImpl(
             projectId,
             languageId,
             keyId,
+            filters
         )
     }
 }

@@ -228,15 +228,16 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
           />
         )}
       </StyledBottom>
-      {Boolean(translation?.suggestionCount) && (
+      {Boolean(translation?.totalSuggestionCount) && (
         <StyledSuggestions>
           <SuggestionsList
             keyId={keyData.keyId}
             languageId={language.id}
-            countContent={translation?.suggestionCount || 0}
-            suggestions={translation?.suggestions || []}
+            countContent={translation!.activeSuggestionCount}
+            suggestions={translation!.suggestions || []}
             isPlural={keyData.keyIsPlural}
             locale={language.tag}
+            languageTag={language.tag}
           />
         </StyledSuggestions>
       )}

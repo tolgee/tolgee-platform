@@ -1,12 +1,16 @@
+import { useMemo } from 'react';
 import { styled } from '@mui/material';
 import { PanelHeader } from '../ToolsPanel/common/PanelHeader';
 import { useTranslate } from '@tolgee/react';
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
-import { components } from 'tg.service/apiSchema.generated';
+import { components, paths } from 'tg.service/apiSchema.generated';
 import { TranslationSuggestion } from './TranslationSuggestion';
-import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
+import {
+  useApiInfiniteQuery,
+  useApiMutation,
+} from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { useMemo } from 'react';
+import { useTranslationsActions } from '../context/TranslationsContext';
 
 const OPEN_SUGGESTIONS_KEY = '__tolgee_suggestions_hidden';
 
@@ -18,10 +22,20 @@ type TranslationSuggestionSimpleModel =
 type TranslationSuggestionModel =
   components['schemas']['TranslationSuggestionModel'];
 
+type SuggestionParams =
+  paths['/v2/projects/{projectId}/language/{languageId}/key/{keyId}/suggestion']['get']['parameters'];
+
 const StyledContainer = styled('div')`
   display: grid;
   border-radius: 8px;
   background: ${({ theme }) => theme.palette.tokens.text._states.hover};
+`;
+
+const StyledMessage = styled('div')`
+  display: grid;
+  text-align: center;
+  padding: 8px 0px;
+  color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
 const StyledHeader = styled('div')`
@@ -58,6 +72,7 @@ type Props = {
   suggestions: TranslationSuggestionSimpleModel[];
   keyId: number;
   languageId: number;
+  languageTag: string;
   isPlural: boolean;
   locale: string;
 };
@@ -67,28 +82,31 @@ export const SuggestionsList = ({
   suggestions,
   keyId,
   languageId,
+  languageTag,
   isPlural,
   locale,
 }: Props) => {
   const project = useProject();
   const { t } = useTranslate();
-
-  const query = {
-    sort: ['createdAt,desc'],
-  };
+  const { updateTranslation } = useTranslationsActions();
 
   const projectId = project.id;
-  const path = {
-    languageId,
-    keyId,
-    projectId,
+  const params: SuggestionParams = {
+    query: {
+      sort: ['createdAt,desc'],
+      filterState: ['ACTIVE'],
+    },
+    path: {
+      languageId,
+      keyId,
+      projectId,
+    },
   };
 
   const suggestionsLoadable = useApiInfiniteQuery({
-    url: '/v2/projects/{projectId}/translation-suggestion/language/{languageId}/key/{keyId}',
+    url: '/v2/projects/{projectId}/language/{languageId}/key/{keyId}/suggestion',
     method: 'get',
-    query,
-    path,
+    ...params,
     options: {
       getNextPageParam: (lastPage) => {
         if (
@@ -96,9 +114,9 @@ export const SuggestionsList = ({
           lastPage.page.number! < lastPage.page.totalPages! - 1
         ) {
           return {
-            path,
+            path: params.path,
             query: {
-              ...query,
+              ...params.query,
               page: lastPage.page!.number! + 1,
             },
           };
@@ -106,8 +124,49 @@ export const SuggestionsList = ({
           return null;
         }
       },
+      onSuccess(suggestions) {
+        updateTranslation({
+          keyId,
+          lang: languageTag,
+          data(translation) {
+            const firstPage = suggestions.pages?.[0];
+            const firstSuggestion = firstPage?._embedded?.suggestions?.[0];
+            return {
+              ...translation,
+              suggestions: firstSuggestion ? [firstSuggestion] : [],
+              suggestionCount: firstPage.page?.totalElements ?? 0,
+            };
+          },
+        });
+      },
     },
   });
+
+  const declineLoadable = useApiMutation({
+    url: '/v2/projects/{projectId}/language/{languageId}/key/{keyId}/suggestion/{suggestionId}/decline',
+    method: 'put',
+    invalidatePrefix:
+      '/v2/projects/{projectId}/language/{languageId}/key/{keyId}/suggestion',
+  });
+
+  const acceptLoadable = useApiMutation({
+    url: '/v2/projects/{projectId}/language/{languageId}/key/{keyId}/suggestion/{suggestionId}/accept',
+    method: 'put',
+    invalidatePrefix:
+      '/v2/projects/{projectId}/language/{languageId}/key/{keyId}/suggestion',
+  });
+
+  function handleDecline(suggestionId: number) {
+    declineLoadable.mutate({
+      path: { projectId, keyId, languageId, suggestionId },
+    });
+  }
+
+  function handleAccept(suggestionId: number) {
+    acceptLoadable.mutate({
+      path: { projectId, keyId, languageId, suggestionId },
+    });
+  }
 
   const handleFetchMore = () => {
     if (suggestionsLoadable.hasNextPage && !suggestionsLoadable.isFetching) {
@@ -122,8 +181,8 @@ export const SuggestionsList = ({
         result.push(suggestion);
       })
     );
-    return result.length ? result : undefined;
-  }, [suggestionsLoadable.data]);
+    return result.length ? result : suggestions;
+  }, [suggestionsLoadable.data, suggestions]);
 
   const [hidden, setHidden] = useLocalStorageState({
     key: OPEN_SUGGESTIONS_KEY,
@@ -162,18 +221,29 @@ export const SuggestionsList = ({
           }}
         >
           <StyledItemsWrapper>
-            {(suggestionsList || suggestions).map((item) => {
-              const itemWithDate = item as Partial<TranslationSuggestionModel>;
-              return (
-                <StyledTranslationSuggestion
-                  key={item.id}
-                  suggestion={item}
-                  isPlural={isPlural}
-                  locale={locale}
-                  lastUpdated={itemWithDate.updatedAt ?? itemWithDate.createdAt}
-                />
-              );
-            })}
+            {suggestionsList?.length ? (
+              suggestionsList.map((item) => {
+                const itemWithDate =
+                  item as Partial<TranslationSuggestionModel>;
+                return (
+                  <StyledTranslationSuggestion
+                    key={item.id}
+                    suggestion={item}
+                    isPlural={isPlural}
+                    locale={locale}
+                    lastUpdated={
+                      itemWithDate.updatedAt ?? itemWithDate.createdAt
+                    }
+                    onAccept={() => handleAccept(item.id)}
+                    onDecline={() => handleDecline(item.id)}
+                  />
+                );
+              })
+            ) : (
+              <StyledMessage>
+                {t('suggestions_list_no_active_suggestions')}
+              </StyledMessage>
+            )}
           </StyledItemsWrapper>
         </StyledScrollWrapper>
       )}

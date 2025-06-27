@@ -42,6 +42,7 @@ const StyledContent = styled('div')`
 const StyledRightPart = styled('div')`
   display: grid;
   grid-template-areas: rightPart;
+  justify-items: end;
 `;
 
 const StyledDate = styled('div')`
@@ -64,6 +65,8 @@ type Props = {
   locale: string;
   maxLines?: number;
   lastUpdated?: number | string;
+  onDecline?: () => void;
+  onAccept?: () => void;
   sx?: SxProps;
   className?: string;
 };
@@ -73,6 +76,8 @@ export const TranslationSuggestion = ({
   isPlural,
   locale,
   maxLines = 3,
+  onAccept,
+  onDecline,
   lastUpdated,
   sx,
   className,
@@ -94,10 +99,19 @@ export const TranslationSuggestion = ({
         <StyledRightPart>
           <StyledDate className="date">{formatDate(lastUpdated)}</StyledDate>
           <StyledActions className="actions">
-            <IconButton size="small" sx={{ margin: '-4px' }} color="success">
+            <IconButton
+              onClick={onAccept}
+              size="small"
+              sx={{ margin: '-4px' }}
+              color="success"
+            >
               <Check width={20} height={20} />
             </IconButton>
-            <IconButton size="small" sx={{ margin: '-4px' }}>
+            <IconButton
+              onClick={onDecline}
+              size="small"
+              sx={{ margin: '-4px' }}
+            >
               <X width={20} height={20} />
             </IconButton>
           </StyledActions>

@@ -137,7 +137,7 @@ export const TranslationRead: React.FC<Props> = ({
         {Boolean(translation?.suggestions?.length) && (
           <SuggestionsFirst
             suggestions={translation!.suggestions!}
-            count={translation!.suggestionCount}
+            count={translation!.activeSuggestionCount}
             isPlural={keyData.keyIsPlural}
             locale={language.tag}
           />

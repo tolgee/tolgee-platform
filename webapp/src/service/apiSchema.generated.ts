@@ -604,6 +604,16 @@ export interface paths {
   "/v2/projects/{projectId}/language-ai-prompt-customizations": {
     get: operations["getLanguagePromptCustomizations"];
   };
+  "/v2/projects/{projectId}/language/{languageId}/key/{keyId}/suggestion": {
+    get: operations["getSuggestions"];
+    post: operations["createSuggestion"];
+  };
+  "/v2/projects/{projectId}/language/{languageId}/key/{keyId}/suggestion/{suggestionId}/accept": {
+    put: operations["acceptSuggestion"];
+  };
+  "/v2/projects/{projectId}/language/{languageId}/key/{keyId}/suggestion/{suggestionId}/decline": {
+    put: operations["declineSuggestion"];
+  };
   "/v2/projects/{projectId}/languages": {
     get: operations["getAll_5"];
     post: operations["createLanguage"];
@@ -788,10 +798,6 @@ export interface paths {
   "/v2/projects/{projectId}/transfer-to-organization/{organizationId}": {
     /** Transfers project's ownership to organization */
     put: operations["transferProjectToOrganization"];
-  };
-  "/v2/projects/{projectId}/translation-suggestion/language/{languageId}/key/{keyId}": {
-    get: operations["getSuggestions"];
-    post: operations["createSuggestion"];
   };
   "/v2/projects/{projectId}/translations": {
     get: operations["getTranslations"];
@@ -2362,7 +2368,8 @@ export interface components {
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
         | "llm_content_filter"
-        | "llm_provider_empty_response";
+        | "llm_provider_empty_response"
+        | "suggestion_not_found";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -5287,7 +5294,8 @@ export interface components {
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
         | "llm_content_filter"
-        | "llm_provider_empty_response";
+        | "llm_provider_empty_response"
+        | "suggestion_not_found";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -5542,6 +5550,11 @@ export interface components {
      *     }
      */
     TranslationViewModel: {
+      /**
+       * Format: int64
+       * @description Number of active suggestions
+       */
+      activeSuggestionCount: number;
       /** @description Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /**
@@ -5562,15 +5575,15 @@ export interface components {
       outdated: boolean;
       /** @description State of translation */
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
-      /**
-       * Format: int64
-       * @description Number of active suggestions
-       */
-      suggestionCount: number;
       /** @description First suggestion */
       suggestions?: components["schemas"]["TranslationSuggestionSimpleModel"][];
       /** @description Translation text */
       text?: string;
+      /**
+       * Format: int64
+       * @description Number of all suggestions
+       */
+      totalSuggestionCount: number;
       /**
        * Format: int64
        * @description Count of unresolved translation comments
@@ -15578,6 +15591,219 @@ export interface operations {
       };
     };
   };
+  getSuggestions: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /** Filter by suggestion state */
+        filterState?: ("ACTIVE" | "ACCEPTED" | "DECLINED")[];
+      };
+      path: {
+        languageId: number;
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelTranslationSuggestionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  createSuggestion: {
+    parameters: {
+      path: {
+        languageId: number;
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateTranslationSuggestionRequest"];
+      };
+    };
+  };
+  acceptSuggestion: {
+    parameters: {
+      path: {
+        languageId: number;
+        keyId: number;
+        suggestionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  declineSuggestion: {
+    parameters: {
+      path: {
+        languageId: number;
+        keyId: number;
+        suggestionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   getAll_5: {
     parameters: {
       path: {
@@ -18838,119 +19064,6 @@ export interface operations {
             | components["schemas"]["ErrorResponseTyped"]
             | components["schemas"]["ErrorResponseBody"];
         };
-      };
-    };
-  };
-  getSuggestions: {
-    parameters: {
-      query: {
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
-        /** Filter by suggestion state */
-        filterState?: ("ACTIVE" | "ACCEPTED" | "DECLINED")[];
-      };
-      path: {
-        languageId: number;
-        keyId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PagedModelTranslationSuggestionModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-  };
-  createSuggestion: {
-    parameters: {
-      path: {
-        languageId: number;
-        keyId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["TranslationSuggestionModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateTranslationSuggestionRequest"];
       };
     };
   };

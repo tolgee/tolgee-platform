@@ -295,9 +295,10 @@ enum class Message {
   GLOSSARY_NON_TRANSLATABLE_TERM_CANNOT_BE_TRANSLATED,
   LLM_CONTENT_FILTER,
   LLM_PROVIDER_EMPTY_RESPONSE,
+  SUGGESTION_NOT_FOUND,
   ;
 
-  val code: String
+    val code: String
     get() = name.lowercase(Locale.getDefault())
 
   @JsonValue

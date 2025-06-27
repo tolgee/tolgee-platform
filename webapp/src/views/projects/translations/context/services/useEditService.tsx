@@ -136,7 +136,7 @@ export const useEditService = ({
             data(value) {
               return {
                 suggestions: [result],
-                suggestionCount: (value.suggestionCount ?? 0) + 1,
+                activeSuggestionCount: (value.activeSuggestionCount ?? 0) + 1,
               } satisfies Partial<TranslationViewModel>;
             },
           });
