@@ -1,3 +1,10 @@
+## [3.123.11](https://github.com/tolgee/tolgee-platform/compare/v3.123.10...v3.123.11) (2025-06-27)
+
+
+### Bug Fixes
+
+* ContentDeliveryConfig: missing migration for structure delimiter ([#3154](https://github.com/tolgee/tolgee-platform/issues/3154)) ([d15e561](https://github.com/tolgee/tolgee-platform/commit/d15e561cae987370df98cc745b162b2c9e9ec2e9))
+
 ## [3.123.10](https://github.com/tolgee/tolgee-platform/compare/v3.123.9...v3.123.10) (2025-06-25)
 
 
