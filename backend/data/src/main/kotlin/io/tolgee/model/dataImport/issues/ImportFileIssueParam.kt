@@ -7,7 +7,6 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import jakarta.validation.constraints.NotBlank
 
 @Entity
 @Table(
@@ -20,6 +19,5 @@ class ImportFileIssueParam(
   val issue: ImportFileIssue,
   @Enumerated
   val type: FileIssueParamType,
-  @field:NotBlank
   val value: String,
 ) : StandardAuditModel()
