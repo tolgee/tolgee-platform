@@ -17,6 +17,7 @@ import { useMissingPlaceholders } from '../cell/useMissingPlaceholders';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
+import { SuggestionsList } from '../Suggestions/SuggestionsList';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -25,7 +26,8 @@ const StyledContainer = styled('div')`
   grid-template-areas:
     'language    controls-t '
     'editor      editor     '
-    'controls-b  controls-b ';
+    'controls-b  controls-b '
+    'suggestions suggestions';
 
   .language {
     align-self: start;
@@ -44,14 +46,21 @@ const StyledContainer = styled('div')`
     padding-right: 10px;
     padding-top: 12px;
   }
+  padding-bottom: 4px;
+  margin-bottom: 8px;
 `;
 
 const StyledBottom = styled(Box)`
   grid-area: controls-b;
-  padding: 0px 12px 4px 16px;
+  padding: 0px 12px 0px 16px;
   display: grid;
   gap: 8px;
-  margin-bottom: 8px;
+`;
+
+const StyledSuggestions = styled(Box)`
+  grid-area: suggestions;
+  padding: 12px 12px 0px 16px;
+  display: grid;
 `;
 
 const StyledControls = styled(Box)`
@@ -219,6 +228,19 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
           />
         )}
       </StyledBottom>
+      {Boolean(translation?.totalSuggestionCount) && (
+        <StyledSuggestions>
+          <SuggestionsList
+            keyId={keyData.keyId}
+            languageId={language.id}
+            countContent={translation!.activeSuggestionCount}
+            suggestions={translation!.suggestions || []}
+            isPlural={keyData.keyIsPlural}
+            locale={language.tag}
+            languageTag={language.tag}
+          />
+        </StyledSuggestions>
+      )}
     </StyledContainer>
   );
 };

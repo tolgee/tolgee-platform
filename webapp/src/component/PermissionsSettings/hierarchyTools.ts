@@ -101,6 +101,7 @@ const SCOPE_TO_LANG_PROPERTY_MAP = {
   'translations.view': 'viewLanguages',
   'translations.edit': 'translateLanguages',
   'translations.state-edit': 'stateChangeLanguages',
+  'translations.suggest': 'suggestLanguages',
 } as const;
 
 type ValueOf<T> = T[keyof T];

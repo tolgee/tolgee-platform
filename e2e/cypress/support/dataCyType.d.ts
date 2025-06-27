@@ -609,6 +609,7 @@ declare namespace DataCy {
         "project-settings-menu-advanced" |
         "project-settings-menu-general" |
         "project-settings-name" |
+        "project-settings-suggestions-mode-select" |
         "project-settings-transfer-button" |
         "project-settings-use-namespaces-checkbox" |
         "project-settings-use-tolgee-placeholders-checkbox" |
@@ -756,6 +757,7 @@ declare namespace DataCy {
         "translation-plural-parameter" |
         "translation-plural-variant" |
         "translation-state-button" |
+        "translation-suggestion" |
         "translation-text" |
         "translation-tools-machine-translation-item" |
         "translation-tools-machine-translation-item-prompt" |

@@ -6,6 +6,7 @@ import io.tolgee.api.ISimpleProject
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
@@ -18,6 +19,8 @@ import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -145,6 +148,11 @@ class Project(
   @ColumnDefault("false")
   @ActivityLoggedProp
   var useNamespaces: Boolean = false
+
+  @ColumnDefault("DISABLED")
+  @ActivityLoggedProp
+  @Enumerated(EnumType.STRING)
+  var suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED
 
   @ColumnDefault("0")
   var lastTaskNumber: Long = 0

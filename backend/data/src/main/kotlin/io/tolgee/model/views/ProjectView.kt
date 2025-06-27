@@ -3,6 +3,7 @@ package io.tolgee.model.views
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.key.Namespace
 
 interface ProjectView {
@@ -17,4 +18,5 @@ interface ProjectView {
   val organizationRole: OrganizationRoleType?
   val directPermission: Permission?
   var icuPlaceholders: Boolean
+  var suggestionsMode: SuggestionsMode
 }
