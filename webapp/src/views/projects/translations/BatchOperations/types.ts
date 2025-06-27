@@ -15,7 +15,9 @@ export type BatchActions =
   | 'change_namespace'
   | 'copy_translations'
   | 'clear_translations'
-  | 'export_translations';
+  | 'export_translations'
+  | 'assign_translation_labels'
+  | 'unassign_translation_labels';
 
 export type BatchJobModel = components['schemas']['BatchJobModel'];
 

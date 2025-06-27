@@ -2,12 +2,16 @@ import { login } from '../../common/apiCalls/common';
 import { labelsTestData } from '../../common/apiCalls/testData/testData';
 import { gcy } from '../../common/shared';
 import { E2ProjectLabelsSection } from '../../compounds/projectSettings/labels/E2ProjectLabelsSection';
+import { isDarkMode } from '../../common/helpers';
+import { E2ActivityChecker } from '../../compounds/E2ActivityChecker';
 
 let projectId = null;
 let secondProjectId = null;
 
 describe('Projects Settings - Labels', () => {
   const projectLabels = new E2ProjectLabelsSection();
+  const activityChecker = new E2ActivityChecker();
+
   beforeEach(() => {
     labelsTestData.clean();
     labelsTestData.generate().then((data) => {
@@ -29,7 +33,7 @@ describe('Projects Settings - Labels', () => {
     labelModal.assertDefaultColorIsFilled();
     labelModal.fillAndSave('test-label', '#FF0055', 'New label description');
 
-    projectLabels.assertLabelsCount(2);
+    projectLabels.assertLabelsCount(6);
     projectLabels.assertLabelExists('test-label', 'New label description');
   });
 
@@ -50,16 +54,20 @@ describe('Projects Settings - Labels', () => {
     projectLabels.visit(projectId);
 
     const labelModal = projectLabels.openEditLabelModal('First label');
-    labelModal.fillAndSave('Edited label', { index: 3, hex: '#1188FF' });
+    labelModal.fillAndSave('Edited label', { index: 3, hex: '#FFBDDC' });
 
-    projectLabels.assertLabelExists('Edited label', null, 'rgb(17, 136, 255)');
+    projectLabels.assertLabelExists(
+      'Edited label',
+      null,
+      isDarkMode ? 'rgba(255, 189, 220, 0.85)' : 'rgb(255, 189, 220)'
+    );
   });
 
   it('should delete a label', () => {
     projectLabels.visit(projectId);
 
     projectLabels.deleteLabel('First label');
-    projectLabels.assertLabelsCount(0);
+    projectLabels.assertLabelsCount(4);
   });
 
   it('shows paginated list of labels', () => {
@@ -70,5 +78,41 @@ describe('Projects Settings - Labels', () => {
       cy.get('button').contains('2').click();
     });
     projectLabels.assertLabelsCount(6);
+  });
+
+  it('creates activity when new label is created', () => {
+    projectLabels.visit(projectId);
+
+    const labelModal = projectLabels.openCreateLabelModal();
+    labelModal.fillAndSave('test-label', '#FF0055', 'New label description');
+
+    activityChecker
+      .checkActivity('Created label')
+      .assertActivityDetails([
+        'Created label',
+        'test-label',
+        'New label description',
+      ]);
+  });
+
+  it('creates activity when label is updated', () => {
+    projectLabels.visit(projectId);
+
+    const labelModal = projectLabels.openEditLabelModal('First label');
+    labelModal.fillAndSave('Edited label', '#00FF00', 'Totally new text');
+
+    activityChecker
+      .checkActivity('Edited label')
+      .assertActivityDetails(['Edited label']);
+  });
+
+  it('creates activity when label is deleted', () => {
+    projectLabels.visit(projectId);
+
+    projectLabels.deleteLabel('First label');
+
+    activityChecker
+      .checkActivity('Deleted label')
+      .assertActivityDetails(['Deleted label', 'This is a description']);
   });
 });

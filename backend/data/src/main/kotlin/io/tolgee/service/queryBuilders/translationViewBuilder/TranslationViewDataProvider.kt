@@ -5,6 +5,7 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.TagService
+import io.tolgee.service.label.LabelService
 import io.tolgee.service.queryBuilders.CursorUtil
 import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component
 class TranslationViewDataProvider(
   private val em: EntityManager,
   private val tagService: TagService,
+  private val labelService: LabelService,
   private val authenticationFacade: AuthenticationFacade,
 ) {
   fun getData(
@@ -46,8 +48,16 @@ class TranslationViewDataProvider(
     deleteFailedKeysInJobTempTable()
 
     val keyIds = views.map { it.keyId }
+    val translationIds = views.flatMap { it.translations.values }.map { it.id }
     tagService.getTagsForKeyIds(keyIds).let { tagMap ->
       views.forEach { it.keyTags = tagMap[it.keyId] ?: listOf() }
+    }
+    labelService.getByTranslationIdsIndexed(translationIds).let { labels ->
+      views.forEach { view ->
+        view.translations.values.forEach { translation ->
+          translation.labels = labels[translation.id] ?: listOf()
+        }
+      }
     }
     return PageImpl(views, pageable, count)
   }

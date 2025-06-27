@@ -90,6 +90,11 @@ export const useTranslationFilters = ({
           filterHasComments: true,
           filterHasUnresolvedComments: undefined,
         });
+      case 'filterLabel':
+        return setFilters({
+          ...filters,
+          filterLabel: add(filters.filterLabel, value),
+        });
     }
   }
 
@@ -140,6 +145,11 @@ export const useTranslationFilters = ({
         return setFilters({
           ...filters,
           filterHasComments: undefined,
+        });
+      case 'filterLabel':
+        return setFilters({
+          ...filters,
+          filterLabel: remove(filters.filterLabel, value),
         });
     }
   }
@@ -199,6 +209,12 @@ export const useTranslationFilters = ({
               `${tag},${state}`
             );
           }
+        });
+        filters.filterLabel?.forEach((id) => {
+          filtersQuery.filterLabel = add(
+            filtersQuery.filterLabel,
+            `${tag},${id.toString()}`
+          );
         });
       });
   }

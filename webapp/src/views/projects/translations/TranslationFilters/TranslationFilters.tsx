@@ -11,6 +11,7 @@ import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { TranslationFiltersPopup } from './TranslationFiltersPopup';
 import { type FilterActions } from './tools';
 import { countFilters, getFilterName } from './summary';
+import { useFilterData } from 'tg.hooks/useFilterData';
 
 const StyledInputButton = styled(IconButton)`
   margin: ${({ theme }) => theme.spacing(-1, -0.5, -1, -0.25)};
@@ -39,6 +40,7 @@ export const TranslationFilters = ({
   const anchorEl = useRef(null);
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
+  const { filterData } = useFilterData(value, projectId);
 
   const numberOfFilters = countFilters(value);
 
@@ -79,7 +81,7 @@ export const TranslationFilters = ({
                 textOverflow="ellipsis"
                 whiteSpace="nowrap"
               >
-                {getFilterName(value)}
+                {getFilterName(value, filterData)}
               </Box>
             ) : numberOfFilters > 0 ? (
               <T

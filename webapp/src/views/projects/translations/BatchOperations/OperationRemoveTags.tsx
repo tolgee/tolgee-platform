@@ -17,7 +17,7 @@ const StyledTags = styled('div')`
   align-items: center;
   overflow: hidden;
   gap: 4px;
-  margin: 6px 6px;
+  padding: 6px;
   position: relative;
   max-width: 450px;
 `;

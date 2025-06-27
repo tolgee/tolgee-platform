@@ -4,17 +4,9 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
-import io.tolgee.batch.request.ClearTranslationsRequest
-import io.tolgee.batch.request.CopyTranslationRequest
-import io.tolgee.batch.request.DeleteKeysRequest
-import io.tolgee.batch.request.MachineTranslationRequest
-import io.tolgee.batch.request.PreTranslationByTmRequest
-import io.tolgee.batch.request.SetKeysNamespaceRequest
-import io.tolgee.batch.request.SetTranslationsStateStateRequest
-import io.tolgee.batch.request.TagKeysRequest
-import io.tolgee.batch.request.UntagKeysRequest
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
+import io.tolgee.batch.request.*
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.batch.BatchJobModel
@@ -252,5 +244,45 @@ class StartBatchJobController(
   private fun List<String>.validate() {
     if (this.any { it.isBlank() }) throw BadRequestException(Message.TAG_IS_BLANK)
     if (this.any { it.length > 100 }) throw BadRequestException(Message.TAG_TOO_LOG)
+  }
+
+  @PostMapping(value = ["/assign-translation-label"])
+  @Operation(
+    summary = "Assign labels to translations",
+  )
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_ASSIGN])
+  @AllowApiAccess
+  fun assignTranslationLabel(
+    @Valid @RequestBody
+    data: LabelTranslationsRequest,
+  ): BatchJobModel {
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkLabelIdsExistAndIsFromProject(data.labelIds, projectHolder.project.id)
+    return batchJobService.startJob(
+      data,
+      projectHolder.projectEntity,
+      authenticationFacade.authenticatedUserEntity,
+      BatchJobType.ASSIGN_TRANSLATION_LABEL,
+    ).model
+  }
+
+  @PostMapping(value = ["/unassign-translation-label"])
+  @Operation(
+    summary = "Unassign labels from translations",
+  )
+  @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_ASSIGN])
+  @AllowApiAccess
+  fun unassignTranslationLabel(
+    @Valid @RequestBody
+    data: LabelTranslationsRequest,
+  ): BatchJobModel {
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    securityService.checkLabelIdsExistAndIsFromProject(data.labelIds, projectHolder.project.id)
+    return batchJobService.startJob(
+      data,
+      projectHolder.projectEntity,
+      authenticationFacade.authenticatedUserEntity,
+      BatchJobType.UNASSIGN_TRANSLATION_LABEL,
+    ).model
   }
 }

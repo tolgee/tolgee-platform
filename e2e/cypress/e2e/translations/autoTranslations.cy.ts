@@ -78,6 +78,7 @@ describe('Translation memory', () => {
       .should('have.length', 2);
     getAutoTranslatedIndicator('Studený přeložený text 1')
       .should('be.visible')
+      .parent()
       .findDcy('translations-auto-translated-clear-button')
       .invoke('show')
       .click();

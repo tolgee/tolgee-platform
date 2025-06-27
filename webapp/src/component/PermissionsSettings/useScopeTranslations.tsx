@@ -43,6 +43,12 @@ export const useScopeTranslations = () => {
     'tasks.edit': t('permissions_item_tasks_edit'),
     'prompts.view': t('permissions_item_prompts_view'),
     'prompts.edit': t('permissions_item_prompts_edit'),
+    'translation-labels.manage': t(
+      'permissions_item_translation_labels_manage'
+    ),
+    'translation-labels.assign': t(
+      'permissions_item_translation_labels_assign'
+    ),
   };
 
   return {

@@ -4,6 +4,7 @@ import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.activity.propChangesProvider.LabelPropChangesProvider
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.BadRequestException
@@ -95,6 +96,7 @@ class Translation(
     joinColumns = [JoinColumn(name = "translation_id")],
     inverseJoinColumns = [JoinColumn(name = "label_id")]
   )
+  @ActivityLoggedProp(LabelPropChangesProvider::class)
   var labels: MutableSet<Label> = mutableSetOf()
 
   val isUntranslated: Boolean
@@ -122,6 +124,11 @@ class Translation(
       !this.outdated &&
       this.mtProvider == null &&
       !this.auto
+  }
+
+  fun addLabel(label: Label) {
+    labels.add(label)
+    label.translations.add(this)
   }
 
   fun removeLabel(label: Label) {
