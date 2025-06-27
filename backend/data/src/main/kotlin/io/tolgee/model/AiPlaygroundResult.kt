@@ -21,6 +21,7 @@ class AiPlaygroundResult(
   var language: Language? = null,
   @ManyToOne
   var user: UserAccount? = null,
+  @Column(columnDefinition = "text")
   var translation: String? = null,
   var contextDescription: String? = null,
 ) : StandardAuditModel()
