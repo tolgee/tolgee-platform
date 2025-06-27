@@ -1,4 +1,4 @@
-package io.tolgee.hateoas.translations
+package io.tolgee.hateoas.translations.suggestions
 
 import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel

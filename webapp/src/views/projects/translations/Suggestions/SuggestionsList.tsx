@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { styled } from '@mui/material';
 import { PanelHeader } from '../ToolsPanel/common/PanelHeader';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 import { components, paths } from 'tg.service/apiSchema.generated';
 import { TranslationSuggestion } from './TranslationSuggestion';
@@ -11,6 +11,7 @@ import {
 } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useTranslationsActions } from '../context/TranslationsContext';
+import { messageService } from 'tg.service/MessageService';
 
 const OPEN_SUGGESTIONS_KEY = '__tolgee_suggestions_hidden';
 
@@ -68,7 +69,7 @@ const StyledTranslationSuggestion = styled(TranslationSuggestion)`
 `;
 
 type Props = {
-  countContent: React.ReactNode;
+  countContent: number;
   suggestions: TranslationSuggestionSimpleModel[];
   keyId: number;
   languageId: number;
@@ -88,13 +89,15 @@ export const SuggestionsList = ({
 }: Props) => {
   const project = useProject();
   const { t } = useTranslate();
-  const { updateTranslation } = useTranslationsActions();
+  const { updateTranslation, setEditForce } = useTranslationsActions();
 
   const projectId = project.id;
   const params: SuggestionParams = {
     query: {
       sort: ['createdAt,desc'],
       filterState: ['ACTIVE'],
+      // @ts-ignore prevent flashing of non-existent options
+      expectedCount: countContent,
     },
     path: {
       languageId,
@@ -162,10 +165,45 @@ export const SuggestionsList = ({
     });
   }
 
+  function acceptSuggestion(suggestionId: number, declineOther: boolean) {
+    acceptLoadable.mutate(
+      {
+        path: { projectId, keyId, languageId, suggestionId },
+        query: { declineOther },
+      },
+      {
+        onSuccess(data) {
+          setEditForce(undefined);
+          updateTranslation({
+            keyId,
+            lang: languageTag,
+            data(translation) {
+              return {
+                ...translation,
+                text: data.accepted.translation,
+                suggestions: [],
+                activeSuggestionCount: 0,
+              };
+            },
+          });
+          if (data.declined.length) {
+            messageService.success(
+              <T
+                keyName="suggestion_accepted_other_declined"
+                params={{ declinedCount: data.declined.length }}
+              />
+            );
+          } else {
+            messageService.success(<T keyName="suggestion_accepted" />);
+          }
+        },
+      }
+    );
+  }
+
   function handleAccept(suggestionId: number) {
-    acceptLoadable.mutate({
-      path: { projectId, keyId, languageId, suggestionId },
-    });
+    const firstPage = suggestionsLoadable.data?.pages?.[0];
+    acceptSuggestion(suggestionId, (firstPage?.page?.totalElements ?? 0) > 1);
   }
 
   const handleFetchMore = () => {

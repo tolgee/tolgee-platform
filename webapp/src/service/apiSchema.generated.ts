@@ -5514,6 +5514,10 @@ export interface components {
       /** @description Translation text */
       text?: string;
     };
+    TranslationSuggestionAcceptResponse: {
+      accepted: components["schemas"]["TranslationSuggestionModel"];
+      declined: number[];
+    };
     TranslationSuggestionModel: {
       author: components["schemas"]["SimpleUserAccountModel"];
       /** Format: date-time */
@@ -15712,12 +15716,15 @@ export interface operations {
         suggestionId: number;
         projectId: number;
       };
+      query: {
+        declineOther?: boolean;
+      };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["TranslationSuggestionModel"];
+          "application/json": components["schemas"]["TranslationSuggestionAcceptResponse"];
         };
       };
       /** Bad Request */

@@ -2,12 +2,15 @@ package io.tolgee.ee.repository
 
 import io.tolgee.dtos.request.suggestion.SuggestionFilters
 import io.tolgee.model.TranslationSuggestion
+import io.tolgee.model.dataImport.issues.ImportFileIssueParam_.value
 import io.tolgee.model.views.TranslationSuggestionView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+
 
 @Repository
 interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion, Long> {
@@ -60,4 +63,21 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
     keyId: Long,
     filters: SuggestionFilters
   ): Page<TranslationSuggestion>
+
+  @Modifying
+  @Query(
+    """
+        UPDATE translation_suggestion ts
+        SET state = 'DECLINED'
+        WHERE ts.project_id = :projectId
+        AND ts.language_id = :languageId
+        AND ts.key_id = :keyId
+        AND ts.state = 'ACTIVE'
+        AND ts.id != :suggestionId
+        RETURNING ts.id
+    
+    """,
+    nativeQuery = true
+  )
+  fun declineOther(projectId: Long, languageId: Long, keyId: Long, suggestionId: Long): List<Long>
 }

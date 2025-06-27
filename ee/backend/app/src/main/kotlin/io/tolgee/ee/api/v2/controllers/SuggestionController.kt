@@ -5,8 +5,9 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.suggestion.SuggestionFilters
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
 import io.tolgee.ee.service.TranslationSuggestionServiceEeImpl
-import io.tolgee.hateoas.translations.TranslationSuggestionModel
-import io.tolgee.hateoas.translations.TranslationSuggestionModelAssembler
+import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionAcceptResponse
+import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionModel
+import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionModelAssembler
 import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
@@ -14,7 +15,6 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.project.ProjectService
 import jakarta.validation.Valid
-import jakarta.websocket.server.PathParam
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -42,7 +43,6 @@ class SuggestionController(
   private val projectHolder: ProjectHolder,
   private val translationSuggestionModelAssembler: TranslationSuggestionModelAssembler,
   private val arrayResourcesAssembler: PagedResourcesAssembler<TranslationSuggestion>,
-  private val projectService: ProjectService,
 ) {
   @PostMapping("")
   @Operation(summary = "Create translation suggestion")
@@ -56,7 +56,11 @@ class SuggestionController(
   ): TranslationSuggestionModel {
     val projectId = projectHolder.project.id
     val suggestion = translationSuggestionService.createSuggestion(
-      projectId, languageId, keyId, dto)
+      projectId,
+      languageId,
+      keyId,
+      dto
+    )
     return translationSuggestionModelAssembler.toModel(suggestion)
   }
 
@@ -74,7 +78,11 @@ class SuggestionController(
   ): PagedModel<TranslationSuggestionModel> {
     val projectId = projectHolder.project.id
     val suggestions = translationSuggestionService.getSuggestionsPaged(
-      pageable, projectId, languageId, keyId, filters
+      pageable,
+      projectId,
+      languageId,
+      keyId,
+      filters
     )
     return arrayResourcesAssembler.toModel(
       suggestions,
@@ -83,7 +91,7 @@ class SuggestionController(
   }
 
   @PutMapping("/{suggestionId:[0-9]+}/decline")
-  @Operation(summary = "Discard suggestion")
+  @Operation(summary = "Decline suggestion")
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   fun declineSuggestion(
@@ -97,16 +105,24 @@ class SuggestionController(
   }
 
   @PutMapping("/{suggestionId:[0-9]+}/accept")
-  @Operation(summary = "Discard suggestion")
+  @Operation(summary = "Accept suggestion")
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   fun acceptSuggestion(
     @PathVariable languageId: Long,
     @PathVariable keyId: Long,
     @PathVariable suggestionId: Long,
-  ): TranslationSuggestionModel {
+    @RequestParam declineOther: Boolean = false
+  ): TranslationSuggestionAcceptResponse {
     val projectId = projectHolder.project.id
-    val suggestion = translationSuggestionService.acceptSuggestion(projectId, keyId, suggestionId)
-    return translationSuggestionModelAssembler.toModel(suggestion)
+    val (suggestion, declined) = translationSuggestionService.acceptSuggestion(
+      projectId,
+      languageId,
+      keyId,
+      suggestionId,
+      declineOther
+    )
+    val accepted = translationSuggestionModelAssembler.toModel(suggestion)
+    return TranslationSuggestionAcceptResponse(accepted, declined)
   }
 }

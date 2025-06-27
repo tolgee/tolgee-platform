@@ -1,4 +1,4 @@
-package io.tolgee.hateoas.translations
+package io.tolgee.hateoas.translations.suggestions
 
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.model.enums.TranslationSuggestionState

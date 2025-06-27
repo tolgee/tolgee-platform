@@ -3,6 +3,7 @@ package io.tolgee.hateoas.translations
 import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.api.v2.hateoas.invitation.TagModelAssembler
 import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
+import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionModelAssembler
 import io.tolgee.model.views.KeyWithTranslationsView
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component

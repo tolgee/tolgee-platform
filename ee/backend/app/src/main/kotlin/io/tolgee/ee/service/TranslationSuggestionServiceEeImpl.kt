@@ -5,13 +5,17 @@ import io.tolgee.dtos.request.suggestion.SuggestionFilters
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
 import io.tolgee.ee.repository.TranslationSuggestionRepository
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.enums.TranslationSuggestionState
+import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.TranslationSuggestionView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.translation.TranslationService
 import io.tolgee.service.translation.TranslationSuggestionService
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
@@ -28,6 +32,7 @@ class TranslationSuggestionServiceEeImpl(
     private val languageService: LanguageService,
     private val entityManager: EntityManager,
     private val authenticationFacade: AuthenticationFacade,
+    private val translationService: TranslationService,
 ) : TranslationSuggestionService {
     override fun getKeysWithSuggestions(
         projectId: Long,
@@ -83,11 +88,25 @@ class TranslationSuggestionServiceEeImpl(
         return suggestion
     }
 
-    fun acceptSuggestion(projectId: Long, keyId: Long, suggestionId: Long): TranslationSuggestion {
+    fun acceptSuggestion(
+        projectId: Long,
+        languageId: Long,
+        keyId: Long,
+        suggestionId: Long,
+        declineOther: Boolean
+    ): Pair<TranslationSuggestion, List<Long>> {
         val suggestion = getSuggestion(projectId, keyId, suggestionId)
         suggestion.state = TranslationSuggestionState.ACCEPTED
         translationSuggestionRepository.save(suggestion)
-        return suggestion
+        val declined = if (declineOther) {
+            translationSuggestionRepository.declineOther(projectId, languageId, keyId, suggestionId)
+        } else emptyList()
+        translationService.setTranslationText(
+            entityManager.getReference(Key::class.java, keyId),
+            entityManager.getReference(Language::class.java, languageId),
+            suggestion.translation
+        )
+        return Pair(suggestion, declined)
     }
 
     fun getSuggestionsPaged(
