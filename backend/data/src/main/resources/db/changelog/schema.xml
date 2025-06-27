@@ -4482,4 +4482,7 @@
             <column name="organization_id"/>
         </createIndex>
     </changeSet>
+    <changeSet author="anty (generated)" id="1751022945678-1">
+        <modifyDataType columnName="structure_delimiter" newDataType="char(1)" tableName="content_delivery_config"/>
+    </changeSet>
 </databaseChangeLog>
