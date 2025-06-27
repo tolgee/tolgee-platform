@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React from 'react';
 import { FormControlLabel, Switch } from '@mui/material';
 import { useFormikContext } from 'formik';
 import { usePlanFormValues } from '../cloud/usePlanFormValues';
