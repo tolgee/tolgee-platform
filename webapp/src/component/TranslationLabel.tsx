@@ -22,8 +22,21 @@ export const StyledTranslationLabel = styled('div')<{ color?: string }>`
   height: 24px;
 `;
 
+const StyledTranslationLabelContent = styled('div')`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+`;
+
 const ToolTipWrapper = styled('div')`
   display: flex;
+  min-width: 0;
+`;
+
+const TooltipContent = styled('div')`
+  display: flex;
+  min-width: 0;
 `;
 
 export const TranslationLabel: React.FC<{
@@ -42,7 +55,9 @@ export const TranslationLabel: React.FC<{
       onClick={onClick}
       {...rest}
     >
-      {children || label.name}
+      <StyledTranslationLabelContent>
+        {children || label.name}
+      </StyledTranslationLabelContent>
     </StyledTranslationLabel>
   );
 
@@ -64,7 +79,7 @@ export const TranslationLabel: React.FC<{
   return tooltip ? (
     <ToolTipWrapper>
       <Tooltip title={tooltip}>
-        <div>{content}</div>
+        <TooltipContent>{content}</TooltipContent>
       </Tooltip>
     </ToolTipWrapper>
   ) : (

@@ -14,7 +14,7 @@ const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 220;
 function PopperComponent(props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { disablePortal, anchorEl, open, ...other } = props;
-  return <Box {...other} style={{ width: '100%' }} />;
+  return <Box {...other} style={{ minWidth: 0, width: '100%' }} />;
 }
 
 function PaperComponent(props) {

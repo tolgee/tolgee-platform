@@ -36,10 +36,6 @@ const StyledList = styled('div')`
     margin-right: 6px;
   }
 
-  & > div {
-    flex-shrink: 0;
-  }
-
   .translation-label {
     cursor: default;
   }

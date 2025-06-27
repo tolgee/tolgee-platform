@@ -7,6 +7,7 @@ const CloseButtonWrapperContainer = styled('div')<{ xs?: boolean }>(
   ({ theme, xs }) => ({
     position: 'relative',
     width: 'min-content',
+    minWidth: 0,
 
     '& .closeButton': {
       position: 'absolute',
@@ -15,8 +16,8 @@ const CloseButtonWrapperContainer = styled('div')<{ xs?: boolean }>(
       right: -8,
       width: xs ? 20 : 24,
       height: xs ? 20 : 24,
-      backgroundColor: theme.palette.tokens._components.chip.defaultCloseFill,
-      color: theme.palette.tokens.primary.contrast,
+      backgroundColor: theme.palette.tokens.icon.backgroundDark,
+      color: theme.palette.tokens.icon.onDark,
       transition: 'visibility 0.1s linear, opacity 0.1s linear',
       display: 'grid',
       alignContent: 'center',
