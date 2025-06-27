@@ -17,6 +17,7 @@ export interface GenericPlanFormData {
   forOrganizationIds: number[];
   public: boolean;
   free: boolean;
+  newStripeProduct: boolean;
   nonCommercial: boolean;
   archived?: boolean;
 }

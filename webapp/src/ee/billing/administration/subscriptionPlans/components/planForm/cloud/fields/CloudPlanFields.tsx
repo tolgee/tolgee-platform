@@ -8,6 +8,8 @@ import { CloudPlanMetricTypeSelectField } from './CloudPlanMetricTypeSelectField
 import { PlanEnabledFeaturesField } from '../../genericFields/PlanEnabledFeaturesField';
 import { PlanFreePlanSwitch } from '../../genericFields/PlanFreePlanSwitch';
 import { PlanNameField } from '../../genericFields/PlanNameField';
+import { PlanNewStripeProductSwitch } from 'tg.ee.module/billing/administration/subscriptionPlans/components/planForm/genericFields/PlanNewStripeProductSwitch';
+import { PlanStripeProductNameField } from 'tg.ee.module/billing/administration/subscriptionPlans/components/planForm/genericFields/PlanStripeProductNameField';
 
 export const CloudPlanFields: FC<{
   parentName?: string;
@@ -27,11 +29,25 @@ export const CloudPlanFields: FC<{
           display: 'grid',
           gap: 2,
           mt: 2,
-          gridTemplateColumns: '1fr 1fr 1fr',
+          mb: 4,
+          gridTemplateColumns: '1fr 1fr',
         }}
       >
         <CloudPlanTypeSelectField parentName={parentName} />
         <CloudPlanMetricTypeSelectField parentName={parentName} />
+      </Box>
+
+      <PlanNewStripeProductSwitch isUpdate={isUpdate} />
+
+      <Box
+        sx={{
+          display: 'grid',
+          gap: 2,
+          mt: 2,
+          gridTemplateColumns: '1fr 1fr',
+        }}
+      >
+        <PlanStripeProductNameField />
         <PlanStripeProductSelectField parentName={parentName} />
       </Box>
 

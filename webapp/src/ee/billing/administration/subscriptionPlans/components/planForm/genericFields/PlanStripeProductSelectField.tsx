@@ -3,6 +3,11 @@ import { Field, FieldProps } from 'formik';
 import { SearchSelect } from 'tg.component/searchSelect/SearchSelect';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { useTranslate } from '@tolgee/react';
+import { usePlanFormValues } from 'tg.ee.module/billing/administration/subscriptionPlans/components/planForm/cloud/usePlanFormValues';
+import {
+  CloudPlanFormData,
+  SelfHostedEePlanFormData,
+} from 'tg.ee.module/billing/administration/subscriptionPlans/components/planForm/cloud/types';
 
 type StripeProductSelectFieldProps = {
   parentName?: string;
@@ -11,6 +16,13 @@ type StripeProductSelectFieldProps = {
 export const PlanStripeProductSelectField: FC<
   StripeProductSelectFieldProps
 > = ({ parentName = '' }) => {
+  const { values } = usePlanFormValues<
+    CloudPlanFormData | SelfHostedEePlanFormData
+  >(parentName);
+
+  if (values.newStripeProduct) {
+    return null;
+  }
   const productsLoadable = useBillingApiQuery({
     url: '/v2/administration/billing/stripe-products',
     method: 'get',
@@ -28,6 +40,7 @@ export const PlanStripeProductSelectField: FC<
             compareFunction={(prompt, label) =>
               label.toLowerCase().includes(prompt.toLowerCase())
             }
+            minHeight={true}
             SelectProps={{
               // @ts-ignore
               'data-cy': 'administration-plan-field-stripe-product',
@@ -52,7 +65,7 @@ export const PlanStripeProductSelectField: FC<
                 : []),
               ...(products?.map(({ id, name }) => ({
                 value: id,
-                name: `${id} ${name}`,
+                name: `${name} (${id})`,
               })) || []),
             ]}
           />
