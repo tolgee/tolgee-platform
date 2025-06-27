@@ -19,6 +19,7 @@ export const getCloudPlanInitialValues = (
         ...planData.includedUsage,
         translations: planData.includedUsage.translations,
       },
+      newStripeProduct: planData.stripeProductId === null,
     } as CloudPlanFormData;
   }
 
@@ -46,5 +47,6 @@ export const getCloudPlanInitialValues = (
     forOrganizationIds: [],
     free: false,
     nonCommercial: false,
+    newStripeProduct: true,
   } as CloudPlanFormData;
 };
