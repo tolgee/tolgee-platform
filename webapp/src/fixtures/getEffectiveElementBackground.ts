@@ -19,13 +19,22 @@ export function getEffectiveBackgroundColor(element: HTMLElement): string {
         rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1, // a (default to 1 if not specified)
       ];
     }
-    // Handle hex or named colors by creating a temporary element
-    const div = document.createElement('div');
-    div.style.backgroundColor = color;
-    document.body.appendChild(div);
-    const computed = getComputedStyle(div).backgroundColor;
-    document.body.removeChild(div);
-    return parseColor(computed); // Recurse to parse computed rgba
+    // Handle hex or named colors using canvas for better performance
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = color;
+      const computedColor = ctx.fillStyle;
+      // Parse hex format
+      if (computedColor.startsWith('#')) {
+        const hex = computedColor.slice(1);
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 2), 16);
+        const b = parseInt(hex.substring(4, 2), 16);
+        return [r, g, b, 1];
+      }
+    }
+    return [0, 0, 0, 0]; // Fallback for unrecognized colors
   }
 
   // Blend two colors (top over bottom) using alpha compositing
@@ -43,8 +52,7 @@ export function getEffectiveBackgroundColor(element: HTMLElement): string {
   // Collect all parents up to document.body
   const elements: HTMLElement[] = [];
   let current: HTMLElement | null = element;
-  // @ts-ignore
-  while (current && current !== document) {
+  while (current && current !== document.documentElement) {
     elements.push(current);
     current = current.parentElement;
   }
