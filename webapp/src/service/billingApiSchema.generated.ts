@@ -251,6 +251,8 @@ export interface components {
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
       stripeProductId: string;
+      /** Format: int64 */
+      subscriptionCount: number;
       type: "PAY_AS_YOU_GO" | "FIXED";
     };
     AdministrationCloudSubscriptionModel: {
@@ -814,7 +816,10 @@ export interface components {
         | "glossary_term_not_found"
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
-        | "llm_content_filter";
+        | "llm_content_filter"
+        | "llm_provider_empty_response"
+        | "label_not_found"
+        | "label_not_from_project";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -1001,6 +1006,8 @@ export interface components {
         | "tasks.edit"
         | "prompts.view"
         | "prompts.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1146,6 +1153,8 @@ export interface components {
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
       stripeProductId: string;
+      /** Format: int64 */
+      subscriptionCount: number;
     };
     SelfHostedEePlanModel: {
       enabledFeatures: (

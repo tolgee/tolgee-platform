@@ -21,6 +21,8 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { PlanPublicChip } from '../../../component/Plan/PlanPublicChip';
+import { PlanSubscriptionCount } from 'tg.ee.module/billing/component/Plan/PlanSubscriptionCount';
+import { PlanListPriceInfo } from 'tg.ee.module/billing/component/Plan/PlanListPriceInfo';
 
 type CloudPlanModel = components['schemas']['CloudPlanModel'];
 
@@ -89,24 +91,37 @@ export const AdministrationCloudPlansView = () => {
                   <ListItemText>{plan.name}</ListItemText>
                   <PlanPublicChip isPublic={plan.public} />
                 </Box>
-                <Box>
-                  <Button
-                    size="small"
-                    component={Link}
-                    to={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.build({
-                      [PARAMS.PLAN_ID]: plan.id,
-                    })}
-                    data-cy="administration-cloud-plans-item-edit"
-                  >
-                    {t('administration_cloud_plan_edit_button')}
-                  </Button>
-                  <IconButton
-                    size="small"
-                    onClick={() => deletePlan(plan)}
-                    data-cy="administration-cloud-plans-item-delete"
-                  >
-                    <X />
-                  </IconButton>
+                <Box display="flex">
+                  <Box display="flex" gap={2} alignItems="center">
+                    <ListItemText>
+                      <PlanSubscriptionCount count={plan.subscriptionCount} />
+                    </ListItemText>
+                    <PlanListPriceInfo prices={plan.prices} period="MONTHLY" />
+                    <PlanListPriceInfo
+                      prices={plan.prices}
+                      period="YEARLY"
+                      bold
+                    />
+                  </Box>
+                  <Box>
+                    <Button
+                      size="small"
+                      component={Link}
+                      to={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_EDIT.build({
+                        [PARAMS.PLAN_ID]: plan.id,
+                      })}
+                      data-cy="administration-cloud-plans-item-edit"
+                    >
+                      {t('administration_cloud_plan_edit_button')}
+                    </Button>
+                    <IconButton
+                      size="small"
+                      onClick={() => deletePlan(plan)}
+                      data-cy="administration-cloud-plans-item-delete"
+                    >
+                      <X />
+                    </IconButton>
+                  </Box>
                 </Box>
               </Box>
             </ListItem>
