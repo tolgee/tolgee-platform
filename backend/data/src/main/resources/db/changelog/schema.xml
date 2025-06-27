@@ -4485,4 +4485,7 @@
     <changeSet author="anty (generated)" id="1751022945678-1">
         <modifyDataType columnName="structure_delimiter" newDataType="char(1)" tableName="content_delivery_config"/>
     </changeSet>
+    <changeSet author="anty (generated)" id="1751022230679-1">
+        <modifyDataType tableName="ai_playground_result" columnName="translation" newDataType="text" />
+    </changeSet>
 </databaseChangeLog>
