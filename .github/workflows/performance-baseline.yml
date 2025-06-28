@@ -1,0 +1,397 @@
+name: Performance Baseline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [heidi/performance-baseline]
+
+jobs:
+  performance-baseline:
+    name: Performance Baseline 📊
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Create performance results directory
+        run: mkdir -p performance-results
+
+      # System Performance Metrics (run first to get baseline)
+      - name: Measure system performance
+        id: system-metrics
+        run: |
+          echo "Collecting system performance metrics..."
+          
+          # CPU info
+          cpu_cores=$(nproc)
+          cpu_model=$(grep "model name" /proc/cpuinfo | head -1 | cut -d: -f2 | xargs)
+          
+          # Memory info
+          total_memory=$(free -m | awk 'NR==2{print $2}')
+          available_memory=$(free -m | awk 'NR==2{print $7}')
+          
+          # Disk info
+          disk_usage=$(df -h / | awk 'NR==2{print $5}' | sed 's/%//')
+          
+          # Network info
+          network_speed=$(cat /sys/class/net/eth0/speed 2>/dev/null || echo "unknown")
+          
+          echo "system_cpu_cores=$cpu_cores" >> $GITHUB_OUTPUT
+          echo "system_total_memory_mb=$total_memory" >> $GITHUB_OUTPUT
+          echo "system_available_memory_mb=$available_memory" >> $GITHUB_OUTPUT
+          echo "system_disk_usage_percent=$disk_usage" >> $GITHUB_OUTPUT
+          echo "system_network_speed_mbps=$network_speed" >> $GITHUB_OUTPUT
+          
+          # Save detailed metrics
+          cat > performance-results/system-metrics.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "runner": {
+              "cpu_cores": $cpu_cores,
+              "cpu_model": "$cpu_model",
+              "total_memory_mb": $total_memory,
+              "available_memory_mb": $available_memory,
+              "disk_usage_percent": $disk_usage,
+              "network_speed_mbps": "$network_speed"
+            }
+          }
+          EOF
+
+      # Backend Performance Metrics
+      - name: Measure backend build performance
+        id: backend-build
+        run: |
+          echo "Starting backend build performance measurement..."
+          
+          # Measure Gradle build time
+          start_time=$(date +%s.%N)
+          ./gradlew clean classes jar bootJar --no-daemon --parallel
+          end_time=$(date +%s.%N)
+          build_time=$(echo "$end_time - $start_time" | bc -l)
+          
+          # Measure build size
+          jar_size=$(stat -c%s "backend/app/build/libs/tolgee.jar" 2>/dev/null || echo "0")
+          
+          # Measure memory usage during build
+          memory_usage=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2}')
+          
+          echo "backend_build_time=$build_time" >> $GITHUB_OUTPUT
+          echo "backend_jar_size=$jar_size" >> $GITHUB_OUTPUT
+          echo "backend_memory_usage=$memory_usage" >> $GITHUB_OUTPUT
+          
+          # Save detailed metrics
+          cat > performance-results/backend-build.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "metrics": {
+              "build_time_seconds": $build_time,
+              "jar_size_bytes": $jar_size,
+              "memory_usage_percent": $memory_usage
+            }
+          }
+          EOF
+
+      - name: Measure backend test performance
+        id: backend-tests
+        run: |
+          echo "Starting backend test performance measurement..."
+          
+          # Measure test execution time for each test suite
+          test_suites=(
+            "server-app:runContextRecreatingTests"
+            "server-app:runStandardTests"
+            "server-app:runWebsocketTests"
+            "data:test"
+            "security:test"
+          )
+          
+          test_results="{}"
+          total_test_time=0
+          
+          for test_suite in "${test_suites[@]}"; do
+            echo "Running $test_suite..."
+            start_time=$(date +%s.%N)
+            ./gradlew $test_suite --no-daemon --parallel
+            end_time=$(date +%s.%N)
+            test_time=$(echo "$end_time - $start_time" | bc -l)
+            total_test_time=$(echo "$total_test_time + $test_time" | bc -l)
+            
+            # Extract test count and results
+            test_output=$(./gradlew $test_suite --no-daemon --parallel 2>&1 | grep -E "(tests|passed|failed|skipped)" | tail -1 || echo "No test output found")
+            
+            test_results=$(echo $test_results | jq --arg suite "$test_suite" --arg time "$test_time" --arg output "$test_output" '. + {($suite): {"time": $time, "output": $output}}')
+          done
+          
+          echo "backend_test_results='$test_results'" >> $GITHUB_OUTPUT
+          echo "backend_total_test_time=$total_test_time" >> $GITHUB_OUTPUT
+          
+          # Save detailed test metrics
+          cat > performance-results/backend-tests.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "total_test_time_seconds": $total_test_time,
+            "test_suites": $test_results
+          }
+          EOF
+
+      # Frontend Performance Metrics
+      - name: Measure frontend build performance
+        id: frontend-build
+        run: |
+          echo "Starting frontend build performance measurement..."
+          
+          # Measure npm install time
+          start_time=$(date +%s.%N)
+          npm ci
+          end_time=$(date +%s.%N)
+          install_time=$(echo "$end_time - $start_time" | bc -l)
+          
+          # Measure build time
+          start_time=$(date +%s.%N)
+          npm run build
+          end_time=$(date +%s.%N)
+          build_time=$(echo "$end_time - $start_time" | bc -l)
+          
+          # Measure bundle sizes
+          total_size=$(du -sb dist | cut -f1)
+          js_size=$(find dist -name "*.js" -exec du -sb {} + | awk '{sum += $1} END {print sum+0}')
+          css_size=$(find dist -name "*.css" -exec du -sb {} + | awk '{sum += $1} END {print sum+0}')
+          
+          # Count files
+          file_count=$(find dist -type f | wc -l)
+          
+          echo "frontend_install_time=$install_time" >> $GITHUB_OUTPUT
+          echo "frontend_build_time=$build_time" >> $GITHUB_OUTPUT
+          echo "frontend_total_size=$total_size" >> $GITHUB_OUTPUT
+          echo "frontend_js_size=$js_size" >> $GITHUB_OUTPUT
+          echo "frontend_css_size=$css_size" >> $GITHUB_OUTPUT
+          echo "frontend_file_count=$file_count" >> $GITHUB_OUTPUT
+          
+          # Save detailed metrics
+          cat > performance-results/frontend-build.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "metrics": {
+              "install_time_seconds": $install_time,
+              "build_time_seconds": $build_time,
+              "total_size_bytes": $total_size,
+              "js_size_bytes": $js_size,
+              "css_size_bytes": $css_size,
+              "file_count": $file_count
+            }
+          }
+          EOF
+        working-directory: ./webapp
+
+      - name: Measure frontend static analysis performance
+        id: frontend-analysis
+        run: |
+          echo "Starting frontend static analysis performance measurement..."
+          
+          # Measure TypeScript compilation time
+          start_time=$(date +%s.%N)
+          npm run tsc
+          end_time=$(date +%s.%N)
+          tsc_time=$(echo "$end_time - $start_time" | bc -l)
+          
+          # Measure ESLint time
+          start_time=$(date +%s.%N)
+          npm run eslint
+          end_time=$(date +%s.%N)
+          eslint_time=$(echo "$end_time - $start_time" | bc -l)
+          
+          echo "frontend_tsc_time=$tsc_time" >> $GITHUB_OUTPUT
+          echo "frontend_eslint_time=$eslint_time" >> $GITHUB_OUTPUT
+          
+          # Save detailed metrics
+          cat > performance-results/frontend-analysis.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "metrics": {
+              "typescript_compilation_time_seconds": $tsc_time,
+              "eslint_time_seconds": $eslint_time
+            }
+          }
+          EOF
+        working-directory: ./webapp
+
+      # E2E Performance Metrics
+      - name: Measure E2E setup performance
+        id: e2e-setup
+        run: |
+          echo "Starting E2E setup performance measurement..."
+          
+          # Measure npm install time
+          start_time=$(date +%s.%N)
+          npm ci
+          end_time=$(date +%s.%N)
+          install_time=$(echo "$end_time - $start_time" | bc -l)
+          
+          # Measure Cypress installation time
+          start_time=$(date +%s.%N)
+          npx cypress install
+          end_time=$(date +%s.%N)
+          cypress_install_time=$(echo "$end_time - $start_time" | bc -l)
+          
+          echo "e2e_install_time=$install_time" >> $GITHUB_OUTPUT
+          echo "e2e_cypress_install_time=$cypress_install_time" >> $GITHUB_OUTPUT
+          
+          # Save detailed metrics
+          cat > performance-results/e2e-setup.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "metrics": {
+              "npm_install_time_seconds": $install_time,
+              "cypress_install_time_seconds": $cypress_install_time
+            }
+          }
+          EOF
+        working-directory: ./e2e
+
+      # Compile Performance Summary
+      - name: Generate performance summary
+        id: performance-summary
+        run: |
+          echo "Generating performance summary..."
+          
+          # Calculate total build time
+          total_build_time=$(echo "${{ steps.backend-build.outputs.backend_build_time }} + ${{ steps.frontend-build.outputs.frontend_build_time }}" | bc -l)
+          
+          # Calculate total test time
+          total_test_time=${{ steps.backend-tests.outputs.backend_total_test_time }}
+          
+          # Calculate total setup time
+          total_setup_time=$(echo "${{ steps.frontend-build.outputs.frontend_install_time }} + ${{ steps.e2e-setup.outputs.e2e_install_time }}" | bc -l)
+          
+          # Create summary report
+          cat > performance-results/summary.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "workflow_run_id": "${{ github.run_id }}",
+            "summary": {
+              "total_build_time_seconds": $total_build_time,
+              "total_test_time_seconds": $total_test_time,
+              "total_setup_time_seconds": $total_setup_time,
+              "total_time_seconds": $(echo "$total_build_time + $total_test_time + $total_setup_time" | bc -l)
+            },
+            "backend": {
+              "build_time_seconds": ${{ steps.backend-build.outputs.backend_build_time }},
+              "jar_size_bytes": ${{ steps.backend-build.outputs.backend_jar_size }},
+              "memory_usage_percent": ${{ steps.backend-build.outputs.backend_memory_usage }},
+              "total_test_time_seconds": $total_test_time
+            },
+            "frontend": {
+              "install_time_seconds": ${{ steps.frontend-build.outputs.frontend_install_time }},
+              "build_time_seconds": ${{ steps.frontend-build.outputs.frontend_build_time }},
+              "total_size_bytes": ${{ steps.frontend-build.outputs.frontend_total_size }},
+              "js_size_bytes": ${{ steps.frontend-build.outputs.frontend_js_size }},
+              "css_size_bytes": ${{ steps.frontend-build.outputs.frontend_css_size }},
+              "file_count": ${{ steps.frontend-build.outputs.frontend_file_count }},
+              "tsc_time_seconds": ${{ steps.frontend-analysis.outputs.frontend_tsc_time }},
+              "eslint_time_seconds": ${{ steps.frontend-analysis.outputs.frontend_eslint_time }}
+            },
+            "e2e": {
+              "install_time_seconds": ${{ steps.e2e-setup.outputs.e2e_install_time }},
+              "cypress_install_time_seconds": ${{ steps.e2e-setup.outputs.e2e_cypress_install_time }}
+            }
+          }
+          EOF
+          
+          echo "Performance baseline completed successfully!"
+
+      # Upload performance results as artifacts
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-baseline-${{ github.run_id }}
+          path: performance-results/
+          retention-days: 30
+
+      # Create performance report
+      - name: Generate performance report
+        run: |
+          echo "## Performance Baseline Report" > performance-report.md
+          echo "" >> performance-report.md
+          echo "**Generated:** $(date -u)" >> performance-report.md
+          echo "**Commit:** ${{ github.sha }}" >> performance-report.md
+          echo "**Branch:** ${{ github.ref_name }}" >> performance-report.md
+          echo "**Workflow Run:** ${{ github.run_id }}" >> performance-report.md
+          echo "" >> performance-report.md
+          
+          echo "### Summary" >> performance-report.md
+          echo "- **Total Build Time:** $(echo "${{ steps.performance-summary.outputs.total_build_time }}" | bc -l | xargs printf "%.2f")s" >> performance-report.md
+          echo "- **Total Test Time:** $(echo "${{ steps.backend-tests.outputs.backend_total_test_time }}" | bc -l | xargs printf "%.2f")s" >> performance-report.md
+          echo "- **Total Setup Time:** $(echo "${{ steps.performance-summary.outputs.total_setup_time }}" | bc -l | xargs printf "%.2f")s" >> performance-report.md
+          echo "" >> performance-report.md
+          
+          echo "### Backend Metrics" >> performance-report.md
+          echo "- **Build Time:** $(echo "${{ steps.backend-build.outputs.backend_build_time }}" | bc -l | xargs printf "%.2f")s" >> performance-report.md
+          echo "- **JAR Size:** $(numfmt --to=iec ${{ steps.backend-build.outputs.backend_jar_size }})" >> performance-report.md
+          echo "- **Memory Usage:** ${{ steps.backend-build.outputs.backend_memory_usage }}%" >> performance-report.md
+          echo "- **Total Test Time:** $(echo "${{ steps.backend-tests.outputs.backend_total_test_time }}" | bc -l | xargs printf "%.2f")s" >> performance-report.md
+          echo "" >> performance-report.md
+          
+          echo "### Frontend Metrics" >> performance-report.md
+          echo "- **Install Time:** $(echo "${{ steps.frontend-build.outputs.frontend_install_time }}" | bc -l | xargs printf "%.2f")s" >> performance-report.md
+          echo "- **Build Time:** $(echo "${{ steps.frontend-build.outputs.frontend_build_time }}" | bc -l | xargs printf "%.2f")s" >> performance-report.md
+          echo "- **Bundle Size:** $(numfmt --to=iec ${{ steps.frontend-build.outputs.frontend_total_size }})" >> performance-report.md
+          echo "- **JS Size:** $(numfmt --to=iec ${{ steps.frontend-build.outputs.frontend_js_size }})" >> performance-report.md
+          echo "- **CSS Size:** $(numfmt --to=iec ${{ steps.frontend-build.outputs.frontend_css_size }})" >> performance-report.md
+          echo "- **File Count:** ${{ steps.frontend-build.outputs.frontend_file_count }}" >> performance-report.md
+          echo "- **TypeScript Compilation:** $(echo "${{ steps.frontend-analysis.outputs.frontend_tsc_time }}" | bc -l | xargs printf "%.2f")s" >> performance-report.md
+          echo "- **ESLint:** $(echo "${{ steps.frontend-analysis.outputs.frontend_eslint_time }}" | bc -l | xargs printf "%.2f")s" >> performance-report.md
+          echo "" >> performance-report.md
+          
+          echo "### E2E Metrics" >> performance-report.md
+          echo "- **Install Time:** $(echo "${{ steps.e2e-setup.outputs.e2e_install_time }}" | bc -l | xargs printf "%.2f")s" >> performance-report.md
+          echo "- **Cypress Install Time:** $(echo "${{ steps.e2e-setup.outputs.e2e_cypress_install_time }}" | bc -l | xargs printf "%.2f")s" >> performance-report.md
+          echo "" >> performance-report.md
+          
+          echo "### System Metrics" >> performance-report.md
+          echo "- **CPU Cores:** ${{ steps.system-metrics.outputs.system_cpu_cores }}" >> performance-report.md
+          echo "- **Total Memory:** ${{ steps.system-metrics.outputs.system_total_memory_mb }}MB" >> performance-report.md
+          echo "- **Available Memory:** ${{ steps.system-metrics.outputs.system_available_memory_mb }}MB" >> performance-report.md
+          echo "- **Disk Usage:** ${{ steps.system-metrics.outputs.system_disk_usage_percent }}%" >> performance-report.md
+          echo "- **Network Speed:** ${{ steps.system-metrics.outputs.system_network_speed_mbps }}Mbps" >> performance-report.md
+
+      - name: Upload performance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report-${{ github.run_id }}
+          path: performance-report.md
+          retention-days: 30
+
+      # Comment on PR with performance summary (if this is a PR)
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('performance-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Performance Baseline Results 📊\n\n${report}\n\n*This report was generated automatically by the performance baseline workflow.*`
+            }); 
