@@ -19,6 +19,8 @@ interface LabelRepository : JpaRepository<Label, Long> {
 
   fun findAllByProjectIdAndIdIn(projectId: Long, ids: List<Long>): List<Label>
 
+  fun findAllByProjectIdAndName(projectId: Long, name: String): List<Label>
+
   fun findByProjectIdAndId(projectId: Long, labelId: Long): Label?
 
   fun findByTranslationsIdIn(translationIds: List<Long>): List<Label>

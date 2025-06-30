@@ -39,6 +39,7 @@ export class E2TranslationLabel {
       gcy('translation-label')
         .contains(label)
         .should('be.visible')
+        .closestDcy('translation-label')
         .siblingDcy('translation-label-delete')
         .invoke('css', 'opacity', 1) // hover is not supported in Cypress, had to use CSS opacity
         .click();
@@ -54,6 +55,7 @@ export class E2TranslationLabel {
     this.getTranslationLabels(key, lang).within(() => {
       gcy('translation-label')
         .contains(label)
+        .closestDcy('translation-label')
         .should('be.visible')
         .should('have.css', 'background-color', expectedColor);
     });

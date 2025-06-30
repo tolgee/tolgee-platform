@@ -3,14 +3,13 @@ import { labelsTestData } from '../../common/apiCalls/testData/testData';
 import { gcy } from '../../common/shared';
 import { E2ProjectLabelsSection } from '../../compounds/projectSettings/labels/E2ProjectLabelsSection';
 import { isDarkMode } from '../../common/helpers';
-import { E2ActivityChecker } from '../../compounds/E2ActivityChecker';
+import { assertActivityDetails, checkActivity } from '../../common/activities';
 
 let projectId = null;
 let secondProjectId = null;
 
 describe('Projects Settings - Labels', () => {
   const projectLabels = new E2ProjectLabelsSection();
-  const activityChecker = new E2ActivityChecker();
 
   beforeEach(() => {
     labelsTestData.clean();
@@ -86,13 +85,12 @@ describe('Projects Settings - Labels', () => {
     const labelModal = projectLabels.openCreateLabelModal();
     labelModal.fillAndSave('test-label', '#FF0055', 'New label description');
 
-    activityChecker
-      .checkActivity('Created label')
-      .assertActivityDetails([
-        'Created label',
-        'test-label',
-        'New label description',
-      ]);
+    checkActivity('Created label');
+    assertActivityDetails([
+      'Created label',
+      'test-label',
+      'New label description',
+    ]);
   });
 
   it('creates activity when label is updated', () => {
@@ -101,9 +99,8 @@ describe('Projects Settings - Labels', () => {
     const labelModal = projectLabels.openEditLabelModal('First label');
     labelModal.fillAndSave('Edited label', '#00FF00', 'Totally new text');
 
-    activityChecker
-      .checkActivity('Edited label')
-      .assertActivityDetails(['Edited label']);
+    checkActivity('Edited label');
+    assertActivityDetails(['Edited label']);
   });
 
   it('creates activity when label is deleted', () => {
@@ -111,8 +108,7 @@ describe('Projects Settings - Labels', () => {
 
     projectLabels.deleteLabel('First label');
 
-    activityChecker
-      .checkActivity('Deleted label')
-      .assertActivityDetails(['Deleted label', 'This is a description']);
+    checkActivity('Deleted label');
+    assertActivityDetails(['Deleted label', 'This is a description']);
   });
 });

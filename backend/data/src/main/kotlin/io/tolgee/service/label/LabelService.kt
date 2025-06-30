@@ -2,6 +2,7 @@ package io.tolgee.service.label
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.label.LabelRequest
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.translation.Label
@@ -69,6 +70,9 @@ class LabelService(
     projectId: Long,
     request: LabelRequest,
   ): Label {
+    if (labelRepository.findAllByProjectIdAndName(projectId, request.name).isNotEmpty()) {
+      throw BadRequestException(Message.LABEL_ALREADY_EXISTS, listOf(request.name))
+    }
     val label = Label()
     updateFromRequest(label, request)
     label.project = entityManager.getReference(Project::class.java, projectId)

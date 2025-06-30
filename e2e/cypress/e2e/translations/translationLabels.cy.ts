@@ -7,15 +7,14 @@ import {
 import { gcy } from '../../common/shared';
 import { isDarkMode } from '../../common/helpers';
 import { E2TranslationLabel } from '../../compounds/E2TranslationLabel';
-import { E2ActivityChecker } from '../../compounds/E2ActivityChecker';
 import { E2TranslationsView } from '../../compounds/E2TranslationsView';
+import { assertActivityDetails, checkActivity } from '../../common/activities';
 
 let projectId = null;
 let emptyProjectId = null;
 
 describe('Projects Settings - Labels', () => {
   const translationLabel = new E2TranslationLabel();
-  const activityChecker = new E2ActivityChecker();
 
   beforeEach(() => {
     labelsTestData.clean();
@@ -125,13 +124,12 @@ describe('Projects Settings - Labels', () => {
       4
     );
 
-    activityChecker
-      .checkActivity('Translation labels updated')
-      .assertActivityDetails([
-        'Translation labels updated',
-        'first key',
-        'Label to assign 1',
-      ]);
+    checkActivity('Translation labels updated');
+    assertActivityDetails([
+      'Translation labels updated',
+      'first key',
+      'Label to assign 1',
+    ]);
   });
 
   it('creates activity when translation labels are removed', () => {
@@ -144,8 +142,7 @@ describe('Projects Settings - Labels', () => {
       'First label'
     );
 
-    activityChecker
-      .checkActivity('Translation labels updated')
-      .assertActivityDetails(['Translation labels updated', 'first key']);
+    checkActivity('Translation labels updated');
+    assertActivityDetails(['Translation labels updated', 'first key']);
   });
 });

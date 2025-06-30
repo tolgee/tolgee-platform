@@ -297,6 +297,7 @@ enum class Message {
   LLM_PROVIDER_EMPTY_RESPONSE,
   LABEL_NOT_FOUND,
   LABEL_NOT_FROM_PROJECT,
+  LABEL_ALREADY_EXISTS,
   ;
 
   val code: String

@@ -1,5 +1,6 @@
 import { styled } from '@mui/material';
 import React from 'react';
+import clsx from 'clsx';
 
 const PaletteGrid = styled('div')`
   display: grid;
@@ -8,18 +9,16 @@ const PaletteGrid = styled('div')`
   padding: 12px;
 `;
 
-const PaletteColor = styled('div')<{ color: string; selected: boolean }>`
+const PaletteColor = styled('div')`
   width: 32px;
   height: 32px;
   border-radius: 4px;
-  background: ${({ color }) => color};
-  border: 2px solid
-    ${({ selected, theme }) =>
-      selected
-        ? theme.palette.tokens.icon.primary
-        : theme.palette.tokens.primary.contrast};
+  border: 2px solid ${({ theme }) => theme.palette.tokens.primary.contrast};
   cursor: pointer;
   box-shadow: 0 0 2px #aaa;
+  &.selected {
+    border: 2px solid ${({ theme }) => theme.palette.tokens.icon.primary};
+  }
 `;
 
 type ColorPaletteProps = {
@@ -39,9 +38,10 @@ export const ColorPalette = ({
         <PaletteColor
           key={key}
           color={color}
-          selected={color === selectedColor}
+          className={clsx(selectedColor === color && 'selected')}
           onClick={() => onColorClick(key)}
           data-cy="palette-color"
+          style={{ backgroundColor: color }}
         />
       ))}
     </PaletteGrid>

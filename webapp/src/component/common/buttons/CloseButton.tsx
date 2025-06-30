@@ -3,39 +3,45 @@ import { IconButton, styled, Tooltip } from '@mui/material';
 import { XClose } from '@untitled-ui/icons-react';
 import clsx from 'clsx';
 
-const CloseButtonWrapperContainer = styled('div')<{ xs?: boolean }>(
-  ({ theme, xs }) => ({
-    position: 'relative',
-    width: 'min-content',
-    minWidth: 0,
+const CloseButtonWrapperContainer = styled('div')<{ xs?: boolean }>`
+  position: relative;
+  width: min-content;
+  min-width: 0;
 
-    '& .closeButton': {
-      position: 'absolute',
-      zIndex: 2,
-      top: -8,
-      right: -8,
-      width: xs ? 20 : 24,
-      height: xs ? 20 : 24,
-      backgroundColor: theme.palette.tokens.icon.backgroundDark,
-      color: theme.palette.tokens.icon.onDark,
-      transition: 'visibility 0.1s linear, opacity 0.1s linear',
-      display: 'grid',
-      alignContent: 'center',
-      justifyContent: 'center',
-      opacity: 0,
-    },
+  & .closeButton {
+    position: absolute;
+    z-index: 2;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background-color: ${({ theme }) =>
+      theme.palette.tokens.icon.backgroundDark};
+    color: ${({ theme }) => theme.palette.tokens.icon.onDark};
+    transition: visibility 0.1s linear, opacity 0.1s linear;
+    display: grid;
+    align-content: center;
+    justify-content: center;
+    opacity: 0;
 
-    '&:hover .closeButton, &:focus-within .closeButton': {
-      opacity: 1,
-    },
+    &.xs {
+      width: 20px;
+      height: 20px;
+    }
+  }
 
-    '& .closeButton:hover': {
-      backgroundColor: theme.palette.tokens.icon.backgroundDarkHover,
-      color: theme.palette.tokens.icon.onDarkHover,
-      visibility: 'visible',
-    },
-  })
-);
+  &:hover .closeButton,
+  &:focus-within .closeButton {
+    opacity: 1;
+  }
+
+  & .closeButton:hover {
+    background-color: ${({ theme }) =>
+      theme.palette.tokens.icon.backgroundDarkHover};
+    color: ${({ theme }) => theme.palette.tokens.icon.onDarkHover};
+    visibility: visible;
+  }
+`;
 
 type Props = {
   onClose?: (e: MouseEvent) => void;
@@ -56,10 +62,10 @@ export const CloseButton: FC<Props> = ({
 }) => {
   if (!onClose) return <>{children}</>;
   return (
-    <CloseButtonWrapperContainer xs>
+    <CloseButtonWrapperContainer>
       <Tooltip title={tooltip || ''} disableInteractive>
         <IconButton
-          className={clsx('closeButton', className)}
+          className={clsx('closeButton', className, xs && 'xs')}
           onClick={onClose}
           data-cy={dataCy}
         >
