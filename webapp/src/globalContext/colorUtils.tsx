@@ -59,7 +59,7 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
 /**
  * Gets the background color based on the theme and provided hex.
  */
-export function getBackgroundColor(theme: Theme, hex?: string): string {
+export function getLabelBackgroundColor(theme: Theme, hex?: string): string {
   if (!hex) {
     return 'transparent';
   }
@@ -71,9 +71,9 @@ export function getBackgroundColor(theme: Theme, hex?: string): string {
 }
 
 /**
- * Gets the text color appropriate for a given background color.
+ * Gets the translation label text color appropriate for a given background color
  */
-export function getTextColor(theme: Theme, color?: string): string {
+export function getLabelTextColor(theme: Theme, color?: string): string {
   if (!color) {
     return theme.palette.tooltip.text;
   }

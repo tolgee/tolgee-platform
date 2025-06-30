@@ -3,14 +3,18 @@ import React from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import clsx from 'clsx';
 import { CloseButton } from 'tg.component/common/buttons/CloseButton';
-import { getBackgroundColor, getTextColor } from 'tg.globalContext/colorUtils';
+import {
+  getLabelBackgroundColor,
+  getLabelTextColor,
+} from 'tg.globalContext/colorUtils';
 
 type LabelModel = components['schemas']['LabelModel'];
 
 export const StyledTranslationLabel = styled('div')<{ color?: string }>`
-  background-color: ${({ color, theme }) => getBackgroundColor(theme, color)};
+  background-color: ${({ color, theme }) =>
+    getLabelBackgroundColor(theme, color)};
   border-radius: 12px;
-  color: ${({ color, theme }) => getTextColor(theme, color)};
+  color: ${({ color, theme }) => getLabelTextColor(theme, color)};
   padding: 0 10px;
   font-size: 14px;
   line-height: 18px;
