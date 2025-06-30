@@ -46,9 +46,9 @@ const StyledWrapper = styled('div')`
     cursor: pointer;
   }
 
-  &.tag-add {
+  &.tagAdd {
     width: 24px;
-    &.full-label {
+    &.fullLabel {
       padding: 0 6px;
       width: initial;
     }
@@ -74,13 +74,7 @@ export const Wrapper: React.FC<Props> = ({
         <StyledWrapper
           as="button"
           data-cy="translations-tag-add"
-          className={clsx(
-            'preview',
-            'clickable',
-            'hover',
-            'tag-add',
-            className
-          )}
+          className={clsx('preview', 'clickable', 'hover', 'tagAdd', className)}
           onClick={stopBubble(onClick)}
         >
           {children}

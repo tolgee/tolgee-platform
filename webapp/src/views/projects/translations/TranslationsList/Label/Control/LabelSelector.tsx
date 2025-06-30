@@ -2,10 +2,11 @@ import React from 'react';
 import { useProject } from 'tg.hooks/useProject';
 import { Box, MenuItem, styled } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
-import { useLabels } from 'tg.hooks/useLabels';
+import { useLabelsService } from 'tg.views/projects/translations/context/services/useLabelsService';
 import { useTranslate } from '@tolgee/react';
 import { TranslationLabel } from 'tg.component/TranslationLabel';
 import { InfiniteSearchSelectContent } from 'tg.component/searchSelect/InfiniteSearchSelectContent';
+import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -22,9 +23,10 @@ type LabelSelectorProps = {
 export const LabelSelector = ({ existing, onSelect }: LabelSelectorProps) => {
   const { t } = useTranslate();
   const project = useProject();
-  const { labels, loadableList, search, setSearch } = useLabels({
+  const { loadableList, search, setSearch } = useLabelsService({
     projectId: project.id,
   });
+  const labels = useTranslationsSelector((c) => c.labels) || [];
 
   const options = labels.filter((label: LabelModel) => {
     return !(existing && existing.some((l) => l.id === label.id));

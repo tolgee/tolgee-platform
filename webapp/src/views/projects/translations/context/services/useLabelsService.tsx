@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useDebounce } from 'use-debounce';
 import { components } from 'tg.service/apiSchema.generated';
@@ -21,11 +21,10 @@ type Props = {
   translations?: ReturnType<typeof useTranslationsService>;
 };
 
-export const useLabels = ({ projectId, translations }: Props) => {
+export const useLabelsService = ({ projectId, translations }: Props) => {
   const [search, setSearch] = useState('');
   const [totalItems, setTotalItems] = useState<number | undefined>(undefined);
   const [searchDebounced] = useDebounce(search, 500);
-  const [labels, setLabels] = useState<LabelModel[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [enabledSelected, setEnabledSelected] = useState<boolean>(false);
   const putLabel = usePutLabel();
@@ -79,6 +78,9 @@ export const useLabels = ({ projectId, translations }: Props) => {
     },
   });
 
+  const labels =
+    loadableList.data?.pages.flatMap((p) => p._embedded?.labels ?? []) || [];
+
   const loadableSelected = useApiQuery({
     url: '/v2/projects/{projectId}/labels/ids',
     method: 'get',
@@ -90,18 +92,27 @@ export const useLabels = ({ projectId, translations }: Props) => {
     },
     options: {
       enabled: enabledSelected,
+      noGlobalLoading: true,
     },
   });
 
-  function fetchSelected(ids: number[]) {
-    // get list of ids which are missing in labels
-    const missingIds = ids.filter((id) => !labels.find((l) => l.id === id));
-    if (missingIds.length === 0) {
-      setEnabledSelected(false);
-      return;
+  const selectedLabels = getSelectedLabels();
+
+  function getSelectedLabels() {
+    if (loadableList.isFetched) {
+      const selected = labels.filter((l) => selectedIds.includes(l.id));
+      if (selected.length === selectedIds.length) {
+        return selected;
+      }
     }
-    setSelectedIds(ids);
-    setEnabledSelected(true);
+    if (!enabledSelected && selectedIds.length > 0) {
+      setEnabledSelected(true);
+    }
+    if (loadableSelected.isFetched) {
+      return loadableSelected.data;
+    }
+
+    return [];
   }
 
   const addLabel = (data: AddLabel) => {
@@ -172,40 +183,17 @@ export const useLabels = ({ projectId, translations }: Props) => {
       });
   };
 
-  // Merge selected labels into the all labels list, avoiding duplicates
-  useEffect(() => {
-    const allLabels: LabelModel[] = [];
-    // Gather all paginated labels
-    if (loadableList.data?.pages) {
-      loadableList.data.pages.forEach((page) => {
-        if (page._embedded?.labels) {
-          allLabels.push(...page._embedded.labels);
-        }
-      });
-    }
-
-    // Add selected labels if not already present
-    if (loadableSelected.data) {
-      loadableSelected.data.forEach((selected) => {
-        if (!allLabels.find((l) => l.id === selected.id)) {
-          allLabels.push(selected);
-        }
-      });
-    }
-    setLabels(allLabels);
-  }, [loadableList.data, loadableSelected.data]);
-
   return {
     labels,
     loadableList,
-    loadableSelected,
     setSearch,
     totalItems,
     search,
     searchDebounced,
-    setSelectedIds,
-    fetchSelected,
     addLabel,
     removeLabel,
+    selectedLabels,
+    setSelectedIds,
+    isLoading: putLabel.isLoading || deleteLabel.isLoading,
   };
 };

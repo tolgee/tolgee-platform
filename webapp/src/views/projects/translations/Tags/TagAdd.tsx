@@ -34,12 +34,12 @@ export const TagAdd: React.FC<Props> = ({
       className={clsx(
         CELL_SHOW_ON_HOVER,
         className,
-        withFullLabel && 'full-label'
+        withFullLabel && 'fullLabel'
       )}
     >
       <StyledAddIcon data-cy="translations-tags-add" />
       {withFullLabel && (
-        <StyledLabel className="translations-tag-label">
+        <StyledLabel>
           <T keyName="translations_tag_label" />
         </StyledLabel>
       )}

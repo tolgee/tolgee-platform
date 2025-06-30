@@ -5,7 +5,7 @@ import { AddLabel } from 'tg.views/projects/translations/TranslationsList/Label/
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { LabelSelector } from 'tg.views/projects/translations/TranslationsList/Label/Control/LabelSelector';
 import { components } from 'tg.service/apiSchema.generated';
-import { useLabels } from 'tg.hooks/useLabels';
+import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -45,11 +45,11 @@ export const LabelControl = forwardRef<HTMLDivElement, LabelControlProps>(
   (props, ref) => {
     const { className, existing, onSelect, menuAnchorOrigin, menuStyle } =
       props;
-    const { labels: availableLabels } = useLabels({});
+    const labels = useTranslationsSelector((c) => c.labels) || [];
+
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-    // Only render the component if available labels exist
-    if (!availableLabels || availableLabels.length === 0) {
+    if (labels.length === 0) {
       return null;
     }
 

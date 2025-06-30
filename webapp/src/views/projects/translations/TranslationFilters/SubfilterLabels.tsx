@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { T, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import { Box, Menu, MenuItem } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -12,7 +12,8 @@ import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { TranslationLabel } from 'tg.component/TranslationLabel';
 import { CompactListSubheader } from 'tg.component/ListComponents';
 import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
-import { useLabels } from 'tg.hooks/useLabels';
+import { useLabelsService } from 'tg.views/projects/translations/context/services/useLabelsService';
+import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -29,25 +30,21 @@ export const SubfilterLabels = ({
   projectId,
   selectedLanguages,
 }: Props) => {
-  const {
-    labels,
-    totalItems,
-    setSearch,
-    searchDebounced,
-    search,
-    loadableList,
-  } = useLabels({ projectId });
+  const labels = useTranslationsSelector((c) => c.labels);
+
+  if (labels.length === 0) {
+    return null;
+  }
+
+  const { totalItems, setSearch, searchDebounced, search, loadableList } =
+    useLabelsService({ projectId });
+
   const [expanded, setExpanded] = useState(
     value.filterTranslationLanguage !== undefined
   );
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
   const anchorEl = useRef<HTMLElement>(null);
-
-  // Only render the component if available labels exist
-  if (!labels || labels.length === 0) {
-    return null;
-  }
 
   function toggleFilterLanguage(
     newValue: FiltersInternal['filterTranslationLanguage']
@@ -119,73 +116,71 @@ export const SubfilterLabels = ({
             )}
             sx={{ position: 'absolute', top: 0, left: 0, right: 0 }}
           />
-          {Boolean(totalItems) && (
-            <Box display="grid">
-              <InfiniteSearchSelectContent
-                open={true}
-                items={labels}
-                maxWidth={400}
-                onSearch={setSearch}
-                search={search}
-                displaySearch={(totalItems ?? 0) > 10}
-                renderOption={renderItem}
-                itemKey={(o) => o.name}
-                ListboxProps={{
-                  style: { maxHeight: 400, overflow: 'auto' },
-                }}
-                searchPlaceholder={t(
-                  'translations_filters_labels_search_placeholder'
-                )}
-                onGetMoreData={handleFetchMore}
-              />
-              <CompactListSubheader>
-                <Box display="flex" justifyContent="space-between">
-                  <Box>{t('translations_filter_languages_select_title')}</Box>
-                </Box>
-              </CompactListSubheader>
-              <FilterItem
-                data-cy="translations-filter-apply-no-base"
-                label={t('translations_filter_languages_no_base')}
-                selected={value.filterTranslationLanguage === undefined}
-                onClick={() => toggleFilterLanguage(undefined)}
-                exclusive
-              />
-              {expanded && (
-                <>
-                  <FilterItem
-                    data-cy="translations-filter-apply-for-all"
-                    label={t('translations_filter_languages_all')}
-                    selected={value.filterTranslationLanguage === true}
-                    onClick={() => toggleFilterLanguage(true)}
-                    exclusive
-                  />
-                  {selectedLanguages?.map((lang) => {
-                    return (
-                      <FilterItem
-                        data-cy="translations-filter-apply-for-language"
-                        key={lang.id}
-                        label={lang.name}
-                        selected={value.filterTranslationLanguage === lang.tag}
-                        onClick={() => toggleFilterLanguage(lang.tag)}
-                        exclusive
-                      />
-                    );
-                  })}
-                </>
+          <Box display="grid">
+            <InfiniteSearchSelectContent
+              open={true}
+              items={labels}
+              maxWidth={400}
+              onSearch={setSearch}
+              search={search}
+              displaySearch={(totalItems ?? 0) > 10}
+              renderOption={renderItem}
+              itemKey={(o) => o.name}
+              ListboxProps={{
+                style: { maxHeight: 400, overflow: 'auto' },
+              }}
+              searchPlaceholder={t(
+                'translations_filters_labels_search_placeholder'
               )}
-              <MenuItem
-                data-cy="translations-filter-apply-for-expand"
-                role="button"
-                onClick={() => setExpanded((value) => !value)}
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                }}
-              >
-                {expanded ? <ChevronUp /> : <ChevronDown />}
-              </MenuItem>
-            </Box>
-          )}
+              onGetMoreData={handleFetchMore}
+            />
+            <CompactListSubheader>
+              <Box display="flex" justifyContent="space-between">
+                <Box>{t('translations_filter_languages_select_title')}</Box>
+              </Box>
+            </CompactListSubheader>
+            <FilterItem
+              data-cy="translations-filter-apply-no-base"
+              label={t('translations_filter_languages_no_base')}
+              selected={value.filterTranslationLanguage === undefined}
+              onClick={() => toggleFilterLanguage(undefined)}
+              exclusive
+            />
+            {expanded && (
+              <>
+                <FilterItem
+                  data-cy="translations-filter-apply-for-all"
+                  label={t('translations_filter_languages_all')}
+                  selected={value.filterTranslationLanguage === true}
+                  onClick={() => toggleFilterLanguage(true)}
+                  exclusive
+                />
+                {selectedLanguages?.map((lang) => {
+                  return (
+                    <FilterItem
+                      data-cy="translations-filter-apply-for-language"
+                      key={lang.id}
+                      label={lang.name}
+                      selected={value.filterTranslationLanguage === lang.tag}
+                      onClick={() => toggleFilterLanguage(lang.tag)}
+                      exclusive
+                    />
+                  );
+                })}
+              </>
+            )}
+            <MenuItem
+              data-cy="translations-filter-apply-for-expand"
+              role="button"
+              onClick={() => setExpanded((value) => !value)}
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+              {expanded ? <ChevronUp /> : <ChevronDown />}
+            </MenuItem>
+          </Box>
         </Menu>
       )}
     </>
@@ -203,10 +198,6 @@ export function getLabelFiltersName(
   if (value.filterLabel?.length) {
     const labelId = value.filterLabel[0];
     const label = labels?.find((l) => l.id.toString() === labelId);
-    return label ? (
-      <TranslationLabel label={label} />
-    ) : (
-      <T keyName="translations_filters_labels_without_labels" />
-    );
+    return label ? <TranslationLabel label={label} /> : null;
   }
 }

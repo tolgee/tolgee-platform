@@ -17,6 +17,7 @@ import { BatchActions, OperationProps } from './types';
 import { createAdder } from 'tg.fixtures/pluginAdder';
 import { useAddBatchOperations as useAddEeBatchOperations } from 'tg.ee';
 import { OperationUnassignTranslationLabel } from 'tg.views/projects/translations/BatchOperations/OperationUnassignTranslationLabel';
+import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 
 export type BatchOperation = {
   id: BatchActions;
@@ -35,6 +36,7 @@ export type BatchOperationAdder = ReturnType<typeof addOperations>;
 
 export const useBatchOperations = () => {
   const { satisfiesPermission } = useProjectPermissions();
+  const labels = useTranslationsSelector((c) => c.labels);
 
   const { t } = useTranslate();
 
@@ -107,12 +109,14 @@ export const useBatchOperations = () => {
       id: 'assign_translation_labels',
       label: t('batch_operations_assign_translation_labels'),
       enabled: canAssignLabels,
+      hidden: labels.length === 0,
       component: OperationAssignTranslationLabel,
     },
     {
       id: 'unassign_translation_labels',
       label: t('batch_operations_unassign_translation_labels'),
       enabled: canAssignLabels,
+      hidden: labels.length === 0,
       component: OperationUnassignTranslationLabel,
     },
     {

@@ -43,7 +43,7 @@ import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/t
 import { useAiPlaygroundService } from './services/useAiPlaygroundService';
 import { usePreventPageLeave } from 'tg.hooks/usePreventPageLeave';
 import { QUERY } from 'tg.constants/links';
-import { useLabels } from 'tg.hooks/useLabels';
+import { useLabelsService } from 'tg.views/projects/translations/context/services/useLabelsService';
 
 type Props = {
   projectId: number;
@@ -158,7 +158,7 @@ export const [
     translations: translationService,
   });
 
-  const labelService = useLabels({
+  const labelService = useLabelsService({
     translations: translationService,
   });
 
@@ -321,6 +321,10 @@ export const [
     removeTranslationLabel(data: RemoveLabel) {
       return labelService.removeLabel(data);
     },
+    fetchLabels(ids: number[]) {
+      labelService.setSelectedIds(ids);
+      return labelService.selectedLabels;
+    },
   };
 
   const dataReady = Boolean(
@@ -345,7 +349,8 @@ export const [
       translationService.isFetching ||
       languagesLoadable.isFetching ||
       stateService.isLoading ||
-      tagsService.isLoading,
+      tagsService.isLoading ||
+      labelService.isLoading,
     isEditLoading: editService.isLoading,
     isFetchingMore: translationService.isFetchingNextPage,
     isLoadingAllIds: translationService.isLoadingAllIds,
@@ -364,6 +369,7 @@ export const [
     layout,
     aiPlaygroundData: aiPlaygroundService.data,
     aiPlaygroundEnabled: props.aiPlayground,
+    labels: labelService.labels,
   };
 
   return [state, actions];
