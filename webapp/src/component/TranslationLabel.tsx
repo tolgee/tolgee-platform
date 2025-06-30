@@ -6,7 +6,7 @@ import { CloseButton } from 'tg.component/common/buttons/CloseButton';
 import {
   getLabelBackgroundColor,
   getLabelTextColor,
-} from 'tg.globalContext/colorUtils';
+} from 'tg.globalContext/labelColorUtils';
 
 type LabelModel = components['schemas']['LabelModel'];
 
