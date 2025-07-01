@@ -1,6 +1,6 @@
 import { login } from '../../common/apiCalls/common';
 import { labelsTestData } from '../../common/apiCalls/testData/testData';
-import { gcy } from '../../common/shared';
+import { assertMessage, gcy } from '../../common/shared';
 import { E2ProjectLabelsSection } from '../../compounds/projectSettings/labels/E2ProjectLabelsSection';
 import { isDarkMode } from '../../common/helpers';
 import { assertActivityDetails, checkActivity } from '../../common/activities';
@@ -110,5 +110,12 @@ describe('Projects Settings - Labels', () => {
 
     checkActivity('Deleted label');
     assertActivityDetails(['Deleted label', 'This is a description']);
+  });
+
+  it('fails to create label with same name', () => {
+    projectLabels.visit(projectId);
+    const labelModal = projectLabels.openCreateLabelModal();
+    labelModal.fillAndSave('First label', '#FF0055');
+    assertMessage('Label with name "First label" already exists');
   });
 });

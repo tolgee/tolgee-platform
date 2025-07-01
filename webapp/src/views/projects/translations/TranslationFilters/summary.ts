@@ -20,7 +20,6 @@ import {
   getLabelFiltersLength,
   getLabelFiltersName,
 } from 'tg.views/projects/translations/TranslationFilters/SubfilterLabels';
-import { useTranslationsActions } from 'tg.views/projects/translations/context/TranslationsContext';
 
 export function countFilters(value: FiltersInternal) {
   return (
@@ -34,14 +33,12 @@ export function countFilters(value: FiltersInternal) {
 }
 
 export function getFilterName(value: FiltersInternal) {
-  const { fetchLabels } = useTranslationsActions();
-  const filterLabels = value.filterLabel?.map((id) => Number(id)) || [];
   return (
     getCommentsFiltersName(value) ||
     getNamespaceFiltersName(value) ||
     getScreenshotFiltersName(value) ||
     getTagFiltersName(value) ||
     getTranslationFiltersName(value) ||
-    getLabelFiltersName(value, fetchLabels(filterLabels))
+    getLabelFiltersName(value)
   );
 }

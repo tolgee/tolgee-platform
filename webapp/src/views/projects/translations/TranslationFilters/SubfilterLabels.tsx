@@ -13,7 +13,10 @@ import { TranslationLabel } from 'tg.component/TranslationLabel';
 import { CompactListSubheader } from 'tg.component/ListComponents';
 import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 import { useLabelsService } from 'tg.views/projects/translations/context/services/useLabelsService';
-import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
+import {
+  useTranslationsActions,
+  useTranslationsSelector,
+} from 'tg.views/projects/translations/context/TranslationsContext';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -191,13 +194,14 @@ export function getLabelFiltersLength(value: FiltersInternal) {
   return value.filterLabel?.length ?? 0;
 }
 
-export function getLabelFiltersName(
-  value: FiltersInternal,
-  labels: LabelModel[] | undefined
-) {
+export function getLabelFiltersName(value: FiltersInternal) {
   if (value.filterLabel?.length) {
+    const { fetchLabels } = useTranslationsActions();
+    const filterLabels = value.filterLabel?.map((id) => Number(id)) || [];
     const labelId = value.filterLabel[0];
-    const label = labels?.find((l) => l.id.toString() === labelId);
+    const label = fetchLabels(filterLabels)?.find(
+      (l) => l.id.toString() === labelId
+    );
     return label ? <TranslationLabel label={label} /> : null;
   }
 }
