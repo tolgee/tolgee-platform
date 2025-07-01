@@ -25,15 +25,15 @@ const StyledLabels = styled('div')`
   display: flex;
   grid-area: labels;
   align-items: center;
+  container-type: inline-size;
 `;
 
 const StyledList = styled('div')`
   display: flex;
   gap: 6px;
   width: 100%;
-
-  & > div:last-child {
-    margin-right: 6px;
+  @container (max-width: 100px) {
+    display: none;
   }
 
   .translation-label {
@@ -59,6 +59,7 @@ const StyledMoreTranslationLabel = styled(StyledTranslationLabel)`
   background-color: ${({ theme }) =>
     theme.palette.tokens._components.chip.defaultFill};
   color: ${({ theme }) => theme.palette.text.primary};
+  min-width: 37px;
 `;
 
 type Props = {
@@ -101,11 +102,11 @@ export const TranslationLabels = ({
     let fit = labels.length;
 
     for (let i = 0; i < labels.length; i++) {
-      const chipWidth = measured[i].offsetWidth;
+      const chipWidth = measured[i].offsetWidth + 6; // 6px gap between chips
       const remaining = labels.length - i - 1;
       const needsMore = remaining > 0;
 
-      const required = used + chipWidth + (needsMore ? moreWidth : 0) + 12; // 6px gap
+      const required = used + chipWidth + (needsMore ? moreWidth : 0) + 1; // +1 for the decimal pixel rounding
 
       if (required > available) {
         fit = Math.max(1, i - 1);

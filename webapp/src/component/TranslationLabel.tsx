@@ -24,6 +24,7 @@ export const StyledTranslationLabel = styled('div')<{ color?: string }>`
   overflow: hidden;
   white-space: nowrap;
   height: 24px;
+  min-width: 28px;
 `;
 
 const StyledTranslationLabelContent = styled('div')`

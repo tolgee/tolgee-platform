@@ -126,9 +126,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const inDomTask = displayTaskButton;
 
   const gridTemplateAreas = `'${spots.join(' ')}'`;
-  const gridTemplateColumns = spots
-    .map((spot) => (spot === 'state' ? 'auto' : '28px'))
-    .join(' ');
+  const gridTemplateColumns = spots.map((_) => '28px').join(' ');
 
   const { t } = useTranslate();
 

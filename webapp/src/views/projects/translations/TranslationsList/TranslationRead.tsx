@@ -16,10 +16,11 @@ const StyledContainer = styled('div')`
     'language labels controls-t'
     'translation translation translation'
     'controls-b controls-b controls-b';
+  gap: 0 6px;
 
   .language {
     align-self: start;
-    padding: 12px 8px 4px 16px;
+    padding: 12px 2px 4px 16px;
   }
 
   .labels {
