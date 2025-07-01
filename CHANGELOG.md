@@ -1,3 +1,10 @@
+## [3.123.13](https://github.com/tolgee/tolgee-platform/compare/v3.123.12...v3.123.13) (2025-07-01)
+
+
+### Bug Fixes
+
+* ignore broken pipe exceptions ([#3156](https://github.com/tolgee/tolgee-platform/issues/3156)) ([ea4b53c](https://github.com/tolgee/tolgee-platform/commit/ea4b53c35f707218028a20eb04435cbad4246a7c))
+
 ## [3.123.12](https://github.com/tolgee/tolgee-platform/compare/v3.123.11...v3.123.12) (2025-06-27)
 
 
