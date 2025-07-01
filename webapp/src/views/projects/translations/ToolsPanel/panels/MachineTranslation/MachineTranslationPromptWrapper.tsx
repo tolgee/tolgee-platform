@@ -1,6 +1,7 @@
 import { Box, Button, styled, SxProps } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Stars } from 'tg.component/CustomIcons';
+import { usePosthog } from 'tg.hooks/usePosthog';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { usePromptUrlState } from 'tg.views/projects/translations/useUrlPromptState';
 
@@ -50,6 +51,8 @@ export const MachineTranslationPromptWrapper = ({
   const { setAiPlayground, setOpenPrompt } = usePromptUrlState();
   const { satisfiesPermission } = useProjectPermissions();
 
+  const ph = usePosthog();
+
   const { t } = useTranslate();
   return (
     <StyledContainer {...{ sx, className }}>
@@ -67,6 +70,7 @@ export const MachineTranslationPromptWrapper = ({
               onClick={() => {
                 setAiPlayground(true);
                 setOpenPrompt(promptId);
+                ph?.capture('AI_TRANSLATOR_CUSTOMIZE');
               }}
             >
               {t('machine_translation_ai_customize')}

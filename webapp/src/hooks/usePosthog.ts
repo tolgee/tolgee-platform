@@ -12,6 +12,10 @@ async function loadPosthog() {
 }
 
 export function usePosthog() {
+  return window[POSTHOG_INSTANCE_WINDOW_PROPERTY] as PostHog | undefined;
+}
+
+export function usePosthogInit() {
   const userData = useUser();
   const config = useConfig();
 
