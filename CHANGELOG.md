@@ -1,3 +1,10 @@
+## [3.123.14](https://github.com/tolgee/tolgee-platform/compare/v3.123.13...v3.123.14) (2025-07-02)
+
+
+### Bug Fixes
+
+* remove temperature argument to be compatible with newer models ([#3150](https://github.com/tolgee/tolgee-platform/issues/3150)) ([622eb47](https://github.com/tolgee/tolgee-platform/commit/622eb4755ad7afe0d90d3f4f21b2cce931bf5645))
+
 ## [3.123.13](https://github.com/tolgee/tolgee-platform/compare/v3.123.12...v3.123.13) (2025-07-01)
 
 
