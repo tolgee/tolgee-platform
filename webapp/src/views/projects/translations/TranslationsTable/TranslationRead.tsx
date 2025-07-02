@@ -17,7 +17,7 @@ const StyledContainer = styled('div')`
     'flags       labels      controls  ';
 
   .flags {
-    padding: 0 8px 4px 4px;
+    padding: 0 8px 1px 4px;
     grid-area: flags;
     display: flex;
     align-items: center;

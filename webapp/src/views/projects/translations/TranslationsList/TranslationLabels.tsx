@@ -25,16 +25,12 @@ const StyledLabels = styled('div')`
   display: flex;
   grid-area: labels;
   align-items: center;
-  container-type: inline-size;
 `;
 
 const StyledList = styled('div')`
   display: flex;
   gap: 6px;
   width: 100%;
-  @container (max-width: 100px) {
-    display: none;
-  }
 
   .translation-label {
     cursor: default;
@@ -53,6 +49,7 @@ const HiddenMeasure = styled(StyledList)`
   pointer-events: none;
   height: 0;
   overflow: hidden;
+  width: unset;
 `;
 
 const StyledMoreTranslationLabel = styled(StyledTranslationLabel)`
@@ -83,6 +80,7 @@ export const TranslationLabels = ({
   const labelControlRef = useRef<HTMLDivElement | null>(null);
   const measureRef = useRef<HTMLDivElement | null>(null);
   const [visibleCount, setVisibleCount] = useState(labels?.length || 0);
+  const [labeledMore, setLabeledMore] = useState(false);
 
   const recalculate = useCallback(() => {
     if (!labels) return;
@@ -109,13 +107,14 @@ export const TranslationLabels = ({
       const required = used + chipWidth + (needsMore ? moreWidth : 0) + 1; // +1 for the decimal pixel rounding
 
       if (required > available) {
-        fit = Math.max(1, i - 1);
+        fit = Math.max(0, i);
         break;
       }
       used += chipWidth;
     }
 
     if (fit !== visibleCount) setVisibleCount(fit);
+    setLabeledMore(fit == 0);
   }, [labels, canAssignLabels, visibleCount]);
 
   const debouncedRecalculate = useMemo(
@@ -177,9 +176,13 @@ export const TranslationLabels = ({
             placement="bottom"
           >
             <StyledMoreTranslationLabel>
-              {t('translations_list_labels_more_label', {
-                count: overflowCount,
-              })}
+              {labeledMore
+                ? t('translations_list_labels_more_label_full', {
+                    count: overflowCount,
+                  })
+                : t('translations_list_labels_more_label', {
+                    count: overflowCount,
+                  })}
             </StyledMoreTranslationLabel>
           </Tooltip>
         )}

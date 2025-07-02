@@ -29,12 +29,6 @@ const StyledControlsWrapper = styled(Box)`
   margin: 0px 0px;
 `;
 
-const StyledStateButtons = styled('div')`
-  display: flex;
-  justify-content: flex-end;
-  padding-right: 8px;
-`;
-
 const StyledBadge = styled(Badge)`
   & .unresolved {
     font-size: 10px;
@@ -94,6 +88,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   active,
   className,
 }) => {
+  const [hasNextState, setHasNextState] = React.useState(false);
   const spots: string[] = [];
 
   const translateTransition = useTaskTransitionTranslation();
@@ -107,7 +102,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const displayTaskButton =
     task && task.number === prefilteredTask && task.userAssigned;
 
-  if (displayTransitionButtons) {
+  if (displayTransitionButtons && hasNextState) {
     spots.push('state');
   }
   if (displayEdit) {
@@ -139,13 +134,13 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
       className={className}
     >
       {inDomTransitionButtons && (
-        <StyledStateButtons style={{ gridArea: 'state' }}>
-          <StateTransitionButtons
-            state={state}
-            onStateChange={onStateChange}
-            className={CELL_SHOW_ON_HOVER}
-          />
-        </StyledStateButtons>
+        <StateTransitionButtons
+          style={{ gridArea: 'state' }}
+          state={state}
+          onStateChange={onStateChange}
+          className={CELL_SHOW_ON_HOVER}
+          onNextStateExist={setHasNextState}
+        />
       )}
       {inDomEdit && (
         <ControlsButton
