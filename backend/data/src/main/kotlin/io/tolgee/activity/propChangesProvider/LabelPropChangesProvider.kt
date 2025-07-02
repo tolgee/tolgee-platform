@@ -13,7 +13,7 @@ class LabelPropChangesProvider : PropChangesProvider {
     val baseCollectionChangesProvider =
       BaseCollectionChangesProvider(
         old as Collection<Any?>?,
-        new as Collection<Any?>?,
+        (new as Collection<Any?>?)?.sortedBy { (it as Label).name },
       ) { extractLabelProperties(it as? Label) }
     return baseCollectionChangesProvider.provide()
   }

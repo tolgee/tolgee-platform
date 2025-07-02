@@ -24,6 +24,7 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OrderBy
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
@@ -96,6 +97,7 @@ class Translation(
     joinColumns = [JoinColumn(name = "translation_id")],
     inverseJoinColumns = [JoinColumn(name = "label_id")]
   )
+  @OrderBy("name ASC")
   @ActivityLoggedProp(LabelPropChangesProvider::class)
   var labels: MutableSet<Label> = mutableSetOf()
 

@@ -23,6 +23,14 @@ interface LabelRepository : JpaRepository<Label, Long> {
 
   fun findByProjectIdAndId(projectId: Long, labelId: Long): Label?
 
+  @Query(
+    """
+    from Label l
+    join l.translations t
+    where t.id in :translationIds
+    order by l.name
+    """
+  )
   fun findByTranslationsIdIn(translationIds: List<Long>): List<Label>
 
   @Query(
