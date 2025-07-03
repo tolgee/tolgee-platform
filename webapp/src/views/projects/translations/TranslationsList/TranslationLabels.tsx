@@ -43,6 +43,10 @@ const TooltipStyledList = styled(StyledList)`
   gap: 8px;
 `;
 
+const TooltipStyledListItem = styled('div')`
+  display: flex;
+`;
+
 const HiddenMeasure = styled(StyledList)`
   visibility: hidden;
   position: absolute;
@@ -159,17 +163,18 @@ export const TranslationLabels = ({
             title={
               <TooltipStyledList>
                 {labels?.slice(visibleCount).map((hiddenLabel) => (
-                  <TranslationLabel
-                    label={hiddenLabel}
-                    key={hiddenLabel.id}
-                    tooltip={hiddenLabel.description}
-                    onClick={(e) => e.stopPropagation()}
-                    onDelete={
-                      onDelete && canAssignLabels
-                        ? () => onDelete(hiddenLabel.id)
-                        : undefined
-                    }
-                  />
+                  <TooltipStyledListItem key={hiddenLabel.id}>
+                    <TranslationLabel
+                      label={hiddenLabel}
+                      tooltip={hiddenLabel.description}
+                      onClick={(e) => e.stopPropagation()}
+                      onDelete={
+                        onDelete && canAssignLabels
+                          ? () => onDelete(hiddenLabel.id)
+                          : undefined
+                      }
+                    />
+                  </TooltipStyledListItem>
                 ))}
               </TooltipStyledList>
             }
