@@ -102,6 +102,25 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_GLOSSARIES_AND_PLAYGROUND':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_glossaries_and_playground"
+                params={{
+                  linkPlayground: (
+                    <BannerLink href="https://docs.tolgee.io/platform/translation_process/ai-playground" />
+                  ),
+                  linkGlossaries: (
+                    <BannerLink href="https://docs.tolgee.io/platform/projects_and_organizations/glossaries" />
+                  ),
+                }}
+              />
+            }
+          />
+        );
+
       default:
         return assertUnreachableReturnNull(value);
     }
