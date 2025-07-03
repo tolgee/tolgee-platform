@@ -27,6 +27,7 @@ export const CloudPlanTemplateSelectorField: FC = () => {
             ...getCloudPlanInitialValues(plan),
             name: values.name,
             public: false,
+            newStripeProduct: false,
           };
           setValues(newValues);
           setSelectedPlanId(plan.id);

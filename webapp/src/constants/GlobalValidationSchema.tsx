@@ -311,8 +311,8 @@ export class Validation {
   static readonly CLOUD_PLAN_FORM = Yup.object({
     name: Yup.string().required(),
     type: Yup.string().required(),
-    stripeProductId: Yup.string().when('free', {
-      is: false,
+    stripeProductId: Yup.string().when(['free', 'newStripeProduct'], {
+      is: (free: any, newStripeProduct: any) => !free && !newStripeProduct,
       then: Yup.string().required(),
     }),
     prices: Yup.object().when('type', {
@@ -325,6 +325,10 @@ export class Validation {
       }),
     }),
     free: Yup.boolean(),
+    stripeProductName: Yup.string().when(['free', 'newStripeProduct'], {
+      is: (free: any, newStripeProduct: any) => !free && newStripeProduct,
+      then: Yup.string().required(),
+    }),
   });
 
   static readonly EE_PLAN_FORM = Yup.object({
