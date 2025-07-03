@@ -107,7 +107,7 @@ class TranslationSuggestionServiceEeImpl(
         suggestion.state = TranslationSuggestionState.ACCEPTED
         translationSuggestionRepository.save(suggestion)
         val declined = if (declineOther) {
-            translationSuggestionRepository.declineOther(projectId, language.id, keyId, suggestionId)
+          declineOtherSuggestions(projectId, language.id, keyId, suggestionId).map { it.id }
         } else {
           emptyList()
         }
@@ -124,6 +124,16 @@ class TranslationSuggestionServiceEeImpl(
         )
         return Pair(suggestion, declined)
     }
+
+  fun declineOtherSuggestions(
+    projectId: Long, languageId: Long, keyId: Long, suggestionId: Long
+  ): List<TranslationSuggestion> {
+    val toDecline = translationSuggestionRepository.getAllActive(projectId, languageId, keyId)
+      .filter { it.id != suggestionId }
+    toDecline.forEach { it.state = TranslationSuggestionState.DECLINED }
+    translationSuggestionRepository.saveAll(toDecline)
+    return toDecline
+  }
 
     fun getSuggestionsPaged(
         pageable: Pageable, projectId: Long, languageTag: String, keyId: Long, filters: SuggestionFilters,
