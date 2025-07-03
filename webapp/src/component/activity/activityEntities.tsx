@@ -436,13 +436,18 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
   },
   TranslationSuggestion: {
     label(params) {
-      return (
-        <T keyName="activity_entity_translation_suggestion" params={params} />
-      );
+      return <T keyName="activity_entity_suggestion" params={params} />;
     },
     description: ['key'],
     fields: {
-      translation: { type: 'text' },
+      translation: {
+        type: 'text',
+        label: () => <T keyName="activity_entity_suggestion.translation" />,
+      },
+      state: {
+        type: 'text',
+        label: () => <T keyName="activity_entity_suggestion.state" />,
+      },
     },
     references: ({ relations }) => {
       const result: Reference[] = [];
