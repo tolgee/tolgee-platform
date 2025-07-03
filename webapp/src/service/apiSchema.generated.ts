@@ -1041,7 +1041,8 @@ export interface components {
         | "FEATURE_VISUAL_EDITOR"
         | "FEATURE_CLI_2"
         | "FEATURE_TASKS"
-        | "FEATURE_LLM_PROVIDERS_AND_PLAYGROUND";
+        | "FEATURE_LLM_PROVIDERS_AND_PLAYGROUND"
+        | "FEATURE_GLOSSARIES_AND_PLAYGROUND";
     };
     ApiKeyModel: {
       /** @description Description */
@@ -4101,7 +4102,14 @@ export interface components {
         | "TASK_CLOSE"
         | "TASK_REOPEN"
         | "TASK_KEY_UPDATE"
-        | "ORDER_TRANSLATION";
+        | "ORDER_TRANSLATION"
+        | "GLOSSARY_CREATE"
+        | "GLOSSARY_UPDATE"
+        | "GLOSSARY_DELETE"
+        | "GLOSSARY_TERM_CREATE"
+        | "GLOSSARY_TERM_UPDATE"
+        | "GLOSSARY_TERM_DELETE"
+        | "GLOSSARY_TERM_TRANSLATION_UPDATE";
     };
     ProjectAiPromptCustomizationModel: {
       /**
