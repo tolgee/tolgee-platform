@@ -1,3 +1,10 @@
+## [3.123.15](https://github.com/tolgee/tolgee-platform/compare/v3.123.14...v3.123.15) (2025-07-03)
+
+
+### Bug Fixes
+
+* add new banner about glossaries and ai playground ([#3161](https://github.com/tolgee/tolgee-platform/issues/3161)) ([96ac384](https://github.com/tolgee/tolgee-platform/commit/96ac3847e0de006148a9a53e4dbbb1507a0cd26f))
+
 ## [3.123.14](https://github.com/tolgee/tolgee-platform/compare/v3.123.13...v3.123.14) (2025-07-02)
 
 
