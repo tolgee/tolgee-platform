@@ -4,7 +4,7 @@ import { XClose } from '@untitled-ui/icons-react';
 const StyledCloseIcon = styled(XClose)`
   cursor: pointer;
   padding: 2px;
-  color: ${({ theme }) => theme.palette.text.secondary};
+  color: ${({ theme }) => theme.palette.text.primary};
 `;
 
 type Props = {

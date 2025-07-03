@@ -11,10 +11,13 @@ import { OperationChangeNamespace } from './OperationChangeNamespace';
 import { OperationCopyTranslations } from './OperationCopyTranslations';
 import { OperationClearTranslations } from './OperationClearTranslations';
 import { OperationExportTranslations } from './OperationExportTranslations';
+import { OperationAssignTranslationLabel } from './OperationAssignTranslationLabel';
 import { FC } from 'react';
 import { BatchActions, OperationProps } from './types';
 import { createAdder } from 'tg.fixtures/pluginAdder';
 import { useAddBatchOperations as useAddEeBatchOperations } from 'tg.ee';
+import { OperationUnassignTranslationLabel } from 'tg.views/projects/translations/BatchOperations/OperationUnassignTranslationLabel';
+import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 
 export type BatchOperation = {
   id: BatchActions;
@@ -33,6 +36,7 @@ export type BatchOperationAdder = ReturnType<typeof addOperations>;
 
 export const useBatchOperations = () => {
   const { satisfiesPermission } = useProjectPermissions();
+  const labels = useTranslationsSelector((c) => c.labels);
 
   const { t } = useTranslate();
 
@@ -43,6 +47,7 @@ export const useBatchOperations = () => {
   const canChangeState = satisfiesPermission('translations.state-edit');
   const canViewTranslations = satisfiesPermission('translations.view');
   const canEditTranslations = satisfiesPermission('translations.edit');
+  const canAssignLabels = satisfiesPermission('translation-labels.assign');
 
   const publicOperations: BatchOperation[] = [
     {
@@ -101,6 +106,20 @@ export const useBatchOperations = () => {
       component: OperationRemoveTags,
     },
     {
+      id: 'assign_translation_labels',
+      label: t('batch_operations_assign_translation_labels'),
+      enabled: canAssignLabels,
+      hidden: labels.length === 0,
+      component: OperationAssignTranslationLabel,
+    },
+    {
+      id: 'unassign_translation_labels',
+      label: t('batch_operations_unassign_translation_labels'),
+      enabled: canAssignLabels,
+      hidden: labels.length === 0,
+      component: OperationUnassignTranslationLabel,
+    },
+    {
       id: 'change_namespace',
       label: t('batch_operations_change_namespace'),
       enabled: canEditKey,
@@ -108,6 +127,7 @@ export const useBatchOperations = () => {
     },
     {
       id: 'delete',
+      divider: true,
       label: t('batch_operations_delete'),
       enabled: canDeleteKey,
       component: OperationDelete,

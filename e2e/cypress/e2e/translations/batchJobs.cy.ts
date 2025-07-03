@@ -77,6 +77,20 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
     cy.gcy('translations-tag').should('not.exist');
   });
 
+  it('assigns and unassigns label to translations', () => {
+    selectAll();
+    selectOperation('Assign labels');
+    chooseLabelInSelector('Label 1');
+    executeBatchOperation();
+    gcy('translation-label').contains('Label 1').should('be.visible');
+
+    selectAll();
+    selectOperation('Unassign labels');
+    chooseLabelInSelector('Label 1');
+    executeBatchOperation();
+    gcy('translation-label').should('not.exist');
+  });
+
   it('will clear translations', () => {
     selectAll();
     selectOperation('Clear translations');
@@ -155,6 +169,20 @@ describe('Batch jobs', { scrollBehavior: false }, () => {
 
   const visit = () => {
     visitTranslations(project.id);
+  };
+
+  const chooseLabelInSelector = (label: string) => {
+    selectLanguage('English');
+    gcy('batch-operations-section').within(() => {
+      gcy('translation-label-control').click();
+    });
+    gcy('search-select-search').type(label);
+    gcy('label-autocomplete-option')
+      .contains(label)
+      .should('be.visible')
+      .click();
+    dismissMenu();
+    gcy('translation-label').contains(label).should('be.visible');
   };
 });
 
