@@ -33,14 +33,22 @@ export const SubfilterLabels = ({
   projectId,
   selectedLanguages,
 }: Props) => {
-  const labels = useTranslationsSelector((c) => c.labels);
+  const allLabels = useTranslationsSelector((c) => c.labels);
 
-  if (labels.length === 0) {
+  if (allLabels.length === 0) {
     return null;
   }
 
-  const { totalItems, setSearch, searchDebounced, search, loadableList } =
-    useLabelsService({ projectId });
+  const {
+    labels: searched,
+    totalItems,
+    setSearch,
+    searchDebounced,
+    search,
+    loadableList,
+  } = useLabelsService({ projectId });
+
+  const labels = searched || allLabels;
 
   const [expanded, setExpanded] = useState(
     value.filterTranslationLanguage !== undefined

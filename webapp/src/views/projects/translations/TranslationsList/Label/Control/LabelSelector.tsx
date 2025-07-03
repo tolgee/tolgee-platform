@@ -23,10 +23,17 @@ type LabelSelectorProps = {
 export const LabelSelector = ({ existing, onSelect }: LabelSelectorProps) => {
   const { t } = useTranslate();
   const project = useProject();
-  const { loadableList, search, setSearch } = useLabelsService({
+  const {
+    labels: searched,
+    loadableList,
+    search,
+    setSearch,
+  } = useLabelsService({
     projectId: project.id,
   });
-  const labels = useTranslationsSelector((c) => c.labels) || [];
+  const prefetched = useTranslationsSelector((c) => c.labels) || [];
+
+  const labels = searched || prefetched;
 
   const options = labels.filter((label: LabelModel) => {
     return !(existing && existing.some((l) => l.id === label.id));

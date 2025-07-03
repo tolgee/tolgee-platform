@@ -151,7 +151,7 @@ export const useLabelsService = ({ projectId, translations }: Props) => {
         lang: data.language.tag,
         data: {
           labels: [...previousLabels, response].sort((a, b) =>
-            a.name.localeCompare(b.name)
+            a.name.toLowerCase().localeCompare(b.name.toLowerCase())
           ),
         },
       });

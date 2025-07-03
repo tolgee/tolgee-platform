@@ -40,11 +40,12 @@ describe('Projects Settings - Labels', () => {
 
   it('search and add label to translation', () => {
     visitTranslations(projectId);
-    translationLabel.assignLabelToTranslation(
+    translationLabel.assignLabelToTranslationWithSearch(
       'first key',
       'en',
-      'Label to assign 1',
-      4
+      'label to assign 1',
+      ['label to assign 2', 'label to assign 3'],
+      1
     );
 
     // Verify label after assigning
@@ -52,7 +53,7 @@ describe('Projects Settings - Labels', () => {
     translationLabel.verifyLabelInTranslationCell(
       'first key',
       'en',
-      'Label to assign 1',
+      'label to assign 1',
       isDarkMode ? 'rgba(255, 0, 255, 0.85)' : 'rgb(255, 0, 255)'
     );
 
@@ -64,7 +65,7 @@ describe('Projects Settings - Labels', () => {
     translationLabel.verifyLabelInTranslationCell(
       'first key',
       'en',
-      'Label to assign 1',
+      'label to assign 1',
       isDarkMode ? 'rgba(255, 0, 255, 0.85)' : 'rgb(255, 0, 255)'
     );
   });
@@ -120,7 +121,7 @@ describe('Projects Settings - Labels', () => {
     translationLabel.assignLabelToTranslation(
       'first key',
       'en',
-      'Label to assign 1',
+      'label to assign 1',
       4
     );
 
@@ -128,7 +129,7 @@ describe('Projects Settings - Labels', () => {
     assertActivityDetails([
       'Translation labels updated',
       'first key',
-      'Label to assign 1',
+      'label to assign 1',
     ]);
   });
 
@@ -144,5 +145,33 @@ describe('Projects Settings - Labels', () => {
 
     checkActivity('Translation labels updated');
     assertActivityDetails(['Translation labels updated', 'first key']);
+  });
+
+  it('adds labels to translations and sorts them alphabetically', () => {
+    visitTranslations(projectId);
+
+    translationLabel.assignMultipleLabelsToTranslation('first key', 'en', [
+      'Unassigned label',
+      'label to assign 3',
+      'label to assign 2',
+    ]);
+
+    getTranslationCell('first key', 'en').within(() => {
+      translationLabel.getTranslationLabels('first key', 'en').within(() => {
+        gcy('translation-label')
+          .should('have.length', 4)
+          .then((labels) => {
+            const labelTexts = Array.from(labels).map(
+              (label) => label.textContent
+            );
+            expect(labelTexts).to.deep.equal([
+              'First label',
+              'label to assign 2',
+              'label to assign 3',
+              'Unassigned label',
+            ]);
+          });
+      });
+    });
   });
 });
