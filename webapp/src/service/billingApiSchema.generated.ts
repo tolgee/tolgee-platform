@@ -24,6 +24,9 @@ export interface paths {
     put: operations["updatePlan_1"];
     delete: operations["deletePlan_1"];
   };
+  "/v2/administration/billing/cloud-plans/{planId}/archive": {
+    put: operations["archivePlan_1"];
+  };
   "/v2/administration/billing/cloud-plans/{planId}/organizations": {
     get: operations["getPlanOrganizations_1"];
   };
@@ -45,6 +48,9 @@ export interface paths {
     get: operations["getPlan"];
     put: operations["updatePlan"];
     delete: operations["deletePlan"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/{planId}/archive": {
+    put: operations["archivePlan"];
   };
   "/v2/administration/billing/self-hosted-ee-plans/{planId}/organizations": {
     get: operations["getPlanOrganizations"];
@@ -212,6 +218,7 @@ export interface paths {
 export interface components {
   schemas: {
     AdministrationCloudPlanModel: {
+      archived: boolean;
       canEditPrices: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
@@ -330,6 +337,7 @@ export interface components {
       ids: components["schemas"]["SubscriptionId"][];
     };
     CloudPlanModel: {
+      archived: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -817,9 +825,7 @@ export interface components {
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
         | "llm_content_filter"
-        | "llm_provider_empty_response"
-        | "label_not_found"
-        | "label_not_from_project";
+        | "llm_provider_empty_response";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -1006,8 +1012,6 @@ export interface components {
         | "tasks.edit"
         | "prompts.view"
         | "prompts.edit"
-        | "translation-labels.manage"
-        | "translation-labels.assign"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1114,6 +1118,7 @@ export interface components {
       planId: number;
     };
     SelfHostedEePlanAdministrationModel: {
+      archived: boolean;
       canEditPrices: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
@@ -1157,6 +1162,7 @@ export interface components {
       subscriptionCount: number;
     };
     SelfHostedEePlanModel: {
+      archived: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -1795,6 +1801,53 @@ export interface operations {
       };
     };
   };
+  archivePlan_1: {
+    parameters: {
+      path: {
+        planId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AdministrationCloudPlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   getPlanOrganizations_1: {
     parameters: {
       path: {
@@ -2222,6 +2275,53 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  archivePlan: {
+    parameters: {
+      path: {
+        planId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelfHostedEePlanAdministrationModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
