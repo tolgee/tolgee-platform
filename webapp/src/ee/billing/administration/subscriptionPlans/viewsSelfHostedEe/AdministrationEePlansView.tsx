@@ -8,6 +8,7 @@ import {
   ListItem,
   ListItemText,
   Paper,
+  styled,
 } from '@mui/material';
 import { X } from '@untitled-ui/icons-react';
 
@@ -23,8 +24,17 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { PlanSubscriptionCount } from 'tg.ee.module/billing/component/Plan/PlanSubscriptionCount';
 import { PlanListPriceInfo } from 'tg.ee.module/billing/component/Plan/PlanListPriceInfo';
+import { PlanArchivedChip } from 'tg.ee.module/billing/component/Plan/PlanArchivedChip';
+import clsx from 'clsx';
 
-type SelfHostedEePlanModel = components['schemas']['SelfHostedEePlanModel'];
+type SelfHostedEePlanAdministrationModel =
+  components['schemas']['SelfHostedEePlanAdministrationModel'];
+
+const StyledListItemText = styled(ListItemText)(({ theme }) => ({
+  '&.archived': {
+    color: theme.palette.text.disabled,
+  },
+}));
 
 export const AdministrationEePlansView = () => {
   const messaging = useMessage();
@@ -36,13 +46,39 @@ export const AdministrationEePlansView = () => {
     query: {},
   });
 
+  const archivePlanLoadable = useBillingApiMutation({
+    url: '/v2/administration/billing/self-hosted-ee-plans/{planId}/archive',
+    method: 'put',
+    invalidatePrefix: '/v2/administration/billing/self-hosted-ee-plans',
+  });
+
   const deletePlanLoadable = useBillingApiMutation({
     url: '/v2/administration/billing/self-hosted-ee-plans/{planId}',
     method: 'delete',
     invalidatePrefix: '/v2/administration/billing/self-hosted-ee-plans',
   });
 
-  function deletePlan(plan: SelfHostedEePlanModel) {
+  function archivePlan(plan: SelfHostedEePlanAdministrationModel) {
+    confirmation({
+      message: <T keyName="administration_plan_archive_message" />,
+      confirmButtonText: <T keyName="general_archive" />,
+      onConfirm: () =>
+        archivePlanLoadable.mutate(
+          {
+            path: { planId: plan.id },
+          },
+          {
+            onSuccess() {
+              messaging.success(
+                <T keyName="administration_plan_archived_success" />
+              );
+            },
+          }
+        ),
+    });
+  }
+
+  function deletePlan(plan: SelfHostedEePlanAdministrationModel) {
     confirmation({
       hardModeText: plan.name,
       message: <T keyName="administration_ee_plan_delete_message" />,
@@ -88,7 +124,12 @@ export const AdministrationEePlansView = () => {
                 alignItems="center"
               >
                 <Box display="flex" gap={2} alignItems="center">
-                  <ListItemText>{plan.name}</ListItemText>
+                  <StyledListItemText
+                    className={clsx(plan.archived && 'archived')}
+                  >
+                    {plan.name}
+                  </StyledListItemText>
+                  <PlanArchivedChip isArchived={plan.archived} />
                   {plan.public && (
                     <Chip
                       data-cy="administration-ee-plans-item-public-badge"
@@ -97,7 +138,7 @@ export const AdministrationEePlansView = () => {
                     />
                   )}
                 </Box>
-                <Box display="flex">
+                <Box display="flex" gap={2}>
                   <Box display="flex" gap={2} alignItems="center">
                     <PlanSubscriptionCount count={plan.subscriptionCount} />
                     <PlanListPriceInfo prices={plan.prices} period="MONTHLY" />
@@ -107,7 +148,17 @@ export const AdministrationEePlansView = () => {
                       bold
                     />
                   </Box>
-                  <Box>
+                  <Box display="flex">
+                    {!plan.archived && (
+                      <Button
+                        size="small"
+                        onClick={() => archivePlan(plan)}
+                        data-cy="administration-ee-plans-item-archive"
+                        style={{ padding: '6px 8px' }}
+                      >
+                        {t('administration_plan_archive_button')}
+                      </Button>
+                    )}
                     <Button
                       size="small"
                       component={Link}

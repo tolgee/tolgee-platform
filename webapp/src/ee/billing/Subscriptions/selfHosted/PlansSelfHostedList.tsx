@@ -66,6 +66,7 @@ export const PlansSelfHostedList: FC<BillingPlansProps> = ({
     public: true,
     nonCommercial: false,
     metricType: 'KEYS_SEATS',
+    archived: false,
   });
 
   const parentForPublic: PlanType[] = [];
