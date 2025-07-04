@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Checkbox, FormControlLabel, styled } from '@mui/material';
 import { PanelHeader } from '../ToolsPanel/common/PanelHeader';
 import { T, useTranslate } from '@tolgee/react';
@@ -139,7 +139,7 @@ export const SuggestionsList = ({
           return {
             ...translation,
             suggestions: firstSuggestion ? [firstSuggestion] : [],
-            suggestionCount: firstPage.page?.totalElements ?? 0,
+            activeSuggestionCount: firstPage.page?.totalElements ?? 0,
           };
         },
       });
@@ -234,10 +234,22 @@ export const SuggestionsList = ({
     return result.length ? result : translation.suggestions;
   }, [suggestionsLoadable.data, translation.suggestions]);
 
-  const [hidden, setHidden] = useLocalStorageState({
+  const [_hidden, _setHidden] = useLocalStorageState({
     key: OPEN_SUGGESTIONS_KEY,
     initial: undefined,
   });
+
+  const [hiddenOverride, setHiddenOverride] = useState<boolean | undefined>(
+    translation.activeSuggestionCount ? undefined : true
+  );
+
+  const hidden = hiddenOverride ?? _hidden;
+
+  function setHidden(value: boolean) {
+    setHiddenOverride(undefined);
+    _setHidden(value ? 'true' : undefined);
+  }
+
   const panelId = 'suggestions';
 
   const isLoading =
@@ -259,7 +271,7 @@ export const SuggestionsList = ({
             translation.activeSuggestionCount
           }
           onToggle={() => {
-            setHidden((value) => (value ? undefined : 'true'));
+            setHidden(!hidden);
           }}
           panelId={panelId}
           open={!hidden}
@@ -274,7 +286,10 @@ export const SuggestionsList = ({
             <Checkbox
               size="small"
               checked={showAll}
-              onChange={(e) => setShowAll(e.target.checked)}
+              onChange={(e) => {
+                setHiddenOverride(false);
+                setShowAll(e.target.checked);
+              }}
             />
           }
           sx={{ mr: 0 }}
