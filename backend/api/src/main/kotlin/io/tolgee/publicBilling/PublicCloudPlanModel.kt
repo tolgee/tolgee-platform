@@ -13,4 +13,5 @@ interface PublicCloudPlanModel {
   val nonCommercial: Boolean
   val includedUsage: PlanIncludedUsageModel
   val metricType: MetricType
+  val archived: Boolean
 }
