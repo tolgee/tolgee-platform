@@ -434,6 +434,30 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
       return result;
     },
   },
+  TranslationSuggestion: {
+    label(params) {
+      return <T keyName="activity_entity_suggestion" params={params} />;
+    },
+    description: ['key'],
+    fields: {
+      translation: {
+        type: 'text',
+        label: () => <T keyName="activity_entity_suggestion.translation" />,
+      },
+      state: {
+        type: 'text',
+        label: () => <T keyName="activity_entity_suggestion.state" />,
+      },
+    },
+    references: ({ relations }) => {
+      const result: Reference[] = [];
+      const keyRef = getKeyWithLanguages(relations);
+      if (keyRef) {
+        result.push(keyRef);
+      }
+      return result;
+    },
+  },
 };
 
 const getKeyWithLanguages = (relations: any): KeyReferenceData | undefined => {

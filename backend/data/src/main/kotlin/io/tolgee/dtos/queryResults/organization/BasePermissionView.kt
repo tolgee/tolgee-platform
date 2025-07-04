@@ -16,6 +16,7 @@ class BasePermissionView(
   override val translateLanguageIds: Set<Long>? = null
   override val viewLanguageIds: Set<Long>? = null
   override val stateChangeLanguageIds: Set<Long>? = null
+  override val suggestLanguageIds: Set<Long>? = null
   override val granular: Boolean
     get() = _scopes != null
 

@@ -4,7 +4,7 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.model.enums.TranslationState
 
 data class TranslationView(
-  val id: Long,
+  val id: Long?,
   val text: String?,
   val state: TranslationState,
   val auto: Boolean,
@@ -12,4 +12,11 @@ data class TranslationView(
   val commentCount: Long,
   val unresolvedCommentCount: Long,
   val outdated: Boolean,
-)
+  val activeSuggestionCount: Long,
+  val totalSuggestionCount: Long,
+) {
+  var suggestions: List<TranslationSuggestionView>? = null
+  companion object {
+    val FIELD_COUNT = 10
+  }
+}
