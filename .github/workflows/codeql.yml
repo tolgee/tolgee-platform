@@ -1,0 +1,32 @@
+name: CodeQL Scan
+
+on:
+  push:
+    branches: [main, test-codeql]
+    paths: ['**/*.ts', '**/*.tsx']
+  pull_request:
+    branches: [main]
+    paths: ['**/*.ts', '**/*.tsx']
+  schedule:
+    - cron: '0 4 * * 1'  # Weekly on Monday
+
+jobs:
+  codeql:
+    name: CodeQL Analysis (TypeScript)
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: typescript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
