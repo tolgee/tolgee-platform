@@ -88,6 +88,7 @@ tasks.register('buildTestEmails', Exec) {
 }
 
 tasks.register('updateEmailTranslations', Exec) {
+    dependsOn 'installEmailDeps'
     onlyIf {
         System.getenv("SKIP_EMAIL_BUILD") != "true" &&
                 System.getenv("TOLGEE_API_URL") != null &&
