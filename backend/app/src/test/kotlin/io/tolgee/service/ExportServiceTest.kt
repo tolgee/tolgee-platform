@@ -186,4 +186,53 @@ class ExportServiceTest : AbstractSpringTest() {
     result.assert.hasSize(4)
     result.forEach { it.key.namespace.assert.isIn(null, "ns-1") }
   }
+
+  @Test
+  fun `project with 2 namespaces and no {namespace} in template path should throw`() {
+    val testData = TranslationsTestData()
+    testData.addTwoNamespaces()
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+
+    val exportParams = ExportParams(filterKeyId = listOf(testData.aKey.id), fileStructureTemplate = "{languageTag}.{extension}")
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
+    val result = provider.data
+  }
+
+  @Test
+  fun `project with 2 namespaces and {namespace} in template path should not throw`() {
+    val testData = TranslationsTestData()
+    testData.addTwoNamespaces()
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+
+    val exportParams = ExportParams(filterKeyId = listOf(testData.aKey.id), fileStructureTemplate = "{languageTag}.{extension}")
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
+    val result = provider.data
+  }
+
+  @Test
+  fun `project with 1 namespace and no {namespace} in template path should not throw`() {
+    val testData = TranslationsTestData()
+    testData.addOneNamespace()
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+
+    val exportParams = ExportParams(filterKeyId = listOf(testData.aKey.id), fileStructureTemplate = "{languageTag}.{extension}")
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
+    val result = provider.data
+  }
+
+  @Test
+  fun `project with 0 namespace and no {namespace} in template path should not throw`() {
+    val testData = TranslationsTestData()
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+
+    val exportParams = ExportParams(filterKeyId = listOf(testData.aKey.id), fileStructureTemplate = "{languageTag}.{extension}")
+    val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
+    val result = provider.data
+  }
+
 }
+
