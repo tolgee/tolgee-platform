@@ -56,11 +56,10 @@ class ExportFilePathProvider(
 
     // Having a single namespace cannot cause a collision when flattening the structure.
     if (projectNamespaceCount > 1) {
-      if (namespace != null && namespace.isNotEmpty()) {
+        // Not providing the namespace in the filename is not allowed and likely to cause collisions.
         if (!getTemplate().contains("{namespace}")) {
           throw getMissingPlaceholderException(ExportFilePathPlaceholder.NAMESPACE)
         }
-      }
     }
 
     if (!params.format.multiLanguage) {
