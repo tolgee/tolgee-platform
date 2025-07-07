@@ -43,6 +43,8 @@ export function getEditorActions({
 
   const actions: TranslationAction[] = [];
 
+  const additional: TranslationAction[] = [];
+
   if (
     satisfiesLanguageAccess('translations.edit', languageId) &&
     (translation?.state !== 'REVIEWED' ||
@@ -57,6 +59,13 @@ export function getEditorActions({
         <T keyName="translations_cell_save" />
       ),
     });
+
+    if (displayTaskControls) {
+      additional.push({
+        action: (props) => onSave({ ...props, preventTaskResolution: true }),
+        label: <T keyName="translations_cell_save_only" />,
+      });
+    }
   }
 
   if (
@@ -65,16 +74,25 @@ export function getEditorActions({
   ) {
     actions.push({
       action: (props) => onSave({ ...props, suggestionOnly: true }),
-      label: <T keyName="translations_cell_suggest" />,
+      label: displayTaskControls ? (
+        <T keyName="translations_cell_suggest_and_done" />
+      ) : (
+        <T keyName="translations_cell_suggest" />
+      ),
     });
+
+    if (displayTaskControls) {
+      additional.push({
+        action: (props) =>
+          onSave({
+            ...props,
+            suggestionOnly: true,
+            preventTaskResolution: true,
+          }),
+        label: <T keyName="translations_cell_suggest_only" />,
+      });
+    }
   }
 
-  if (displayTaskControls) {
-    actions.push({
-      action: (props) => onSave({ ...props, preventTaskResolution: true }),
-      label: <T keyName="translations_cell_save_only" />,
-    });
-  }
-
-  return actions;
+  return [...actions, ...additional];
 }
