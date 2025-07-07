@@ -208,6 +208,23 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
           return <T keyName="activity_entity_project.name" params={params} />;
         },
       },
+      description: {
+        label(params) {
+          return (
+            <T keyName="activity_entity_project.description" params={params} />
+          );
+        },
+      },
+      suggestionsMode: {
+        label(params) {
+          return (
+            <T
+              keyName="activity_entity_project.suggestion_mode"
+              params={params}
+            />
+          );
+        },
+      },
       baseLanguage: {
         type: 'project_language',
         label(params) {
