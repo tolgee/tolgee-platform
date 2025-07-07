@@ -4,12 +4,15 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.posthog.java.PostHog
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.retry
@@ -251,6 +254,22 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       assertThatJson(parsed["en.json"]!!) {
         node("key").isEqualTo("hello")
       }
+    }
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `it returns 400 with MULTIPLE_NAMESPACES_MAPPED_TO_SINGLE_FILE error when namespaced and fileStructureTemplate is missing {namespace}`() {
+    retryingOnCommonIssues {
+      namespacesTestData = NamespacesTestData()
+      testDataService.saveTestData(namespacesTestData!!.root)
+      projectSupplier = { namespacesTestData!!.projectBuilder.self }
+      userAccount = namespacesTestData!!.user
+
+      performProjectAuthPost("export", mapOf("fileStructureTemplate" to "{languageTag}.{extension}"))
+        .andIsBadRequest
+        .andHasErrorMessage(Message.MULTIPLE_NAMESPACES_MAPPED_TO_SINGLE_FILE)
     }
   }
 

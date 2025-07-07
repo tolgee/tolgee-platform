@@ -1,5 +1,7 @@
 package io.tolgee.formats.nestedStructureModel
 
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.formats.path.ArrayPathItem
 import io.tolgee.formats.path.ObjectPathItem
 import io.tolgee.formats.path.PathItem
@@ -218,13 +220,14 @@ class StructureModelBuilder(
     fullPath: List<PathItem>,
   ) {
     if (value != null) {
-      throw IllegalStateException(
-        "Cannot add item to node. This is a bug, data should be sorted by key name path. Path: ${
-          buildPath(
-            fullPath,
-          )
-        }",
-      )
+      throw BadRequestException(Message.MULTIPLE_NAMESPACES_MAPPED_TO_SINGLE_FILE)
+//      throw IllegalStateException(
+//        "Cannot add item to node. This is a bug, data should be sorted by key name path. Path: ${
+//          buildPath(
+//            fullPath,
+//          )
+//        }",
+//      )
     }
   }
 
