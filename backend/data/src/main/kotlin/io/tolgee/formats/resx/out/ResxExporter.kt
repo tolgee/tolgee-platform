@@ -14,6 +14,7 @@ class ResxExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
+  private val projectNamespaceCount: Int,
 ) : FileExporter {
   private val fileUnits = mutableMapOf<String, MutableList<ResxEntry>>()
 
@@ -50,6 +51,7 @@ class ResxExporter(
     ExportFilePathProvider(
       exportParams,
       "resx",
+      projectNamespaceCount
     )
   }
 

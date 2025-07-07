@@ -86,6 +86,7 @@ object YamlExportTestData {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     exportParams: ExportParams? = null,
+    projectNamespaceCount: Int = 0
   ): YamlFileExporter {
     return YamlFileExporter(
       translations = translations,
@@ -98,6 +99,7 @@ object YamlExportTestData {
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       objectMapper = ObjectMapper(YAMLFactory()),
       customPrettyPrinter = CustomPrettyPrinter(),
+      projectNamespaceCount = projectNamespaceCount,
     )
   }
 }

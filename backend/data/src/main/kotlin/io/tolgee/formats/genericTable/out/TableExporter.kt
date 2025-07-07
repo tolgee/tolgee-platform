@@ -14,11 +14,13 @@ abstract class TableExporter(
   val exportParams: IExportParams,
   val fileExtension: String,
   val isProjectIcuPlaceholdersEnabled: Boolean = true,
+  private val projectNamespaceCount: Int,
 ) : FileExporter {
   val pathProvider by lazy {
     ExportFilePathProvider(
       exportParams,
       fileExtension,
+      projectNamespaceCount = projectNamespaceCount,
     )
   }
 

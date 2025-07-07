@@ -12,7 +12,8 @@ class XlsxFileExporter(
   translations: List<ExportTranslationView>,
   exportParams: IExportParams,
   isProjectIcuPlaceholdersEnabled: Boolean = true,
-) : TableExporter(translations, exportParams, "xlsx", isProjectIcuPlaceholdersEnabled) {
+  projectNamespaceCount: Int,
+) : TableExporter(translations, exportParams, "xlsx", isProjectIcuPlaceholdersEnabled, projectNamespaceCount) {
   override fun List<TableEntry>.toFileContents(): InputStream {
     val languageTags =
       exportParams.languages?.sorted()?.toTypedArray()

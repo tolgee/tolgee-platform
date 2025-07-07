@@ -352,6 +352,7 @@ class PoFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
+    projectNamespaceCount: Int = 0,
   ): PoFileExporter {
     val baseLanguageMock = mock<ILanguage>()
     whenever(baseLanguageMock.tag).thenAnswer { "en" }
@@ -361,6 +362,7 @@ class PoFileExporterTest {
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       baseLanguage = baseLanguageMock,
       baseTranslationsProvider = { listOf() },
+      projectNamespaceCount = projectNamespaceCount,
     )
   }
 

@@ -147,11 +147,13 @@ class PropertiesFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
+    projectNamespaceCount: Int = 0,
   ): PropertiesFileExporter {
     return PropertiesFileExporter(
       translations = translations,
       exportParams = params,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
+      projectNamespaceCount
     )
   }
 

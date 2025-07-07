@@ -9,6 +9,7 @@ import io.tolgee.service.export.dataProvider.ExportTranslationView
 class ExportFilePathProvider(
   private val params: IExportParams,
   private val extension: String,
+  private val projectNamespaceCount: Int,
 ) {
   /**
    * This method takes the template provided in params and returns the file path by replacing the placeholders
@@ -53,10 +54,12 @@ class ExportFilePathProvider(
 
   private fun validateTemplate(namespace: String?) {
 
-    // TODO: Discuss that this is technically a breaking changge. Would it be OK to scan the translations for collisions?
-    if (namespace != null && namespace.isNotEmpty()) {
-      if (!getTemplate().contains("{namespace}")) {
-        throw getMissingPlaceholderException(ExportFilePathPlaceholder.NAMESPACE)
+    // Having a single namespace cannot cause a collision when flattening the structure.
+    if (projectNamespaceCount > 1) {
+      if (namespace != null && namespace.isNotEmpty()) {
+        if (!getTemplate().contains("{namespace}")) {
+          throw getMissingPlaceholderException(ExportFilePathPlaceholder.NAMESPACE)
+        }
       }
     }
 

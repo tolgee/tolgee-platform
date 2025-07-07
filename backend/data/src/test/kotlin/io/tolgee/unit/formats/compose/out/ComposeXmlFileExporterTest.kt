@@ -313,11 +313,13 @@ class ComposeXmlFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
+    projectNamespaceCount: Int = 0,
   ): XmlResourcesExporter {
     return XmlResourcesExporter(
       translations = translations,
       exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+      projectNamespaceCount = projectNamespaceCount,
     )
   }
 

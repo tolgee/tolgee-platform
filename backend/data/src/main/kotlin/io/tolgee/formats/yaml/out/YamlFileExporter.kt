@@ -17,6 +17,7 @@ class YamlFileExporter(
   objectMapper: ObjectMapper,
   projectIcuPlaceholdersSupport: Boolean,
   customPrettyPrinter: CustomPrettyPrinter,
+  projectNamespaceCount: Int,
 ) : FileExporter {
   private val fileExtension: String = exportParams.format.extension
 
@@ -37,6 +38,7 @@ class YamlFileExporter(
       supportArrays = supportArrays,
       messageFormat = messageFormat,
       customPrettyPrinter = customPrettyPrinter,
+      projectNamespaceCount = projectNamespaceCount,
     )
 
   private val rootKeyIsLanguageTag

@@ -10,6 +10,7 @@ class AppleStringsStringsdictExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
+  private val projectNamespaceCount: Int,
 ) : FileExporter {
   private val preparedFiles = mutableMapOf<String, PreparedFile>()
 
@@ -44,11 +45,15 @@ class AppleStringsStringsdictExporter(
     ExportFilePathProvider(
       exportParams,
       "strings",
+      projectNamespaceCount = projectNamespaceCount,
     )
   }
 
   private val stringsdictFilePathProvider by lazy {
-    ExportFilePathProvider(exportParams, "stringsdict")
+    ExportFilePathProvider(
+      exportParams, "stringsdict",
+      projectNamespaceCount = projectNamespaceCount
+    )
   }
 
   private fun handleTranslation(it: ExportTranslationView) {

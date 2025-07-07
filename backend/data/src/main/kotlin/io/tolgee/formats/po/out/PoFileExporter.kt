@@ -16,6 +16,7 @@ class PoFileExporter(
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: ILanguage,
   private val projectIcuPlaceholdersSupport: Boolean = true,
+  private val projectNamespaceCount: Int,
 ) : FileExporter {
   val fileExtension: String = "po"
 
@@ -68,6 +69,7 @@ class PoFileExporter(
     ExportFilePathProvider(
       exportParams,
       fileExtension,
+      projectNamespaceCount = projectNamespaceCount,
     )
   }
 

@@ -98,6 +98,7 @@ class PoMessageFormatsExporterTest {
       exportParams = ExportParams().also { it.messageFormat = importFormat },
       baseLanguage = baseLanguageMock,
       baseTranslationsProvider = { listOf() },
+      projectNamespaceCount = 0,
     )
   }
 }

@@ -22,6 +22,7 @@ class AppleXliffExporter(
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   private val baseLanguageTag: String,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
+  private val projectNamespaceCount: Int,
 ) : FileExporter {
   private val fileExtension: String = ExportFormat.XLIFF.extension
 
@@ -295,6 +296,7 @@ class AppleXliffExporter(
     ExportFilePathProvider(
       exportParams,
       fileExtension,
+      projectNamespaceCount = projectNamespaceCount,
     )
   }
 

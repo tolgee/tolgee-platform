@@ -203,6 +203,7 @@ private fun getExporter(translations: List<ExportTranslationView>): FlutterArbFi
     exportParams = getExportParams(),
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
+    projectNamespaceCount = 0
   )
 }
 
@@ -210,6 +211,7 @@ private fun getExporter(
   translations: List<ExportTranslationView>,
   isProjectIcuPlaceholdersEnabled: Boolean = true,
   params: ExportParams = getExportParams(),
+  projectNamespaceCount: Int = 0,
 ): FlutterArbFileExporter {
   return FlutterArbFileExporter(
     translations = translations,
@@ -217,6 +219,7 @@ private fun getExporter(
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
     isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+    projectNamespaceCount = projectNamespaceCount,
   )
 }
 

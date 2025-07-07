@@ -114,11 +114,13 @@ class CsvFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     exportParams: ExportParams = ExportParams(),
+    projectNamespaceCount: Int = 0,
   ): CsvFileExporter {
     return CsvFileExporter(
       translations = translations,
       exportParams = exportParams,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+      projectNamespaceCount
     )
   }
 }

@@ -459,6 +459,7 @@ class AppleXliffFileExporterTest {
     baseTranslations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
+    projectNamespaceCount: Int = 0,
   ): AppleXliffExporter {
     return AppleXliffExporter(
       translations = translations,
@@ -466,6 +467,7 @@ class AppleXliffFileExporterTest {
       baseTranslationsProvider = { baseTranslations },
       baseLanguageTag = "tag",
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+      projectNamespaceCount = projectNamespaceCount,
     )
   }
 

@@ -23,6 +23,7 @@ class PropertiesFileExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
   private val projectIcuPlaceholdersSupport: Boolean,
+  private val projectNamespaceCount: Int,
 ) : FileExporter {
   private val fileExtension: String = "properties"
 
@@ -79,6 +80,7 @@ class PropertiesFileExporter(
     ExportFilePathProvider(
       exportParams,
       fileExtension,
+      projectNamespaceCount
     )
   }
 }

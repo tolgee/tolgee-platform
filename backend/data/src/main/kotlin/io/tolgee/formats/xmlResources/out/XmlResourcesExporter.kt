@@ -20,6 +20,7 @@ class XmlResourcesExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
+  private val projectNamespaceCount: Int,
 ) : FileExporter {
   /**
    * Map (Path To file -> Map (Key Name -> Node Wrapper))
@@ -188,6 +189,7 @@ class XmlResourcesExporter(
     ExportFilePathProvider(
       exportParams,
       "xml",
+      projectNamespaceCount
     )
   }
 

@@ -373,11 +373,13 @@ class StringsStringsdictFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
+    projectNamespaceCount: Int = 0,
   ): AppleStringsStringsdictExporter {
     return AppleStringsStringsdictExporter(
       translations = translations,
       exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+      projectNamespaceCount = projectNamespaceCount,
     )
   }
 
@@ -385,6 +387,7 @@ class StringsStringsdictFileExporterTest {
     return AppleStringsStringsdictExporter(
       translations = translations,
       exportParams = getExportParams(),
+      projectNamespaceCount = 0,
     )
   }
 

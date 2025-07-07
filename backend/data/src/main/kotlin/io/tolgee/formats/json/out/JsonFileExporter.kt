@@ -17,6 +17,7 @@ class JsonFileExporter(
   projectIcuPlaceholdersSupport: Boolean,
   val objectMapper: ObjectMapper,
   customPrettyPrinter: CustomPrettyPrinter,
+  projectNamespaceCount: Int,
 ) : FileExporter {
   private val fileExtension: String = ExportFormat.JSON.extension
 
@@ -37,6 +38,7 @@ class JsonFileExporter(
       supportArrays = supportArrays,
       messageFormat = messageFormat,
       customPrettyPrinter = customPrettyPrinter,
+      projectNamespaceCount = projectNamespaceCount,
     )
 
   private val supportArrays

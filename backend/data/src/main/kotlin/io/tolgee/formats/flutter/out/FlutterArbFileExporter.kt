@@ -18,6 +18,7 @@ class FlutterArbFileExporter(
   private val baseLanguageTag: String,
   private val objectMapper: ObjectMapper,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
+  private val projectNamespaceCount: Int,
 ) : FileExporter {
   /**
    * Map (Path To file -> Map (Key Name -> Node Wrapper))
@@ -81,6 +82,7 @@ class FlutterArbFileExporter(
     ExportFilePathProvider(
       exportParams,
       "arb",
+      projectNamespaceCount = projectNamespaceCount,
     )
   }
 

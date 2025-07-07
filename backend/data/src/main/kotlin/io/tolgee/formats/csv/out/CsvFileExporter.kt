@@ -9,8 +9,8 @@ import java.io.InputStream
 class CsvFileExporter(
   translations: List<ExportTranslationView>,
   exportParams: IExportParams,
-  isProjectIcuPlaceholdersEnabled: Boolean = true,
-) : TableExporter(translations, exportParams, "csv", isProjectIcuPlaceholdersEnabled) {
+  isProjectIcuPlaceholdersEnabled: Boolean = true, projectNamespaceCount: Int,
+) : TableExporter(translations, exportParams, "csv", isProjectIcuPlaceholdersEnabled, projectNamespaceCount) {
   override fun List<TableEntry>.toFileContents(): InputStream {
     val languageTags =
       exportParams.languages?.sorted()?.toTypedArray()

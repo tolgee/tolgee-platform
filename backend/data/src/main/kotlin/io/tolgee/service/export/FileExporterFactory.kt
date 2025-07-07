@@ -23,6 +23,7 @@ import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
+import kotlin.Int
 
 @Component
 class FileExporterFactory(
@@ -38,6 +39,7 @@ class FileExporterFactory(
     baseTranslationsProvider: () -> List<ExportTranslationView>,
     baseLanguage: LanguageDto,
     projectIcuPlaceholdersSupport: Boolean,
+    projectNamespaceCount: Int,
   ): FileExporter {
     return when (exportParams.format) {
       ExportFormat.CSV ->
@@ -45,6 +47,7 @@ class FileExporterFactory(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
+          projectNamespaceCount = projectNamespaceCount,
         )
 
       ExportFormat.JSON, ExportFormat.JSON_TOLGEE, ExportFormat.JSON_I18NEXT ->
@@ -54,6 +57,7 @@ class FileExporterFactory(
           objectMapper = objectMapper,
           projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
           customPrettyPrinter = customPrettyPrinter,
+          projectNamespaceCount = projectNamespaceCount,
         )
 
       ExportFormat.YAML_RUBY, ExportFormat.YAML ->
@@ -63,6 +67,7 @@ class FileExporterFactory(
           objectMapper = yamlObjectMapper,
           projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
           customPrettyPrinter,
+          projectNamespaceCount = projectNamespaceCount,
         )
 
       ExportFormat.XLIFF ->
@@ -72,6 +77,7 @@ class FileExporterFactory(
           baseTranslationsProvider,
           baseLanguage,
           projectIcuPlaceholdersSupport,
+          projectNamespaceCount = projectNamespaceCount,
         )
 
       ExportFormat.APPLE_XLIFF ->
@@ -81,11 +87,18 @@ class FileExporterFactory(
           baseTranslationsProvider,
           baseLanguage.tag,
           projectIcuPlaceholdersSupport,
+          projectNamespaceCount = projectNamespaceCount,
         )
 
-      ExportFormat.ANDROID_XML -> XmlResourcesExporter(data, exportParams, projectIcuPlaceholdersSupport)
+      ExportFormat.ANDROID_XML -> XmlResourcesExporter(
+        data, exportParams, projectIcuPlaceholdersSupport,
+        projectNamespaceCount = projectNamespaceCount
+      )
 
-      ExportFormat.COMPOSE_XML -> XmlResourcesExporter(data, exportParams, projectIcuPlaceholdersSupport)
+      ExportFormat.COMPOSE_XML -> XmlResourcesExporter(
+        data, exportParams, projectIcuPlaceholdersSupport,
+        projectNamespaceCount = projectNamespaceCount
+      )
 
       ExportFormat.PO ->
         PoFileExporter(
@@ -94,10 +107,14 @@ class FileExporterFactory(
           baseTranslationsProvider,
           baseLanguage,
           projectIcuPlaceholdersSupport,
+          projectNamespaceCount = projectNamespaceCount,
         )
 
       ExportFormat.APPLE_STRINGS_STRINGSDICT ->
-        AppleStringsStringsdictExporter(data, exportParams, projectIcuPlaceholdersSupport)
+        AppleStringsStringsdictExporter(
+          data, exportParams, projectIcuPlaceholdersSupport,
+          projectNamespaceCount = projectNamespaceCount
+        )
 
       ExportFormat.APPLE_XCSTRINGS ->
         AppleXcstringsExporter(
@@ -105,6 +122,7 @@ class FileExporterFactory(
           exportParams = exportParams,
           objectMapper = objectMapper,
           isProjectIcuPlaceholdersEnabled = projectIcuPlaceholdersSupport,
+          projectNamespaceCount = projectNamespaceCount,
         )
 
       ExportFormat.FLUTTER_ARB ->
@@ -114,13 +132,20 @@ class FileExporterFactory(
           baseLanguage.tag,
           objectMapper,
           projectIcuPlaceholdersSupport,
+          projectNamespaceCount = projectNamespaceCount,
         )
 
       ExportFormat.PROPERTIES ->
-        PropertiesFileExporter(data, exportParams, projectIcuPlaceholdersSupport)
+        PropertiesFileExporter(
+          data, exportParams, projectIcuPlaceholdersSupport,
+          projectNamespaceCount = projectNamespaceCount
+        )
 
       ExportFormat.RESX_ICU ->
-        ResxExporter(data, exportParams, projectIcuPlaceholdersSupport)
+        ResxExporter(
+          data, exportParams, projectIcuPlaceholdersSupport,
+          projectNamespaceCount = projectNamespaceCount
+        )
 
       ExportFormat.XLSX ->
         XlsxFileExporter(
@@ -128,6 +153,7 @@ class FileExporterFactory(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
+          projectNamespaceCount = projectNamespaceCount,
         )
     }
   }

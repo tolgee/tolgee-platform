@@ -45,6 +45,7 @@ class XliffFileExporterTest {
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
+        projectNamespaceCount = 0
       ).produceFiles()
 
     assertThat(files).hasSize(2)
@@ -118,6 +119,7 @@ class XliffFileExporterTest {
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
+        projectNamespaceCount = 0,
       ).produceFiles()
 
     assertThat(files).hasSize(2)
@@ -148,6 +150,7 @@ class XliffFileExporterTest {
         baseTranslationsProvider = { listOf() },
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
+        projectNamespaceCount = 0
       ).produceFiles()
 
     val fileContent = files["en.xliff"]!!.bufferedReader().readText()
@@ -237,6 +240,7 @@ class XliffFileExporterTest {
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
+        projectNamespaceCount = 0
       ).produceFiles()
 
     val validator: Validator
@@ -480,6 +484,7 @@ class XliffFileExporterTest {
       baseLanguage = Language().apply { tag = "en" },
       baseTranslationsProvider = { listOf() },
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
+      projectNamespaceCount = 0
     )
   }
 

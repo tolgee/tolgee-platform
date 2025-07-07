@@ -20,6 +20,7 @@ class GenericStructuredFileExporter(
   private val supportArrays: Boolean,
   private val messageFormat: ExportMessageFormat,
   private val customPrettyPrinter: CustomPrettyPrinter,
+  private val projectNamespaceCount: Int,
 ) : FileExporter {
   val result: LinkedHashMap<String, StructureModelBuilder> = LinkedHashMap()
 
@@ -153,6 +154,7 @@ class GenericStructuredFileExporter(
     ExportFilePathProvider(
       exportParams,
       fileExtension,
+      projectNamespaceCount = projectNamespaceCount,
     )
   }
 }

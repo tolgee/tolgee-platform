@@ -328,6 +328,7 @@ class JsonFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     exportParams: ExportParams = ExportParams(),
+    projectNamespaceCount: Int = 0,
   ): JsonFileExporter {
     return JsonFileExporter(
       translations = translations,
@@ -335,6 +336,7 @@ class JsonFileExporterTest {
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       objectMapper = jacksonObjectMapper(),
       customPrettyPrinter = CustomPrettyPrinter(),
+      projectNamespaceCount = projectNamespaceCount,
     )
   }
 }
