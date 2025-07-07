@@ -154,7 +154,6 @@ export const AdministrationEePlansView = () => {
                         size="small"
                         onClick={() => archivePlan(plan)}
                         data-cy="administration-ee-plans-item-archive"
-                        style={{ padding: '6px 8px' }}
                       >
                         {t('administration_plan_archive_button')}
                       </Button>
