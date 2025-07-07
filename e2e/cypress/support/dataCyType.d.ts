@@ -219,7 +219,6 @@ declare namespace DataCy {
         "comment-menu-needs-resolution" |
         "comment-resolve" |
         "comment-text" |
-        "confirmation-dialog-checkbox" |
         "content-delivery-add-button" |
         "content-delivery-auto-publish-checkbox" |
         "content-delivery-delete-button" |
