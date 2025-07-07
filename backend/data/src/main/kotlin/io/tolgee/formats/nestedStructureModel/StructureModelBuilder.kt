@@ -220,14 +220,13 @@ class StructureModelBuilder(
     fullPath: List<PathItem>,
   ) {
     if (value != null) {
-      throw BadRequestException(Message.MULTIPLE_NAMESPACES_MAPPED_TO_SINGLE_FILE)
-//      throw IllegalStateException(
-//        "Cannot add item to node. This is a bug, data should be sorted by key name path. Path: ${
-//          buildPath(
-//            fullPath,
-//          )
-//        }",
-//      )
+      throw IllegalStateException(
+        "Cannot add item to node. This is a bug, data should be sorted by key name path. Path: ${
+          buildPath(
+            fullPath,
+          )
+        }",
+      )
     }
   }
 

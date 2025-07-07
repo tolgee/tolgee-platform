@@ -269,7 +269,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
       performProjectAuthPost("export", mapOf("fileStructureTemplate" to "{languageTag}.{extension}"))
         .andIsBadRequest
-        .andHasErrorMessage(Message.MULTIPLE_NAMESPACES_MAPPED_TO_SINGLE_FILE)
+        .andHasErrorMessage(Message.MISSING_PLACEHOLDER_IN_TEMPLATE) // TODO: check that the missing placeholder is {namespace}
     }
   }
 

@@ -18,7 +18,7 @@ class ExportFilePathProvider(
     languageTag: String? = null,
     replaceExtension: Boolean = true,
   ): String {
-    val template = validateAndGetTemplate()
+    val template = validateAndGetTemplate(namespace)
     return template
       .replacePlaceholder(ExportFilePathPlaceholder.NAMESPACE, namespace ?: "")
       .replaceLanguageTag(languageTag ?: "all")
@@ -46,12 +46,20 @@ class ExportFilePathProvider(
     return params.fileStructureTemplate ?: params.format.defaultFileStructureTemplate
   }
 
-  private fun validateAndGetTemplate(): String {
-    validateTemplate()
+  private fun validateAndGetTemplate(namespace: String?): String {
+    validateTemplate(namespace)
     return getTemplate()
   }
 
-  private fun validateTemplate() {
+  private fun validateTemplate(namespace: String?) {
+
+    // TODO: Discuss that this is technically a breaking changge. Would it be OK to scan the translations for collisions?
+    if (namespace != null && namespace.isNotEmpty()) {
+      if (!getTemplate().contains("{namespace}")) {
+        throw getMissingPlaceholderException(ExportFilePathPlaceholder.NAMESPACE)
+      }
+    }
+
     if (!params.format.multiLanguage) {
       val containsLanguageTag =
         arrayOf(
