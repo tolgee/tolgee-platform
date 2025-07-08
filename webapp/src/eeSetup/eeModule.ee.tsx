@@ -14,7 +14,7 @@ import { addUserMenuItems } from '../component/security/UserMenu/UserMenuItems';
 import { BillingMenuItem } from '../ee/billing/component/UserMenu/BillingMenuItem';
 import { PublicOnlyRoute } from '../component/common/PublicOnlyRoute';
 import { PrivateRoute } from '../component/common/PrivateRoute';
-import { LINKS } from '../constants/links';
+import { LINKS, PARAMS } from '../constants/links';
 import { MyTasksView } from '../ee/task/views/myTasks/MyTasksView';
 import { useGlobalContext } from '../globalContext/GlobalContext';
 import { useUserTasks } from '../globalContext/useUserTasks';
@@ -63,6 +63,8 @@ import {
   GlossariesPanel,
 } from '../ee/glossary/components/GlossariesPanel';
 import { GlossaryRouter } from '../ee/glossary/views/GlossaryRouter';
+import { createAdder } from '../fixtures/pluginAdder';
+import { ProjectSettingsTab } from '../views/projects/project/ProjectSettingsView';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -84,6 +86,7 @@ export { TaskInfoMessage } from '../ee/task/components/TaskInfoMessage';
 export { AiPrompt } from '../ee/llm/AiPrompt/AiPrompt';
 export { AiContextData } from '../ee/llm/AiContextData/AiContextData';
 export { AiPromptsList } from '../ee/llm/AiPromptsList/AiPromptsList';
+export { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
 
 export const billingMenuItems = [
   BillingMenuItem,
@@ -417,6 +420,27 @@ export const useAddAdministrationMenuItems = () => {
       },
     ],
     { position: 'after', value: 'users' }
+  );
+};
+
+export const useAddProjectSettingsTabs = (projectId: number) => {
+  const { t } = useTranslate();
+
+  return createAdder<ProjectSettingsTab>({ referencingProperty: 'value' })(
+    [
+      {
+        value: 'labels',
+        label: t('project_settings_menu_labels'),
+        link: LINKS.PROJECT_EDIT_LABELS.build({
+          [PARAMS.PROJECT_ID]: projectId,
+        }),
+        dataCy: 'project-settings-menu-labels',
+      },
+    ],
+    {
+      position: 'after',
+      value: 'advanced',
+    }
   );
 };
 

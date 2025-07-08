@@ -4,9 +4,9 @@ import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasL
 import { useState } from 'react';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { LabelItem } from 'tg.views/projects/project/components/Labels/LabelItem';
-import { LabelModal } from 'tg.views/projects/project/components/Labels/LabelModal';
-import { LabelFormValues } from 'tg.views/projects/project/components/Labels/LabelForm';
+import { LabelItem } from 'tg.ee.module/translationLabels/Settings/LabelItem';
+import { LabelModal } from 'tg.ee.module/translationLabels/Settings/LabelModal';
+import { LabelFormValues } from 'tg.ee.module/translationLabels/Settings/LabelForm';
 import { components } from 'tg.service/apiSchema.generated';
 import { Plus } from '@untitled-ui/icons-react';
 import { confirmation } from 'tg.hooks/confirmation';
