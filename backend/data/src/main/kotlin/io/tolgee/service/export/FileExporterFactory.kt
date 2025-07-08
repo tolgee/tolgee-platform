@@ -45,6 +45,7 @@ class FileExporterFactory(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
+          getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.JSON, ExportFormat.JSON_TOLGEE, ExportFormat.JSON_I18NEXT ->
@@ -54,6 +55,7 @@ class FileExporterFactory(
           objectMapper = objectMapper,
           projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
           customPrettyPrinter = customPrettyPrinter,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.YAML_RUBY, ExportFormat.YAML ->
@@ -63,6 +65,7 @@ class FileExporterFactory(
           objectMapper = yamlObjectMapper,
           projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
           customPrettyPrinter,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.XLIFF ->
@@ -72,32 +75,49 @@ class FileExporterFactory(
           baseTranslationsProvider,
           baseLanguage,
           projectIcuPlaceholdersSupport,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.APPLE_XLIFF ->
         AppleXliffExporter(
           data,
-          exportParams,
           baseTranslationsProvider,
           baseLanguage.tag,
           projectIcuPlaceholdersSupport,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
-      ExportFormat.ANDROID_XML -> XmlResourcesExporter(data, exportParams, projectIcuPlaceholdersSupport)
+      ExportFormat.ANDROID_XML -> XmlResourcesExporter(
+        data,
+        exportParams,
+        projectIcuPlaceholdersSupport,
+        filePathProvider = getFilePathProvider(exportParams, data)
+      )
 
-      ExportFormat.COMPOSE_XML -> XmlResourcesExporter(data, exportParams, projectIcuPlaceholdersSupport)
+      ExportFormat.COMPOSE_XML -> XmlResourcesExporter(
+        data,
+        exportParams,
+        projectIcuPlaceholdersSupport,
+        filePathProvider = getFilePathProvider(exportParams, data)
+      )
 
       ExportFormat.PO ->
         PoFileExporter(
           data,
           exportParams,
-          baseTranslationsProvider,
           baseLanguage,
           projectIcuPlaceholdersSupport,
+          getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.APPLE_STRINGS_STRINGSDICT ->
-        AppleStringsStringsdictExporter(data, exportParams, projectIcuPlaceholdersSupport)
+        AppleStringsStringsdictExporter(
+          data,
+          exportParams,
+          projectIcuPlaceholdersSupport,
+          stringsFilePathProvider = getFilePathProvider(exportParams, data, "strings"),
+          stringsdictFilePathProvider = getFilePathProvider(exportParams, data, "stringsdict")
+        )
 
       ExportFormat.APPLE_XCSTRINGS ->
         AppleXcstringsExporter(
@@ -105,6 +125,7 @@ class FileExporterFactory(
           exportParams = exportParams,
           objectMapper = objectMapper,
           isProjectIcuPlaceholdersEnabled = projectIcuPlaceholdersSupport,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.FLUTTER_ARB ->
@@ -114,13 +135,24 @@ class FileExporterFactory(
           baseLanguage.tag,
           objectMapper,
           projectIcuPlaceholdersSupport,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.PROPERTIES ->
-        PropertiesFileExporter(data, exportParams, projectIcuPlaceholdersSupport)
+        PropertiesFileExporter(
+          data,
+          exportParams,
+          projectIcuPlaceholdersSupport,
+          filePathProvider = getFilePathProvider(exportParams, data)
+        )
 
       ExportFormat.RESX_ICU ->
-        ResxExporter(data, exportParams, projectIcuPlaceholdersSupport)
+        ResxExporter(
+          data,
+          exportParams,
+          projectIcuPlaceholdersSupport,
+          pathProvider = getFilePathProvider(exportParams, data)
+        )
 
       ExportFormat.XLSX ->
         XlsxFileExporter(
@@ -128,7 +160,19 @@ class FileExporterFactory(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
+          pathProvider = getFilePathProvider(exportParams, data),
         )
     }
+  }
+
+  fun getFilePathProvider(
+    exportParams: IExportParams,
+    translations: List<ExportTranslationView>,
+    extension: String = exportParams.format.extension
+  ): ExportFilePathProvider {
+    return ExportFilePathProvider(
+      template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+      extension = extension,
+    )
   }
 }

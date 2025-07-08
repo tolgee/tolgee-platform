@@ -4,6 +4,8 @@ import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.apple.out.AppleStringsStringsdictExporter
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
@@ -374,17 +376,36 @@ class StringsStringsdictFileExporterTest {
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
   ): AppleStringsStringsdictExporter {
+    val template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate()
     return AppleStringsStringsdictExporter(
       translations = translations,
       exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+      stringsFilePathProvider = ExportFilePathProvider(
+        template = template,
+        extension = "strings",
+      ),
+      stringsdictFilePathProvider = ExportFilePathProvider(
+        template = template,
+        extension = "stringsdict",
+      ),
     )
   }
 
   private fun getExporter(translations: List<ExportTranslationView>): AppleStringsStringsdictExporter {
+    val params = getExportParams()
+    val template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate()
     return AppleStringsStringsdictExporter(
       translations = translations,
-      exportParams = getExportParams(),
+      exportParams = params,
+      stringsFilePathProvider = ExportFilePathProvider(
+        template = template,
+        extension = "strings",
+      ),
+      stringsdictFilePathProvider = ExportFilePathProvider(
+        template = template,
+        extension = "stringsdict",
+      ),
     )
   }
 

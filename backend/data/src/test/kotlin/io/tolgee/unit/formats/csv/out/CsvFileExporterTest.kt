@@ -1,7 +1,10 @@
 package io.tolgee.unit.formats.csv.out
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.csv.out.CsvFileExporter
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
@@ -113,12 +116,19 @@ class CsvFileExporterTest {
   private fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
-    exportParams: ExportParams = ExportParams(),
   ): CsvFileExporter {
+    val exportParams = ExportParams().apply {
+      format = ExportFormat.CSV
+    }
+
     return CsvFileExporter(
       translations = translations,
       exportParams = exportParams,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+      filePathProvider = ExportFilePathProvider(
+        template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+        extension = exportParams.format.extension,
+      )
     )
   }
 }
