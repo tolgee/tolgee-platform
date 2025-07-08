@@ -1,19 +1,29 @@
-package io.tolgee.api.v2.controllers.labels
+package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.LabelsTestData
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertError
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.node
 import io.tolgee.model.enums.Scope
+import io.tolgee.service.label.LabelService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import jakarta.transaction.Transactional
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 
-class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-
+class LabelsControllerTest(
+  @Autowired
+  private var labelService: LabelService
+) : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: LabelsTestData
 
   @BeforeEach
@@ -174,8 +184,8 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     scopes = [Scope.TRANSLATION_LABEL_ASSIGN],
   )
   fun `assigns label to translation`() {
-    assert(testData.unassignedTranslation.labels.size == 0)
-    assert(testData.unassignedLabel.translations.size == 0)
+    assert(testData.unassignedTranslation.labels.isEmpty())
+    assert(testData.unassignedLabel.translations.isEmpty())
     performProjectAuthPut(
       "translations/${testData.unassignedTranslation.id}/label/${testData.unassignedLabel.id}",
     ).andIsOk
@@ -202,8 +212,8 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     val translation = translationService.get(testData.labeledTranslation.id)
     val label = labelService.find(testData.firstLabel.id).get()
-    assert(translation.labels.size == 0)
-    assert(label.translations.size == 0)
+    assert(translation.labels.isEmpty())
+    assert(label.translations.isEmpty())
   }
 
   @Test
@@ -262,8 +272,8 @@ class LabelsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     val translation = translationService.get(testData.unassignedTranslation.id)
     val label = labelService.find(testData.unassignedLabel.id).get()
-    assert(translation.labels.size == 0)
-    assert(label.translations.size == 0)
+    assert(translation.labels.isEmpty())
+    assert(label.translations.isEmpty())
   }
 
   @Test

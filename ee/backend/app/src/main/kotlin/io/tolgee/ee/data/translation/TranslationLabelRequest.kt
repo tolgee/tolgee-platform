@@ -1,4 +1,4 @@
-package io.tolgee.dtos.request.translation.label
+package io.tolgee.ee.data.translation
 
 import jakarta.validation.constraints.NotNull
 

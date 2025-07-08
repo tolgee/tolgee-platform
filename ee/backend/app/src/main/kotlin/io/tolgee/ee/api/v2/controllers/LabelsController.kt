@@ -1,10 +1,13 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.dtos.request.label.LabelRequest
-import io.tolgee.dtos.request.translation.label.TranslationLabelRequest
+import io.tolgee.api.v2.controllers.IController
+import io.tolgee.ee.data.label.LabelRequest
+import io.tolgee.ee.data.translation.TranslationLabelRequest
+import io.tolgee.ee.service.LabelServiceImpl
 import io.tolgee.hateoas.label.LabelModel
 import io.tolgee.hateoas.label.LabelModelAssembler
 import io.tolgee.model.enums.Scope
@@ -14,7 +17,6 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
-import io.tolgee.service.label.LabelService
 import io.tolgee.service.translation.TranslationService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -22,8 +24,16 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
-import org.springframework.web.bind.annotation.*
-import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -34,14 +44,14 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
     "/v2/projects/",
   ],
 )
-@OpenApiTag(name = "Labels", description = "Operations related to labels")
+@Tag(name = "Labels", description = "Operations related to labels")
 @OpenApiOrderExtension(8)
 class LabelsController(
-  private val projectHolder: ProjectHolder,
-  private val labelService: LabelService,
-  private val labelModelAssembler: LabelModelAssembler,
-  private val pagedResourcesAssembler: PagedResourcesAssembler<Label>,
-  private val translationService: TranslationService,
+    private val projectHolder: ProjectHolder,
+    private val labelService: LabelServiceImpl,
+    private val labelModelAssembler: LabelModelAssembler,
+    private val pagedResourcesAssembler: PagedResourcesAssembler<Label>,
+    private val translationService: TranslationService,
 ) : IController {
 
   @GetMapping(value = ["labels"])
@@ -49,9 +59,9 @@ class LabelsController(
   @UseDefaultPermissions
   @AllowApiAccess
   fun getAll(
-    @RequestParam
+      @RequestParam
     search: String? = null,
-    @SortDefault("name")
+      @SortDefault("name")
     @ParameterObject pageable: Pageable,
   ): PagedModel<LabelModel> {
     val data = labelService.getProjectLabels(projectHolder.project.id, pageable, search)
@@ -88,9 +98,9 @@ class LabelsController(
   @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_MANAGE])
   @AllowApiAccess
   fun updateLabel(
-    @PathVariable("labelId")
+      @PathVariable("labelId")
     labelId: Long,
-    @RequestBody @Valid
+      @RequestBody @Valid
     request: LabelRequest,
   ): LabelModel {
     return labelService.updateLabel(projectHolder.project.id, labelId, request).model

@@ -13,9 +13,9 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
-import io.tolgee.repository.LabelRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.task.ITaskService
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,9 +29,6 @@ class SecurityService(
   private val keyRepository: KeyRepository,
   private val projectHolder: ProjectHolder,
 ) {
-  @Autowired
-  private lateinit var labelRepository: LabelRepository
-
   @set:Autowired
   lateinit var apiKeyService: ApiKeyService
 
@@ -44,6 +41,9 @@ class SecurityService(
   @set:Autowired
   @Lazy
   lateinit var taskService: ITaskService
+
+  @Autowired
+  private lateinit var labelService: LabelService
 
   fun checkAnyProjectPermission(projectId: Long) {
     if (
@@ -474,7 +474,7 @@ class SecurityService(
     labelIds: List<Long>,
     projectId: Long,
   ) {
-    val projectIds = labelRepository.getProjectIdsForLabelIds(labelIds)
+    val projectIds = labelService.getProjectIdsForLabelIds(labelIds)
     if (projectIds.size != labelIds.size) {
       throw NotFoundException(Message.LABEL_NOT_FOUND)
     }

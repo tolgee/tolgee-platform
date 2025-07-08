@@ -1,4 +1,4 @@
-package io.tolgee.repository
+package io.tolgee.ee.repository
 
 import io.tolgee.model.translation.Label
 import org.springframework.data.domain.Page

@@ -1,17 +1,22 @@
-package io.tolgee.api.v2.controllers.batch
+package io.tolgee.ee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.collections.forEach
 
-class BatchAssignTranslationLabelsTest : ProjectAuthControllerTest("/v2/projects/") {
+class BatchAssignTranslationLabelsTest(
   @Autowired
-  lateinit var batchJobTestBase: BatchJobTestBase
+  private val batchJobTestBase: BatchJobTestBase
+) : ProjectAuthControllerTest("/v2/projects/") {
 
   @BeforeEach
   fun setup() {
@@ -47,11 +52,11 @@ class BatchAssignTranslationLabelsTest : ProjectAuthControllerTest("/v2/projects
       ),
     ).andIsOk
 
-    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-      translationService.getTranslationsWithLabels(keyIds, languageIds).forEach { translation: Translation ->
-        translation.labels.map { it.id }.containsAll(labelIds).assert.isTrue
+      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+          translationService.getTranslationsWithLabels(keyIds, languageIds).forEach { translation: Translation ->
+              translation.labels.map { it.id }.containsAll(labelIds).assert.isTrue
+          }
       }
-    }
   }
 
   @Test
@@ -137,13 +142,13 @@ class BatchAssignTranslationLabelsTest : ProjectAuthControllerTest("/v2/projects
       ),
     ).andIsOk
 
-    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-      translationService.getTranslationsWithLabels(keyIds, languageIds).forEach { translation: Translation ->
-        val actualLabelIds = translation.labels.map { it.id }
-        actualLabelIds.assert.doesNotContainSequence(unassignLabelsIds)
-        actualLabelIds.containsAll(assignedLabelsIds).assert.isTrue
+      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+          translationService.getTranslationsWithLabels(keyIds, languageIds).forEach { translation: Translation ->
+              val actualLabelIds = translation.labels.map { it.id }
+              actualLabelIds.assert.doesNotContainSequence(unassignLabelsIds)
+              actualLabelIds.containsAll(assignedLabelsIds).assert.isTrue
+          }
       }
-    }
   }
 
   @Test
@@ -205,12 +210,12 @@ class BatchAssignTranslationLabelsTest : ProjectAuthControllerTest("/v2/projects
       ),
     ).andIsOk
 
-    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-      val translations = translationService.getTranslationsWithLabels(keyIds, languageIds)
-      translations.assert.hasSize(keyIds.size * languageIds.size)
-      translations.forEach {
-        it.labels.map { it.id }.containsAll(labelIds).assert.isTrue
+      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+          val translations = translationService.getTranslationsWithLabels(keyIds, languageIds)
+          translations.assert.hasSize(keyIds.size * languageIds.size)
+          translations.forEach {
+              it.labels.map { it.id }.containsAll(labelIds).assert.isTrue
+          }
       }
-    }
   }
 }
