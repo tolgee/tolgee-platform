@@ -39,7 +39,6 @@ class ExportService(
       baseTranslationsProvider = baseTranslationsProvider,
       baseLanguage,
       projectIcuPlaceholdersSupport = project.icuPlaceholders,
-      projectNamespaceCount = project.namespaces.count(),
     ).produceFiles().also {
       businessEventPublisher.publishOnceInTime(
         OnBusinessEventToCaptureEvent(

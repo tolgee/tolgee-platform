@@ -1,15 +1,11 @@
 package io.tolgee.service.export
 
 import com.ibm.icu.util.ULocale
-import io.tolgee.constants.Message
-import io.tolgee.dtos.IExportParams
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 
 class ExportFilePathProvider(
-  private val params: IExportParams,
+  private val template: String,
   private val extension: String,
-  private val projectNamespaceCount: Int,
 ) {
   /**
    * This method takes the template provided in params and returns the file path by replacing the placeholders
@@ -19,7 +15,6 @@ class ExportFilePathProvider(
     languageTag: String? = null,
     replaceExtension: Boolean = true,
   ): String {
-    val template = validateAndGetTemplate(namespace)
     return template
       .replacePlaceholder(ExportFilePathPlaceholder.NAMESPACE, namespace ?: "")
       .replaceLanguageTag(languageTag ?: "all")
@@ -42,54 +37,6 @@ class ExportFilePathProvider(
   private fun String.removeLeadingSlash(): String {
     return this.removePrefix("/")
   }
-
-  private fun getTemplate(): String {
-    return params.fileStructureTemplate ?: params.format.defaultFileStructureTemplate
-  }
-
-  private fun validateAndGetTemplate(namespace: String?): String {
-    validateTemplate(namespace)
-    return getTemplate()
-  }
-
-  private fun validateTemplate(namespace: String?) {
-
-    // Having a single namespace cannot cause a collision when flattening the structure.
-    if (projectNamespaceCount > 1) {
-        // Not providing the namespace in the filename is not allowed and likely to cause collisions.
-        if (!getTemplate().contains("{namespace}")) {
-          throw getMissingPlaceholderException(ExportFilePathPlaceholder.NAMESPACE)
-        }
-    }
-
-    if (!params.format.multiLanguage) {
-      val containsLanguageTag =
-        arrayOf(
-          ExportFilePathPlaceholder.LANGUAGE_TAG,
-          ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
-          ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
-        ).any { getTemplate().contains(it.placeholder) }
-
-      if (!containsLanguageTag) {
-        throw getMissingPlaceholderException(
-          ExportFilePathPlaceholder.LANGUAGE_TAG,
-          ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
-          ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
-        )
-      }
-    }
-
-    val containsExtension = getTemplate().contains(ExportFilePathPlaceholder.EXTENSION.placeholder)
-    if (!containsExtension) {
-      throw getMissingPlaceholderException(ExportFilePathPlaceholder.EXTENSION)
-    }
-  }
-
-  private fun getMissingPlaceholderException(vararg placeholder: ExportFilePathPlaceholder) =
-    BadRequestException(
-      Message.MISSING_PLACEHOLDER_IN_TEMPLATE,
-      placeholder.toList(),
-    )
 
   private fun String.replaceMultipleSlashes() = this.replace(MULTIPLE_SLASHES, "/")
 

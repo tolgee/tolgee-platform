@@ -1,10 +1,13 @@
 package io.tolgee.unit.formats.xliff.out
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.xliff.out.XliffFileExporter
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
@@ -45,7 +48,10 @@ class XliffFileExporterTest {
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
-        projectNamespaceCount = 0
+        filePathProvider = ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+          extension = params.format?.extension ?: "xliff",
+        )
       ).produceFiles()
 
     assertThat(files).hasSize(2)
@@ -119,7 +125,10 @@ class XliffFileExporterTest {
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
-        projectNamespaceCount = 0,
+        filePathProvider = ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+          extension = params.format?.extension ?: "xliff",
+        ),
       ).produceFiles()
 
     assertThat(files).hasSize(2)
@@ -150,7 +159,21 @@ class XliffFileExporterTest {
         baseTranslationsProvider = { listOf() },
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
-        projectNamespaceCount = 0
+        filePathProvider = ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(
+            params,
+              listOf(
+              ExportTranslationView(
+                1,
+                "<p>Sweat jesus, this is HTML!</p>",
+                TranslationState.TRANSLATED,
+                ExportKeyView(1, "html_key", description = "Omg!\n  This is really.    \n preserved"),
+                "en",
+              )
+            )
+          ).validateAndGetTemplate(),
+          extension = params.format?.extension ?: "xliff",
+        )
       ).produceFiles()
 
     val fileContent = files["en.xliff"]!!.bufferedReader().readText()
@@ -240,7 +263,10 @@ class XliffFileExporterTest {
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
-        projectNamespaceCount = 0
+        filePathProvider = ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+          extension = params.format?.extension ?: "xliff",
+        )
       ).produceFiles()
 
     val validator: Validator
@@ -382,7 +408,10 @@ class XliffFileExporterTest {
     val exporter =
       getExporter(
         built.translations,
-        exportParams = ExportParams(messageFormat = ExportMessageFormat.RUBY_SPRINTF),
+        exportParams = ExportParams(
+          messageFormat = ExportMessageFormat.RUBY_SPRINTF,
+          format = ExportFormat.XLIFF
+        ),
       )
     val data = getExported(exporter)
     data.assertFile(
@@ -436,7 +465,7 @@ class XliffFileExporterTest {
     val exporter =
       getExporter(
         built.translations,
-        exportParams = ExportParams(escapeHtml = true),
+        exportParams = ExportParams(escapeHtml = true, format = ExportFormat.XLIFF),
       )
     val data = getExported(exporter)
     data.assertFile(
@@ -484,9 +513,12 @@ class XliffFileExporterTest {
       baseLanguage = Language().apply { tag = "en" },
       baseTranslationsProvider = { listOf() },
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
-      projectNamespaceCount = 0
+      filePathProvider = ExportFilePathProvider(
+        template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+        extension = exportParams.format.extension,
+      )
     )
   }
 
-  private fun getExportParams() = ExportParams()
+  private fun getExportParams() = ExportParams().apply { format = ExportFormat.XLIFF }
 }

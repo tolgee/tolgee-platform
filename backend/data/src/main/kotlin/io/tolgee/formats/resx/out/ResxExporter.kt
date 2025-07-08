@@ -14,7 +14,7 @@ class ResxExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
-  private val projectNamespaceCount: Int,
+  private val pathProvider: ExportFilePathProvider,
 ) : FileExporter {
   private val fileUnits = mutableMapOf<String, MutableList<ResxEntry>>()
 
@@ -45,14 +45,6 @@ class ResxExporter(
         namespace = translation.key.namespace,
       )
     return fileUnits.computeIfAbsent(filePath) { mutableListOf() }
-  }
-
-  private val pathProvider by lazy {
-    ExportFilePathProvider(
-      exportParams,
-      "resx",
-      projectNamespaceCount
-    )
   }
 
   private fun getConvertedMessage(

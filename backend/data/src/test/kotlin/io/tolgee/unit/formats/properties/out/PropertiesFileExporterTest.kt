@@ -5,6 +5,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.properties.out.PropertiesFileExporter
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
 import io.tolgee.unit.util.assertFile
@@ -147,13 +149,15 @@ class PropertiesFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
-    projectNamespaceCount: Int = 0,
   ): PropertiesFileExporter {
     return PropertiesFileExporter(
       translations = translations,
       exportParams = params,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
-      projectNamespaceCount
+      filePathProvider = ExportFilePathProvider(
+        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+        extension = params.format?.extension ?: "properties",
+      )
     )
   }
 

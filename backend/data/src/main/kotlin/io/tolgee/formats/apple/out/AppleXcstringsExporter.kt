@@ -14,7 +14,7 @@ class AppleXcstringsExporter(
   private val exportParams: IExportParams,
   private val objectMapper: ObjectMapper,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
-  private val projectNamespaceCount: Int,
+  private val filePathProvider: ExportFilePathProvider,
 ) : FileExporter {
   private val preparedFiles = mutableMapOf<String, ObjectNode>()
 
@@ -146,11 +146,7 @@ class AppleXcstringsExporter(
   }
 
   private fun getBaseFilePath(translation: ExportTranslationView): String {
-    return ExportFilePathProvider(
-      exportParams,
-      "xcstrings",
-      projectNamespaceCount = projectNamespaceCount,
-    ).getFilePath(
+    return filePathProvider.getFilePath(
       translation.key.namespace,
       null,
       replaceExtension = true,

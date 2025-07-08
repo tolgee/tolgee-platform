@@ -260,7 +260,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  fun `it returns 400 with MISSING_PLACEHOLDER_IN_TEMPLATE error when namespaced and fileStructureTemplate is missing {namespace}`() {
+  fun `it returns 400 error when namespaced and fileStructureTemplate is missing {namespace}`() {
     retryingOnCommonIssues {
       namespacesTestData = NamespacesTestData()
       testDataService.saveTestData(namespacesTestData!!.root)
@@ -269,7 +269,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
       performProjectAuthPost("export", mapOf("fileStructureTemplate" to "{languageTag}.{extension}"))
         .andIsBadRequest
-        .andHasErrorMessage(Message.MISSING_PLACEHOLDER_IN_TEMPLATE) // TODO: check that the missing placeholder is {namespace}
+        .andHasErrorMessage(Message.MISSING_PLACEHOLDER_IN_TEMPLATE)
     }
   }
 

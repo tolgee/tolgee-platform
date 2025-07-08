@@ -12,17 +12,9 @@ import java.io.InputStream
 abstract class TableExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
-  val fileExtension: String,
   val isProjectIcuPlaceholdersEnabled: Boolean = true,
-  private val projectNamespaceCount: Int,
+  val pathProvider: ExportFilePathProvider,
 ) : FileExporter {
-  val pathProvider by lazy {
-    ExportFilePathProvider(
-      exportParams,
-      fileExtension,
-      projectNamespaceCount = projectNamespaceCount,
-    )
-  }
 
   val messageFormat
     get() = exportParams.messageFormat ?: ExportMessageFormat.ICU

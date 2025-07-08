@@ -18,7 +18,7 @@ class FlutterArbFileExporter(
   private val baseLanguageTag: String,
   private val objectMapper: ObjectMapper,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
-  private val projectNamespaceCount: Int,
+  private val filePathProvider: ExportFilePathProvider,
 ) : FileExporter {
   /**
    * Map (Path To file -> Map (Key Name -> Node Wrapper))
@@ -78,19 +78,11 @@ class FlutterArbFileExporter(
     return filePathProvider.getFilePath(namespace = translation.key.namespace, languageTag = translation.languageTag)
   }
 
-  private val filePathProvider by lazy {
-    ExportFilePathProvider(
-      exportParams,
-      "arb",
-      projectNamespaceCount = projectNamespaceCount,
-    )
-  }
-
   private fun getConvertedMessage(translation: ExportTranslationView): String? {
     translation.text ?: return null
     val converted =
       IcuToFlutterArbMessageConvertor(
-        message = translation.text ?: "",
+        message = translation.text,
         forceIsPlural = translation.key.isPlural,
         isProjectIcuPlaceholdersEnabled,
       ).convert()

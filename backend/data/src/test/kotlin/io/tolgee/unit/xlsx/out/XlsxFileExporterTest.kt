@@ -3,6 +3,8 @@ package io.tolgee.unit.xlsx.out
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.xlsx.out.XlsxFileExporter
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExportedCompressed
@@ -247,14 +249,16 @@ class XlsxFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     exportParams: ExportParams = ExportParams(),
-    projectNamespaceCount: Int = 0,
   ): XlsxFileExporter {
     return XlsxFileExporter(
-      currentDateProvider.date,
+      currentDate = currentDateProvider.date,
       translations = translations,
       exportParams = exportParams,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
-      projectNamespaceCount = projectNamespaceCount,
+      pathProvider = ExportFilePathProvider(
+        template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+        extension = exportParams.format?.extension ?: "xlsx",
+      ),
     )
   }
 }

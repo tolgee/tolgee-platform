@@ -1,7 +1,5 @@
 package io.tolgee.formats.nestedStructureModel
 
-import io.tolgee.constants.Message
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.formats.path.ArrayPathItem
 import io.tolgee.formats.path.ObjectPathItem
 import io.tolgee.formats.path.PathItem

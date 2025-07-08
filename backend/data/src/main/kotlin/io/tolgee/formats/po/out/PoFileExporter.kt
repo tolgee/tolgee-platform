@@ -13,13 +13,10 @@ import java.io.InputStream
 class PoFileExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
-  baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: ILanguage,
   private val projectIcuPlaceholdersSupport: Boolean = true,
-  private val projectNamespaceCount: Int,
+  private val filePathProvider: ExportFilePathProvider
 ) : FileExporter {
-  val fileExtension: String = "po"
-
   private val preparedResult: LinkedHashMap<String, StringBuilder> = LinkedHashMap()
 
   override fun produceFiles(): Map<String, InputStream> {
@@ -63,14 +60,6 @@ class PoFileExporter(
     return preparedResult.computeIfAbsent(path) {
       initPoFile(translation)
     }
-  }
-
-  private val filePathProvider by lazy {
-    ExportFilePathProvider(
-      exportParams,
-      fileExtension,
-      projectNamespaceCount = projectNamespaceCount,
-    )
   }
 
   private fun initPoFile(translation: ExportTranslationView): StringBuilder {

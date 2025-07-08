@@ -23,7 +23,6 @@ import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
-import kotlin.Int
 
 @Component
 class FileExporterFactory(
@@ -39,7 +38,6 @@ class FileExporterFactory(
     baseTranslationsProvider: () -> List<ExportTranslationView>,
     baseLanguage: LanguageDto,
     projectIcuPlaceholdersSupport: Boolean,
-    projectNamespaceCount: Int,
   ): FileExporter {
     return when (exportParams.format) {
       ExportFormat.CSV ->
@@ -47,7 +45,7 @@ class FileExporterFactory(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
-          projectNamespaceCount = projectNamespaceCount,
+          getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.JSON, ExportFormat.JSON_TOLGEE, ExportFormat.JSON_I18NEXT ->
@@ -57,7 +55,7 @@ class FileExporterFactory(
           objectMapper = objectMapper,
           projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
           customPrettyPrinter = customPrettyPrinter,
-          projectNamespaceCount = projectNamespaceCount,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.YAML_RUBY, ExportFormat.YAML ->
@@ -67,7 +65,7 @@ class FileExporterFactory(
           objectMapper = yamlObjectMapper,
           projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
           customPrettyPrinter,
-          projectNamespaceCount = projectNamespaceCount,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.XLIFF ->
@@ -77,43 +75,48 @@ class FileExporterFactory(
           baseTranslationsProvider,
           baseLanguage,
           projectIcuPlaceholdersSupport,
-          projectNamespaceCount = projectNamespaceCount,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.APPLE_XLIFF ->
         AppleXliffExporter(
           data,
-          exportParams,
           baseTranslationsProvider,
           baseLanguage.tag,
           projectIcuPlaceholdersSupport,
-          projectNamespaceCount = projectNamespaceCount,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.ANDROID_XML -> XmlResourcesExporter(
-        data, exportParams, projectIcuPlaceholdersSupport,
-        projectNamespaceCount = projectNamespaceCount
+        data,
+        exportParams,
+        projectIcuPlaceholdersSupport,
+        filePathProvider = getFilePathProvider(exportParams, data)
       )
 
       ExportFormat.COMPOSE_XML -> XmlResourcesExporter(
-        data, exportParams, projectIcuPlaceholdersSupport,
-        projectNamespaceCount = projectNamespaceCount
+        data,
+        exportParams,
+        projectIcuPlaceholdersSupport,
+        filePathProvider = getFilePathProvider(exportParams, data)
       )
 
       ExportFormat.PO ->
         PoFileExporter(
           data,
           exportParams,
-          baseTranslationsProvider,
           baseLanguage,
           projectIcuPlaceholdersSupport,
-          projectNamespaceCount = projectNamespaceCount,
+          getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.APPLE_STRINGS_STRINGSDICT ->
         AppleStringsStringsdictExporter(
-          data, exportParams, projectIcuPlaceholdersSupport,
-          projectNamespaceCount = projectNamespaceCount
+          data,
+          exportParams,
+          projectIcuPlaceholdersSupport,
+          stringsFilePathProvider = getFilePathProvider(exportParams, data, "strings"),
+          stringsdictFilePathProvider = getFilePathProvider(exportParams, data, "stringsdict")
         )
 
       ExportFormat.APPLE_XCSTRINGS ->
@@ -122,7 +125,7 @@ class FileExporterFactory(
           exportParams = exportParams,
           objectMapper = objectMapper,
           isProjectIcuPlaceholdersEnabled = projectIcuPlaceholdersSupport,
-          projectNamespaceCount = projectNamespaceCount,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.FLUTTER_ARB ->
@@ -132,19 +135,23 @@ class FileExporterFactory(
           baseLanguage.tag,
           objectMapper,
           projectIcuPlaceholdersSupport,
-          projectNamespaceCount = projectNamespaceCount,
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.PROPERTIES ->
         PropertiesFileExporter(
-          data, exportParams, projectIcuPlaceholdersSupport,
-          projectNamespaceCount = projectNamespaceCount
+          data,
+          exportParams,
+          projectIcuPlaceholdersSupport,
+          filePathProvider = getFilePathProvider(exportParams, data)
         )
 
       ExportFormat.RESX_ICU ->
         ResxExporter(
-          data, exportParams, projectIcuPlaceholdersSupport,
-          projectNamespaceCount = projectNamespaceCount
+          data,
+          exportParams,
+          projectIcuPlaceholdersSupport,
+          pathProvider = getFilePathProvider(exportParams, data)
         )
 
       ExportFormat.XLSX ->
@@ -153,8 +160,19 @@ class FileExporterFactory(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
-          projectNamespaceCount = projectNamespaceCount,
+          pathProvider = getFilePathProvider(exportParams, data),
         )
     }
+  }
+
+  fun getFilePathProvider(
+    exportParams: IExportParams,
+    translations: List<ExportTranslationView>,
+    extension: String = exportParams.format.extension
+  ): ExportFilePathProvider {
+    return ExportFilePathProvider(
+      template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+      extension = extension,
+    )
   }
 }

@@ -20,7 +20,7 @@ enum class ExportFormat(
   APPLE_XLIFF(
     "xliff",
     "application/x-xliff+xml",
-    defaultFileStructureTemplate = "{languageTag}.{extension}",
+    defaultFileStructureTemplate = "{namespace}/{languageTag}.{extension}",
   ),
   ANDROID_XML(
     "xml",

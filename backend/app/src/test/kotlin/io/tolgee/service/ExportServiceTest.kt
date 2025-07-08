@@ -194,7 +194,8 @@ class ExportServiceTest : AbstractSpringTest() {
     testData.addFewKeysWithTags()
     testDataService.saveTestData(testData.root)
 
-    val exportParams = ExportParams(filterKeyId = listOf(testData.aKey.id), fileStructureTemplate = "{languageTag}.{extension}")
+    val exportParams =
+      ExportParams(filterKeyId = listOf(testData.aKey.id), fileStructureTemplate = "{languageTag}.{extension}")
     val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
     val result = provider.data
   }
@@ -206,7 +207,8 @@ class ExportServiceTest : AbstractSpringTest() {
     testData.addFewKeysWithTags()
     testDataService.saveTestData(testData.root)
 
-    val exportParams = ExportParams(filterKeyId = listOf(testData.aKey.id), fileStructureTemplate = "{languageTag}.{extension}")
+    val exportParams =
+      ExportParams(filterKeyId = listOf(testData.aKey.id), fileStructureTemplate = "{languageTag}.{extension}")
     val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
     val result = provider.data
   }
@@ -218,7 +220,8 @@ class ExportServiceTest : AbstractSpringTest() {
     testData.addFewKeysWithTags()
     testDataService.saveTestData(testData.root)
 
-    val exportParams = ExportParams(filterKeyId = listOf(testData.aKey.id), fileStructureTemplate = "{languageTag}.{extension}")
+    val exportParams =
+      ExportParams(filterKeyId = listOf(testData.aKey.id), fileStructureTemplate = "{languageTag}.{extension}")
     val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
     val result = provider.data
   }
@@ -229,10 +232,9 @@ class ExportServiceTest : AbstractSpringTest() {
     testData.addFewKeysWithTags()
     testDataService.saveTestData(testData.root)
 
-    val exportParams = ExportParams(filterKeyId = listOf(testData.aKey.id), fileStructureTemplate = "{languageTag}.{extension}")
+    val exportParams =
+      ExportParams(filterKeyId = listOf(testData.aKey.id), fileStructureTemplate = "{languageTag}.{extension}")
     val provider = ExportDataProvider(applicationContext, exportParams, testData.project.id)
     val result = provider.data
   }
-
 }
-

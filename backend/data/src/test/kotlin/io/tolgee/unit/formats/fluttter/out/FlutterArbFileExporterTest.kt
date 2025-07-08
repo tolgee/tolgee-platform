@@ -4,6 +4,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.flutter.out.FlutterArbFileExporter
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
 import io.tolgee.util.buildExportTranslationList
@@ -198,12 +200,16 @@ class FlutterArbFileExporterTest {
 }
 
 private fun getExporter(translations: List<ExportTranslationView>): FlutterArbFileExporter {
+  val params = getExportParams()
   return FlutterArbFileExporter(
     translations = translations,
-    exportParams = getExportParams(),
+    exportParams = params,
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
-    projectNamespaceCount = 0
+    filePathProvider = ExportFilePathProvider(
+      template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+      extension = params.format.extension,
+    )
   )
 }
 
@@ -211,7 +217,6 @@ private fun getExporter(
   translations: List<ExportTranslationView>,
   isProjectIcuPlaceholdersEnabled: Boolean = true,
   params: ExportParams = getExportParams(),
-  projectNamespaceCount: Int = 0,
 ): FlutterArbFileExporter {
   return FlutterArbFileExporter(
     translations = translations,
@@ -219,7 +224,10 @@ private fun getExporter(
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
     isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
-    projectNamespaceCount = projectNamespaceCount,
+    filePathProvider = ExportFilePathProvider(
+      template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+      extension = params.format.extension,
+    )
   )
 }
 

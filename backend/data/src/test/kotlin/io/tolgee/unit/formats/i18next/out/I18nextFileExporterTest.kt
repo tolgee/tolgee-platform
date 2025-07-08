@@ -5,6 +5,8 @@ import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.formats.json.out.JsonFileExporter
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
@@ -126,7 +128,6 @@ class I18nextFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     exportParams: ExportParams = ExportParams(),
-    projectNamespaceCount: Int = 0,
   ): JsonFileExporter {
     return JsonFileExporter(
       translations = translations,
@@ -134,7 +135,10 @@ class I18nextFileExporterTest {
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       objectMapper = jacksonObjectMapper(),
       customPrettyPrinter = CustomPrettyPrinter(),
-      projectNamespaceCount
+      filePathProvider = ExportFilePathProvider(
+        template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+        extension = exportParams.format?.extension ?: "json",
+      )
     )
   }
 }

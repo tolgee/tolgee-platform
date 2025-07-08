@@ -6,6 +6,8 @@ import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.formats.yaml.out.YamlFileExporter
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.util.buildExportTranslationList
 
@@ -85,21 +87,23 @@ object YamlExportTestData {
   fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
-    exportParams: ExportParams? = null,
-    projectNamespaceCount: Int = 0
+    exportParams: ExportParams? = null
   ): YamlFileExporter {
+    val params = exportParams ?: ExportParams().also {
+      it.supportArrays = true
+      it.structureDelimiter = '.'
+      it.format = ExportFormat.YAML_RUBY
+    }
     return YamlFileExporter(
       translations = translations,
-      exportParams =
-        exportParams ?: ExportParams().also {
-          it.supportArrays = true
-          it.structureDelimiter = '.'
-          it.format = ExportFormat.YAML_RUBY
-        },
+      exportParams = params,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       objectMapper = ObjectMapper(YAMLFactory()),
       customPrettyPrinter = CustomPrettyPrinter(),
-      projectNamespaceCount = projectNamespaceCount,
+      filePathProvider = ExportFilePathProvider(
+        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+        extension = params.format?.extension ?: "yaml",
+      )
     )
   }
 }
