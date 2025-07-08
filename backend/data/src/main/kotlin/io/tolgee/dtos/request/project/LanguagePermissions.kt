@@ -6,4 +6,5 @@ class LanguagePermissions(
   var translate: Set<Language>?,
   var view: Set<Language>?,
   var stateChange: Set<Language>?,
+  var suggest: Set<Language>?,
 )

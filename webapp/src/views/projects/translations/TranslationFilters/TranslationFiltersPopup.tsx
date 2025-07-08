@@ -13,6 +13,7 @@ import {
 import { SubfilterTranslations } from './SubfilterTranslations';
 import { SubfilterScreenshots } from './SubfilterScreenshots';
 import { SubfilterComments } from './SubfilterComments';
+import { SubfilterSuggestions } from './SubfilterSuggestions';
 
 type Props = {
   value: FiltersType;
@@ -77,6 +78,14 @@ export const TranslationFiltersPopup = ({
               projectId={projectId}
             />
           </>
+        )}
+        {project.suggestionsMode !== 'DISABLED' && (
+          <SubfilterSuggestions
+            value={value}
+            actions={actions}
+            projectId={projectId}
+            selectedLanguages={selectedLanguages}
+          />
         )}
         {showClearButton && Boolean(countFilters(value)) && (
           <MenuItem onClick={() => actions.setFilters({})}>

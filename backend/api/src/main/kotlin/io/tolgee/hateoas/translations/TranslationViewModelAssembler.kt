@@ -1,12 +1,15 @@
 package io.tolgee.hateoas.translations
 
 import io.tolgee.api.v2.controllers.translation.TranslationsController
+import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionSimpleModelAssembler
 import io.tolgee.model.views.TranslationView
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 
 @Component
-class TranslationViewModelAssembler() : RepresentationModelAssemblerSupport<TranslationView, TranslationViewModel>(
+class TranslationViewModelAssembler(
+  private val translationSuggestionSimpleModelAssembler: TranslationSuggestionSimpleModelAssembler
+) : RepresentationModelAssemblerSupport<TranslationView, TranslationViewModel>(
   TranslationsController::class.java,
   TranslationViewModel::class.java,
 ) {
@@ -20,6 +23,9 @@ class TranslationViewModelAssembler() : RepresentationModelAssemblerSupport<Tran
       mtProvider = view.mtProvider,
       commentCount = view.commentCount,
       unresolvedCommentCount = view.unresolvedCommentCount,
+      activeSuggestionCount = view.activeSuggestionCount,
+      totalSuggestionCount = view.totalSuggestionCount,
+      suggestions = view.suggestions?.map { translationSuggestionSimpleModelAssembler.toModel(it) }
     )
   }
 }
