@@ -65,6 +65,8 @@ import {
 import { GlossaryRouter } from '../ee/glossary/views/GlossaryRouter';
 import { createAdder } from '../fixtures/pluginAdder';
 import { ProjectSettingsTab } from '../views/projects/project/ProjectSettingsView';
+import { OperationAssignTranslationLabel } from '../ee/batchOperations/OperationAssignTranslationLabel';
+import { OperationUnassignTranslationLabel } from '../ee/batchOperations/OperationUnassignTranslationLabel';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -221,46 +223,72 @@ export const useAddBatchOperations = () => {
   const prefilteredTask = useTranslationsSelector(
     (c) => c.prefilter?.task !== undefined
   );
+  const labels = useTranslationsSelector((c) => c.labels);
+
   const { isEnabled } = useEnabledFeatures();
   const canEditTasks = satisfiesPermission('tasks.edit');
+  const canAssignLabels = satisfiesPermission('translation-labels.assign');
   const taskFeature = isEnabled('TASKS');
   const orderTranslationsFeature = isEnabled('ORDER_TRANSLATION');
   const { t } = useTranslate();
 
-  return addOperations(
-    [
-      {
-        id: 'task_create',
-        label: t('batch_operations_create_task'),
-        divider: true,
-        enabled: canEditTasks,
-        hidden: !taskFeature,
-        component: OperationTaskCreate,
-      },
-      {
-        id: 'task_add_keys',
-        label: t('batch_operations_task_add_keys'),
-        enabled: canEditTasks,
-        hidden: prefilteredTask || (!taskFeature && !orderTranslationsFeature),
-        component: OperationTaskAddKeys,
-      },
-      {
-        id: 'task_remove_keys',
-        label: t('batch_operations_task_remove_keys'),
-        enabled: canEditTasks,
-        hidden: !prefilteredTask || (!taskFeature && !orderTranslationsFeature),
-        component: OperationTaskRemoveKeys,
-      },
-      {
-        id: 'order_translation',
-        label: t('batch_operations_order_translation'),
-        enabled: canEditTasks,
-        hidden: !orderTranslationsFeature,
-        component: OperationOrderTranslation,
-      },
-    ],
-    { position: 'after', value: 'export_translations' }
-  );
+  return addOperations([
+    {
+      items: [
+        {
+          id: 'task_create',
+          label: t('batch_operations_create_task'),
+          divider: true,
+          enabled: canEditTasks,
+          hidden: !taskFeature,
+          component: OperationTaskCreate,
+        },
+        {
+          id: 'task_add_keys',
+          label: t('batch_operations_task_add_keys'),
+          enabled: canEditTasks,
+          hidden:
+            prefilteredTask || (!taskFeature && !orderTranslationsFeature),
+          component: OperationTaskAddKeys,
+        },
+        {
+          id: 'task_remove_keys',
+          label: t('batch_operations_task_remove_keys'),
+          enabled: canEditTasks,
+          hidden:
+            !prefilteredTask || (!taskFeature && !orderTranslationsFeature),
+          component: OperationTaskRemoveKeys,
+        },
+        {
+          id: 'order_translation',
+          label: t('batch_operations_order_translation'),
+          enabled: canEditTasks,
+          hidden: !orderTranslationsFeature,
+          component: OperationOrderTranslation,
+        },
+      ],
+      placement: { position: 'after', value: 'export_translations' },
+    },
+    {
+      items: [
+        {
+          id: 'assign_translation_labels',
+          label: t('batch_operations_assign_translation_labels'),
+          enabled: canAssignLabels,
+          hidden: labels.length === 0,
+          component: OperationAssignTranslationLabel,
+        },
+        {
+          id: 'unassign_translation_labels',
+          label: t('batch_operations_unassign_translation_labels'),
+          enabled: canAssignLabels,
+          hidden: labels.length === 0,
+          component: OperationUnassignTranslationLabel,
+        },
+      ],
+      placement: { position: 'after', value: 'remove_tags' },
+    },
+  ]);
 };
 
 export const translationPanelAdder = addPanel(

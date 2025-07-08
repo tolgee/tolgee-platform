@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { styled } from '@mui/material';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { OperationProps } from './types';
-import { useTranslationsSelector } from '../context/TranslationsContext';
-import { BatchOperationsSubmit } from './components/BatchOperationsSubmit';
-import { OperationContainer } from './components/OperationContainer';
+import { OperationProps } from 'tg.views/projects/translations/BatchOperations/types';
+import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
+import { BatchOperationsSubmit } from 'tg.views/projects/translations/BatchOperations/components/BatchOperationsSubmit';
+import { OperationContainer } from 'tg.views/projects/translations/BatchOperations/components/OperationContainer';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationLabel } from 'tg.component/TranslationLabel';
 import { LabelControl } from 'tg.views/projects/translations/TranslationsList/Label/LabelControl';
@@ -26,7 +26,7 @@ const StyledLabels = styled('div')`
 
 type Props = OperationProps;
 
-export const OperationUnassignTranslationLabel = ({
+export const OperationAssignTranslationLabel = ({
   disabled,
   onStart,
 }: Props) => {
@@ -49,7 +49,7 @@ export const OperationUnassignTranslationLabel = ({
   }
 
   const batchLoadable = useApiMutation({
-    url: '/v2/projects/{projectId}/start-batch-job/unassign-translation-label',
+    url: '/v2/projects/{projectId}/start-batch-job/assign-translation-label',
     method: 'post',
   });
 
