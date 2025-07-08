@@ -1,3 +1,10 @@
+## [3.123.16](https://github.com/tolgee/tolgee-platform/compare/v3.123.15...v3.123.16) (2025-07-08)
+
+
+### Bug Fixes
+
+* ImportFile issue: handle propely when empty string is passed as issue param value ([#3149](https://github.com/tolgee/tolgee-platform/issues/3149)) ([a60467d](https://github.com/tolgee/tolgee-platform/commit/a60467d22a71245047907c563e2d8b1fcb579b61))
+
 ## [3.123.15](https://github.com/tolgee/tolgee-platform/compare/v3.123.14...v3.123.15) (2025-07-03)
 
 
