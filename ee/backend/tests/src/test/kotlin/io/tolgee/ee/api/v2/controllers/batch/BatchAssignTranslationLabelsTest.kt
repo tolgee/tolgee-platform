@@ -1,6 +1,8 @@
 package io.tolgee.ee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Feature
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
@@ -15,12 +17,15 @@ import kotlin.collections.forEach
 
 class BatchAssignTranslationLabelsTest(
   @Autowired
-  private val batchJobTestBase: BatchJobTestBase
+  private val batchJobTestBase: BatchJobTestBase,
+  @Autowired
+  private var enabledFeaturesProvider: PublicEnabledFeaturesProvider,
 ) : ProjectAuthControllerTest("/v2/projects/") {
 
   @BeforeEach
   fun setup() {
     batchJobTestBase.setup()
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_LABELS)
   }
 
   val testData
@@ -217,5 +222,34 @@ class BatchAssignTranslationLabelsTest(
               it.labels.map { it.id }.containsAll(labelIds).assert.isTrue
           }
       }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it fails to assign labels if feature is not enabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+
+    val labelCount = 1
+    val keyCount = 2
+    val labels = testData.addLabels(labelCount)
+    val keys = testData.addKeysWithLanguages(keyCount)
+
+    batchJobTestBase.saveAndPrepare(this)
+
+    val allKeyIds = keys.map { it.id }.toList()
+    val allLanguageIds = testData.projectBuilder.data.languages.map { it.self.id }
+
+    val keyIds = allKeyIds.take(1)
+    val languageIds = allLanguageIds.take(2)
+    val labelIds = labels.map { it.id }
+
+    performProjectAuthPost(
+      "start-batch-job/assign-translation-label",
+      mapOf(
+        "keyIds" to keyIds,
+        "languageIds" to languageIds,
+        "labelIds" to labelIds,
+      ),
+    ).andIsBadRequest
   }
 }

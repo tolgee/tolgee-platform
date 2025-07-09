@@ -21,6 +21,10 @@ describe('Projects Settings - Labels', () => {
     });
   });
 
+  afterEach(() => {
+    setFeature('TRANSLATION_LABELS', true);
+  });
+
   it('does not show labels tab when feature is disabled', () => {
     setFeature('TRANSLATION_LABELS', false);
     projectLabels.visitProjectSettings(projectId);
