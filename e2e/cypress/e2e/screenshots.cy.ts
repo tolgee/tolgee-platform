@@ -134,7 +134,7 @@ describe('Screenshots', () => {
         getAndFocusRow(0)
           .findDcy('screenshot-thumbnail')
           .first()
-          .findDcy('screenshot-thumbnail-delete')
+          .siblingDcy('screenshot-thumbnail-delete')
           .click({ force: true });
 
         cy.contains('Confirm').click();

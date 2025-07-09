@@ -7,9 +7,17 @@ export class E2ProjectLabelsSection {
     cy.visit(`${HOST}/projects/${projectId}/manage/edit/labels`);
   }
 
-  openFromProjectSettings(projectId: number) {
+  visitProjectSettings(projectId: number) {
     cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
+  }
+
+  visitFromProjectSettings() {
     gcy('project-settings-menu-labels').should('be.visible').click();
+  }
+
+  openFromProjectSettings(projectId: number) {
+    this.visitProjectSettings(projectId);
+    this.visitFromProjectSettings();
   }
 
   openCreateLabelModal() {

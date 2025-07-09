@@ -4,7 +4,7 @@ import { useTranslate } from '@tolgee/react';
 import {
   LabelForm,
   LabelFormValues,
-} from 'tg.views/projects/project/components/Labels/LabelForm';
+} from 'tg.ee.module/translationLabels/Settings/LabelForm';
 import { components } from 'tg.service/apiSchema.generated';
 
 type LabelModel = components['schemas']['LabelModel'];

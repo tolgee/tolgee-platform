@@ -9,6 +9,8 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useUrlSearchArray } from 'tg.hooks/useUrlSearch';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import {
+  AddLabel,
+  RemoveLabel,
   AddTag,
   AddTranslation,
   CellPosition,
@@ -41,6 +43,8 @@ import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/t
 import { useAiPlaygroundService } from './services/useAiPlaygroundService';
 import { usePreventPageLeave } from 'tg.hooks/usePreventPageLeave';
 import { QUERY } from 'tg.constants/links';
+import { useLabelsService } from 'tg.views/projects/translations/context/services/useLabelsService';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 type Props = {
   projectId: number;
@@ -76,6 +80,7 @@ export const [
   );
 
   const { satisfiesLanguageAccess } = useProjectPermissions();
+  const { isEnabled } = useEnabledFeatures();
 
   const prefilteredTaskLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}',
@@ -153,6 +158,11 @@ export const [
 
   const tagsService = useTagsService({
     translations: translationService,
+  });
+
+  const labelService = useLabelsService({
+    translations: translationService,
+    enabled: isEnabled('TRANSLATION_LABELS'),
   });
 
   const selectionService = useSelectionService({
@@ -308,6 +318,16 @@ export const [
     },
     setSidePanelOpen,
     setEventBlockers,
+    addTranslationLabel(data: AddLabel) {
+      return labelService.addLabel(data);
+    },
+    removeTranslationLabel(data: RemoveLabel) {
+      return labelService.removeLabel(data);
+    },
+    fetchLabels(ids: number[]) {
+      labelService.setSelectedIds(ids);
+      return labelService.selectedLabels;
+    },
   };
 
   const dataReady = Boolean(
@@ -332,7 +352,8 @@ export const [
       translationService.isFetching ||
       languagesLoadable.isFetching ||
       stateService.isLoading ||
-      tagsService.isLoading,
+      tagsService.isLoading ||
+      labelService.isLoading,
     isEditLoading: editService.isLoading,
     isFetchingMore: translationService.isFetchingNextPage,
     isLoadingAllIds: translationService.isLoadingAllIds,
@@ -351,6 +372,7 @@ export const [
     layout,
     aiPlaygroundData: aiPlaygroundService.data,
     aiPlaygroundEnabled: props.aiPlayground,
+    labels: labelService.labels,
   };
 
   return [state, actions];

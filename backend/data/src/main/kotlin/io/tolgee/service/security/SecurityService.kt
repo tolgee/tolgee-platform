@@ -15,6 +15,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.task.ITaskService
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,6 +41,9 @@ class SecurityService(
   @set:Autowired
   @Lazy
   lateinit var taskService: ITaskService
+
+  @Autowired
+  private lateinit var labelService: LabelService
 
   fun checkAnyProjectPermission(projectId: Long) {
     if (
@@ -463,6 +467,19 @@ class SecurityService(
 
     if (firstProjectId != projectId) {
       throw PermissionException(Message.KEY_NOT_FROM_PROJECT)
+    }
+  }
+
+  fun checkLabelIdsExistAndIsFromProject(
+    labelIds: List<Long>,
+    projectId: Long,
+  ) {
+    val projectIds = labelService.getProjectIdsForLabelIds(labelIds)
+    if (projectIds.size != labelIds.size) {
+      throw NotFoundException(Message.LABEL_NOT_FOUND)
+    }
+    if (projectIds.any { it != projectId }) {
+      throw PermissionException(Message.MULTIPLE_PROJECTS_NOT_SUPPORTED)
     }
   }
 

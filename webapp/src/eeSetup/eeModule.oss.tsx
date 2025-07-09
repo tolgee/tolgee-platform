@@ -71,3 +71,8 @@ export const useGlossaryTermHighlights = (
 
 export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
   NotIncludedInOss('Glossaries');
+export const useAddProjectSettingsTabs =
+  (projectId: number) => (existingItems) =>
+    existingItems;
+
+export const ProjectSettingsLabels = Empty;

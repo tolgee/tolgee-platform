@@ -6,20 +6,29 @@ import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationFlags } from '../cell/TranslationFlags';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
+import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 
 const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: 1fr auto;
   grid-template-areas:
-    'translation translation '
-    'flags       controls  ';
+    'translation translation translation '
+    'flags       labels      controls  ';
 
   .flags {
-    padding: 0px 12px 4px 16px;
+    padding: 0 8px 1px 4px;
     grid-area: flags;
     display: flex;
     align-items: center;
+    & > div:first-child {
+      margin-left: 2px;
+    }
+  }
+
+  .labels {
+    padding: 0 0 3px 0;
+    min-width: 0;
   }
 
   .controls {
@@ -72,6 +81,8 @@ export const TranslationRead: React.FC<Props> = ({
     aiPlaygroundEnabled,
     aiPlaygroundData,
     cellClickable,
+    addLabel,
+    removeLabel,
   } = tools;
 
   const toggleEdit = () => {
@@ -118,6 +129,12 @@ export const TranslationRead: React.FC<Props> = ({
         className="flags"
         keyData={keyData}
         lang={language.tag}
+      />
+      <TranslationLabels
+        labels={translation?.labels}
+        className="labels"
+        onSelect={(label) => addLabel(label.id)}
+        onDelete={(labelId) => removeLabel(labelId)}
       />
       {!aiPlaygroundEnabled && (
         <ControlsTranslation

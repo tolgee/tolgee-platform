@@ -7,7 +7,7 @@ import { FieldLabel } from 'tg.component/FormField';
 import { T, useTranslate } from '@tolgee/react';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { ColorPaletteField } from 'tg.component/common/form/fields/ColorPaletteField';
-import { tolgeePalette } from '../../../../../figmaTheme';
+import { tolgeePalette } from '../../../figmaTheme';
 
 type LabelModel = components['schemas']['LabelModel'];
 

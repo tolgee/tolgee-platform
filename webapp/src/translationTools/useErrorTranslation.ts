@@ -197,6 +197,8 @@ export function useErrorTranslation() {
         return t('llm_content_filter');
       case 'llm_provider_empty_response':
         return t('llm_provider_empty_response');
+      case 'label_already_exists':
+        return t('label_already_exists', { value: params?.[0] || '' });
       default:
         return code;
     }

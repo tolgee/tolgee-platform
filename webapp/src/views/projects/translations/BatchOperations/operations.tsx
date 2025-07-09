@@ -13,7 +13,7 @@ import { OperationClearTranslations } from './OperationClearTranslations';
 import { OperationExportTranslations } from './OperationExportTranslations';
 import { FC } from 'react';
 import { BatchActions, OperationProps } from './types';
-import { createAdder } from 'tg.fixtures/pluginAdder';
+import { createMultiAdder } from 'tg.fixtures/pluginAdder';
 import { useAddBatchOperations as useAddEeBatchOperations } from 'tg.ee';
 
 export type BatchOperation = {
@@ -25,7 +25,7 @@ export type BatchOperation = {
   component: FC<OperationProps>;
 };
 
-export const addOperations = createAdder<BatchOperation>({
+export const addOperations = createMultiAdder<BatchOperation>({
   referencingProperty: 'id',
 });
 
@@ -108,6 +108,7 @@ export const useBatchOperations = () => {
     },
     {
       id: 'delete',
+      divider: true,
       label: t('batch_operations_delete'),
       enabled: canDeleteKey,
       component: OperationDelete,

@@ -14,7 +14,7 @@ const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 220;
 function PopperComponent(props) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { disablePortal, anchorEl, open, ...other } = props;
-  return <Box {...other} style={{ width: '100%' }} />;
+  return <Box {...other} style={{ minWidth: 0, width: '100%' }} />;
 }
 
 function PaperComponent(props) {
@@ -31,6 +31,7 @@ type Props<T> = {
   itemKey: (item: T) => React.Key;
   displaySearch?: boolean;
   searchPlaceholder?: string;
+  searchInputOnClick?: (e: React.MouseEvent) => void;
   search?: string;
   onSearch?: (value: string) => void;
   title?: string;
@@ -45,6 +46,7 @@ type Props<T> = {
     option: T
   ) => React.ReactNode;
   ListboxProps?: React.HTMLAttributes<HTMLUListElement>;
+  'data-cy'?: string;
 };
 
 export function InfiniteSearchSelectContent<T>({
@@ -55,6 +57,7 @@ export function InfiniteSearchSelectContent<T>({
   itemKey,
   displaySearch,
   searchPlaceholder,
+  searchInputOnClick,
   search,
   onSearch,
   title,
@@ -64,6 +67,7 @@ export function InfiniteSearchSelectContent<T>({
   renderOption,
   ListboxProps,
   onGetMoreData,
+  ...props
 }: Props<T>) {
   const [inputValue, setInputValue] = useState('');
   const { t } = useTranslate();
@@ -75,7 +79,10 @@ export function InfiniteSearchSelectContent<T>({
       : anchorEl.offsetWidth;
 
   return (
-    <StyledWrapper sx={{ minWidth: width, maxWidth: maxWidth ?? width }}>
+    <StyledWrapper
+      sx={{ minWidth: width, maxWidth: maxWidth ?? width }}
+      data-cy={props['data-cy']}
+    >
       <Autocomplete
         open
         filterOptions={(options, state) => {
@@ -140,6 +147,7 @@ export function InfiniteSearchSelectContent<T>({
               inputProps={params.inputProps}
               autoFocus
               placeholder={searchPlaceholder}
+              onClick={searchInputOnClick}
             />
             {!displaySearch && title && <StyledHeading>{title}</StyledHeading>}
           </StyledInputWrapper>
