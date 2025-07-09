@@ -18,6 +18,7 @@ import clsx from 'clsx';
 import { CELL_SHOW_ON_HOVER } from 'tg.views/projects/translations/cell/styles';
 import { useTranslate } from '@tolgee/react';
 import { stopBubble } from 'tg.fixtures/eventHandler';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -78,6 +79,11 @@ export const TranslationLabels = ({
 }: Props) => {
   const { satisfiesPermission } = useProjectPermissions();
   const canAssignLabels = satisfiesPermission('translation-labels.assign');
+  const { isEnabled } = useEnabledFeatures();
+  const labelsEnabled = isEnabled('TRANSLATION_LABELS');
+  if (!labelsEnabled) {
+    return null;
+  }
   const { t } = useTranslate();
 
   const containerRef = useRef<HTMLDivElement | null>(null);

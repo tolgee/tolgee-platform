@@ -44,6 +44,7 @@ import { useAiPlaygroundService } from './services/useAiPlaygroundService';
 import { usePreventPageLeave } from 'tg.hooks/usePreventPageLeave';
 import { QUERY } from 'tg.constants/links';
 import { useLabelsService } from 'tg.views/projects/translations/context/services/useLabelsService';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 type Props = {
   projectId: number;
@@ -79,6 +80,7 @@ export const [
   );
 
   const { satisfiesLanguageAccess } = useProjectPermissions();
+  const { isEnabled } = useEnabledFeatures();
 
   const prefilteredTaskLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/tasks/{taskNumber}',
@@ -160,6 +162,7 @@ export const [
 
   const labelService = useLabelsService({
     translations: translationService,
+    enabled: isEnabled('TRANSLATION_LABELS'),
   });
 
   const selectionService = useSelectionService({

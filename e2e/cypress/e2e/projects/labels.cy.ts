@@ -4,6 +4,7 @@ import { assertMessage, gcy } from '../../common/shared';
 import { E2ProjectLabelsSection } from '../../compounds/projectSettings/labels/E2ProjectLabelsSection';
 import { isDarkMode } from '../../common/helpers';
 import { assertActivityDetails, checkActivity } from '../../common/activities';
+import { setFeature } from '../../common/features';
 
 let projectId = null;
 let secondProjectId = null;
@@ -18,6 +19,12 @@ describe('Projects Settings - Labels', () => {
       projectId = data.body.projects[0].id;
       secondProjectId = data.body.projects[1].id;
     });
+  });
+
+  it('does not show labels tab when feature is disabled', () => {
+    setFeature('TRANSLATION_LABELS', false);
+    projectLabels.visitProjectSettings(projectId);
+    gcy('project-settings-menu-labels').should('not.exist');
   });
 
   it('list project labels', () => {

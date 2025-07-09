@@ -37,8 +37,12 @@ export class E2TranslationsView {
   }
 
   selectLabelsFilter() {
-    gcy('submenu-item').contains('Labels').should('exist').click();
+    this.getLabelsFilter().should('exist').click();
     return this;
+  }
+
+  getLabelsFilter() {
+    return gcy('submenu-item').contains('Labels');
   }
 
   selectLabelByName(labelName: string) {

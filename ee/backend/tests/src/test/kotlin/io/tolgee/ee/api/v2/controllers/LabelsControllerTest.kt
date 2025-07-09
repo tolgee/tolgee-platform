@@ -1,9 +1,14 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Feature
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.LabelsTestData
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
@@ -22,7 +27,9 @@ import org.springframework.data.domain.Pageable
 
 class LabelsControllerTest(
   @Autowired
-  private var labelService: LabelService
+  private var labelService: LabelService,
+  @Autowired
+  private var enabledFeaturesProvider: PublicEnabledFeaturesProvider,
 ) : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: LabelsTestData
 
@@ -32,6 +39,7 @@ class LabelsControllerTest(
     projectSupplier = { testData.projectBuilder.self }
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_LABELS)
   }
 
   @Test
@@ -47,6 +55,15 @@ class LabelsControllerTest(
       }
       node("page.totalElements").isNumber.isEqualTo(5.toBigDecimal())
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot get labels when feature is not enabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    performProjectAuthGet("labels").andIsBadRequest.andHasErrorMessage(
+      Message.FEATURE_NOT_ENABLED,
+    )
   }
 
   @Test

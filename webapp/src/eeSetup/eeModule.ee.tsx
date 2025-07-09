@@ -229,6 +229,7 @@ export const useAddBatchOperations = () => {
   const canEditTasks = satisfiesPermission('tasks.edit');
   const canAssignLabels = satisfiesPermission('translation-labels.assign');
   const taskFeature = isEnabled('TASKS');
+  const labelFeature = isEnabled('TRANSLATION_LABELS');
   const orderTranslationsFeature = isEnabled('ORDER_TRANSLATION');
   const { t } = useTranslate();
 
@@ -275,14 +276,14 @@ export const useAddBatchOperations = () => {
           id: 'assign_translation_labels',
           label: t('batch_operations_assign_translation_labels'),
           enabled: canAssignLabels,
-          hidden: labels.length === 0,
+          hidden: !labelFeature || labels.length === 0,
           component: OperationAssignTranslationLabel,
         },
         {
           id: 'unassign_translation_labels',
           label: t('batch_operations_unassign_translation_labels'),
           enabled: canAssignLabels,
-          hidden: labels.length === 0,
+          hidden: !labelFeature || labels.length === 0,
           component: OperationUnassignTranslationLabel,
         },
       ],
@@ -453,18 +454,22 @@ export const useAddAdministrationMenuItems = () => {
 
 export const useAddProjectSettingsTabs = (projectId: number) => {
   const { t } = useTranslate();
+  const { isEnabled } = useEnabledFeatures();
 
+  const tabs: ProjectSettingsTab[] = [];
+
+  if (isEnabled('TRANSLATION_LABELS')) {
+    tabs.push({
+      value: 'labels',
+      label: t('project_settings_menu_labels'),
+      link: LINKS.PROJECT_EDIT_LABELS.build({
+        [PARAMS.PROJECT_ID]: projectId,
+      }),
+      dataCy: 'project-settings-menu-labels',
+    });
+  }
   return createAdder<ProjectSettingsTab>({ referencingProperty: 'value' })(
-    [
-      {
-        value: 'labels',
-        label: t('project_settings_menu_labels'),
-        link: LINKS.PROJECT_EDIT_LABELS.build({
-          [PARAMS.PROJECT_ID]: projectId,
-        }),
-        dataCy: 'project-settings-menu-labels',
-      },
-    ],
+    tabs,
     {
       position: 'after',
       value: 'advanced',

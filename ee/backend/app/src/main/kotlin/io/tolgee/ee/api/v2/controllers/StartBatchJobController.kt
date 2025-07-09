@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.*
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.hateoas.batch.BatchJobModel
 import io.tolgee.hateoas.batch.BatchJobModelAssembler
 import io.tolgee.model.batch.BatchJob
@@ -34,6 +36,7 @@ class StartBatchJobController(
   private val batchJobService: BatchJobService,
   private val authenticationFacade: AuthenticationFacade,
   private val batchJobModelAssembler: BatchJobModelAssembler,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   @PostMapping(value = ["/assign-translation-label"])
   @Operation(
@@ -45,6 +48,10 @@ class StartBatchJobController(
     @Valid @RequestBody
     data: LabelTranslationsRequest,
   ): BatchJobModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId,
+      Feature.TRANSLATION_LABELS,
+    )
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLabelIdsExistAndIsFromProject(data.labelIds, projectHolder.project.id)
     return batchJobService.startJob(
@@ -65,6 +72,10 @@ class StartBatchJobController(
     @Valid @RequestBody
     data: LabelTranslationsRequest,
   ): BatchJobModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId,
+      Feature.TRANSLATION_LABELS,
+    )
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLabelIdsExistAndIsFromProject(data.labelIds, projectHolder.project.id)
     return batchJobService.startJob(

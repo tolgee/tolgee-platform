@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.ee.data.label.LabelRequest
 import io.tolgee.ee.data.translation.TranslationLabelRequest
 import io.tolgee.ee.service.LabelServiceImpl
@@ -52,7 +54,8 @@ class LabelsController(
     private val labelModelAssembler: LabelModelAssembler,
     private val pagedResourcesAssembler: PagedResourcesAssembler<Label>,
     private val translationService: TranslationService,
-) : IController {
+    private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  ) : IController {
 
   @GetMapping(value = ["labels"])
   @Operation(summary = "Get available project labels")
@@ -64,6 +67,10 @@ class LabelsController(
       @SortDefault("name")
     @ParameterObject pageable: Pageable,
   ): PagedModel<LabelModel> {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId,
+      Feature.TRANSLATION_LABELS,
+    )
     val data = labelService.getProjectLabels(projectHolder.project.id, pageable, search)
     return pagedResourcesAssembler.toModel(data, labelModelAssembler)
   }
@@ -76,6 +83,10 @@ class LabelsController(
     @RequestParam("id")
     ids: List<Long>,
   ): List<LabelModel> {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId,
+      Feature.TRANSLATION_LABELS,
+    )
     val labels = labelService.getProjectLabelsByIds(projectHolder.project.id, ids)
     return labels.map { it.model }
   }
@@ -89,6 +100,10 @@ class LabelsController(
     @RequestBody @Valid
     request: LabelRequest
   ): LabelModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId,
+      Feature.TRANSLATION_LABELS,
+    )
     return labelService.createLabel(projectHolder.project.id, request).model
   }
 
@@ -103,6 +118,10 @@ class LabelsController(
       @RequestBody @Valid
     request: LabelRequest,
   ): LabelModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId,
+      Feature.TRANSLATION_LABELS,
+    )
     return labelService.updateLabel(projectHolder.project.id, labelId, request).model
   }
 
@@ -115,6 +134,10 @@ class LabelsController(
     @PathVariable("labelId")
     labelId: Long,
   ) {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId,
+      Feature.TRANSLATION_LABELS,
+    )
     labelService.deleteLabel(projectHolder.project.id, labelId)
   }
 
@@ -127,6 +150,10 @@ class LabelsController(
     @RequestBody @Valid
     request: TranslationLabelRequest
   ): LabelModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId,
+      Feature.TRANSLATION_LABELS,
+    )
     val translation = translationService.getOrCreate(
       projectHolder.project.id,
       request.keyId,
@@ -147,6 +174,10 @@ class LabelsController(
     @PathVariable("labelId")
     labelId: Long
   ): LabelModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId,
+      Feature.TRANSLATION_LABELS,
+    )
     return labelService.assignLabel(projectHolder.project.id, translationId, labelId).model
   }
 
@@ -161,6 +192,10 @@ class LabelsController(
     @PathVariable("labelId")
     labelId: Long
   ) {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId,
+      Feature.TRANSLATION_LABELS,
+    )
     labelService.unassignLabel(projectHolder.project.id, translationId, labelId)
   }
 

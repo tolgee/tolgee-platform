@@ -19,9 +19,14 @@ type LabelModel = components['schemas']['LabelModel'];
 type Props = {
   projectId?: number;
   translations?: ReturnType<typeof useTranslationsService>;
+  enabled?: boolean;
 };
 
-export const useLabelsService = ({ projectId, translations }: Props) => {
+export const useLabelsService = ({
+  projectId,
+  translations,
+  enabled = true,
+}: Props) => {
   const [search, setSearch] = useState('');
   const [totalItems, setTotalItems] = useState<number | undefined>(undefined);
   const [searchDebounced] = useDebounce(search, 500);
@@ -46,6 +51,7 @@ export const useLabelsService = ({ projectId, translations }: Props) => {
     },
     query,
     options: {
+      enabled,
       keepPreviousData: true,
       refetchOnMount: true,
       noGlobalLoading: true,
@@ -91,7 +97,7 @@ export const useLabelsService = ({ projectId, translations }: Props) => {
       id: selectedIds,
     },
     options: {
-      enabled: enabledSelected,
+      enabled: enabled && enabledSelected,
       noGlobalLoading: true,
     },
   });

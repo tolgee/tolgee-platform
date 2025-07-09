@@ -6,6 +6,7 @@ import { stopBubble } from 'tg.fixtures/eventHandler';
 import { LabelSelector } from 'tg.views/projects/translations/TranslationsList/Label/Control/LabelSelector';
 import { components } from 'tg.service/apiSchema.generated';
 import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -45,6 +46,11 @@ export const LabelControl = forwardRef<HTMLDivElement, LabelControlProps>(
   (props, ref) => {
     const { className, existing, onSelect, menuAnchorOrigin, menuStyle } =
       props;
+    const { isEnabled } = useEnabledFeatures();
+    const labelsEnabled = isEnabled('TRANSLATION_LABELS');
+    if (!labelsEnabled) {
+      return null;
+    }
     const labels = useTranslationsSelector((c) => c.labels) || [];
 
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);

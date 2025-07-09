@@ -4,11 +4,17 @@ import {
   getTranslationCell,
   visitTranslations,
 } from '../../common/translations';
-import { gcy } from '../../common/shared';
+import { dismissMenu, gcy } from '../../common/shared';
 import { isDarkMode } from '../../common/helpers';
 import { E2TranslationLabel } from '../../compounds/E2TranslationLabel';
 import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 import { assertActivityDetails, checkActivity } from '../../common/activities';
+import { setFeature } from '../../common/features';
+import {
+  findBatchOperation,
+  openBatchOperationMenu,
+  selectAll,
+} from '../../common/batchOperations';
 
 let projectId = null;
 let emptyProjectId = null;
@@ -25,6 +31,10 @@ describe('Projects Settings - Labels', () => {
     });
   });
 
+  afterEach(() => {
+    setFeature('TRANSLATION_LABELS', true);
+  });
+
   it('see translation label', () => {
     visitTranslations(projectId);
     getTranslationCell('first key', 'en').within(() => {
@@ -36,6 +46,26 @@ describe('Projects Settings - Labels', () => {
         )
         .contains('First label');
     });
+  });
+
+  it('does not list translation labels when feature is disabled', () => {
+    setFeature('TRANSLATION_LABELS', false);
+    visitTranslations(projectId);
+    translationLabel
+      .getTranslationLabels('first key', 'en')
+      .should('not.exist');
+
+    // Ensure the filter select does not show labels option
+    const view = new E2TranslationsView();
+    view.openFilterSelect().getLabelsFilter().should('not.exist');
+    dismissMenu();
+
+    // ensure that batch operations assign / unassign labels are not available
+    selectAll();
+    openBatchOperationMenu();
+    findBatchOperation('Assign labels').should('not.exist');
+    findBatchOperation('Unassign labels').should('not.exist');
+    setFeature('TRANSLATION_LABELS', true);
   });
 
   it('search and add label to translation', () => {

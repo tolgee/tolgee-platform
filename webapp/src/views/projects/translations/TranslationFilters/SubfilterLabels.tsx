@@ -17,6 +17,7 @@ import {
   useTranslationsActions,
   useTranslationsSelector,
 } from 'tg.views/projects/translations/context/TranslationsContext';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -33,6 +34,11 @@ export const SubfilterLabels = ({
   projectId,
   selectedLanguages,
 }: Props) => {
+  const { isEnabled } = useEnabledFeatures();
+  const labelsEnabled = isEnabled('TRANSLATION_LABELS');
+  if (!labelsEnabled) {
+    return null;
+  }
   const allLabels = useTranslationsSelector((c) => c.labels);
 
   if (allLabels.length === 0) {

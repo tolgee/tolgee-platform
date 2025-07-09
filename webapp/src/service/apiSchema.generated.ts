@@ -2055,6 +2055,7 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
+        | "TRANSLATION_LABELS"
       )[];
       isPayAsYouGo: boolean;
       /** Format: date-time */
@@ -2373,7 +2374,8 @@ export interface components {
         | "llm_content_filter"
         | "llm_provider_empty_response"
         | "label_not_found"
-        | "label_not_from_project";
+        | "label_not_from_project"
+        | "label_already_exists";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -4063,6 +4065,7 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
+        | "TRANSLATION_LABELS"
       )[];
       /** Format: int64 */
       id: number;
@@ -4421,6 +4424,7 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
+        | "TRANSLATION_LABELS"
       )[];
       free: boolean;
       /** Format: int64 */
@@ -4735,6 +4739,7 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
+        | "TRANSLATION_LABELS"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -5314,7 +5319,8 @@ export interface components {
         | "llm_content_filter"
         | "llm_provider_empty_response"
         | "label_not_found"
-        | "label_not_from_project";
+        | "label_not_from_project"
+        | "label_already_exists";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
