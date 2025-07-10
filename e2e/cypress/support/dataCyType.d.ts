@@ -68,6 +68,7 @@ declare namespace DataCy {
         "administration-organizations-list-item" |
         "administration-organizations-projects-button" |
         "administration-organizations-settings-button" |
+        "administration-plan-field-archived" |
         "administration-plan-field-feature" |
         "administration-plan-field-name" |
         "administration-plan-field-non-commercial" |

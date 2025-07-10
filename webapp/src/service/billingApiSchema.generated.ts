@@ -372,6 +372,7 @@ export interface components {
       type: "PAY_AS_YOU_GO" | "FIXED";
     };
     CloudPlanRequest: {
+      archived?: boolean;
       /** Format: date-time */
       availableUntil?: string;
       enabledFeatures: (
@@ -1196,6 +1197,7 @@ export interface components {
       public: boolean;
     };
     SelfHostedEePlanRequest: {
+      archived?: boolean;
       /** Format: date-time */
       availableUntil?: string;
       enabledFeatures: (
