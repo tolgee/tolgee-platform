@@ -18,6 +18,7 @@ export interface GenericPlanFormData {
   public: boolean;
   free: boolean;
   nonCommercial: boolean;
+  archived: boolean;
 }
 
 export interface CloudPlanFormData extends GenericPlanFormData {

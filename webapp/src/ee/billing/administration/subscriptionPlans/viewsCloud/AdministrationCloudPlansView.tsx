@@ -136,12 +136,7 @@ export const AdministrationCloudPlansView = () => {
                     <ListItemText>
                       <PlanSubscriptionCount count={plan.subscriptionCount} />
                     </ListItemText>
-                    <PlanListPriceInfo prices={plan.prices} period="MONTHLY" />
-                    <PlanListPriceInfo
-                      prices={plan.prices}
-                      period="YEARLY"
-                      bold
-                    />
+                    <PlanListPriceInfo prices={plan.prices} bold />
                   </Box>
                   <Box display="flex">
                     {!plan.archived && (
