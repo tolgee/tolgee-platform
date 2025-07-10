@@ -2,12 +2,12 @@ import React, { FC } from 'react';
 import { Alert, FormControlLabel, Switch } from '@mui/material';
 import { useFormikContext } from 'formik';
 import { T, useTranslate } from '@tolgee/react';
-import { CloudPlanFormData } from '../cloud/types';
+import { GenericPlanFormData } from '../cloud/types';
 
 export const PlanArchivedSwitch: FC<{ isUpdate?: boolean }> = ({
   isUpdate,
 }) => {
-  const { setFieldValue, values } = useFormikContext<CloudPlanFormData>();
+  const { setFieldValue, values } = useFormikContext<GenericPlanFormData>();
 
   const { t } = useTranslate();
 
