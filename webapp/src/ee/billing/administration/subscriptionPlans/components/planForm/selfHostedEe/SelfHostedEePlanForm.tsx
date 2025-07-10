@@ -12,6 +12,7 @@ import { SelfHostedEePlanFormData } from '../cloud/types';
 import { SelfHostedEePlanTypeSelectField } from './fields/SelfHostedEePlanTypeSelectField';
 import { PlanSaveButton } from '../genericFields/PlanSaveButton';
 import { SelfHostedEePlanPricesAndLimits } from './fields/SelfHostedEePlanPricesAndLimits';
+import { PlanArchivedSwitch } from 'tg.ee.module/billing/administration/subscriptionPlans/components/planForm/genericFields/PlanArchivedSwitch';
 
 type Props = {
   initialData: SelfHostedEePlanFormData;
@@ -39,7 +40,10 @@ export function SelfHostedEePlanForm({
     >
       <Form>
         <Box mb={3} mt={3}>
-          <PlanPublicSwitchField />
+          <Box display="grid">
+            <PlanArchivedSwitch isUpdate={isUpdate} />
+            <PlanPublicSwitchField />
+          </Box>
 
           {beforeFields}
 

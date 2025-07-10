@@ -7,6 +7,7 @@ import { CloudPlanFormData } from './types';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { Form, Formik } from 'formik';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { PlanArchivedSwitch } from 'tg.ee.module/billing/administration/subscriptionPlans/components/planForm/genericFields/PlanArchivedSwitch';
 
 type Props = {
   isUpdate?: boolean;
@@ -63,8 +64,10 @@ export function CloudPlanForm({
       <Form>
         {beforeFields}
         <Box mb={3} pt={2}>
-          <PlanPublicSwitchField {...publicSwitchFieldProps} />
-
+          <Box display="grid">
+            <PlanArchivedSwitch isUpdate={isUpdate} />
+            <PlanPublicSwitchField {...publicSwitchFieldProps} />
+          </Box>
           <CloudPlanFields isUpdate={isUpdate} canEditPrices={canEditPrices} />
 
           <PlanSaveButton loading={loading} />
