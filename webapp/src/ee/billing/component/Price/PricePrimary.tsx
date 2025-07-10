@@ -22,6 +22,7 @@ type Props = {
   highlightColor: string;
   sx?: SxProps;
   className?: string;
+  noPeriodSwitch?: boolean;
 };
 
 export const PricePrimary = ({
@@ -30,11 +31,12 @@ export const PricePrimary = ({
   highlightColor,
   sx,
   className,
+  noPeriodSwitch = false,
 }: Props) => {
   const { subscriptionMonthly, subscriptionYearly } = prices;
   const formatMoney = useMoneyFormatter();
 
-  const needsPeriodSwitch = isPlanPeriodDependant(prices);
+  const needsPeriodSwitch = !noPeriodSwitch && isPlanPeriodDependant(prices);
 
   const subscriptionPrice =
     period === 'MONTHLY' ? subscriptionMonthly : subscriptionYearly / 12;

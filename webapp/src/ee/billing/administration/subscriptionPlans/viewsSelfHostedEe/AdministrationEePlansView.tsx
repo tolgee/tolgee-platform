@@ -141,12 +141,7 @@ export const AdministrationEePlansView = () => {
                 <Box display="flex" gap={2}>
                   <Box display="flex" gap={2} alignItems="center">
                     <PlanSubscriptionCount count={plan.subscriptionCount} />
-                    <PlanListPriceInfo prices={plan.prices} period="MONTHLY" />
-                    <PlanListPriceInfo
-                      prices={plan.prices}
-                      period="YEARLY"
-                      bold
-                    />
+                    <PlanListPriceInfo prices={plan.prices} bold />
                   </Box>
                   <Box display="flex">
                     {!plan.archived && (
