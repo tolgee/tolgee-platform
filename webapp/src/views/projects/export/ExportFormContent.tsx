@@ -44,7 +44,7 @@ export const ExportFormContent = ({
       <StateSelector className="states" />
       <LanguageSelector className="langs" languages={allLanguages} />
       <FormatSelector className="format" />
-      {getFormatById(values.format).defaultSupportArrays && (
+      {getFormatById(values.format).showSupportArrays && (
         <>
           <StyledOptions className="options">
             <SupportArraysSelector />

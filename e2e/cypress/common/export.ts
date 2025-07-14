@@ -97,12 +97,41 @@ export const testExportFormats = (
   };
 
   testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
-    format: 'JSON',
+    format: 'Native JSON',
     expectedParams: {
       format: 'JSON',
       supportArrays: false,
     },
   });
+
+  testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
+    format: 'Flat JSON',
+    messageFormat: 'Java String.format',
+    expectedParams: {
+      format: 'JSON',
+      structureDelimiter: '.',
+      supportArrays: false,
+    },
+  });
+
+  testFormatWithMessageFormats(
+    [
+      'ICU',
+      'PHP Sprintf',
+      'C Sprintf',
+      'Ruby Sprintf',
+      'Java String.format',
+      'Python Percent',
+    ],
+    {
+      format: 'Flat JSON',
+      expectedParams: {
+        format: 'JSON',
+        structureDelimiter: '.',
+        supportArrays: false,
+      },
+    }
+  );
 
   testFormat(interceptFn, submitFn, clearCheckboxesAfter, afterFn, {
     format: 'Structured JSON',
@@ -115,7 +144,14 @@ export const testExportFormats = (
   });
 
   testFormatWithMessageFormats(
-    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    [
+      'ICU',
+      'PHP Sprintf',
+      'C Sprintf',
+      'Ruby Sprintf',
+      'Java String.format',
+      'Python Percent',
+    ],
     {
       format: 'Structured JSON',
       expectedParams: {
@@ -127,7 +163,14 @@ export const testExportFormats = (
   );
 
   testFormatWithMessageFormats(
-    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    [
+      'ICU',
+      'PHP Sprintf',
+      'C Sprintf',
+      'Ruby Sprintf',
+      'Java String.format',
+      'Python Percent',
+    ],
     {
       format: 'XLIFF',
       expectedParams: {
@@ -138,7 +181,14 @@ export const testExportFormats = (
   );
 
   testFormatWithMessageFormats(
-    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Java String.format'],
+    [
+      'ICU',
+      'PHP Sprintf',
+      'C Sprintf',
+      'Ruby Sprintf',
+      'Java String.format',
+      'Python Percent',
+    ],
     {
       format: 'Flat YAML',
       expectedParams: {
@@ -148,7 +198,14 @@ export const testExportFormats = (
   );
 
   testFormatWithMessageFormats(
-    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Java String.format'],
+    [
+      'ICU',
+      'PHP Sprintf',
+      'C Sprintf',
+      'Ruby Sprintf',
+      'Java String.format',
+      'Python Percent',
+    ],
     {
       format: 'Structured YAML',
       expectedParams: {
@@ -241,7 +298,14 @@ export const testExportFormats = (
   });
 
   testFormatWithMessageFormats(
-    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    [
+      'ICU',
+      'PHP Sprintf',
+      'C Sprintf',
+      'Ruby Sprintf',
+      'Java String.format',
+      'Python Percent',
+    ],
     {
       format: 'CSV',
       expectedParams: {
@@ -251,7 +315,14 @@ export const testExportFormats = (
   );
 
   testFormatWithMessageFormats(
-    ['ICU', 'PHP Sprintf', 'C Sprintf', 'Ruby Sprintf', 'Java String.format'],
+    [
+      'ICU',
+      'PHP Sprintf',
+      'C Sprintf',
+      'Ruby Sprintf',
+      'Java String.format',
+      'Python Percent',
+    ],
     {
       format: 'XLSX',
       expectedParams: {
