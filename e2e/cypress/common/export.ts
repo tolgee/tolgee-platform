@@ -109,7 +109,7 @@ export const testExportFormats = (
     messageFormat: 'Java String.format',
     expectedParams: {
       format: 'JSON',
-      structureDelimiter: '.',
+      structureDelimiter: '',
       supportArrays: false,
     },
   });
@@ -127,7 +127,7 @@ export const testExportFormats = (
       format: 'Flat JSON',
       expectedParams: {
         format: 'JSON',
-        structureDelimiter: '.',
+        structureDelimiter: '',
         supportArrays: false,
       },
     }
