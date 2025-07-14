@@ -44,7 +44,8 @@ export const formatGroups: FormatGroup[] = [
           (params.structureDelimiter === '' ||
             params.structureDelimiter == null) &&
           !params.supportArrays &&
-          params.messageFormat === undefined,
+          (params.messageFormat === undefined ||
+            params.messageFormat === 'ICU'),
       },
     ],
   },
@@ -80,7 +81,9 @@ export const formatGroups: FormatGroup[] = [
             params.format === 'JSON' &&
             (params.structureDelimiter === '' ||
               params.structureDelimiter == null) &&
-            (params.supportArrays || params.messageFormat !== undefined)
+            (params.supportArrays ||
+              (params.messageFormat !== undefined &&
+                params.messageFormat !== 'ICU'))
           );
         },
         supportedMessageFormats: [

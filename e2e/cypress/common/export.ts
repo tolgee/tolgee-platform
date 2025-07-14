@@ -116,7 +116,6 @@ export const testExportFormats = (
 
   testFormatWithMessageFormats(
     [
-      'ICU',
       'PHP Sprintf',
       'C Sprintf',
       'Ruby Sprintf',
