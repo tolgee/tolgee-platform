@@ -41,7 +41,8 @@ export const PlanStripeProductSelectField: FC<
             onChange={(val) => form.setFieldValue(field.name, val)}
             items={[
               { value: '', name: 'None' },
-              ...(!products?.find((product) => product.id === field.value)
+              ...(!products?.find((product) => product.id === field.value) &&
+              field.value
                 ? [
                     {
                       value: field.value,
