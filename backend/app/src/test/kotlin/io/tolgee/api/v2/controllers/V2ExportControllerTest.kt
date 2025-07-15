@@ -262,10 +262,14 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it returns 400 error when namespaced and fileStructureTemplate is missing {namespace}`() {
     retryingOnCommonIssues {
-      namespacesTestData = NamespacesTestData()
-      testDataService.saveTestData(namespacesTestData!!.root)
-      projectSupplier = { namespacesTestData!!.projectBuilder.self }
-      userAccount = namespacesTestData!!.user
+      val testData = TranslationsTestData().also {
+        // to avoid collision
+        it.user.username = "franta-2"
+      }
+      testData.addTwoNamespacesTranslations()
+      testDataService.saveTestData(testData.root)
+      projectSupplier = { testData.project }
+      userAccount = testData.user
 
       performProjectAuthPost("export", mapOf("fileStructureTemplate" to "{languageTag}.{extension}"))
         .andIsBadRequest

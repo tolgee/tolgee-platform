@@ -186,22 +186,10 @@ class TranslationsTestData {
     }
   }
 
-  fun addOneNamespace() {
+  fun addTwoNamespacesTranslations() {
     projectBuilder.apply {
-      addNamespace {
-        name = "ns-1"
-      }
-    }
-  }
-
-  fun addTwoNamespaces() {
-    projectBuilder.apply {
-      addNamespace {
-        name = "ns-1"
-      }
-      addNamespace {
-        name = "ns-2"
-      }
+      addKey("ns-1", "1").addTranslation("en", "1")
+      addKey("ns-2", "1").addTranslation("en", "2")
     }
   }
 
