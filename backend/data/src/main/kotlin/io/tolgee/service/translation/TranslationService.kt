@@ -186,7 +186,10 @@ class TranslationService(
     translations: Map<Language, String?>,
     oldTranslations: Map<Language, String?>,
   ): Map<Language, Translation> {
-    return SetTranslationTextUtil(applicationContext, projectHolder.project).setForKey(key, translations, oldTranslations)
+    return SetTranslationTextUtil(
+      applicationContext,
+      projectHolder.project
+    ).setForKey(key, translations, oldTranslations)
   }
 
   fun setTranslationText(
@@ -195,7 +198,10 @@ class TranslationService(
     text: String?,
     state: TranslationState? = null,
   ): Translation {
-    return SetTranslationTextUtil(applicationContext, projectHolder.project).setTranslationText(key, language, text, state)
+    return SetTranslationTextUtil(
+      applicationContext,
+      projectHolder.project
+    ).setTranslationText(key, language, text, state)
   }
 
   fun setTranslationText(

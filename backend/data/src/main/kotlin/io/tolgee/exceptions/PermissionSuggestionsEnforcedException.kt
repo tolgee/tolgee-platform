@@ -8,4 +8,4 @@ import java.io.Serializable
 open class PermissionSuggestionsEnforcedException(
   message: io.tolgee.constants.Message = io.tolgee.constants.Message.OPERATION_NOT_PERMITTED,
   params: List<Serializable?>? = null,
-): PermissionException(message, params)
+) : PermissionException(message, params)

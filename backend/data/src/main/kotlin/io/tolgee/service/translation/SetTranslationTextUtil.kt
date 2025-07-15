@@ -11,7 +11,6 @@ import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
-import io.tolgee.security.ProjectHolder
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
 import org.springframework.context.ApplicationContext
@@ -98,9 +97,9 @@ class SetTranslationTextUtil(
     }
 
     if (
-      hasTextChanged
-      && project.suggestionsMode == SuggestionsMode.ENFORCED
-      && translation.state == TranslationState.REVIEWED
+      hasTextChanged &&
+      project.suggestionsMode == SuggestionsMode.ENFORCED &&
+      translation.state == TranslationState.REVIEWED
     ) {
       try {
         securityService.checkLanguageStateChangePermission(
@@ -113,7 +112,6 @@ class SetTranslationTextUtil(
         // so it can be confidently caught
         throw PermissionSuggestionsEnforcedException(params = e.params)
       }
-
     }
 
     translation.text = text

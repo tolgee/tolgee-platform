@@ -12,7 +12,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TaskType
-import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder

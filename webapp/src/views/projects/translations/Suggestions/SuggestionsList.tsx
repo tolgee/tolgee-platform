@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Checkbox, FormControlLabel, styled } from '@mui/material';
 import { PanelHeader } from '../ToolsPanel/common/PanelHeader';
 import { T, useTranslate } from '@tolgee/react';
