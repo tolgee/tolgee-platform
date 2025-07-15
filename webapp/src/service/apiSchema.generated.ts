@@ -2377,7 +2377,8 @@ export interface components {
         | "llm_content_filter"
         | "llm_provider_empty_response"
         | "suggestion_not_found"
-        | "user_can_only_delete_his_suggestions";
+        | "user_can_only_delete_his_suggestions"
+        | "cannot_modify_reviewed_translation";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2816,6 +2817,7 @@ export interface components {
       /** Format: int64 */
       conflictId?: number;
       conflictText?: string;
+      conflictType?: "CANNOT_EDIT_REVIEWED" | "CANNOT_EDIT_DISABLED";
       existingKeyIsPlural: boolean;
       /** Format: int64 */
       id: number;
@@ -5309,7 +5311,8 @@ export interface components {
         | "llm_content_filter"
         | "llm_provider_empty_response"
         | "suggestion_not_found"
-        | "user_can_only_delete_his_suggestions";
+        | "user_can_only_delete_his_suggestions"
+        | "cannot_modify_reviewed_translation";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };

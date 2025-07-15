@@ -21,6 +21,7 @@ import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
@@ -48,6 +49,7 @@ class TranslationService(
   private val translationViewDataProvider: TranslationViewDataProvider,
   private val entityManager: EntityManager,
   private val translationCommentService: TranslationCommentService,
+  private val projectHolder: ProjectHolder
 ) {
   @set:Autowired
   @set:Lazy
@@ -175,7 +177,7 @@ class TranslationService(
     key: Key,
     translations: Map<String, String?>,
   ): Map<String, Translation> {
-    return SetTranslationTextUtil(applicationContext).setForKey(key, translations)
+    return SetTranslationTextUtil(applicationContext, projectHolder.project).setForKey(key, translations)
   }
 
   @Transactional
@@ -184,7 +186,7 @@ class TranslationService(
     translations: Map<Language, String?>,
     oldTranslations: Map<Language, String?>,
   ): Map<Language, Translation> {
-    return SetTranslationTextUtil(applicationContext).setForKey(key, translations, oldTranslations)
+    return SetTranslationTextUtil(applicationContext, projectHolder.project).setForKey(key, translations, oldTranslations)
   }
 
   fun setTranslationText(
@@ -193,21 +195,21 @@ class TranslationService(
     text: String?,
     state: TranslationState? = null,
   ): Translation {
-    return SetTranslationTextUtil(applicationContext).setTranslationText(key, language, text, state)
+    return SetTranslationTextUtil(applicationContext, projectHolder.project).setTranslationText(key, language, text, state)
   }
 
   fun setTranslationText(
     translation: Translation,
     text: String?,
   ): Translation {
-    return SetTranslationTextUtil(applicationContext).setTranslationText(translation, text)
+    return SetTranslationTextUtil(applicationContext, projectHolder.project).setTranslationText(translation, text)
   }
 
   fun setTranslationTextNoSave(
     translation: Translation,
     text: String?,
   ) {
-    return SetTranslationTextUtil(applicationContext).setTranslationTextNoSave(translation, text)
+    return SetTranslationTextUtil(applicationContext, projectHolder.project).setTranslationTextNoSave(translation, text)
   }
 
   fun save(translation: Translation): Translation {

@@ -4563,4 +4563,9 @@
     <changeSet author="stepangranat (generated)" id="1750844656347-1">
         <modifyDataType columnName="structure_delimiter" newDataType="char(1)" tableName="content_delivery_config"/>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1752567847368-1">
+        <addColumn tableName="import_translation">
+            <column name="conflict_type" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

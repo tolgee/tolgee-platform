@@ -1,6 +1,6 @@
 import React, { FunctionComponent, LegacyRef, useEffect } from 'react';
-import { Box, BoxProps, IconButton, styled } from '@mui/material';
-import { green } from '@mui/material/colors';
+import { Box, BoxProps, IconButton, styled, Tooltip } from '@mui/material';
+import { green, grey } from '@mui/material/colors';
 import { ChevronUp, ChevronDown, Check } from '@untitled-ui/icons-react';
 import clsx from 'clsx';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
@@ -18,6 +18,8 @@ type Props = {
   expandable: boolean;
   languageTag: string;
   isPlural: boolean;
+  disabled?: boolean;
+  conflictHint?: string;
   'data-cy': string;
 };
 
@@ -40,6 +42,15 @@ const StyledRoot = styled(Box)`
       theme.palette.mode === 'light' ? green['900'] : green['100']};
     background-color: ${({ theme }) =>
       theme.palette.mode === 'light' ? green['50'] : green['900']};
+  }
+
+  &.disabled {
+    border-color: ${({ theme }) =>
+      theme.palette.mode === 'light' ? grey['900'] : grey['100']};
+    background-color: ${({ theme }) =>
+      theme.palette.mode === 'light' ? grey['50'] : grey['900']};
+    opacity: 0.6;
+    cursor: default;
   }
 `;
 
@@ -90,14 +101,15 @@ export const ImportConflictTranslation: React.FC<Props> = (props) => {
 
   const dataCySelected = { 'data-cy-selected': props.selected || undefined };
 
-  return (
+  const content = (
     <StyledRoot
       position="relative"
-      onClick={props.onSelect}
-      className={clsx(
-        { selected: props.selected || props.loaded },
-        { expanded: props.expanded }
-      )}
+      onClick={!props.disabled ? props.onSelect : undefined}
+      className={clsx({
+        selected: props.selected || props.loaded,
+        expanded: props.expanded,
+        disabled: props.disabled,
+      })}
       display="flex"
       {...dataCySelected}
       data-cy={props['data-cy']}
@@ -151,4 +163,10 @@ export const ImportConflictTranslation: React.FC<Props> = (props) => {
       )}
     </StyledRoot>
   );
+
+  if (props.conflictHint) {
+    return <Tooltip title={props.conflictHint}>{content}</Tooltip>;
+  } else {
+    return content;
+  }
 };

@@ -23,6 +23,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
+import io.tolgee.model.enums.ConflictType
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
@@ -433,12 +434,28 @@ class ImportService(
     return importTranslationRepository.findByIdAndLanguageId(translationId, languageId)
   }
 
+  fun checkTranslationIsEditable(translation: ImportTranslation): BadRequestException? {
+    if (translation.conflictType == ConflictType.CANNOT_EDIT_REVIEWED) {
+      return BadRequestException(Message.CANNOT_MODIFY_REVIEWED_TRANSLATION)
+    }
+
+    if (translation.conflictType == ConflictType.CANNOT_EDIT_DISABLED) {
+      return BadRequestException(Message.CANNOT_MODIFY_DISABLED_TRANSLATION)
+    }
+    return null
+  }
+
   fun resolveTranslationConflict(
     translationId: Long,
     languageId: Long,
     override: Boolean,
   ) {
     val translation = findTranslation(translationId, languageId) ?: throw NotFoundException()
+
+    if (override) {
+      checkTranslationIsEditable(translation)?.let { throw it }
+    }
+
     translation.override = override
     translation.resolve()
     importTranslationRepository.save(translation)
@@ -450,8 +467,10 @@ class ImportService(
   ) {
     val translations = findTranslations(language.id)
     translations.forEach {
-      it.resolve()
-      it.override = override
+      if (!override || checkTranslationIsEditable(it) == null) {
+        it.resolve()
+        it.override = override
+      }
     }
     this.importTranslationRepository.saveAll(translations)
   }

@@ -27,6 +27,7 @@ class ImportTranslationModelAssembler :
       keyDescription = view.keyDescription,
       isPlural = view.plural,
       existingKeyIsPlural = view.existingKeyPlural ?: false,
+      conflictType = view.conflictType,
     )
   }
 

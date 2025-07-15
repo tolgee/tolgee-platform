@@ -271,15 +271,17 @@ class SecurityService(
         }
       }
     )
-    if (keyId != null) {
-      val project = permissionService.getProjectPermissionData(projectId, authenticationFacade.authenticatedUser.id)
-      if (project.suggestionsMode == SuggestionsMode.ENFORCED) {
-        val existingTranslations = translationService.getTranslations(listOf(keyId), languageIds.toList())
-        // for translations in REVIEWED state user also needs state change permission
-        for (translation in existingTranslations.filter { it.state == TranslationState.REVIEWED }) {
-          checkLanguageStateChangePermission(projectId, listOf(translation.language.id))
-        }
-      }
+  }
+
+  fun canEditReviewedTranslation(projectId: Long, languageId: Long, keyId: Long? = null): Boolean {
+    if (projectHolder.project.suggestionsMode != SuggestionsMode.ENFORCED) {
+      return true
+    }
+    try {
+      checkLanguageStateChangePermission(projectId, listOf(languageId), keyId)
+      return true
+    } catch (e: PermissionException) {
+      return false
     }
   }
 

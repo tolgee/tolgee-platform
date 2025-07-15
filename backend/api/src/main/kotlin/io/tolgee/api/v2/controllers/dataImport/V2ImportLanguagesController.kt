@@ -22,6 +22,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -51,6 +52,7 @@ class V2ImportLanguagesController(
   private val pagedTranslationsResourcesAssembler: PagedResourcesAssembler<ImportTranslationView>,
   private val projectHolder: ProjectHolder,
   private val languageService: LanguageService,
+  private val translationService: TranslationService,
 ) : Logging {
   @GetMapping("/result/languages/{languageId}")
   @Operation(description = "Returns language prepared to import.", summary = "Get import language")

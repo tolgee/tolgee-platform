@@ -1,17 +1,24 @@
 package io.tolgee.service.translation
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
+import io.tolgee.exceptions.PermissionSuggestionsEnforcedException
 import io.tolgee.model.Language
+import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.security.SecurityService
 import org.springframework.context.ApplicationContext
 
 class SetTranslationTextUtil(
   private val applicationContext: ApplicationContext,
+  private val project: ProjectDto,
 ) {
   fun setForKey(
     key: Key,
@@ -63,7 +70,7 @@ class SetTranslationTextUtil(
     language: Language,
     text: String?,
     state: TranslationState? = null,
-    ): Translation {
+  ): Translation {
     val translation = translationService.getOrCreate(key, language)
     setTranslationText(translation, text, state)
     key.translations.add(translation)
@@ -74,7 +81,7 @@ class SetTranslationTextUtil(
     translation: Translation,
     text: String?,
     state: TranslationState? = null,
-    ): Translation {
+  ): Translation {
     setTranslationTextNoSave(translation, text, state)
     return translationService.save(translation)
   }
@@ -88,6 +95,25 @@ class SetTranslationTextUtil(
 
     if (hasTextChanged) {
       translation.resetFlags()
+    }
+
+    if (
+      hasTextChanged
+      && project.suggestionsMode == SuggestionsMode.ENFORCED
+      && translation.state == TranslationState.REVIEWED
+    ) {
+      try {
+        securityService.checkLanguageStateChangePermission(
+          project.id,
+          listOf(translation.language.id),
+          translation.key.id
+        )
+      } catch (e: PermissionException) {
+        // throwing a special exception
+        // so it can be confidently caught
+        throw PermissionSuggestionsEnforcedException(params = e.params)
+      }
+
     }
 
     translation.text = text
@@ -111,6 +137,10 @@ class SetTranslationTextUtil(
 
   private val languageService by lazy {
     applicationContext.getBean(LanguageService::class.java)
+  }
+
+  private val securityService by lazy {
+    applicationContext.getBean(SecurityService::class.java)
   }
 
   private fun languageByIdFromLanguages(
