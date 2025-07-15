@@ -8,6 +8,7 @@ import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.ImportResult
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.SingleStepImportRequest
@@ -24,6 +25,7 @@ import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
 import io.tolgee.model.enums.ConflictType
+import io.tolgee.model.enums.NonEditableImportResolution
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
@@ -42,6 +44,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.interceptor.TransactionAspectSupport
 import org.springframework.transaction.interceptor.TransactionInterceptor
 import java.io.Serializable
 
@@ -115,7 +118,7 @@ class ImportService(
     userAccount: UserAccount,
     params: SingleStepImportRequest,
     reportStatus: (ImportApplicationStatus) -> Unit,
-  ) {
+  ): ImportResult {
     reportStatus(ImportApplicationStatus.ANALYZING_FILES)
     val import = Import(project).also { it.author = userAccount }
 
@@ -149,7 +152,7 @@ class ImportService(
 
     entityManager.clear()
 
-    StoredDataImporter(
+    val result = StoredDataImporter(
       applicationContext,
       import,
       params.forceMode,
@@ -157,7 +160,10 @@ class ImportService(
       importSettings = params,
       _importDataManager = fileProcessor.importDataManager,
       isSingleStepImport = true,
+      nonEditableResolution = params.nonEditableImportResolution ?: NonEditableImportResolution.FAIL,
     ).doImport()
+
+    return result
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
@@ -166,8 +172,8 @@ class ImportService(
     authorId: Long,
     forceMode: ForceMode = ForceMode.NO_FORCE,
     reportStatus: (ImportApplicationStatus) -> Unit = {},
-  ) {
-    import(getNotExpired(projectId, authorId), forceMode, reportStatus)
+  ): ImportResult {
+    return import(getNotExpired(projectId, authorId), forceMode, reportStatus)
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
@@ -175,12 +181,13 @@ class ImportService(
     import: Import,
     forceMode: ForceMode = ForceMode.NO_FORCE,
     reportStatus: (ImportApplicationStatus) -> Unit = {},
-  ) {
+  ): ImportResult {
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val providedSettingsOrFromDb = importSettingsService.get(import.author, import.project.id)
-    StoredDataImporter(applicationContext, import, forceMode, reportStatus, providedSettingsOrFromDb).doImport()
+    val result = StoredDataImporter(applicationContext, import, forceMode, reportStatus, providedSettingsOrFromDb).doImport()
     deleteImport(import)
     publishImportBusinessEvent(import.project.id, import.author.id)
+    return result
   }
 
   private fun publishImportBusinessEvent(

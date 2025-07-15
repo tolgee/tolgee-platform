@@ -3,6 +3,7 @@ package io.tolgee.dtos.request
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.IImportSettings
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
+import io.tolgee.model.enums.NonEditableImportResolution
 import io.tolgee.service.dataImport.ForceMode
 
 class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
@@ -50,4 +51,9 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
       "(only within namespaces which are included in the import).",
   )
   var removeOtherKeys: Boolean? = false
+
+  @get:Schema(
+    description = "What to do if the translation is not editable (can be disabled or reviewed in enforced suggestion mode)"
+  )
+  val nonEditableImportResolution: NonEditableImportResolution? = NonEditableImportResolution.FAIL
 }

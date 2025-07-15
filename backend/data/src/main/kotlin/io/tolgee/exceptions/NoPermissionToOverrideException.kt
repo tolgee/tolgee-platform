@@ -5,7 +5,8 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import java.io.Serializable
 
 @ResponseStatus(HttpStatus.FORBIDDEN)
-open class PermissionSuggestionsEnforcedException(
+open class NoPermissionToOverrideException(
   message: io.tolgee.constants.Message = io.tolgee.constants.Message.OPERATION_NOT_PERMITTED,
   params: List<Serializable?>? = null,
+  val keyId: Long,
 ) : PermissionException(message, params)

@@ -1,12 +1,17 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.api.IImportSettings
+import io.tolgee.constants.Message
+import io.tolgee.dtos.ImportResult
+import io.tolgee.dtos.SimpleKeyResult
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
+import io.tolgee.exceptions.NoPermissionToOverrideException
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.enums.NonEditableImportResolution
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
@@ -33,6 +38,7 @@ class StoredDataImporter(
   // for single step import, we provide import data manager
   private val _importDataManager: ImportDataManager? = null,
   private val isSingleStepImport: Boolean = false,
+  private val nonEditableResolution: NonEditableImportResolution = NonEditableImportResolution.FAIL,
 ) {
   private val importDataManager by lazy {
     if (_importDataManager != null) {
@@ -76,6 +82,8 @@ class StoredDataImporter(
    */
   val outdatedFlagKeys: MutableList<Long> = mutableListOf()
 
+  val failedKeyIds: MutableSet<Long> = mutableSetOf()
+
   /**
    * These are all keyMetas from all the keys to import. If multiple keys have same name and
    * namespace, the meta is merged to one, so there is only one meta for one key!!!
@@ -101,11 +109,17 @@ class StoredDataImporter(
     result
   }
 
-  fun doImport() {
+  fun doImport(): ImportResult {
     reportStatus(ImportApplicationStatus.PREPARING_AND_VALIDATING)
+
     importDataManager.storedLanguages.forEach {
       it.prepareImport()
     }
+
+    if (failedKeyIds.isNotEmpty() && nonEditableResolution == NonEditableImportResolution.FAIL) {
+      throw BadRequestException(message = Message.CANNOT_MODIFY_KEYS, params = getFailedKeys(failedKeyIds))
+    }
+
     addKeysAndCheckPermissions()
 
     handleKeyMetas()
@@ -137,6 +151,14 @@ class StoredDataImporter(
     deleteOtherKeys()
 
     entityManager.flushAndClear()
+
+    val failedKeys = if (nonEditableResolution == NonEditableImportResolution.REPORT && failedKeyIds.isNotEmpty()) {
+      getFailedKeys(failedKeyIds)
+    } else {
+      null
+    }
+
+    return ImportResult(failedKeys)
   }
 
   private fun tagNewKeys() {
@@ -195,6 +217,10 @@ class StoredDataImporter(
   private fun saveTranslations() {
     checkTranslationPermissions()
     translationService.saveAll(translationsToSave.map { it.second })
+  }
+
+  private fun getFailedKeys(ids: Set<Long>): List<SimpleKeyResult> {
+    return keyService.find(ids).map { it.toSimpleKey() }
   }
 
   private fun saveKeys(): Collection<Key> {
@@ -275,7 +301,7 @@ class StoredDataImporter(
     if (this.conflict == null || (this.override && this.resolved) || forceMode == ForceMode.OVERRIDE) {
       val language =
         this.language.existingLanguage
-          ?: throw BadRequestException(io.tolgee.constants.Message.EXISTING_LANGUAGE_NOT_SELECTED)
+          ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
       val translation =
         this.conflict ?: Translation().apply {
           this.language = language
@@ -284,7 +310,11 @@ class StoredDataImporter(
       if (language == language.project.baseLanguage && translation.text != this.text) {
         outdatedFlagKeys.add(translation.key.id)
       }
-      translationService.setTranslationTextNoSave(translation, text)
+      try {
+        translationService.setTranslationTextNoSave(translation, text)
+      } catch (e: NoPermissionToOverrideException) {
+        failedKeyIds.add(e.keyId)
+      }
       translationsToSave.add(this to translation)
     }
   }

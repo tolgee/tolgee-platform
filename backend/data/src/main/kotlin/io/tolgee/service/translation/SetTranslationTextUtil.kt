@@ -5,7 +5,7 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.exceptions.PermissionSuggestionsEnforcedException
+import io.tolgee.exceptions.NoPermissionToOverrideException
 import io.tolgee.model.Language
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationState
@@ -92,10 +92,6 @@ class SetTranslationTextUtil(
   ) {
     val hasTextChanged = translation.text != text
 
-    if (hasTextChanged) {
-      translation.resetFlags()
-    }
-
     if (
       hasTextChanged &&
       project.suggestionsMode == SuggestionsMode.ENFORCED &&
@@ -110,8 +106,15 @@ class SetTranslationTextUtil(
       } catch (e: PermissionException) {
         // throwing a special exception
         // so it can be confidently caught
-        throw PermissionSuggestionsEnforcedException(params = e.params)
+        throw NoPermissionToOverrideException(
+          params = e.params,
+          keyId = translation.key.id,
+        )
       }
+    }
+
+    if (hasTextChanged) {
+      translation.resetFlags()
     }
 
     translation.text = text
