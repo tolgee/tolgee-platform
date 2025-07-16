@@ -6,4 +6,4 @@ class SimpleKeyResult(
   val id: Long,
   val name: String,
   val namespace: String?,
-): Serializable
+) : Serializable

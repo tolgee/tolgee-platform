@@ -53,7 +53,8 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
   var removeOtherKeys: Boolean? = false
 
   @get:Schema(
-    description = "What to do if the translation is not editable (can be disabled or reviewed in enforced suggestion mode)"
+    description = "What to do if the translation is not editable " +
+      " (can be disabled or reviewed in enforced suggestion mode)"
   )
   val nonEditableImportResolution: NonEditableImportResolution? = NonEditableImportResolution.FAIL
 }
