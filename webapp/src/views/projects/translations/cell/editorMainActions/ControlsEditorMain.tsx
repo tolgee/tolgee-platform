@@ -120,14 +120,14 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
         </>
       ) : (
         <LoadingButton
-          onClick={() => firstAction.action()}
+          onClick={() => firstAction?.action()}
           color="primary"
           size="small"
           variant="contained"
           loading={isEditLoading}
           data-cy="translations-cell-save-button"
         >
-          {firstAction.label}
+          {firstAction?.label}
         </LoadingButton>
       )}
     </StyledContainer>

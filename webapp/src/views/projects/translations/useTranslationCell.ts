@@ -15,6 +15,7 @@ import {
   EditMode,
 } from './context/types';
 import { useProject } from 'tg.hooks/useProject';
+import { getEditorActions } from './cell/editorMainActions/getEditorActions';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -182,6 +183,14 @@ export const useTranslationCell = ({
     updateEdit({ activeVariant });
   }
 
+  const tasks = keyData.tasks?.filter((t) => t.languageTag === language.tag);
+
+  const prefilteredTask = useTranslationsSelector((c) =>
+    c.prefilteredTask?.language.id === language.id
+      ? c.prefilteredTask
+      : undefined
+  );
+
   const canChangeState =
     (assignedTask?.userAssigned && assignedTask.type === 'REVIEW') ||
     satisfiesLanguageAccess('translations.state-edit', language.id);
@@ -193,17 +202,15 @@ export const useTranslationCell = ({
     language.id
   );
 
-  const hasEditPermission =
-    satisfiesLanguageAccess('translations.edit', language.id) ||
-    (assignedTask?.userAssigned && assignedTask.type === 'TRANSLATE');
+  const editorActions = getEditorActions({
+    currentTask: prefilteredTask?.number,
+    languageId: language.id,
+    project,
+    tasks,
+    translation,
+  });
 
-  const canEditReviewedTranslation =
-    project.suggestionsMode === 'ENFORCED'
-      ? translation?.state !== 'REVIEWED' || canSuggest
-      : true;
-
-  const editEnabled =
-    hasEditPermission && canEditReviewedTranslation && !disabled;
+  const editEnabled = editorActions.length && !disabled;
 
   const aiPlaygroundData = useTranslationsSelector(
     (c) => c.aiPlaygroundData?.[keyId]?.[language.id]
@@ -213,16 +220,7 @@ export const useTranslationCell = ({
     (c) => c.aiPlaygroundEnabled
   );
 
-  const cellClickable =
-    ((editEnabled || canSuggest) && !isEditing) || aiPlaygroundEnabled;
-
-  const prefilteredTask = useTranslationsSelector((c) =>
-    c.prefilteredTask?.language.id === language.id
-      ? c.prefilteredTask
-      : undefined
-  );
-
-  const tasks = keyData.tasks?.filter((t) => t.languageTag === language.tag);
+  const cellClickable = (editEnabled && !isEditing) || aiPlaygroundEnabled;
 
   return {
     keyId,

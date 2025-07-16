@@ -35,7 +35,7 @@ export const TranslationEditor = ({ mode, tools, editorRef }: Props) => {
     tasks,
     languageId: language.id,
     project,
-  })?.[0].action;
+  })?.[0]?.action;
 
   return (
     <PluralEditor
