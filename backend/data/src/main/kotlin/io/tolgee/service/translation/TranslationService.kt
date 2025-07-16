@@ -22,7 +22,6 @@ import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
-import io.tolgee.security.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
@@ -50,7 +49,6 @@ class TranslationService(
   private val translationViewDataProvider: TranslationViewDataProvider,
   private val entityManager: EntityManager,
   private val translationCommentService: TranslationCommentService,
-  private val projectHolder: ProjectHolder
 ) {
   @set:Autowired
   @set:Lazy
@@ -178,7 +176,7 @@ class TranslationService(
     key: Key,
     translations: Map<String, String?>,
   ): Map<String, Translation> {
-    return SetTranslationTextUtil(applicationContext, projectHolder.projectOrNull).setForKey(key, translations)
+    return SetTranslationTextUtil(applicationContext).setForKey(key, translations)
   }
 
   @Transactional
@@ -188,8 +186,7 @@ class TranslationService(
     oldTranslations: Map<Language, String?>,
   ): Map<Language, Translation> {
     return SetTranslationTextUtil(
-      applicationContext,
-      projectHolder.projectOrNull
+      applicationContext
     ).setForKey(key, translations, oldTranslations)
   }
 
@@ -200,8 +197,7 @@ class TranslationService(
     state: TranslationState? = null,
   ): Translation {
     return SetTranslationTextUtil(
-      applicationContext,
-      projectHolder.projectOrNull
+      applicationContext
     ).setTranslationText(key, language, text, state)
   }
 
@@ -209,7 +205,7 @@ class TranslationService(
     translation: Translation,
     text: String?,
   ): Translation {
-    return SetTranslationTextUtil(applicationContext, projectHolder.projectOrNull).setTranslationText(translation, text)
+    return SetTranslationTextUtil(applicationContext).setTranslationText(translation, text)
   }
 
   @Transactional(noRollbackFor = [NoPermissionToOverrideException::class])
@@ -219,8 +215,8 @@ class TranslationService(
   ) {
     return SetTranslationTextUtil(
       applicationContext,
-      projectHolder.projectOrNull
-    ).setTranslationTextNoSave(translation, text)
+
+      ).setTranslationTextNoSave(translation, text)
   }
 
   fun save(translation: Translation): Translation {

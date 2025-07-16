@@ -1,7 +1,6 @@
 package io.tolgee.service.translation
 
 import io.tolgee.constants.Message
-import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -11,13 +10,13 @@ import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
 import org.springframework.context.ApplicationContext
 
 class SetTranslationTextUtil(
   private val applicationContext: ApplicationContext,
-  private val project: ProjectDto?,
 ) {
   fun setForKey(
     key: Key,
@@ -91,6 +90,7 @@ class SetTranslationTextUtil(
     state: TranslationState? = null,
   ) {
     val hasTextChanged = translation.text != text
+    val project = projectHolder.projectOrNull
 
     if (
       hasTextChanged &&
@@ -143,6 +143,10 @@ class SetTranslationTextUtil(
 
   private val securityService by lazy {
     applicationContext.getBean(SecurityService::class.java)
+  }
+
+  private val projectHolder: ProjectHolder by lazy {
+    applicationContext.getBean(ProjectHolder::class.java)
   }
 
   private fun languageByIdFromLanguages(
