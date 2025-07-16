@@ -178,7 +178,7 @@ class TranslationService(
     key: Key,
     translations: Map<String, String?>,
   ): Map<String, Translation> {
-    return SetTranslationTextUtil(applicationContext, projectHolder.project).setForKey(key, translations)
+    return SetTranslationTextUtil(applicationContext, projectHolder.projectOrNull).setForKey(key, translations)
   }
 
   @Transactional
@@ -189,7 +189,7 @@ class TranslationService(
   ): Map<Language, Translation> {
     return SetTranslationTextUtil(
       applicationContext,
-      projectHolder.project
+      projectHolder.projectOrNull
     ).setForKey(key, translations, oldTranslations)
   }
 
@@ -201,7 +201,7 @@ class TranslationService(
   ): Translation {
     return SetTranslationTextUtil(
       applicationContext,
-      projectHolder.project
+      projectHolder.projectOrNull
     ).setTranslationText(key, language, text, state)
   }
 
@@ -209,7 +209,7 @@ class TranslationService(
     translation: Translation,
     text: String?,
   ): Translation {
-    return SetTranslationTextUtil(applicationContext, projectHolder.project).setTranslationText(translation, text)
+    return SetTranslationTextUtil(applicationContext, projectHolder.projectOrNull).setTranslationText(translation, text)
   }
 
   @Transactional(noRollbackFor = [NoPermissionToOverrideException::class])
@@ -217,7 +217,7 @@ class TranslationService(
     translation: Translation,
     text: String?,
   ) {
-    return SetTranslationTextUtil(applicationContext, projectHolder.project).setTranslationTextNoSave(translation, text)
+    return SetTranslationTextUtil(applicationContext, projectHolder.projectOrNull).setTranslationTextNoSave(translation, text)
   }
 
   fun save(translation: Translation): Translation {

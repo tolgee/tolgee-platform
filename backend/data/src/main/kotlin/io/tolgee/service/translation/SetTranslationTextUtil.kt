@@ -17,7 +17,7 @@ import org.springframework.context.ApplicationContext
 
 class SetTranslationTextUtil(
   private val applicationContext: ApplicationContext,
-  private val project: ProjectDto,
+  private val project: ProjectDto?,
 ) {
   fun setForKey(
     key: Key,
@@ -94,6 +94,7 @@ class SetTranslationTextUtil(
 
     if (
       hasTextChanged &&
+      project !== null &&
       project.suggestionsMode == SuggestionsMode.ENFORCED &&
       translation.state == TranslationState.REVIEWED
     ) {
