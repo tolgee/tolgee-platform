@@ -88,7 +88,7 @@ export const ProjectSettingsAdvanced = () => {
             <Checkbox
               disabled={updateLoadable.isLoading}
               checked={project.icuPlaceholders}
-              onChange={(_, val) => updateSettings({ useNamespaces: val })}
+              onChange={(_, val) => updateSettings({ icuPlaceholders: val })}
             />
           }
           label={t('project_settings_use_tolgee_placeholders_label')}
