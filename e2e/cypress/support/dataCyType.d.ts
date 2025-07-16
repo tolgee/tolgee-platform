@@ -402,6 +402,7 @@ declare namespace DataCy {
         "invitation-dialog-type-link-button" |
         "invite-generate-button" |
         "invoice-details-dialog" |
+        "key-edit-modal-save" |
         "key-edit-tab-advanced" |
         "key-edit-tab-context" |
         "key-edit-tab-custom-properties" |
@@ -770,7 +771,6 @@ declare namespace DataCy {
         "translations-cell-edit-button" |
         "translations-cell-insert-base-button" |
         "translations-cell-main-action-button" |
-        "translations-cell-save-button" |
         "translations-cell-screenshots-button" |
         "translations-cell-switch-mode" |
         "translations-cell-task-button" |

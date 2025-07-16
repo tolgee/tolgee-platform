@@ -125,7 +125,7 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
           size="small"
           variant="contained"
           loading={isEditLoading}
-          data-cy="translations-cell-save-button"
+          data-cy="translations-cell-main-action-button"
         >
           {firstAction?.label}
         </LoadingButton>

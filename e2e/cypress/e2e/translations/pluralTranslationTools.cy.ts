@@ -53,7 +53,7 @@ describe('translation tools panel with plurals', () => {
       .should('be.visible')
       .click();
 
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
     cy.gcy('global-editor').should('not.exist');
   });
@@ -87,7 +87,7 @@ describe('translation tools panel with plurals', () => {
       .should('be.visible')
       .click();
 
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
     cy.gcy('global-editor').should('not.exist');
   });
