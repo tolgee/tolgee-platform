@@ -217,7 +217,10 @@ class TranslationService(
     translation: Translation,
     text: String?,
   ) {
-    return SetTranslationTextUtil(applicationContext, projectHolder.projectOrNull).setTranslationTextNoSave(translation, text)
+    return SetTranslationTextUtil(
+      applicationContext,
+      projectHolder.projectOrNull
+    ).setTranslationTextNoSave(translation, text)
   }
 
   fun save(translation: Translation): Translation {
