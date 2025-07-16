@@ -210,7 +210,7 @@ export const useTranslationCell = ({
     translation,
   });
 
-  const editEnabled = editorActions.length && !disabled;
+  const editEnabled = Boolean(editorActions.length) && !disabled;
 
   const aiPlaygroundData = useTranslationsSelector(
     (c) => c.aiPlaygroundData?.[keyId]?.[language.id]
