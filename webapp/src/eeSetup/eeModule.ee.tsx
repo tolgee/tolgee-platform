@@ -71,6 +71,8 @@ import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLa
 import { BranchesView } from '../ee/branching/BranchesView';
 import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
+import { AdministrationPlanMigrationCreate } from '../ee/billing/administration/subscriptionPlans/migration/AdministrationPlanMigrationCreate';
+import { AdministrationPlanMigrationEdit } from '../ee/billing/administration/subscriptionPlans/migration/AdministrationPlanMigrationEdit';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { BranchReference } from '../ee/branching/components/BranchReference';
@@ -142,6 +144,18 @@ export const routes = {
         path={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_CREATE.template}
       >
         <AdministrationCloudPlanCreateView />
+      </PrivateRoute>
+      <PrivateRoute
+        exact
+        path={LINKS.ADMINISTRATION_BILLING_PLAN_MIGRATION_CREATE.template}
+      >
+        <AdministrationPlanMigrationCreate />
+      </PrivateRoute>
+      <PrivateRoute
+        exact
+        path={LINKS.ADMINISTRATION_BILLING_PLAN_MIGRATION_EDIT.template}
+      >
+        <AdministrationPlanMigrationEdit />
       </PrivateRoute>
       <PrivateRoute
         exact
