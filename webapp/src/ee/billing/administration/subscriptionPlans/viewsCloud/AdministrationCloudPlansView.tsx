@@ -121,7 +121,7 @@ export const AdministrationCloudPlansView = () => {
             startIcon={<Settings01 width={19} height={19} />}
             component={Link}
             color="warning"
-            to={LINKS.ADMINISTRATION_BILLING_PLAN_MIGRATION_CREATE.build()}
+            to={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_MIGRATION_CREATE.build()}
             data-cy="administration-cloud-plans-create-migration"
           >
             {t('administration_cloud_plan_create_migration')}

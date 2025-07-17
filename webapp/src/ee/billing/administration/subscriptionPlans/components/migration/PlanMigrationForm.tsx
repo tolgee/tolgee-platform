@@ -5,16 +5,20 @@ import React from 'react';
 import { useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { ArrowRightIcon } from '@mui/x-date-pickers';
-import { PlanSelectorField } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migrationForm/fields/PlanSelectorField';
+import { PlanSelectorField } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/fields/PlanSelectorField';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Switch } from 'tg.component/common/form/fields/Switch';
+import { PlanType } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/types';
 
-type MigrationModel =
+type CloudPlanMigrationModel =
   components['schemas']['AdministrationCloudPlanMigrationModel'];
+type SelfHostedEePlanMigrationModel =
+  components['schemas']['AdministrationSelfHostedEePlanMigrationModel'];
 
 type Props = {
-  migration?: MigrationModel;
+  migration?: CloudPlanMigrationModel | SelfHostedEePlanMigrationModel;
   onSubmit: (value: PlanMigrationFormData) => void;
+  planType?: PlanType;
   loading: boolean | undefined;
 };
 
@@ -29,7 +33,12 @@ const emptyDefaultValues: PlanMigrationFormData = {
 export type PlanMigrationFormData =
   components['schemas']['PlanMigrationRequest'];
 
-export const PlanMigrationForm = ({ migration, onSubmit, loading }: Props) => {
+export const PlanMigrationForm = ({
+  migration,
+  onSubmit,
+  loading,
+  planType = 'cloud',
+}: Props) => {
   const { t } = useTranslate();
   const isUpdate = migration != null;
   const defaultValues: PlanMigrationFormData = migration
@@ -78,6 +87,7 @@ export const PlanMigrationForm = ({ migration, onSubmit, loading }: Props) => {
             onPlanChange={(plan) => setSelectedSourcePlan(plan.id)}
             hiddenPlans={[selectedTargetPlan]}
             filterHasMigration={false}
+            type={planType}
             {...(migration && { plans: [migration.sourcePlan] })}
           />
           <ArrowRightIcon style={{ marginTop: 25 }} />
@@ -89,6 +99,7 @@ export const PlanMigrationForm = ({ migration, onSubmit, loading }: Props) => {
             }}
             data-cy="target-plan-selector"
             onPlanChange={(plan) => setSelectedTargetPlan(plan.id)}
+            type={planType}
             hiddenPlans={[selectedSourcePlan]}
           />
         </Box>
