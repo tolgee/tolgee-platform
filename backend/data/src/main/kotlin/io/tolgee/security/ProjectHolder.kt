@@ -6,8 +6,7 @@ import io.tolgee.model.Project
 import io.tolgee.service.project.ProjectService
 import org.springframework.stereotype.Component
 
-@Component
-class ProjectHolder(
+open class ProjectHolder(
   private val projectService: ProjectService,
 ) {
   val projectEntity: Project by lazy {
@@ -15,7 +14,7 @@ class ProjectHolder(
   }
 
   private var _project: ProjectDto? = null
-  var project: ProjectDto
+  open var project: ProjectDto
     set(value) {
       Sentry.addBreadcrumb("Project Id: ${value.id}")
       _project = value
@@ -24,6 +23,6 @@ class ProjectHolder(
       return _project ?: throw ProjectNotSelectedException()
     }
 
-  val projectOrNull: ProjectDto?
+  open val projectOrNull: ProjectDto?
     get() = _project
 }
