@@ -43,11 +43,13 @@ declare namespace DataCy {
         "administration-cloud-plan-field-select-existing-stripe-product" |
         "administration-cloud-plan-field-type" |
         "administration-cloud-plan-field-type-item" |
+        "administration-cloud-plans-create-migration" |
         "administration-cloud-plans-item" |
         "administration-cloud-plans-item-archive" |
         "administration-cloud-plans-item-archived-badge" |
         "administration-cloud-plans-item-delete" |
         "administration-cloud-plans-item-edit" |
+        "administration-cloud-plans-item-is-migrating-badge" |
         "administration-cloud-plans-item-public-badge" |
         "administration-create-custom-plan-button" |
         "administration-customize-plan-switch" |
@@ -745,6 +747,7 @@ declare namespace DataCy {
         "signup-error-free-seat-limit" |
         "signup-error-plan-seat-limit" |
         "signup-error-seats-spending-limit" |
+        "source-plan-selector" |
         "spending-limit-dialog-close" |
         "spending-limit-exceeded-popover" |
         "sso-migration-info-text" |
@@ -779,6 +782,7 @@ declare namespace DataCy {
         "switch-popover-search" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
+        "target-plan-selector" |
         "task-date-picker" |
         "task-detail" |
         "task-detail-author" |
