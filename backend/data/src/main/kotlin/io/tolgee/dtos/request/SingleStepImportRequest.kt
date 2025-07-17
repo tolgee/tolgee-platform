@@ -3,7 +3,6 @@ package io.tolgee.dtos.request
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.IImportSettings
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
-import io.tolgee.model.enums.NonEditableImportResolution
 import io.tolgee.service.dataImport.ForceMode
 
 class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
@@ -11,8 +10,15 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
     description =
       "Whether to override existing translation data.\n\n" +
         "When set to `KEEP`, existing translations will be kept.\n\n" +
-        "When set to `OVERRIDE`, existing translations will be overwrote.\n\n" +
-        "When set to `NO_FORCE`, error will be thrown on conflict.",
+        "When set to `NO_FORCE`, error will be thrown on conflict.\n\n" +
+        "When set to `OVERRIDE`, existing translations will be overwritten, " +
+        "fails for protected translations (failed keys are reported).\n\n" +
+        "When set to `OVERRIDE_FAIL`, existing translations will be overwritten, " +
+        "fails for protected translations (if something fails whole import will fail).\n\n" +
+        "When set to `OVERRIDE_ALL`, will override everything that is within user permissions " +
+        "(failed keys are reported).\n\n" +
+        "When set to `OVERRIDE_ALL_FAIL`, will override everything that is within user permissions " +
+        "(if something is not possible whole import will fail).\n\n"
   )
   val forceMode: ForceMode = ForceMode.NO_FORCE
 
@@ -51,10 +57,4 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
       "(only within namespaces which are included in the import).",
   )
   var removeOtherKeys: Boolean? = false
-
-  @get:Schema(
-    description = "What to do if the translation is not editable " +
-      " (can be disabled or reviewed in enforced suggestion mode)"
-  )
-  val nonEditableImportResolution: NonEditableImportResolution? = NonEditableImportResolution.FAIL
 }

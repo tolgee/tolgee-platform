@@ -25,7 +25,6 @@ import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
 import io.tolgee.model.enums.ConflictType
-import io.tolgee.model.enums.NonEditableImportResolution
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
@@ -159,7 +158,6 @@ class ImportService(
       importSettings = params,
       _importDataManager = fileProcessor.importDataManager,
       isSingleStepImport = true,
-      nonEditableResolution = params.nonEditableImportResolution ?: NonEditableImportResolution.FAIL,
     ).doImport()
 
     return result
@@ -479,7 +477,7 @@ class ImportService(
   ) {
     val translations = findTranslations(language.id)
     translations.forEach {
-      if (!override || checkTranslationIsEditable(it) == null) {
+      if (!override || it.conflictType == null) {
         it.resolve()
         it.override = override
       }
@@ -555,7 +553,7 @@ class ImportService(
     val languageIdStrings = importLanguageIds.map { it.toString() }
     entityManager.createNativeQuery(
       """
-      with deleted as (  
+      with deleted as (
         delete from import_file_issue_param
         where issue_id in (
           select import_file_issue.id from import_file_issue

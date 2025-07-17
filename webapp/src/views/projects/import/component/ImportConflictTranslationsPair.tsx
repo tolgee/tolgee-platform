@@ -103,7 +103,7 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
           expandable={leftExpandable || rightExpandable}
           languageTag={row.existingLanguageTag || 'en'}
           isPlural={translation.existingKeyIsPlural || translation.isPlural}
-          disabled={Boolean(translation.conflictType)}
+          disabled={!translation.isOverridable}
           conflictHint={translateConflictHint(translation.conflictType)}
         />
       </Grid>

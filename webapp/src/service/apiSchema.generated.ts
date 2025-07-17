@@ -2030,7 +2030,9 @@ export interface components {
       name: string;
       slug?: string;
       /** @description Suggestions can be disabled (hidden from UI) or optional (visible in the UI) or enforced (force user to use them instead of editing reviewed translations) */
-      suggestionsMode: "DISABLED" | "OPTIONAL" | "ENFORCED";
+      suggestionsMode: "DISABLED" | "ENABLED";
+      /** @description Protects reviewed translations, so translators can't change them by default and others will receive warning. */
+      translationProtection: "NONE" | "PROTECT_REVIEWED";
       useNamespaces: boolean;
     };
     EeSubscriptionModel: {
@@ -2378,7 +2380,8 @@ export interface components {
         | "llm_provider_empty_response"
         | "suggestion_not_found"
         | "user_can_only_delete_his_suggestions"
-        | "cannot_modify_reviewed_translation";
+        | "cannot_modify_reviewed_translation"
+        | "cannot_modify_keys";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2797,6 +2800,9 @@ export interface components {
       /** @example homepage */
       name: string;
     };
+    ImportResult: {
+      failedKeys?: components["schemas"]["SimpleKeyResult"][];
+    };
     ImportSettingsModel: {
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
@@ -2817,10 +2823,14 @@ export interface components {
       /** Format: int64 */
       conflictId?: number;
       conflictText?: string;
-      conflictType?: "CANNOT_EDIT_REVIEWED" | "CANNOT_EDIT_DISABLED";
+      conflictType?:
+        | "CANNOT_EDIT_REVIEWED"
+        | "CANNOT_EDIT_DISABLED"
+        | "SHOULD_NOT_EDIT_REVIEWED";
       existingKeyIsPlural: boolean;
       /** Format: int64 */
       id: number;
+      isOverridable: boolean;
       isPlural: boolean;
       keyDescription?: string;
       /** Format: int64 */
@@ -4249,8 +4259,10 @@ export interface components {
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       slug?: string;
-      /** @description Translators can either edit translations directly, only suggest or both. */
-      suggestionsMode: "DISABLED" | "OPTIONAL" | "ENFORCED";
+      /** @description Suggestions for translations */
+      suggestionsMode: "DISABLED" | "ENABLED";
+      /** @description Level of protection of translations */
+      translationProtection: "NONE" | "PROTECT_REVIEWED";
       useNamespaces: boolean;
     };
     ProjectStatistics: {
@@ -4904,6 +4916,12 @@ export interface components {
       id: number;
       name: string;
     };
+    SimpleKeyResult: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      namespace?: string;
+    };
     SimpleOrganizationModel: {
       avatar?: components["schemas"]["Avatar"];
       basePermissions: components["schemas"]["PermissionModel"];
@@ -4947,11 +4965,23 @@ export interface components {
        *
        * When set to `KEEP`, existing translations will be kept.
        *
-       * When set to `OVERRIDE`, existing translations will be overwrote.
-       *
        * When set to `NO_FORCE`, error will be thrown on conflict.
+       *
+       * When set to `OVERRIDE`, existing translations will be overwritten, if translation is not disabled or reviewed in `enforced` mode (failed keys are reported).
+       *
+       * When set to `OVERRIDE_FAIL`, existing translations will be overwritten, if translation is not disabled or reviewed in `enforced` mode (if something fails whole import will fail).
+       *
+       * When set to `OVERRIDE_ALL`, will override everything that is within user permissions (failed keys are reported).
+       *
+       * When set to `OVERRIDE_ALL_FAIL`, will override everything that is within user permissions (if something is not possible whole import will fail).
        */
-      forceMode: "OVERRIDE" | "KEEP" | "NO_FORCE";
+      forceMode:
+        | "OVERRIDE"
+        | "KEEP"
+        | "NO_FORCE"
+        | "OVERRIDE_FAIL"
+        | "OVERRIDE_ALL"
+        | "OVERRIDE_ALL_FAIL";
       /**
        * @description Maps the languages from imported files to languages existing in the Tolgee platform.
        *
@@ -5312,7 +5342,8 @@ export interface components {
         | "llm_provider_empty_response"
         | "suggestion_not_found"
         | "user_can_only_delete_his_suggestions"
-        | "cannot_modify_reviewed_translation";
+        | "cannot_modify_reviewed_translation"
+        | "cannot_modify_keys";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -13570,7 +13601,13 @@ export interface operations {
     parameters: {
       query: {
         /** Whether override or keep all translations with unresolved conflicts */
-        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+        forceMode?:
+          | "OVERRIDE"
+          | "KEEP"
+          | "NO_FORCE"
+          | "OVERRIDE_FAIL"
+          | "OVERRIDE_ALL"
+          | "OVERRIDE_ALL_FAIL";
       };
       path: {
         projectId: number;
@@ -13618,7 +13655,13 @@ export interface operations {
     parameters: {
       query: {
         /** Whether override or keep all translations with unresolved conflicts */
-        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+        forceMode?:
+          | "OVERRIDE"
+          | "KEEP"
+          | "NO_FORCE"
+          | "OVERRIDE_FAIL"
+          | "OVERRIDE_ALL"
+          | "OVERRIDE_ALL_FAIL";
       };
       path: {
         projectId: number;
@@ -17242,7 +17285,11 @@ export interface operations {
     };
     responses: {
       /** OK */
-      200: unknown;
+      200: {
+        content: {
+          "application/json": components["schemas"]["ImportResult"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {

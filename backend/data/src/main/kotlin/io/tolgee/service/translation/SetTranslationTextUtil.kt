@@ -4,9 +4,8 @@ import io.tolgee.constants.Message
 import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.exceptions.NoPermissionToOverrideException
 import io.tolgee.model.Language
-import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -95,23 +94,9 @@ class SetTranslationTextUtil(
     if (
       hasTextChanged &&
       project !== null &&
-      project.suggestionsMode == SuggestionsMode.ENFORCED &&
-      translation.state == TranslationState.REVIEWED
+      securityService.canEditReviewedTranslation(project.id, translation.language.id, translation.key.id)
     ) {
-      try {
-        securityService.checkLanguageStateChangePermission(
-          project.id,
-          listOf(translation.language.id),
-          translation.key.id
-        )
-      } catch (e: PermissionException) {
-        // throwing a special exception
-        // so it can be confidently caught
-        throw NoPermissionToOverrideException(
-          params = e.params,
-          keyId = translation.key.id,
-        )
-      }
+      throw PermissionException(missingScopes = listOf(Scope.TRANSLATIONS_STATE_EDIT))
     }
 
     if (hasTextChanged) {

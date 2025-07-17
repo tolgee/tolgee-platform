@@ -20,6 +20,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         r.slug as slug, r.avatarHash as avatarHash,
         r.useNamespaces as useNamespaces,
         r.suggestionsMode as suggestionsMode,
+        r.translationProtection as translationProtection,
         dn as defaultNamespace, o as organizationOwner,
         role.type as organizationRole, p as directPermission, r.icuPlaceholders as icuPlaceholders
         from Project r

@@ -57,7 +57,7 @@ export function getEditorActions({
   if (
     (satisfiesLanguageAccess('translations.edit', languageId) &&
       (translation?.state !== 'REVIEWED' ||
-        project.suggestionsMode !== 'ENFORCED' ||
+        project.translationProtection !== 'PROTECT_REVIEWED' ||
         satisfiesLanguageAccess('translations.state-edit', languageId))) ||
     (assignedTask?.userAssigned && assignedTask.type === 'TRANSLATE')
   ) {

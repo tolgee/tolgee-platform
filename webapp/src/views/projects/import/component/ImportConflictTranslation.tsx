@@ -1,7 +1,20 @@
 import React, { FunctionComponent, LegacyRef, useEffect } from 'react';
-import { Box, BoxProps, IconButton, styled, Tooltip } from '@mui/material';
+import {
+  Box,
+  BoxProps,
+  IconButton,
+  styled,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { green, grey } from '@mui/material/colors';
-import { ChevronUp, ChevronDown, Check } from '@untitled-ui/icons-react';
+import {
+  ChevronUp,
+  ChevronDown,
+  Check,
+  AlertTriangle,
+  AlertCircle,
+} from '@untitled-ui/icons-react';
 import clsx from 'clsx';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { TranslationVisual } from 'tg.views/projects/translations/translationVisual/TranslationVisual';
@@ -22,6 +35,10 @@ type Props = {
   conflictHint?: string;
   'data-cy': string;
 };
+
+const StyledContainer = styled(Box)`
+  display: grid;
+`;
 
 const StyledRoot = styled(Box)`
   border-radius: ${({ theme }) => theme.shape.borderRadius};
@@ -72,6 +89,7 @@ const BoxWithRef = Box as FunctionComponent<
 >;
 
 export const ImportConflictTranslation: React.FC<Props> = (props) => {
+  const theme = useTheme();
   const textRef = React.createRef<HTMLDivElement>();
 
   const detectExpandability = () => {
@@ -101,72 +119,88 @@ export const ImportConflictTranslation: React.FC<Props> = (props) => {
 
   const dataCySelected = { 'data-cy-selected': props.selected || undefined };
 
-  const content = (
-    <StyledRoot
-      position="relative"
-      onClick={!props.disabled ? props.onSelect : undefined}
-      className={clsx({
-        selected: props.selected || props.loaded,
-        expanded: props.expanded,
-        disabled: props.disabled,
-      })}
-      display="flex"
-      {...dataCySelected}
-      data-cy={props['data-cy']}
-    >
-      {props.loading && (
-        <StyledLoading
-          p={1}
-          data-cy="import-resolution-dialog-translation-loading"
-        >
-          <SpinnerProgress size={20} />
-        </StyledLoading>
-      )}
-      {props.loaded && (
-        <StyledLoading
-          p={1}
-          data-cy="import-resolution-dialog-translation-check"
-        >
-          <Check />
-        </StyledLoading>
-      )}
-      <BoxWithRef
-        flexGrow={1}
-        overflow="hidden"
-        textOverflow="ellipsis"
-        ref={textRef}
+  return (
+    <StyledContainer>
+      <StyledRoot
+        position="relative"
+        onClick={!props.disabled ? props.onSelect : undefined}
+        className={clsx({
+          selected: props.selected || props.loaded,
+          expanded: props.expanded,
+          disabled: props.disabled,
+        })}
+        display="flex"
+        {...dataCySelected}
+        data-cy={props['data-cy']}
       >
-        <TranslationVisual
-          maxLines={props.expanded ? 0 : 3}
-          text={props.text}
-          locale={props.languageTag}
-          isPlural={props.isPlural}
-        />
-      </BoxWithRef>
-      {props.expandable && (
-        <Box
-          style={{
-            opacity: props.loading || props.loaded ? 0 : 1,
-          }}
-        >
-          <StyledToggleButton
-            data-cy="import-resolution-translation-expand-button"
-            onClick={(e) => {
-              e.stopPropagation();
-              props.onToggle();
-            }}
-            size="large"
+        {props.loading && (
+          <StyledLoading
+            p={1}
+            data-cy="import-resolution-dialog-translation-loading"
           >
-            {!props.expanded ? <ChevronDown /> : <ChevronUp />}
-          </StyledToggleButton>
+            <SpinnerProgress size={20} />
+          </StyledLoading>
+        )}
+        {props.loaded && (
+          <StyledLoading
+            p={1}
+            data-cy="import-resolution-dialog-translation-check"
+          >
+            <Check />
+          </StyledLoading>
+        )}
+        <BoxWithRef
+          flexGrow={1}
+          overflow="hidden"
+          textOverflow="ellipsis"
+          ref={textRef}
+        >
+          <TranslationVisual
+            maxLines={props.expanded ? 0 : 3}
+            text={props.text}
+            locale={props.languageTag}
+            isPlural={props.isPlural}
+          />
+        </BoxWithRef>
+        {props.expandable && (
+          <Box
+            style={{
+              opacity: props.loading || props.loaded ? 0 : 1,
+            }}
+          >
+            <StyledToggleButton
+              data-cy="import-resolution-translation-expand-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                props.onToggle();
+              }}
+              size="large"
+            >
+              {!props.expanded ? <ChevronDown /> : <ChevronUp />}
+            </StyledToggleButton>
+          </Box>
+        )}
+      </StyledRoot>
+      {props.conflictHint && (
+        <Box
+          color={
+            props.disabled
+              ? theme.palette.error.main
+              : theme.palette.warning.main
+          }
+          display="flex"
+          alignItems="center"
+          gap={0.5}
+          mt={0.2}
+        >
+          {props.disabled ? (
+            <AlertCircle width={15} />
+          ) : (
+            <AlertTriangle width={15} />
+          )}
+          <Typography variant="caption">{props.conflictHint}</Typography>
         </Box>
       )}
-    </StyledRoot>
+    </StyledContainer>
   );
-
-  if (props.conflictHint) {
-    return <Tooltip title={props.conflictHint}>{content}</Tooltip>;
-  } else {
-    return content;
-  }
 };

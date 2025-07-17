@@ -13,6 +13,7 @@ import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.model.enums.ConflictType
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
@@ -182,9 +183,15 @@ class ImportDataManager(
 
     if (
       translation.state == TranslationState.REVIEWED &&
-      !securityService.canEditReviewedTranslation(projectHolder.project.id, translation.language.id)
+      projectHolder.project.translationProtection == TranslationProtection.PROTECT_REVIEWED
     ) {
-      return ConflictType.CANNOT_EDIT_REVIEWED
+      if (
+        !securityService.canEditReviewedTranslation(projectHolder.project.id, translation.language.id)
+      ) {
+        return ConflictType.CANNOT_EDIT_REVIEWED
+      } else {
+        return ConflictType.SHOULD_NOT_EDIT_REVIEWED
+      }
     }
     return null
   }
@@ -260,7 +267,7 @@ class ImportDataManager(
         (
           (editedLanguage.existingLanguage == it.existingLanguage && it.existingLanguage != null) ||
             (oldExistingLanguage == it.existingLanguage && it.existingLanguage != null)
-        ) &&
+          ) &&
           it != editedLanguage
       }
         .sortedBy { it.id } + listOf(editedLanguage)

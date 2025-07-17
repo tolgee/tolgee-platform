@@ -10,8 +10,8 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TaskType
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
@@ -273,7 +273,7 @@ class SecurityService(
   }
 
   fun canEditReviewedTranslation(projectId: Long, languageId: Long, keyId: Long? = null): Boolean {
-    if (projectHolder.project.suggestionsMode != SuggestionsMode.ENFORCED) {
+    if (projectHolder.project.translationProtection != TranslationProtection.PROTECT_REVIEWED) {
       return true
     }
     try {

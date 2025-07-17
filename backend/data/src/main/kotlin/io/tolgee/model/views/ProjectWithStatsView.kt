@@ -20,5 +20,6 @@ class ProjectWithStatsView(
     view.directPermission,
     view.icuPlaceholders,
     view.suggestionsMode,
+    view.translationProtection,
     view.permittedLanguageIds,
   )

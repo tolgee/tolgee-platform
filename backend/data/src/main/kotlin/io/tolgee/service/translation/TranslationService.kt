@@ -6,7 +6,6 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NoPermissionToOverrideException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.formats.*
 import io.tolgee.helpers.TextHelper
@@ -208,15 +207,13 @@ class TranslationService(
     return SetTranslationTextUtil(applicationContext).setTranslationText(translation, text)
   }
 
-  @Transactional(noRollbackFor = [NoPermissionToOverrideException::class])
   fun setTranslationTextNoSave(
     translation: Translation,
     text: String?,
   ) {
     return SetTranslationTextUtil(
       applicationContext,
-
-      ).setTranslationTextNoSave(translation, text)
+    ).setTranslationTextNoSave(translation, text)
   }
 
   fun save(translation: Translation): Translation {

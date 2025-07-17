@@ -17,4 +17,10 @@ interface ImportTranslationView {
   val conflictText: String?
   val override: Boolean
   val resolvedHash: String?
+
+  companion object {
+    fun isOverridable(conflictType: ConflictType?): Boolean {
+      return conflictType == null || conflictType == ConflictType.SHOULD_NOT_EDIT_REVIEWED
+    }
+  }
 }

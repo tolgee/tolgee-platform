@@ -108,6 +108,7 @@ export const ProjectSettingsGeneral = () => {
               : data.defaultNamespaceId,
           icuPlaceholders: project.icuPlaceholders,
           suggestionsMode: project.suggestionsMode,
+          translationProtection: project.translationProtection,
         },
       },
     });

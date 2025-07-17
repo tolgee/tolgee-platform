@@ -9,6 +9,7 @@ import io.tolgee.hateoas.permission.ComputedPermissionModel
 import io.tolgee.hateoas.permission.PermissionModel
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.TranslationProtection
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -30,6 +31,8 @@ open class ProjectModel(
   val computedPermission: ComputedPermissionModel,
   @Schema(description = "Whether to disable ICU placeholder visualization in the editor and it's support.")
   var icuPlaceholders: Boolean,
-  @Schema(description = "Translators can either edit translations directly, only suggest or both.")
-  var suggestionsMode: SuggestionsMode
+  @Schema(description = "Suggestions for translations")
+  var suggestionsMode: SuggestionsMode,
+  @Schema(description = "Level of protection of translations")
+  var translationProtection: TranslationProtection
 ) : RepresentationModel<ProjectModel>()

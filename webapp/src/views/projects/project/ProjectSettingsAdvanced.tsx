@@ -23,6 +23,8 @@ import { components } from 'tg.service/apiSchema.generated';
 type EditProjectRequest = components['schemas']['EditProjectRequest'];
 type SuggestionsMode =
   components['schemas']['EditProjectRequest']['suggestionsMode'];
+type TranslationProtection =
+  components['schemas']['EditProjectRequest']['translationProtection'];
 
 export const ProjectSettingsAdvanced = () => {
   const project = useProject();
@@ -113,12 +115,37 @@ export const ProjectSettingsAdvanced = () => {
           sx={{ paddingBottom: 1 }}
         >
           <MenuItem value="DISABLED">{t('suggestions_mode_disabled')}</MenuItem>
-          <MenuItem value="OPTIONAL">{t('suggestions_mode_optional')}</MenuItem>
-          <MenuItem value="ENFORCED">{t('suggestions_mode_enforced')}</MenuItem>
+          <MenuItem value="ENABLED">{t('suggestions_mode_enabled')}</MenuItem>
         </Select>
         <Typography variant="caption">
           <T
             keyName="project_settings_suggestions_mode_hint"
+            params={{ b: <b />, li: <li />, ul: <ul /> }}
+          />
+        </Typography>
+      </Box>
+
+      <Box mt={2} display="grid" justifyItems="start">
+        <Select
+          label={t('project_settings_translation_protection_label')}
+          value={project.translationProtection}
+          data-cy="project-settings-translation-protection-select"
+          minHeight={false}
+          onChange={(e) =>
+            updateSettings({
+              translationProtection: e.target.value as TranslationProtection,
+            })
+          }
+          sx={{ paddingBottom: 1 }}
+        >
+          <MenuItem value="NONE">{t('translation_protection_none')}</MenuItem>
+          <MenuItem value="PROTECT_REVIEWED">
+            {t('translation_protection_protect_reviewed')}
+          </MenuItem>
+        </Select>
+        <Typography variant="caption">
+          <T
+            keyName="project_settings_translation_protection_hint"
             params={{ b: <b />, li: <li />, ul: <ul /> }}
           />
         </Typography>

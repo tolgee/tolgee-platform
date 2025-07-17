@@ -6,17 +6,15 @@ import io.tolgee.dtos.ImportResult
 import io.tolgee.dtos.SimpleKeyResult
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.ImportConflictNotResolvedException
-import io.tolgee.exceptions.NoPermissionToOverrideException
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
-import io.tolgee.model.enums.NonEditableImportResolution
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
@@ -38,7 +36,6 @@ class StoredDataImporter(
   // for single step import, we provide import data manager
   private val _importDataManager: ImportDataManager? = null,
   private val isSingleStepImport: Boolean = false,
-  private val nonEditableResolution: NonEditableImportResolution = NonEditableImportResolution.FAIL,
 ) {
   private val importDataManager by lazy {
     if (_importDataManager != null) {
@@ -116,8 +113,15 @@ class StoredDataImporter(
       it.prepareImport()
     }
 
-    if (failedKeyIds.isNotEmpty() && nonEditableResolution == NonEditableImportResolution.FAIL) {
-      throw BadRequestException(message = Message.CANNOT_MODIFY_KEYS, params = getFailedKeys(failedKeyIds))
+    if (
+      failedKeyIds.isNotEmpty() &&
+      (
+        forceMode == ForceMode.OVERRIDE_ALL_FAIL ||
+        forceMode == ForceMode.OVERRIDE_FAIL ||
+        forceMode == ForceMode.NO_FORCE
+      )
+    ) {
+      throw BadRequestException(message = Message.IMPORT_FAILED, params = getFailedKeys(failedKeyIds))
     }
 
     addKeysAndCheckPermissions()
@@ -152,11 +156,7 @@ class StoredDataImporter(
 
     entityManager.flushAndClear()
 
-    val failedKeys = if (nonEditableResolution == NonEditableImportResolution.REPORT && failedKeyIds.isNotEmpty()) {
-      getFailedKeys(failedKeyIds)
-    } else {
-      null
-    }
+    val failedKeys = if (failedKeyIds.isNotEmpty()) getFailedKeys(failedKeyIds) else null
 
     return ImportResult(failedKeys)
   }
@@ -297,25 +297,25 @@ class StoredDataImporter(
     if (!this.isSelectedToImport || !this.key.shouldBeImported || this.language.ignored) {
       return
     }
-    this.checkConflictResolved()
-    if (this.conflict == null || (this.override && this.resolved) || forceMode == ForceMode.OVERRIDE) {
-      val language =
-        this.language.existingLanguage
-          ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
-      val translation =
-        this.conflict ?: Translation().apply {
-          this.language = language
+
+    if (this.isFailedConflict()) {
+      failedKeyIds.add(this.existingKey.id)
+    } else {
+      if (this.conflict == null || (this.override && this.resolved) || forceMode == ForceMode.OVERRIDE) {
+        val language =
+          this.language.existingLanguage
+            ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
+        val translation =
+          this.conflict ?: Translation().apply {
+            this.language = language
+          }
+        translation.key = existingKey
+        if (language == language.project.baseLanguage && translation.text != this.text) {
+          outdatedFlagKeys.add(translation.key.id)
         }
-      translation.key = existingKey
-      if (language == language.project.baseLanguage && translation.text != this.text) {
-        outdatedFlagKeys.add(translation.key.id)
-      }
-      try {
         translationService.setTranslationTextNoSave(translation, text)
-      } catch (e: NoPermissionToOverrideException) {
-        failedKeyIds.add(e.keyId)
+        translationsToSave.add(this to translation)
       }
-      translationsToSave.add(this to translation)
     }
   }
 
@@ -351,15 +351,17 @@ class StoredDataImporter(
     }
   }
 
-  private fun ImportTranslation.checkConflictResolved() {
-    if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolved) {
-      if (importDataManager.saveData) {
-        importDataManager.saveAllStoredTranslations()
-      }
-      throw ImportConflictNotResolvedException(
-        mutableListOf(this.key.name, this.language.name, this.text).filterNotNull().toMutableList(),
-      )
+  private fun ImportTranslation.isFailedConflict(): Boolean {
+    if (forceMode == ForceMode.KEEP) {
+      return false
     }
+    if (
+      (forceMode == ForceMode.OVERRIDE_ALL || forceMode == ForceMode.OVERRIDE_ALL_FAIL) &&
+      ImportTranslationView.isOverridable(this.conflictType)
+    ) {
+      return false
+    }
+    return this.conflict != null && !this.resolved
   }
 
   private fun getNamespace(name: String?): Namespace? {

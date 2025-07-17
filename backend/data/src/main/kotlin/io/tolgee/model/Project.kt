@@ -7,6 +7,7 @@ import io.tolgee.model.automations.Automation
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
@@ -153,6 +154,11 @@ class Project(
   @ActivityLoggedProp
   @Enumerated(EnumType.STRING)
   var suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED
+
+  @ColumnDefault("NONE")
+  @ActivityLoggedProp
+  @Enumerated(EnumType.STRING)
+  var translationProtection: TranslationProtection = TranslationProtection.NONE
 
   @ColumnDefault("0")
   var lastTaskNumber: Long = 0
