@@ -20,11 +20,11 @@ export interface paths {
     post: operations["create_2"];
   };
   "/v2/administration/billing/cloud-plans/migration": {
-    post: operations["createPlanMigration"];
+    post: operations["createPlanMigration_1"];
   };
   "/v2/administration/billing/cloud-plans/migration/{migrationId}": {
-    get: operations["getPlanMigration"];
-    put: operations["updatePlanMigration"];
+    get: operations["getPlanMigration_1"];
+    put: operations["updatePlanMigration_1"];
   };
   "/v2/administration/billing/cloud-plans/{planId}": {
     get: operations["getPlan_1"];
@@ -47,6 +47,13 @@ export interface paths {
   "/v2/administration/billing/self-hosted-ee-plans": {
     get: operations["getPlans_1"];
     post: operations["create_1"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/migration": {
+    post: operations["createPlanMigration"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}": {
+    get: operations["getPlanMigration"];
+    put: operations["updatePlanMigration"];
   };
   "/v2/administration/billing/self-hosted-ee-plans/{planId}": {
     get: operations["getPlan"];
@@ -301,6 +308,19 @@ export interface components {
       stripeSubscriptionId?: string;
       /** Format: int64 */
       trialEnd?: number;
+    };
+    AdministrationSelfHostedEePlanMigrationModel: {
+      enabled: boolean;
+      /** Format: int64 */
+      id: number;
+      /** Format: int32 */
+      monthlyOffsetDays: number;
+      sourcePlan: components["schemas"]["SelfHostedEePlanModel"];
+      /** Format: int32 */
+      subscriptionsCount?: number;
+      targetPlan: components["schemas"]["SelfHostedEePlanModel"];
+      /** Format: int32 */
+      yearlyOffsetDays: number;
     };
     AssignCloudPlanRequest: {
       customPlan?: components["schemas"]["CloudPlanRequest"];
@@ -1143,6 +1163,7 @@ export interface components {
       planId: number;
     };
     SelfHostedEePlanAdministrationModel: {
+      activeMigration?: boolean;
       canEditPrices: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
@@ -1177,6 +1198,8 @@ export interface components {
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       isPayAsYouGo: boolean;
+      /** Format: int64 */
+      migrationId?: number;
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -1681,7 +1704,7 @@ export interface operations {
       };
     };
   };
-  createPlanMigration: {
+  createPlanMigration_1: {
     responses: {
       /** OK */
       200: {
@@ -1728,7 +1751,7 @@ export interface operations {
       };
     };
   };
-  getPlanMigration: {
+  getPlanMigration_1: {
     parameters: {
       path: {
         migrationId: number;
@@ -1775,7 +1798,7 @@ export interface operations {
       };
     };
   };
-  updatePlanMigration: {
+  updatePlanMigration_1: {
     parameters: {
       path: {
         migrationId: number;
@@ -2286,6 +2309,152 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SelfHostedEePlanRequest"];
+      };
+    };
+  };
+  createPlanMigration: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AdministrationSelfHostedEePlanMigrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationRequest"];
+      };
+    };
+  };
+  getPlanMigration: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AdministrationSelfHostedEePlanMigrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  updatePlanMigration: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AdministrationSelfHostedEePlanMigrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationRequest"];
       };
     };
   };
