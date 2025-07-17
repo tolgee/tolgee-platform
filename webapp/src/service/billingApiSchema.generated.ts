@@ -19,6 +19,13 @@ export interface paths {
     get: operations["getPlans_2"];
     post: operations["create_2"];
   };
+  "/v2/administration/billing/cloud-plans/migration": {
+    post: operations["createPlanMigration"];
+  };
+  "/v2/administration/billing/cloud-plans/migration/{migrationId}": {
+    get: operations["getPlanMigration"];
+    put: operations["updatePlanMigration"];
+  };
   "/v2/administration/billing/cloud-plans/{planId}": {
     get: operations["getPlan_1"];
     put: operations["updatePlan_1"];
@@ -211,7 +218,21 @@ export interface paths {
 
 export interface components {
   schemas: {
+    AdministrationCloudPlanMigrationModel: {
+      enabled: boolean;
+      /** Format: int64 */
+      id: number;
+      /** Format: int32 */
+      monthlyOffsetDays: number;
+      sourcePlan: components["schemas"]["CloudPlanModel"];
+      /** Format: int32 */
+      subscriptionsCount?: number;
+      targetPlan: components["schemas"]["CloudPlanModel"];
+      /** Format: int32 */
+      yearlyOffsetDays: number;
+    };
     AdministrationCloudPlanModel: {
+      activeMigration?: boolean;
       canEditPrices: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
@@ -246,6 +267,8 @@ export interface components {
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       metricType: "KEYS_SEATS" | "STRINGS";
+      /** Format: int64 */
+      migrationId?: number;
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -814,7 +837,9 @@ export interface components {
         | "glossary_term_not_found"
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
-        | "llm_content_filter";
+        | "llm_content_filter"
+        | "llm_provider_empty_response"
+        | "plan_migration_not_found";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -1039,6 +1064,17 @@ export interface components {
       seats: number;
       /** Format: int64 */
       translations: number;
+    };
+    PlanMigrationRequest: {
+      enabled: boolean;
+      /** Format: int32 */
+      monthlyOffsetDays: number;
+      /** Format: int64 */
+      sourcePlanId: number;
+      /** Format: int64 */
+      targetPlanId: number;
+      /** Format: int32 */
+      yearlyOffsetDays: number;
     };
     PlanPricesModel: {
       perSeat: number;
@@ -1554,6 +1590,7 @@ export interface operations {
         filterAssignableToOrganization?: number;
         filterPlanIds?: number[];
         filterPublic?: boolean;
+        filterHasMigration?: boolean;
       };
     };
     responses: {
@@ -1641,6 +1678,152 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["CloudPlanRequest"];
+      };
+    };
+  };
+  createPlanMigration: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AdministrationCloudPlanMigrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationRequest"];
+      };
+    };
+  };
+  getPlanMigration: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AdministrationCloudPlanMigrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  updatePlanMigration: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AdministrationCloudPlanMigrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationRequest"];
       };
     };
   };
@@ -2015,6 +2198,7 @@ export interface operations {
         filterAssignableToOrganization?: number;
         filterPlanIds?: number[];
         filterPublic?: boolean;
+        filterHasMigration?: boolean;
       };
     };
     responses: {

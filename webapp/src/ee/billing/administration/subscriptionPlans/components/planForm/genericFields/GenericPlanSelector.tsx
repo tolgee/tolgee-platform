@@ -10,11 +10,12 @@ type GenericPlanType = { id: number; name: string };
 
 export interface GenericPlanSelector<T extends GenericPlanType> {
   organizationId?: number;
-  onPlanChange?: (planId: T) => void;
+  onPlanChange?: (plan: T) => void;
   value?: number;
   onChange?: (value: number) => void;
   selectProps?: React.ComponentProps<typeof SearchSelect>[`SelectProps`];
   plans?: T[];
+  hiddenPlans?: number[];
 }
 
 export const GenericPlanSelector = <T extends GenericPlanType>({
@@ -23,6 +24,7 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   selectProps,
   onPlanChange,
   plans,
+  hiddenPlans,
 }: GenericPlanSelector<T>) => {
   if (!plans) {
     return (
@@ -32,13 +34,15 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
     );
   }
 
-  const selectItems = plans.map(
-    (plan) =>
-      ({
-        value: plan.id,
-        name: plan.name,
-      } satisfies SelectItem<number>)
-  );
+  const selectItems = plans
+    .filter((plan) => !hiddenPlans?.includes(plan.id))
+    .map(
+      (plan) =>
+        ({
+          value: plan.id,
+          name: plan.name,
+        } satisfies SelectItem<number>)
+    );
 
   function handleChange(planId: number) {
     if (plans) {
