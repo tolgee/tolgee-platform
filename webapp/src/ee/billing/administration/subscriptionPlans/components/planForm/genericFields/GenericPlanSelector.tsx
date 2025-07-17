@@ -12,12 +12,13 @@ type GenericPlanType = { id: number; name: string };
 
 export interface GenericPlanSelector<T extends GenericPlanType> {
   organizationId?: number;
-  onPlanChange?: (planId: T) => void;
+  onPlanChange?: (plan: T) => void;
   value?: number;
   onChange?: (value: number) => void;
   selectProps?: React.ComponentProps<typeof SearchSelect>[`SelectProps`];
   plans?: T[];
   loading: boolean;
+  hiddenPlans?: number[];
 }
 
 export const GenericPlanSelector = <T extends GenericPlanType>({
@@ -27,17 +28,20 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   onPlanChange,
   plans,
   loading,
+  hiddenPlans,
 }: GenericPlanSelector<T>) => {
   const sortedPlans = useSortPlans(plans);
 
   const selectItems =
-    sortedPlans?.map(
-      (plan) =>
-        ({
-          value: plan.id,
-          name: plan.name,
-        } satisfies SelectItem<number>)
-    ) || [];
+    sortedPlans
+      ?.filter((plan) => !hiddenPlans?.includes(plan.id))
+      ?.map(
+        (plan) =>
+          ({
+            value: plan.id,
+            name: plan.name,
+          } satisfies SelectItem<number>)
+      ) || [];
 
   const { incrementPlanWithId } = usePreferredPlans();
 
