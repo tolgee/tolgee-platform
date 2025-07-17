@@ -68,6 +68,8 @@ import { ProjectSettingsTab } from '../views/projects/project/ProjectSettingsVie
 import { OperationAssignTranslationLabel } from '../ee/batchOperations/OperationAssignTranslationLabel';
 import { OperationUnassignTranslationLabel } from '../ee/batchOperations/OperationUnassignTranslationLabel';
 import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
+import { AdministrationPlanMigrationCreate } from '../ee/billing/administration/subscriptionPlans/migration/AdministrationPlanMigrationCreate';
+import { AdministrationPlanMigrationEdit } from '../ee/billing/administration/subscriptionPlans/migration/AdministrationPlanMigrationEdit';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -138,6 +140,18 @@ export const routes = {
         path={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_CREATE.template}
       >
         <AdministrationCloudPlanCreateView />
+      </PrivateRoute>
+      <PrivateRoute
+        exact
+        path={LINKS.ADMINISTRATION_BILLING_PLAN_MIGRATION_CREATE.template}
+      >
+        <AdministrationPlanMigrationCreate />
+      </PrivateRoute>
+      <PrivateRoute
+        exact
+        path={LINKS.ADMINISTRATION_BILLING_PLAN_MIGRATION_EDIT.template}
+      >
+        <AdministrationPlanMigrationEdit />
       </PrivateRoute>
       <PrivateRoute
         exact

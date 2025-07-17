@@ -12,13 +12,15 @@ export const CloudPlanSelector: FC<
     organizationId?: number;
     selectProps?: React.ComponentProps<typeof SearchSelect>[`SelectProps`];
     filterPublic?: boolean;
+    filterHasMigration?: boolean;
   }
-> = ({ organizationId, filterPublic, ...props }) => {
+> = ({ organizationId, filterPublic, filterHasMigration, ...props }) => {
   const plansLoadable = useBillingApiQuery({
     url: '/v2/administration/billing/cloud-plans',
     method: 'get',
     query: {
       filterPublic,
+      filterHasMigration,
     },
   });
 
