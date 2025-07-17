@@ -7,13 +7,13 @@ import { LINKS } from 'tg.constants/links';
 import {
   PlanMigrationForm,
   PlanMigrationFormData,
-} from 'tg.ee.module/billing/administration/subscriptionPlans/components/migrationForm/PlanMigrationForm';
+} from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/PlanMigrationForm';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import React from 'react';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useHistory } from 'react-router-dom';
 
-export const AdministrationPlanMigrationCreate = () => {
+export const AdministrationCloudPlanMigrationCreate = () => {
   const { t } = useTranslate();
   const messaging = useMessage();
   const history = useHistory();
@@ -24,7 +24,7 @@ export const AdministrationPlanMigrationCreate = () => {
       {
         onSuccess: () => {
           messaging.success(
-            <T keyName="administration_cloud_plan_migration_created_success" />
+            <T keyName="administration_plan_migration_created_success" />
           );
           history.push(LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build());
         },
@@ -50,7 +50,7 @@ export const AdministrationPlanMigrationCreate = () => {
           ],
           [
             t('administration_plan_migration_configure'),
-            LINKS.ADMINISTRATION_BILLING_PLAN_MIGRATION_CREATE.build(),
+            LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_MIGRATION_CREATE.build(),
           ],
         ]}
       >
