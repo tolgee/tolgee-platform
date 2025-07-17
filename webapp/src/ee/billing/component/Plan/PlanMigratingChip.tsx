@@ -9,6 +9,7 @@ import { FullWidthTooltip } from 'tg.component/common/FullWidthTooltip';
 import { LINKS } from 'tg.constants/links';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
+import { PlanType } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/types';
 
 const TooltipText = styled('div')`
   white-space: nowrap;
@@ -29,24 +30,43 @@ const MigrationDetailBox = styled(Box)`
 export const PlanMigratingChip = ({
   migrationId,
   isEnabled,
+  planType = 'cloud',
 }: {
   migrationId?: number;
   isEnabled?: boolean;
+  planType?: PlanType;
 }) => {
   if (!migrationId) {
     return null;
   }
   const [opened, setOpened] = useState(false);
-  const infoLoadable = useBillingApiQuery({
+  const infoCloudLoadable = useBillingApiQuery({
     url: '/v2/administration/billing/cloud-plans/migration/{migrationId}',
     method: 'get',
     path: { migrationId: migrationId },
     options: {
-      enabled: !!migrationId && opened,
+      enabled: planType == 'cloud' && !!migrationId && opened,
     },
   });
 
-  const info = infoLoadable.data;
+  const infoSelfHostedEeLoadable = useBillingApiQuery({
+    url: '/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}',
+    method: 'get',
+    path: { migrationId: migrationId },
+    options: {
+      enabled: planType == 'self-hosted' && !!migrationId && opened,
+    },
+  });
+
+  const loadable =
+    planType == 'cloud' ? infoCloudLoadable : infoSelfHostedEeLoadable;
+
+  const info = loadable.data;
+
+  const configureLink =
+    planType == 'cloud'
+      ? LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_MIGRATION_EDIT
+      : LINKS.ADMINISTRATION_BILLING_EE_PLAN_MIGRATION_EDIT;
 
   const { t } = useTranslate();
   return (
@@ -54,7 +74,7 @@ export const PlanMigratingChip = ({
       sx={{ maxWidth: 'initial' }}
       onOpen={() => setOpened(true)}
       title={
-        infoLoadable.isLoading ? (
+        loadable.isLoading ? (
           <Box padding={3}>
             <SpinnerProgress size={24} />
           </Box>
@@ -172,7 +192,7 @@ export const PlanMigratingChip = ({
                 startIcon={<Settings01 width={19} height={19} />}
                 component={Link}
                 color="warning"
-                to={LINKS.ADMINISTRATION_BILLING_PLAN_MIGRATION_EDIT.build({
+                to={configureLink.build({
                   migrationId: info.id,
                 })}
                 data-cy="administration-cloud-plans-create-migration"

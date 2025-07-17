@@ -7,7 +7,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import {
   PlanMigrationForm,
   PlanMigrationFormData,
-} from 'tg.ee.module/billing/administration/subscriptionPlans/components/migrationForm/PlanMigrationForm';
+} from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/PlanMigrationForm';
 import {
   useBillingApiMutation,
   useBillingApiQuery,
@@ -17,7 +17,7 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 
-export const AdministrationPlanMigrationEdit = () => {
+export const AdministrationSelfHostedEePlanMigrationEdit = () => {
   const { t } = useTranslate();
   const match = useRouteMatch();
   const messaging = useMessage();
@@ -25,13 +25,13 @@ export const AdministrationPlanMigrationEdit = () => {
   const migrationId = match.params[PARAMS.PLAN_MIGRATION_ID] as number;
 
   const migrationLoadable = useBillingApiQuery({
-    url: '/v2/administration/billing/cloud-plans/migration/{migrationId}',
+    url: '/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}',
     method: 'get',
     path: { migrationId },
   });
 
   const updatePlanMigrationLoadable = useBillingApiMutation({
-    url: '/v2/administration/billing/cloud-plans/migration/{migrationId}',
+    url: '/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}',
     method: 'put',
   });
 
@@ -50,9 +50,9 @@ export const AdministrationPlanMigrationEdit = () => {
       {
         onSuccess: () => {
           messaging.success(
-            <T keyName="administration_cloud_plan_migration_updated_success" />
+            <T keyName="administration_plan_migration_updated_success" />
           );
-          history.push(LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build());
+          history.push(LINKS.ADMINISTRATION_BILLING_EE_PLANS.build());
         },
       }
     );
@@ -71,7 +71,7 @@ export const AdministrationPlanMigrationEdit = () => {
           ],
           [
             t('administration_plan_migration_configure_existing'),
-            LINKS.ADMINISTRATION_BILLING_PLAN_MIGRATION_EDIT.build({
+            LINKS.ADMINISTRATION_BILLING_EE_PLAN_MIGRATION_EDIT.build({
               [PARAMS.PLAN_MIGRATION_ID]: migrationId,
             }),
           ],
@@ -86,6 +86,7 @@ export const AdministrationPlanMigrationEdit = () => {
           migration={migration}
           onSubmit={submit}
           loading={updatePlanMigrationLoadable.isLoading}
+          planType="self-hosted"
         />
       </BaseAdministrationView>
     </DashboardPage>
