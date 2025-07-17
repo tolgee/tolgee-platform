@@ -26,7 +26,7 @@ jobs:
 
       # Build Tolgee image
       - name: Build Tolgee image
-        run: docker build -t tolgee:ci -f build/docker/Dockerfile .
+        run: docker build -t tolgee:ci -f docker/app/Dockerfile .
 
       # CVE Scan on that image
       - name: Grype image scan
