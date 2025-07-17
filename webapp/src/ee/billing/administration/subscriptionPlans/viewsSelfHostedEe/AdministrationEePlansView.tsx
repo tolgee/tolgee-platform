@@ -10,7 +10,7 @@ import {
   Paper,
   styled,
 } from '@mui/material';
-import { X } from '@untitled-ui/icons-react';
+import { Settings01, X } from '@untitled-ui/icons-react';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -26,6 +26,7 @@ import { PlanSubscriptionCount } from 'tg.ee.module/billing/component/Plan/PlanS
 import { PlanListPriceInfo } from 'tg.ee.module/billing/component/Plan/PlanListPriceInfo';
 import { PlanArchivedChip } from 'tg.ee.module/billing/component/Plan/PlanArchivedChip';
 import clsx from 'clsx';
+import { PlanMigratingChip } from 'tg.ee.module/billing/component/Plan/PlanMigratingChip';
 
 type SelfHostedEePlanAdministrationModel =
   components['schemas']['SelfHostedEePlanAdministrationModel'];
@@ -113,6 +114,20 @@ export const AdministrationEePlansView = () => {
         hideChildrenOnLoading={false}
         addLinkTo={LINKS.ADMINISTRATION_BILLING_EE_PLAN_CREATE.build()}
         onAdd={() => {}}
+        customButtons={[
+          <Button
+            key="create-migration"
+            variant="contained"
+            size="medium"
+            startIcon={<Settings01 width={19} height={19} />}
+            component={Link}
+            color="warning"
+            to={LINKS.ADMINISTRATION_BILLING_EE_PLAN_MIGRATION_CREATE.build()}
+            data-cy="administration-cloud-plans-create-migration"
+          >
+            {t('administration_cloud_plan_create_migration')}
+          </Button>,
+        ]}
       >
         <Paper variant="outlined">
           {plansLoadable.data?._embedded?.plans?.map((plan, i) => (
@@ -137,6 +152,11 @@ export const AdministrationEePlansView = () => {
                       label={t('administration_ee_plan_public_badge')}
                     />
                   )}
+                  <PlanMigratingChip
+                    migrationId={plan.migrationId}
+                    isEnabled={plan.activeMigration}
+                    planType="self-hosted"
+                  />
                 </Box>
                 <Box display="flex" gap={2}>
                   <Box display="flex" gap={2} alignItems="center">
