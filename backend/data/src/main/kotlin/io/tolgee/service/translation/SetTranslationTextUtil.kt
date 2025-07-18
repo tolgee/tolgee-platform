@@ -94,7 +94,7 @@ class SetTranslationTextUtil(
     if (
       hasTextChanged &&
       project !== null &&
-      securityService.canEditReviewedTranslation(project.id, translation.language.id, translation.key.id)
+      !securityService.canEditReviewedTranslation(project.id, translation.language.id, translation.key.id)
     ) {
       throw PermissionException(missingScopes = listOf(Scope.TRANSLATIONS_STATE_EDIT))
     }
