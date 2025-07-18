@@ -27,7 +27,8 @@ data class EditProjectRequest(
   )
   var suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED,
   @Schema(
-    description = "Protects reviewed translations, so translators can't change them by default and others will receive warning."
+    description = "Protects reviewed translations, so translators" +
+      " can't change them by default and others will receive warning."
   )
   var translationProtection: TranslationProtection = TranslationProtection.NONE,
 )
