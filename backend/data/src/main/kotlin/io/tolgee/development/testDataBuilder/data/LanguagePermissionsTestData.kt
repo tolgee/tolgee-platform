@@ -10,11 +10,15 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
 import java.util.*
 
-class LanguagePermissionsTestData(val projectSuggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED) {
+class LanguagePermissionsTestData(
+  val projectSuggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED,
+  val projectTranslationProtection: TranslationProtection = TranslationProtection.NONE
+) {
   lateinit var project: Project
   lateinit var englishLanguage: Language
   lateinit var germanLanguage: Language
@@ -135,6 +139,7 @@ class LanguagePermissionsTestData(val projectSuggestionsMode: SuggestionsMode = 
       name = "Project"
       organizationOwner = organization.self
       suggestionsMode = projectSuggestionsMode
+      translationProtection = projectTranslationProtection
     }.build {
       projectBuilder = this
       englishLanguage = addEnglish().self

@@ -5,7 +5,7 @@ import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -16,8 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest
 class TranslationsControllerSuggestionsModeTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: LanguagePermissionsTestData
 
-  fun initTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED) {
-    testData = LanguagePermissionsTestData(suggestionsMode)
+  fun initTestData(translationProtection: TranslationProtection = TranslationProtection.NONE) {
+    testData = LanguagePermissionsTestData(projectTranslationProtection = translationProtection)
     this.projectSupplier = { testData.project }
     testDataService.saveTestData(testData.root)
   }
@@ -25,7 +25,7 @@ class TranslationsControllerSuggestionsModeTest : ProjectAuthControllerTest("/v2
   @ProjectJWTAuthTestMethod
   @Test
   fun `translator can update reviewed translation when suggestions mode is optional`() {
-    initTestData(SuggestionsMode.OPTIONAL)
+    initTestData(TranslationProtection.NONE)
     userAccount = testData.translateEnOnlyUser
     performUpdate("reviewedKey", "en").andIsOk
   }
@@ -33,7 +33,7 @@ class TranslationsControllerSuggestionsModeTest : ProjectAuthControllerTest("/v2
   @ProjectJWTAuthTestMethod
   @Test
   fun `translator can't update reviewed translation when suggestions mode is enforced`() {
-    initTestData(SuggestionsMode.ENFORCED)
+    initTestData(TranslationProtection.PROTECT_REVIEWED)
     userAccount = testData.translateEnOnlyUser
     performUpdate("reviewedKey", "en").andIsForbidden
   }
@@ -41,7 +41,7 @@ class TranslationsControllerSuggestionsModeTest : ProjectAuthControllerTest("/v2
   @ProjectJWTAuthTestMethod
   @Test
   fun `translator can update unreviewed translation when suggestions mode is enforced`() {
-    initTestData(SuggestionsMode.ENFORCED)
+    initTestData(TranslationProtection.PROTECT_REVIEWED)
     userAccount = testData.translateEnOnlyUser
     performUpdate("key", "en").andIsOk
   }
@@ -49,7 +49,7 @@ class TranslationsControllerSuggestionsModeTest : ProjectAuthControllerTest("/v2
   @ProjectJWTAuthTestMethod
   @Test
   fun `translator can update empty translation when suggestions mode is enforced`() {
-    initTestData(SuggestionsMode.ENFORCED)
+    initTestData(TranslationProtection.PROTECT_REVIEWED)
     userAccount = testData.translateEnOnlyUser
     performUpdate("key2", "en").andIsOk
   }
