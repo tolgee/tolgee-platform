@@ -17,7 +17,6 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.security.SecurityService
 import jakarta.validation.Valid
-import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -29,8 +28,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}/start-batch-job", "/v2/projects/start-batch-job"])
 @Tag(name = "Batch Operations")
 @Suppress("MVCPathVariableInspection")
-@Component("eeStartBatchJobController")
-class StartBatchJobController(
+class EeStartBatchJobController(
   private val securityService: SecurityService,
   private val projectHolder: ProjectHolder,
   private val batchJobService: BatchJobService,

@@ -46,9 +46,9 @@ import org.springframework.web.bind.annotation.RestController
     "/v2/projects/",
   ],
 )
-@Tag(name = "Labels", description = "Operations related to labels")
+@Tag(name = "Translation labels", description = "Operations related to translation labels")
 @OpenApiOrderExtension(8)
-class LabelsController(
+class TranslationLabelsController(
     private val projectHolder: ProjectHolder,
     private val labelService: LabelServiceImpl,
     private val labelModelAssembler: LabelModelAssembler,
