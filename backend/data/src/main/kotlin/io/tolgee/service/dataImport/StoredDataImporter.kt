@@ -6,6 +6,7 @@ import io.tolgee.dtos.ImportResult
 import io.tolgee.dtos.SimpleKeyResult
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
@@ -121,7 +122,7 @@ class StoredDataImporter(
         forceMode == ForceMode.NO_FORCE
       )
     ) {
-      throw BadRequestException(message = Message.IMPORT_FAILED, params = getFailedKeys(failedKeyIds))
+      throw ImportConflictNotResolvedException(params = getFailedKeys(failedKeyIds))
     }
 
     addKeysAndCheckPermissions()
@@ -361,11 +362,11 @@ class StoredDataImporter(
     }
     if (
       (forceMode == ForceMode.OVERRIDE || forceMode == ForceMode.OVERRIDE_FAIL) &&
-      ImportTranslationView.isOverridableWithAll(this.conflictType)
+      ImportTranslationView.isOverridable(this.conflictType)
     ) {
       return false
     }
-    return this.conflict != null && (!this.override || !this.resolved)
+    return this.conflict != null && !this.resolved
   }
 
   private fun getNamespace(name: String?): Namespace? {
