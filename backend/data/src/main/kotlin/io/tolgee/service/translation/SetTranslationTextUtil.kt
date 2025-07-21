@@ -112,10 +112,11 @@ class SetTranslationTextUtil(
         text.isNullOrEmpty() -> TranslationState.UNTRANSLATED
         translation.isUntranslated && hasText -> TranslationState.TRANSLATED
         hasTextChanged ->
-          if (project?.translationProtection == TranslationProtection.PROTECT_REVIEWED)
+          if (project?.translationProtection == TranslationProtection.PROTECT_REVIEWED) {
             translation.state
-          else
+          } else {
             TranslationState.TRANSLATED
+          }
         else -> translation.state
       }
   }

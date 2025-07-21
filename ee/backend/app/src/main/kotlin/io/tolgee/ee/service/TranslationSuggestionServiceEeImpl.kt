@@ -8,7 +8,6 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
 import io.tolgee.model.TranslationSuggestion
-import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationSuggestionView
