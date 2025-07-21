@@ -301,21 +301,19 @@ class StoredDataImporter(
     if (this.isFailedConflict()) {
       failedKeyIds.add(this.existingKey.id)
     } else {
-      if (this.conflict == null || (this.override && this.resolved) || forceMode == ForceMode.OVERRIDE) {
-        val language =
-          this.language.existingLanguage
-            ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
-        val translation =
-          this.conflict ?: Translation().apply {
-            this.language = language
-          }
-        translation.key = existingKey
-        if (language == language.project.baseLanguage && translation.text != this.text) {
-          outdatedFlagKeys.add(translation.key.id)
+      val language =
+        this.language.existingLanguage
+          ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
+      val translation =
+        this.conflict ?: Translation().apply {
+          this.language = language
         }
-        translationService.setTranslationTextNoSave(translation, text)
-        translationsToSave.add(this to translation)
+      translation.key = existingKey
+      if (language == language.project.baseLanguage && translation.text != this.text) {
+        outdatedFlagKeys.add(translation.key.id)
       }
+      translationService.setTranslationTextNoSave(translation, text)
+      translationsToSave.add(this to translation)
     }
   }
 
@@ -357,11 +355,17 @@ class StoredDataImporter(
     }
     if (
       (forceMode == ForceMode.OVERRIDE_ALL || forceMode == ForceMode.OVERRIDE_ALL_FAIL) &&
-      ImportTranslationView.isOverridable(this.conflictType)
+      ImportTranslationView.isOverridableWithAll(this.conflictType)
     ) {
       return false
     }
-    return this.conflict != null && !this.resolved
+    if (
+      (forceMode == ForceMode.OVERRIDE || forceMode == ForceMode.OVERRIDE_FAIL) &&
+      ImportTranslationView.isOverridableWithAll(this.conflictType)
+    ) {
+      return false
+    }
+    return this.conflict != null && (!this.override || !this.resolved)
   }
 
   private fun getNamespace(name: String?): Namespace? {

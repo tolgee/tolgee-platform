@@ -318,7 +318,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     performImport(
       projectId = testData.project.id,
       listOf(Pair(jsonFileName, simpleJson)),
-    ).andIsBadRequest.andHasErrorMessage(Message.CONFLICT_IS_NOT_RESOLVED)
+    ).andIsBadRequest.andHasErrorMessage(Message.IMPORT_FAILED)
   }
 
   @Test

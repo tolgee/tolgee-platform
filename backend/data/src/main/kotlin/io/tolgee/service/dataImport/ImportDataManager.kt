@@ -22,7 +22,6 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
-import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
@@ -40,8 +39,6 @@ class ImportDataManager(
   private val keyService: KeyService by lazy { applicationContext.getBean(KeyService::class.java) }
 
   private val namespaceService: NamespaceService by lazy { applicationContext.getBean(NamespaceService::class.java) }
-
-  private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
 
   private val projectHolder: ProjectHolder by lazy { applicationContext.getBean(ProjectHolder::class.java) }
 
