@@ -20,7 +20,7 @@ export const PlanArchivedSwitch: FC<{ isUpdate?: boolean }> = ({
       <FormControlLabel
         control={
           <Switch
-            checked={values.archived}
+            checked={values.archived ?? false}
             onChange={() => setFieldValue('archived', !values.archived)}
           />
         }
