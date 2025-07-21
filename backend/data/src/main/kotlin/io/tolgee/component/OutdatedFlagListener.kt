@@ -1,6 +1,7 @@
 package io.tolgee.component
 
 import io.tolgee.events.OnTranslationsSet
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.event.EventListener
 import org.springframework.core.annotation.Order

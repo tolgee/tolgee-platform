@@ -6,6 +6,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Language
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -66,10 +67,9 @@ class SetTranslationTextUtil(
     key: Key,
     language: Language,
     text: String?,
-    state: TranslationState? = null,
   ): Translation {
     val translation = translationService.getOrCreate(key, language)
-    setTranslationText(translation, text, state)
+    setTranslationText(translation, text)
     key.translations.add(translation)
     return translation
   }
@@ -77,16 +77,14 @@ class SetTranslationTextUtil(
   fun setTranslationText(
     translation: Translation,
     text: String?,
-    state: TranslationState? = null,
   ): Translation {
-    setTranslationTextNoSave(translation, text, state)
+    setTranslationTextNoSave(translation, text)
     return translationService.save(translation)
   }
 
   fun setTranslationTextNoSave(
     translation: Translation,
     text: String?,
-    state: TranslationState? = null,
   ) {
     val hasTextChanged = translation.text != text
     val project = projectHolder.projectOrNull
@@ -112,9 +110,12 @@ class SetTranslationTextUtil(
       when {
         translation.state == TranslationState.DISABLED -> TranslationState.DISABLED
         text.isNullOrEmpty() -> TranslationState.UNTRANSLATED
-        state != null -> state
         translation.isUntranslated && hasText -> TranslationState.TRANSLATED
-        hasTextChanged -> TranslationState.TRANSLATED
+        hasTextChanged ->
+          if (project?.translationProtection == TranslationProtection.PROTECT_REVIEWED)
+            translation.state
+          else
+            TranslationState.TRANSLATED
         else -> translation.state
       }
   }

@@ -113,16 +113,9 @@ class TranslationSuggestionServiceEeImpl(
       emptyList()
     }
     translationSuggestionRepository.save(suggestion)
-    val translation = translationService.getTranslations(listOf(keyId), listOf(language.id)).firstOrNull()
-    val newState = when {
-      translation?.state == TranslationState.REVIEWED -> TranslationState.REVIEWED
-      else -> translation?.state
-    }
-    translationService.setTranslationText(
+    translationService.setForKey(
       entityManager.getReference(Key::class.java, keyId),
-      language,
-      suggestion.translation,
-      newState
+      mapOf(languageTag to suggestion.translation)
     )
     return Pair(suggestion, declined)
   }

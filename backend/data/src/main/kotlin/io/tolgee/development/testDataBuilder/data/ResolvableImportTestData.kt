@@ -3,6 +3,7 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.model.Language
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -15,6 +16,7 @@ class ResolvableImportTestData : BaseTestData() {
   lateinit var keyCreateOnlyUser: UserAccount
   lateinit var translateOnlyUser: UserAccount
   lateinit var secondLanguage: Language
+  lateinit var translatorUser: UserAccount
 
   init {
     projectBuilder.apply {
@@ -102,6 +104,16 @@ class ResolvableImportTestData : BaseTestData() {
       type = null
       scopes = arrayOf(Scope.TRANSLATIONS_EDIT)
       translateLanguages = mutableSetOf(englishLanguage)
+    }
+
+    root.addUserAccount {
+      username = "translator"
+      translatorUser = this
+    }
+
+    projectBuilder.addPermission {
+      user = translatorUser
+      type = ProjectPermissionType.TRANSLATE
     }
   }
 
