@@ -16,7 +16,6 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.AutoTranslationConfigRepository
-import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtService
@@ -40,7 +39,6 @@ class AutoTranslationService(
   private val authenticationFacade: AuthenticationFacade,
   private val entityManager: EntityManager,
   private val transactionManager: PlatformTransactionManager,
-  private val projectHolder: ProjectHolder,
   private val projectService: ProjectService,
 ) {
   val logger: Logger = LoggerFactory.getLogger(this::class.java)
