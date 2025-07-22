@@ -1,6 +1,10 @@
 type Insertion<T> = {
   items: T[];
-  placement: { position: 'before' | 'after' | 'start' | 'end'; value?: any };
+  placement: {
+    position: 'before' | 'after' | 'start' | 'end';
+    value?: any;
+    fallbackPosition?: 'start' | 'end';
+  };
 };
 
 function _applyInsertions<T>(
@@ -10,7 +14,6 @@ function _applyInsertions<T>(
 ): T[] {
   let newItems: T[] = [...existingItems];
 
-  // Handle 'start' and 'end'
   insertions.forEach(({ items, placement }) => {
     if (placement.position === 'start') {
       newItems = [...items, ...newItems];
@@ -20,16 +23,18 @@ function _applyInsertions<T>(
     }
   });
 
-  // Handle 'before' and 'after'
   insertions.forEach(({ items, placement }) => {
     if (placement.position === 'before' || placement.position === 'after') {
       const tempItems: T[] = [];
+      let itemFound = false;
+
       newItems.forEach((item) => {
         if (
           placement.position === 'before' &&
           item[referencingProperty] === placement.value
         ) {
           tempItems.push(...items);
+          itemFound = true;
         }
         tempItems.push(item);
         if (
@@ -37,9 +42,21 @@ function _applyInsertions<T>(
           item[referencingProperty] === placement.value
         ) {
           tempItems.push(...items);
+          itemFound = true;
         }
       });
-      newItems = tempItems;
+
+      if (!itemFound && placement.fallbackPosition) {
+        if (placement.fallbackPosition === 'start') {
+          newItems = [...items, ...tempItems];
+        } else if (placement.fallbackPosition === 'end') {
+          newItems = [...tempItems, ...items];
+        } else {
+          newItems = tempItems;
+        }
+      } else {
+        newItems = tempItems;
+      }
     }
   });
 
@@ -49,7 +66,11 @@ function _applyInsertions<T>(
 export function createAdder<T>(props: { referencingProperty: string }) {
   return (
       items: T[],
-      position: { position: 'before' | 'after' | 'start' | 'end'; value?: any }
+      position: {
+        position: 'before' | 'after' | 'start' | 'end';
+        value?: any;
+        fallbackPosition?: 'start' | 'end';
+      }
     ) =>
     (existingItems: T[]) =>
       _applyInsertions(

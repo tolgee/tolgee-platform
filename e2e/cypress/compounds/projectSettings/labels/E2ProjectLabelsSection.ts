@@ -21,9 +21,13 @@ export class E2ProjectLabelsSection {
   }
 
   openCreateLabelModal() {
-    gcy('project-settings-labels-add-button').click();
+    this.getAddButton().click();
     gcy('label-modal').should('be.visible');
     return new E2LabelModal();
+  }
+
+  getAddButton() {
+    return gcy('project-settings-labels-add-button');
   }
 
   openEditLabelModal(labelName: string) {

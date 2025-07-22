@@ -1,4 +1,4 @@
-import { Box, Button, styled, Typography } from '@mui/material';
+import { Box, Button, Link, styled, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { useState } from 'react';
@@ -11,6 +11,9 @@ import { components } from 'tg.service/apiSchema.generated';
 import { Plus } from '@untitled-ui/icons-react';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
+import { DOCS_ROOT } from 'tg.constants/docLinks';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -27,6 +30,8 @@ export const ProjectSettingsLabels = () => {
   const [modalOpened, setModalOpen] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState<LabelModel>();
   const { satisfiesPermission } = useProjectPermissions();
+  const { isEnabled } = useEnabledFeatures();
+  const labelsFeature = isEnabled('TRANSLATION_LABELS');
   const canManageLabels = satisfiesPermission('translation-labels.manage');
 
   const addLabel = () => {
@@ -83,6 +88,7 @@ export const ProjectSettingsLabels = () => {
     },
     options: {
       keepPreviousData: true,
+      enabled: labelsFeature,
     },
   });
 
@@ -106,22 +112,33 @@ export const ProjectSettingsLabels = () => {
 
   return (
     <>
-      <Box>
+      <Box display="flex" flexDirection="column" gap={3} mt={4}>
         <Box
-          mt={2}
           mb={1}
           display="flex"
-          justifyContent="right"
+          justifyContent="space-between"
           alignItems="center"
         >
-          <Box
-            display="flex"
-            gap={2}
-            justifyContent="end"
-            mb={1}
-            alignItems="stretch"
-          >
-            {canManageLabels && (
+          <Box>
+            <Typography variant="h5">
+              {t('project_settings_menu_translation_labels_title')}
+            </Typography>
+            <div>
+              <T
+                keyName="project_settings_menu_translation_labels_description"
+                params={{
+                  a: (
+                    <Link
+                      href={`${DOCS_ROOT}/platform/translation_process/labels`}
+                      target="_blank"
+                    />
+                  ),
+                }}
+              />
+            </div>
+          </Box>
+          <Box display="flex" gap={2} justifyContent="end" alignItems="stretch">
+            {labelsFeature && canManageLabels && (
               <Button
                 variant="contained"
                 color="primary"
@@ -134,26 +151,36 @@ export const ProjectSettingsLabels = () => {
             )}
           </Box>
         </Box>
-        <PaginatedHateoasList
-          loadable={labels}
-          onPageChange={setPage}
-          listComponent={TableGrid}
-          data-cy="project-settings-labels-list"
-          emptyPlaceholder={
-            <Box m={2} display="flex" justifyContent="center">
-              <Typography color="textSecondary">
-                {t('project_settings_no_labels_yet')}
-              </Typography>
-            </Box>
-          }
-          renderItem={(l: LabelModel) => (
-            <LabelItem
-              label={l}
-              onLabelEdit={canManageLabels ? () => editLabel(l) : undefined}
-              onLabelRemove={canManageLabels ? () => removeLabel(l) : undefined}
+        {labelsFeature ? (
+          <PaginatedHateoasList
+            loadable={labels}
+            onPageChange={setPage}
+            listComponent={TableGrid}
+            data-cy="project-settings-labels-list"
+            emptyPlaceholder={
+              <Box m={2} display="flex" justifyContent="center">
+                <Typography color="textSecondary">
+                  {t('project_settings_no_labels_yet')}
+                </Typography>
+              </Box>
+            }
+            renderItem={(l: LabelModel) => (
+              <LabelItem
+                label={l}
+                onLabelEdit={canManageLabels ? () => editLabel(l) : undefined}
+                onLabelRemove={
+                  canManageLabels ? () => removeLabel(l) : undefined
+                }
+              />
+            )}
+          />
+        ) : (
+          <Box>
+            <DisabledFeatureBanner
+              customMessage={t('labels_feature_description')}
             />
-          )}
-        />
+          </Box>
+        )}
       </Box>
       <LabelModal
         open={modalOpened}

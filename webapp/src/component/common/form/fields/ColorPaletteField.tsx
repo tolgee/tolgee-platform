@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useField } from 'formik';
 import {
   Popover,
@@ -8,9 +8,11 @@ import {
   FormControl,
   InputLabel,
   useTheme,
+  FormHelperText,
 } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { ColorPalette } from 'tg.component/common/ColorPalette';
+import { useFieldError } from 'tg.component/common/form/fields/useFieldError';
 
 const ColorPreview = styled('div')<{ color: string }>`
   width: 32px;
@@ -104,6 +106,9 @@ export const ColorPaletteField = ({
   };
 
   const showError = meta.touched && Boolean(meta.error);
+  const { error, helperText: errorHelperText } = useFieldError({
+    fieldName: name,
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPickedColorKey(findColorKey(e.target.value) || null);
@@ -159,6 +164,11 @@ export const ColorPaletteField = ({
             required={required}
           />
         </div>
+      </div>
+      <div>
+        {error && (
+          <FormHelperText error={error}>{errorHelperText}</FormHelperText>
+        )}
       </div>
       <Popover
         open={!!anchorEl}

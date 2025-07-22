@@ -261,6 +261,7 @@ declare namespace DataCy {
         "developer-menu-content-delivery" |
         "developer-menu-storage" |
         "developer-menu-webhooks" |
+        "disabled-feature-banner" |
         "dropzone" |
         "dropzone-inner" |
         "edit-pat-dialog-content" |

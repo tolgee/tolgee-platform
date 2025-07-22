@@ -3,7 +3,7 @@ import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoV
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { T, useTranslate } from '@tolgee/react';
 import { BookClosed, ClipboardCheck } from '@untitled-ui/icons-react';
-import { Link, Route, Switch } from 'react-router-dom';
+import { Link, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { Badge, Box, MenuItem } from '@mui/material';
 
 import { AdministrationEeTAView } from '../ee/billing/administration/translationAgencies/AdministrationEeTAView';
@@ -67,6 +67,7 @@ import { createAdder } from '../fixtures/pluginAdder';
 import { ProjectSettingsTab } from '../views/projects/project/ProjectSettingsView';
 import { OperationAssignTranslationLabel } from '../ee/batchOperations/OperationAssignTranslationLabel';
 import { OperationUnassignTranslationLabel } from '../ee/batchOperations/OperationUnassignTranslationLabel';
+import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -88,7 +89,6 @@ export { TaskInfoMessage } from '../ee/task/components/TaskInfoMessage';
 export { AiPrompt } from '../ee/llm/AiPrompt/AiPrompt';
 export { AiContextData } from '../ee/llm/AiContextData/AiContextData';
 export { AiPromptsList } from '../ee/llm/AiPromptsList/AiPromptsList';
-export { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
 
 export const billingMenuItems = [
   BillingMenuItem,
@@ -454,25 +454,26 @@ export const useAddAdministrationMenuItems = () => {
 
 export const useAddProjectSettingsTabs = (projectId: number) => {
   const { t } = useTranslate();
-  const { isEnabled } = useEnabledFeatures();
-
   const tabs: ProjectSettingsTab[] = [];
 
-  if (isEnabled('TRANSLATION_LABELS')) {
-    tabs.push({
-      value: 'labels',
-      label: t('project_settings_menu_labels'),
-      link: LINKS.PROJECT_EDIT_LABELS.build({
-        [PARAMS.PROJECT_ID]: projectId,
-      }),
-      dataCy: 'project-settings-menu-labels',
-    });
-  }
+  tabs.push({
+    value: 'labels',
+    label: t('project_settings_menu_labels'),
+    link: LINKS.PROJECT_EDIT_LABELS.build({
+      [PARAMS.PROJECT_ID]: projectId,
+    }),
+    dataCy: 'project-settings-menu-labels',
+    component: ProjectSettingsLabels,
+    enabled: true,
+    routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_LABELS.template),
+  });
+
   return createAdder<ProjectSettingsTab>({ referencingProperty: 'value' })(
     tabs,
     {
       position: 'after',
       value: 'advanced',
+      fallbackPosition: 'start',
     }
   );
 };

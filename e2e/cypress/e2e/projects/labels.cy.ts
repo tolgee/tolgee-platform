@@ -1,6 +1,6 @@
 import { login } from '../../common/apiCalls/common';
 import { labelsTestData } from '../../common/apiCalls/testData/testData';
-import { assertMessage, gcy } from '../../common/shared';
+import { assertMessage, assertMissingFeature, gcy } from '../../common/shared';
 import { E2ProjectLabelsSection } from '../../compounds/projectSettings/labels/E2ProjectLabelsSection';
 import { isDarkMode } from '../../common/helpers';
 import { assertActivityDetails, checkActivity } from '../../common/activities';
@@ -25,10 +25,11 @@ describe('Projects Settings - Labels', () => {
     setFeature('TRANSLATION_LABELS', true);
   });
 
-  it('does not show labels tab when feature is disabled', () => {
+  it('shows feature unavailable when feature is disabled', () => {
     setFeature('TRANSLATION_LABELS', false);
-    projectLabels.visitProjectSettings(projectId);
-    gcy('project-settings-menu-labels').should('not.exist');
+    projectLabels.openFromProjectSettings(projectId);
+    assertMissingFeature();
+    projectLabels.getAddButton().should('not.exist');
   });
 
   it('list project labels', () => {
@@ -96,9 +97,9 @@ describe('Projects Settings - Labels', () => {
     const labelModal = projectLabels.openCreateLabelModal();
     labelModal.fillAndSave('test-label', '#FF0055', 'New label description');
 
-    checkActivity('Created label');
+    checkActivity('Created translation label');
     assertActivityDetails([
-      'Created label',
+      'Created translation label',
       'test-label',
       'New label description',
     ]);
@@ -110,8 +111,8 @@ describe('Projects Settings - Labels', () => {
     const labelModal = projectLabels.openEditLabelModal('First label');
     labelModal.fillAndSave('Edited label', '#00FF00', 'Totally new text');
 
-    checkActivity('Edited label');
-    assertActivityDetails(['Edited label']);
+    checkActivity('Edited translation label');
+    assertActivityDetails(['Edited translation label']);
   });
 
   it('creates activity when label is deleted', () => {
@@ -119,8 +120,11 @@ describe('Projects Settings - Labels', () => {
 
     projectLabels.deleteLabel('First label');
 
-    checkActivity('Deleted label');
-    assertActivityDetails(['Deleted label', 'This is a description']);
+    checkActivity('Deleted translation label');
+    assertActivityDetails([
+      'Deleted translation label',
+      'This is a description',
+    ]);
   });
 
   it('fails to create label with same name', () => {
