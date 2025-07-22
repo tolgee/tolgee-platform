@@ -299,23 +299,37 @@ class StoredDataImporter(
       return
     }
 
-    if (this.isFailedConflict()) {
-      failedKeyIds.add(this.existingKey.id)
-    } else {
-      val language =
-        this.language.existingLanguage
-          ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
-      val translation =
-        this.conflict ?: Translation().apply {
-          this.language = language
-        }
-      translation.key = existingKey
-      if (language == language.project.baseLanguage && translation.text != this.text) {
-        outdatedFlagKeys.add(translation.key.id)
-      }
-      translationService.setTranslationTextNoSave(translation, text)
-      translationsToSave.add(this to translation)
+    // user specifically selected this translation to not be overriden
+    if (this.resolved && !this.override) {
+      return
     }
+
+    if (!this.resolved && forceMode === ForceMode.KEEP) {
+      return
+    }
+
+    val isFailed = this.isFailedConflict()
+
+
+    if (isFailed) {
+      failedKeyIds.add(this.existingKey.id)
+      return
+    }
+
+    val language =
+      this.language.existingLanguage
+        ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
+    val translation =
+      this.conflict ?: Translation().apply {
+        this.language = language
+      }
+    translation.key = existingKey
+    if (language == language.project.baseLanguage && translation.text != this.text) {
+      outdatedFlagKeys.add(translation.key.id)
+    }
+    translationService.setTranslationTextNoSave(translation, text)
+    translationsToSave.add(this to translation)
+
   }
 
   private val ImportTranslation.existingKey: Key
