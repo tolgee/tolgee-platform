@@ -74,5 +74,3 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
 export const useAddProjectSettingsTabs =
   (projectId: number) => (existingItems) =>
     existingItems;
-
-export const ProjectSettingsLabels = Empty;
