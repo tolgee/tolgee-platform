@@ -138,3 +138,99 @@ This way, IDEA is started with correct environment from zsh or bash and so the G
 
 If you don't like this solution (I don't like it too), you can start looking for better solution.
 This thread is a good starting point: https://discuss.gradle.org/t/exec-execute-in-gradle-doesnt-use-path/25598/3
+
+## Logging business events
+
+To monitor business activities in the Tolgee platform, we use PostHog for event tracking. There are three ways to log business events:
+
+### 1. Automatic logging with ActivityHolder
+
+When an activity is stored with a modifying endpoint on the backend, the event is automatically logged. Developers can optionally provide additional metadata using the `businessEventData` property in `ActivityHolder`.
+
+Usually, you don't need to provide the data, but If you really need to, you can do it this way.
+```kotlin
+// Example: Adding business event data to an activity
+@Component
+class YourService(
+    private val activityHolder: ActivityHolder
+) {
+    fun performAction() {
+        // Set the activity type
+        activityHolder.activity = ActivityType.YOUR_ACTIVITY_TYPE
+
+        // Add business event metadata
+        activityHolder.businessEventData["key1"] = "value1"
+        activityHolder.businessEventData["key2"] = "value2"
+
+        // Perform your action...
+    }
+}
+```
+
+### 2. Manual logging from backend code
+
+For cases where you need to log events that aren't tied to an activity, you can use the `BusinessEventPublisher` directly:
+
+```kotlin
+@Component
+class YourService(
+    private val businessEventPublisher: BusinessEventPublisher
+) {
+    fun logCustomEvent() {
+        businessEventPublisher.publish(
+            OnBusinessEventToCaptureEvent(
+                eventName = "YOUR_CUSTOM_EVENT",
+                data = mapOf("key1" to "value1", "key2" to "value2"),
+                // Optional fields:
+                projectId = 123,
+                organizationId = 456
+            )
+        )
+    }
+
+    // You can also publish events that should only be sent once in a specific time period
+    fun logRareEvent() {
+        businessEventPublisher.publishOnceInTime(
+            OnBusinessEventToCaptureEvent(
+                eventName = "rare_event",
+                data = mapOf("key1" to "value1")
+            ),
+            onceIn = Duration.ofHours(24) // Only log once per day
+        )
+    }
+}
+```
+
+### 3. Logging from frontend code
+
+For logging events from the frontend, use the provided React hooks:
+
+```typescript
+// Example 1: Using useReportEvent hook for event-triggered reporting
+import { useReportEvent } from 'tg.hooks/useReportEvent';
+
+function ExampleComponent() {
+  // Get the report function
+  const reportEvent = useReportEvent();
+
+  // Use it in an event handler
+  function handleButtonClick() {
+    reportEvent('button_clicked', { buttonName: 'submit', page: 'settings' });
+    // Rest of your click handler logic...
+  }
+}
+```
+
+```typescript
+// Example 2: Using useReportOnce hook for reporting on component mount
+import { useReportOnce } from 'tg.hooks/useReportEvent';
+
+function AnotherComponent() {
+  // This will automatically report the event once when the component mounts
+  useReportOnce('page_viewed', { pageName: 'settings' });
+
+  // Rest of your component...
+}
+```
+
+These frontend hooks send events through the backend API, ensuring they aren't blocked by ad blockers.
