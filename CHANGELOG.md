@@ -1,3 +1,10 @@
+## [3.123.17](https://github.com/tolgee/tolgee-platform/compare/v3.123.16...v3.123.17) (2025-07-23)
+
+
+### Bug Fixes
+
+* namespace collision export behavior ([#3166](https://github.com/tolgee/tolgee-platform/issues/3166)) ([f08ab11](https://github.com/tolgee/tolgee-platform/commit/f08ab112f5713c19d91559a2d6858eb1d0134de4))
+
 ## [3.123.16](https://github.com/tolgee/tolgee-platform/compare/v3.123.15...v3.123.16) (2025-07-08)
 
 
