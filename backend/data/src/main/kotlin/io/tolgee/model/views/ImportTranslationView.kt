@@ -23,7 +23,7 @@ interface ImportTranslationView {
       return conflictType == null || conflictType == ConflictType.SHOULD_NOT_EDIT_REVIEWED
     }
 
-    fun isOverridable(conflictType: ConflictType?): Boolean {
+    fun isOverridableWithRecommended(conflictType: ConflictType?): Boolean {
       return conflictType == null
     }
   }

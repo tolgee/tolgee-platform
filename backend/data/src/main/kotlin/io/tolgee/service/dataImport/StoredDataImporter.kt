@@ -34,6 +34,8 @@ class StoredDataImporter(
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
   private val reportStatus: (ImportApplicationStatus) -> Unit = {},
   private val importSettings: IImportSettings,
+  private val overrideMode: OverrideMode = OverrideMode.RECOMMENDED,
+  private val errorOnFailedKey: Boolean = false,
   // for single step import, we provide import data manager
   private val _importDataManager: ImportDataManager? = null,
   private val isSingleStepImport: Boolean = false,
@@ -117,9 +119,8 @@ class StoredDataImporter(
     if (
       failedKeyIds.isNotEmpty() &&
       (
-        forceMode == ForceMode.OVERRIDE_ALL_FAIL ||
-        forceMode == ForceMode.OVERRIDE_FAIL ||
-        forceMode == ForceMode.NO_FORCE
+        forceMode == ForceMode.NO_FORCE ||
+        errorOnFailedKey
       )
     ) {
       throw ImportConflictNotResolvedException(params = getFailedKeys(failedKeyIds))
@@ -366,17 +367,19 @@ class StoredDataImporter(
     if (forceMode == ForceMode.KEEP) {
       return false
     }
-    if (
-      (forceMode == ForceMode.OVERRIDE_ALL || forceMode == ForceMode.OVERRIDE_ALL_FAIL) &&
-      ImportTranslationView.isOverridableWithAll(this.conflictType)
-    ) {
-      return false
-    }
-    if (
-      (forceMode == ForceMode.OVERRIDE || forceMode == ForceMode.OVERRIDE_FAIL) &&
-      ImportTranslationView.isOverridable(this.conflictType)
-    ) {
-      return false
+    if (forceMode == ForceMode.OVERRIDE) {
+      if (
+        (overrideMode == OverrideMode.ALL) &&
+        ImportTranslationView.isOverridableWithAll(this.conflictType)
+      ) {
+        return false
+      }
+      if (
+        (overrideMode == OverrideMode.RECOMMENDED) &&
+        ImportTranslationView.isOverridableWithRecommended(this.conflictType)
+      ) {
+        return false
+      }
     }
     return this.conflict != null && !this.resolved
   }

@@ -158,6 +158,8 @@ class ImportService(
       importSettings = params,
       _importDataManager = fileProcessor.importDataManager,
       isSingleStepImport = true,
+      overrideMode = params.overrideMode,
+      errorOnFailedKey = params.errorOnFailedKey,
     ).doImport()
 
     return result
@@ -186,7 +188,9 @@ class ImportService(
       import,
       forceMode,
       reportStatus,
-      providedSettingsOrFromDb
+      providedSettingsOrFromDb,
+      overrideMode = OverrideMode.RECOMMENDED,
+      errorOnFailedKey = true
     ).doImport()
     deleteImport(import)
     publishImportBusinessEvent(import.project.id, import.author.id)
