@@ -4,6 +4,7 @@ import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.model.ILanguage
+import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
 import io.tolgee.util.buildExportTranslationList
@@ -93,11 +94,18 @@ class PoMessageFormatsExporterTest {
 
     val baseLanguageMock = mock<ILanguage>()
     whenever(baseLanguageMock.tag).thenAnswer { "en" }
+    val params = ExportParams().also {
+      it.messageFormat = importFormat
+    }
     return PoFileExporter(
       translations = built.translations,
-      exportParams = ExportParams().also { it.messageFormat = importFormat },
+      exportParams = params,
       baseLanguage = baseLanguageMock,
-      baseTranslationsProvider = { listOf() },
+      projectIcuPlaceholdersSupport = true,
+      filePathProvider = ExportFilePathProvider(
+        template = "{languageTag}.{extension}",
+        extension = "po",
+      )
     )
   }
 }

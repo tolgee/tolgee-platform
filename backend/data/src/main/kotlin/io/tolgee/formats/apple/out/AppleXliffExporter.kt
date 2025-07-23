@@ -1,6 +1,5 @@
 package io.tolgee.formats.apple.out
 
-import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.PossiblePluralConversionResult
 import io.tolgee.formats.apple.APPLE_CORRESPONDING_STRINGS_FILE_ORIGINAL
@@ -18,10 +17,10 @@ import java.io.InputStream
 
 class AppleXliffExporter(
   private val translations: List<ExportTranslationView>,
-  private val exportParams: IExportParams,
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   private val baseLanguageTag: String,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
+  private val filePathProvider: ExportFilePathProvider,
 ) : FileExporter {
   private val fileExtension: String = ExportFormat.XLIFF.extension
 
@@ -289,13 +288,6 @@ class AppleXliffExporter(
     namespace: String?,
   ): String {
     return filePathProvider.getFilePath(namespace, languageTag)
-  }
-
-  private val filePathProvider by lazy {
-    ExportFilePathProvider(
-      exportParams,
-      fileExtension,
-    )
   }
 
   data class KeyInStringsDict(

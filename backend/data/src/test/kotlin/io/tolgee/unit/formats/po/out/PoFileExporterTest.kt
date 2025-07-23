@@ -1,10 +1,13 @@
 package io.tolgee.unit.formats.po.out
 
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.model.ILanguage
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportKeyView
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
@@ -31,7 +34,7 @@ class PoFileExporterTest {
       "Content-Transfer-Encoding: 8bit\n"
       "Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
       "X-Generator: Tolgee\n"
-      
+
       msgid "key"
       msgstr[0] "%d den"
       msgstr[1] "dny"
@@ -48,7 +51,7 @@ class PoFileExporterTest {
       "Content-Transfer-Encoding: 8bit\n"
       "Plural-Forms: nplurals = 2; plural = (n !== 1)\n"
       "X-Generator: Tolgee\n"
-      
+
       msgid "key"
       msgstr[0] "%d day"
       msgstr[1] "%d days"${"\n"}
@@ -70,7 +73,7 @@ class PoFileExporterTest {
       "Content-Transfer-Encoding: 8bit\n"
       "Plural-Forms: nplurals = 2; plural = (n !== 1)\n"
       "X-Generator: Tolgee\n"
-      
+
       msgid "key"
       msgstr "Hello! %s, how are you?"${"\n"}
       """.trimIndent(),
@@ -150,12 +153,12 @@ class PoFileExporterTest {
       "Content-Transfer-Encoding: 8bit\n"
       "Plural-Forms: nplurals = 2; plural = (n !== 1)\n"
       "X-Generator: Tolgee\n"
-      
+
       msgid "key"
       msgstr ""
       "\" \n"
       " \\\" \\\\"
-      
+
       """.trimIndent(),
     )
   }
@@ -360,11 +363,17 @@ class PoFileExporterTest {
       exportParams = params,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       baseLanguage = baseLanguageMock,
-      baseTranslationsProvider = { listOf() },
+      filePathProvider = ExportFilePathProvider(
+        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+        extension = params.format.extension,
+      )
     )
   }
 
   private fun getExportParams(): ExportParams {
-    return ExportParams().also { it.messageFormat = ExportMessageFormat.PHP_SPRINTF }
+    return ExportParams().also {
+      it.messageFormat = ExportMessageFormat.PHP_SPRINTF
+      it.format = ExportFormat.PO
+    }
   }
 }

@@ -20,6 +20,7 @@ class XmlResourcesExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
+  private val filePathProvider: ExportFilePathProvider,
 ) : FileExporter {
   /**
    * Map (Path To file -> Map (Key Name -> Node Wrapper))
@@ -180,15 +181,8 @@ class XmlResourcesExporter(
 
   private fun getFileUnits(translation: ExportTranslationView): MutableMap<String, NodeWrapper> {
     val filePath =
-      pathProvider.getFilePath(languageTag = translation.languageTag, namespace = translation.key.namespace)
+      filePathProvider.getFilePath(languageTag = translation.languageTag, namespace = translation.key.namespace)
     return fileUnits.computeIfAbsent(filePath) { mutableMapOf() }
-  }
-
-  private val pathProvider by lazy {
-    ExportFilePathProvider(
-      exportParams,
-      "xml",
-    )
   }
 
   private fun getConvertedMessage(

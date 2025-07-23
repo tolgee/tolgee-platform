@@ -4,18 +4,25 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.service.export.ExportService
 import io.tolgee.service.export.dataProvider.ExportDataProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @Transactional
 class ExportServiceTest : AbstractSpringTest() {
+  @Autowired
+  private lateinit var exportService: ExportService
+
   @Test
   fun `returns correct export data`() {
     val testData = TranslationsTestData()
@@ -185,5 +192,31 @@ class ExportServiceTest : AbstractSpringTest() {
 
     result.assert.hasSize(4)
     result.forEach { it.key.namespace.assert.isIn(null, "ns-1") }
+  }
+
+  @Test
+  fun `export with 2 namespaces and no {namespace} in template path should throw`() {
+    val testData = TranslationsTestData()
+    testData.addTwoNamespacesTranslations()
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+
+    val exportParams =
+      ExportParams(fileStructureTemplate = "{languageTag}.{extension}")
+
+    assertThatThrownBy {
+      exportService.export(testData.project.id, exportParams)
+    }.isInstanceOf(BadRequestException::class.java)
+  }
+
+  @Test
+  fun `export with 2 namespaces and {namespace} in template path should not throw`() {
+    val testData = TranslationsTestData()
+    testData.addTwoNamespacesTranslations()
+    testDataService.saveTestData(testData.root)
+
+    val exportParams =
+      ExportParams(fileStructureTemplate = "{namespace}/{languageTag}.{extension}")
+    exportService.export(testData.project.id, exportParams)
   }
 }
