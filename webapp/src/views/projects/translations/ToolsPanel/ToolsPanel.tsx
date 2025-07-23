@@ -43,7 +43,7 @@ export const ToolsPanel = () => {
   const languages = useTranslationsSelector((c) => c.languages);
   const { setSidePanelOpen } = useTranslationsActions();
 
-  const [openPanels, setOpenPanels] = useOpenPanels();
+  const { openPanels, togglePanelOpen } = useOpenPanels();
 
   const keyData = useMemo(() => {
     return translations?.find((t) => t.keyId === keyId);
@@ -73,11 +73,7 @@ export const ToolsPanel = () => {
                 key={config.id}
                 data={dataProps}
                 onToggle={() => {
-                  if (openPanels.includes(config.id)) {
-                    setOpenPanels(openPanels.filter((i) => i !== config.id));
-                  } else {
-                    setOpenPanels([...openPanels, config.id]);
-                  }
+                  togglePanelOpen(config.id);
                 }}
                 open={openPanels.includes(config.id)}
               />
@@ -99,11 +95,7 @@ export const ToolsPanel = () => {
               key={config.id}
               data={dataProps}
               onToggle={() => {
-                if (openPanels.includes(config.id)) {
-                  setOpenPanels(openPanels.filter((i) => i !== config.id));
-                } else {
-                  setOpenPanels([...openPanels, config.id]);
-                }
+                togglePanelOpen(config.id);
               }}
               open={openPanels.includes(config.id)}
             />

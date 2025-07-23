@@ -1,6 +1,9 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.api.IImportSettings
+import io.tolgee.constants.Message
+import io.tolgee.dtos.ImportResult
+import io.tolgee.dtos.SimpleKeyResult
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
@@ -12,6 +15,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
@@ -28,11 +32,14 @@ class StoredDataImporter(
   applicationContext: ApplicationContext,
   private val import: Import,
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
-  private val reportStatus: (ImportApplicationStatus) -> Unit = {},
+  private val reportStatus: ((ImportApplicationStatus) -> Unit)? = null,
   private val importSettings: IImportSettings,
+  private val overrideMode: OverrideMode = OverrideMode.RECOMMENDED,
+  private val errorOnFailedKey: Boolean? = null,
   // for single step import, we provide import data manager
   private val _importDataManager: ImportDataManager? = null,
   private val isSingleStepImport: Boolean = false,
+  private val resolveConflict: ((ImportTranslation) -> ForceMode?)? = null,
 ) {
   private val importDataManager by lazy {
     if (_importDataManager != null) {
@@ -76,6 +83,8 @@ class StoredDataImporter(
    */
   val outdatedFlagKeys: MutableList<Long> = mutableListOf()
 
+  val failedKeyIds: MutableSet<Long> = mutableSetOf()
+
   /**
    * These are all keyMetas from all the keys to import. If multiple keys have same name and
    * namespace, the meta is merged to one, so there is only one meta for one key!!!
@@ -101,16 +110,27 @@ class StoredDataImporter(
     result
   }
 
-  fun doImport() {
-    reportStatus(ImportApplicationStatus.PREPARING_AND_VALIDATING)
+  fun doImport(): ImportResult {
+    reportStatus?.invoke(ImportApplicationStatus.PREPARING_AND_VALIDATING)
+
     importDataManager.storedLanguages.forEach {
       it.prepareImport()
     }
+
+    val shouldThrowError = errorOnFailedKey ?: when(forceMode) {
+      ForceMode.NO_FORCE -> true
+      else -> false
+    }
+
+    if (failedKeyIds.isNotEmpty() && shouldThrowError) {
+      throw ImportConflictNotResolvedException(params = getFailedKeys(failedKeyIds))
+    }
+
     addKeysAndCheckPermissions()
 
     handleKeyMetas()
 
-    reportStatus(ImportApplicationStatus.STORING_KEYS)
+    reportStatus?.invoke(ImportApplicationStatus.STORING_KEYS)
 
     namespaceService.saveAll(namespacesToSave.values)
 
@@ -120,11 +140,11 @@ class StoredDataImporter(
 
     saveKeyMetaData(keyEntitiesToSave)
 
-    reportStatus(ImportApplicationStatus.STORING_TRANSLATIONS)
+    reportStatus?.invoke(ImportApplicationStatus.STORING_TRANSLATIONS)
 
     saveTranslations()
 
-    reportStatus(ImportApplicationStatus.FINALIZING)
+    reportStatus?.invoke(ImportApplicationStatus.FINALIZING)
 
     entityManager.flush()
 
@@ -137,6 +157,10 @@ class StoredDataImporter(
     deleteOtherKeys()
 
     entityManager.flushAndClear()
+
+    val failedKeys = if (failedKeyIds.isNotEmpty()) getFailedKeys(failedKeyIds) else null
+
+    return ImportResult(failedKeys)
   }
 
   private fun tagNewKeys() {
@@ -195,6 +219,10 @@ class StoredDataImporter(
   private fun saveTranslations() {
     checkTranslationPermissions()
     translationService.saveAll(translationsToSave.map { it.second })
+  }
+
+  private fun getFailedKeys(ids: Set<Long>): List<SimpleKeyResult> {
+    return keyService.find(ids).map { it.toSimpleKey() }
   }
 
   private fun saveKeys(): Collection<Key> {
@@ -271,22 +299,31 @@ class StoredDataImporter(
     if (!this.isSelectedToImport || !this.key.shouldBeImported || this.language.ignored) {
       return
     }
-    this.checkConflictResolved()
-    if (this.conflict == null || (this.override && this.resolved) || forceMode == ForceMode.OVERRIDE) {
-      val language =
-        this.language.existingLanguage
-          ?: throw BadRequestException(io.tolgee.constants.Message.EXISTING_LANGUAGE_NOT_SELECTED)
-      val translation =
-        this.conflict ?: Translation().apply {
-          this.language = language
-        }
-      translation.key = existingKey
-      if (language == language.project.baseLanguage && translation.text != this.text) {
-        outdatedFlagKeys.add(translation.key.id)
-      }
-      translationService.setTranslationTextNoSave(translation, text)
-      translationsToSave.add(this to translation)
+
+    val resolution = this.getConflictResolution()
+
+    if (resolution == ForceMode.KEEP) {
+      return
     }
+
+    if (resolution == ForceMode.NO_FORCE) {
+      failedKeyIds.add(this.existingKey.id)
+      return
+    }
+
+    val language =
+      this.language.existingLanguage
+        ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
+    val translation =
+      this.conflict ?: Translation().apply {
+        this.language = language
+      }
+    translation.key = existingKey
+    if (language == language.project.baseLanguage && translation.text != this.text) {
+      outdatedFlagKeys.add(translation.key.id)
+    }
+    translationService.setTranslationTextNoSave(translation, text)
+    translationsToSave.add(this to translation)
   }
 
   private val ImportTranslation.existingKey: Key
@@ -321,15 +358,32 @@ class StoredDataImporter(
     }
   }
 
-  private fun ImportTranslation.checkConflictResolved() {
-    if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolved) {
-      if (importDataManager.saveData) {
-        importDataManager.saveAllStoredTranslations()
-      }
-      throw ImportConflictNotResolvedException(
-        mutableListOf(this.key.name, this.language.name, this.text).filterNotNull().toMutableList(),
-      )
+  private fun ImportTranslation.getConflictResolution(): ForceMode {
+    if (this.conflict?.text == null) {
+      return ForceMode.OVERRIDE
     }
+    if (this.resolved) {
+      return if (this.override) ForceMode.OVERRIDE else ForceMode.KEEP
+    }
+    val currentForceMode = resolveConflict?.invoke(this) ?: forceMode
+    if (currentForceMode == ForceMode.KEEP) {
+      return ForceMode.KEEP
+    }
+    if (currentForceMode == ForceMode.OVERRIDE) {
+      if (
+        (overrideMode == OverrideMode.ALL) &&
+        ImportTranslationView.isOverridableWithAll(this.conflictType)
+      ) {
+        return ForceMode.OVERRIDE
+      }
+      if (
+        (overrideMode == OverrideMode.RECOMMENDED) &&
+        ImportTranslationView.isOverridableWithRecommended(this.conflictType)
+      ) {
+        return ForceMode.OVERRIDE
+      }
+    }
+    return ForceMode.NO_FORCE
   }
 
   private fun getNamespace(name: String?): Namespace? {

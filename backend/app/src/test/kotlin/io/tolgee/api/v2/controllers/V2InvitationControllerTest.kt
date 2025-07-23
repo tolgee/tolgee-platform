@@ -131,7 +131,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
         CreateProjectInvitationParams(
           project,
           ProjectPermissionType.TRANSLATE,
-          LanguagePermissions(translate = project.languages, null, null),
+          LanguagePermissions(translate = project.languages, null, null, null),
           null,
         ),
       ).code

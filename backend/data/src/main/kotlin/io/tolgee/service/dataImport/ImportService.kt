@@ -8,9 +8,11 @@ import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.ImportResult
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.SingleStepImportRequest
+import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableRequest
 import io.tolgee.events.OnImportSoftDeleted
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.exceptions.BadRequestException
@@ -21,8 +23,10 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.*
+import io.tolgee.model.dataImport.Import_.files
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
+import io.tolgee.model.enums.ConflictType
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
@@ -113,9 +117,10 @@ class ImportService(
     project: Project,
     userAccount: UserAccount,
     params: SingleStepImportRequest,
-    reportStatus: (ImportApplicationStatus) -> Unit,
-  ) {
-    reportStatus(ImportApplicationStatus.ANALYZING_FILES)
+    reportStatus: ((ImportApplicationStatus) -> Unit)? = null,
+    resolveConflict: ((translation: ImportTranslation) -> ForceMode?)? = null
+  ): ImportResult {
+    reportStatus?.invoke(ImportApplicationStatus.ANALYZING_FILES)
     val import = Import(project).also { it.author = userAccount }
 
     publishImportBusinessEvent(project.id, userAccount.id)
@@ -148,7 +153,7 @@ class ImportService(
 
     entityManager.clear()
 
-    StoredDataImporter(
+    val result = StoredDataImporter(
       applicationContext,
       import,
       params.forceMode,
@@ -156,7 +161,46 @@ class ImportService(
       importSettings = params,
       _importDataManager = fileProcessor.importDataManager,
       isSingleStepImport = true,
+      overrideMode = params.overrideMode,
+      errorOnFailedKey = params.errorOnFailedKey,
+      resolveConflict = resolveConflict,
     ).doImport()
+
+    return result
+  }
+
+  @Transactional
+  fun singleStepImportResolvable(
+    project: Project,
+    userAccount: UserAccount,
+    params: SingleStepImportResolvableRequest,
+    reportStatus: (ImportApplicationStatus) -> Unit,
+  ): ImportResult {
+    val keysToFilesManager = KeysToFilesManager()
+    keysToFilesManager.processKeys(params.keys)
+
+    val request = SingleStepImportRequest()
+    request.overrideMode = params.overrideMode
+    request.errorOnFailedKey = params.errorOnFailedKey
+    request.convertPlaceholdersToIcu = false
+    request.tagNewKeys = params.tagNewKeys
+    request.fileMappings = keysToFilesManager.getFileMappings()
+
+    val conflictResolutionMap = keysToFilesManager.getConflictResolutionMap()
+
+    return singleStepImport(
+      files = keysToFilesManager.getDtos(),
+      project = project,
+      userAccount,
+      request,
+      reportStatus,
+      resolveConflict = { translation ->
+        conflictResolutionMap
+          .get(translation.key.file.namespace)
+          ?.get(translation.language.name)
+          ?.get(translation.key.name)
+      }
+    )
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
@@ -165,8 +209,8 @@ class ImportService(
     authorId: Long,
     forceMode: ForceMode = ForceMode.NO_FORCE,
     reportStatus: (ImportApplicationStatus) -> Unit = {},
-  ) {
-    import(getNotExpired(projectId, authorId), forceMode, reportStatus)
+  ): ImportResult {
+    return import(getNotExpired(projectId, authorId), forceMode, reportStatus)
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
@@ -174,12 +218,20 @@ class ImportService(
     import: Import,
     forceMode: ForceMode = ForceMode.NO_FORCE,
     reportStatus: (ImportApplicationStatus) -> Unit = {},
-  ) {
+  ): ImportResult {
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val providedSettingsOrFromDb = importSettingsService.get(import.author, import.project.id)
-    StoredDataImporter(applicationContext, import, forceMode, reportStatus, providedSettingsOrFromDb).doImport()
+    val result = StoredDataImporter(
+      applicationContext,
+      import,
+      forceMode,
+      reportStatus,
+      providedSettingsOrFromDb,
+      errorOnFailedKey = true,
+    ).doImport()
     deleteImport(import)
     publishImportBusinessEvent(import.project.id, import.author.id)
+    return result
   }
 
   private fun publishImportBusinessEvent(
@@ -433,12 +485,28 @@ class ImportService(
     return importTranslationRepository.findByIdAndLanguageId(translationId, languageId)
   }
 
+  fun checkTranslationIsEditable(translation: ImportTranslation): BadRequestException? {
+    if (translation.conflictType == ConflictType.CANNOT_EDIT_REVIEWED) {
+      return BadRequestException(Message.CANNOT_MODIFY_REVIEWED_TRANSLATION)
+    }
+
+    if (translation.conflictType == ConflictType.CANNOT_EDIT_DISABLED) {
+      return BadRequestException(Message.CANNOT_MODIFY_DISABLED_TRANSLATION)
+    }
+    return null
+  }
+
   fun resolveTranslationConflict(
     translationId: Long,
     languageId: Long,
     override: Boolean,
   ) {
     val translation = findTranslation(translationId, languageId) ?: throw NotFoundException()
+
+    if (override) {
+      checkTranslationIsEditable(translation)?.let { throw it }
+    }
+
     translation.override = override
     translation.resolve()
     importTranslationRepository.save(translation)
@@ -450,8 +518,10 @@ class ImportService(
   ) {
     val translations = findTranslations(language.id)
     translations.forEach {
-      it.resolve()
-      it.override = override
+      if (!override || it.conflictType == null) {
+        it.resolve()
+        it.override = override
+      }
     }
     this.importTranslationRepository.saveAll(translations)
   }
@@ -524,7 +594,7 @@ class ImportService(
     val languageIdStrings = importLanguageIds.map { it.toString() }
     entityManager.createNativeQuery(
       """
-      with deleted as (  
+      with deleted as (
         delete from import_file_issue_param
         where issue_id in (
           select import_file_issue.id from import_file_issue

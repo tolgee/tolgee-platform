@@ -6,10 +6,12 @@ import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.AutoTranslationRequest
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
 import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.Language
 import io.tolgee.model.Project
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -17,6 +19,7 @@ import io.tolgee.repository.AutoTranslationConfigRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MtService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
@@ -36,6 +39,7 @@ class AutoTranslationService(
   private val authenticationFacade: AuthenticationFacade,
   private val entityManager: EntityManager,
   private val transactionManager: PlatformTransactionManager,
+  private val projectService: ProjectService,
 ) {
   val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -91,6 +95,7 @@ class AutoTranslationService(
     keyId: Long,
     languageId: Long,
   ) {
+    val project = projectService.getDto(projectId)
     val config = getConfig(entityManager.getReference(Project::class.java, projectId), languageId)
     val translation =
       translationService.getTranslations(listOf(keyId), listOf(languageId)).singleOrNull() ?: Translation().apply {
@@ -110,7 +115,7 @@ class AutoTranslationService(
     val (text, usedService) = getAutoTranslatedValue(config, translation) ?: return
     text ?: return
 
-    translation.setValueAndState(text, usedService)
+    translation.setValueAndState(project, text, usedService)
   }
 
   private fun getAutoTranslatedValue(
@@ -249,6 +254,7 @@ class AutoTranslationService(
     key: Key,
     isBatch: Boolean,
   ) {
+    val project = projectService.getDto(key.project.id)
     val languages = translations.map { it.language.id }
 
     val result =
@@ -261,7 +267,7 @@ class AutoTranslationService(
     translations.forEach { translation ->
       result[translation.language.id]?.let {
         it.translatedText?.let { text ->
-          translation.setValueAndState(text, it.service)
+          translation.setValueAndState(project, text, it.service)
         }
       }
     }
@@ -274,23 +280,27 @@ class AutoTranslationService(
     toTranslate: List<Translation>,
     key: Key,
   ): Map<Translation, Boolean> {
+    val project = projectService.getDto(key.project.id)
     return toTranslate.associateWith { translation ->
       val tmValue = translationMemoryService.getAutoTranslatedValue(key, translation.language)
       tmValue?.targetTranslationText
         .let { targetText -> if (targetText.isNullOrEmpty()) null else targetText }
         ?.let {
-          translation.setValueAndState(it, null)
+          translation.setValueAndState(project, it, null)
         }
       (tmValue != null)
     }
   }
 
   private fun Translation.setValueAndState(
+    project: ProjectDto,
     text: String,
     usedService: MtServiceType?,
   ) {
     this.resetFlags()
-    this.state = TranslationState.TRANSLATED
+    if (project.translationProtection != TranslationProtection.PROTECT_REVIEWED) {
+      this.state = TranslationState.TRANSLATED
+    }
     this.auto = true
     this.text = text
     this.mtProvider = usedService

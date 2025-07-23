@@ -14,4 +14,7 @@ interface RequestWithLanguagePermissions {
 
   @get:Schema(deprecated = true, description = "Languages user can change translation state (review)")
   var stateChangeLanguages: Set<Long>?
+
+  @get:Schema(deprecated = true, description = "Languages user can suggest translation")
+  var suggestLanguages: Set<Long>?
 }

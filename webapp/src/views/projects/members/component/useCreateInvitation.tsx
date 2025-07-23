@@ -8,6 +8,7 @@ import {
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { getScopeLanguagePermission } from 'tg.component/PermissionsSettings/hierarchyTools';
+import { languagePermissionsForRole } from './useUpdatePermissions';
 
 type Props = {
   projectId: number;
@@ -67,19 +68,12 @@ export const useCreateInvitation = ({ projectId, allLangs }: Props) => {
           },
         });
       } else if (permissions.tab === 'basic' && permissions.basicState.role) {
-        let languagePermissions: LanguagePermissions = {};
         const role = permissions.basicState.role;
 
-        if (role === 'REVIEW') {
-          languagePermissions = {
-            translateLanguages: permissions.basicState.languages,
-            stateChangeLanguages: permissions.basicState.languages,
-          };
-        } else if (role === 'TRANSLATE') {
-          languagePermissions = {
-            translateLanguages: permissions.basicState.languages,
-          };
-        }
+        const languagePermissions = languagePermissionsForRole(
+          role,
+          permissions.basicState.languages
+        );
 
         return invite.mutateAsync({
           path: {

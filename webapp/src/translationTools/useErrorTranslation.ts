@@ -197,6 +197,8 @@ export function useErrorTranslation() {
         return t('llm_content_filter');
       case 'llm_provider_empty_response':
         return t('llm_provider_empty_response');
+      case 'cannot_modify_reviewed_translation':
+        return t('cannot_modify_reviewed_translation');
       default:
         return code;
     }

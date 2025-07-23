@@ -15,11 +15,13 @@ import {
   EditMode,
 } from './context/types';
 import { useProject } from 'tg.hooks/useProject';
+import { getEditorActions } from './cell/editorMainActions/getEditorActions';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
 export type SaveProps = {
   preventTaskResolution?: boolean;
+  suggestionOnly?: boolean;
   after?: AfterCommand;
 };
 
@@ -85,10 +87,12 @@ export const useTranslationCell = ({
     });
   };
 
-  const handleSave = ({ after, preventTaskResolution }: SaveProps) => {
+  const handleSave = (props?: SaveProps) => {
+    const { after, preventTaskResolution, suggestionOnly } = props || {};
     changeField({
       after,
       preventTaskResolution,
+      suggestionOnly,
       onSuccess: () => onSaveSuccess?.(value),
     });
   };
@@ -161,7 +165,7 @@ export const useTranslationCell = ({
   };
 
   const setState = () => {
-    if (!translation) {
+    if (!translation?.id) {
       return;
     }
     const nextState = TRANSLATION_STATES[translation.state]?.next;
@@ -169,7 +173,7 @@ export const useTranslationCell = ({
       setTranslationState({
         state: nextState,
         keyId,
-        translationId: translation!.id,
+        translationId: translation!.id!,
         language: langTag!,
       });
     }
@@ -179,15 +183,35 @@ export const useTranslationCell = ({
     updateEdit({ activeVariant });
   }
 
+  const tasks = keyData.tasks?.filter((t) => t.languageTag === language.tag);
+
+  const prefilteredTask = useTranslationsSelector((c) =>
+    c.prefilteredTask?.language.id === language.id
+      ? c.prefilteredTask
+      : undefined
+  );
+
   const canChangeState =
     (assignedTask?.userAssigned && assignedTask.type === 'REVIEW') ||
     satisfiesLanguageAccess('translations.state-edit', language.id);
 
   const disabled = translation?.state === 'DISABLED';
-  const editEnabled =
-    ((assignedTask?.userAssigned && assignedTask.type === 'TRANSLATE') ||
-      satisfiesLanguageAccess('translations.edit', language.id)) &&
-    !disabled;
+
+  const canSuggest = satisfiesLanguageAccess(
+    'translations.suggest',
+    language.id
+  );
+
+  const editorActions = getEditorActions({
+    currentTask: prefilteredTask?.number,
+    languageId: language.id,
+    project,
+    tasks,
+    translation,
+  });
+
+  const editEnabled = Boolean(editorActions.length) && !disabled;
+
   const aiPlaygroundData = useTranslationsSelector(
     (c) => c.aiPlaygroundData?.[keyId]?.[language.id]
   );
@@ -196,9 +220,7 @@ export const useTranslationCell = ({
     (c) => c.aiPlaygroundEnabled
   );
 
-  const editable = editEnabled && !disabled;
-
-  const cellClickable = (editable && !isEditing) || aiPlaygroundEnabled;
+  const cellClickable = (editEnabled && !isEditing) || aiPlaygroundEnabled;
 
   return {
     keyId,
@@ -221,6 +243,7 @@ export const useTranslationCell = ({
     keyData,
     canChangeState,
     editEnabled,
+    canSuggest,
     translation,
     disabled,
     baseValue,
@@ -228,6 +251,7 @@ export const useTranslationCell = ({
     aiPlaygroundData,
     aiPlaygroundEnabled,
     cellClickable,
-    editable,
+    prefilteredTask,
+    tasks,
   };
 };

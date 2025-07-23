@@ -604,6 +604,22 @@ export interface paths {
   "/v2/projects/{projectId}/language-ai-prompt-customizations": {
     get: operations["getLanguagePromptCustomizations"];
   };
+  "/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion": {
+    get: operations["getSuggestions"];
+    post: operations["createSuggestion"];
+  };
+  "/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion/{suggestionId}": {
+    delete: operations["deleteSuggestion"];
+  };
+  "/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion/{suggestionId}/accept": {
+    put: operations["acceptSuggestion"];
+  };
+  "/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion/{suggestionId}/decline": {
+    put: operations["declineSuggestion"];
+  };
+  "/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion/{suggestionId}/reverse": {
+    put: operations["reverseSuggestion"];
+  };
   "/v2/projects/{projectId}/languages": {
     get: operations["getAll_5"];
     post: operations["createLanguage"];
@@ -1093,6 +1109,7 @@ export interface components {
       scopes: (
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1127,6 +1144,11 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
+       * @example 200001,200004
+       */
+      suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
@@ -1496,6 +1518,7 @@ export interface components {
       scopes: (
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -1530,6 +1553,11 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
+       * @example 200001,200004
+       */
+      suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
@@ -1926,6 +1954,9 @@ export interface components {
       name?: string;
       type: "TRANSLATE" | "REVIEW";
     };
+    CreateTranslationSuggestionRequest: {
+      translation: string;
+    };
     CreateUpdateGlossaryTermResponse: {
       term: components["schemas"]["SimpleGlossaryTermModel"];
       translation?: components["schemas"]["GlossaryTermTranslationModel"];
@@ -1998,6 +2029,10 @@ export interface components {
       icuPlaceholders: boolean;
       name: string;
       slug?: string;
+      /** @description Suggestions can be disabled (hidden from UI) or optional (visible in the UI) or enforced (force user to use them instead of editing reviewed translations) */
+      suggestionsMode: "DISABLED" | "ENABLED";
+      /** @description Protects reviewed translations, so translators can't change them by default and others will receive warning. */
+      translationProtection: "NONE" | "PROTECT_REVIEWED";
       useNamespaces: boolean;
     };
     EeSubscriptionModel: {
@@ -2342,7 +2377,11 @@ export interface components {
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
         | "llm_content_filter"
-        | "llm_provider_empty_response";
+        | "llm_provider_empty_response"
+        | "suggestion_not_found"
+        | "user_can_only_delete_his_suggestions"
+        | "cannot_modify_reviewed_translation"
+        | "cannot_modify_keys";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2548,6 +2587,7 @@ export interface components {
       scope:
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -2760,6 +2800,9 @@ export interface components {
       /** @example homepage */
       name: string;
     };
+    ImportResult: {
+      failedKeys?: components["schemas"]["SimpleKeyResult"][];
+    };
     ImportSettingsModel: {
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
@@ -2780,9 +2823,14 @@ export interface components {
       /** Format: int64 */
       conflictId?: number;
       conflictText?: string;
+      conflictType?:
+        | "CANNOT_EDIT_REVIEWED"
+        | "CANNOT_EDIT_DISABLED"
+        | "SHOULD_NOT_EDIT_REVIEWED";
       existingKeyIsPlural: boolean;
       /** Format: int64 */
       id: number;
+      isOverridable: boolean;
       isPlural: boolean;
       keyDescription?: string;
       /** Format: int64 */
@@ -3739,6 +3787,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelTranslationSuggestionModel: {
+      _embedded?: {
+        suggestions?: components["schemas"]["TranslationSuggestionModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelUserAccountInProjectModel: {
       _embedded?: {
         users?: components["schemas"]["UserAccountInProjectModel"][];
@@ -3818,6 +3872,7 @@ export interface components {
       scopes: (
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3852,6 +3907,11 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
+       * @example 200001,200004
+       */
+      suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
@@ -3882,6 +3942,7 @@ export interface components {
       scopes: (
         | "translations.view"
         | "translations.edit"
+        | "translations.suggest"
         | "keys.edit"
         | "screenshots.upload"
         | "screenshots.delete"
@@ -3916,6 +3977,11 @@ export interface components {
        * @example 200001,200004
        */
       stateChangeLanguageIds?: number[];
+      /**
+       * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
+       * @example 200001,200004
+       */
+      suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
        * @example 200001,200004
@@ -4109,7 +4175,12 @@ export interface components {
         | "GLOSSARY_TERM_CREATE"
         | "GLOSSARY_TERM_UPDATE"
         | "GLOSSARY_TERM_DELETE"
-        | "GLOSSARY_TERM_TRANSLATION_UPDATE";
+        | "GLOSSARY_TERM_TRANSLATION_UPDATE"
+        | "CREATE_SUGGESTION"
+        | "DECLINE_SUGGESTION"
+        | "ACCEPT_SUGGESTION"
+        | "REVERSE_SUGGESTION"
+        | "DELETE_SUGGESTION";
     };
     ProjectAiPromptCustomizationModel: {
       /**
@@ -4158,6 +4229,11 @@ export interface components {
       stateChangeLanguages?: number[];
       /**
        * @deprecated
+       * @description Languages user can suggest translation
+       */
+      suggestLanguages?: number[];
+      /**
+       * @deprecated
        * @description Languages user can translate to
        */
       translateLanguages?: number[];
@@ -4183,6 +4259,10 @@ export interface components {
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       slug?: string;
+      /** @description Suggestions for translations */
+      suggestionsMode: "DISABLED" | "ENABLED";
+      /** @description Level of protection of translations */
+      translationProtection: "NONE" | "PROTECT_REVIEWED";
       useNamespaces: boolean;
     };
     ProjectStatistics: {
@@ -4836,6 +4916,12 @@ export interface components {
       id: number;
       name: string;
     };
+    SimpleKeyResult: {
+      /** Format: int64 */
+      id: number;
+      name: string;
+      namespace?: string;
+    };
     SimpleOrganizationModel: {
       avatar?: components["schemas"]["Avatar"];
       basePermissions: components["schemas"]["PermissionModel"];
@@ -4879,11 +4965,23 @@ export interface components {
        *
        * When set to `KEEP`, existing translations will be kept.
        *
-       * When set to `OVERRIDE`, existing translations will be overwrote.
-       *
        * When set to `NO_FORCE`, error will be thrown on conflict.
+       *
+       * When set to `OVERRIDE`, existing translations will be overwritten, if translation is not disabled or reviewed in `enforced` mode (failed keys are reported).
+       *
+       * When set to `OVERRIDE_FAIL`, existing translations will be overwritten, if translation is not disabled or reviewed in `enforced` mode (if something fails whole import will fail).
+       *
+       * When set to `OVERRIDE_ALL`, will override everything that is within user permissions (failed keys are reported).
+       *
+       * When set to `OVERRIDE_ALL_FAIL`, will override everything that is within user permissions (if something is not possible whole import will fail).
        */
-      forceMode: "OVERRIDE" | "KEEP" | "NO_FORCE";
+      forceMode:
+        | "OVERRIDE"
+        | "KEEP"
+        | "NO_FORCE"
+        | "OVERRIDE_FAIL"
+        | "OVERRIDE_ALL"
+        | "OVERRIDE_ALL_FAIL";
       /**
        * @description Maps the languages from imported files to languages existing in the Tolgee platform.
        *
@@ -5241,7 +5339,11 @@ export interface components {
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
         | "llm_content_filter"
-        | "llm_provider_empty_response";
+        | "llm_provider_empty_response"
+        | "suggestion_not_found"
+        | "user_can_only_delete_his_suggestions"
+        | "cannot_modify_reviewed_translation"
+        | "cannot_modify_keys";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -5460,6 +5562,33 @@ export interface components {
       /** @description Translation text */
       text?: string;
     };
+    TranslationSuggestionAcceptResponse: {
+      accepted: components["schemas"]["TranslationSuggestionModel"];
+      declined: number[];
+    };
+    TranslationSuggestionModel: {
+      author: components["schemas"]["SimpleUserAccountModel"];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      keyId: number;
+      /** Format: int64 */
+      languageId: number;
+      state: "ACTIVE" | "ACCEPTED" | "DECLINED";
+      translation?: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    /** @description First suggestion */
+    TranslationSuggestionSimpleModel: {
+      author: components["schemas"]["SimpleUserAccountModel"];
+      /** Format: int64 */
+      id: number;
+      state: "ACTIVE" | "ACCEPTED" | "DECLINED";
+      translation?: string;
+    };
     /**
      * @description Translations object
      * @example
@@ -5473,6 +5602,11 @@ export interface components {
      *     }
      */
     TranslationViewModel: {
+      /**
+       * Format: int64
+       * @description Number of active suggestions
+       */
+      activeSuggestionCount: number;
       /** @description Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /**
@@ -5486,15 +5620,22 @@ export interface components {
        * Format: int64
        * @description Id of translation record
        */
-      id: number;
+      id?: number;
       /** @description Which machine translation service was used to auto translate this */
       mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
       /** @description Whether base language translation was changed after this translation was updated */
       outdated: boolean;
       /** @description State of translation */
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+      /** @description First suggestion */
+      suggestions?: components["schemas"]["TranslationSuggestionSimpleModel"][];
       /** @description Translation text */
       text?: string;
+      /**
+       * Format: int64
+       * @description Number of all suggestions
+       */
+      totalSuggestionCount: number;
       /**
        * Format: int64
        * @description Count of unresolved translation comments
@@ -13460,7 +13601,13 @@ export interface operations {
     parameters: {
       query: {
         /** Whether override or keep all translations with unresolved conflicts */
-        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+        forceMode?:
+          | "OVERRIDE"
+          | "KEEP"
+          | "NO_FORCE"
+          | "OVERRIDE_FAIL"
+          | "OVERRIDE_ALL"
+          | "OVERRIDE_ALL_FAIL";
       };
       path: {
         projectId: number;
@@ -13508,7 +13655,13 @@ export interface operations {
     parameters: {
       query: {
         /** Whether override or keep all translations with unresolved conflicts */
-        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+        forceMode?:
+          | "OVERRIDE"
+          | "KEEP"
+          | "NO_FORCE"
+          | "OVERRIDE_FAIL"
+          | "OVERRIDE_ALL"
+          | "OVERRIDE_ALL_FAIL";
       };
       path: {
         projectId: number;
@@ -14746,6 +14899,10 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter keys with any suggestions in lang */
+        filterHasSuggestionsInLang?: string[];
+        /** Filter keys with no suggestions in lang */
+        filterHasNoSuggestionsInLang?: string[];
       };
       path: {
         projectId: number;
@@ -15462,6 +15619,318 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["CollectionModelLanguageAiPromptCustomizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getSuggestions: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /** Filter by suggestion state */
+        filterState?: ("ACTIVE" | "ACCEPTED" | "DECLINED")[];
+      };
+      path: {
+        languageTag: string;
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelTranslationSuggestionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  createSuggestion: {
+    parameters: {
+      path: {
+        languageTag: string;
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateTranslationSuggestionRequest"];
+      };
+    };
+  };
+  deleteSuggestion: {
+    parameters: {
+      path: {
+        languageTag: string;
+        keyId: number;
+        suggestionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  acceptSuggestion: {
+    parameters: {
+      path: {
+        languageTag: string;
+        keyId: number;
+        suggestionId: number;
+        projectId: number;
+      };
+      query: {
+        declineOther?: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionAcceptResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  declineSuggestion: {
+    parameters: {
+      path: {
+        languageTag: string;
+        keyId: number;
+        suggestionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  reverseSuggestion: {
+    parameters: {
+      path: {
+        languageTag: string;
+        keyId: number;
+        suggestionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionModel"];
         };
       };
       /** Bad Request */
@@ -16816,7 +17285,11 @@ export interface operations {
     };
     responses: {
       /** OK */
-      200: unknown;
+      200: {
+        content: {
+          "application/json": components["schemas"]["ImportResult"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
@@ -18834,6 +19307,10 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter keys with any suggestions in lang */
+        filterHasSuggestionsInLang?: string[];
+        /** Filter keys with no suggestions in lang */
+        filterHasNoSuggestionsInLang?: string[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -19117,6 +19594,10 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter keys with any suggestions in lang */
+        filterHasSuggestionsInLang?: string[];
+        /** Filter keys with no suggestions in lang */
+        filterHasNoSuggestionsInLang?: string[];
       };
       path: {
         projectId: number;
@@ -19958,6 +20439,7 @@ export interface operations {
         translateLanguages?: number[];
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
+        suggestLanguages?: number[];
       };
     };
     responses: {
@@ -20015,6 +20497,7 @@ export interface operations {
         translateLanguages?: number[];
         viewLanguages?: number[];
         stateChangeLanguages?: number[];
+        suggestLanguages?: number[];
       };
     };
     responses: {
@@ -20719,6 +21202,7 @@ export interface operations {
             [key: string]: (
               | "translations.view"
               | "translations.edit"
+              | "translations.suggest"
               | "keys.edit"
               | "screenshots.upload"
               | "screenshots.delete"

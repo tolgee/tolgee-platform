@@ -18,7 +18,7 @@ export function getCellCancelButton() {
 }
 
 export function getCellSaveButton() {
-  return cy.gcy('translations-cell-save-button');
+  return cy.gcy('translations-cell-main-action-button').contains('Save');
 }
 
 export function getCellInsertBaseButton() {
