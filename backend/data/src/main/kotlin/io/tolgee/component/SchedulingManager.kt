@@ -3,6 +3,7 @@ package io.tolgee.component
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import jakarta.annotation.PreDestroy
+import org.springframework.scheduling.support.CronTrigger
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.util.UUID
@@ -41,6 +42,19 @@ class SchedulingManager(
     period: Duration,
   ): String {
     val future = taskScheduler.scheduleWithFixedDelay(runnable, period)
+    val id = UUID.randomUUID().toString()
+    scheduledTasks[id] = future
+    return id
+  }
+
+  fun scheduleWithCron(
+    runnable: Runnable,
+    cron: String,
+  ): String {
+    val future = taskScheduler.schedule(runnable, CronTrigger(cron))
+    if (future == null) {
+      throw IllegalStateException("Future from scheduler was null")
+    }
     val id = UUID.randomUUID().toString()
     scheduledTasks[id] = future
     return id
