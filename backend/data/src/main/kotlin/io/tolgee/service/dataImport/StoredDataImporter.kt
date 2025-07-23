@@ -310,7 +310,6 @@ class StoredDataImporter(
 
     val isFailed = this.isFailedConflict()
 
-
     if (isFailed) {
       failedKeyIds.add(this.existingKey.id)
       return
@@ -329,7 +328,6 @@ class StoredDataImporter(
     }
     translationService.setTranslationTextNoSave(translation, text)
     translationsToSave.add(this to translation)
-
   }
 
   private val ImportTranslation.existingKey: Key
