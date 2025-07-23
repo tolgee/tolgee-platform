@@ -2,7 +2,12 @@ package io.tolgee.service.dataImport
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.dataImport.ImportFileDto
+import io.tolgee.dtos.request.ImportFileMapping
 import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableItemRequest
+import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableTranslationRequest
+import io.tolgee.formats.importCommon.ImportFormat
+import io.tolgee.util.nullIfEmpty
+import kotlin.collections.getOrElse
 
 class KeysToFilesManager {
   var files: MutableSet<VirtualFile> = mutableSetOf()
@@ -15,7 +20,7 @@ class KeysToFilesManager {
             virtualFile = VirtualFile(language, key.namespace ?: "")
             files.add(virtualFile)
           }
-          virtualFile.records[key.name] = data.text
+          virtualFile.records[key.name] = data
         }
       }
     }
@@ -23,14 +28,48 @@ class KeysToFilesManager {
 
   fun getDtos(): List<ImportFileDto> {
     return files.map { file ->
-      val content = jacksonObjectMapper().writeValueAsString(file.records)
-      ImportFileDto("${file.namespace}/${file.language}.json", content.toByteArray())
+      ImportFileDto(
+        getFileName(file.namespace, file.language),
+        file.contentsToByteArray()
+      )
     }
+  }
+
+  fun getFileMappings(): List<ImportFileMapping> {
+    return files.map {
+      ImportFileMapping(
+        fileName = getFileName(it.namespace, it.language),
+        languageTag = it.language,
+        namespace = it.namespace.nullIfEmpty,
+        format = ImportFormat.JSON_ICU,
+      )
+    }
+  }
+
+  fun getConflictResolutionMap(): MutableMap<String, MutableMap<String, MutableMap<String, ForceMode?>>> {
+    val map = mutableMapOf<String, MutableMap<String, MutableMap<String, ForceMode?>>>()
+    files.forEach { file ->
+      val namespace = map.getOrPut(file.namespace) { mutableMapOf() }
+      val language = namespace.getOrPut(file.language) { mutableMapOf() }
+      file.records.entries.forEach { (key, data) ->
+        language[key] = data.forceMode
+      }
+    }
+    return map
+  }
+
+  fun getFileName(namespace: String, language: String): String {
+    return "${namespace}/${language}.json"
   }
 
   companion object {
     class VirtualFile(val language: String, val namespace: String) {
-      var records: MutableMap<String, String> = mutableMapOf()
+      var records: MutableMap<String, SingleStepImportResolvableTranslationRequest> = mutableMapOf()
+
+      fun contentsToByteArray(): ByteArray {
+        val jsonRecord: Map<String, String> = records.map { (key, value) -> key to value.text }.toMap()
+        return jacksonObjectMapper().writeValueAsString(jsonRecord).toByteArray()
+      }
 
       override fun equals(other: Any?): Boolean {
         if (this === other) return true

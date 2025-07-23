@@ -117,9 +117,10 @@ class ImportService(
     project: Project,
     userAccount: UserAccount,
     params: SingleStepImportRequest,
-    reportStatus: (ImportApplicationStatus) -> Unit,
+    reportStatus: ((ImportApplicationStatus) -> Unit)? = null,
+    resolveConflict: ((translation: ImportTranslation) -> ForceMode?)? = null
   ): ImportResult {
-    reportStatus(ImportApplicationStatus.ANALYZING_FILES)
+    reportStatus?.invoke(ImportApplicationStatus.ANALYZING_FILES)
     val import = Import(project).also { it.author = userAccount }
 
     publishImportBusinessEvent(project.id, userAccount.id)
@@ -162,6 +163,7 @@ class ImportService(
       isSingleStepImport = true,
       overrideMode = params.overrideMode,
       errorOnFailedKey = params.errorOnFailedKey,
+      resolveConflict = resolveConflict,
     ).doImport()
 
     return result
@@ -182,6 +184,9 @@ class ImportService(
     request.errorOnFailedKey = params.errorOnFailedKey
     request.convertPlaceholdersToIcu = false
     request.tagNewKeys = params.tagNewKeys
+    request.fileMappings = keysToFilesManager.getFileMappings()
+
+    val conflictResolutionMap = keysToFilesManager.getConflictResolutionMap()
 
     return singleStepImport(
       files = keysToFilesManager.getDtos(),
@@ -189,6 +194,12 @@ class ImportService(
       userAccount,
       request,
       reportStatus,
+      resolveConflict = { translation ->
+        conflictResolutionMap
+          .get(translation.key.file.namespace)
+          ?.get(translation.language.name)
+          ?.get(translation.key.name)
+      }
     )
   }
 
@@ -216,8 +227,7 @@ class ImportService(
       forceMode,
       reportStatus,
       providedSettingsOrFromDb,
-      overrideMode = OverrideMode.RECOMMENDED,
-      errorOnFailedKey = true
+      errorOnFailedKey = true,
     ).doImport()
     deleteImport(import)
     publishImportBusinessEvent(import.project.id, import.author.id)

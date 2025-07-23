@@ -32,13 +32,14 @@ class StoredDataImporter(
   applicationContext: ApplicationContext,
   private val import: Import,
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
-  private val reportStatus: (ImportApplicationStatus) -> Unit = {},
+  private val reportStatus: ((ImportApplicationStatus) -> Unit)? = null,
   private val importSettings: IImportSettings,
   private val overrideMode: OverrideMode = OverrideMode.RECOMMENDED,
-  private val errorOnFailedKey: Boolean = false,
+  private val errorOnFailedKey: Boolean? = null,
   // for single step import, we provide import data manager
   private val _importDataManager: ImportDataManager? = null,
   private val isSingleStepImport: Boolean = false,
+  private val resolveConflict: ((ImportTranslation) -> ForceMode?)? = null,
 ) {
   private val importDataManager by lazy {
     if (_importDataManager != null) {
@@ -110,19 +111,18 @@ class StoredDataImporter(
   }
 
   fun doImport(): ImportResult {
-    reportStatus(ImportApplicationStatus.PREPARING_AND_VALIDATING)
+    reportStatus?.invoke(ImportApplicationStatus.PREPARING_AND_VALIDATING)
 
     importDataManager.storedLanguages.forEach {
       it.prepareImport()
     }
 
-    if (
-      failedKeyIds.isNotEmpty() &&
-      (
-        forceMode == ForceMode.NO_FORCE ||
-        errorOnFailedKey
-      )
-    ) {
+    val shouldThrowError = errorOnFailedKey ?: when(forceMode) {
+      ForceMode.NO_FORCE -> true
+      else -> false
+    }
+
+    if (failedKeyIds.isNotEmpty() && shouldThrowError) {
       throw ImportConflictNotResolvedException(params = getFailedKeys(failedKeyIds))
     }
 
@@ -130,7 +130,7 @@ class StoredDataImporter(
 
     handleKeyMetas()
 
-    reportStatus(ImportApplicationStatus.STORING_KEYS)
+    reportStatus?.invoke(ImportApplicationStatus.STORING_KEYS)
 
     namespaceService.saveAll(namespacesToSave.values)
 
@@ -140,11 +140,11 @@ class StoredDataImporter(
 
     saveKeyMetaData(keyEntitiesToSave)
 
-    reportStatus(ImportApplicationStatus.STORING_TRANSLATIONS)
+    reportStatus?.invoke(ImportApplicationStatus.STORING_TRANSLATIONS)
 
     saveTranslations()
 
-    reportStatus(ImportApplicationStatus.FINALIZING)
+    reportStatus?.invoke(ImportApplicationStatus.FINALIZING)
 
     entityManager.flush()
 
@@ -300,18 +300,13 @@ class StoredDataImporter(
       return
     }
 
-    // user specifically selected this translation to not be overriden
-    if (this.resolved && !this.override) {
+    val resolution = this.getConflictResolution()
+
+    if (resolution == ForceMode.KEEP) {
       return
     }
 
-    if (!this.resolved && forceMode === ForceMode.KEEP) {
-      return
-    }
-
-    val isFailed = this.isFailedConflict()
-
-    if (isFailed) {
+    if (resolution == ForceMode.NO_FORCE) {
       failedKeyIds.add(this.existingKey.id)
       return
     }
@@ -363,25 +358,32 @@ class StoredDataImporter(
     }
   }
 
-  private fun ImportTranslation.isFailedConflict(): Boolean {
-    if (forceMode == ForceMode.KEEP) {
-      return false
+  private fun ImportTranslation.getConflictResolution(): ForceMode {
+    if (this.conflict?.text == null) {
+      return ForceMode.OVERRIDE
     }
-    if (forceMode == ForceMode.OVERRIDE) {
+    if (this.resolved) {
+      return if (this.override) ForceMode.OVERRIDE else ForceMode.KEEP
+    }
+    val currentForceMode = resolveConflict?.invoke(this) ?: forceMode
+    if (currentForceMode == ForceMode.KEEP) {
+      return ForceMode.KEEP
+    }
+    if (currentForceMode == ForceMode.OVERRIDE) {
       if (
         (overrideMode == OverrideMode.ALL) &&
         ImportTranslationView.isOverridableWithAll(this.conflictType)
       ) {
-        return false
+        return ForceMode.OVERRIDE
       }
       if (
         (overrideMode == OverrideMode.RECOMMENDED) &&
         ImportTranslationView.isOverridableWithRecommended(this.conflictType)
       ) {
-        return false
+        return ForceMode.OVERRIDE
       }
     }
-    return this.conflict != null && !this.resolved
+    return ForceMode.NO_FORCE
   }
 
   private fun getNamespace(name: String?): Namespace? {

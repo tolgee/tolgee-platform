@@ -30,9 +30,10 @@ class SingleStepImportResolvableControllerTest : ProjectAuthControllerTest("/v2/
   fun setup() {
     testData = ResolvableImportTestData()
     testData.projectBuilder.self.translationProtection = TranslationProtection.PROTECT_REVIEWED
+    testData.projectBuilder.self.useNamespaces = true
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
-    userAccount = testData.translatorUser
+    userAccount = testData.user
   }
 
   @Test
@@ -60,7 +61,7 @@ class SingleStepImportResolvableControllerTest : ProjectAuthControllerTest("/v2/
       "single-step-import-resolvable",
       request
     ).andIsOk.andAssertThatJson {
-      node("keys").isArray.hasSize(1)
+      node("failedKeys").isNull()
     }
 
     executeInNewTransaction {
@@ -75,13 +76,15 @@ class SingleStepImportResolvableControllerTest : ProjectAuthControllerTest("/v2/
     languageTag: String,
     expectedText: String,
   ) {
-    projectService
+    val text = projectService
       .get(testData.projectBuilder.self.id)
       .keys
-      .find { it.name == keyName && it.namespace?.name == namespace }!!
-      .translations
-      .find { it.language.tag == languageTag }!!
-      .text
+      .find { it.name == keyName && it.namespace?.name == namespace }
+      ?.translations
+      ?.find { it.language.tag == languageTag }
+      ?.text
+
+    text
       .assert
       .isEqualTo(
         expectedText,

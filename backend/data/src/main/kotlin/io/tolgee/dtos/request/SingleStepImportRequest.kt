@@ -32,7 +32,7 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
       "If `true`, import will fail completely on failed override and won't apply any changes. " +
         "Failed keys are reported in the `params` of the error response"
   )
-  var errorOnFailedKey: Boolean = false
+  var errorOnFailedKey: Boolean? = null
 
   @Schema(
     description =

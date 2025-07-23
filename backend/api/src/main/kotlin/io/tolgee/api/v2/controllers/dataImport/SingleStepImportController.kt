@@ -86,6 +86,6 @@ class SingleStepImportController(
       project = projectHolder.projectEntity,
       userAccount = authenticationFacade.authenticatedUserEntity,
       params = params,
-    ) {}
+    )
   }
 }

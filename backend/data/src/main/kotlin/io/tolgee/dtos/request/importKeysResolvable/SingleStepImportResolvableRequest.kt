@@ -22,7 +22,7 @@ data class SingleStepImportResolvableRequest(
         "If `true`, import will fail completely on failed override and won't apply any changes. " +
         "Failed keys are reported in the `params` of the error response"
   )
-  val errorOnFailedKey: Boolean = false,
+  val errorOnFailedKey: Boolean? = null,
 
   override var overrideKeyDescriptions: Boolean = false,
   override var convertPlaceholdersToIcu: Boolean = true,
