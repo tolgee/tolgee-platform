@@ -14,7 +14,7 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
         "When set to `NO_FORCE`, error will be thrown on conflict.\n" +
         "When set to `OVERRIDE`, existing translations will be overwritten"
   )
-  val forceMode: ForceMode = ForceMode.NO_FORCE
+  var forceMode: ForceMode = ForceMode.NO_FORCE
 
   @Schema(
     description =
@@ -24,7 +24,7 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
         "When set to `ALL` it will fail for DISABLED translations, " +
           "but will try to update protected REVIEWED translations (fails only if user has no permission)\n"
   )
-  val overrideMode: OverrideMode = OverrideMode.RECOMMENDED
+  var overrideMode: OverrideMode = OverrideMode.RECOMMENDED
 
   @Schema(
     description =
@@ -32,7 +32,7 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
       "If `true`, import will fail completely on failed override and won't apply any changes. " +
         "Failed keys are reported in the `params` of the error response"
   )
-  val errorOnFailedKey: Boolean = false
+  var errorOnFailedKey: Boolean = false
 
   @Schema(
     description =
@@ -42,7 +42,7 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
         "Example: In xliff files, there are `source-language` and `target-language` attributes defined on `file` " +
         "element. Using this field you can map source and target values to languages stored in the Tolgee Platform.",
   )
-  val languageMappings: List<LanguageMapping>? = null
+  var languageMappings: List<LanguageMapping>? = null
 
   override var overrideKeyDescriptions: Boolean = false
   override var convertPlaceholdersToIcu: Boolean = true

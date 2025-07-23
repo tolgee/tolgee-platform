@@ -12,6 +12,7 @@ import io.tolgee.dtos.ImportResult
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.SingleStepImportRequest
+import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableRequest
 import io.tolgee.events.OnImportSoftDeleted
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.exceptions.BadRequestException
@@ -22,6 +23,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.*
+import io.tolgee.model.dataImport.Import_.files
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
 import io.tolgee.model.enums.ConflictType
@@ -163,6 +165,31 @@ class ImportService(
     ).doImport()
 
     return result
+  }
+
+  @Transactional
+  fun singleStepImportResolvable(
+    project: Project,
+    userAccount: UserAccount,
+    params: SingleStepImportResolvableRequest,
+    reportStatus: (ImportApplicationStatus) -> Unit,
+  ): ImportResult {
+    val keysToFilesManager = KeysToFilesManager()
+    keysToFilesManager.processKeys(params.keys)
+
+    val request = SingleStepImportRequest()
+    request.overrideMode = params.overrideMode
+    request.errorOnFailedKey = params.errorOnFailedKey
+    request.convertPlaceholdersToIcu = false
+    request.tagNewKeys = params.tagNewKeys
+
+    return singleStepImport(
+      files = keysToFilesManager.getDtos(),
+      project = project,
+      userAccount,
+      request,
+      reportStatus,
+    )
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
