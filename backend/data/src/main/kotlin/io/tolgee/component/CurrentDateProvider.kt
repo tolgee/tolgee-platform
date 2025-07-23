@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import java.sql.Timestamp
 import java.time.Duration
+import java.time.LocalDate
+import java.time.ZoneId.systemDefault
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAccessor
@@ -85,6 +87,11 @@ class CurrentDateProvider(
     get() {
       return forcedDate ?: Date()
     }
+
+  val localDate: LocalDate
+      get() {
+        return date.toInstant().atZone(systemDefault()).toLocalDate()
+      }
 
   override fun getNow(): Optional<TemporalAccessor> {
     return Optional.of(date.toInstant())
