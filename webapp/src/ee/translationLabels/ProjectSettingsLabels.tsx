@@ -14,6 +14,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 import { DOCS_ROOT } from 'tg.constants/docLinks';
+import { useReportOnce } from 'tg.hooks/useReportEvent';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -33,6 +34,8 @@ export const ProjectSettingsLabels = () => {
   const { isEnabled } = useEnabledFeatures();
   const labelsFeature = isEnabled('TRANSLATION_LABELS');
   const canManageLabels = satisfiesPermission('translation-labels.manage');
+
+  useReportOnce('TRANSLATION_LABELS_SETTINGS');
 
   const addLabel = () => {
     setSelectedLabel(undefined);
