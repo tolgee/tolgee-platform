@@ -9,6 +9,7 @@ import { resolve } from 'path';
 
 import { extractDataCy } from './dataCy.plugin';
 import rehypeHighlight from 'rehype-highlight';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
@@ -30,6 +31,11 @@ export default defineConfig(({ mode }) => {
             dest: '',
           },
         ],
+      }),
+      sentryVitePlugin({
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        org: 'tolgee',
+        project: 'tolgee-client',
       }),
     ],
     server: {

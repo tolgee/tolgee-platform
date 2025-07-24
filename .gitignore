@@ -79,3 +79,6 @@ ngrok.local.yml
 # IDEs and tools
 .cursorrules
 .cursorignore
+
+# Sentry Config File
+/webapp/.env.sentry-build-plugin
