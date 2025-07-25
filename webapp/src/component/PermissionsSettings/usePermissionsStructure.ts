@@ -75,6 +75,17 @@ export const usePermissionsStructure = (options?: Scope[]) => {
               },
             ],
           },
+          {
+            label: t('permissions_item_translation_labels'),
+            children: [
+              {
+                value: 'translation-labels.assign',
+              },
+              {
+                value: 'translation-labels.manage',
+              },
+            ],
+          },
         ],
       },
       {

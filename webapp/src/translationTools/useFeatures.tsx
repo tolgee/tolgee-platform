@@ -37,5 +37,6 @@ export function useFeatures() {
       'billing_subscriptions_backup_configuration_feature'
     ),
     TEAM_TRAINING: t('billing_subscriptions_team_training'),
+    TRANSLATION_LABELS: t('billing_subscriptions_translation_labels'),
   } as const satisfies Record<Feature, string>;
 }

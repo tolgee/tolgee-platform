@@ -53,7 +53,7 @@ export const DisabledFeatureBanner = ({
     ) : undefined;
 
   return (
-    <StyledContainer>
+    <StyledContainer data-cy="disabled-feature-banner">
       <StyledAlert severity="info" action={action}>
         <AlertTitle sx={{ mb: customMessage ? undefined : 0, pb: 0 }}>
           {customTitle ?? message}

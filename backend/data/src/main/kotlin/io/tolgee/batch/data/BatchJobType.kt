@@ -83,4 +83,14 @@ enum class BatchJobType(
     maxRetries = 3,
     processor = TrialExpirationNoticeProcessor::class,
   ),
+  ASSIGN_TRANSLATION_LABEL(
+    activityType = ActivityType.BATCH_ASSIGN_TRANSLATION_LABEL,
+    maxRetries = 3,
+    processor = AssignTranslationLabelChunkProcessor::class,
+  ),
+  UNASSIGN_TRANSLATION_LABEL(
+    activityType = ActivityType.BATCH_UNASSIGN_TRANSLATION_LABEL,
+    maxRetries = 3,
+    processor = UnassignTranslationLabelChunkProcessor::class,
+  )
 }

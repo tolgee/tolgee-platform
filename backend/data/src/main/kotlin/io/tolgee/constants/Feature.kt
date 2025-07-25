@@ -22,6 +22,7 @@ enum class Feature {
   SSO,
   ORDER_TRANSLATION,
   GLOSSARY,
+  TRANSLATION_LABELS,
   ;
 
   companion object {
