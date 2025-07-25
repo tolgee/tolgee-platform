@@ -17,19 +17,26 @@ import { useMissingPlaceholders } from '../cell/useMissingPlaceholders';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
+import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 
 const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: auto 1fr auto;
   grid-template-areas:
-    'language    controls-t '
-    'editor      editor     '
-    'controls-b  controls-b ';
+    'language   labels     controls-t '
+    'editor     editor     editor     '
+    'controls-b controls-b controls-b ';
+  gap: 0 6px;
 
   .language {
     align-self: start;
-    padding: 12px 12px 4px 16px;
+    padding: 12px 2px 4px 16px;
+  }
+
+  .labels {
+    padding: 6px 0 0 0;
+    min-width: 0;
   }
 
   .editor {
@@ -60,6 +67,7 @@ const StyledControls = styled(Box)`
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+
   .controls-main {
     flex-grow: 1;
     justify-content: end;
@@ -84,6 +92,8 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     editEnabled,
     disabled,
     setAssignedTaskState,
+    addLabel,
+    removeLabel,
   } = tools;
   const { t } = useTranslate();
   const editVal = tools.editVal!;
@@ -147,6 +157,12 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
         keyData={keyData}
         language={language}
         className="language"
+      />
+      <TranslationLabels
+        labels={translation?.labels}
+        onSelect={(label) => addLabel(label.id)}
+        onDelete={(labelId) => removeLabel(labelId)}
+        className="labels"
       />
       <ControlsEditorSmall
         controlsProps={{

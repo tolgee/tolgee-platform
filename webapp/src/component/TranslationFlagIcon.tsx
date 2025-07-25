@@ -3,8 +3,8 @@ import { Tooltip, styled } from '@mui/material';
 export const StyledImgWrapper = styled('div')`
   display: flex;
   & svg {
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
   }
 `;
 

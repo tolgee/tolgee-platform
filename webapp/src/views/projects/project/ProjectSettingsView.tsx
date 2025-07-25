@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import { Box, Tab, Tabs, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { Link, useRouteMatch } from 'react-router-dom';
+import { Link, match, Redirect, useRouteMatch } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
@@ -9,7 +9,18 @@ import { useProject } from 'tg.hooks/useProject';
 import { BaseProjectView } from '../BaseProjectView';
 import { ProjectSettingsGeneral } from './ProjectSettingsGeneral';
 import { ProjectSettingsAdvanced } from './ProjectSettingsAdvanced';
-import { ProjectSettingsLabels } from 'tg.views/projects/project/ProjectSettingsLabels';
+import { useAddProjectSettingsTabs } from 'tg.ee';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+
+export type ProjectSettingsTab = {
+  value: string;
+  label: string;
+  link: string;
+  dataCy?: string;
+  component?: FunctionComponent;
+  enabled: boolean;
+  routeMatch: match | null;
+};
 
 const StyledTabs = styled(Tabs)`
   margin-bottom: -1px;
@@ -19,13 +30,46 @@ const StyledTabWrapper = styled(Box)`
   border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
 `;
 
-export const ProjectSettingsView: FunctionComponent = () => {
+export const ProjectSettingsView = () => {
   const project = useProject();
   const { t } = useTranslate();
+  const { satisfiesPermission } = useProjectPermissions();
 
-  const pageGeneral = useRouteMatch(LINKS.PROJECT_EDIT.template);
-  const pageAdvanced = useRouteMatch(LINKS.PROJECT_EDIT_ADVANCED.template);
-  const pageLabels = useRouteMatch(LINKS.PROJECT_EDIT_LABELS.template);
+  let tabs = [
+    {
+      value: 'general',
+      label: t('project_settings_menu_general'),
+      link: LINKS.PROJECT_EDIT.build({
+        [PARAMS.PROJECT_ID]: project.id,
+      }),
+      dataCy: 'project-settings-menu-general',
+      component: ProjectSettingsGeneral,
+      enabled: satisfiesPermission('project.edit'),
+      routeMatch: useRouteMatch(LINKS.PROJECT_EDIT.template),
+    },
+    {
+      value: 'advanced',
+      label: t('project_settings_menu_advanced'),
+      link: LINKS.PROJECT_EDIT_ADVANCED.build({
+        [PARAMS.PROJECT_ID]: project.id,
+      }),
+      dataCy: 'project-settings-menu-advanced',
+      component: ProjectSettingsAdvanced,
+      enabled: satisfiesPermission('project.edit'),
+      routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_ADVANCED.template),
+    },
+  ] as ProjectSettingsTab[];
+
+  tabs = useAddProjectSettingsTabs(project.id)(tabs);
+
+  const matchedTab = tabs.find((t) => t.routeMatch?.isExact);
+  if (matchedTab && !matchedTab.enabled) {
+    const firstEnabled = tabs.find((t) => t.enabled);
+    if (firstEnabled) {
+      return <Redirect to={firstEnabled?.link} />;
+    }
+  }
+  const ComponentToRender = matchedTab?.component;
 
   return (
     <BaseProjectView
@@ -42,51 +86,24 @@ export const ProjectSettingsView: FunctionComponent = () => {
       ]}
     >
       <StyledTabWrapper>
-        <StyledTabs
-          value={
-            pageGeneral?.isExact
-              ? 'general'
-              : pageAdvanced?.isExact
-              ? 'advanced'
-              : pageLabels?.isExact
-              ? 'labels'
-              : null
-          }
-        >
-          <Tab
-            value="general"
-            component={Link}
-            to={LINKS.PROJECT_EDIT.build({
-              [PARAMS.PROJECT_ID]: project.id,
-            })}
-            label={t('project_settings_menu_general')}
-            data-cy="project-settings-menu-general"
-          />
-          <Tab
-            value="advanced"
-            component={Link}
-            to={LINKS.PROJECT_EDIT_ADVANCED.build({
-              [PARAMS.PROJECT_ID]: project.id,
-            })}
-            label={t('project_settings_menu_advanced')}
-            data-cy="project-settings-menu-advanced"
-          />
-          <Tab
-            value="labels"
-            component={Link}
-            to={LINKS.PROJECT_EDIT_LABELS.build({
-              [PARAMS.PROJECT_ID]: project.id,
-            })}
-            label={t('project_settings_menu_labels')}
-            data-cy="project-settings-menu-labels"
-          />
+        <StyledTabs value={matchedTab?.value}>
+          {tabs
+            .filter((tab) => tab.enabled)
+            .map((tab) => (
+              <Tab
+                key={tab.value}
+                value={tab.value}
+                label={tab.label}
+                component={Link}
+                to={tab.link}
+                data-cy={tab.dataCy}
+              />
+            ))}
         </StyledTabs>
       </StyledTabWrapper>
 
       <Box data-cy="project-settings">
-        {pageGeneral?.isExact && <ProjectSettingsGeneral />}
-        {pageAdvanced?.isExact && <ProjectSettingsAdvanced />}
-        {pageLabels?.isExact && <ProjectSettingsLabels />}
+        {ComponentToRender && <ComponentToRender />}
       </Box>
     </BaseProjectView>
   );

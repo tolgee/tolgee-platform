@@ -12,7 +12,7 @@ export class E2LabelModal {
     description,
   }: {
     name: string;
-    color: string | PaletteColor;
+    color?: string | PaletteColor;
     description?: string;
   }) {
     cy.get('input[name="name"]').clear().type(name);

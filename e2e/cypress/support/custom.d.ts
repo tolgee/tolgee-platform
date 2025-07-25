@@ -5,6 +5,8 @@ declare namespace Cypress {
   interface Chainable<Subject = any> {
     closestDcy(dataCy: Value): Chainable;
 
+    siblingDcy(dataCy: Value): Chainable;
+
     gcy(dataCy: Value, options?: Parameters<typeof cy['get']>[1]): Chainable;
 
     findDcy(

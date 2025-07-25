@@ -10,6 +10,14 @@ export const register = () => {
     }
   );
 
+  Cypress.Commands.add(
+    'siblingDcy',
+    { prevSubject: 'element' },
+    (subject, dataCy) => {
+      return cy.wrap(subject).siblings(`[data-cy="${dataCy}"]`);
+    }
+  );
+
   Cypress.Commands.add('gcy', (dataCy, options) => {
     return cy.get('[data-cy="' + dataCy + '"]', options);
   });

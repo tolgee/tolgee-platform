@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.batch.request.ClearTranslationsRequest
 import io.tolgee.batch.request.CopyTranslationRequest
 import io.tolgee.batch.request.DeleteKeysRequest
@@ -13,8 +15,6 @@ import io.tolgee.batch.request.SetKeysNamespaceRequest
 import io.tolgee.batch.request.SetTranslationsStateStateRequest
 import io.tolgee.batch.request.TagKeysRequest
 import io.tolgee.batch.request.UntagKeysRequest
-import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
-import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.batch.BatchJobModel
