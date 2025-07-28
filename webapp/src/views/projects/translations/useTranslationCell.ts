@@ -191,7 +191,7 @@ export const useTranslationCell = ({
   };
 
   const removeLabel = (labelId: number) => {
-    if (!translation) {
+    if (!translation?.id) {
       return;
     }
     removeTranslationLabel({
