@@ -396,6 +396,7 @@
   "announcement_feature_tasks": "我们发布了一个新功能：任务！",
   "announcement_general_link_text": "显示更多",
   "announcement_glossaries_and_playground": "我们已发布 <linkGlossaries>Glossaries</linkGlossaries> 和 <linkPlayground>AI Playground</linkPlayground>！",
+  "announcement_labels": "我们 已 发布 译文标签 ！",
   "announcement_llm_providers_and_playground": "我们已发布 <linkPlayground>AI Playground</linkPlayground> 和 <linkProviders>Custom LLM Providers</linkProviders>！",
   "announcement_new_pricing": "Tolgee 将为自托管实例引入新的定价方式",
   "announcement_visual_editor_and_formats_support": "发布了可视化编辑器和对iOS、Android、Flutter等的支持",

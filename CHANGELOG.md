@@ -1,3 +1,10 @@
+# [3.125.0](https://github.com/tolgee/tolgee-platform/compare/v3.124.0...v3.125.0) (2025-07-28)
+
+
+### Features
+
+* labels release preparation ([#3182](https://github.com/tolgee/tolgee-platform/issues/3182)) ([8bec72c](https://github.com/tolgee/tolgee-platform/commit/8bec72c2853df8f26a14c985d946b2c536d52c77))
+
 # [3.124.0](https://github.com/tolgee/tolgee-platform/compare/v3.123.17...v3.124.0) (2025-07-28)
 
 

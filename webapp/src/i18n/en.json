@@ -397,6 +397,7 @@
   "announcement_feature_tasks": "We've released a new feature: Tasks!",
   "announcement_general_link_text": "Show more",
   "announcement_glossaries_and_playground": "We've released <linkGlossaries>Glossaries</linkGlossaries> and <linkPlayground>AI Playground</linkPlayground>!",
+  "announcement_labels": "We've released translation labels!",
   "announcement_llm_providers_and_playground": "We've released <linkPlayground>AI Playground</linkPlayground> and <linkProviders>Custom LLM Providers</linkProviders>!",
   "announcement_new_pricing": "Tolgee is introducing new pricing for self-hosted instances",
   "announcement_visual_editor_and_formats_support": "Released Visual Editor and support for iOS, Android, Flutter and other",
