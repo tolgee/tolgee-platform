@@ -10,6 +10,7 @@ interface TranslationSuggestionView {
   var languageTag: String
   var translation: String?
   var state: TranslationSuggestionState
+  var plural: Boolean
 
   var authorId: Long
   var authorName: String

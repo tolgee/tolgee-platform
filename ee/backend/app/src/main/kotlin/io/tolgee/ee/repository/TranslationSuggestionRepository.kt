@@ -20,6 +20,7 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
         l.tag as languageTag,
         ts.translation as translation,
         ts.state as state,
+        ts.is_plural as plural,
         
         u.id as authorId,
         u.name as authorName,
@@ -71,4 +72,25 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
     """,
   )
   fun getAllActive(projectId: Long, languageId: Long, keyId: Long): List<TranslationSuggestion>
+
+  @Query(
+    """
+        from TranslationSuggestion ts
+            join ts.language
+            join ts.key
+        where ts.project.id = :projectId
+            and ts.language.id = :languageId
+            and ts.key.id = :keyId
+            and ts.translation = :translation
+            and ts.isPlural = :isPlural
+            and ts.state = 'ACTIVE'
+    """,
+  )
+  fun findSuggestion(
+    projectId: Long,
+    languageId: Long,
+    keyId: Long,
+    translation: String,
+    isPlural: Boolean
+  ): List<TranslationSuggestion>
 }

@@ -626,11 +626,12 @@ declare namespace DataCy {
         "project-settings-menu-general" |
         "project-settings-menu-labels" |
         "project-settings-name" |
-        "project-settings-suggestions-mode-select" |
+        "project-settings-suggestions-mode-switch" |
         "project-settings-transfer-button" |
-        "project-settings-translation-protection-select" |
-        "project-settings-use-namespaces-checkbox" |
-        "project-settings-use-tolgee-placeholders-checkbox" |
+        "project-settings-translation-protection-switch" |
+        "project-settings-use-namespaces-default-namespace-select" |
+        "project-settings-use-namespaces-switch" |
+        "project-settings-use-tolgee-placeholders-switch" |
         "project-states-bar-bar" |
         "project-states-bar-dot" |
         "project-states-bar-legend" |
@@ -697,6 +698,8 @@ declare namespace DataCy {
         "subscriptions-cloud-popover-active-plan-name" |
         "subscriptions-trial-alert" |
         "subscriptions-trial-alert-reaching-the-limit" |
+        "suggestion-action" |
+        "suggestions-list" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
         "task-date-picker" |
@@ -775,14 +778,17 @@ declare namespace DataCy {
         "translation-label-delete" |
         "translation-panel" |
         "translation-panel-content" |
+        "translation-panel-items-count" |
         "translation-panel-toggle" |
         "translation-plural-parameter" |
         "translation-plural-variant" |
         "translation-state-button" |
         "translation-suggestion" |
+        "translation-suggestion-action-menu-item" |
         "translation-text" |
         "translation-tools-machine-translation-item" |
         "translation-tools-machine-translation-item-prompt" |
+        "translation-tools-suggestions-show-all-checkbox" |
         "translation-tools-translation-memory-item" |
         "translations-add-button" |
         "translations-auto-translated-clear-button" |
@@ -792,6 +798,8 @@ declare namespace DataCy {
         "translations-cell-edit-button" |
         "translations-cell-insert-base-button" |
         "translations-cell-main-action-button" |
+        "translations-cell-menu-item" |
+        "translations-cell-menu-open-button" |
         "translations-cell-screenshots-button" |
         "translations-cell-switch-mode" |
         "translations-cell-task-button" |

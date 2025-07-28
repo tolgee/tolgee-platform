@@ -4,8 +4,11 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.suggestion.SuggestionFilters
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
 import io.tolgee.ee.repository.TranslationSuggestionRepository
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.formats.StringIsNotPluralException
+import io.tolgee.formats.normalizePlurals
 import io.tolgee.model.Project
 import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.enums.TranslationSuggestionState
@@ -14,6 +17,7 @@ import io.tolgee.model.views.TranslationSuggestionView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.translation.SetTranslationTextUtil
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.service.translation.TranslationSuggestionService
 import org.springframework.context.annotation.Primary
@@ -61,12 +65,36 @@ class TranslationSuggestionServiceEeImpl(
     val language =
       languageService.findEntity(project.id, languageTag) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
+    val normalizedTranslation =
+      try {
+        if (key.isPlural) {
+          normalizePlurals(mapOf("key" to dto.translation)).get("key") ?: ""
+        } else {
+          dto.translation
+        }
+      } catch (e: StringIsNotPluralException) {
+        throw BadRequestException(Message.INVALID_PLURAL_FORM)
+      }
+
+    val existingSuggestion = translationSuggestionRepository.findSuggestion(
+      project.id,
+      language.id,
+      key.id,
+      normalizedTranslation,
+      key.isPlural
+    )
+
+    if (existingSuggestion.isNotEmpty()) {
+      throw BadRequestException(Message.DUPLICATE_SUGGESTION)
+    }
+
     val suggestion = TranslationSuggestion(
       key = key,
       project = project,
       language = language,
       author = authenticationFacade.authenticatedUserEntity,
-      translation = dto.translation,
+      translation = normalizedTranslation,
+      isPlural = key.isPlural,
     )
 
     translationSuggestionRepository.save(suggestion)
@@ -104,7 +132,15 @@ class TranslationSuggestionServiceEeImpl(
   ): Pair<TranslationSuggestion, List<Long>> {
     val language =
       languageService.findEntity(projectId, languageTag) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+    val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
     val suggestion = getSuggestion(projectId, keyId, suggestionId)
+    if (key.isPlural != suggestion.isPlural) {
+      if (suggestion.isPlural) {
+        throw BadRequestException(Message.SUGGESTION_CANT_BE_PLURAL)
+      } else {
+        throw BadRequestException(Message.SUGGESTION_MUST_BE_PLURAL)
+      }
+    }
     suggestion.state = TranslationSuggestionState.ACCEPTED
     val declined = if (declineOther) {
       declineOtherSuggestions(projectId, language.id, keyId, suggestionId)
@@ -114,7 +150,8 @@ class TranslationSuggestionServiceEeImpl(
     translationSuggestionRepository.save(suggestion)
     translationService.setForKey(
       entityManager.getReference(Key::class.java, keyId),
-      mapOf(languageTag to suggestion.translation)
+      mapOf(languageTag to suggestion.translation),
+      options = SetTranslationTextUtil.Companion.Options(keepState = true)
     )
     return Pair(suggestion, declined)
   }

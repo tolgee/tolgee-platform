@@ -19,5 +19,5 @@ open class ImportTranslationModel(
   val isPlural: Boolean,
   val existingKeyIsPlural: Boolean,
   val conflictType: ConflictType?,
-  val isOverridable: Boolean
+  val isOverridable: Boolean,
 ) : RepresentationModel<ImportTranslationModel>()

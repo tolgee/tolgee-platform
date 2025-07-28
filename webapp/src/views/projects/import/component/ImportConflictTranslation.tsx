@@ -18,6 +18,7 @@ import {
 import clsx from 'clsx';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
 import { TranslationVisual } from 'tg.views/projects/translations/translationVisual/TranslationVisual';
+import { T } from '@tolgee/react';
 
 type Props = {
   text?: string;
@@ -75,6 +76,11 @@ const StyledLoading = styled(Box)`
   position: absolute;
   right: 0px;
   top: 0px;
+`;
+
+const StyledEmpty = styled(Box)`
+  font-style: italic;
+  color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
 const StyledToggleButton = styled(IconButton)(({ theme }) => ({
@@ -155,12 +161,18 @@ export const ImportConflictTranslation: React.FC<Props> = (props) => {
           textOverflow="ellipsis"
           ref={textRef}
         >
-          <TranslationVisual
-            maxLines={props.expanded ? 0 : 3}
-            text={props.text}
-            locale={props.languageTag}
-            isPlural={props.isPlural}
-          />
+          {props.text ? (
+            <TranslationVisual
+              maxLines={props.expanded ? 0 : 3}
+              text={props.text}
+              locale={props.languageTag}
+              isPlural={props.isPlural}
+            />
+          ) : (
+            <StyledEmpty>
+              <T keyName="import-resolution-translation-empty" />
+            </StyledEmpty>
+          )}
         </BoxWithRef>
         {props.expandable && (
           <Box

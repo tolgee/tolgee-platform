@@ -180,6 +180,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
                 currentTask={prefilteredTask?.number}
                 translation={translation}
                 languageId={language.id}
+                value={editVal.value}
               />
             ) : (
               <ControlsEditorReadOnly onClose={() => handleClose(true)} />

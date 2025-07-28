@@ -10,6 +10,7 @@ import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.TranslationSuggestion_
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
@@ -166,7 +167,7 @@ class QueryBase<T>(
         ),
         cb.equal(
           subqueryRoot.get(TranslationSuggestion_.state),
-          cb.literal("ACTIVE"),
+          cb.literal(TranslationSuggestionState.ACTIVE.name),
         )
       )
     )

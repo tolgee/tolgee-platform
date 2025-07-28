@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { Checkbox, FormControlLabel, styled } from '@mui/material';
 import { PanelHeader } from '../ToolsPanel/common/PanelHeader';
 import { T, useTranslate } from '@tolgee/react';
-import { useLocalStorageState } from 'tg.hooks/useLocalStorageState';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationSuggestion } from './TranslationSuggestion';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -14,8 +13,6 @@ import { LabelHint } from 'tg.component/common/LabelHint';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUser } from 'tg.globalContext/helpers';
 
-const OPEN_SUGGESTIONS_KEY = '__tolgee_suggestions_hidden';
-
 const FETCH_NEXT_PAGE_SCROLL_THRESHOLD_IN_PIXELS = 220;
 
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
@@ -26,7 +23,7 @@ type TranslationSuggestionModel =
 const StyledContainer = styled('div')`
   display: grid;
   border-radius: 8px;
-  background: ${({ theme }) => theme.palette.tokens.text._states.hover};
+  background: ${({ theme }) => theme.palette.tokens.background.onDefaultGrey};
 `;
 
 const StyledMessage = styled('div')`
@@ -52,7 +49,6 @@ const StyledScrollWrapper = styled('div')`
 
 const StyledItemsWrapper = styled('div')`
   display: grid;
-  gap: 8px;
 `;
 
 const StyledTranslationSuggestion = styled(TranslationSuggestion)`
@@ -61,7 +57,7 @@ const StyledTranslationSuggestion = styled(TranslationSuggestion)`
   transition: background-color 0.1s ease-in-out;
 
   &:hover {
-    background-color: ${({ theme }) => theme.palette.divider};
+    background-color: ${({ theme }) => theme.palette.tokens.action.selected};
   }
 `;
 
@@ -86,6 +82,7 @@ export const SuggestionsList = ({
   const { t } = useTranslate();
   const { updateTranslation, setEditForce } = useTranslationsActions();
   const [showAll, setShowAll] = useState(false);
+  const [hidden, setHidden] = useState(translation.activeSuggestionCount === 0);
   const { satisfiesLanguageAccess } = useProjectPermissions();
   const canReview = satisfiesLanguageAccess(
     'translations.state-edit',
@@ -234,22 +231,6 @@ export const SuggestionsList = ({
     return result.length ? result : translation.suggestions;
   }, [suggestionsLoadable.data, translation.suggestions]);
 
-  const [_hidden, _setHidden] = useLocalStorageState({
-    key: OPEN_SUGGESTIONS_KEY,
-    initial: undefined,
-  });
-
-  const [hiddenOverride, setHiddenOverride] = useState<boolean | undefined>(
-    translation.activeSuggestionCount ? undefined : true
-  );
-
-  const hidden = hiddenOverride ?? _hidden;
-
-  function setHidden(value: boolean) {
-    setHiddenOverride(undefined);
-    _setHidden(value ? 'true' : undefined);
-  }
-
   const panelId = 'suggestions';
 
   const isLoading =
@@ -260,7 +241,7 @@ export const SuggestionsList = ({
     (suggestionsLoadable.isFetching && !suggestionsLoadable.isFetchingNextPage);
 
   return (
-    <StyledContainer>
+    <StyledContainer data-cy="suggestions-list">
       <StyledHeader>
         <PanelHeader
           sx={{ height: 'unset', padding: 0, background: 'unset' }}
@@ -276,24 +257,31 @@ export const SuggestionsList = ({
           panelId={panelId}
           open={!hidden}
         />
-        <FormControlLabel
-          label={
-            <LabelHint title={t('translation_tools_suggestions_show_all_hint')}>
-              {t('translation_tools_suggestions_show_all_label')}
-            </LabelHint>
-          }
-          control={
-            <Checkbox
-              size="small"
-              checked={showAll}
-              onChange={(e) => {
-                setHiddenOverride(false);
-                setShowAll(e.target.checked);
-              }}
-            />
-          }
-          sx={{ mr: 0 }}
-        />
+        {translation.totalSuggestionCount !==
+          translation.activeSuggestionCount && (
+          <FormControlLabel
+            data-cy="translation-tools-suggestions-show-all-checkbox"
+            label={
+              <LabelHint
+                title={t('translation_tools_suggestions_show_all_hint')}
+              >
+                {t('translation_tools_suggestions_show_all_label')}
+              </LabelHint>
+            }
+            control={
+              <Checkbox
+                size="small"
+                checked={showAll}
+                onChange={(e) => {
+                  setShowAll(!showAll);
+                  setHidden(false);
+                }}
+                sx={{ height: 34, width: 34, marginRight: '2px' }}
+              />
+            }
+            sx={{ mr: 0, my: '-8px' }}
+          />
+        )}
       </StyledHeader>
       {!hidden && (
         <StyledScrollWrapper

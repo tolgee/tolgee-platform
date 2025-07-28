@@ -538,7 +538,10 @@ export interface paths {
     post: operations["importKeys_2"];
   };
   "/v2/projects/{projectId}/keys/import-resolvable": {
-    /** Import's new keys with translations. Translations can be updated, when specified. */
+    /**
+     * Import's new keys with translations. Translations can be updated, when specified.
+     *       DEPRECATED: Use /v2/projects/{projectId}/single-step-import-resolvable instead.
+     */
     post: operations["importKeys"];
   };
   "/v2/projects/{projectId}/keys/info": {
@@ -699,7 +702,10 @@ export interface paths {
   };
   "/v2/projects/{projectId}/single-step-import": {
     /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
-    post: operations["doImport"];
+    post: operations["singleStepFromFiles"];
+  };
+  "/v2/projects/{projectId}/single-step-import-resolvable": {
+    post: operations["singleStepResolvableImport"];
   };
   "/v2/projects/{projectId}/start-batch-job/ai-playground-translate": {
     post: operations["aiPlaygroundTranslate"];
@@ -1083,7 +1089,8 @@ export interface components {
         | "FEATURE_TASKS"
         | "FEATURE_LLM_PROVIDERS_AND_PLAYGROUND"
         | "FEATURE_GLOSSARIES_AND_PLAYGROUND"
-        | "FEATURE_LABELS";
+        | "FEATURE_LABELS"
+        | "FEATURE_SUGGESTIONS_AND_LABELS";
     };
     ApiKeyModel: {
       /** @description Description */
@@ -2060,7 +2067,7 @@ export interface components {
       icuPlaceholders: boolean;
       name: string;
       slug?: string;
-      /** @description Suggestions can be disabled (hidden from UI) or optional (visible in the UI) or enforced (force user to use them instead of editing reviewed translations) */
+      /** @description Suggestions can be DISABLED (hidden from UI) or ENABLED (visible in the UI) */
       suggestionsMode: "DISABLED" | "ENABLED";
       /** @description Protects reviewed translations, so translators can't change them by default and others will receive warning. */
       translationProtection: "NONE" | "PROTECT_REVIEWED";
@@ -2413,7 +2420,15 @@ export interface components {
         | "label_not_found"
         | "label_not_from_project"
         | "label_already_exists"
-        | "filter_by_value_label_not_valid";
+        | "filter_by_value_label_not_valid"
+        | "suggestion_not_found"
+        | "user_can_only_delete_his_suggestions"
+        | "cannot_modify_reviewed_translation"
+        | "cannot_modify_keys"
+        | "expect_no_conflict_failed"
+        | "suggestion_cant_be_plural"
+        | "suggestion_must_be_plural"
+        | "duplicate_suggestion";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -2835,7 +2850,7 @@ export interface components {
       name: string;
     };
     ImportResult: {
-      failedKeys?: components["schemas"]["SimpleKeyResult"][];
+      unresolvedConflicts?: components["schemas"]["SimpleImportConflictResult"][];
     };
     ImportSettingsModel: {
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
@@ -2878,11 +2893,10 @@ export interface components {
     ImportTranslationResolvableDto: {
       /**
        * @description Determines, how conflict is resolved.
-       *
-       * - KEEP: Translation is not changed
-       * - OVERRIDE: Translation is overridden
-       * - NEW: New translation is created
-       * - FORCE_OVERRIDE: Translation is updated, created or kept.
+       *       - KEEP: Translation is not changed
+       *       - OVERRIDE: Translation is overridden
+       *       - NEW: New translation is created
+       *       - FORCE_OVERRIDE: Translation is updated, created or kept.
        *
        * @example OVERRIDE
        */
@@ -4250,7 +4264,12 @@ export interface components {
         | "TRANSLATION_LABEL_ASSIGN"
         | "TRANSLATION_LABEL_CREATE"
         | "TRANSLATION_LABEL_UPDATE"
-        | "TRANSLATION_LABEL_DELETE";
+        | "TRANSLATION_LABEL_DELETE"
+        | "CREATE_SUGGESTION"
+        | "DECLINE_SUGGESTION"
+        | "ACCEPT_SUGGESTION"
+        | "REVERSE_SUGGESTION"
+        | "DELETE_SUGGESTION";
     };
     ProjectAiPromptCustomizationModel: {
       /**
@@ -4292,26 +4311,14 @@ export interface components {
        * @example translations.view,translations.edit
        */
       scopes?: string[];
-      /**
-       * @deprecated
-       * @description Languages user can change translation state (review)
-       */
+      /** @description Languages user can change translation state (review) */
       stateChangeLanguages?: number[];
-      /**
-       * @deprecated
-       * @description Languages user can suggest translation
-       */
+      /** @description Languages user can suggest translation */
       suggestLanguages?: number[];
-      /**
-       * @deprecated
-       * @description Languages user can translate to
-       */
+      /** @description Languages user can translate to */
       translateLanguages?: number[];
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /**
-       * @deprecated
-       * @description Languages user can view
-       */
+      /** @description Languages user can view */
       viewLanguages?: number[];
     };
     ProjectModel: {
@@ -4988,11 +4995,11 @@ export interface components {
       id: number;
       name: string;
     };
-    SimpleKeyResult: {
-      /** Format: int64 */
-      id: number;
-      name: string;
-      namespace?: string;
+    SimpleImportConflictResult: {
+      isOverridable: boolean;
+      keyName: string;
+      keyNamespace?: string;
+      language: string;
     };
     SimpleOrganizationModel: {
       avatar?: components["schemas"]["Avatar"];
@@ -5030,30 +5037,21 @@ export interface components {
       convertPlaceholdersToIcu: boolean;
       /** @description If false, only updates keys, skipping the creation of new keys */
       createNewKeys: boolean;
+      /**
+       * @description If `false`, import will apply all `non-failed` overrides and reports `unresolvedConflict`
+       * .If `true`, import will fail completely on unresolved conflict and won't apply any changes. Unresolved conflicts are reported in the `params` of the error response
+       */
+      errorOnUnresolvedConflict?: boolean;
       /** @description Definition of mapping for each file to import. */
       fileMappings: components["schemas"]["ImportFileMapping"][];
       /**
        * @description Whether to override existing translation data.
        *
        * When set to `KEEP`, existing translations will be kept.
-       *
        * When set to `NO_FORCE`, error will be thrown on conflict.
-       *
-       * When set to `OVERRIDE`, existing translations will be overwritten, if translation is not disabled or reviewed in `enforced` mode (failed keys are reported).
-       *
-       * When set to `OVERRIDE_FAIL`, existing translations will be overwritten, if translation is not disabled or reviewed in `enforced` mode (if something fails whole import will fail).
-       *
-       * When set to `OVERRIDE_ALL`, will override everything that is within user permissions (failed keys are reported).
-       *
-       * When set to `OVERRIDE_ALL_FAIL`, will override everything that is within user permissions (if something is not possible whole import will fail).
+       * When set to `OVERRIDE`, existing translations will be overwritten
        */
-      forceMode:
-        | "OVERRIDE"
-        | "KEEP"
-        | "NO_FORCE"
-        | "OVERRIDE_FAIL"
-        | "OVERRIDE_ALL"
-        | "OVERRIDE_ALL_FAIL";
+      forceMode: "OVERRIDE" | "KEEP" | "NO_FORCE";
       /**
        * @description Maps the languages from imported files to languages existing in the Tolgee platform.
        *
@@ -5066,6 +5064,13 @@ export interface components {
       languageMappings?: components["schemas"]["LanguageMapping"][];
       /** @description If true, key descriptions will be overridden by the import */
       overrideKeyDescriptions: boolean;
+      /**
+       * @description Some translations are forbidden or protected:
+       *
+       * When set to `RECOMMENDED` it will fail for DISABLED translations and protected REVIEWED translations.
+       * When set to `ALL` it will fail for DISABLED translations, but will try to update protected REVIEWED translations (fails only if user has no permission)
+       */
+      overrideMode?: "RECOMMENDED" | "ALL";
       /** @description If yes, keys from project that were not included in import will be deleted (only within namespaces which are included in the import). */
       removeOtherKeys?: boolean;
       /**
@@ -5075,6 +5080,57 @@ export interface components {
       structureDelimiter?: string;
       /** @description Keys created by this import will be tagged with these tags. It add tags only to new keys. The keys that already exist will not be tagged. */
       tagNewKeys: string[];
+    };
+    /** @description List of keys to import */
+    SingleStepImportResolvableItemRequest: {
+      /**
+       * @description Key name to set translations for
+       * @example what_a_key_to_translate
+       */
+      name: string;
+      /** @description The namespace of the key. (When empty or null default namespace will be used) */
+      namespace?: string;
+      screenshots?: components["schemas"]["KeyScreenshotDto"][];
+      /** @description Object mapping language tag to translation */
+      translations: {
+        [
+          key: string
+        ]: components["schemas"]["SingleStepImportResolvableTranslationRequest"];
+      };
+    };
+    SingleStepImportResolvableRequest: {
+      /**
+       * @description If `false`, import will apply all `non-failed` overrides and reports `unresolvedConflict`
+       * .If `true`, import will fail completely on unresolved conflict and won't apply any changes. Unresolved conflicts are reported in the `params` of the error response
+       */
+      errorOnUnresolvedConflict?: boolean;
+      /** @description List of keys to import */
+      keys: components["schemas"]["SingleStepImportResolvableItemRequest"][];
+      /**
+       * @description Some translations are forbidden or protected:
+       *
+       * When set to `RECOMMENDED` it will fail for DISABLED translations and protected REVIEWED translations.
+       * When set to `ALL` it will fail for DISABLED translations, but will try to update protected REVIEWED translations (fails only if user has no permission)
+       */
+      overrideMode?: "RECOMMENDED" | "ALL";
+    };
+    /** @description Object mapping language tag to translation */
+    SingleStepImportResolvableTranslationRequest: {
+      /**
+       * @description
+       *     To ensure the import doesn't override something that should not be (in case data have changed unexpectedly),
+       *     you can specify what do you "expect":
+       *       - EXPECT_NO_CONFLICT: There should be no conflict, if there is, import fails
+       *       - OVERRIDE: New translation is applied over the existing in every case (Default)
+       *
+       * @example OVERRIDE
+       */
+      resolution?: "EXPECT_NO_CONFLICT" | "OVERRIDE";
+      /**
+       * @description Translation text
+       * @example Hello! I am a translation!
+       */
+      text: string;
     };
     SlackCommandDto: {
       channel_id: string;
@@ -5415,7 +5471,15 @@ export interface components {
         | "label_not_found"
         | "label_not_from_project"
         | "label_already_exists"
-        | "filter_by_value_label_not_valid";
+        | "filter_by_value_label_not_valid"
+        | "suggestion_not_found"
+        | "user_can_only_delete_his_suggestions"
+        | "cannot_modify_reviewed_translation"
+        | "cannot_modify_keys"
+        | "expect_no_conflict_failed"
+        | "suggestion_cant_be_plural"
+        | "suggestion_must_be_plural"
+        | "duplicate_suggestion";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
@@ -5652,6 +5716,7 @@ export interface components {
       createdAt: string;
       /** Format: int64 */
       id: number;
+      isPlural: boolean;
       /** Format: int64 */
       keyId: number;
       /** Format: int64 */
@@ -5666,6 +5731,7 @@ export interface components {
       author: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
+      isPlural: boolean;
       state: "ACTIVE" | "ACCEPTED" | "DECLINED";
       translation?: string;
     };
@@ -5700,7 +5766,7 @@ export interface components {
        * Format: int64
        * @description Id of translation record
        */
-      id: number;
+      id?: number;
       /** @description Labels assigned to this translation */
       labels?: components["schemas"]["LabelModel"][];
       /** @description Which machine translation service was used to auto translate this */
@@ -13683,13 +13749,7 @@ export interface operations {
     parameters: {
       query: {
         /** Whether override or keep all translations with unresolved conflicts */
-        forceMode?:
-          | "OVERRIDE"
-          | "KEEP"
-          | "NO_FORCE"
-          | "OVERRIDE_FAIL"
-          | "OVERRIDE_ALL"
-          | "OVERRIDE_ALL_FAIL";
+        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
       };
       path: {
         projectId: number;
@@ -13737,13 +13797,7 @@ export interface operations {
     parameters: {
       query: {
         /** Whether override or keep all translations with unresolved conflicts */
-        forceMode?:
-          | "OVERRIDE"
-          | "KEEP"
-          | "NO_FORCE"
-          | "OVERRIDE_FAIL"
-          | "OVERRIDE_ALL"
-          | "OVERRIDE_ALL_FAIL";
+        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
       };
       path: {
         projectId: number;
@@ -14739,7 +14793,10 @@ export interface operations {
       };
     };
   };
-  /** Import's new keys with translations. Translations can be updated, when specified. */
+  /**
+   * Import's new keys with translations. Translations can be updated, when specified.
+   *       DEPRECATED: Use /v2/projects/{projectId}/single-step-import-resolvable instead.
+   */
   importKeys: {
     parameters: {
       path: {
@@ -14983,6 +15040,10 @@ export interface operations {
         filterHasCommentsInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
+        /** Filter keys with any suggestions in lang */
+        filterHasSuggestionsInLang?: string[];
+        /** Filter keys with no suggestions in lang */
+        filterHasNoSuggestionsInLang?: string[];
       };
       path: {
         projectId: number;
@@ -15954,6 +16015,318 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["CollectionModelLanguageAiPromptCustomizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getSuggestions: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /** Filter by suggestion state */
+        filterState?: ("ACTIVE" | "ACCEPTED" | "DECLINED")[];
+      };
+      path: {
+        languageTag: string;
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelTranslationSuggestionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  createSuggestion: {
+    parameters: {
+      path: {
+        languageTag: string;
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateTranslationSuggestionRequest"];
+      };
+    };
+  };
+  deleteSuggestion: {
+    parameters: {
+      path: {
+        languageTag: string;
+        keyId: number;
+        suggestionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  acceptSuggestion: {
+    parameters: {
+      path: {
+        languageTag: string;
+        keyId: number;
+        suggestionId: number;
+        projectId: number;
+      };
+      query: {
+        declineOther?: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionAcceptResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  declineSuggestion: {
+    parameters: {
+      path: {
+        languageTag: string;
+        keyId: number;
+        suggestionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  reverseSuggestion: {
+    parameters: {
+      path: {
+        languageTag: string;
+        keyId: number;
+        suggestionId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TranslationSuggestionModel"];
         };
       };
       /** Bad Request */
@@ -17300,7 +17673,7 @@ export interface operations {
     };
   };
   /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
-  doImport: {
+  singleStepFromFiles: {
     parameters: {
       path: {
         projectId: number;
@@ -17352,6 +17725,58 @@ export interface operations {
           files: string[];
           params: components["schemas"]["SingleStepImportRequest"];
         };
+      };
+    };
+  };
+  singleStepResolvableImport: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ImportResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SingleStepImportResolvableRequest"];
       };
     };
   };
@@ -19436,6 +19861,10 @@ export interface operations {
         filterHasCommentsInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
+        /** Filter keys with any suggestions in lang */
+        filterHasSuggestionsInLang?: string[];
+        /** Filter keys with no suggestions in lang */
+        filterHasNoSuggestionsInLang?: string[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -19773,6 +20202,10 @@ export interface operations {
         filterHasCommentsInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
+        /** Filter keys with any suggestions in lang */
+        filterHasSuggestionsInLang?: string[];
+        /** Filter keys with no suggestions in lang */
+        filterHasNoSuggestionsInLang?: string[];
       };
       path: {
         projectId: number;

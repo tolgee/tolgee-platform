@@ -28,6 +28,7 @@ import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
+import io.tolgee.service.translation.SetTranslationTextUtil.Companion.Options
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
@@ -192,8 +193,9 @@ class TranslationService(
   fun setForKey(
     key: Key,
     translations: Map<String, String?>,
+    options: Options? = null,
   ): Map<String, Translation> {
-    return SetTranslationTextUtil(applicationContext).setForKey(key, translations)
+    return SetTranslationTextUtil(applicationContext).setForKey(key, translations, options)
   }
 
   @Transactional

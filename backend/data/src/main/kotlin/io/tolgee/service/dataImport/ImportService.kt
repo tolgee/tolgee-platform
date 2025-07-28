@@ -16,7 +16,6 @@ import io.tolgee.dtos.request.KeyDefinitionDto
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableRequest
 import io.tolgee.dtos.request.importKeysResolvable.ResolvableTranslationResolution
-import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.events.OnImportSoftDeleted
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.exceptions.BadRequestException
@@ -152,7 +151,7 @@ class ImportService(
       throw BadRequestException(Message.IMPORT_FAILED, fileProcessor.errors as List<Serializable>)
     }
 
-    if (fileProcessor.importDataManager.storedLanguages.isEmpty()) {
+    if (fileProcessor.importDataManager.storedLanguages.isEmpty() && screenshots.isEmpty()) {
       throw BadRequestException(Message.NO_DATA_TO_IMPORT)
     }
 
@@ -166,8 +165,8 @@ class ImportService(
       importSettings = params,
       _importDataManager = fileProcessor.importDataManager,
       isSingleStepImport = true,
-      overrideMode = params.overrideMode,
-      errorOnFailedKey = params.errorOnFailedKey,
+      overrideMode = params.overrideMode ?: OverrideMode.RECOMMENDED,
+      errorOnUnresolvedConflict = params.errorOnUnresolvedConflict,
       resolveConflict = resolveConflict,
       screenshots = screenshots
     ).doImport()
@@ -186,11 +185,17 @@ class ImportService(
     keysToFilesManager.processKeys(params.keys)
 
     val request = SingleStepImportRequest()
-    request.overrideMode = params.overrideMode
-    request.errorOnFailedKey = params.errorOnFailedKey
+    request.overrideMode = params.overrideMode ?: OverrideMode.RECOMMENDED
+    request.errorOnUnresolvedConflict = params.errorOnUnresolvedConflict
+
+    // these options are not user accessible,
+    // because it might act weird when just importing screenshots without any actual translations
+    // leaving this for an actual usecase as it's now not clear how it should behave
     request.convertPlaceholdersToIcu = false
-    request.tagNewKeys = params.tagNewKeys
+    request.tagNewKeys = emptyList()
     request.fileMappings = keysToFilesManager.getFileMappings()
+    request.removeOtherKeys = false
+    request.createNewKeys = true
 
     val conflictResolutionMap = keysToFilesManager.getConflictResolutionMap()
 
@@ -204,7 +209,7 @@ class ImportService(
         } ?: emptyList()
       }
 
-    return singleStepImport(
+    return self.singleStepImport(
       files = keysToFilesManager.getDtos(),
       project = project,
       userAccount,
@@ -262,7 +267,7 @@ class ImportService(
       forceMode,
       reportStatus,
       providedSettingsOrFromDb,
-      errorOnFailedKey = true,
+      errorOnUnresolvedConflict = true,
     ).doImport()
     deleteImport(import)
     publishImportBusinessEvent(import.project.id, import.author.id)
@@ -553,7 +558,7 @@ class ImportService(
   ) {
     val translations = findTranslations(language.id)
     translations.forEach {
-      if (!override || it.conflictType == null) {
+      if (!override || ImportTranslationView.isOverridable(it.conflictType)) {
         it.resolve()
         it.override = override
       }

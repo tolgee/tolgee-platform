@@ -1,10 +1,4 @@
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  MenuItem,
-  Typography,
-} from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { DangerButton } from 'tg.component/DangerZone/DangerButton';
 import { DangerZone } from 'tg.component/DangerZone/DangerZone';
@@ -17,19 +11,21 @@ import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog'
 import { messageService } from 'tg.service/MessageService';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
-import { Select } from 'tg.component/common/Select';
 import { components } from 'tg.service/apiSchema.generated';
+import { SwitchWithDescription } from './components/SwitchWithDescription';
+import { DOCS_ROOT } from 'tg.constants/docLinks';
+import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
+import { DefaultNamespaceSelect } from './components/DefaultNamespaceSelect';
+import { LinkReadMore } from 'tg.component/LinkReadMore';
 
 type EditProjectRequest = components['schemas']['EditProjectRequest'];
-type SuggestionsMode =
-  components['schemas']['EditProjectRequest']['suggestionsMode'];
-type TranslationProtection =
-  components['schemas']['EditProjectRequest']['translationProtection'];
 
 export const ProjectSettingsAdvanced = () => {
   const project = useProject();
   const { t } = useTranslate();
   const history = useHistory();
+
+  const { allNamespacesWithNone } = useProjectNamespaces();
 
   const deleteLoadable = useApiMutation({
     url: '/v2/projects/{projectId}',
@@ -83,79 +79,121 @@ export const ProjectSettingsAdvanced = () => {
     });
   };
   return (
-    <>
-      <Box mt={2} display="grid" justifyItems="start">
-        <FormControlLabel
-          control={
-            <Checkbox
-              disabled={updateLoadable.isLoading}
-              checked={project.icuPlaceholders}
-              onChange={(_, val) => updateSettings({ icuPlaceholders: val })}
-            />
-          }
-          label={t('project_settings_use_tolgee_placeholders_label')}
-          data-cy="project-settings-use-tolgee-placeholders-checkbox"
-        />
-        <Typography variant="caption">
-          {t('project_settings_tolgee_placeholders_hint')}
-        </Typography>
-      </Box>
+    <Box display="grid" mb={8}>
+      <Typography variant="h5" mt={4} mb="20px">
+        {t('project_settings_advanced_translations')}
+      </Typography>
 
-      <Box mt={2} display="grid" justifyItems="start">
-        <Select
-          label={t('project_settings_suggestions_mode_label')}
-          value={project.suggestionsMode}
-          data-cy="project-settings-suggestions-mode-select"
-          minHeight={false}
-          onChange={(e) =>
-            updateSettings({
-              suggestionsMode: e.target.value as SuggestionsMode,
-            })
-          }
-          sx={{ paddingBottom: 1 }}
-        >
-          <MenuItem value="DISABLED">{t('suggestions_mode_disabled')}</MenuItem>
-          <MenuItem value="ENABLED">{t('suggestions_mode_enabled')}</MenuItem>
-        </Select>
-        <Typography variant="caption">
+      <SwitchWithDescription
+        data-cy="project-settings-suggestions-mode-switch"
+        title={t('project_settings_suggestions_mode_label')}
+        description={
           <T
             keyName="project_settings_suggestions_mode_hint"
             params={{ b: <b />, li: <li />, ul: <ul /> }}
           />
-        </Typography>
-      </Box>
+        }
+        checked={project.suggestionsMode === 'ENABLED'}
+        onSwitch={() =>
+          updateSettings({
+            suggestionsMode:
+              project.suggestionsMode === 'ENABLED' ? 'DISABLED' : 'ENABLED',
+          })
+        }
+        disabled={updateLoadable.isLoading}
+      />
 
-      <Box mt={2} display="grid" justifyItems="start">
-        <Select
-          label={t('project_settings_translation_protection_label')}
-          value={project.translationProtection}
-          data-cy="project-settings-translation-protection-select"
-          minHeight={false}
-          onChange={(e) =>
-            updateSettings({
-              translationProtection: e.target.value as TranslationProtection,
-            })
-          }
-          sx={{ paddingBottom: 1 }}
-        >
-          <MenuItem value="NONE">{t('translation_protection_none')}</MenuItem>
-          <MenuItem value="PROTECT_REVIEWED">
-            {t('translation_protection_protect_reviewed')}
-          </MenuItem>
-        </Select>
-        <Typography variant="caption">
+      <Box mt={2} />
+
+      <SwitchWithDescription
+        data-cy="project-settings-translation-protection-switch"
+        title={t('project_settings_translation_protection_label')}
+        description={
           <T
             keyName="project_settings_translation_protection_hint"
             params={{ b: <b />, li: <li />, ul: <ul /> }}
           />
-        </Typography>
-      </Box>
+        }
+        checked={project.translationProtection === 'PROTECT_REVIEWED'}
+        onSwitch={() =>
+          updateSettings({
+            translationProtection:
+              project.translationProtection === 'PROTECT_REVIEWED'
+                ? 'NONE'
+                : 'PROTECT_REVIEWED',
+          })
+        }
+        disabled={updateLoadable.isLoading}
+      />
 
-      <Box mt={4} mb={1}>
-        <Typography variant={'h5'}>
-          <T keyName="project_settings_danger_zone_title" />
-        </Typography>
-      </Box>
+      <Typography variant="h5" mt={5} mb="20px">
+        {t('project_settings_advanced_export_and_file_formats')}
+      </Typography>
+
+      <SwitchWithDescription
+        data-cy="project-settings-use-tolgee-placeholders-switch"
+        title={t('project_settings_use_tolgee_placeholders_label')}
+        description={
+          <T
+            keyName="project_settings_tolgee_placeholders_hint"
+            params={{
+              LearnMore: (
+                <LinkReadMore
+                  url={`${DOCS_ROOT}/platform/translation_process/tolgee_universal_icu_placeholders`}
+                />
+              ),
+            }}
+          />
+        }
+        checked={project.icuPlaceholders}
+        onSwitch={() =>
+          updateSettings({ icuPlaceholders: !project.icuPlaceholders })
+        }
+        disabled={updateLoadable.isLoading}
+      />
+
+      <Box pt={2} />
+
+      <SwitchWithDescription
+        data-cy="project-settings-use-namespaces-switch"
+        title={t('project_settings_use_namespaces')}
+        description={
+          <T
+            keyName="project_settings_use_namespaces_hint"
+            params={{
+              LearnMore: (
+                <LinkReadMore url={`${DOCS_ROOT}/js-sdk/namespaces`} />
+              ),
+            }}
+          />
+        }
+        checked={project.useNamespaces}
+        onSwitch={() =>
+          updateSettings({
+            useNamespaces: !project.useNamespaces,
+          })
+        }
+        disabled={updateLoadable.isLoading}
+      />
+
+      {project.useNamespaces && (
+        <Box display="grid" pt={2} maxWidth="300px">
+          <DefaultNamespaceSelect
+            data-cy="project-settings-use-namespaces-default-namespace-select"
+            label={<T keyName="project_settings_base_namespace" />}
+            name="defaultNamespaceId"
+            namespaces={allNamespacesWithNone}
+            hidden={!project.useNamespaces}
+            value={project.defaultNamespace?.id}
+            onChange={(nsId) => updateSettings({ defaultNamespaceId: nsId })}
+          />
+        </Box>
+      )}
+
+      <Typography variant="h5" mt={5} mb={2}>
+        <T keyName="project_settings_danger_zone_title" />
+      </Typography>
+
       <DangerZone
         actions={[
           {
@@ -187,6 +225,6 @@ export const ProjectSettingsAdvanced = () => {
         open={transferDialogOpen}
         onClose={() => setTransferDialogOpen(false)}
       />
-    </>
+    </Box>
   );
 };

@@ -19,7 +19,6 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.task.ITaskService
-import io.tolgee.service.translation.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
@@ -31,9 +30,6 @@ class SecurityService(
   private val keyRepository: KeyRepository,
   private val projectHolder: ProjectHolder,
 ) {
-  @Autowired
-  private lateinit var translationService: TranslationService
-
   @set:Autowired
   lateinit var apiKeyService: ApiKeyService
 
@@ -514,7 +510,6 @@ class SecurityService(
     }
   }
 
-  
   /**
    * Perform multiple permission checks
    * if any of them pass, pass the whole check

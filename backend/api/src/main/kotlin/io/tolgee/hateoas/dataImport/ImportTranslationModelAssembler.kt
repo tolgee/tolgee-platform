@@ -28,7 +28,7 @@ class ImportTranslationModelAssembler :
       isPlural = view.plural,
       existingKeyIsPlural = view.existingKeyPlural ?: false,
       conflictType = view.conflictType,
-      isOverridable = ImportTranslationView.isOverridableWithRecommended(view.conflictType)
+      isOverridable = ImportTranslationView.isOverridable(view.conflictType),
     )
   }
 

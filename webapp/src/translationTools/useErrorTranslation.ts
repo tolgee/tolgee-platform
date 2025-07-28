@@ -201,6 +201,12 @@ export function useErrorTranslation() {
         return t('label_already_exists', { value: params?.[0] || '' });
       case 'cannot_modify_reviewed_translation':
         return t('cannot_modify_reviewed_translation');
+      case 'suggestion_cant_be_plural':
+        return t('suggestion_cant_be_plural');
+      case 'suggestion_must_be_plural':
+        return t('suggestion_must_be_plural');
+      case 'duplicate_suggestion':
+        return t('duplicate_suggestion');
       default:
         return code;
     }

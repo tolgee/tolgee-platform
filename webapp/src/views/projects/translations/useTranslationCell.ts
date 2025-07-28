@@ -191,7 +191,7 @@ export const useTranslationCell = ({
   };
 
   const removeLabel = (labelId: number) => {
-    if (!translation) {
+    if (!translation?.id) {
       return;
     }
     removeTranslationLabel({
@@ -231,6 +231,7 @@ export const useTranslationCell = ({
     project,
     tasks,
     translation,
+    value: cursor?.value,
   });
 
   const editEnabled = Boolean(editorActions.length) && !disabled;

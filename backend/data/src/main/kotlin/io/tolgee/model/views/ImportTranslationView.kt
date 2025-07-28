@@ -19,11 +19,11 @@ interface ImportTranslationView {
   val resolvedHash: String?
 
   companion object {
-    fun isOverridableWithAll(conflictType: ConflictType?): Boolean {
+    fun isOverridable(conflictType: ConflictType?): Boolean {
       return conflictType == null || conflictType == ConflictType.SHOULD_NOT_EDIT_REVIEWED
     }
 
-    fun isOverridableWithRecommended(conflictType: ConflictType?): Boolean {
+    fun isOverridableAndRecommended(conflictType: ConflictType?): Boolean {
       return conflictType == null
     }
   }

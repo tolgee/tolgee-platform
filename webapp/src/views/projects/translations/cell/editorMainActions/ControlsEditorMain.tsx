@@ -10,6 +10,7 @@ import { useTranslationsSelector } from '../../context/TranslationsContext';
 import { SaveProps } from '../../useTranslationCell';
 import { useProject } from 'tg.hooks/useProject';
 import { getEditorActions } from './getEditorActions';
+import { TolgeeFormat } from '@tginternal/editor';
 
 type TaskModel = components['schemas']['KeyTaskViewModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
@@ -33,6 +34,7 @@ type ControlsProps = {
   currentTask: number | undefined;
   translation: TranslationViewModel | undefined;
   languageId: number;
+  value: TolgeeFormat;
 };
 
 export const ControlsEditorMain: React.FC<ControlsProps> = ({
@@ -43,6 +45,7 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
   currentTask,
   translation,
   languageId,
+  value,
 }: ControlsProps) => {
   const project = useProject();
 
@@ -53,6 +56,7 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
     tasks,
     currentTask,
     project,
+    value,
   });
 
   const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
@@ -82,6 +86,7 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
           <ButtonGroup size="small" ref={anchorEl as any}>
             <LoadingButton
               onClick={() => firstAction.action()}
+              disabled={firstAction.disabled}
               color="primary"
               variant="contained"
               loading={isEditLoading}
@@ -96,6 +101,7 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
               color="primary"
               variant="contained"
               onClick={() => setOpen(true)}
+              data-cy="translations-cell-menu-open-button"
             >
               <ArrowDropDown />
             </StyledButton>
@@ -112,7 +118,12 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           >
             {otherActions.map((action, i) => (
-              <MenuItem key={i} onClick={withClose(action.action)}>
+              <MenuItem
+                key={i}
+                onClick={withClose(action.action)}
+                disabled={action.disabled}
+                data-cy="translations-cell-menu-item"
+              >
                 {action.label}
               </MenuItem>
             ))}
@@ -121,6 +132,7 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
       ) : (
         <LoadingButton
           onClick={() => firstAction?.action()}
+          disabled={firstAction.disabled}
           color="primary"
           size="small"
           variant="contained"

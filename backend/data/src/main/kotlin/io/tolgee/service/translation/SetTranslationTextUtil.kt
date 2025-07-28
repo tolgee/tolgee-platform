@@ -21,6 +21,7 @@ class SetTranslationTextUtil(
   fun setForKey(
     key: Key,
     translations: Map<String, String?>,
+    options: Options? = null,
   ): Map<String, Translation> {
     val normalized =
       translationService.validateAndNormalizePlurals(translations, key.isPlural, key.pluralArgName)
@@ -38,6 +39,7 @@ class SetTranslationTextUtil(
       normalized.map { languageByTagFromLanguages(it.key, languages) to it.value }
         .toMap(),
       oldTranslations,
+      options,
     ).mapKeys { it.key.tag }
   }
 
@@ -45,10 +47,11 @@ class SetTranslationTextUtil(
     key: Key,
     translations: Map<Language, String?>,
     oldTranslations: Map<Language, String?>,
+    options: Options? = null
   ): Map<Language, Translation> {
     val result =
       translations.entries.associate { (language, value) ->
-        language to setTranslationText(key, language, value)
+        language to setTranslationText(key, language, value, options)
       }.mapValues { it.value }
 
     applicationContext.publishEvent(
@@ -67,9 +70,10 @@ class SetTranslationTextUtil(
     key: Key,
     language: Language,
     text: String?,
+    options: Options? = null
   ): Translation {
     val translation = translationService.getOrCreate(key, language)
-    setTranslationText(translation, text)
+    setTranslationText(translation, text, options)
     key.translations.add(translation)
     return translation
   }
@@ -77,14 +81,16 @@ class SetTranslationTextUtil(
   fun setTranslationText(
     translation: Translation,
     text: String?,
+    options: Options? = null,
   ): Translation {
-    setTranslationTextNoSave(translation, text)
+    setTranslationTextNoSave(translation, text, options)
     return translationService.save(translation)
   }
 
   fun setTranslationTextNoSave(
     translation: Translation,
     text: String?,
+    options: Options? = null,
   ) {
     val hasTextChanged = translation.text != text
     val project = projectHolder.projectOrNull
@@ -106,17 +112,21 @@ class SetTranslationTextUtil(
 
     val hasText = !text.isNullOrEmpty()
 
+    val keepState = options?.keepState
+      ?: (project?.translationProtection == TranslationProtection.PROTECT_REVIEWED)
+
     translation.state =
       when {
         translation.state == TranslationState.DISABLED -> TranslationState.DISABLED
         text.isNullOrEmpty() -> TranslationState.UNTRANSLATED
         translation.isUntranslated && hasText -> TranslationState.TRANSLATED
         hasTextChanged ->
-          if (project?.translationProtection == TranslationProtection.PROTECT_REVIEWED) {
+          if (keepState) {
             translation.state
           } else {
             TranslationState.TRANSLATED
           }
+
         else -> translation.state
       }
   }
@@ -146,4 +156,10 @@ class SetTranslationTextUtil(
     tag: String,
     languages: Collection<Language>,
   ) = languages.find { it.tag == tag } ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+
+  companion object {
+    data class Options(
+      val keepState: Boolean = false
+    )
+  }
 }

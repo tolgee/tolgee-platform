@@ -173,7 +173,7 @@ class SuggestionController(
   @DeleteMapping("/{suggestionId:[0-9]+}")
   @Operation(summary = "Delete suggestion")
   @AllowApiAccess
-  // user can only delete suggestion created by him; it's checked in the service
+  // user can only delete suggestion created by them; it's checked in the service
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @RequestActivity(ActivityType.DELETE_SUGGESTION)
   fun deleteSuggestion(

@@ -26,6 +26,7 @@ class TranslationSuggestionModelAssembler(
       state = entity.state,
       updatedAt = entity.updatedAt ?: Date(),
       createdAt = entity.createdAt ?: Date(),
+      isPlural = entity.isPlural,
     )
   }
 }

@@ -70,7 +70,9 @@ export const PanelHeader = ({
       {icon}
       <StyledName>{name}</StyledName>
       {!hideCount && countContent !== undefined ? (
-        <StyledBadge>{countContent}</StyledBadge>
+        <StyledBadge data-cy="translation-panel-items-count">
+          {countContent}
+        </StyledBadge>
       ) : (
         <div />
       )}

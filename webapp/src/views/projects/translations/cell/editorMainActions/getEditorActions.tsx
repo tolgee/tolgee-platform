@@ -3,6 +3,8 @@ import { components } from 'tg.service/apiSchema.generated';
 import { getPermissionTools } from 'tg.fixtures/getPermissionTools';
 import { T } from '@tolgee/react';
 import React from 'react';
+import { isEmpty, isUnchanged } from 'tg.fixtures/plurals';
+import { TolgeeFormat } from '@tginternal/editor';
 
 type ProjectModel = components['schemas']['ProjectModel'];
 type TaskModel = components['schemas']['KeyTaskViewModel'];
@@ -15,11 +17,13 @@ type Props = {
   translation: TranslationViewModel | undefined;
   languageId: number;
   project: ProjectModel;
+  value: TolgeeFormat | undefined;
 };
 
 type TranslationAction = {
   action: (props?: SaveProps) => void;
   label: React.ReactNode;
+  disabled?: boolean;
 };
 
 /**
@@ -35,7 +39,11 @@ export function getEditorActions({
   languageId,
   translation,
   project,
+  value,
 }: Props) {
+  const editorEmpty = isEmpty(value);
+  const editorUnchanged = isUnchanged(value, translation?.text);
+  const disabled = editorEmpty || editorUnchanged;
   const { satisfiesLanguageAccess } = getPermissionTools(
     project.computedPermission
   );
@@ -89,6 +97,7 @@ export function getEditorActions({
       ) : (
         <T keyName="translations_cell_suggest" />
       ),
+      disabled,
     });
 
     if (displayTaskControls) {
@@ -100,6 +109,7 @@ export function getEditorActions({
             preventTaskResolution: true,
           }),
         label: <T keyName="translations_cell_suggest_only" />,
+        disabled,
       });
     }
   }

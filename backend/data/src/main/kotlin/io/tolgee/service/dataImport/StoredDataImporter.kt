@@ -3,7 +3,7 @@ package io.tolgee.service.dataImport
 import io.tolgee.api.IImportSettings
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ImportResult
-import io.tolgee.dtos.SimpleKeyResult
+import io.tolgee.dtos.dataImport.SimpleImportConflictResult
 import io.tolgee.dtos.request.KeyDefinitionDto
 import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.SingleStepImportRequest
@@ -12,7 +12,6 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.Screenshot
 import io.tolgee.model.UploadedImage
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
@@ -36,6 +35,7 @@ import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.flushAndClear
 import io.tolgee.util.getSafeNamespace
+import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import kotlin.collections.forEach
@@ -47,14 +47,13 @@ class StoredDataImporter(
   private val reportStatus: ((ImportApplicationStatus) -> Unit)? = null,
   private val importSettings: IImportSettings,
   private val overrideMode: OverrideMode = OverrideMode.RECOMMENDED,
-  private val errorOnFailedKey: Boolean? = null,
+  private val errorOnUnresolvedConflict: Boolean? = null,
   // for single step import, we provide import data manager
   private val _importDataManager: ImportDataManager? = null,
   private val isSingleStepImport: Boolean = false,
   private val screenshots: List<ScreenshotToImport> = emptyList(),
   private val resolveConflict: ((ImportTranslation) -> ForceMode?)? = null,
 ) {
-  private val importedKeys: MutableSet<Key> = mutableSetOf()
   private val importDataManager by lazy {
     if (_importDataManager != null) {
       return@lazy _importDataManager
@@ -103,7 +102,7 @@ class StoredDataImporter(
    */
   val outdatedFlagKeys: MutableList<Long> = mutableListOf()
 
-  val failedKeyIds: MutableSet<Long> = mutableSetOf()
+  val unresolvedConflicts: MutableList<ImportTranslation> = mutableListOf()
 
   /**
    * These are all keyMetas from all the keys to import. If multiple keys have same name and
@@ -137,13 +136,13 @@ class StoredDataImporter(
       it.prepareImport()
     }
 
-    val shouldThrowError = errorOnFailedKey ?: when (forceMode) {
+    val shouldThrowError = errorOnUnresolvedConflict ?: when (forceMode) {
       ForceMode.NO_FORCE -> true
       else -> false
     }
 
-    if (failedKeyIds.isNotEmpty() && shouldThrowError) {
-      throw ImportConflictNotResolvedException(params = getFailedKeys(failedKeyIds))
+    if (unresolvedConflicts.isNotEmpty() && shouldThrowError) {
+      throw ImportConflictNotResolvedException(params = getUnresolvedConflicts(unresolvedConflicts))
     }
 
     addKeysAndCheckPermissions()
@@ -153,6 +152,8 @@ class StoredDataImporter(
     reportStatus?.invoke(ImportApplicationStatus.STORING_KEYS)
 
     namespaceService.saveAll(namespacesToSave.values)
+
+    addScreenshots()
 
     val keyEntitiesToSave = saveKeys()
 
@@ -178,14 +179,15 @@ class StoredDataImporter(
 
     entityManager.flushAndClear()
 
-    addScreenshots()
-
-    val failedKeys = if (failedKeyIds.isNotEmpty()) getFailedKeys(failedKeyIds) else null
+    val failedKeys = if (unresolvedConflicts.isNotEmpty()) getUnresolvedConflicts(unresolvedConflicts) else null
 
     return ImportResult(failedKeys)
   }
 
-  private fun addScreenshots(): Map<Long, Screenshot> {
+  private fun addScreenshots() {
+    if (screenshots.isEmpty()) {
+      return
+    }
     val uploadedImagesIds = screenshots.map { it -> it.screenshot.uploadedImageId }
     val images = imageUploadService.find(uploadedImagesIds)
     checkImageUploadPermissions(images)
@@ -196,10 +198,12 @@ class StoredDataImporter(
 
     val locations = images.map { it.location }
 
+    val existingKeys = importDataManager.existingKeys.entries.map { it.value }
+
     val allReferences =
       screenshotService
         .getKeyScreenshotReferences(
-          importedKeys.toList(),
+          existingKeys,
           locations,
         ).toMutableList()
 
@@ -207,7 +211,11 @@ class StoredDataImporter(
 
     screenshots.forEach {
       val screenshot = it.screenshot
-      val key = getOrCreateKey(it.key)
+      val key =
+        newKeys.find { key -> key.name == it.key.name && key.namespace?.name == it.key.namespace?.nullIfEmpty }
+          ?: existingKeys.find { key ->
+            key.name == it.key.name && key.namespace?.name == it.key.namespace?.nullIfEmpty
+          } ?: addKeyToSave(it.key.namespace?.nullIfEmpty, it.key.name)
 
       val screenshotResult =
         createdScreenshots[screenshot.uploadedImageId]
@@ -215,7 +223,7 @@ class StoredDataImporter(
       val info = ScreenshotInfoDto(screenshot.text, screenshot.positions)
 
       screenshotService.addReference(
-        key = key.first,
+        key = key,
         screenshot = screenshotResult.screenshot,
         info = info,
         originalDimension = screenshotResult.originalDimension,
@@ -224,36 +232,14 @@ class StoredDataImporter(
 
       val toDelete =
         allReferences.filter { reference ->
-          reference.key.id == key.first.id &&
+          reference.key.id == key.id &&
             reference.screenshot.location == screenshotResult.screenshot.location
         }
       referencesToDelete.addAll(toDelete)
     }
 
     screenshotService.removeScreenshotReferences(referencesToDelete)
-
-    return createdScreenshots
-      .map { (uploadedImageId, screenshotResult) ->
-        uploadedImageId to screenshotResult.screenshot
-      }.toMap()
   }
-
-  private fun getOrCreateKey(keyToImport: KeyDefinitionDto): Pair<Key, Boolean> {
-    var isNew = false
-    val key =
-      importDataManager.existingKeys.computeIfAbsent(keyToImport.namespace to keyToImport.name) {
-        isNew = true
-        securityService.checkProjectPermission(import.project.id, Scope.KEYS_CREATE)
-        keyService.createWithoutExistenceCheck(
-          project = import.project,
-          name = keyToImport.name,
-          namespace = keyToImport.namespace,
-          isPlural = false,
-        )
-      }
-    return key to isNew
-  }
-
 
   private fun checkImageUploadPermissions(images: List<UploadedImage>) {
     if (images.isNotEmpty()) {
@@ -324,8 +310,15 @@ class StoredDataImporter(
     translationService.saveAll(translationsToSave.map { it.second })
   }
 
-  private fun getFailedKeys(ids: Set<Long>): List<SimpleKeyResult> {
-    return keyService.find(ids).map { it.toSimpleKey() }
+  private fun getUnresolvedConflicts(conflicts: List<ImportTranslation>): List<SimpleImportConflictResult> {
+    return conflicts.map {
+      SimpleImportConflictResult(
+        keyName = it.key.name,
+        keyNamespace = it.conflict?.key?.namespace?.name,
+        language = it.conflict!!.language.tag,
+        isOverridable = ImportTranslationView.isOverridable(it.conflictType)
+      )
+    }
   }
 
   private fun saveKeys(): Collection<Key> {
@@ -410,7 +403,7 @@ class StoredDataImporter(
     }
 
     if (resolution == ForceMode.NO_FORCE) {
-      failedKeyIds.add(this.existingKey.id)
+      unresolvedConflicts.add(this)
       return
     }
 
@@ -422,7 +415,6 @@ class StoredDataImporter(
         this.language = language
       }
 
-    this@StoredDataImporter.importedKeys.add(existingKey)
     translation.key = existingKey
     if (language == language.project.baseLanguage && translation.text != this.text) {
       outdatedFlagKeys.add(translation.key.id)
@@ -464,9 +456,10 @@ class StoredDataImporter(
   }
 
   private fun ImportTranslation.getConflictResolution(): ForceMode {
-    if (this.conflict?.text == null) {
+    if (this.conflict == null) {
       return ForceMode.OVERRIDE
     }
+
     if (this.resolved) {
       return if (this.override) ForceMode.OVERRIDE else ForceMode.KEEP
     }
@@ -477,13 +470,13 @@ class StoredDataImporter(
     if (currentForceMode == ForceMode.OVERRIDE) {
       if (
         (overrideMode == OverrideMode.ALL) &&
-        ImportTranslationView.isOverridableWithAll(this.conflictType)
+        ImportTranslationView.isOverridable(this.conflictType)
       ) {
         return ForceMode.OVERRIDE
       }
       if (
         (overrideMode == OverrideMode.RECOMMENDED) &&
-        ImportTranslationView.isOverridableWithRecommended(this.conflictType)
+        ImportTranslationView.isOverridableAndRecommended(this.conflictType)
       ) {
         return ForceMode.OVERRIDE
       }

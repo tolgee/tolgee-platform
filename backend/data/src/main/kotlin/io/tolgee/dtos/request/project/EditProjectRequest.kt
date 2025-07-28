@@ -22,8 +22,7 @@ data class EditProjectRequest(
   @Schema(description = "Whether to use ICU placeholder visualization in the editor and it's support.")
   var icuPlaceholders: Boolean = true,
   @Schema(
-    description = "Suggestions can be disabled (hidden from UI) or optional (visible in the UI)" +
-    " or enforced (force user to use them instead of editing reviewed translations)"
+    description = "Suggestions can be DISABLED (hidden from UI) or ENABLED (visible in the UI)"
   )
   var suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED,
   @Schema(

@@ -1,3 +1,5 @@
 package io.tolgee.dtos
 
-class ImportResult(val failedKeys: List<SimpleKeyResult>?)
+import io.tolgee.dtos.dataImport.SimpleImportConflictResult
+
+class ImportResult(val unresolvedConflicts: List<SimpleImportConflictResult>?)

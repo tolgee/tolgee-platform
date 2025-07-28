@@ -564,7 +564,7 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
       "/translations?filterHasSuggestionsInLang=${testData.czechLanguage.tag}",
     ).andIsOk.andAssertThatJson {
       node("_embedded.keys") {
-        isArray.hasSize(1)
+        isArray.hasSize(2)
         node("[0].keyName").isEqualTo("key 0")
       }
     }

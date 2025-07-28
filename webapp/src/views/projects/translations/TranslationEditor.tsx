@@ -35,6 +35,7 @@ export const TranslationEditor = ({ mode, tools, editorRef }: Props) => {
     tasks,
     languageId: language.id,
     project,
+    value: editVal?.value,
   })?.[0]?.action;
 
   return (

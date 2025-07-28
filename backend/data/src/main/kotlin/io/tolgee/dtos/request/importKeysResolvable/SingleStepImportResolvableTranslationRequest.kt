@@ -17,5 +17,5 @@ class SingleStepImportResolvableTranslationRequest(
     """,
     example = "OVERRIDE",
   )
-  val resolution: ResolvableTranslationResolution = ResolvableTranslationResolution.OVERRIDE,
+  val resolution: ResolvableTranslationResolution? = ResolvableTranslationResolution.OVERRIDE,
 )

@@ -297,6 +297,9 @@ const getTheme = (mode: PaletteMode) => {
         styleOverrides: {
           root: {
             textDecoration: 'none',
+            '&:hover': {
+              textDecoration: 'underline',
+            },
           },
         },
       },

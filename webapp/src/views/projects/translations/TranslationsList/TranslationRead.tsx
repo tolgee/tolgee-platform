@@ -83,8 +83,6 @@ export const TranslationRead: React.FC<Props> = ({
     setAssignedTaskState,
     aiPlaygroundData,
     aiPlaygroundEnabled,
-    editEnabled,
-    canSuggest,
     disabled,
     addLabel,
     removeLabel,
@@ -131,7 +129,7 @@ export const TranslationRead: React.FC<Props> = ({
           onTaskStateChange={setAssignedTaskState}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
           stateChangeEnabled={canChangeState}
-          editEnabled={editEnabled || canSuggest}
+          editEnabled={cellClickable}
           state={state}
           onStateChange={handleStateChange}
           active={active}
@@ -152,8 +150,8 @@ export const TranslationRead: React.FC<Props> = ({
         />
         {Boolean(translation?.suggestions?.length) && (
           <SuggestionsFirst
-            suggestions={translation!.suggestions!}
-            count={translation!.activeSuggestionCount}
+            suggestions={translation?.suggestions ?? []}
+            count={translation?.activeSuggestionCount ?? 0}
             isPlural={keyData.keyIsPlural}
             locale={language.tag}
           />

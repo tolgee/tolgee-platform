@@ -453,8 +453,10 @@ export const actionsConfiguration: Partial<
       TranslationSuggestion: true,
     },
     description(data) {
-      return data.modifiedEntities?.TranslationSuggestion?.[0]?.modifications
-        ?.translation?.new as any as string;
+      const translation =
+        data.modifiedEntities?.TranslationSuggestion?.[0]?.modifications
+          ?.translation?.new;
+      return typeof translation === 'string' ? translation : undefined;
     },
   },
   ACCEPT_SUGGESTION: {

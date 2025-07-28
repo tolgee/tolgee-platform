@@ -27,6 +27,7 @@ class TranslationSuggestionSimpleModelAssembler(
         deleted = entity.authorDeletedAt != null,
       ),
       state = entity.state,
+      isPlural = entity.plural,
     )
   }
 }

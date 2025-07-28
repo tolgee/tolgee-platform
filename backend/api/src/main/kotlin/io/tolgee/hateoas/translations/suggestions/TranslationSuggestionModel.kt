@@ -14,6 +14,7 @@ class TranslationSuggestionModel(
   val translation: String?,
   val state: TranslationSuggestionState,
   val author: SimpleUserAccountModel,
+  val isPlural: Boolean,
   val updatedAt: Date,
   val createdAt: Date,
 ) : RepresentationModel<TranslationSuggestionModel>()

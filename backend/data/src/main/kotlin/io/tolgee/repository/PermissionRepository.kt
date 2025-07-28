@@ -37,6 +37,7 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
         left join fetch p.viewLanguages
         left join fetch p.translateLanguages
         left join fetch p.stateChangeLanguages
+        left join fetch p.suggestLanguages
         where p.project.id = :projectId""",
   )
   fun getByProjectWithFetchedLanguages(projectId: Long): List<Permission>
@@ -47,6 +48,7 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
     left join p.translateLanguages tl on tl = :language
     left join p.viewLanguages vl on vl = :language
     left join p.stateChangeLanguages scl on scl = :language
+    left join p.suggestLanguages sul on sul = :language
     where tl.id is not null or vl.id is not null or scl.id is not null
   """,
   )

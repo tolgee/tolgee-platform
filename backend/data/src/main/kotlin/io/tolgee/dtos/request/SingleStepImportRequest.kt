@@ -24,15 +24,15 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
         "When set to `ALL` it will fail for DISABLED translations, " +
           "but will try to update protected REVIEWED translations (fails only if user has no permission)\n"
   )
-  var overrideMode: OverrideMode = OverrideMode.RECOMMENDED
+  var overrideMode: OverrideMode? = OverrideMode.RECOMMENDED
 
   @Schema(
     description =
-      "If `false`, import will apply all `non-failed` overrides and reports `failedKeys`\n." +
-      "If `true`, import will fail completely on failed override and won't apply any changes. " +
-        "Failed keys are reported in the `params` of the error response"
+      "If `false`, import will apply all `non-failed` overrides and reports `unresolvedConflict`\n." +
+      "If `true`, import will fail completely on unresolved conflict and won't apply any changes. " +
+        "Unresolved conflicts are reported in the `params` of the error response"
   )
-  var errorOnFailedKey: Boolean? = null
+  var errorOnUnresolvedConflict: Boolean? = null
 
   @Schema(
     description =

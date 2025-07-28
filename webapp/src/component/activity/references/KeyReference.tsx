@@ -27,6 +27,15 @@ export const KeyReference: React.FC<Props> = ({ data }) => {
     : undefined;
 
   const includedLanguages = new Set();
+  const uniqueLanguages =
+    data.languages?.filter((l) => {
+      if (includedLanguages.has(l.tag)) {
+        return false;
+      } else {
+        includedLanguages.add(l.tag);
+        return true;
+      }
+    }) || [];
 
   const content = (
     <>
@@ -37,25 +46,16 @@ export const KeyReference: React.FC<Props> = ({ data }) => {
         {data.keyName}
         {data.languages && ' '}
       </span>
-      {data.languages
-        ?.filter((l) => {
-          if (includedLanguages.has(l.tag)) {
-            return false;
-          } else {
-            includedLanguages.add(l.tag);
-            return true;
-          }
-        })
-        .map((l, i) => (
-          <React.Fragment key={i}>
-            <Tooltip title={`${l.name} (${l.tag})`}>
-              <span>
-                <CircledLanguageIcon size={14} flag={l.flagEmoji} />
-              </span>
-            </Tooltip>
-            {i + 1 < data.languages!.length && ' '}
-          </React.Fragment>
-        )) || []}
+      {uniqueLanguages.map((l, i) => (
+        <React.Fragment key={i}>
+          <Tooltip title={`${l.name} (${l.tag})`}>
+            <span>
+              <CircledLanguageIcon size={14} flag={l.flagEmoji} />
+            </span>
+          </Tooltip>
+          {i + 1 < data.languages!.length && ' '}
+        </React.Fragment>
+      )) || []}
     </>
   );
 

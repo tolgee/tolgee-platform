@@ -11,15 +11,18 @@ import io.tolgee.util.nullIfEmpty
 import kotlin.collections.forEach
 
 class KeysToFilesManager {
-  var files: MutableSet<VirtualFile> = mutableSetOf()
+  private val filesMap: MutableMap<Pair<String, String>, VirtualFile> = mutableMapOf()
+
+  val files: Set<VirtualFile>
+    get() = filesMap.values.toSet()
+
   fun processKeys(keys: List<SingleStepImportResolvableItemRequest>) {
     keys.forEach { key ->
       key.translations.entries.forEach { (language, data) ->
         if (data?.text != null) {
-          var virtualFile = files.find { it.language == language && it.namespace == (key.namespace ?: "") }
-          if (virtualFile == null) {
-            virtualFile = VirtualFile(language, key.namespace ?: "")
-            files.add(virtualFile)
+          val fileKey = language to (key.namespace ?: "")
+          val virtualFile = filesMap.getOrPut(fileKey) {
+            VirtualFile(language, key.namespace ?: "")
           }
           virtualFile.records[key.name] = data
         }
