@@ -32,6 +32,10 @@ export function useBatchOperationTypeTranslate() {
         return t('batch_operation_type_auto_translate');
       case 'AUTOMATION':
         return t('batch_operation_type_automation');
+      case 'ASSIGN_TRANSLATION_LABEL':
+        return t('batch_operation_type_assign_translation_label');
+      case 'UNASSIGN_TRANSLATION_LABEL':
+        return t('batch_operation_type_unassign_translation_label');
       default:
         return type;
     }

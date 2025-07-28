@@ -57,9 +57,17 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     languageId: Long,
   ): Optional<Translation>
 
-  fun findOneByKeyIdAndLanguageId(
-    key: Long,
-    language: Long,
+  @Query(
+    """
+    from Translation t 
+    join fetch t.key k
+    where t.key.id = :keyId and k.project.id = :projectId and t.language.id = :languageId
+  """,
+  )
+  fun findOneByProjectIdAndKeyIdAndLanguageId(
+    projectId: Long,
+    keyId: Long,
+    languageId: Long,
   ): Translation?
 
   @Query(
@@ -224,4 +232,16 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query("select max(coalesce(t.updatedAt, t.createdAt)) from Translation t where t.language.id = :languageId")
   fun getLastModifiedDate(languageId: Long): Date?
+
+  @Query(
+    """
+    SELECT t FROM Translation t
+    LEFT JOIN FETCH t.labels 
+    WHERE t.key.id IN :keyIds AND t.language.id IN :languageIds
+    """
+  )
+  fun getTranslationsWithLabels(
+    keyIds: Collection<Long>,
+    languageIds: Collection<Long>,
+  ): List<Translation>
 }

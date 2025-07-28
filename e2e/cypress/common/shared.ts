@@ -215,3 +215,7 @@ export const visitProjectDeveloperHooks = (projectId: number) => {
 export const dismissMenu = () => {
   cy.focused().type('{esc}');
 };
+
+export const assertMissingFeature = () => {
+  gcy('disabled-feature-banner').should('be.visible');
+};

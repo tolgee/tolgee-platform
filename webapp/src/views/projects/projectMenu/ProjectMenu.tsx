@@ -141,7 +141,8 @@ export const ProjectMenu = () => {
     {
       id: 'settings',
       condition: ({ satisfiesPermission }) =>
-        satisfiesPermission('project.edit'),
+        satisfiesPermission('project.edit') ||
+        satisfiesPermission('translation-labels.manage'),
       link: LINKS.PROJECT_EDIT,
       icon: Settings01,
       text: t('project_menu_project_settings'),

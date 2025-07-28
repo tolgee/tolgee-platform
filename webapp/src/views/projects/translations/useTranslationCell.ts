@@ -48,6 +48,8 @@ export const useTranslationCell = ({
     setTranslationState,
     setTaskState,
     updateEdit,
+    addTranslationLabel,
+    removeTranslationLabel,
   } = useTranslationsActions();
 
   const { satisfiesLanguageAccess } = useProjectPermissions();
@@ -175,6 +177,27 @@ export const useTranslationCell = ({
     }
   };
 
+  const addLabel = (labelId: number) => {
+    addTranslationLabel({
+      labelId,
+      keyId: keyData.keyId,
+      translationId: translation?.id,
+      language: language,
+    });
+  };
+
+  const removeLabel = (labelId: number) => {
+    if (!translation) {
+      return;
+    }
+    removeTranslationLabel({
+      labelId,
+      keyId: keyData.keyId,
+      translationId: translation.id,
+      language: language,
+    });
+  };
+
   function setVariant(activeVariant: string | undefined) {
     updateEdit({ activeVariant });
   }
@@ -229,5 +252,7 @@ export const useTranslationCell = ({
     aiPlaygroundEnabled,
     cellClickable,
     editable,
+    addLabel,
+    removeLabel,
   };
 };

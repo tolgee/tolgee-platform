@@ -61,3 +61,21 @@ export const usePutTaskTranslation = () =>
     url: '/v2/projects/{projectId}/tasks/{taskNumber}/keys/{keyId}',
     method: 'put',
   });
+
+export const usePutLabel = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/label/{labelId}',
+    method: 'put',
+  });
+
+export const useRemoveLabel = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/label/{labelId}',
+    method: 'delete',
+  });
+
+export const usePutLabelWithoutTranslation = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/translations/label',
+    method: 'put',
+  });
