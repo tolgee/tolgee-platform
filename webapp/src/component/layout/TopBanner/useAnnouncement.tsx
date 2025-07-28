@@ -121,6 +121,14 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_LABELS':
+        return (
+          <Announcement
+            content={<T keyName="announcement_labels" />}
+            link="https://docs.tolgee.io/platform/translation_process/labels"
+          />
+        );
+
       default:
         return assertUnreachableReturnNull(value);
     }

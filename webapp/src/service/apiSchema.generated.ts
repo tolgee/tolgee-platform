@@ -1066,7 +1066,8 @@ export interface components {
         | "FEATURE_CLI_2"
         | "FEATURE_TASKS"
         | "FEATURE_LLM_PROVIDERS_AND_PLAYGROUND"
-        | "FEATURE_GLOSSARIES_AND_PLAYGROUND";
+        | "FEATURE_GLOSSARIES_AND_PLAYGROUND"
+        | "FEATURE_LABELS";
     };
     ApiKeyModel: {
       /** @description Description */
@@ -2376,7 +2377,8 @@ export interface components {
         | "llm_provider_empty_response"
         | "label_not_found"
         | "label_not_from_project"
-        | "label_already_exists";
+        | "label_already_exists"
+        | "filter_by_value_label_not_valid";
       params?: { [key: string]: unknown }[];
     };
     ExistenceEntityDescription: {
@@ -5321,7 +5323,8 @@ export interface components {
         | "llm_provider_empty_response"
         | "label_not_found"
         | "label_not_from_project"
-        | "label_already_exists";
+        | "label_already_exists"
+        | "filter_by_value_label_not_valid";
       params?: { [key: string]: unknown }[];
       success: boolean;
     };
