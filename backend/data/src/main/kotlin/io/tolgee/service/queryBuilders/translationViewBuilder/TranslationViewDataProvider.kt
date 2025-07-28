@@ -49,7 +49,7 @@ class TranslationViewDataProvider(
 
     val keyIds = views.map { it.keyId }
     val translationIds = views.flatMap { it.translations.values }
-      .filter { it.id != null}
+      .filter { it.id != null }
       .map { it.id!! }
     tagService.getTagsForKeyIds(keyIds).let { tagMap ->
       views.forEach { it.keyTags = tagMap[it.keyId] ?: emptyList() }

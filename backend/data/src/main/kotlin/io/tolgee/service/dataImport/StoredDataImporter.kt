@@ -254,7 +254,6 @@ class StoredDataImporter(
     return key to isNew
   }
 
-
   private fun checkImageUploadPermissions(images: List<UploadedImage>) {
     if (images.isNotEmpty()) {
       securityService.checkScreenshotsUploadPermission(import.project.id)

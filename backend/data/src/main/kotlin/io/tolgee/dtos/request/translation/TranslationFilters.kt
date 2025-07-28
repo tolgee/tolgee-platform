@@ -147,7 +147,7 @@ To filter default namespace, set to empty string.
     example = "labelId1,labelId2",
   )
   var filterLabel: List<String>? = null
-  
+
   @field:Parameter(
     description = "Filter keys with any suggestions in lang",
   )

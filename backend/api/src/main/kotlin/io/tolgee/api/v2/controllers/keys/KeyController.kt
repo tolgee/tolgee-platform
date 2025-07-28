@@ -225,7 +225,6 @@ class KeyController(
     keyService.importKeys(dto.keys, projectHolder.projectEntity)
   }
 
-
   @PostMapping("/import-resolvable")
   @Operation(
     summary = "Import keys (resolvable)",

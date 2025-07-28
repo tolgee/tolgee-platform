@@ -514,7 +514,6 @@ class SecurityService(
     }
   }
 
-  
   /**
    * Perform multiple permission checks
    * if any of them pass, pass the whole check

@@ -16,7 +16,6 @@ import io.tolgee.dtos.request.KeyDefinitionDto
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableRequest
 import io.tolgee.dtos.request.importKeysResolvable.ResolvableTranslationResolution
-import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.events.OnImportSoftDeleted
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.exceptions.BadRequestException
