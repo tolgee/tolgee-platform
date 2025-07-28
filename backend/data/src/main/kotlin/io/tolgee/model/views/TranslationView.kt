@@ -13,7 +13,7 @@ data class TranslationView(
   val commentCount: Long,
   val unresolvedCommentCount: Long,
   val outdated: Boolean,
-  var labels: List<Label> = emptyList()
+  var labels: List<Label> = emptyList(),
   val activeSuggestionCount: Long,
   val totalSuggestionCount: Long,
 ) {
