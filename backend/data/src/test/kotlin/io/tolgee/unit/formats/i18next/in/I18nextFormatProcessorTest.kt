@@ -1,6 +1,7 @@
 package io.tolgee.unit.formats.i18next.`in`
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.formats.json.`in`.JsonFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.*
@@ -401,6 +402,6 @@ class I18nextFormatProcessorTest {
   }
 
   private fun processFile() {
-    KeysProcessor(mockUtil.fileProcessorContext, jacksonObjectMapper()).process()
+    JsonFileProcessor(mockUtil.fileProcessorContext, jacksonObjectMapper()).process()
   }
 }
