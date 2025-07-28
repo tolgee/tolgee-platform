@@ -1,3 +1,10 @@
+# [3.124.0](https://github.com/tolgee/tolgee-platform/compare/v3.123.17...v3.124.0) (2025-07-28)
+
+
+### Features
+
+* translation labels ([#3181](https://github.com/tolgee/tolgee-platform/issues/3181)) ([c9e6b6d](https://github.com/tolgee/tolgee-platform/commit/c9e6b6dce9c31143794684f8227b7f1fa00adbfb)), closes [#3075](https://github.com/tolgee/tolgee-platform/issues/3075)
+
 ## [3.123.17](https://github.com/tolgee/tolgee-platform/compare/v3.123.16...v3.123.17) (2025-07-23)
 
 
