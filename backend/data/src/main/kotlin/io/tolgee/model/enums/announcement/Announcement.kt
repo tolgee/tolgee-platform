@@ -18,6 +18,7 @@ enum class Announcement(
   FEATURE_TASKS(parseTime("2024-11-01 00:00 UTC")),
   FEATURE_LLM_PROVIDERS_AND_PLAYGROUND(parseTime("2025-07-01 00:00 UTC")),
   FEATURE_GLOSSARIES_AND_PLAYGROUND(parseTime("2025-08-01 00:00 UTC")),
+  FEATURE_LABELS(parseTime("2025-09-01 00:00 UTC")),
   ;
 
   companion object {

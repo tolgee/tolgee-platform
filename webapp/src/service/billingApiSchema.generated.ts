@@ -233,6 +233,7 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
+        | "TRANSLATION_LABELS"
       )[];
       /**
        * Format: int64
@@ -348,6 +349,7 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
+        | "TRANSLATION_LABELS"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -384,6 +386,7 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
+        | "TRANSLATION_LABELS"
       )[];
       forOrganizationIds: number[];
       free: boolean;
@@ -814,7 +817,12 @@ export interface components {
         | "glossary_term_not_found"
         | "glossary_term_translation_not_found"
         | "glossary_non_translatable_term_cannot_be_translated"
-        | "llm_content_filter";
+        | "llm_content_filter"
+        | "llm_provider_empty_response"
+        | "label_not_found"
+        | "label_not_from_project"
+        | "label_already_exists"
+        | "filter_by_value_label_not_valid";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -1001,6 +1009,8 @@ export interface components {
         | "tasks.edit"
         | "prompts.view"
         | "prompts.edit"
+        | "translation-labels.manage"
+        | "translation-labels.assign"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1128,6 +1138,7 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
+        | "TRANSLATION_LABELS"
       )[];
       /**
        * Format: int64
@@ -1168,6 +1179,7 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
+        | "TRANSLATION_LABELS"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -1203,6 +1215,7 @@ export interface components {
         | "SSO"
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
+        | "TRANSLATION_LABELS"
       )[];
       forOrganizationIds: number[];
       free: boolean;
@@ -1867,6 +1880,7 @@ export interface operations {
             | "SSO"
             | "ORDER_TRANSLATION"
             | "GLOSSARY"
+            | "TRANSLATION_LABELS"
           )[];
         };
       };
