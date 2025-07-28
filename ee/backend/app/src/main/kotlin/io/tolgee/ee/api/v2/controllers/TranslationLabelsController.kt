@@ -49,22 +49,22 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Translation labels", description = "Operations related to translation labels")
 @OpenApiOrderExtension(8)
 class TranslationLabelsController(
-    private val projectHolder: ProjectHolder,
-    private val labelService: LabelServiceImpl,
-    private val labelModelAssembler: LabelModelAssembler,
-    private val pagedResourcesAssembler: PagedResourcesAssembler<Label>,
-    private val translationService: TranslationService,
-    private val enabledFeaturesProvider: EnabledFeaturesProvider,
-  ) : IController {
+  private val projectHolder: ProjectHolder,
+  private val labelService: LabelServiceImpl,
+  private val labelModelAssembler: LabelModelAssembler,
+  private val pagedResourcesAssembler: PagedResourcesAssembler<Label>,
+  private val translationService: TranslationService,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
+) : IController {
 
   @GetMapping(value = ["labels"])
   @Operation(summary = "Get available project labels")
   @UseDefaultPermissions
   @AllowApiAccess
   fun getAll(
-      @RequestParam
+    @RequestParam
     search: String? = null,
-      @SortDefault("name")
+    @SortDefault("name")
     @ParameterObject pageable: Pageable,
   ): PagedModel<LabelModel> {
     enabledFeaturesProvider.checkFeatureEnabled(
@@ -87,6 +87,9 @@ class TranslationLabelsController(
       projectHolder.project.organizationOwnerId,
       Feature.TRANSLATION_LABELS,
     )
+    if (ids.isEmpty()) {
+      return emptyList()
+    }
     val labels = labelService.getProjectLabelsByIds(projectHolder.project.id, ids)
     return labels.map { it.model }
   }
@@ -113,9 +116,9 @@ class TranslationLabelsController(
   @RequiresProjectPermissions([Scope.TRANSLATION_LABEL_MANAGE])
   @AllowApiAccess
   fun updateLabel(
-      @PathVariable("labelId")
+    @PathVariable("labelId")
     labelId: Long,
-      @RequestBody @Valid
+    @RequestBody @Valid
     request: LabelRequest,
   ): LabelModel {
     enabledFeaturesProvider.checkFeatureEnabled(

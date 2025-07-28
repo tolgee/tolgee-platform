@@ -12,7 +12,7 @@ export function checkActivity(activityText: string) {
     .findDcy('activity-compact-detail-button')
     .click({ force: true });
 
-  return this;
+  return cy;
 }
 
 export function assertActivityDetails(expectedTexts: string[]) {
@@ -21,5 +21,5 @@ export function assertActivityDetails(expectedTexts: string[]) {
       cy.contains(text).should('be.visible');
     });
   });
-  return this;
+  return cy;
 }

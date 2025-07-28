@@ -91,6 +91,12 @@ class LabelServiceImpl(
     request: LabelRequest,
   ): Label {
     val label = getByProjectIdAndId(projectId, labelId)
+    if (label.name != request.name) {
+      val existingLabels = labelRepository.findAllByProjectIdAndName(projectId, request.name)
+      if (existingLabels.any { it.id != labelId }) {
+        throw BadRequestException(Message.LABEL_ALREADY_EXISTS, listOf(request.name))
+      }
+    }
     updateFromRequest(label, request)
 
     labelRepository.save(label)
@@ -121,6 +127,7 @@ class LabelServiceImpl(
       translationId
     ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
     translation.addLabel(label)
+    translationRepository.save(translation)
     labelRepository.save(label)
     return label
   }

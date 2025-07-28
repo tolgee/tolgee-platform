@@ -298,6 +298,7 @@ enum class Message {
   LABEL_NOT_FOUND,
   LABEL_NOT_FROM_PROJECT,
   LABEL_ALREADY_EXISTS,
+  FILTER_BY_VALUE_LABEL_NOT_VALID,
   ;
 
   val code: String
