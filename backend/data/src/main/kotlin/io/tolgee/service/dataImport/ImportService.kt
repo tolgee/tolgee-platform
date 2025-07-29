@@ -185,11 +185,12 @@ class ImportService(
     keysToFilesManager.processKeys(params.keys)
 
     val request = SingleStepImportRequest()
-    request.overrideMode = params.overrideMode
+    request.overrideMode = params.overrideMode ?: OverrideMode.RECOMMENDED
     request.errorOnFailedKey = params.errorOnFailedKey
-    request.convertPlaceholdersToIcu = false
-    request.tagNewKeys = params.tagNewKeys
+    request.convertPlaceholdersToIcu = params.convertPlaceholdersToIcu ?: false
+    request.tagNewKeys = params.tagNewKeys ?: emptyList()
     request.fileMappings = keysToFilesManager.getFileMappings()
+    request.removeOtherKeys = params.removeOtherKeys
 
     val conflictResolutionMap = keysToFilesManager.getConflictResolutionMap()
 
@@ -203,7 +204,7 @@ class ImportService(
         } ?: emptyList()
       }
 
-    return singleStepImport(
+    return self.singleStepImport(
       files = keysToFilesManager.getDtos(),
       project = project,
       userAccount,

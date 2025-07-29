@@ -36,6 +36,7 @@ import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.flushAndClear
 import io.tolgee.util.getSafeNamespace
+import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import kotlin.collections.forEach
@@ -54,7 +55,6 @@ class StoredDataImporter(
   private val screenshots: List<ScreenshotToImport> = emptyList(),
   private val resolveConflict: ((ImportTranslation) -> ForceMode?)? = null,
 ) {
-  private val importedKeys: MutableSet<Key> = mutableSetOf()
   private val importDataManager by lazy {
     if (_importDataManager != null) {
       return@lazy _importDataManager
@@ -154,6 +154,8 @@ class StoredDataImporter(
 
     namespaceService.saveAll(namespacesToSave.values)
 
+    addScreenshots()
+
     val keyEntitiesToSave = saveKeys()
 
     handlePluralization()
@@ -178,8 +180,6 @@ class StoredDataImporter(
 
     entityManager.flushAndClear()
 
-    addScreenshots()
-
     val failedKeys = if (failedKeyIds.isNotEmpty()) getFailedKeys(failedKeyIds) else null
 
     return ImportResult(failedKeys)
@@ -196,10 +196,12 @@ class StoredDataImporter(
 
     val locations = images.map { it.location }
 
+    val existingKeys = importDataManager.existingKeys.entries.map { it.value }
+
     val allReferences =
       screenshotService
         .getKeyScreenshotReferences(
-          importedKeys.toList(),
+          existingKeys,
           locations,
         ).toMutableList()
 
@@ -207,7 +209,11 @@ class StoredDataImporter(
 
     screenshots.forEach {
       val screenshot = it.screenshot
-      val key = getOrCreateKey(it.key)
+      val key =
+        newKeys.find { key -> key.name == it.key.name && key.namespace?.name == it.key.namespace?.nullIfEmpty }
+          ?: existingKeys.find { key ->
+            key.name == it.key.name && key.namespace?.name == it.key.namespace?.nullIfEmpty
+          } ?: createNewKey(it.key.name, it.key.namespace?.nullIfEmpty)
 
       val screenshotResult =
         createdScreenshots[screenshot.uploadedImageId]
@@ -215,7 +221,7 @@ class StoredDataImporter(
       val info = ScreenshotInfoDto(screenshot.text, screenshot.positions)
 
       screenshotService.addReference(
-        key = key.first,
+        key = key!!,
         screenshot = screenshotResult.screenshot,
         info = info,
         originalDimension = screenshotResult.originalDimension,
@@ -224,7 +230,7 @@ class StoredDataImporter(
 
       val toDelete =
         allReferences.filter { reference ->
-          reference.key.id == key.first.id &&
+          reference.key.id == key.id &&
             reference.screenshot.location == screenshotResult.screenshot.location
         }
       referencesToDelete.addAll(toDelete)
@@ -236,22 +242,6 @@ class StoredDataImporter(
       .map { (uploadedImageId, screenshotResult) ->
         uploadedImageId to screenshotResult.screenshot
       }.toMap()
-  }
-
-  private fun getOrCreateKey(keyToImport: KeyDefinitionDto): Pair<Key, Boolean> {
-    var isNew = false
-    val key =
-      importDataManager.existingKeys.computeIfAbsent(keyToImport.namespace to keyToImport.name) {
-        isNew = true
-        securityService.checkProjectPermission(import.project.id, Scope.KEYS_CREATE)
-        keyService.createWithoutExistenceCheck(
-          project = import.project,
-          name = keyToImport.name,
-          namespace = keyToImport.namespace,
-          isPlural = false,
-        )
-      }
-    return key to isNew
   }
 
   private fun checkImageUploadPermissions(images: List<UploadedImage>) {
@@ -421,7 +411,6 @@ class StoredDataImporter(
         this.language = language
       }
 
-    this@StoredDataImporter.importedKeys.add(existingKey)
     translation.key = existingKey
     if (language == language.project.baseLanguage && translation.text != this.text) {
       outdatedFlagKeys.add(translation.key.id)
