@@ -18,6 +18,7 @@
     "@mui/x-date-pickers": "^7.9.0",
     "@openreplay/tracker": "^3.5.4",
     "@sentry/browser": "^7.80.0",
+    "@sentry/vite-plugin": "^4.0.1",
     "@stomp/stompjs": "^6.1.2",
     "@tginternal/editor": "1.15.2",
     "@tolgee/format-icu": "^5.27.0",
