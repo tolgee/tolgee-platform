@@ -62,7 +62,7 @@ export const useCloudPlans = () => {
       mtCredits: -2,
       translations: -2,
     },
-    archived: false,
+    archivedAt: undefined,
   });
 
   const parentForPublic: PlanType[] = [];

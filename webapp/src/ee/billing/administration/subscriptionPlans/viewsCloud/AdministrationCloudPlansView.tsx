@@ -124,11 +124,11 @@ export const AdministrationCloudPlansView = () => {
               >
                 <Box display="flex" gap={2} alignItems="center">
                   <StyledListItemText
-                    className={clsx(plan.archived && 'archived')}
+                    className={clsx(plan.archivedAt != null && 'archived')}
                   >
                     {plan.name}
                   </StyledListItemText>
-                  <PlanArchivedChip isArchived={plan.archived} />
+                  <PlanArchivedChip isArchived={plan.archivedAt != null} />
                   <PlanPublicChip isPublic={plan.public} />
                 </Box>
                 <Box display="flex" gap={2}>
@@ -139,7 +139,7 @@ export const AdministrationCloudPlansView = () => {
                     <PlanListPriceInfo prices={plan.prices} bold />
                   </Box>
                   <Box display="flex">
-                    {!plan.archived && (
+                    {!plan.archivedAt && (
                       <Button
                         size="small"
                         onClick={() => archivePlan(plan)}

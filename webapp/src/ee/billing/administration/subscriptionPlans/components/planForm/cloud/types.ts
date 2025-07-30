@@ -26,5 +26,8 @@ export interface CloudPlanFormData extends GenericPlanFormData {
   metricType: MetricType;
 }
 
-export type SelfHostedEePlanFormData =
-  components['schemas']['SelfHostedEePlanRequest'];
+export interface SelfHostedEePlanFormData extends SelfHostedEePlanRequest {
+  canEditPrices: boolean;
+}
+
+type SelfHostedEePlanRequest = components['schemas']['SelfHostedEePlanRequest'];
