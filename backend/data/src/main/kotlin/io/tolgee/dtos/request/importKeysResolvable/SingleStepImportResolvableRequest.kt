@@ -23,13 +23,6 @@ data class SingleStepImportResolvableRequest(
   val errorOnFailedKey: Boolean? = null,
 
   @get:Schema(
-    description =
-      "Keys created by this import will be tagged with these tags. " +
-        "It add tags only to new keys. The keys that already exist will not be tagged.",
-  )
-  var tagNewKeys: List<String>? = listOf(),
-
-  @get:Schema(
     description = "List of keys to import",
   )
   var keys: List<SingleStepImportResolvableItemRequest> = listOf()

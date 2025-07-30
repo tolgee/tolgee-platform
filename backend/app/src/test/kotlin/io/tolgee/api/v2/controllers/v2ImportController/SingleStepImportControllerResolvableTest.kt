@@ -153,62 +153,6 @@ class SingleStepImportControllerResolvableTest : ProjectAuthControllerTest("/v2/
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it tags new keys`() {
-    val request = SingleStepImportResolvableRequest(
-      keys = listOf(
-        SingleStepImportResolvableItemRequest(
-          name = "key-1",
-          namespace = "namespace-1",
-          screenshots = listOf(
-            KeyScreenshotDto(
-              text = "Oh oh Oh",
-              uploadedImageId = uploadedImageId,
-              positions = listOf(
-                KeyInScreenshotPositionDto(
-                  x = 100,
-                  y = 150,
-                  width = 80,
-                  height = 100,
-                ),
-              )
-            )
-          )
-        ),
-        SingleStepImportResolvableItemRequest(
-          name = "new_key",
-          namespace = "namespace-1",
-          screenshots = listOf(
-            KeyScreenshotDto(
-              text = "Oh oh Oh",
-              uploadedImageId = uploadedImageId,
-              positions = listOf(
-                KeyInScreenshotPositionDto(
-                  x = 100,
-                  y = 150,
-                  width = 80,
-                  height = 100,
-                ),
-              )
-            )
-          )
-        )
-      ),
-      tagNewKeys = listOf("new_key")
-    )
-
-    performProjectAuthPost(
-      "single-step-import-resolvable",
-      request,
-    ).andIsOk
-
-    executeInNewTransaction {
-      getKey("namespace-1", "key-1")?.keyMeta?.tags.assert.isNull()
-      getKey("namespace-1", "new_key")?.keyMeta?.tags.assert.hasSize(1)
-    }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
   fun `it imports unreviewed or new translations`() {
     val request = SingleStepImportResolvableRequest(
       keys = listOf(
