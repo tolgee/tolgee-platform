@@ -5,9 +5,10 @@ import {
   MenuItem,
   styled,
   SxProps,
+  Tooltip,
   useTheme,
 } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
@@ -181,7 +182,18 @@ export const TranslationSuggestion = ({
       }}
       data-cy="translation-suggestion"
     >
-      <AvatarImg owner={{ ...suggestion.author, type: 'USER' }} size={24} />
+      <Tooltip
+        title={
+          <T
+            keyName="suggestion_author_tooltip"
+            params={{ user: user?.name ?? user?.username, b: <b /> }}
+          />
+        }
+      >
+        <Box>
+          <AvatarImg owner={{ ...suggestion.author, type: 'USER' }} size={24} />
+        </Box>
+      </Tooltip>
       <StyledContent>
         <TranslationVisual
           text={suggestion.translation}
