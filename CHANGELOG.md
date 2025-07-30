@@ -1,3 +1,10 @@
+## [3.125.1](https://github.com/tolgee/tolgee-platform/compare/v3.125.0...v3.125.1) (2025-07-30)
+
+
+### Bug Fixes
+
+* Server configuration property generation ([#3184](https://github.com/tolgee/tolgee-platform/issues/3184)) ([384b424](https://github.com/tolgee/tolgee-platform/commit/384b4243a76aa89d046515472f90969f197475ba))
+
 # [3.125.0](https://github.com/tolgee/tolgee-platform/compare/v3.124.0...v3.125.0) (2025-07-28)
 
 
