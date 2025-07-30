@@ -22,7 +22,7 @@ import {
 import { useUser } from 'tg.globalContext/helpers';
 import { SuggestionAction } from './SuggestionAction';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
-import { ReactElement, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import React from 'react';
 import clsx from 'clsx';
 
