@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Link, TableCell, TableRow, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
@@ -12,10 +12,12 @@ import {
   useBillingApiMutation,
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
-import React from 'react';
+import React, { useState } from 'react';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
+import { EmptyState } from 'tg.component/common/EmptyState';
+import { PaginatedHateoasTable } from 'tg.component/common/table/PaginatedHateoasTable';
 
 export const AdministrationCloudPlanMigrationEdit = () => {
   const { t } = useTranslate();
@@ -23,11 +25,25 @@ export const AdministrationCloudPlanMigrationEdit = () => {
   const messaging = useMessage();
   const history = useHistory();
   const migrationId = match.params[PARAMS.PLAN_MIGRATION_ID] as number;
+  const [subscriptionsPage, setSubscriptionsPage] = useState(0);
 
   const migrationLoadable = useBillingApiQuery({
     url: '/v2/administration/billing/cloud-plans/migration/{migrationId}',
     method: 'get',
     path: { migrationId },
+  });
+
+  const subscriptions = useBillingApiQuery({
+    url: '/v2/administration/billing/cloud-plans/migration/{migrationId}/subscriptions',
+    method: 'get',
+    path: { migrationId },
+    query: {
+      page: subscriptionsPage,
+      size: 10,
+    },
+    options: {
+      keepPreviousData: true,
+    },
   });
 
   const updatePlanMigrationLoadable = useBillingApiMutation({
@@ -86,6 +102,50 @@ export const AdministrationCloudPlanMigrationEdit = () => {
           migration={migration}
           onSubmit={submit}
           loading={updatePlanMigrationLoadable.isLoading}
+        />
+        <Box my={2}>
+          <Typography variant="h6">
+            {t('administration_plan_migration_migrated_subscriptions')}
+          </Typography>
+        </Box>
+        <PaginatedHateoasTable
+          wrapperComponentProps={{ className: 'listWrapper' }}
+          loadable={subscriptions}
+          onPageChange={setSubscriptionsPage}
+          tableHead={
+            <>
+              <TableCell>{t('global_organization')}</TableCell>
+              <TableCell>{t('administration_plan_migration_from')}</TableCell>
+              <TableCell>{t('administration_plan_migration_to')}</TableCell>
+              <TableCell>
+                {t('administration_plan_migrated_subscription_status')}
+              </TableCell>
+            </>
+          }
+          renderItem={(item) => (
+            <TableRow>
+              <TableCell>
+                <Link
+                  href={LINKS.ORGANIZATION_PROFILE.build({
+                    [PARAMS.ORGANIZATION_SLUG]: item.organizationSlug,
+                  })}
+                >
+                  {item.organizationName}
+                </Link>{' '}
+              </TableCell>
+              <TableCell>{item.originPlan}</TableCell>
+              <TableCell>{item.plan}</TableCell>
+              <TableCell>{item.status}</TableCell>
+            </TableRow>
+          )}
+          emptyPlaceholder={
+            <EmptyState
+              loading={subscriptions.isLoading}
+              wrapperProps={{ py: 1 }}
+            >
+              <T keyName="administration_plan_migration_no_migrated_subscriptions" />
+            </EmptyState>
+          }
         />
       </BaseAdministrationView>
     </DashboardPage>
