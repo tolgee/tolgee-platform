@@ -1,5 +1,6 @@
 package io.tolgee.ee.service
 
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.label.LabelRequest
 import io.tolgee.exceptions.BadRequestException
@@ -27,6 +28,7 @@ class LabelServiceImpl(
   private val entityManager: EntityManager,
   private val translationRepository: TranslationRepository,
   @Lazy private val translationService: TranslationService,
+  private val activityHolder: ActivityHolder,
   ) : LabelService {
   override fun getProjectLabels(projectId: Long, pageable: Pageable, search: String?): Page<Label> {
     return labelRepository.findByProjectId(projectId, pageable, search)
@@ -78,6 +80,7 @@ class LabelServiceImpl(
     }
     val label = Label()
     updateFromRequest(label, request)
+    activityHolder.businessEventData["name"] = label.name
     label.project = entityManager.getReference(Project::class.java, projectId)
 
     labelRepository.save(label)
@@ -98,6 +101,7 @@ class LabelServiceImpl(
       }
     }
     updateFromRequest(label, request)
+    activityHolder.businessEventData["name"] = label.name
 
     labelRepository.save(label)
     return label
