@@ -26,6 +26,9 @@ export interface paths {
     get: operations["getPlanMigration_1"];
     put: operations["updatePlanMigration_1"];
   };
+  "/v2/administration/billing/cloud-plans/migration/{migrationId}/subscriptions": {
+    get: operations["getPlanMigrationSubscriptions"];
+  };
   "/v2/administration/billing/cloud-plans/{planId}": {
     get: operations["getPlan_1"];
     put: operations["updatePlan_1"];
@@ -225,19 +228,6 @@ export interface paths {
 
 export interface components {
   schemas: {
-    AdministrationCloudPlanMigrationModel: {
-      enabled: boolean;
-      /** Format: int64 */
-      id: number;
-      /** Format: int32 */
-      monthlyOffsetDays: number;
-      sourcePlan: components["schemas"]["CloudPlanModel"];
-      /** Format: int32 */
-      subscriptionsCount?: number;
-      targetPlan: components["schemas"]["CloudPlanModel"];
-      /** Format: int32 */
-      yearlyOffsetDays: number;
-    };
     AdministrationCloudPlanModel: {
       activeMigration?: boolean;
       canEditPrices: boolean;
@@ -369,6 +359,26 @@ export interface components {
     };
     CancelLocalSubscriptionsRequest: {
       ids: components["schemas"]["SubscriptionId"][];
+    };
+    CloudPlanMigrationHistoryModel: {
+      organizationName: string;
+      organizationSlug: string;
+      originPlan: string;
+      plan: string;
+      status: "COMPLETED" | "SCHEDULED";
+    };
+    CloudPlanMigrationModel: {
+      enabled: boolean;
+      /** Format: int64 */
+      id: number;
+      /** Format: int32 */
+      monthlyOffsetDays: number;
+      sourcePlan: components["schemas"]["CloudPlanModel"];
+      /** Format: int32 */
+      subscriptionsCount?: number;
+      targetPlan: components["schemas"]["CloudPlanModel"];
+      /** Format: int32 */
+      yearlyOffsetDays: number;
     };
     CloudPlanModel: {
       enabledFeatures: (
@@ -971,6 +981,12 @@ export interface components {
       totalElements?: number;
       /** Format: int64 */
       totalPages?: number;
+    };
+    PagedModelCloudPlanMigrationHistoryModel: {
+      _embedded?: {
+        cloudPlanMigrationHistoryModelList?: components["schemas"]["CloudPlanMigrationHistoryModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     PagedModelInvoiceModel: {
       _embedded?: {
@@ -1709,7 +1725,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["AdministrationCloudPlanMigrationModel"];
+          "application/json": components["schemas"]["CloudPlanMigrationModel"];
         };
       };
       /** Bad Request */
@@ -1761,7 +1777,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["AdministrationCloudPlanMigrationModel"];
+          "application/json": components["schemas"]["CloudPlanMigrationModel"];
         };
       };
       /** Bad Request */
@@ -1808,7 +1824,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["AdministrationCloudPlanMigrationModel"];
+          "application/json": components["schemas"]["CloudPlanMigrationModel"];
         };
       };
       /** Bad Request */
@@ -1847,6 +1863,61 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["PlanMigrationRequest"];
+      };
+    };
+  };
+  getPlanMigrationSubscriptions: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelCloudPlanMigrationHistoryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
