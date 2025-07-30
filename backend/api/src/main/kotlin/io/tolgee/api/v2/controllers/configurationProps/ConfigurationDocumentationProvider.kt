@@ -85,7 +85,9 @@ class ConfigurationDocumentationProvider {
         typeOf<Double?>(),
         typeOf<List<*>?>(),
         typeOf<Boolean?>(),
+        typeOf<Map<*,*>?>()
       ) || (it.returnType.javaType as? Class<*>)?.isEnum == true -> {
+        // For these simple types, we cannot dig deeper, so we store them as a property
         val name = getPropertyName(annotation, it)
         return Property(
           name = name,
@@ -98,6 +100,7 @@ class ConfigurationDocumentationProvider {
       }
 
       else -> {
+        // we expect this is some configuration property class, so we need to dig deeper and examine the object instance
         val child =
           it.getter.call(obj)
             ?: throw RuntimeException("Property ${it.name} is null")
