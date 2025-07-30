@@ -185,7 +185,10 @@ class StoredDataImporter(
     return ImportResult(failedKeys)
   }
 
-  private fun addScreenshots(): Map<Long, Screenshot> {
+  private fun addScreenshots() {
+    if (screenshots.isEmpty()) {
+      return
+    }
     val uploadedImagesIds = screenshots.map { it -> it.screenshot.uploadedImageId }
     val images = imageUploadService.find(uploadedImagesIds)
     checkImageUploadPermissions(images)
@@ -237,11 +240,6 @@ class StoredDataImporter(
     }
 
     screenshotService.removeScreenshotReferences(referencesToDelete)
-
-    return createdScreenshots
-      .map { (uploadedImageId, screenshotResult) ->
-        uploadedImageId to screenshotResult.screenshot
-      }.toMap()
   }
 
   private fun checkImageUploadPermissions(images: List<UploadedImage>) {
