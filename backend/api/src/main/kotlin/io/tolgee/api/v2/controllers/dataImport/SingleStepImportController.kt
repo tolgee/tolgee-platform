@@ -101,10 +101,6 @@ class SingleStepImportController(
   fun singleStepResolvableImport(
     @RequestBody @Valid params: SingleStepImportResolvableRequest,
   ): ImportResult {
-    if (params.removeOtherKeys == true) {
-      securityService.checkProjectPermission(projectHolder.project.id, Scope.KEYS_DELETE)
-    }
-
     return importService.singleStepImportResolvable(
       project = projectHolder.projectEntity,
       userAccount = authenticationFacade.authenticatedUserEntity,

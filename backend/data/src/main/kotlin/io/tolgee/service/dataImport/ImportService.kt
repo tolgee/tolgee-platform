@@ -151,7 +151,7 @@ class ImportService(
       throw BadRequestException(Message.IMPORT_FAILED, fileProcessor.errors as List<Serializable>)
     }
 
-    if (fileProcessor.importDataManager.storedLanguages.isEmpty()) {
+    if (fileProcessor.importDataManager.storedLanguages.isEmpty() && screenshots.isEmpty()) {
       throw BadRequestException(Message.NO_DATA_TO_IMPORT)
     }
 
@@ -187,10 +187,11 @@ class ImportService(
     val request = SingleStepImportRequest()
     request.overrideMode = params.overrideMode ?: OverrideMode.RECOMMENDED
     request.errorOnFailedKey = params.errorOnFailedKey
-    request.convertPlaceholdersToIcu = params.convertPlaceholdersToIcu ?: false
+    request.convertPlaceholdersToIcu = false
     request.tagNewKeys = params.tagNewKeys ?: emptyList()
     request.fileMappings = keysToFilesManager.getFileMappings()
-    request.removeOtherKeys = params.removeOtherKeys
+    request.removeOtherKeys = false
+    request.createNewKeys = true
 
     val conflictResolutionMap = keysToFilesManager.getConflictResolutionMap()
 

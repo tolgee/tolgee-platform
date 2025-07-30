@@ -146,6 +146,64 @@ class SingleStepImportControllerResolvableTest : ProjectAuthControllerTest("/v2/
       assertTranslationText("namespace-1", "key-2", "en", "existing translation")
 
       getKey("namespace-1", "key-1")?.keyScreenshotReferences.assert.hasSize(1)
+      getKey("namespace-1", "key-2")?.keyScreenshotReferences.assert.hasSize(2)
+      getKey("namespace-1", "nonexisting")?.keyScreenshotReferences.assert.hasSize(1)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it tags new keys`() {
+    val request = SingleStepImportResolvableRequest(
+      keys = listOf(
+        SingleStepImportResolvableItemRequest(
+          name = "key-1",
+          namespace = "namespace-1",
+          screenshots = listOf(
+            KeyScreenshotDto(
+              text = "Oh oh Oh",
+              uploadedImageId = uploadedImageId,
+              positions = listOf(
+                KeyInScreenshotPositionDto(
+                  x = 100,
+                  y = 150,
+                  width = 80,
+                  height = 100,
+                ),
+              )
+            )
+          )
+        ),
+        SingleStepImportResolvableItemRequest(
+          name = "new_key",
+          namespace = "namespace-1",
+          screenshots = listOf(
+            KeyScreenshotDto(
+              text = "Oh oh Oh",
+              uploadedImageId = uploadedImageId,
+              positions = listOf(
+                KeyInScreenshotPositionDto(
+                  x = 100,
+                  y = 150,
+                  width = 80,
+                  height = 100,
+                ),
+              )
+            )
+          )
+        )
+      ),
+      tagNewKeys = listOf("new_key")
+    )
+
+    performProjectAuthPost(
+      "single-step-import-resolvable",
+      request,
+    ).andIsOk
+
+    executeInNewTransaction {
+      getKey("namespace-1", "key-1")?.keyMeta?.tags.assert.isNull()
+      getKey("namespace-1", "new_key")?.keyMeta?.tags.assert.hasSize(1)
     }
   }
 
@@ -220,7 +278,7 @@ class SingleStepImportControllerResolvableTest : ProjectAuthControllerTest("/v2/
   ): Key? {
     return projectService.get(testData.projectBuilder.self.id).keys.find {
       it.name == keyName &&
-      it.namespace?.name == namespace
+        it.namespace?.name == namespace
     }
   }
 

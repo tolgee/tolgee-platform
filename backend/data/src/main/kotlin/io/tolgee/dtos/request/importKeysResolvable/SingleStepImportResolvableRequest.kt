@@ -22,25 +22,12 @@ data class SingleStepImportResolvableRequest(
   )
   val errorOnFailedKey: Boolean? = null,
 
-  var convertPlaceholdersToIcu: Boolean? = false,
-
-  @get:Schema(
-    description = "If false, only updates keys, skipping the creation of new keys",
-  )
-  var createNewKeys: Boolean? = true,
-
   @get:Schema(
     description =
       "Keys created by this import will be tagged with these tags. " +
         "It add tags only to new keys. The keys that already exist will not be tagged.",
   )
   var tagNewKeys: List<String>? = listOf(),
-
-  @get:Schema(
-    description = "If yes, keys from project that were not included in import will be deleted " +
-      "(only within namespaces which are included in the import).",
-  )
-  var removeOtherKeys: Boolean? = false,
 
   @get:Schema(
     description = "List of keys to import",
