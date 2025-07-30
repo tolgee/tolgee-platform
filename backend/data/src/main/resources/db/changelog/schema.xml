@@ -4615,4 +4615,7 @@
     <changeSet author="stepangranat (generated)" id="1753714098900-15">
         <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="translation_suggestion" constraintName="FKs89k165m4ci8qu42yg7xxh6er" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1753873150144-1">
+        <addNotNullConstraint columnDataType="clob" columnName="translation" tableName="translation_suggestion" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

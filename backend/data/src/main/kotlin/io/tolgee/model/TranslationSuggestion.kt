@@ -21,17 +21,26 @@ import jakarta.persistence.*
 @ActivityEntityDescribingPaths(["key", "language"])
 class TranslationSuggestion(
   @ManyToOne
+  @JoinColumn(nullable = false)
   var project: Project,
+
   @ManyToOne
+  @JoinColumn(nullable = false)
   var key: Key? = null,
+
   @ManyToOne
+  @JoinColumn(nullable = false)
   var language: Language? = null,
+
   @ManyToOne
+  @JoinColumn(nullable = false)
   var author: UserAccount? = null,
-  @Column(columnDefinition = "text")
+
+  @Column(columnDefinition = "text", nullable = false)
   @ActivityLoggedProp
   @ActivityDescribingProp
   var translation: String? = null,
+
   @Enumerated(EnumType.STRING)
   @ActivityLoggedProp
   var state: TranslationSuggestionState = TranslationSuggestionState.ACTIVE,

@@ -702,10 +702,10 @@ export interface paths {
   };
   "/v2/projects/{projectId}/single-step-import": {
     /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
-    post: operations["doImport_2"];
+    post: operations["singleStepFromFiles"];
   };
   "/v2/projects/{projectId}/single-step-import-resolvable": {
-    post: operations["doImport"];
+    post: operations["singleStepResolvableImport"];
   };
   "/v2/projects/{projectId}/start-batch-job/ai-playground-translate": {
     post: operations["aiPlaygroundTranslate"];
@@ -4305,26 +4305,14 @@ export interface components {
        * @example translations.view,translations.edit
        */
       scopes?: string[];
-      /**
-       * @deprecated
-       * @description Languages user can change translation state (review)
-       */
+      /** @description Languages user can change translation state (review) */
       stateChangeLanguages?: number[];
-      /**
-       * @deprecated
-       * @description Languages user can suggest translation
-       */
+      /** @description Languages user can suggest translation */
       suggestLanguages?: number[];
-      /**
-       * @deprecated
-       * @description Languages user can translate to
-       */
+      /** @description Languages user can translate to */
       translateLanguages?: number[];
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
-      /**
-       * @deprecated
-       * @description Languages user can view
-       */
+      /** @description Languages user can view */
       viewLanguages?: number[];
     };
     ProjectModel: {
@@ -5105,10 +5093,6 @@ export interface components {
       };
     };
     SingleStepImportResolvableRequest: {
-      /** @description If true, placeholders from other formats will be converted to ICU when possible */
-      convertPlaceholdersToIcu: boolean;
-      /** @description If false, only updates keys, skipping the creation of new keys */
-      createNewKeys: boolean;
       /**
        * @description If `false`, import will apply all `non-failed` overrides and reports `failedKeys`
        * .If `true`, import will fail completely on failed override and won't apply any changes. Failed keys are reported in the `params` of the error response
@@ -5116,24 +5100,13 @@ export interface components {
       errorOnFailedKey?: boolean;
       /** @description List of keys to import */
       keys: components["schemas"]["SingleStepImportResolvableItemRequest"][];
-      /** @description If true, key descriptions will be overridden by the import */
-      overrideKeyDescriptions: boolean;
       /**
        * @description Some translations are forbidden or protected:
        *
        * When set to `RECOMMENDED` it will fail for DISABLED translations and protected REVIEWED translations.
        * When set to `ALL` it will fail for DISABLED translations, but will try to update protected REVIEWED translations (fails only if user has no permission)
        */
-      overrideMode: "RECOMMENDED" | "ALL";
-      /** @description If yes, keys from project that were not included in import will be deleted (only within namespaces which are included in the import). */
-      removeOtherKeys?: boolean;
-      /**
-       * @description When importing files in structured formats (e.g., JSON, YAML), this field defines the delimiter which will be used in names of imported keys.
-       * @example .
-       */
-      structureDelimiter?: string;
-      /** @description Keys created by this import will be tagged with these tags. It add tags only to new keys. The keys that already exist will not be tagged. */
-      tagNewKeys: string[];
+      overrideMode?: "RECOMMENDED" | "ALL";
     };
     /** @description Object mapping language tag to translation */
     SingleStepImportResolvableTranslationRequest: {
@@ -17689,7 +17662,7 @@ export interface operations {
     };
   };
   /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
-  doImport_2: {
+  singleStepFromFiles: {
     parameters: {
       path: {
         projectId: number;
@@ -17744,7 +17717,7 @@ export interface operations {
       };
     };
   };
-  doImport: {
+  singleStepResolvableImport: {
     parameters: {
       path: {
         projectId: number;
