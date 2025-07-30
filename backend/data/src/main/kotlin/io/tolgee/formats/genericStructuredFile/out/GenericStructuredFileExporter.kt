@@ -2,9 +2,11 @@ package io.tolgee.formats.genericStructuredFile.out
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
+import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.nestedStructureModel.StructureModelBuilder
+import io.tolgee.formats.path.ObjectPathItem
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
@@ -58,8 +60,11 @@ class GenericStructuredFileExporter(
   private val pluralsViaSuffixes
     get() = messageFormat == ExportMessageFormat.I18NEXT
 
+  private val pluralsViaNestingForApple
+    get() = exportParams.format == ExportFormat.APPLE_SDK
+
   private val pluralsViaNesting
-    get() = !pluralsViaSuffixes && messageFormat != ExportMessageFormat.ICU
+    get() = !pluralsViaSuffixes && !pluralsViaNestingForApple && messageFormat != ExportMessageFormat.ICU
 
   private val placeholderConvertorFactory
     get() = messageFormat.paramConvertorFactory
@@ -68,13 +73,16 @@ class GenericStructuredFileExporter(
     if (pluralsViaNesting) {
       return addNestedPlural(translation)
     }
+    if (pluralsViaNestingForApple) {
+      return addNestedPlural(translation, appleStructure = true)
+    }
     if (pluralsViaSuffixes) {
       return addSuffixedPlural(translation)
     }
     return addSingularTranslation(translation)
   }
 
-  private fun addNestedPlural(translation: ExportTranslationView) {
+  private fun addNestedPlural(translation: ExportTranslationView, appleStructure: Boolean = false) {
     val pluralForms =
       convertMessageForNestedPlural(translation.text) ?: let {
         // this should never happen, but if it does, it's better to add a null key then crash or ignore it
@@ -82,11 +90,18 @@ class GenericStructuredFileExporter(
         return
       }
 
+    val nestedInside = if (appleStructure) {
+      listOf(ObjectPathItem("variations", "variations"), ObjectPathItem("plural", "plural"))
+    } else {
+      emptyList()
+    }
+
     val builder = getFileContentResultBuilder(translation)
     builder.addValue(
       translation.languageTag,
       translation.key.name,
       pluralForms,
+      nestInside = nestedInside
     )
   }
 

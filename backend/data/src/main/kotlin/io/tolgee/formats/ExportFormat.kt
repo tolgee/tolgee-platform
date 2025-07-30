@@ -50,4 +50,12 @@ enum class ExportFormat(
     defaultFileStructureTemplate = "Localizable.{extension}",
     multiLanguage = true,
   ),
+  ANDROID_SDK(
+    "json",
+    "application/json",
+  ),
+  APPLE_SDK(
+    "json",
+    "application/json",
+  )
 }
