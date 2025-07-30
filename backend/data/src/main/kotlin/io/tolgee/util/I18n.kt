@@ -4,10 +4,11 @@ import io.tolgee.constants.SupportedLocale
 import org.springframework.stereotype.Component
 import java.text.MessageFormat
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class I18n : Logging {
-  private val bundles = mutableMapOf<SupportedLocale, ResourceBundle>()
+  private val bundles = ConcurrentHashMap<SupportedLocale, ResourceBundle>()
   private val defaultLocale: SupportedLocale = SupportedLocale.DEFAULT
 
   internal fun getBundle(locale: SupportedLocale): ResourceBundle {
