@@ -1,4 +1,5 @@
 import { IconButton, IconButtonOwnProps, Tooltip } from '@mui/material';
+import React from 'react';
 
 type Props = {
   onClick?: () => void;
@@ -8,13 +9,10 @@ type Props = {
   disabled?: boolean;
 };
 
-export const SuggestionAction = ({
-  icon,
-  onClick,
-  color,
-  tooltip,
-  disabled,
-}: Props) => {
+export const SuggestionAction = React.forwardRef(function SuggestionAction(
+  { icon, onClick, color, tooltip, disabled }: Props,
+  ref: React.ForwardedRef<HTMLButtonElement>
+) {
   const Icon = icon;
 
   const button = (
@@ -24,6 +22,7 @@ export const SuggestionAction = ({
       color={color}
       sx={{ margin: '-4px' }}
       disabled={disabled}
+      ref={ref}
     >
       <Icon width={20} height={20} />
     </IconButton>
@@ -38,4 +37,4 @@ export const SuggestionAction = ({
       </Tooltip>
     );
   }
-};
+});

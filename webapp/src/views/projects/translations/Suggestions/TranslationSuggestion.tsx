@@ -1,14 +1,28 @@
-import { Box, styled, SxProps } from '@mui/material';
+import {
+  Box,
+  IconButtonOwnProps,
+  Menu,
+  MenuItem,
+  styled,
+  SxProps,
+  useTheme,
+} from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
 import { useTimeDistance } from 'tg.hooks/useTimeDistance';
-import { Check, ReverseLeft, Trash02, X } from '@untitled-ui/icons-react';
+import {
+  Check,
+  DotsVertical,
+  ReverseLeft,
+  Trash02,
+  X,
+} from '@untitled-ui/icons-react';
 import { useUser } from 'tg.globalContext/helpers';
 import { SuggestionAction } from './SuggestionAction';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
-import { ReactElement } from 'react';
+import { ReactElement, useRef, useState } from 'react';
 import React from 'react';
 import clsx from 'clsx';
 
@@ -66,6 +80,14 @@ const StyledActions = styled('div')`
   gap: 4px;
 `;
 
+type ActionItem = {
+  label: string;
+  onClick: () => void;
+  icon: React.ElementType<{ width: number; height: number }>;
+  color?: IconButtonOwnProps['color'];
+  disabled?: boolean;
+};
+
 type Props = {
   suggestion: TranslationSuggestionSimpleModel;
   isPlural: boolean;
@@ -95,56 +117,56 @@ export const TranslationSuggestion = ({
   className,
   isLoading,
 }: Props) => {
+  const theme = useTheme();
   const formatDate = useTimeDistance();
   const user = useUser();
   const { t } = useTranslate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLButtonElement>(null);
 
-  const actions: ReactElement[] = [];
+  const actions: ActionItem[] = [];
 
+  if (onDelete && suggestion.author.id === user?.id) {
+    actions.push({
+      label: t('translation_suggestion_delete_tooltip'),
+      onClick: onDelete,
+      icon: Trash02,
+      color: 'error',
+      disabled: isLoading,
+    });
+  }
   if (suggestion.state !== 'ACTIVE') {
     if (onReverse) {
-      actions.push(
-        <SuggestionAction
-          tooltip={t('translation_suggestion_reverse_tooltip')}
-          onClick={onReverse}
-          icon={ReverseLeft}
-          disabled={isLoading}
-        />
-      );
+      actions.push({
+        label: t('translation_suggestion_reverse_tooltip'),
+        onClick: onReverse,
+        icon: ReverseLeft,
+        disabled: isLoading,
+      });
     }
-  } else if (suggestion.author.id !== user?.id) {
+  } else {
     if (onAccept) {
-      actions.push(
-        <SuggestionAction
-          tooltip={t('translation_suggestion_accept_tooltip')}
-          onClick={onAccept}
-          icon={Check}
-          color="success"
-          disabled={isLoading}
-        />
-      );
+      actions.push({
+        label: t('translation_suggestion_accept_tooltip'),
+        onClick: onAccept,
+        icon: Check,
+        color: 'success',
+        disabled: isLoading,
+      });
     }
     if (onDecline) {
-      actions.push(
-        <SuggestionAction
-          tooltip={t('translation_suggestion_decline_tooltip')}
-          onClick={onDecline}
-          icon={X}
-          disabled={isLoading}
-        />
-      );
+      actions.push({
+        label: t('translation_suggestion_decline_tooltip'),
+        onClick: onDecline,
+        icon: X,
+        disabled: isLoading,
+      });
     }
-  } else if (onDelete) {
-    actions.push(
-      <SuggestionAction
-        tooltip={t('translation_suggestion_delete_tooltip')}
-        onClick={onDelete}
-        icon={Trash02}
-        color="error"
-        disabled={isLoading}
-      />
-    );
   }
+
+  const showMenu = actions.length > 2;
+  const regularItems = showMenu ? actions.slice(0, 1) : actions;
+  const menuItems = showMenu ? actions.slice(1) : [];
 
   return (
     <StyledContainer
@@ -169,9 +191,58 @@ export const TranslationSuggestion = ({
         <StyledRightPart>
           <StyledDate className="date">{formatDate(lastUpdated)}</StyledDate>
           <StyledActions className="actions">
-            {actions.map((action, i) => (
-              <React.Fragment key={i}>{action}</React.Fragment>
+            {regularItems.map((action, i) => (
+              <SuggestionAction
+                key={i}
+                tooltip={action.label}
+                icon={action.icon}
+                color={action.color}
+                disabled={action.disabled}
+                onClick={action.onClick}
+              />
             ))}
+            {showMenu && (
+              <>
+                <SuggestionAction
+                  tooltip={t('translation_suggestion_show_more_tooltip')}
+                  icon={DotsVertical}
+                  color="default"
+                  onClick={() => setMenuOpen(true)}
+                  ref={menuRef}
+                />
+                <Menu
+                  open={menuOpen}
+                  anchorEl={menuRef.current}
+                  onClose={() => setMenuOpen(false)}
+                >
+                  {menuItems.map((action, i) => {
+                    const Icon = action.icon;
+                    const color = action.color
+                      ? theme.palette[action.color]?.main
+                      : undefined;
+                    return (
+                      <MenuItem
+                        key={i}
+                        onClick={() => {
+                          action.onClick();
+                          setMenuOpen(false);
+                        }}
+                      >
+                        <Box
+                          display="flex"
+                          gap={1}
+                          alignItems="center"
+                          color={color}
+                        >
+                          <Icon width={20} height={20} />
+                          <span>{action.label}</span>
+                        </Box>
+                      </MenuItem>
+                    );
+                  })}
+                </Menu>
+              </>
+            )}
           </StyledActions>
         </StyledRightPart>
       )}
