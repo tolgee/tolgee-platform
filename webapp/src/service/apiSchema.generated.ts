@@ -4407,6 +4407,8 @@ export interface components {
       enabled: boolean;
     };
     PublicCloudPlanModel: {
+      /** Format: date-time */
+      archivedAt?: string;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -4722,6 +4724,8 @@ export interface components {
       ids: number[];
     };
     SelfHostedEePlanModel: {
+      /** Format: date-time */
+      archivedAt?: string;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
