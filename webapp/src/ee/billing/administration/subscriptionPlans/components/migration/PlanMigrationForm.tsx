@@ -10,8 +10,7 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Switch } from 'tg.component/common/form/fields/Switch';
 import { PlanType } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/types';
 
-type CloudPlanMigrationModel =
-  components['schemas']['AdministrationCloudPlanMigrationModel'];
+type CloudPlanMigrationModel = components['schemas']['CloudPlanMigrationModel'];
 type SelfHostedEePlanMigrationModel =
   components['schemas']['AdministrationSelfHostedEePlanMigrationModel'];
 
