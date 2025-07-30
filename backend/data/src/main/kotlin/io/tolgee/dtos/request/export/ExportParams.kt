@@ -93,5 +93,5 @@ data class ExportParams(
   @field:Parameter(
     description = HTML_ESCAPE_DESCRIPTION,
   )
-  override var escapeHtml: Boolean = false,
+  override var escapeHtml: Boolean? = false,
 ) : IExportParams

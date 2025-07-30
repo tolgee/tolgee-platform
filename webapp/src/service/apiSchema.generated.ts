@@ -1587,7 +1587,7 @@ export interface components {
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
-      escapeHtml: boolean;
+      escapeHtml?: boolean;
       /**
        * @description This is a template that defines the structure of the resulting .zip file content.
        *
@@ -1707,7 +1707,7 @@ export interface components {
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
-      escapeHtml: boolean;
+      escapeHtml?: boolean;
       /**
        * @description This is a template that defines the structure of the resulting .zip file content.
        *
@@ -2426,7 +2426,7 @@ export interface components {
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
-      escapeHtml: boolean;
+      escapeHtml?: boolean;
       /**
        * @description This is a template that defines the structure of the resulting .zip file content.
        *
