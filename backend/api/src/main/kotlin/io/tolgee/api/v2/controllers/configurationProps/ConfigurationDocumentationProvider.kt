@@ -85,7 +85,7 @@ class ConfigurationDocumentationProvider {
         typeOf<Double?>(),
         typeOf<List<*>?>(),
         typeOf<Boolean?>(),
-        typeOf<Map<*,*>?>()
+        typeOf<Map<*, *>?>()
       ) || (it.returnType.javaType as? Class<*>)?.isEnum == true -> {
         // For these simple types, we cannot dig deeper, so we store them as a property
         val name = getPropertyName(annotation, it)
