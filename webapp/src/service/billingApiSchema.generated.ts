@@ -218,7 +218,8 @@ export interface paths {
 export interface components {
   schemas: {
     AdministrationCloudPlanModel: {
-      archived: boolean;
+      /** Format: date-time */
+      archivedAt?: string;
       canEditPrices: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
@@ -337,7 +338,8 @@ export interface components {
       ids: components["schemas"]["SubscriptionId"][];
     };
     CloudPlanModel: {
-      archived: boolean;
+      /** Format: date-time */
+      archivedAt?: string;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -1119,7 +1121,8 @@ export interface components {
       planId: number;
     };
     SelfHostedEePlanAdministrationModel: {
-      archived: boolean;
+      /** Format: date-time */
+      archivedAt?: string;
       canEditPrices: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
@@ -1163,7 +1166,8 @@ export interface components {
       subscriptionCount: number;
     };
     SelfHostedEePlanModel: {
-      archived: boolean;
+      /** Format: date-time */
+      archivedAt?: string;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
