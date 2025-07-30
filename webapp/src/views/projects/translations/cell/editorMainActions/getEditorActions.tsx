@@ -15,11 +15,13 @@ type Props = {
   translation: TranslationViewModel | undefined;
   languageId: number;
   project: ProjectModel;
+  editorEmpty: boolean;
 };
 
 type TranslationAction = {
   action: (props?: SaveProps) => void;
   label: React.ReactNode;
+  disabled?: boolean;
 };
 
 /**
@@ -35,6 +37,7 @@ export function getEditorActions({
   languageId,
   translation,
   project,
+  editorEmpty,
 }: Props) {
   const { satisfiesLanguageAccess } = getPermissionTools(
     project.computedPermission
@@ -89,6 +92,7 @@ export function getEditorActions({
       ) : (
         <T keyName="translations_cell_suggest" />
       ),
+      disabled: editorEmpty,
     });
 
     if (displayTaskControls) {
@@ -100,6 +104,7 @@ export function getEditorActions({
             preventTaskResolution: true,
           }),
         label: <T keyName="translations_cell_suggest_only" />,
+        disabled: editorEmpty,
       });
     }
   }

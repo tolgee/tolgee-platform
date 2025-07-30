@@ -44,6 +44,7 @@ const StyledContainer = styled(Box)`
     opacity: 0;
   }
 
+  &.showActions,
   &.withActions:hover,
   &.withActions:focus-within {
     .actions {
@@ -173,7 +174,10 @@ export const TranslationSuggestion = ({
       style={{ opacity: suggestion.state === 'ACTIVE' ? 1 : 0.5 }}
       {...{
         sx,
-        className: clsx({ withActions: actions.length !== 0 }, className),
+        className: clsx(
+          { withActions: actions.length !== 0, showActions: menuOpen },
+          className
+        ),
       }}
       data-cy="translation-suggestion"
     >

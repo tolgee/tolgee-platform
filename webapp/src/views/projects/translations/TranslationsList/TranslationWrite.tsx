@@ -19,6 +19,7 @@ import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsList } from '../Suggestions/SuggestionsList';
+import { isEmpty } from 'tg.fixtures/plurals';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -227,6 +228,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
                 currentTask={prefilteredTask?.number}
                 translation={translation}
                 languageId={language.id}
+                editorEmpty={isEmpty(editVal.value)}
               />
             </StyledControls>
           </>

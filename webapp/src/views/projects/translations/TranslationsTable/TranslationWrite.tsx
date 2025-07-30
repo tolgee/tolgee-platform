@@ -14,6 +14,7 @@ import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
 import { TaskInfoMessage } from 'tg.ee';
+import { isEmpty } from 'tg.fixtures/plurals';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -180,6 +181,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
                 currentTask={prefilteredTask?.number}
                 translation={translation}
                 languageId={language.id}
+                editorEmpty={isEmpty(editVal.value)}
               />
             ) : (
               <ControlsEditorReadOnly onClose={() => handleClose(true)} />

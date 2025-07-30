@@ -33,6 +33,7 @@ type ControlsProps = {
   currentTask: number | undefined;
   translation: TranslationViewModel | undefined;
   languageId: number;
+  editorEmpty: boolean;
 };
 
 export const ControlsEditorMain: React.FC<ControlsProps> = ({
@@ -43,6 +44,7 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
   currentTask,
   translation,
   languageId,
+  editorEmpty,
 }: ControlsProps) => {
   const project = useProject();
 
@@ -53,6 +55,7 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
     tasks,
     currentTask,
     project,
+    editorEmpty,
   });
 
   const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
@@ -82,6 +85,7 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
           <ButtonGroup size="small" ref={anchorEl as any}>
             <LoadingButton
               onClick={() => firstAction.action()}
+              disabled={firstAction.disabled}
               color="primary"
               variant="contained"
               loading={isEditLoading}
@@ -112,7 +116,11 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           >
             {otherActions.map((action, i) => (
-              <MenuItem key={i} onClick={withClose(action.action)}>
+              <MenuItem
+                key={i}
+                onClick={withClose(action.action)}
+                disabled={action.disabled}
+              >
                 {action.label}
               </MenuItem>
             ))}
@@ -121,6 +129,7 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
       ) : (
         <LoadingButton
           onClick={() => firstAction?.action()}
+          disabled={firstAction.disabled}
           color="primary"
           size="small"
           variant="contained"

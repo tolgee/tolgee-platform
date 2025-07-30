@@ -1,6 +1,7 @@
-import { styled } from '@mui/material';
+import { styled, Tooltip } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationSuggestion } from './TranslationSuggestion';
+import { useTranslate } from '@tolgee/react';
 
 type TranslationSuggestionSimpleModel =
   components['schemas']['TranslationSuggestionSimpleModel'];
@@ -42,6 +43,7 @@ export const SuggestionsFirst = ({
   isPlural,
   locale,
 }: Props) => {
+  const { t } = useTranslate();
   const extraCount = count - suggestions.length;
   return (
     <StyledContainer>
@@ -56,7 +58,11 @@ export const SuggestionsFirst = ({
           />
         ))}
       </StyledWrapper>
-      {Boolean(extraCount) && <StyledExtra>+{extraCount}</StyledExtra>}
+      {Boolean(extraCount) && (
+        <Tooltip title={t('suggestions_other_tooltip')}>
+          <StyledExtra>+{extraCount}</StyledExtra>
+        </Tooltip>
+      )}
     </StyledContainer>
   );
 };

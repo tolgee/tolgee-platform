@@ -16,6 +16,7 @@ import {
 } from './context/types';
 import { useProject } from 'tg.hooks/useProject';
 import { getEditorActions } from './cell/editorMainActions/getEditorActions';
+import { isEmpty } from 'tg.fixtures/plurals';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -231,6 +232,7 @@ export const useTranslationCell = ({
     project,
     tasks,
     translation,
+    editorEmpty: isEmpty(cursor?.value),
   });
 
   const editEnabled = Boolean(editorActions.length) && !disabled;
