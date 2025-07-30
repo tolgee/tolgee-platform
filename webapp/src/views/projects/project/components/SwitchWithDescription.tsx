@@ -15,7 +15,7 @@ const StyledTitle = styled(Box)`
 `;
 
 const StyledDescription = styled(Box)`
-  font-size: 25px;
+  font-size: 14px;
 `;
 
 type Props = {
