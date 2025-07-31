@@ -46,10 +46,6 @@ apply plugin: "kotlin-allopen"
 apply plugin: "org.jetbrains.kotlin.plugin.spring"
 apply plugin: "org.gradle.test-retry"
 
-repositories {
-    mavenCentral()
-}
-
 dependencyManagement {
     applyMavenExclusions = false
 }
@@ -196,7 +192,7 @@ dependencies {
 
 }
 
-test {
+tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
     testLogging {
@@ -249,16 +245,9 @@ springBoot {
     }
 }
 
-bootJar {
-    archiveFileName = "tolgee-${project.version}.jar"
-    manifest {
-        attributes('Implementation-Version': project.version)
-    }
-}
-
 def unpackTarget = "build/dependency"
 
-task unpack(type: Copy) {
+tasks.register('unpack', Copy) {
     from(zipTree(project.tasks.findByName("bootJar").outputs.files.singleFile))
     into(unpackTarget)
     if (System.getenv("SKIP_SERVER_BUILD") != "true") {
@@ -266,7 +255,7 @@ task unpack(type: Copy) {
     }
 }
 
-task addVersionFile(type: Task) {
+tasks.register('addVersionFile', Task) {
     mustRunAfter unpack
     doLast {
         def file = new File("${project.buildDir}/dependency/BOOT-INF/classes/.VERSION")
@@ -279,12 +268,17 @@ sourceSets {
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-jar {
+tasks.named('jar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
 
-bootJar {
+tasks.named('bootJar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+    archiveFileName = "tolgee-${project.version}.jar"
+    manifest {
+        attributes('Implementation-Version': project.version)
+    }
 }
 
 normalization {
