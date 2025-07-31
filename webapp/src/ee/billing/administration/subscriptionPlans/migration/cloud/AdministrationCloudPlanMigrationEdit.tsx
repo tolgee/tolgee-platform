@@ -51,6 +51,25 @@ export const AdministrationCloudPlanMigrationEdit = () => {
     method: 'put',
   });
 
+  const deletePlanMigrationMutation = useBillingApiMutation({
+    url: '/v2/administration/billing/cloud-plans/migration/{migrationId}',
+    method: 'delete',
+  });
+
+  const onDelete = (migrationId: number) => {
+    deletePlanMigrationMutation.mutate(
+      { path: { migrationId } },
+      {
+        onSuccess: () => {
+          messaging.success(
+            <T keyName="administration_plan_migration_deleted_success" />
+          );
+          history.push(LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build());
+        },
+      }
+    );
+  };
+
   if (migrationLoadable.isLoading) {
     return <SpinnerProgress />;
   }
@@ -101,6 +120,7 @@ export const AdministrationCloudPlanMigrationEdit = () => {
         <PlanMigrationForm
           migration={migration}
           onSubmit={submit}
+          onDelete={onDelete}
           loading={updatePlanMigrationLoadable.isLoading}
         />
         <Box my={2}>

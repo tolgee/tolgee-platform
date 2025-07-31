@@ -265,6 +265,7 @@ declare namespace DataCy {
         "create-task-submit" |
         "dashboard-projects-list-item" |
         "default-namespace-select" |
+        "delete-plan-migration-button" |
         "delete-user-button" |
         "developer-menu-content-delivery" |
         "developer-menu-storage" |
