@@ -25,6 +25,7 @@ export interface paths {
   "/v2/administration/billing/cloud-plans/migration/{migrationId}": {
     get: operations["getPlanMigration_1"];
     put: operations["updatePlanMigration_1"];
+    delete: operations["deletePlanMigration_1"];
   };
   "/v2/administration/billing/cloud-plans/migration/{migrationId}/subscriptions": {
     get: operations["getPlanMigrationSubscriptions"];
@@ -57,6 +58,7 @@ export interface paths {
   "/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}": {
     get: operations["getPlanMigration"];
     put: operations["updatePlanMigration"];
+    delete: operations["deletePlanMigration"];
   };
   "/v2/administration/billing/self-hosted-ee-plans/{planId}": {
     get: operations["getPlan"];
@@ -1866,6 +1868,49 @@ export interface operations {
       };
     };
   };
+  deletePlanMigration_1: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   getPlanMigrationSubscriptions: {
     parameters: {
       path: {
@@ -2526,6 +2571,49 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["PlanMigrationRequest"];
+      };
+    };
+  };
+  deletePlanMigration: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
       };
     };
   };
