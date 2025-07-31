@@ -76,5 +76,5 @@ class ContentDeliveryConfigRequest() : IExportParams {
   @Schema(
     description = ExportParamsDocs.HTML_ESCAPE_DESCRIPTION,
   )
-  override var escapeHtml: Boolean = false
+  override var escapeHtml: Boolean? = false
 }
