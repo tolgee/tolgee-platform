@@ -14,7 +14,9 @@ import { LINKS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 import { SwitchWithDescription } from './components/SwitchWithDescription';
 import { DOCS_ROOT } from 'tg.constants/docLinks';
-import { LinkExternal } from 'tg.component/LinkExternal';
+import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
+import { DefaultNamespaceSelect } from './components/DefaultNamespaceSelect';
+import { LinkLearnMore } from 'tg.component/LinkReadMore';
 
 type EditProjectRequest = components['schemas']['EditProjectRequest'];
 
@@ -22,6 +24,8 @@ export const ProjectSettingsAdvanced = () => {
   const project = useProject();
   const { t } = useTranslate();
   const history = useHistory();
+
+  const { allNamespacesWithNone } = useProjectNamespaces();
 
   const deleteLoadable = useApiMutation({
     url: '/v2/projects/{projectId}',
@@ -75,7 +79,7 @@ export const ProjectSettingsAdvanced = () => {
     });
   };
   return (
-    <Box display="grid">
+    <Box display="grid" mb={8}>
       <Typography variant="h5" mt={4} mb="20px">
         {t('project_settings_advanced_translations')}
       </Typography>
@@ -126,7 +130,18 @@ export const ProjectSettingsAdvanced = () => {
 
       <SwitchWithDescription
         title={t('project_settings_use_tolgee_placeholders_label')}
-        description={t('project_settings_tolgee_placeholders_hint')}
+        description={
+          <T
+            keyName="project_settings_tolgee_placeholders_hint"
+            params={{
+              LearnMore: (
+                <LinkLearnMore
+                  url={`${DOCS_ROOT}/platform/translation_process/tolgee_universal_icu_placeholders`}
+                />
+              ),
+            }}
+          />
+        }
         checked={project.icuPlaceholders}
         onSwitch={() =>
           updateSettings({ icuPlaceholders: !project.icuPlaceholders })
@@ -137,17 +152,14 @@ export const ProjectSettingsAdvanced = () => {
       <Box pt={2} />
 
       <SwitchWithDescription
+        data-cy="project-settings-use-tolgee-placeholders-checkbox"
         title={t('project_settings_use_namespaces')}
         description={
           <T
             keyName="project_settings_use_namespaces_hint"
             params={{
-              a: (
-                <LinkExternal
-                  href={`${DOCS_ROOT}/js-sdk/namespaces`}
-                  target="_blank"
-                  rel="noreferrer"
-                />
+              LearnMore: (
+                <LinkLearnMore url={`${DOCS_ROOT}/js-sdk/namespaces`} />
               ),
             }}
           />
@@ -160,6 +172,22 @@ export const ProjectSettingsAdvanced = () => {
         }
         disabled={updateLoadable.isLoading}
       />
+
+      {project.useNamespaces && (
+        <Box display="grid" pt={2} maxWidth="300px">
+          <DefaultNamespaceSelect
+            data-cy="project-settings-use-namespaces-checkbox"
+            label={<T keyName="project_settings_base_namespace" />}
+            name="defaultNamespaceId"
+            namespaces={allNamespacesWithNone}
+            hidden={!project.useNamespaces}
+            value={project.defaultNamespace?.id}
+            onChange={(nsId) =>
+              updateSettings({ defaultNamespaceId: nsId ?? undefined })
+            }
+          />
+        </Box>
+      )}
 
       <Typography variant="h5" mt={5} mb={2}>
         <T keyName="project_settings_danger_zone_title" />

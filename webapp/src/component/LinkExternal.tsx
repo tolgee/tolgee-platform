@@ -4,7 +4,7 @@ import { ArrowUpRight } from '@untitled-ui/icons-react';
 
 export const LinkExternal: OverridableComponent<LinkTypeMap> = (props) => {
   return (
-    <Link {...(props as any)}>
+    <Link target="_blank" rel="noreferrer noopener" {...(props as any)}>
       {(props as any).children}
       <ArrowUpRight
         style={{

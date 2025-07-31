@@ -261,6 +261,7 @@ export const tolgeePalette = {
       default: tolgeeColors['lightGrey']['50'],
       hover: '#1f2d4005',
       selected: '#1f2d400a',
+      danger: '#d600270a',
       onDefault: '#ffffff',
       onDefaultGrey: '#1f2d400a',
       'paper-1': '#ffffff',
@@ -392,13 +393,13 @@ export const tolgeePalette = {
         importantLinkHover: tolgeeColors['pink']['600'],
       },
       progressbar: {
+        background: tolgeeColors['grey']['50'],
         pricing: {
           low: tolgeeColors['red']['400'],
           over: tolgeeColors['yellow']['500'],
           overForbidden: tolgeeColors['red']['800'],
           sufficient: tolgeeColors['teal']['500'],
         },
-        background: tolgeeColors['grey']['50'],
         task: {
           inProgress: tolgeeColors['lightBlue']['500'],
           done: tolgeeColors['green']['600'],
@@ -599,6 +600,7 @@ export const tolgeePalette = {
       default: tolgeeColors['grey']['900'],
       hover: '#ffffff05',
       selected: '#ffffff0a',
+      danger: '#f9c4d614',
       onDefault: '#182230b2',
       onDefaultGrey: '#ffffff0a',
       'paper-1': tolgeeColors['grey']['800'],
@@ -730,13 +732,13 @@ export const tolgeePalette = {
         importantLinkHover: tolgeeColors['grey']['50'],
       },
       progressbar: {
+        background: tolgeeColors['grey']['700'],
         pricing: {
           low: tolgeeColors['red']['400'],
           over: tolgeeColors['yellow']['500'],
           overForbidden: tolgeeColors['red']['600'],
           sufficient: tolgeeColors['teal']['400'],
         },
-        background: tolgeeColors['grey']['700'],
         task: {
           inProgress: tolgeeColors['lightBlue']['700'],
           done: tolgeeColors['green']['600'],
