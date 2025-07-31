@@ -34,6 +34,7 @@ type Props<T> = {
   SelectProps?: React.ComponentProps<typeof Select>;
   compareFunction?: (prompt: string, label: string) => boolean;
   noContain?: boolean;
+  minHeight?: boolean;
   dataCy?: string;
 };
 
@@ -52,6 +53,7 @@ export function SearchSelect<T extends React.Key>({
   SelectProps,
   compareFunction,
   noContain,
+  minHeight = false,
   dataCy = 'search-select',
 }: Props<T>) {
   const anchorEl = useRef<HTMLAnchorElement>(null);
@@ -98,7 +100,7 @@ export function SearchSelect<T extends React.Key>({
         value={myRenderValue()}
         displayEmpty
         multiple
-        minHeight={false}
+        minHeight={minHeight}
         renderValue={myRenderValue}
         {...SelectProps}
       />
