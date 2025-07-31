@@ -1,14 +1,15 @@
 import { Form, Formik } from 'formik';
-import { Box, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import React from 'react';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { ArrowRightIcon } from '@mui/x-date-pickers';
 import { PlanSelectorField } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/fields/PlanSelectorField';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Switch } from 'tg.component/common/form/fields/Switch';
 import { PlanType } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/types';
+import { confirmation } from 'tg.hooks/confirmation';
 
 type CloudPlanMigrationModel = components['schemas']['CloudPlanMigrationModel'];
 type SelfHostedEePlanMigrationModel =
@@ -17,6 +18,7 @@ type SelfHostedEePlanMigrationModel =
 type Props = {
   migration?: CloudPlanMigrationModel | SelfHostedEePlanMigrationModel;
   onSubmit: (value: PlanMigrationFormData) => void;
+  onDelete?: (id: number) => void;
   planType?: PlanType;
   loading: boolean | undefined;
 };
@@ -36,6 +38,7 @@ export const PlanMigrationForm = ({
   migration,
   onSubmit,
   loading,
+  onDelete,
   planType = 'cloud',
 }: Props) => {
   const { t } = useTranslate();
@@ -125,7 +128,25 @@ export const PlanMigrationForm = ({
             required
           />
         </Box>
-        <Box display="flex" justifyContent="end" mt={4}>
+        <Box display="flex" justifyContent="space-between" mt={4} gap={2}>
+          {migration && isUpdate && (
+            <Button
+              color="error"
+              data-cy="delete-plan-migration-button"
+              variant={'outlined'}
+              onClick={() =>
+                confirmation({
+                  onConfirm: () => onDelete?.(migration.id),
+                  message: t(
+                    'administration_plan_migration_delete_confirmation'
+                  ),
+                  confirmButtonText: t('global_delete_button'),
+                })
+              }
+            >
+              <T keyName="administration_plan_migration_delete_button" />
+            </Button>
+          )}
           <LoadingButton
             variant="contained"
             color="primary"
