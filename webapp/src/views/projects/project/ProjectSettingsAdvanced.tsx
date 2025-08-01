@@ -85,6 +85,7 @@ export const ProjectSettingsAdvanced = () => {
       </Typography>
 
       <SwitchWithDescription
+        data-cy="project-settings-suggestions-mode-switch"
         title={t('project_settings_suggestions_mode_label')}
         description={
           <T
@@ -105,6 +106,7 @@ export const ProjectSettingsAdvanced = () => {
       <Box mt={2} />
 
       <SwitchWithDescription
+        data-cy="project-settings-translation-protection-switch"
         title={t('project_settings_translation_protection_label')}
         description={
           <T

@@ -133,6 +133,8 @@ export const authProviderChange = generateTestDataObject(
 
 export const labelsTestData = generateTestDataObject('label');
 
+export const suggestionsTestData = generateTestDataObject('suggestions');
+
 export const sensitiveOperationProtectionTestData = {
   ...generateTestDataObject('sensitive-operation-protection'),
   getOtp: () =>

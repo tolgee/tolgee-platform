@@ -8,7 +8,7 @@ import { HOST } from '../../common/constants';
 import { visitSingleKey } from '../../common/singleKey';
 import { createTranslation } from '../../common/translations';
 
-describe('Project enabled namespaces and default namespace', () => {
+describe('Project settings namespaces and default namespace', () => {
   let projectId: number;
   beforeEach(() => {
     login().then(() =>

@@ -76,7 +76,6 @@ export const TranslationRead: React.FC<Props> = ({
     translation,
     language,
     canChangeState,
-    editEnabled,
     keyData,
     setAssignedTaskState,
     aiPlaygroundEnabled,
@@ -97,7 +96,6 @@ export const TranslationRead: React.FC<Props> = ({
   const state = translation?.state || 'UNTRANSLATED';
 
   const disabled = state === 'DISABLED';
-  const editable = editEnabled && !disabled;
 
   return (
     <StyledContainer
@@ -152,7 +150,7 @@ export const TranslationRead: React.FC<Props> = ({
           commentsCount={translation?.commentCount}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
           stateChangeEnabled={canChangeState}
-          editEnabled={editable}
+          editEnabled={cellClickable}
           state={state}
           onStateChange={handleStateChange}
           active={active}

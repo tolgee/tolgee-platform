@@ -12,7 +12,7 @@ import io.tolgee.model.enums.TranslationState
 import kotlin.collections.forEach
 
 class SuggestionsTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED) :
-  BaseTestData("suggestionsTestUser", "Project with suggestions") {
+  BaseTestData("suggestionsuggestionsTestUser", "Project with suggestions") {
   var projectReviewer: UserAccountBuilder
   var orgAdmin: UserAccountBuilder
   var orgMember: UserAccountBuilder
