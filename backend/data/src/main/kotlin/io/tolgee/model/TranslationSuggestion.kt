@@ -7,6 +7,7 @@ import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.key.Key
 import jakarta.persistence.*
+import org.hibernate.annotations.ColumnDefault
 
 @Entity
 @Table(
@@ -40,6 +41,10 @@ class TranslationSuggestion(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var translation: String? = null,
+
+  @ActivityLoggedProp
+  @ColumnDefault("false")
+  var isPlural: Boolean = false,
 
   @Enumerated(EnumType.STRING)
   @ActivityLoggedProp

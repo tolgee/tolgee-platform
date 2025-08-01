@@ -20,6 +20,7 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
         l.tag as languageTag,
         ts.translation as translation,
         ts.state as state,
+        ts.is_plural as plural,
         
         u.id as authorId,
         u.name as authorName,

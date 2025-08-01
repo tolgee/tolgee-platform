@@ -7,6 +7,7 @@ import org.springframework.hateoas.RepresentationModel
 class TranslationSuggestionSimpleModel(
   val id: Long,
   val translation: String?,
+  val isPlural: Boolean,
   val author: SimpleUserAccountModel,
   val state: TranslationSuggestionState,
 ) : RepresentationModel<TranslationSuggestionSimpleModel>()

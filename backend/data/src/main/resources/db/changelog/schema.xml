@@ -4618,4 +4618,11 @@
     <changeSet author="stepangranat (generated)" id="1753873150144-1">
         <addNotNullConstraint columnDataType="clob" columnName="translation" tableName="translation_suggestion" validate="true"/>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1753976737585-1">
+        <addColumn tableName="translation_suggestion">
+            <column defaultValueBoolean="false" name="is_plural" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

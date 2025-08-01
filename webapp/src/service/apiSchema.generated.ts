@@ -5707,6 +5707,7 @@ export interface components {
       createdAt: string;
       /** Format: int64 */
       id: number;
+      isPlural: boolean;
       /** Format: int64 */
       keyId: number;
       /** Format: int64 */
@@ -5721,6 +5722,7 @@ export interface components {
       author: components["schemas"]["SimpleUserAccountModel"];
       /** Format: int64 */
       id: number;
+      isPlural: boolean;
       state: "ACTIVE" | "ACCEPTED" | "DECLINED";
       translation?: string;
     };

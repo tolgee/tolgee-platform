@@ -107,7 +107,6 @@ type Props = {
 
 export const TranslationSuggestion = ({
   suggestion,
-  isPlural,
   locale,
   maxLines = 3,
   onAccept,
@@ -197,7 +196,7 @@ export const TranslationSuggestion = ({
       <StyledContent>
         <TranslationVisual
           text={suggestion.translation}
-          isPlural={isPlural}
+          isPlural={suggestion.isPlural}
           locale={locale}
           maxLines={maxLines}
           extraPadding={false}
