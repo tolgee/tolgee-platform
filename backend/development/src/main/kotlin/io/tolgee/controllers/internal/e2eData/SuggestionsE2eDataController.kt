@@ -5,10 +5,7 @@ import io.tolgee.data.StandardTestDataResult
 import io.tolgee.data.service.TestDataGeneratingService
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
-import io.tolgee.development.testDataBuilder.data.TaskTestData
 import io.tolgee.model.enums.SuggestionsMode
-import io.tolgee.model.enums.TaskState
-import io.tolgee.model.enums.TaskType
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
