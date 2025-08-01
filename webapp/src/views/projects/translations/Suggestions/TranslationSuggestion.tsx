@@ -34,7 +34,7 @@ const StyledContainer = styled(Box)`
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 8px 8px;
   align-items: start;
 
   & .actions,

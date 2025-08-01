@@ -49,7 +49,6 @@ const StyledScrollWrapper = styled('div')`
 
 const StyledItemsWrapper = styled('div')`
   display: grid;
-  gap: 8px;
 `;
 
 const StyledTranslationSuggestion = styled(TranslationSuggestion)`

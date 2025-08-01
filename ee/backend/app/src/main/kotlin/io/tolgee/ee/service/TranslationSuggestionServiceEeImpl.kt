@@ -67,10 +67,11 @@ class TranslationSuggestionServiceEeImpl(
 
     val normalizedTranslation =
       try {
-        if (key.isPlural)
+        if (key.isPlural) {
           normalizePlurals(mapOf("key" to dto.translation)).get("key") ?: ""
-        else
+        } else {
           dto.translation
+        }
       } catch (e: StringIsNotPluralException) {
         throw BadRequestException(Message.INVALID_PLURAL_FORM)
       }
