@@ -629,6 +629,7 @@ declare namespace DataCy {
         "project-settings-transfer-button" |
         "project-settings-use-namespaces-default-namespace-select" |
         "project-settings-use-namespaces-switch" |
+        "project-settings-use-tolgee-placeholders-switch" |
         "project-states-bar-bar" |
         "project-states-bar-dot" |
         "project-states-bar-legend" |

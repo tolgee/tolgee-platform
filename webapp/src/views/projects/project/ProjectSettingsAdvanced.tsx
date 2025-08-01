@@ -129,6 +129,7 @@ export const ProjectSettingsAdvanced = () => {
       </Typography>
 
       <SwitchWithDescription
+        data-cy="project-settings-use-tolgee-placeholders-switch"
         title={t('project_settings_use_tolgee_placeholders_label')}
         description={
           <T
