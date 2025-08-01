@@ -20,10 +20,10 @@ ENV HEALTHCHECK_PORT=8080 \
     spring_profiles_active=docker
 
 # Copy necessary application files
-COPY BOOT-INF/lib /app/lib
-COPY META-INF /app/META-INF
-COPY BOOT-INF/classes /app
-COPY --chmod=755 cmd.sh /app
+#COPY BOOT-INF/lib /app/lib
+#COPY META-INF /app/META-INF
+#COPY BOOT-INF/classes /app
+#COPY --chmod=755 cmd.sh /app
 
 #################
 ### Let's go   ##
