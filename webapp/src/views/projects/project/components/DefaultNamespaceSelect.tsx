@@ -64,7 +64,7 @@ export const DefaultNamespaceSelect = (props: Props) => {
         value={props.value ?? ''}
         onChange={(e) =>
           props.onChange(
-            (e.target.value ?? undefined) as unknown as number | undefined
+            (e.target.value || undefined) as unknown as number | undefined
           )
         }
         renderValue={(v) => {

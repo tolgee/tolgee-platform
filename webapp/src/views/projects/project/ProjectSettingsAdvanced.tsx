@@ -152,7 +152,7 @@ export const ProjectSettingsAdvanced = () => {
       <Box pt={2} />
 
       <SwitchWithDescription
-        data-cy="project-settings-use-tolgee-placeholders-checkbox"
+        data-cy="project-settings-use-namespaces-switch"
         title={t('project_settings_use_namespaces')}
         description={
           <T
@@ -176,15 +176,13 @@ export const ProjectSettingsAdvanced = () => {
       {project.useNamespaces && (
         <Box display="grid" pt={2} maxWidth="300px">
           <DefaultNamespaceSelect
-            data-cy="project-settings-use-namespaces-checkbox"
+            data-cy="project-settings-use-namespaces-default-namespace-select"
             label={<T keyName="project_settings_base_namespace" />}
             name="defaultNamespaceId"
             namespaces={allNamespacesWithNone}
             hidden={!project.useNamespaces}
             value={project.defaultNamespace?.id}
-            onChange={(nsId) =>
-              updateSettings({ defaultNamespaceId: nsId ?? undefined })
-            }
+            onChange={(nsId) => updateSettings({ defaultNamespaceId: nsId })}
           />
         </Box>
       )}

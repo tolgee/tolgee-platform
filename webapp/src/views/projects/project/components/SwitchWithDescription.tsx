@@ -24,6 +24,7 @@ type Props = {
   onSwitch: () => void;
   checked: boolean;
   disabled: boolean;
+  'data-cy'?: string;
 };
 
 export const SwitchWithDescription = ({
@@ -32,6 +33,7 @@ export const SwitchWithDescription = ({
   onSwitch,
   checked,
   disabled,
+  'data-cy': dataCy,
 }: Props) => {
   return (
     <StyledContainer>
@@ -40,7 +42,11 @@ export const SwitchWithDescription = ({
         {description}
       </StyledDescription>
       <Box gridArea="switch">
-        <Switch checked={checked} onChange={disabled ? undefined : onSwitch} />
+        <Switch
+          checked={checked}
+          onChange={disabled ? undefined : onSwitch}
+          data-cy={dataCy}
+        />
       </Box>
     </StyledContainer>
   );
