@@ -2,8 +2,10 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
+import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
@@ -15,7 +17,7 @@ import java.math.BigDecimal
 class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionsTestData
 
-  fun initTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED) {
+  fun initTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.ENABLED) {
     testData = SuggestionsTestData(suggestionsMode)
     projectSupplier = { testData.relatedProject.self }
     testDataService.saveTestData(testData.root)
@@ -44,6 +46,34 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `creates suggestion`() {
+    initTestData()
+    performProjectAuthPost(
+      "language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion",
+      CreateTranslationSuggestionRequest(
+        translation = "New suggestion"
+      )
+    ).andIsOk.andAssertThatJson {
+      node("translation").isEqualTo("New suggestion")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `refuses plain suggestion on plural key`() {
+    initTestData()
+    performProjectAuthPost(
+      "language/${testData.czechLanguage.tag}/key/${testData.pluralKey.self.id}/suggestion",
+      CreateTranslationSuggestionRequest(
+        translation = "New suggestion"
+      )
+    ).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("invalid_plural_form")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `accepts suggestion`() {
     initTestData()
     performProjectAuthPut(
@@ -56,6 +86,50 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("state").isEqualTo("ACCEPTED")
         }
         node("declined").isArray.hasSize(0)
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `can't accept plain suggestion on plural key`() {
+    initTestData()
+    userAccount = testData.user
+    val firstKey = testData.keys[0].self
+    performProjectAuthPut(
+      "keys/${firstKey.id}/complex-update",
+      ComplexEditKeyDto(
+        name = firstKey.name,
+        isPlural = true
+      )
+    )
+      .andIsOk
+    performProjectAuthPut(
+      "language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
+    )
+      .andIsBadRequest.andAssertThatJson {
+        node("code").isEqualTo("suggestion_must_be_plural")
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `can't accept plural suggestion on plain key`() {
+    initTestData()
+    userAccount = testData.user
+    val pluralKey = testData.pluralKey.self
+    performProjectAuthPut(
+      "keys/${pluralKey.id}/complex-update",
+      ComplexEditKeyDto(
+        name = pluralKey.name,
+        isPlural = false
+      )
+    ).andIsOk
+
+    performProjectAuthPut(
+      "language/${testData.czechLanguage.tag}/key/${pluralKey.id}/suggestion/${testData.pluralSuggestion.self.id}/accept"
+    )
+      .andIsBadRequest.andAssertThatJson {
+        node("code").isEqualTo("suggestion_cant_be_plural")
       }
   }
 
@@ -74,6 +148,23 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         }
         node("declined[0]").isEqualTo(testData.czechSuggestions[1].self.id)
         node("declined").isArray.hasSize(1)
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `accepts suggestion and keeps the reviewed state`() {
+    initTestData()
+    val firstKey = testData.keys[0].self
+    performProjectAuthPut(
+      "language/${testData.czechLanguage.tag}/key/${firstKey.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
+    ).andIsOk
+    performProjectAuthGet("/translations?sort=id&filterKeyId=${firstKey.id}")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys[0].translations.cs") {
+          node("text").isEqualTo("Navržený překlad 0-1")
+          node("state").isEqualTo("REVIEWED")
+        }
       }
   }
 

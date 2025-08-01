@@ -8,6 +8,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.TranslationState
 import kotlin.collections.forEach
 
 class SuggestionsTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED) :
@@ -22,6 +23,8 @@ class SuggestionsTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.DIS
   var keys: MutableList<KeyBuilder> = mutableListOf()
   val czechSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
   val englishSuggestions: MutableList<SuggestionBuilder> = mutableListOf()
+  lateinit var pluralKey: KeyBuilder
+  lateinit var pluralSuggestion: SuggestionBuilder
   lateinit var czechLanguage: Language
 
   init {
@@ -114,8 +117,12 @@ class SuggestionsTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.DIS
       (0 until 4).forEach {
         keys.add(
           addKey(null, "key $it").apply {
-            addTranslation("en", "Translation $it")
-            addTranslation("cs", "Překlad $it")
+            addTranslation("en", "Translation $it").apply {
+              self.state = TranslationState.REVIEWED
+            }
+            addTranslation("cs", "Překlad $it").apply {
+              self.state = TranslationState.REVIEWED
+            }
           },
         )
       }
@@ -152,6 +159,21 @@ class SuggestionsTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.DIS
             this.translation = "Suggested translation 0-2"
           }
         )
+      }
+
+      pluralKey = addKey(null, "pluralKey").apply {
+        self.isPlural = true
+        addTranslation("en", "{value, plural, one {# key} other {# keys}}")
+        addTranslation("cs", "{value, plural, one {# klíč} few {# klíče} other {# klíčů}}")
+      }
+
+      pluralKey.apply {
+        pluralSuggestion = addSuggestion {
+          this.language = czechLanguage
+          this.author = projectTranslator.self
+          this.translation = "{value, plural, one {# překlad} few {# překlady} other {# překladů}}"
+          this.isPlural = true
+        }
       }
     }
   }
