@@ -23,7 +23,7 @@ type TranslationSuggestionModel =
 const StyledContainer = styled('div')`
   display: grid;
   border-radius: 8px;
-  background: ${({ theme }) => theme.palette.tokens.text._states.hover};
+  background: ${({ theme }) => theme.palette.tokens.background.onDefaultGrey};
 `;
 
 const StyledMessage = styled('div')`
@@ -57,7 +57,7 @@ const StyledTranslationSuggestion = styled(TranslationSuggestion)`
   transition: background-color 0.1s ease-in-out;
 
   &:hover {
-    background-color: ${({ theme }) => theme.palette.divider};
+    background-color: ${({ theme }) => theme.palette.tokens.action.selected};
   }
 `;
 
@@ -275,10 +275,10 @@ export const SuggestionsList = ({
                   setShowAll(!showAll);
                   setHidden(false);
                 }}
-                sx={{ height: 34, width: 34, my: '-6px', marginRight: '2px' }}
+                sx={{ height: 34, width: 34, marginRight: '2px' }}
               />
             }
-            sx={{ mr: 0 }}
+            sx={{ mr: 0, my: '-8px' }}
           />
         )}
       </StyledHeader>

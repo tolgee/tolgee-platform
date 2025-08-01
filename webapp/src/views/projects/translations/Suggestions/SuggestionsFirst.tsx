@@ -17,7 +17,7 @@ const StyledExtra = styled('div')`
   padding: 1px 8px;
   align-items: center;
   border-radius: 13px;
-  background: ${({ theme }) => theme.palette.tokens.text._states.hover};
+  background: ${({ theme }) => theme.palette.tokens.background.onDefaultGrey};
   margin-top: 8px;
   margin-left: 8px;
 `;
@@ -26,7 +26,7 @@ const StyledWrapper = styled('div')`
   display: grid;
   gap: 8px;
   border-radius: 8px;
-  background: ${({ theme }) => theme.palette.tokens.text._states.hover};
+  background: ${({ theme }) => theme.palette.tokens.background.onDefaultGrey};
 `;
 
 type Props = {

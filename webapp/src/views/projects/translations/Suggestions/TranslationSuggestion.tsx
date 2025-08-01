@@ -168,10 +168,9 @@ export const TranslationSuggestion = ({
   const showMenu = actions.length > 2;
   const regularItems = showMenu ? actions.slice(0, 1) : actions;
   const menuItems = showMenu ? actions.slice(1) : [];
-
+  const active = suggestion.state === 'ACTIVE';
   return (
     <StyledContainer
-      style={{ opacity: suggestion.state === 'ACTIVE' ? 1 : 0.5 }}
       {...{
         sx,
         className: clsx(
@@ -189,11 +188,11 @@ export const TranslationSuggestion = ({
           />
         }
       >
-        <Box>
+        <Box sx={{ opacity: active ? 1 : 0.5 }}>
           <AvatarImg owner={{ ...suggestion.author, type: 'USER' }} size={24} />
         </Box>
       </Tooltip>
-      <StyledContent>
+      <StyledContent sx={{ opacity: active ? 1 : 0.5 }}>
         <TranslationVisual
           text={suggestion.translation}
           isPlural={suggestion.isPlural}
