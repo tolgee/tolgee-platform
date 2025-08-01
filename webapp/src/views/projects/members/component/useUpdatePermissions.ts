@@ -1,5 +1,6 @@
 import {
   LanguagePermissions,
+  PermissionModelRole,
   PermissionSettingsState,
 } from 'tg.component/PermissionsSettings/types';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -9,6 +10,26 @@ type Props = {
   userId: number;
   projectId: number;
 };
+
+export function languagePermissionsForRole(
+  role: PermissionModelRole,
+  languages: number[] | undefined
+) {
+  let languagePermissions: LanguagePermissions = {};
+  if (role === 'REVIEW') {
+    languagePermissions = {
+      translateLanguages: languages,
+      stateChangeLanguages: languages,
+      suggestLanguages: languages,
+    };
+  } else if (role === 'TRANSLATE') {
+    languagePermissions = {
+      translateLanguages: languages,
+      suggestLanguages: languages,
+    };
+  }
+  return languagePermissions;
+}
 
 export const useUpdatePermissions = ({ userId, projectId }: Props) => {
   const editRole = useApiMutation({
@@ -65,19 +86,12 @@ export const useUpdatePermissions = ({ userId, projectId }: Props) => {
         settingsState.tab === 'basic' &&
         settingsState.basicState.role
       ) {
-        let languagePermissions: LanguagePermissions = {};
         const role = settingsState.basicState.role;
 
-        if (role === 'REVIEW') {
-          languagePermissions = {
-            translateLanguages: settingsState.basicState.languages,
-            stateChangeLanguages: settingsState.basicState.languages,
-          };
-        } else if (role === 'TRANSLATE') {
-          languagePermissions = {
-            translateLanguages: settingsState.basicState.languages,
-          };
-        }
+        const languagePermissions = languagePermissionsForRole(
+          role,
+          settingsState.basicState.languages
+        );
 
         await editRole.mutateAsync({
           path: {

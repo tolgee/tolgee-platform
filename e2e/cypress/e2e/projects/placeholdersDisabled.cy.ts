@@ -22,10 +22,10 @@ describe('disabled placeholders project', () => {
     createProject(name, 'Facebook');
     selectInProjectMenu('Project settings');
     cy.gcy('project-settings-menu-advanced').click();
-    cy.gcy('project-settings-use-tolgee-placeholders-checkbox').click();
+    cy.gcy('project-settings-use-tolgee-placeholders-switch').click();
     waitForGlobalLoading();
     cy.reload();
-    cy.gcy('project-settings-use-tolgee-placeholders-checkbox')
+    cy.gcy('project-settings-use-tolgee-placeholders-switch')
       .find('input')
       .should('not.be.checked');
   });

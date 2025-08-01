@@ -6,10 +6,13 @@ import { ArrowDropDown } from 'tg.component/CustomIcons';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { components } from 'tg.service/apiSchema.generated';
 
-import { useTranslationsSelector } from '../context/TranslationsContext';
-import { SaveProps } from '../useTranslationCell';
+import { useTranslationsSelector } from '../../context/TranslationsContext';
+import { SaveProps } from '../../useTranslationCell';
+import { useProject } from 'tg.hooks/useProject';
+import { getEditorActions } from './getEditorActions';
 
 type TaskModel = components['schemas']['KeyTaskViewModel'];
+type TranslationViewModel = components['schemas']['TranslationViewModel'];
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -23,11 +26,14 @@ const StyledButton = styled(Button)`
 `;
 
 type ControlsProps = {
-  onSave?: (options: SaveProps) => void;
-  onCancel?: () => void;
+  onSave: (options?: SaveProps) => void;
+  onCancel: () => void;
   className?: string;
   tasks: TaskModel[] | undefined;
   currentTask: number | undefined;
+  translation: TranslationViewModel | undefined;
+  languageId: number;
+  editorEmpty: boolean;
 };
 
 export const ControlsEditorMain: React.FC<ControlsProps> = ({
@@ -36,22 +42,32 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
   className,
   tasks,
   currentTask,
-}) => {
+  translation,
+  languageId,
+  editorEmpty,
+}: ControlsProps) => {
+  const project = useProject();
+
+  const actions = getEditorActions({
+    onSave,
+    translation,
+    languageId,
+    tasks,
+    currentTask,
+    project,
+    editorEmpty,
+  });
+
   const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
   const anchorEl = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
-  const task = tasks?.[0];
-  const displayTaskControls =
-    (currentTask === undefined || currentTask === task?.number) &&
-    task &&
-    task.userAssigned &&
-    !task.done &&
-    task.type === 'TRANSLATE';
 
   const withClose = (callback?: () => void) => () => {
     setOpen(false);
     callback?.();
   };
+
+  const [firstAction, ...otherActions] = actions;
 
   return (
     <StyledContainer className={className}>
@@ -64,20 +80,21 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
       >
         <T keyName="translations_cell_cancel" />
       </Button>
-      {displayTaskControls ? (
+      {actions.length > 1 ? (
         <>
           <ButtonGroup size="small" ref={anchorEl as any}>
             <LoadingButton
-              onClick={() => onSave?.({})}
+              onClick={() => firstAction.action()}
+              disabled={firstAction.disabled}
               color="primary"
               variant="contained"
               loading={isEditLoading}
-              data-cy="translations-cell-save-button"
+              data-cy="translations-cell-main-action-button"
               sx={{
                 whiteSpace: 'nowrap',
               }}
             >
-              <T keyName="translations_cell_save_and_done" />
+              {firstAction.label}
             </LoadingButton>
             <StyledButton
               color="primary"
@@ -98,25 +115,28 @@ export const ControlsEditorMain: React.FC<ControlsProps> = ({
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           >
-            <MenuItem
-              onClick={withClose(() =>
-                onSave?.({ preventTaskResolution: true })
-              )}
-            >
-              <T keyName="translations_cell_save_only" />
-            </MenuItem>
+            {otherActions.map((action, i) => (
+              <MenuItem
+                key={i}
+                onClick={withClose(action.action)}
+                disabled={action.disabled}
+              >
+                {action.label}
+              </MenuItem>
+            ))}
           </Menu>
         </>
       ) : (
         <LoadingButton
-          onClick={() => onSave?.({})}
+          onClick={() => firstAction?.action()}
+          disabled={firstAction.disabled}
           color="primary"
           size="small"
           variant="contained"
           loading={isEditLoading}
-          data-cy="translations-cell-save-button"
+          data-cy="translations-cell-main-action-button"
         >
-          <T keyName="translations_cell_save" />
+          {firstAction?.label}
         </LoadingButton>
       )}
     </StyledContainer>

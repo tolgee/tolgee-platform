@@ -3,7 +3,7 @@ import { EditorView } from 'codemirror';
 import { styled } from '@mui/material';
 import { Placeholder } from '@tginternal/editor';
 
-import { ControlsEditorMain } from '../cell/ControlsEditorMain';
+import { ControlsEditorMain } from '../cell/editorMainActions/ControlsEditorMain';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { useTranslationCell } from '../useTranslationCell';
@@ -14,6 +14,7 @@ import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
 import { TaskInfoMessage } from 'tg.ee';
+import { isEmpty } from 'tg.fixtures/plurals';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -178,6 +179,9 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
                 onCancel={() => handleClose(true)}
                 tasks={translationTasks}
                 currentTask={prefilteredTask?.number}
+                translation={translation}
+                languageId={language.id}
+                editorEmpty={isEmpty(editVal.value)}
               />
             ) : (
               <ControlsEditorReadOnly onClose={() => handleClose(true)} />

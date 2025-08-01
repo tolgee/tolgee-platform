@@ -26,6 +26,8 @@ data class KeyWithTranslationsView(
   var tasks: List<KeyTaskView>? = null
 
   companion object {
+    val FIELD_COUNT = 10
+
     fun of(
       queryData: Array<Any?>,
       languages: List<LanguageDto>,
@@ -45,24 +47,33 @@ data class KeyWithTranslationsView(
           contextPresent = data.removeFirst() as Boolean,
         )
 
-      (0 until data.size step 8).forEach { i ->
-        val language = languages[i / 8].tag
+      (0 until data.size step FIELD_COUNT).forEach { i ->
+        val language = languages[i / FIELD_COUNT].tag
 
         val id = data[i] as Long?
-        if (id != null) {
-          result.translations[language] =
-            TranslationView(
-              id = id,
-              text = data[i + 1] as String?,
-              state = (data[i + 2] ?: TranslationState.TRANSLATED) as TranslationState,
-              outdated = data[i + 3] as Boolean,
-              auto = data[i + 4] as Boolean,
-              mtProvider = data[i + 5] as MtServiceType?,
-              commentCount = (data[i + 6]) as Long,
-              unresolvedCommentCount = (data[i + 7]) as Long,
-            )
-        }
+        result.translations[language] =
+          TranslationView(
+            id = id,
+            text = data[i + 1] as String?,
+            state =
+              (
+                data[i + 2]
+                ?: if (id == null) {
+                  TranslationState.UNTRANSLATED
+                } else {
+                  TranslationState.TRANSLATED
+                }
+              ) as TranslationState,
+            outdated = (data[i + 3] ?: false) as Boolean,
+            auto = (data[i + 4] ?: false) as Boolean,
+            mtProvider = data[i + 5] as MtServiceType?,
+            commentCount = (data[i + 6] ?: 0L) as Long,
+            unresolvedCommentCount = (data[i + 7] ?: 0L) as Long,
+            activeSuggestionCount = (data[i + 8] ?: 0L) as Long,
+            totalSuggestionCount = (data[i + 9] ?: 0L) as Long,
+          )
       }
+
       return result
     }
   }
@@ -79,7 +90,7 @@ data class KeyWithTranslationsView(
         val translation = translations[path[1]]
         when (path[2]) {
           TranslationView::text.name -> translation?.text
-          TranslationView::id.name -> translation?.id.toString()
+          TranslationView::id.name -> translation?.id?.toString()
           TranslationView::state.name -> translation?.state?.name
           else -> null
         }

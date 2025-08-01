@@ -133,6 +133,14 @@ export const authProviderChange = generateTestDataObject(
 
 export const labelsTestData = generateTestDataObject('label');
 
+export const suggestionsTestData = {
+  ...generateTestDataObject('suggestions'),
+  generateWithEnabledSuggestions: () =>
+    internalFetch(
+      `e2e-data/suggestions/generate-suggestions-enabled`
+    ) as Cypress.Chainable<Cypress.Response<TestDataStandardResponse>>,
+};
+
 export const sensitiveOperationProtectionTestData = {
   ...generateTestDataObject('sensitive-operation-protection'),
   getOtp: () =>

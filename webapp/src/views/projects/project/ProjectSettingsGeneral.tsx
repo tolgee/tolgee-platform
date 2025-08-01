@@ -10,21 +10,14 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useLeaveProject } from '../useLeaveProject';
 import { TextField } from 'tg.component/common/form/fields/TextField';
-import { Checkbox } from 'tg.component/common/form/fields/Checkbox';
 import { FieldLabel } from 'tg.component/FormField';
-import { Box, FormControlLabel, styled, Typography } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
-import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
-import { DOCS_ROOT } from 'tg.constants/docLinks';
-import { DefaultNamespaceSelect } from './components/DefaultNamespaceSelect';
-import { useField } from 'formik';
 
 type FormValues = {
   name: string;
   description: string | undefined;
   baseLanguageId: number | undefined;
-  useNamespaces: boolean | false;
-  defaultNamespaceId: number | '';
 };
 
 const StyledContainer = styled('div')`
@@ -53,31 +46,14 @@ const LanguageSelect = () => {
   );
 };
 
-const NamespaceSelect = () => {
-  const [useNamespacesField] = useField('useNamespaces');
-  const { allNamespacesWithNone } = useProjectNamespaces();
-
-  return (
-    <DefaultNamespaceSelect
-      label={<T keyName="project_settings_base_namespace" />}
-      name="defaultNamespaceId"
-      namespaces={allNamespacesWithNone}
-      hidden={!useNamespacesField.value}
-    />
-  );
-};
-
 export const ProjectSettingsGeneral = () => {
   const project = useProject();
   const { leave, isLeaving } = useLeaveProject();
-  const { defaultNamespace } = useProjectNamespaces();
 
   const initialValues = {
     name: project.name,
     baseLanguageId: project.baseLanguage?.id,
     description: project.description ?? '',
-    useNamespaces: project.useNamespaces ?? false,
-    defaultNamespaceId: defaultNamespace?.id ?? '',
   } satisfies FormValues;
 
   const updateLoadable = useApiMutation({
@@ -90,23 +66,17 @@ export const ProjectSettingsGeneral = () => {
   });
 
   const updateProjectSettings = (values: FormValues) => {
-    const data = {
-      ...values,
-      description: values.description || undefined,
-      useNamespaces: values.useNamespaces || false,
-      defaultNamespaceId:
-        values.defaultNamespaceId === 0 ? undefined : values.defaultNamespaceId,
-    };
     return updateLoadable.mutateAsync({
       path: { projectId: project.id },
       content: {
         'application/json': {
-          ...data,
-          defaultNamespaceId:
-            data.defaultNamespaceId === ''
-              ? undefined
-              : data.defaultNamespaceId,
           icuPlaceholders: project.icuPlaceholders,
+          suggestionsMode: project.suggestionsMode,
+          translationProtection: project.translationProtection,
+          defaultNamespaceId: project.defaultNamespace?.id,
+          useNamespaces: project.useNamespaces,
+          ...values,
+          description: values.description || undefined,
         },
       },
     });
@@ -170,36 +140,6 @@ export const ProjectSettingsGeneral = () => {
             <ProjectLanguagesProvider>
               <LanguageSelect />
             </ProjectLanguagesProvider>
-            <Box display="grid">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="useNamespaces"
-                    disabled={updateLoadable.isLoading}
-                  />
-                }
-                label={<T keyName="project_settings_use_namespaces" />}
-                data-cy="project-settings-use-namespaces-checkbox"
-              />
-              <Typography variant="caption">
-                {
-                  <T
-                    keyName="project_settings_use_namespaces_hint"
-                    params={{
-                      a: (
-                        <a
-                          href={`${DOCS_ROOT}/js-sdk/namespaces`}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{ color: '#D81B5F' }}
-                        />
-                      ),
-                    }}
-                  />
-                }
-              </Typography>
-            </Box>
-            <NamespaceSelect />
           </Box>
         </StandardForm>
       </Box>

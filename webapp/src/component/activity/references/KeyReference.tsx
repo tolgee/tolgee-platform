@@ -26,6 +26,17 @@ export const KeyReference: React.FC<Props> = ({ data }) => {
       })
     : undefined;
 
+  const includedLanguages = new Set();
+  const uniqueLanguages =
+    data.languages?.filter((l) => {
+      if (includedLanguages.has(l.tag)) {
+        return false;
+      } else {
+        includedLanguages.add(l.tag);
+        return true;
+      }
+    }) || [];
+
   const content = (
     <>
       <span className="referenceText">
@@ -35,7 +46,7 @@ export const KeyReference: React.FC<Props> = ({ data }) => {
         {data.keyName}
         {data.languages && ' '}
       </span>
-      {data.languages?.map((l, i) => (
+      {uniqueLanguages.map((l, i) => (
         <React.Fragment key={i}>
           <Tooltip title={`${l.name} (${l.tag})`}>
             <span>
