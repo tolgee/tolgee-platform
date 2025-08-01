@@ -18,7 +18,7 @@ const StyledExtra = styled('div')`
   align-items: center;
   border-radius: 13px;
   background: ${({ theme }) => theme.palette.tokens.text._states.hover};
-  margin-top: 10px;
+  margin-top: 8px;
   margin-left: 8px;
 `;
 

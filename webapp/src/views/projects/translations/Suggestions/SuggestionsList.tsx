@@ -275,6 +275,7 @@ export const SuggestionsList = ({
                   setShowAll(!showAll);
                   setHidden(false);
                 }}
+                sx={{ height: 34, width: 34, my: '-6px', marginRight: '2px' }}
               />
             }
             sx={{ mr: 0 }}
