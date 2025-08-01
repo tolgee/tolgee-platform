@@ -9,7 +9,6 @@ type TranslationSuggestionSimpleModel =
 const StyledContainer = styled('div')`
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 8px;
   align-items: start;
 `;
 
@@ -20,11 +19,11 @@ const StyledExtra = styled('div')`
   border-radius: 13px;
   background: ${({ theme }) => theme.palette.tokens.text._states.hover};
   margin-top: 10px;
+  margin-left: 8px;
 `;
 
 const StyledWrapper = styled('div')`
   display: grid;
-  padding: 6px 8px;
   gap: 8px;
   border-radius: 8px;
   background: ${({ theme }) => theme.palette.tokens.text._states.hover};
