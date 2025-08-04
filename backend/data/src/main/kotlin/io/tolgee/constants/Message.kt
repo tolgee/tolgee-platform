@@ -331,6 +331,7 @@ enum class Message {
   URL_NOT_VALID,
   QA_CHECKS_NOT_ENABLED,
   PLAN_MIGRATION_NOT_FOUND,
+  PLAN_HAS_MIGRATIONS,
   ;
 
   val code: String
