@@ -28,7 +28,7 @@ export interface paths {
     delete: operations["deletePlanMigration_1"];
   };
   "/v2/administration/billing/cloud-plans/migration/{migrationId}/subscriptions": {
-    get: operations["getPlanMigrationSubscriptions"];
+    get: operations["getPlanMigrationSubscriptions_1"];
   };
   "/v2/administration/billing/cloud-plans/{planId}": {
     get: operations["getPlan_1"];
@@ -59,6 +59,9 @@ export interface paths {
     get: operations["getPlanMigration"];
     put: operations["updatePlanMigration"];
     delete: operations["deletePlanMigration"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}/subscriptions": {
+    get: operations["getPlanMigrationSubscriptions"];
   };
   "/v2/administration/billing/self-hosted-ee-plans/{planId}": {
     get: operations["getPlan"];
@@ -363,6 +366,8 @@ export interface components {
       ids: components["schemas"]["SubscriptionId"][];
     };
     CloudPlanMigrationHistoryModel: {
+      /** Format: int64 */
+      migratedAt: number;
       organizationName: string;
       organizationSlug: string;
       originPlan: string;
@@ -1002,6 +1007,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelSelfHostedEePlanMigrationHistoryModel: {
+      _embedded?: {
+        selfHostedEePlanMigrationHistoryModelList?: components["schemas"]["SelfHostedEePlanMigrationHistoryModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelSimpleOrganizationModel: {
       _embedded?: {
         organizations?: components["schemas"]["SimpleOrganizationModel"][];
@@ -1223,6 +1234,15 @@ export interface components {
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
       stripeProductId: string;
+    };
+    SelfHostedEePlanMigrationHistoryModel: {
+      /** Format: int64 */
+      migratedAt: number;
+      organizationName: string;
+      organizationSlug: string;
+      originPlan: string;
+      plan: string;
+      status: "COMPLETED" | "SCHEDULED";
     };
     SelfHostedEePlanModel: {
       enabledFeatures: (
@@ -1911,7 +1931,7 @@ export interface operations {
       };
     };
   };
-  getPlanMigrationSubscriptions: {
+  getPlanMigrationSubscriptions_1: {
     parameters: {
       path: {
         migrationId: number;
@@ -2583,6 +2603,61 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
+  getPlanMigrationSubscriptions: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelSelfHostedEePlanMigrationHistoryModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
