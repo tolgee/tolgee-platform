@@ -72,6 +72,10 @@ class EmailTestUtil {
     verify(javaMailSender).send(any<MimeMessage>())
   }
 
+  fun verifyTimesEmailSent(num: Int) {
+    verify(javaMailSender, times(num)).send(any<MimeMessage>())
+  }
+
   val assertEmailTo: AbstractStringAssert<*>
     get() {
       @Suppress("CAST_NEVER_SUCCEEDS")
