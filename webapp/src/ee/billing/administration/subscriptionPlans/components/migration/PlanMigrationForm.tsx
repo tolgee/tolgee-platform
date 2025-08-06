@@ -10,6 +10,7 @@ import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Switch } from 'tg.component/common/form/fields/Switch';
 import { PlanType } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/types';
 import { confirmation } from 'tg.hooks/confirmation';
+import { LabelHint } from 'tg.component/common/LabelHint';
 
 type CloudPlanMigrationModel = components['schemas']['CloudPlanMigrationModel'];
 type SelfHostedEePlanMigrationModel =
@@ -105,9 +106,14 @@ export const PlanMigrationForm = ({
             hiddenPlans={[selectedSourcePlan]}
           />
         </Box>
-        <Typography mb={1}>
-          {t('administration_plan_migration_run_configuration')}
-        </Typography>
+        <Box display="flex" alignItems="center" mb={1}>
+          <LabelHint title={t('administration_plan_migration_timing_hint')}>
+            <Typography>
+              {t('administration_plan_migration_run_configuration')}
+            </Typography>
+          </LabelHint>
+        </Box>
+
         <Box display="grid" mb={2} width="fit-content">
           <TextField
             name="monthlyOffsetDays"
@@ -129,24 +135,26 @@ export const PlanMigrationForm = ({
           />
         </Box>
         <Box display="flex" justifyContent="space-between" mt={4} gap={2}>
-          {migration && isUpdate && (
-            <Button
-              color="error"
-              data-cy="delete-plan-migration-button"
-              variant={'outlined'}
-              onClick={() =>
-                confirmation({
-                  onConfirm: () => onDelete?.(migration.id),
-                  message: t(
-                    'administration_plan_migration_delete_confirmation'
-                  ),
-                  confirmButtonText: t('global_delete_button'),
-                })
-              }
-            >
-              <T keyName="administration_plan_migration_delete_button" />
-            </Button>
-          )}
+          <Box>
+            {migration && isUpdate && (
+              <Button
+                color="error"
+                data-cy="delete-plan-migration-button"
+                variant={'outlined'}
+                onClick={() =>
+                  confirmation({
+                    onConfirm: () => onDelete?.(migration.id),
+                    message: t(
+                      'administration_plan_migration_delete_confirmation'
+                    ),
+                    confirmButtonText: t('global_delete_button'),
+                  })
+                }
+              >
+                <T keyName="administration_plan_migration_delete_button" />
+              </Button>
+            )}
+          </Box>
           <LoadingButton
             variant="contained"
             color="primary"
