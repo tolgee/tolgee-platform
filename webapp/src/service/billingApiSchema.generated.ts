@@ -365,15 +365,6 @@ export interface components {
     CancelLocalSubscriptionsRequest: {
       ids: components["schemas"]["SubscriptionId"][];
     };
-    CloudPlanMigrationHistoryModel: {
-      /** Format: int64 */
-      migratedAt: number;
-      organizationName: string;
-      organizationSlug: string;
-      originPlan: string;
-      plan: string;
-      status: "COMPLETED" | "SCHEDULED";
-    };
     CloudPlanMigrationModel: {
       enabled: boolean;
       /** Format: int64 */
@@ -876,7 +867,8 @@ export interface components {
         | "glossary_non_translatable_term_cannot_be_translated"
         | "llm_content_filter"
         | "llm_provider_empty_response"
-        | "plan_migration_not_found";
+        | "plan_migration_not_found"
+        | "plan_has_migrations";
       params?: { [key: string]: unknown }[];
     };
     ExampleItem: {
@@ -989,12 +981,6 @@ export interface components {
       /** Format: int64 */
       totalPages?: number;
     };
-    PagedModelCloudPlanMigrationHistoryModel: {
-      _embedded?: {
-        cloudPlanMigrationHistoryModelList?: components["schemas"]["CloudPlanMigrationHistoryModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
     PagedModelInvoiceModel: {
       _embedded?: {
         invoices?: components["schemas"]["InvoiceModel"][];
@@ -1007,9 +993,9 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    PagedModelSelfHostedEePlanMigrationHistoryModel: {
+    PagedModelPlanMigrationHistoryModel: {
       _embedded?: {
-        selfHostedEePlanMigrationHistoryModelList?: components["schemas"]["SelfHostedEePlanMigrationHistoryModel"][];
+        planMigrationHistoryModelList?: components["schemas"]["PlanMigrationHistoryModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -1113,6 +1099,17 @@ export interface components {
       seats: number;
       /** Format: int64 */
       translations: number;
+    };
+    PlanMigrationHistoryModel: {
+      /** Format: int64 */
+      finalizedAt?: number;
+      organizationName: string;
+      organizationSlug: string;
+      originPlan: string;
+      plan: string;
+      /** Format: int64 */
+      scheduledAt: number;
+      status: "COMPLETED" | "SCHEDULED";
     };
     PlanMigrationRequest: {
       enabled: boolean;
@@ -1234,15 +1231,6 @@ export interface components {
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
       stripeProductId: string;
-    };
-    SelfHostedEePlanMigrationHistoryModel: {
-      /** Format: int64 */
-      migratedAt: number;
-      organizationName: string;
-      organizationSlug: string;
-      originPlan: string;
-      plan: string;
-      status: "COMPLETED" | "SCHEDULED";
     };
     SelfHostedEePlanModel: {
       enabledFeatures: (
@@ -1949,7 +1937,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelCloudPlanMigrationHistoryModel"];
+          "application/json": components["schemas"]["PagedModelPlanMigrationHistoryModel"];
         };
       };
       /** Bad Request */
@@ -2655,7 +2643,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelSelfHostedEePlanMigrationHistoryModel"];
+          "application/json": components["schemas"]["PagedModelPlanMigrationHistoryModel"];
         };
       };
       /** Bad Request */
