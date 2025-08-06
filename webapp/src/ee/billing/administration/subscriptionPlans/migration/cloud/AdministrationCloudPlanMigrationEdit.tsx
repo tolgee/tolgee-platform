@@ -160,7 +160,7 @@ export const AdministrationCloudPlanMigrationEdit = () => {
               <TableCell>{item.originPlan}</TableCell>
               <TableCell>{item.plan}</TableCell>
               <TableCell>
-                {formatDate(item.migratedAt, {
+                {formatDate(item.scheduledAt, {
                   timeZone: 'UTC',
                   dateStyle: 'short',
                   timeStyle: 'short',
