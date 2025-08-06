@@ -2,7 +2,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { Chip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
-type Status = components['schemas']['CloudPlanMigrationHistoryModel']['status'];
+type Status = components['schemas']['PlanMigrationHistoryModel']['status'];
 
 type Props = {
   status: Status;
