@@ -16,6 +16,7 @@ export interface GenericPlanSelector<T extends GenericPlanType> {
   selectProps?: React.ComponentProps<typeof SearchSelect>[`SelectProps`];
   plans?: T[];
   hiddenPlans?: number[];
+  dataCy?: string;
 }
 
 export const GenericPlanSelector = <T extends GenericPlanType>({
@@ -25,6 +26,7 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   onPlanChange,
   plans,
   hiddenPlans,
+  dataCy = 'administration-plan-selector',
 }: GenericPlanSelector<T>) => {
   if (!plans) {
     return (
@@ -60,7 +62,7 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
 
   return (
     <SearchSelect
-      dataCy="administration-plan-selector"
+      dataCy={dataCy}
       SelectProps={selectProps}
       items={selectItems}
       value={value}
