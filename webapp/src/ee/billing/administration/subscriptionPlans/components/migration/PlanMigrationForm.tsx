@@ -88,7 +88,7 @@ export const PlanMigrationForm = ({
               required: true,
               disabled: isUpdate,
             }}
-            data-cy="source-plan-selector"
+            dataCy="source-plan-selector"
             onPlanChange={(plan) => setSelectedSourcePlan(plan.id)}
             hiddenPlans={[selectedTargetPlan]}
             filterHasMigration={false}
@@ -102,7 +102,7 @@ export const PlanMigrationForm = ({
               label: t('administration_plan_migration_target_plan'),
               required: true,
             }}
-            data-cy="target-plan-selector"
+            dataCy="target-plan-selector"
             onPlanChange={(plan) => setSelectedTargetPlan(plan.id)}
             type={planType}
             hiddenPlans={[selectedSourcePlan]}

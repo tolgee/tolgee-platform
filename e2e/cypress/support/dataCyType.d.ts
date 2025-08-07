@@ -40,13 +40,11 @@ declare namespace DataCy {
         "administration-cloud-plan-field-select-existing-stripe-product" |
         "administration-cloud-plan-field-type" |
         "administration-cloud-plan-field-type-item" |
-        "administration-cloud-plans-create-migration" |
         "administration-cloud-plans-item" |
         "administration-cloud-plans-item-archive" |
         "administration-cloud-plans-item-archived-badge" |
         "administration-cloud-plans-item-delete" |
         "administration-cloud-plans-item-edit" |
-        "administration-cloud-plans-item-is-migrating-badge" |
         "administration-cloud-plans-item-public-badge" |
         "administration-create-custom-plan-button" |
         "administration-customize-plan-switch" |
@@ -82,6 +80,9 @@ declare namespace DataCy {
         "administration-plan-field-stripe-product" |
         "administration-plan-field-stripe-product-name" |
         "administration-plan-selector" |
+        "administration-plans-create-migration" |
+        "administration-plans-edit-migration" |
+        "administration-plans-item-is-migrating-badge" |
         "administration-subscriptions-active-self-hosted-ee-plan" |
         "administration-subscriptions-assign-plan-save-button" |
         "administration-subscriptions-cloud-plan-name" |
@@ -571,6 +572,7 @@ declare namespace DataCy {
         "permissions-menu-save" |
         "plan-limit-dialog-close" |
         "plan-limit-exceeded-popover" |
+        "plan-migration-tooltip-detail" |
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |

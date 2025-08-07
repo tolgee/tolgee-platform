@@ -123,7 +123,7 @@ export const AdministrationEePlansView = () => {
             component={Link}
             color="warning"
             to={LINKS.ADMINISTRATION_BILLING_EE_PLAN_MIGRATION_CREATE.build()}
-            data-cy="administration-cloud-plans-create-migration"
+            data-cy="administration-plans-create-migration"
           >
             {t('administration_cloud_plan_create_migration')}
           </Button>,

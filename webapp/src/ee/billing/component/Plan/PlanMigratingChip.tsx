@@ -79,7 +79,7 @@ export const PlanMigratingChip = ({
             <SpinnerProgress size={24} />
           </Box>
         ) : info ? (
-          <Box p={1}>
+          <Box p={1} data-cy="plan-migration-tooltip-detail">
             <Box display="flex" gap={1}>
               <Typography variant={'h6'} mb={2}>
                 {t('administration_plan_migration_details')}
@@ -195,7 +195,7 @@ export const PlanMigratingChip = ({
                 to={configureLink.build({
                   migrationId: info.id,
                 })}
-                data-cy="administration-cloud-plans-create-migration"
+                data-cy="administration-plans-edit-migration"
               >
                 {t('global_configure')}
               </Button>
@@ -211,7 +211,7 @@ export const PlanMigratingChip = ({
       }
     >
       <Chip
-        data-cy="administration-cloud-plans-item-is-migrating-badge"
+        data-cy="administration-plans-item-is-migrating-badge"
         size="small"
         color={isEnabled ? 'warning' : 'default'}
         sx={{ cursor: 'pointer' }}
