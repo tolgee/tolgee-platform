@@ -1,8 +1,5 @@
-FROM postgres:13.21-alpine3.22
+FROM eclipse-temurin:21-alpine
 
-ENTRYPOINT []
-
-RUN apk --no-cache add openjdk21
 RUN apk --no-cache add libxml2
 
 #############
