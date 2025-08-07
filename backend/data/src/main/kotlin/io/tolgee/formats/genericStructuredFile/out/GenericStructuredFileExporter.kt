@@ -13,13 +13,13 @@ import java.io.InputStream
 class GenericStructuredFileExporter(
   val translations: List<ExportTranslationView>,
   val exportParams: IExportParams,
-  val fileExtension: String,
   private val projectIcuPlaceholdersSupport: Boolean,
   private val objectMapper: ObjectMapper,
   private val rootKeyIsLanguageTag: Boolean = false,
   private val supportArrays: Boolean,
   private val messageFormat: ExportMessageFormat,
   private val customPrettyPrinter: CustomPrettyPrinter,
+  private val filePathProvider: ExportFilePathProvider,
 ) : FileExporter {
   val result: LinkedHashMap<String, StructureModelBuilder> = LinkedHashMap()
 
@@ -149,10 +149,5 @@ class GenericStructuredFileExporter(
     }
   }
 
-  private val pathProvider by lazy {
-    ExportFilePathProvider(
-      exportParams,
-      fileExtension,
-    )
-  }
+  private val pathProvider = filePathProvider
 }

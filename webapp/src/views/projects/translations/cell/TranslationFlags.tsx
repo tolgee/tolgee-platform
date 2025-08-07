@@ -1,5 +1,5 @@
 import { Box, styled } from '@mui/material';
-import { Flag02, XClose } from '@untitled-ui/icons-react';
+import { Flag02 } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -10,20 +10,14 @@ import { TranslationFlagIcon } from 'tg.component/TranslationFlagIcon';
 
 import { useTranslationsActions } from '../context/TranslationsContext';
 import { TranslationTaskIndicator } from 'tg.ee';
+import { CloseButton } from 'tg.component/common/buttons/CloseButton';
+import React from 'react';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 
 const StyledWrapper = styled('div')`
   display: flex;
-  gap: 2px;
-`;
-
-const StyledClearButton = styled(XClose)`
-  padding-left: 2px;
-  width: 18px;
-  height: 18px;
-  display: none;
 `;
 
 const ActiveFlagCircle = styled(Flag02)`
@@ -34,19 +28,19 @@ export const StyledTranslationFlagsContainer = styled(Box)`
   display: inline-flex;
   flex-grow: 0;
   align-items: center;
-  height: 20px;
+  height: 24px;
   border: 1px solid transparent;
-  padding: 0px 4px;
-  margin-left: -4px;
   border-radius: 10px;
+  padding: 3px 8px;
+
+  &:hover {
+    border: 1px solid ${({ theme }) => theme.palette.tokens.border.secondary};
+  }
 
   &.clickDisabled {
     cursor: default;
   }
 
-  &:hover .clearButton {
-    display: block;
-  }
   &:hover {
     border: 1px solid ${({ theme }) => theme.palette.divider1};
     transition: all 0.1s;
@@ -123,29 +117,37 @@ export const TranslationFlags: React.FC<Props> = ({
     <StyledWrapper className={className}>
       {task && <TranslationTaskIndicator task={task} />}
       {translation?.auto && (
-        <StyledTranslationFlagsContainer data-cy="translations-auto-translated-indicator">
-          <AutoTranslationIcon provider={translation.mtProvider} />
-          <StyledClearButton
-            role="button"
-            onClick={handleClearAutoTranslated}
-            data-cy="translations-auto-translated-clear-button"
-            className="clearButton"
-          />
-        </StyledTranslationFlagsContainer>
+        <CloseButton
+          data-cy="translations-auto-translated-clear-button"
+          onClose={(e) =>
+            handleClearAutoTranslated(
+              e as React.MouseEvent<SVGSVGElement, MouseEvent>
+            )
+          }
+          xs
+        >
+          <StyledTranslationFlagsContainer data-cy="translations-auto-translated-indicator">
+            <AutoTranslationIcon provider={translation.mtProvider} />
+          </StyledTranslationFlagsContainer>
+        </CloseButton>
       )}
       {translation?.outdated && (
-        <StyledTranslationFlagsContainer data-cy="translations-outdated-indicator">
-          <TranslationFlagIcon
-            tooltip={t('translations_cell_outdated')}
-            icon={<ActiveFlagCircle />}
-          />
-          <StyledClearButton
-            role="button"
-            onClick={handleClearOutdated}
-            data-cy="translations-outdated-clear-button"
-            className="clearButton"
-          />
-        </StyledTranslationFlagsContainer>
+        <CloseButton
+          data-cy="translations-outdated-clear-button"
+          onClose={(e) =>
+            handleClearOutdated(
+              e as React.MouseEvent<SVGSVGElement, MouseEvent>
+            )
+          }
+          xs
+        >
+          <StyledTranslationFlagsContainer data-cy="translations-outdated-indicator">
+            <TranslationFlagIcon
+              tooltip={t('translations_cell_outdated')}
+              icon={<ActiveFlagCircle />}
+            />
+          </StyledTranslationFlagsContainer>
+        </CloseButton>
       )}
     </StyledWrapper>
   );

@@ -1,7 +1,6 @@
 package io.tolgee.formats.xliff.out
 
 import io.tolgee.dtos.IExportParams
-import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.xliff.model.XliffFile
@@ -20,9 +19,8 @@ class XliffFileExporter(
   baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: ILanguage,
   val projectIcuPlaceholdersSupport: Boolean,
+  private val filePathProvider: ExportFilePathProvider,
 ) : FileExporter {
-  val fileExtension: String = ExportFormat.XLIFF.extension
-
   /**
    * Path -> Xliff Model
    */
@@ -100,12 +98,5 @@ class XliffFileExporter(
         )
       }
     }.files.first()
-  }
-
-  private val filePathProvider by lazy {
-    ExportFilePathProvider(
-      exportParams,
-      fileExtension,
-    )
   }
 }

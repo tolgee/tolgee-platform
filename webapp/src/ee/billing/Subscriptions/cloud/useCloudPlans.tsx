@@ -49,6 +49,7 @@ export const useCloudPlans = () => {
       'SSO',
       'AI_PROMPT_CUSTOMIZATION',
       'GLOSSARY',
+      'TRANSLATION_LABELS',
     ] as const satisfies PlanType['enabledFeatures'],
     free: false,
     hasYearlyPrice: false,

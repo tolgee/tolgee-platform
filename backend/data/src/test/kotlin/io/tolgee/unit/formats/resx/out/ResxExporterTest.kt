@@ -3,6 +3,8 @@ package io.tolgee.unit.formats.resx.out
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.resx.out.ResxExporter
+import io.tolgee.service.export.ExportFilePathProvider
+import io.tolgee.service.export.ExportFileStructureTemplateProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assert
 import io.tolgee.util.buildExportTranslationList
@@ -271,6 +273,10 @@ class ResxExporterTest {
       translations = translations,
       exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
+      pathProvider = ExportFilePathProvider(
+        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+        extension = params.format?.extension ?: "resx",
+      ),
     )
   }
 

@@ -186,6 +186,13 @@ class TranslationsTestData {
     }
   }
 
+  fun addTwoNamespacesTranslations() {
+    projectBuilder.apply {
+      addKey("ns-1", "1").addTranslation("en", "1")
+      addKey("ns-2", "1").addTranslation("en", "2")
+    }
+  }
+
   fun addKeyWithDot() {
     projectBuilder.addKey {
       name = "key.with.dots"

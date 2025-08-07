@@ -1,3 +1,38 @@
+## [3.125.1](https://github.com/tolgee/tolgee-platform/compare/v3.125.0...v3.125.1) (2025-07-30)
+
+
+### Bug Fixes
+
+* Server configuration property generation ([#3184](https://github.com/tolgee/tolgee-platform/issues/3184)) ([384b424](https://github.com/tolgee/tolgee-platform/commit/384b4243a76aa89d046515472f90969f197475ba))
+
+# [3.125.0](https://github.com/tolgee/tolgee-platform/compare/v3.124.0...v3.125.0) (2025-07-28)
+
+
+### Features
+
+* labels release preparation ([#3182](https://github.com/tolgee/tolgee-platform/issues/3182)) ([8bec72c](https://github.com/tolgee/tolgee-platform/commit/8bec72c2853df8f26a14c985d946b2c536d52c77))
+
+# [3.124.0](https://github.com/tolgee/tolgee-platform/compare/v3.123.17...v3.124.0) (2025-07-28)
+
+
+### Features
+
+* translation labels ([#3181](https://github.com/tolgee/tolgee-platform/issues/3181)) ([c9e6b6d](https://github.com/tolgee/tolgee-platform/commit/c9e6b6dce9c31143794684f8227b7f1fa00adbfb)), closes [#3075](https://github.com/tolgee/tolgee-platform/issues/3075)
+
+## [3.123.17](https://github.com/tolgee/tolgee-platform/compare/v3.123.16...v3.123.17) (2025-07-23)
+
+
+### Bug Fixes
+
+* namespace collision export behavior ([#3166](https://github.com/tolgee/tolgee-platform/issues/3166)) ([f08ab11](https://github.com/tolgee/tolgee-platform/commit/f08ab112f5713c19d91559a2d6858eb1d0134de4))
+
+## [3.123.16](https://github.com/tolgee/tolgee-platform/compare/v3.123.15...v3.123.16) (2025-07-08)
+
+
+### Bug Fixes
+
+* ImportFile issue: handle propely when empty string is passed as issue param value ([#3149](https://github.com/tolgee/tolgee-platform/issues/3149)) ([a60467d](https://github.com/tolgee/tolgee-platform/commit/a60467d22a71245047907c563e2d8b1fcb579b61))
+
 ## [3.123.15](https://github.com/tolgee/tolgee-platform/compare/v3.123.14...v3.123.15) (2025-07-03)
 
 

@@ -53,6 +53,7 @@ export const PlansSelfHostedList: FC<BillingPlansProps> = ({
       'SSO',
       'AI_PROMPT_CUSTOMIZATION',
       'GLOSSARY',
+      'TRANSLATION_LABELS',
     ] as const satisfies SelfHostedEePlanModel['enabledFeatures'],
     includedUsage: {
       seats: -2,

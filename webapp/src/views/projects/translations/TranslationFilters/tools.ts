@@ -21,6 +21,7 @@ export type FiltersInternal = {
   filterHasNoScreenshot?: boolean;
   filterHasUnresolvedComments?: boolean;
   filterHasComments?: boolean;
+  filterLabel?: string[];
 
   /*
    * Specifies which languages will be considered when filtering by translation state
@@ -40,7 +41,8 @@ export type AddParams =
   | ['filterHasScreenshot']
   | ['filterHasNoScreenshot']
   | ['filterHasUnresolvedComments']
-  | ['filterHasComments'];
+  | ['filterHasComments']
+  | ['filterLabel', string];
 
 export type FilterActions = {
   addFilter: (...params: AddParams) => void;
