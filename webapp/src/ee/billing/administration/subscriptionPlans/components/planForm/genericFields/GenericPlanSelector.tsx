@@ -19,6 +19,7 @@ export interface GenericPlanSelector<T extends GenericPlanType> {
   plans?: T[];
   loading: boolean;
   hiddenPlans?: number[];
+  dataCy?: string;
 }
 
 export const GenericPlanSelector = <T extends GenericPlanType>({
@@ -29,6 +30,7 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   plans,
   loading,
   hiddenPlans,
+  dataCy = 'administration-plan-selector',
 }: GenericPlanSelector<T>) => {
   const sortedPlans = useSortPlans(plans);
 
@@ -74,7 +76,7 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
 
   return (
     <SearchSelect
-      dataCy="administration-plan-selector"
+      dataCy={dataCy}
       SelectProps={selectProps}
       items={selectItems}
       value={value}
