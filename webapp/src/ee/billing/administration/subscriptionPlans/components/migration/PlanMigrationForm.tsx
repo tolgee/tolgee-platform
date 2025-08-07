@@ -11,6 +11,7 @@ import { Switch } from 'tg.component/common/form/fields/Switch';
 import { PlanType } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/types';
 import { confirmation } from 'tg.hooks/confirmation';
 import { LabelHint } from 'tg.component/common/LabelHint';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 type CloudPlanMigrationModel = components['schemas']['CloudPlanMigrationModel'];
 type SelfHostedEePlanMigrationModel =
@@ -66,6 +67,7 @@ export const PlanMigrationForm = ({
       initialValues={defaultValues}
       enableReinitialize
       onSubmit={onSubmit}
+      validationSchema={Validation.PLAN_MIRATION_FORM}
     >
       <Form>
         <Box mt={2}>
@@ -122,7 +124,6 @@ export const PlanMigrationForm = ({
             InputProps={{
               endAdornment: <Box>{t('global_days')}</Box>,
             }}
-            required
           />
           <TextField
             name="yearlyOffsetDays"
@@ -131,7 +132,6 @@ export const PlanMigrationForm = ({
             InputProps={{
               endAdornment: <Box>{t('global_days')}</Box>,
             }}
-            required
           />
         </Box>
         <Box display="flex" justifyContent="space-between" mt={4} gap={2}>
