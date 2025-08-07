@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21-alpine
 
-RUN apk --no-cache add libxml2
+RUN apk --no-cache add libxml2 bash
 
 #############
 ### Tolgee  #

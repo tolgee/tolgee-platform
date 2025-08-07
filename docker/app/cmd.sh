@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 ARCH=`uname -m`
 if [ "$ARCH" = "aarch64" ]; then
