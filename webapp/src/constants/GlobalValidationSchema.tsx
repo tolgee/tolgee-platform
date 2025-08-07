@@ -39,6 +39,14 @@ Yup.setLocale({
       />
     ),
   },
+  number: {
+    min: ({ min }) => (
+      <T
+        keyName="validation_schema_number_min_message"
+        params={{ min: min.toString() }}
+      />
+    ),
+  },
 });
 
 export class Validation {
@@ -507,6 +515,12 @@ export class Validation {
       caseSensitive: Yup.boolean(),
       abbreviation: Yup.boolean(),
       forbidden: Yup.boolean(),
+    });
+
+  static readonly PLAN_MIRATION_FORM = () =>
+    Yup.object().shape({
+      monthlyOffsetDays: Yup.number().required().min(0),
+      yearlyOffsetDays: Yup.number().required().min(0),
     });
 }
 
