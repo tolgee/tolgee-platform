@@ -187,4 +187,14 @@ class TranslationSuggestionServiceEeImpl(
 
     translationSuggestionRepository.delete(suggestion)
   }
+
+  override fun deleteAllByLanguage(id: Long) {
+    val suggestions = translationSuggestionRepository.getAllByLanguage(id)
+    translationSuggestionRepository.deleteAll(suggestions)
+  }
+
+  override fun deleteAllByProject(id: Long) {
+    val suggestions = translationSuggestionRepository.getAllByProject(id)
+    translationSuggestionRepository.deleteAll(suggestions)
+  }
 }
