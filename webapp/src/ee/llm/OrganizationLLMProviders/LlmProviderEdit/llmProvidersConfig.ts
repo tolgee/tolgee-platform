@@ -34,6 +34,13 @@ export const llmProvidersDefaults = (
 });
 
 export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
+  const reasoningEffort: Partial<ProviderOptions> = {
+    label: t('llm_provider_form_openai_reasoning_effort'),
+    hint: t('llm_provider_form_openai_reasoning_effort_hint'),
+    optional: true,
+    enum: [undefined, 'minimal', 'low', 'medium', 'high'],
+    defaultValue: undefined,
+  };
   return {
     OPENAI: {
       name: {},
@@ -52,6 +59,7 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
         enum: [undefined, 'json_schema'],
         defaultValue: 'json_schema',
       },
+      reasoningEffort,
     },
     OPENAI_AZURE: {
       name: {},
@@ -66,6 +74,7 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
         enum: [undefined, 'json_schema'],
         defaultValue: 'json_schema',
       },
+      reasoningEffort,
     },
     ANTHROPIC: {
       name: {},
@@ -130,7 +139,9 @@ export const getInitialValues = (
         ...llmProvidersDefaults(t)[name],
         ...o,
       };
-      result[name] = options.defaultValue ?? '';
+      result[name] = options.enum
+        ? options.defaultValue
+        : options.defaultValue ?? '';
     });
   }
   return result;

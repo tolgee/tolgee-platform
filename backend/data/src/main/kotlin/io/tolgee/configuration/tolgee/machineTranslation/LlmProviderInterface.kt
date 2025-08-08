@@ -31,6 +31,10 @@ interface LlmProviderInterface {
   @DocProperty(description = "Provider deployment (azure only)")
   var deployment: String?
 
+  // openai
+  @DocProperty(description = "ChatGPT reasoning effort")
+  var reasoningEffort: String?
+
   // pricing
   @DocProperty(hidden = true)
   var tokenPriceInCreditsInput: Double?

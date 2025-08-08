@@ -3360,6 +3360,7 @@ export interface components {
       model?: string;
       name: string;
       priority?: "LOW" | "HIGH";
+      reasoningEffort?: string;
       type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE" | "ANTHROPIC" | "GOOGLE_AI";
     };
     LlmProviderRequest: {
@@ -3371,6 +3372,7 @@ export interface components {
       model?: string;
       name: string;
       priority?: "LOW" | "HIGH";
+      reasoningEffort?: string;
       type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE" | "ANTHROPIC" | "GOOGLE_AI";
     };
     LlmProviderSimpleModel: {

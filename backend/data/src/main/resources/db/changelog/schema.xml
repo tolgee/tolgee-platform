@@ -4533,4 +4533,9 @@
     <changeSet author="daniels (generated)" id="1749049826107-6">
         <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="translation_label" constraintName="FKl33hmnchdjvyqy91m3g1l6w1r" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="translation" validate="true"/>
     </changeSet>
+    <changeSet author="stepangranat (generated)" id="1754643318072-1">
+        <addColumn tableName="llm_provider">
+            <column name="reasoning_effort" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

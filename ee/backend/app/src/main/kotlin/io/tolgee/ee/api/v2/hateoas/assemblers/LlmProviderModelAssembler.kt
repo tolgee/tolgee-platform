@@ -22,6 +22,7 @@ class LlmProviderModelAssembler : RepresentationModelAssemblerSupport<LlmProvide
       model = entity.model,
       deployment = entity.deployment,
       format = entity.format,
+      reasoningEffort = entity.reasoningEffort,
     )
   }
 }

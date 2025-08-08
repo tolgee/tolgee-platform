@@ -29,6 +29,7 @@ class LlmProvider(
   var deployment: String? = null,
   var keepAlive: String? = null,
   var format: String? = null,
+  var reasoningEffort: String? = null,
   @ManyToOne
   var organization: Organization,
 ) : AuditModel() {
@@ -43,6 +44,7 @@ class LlmProvider(
       model = model,
       deployment = deployment,
       format = format,
+      reasoningEffort = reasoningEffort,
       attempts = null,
       tokenPriceInCreditsInput = null,
       tokenPriceInCreditsOutput = null,
