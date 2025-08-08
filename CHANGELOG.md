@@ -1,3 +1,10 @@
+# [3.126.0](https://github.com/tolgee/tolgee-platform/compare/v3.125.1...v3.126.0) (2025-08-08)
+
+
+### Features
+
+* support reasoning effort ([#3197](https://github.com/tolgee/tolgee-platform/issues/3197)) ([5166898](https://github.com/tolgee/tolgee-platform/commit/51668986633987cc36e02f47c37e98c1ed3f8dda))
+
 ## [3.125.1](https://github.com/tolgee/tolgee-platform/compare/v3.125.0...v3.125.1) (2025-07-30)
 
 
