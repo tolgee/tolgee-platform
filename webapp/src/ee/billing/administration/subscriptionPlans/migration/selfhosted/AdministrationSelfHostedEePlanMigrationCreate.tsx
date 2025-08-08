@@ -6,13 +6,13 @@ import { BaseAdministrationView } from 'tg.views/administration/components/BaseA
 import { LINKS } from 'tg.constants/links';
 import {
   CreatePlanMigrationFormData,
-  PlanMigrationForm,
   PlanMigrationFormData,
 } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/PlanMigrationForm';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import React from 'react';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useHistory } from 'react-router-dom';
+import { CreatePlanMigrationForm } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/CreatePlanMigrationForm';
 
 export const AdministrationSelfHostedEePlanMigrationCreate = () => {
   const { t } = useTranslate();
@@ -64,7 +64,7 @@ export const AdministrationSelfHostedEePlanMigrationCreate = () => {
             {t('administration_plan_migration_configure')}
           </Typography>
         </Box>
-        <PlanMigrationForm
+        <CreatePlanMigrationForm
           onSubmit={submit}
           loading={createPlanMigrationLoadable.isLoading}
           planType="self-hosted"
