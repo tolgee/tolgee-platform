@@ -139,7 +139,9 @@ export const getInitialValues = (
         ...llmProvidersDefaults(t)[name],
         ...o,
       };
-      result[name] = o.enum ? options.defaultValue : options.defaultValue ?? '';
+      result[name] = options.enum
+        ? options.defaultValue
+        : options.defaultValue ?? '';
     });
   }
   return result;
