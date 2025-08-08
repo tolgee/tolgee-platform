@@ -1,6 +1,8 @@
 import { EditorView } from 'codemirror';
 import { PluralEditor } from './translationVisual/PluralEditor';
 import { useTranslationCell } from './useTranslationCell';
+import { getEditorActions } from './cell/editorMainActions/getEditorActions';
+import { useProject } from 'tg.hooks/useProject';
 
 type Props = {
   mode: 'placeholders' | 'syntax';
@@ -19,7 +21,22 @@ export const TranslationEditor = ({ mode, tools, editorRef }: Props) => {
     handleClose,
     handleInsertBase,
     baseValue,
+    translation,
+    prefilteredTask,
+    tasks,
   } = tools;
+
+  const project = useProject();
+
+  const primaryAction = getEditorActions({
+    onSave: handleSave,
+    translation,
+    currentTask: prefilteredTask?.number,
+    tasks,
+    languageId: language.id,
+    project,
+    value: editVal?.value,
+  })?.[0]?.action;
 
   return (
     <PluralEditor
@@ -38,9 +55,9 @@ export const TranslationEditor = ({ mode, tools, editorRef }: Props) => {
           { key: `Mod-e`, run: () => (setState(), true) },
           {
             key: 'Mod-Enter',
-            run: () => (handleSave({ after: 'EDIT_NEXT' }), true),
+            run: () => (primaryAction?.({ after: 'EDIT_NEXT' }), true),
           },
-          { key: 'Enter', run: () => (handleSave({}), true) },
+          { key: 'Enter', run: () => (primaryAction?.({}), true) },
           {
             key: 'Mod-Insert',
             mac: 'Cmd-Shift-s',

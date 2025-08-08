@@ -10,6 +10,11 @@ import { components } from '../../../../../webapp/src/service/apiSchema.generate
 export type PermissionModelScopes =
   components['schemas']['PermissionModel']['scopes'];
 
+export type SuggestionMode =
+  components['schemas']['ProjectModel']['suggestionsMode'];
+export type TranslationProtection =
+  components['schemas']['ProjectModel']['translationProtection'];
+
 export const ssoOrganizationsLoginTestData = generateTestDataObject(
   'sso-organizations-login'
 );
@@ -132,6 +137,22 @@ export const authProviderChange = generateTestDataObject(
 );
 
 export const labelsTestData = generateTestDataObject('label');
+
+export const suggestionsTestData = {
+  ...generateTestDataObject('suggestions'),
+  generate: (props?: {
+    suggestionsMode?: SuggestionMode;
+    translationProtection?: TranslationProtection;
+    disableTranslation?: boolean;
+  }) =>
+    internalFetch(
+      `e2e-data/suggestions/generate?suggestionsMode=${
+        props?.suggestionsMode ?? 'DISABLED'
+      }&translationProtection=${
+        props?.translationProtection ?? 'NONE'
+      }&disableTranslation=${props?.disableTranslation ?? false}`
+    ) as Cypress.Chainable<Cypress.Response<TestDataStandardResponse>>,
+};
 
 export const sensitiveOperationProtectionTestData = {
   ...generateTestDataObject('sensitive-operation-protection'),

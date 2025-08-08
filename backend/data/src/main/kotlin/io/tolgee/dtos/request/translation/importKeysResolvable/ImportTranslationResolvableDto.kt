@@ -10,12 +10,11 @@ class ImportTranslationResolvableDto(
   val text: String = "",
   @Schema(
     description = """Determines, how conflict is resolved.
-
-- KEEP: Translation is not changed
-- OVERRIDE: Translation is overridden
-- NEW: New translation is created
-- FORCE_OVERRIDE: Translation is updated, created or kept.
-""",
+      - KEEP: Translation is not changed
+      - OVERRIDE: Translation is overridden
+      - NEW: New translation is created
+      - FORCE_OVERRIDE: Translation is updated, created or kept.
+    """,
     example = "OVERRIDE",
   )
   val resolution: ImportTranslationResolution = ImportTranslationResolution.NEW,

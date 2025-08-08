@@ -16,6 +16,7 @@ class ApiKeyPermissionsModel(
   override var viewLanguageIds: Set<Long>?,
   override val translateLanguageIds: Set<Long>?,
   override var stateChangeLanguageIds: Set<Long>?,
+  override val suggestLanguageIds: Collection<Long>?,
   override var scopes: Array<Scope> = arrayOf(),
   @get:Schema(
     description =

@@ -1,4 +1,4 @@
-import { Box, Button, Link, styled, Typography } from '@mui/material';
+import { Box, Button, styled, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { useState } from 'react';
@@ -15,6 +15,7 @@ import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 import { DOCS_ROOT } from 'tg.constants/docLinks';
 import { useReportOnce } from 'tg.hooks/useReportEvent';
+import { LinkReadMore } from 'tg.component/LinkReadMore';
 
 type LabelModel = components['schemas']['LabelModel'];
 
@@ -123,17 +124,16 @@ export const ProjectSettingsLabels = () => {
           alignItems="center"
         >
           <Box>
-            <Typography variant="h5">
+            <Typography variant="h5" mb={1}>
               {t('project_settings_menu_translation_labels_title')}
             </Typography>
             <div>
               <T
-                keyName="project_settings_menu_translation_labels_description"
+                keyName="project_settings_menu_translation_labels_hint"
                 params={{
-                  a: (
-                    <Link
-                      href={`${DOCS_ROOT}/platform/translation_process/labels`}
-                      target="_blank"
+                  LearnMore: (
+                    <LinkReadMore
+                      url={`${DOCS_ROOT}/platform/translation_process/labels`}
                     />
                   ),
                 }}

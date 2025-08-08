@@ -39,6 +39,8 @@ class CursorUtilUnitTest {
                 mtProvider = null,
                 commentCount = 0,
                 unresolvedCommentCount = 1,
+                activeSuggestionCount = 0,
+                totalSuggestionCount = 0,
               ),
           ),
         createdAt = Timestamp(1000003022),

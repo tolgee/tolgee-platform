@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.dataImport
 
+import io.tolgee.model.enums.ConflictType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -17,4 +18,6 @@ open class ImportTranslationModel(
   val resolved: Boolean,
   val isPlural: Boolean,
   val existingKeyIsPlural: Boolean,
+  val conflictType: ConflictType?,
+  val isOverridable: Boolean,
 ) : RepresentationModel<ImportTranslationModel>()

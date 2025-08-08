@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.Screenshot
+import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Tag
@@ -30,6 +31,12 @@ class KeyBuilder(
         self.key = this@KeyBuilder.self
       }
     return addOperation(projectBuilder.data.translations, builder, ft)
+  }
+
+  fun addSuggestion(ft: FT<TranslationSuggestion>): SuggestionBuilder {
+    val builder =
+      SuggestionBuilder(this)
+    return addOperation(projectBuilder.data.suggestions, builder, ft)
   }
 
   val translations get() = projectBuilder.data.translations.filter { it.self.key === self }

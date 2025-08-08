@@ -76,7 +76,7 @@ export const TranslationFlags: React.FC<Props> = ({
     e.stopPropagation();
     clearAutoTranslatedState
       .mutateAsync({
-        path: { projectId: project.id, translationId: translation!.id },
+        path: { projectId: project.id, translationId: translation!.id! },
       })
       .then(() => {
         updateTranslation({
@@ -100,7 +100,7 @@ export const TranslationFlags: React.FC<Props> = ({
       .mutateAsync({
         path: {
           projectId: project.id,
-          translationId: translation!.id,
+          translationId: translation!.id!,
           state: false,
         },
       })

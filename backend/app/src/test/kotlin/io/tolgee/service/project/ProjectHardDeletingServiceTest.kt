@@ -119,6 +119,15 @@ class ProjectHardDeletingServiceTest : AbstractSpringTest() {
     }
   }
 
+  @Test
+  fun `deletes project with suggestions`() {
+    val testData = SuggestionsTestData()
+    testDataService.saveTestData(testData.root)
+    io.tolgee.util.executeInNewTransaction(platformTransactionManager) {
+      projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self.refresh())
+    }
+  }
+
   fun Project.refresh(): Project {
     return projectService.get(this.id)
   }

@@ -79,3 +79,9 @@ export const usePutLabelWithoutTranslation = () =>
     url: '/v2/projects/{projectId}/translations/label',
     method: 'put',
   });
+
+export const usePostTranslationSuggestion = () =>
+  useApiMutation({
+    url: '/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion',
+    method: 'post',
+  });

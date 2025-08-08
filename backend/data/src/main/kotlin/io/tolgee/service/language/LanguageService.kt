@@ -22,6 +22,7 @@ import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translation.TranslationSuggestionService
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
@@ -55,6 +56,10 @@ class LanguageService(
   private val authenticationFacade: AuthenticationFacade,
   private val applicationContext: ApplicationContext,
 ) {
+  @Lazy
+  @Autowired
+  private lateinit var translationSuggestionService: TranslationSuggestionService
+
   @set:Autowired
   @set:Lazy
   lateinit var translationService: TranslationService
@@ -174,6 +179,10 @@ class LanguageService(
     projectId: Long,
   ): LanguageDto? {
     return self.getProjectLanguages(projectId).singleOrNull { it.id == languageId }
+  }
+
+  fun findEntity(projectId: Long, tag: String): Language? {
+    return languageRepository.find(projectId, tag)
   }
 
   fun findEntity(id: Long): Language? {
@@ -302,6 +311,7 @@ class LanguageService(
   fun deleteAllByProject(projectId: Long) {
     translationService.deleteAllByProject(projectId)
     autoTranslationService.deleteConfigsByProject(projectId)
+    translationSuggestionService.deleteAllByProject(projectId)
     entityManager.createNativeQuery(
       "delete from language_stats " +
         "where language_id in (select id from language where project_id = :projectId)",

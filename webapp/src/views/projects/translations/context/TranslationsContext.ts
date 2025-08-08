@@ -149,11 +149,17 @@ export const [
     viewRefs,
   });
 
+  const allLanguagesData = useMemo(
+    () => languagesLoadable.data?._embedded?.languages ?? [],
+    [languagesLoadable.data]
+  );
+
   const editService = useEditService({
     positionService,
     translationService,
     viewRefs,
     taskService,
+    allLanguages: allLanguagesData,
   });
 
   const tagsService = useTagsService({
