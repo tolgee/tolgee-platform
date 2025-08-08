@@ -48,7 +48,8 @@ class FileExporterFactory(
           getFilePathProvider(exportParams, data),
         )
 
-      ExportFormat.JSON, ExportFormat.JSON_TOLGEE, ExportFormat.JSON_I18NEXT ->
+      ExportFormat.JSON, ExportFormat.JSON_TOLGEE, ExportFormat.JSON_I18NEXT,
+      ExportFormat.ANDROID_SDK, ExportFormat.APPLE_SDK ->
         JsonFileExporter(
           data,
           exportParams,

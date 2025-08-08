@@ -98,7 +98,7 @@ interface IExportParams {
   @get:Schema(
     description = HTML_ESCAPE_DESCRIPTION,
   )
-  var escapeHtml: Boolean
+  var escapeHtml: Boolean?
 
   fun copyPropsFrom(other: IExportParams) {
     this.languages = other.languages
