@@ -14,6 +14,7 @@ data class LlmProviderRequest(
   var deployment: String? = null,
   var keepAlive: String? = null,
   var format: String? = null,
+  var reasoningEffort: String? = null,
 ) {
   @JsonSetter("type")
   fun setType(type: String) {

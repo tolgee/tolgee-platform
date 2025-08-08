@@ -54,6 +54,8 @@ class LlmProperties : MachineTranslationServiceProperties {
     override var model: String? = null,
     @DocProperty("Provider deployment (optional for some providers)")
     override var deployment: String? = null,
+    @DocProperty(description = "ChatGPT reasoning effort")
+    override var reasoningEffort: String? = null,
     override var format: String? = null,
     @DocProperty("Load-balancing instruction HIGH = used for suggestions, LOW = used for batch operations")
     override var priority: LlmProviderPriority? = null,
@@ -77,6 +79,7 @@ class LlmProperties : MachineTranslationServiceProperties {
         model = model,
         deployment = deployment,
         format = format,
+        reasoningEffort = reasoningEffort,
         tokenPriceInCreditsInput = tokenPriceInCreditsInput,
         tokenPriceInCreditsOutput = tokenPriceInCreditsOutput,
         attempts = attempts,

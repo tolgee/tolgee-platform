@@ -53,6 +53,7 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
             null
           },
         model = config.model,
+        reasoning_effort = config.reasoningEffort,
       )
 
     val request = HttpEntity(requestBody, headers)
@@ -141,6 +142,8 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
       val response_format: RequestResponseFormat? = null,
       val messages: List<RequestMessage>,
       val model: String?,
+      @JsonInclude(JsonInclude.Include.NON_NULL)
+      val reasoning_effort: String? = null,
       @JsonInclude(JsonInclude.Include.NON_NULL)
       val temperature: Long? = null,
     )

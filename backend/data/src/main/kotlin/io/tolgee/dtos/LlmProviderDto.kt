@@ -15,6 +15,7 @@ data class LlmProviderDto(
   override var model: String?,
   override var deployment: String?,
   override var format: String?,
+  override var reasoningEffort: String?,
   override var tokenPriceInCreditsInput: Double?,
   override var tokenPriceInCreditsOutput: Double?,
   override var attempts: List<Int>?,
