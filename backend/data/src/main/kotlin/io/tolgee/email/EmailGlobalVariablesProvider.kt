@@ -34,7 +34,7 @@ class EmailGlobalVariablesProvider(
     return mapOf(
       "isCloud" to isCloud,
       "instanceQualifier" to if (isCloud) tolgeeProperties.appName else tolgeeProperties.frontEndUrl.intoQualifier(),
-      "instanceUrl" to tolgeeProperties.frontEndUrl,
+      "instanceUrl" to "http://localhost:8080",
     )
   }
 
