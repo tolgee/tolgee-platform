@@ -17,24 +17,14 @@ type CloudPlanMigrationModel = components['schemas']['CloudPlanMigrationModel'];
 type SelfHostedEePlanMigrationModel =
   components['schemas']['AdministrationSelfHostedEePlanMigrationModel'];
 
-type Props = {
-  migration?: CloudPlanMigrationModel | SelfHostedEePlanMigrationModel;
-  onSubmit: (
-    value: CreatePlanMigrationFormData | PlanMigrationFormData
-  ) => void;
+type Props<T> = {
+  defaultValues: T;
+  onSubmit: (value: T) => void;
   onDelete?: (id: number) => void;
   planType?: PlanType;
-  loading: boolean | undefined;
+  migration?: CloudPlanMigrationModel | SelfHostedEePlanMigrationModel;
+  loading?: boolean;
 };
-
-const emptyDefaultValues: CreatePlanMigrationFormData | PlanMigrationFormData =
-  {
-    enabled: true,
-    sourcePlanId: 0,
-    targetPlanId: 0,
-    monthlyOffsetDays: 14,
-    yearlyOffsetDays: 30,
-  };
 
 export type PlanMigrationFormData =
   components['schemas']['PlanMigrationRequest'];
@@ -42,25 +32,18 @@ export type PlanMigrationFormData =
 export type CreatePlanMigrationFormData =
   components['schemas']['CreatePlanMigrationRequest'];
 
-export const PlanMigrationForm = ({
-  migration,
+export const PlanMigrationForm = <
+  T extends CreatePlanMigrationFormData | PlanMigrationFormData
+>({
+  defaultValues,
   onSubmit,
   loading,
   onDelete,
+  migration,
   planType = 'cloud',
-}: Props) => {
+}: Props<T>) => {
   const { t } = useTranslate();
   const isUpdate = migration != null;
-  const defaultValues: CreatePlanMigrationFormData | PlanMigrationFormData =
-    migration
-      ? {
-          enabled: migration.enabled,
-          sourcePlanId: migration.sourcePlan.id,
-          targetPlanId: migration.targetPlan.id,
-          monthlyOffsetDays: migration.monthlyOffsetDays,
-          yearlyOffsetDays: migration.yearlyOffsetDays,
-        }
-      : emptyDefaultValues;
 
   const [selectedSourcePlan, setSelectedSourcePlan] = React.useState<number>(
     (defaultValues as CreatePlanMigrationFormData).sourcePlanId
@@ -69,16 +52,19 @@ export const PlanMigrationForm = ({
     defaultValues.targetPlanId
   );
 
+  const initValues = {
+    ...defaultValues,
+    ...(isUpdate &&
+      migration && {
+        sourcePlanId: migration.sourcePlan.id,
+      }),
+  };
+
   return (
-    <Formik<CreatePlanMigrationFormData | PlanMigrationFormData>
-      initialValues={defaultValues}
+    <Formik<T>
+      initialValues={initValues}
       enableReinitialize
-      onSubmit={(values) => {
-        const formData = isUpdate
-          ? (values as PlanMigrationFormData)
-          : (values as CreatePlanMigrationFormData);
-        onSubmit(formData);
-      }}
+      onSubmit={onSubmit}
       validationSchema={Validation.PLAN_MIRATION_FORM}
     >
       <Form>

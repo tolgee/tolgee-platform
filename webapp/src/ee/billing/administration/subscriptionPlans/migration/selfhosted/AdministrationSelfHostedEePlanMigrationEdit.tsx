@@ -4,10 +4,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import {
-  PlanMigrationForm,
-  PlanMigrationFormData,
-} from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/PlanMigrationForm';
+import { PlanMigrationFormData } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/PlanMigrationForm';
 import {
   useBillingApiMutation,
   useBillingApiQuery,
@@ -20,6 +17,7 @@ import { PaginatedHateoasTable } from 'tg.component/common/table/PaginatedHateoa
 import { PlanMigrationStatus } from 'tg.ee.module/billing/administration/subscriptionPlans/migration/general/PlanMigrationStatus';
 import { EmptyState } from 'tg.component/common/EmptyState';
 import { useDateFormatter } from 'tg.hooks/useLocale';
+import { EditPlanMigrationForm } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/EditPlanMigrationForm';
 
 export const AdministrationSelfHostedEePlanMigrationEdit = () => {
   const { t } = useTranslate();
@@ -120,7 +118,7 @@ export const AdministrationSelfHostedEePlanMigrationEdit = () => {
             {t('administration_plan_migration_configure_existing')}
           </Typography>
         </Box>
-        <PlanMigrationForm
+        <EditPlanMigrationForm
           migration={migration}
           onSubmit={submit}
           onDelete={onDelete}
