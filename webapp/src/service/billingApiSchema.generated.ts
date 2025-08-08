@@ -524,6 +524,17 @@ export interface components {
         stripeProducts?: components["schemas"]["StripeProductModel"][];
       };
     };
+    CreatePlanMigrationRequest: {
+      enabled: boolean;
+      /** Format: int32 */
+      monthlyOffsetDays: number;
+      /** Format: int64 */
+      sourcePlanId: number;
+      /** Format: int64 */
+      targetPlanId: number;
+      /** Format: int32 */
+      yearlyOffsetDays: number;
+    };
     CreateTaskRequest: {
       assignees: number[];
       description: string;
@@ -1115,8 +1126,6 @@ export interface components {
       enabled: boolean;
       /** Format: int32 */
       monthlyOffsetDays: number;
-      /** Format: int64 */
-      sourcePlanId: number;
       /** Format: int64 */
       targetPlanId: number;
       /** Format: int32 */
@@ -1773,7 +1782,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["PlanMigrationRequest"];
+        "application/json": components["schemas"]["CreatePlanMigrationRequest"];
       };
     };
   };
@@ -2479,7 +2488,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["PlanMigrationRequest"];
+        "application/json": components["schemas"]["CreatePlanMigrationRequest"];
       };
     };
   };
