@@ -5,6 +5,7 @@ import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
 import { LINKS } from 'tg.constants/links';
 import {
+  CreatePlanMigrationFormData,
   PlanMigrationForm,
   PlanMigrationFormData,
 } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/PlanMigrationForm';
@@ -18,9 +19,13 @@ export const AdministrationCloudPlanMigrationCreate = () => {
   const messaging = useMessage();
   const history = useHistory();
 
-  const submit = (values: PlanMigrationFormData) => {
+  const submit = (
+    values: CreatePlanMigrationFormData | PlanMigrationFormData
+  ) => {
     createPlanMigrationLoadable.mutate(
-      { content: { 'application/json': values } },
+      {
+        content: { 'application/json': values as CreatePlanMigrationFormData },
+      },
       {
         onSuccess: () => {
           messaging.success(
