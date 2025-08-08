@@ -1,0 +1,44 @@
+name: Security Gate
+
+on:
+  pull_request:
+    branches: [main, secscan]
+
+jobs:
+  secrets-and-image-scan:
+    name: "Secrets and  Image Scan"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Secret key leak scan
+      - name: TruffleHog secrets scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: .
+          scan: git
+          fail: true
+
+      # Build Tolgee image
+      - name: Build Tolgee image
+        run: docker build -t tolgee:ci -f docker/app/Dockerfile .
+
+      # CVE Scan on that image
+      - name: Grype image scan
+        uses: anchore/scan-action@v3
+        with:
+          image: tolgee:ci    # Should match the tag from previous step, note the colon!
+          fail-build: true
+          output-format: sarif
+          acs-report-enable: true
+
+      # Upload SARIF to show alerts in PR
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: grype.sarif
