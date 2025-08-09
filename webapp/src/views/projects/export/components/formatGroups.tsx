@@ -33,7 +33,7 @@ export const formatGroups: FormatGroup[] = [
       {
         id: 'native_json',
         extension: 'json',
-        name: <T keyName="export-format-flat-json" />,
+        name: <T keyName="export-format-native-flat-json" />,
         defaultStructureDelimiter: '',
         structured: false,
         showSupportArrays: false,
@@ -43,7 +43,9 @@ export const formatGroups: FormatGroup[] = [
           params.format === 'JSON' &&
           (params.structureDelimiter === '' ||
             params.structureDelimiter == null) &&
-          !params.supportArrays,
+          !params.supportArrays &&
+          (params.messageFormat === undefined ||
+            params.messageFormat === 'ICU'),
       },
     ],
   },
@@ -62,6 +64,35 @@ export const formatGroups: FormatGroup[] = [
           'PHP_SPRINTF',
           'C_SPRINTF',
           'RUBY_SPRINTF',
+          'PYTHON_PERCENT',
+        ],
+      },
+      {
+        id: 'generic_flat_json',
+        extension: 'json',
+        name: <T keyName="export-format-flat-json" />,
+        format: 'JSON',
+        defaultStructureDelimiter: '',
+        structured: false,
+        showSupportArrays: true,
+        defaultSupportArrays: false,
+        matchByExportParams: (params) => {
+          return (
+            params.format === 'JSON' &&
+            (params.structureDelimiter === '' ||
+              params.structureDelimiter == null) &&
+            (params.supportArrays ||
+              (params.messageFormat !== undefined &&
+                params.messageFormat !== 'ICU'))
+          );
+        },
+        supportedMessageFormats: [
+          'ICU',
+          'JAVA_STRING_FORMAT',
+          'PHP_SPRINTF',
+          'C_SPRINTF',
+          'RUBY_SPRINTF',
+          'PYTHON_PERCENT',
         ],
       },
       {
@@ -81,6 +112,7 @@ export const formatGroups: FormatGroup[] = [
           'PHP_SPRINTF',
           'C_SPRINTF',
           'RUBY_SPRINTF',
+          'PYTHON_PERCENT',
         ],
       },
       {
@@ -111,14 +143,13 @@ export const formatGroups: FormatGroup[] = [
         format: 'YAML',
         defaultStructureDelimiter: '',
         structured: false,
-        showSupportArrays: false,
+        showSupportArrays: true,
         defaultSupportArrays: false,
         matchByExportParams: (params) => {
           return (
             params.format === 'YAML' &&
             (params.structureDelimiter === '' ||
-              params.structureDelimiter == null) &&
-            !params.supportArrays
+              params.structureDelimiter == null)
           );
         },
         supportedMessageFormats: [
@@ -126,6 +157,8 @@ export const formatGroups: FormatGroup[] = [
           'JAVA_STRING_FORMAT',
           'PHP_SPRINTF',
           'C_SPRINTF',
+          'RUBY_SPRINTF',
+          'PYTHON_PERCENT',
         ],
       },
       {
@@ -144,6 +177,8 @@ export const formatGroups: FormatGroup[] = [
           'JAVA_STRING_FORMAT',
           'PHP_SPRINTF',
           'C_SPRINTF',
+          'RUBY_SPRINTF',
+          'PYTHON_PERCENT',
         ],
       },
       {
@@ -157,6 +192,7 @@ export const formatGroups: FormatGroup[] = [
           'PHP_SPRINTF',
           'C_SPRINTF',
           'RUBY_SPRINTF',
+          'PYTHON_PERCENT',
         ],
       },
       {
@@ -170,6 +206,7 @@ export const formatGroups: FormatGroup[] = [
           'PHP_SPRINTF',
           'C_SPRINTF',
           'RUBY_SPRINTF',
+          'PYTHON_PERCENT',
         ],
       },
     ],
