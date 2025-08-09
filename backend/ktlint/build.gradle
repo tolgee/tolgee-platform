@@ -15,10 +15,6 @@ plugins {
 
 group = 'io.tolgee.testing.ktlint'
 
-repositories {
-    mavenCentral()
-}
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -38,11 +34,11 @@ dependencies {
 
     // Not ideal, but doesn't work without, so there it is.
     // It brings stuff in the classpath that makes test work, and at least that way there's no version drift issues
-    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 
     ktlint sourceSets.main.output
 }
 
-test {
+tasks.named('test', Test) {
     useJUnitPlatform()
 }
