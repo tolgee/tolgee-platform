@@ -8,7 +8,12 @@ import { Box } from '@mui/material';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { useUserPreferenceStorage } from 'tg.hooks/useUserPreferenceStorage';
 
-type GenericPlanType = { id: number; name: string };
+export type GenericPlanType = { id: number; name: string; free: boolean };
+
+type PlansProps = {
+  hiddenIds?: number[];
+  free?: boolean;
+};
 
 export interface GenericPlanSelector<T extends GenericPlanType> {
   organizationId?: number;
@@ -19,6 +24,7 @@ export interface GenericPlanSelector<T extends GenericPlanType> {
   plans?: T[];
   loading: boolean;
   hiddenPlans?: number[];
+  planProps?: PlansProps;
   dataCy?: string;
 }
 
@@ -30,13 +36,22 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   plans,
   loading,
   hiddenPlans,
+  planProps,
   dataCy = 'administration-plan-selector',
 }: GenericPlanSelector<T>) => {
   const sortedPlans = useSortPlans(plans);
 
   const selectItems =
     sortedPlans
-      ?.filter((plan) => !hiddenPlans?.includes(plan.id))
+      ?.filter((plan) => {
+        if (planProps?.hiddenIds?.includes(plan.id)) {
+          return false;
+        }
+        if (planProps?.free !== undefined) {
+          return planProps.free === plan.free;
+        }
+        return true;
+      })
       ?.map(
         (plan) =>
           ({
