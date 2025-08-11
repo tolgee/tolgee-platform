@@ -94,12 +94,13 @@ export const useEditService = ({
   };
 
   const createSuggestion = async (payload: SetEdit) => {
-    if (payload.language !== undefined && payload.value !== getEditOldValue()) {
+    const languageId = allLanguages.find((l) => l.tag === payload.language)?.id;
+    if (languageId !== undefined && payload.value !== getEditOldValue()) {
       return await postSuggestion.mutateAsync({
         path: {
           projectId: project.id,
           keyId: payload.keyId,
-          languageTag: payload.language,
+          languageId: languageId,
         },
         content: {
           'application/json': {

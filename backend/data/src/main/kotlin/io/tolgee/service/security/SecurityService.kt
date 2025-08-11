@@ -208,15 +208,14 @@ class SecurityService(
     ) { data, languageIds -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
   }
 
-  fun checkSuggestPermissionByTag(
+  fun checkLanguageSuggestPermission(
     projectId: Long,
-    languageTags: Collection<String>,
+    languageIds: Collection<Long>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_SUGGEST)
-    checkLanguagePermissionByTag(
+    checkLanguagePermission(
       projectId,
-      languageTags,
-    ) { data, languageIds -> data.checkSuggestPermitted(*languageIds.toLongArray()) }
+    ) { data -> data.checkSuggestPermitted(*languageIds.toLongArray()) }
   }
 
   fun checkLanguageViewPermission(

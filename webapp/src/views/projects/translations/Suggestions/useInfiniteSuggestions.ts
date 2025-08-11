@@ -3,7 +3,7 @@ import { components, paths } from 'tg.service/apiSchema.generated';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 
 type SuggestionParams =
-  paths['/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion']['get']['parameters'];
+  paths['/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion']['get']['parameters'];
 
 type PagedModelTranslationSuggestionModel =
   components['schemas']['PagedModelTranslationSuggestionModel'];
@@ -11,7 +11,7 @@ type PagedModelTranslationSuggestionModel =
 type FilterStateParam = SuggestionParams['query']['filterState'];
 
 type Props = {
-  languageTag: string;
+  languageId: number;
   keyId: number;
   projectId: number;
   filterState?: FilterStateParam;
@@ -23,7 +23,7 @@ type Props = {
 };
 
 export const useInfiniteSuggestions = ({
-  languageTag,
+  languageId,
   keyId,
   projectId,
   filterState,
@@ -39,14 +39,14 @@ export const useInfiniteSuggestions = ({
       expectedCount,
     },
     path: {
-      languageTag,
+      languageId,
       keyId,
       projectId,
     },
   };
 
   const suggestionsLoadable = useApiInfiniteQuery({
-    url: '/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion',
+    url: '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion',
     method: 'get',
     ...params,
     options: {

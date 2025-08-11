@@ -25,10 +25,6 @@ class TranslationSuggestion(
 
   @ManyToOne
   @JoinColumn(nullable = false)
-  var key: Key? = null,
-
-  @ManyToOne
-  @JoinColumn(nullable = false)
   var language: Language? = null,
 
   @ManyToOne
@@ -47,4 +43,8 @@ class TranslationSuggestion(
   @Enumerated(EnumType.STRING)
   @ActivityLoggedProp
   var state: TranslationSuggestionState = TranslationSuggestionState.ACTIVE,
-) : StandardAuditModel()
+) : StandardAuditModel() {
+  @ManyToOne
+  @JoinColumn(nullable = false)
+  lateinit var key: Key
+}

@@ -37,8 +37,8 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/projects/{projectId:[0-9]+}/language/{languageTag}/key/{keyId:[0-9]+}/suggestion",
-    "/v2/projects/language/{languageId:[0-9]+}/key/{keyId:[0-9]+}/suggestion",
+    "/v2/projects/{projectId:[0-9]+}/languages/{languageId:[0-9]+}/key/{keyId:[0-9]+}/suggestion",
+    "/v2/projects/languages/{languageId:[0-9]+}/key/{keyId:[0-9]+}/suggestion",
   ],
 )
 @Tag(name = "Translation suggestion")
@@ -58,17 +58,17 @@ class SuggestionController(
   fun createSuggestion(
     @RequestBody @Valid
     dto: CreateTranslationSuggestionRequest,
-    @PathVariable languageTag: String,
+    @PathVariable languageId: Long,
     @PathVariable keyId: Long,
   ): TranslationSuggestionModel {
     val project = projectHolder.projectEntity
-    securityService.checkSuggestPermissionByTag(
+    securityService.checkLanguageSuggestPermission(
       project.id,
-      listOf(languageTag)
+      listOf(languageId)
     )
     val suggestion = translationSuggestionService.createSuggestion(
       project,
-      languageTag,
+      languageId,
       keyId,
       dto
     )
@@ -84,18 +84,18 @@ class SuggestionController(
     pageable: Pageable,
     @ParameterObject
     filters: SuggestionFilters,
-    @PathVariable languageTag: String,
+    @PathVariable languageId: Long,
     @PathVariable keyId: Long,
   ): PagedModel<TranslationSuggestionModel> {
-    securityService.checkLanguageViewPermissionByTag(
+    securityService.checkLanguageSuggestPermission(
       projectHolder.project.id,
-      listOf(languageTag)
+      listOf(languageId)
     )
     val projectId = projectHolder.project.id
     val suggestions = translationSuggestionService.getSuggestionsPaged(
       pageable,
       projectId,
-      languageTag,
+      languageId,
       keyId,
       filters
     )
@@ -111,13 +111,13 @@ class SuggestionController(
   @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @RequestActivity(ActivityType.DECLINE_SUGGESTION)
   fun declineSuggestion(
-    @PathVariable languageTag: String,
+    @PathVariable languageId: Long,
     @PathVariable keyId: Long,
     @PathVariable suggestionId: Long,
   ): TranslationSuggestionModel {
-    securityService.checkLanguageStateChangePermissionsByTag(
+    securityService.checkLanguageStateChangePermission(
       projectHolder.project.id,
-      listOf(languageTag)
+      listOf(languageId)
     )
     val projectId = projectHolder.project.id
     val suggestion = translationSuggestionService.declineSuggestion(projectId, keyId, suggestionId)
@@ -130,19 +130,19 @@ class SuggestionController(
   @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @RequestActivity(ActivityType.ACCEPT_SUGGESTION)
   fun acceptSuggestion(
-    @PathVariable languageTag: String,
+    @PathVariable languageId: Long,
     @PathVariable keyId: Long,
     @PathVariable suggestionId: Long,
     @RequestParam declineOther: Boolean = false
   ): TranslationSuggestionAcceptResponse {
-    securityService.checkLanguageStateChangePermissionsByTag(
+    securityService.checkLanguageStateChangePermission(
       projectHolder.project.id,
-      listOf(languageTag)
+      listOf(languageId)
     )
     val projectId = projectHolder.project.id
     val (suggestion, declined) = translationSuggestionService.acceptSuggestion(
       projectId,
-      languageTag,
+      languageId,
       keyId,
       suggestionId,
       declineOther
@@ -157,13 +157,13 @@ class SuggestionController(
   @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
   @RequestActivity(ActivityType.ACCEPT_SUGGESTION)
   fun reverseSuggestion(
-    @PathVariable languageTag: String,
+    @PathVariable languageId: Long,
     @PathVariable keyId: Long,
     @PathVariable suggestionId: Long,
   ): TranslationSuggestionModel {
-    securityService.checkLanguageStateChangePermissionsByTag(
+    securityService.checkLanguageStateChangePermission(
       projectHolder.project.id,
-      listOf(languageTag)
+      listOf(languageId)
     )
     val projectId = projectHolder.project.id
     val suggestion = translationSuggestionService.reverseSuggestion(projectId, keyId, suggestionId)
@@ -177,7 +177,7 @@ class SuggestionController(
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @RequestActivity(ActivityType.DELETE_SUGGESTION)
   fun deleteSuggestion(
-    @PathVariable languageTag: String,
+    @PathVariable languageId: Long,
     @PathVariable keyId: Long,
     @PathVariable suggestionId: Long,
   ) {

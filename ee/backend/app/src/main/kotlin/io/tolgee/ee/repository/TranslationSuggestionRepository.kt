@@ -47,7 +47,7 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
         left join fetch ts.author
       where ts.project.id = :projectId
         and ts.key.id = :keyId
-        and ts.language.tag = :languageTag
+        and ts.language.id = :languageId
         and (
             :#{#filters.filterState} is null
             or ts.state in :#{#filters.filterState}
@@ -57,7 +57,7 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
   fun getPaged(
     pageable: Pageable,
     projectId: Long,
-    languageTag: String,
+    languageId: Long,
     keyId: Long,
     filters: SuggestionFilters
   ): Page<TranslationSuggestion>

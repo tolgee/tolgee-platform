@@ -93,37 +93,37 @@ export const SuggestionsList = ({
   const projectId = project.id;
 
   const declineLoadable = useApiMutation({
-    url: '/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion/{suggestionId}/decline',
+    url: '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/decline',
     method: 'put',
     invalidatePrefix:
-      '/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion',
+      '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion',
   });
 
   const reverseLoadable = useApiMutation({
-    url: '/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion/{suggestionId}/reverse',
+    url: '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/reverse',
     method: 'put',
     invalidatePrefix:
-      '/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion',
+      '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion',
   });
 
   const deleteLoadable = useApiMutation({
-    url: '/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion/{suggestionId}',
+    url: '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}',
     method: 'delete',
     invalidatePrefix:
-      '/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion',
+      '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion',
   });
 
   const acceptLoadable = useApiMutation({
-    url: '/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion/{suggestionId}/accept',
+    url: '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/accept',
     method: 'put',
     invalidatePrefix:
-      '/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion',
+      '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion',
   });
 
   const activeSuggestions = useInfiniteSuggestions({
     projectId,
     keyId,
-    languageTag,
+    languageId,
     filterState: ['ACTIVE'],
     expectedCount: translation.activeSuggestionCount,
     onSuccess(suggestions) {
@@ -146,7 +146,7 @@ export const SuggestionsList = ({
   const allSuggestions = useInfiniteSuggestions({
     projectId,
     keyId,
-    languageTag,
+    languageId,
     expectedCount: translation.totalSuggestionCount,
     enabled: showAll,
   });
@@ -158,26 +158,26 @@ export const SuggestionsList = ({
 
   function handleDecline(suggestionId: number) {
     declineLoadable.mutate({
-      path: { projectId, keyId, languageTag, suggestionId },
+      path: { projectId, keyId, languageId, suggestionId },
     });
   }
 
   function handleDelete(suggestionId: number) {
     deleteLoadable.mutate({
-      path: { projectId, keyId, languageTag, suggestionId },
+      path: { projectId, keyId, languageId, suggestionId },
     });
   }
 
   function handleReverse(suggestionId: number) {
     reverseLoadable.mutate({
-      path: { projectId, keyId, languageTag, suggestionId },
+      path: { projectId, keyId, languageId, suggestionId },
     });
   }
 
   function acceptSuggestion(suggestionId: number, declineOther: boolean) {
     acceptLoadable.mutate(
       {
-        path: { projectId, keyId, languageTag, suggestionId },
+        path: { projectId, keyId, languageId, suggestionId },
         query: { declineOther },
       },
       {

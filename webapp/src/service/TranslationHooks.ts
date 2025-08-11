@@ -82,6 +82,6 @@ export const usePutLabelWithoutTranslation = () =>
 
 export const usePostTranslationSuggestion = () =>
   useApiMutation({
-    url: '/v2/projects/{projectId}/language/{languageTag}/key/{keyId}/suggestion',
+    url: '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion',
     method: 'post',
   });

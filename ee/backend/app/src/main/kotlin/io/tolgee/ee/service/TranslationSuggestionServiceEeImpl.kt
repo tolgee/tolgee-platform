@@ -56,14 +56,14 @@ class TranslationSuggestionServiceEeImpl(
 
   fun createSuggestion(
     project: Project,
-    languageTag: String,
+    languageId: Long,
     keyId: Long,
     dto: CreateTranslationSuggestionRequest,
   ): TranslationSuggestion {
     val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
     keyService.checkInProject(key, project.id)
     val language =
-      languageService.findEntity(project.id, languageTag) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+      languageService.findEntity(languageId, project.id) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
     val normalizedTranslation =
       try {
@@ -89,13 +89,13 @@ class TranslationSuggestionServiceEeImpl(
     }
 
     val suggestion = TranslationSuggestion(
-      key = key,
       project = project,
       language = language,
       author = authenticationFacade.authenticatedUserEntity,
       translation = normalizedTranslation,
       isPlural = key.isPlural,
     )
+    suggestion.key = key
 
     translationSuggestionRepository.save(suggestion)
     return suggestion
@@ -125,13 +125,13 @@ class TranslationSuggestionServiceEeImpl(
   @Transactional
   fun acceptSuggestion(
     projectId: Long,
-    languageTag: String,
+    languageId: Long,
     keyId: Long,
     suggestionId: Long,
     declineOther: Boolean
   ): Pair<TranslationSuggestion, List<Long>> {
     val language =
-      languageService.findEntity(projectId, languageTag) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+      languageService.findEntity(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
     val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
     val suggestion = getSuggestion(projectId, keyId, suggestionId)
     if (key.isPlural != suggestion.isPlural) {
@@ -150,7 +150,7 @@ class TranslationSuggestionServiceEeImpl(
     translationSuggestionRepository.save(suggestion)
     translationService.setForKey(
       entityManager.getReference(Key::class.java, keyId),
-      mapOf(languageTag to suggestion.translation),
+      mapOf(language.tag to suggestion.translation),
       options = SetTranslationTextUtil.Companion.Options(keepState = true)
     )
     return Pair(suggestion, declined)
@@ -167,12 +167,12 @@ class TranslationSuggestionServiceEeImpl(
   }
 
   fun getSuggestionsPaged(
-    pageable: Pageable, projectId: Long, languageTag: String, keyId: Long, filters: SuggestionFilters,
+    pageable: Pageable, projectId: Long, languageId: Long, keyId: Long, filters: SuggestionFilters,
   ): Page<TranslationSuggestion> {
     return translationSuggestionRepository.getPaged(
       pageable,
       projectId,
-      languageTag,
+      languageId,
       keyId,
       filters
     )
