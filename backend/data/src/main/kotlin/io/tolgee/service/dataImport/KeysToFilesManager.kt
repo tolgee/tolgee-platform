@@ -65,27 +65,17 @@ class KeysToFilesManager {
     return map
   }
 
-  fun getFileName(namespace: String, language: String): String {
+  private fun getFileName(namespace: String, language: String): String {
     return "$namespace/$language.json"
   }
 
   companion object {
-    class VirtualFile(val language: String, val namespace: String) {
+    data class VirtualFile(val language: String, val namespace: String) {
       var records: MutableMap<String, SingleStepImportResolvableTranslationRequest> = mutableMapOf()
 
       fun contentsToByteArray(): ByteArray {
         val jsonRecord: Map<String, String> = records.map { (key, value) -> key to value.text }.toMap()
         return jacksonObjectMapper().writeValueAsString(jsonRecord).toByteArray()
-      }
-
-      override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is VirtualFile) return false
-        return language == other.language && namespace == other.namespace
-      }
-
-      override fun hashCode(): Int {
-        return 31 * language.hashCode() + namespace.hashCode()
       }
     }
   }

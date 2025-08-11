@@ -151,12 +151,12 @@ class SuggestionController(
     return TranslationSuggestionAcceptResponse(accepted, declined)
   }
 
-  @PutMapping("/{suggestionId:[0-9]+}/reverse")
-  @Operation(summary = "Reverse suggestion")
+  @PutMapping("/{suggestionId:[0-9]+}/set-active")
+  @Operation(summary = "Set suggestion active")
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
-  @RequestActivity(ActivityType.ACCEPT_SUGGESTION)
-  fun reverseSuggestion(
+  @RequestActivity(ActivityType.SUGGESTION_SET_ACTIVE)
+  fun suggestionSetActive(
     @PathVariable languageId: Long,
     @PathVariable keyId: Long,
     @PathVariable suggestionId: Long,
@@ -166,12 +166,15 @@ class SuggestionController(
       listOf(languageId)
     )
     val projectId = projectHolder.project.id
-    val suggestion = translationSuggestionService.reverseSuggestion(projectId, keyId, suggestionId)
+    val suggestion = translationSuggestionService.suggestionSetActive(projectId, keyId, suggestionId)
     return translationSuggestionModelAssembler.toModel(suggestion)
   }
 
   @DeleteMapping("/{suggestionId:[0-9]+}")
-  @Operation(summary = "Delete suggestion")
+  @Operation(
+    summary = "Delete suggestion",
+    description = "User can only delete suggestion created by them"
+  )
   @AllowApiAccess
   // user can only delete suggestion created by them; it's checked in the service
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])

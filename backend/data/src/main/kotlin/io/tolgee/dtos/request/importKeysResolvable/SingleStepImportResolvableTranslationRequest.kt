@@ -3,9 +3,6 @@ package io.tolgee.dtos.request.importKeysResolvable
 import io.swagger.v3.oas.annotations.media.Schema
 
 class SingleStepImportResolvableTranslationRequest(
-  /**
-   * Key full path is stored as name in entity
-   */
   @Schema(description = "Translation text", example = "Hello! I am a translation!")
   val text: String = "",
   @Schema(

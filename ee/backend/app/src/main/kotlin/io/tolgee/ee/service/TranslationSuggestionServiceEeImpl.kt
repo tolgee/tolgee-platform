@@ -42,16 +42,16 @@ class TranslationSuggestionServiceEeImpl(
     projectId: Long,
     keyIds: List<Long>,
     languageIds: List<Long>
-  ): Map<Long, List<TranslationSuggestionView>> {
+  ): Map<Pair<Long, String>, List<TranslationSuggestionView>> {
     val data = translationSuggestionRepository.getByKeyId(projectId, languageIds, keyIds)
-    val result = mutableMapOf<Long, MutableList<TranslationSuggestionView>>()
+    val result = mutableMapOf<Pair<Long, String>, MutableList<TranslationSuggestionView>>()
     data.forEach {
-      val keyId = it.keyId
-      val existing = result[keyId] ?: mutableListOf()
+      val pair = Pair(it.keyId, it.languageTag)
+      val existing = result[pair] ?: mutableListOf()
       existing.add(it)
-      result.set(keyId, existing)
+      result.set(pair, existing)
     }
-    return result
+    return result as Map<Pair<Long, String>, List<TranslationSuggestionView>>
   }
 
   fun createSuggestion(
@@ -115,7 +115,7 @@ class TranslationSuggestionServiceEeImpl(
     return suggestion
   }
 
-  fun reverseSuggestion(projectId: Long, keyId: Long, suggestionId: Long): TranslationSuggestion {
+  fun suggestionSetActive(projectId: Long, keyId: Long, suggestionId: Long): TranslationSuggestion {
     val suggestion = getSuggestion(projectId, keyId, suggestionId)
     suggestion.state = TranslationSuggestionState.ACTIVE
     translationSuggestionRepository.save(suggestion)

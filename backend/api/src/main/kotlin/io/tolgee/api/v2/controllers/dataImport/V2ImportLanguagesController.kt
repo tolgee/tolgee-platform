@@ -18,11 +18,9 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.language.LanguageService
-import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable

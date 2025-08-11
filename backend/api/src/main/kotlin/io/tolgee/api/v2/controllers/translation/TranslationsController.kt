@@ -322,7 +322,7 @@ When null, resulting file will be a flat key-value object.
     )
     data.content.forEach { key ->
       key.translations.forEach { (tag, translation) ->
-        translation.suggestions = keysWithSuggestions[key.keyId]?.filter { it.languageTag == tag }
+        translation.suggestions = keysWithSuggestions[Pair(key.keyId, tag)]
       }
     }
   }

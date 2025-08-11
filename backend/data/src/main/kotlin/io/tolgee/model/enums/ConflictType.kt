@@ -1,9 +1,18 @@
 package io.tolgee.model.enums
 
 enum class ConflictType {
+  /**
+   * When project.translationProtection = PROTECT_REVIEWED
+   * user has permission to change the translation, but we don't recommend it by default
+   */
+  SHOULD_NOT_EDIT_REVIEWED,
+
+  /**
+   * When project.translationProtection = PROTECT_REVIEWED
+   * and user has no state-edit permission
+   */
   CANNOT_EDIT_REVIEWED,
-  CANNOT_EDIT_DISABLED,
-  SHOULD_NOT_EDIT_REVIEWED;
+  CANNOT_EDIT_DISABLED;
 
   companion object {
     fun isOverridable(conflictType: ConflictType?): Boolean {

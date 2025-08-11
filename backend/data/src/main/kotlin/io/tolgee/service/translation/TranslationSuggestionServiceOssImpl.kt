@@ -9,8 +9,8 @@ class TranslationSuggestionServiceOssImpl : TranslationSuggestionService {
     projectId: Long,
     keyIds: List<Long>,
     languageIds: List<Long>
-  ): Map<Long, List<TranslationSuggestionView>> {
-    return emptyMap()
+  ): Map<Pair<Long, String>, List<TranslationSuggestionView>> {
+    return mutableMapOf()
   }
 
   override fun deleteAllByLanguage(id: Long) {
