@@ -27,16 +27,19 @@ export default function Var({
   demoValue,
   dangerouslyInjectValueAsHtmlWithoutSanitization: injectHtml,
 }: Props) {
-  const children = injectHtml ? undefined : demoValue;
-  const html = injectHtml ? demoValue : undefined;
+  if (injectHtml) {
+    return React.createElement('span', {
+      [injectHtml ? 'th:utext' : 'th:text']: `\${${variable}}`,
+      dangerouslySetInnerHTML: { __html: demoValue },
+    });
+  }
 
   // eslint-disable-next-line react/no-danger-with-children
   return React.createElement(
     'span',
     {
       [injectHtml ? 'th:utext' : 'th:text']: `\${${variable}}`,
-      dangerouslySetInnerHTML: { __html: html },
     },
-    children
+    demoValue
   );
 }
