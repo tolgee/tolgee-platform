@@ -6,7 +6,12 @@ import React from 'react';
 import { T } from '@tolgee/react';
 import { Box } from '@mui/material';
 
-type GenericPlanType = { id: number; name: string };
+export type GenericPlanType = { id: number; name: string; free: boolean };
+
+type PlansProps = {
+  hiddenIds?: number[];
+  free?: boolean;
+};
 
 export interface GenericPlanSelector<T extends GenericPlanType> {
   organizationId?: number;
@@ -15,7 +20,7 @@ export interface GenericPlanSelector<T extends GenericPlanType> {
   onChange?: (value: number) => void;
   selectProps?: React.ComponentProps<typeof SearchSelect>[`SelectProps`];
   plans?: T[];
-  hiddenPlans?: number[];
+  planProps?: PlansProps;
   dataCy?: string;
 }
 
@@ -25,7 +30,7 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   selectProps,
   onPlanChange,
   plans,
-  hiddenPlans,
+  planProps,
   dataCy = 'administration-plan-selector',
 }: GenericPlanSelector<T>) => {
   if (!plans) {
@@ -37,7 +42,15 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   }
 
   const selectItems = plans
-    .filter((plan) => !hiddenPlans?.includes(plan.id))
+    .filter((plan) => {
+      if (planProps?.hiddenIds?.includes(plan.id)) {
+        return false;
+      }
+      if (planProps?.free !== undefined) {
+        return planProps.free === plan.free;
+      }
+      return true;
+    })
     .map(
       (plan) =>
         ({
