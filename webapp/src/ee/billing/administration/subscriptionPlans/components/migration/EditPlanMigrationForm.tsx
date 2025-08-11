@@ -18,6 +18,7 @@ export const EditPlanMigrationForm: React.FC<Props> = (props) => {
   const { migration } = props;
   const initialValues: PlanMigrationFormData = {
     enabled: migration.enabled,
+    sourcePlanFree: migration.sourcePlan.free,
     targetPlanId: migration.targetPlan.id,
     monthlyOffsetDays: migration.monthlyOffsetDays,
     yearlyOffsetDays: migration.yearlyOffsetDays,

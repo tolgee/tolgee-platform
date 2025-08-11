@@ -1,9 +1,8 @@
-import { PlanMigrationForm } from './PlanMigrationForm';
-import { components } from 'tg.service/billingApiSchema.generated';
+import {
+  CreatePlanMigrationFormData,
+  PlanMigrationForm,
+} from './PlanMigrationForm';
 import { PlanType } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/types';
-
-export type CreatePlanMigrationFormData =
-  components['schemas']['CreatePlanMigrationRequest'];
 
 const emptyDefaultValues: CreatePlanMigrationFormData = {
   enabled: true,

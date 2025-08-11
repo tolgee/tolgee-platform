@@ -1,7 +1,7 @@
 import { Form, Formik } from 'formik';
 import { Box, Button, Typography } from '@mui/material';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import React from 'react';
+import React, { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { ArrowRightIcon } from '@mui/x-date-pickers';
@@ -27,10 +27,17 @@ type Props<T> = {
 };
 
 export type PlanMigrationFormData =
-  components['schemas']['PlanMigrationRequest'];
+  components['schemas']['PlanMigrationRequest'] & {
+    sourcePlanFree: boolean;
+  };
 
 export type CreatePlanMigrationFormData =
   components['schemas']['CreatePlanMigrationRequest'];
+
+type FormPlanType = {
+  id: number;
+  free?: boolean;
+};
 
 export const PlanMigrationForm = <
   T extends CreatePlanMigrationFormData | PlanMigrationFormData
@@ -45,12 +52,20 @@ export const PlanMigrationForm = <
   const { t } = useTranslate();
   const isUpdate = migration != null;
 
-  const [selectedSourcePlan, setSelectedSourcePlan] = React.useState<number>(
-    (defaultValues as CreatePlanMigrationFormData).sourcePlanId
-  );
-  const [selectedTargetPlan, setSelectedTargetPlan] = React.useState<number>(
-    defaultValues.targetPlanId
-  );
+  const defaultSourcePlan = migration
+    ? {
+        id: migration && migration.sourcePlan.id,
+        free: migration.sourcePlan.free,
+      }
+    : undefined;
+
+  const [selectedSourcePlan, setSelectedSourcePlan] = useState<
+    FormPlanType | undefined
+  >(defaultSourcePlan);
+
+  const [selectedTargetPlan, setSelectedTargetPlan] = useState<FormPlanType>({
+    id: defaultValues.targetPlanId,
+  });
 
   const initValues = {
     ...defaultValues,
@@ -87,8 +102,12 @@ export const PlanMigrationForm = <
               disabled: isUpdate,
             }}
             dataCy="source-plan-selector"
-            onPlanChange={(plan) => setSelectedSourcePlan(plan.id)}
-            hiddenPlans={[selectedTargetPlan]}
+            onPlanChange={(plan) => {
+              setSelectedSourcePlan(plan);
+            }}
+            planProps={{
+              hiddenIds: [selectedTargetPlan.id],
+            }}
             filterHasMigration={false}
             type={planType}
             {...(migration && { plans: [migration.sourcePlan] })}
@@ -101,9 +120,14 @@ export const PlanMigrationForm = <
               required: true,
             }}
             dataCy="target-plan-selector"
-            onPlanChange={(plan) => setSelectedTargetPlan(plan.id)}
+            onPlanChange={(plan) => setSelectedTargetPlan(plan)}
             type={planType}
-            hiddenPlans={[selectedSourcePlan]}
+            planProps={
+              selectedSourcePlan && {
+                hiddenIds: [selectedSourcePlan.id],
+                free: selectedSourcePlan.free,
+              }
+            }
           />
         </Box>
         <Box display="flex" alignItems="center" mb={1}>
