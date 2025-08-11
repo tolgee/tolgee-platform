@@ -66,6 +66,28 @@ dependencies {
 }
 ```
 
+## Add network security config
+
+Create a network security config file `network_security.xml` in your `res/xml` folder:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <domain-config>
+        <domain includeSubdomains="true">tolgee.io</domain>
+        <domain includeSubdomains="true">tolg.ee</domain>
+    </domain-config>
+</network-security-config>
+```
+
+Add network security config to your `AndroidManifest.xml`:
+
+```xml
+<application
+        android:networkSecurityConfig="@xml/network_security"> <!-- Add this line to your existing application tag -->
+</application>
+```
+
 ## Setup CDN
 
 In Developer settings create a new CDN deployment for the project with the format set to `Android SDK` and use the URL in the next step.
