@@ -45,14 +45,12 @@ import org.springframework.web.bind.annotation.RestController
 @ImportDocsTag
 class V2ImportLanguagesController(
   private val importService: ImportService,
-  private val authenticationFacade: AuthenticationFacade,
   private val importLanguageModelAssembler: ImportLanguageModelAssembler,
   private val importTranslationModelAssembler: ImportTranslationModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedTranslationsResourcesAssembler: PagedResourcesAssembler<ImportTranslationView>,
   private val projectHolder: ProjectHolder,
   private val languageService: LanguageService,
-  private val translationService: TranslationService,
 ) : Logging {
   @GetMapping("/result/languages/{languageId}")
   @Operation(description = "Returns language prepared to import.", summary = "Get import language")

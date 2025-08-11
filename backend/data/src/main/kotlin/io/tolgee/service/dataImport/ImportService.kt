@@ -558,7 +558,7 @@ class ImportService(
   ) {
     val translations = findTranslations(language.id)
     translations.forEach {
-      if (!override || ImportTranslationView.isOverridable(it.conflictType)) {
+      if (!override || ConflictType.isOverridable(it.conflictType)) {
         it.resolve()
         it.override = override
       }

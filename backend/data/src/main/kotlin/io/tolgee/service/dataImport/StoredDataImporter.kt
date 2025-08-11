@@ -16,6 +16,7 @@ import io.tolgee.model.UploadedImage
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.enums.ConflictType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
@@ -316,7 +317,7 @@ class StoredDataImporter(
         keyName = it.key.name,
         keyNamespace = it.conflict?.key?.namespace?.name,
         language = it.conflict!!.language.tag,
-        isOverridable = ImportTranslationView.isOverridable(it.conflictType)
+        isOverridable = ConflictType.isOverridable(it.conflictType)
       )
     }
   }
@@ -470,13 +471,13 @@ class StoredDataImporter(
     if (currentForceMode == ForceMode.OVERRIDE) {
       if (
         (overrideMode == OverrideMode.ALL) &&
-        ImportTranslationView.isOverridable(this.conflictType)
+        ConflictType.isOverridable(this.conflictType)
       ) {
         return ForceMode.OVERRIDE
       }
       if (
         (overrideMode == OverrideMode.RECOMMENDED) &&
-        ImportTranslationView.isOverridableAndRecommended(this.conflictType)
+        ConflictType.isOverridableAndRecommended(this.conflictType)
       ) {
         return ForceMode.OVERRIDE
       }

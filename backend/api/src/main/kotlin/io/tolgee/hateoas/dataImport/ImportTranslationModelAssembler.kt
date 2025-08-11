@@ -2,6 +2,7 @@ package io.tolgee.hateoas.dataImport
 
 import io.tolgee.api.v2.controllers.dataImport.V2ImportController
 import io.tolgee.formats.convertToIcuPlural
+import io.tolgee.model.enums.ConflictType
 import io.tolgee.model.views.ImportTranslationView
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
@@ -28,7 +29,7 @@ class ImportTranslationModelAssembler :
       isPlural = view.plural,
       existingKeyIsPlural = view.existingKeyPlural ?: false,
       conflictType = view.conflictType,
-      isOverridable = ImportTranslationView.isOverridable(view.conflictType),
+      isOverridable = ConflictType.isOverridable(view.conflictType),
     )
   }
 
