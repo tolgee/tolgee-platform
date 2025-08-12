@@ -9,13 +9,8 @@ import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ImportResult
-import io.tolgee.dtos.SimpleKeyResult
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.request.KeyDefinitionDto
-import io.tolgee.dtos.request.SingleStepImportRequest
-import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableRequest
-import io.tolgee.dtos.request.importKeysResolvable.ResolvableTranslationResolution
 import io.tolgee.events.OnImportSoftDeleted
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.exceptions.BadRequestException
@@ -35,7 +30,6 @@ import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.repository.dataImport.*
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
-import io.tolgee.service.dataImport.StoredDataImporter.Companion.ScreenshotToImport
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
@@ -49,7 +43,6 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionInterceptor
-import java.io.Serializable
 
 @Service
 @Transactional

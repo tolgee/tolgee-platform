@@ -19,7 +19,6 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
-import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.SingleStepImportService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
