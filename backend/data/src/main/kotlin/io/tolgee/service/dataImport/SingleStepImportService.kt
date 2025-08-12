@@ -15,7 +15,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportTranslation
-import io.tolgee.service.dataImport.StoredDataImporter.Companion.ScreenshotToImport
+import io.tolgee.service.dataImport.ScreenshotImporter.Companion.ScreenshotToImport
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext

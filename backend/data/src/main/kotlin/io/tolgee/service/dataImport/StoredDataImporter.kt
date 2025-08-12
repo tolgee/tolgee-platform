@@ -4,13 +4,9 @@ import io.tolgee.api.IImportSettings
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ImportResult
 import io.tolgee.dtos.dataImport.SimpleImportConflictResult
-import io.tolgee.dtos.request.KeyDefinitionDto
-import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.SingleStepImportRequest
-import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
@@ -19,7 +15,6 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
-import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
@@ -49,7 +44,7 @@ class StoredDataImporter(
   // for single step import, we provide import data manager
   private val _importDataManager: ImportDataManager? = null,
   private val isSingleStepImport: Boolean = false,
-  private val screenshots: List<ScreenshotToImport> = emptyList(),
+  private val screenshots: List<ScreenshotImporter.Companion.ScreenshotToImport> = emptyList(),
   private val resolveConflict: ((ImportTranslation) -> ForceMode?)? = null,
 ) {
   private val importDataManager by lazy {
@@ -58,6 +53,8 @@ class StoredDataImporter(
     }
     ImportDataManager(applicationContext, import)
   }
+
+  private val screenshotImporter by lazy { ScreenshotImporter(applicationContext) }
 
   private val keyService = applicationContext.getBean(KeyService::class.java)
   private val namespaceService = applicationContext.getBean(NamespaceService::class.java)
@@ -178,60 +175,16 @@ class StoredDataImporter(
   }
 
   private fun addScreenshots() {
-    if (screenshots.isEmpty()) {
-      return
-    }
-    val uploadedImagesIds = screenshots.map { it -> it.screenshot.uploadedImageId }
-    val images = imageUploadService.find(uploadedImagesIds)
-    securityService.checkImageUploadPermissions(import.project.id, images)
-    val createdScreenshots =
-      images.associate {
-        it.id to screenshotService.saveScreenshot(it)
-      }
-
-    val locations = images.map { it.location }
-
-    val existingKeys = importDataManager.existingKeys.entries.map { it.value }
-
-    val allReferences =
-      screenshotService
-        .getKeyScreenshotReferences(
-          existingKeys,
-          locations,
-        ).toMutableList()
-
-    val referencesToDelete = mutableListOf<KeyScreenshotReference>()
-
-    screenshots.forEach {
-      val screenshot = it.screenshot
-      val key =
-        newKeys.find { key -> key.name == it.key.name && key.namespace?.name == it.key.namespace?.nullIfEmpty }
-          ?: existingKeys.find { key ->
-            key.name == it.key.name && key.namespace?.name == it.key.namespace?.nullIfEmpty
-          } ?: addKeyToSave(it.key.namespace?.nullIfEmpty, it.key.name)
-
-      val screenshotResult =
-        createdScreenshots[screenshot.uploadedImageId]
-          ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
-      val info = ScreenshotInfoDto(screenshot.text, screenshot.positions)
-
-      screenshotService.addReference(
-        key = key,
-        screenshot = screenshotResult.screenshot,
-        info = info,
-        originalDimension = screenshotResult.originalDimension,
-        targetDimension = screenshotResult.targetDimension,
-      )
-
-      val toDelete =
-        allReferences.filter { reference ->
-          reference.key.id == key.id &&
-            reference.screenshot.location == screenshotResult.screenshot.location
-        }
-      referencesToDelete.addAll(toDelete)
-    }
-
-    screenshotService.removeScreenshotReferences(referencesToDelete)
+    screenshotImporter.importScreenshots(
+      screenshots,
+      existingKeys = importDataManager.existingKeys,
+      newKeys = newKeys,
+      addKeyToSave = {
+        namespace: String?, key: String ->
+        this.addKeyToSave(namespace, key)
+      },
+      projectId = import.project.id
+    )
   }
 
   /**
@@ -491,12 +444,5 @@ class StoredDataImporter(
 
   private val tagService by lazy {
     applicationContext.getBean(TagService::class.java)
-  }
-
-  companion object {
-    data class ScreenshotToImport(
-      val key: KeyDefinitionDto,
-      val screenshot: KeyScreenshotDto
-    )
   }
 }
