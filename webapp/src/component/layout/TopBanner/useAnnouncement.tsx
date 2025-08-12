@@ -129,6 +129,25 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_SUGGESTIONS_AND_LABELS':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_suggestions_and_labels"
+                params={{
+                  linkSuggestions: (
+                    <BannerLink href="https://docs.tolgee.io/platform/projects_and_organizations/suggestions" />
+                  ),
+                  linkLabels: (
+                    <BannerLink href="https://docs.tolgee.io/platform/translation_process/labels" />
+                  ),
+                }}
+              />
+            }
+          />
+        );
+
       default:
         return assertUnreachableReturnNull(value);
     }

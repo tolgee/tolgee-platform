@@ -18,7 +18,6 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.language.LanguageService
@@ -44,7 +43,6 @@ import org.springframework.web.bind.annotation.RestController
 @ImportDocsTag
 class V2ImportLanguagesController(
   private val importService: ImportService,
-  private val authenticationFacade: AuthenticationFacade,
   private val importLanguageModelAssembler: ImportLanguageModelAssembler,
   private val importTranslationModelAssembler: ImportTranslationModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")

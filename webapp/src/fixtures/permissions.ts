@@ -13,6 +13,7 @@ export const SCOPE_TO_LANG_PROPERTY_MAP = {
   'translations.view': 'viewLanguageIds',
   'translations.edit': 'translateLanguageIds',
   'translations.state-edit': 'stateChangeLanguageIds',
+  'translations.suggest': 'suggestLanguageIds',
 };
 
 export type ScopeWithLanguage = keyof typeof SCOPE_TO_LANG_PROPERTY_MAP;

@@ -8,9 +8,11 @@ import io.tolgee.exceptions.LanguageNotPermittedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
+import io.tolgee.model.UploadedImage
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TaskType
+import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
@@ -21,6 +23,7 @@ import io.tolgee.service.task.ITaskService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import kotlin.collections.forEach
 
 @Service
 class SecurityService(
@@ -207,6 +210,16 @@ class SecurityService(
     ) { data, languageIds -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
   }
 
+  fun checkLanguageSuggestPermission(
+    projectId: Long,
+    languageIds: Collection<Long>,
+  ) {
+    checkProjectPermission(projectId, Scope.TRANSLATIONS_SUGGEST)
+    checkLanguagePermission(
+      projectId,
+    ) { data -> data.checkSuggestPermitted(*languageIds.toLongArray()) }
+  }
+
   fun checkLanguageViewPermission(
     projectId: Long,
     languageIds: Collection<Long>,
@@ -245,15 +258,30 @@ class SecurityService(
     languageIds: Collection<Long>,
     keyId: Long? = null,
   ) {
-    try {
-      checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
-      checkLanguagePermission(
-        projectId,
-      ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
-    } catch (e: PermissionException) {
-      if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
-        throw e
+    passIfAnyPermissionCheckSucceeds(
+      {
+        checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
+        checkLanguagePermission(
+          projectId,
+        ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+      },
+      {
+        if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
+          throw PermissionException(Message.OPERATION_NOT_PERMITTED)
+        }
       }
+    )
+  }
+
+  fun canEditReviewedTranslation(projectId: Long, languageId: Long, keyId: Long? = null): Boolean {
+    if (projectHolder.project.translationProtection != TranslationProtection.PROTECT_REVIEWED) {
+      return true
+    }
+    try {
+      checkLanguageStateChangePermission(projectId, listOf(languageId), keyId)
+      return true
+    } catch (e: PermissionException) {
+      return false
     }
   }
 
@@ -480,6 +508,39 @@ class SecurityService(
     }
     if (projectIds.any { it != projectId }) {
       throw PermissionException(Message.MULTIPLE_PROJECTS_NOT_SUPPORTED)
+    }
+  }
+
+  fun checkImageUploadPermissions(projectId: Long, images: List<UploadedImage>) {
+    if (images.isNotEmpty()) {
+      checkScreenshotsUploadPermission(projectId)
+    }
+    images.forEach { image ->
+      if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
+        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
+      }
+    }
+  }
+
+  /**
+   * Perform multiple permission checks
+   * if any of them pass, pass the whole check
+   * if all fail, return error from the first one
+   */
+  private fun passIfAnyPermissionCheckSucceeds(vararg permissionChecks: () -> Unit) {
+    var error: PermissionException? = null
+    for (test in permissionChecks) {
+      try {
+        test()
+        return
+      } catch (e: PermissionException) {
+        if (error == null) {
+          error = e
+        }
+      }
+    }
+    if (error != null) {
+      throw error
     }
   }
 

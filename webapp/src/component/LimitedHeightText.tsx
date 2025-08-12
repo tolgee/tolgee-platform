@@ -16,6 +16,7 @@ const StyledContainer = styled('div')`
   position: relative;
   display: grid;
   animation: ${fadeIn} 0.1s ease-in-out;
+  overflow: hidden;
 
   & .text {
     overflow: hidden;

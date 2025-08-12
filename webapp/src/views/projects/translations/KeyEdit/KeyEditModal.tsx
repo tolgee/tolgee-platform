@@ -239,7 +239,7 @@ export const KeyEditModal: React.FC<Props> = ({
                 <T keyName="global_cancel_button" />
               </Button>
               <LoadingButton
-                data-cy="translations-cell-save-button"
+                data-cy="translations-cell-main-action-button"
                 loading={updateKeyLoadable.isLoading}
                 color="primary"
                 variant="contained"

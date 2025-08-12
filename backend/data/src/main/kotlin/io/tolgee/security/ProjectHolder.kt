@@ -8,11 +8,12 @@ import io.tolgee.service.project.ProjectService
 open class ProjectHolder(
   private val projectService: ProjectService,
 ) {
+  private var _project: ProjectDto? = null
+
   open val projectEntity: Project by lazy {
     projectService.get(project.id)
   }
 
-  private var _project: ProjectDto? = null
   open var project: ProjectDto
     set(value) {
       Sentry.addBreadcrumb("Project Id: ${value.id}")
@@ -22,6 +23,6 @@ open class ProjectHolder(
       return _project ?: throw ProjectNotSelectedException()
     }
 
-  val projectOrNull: ProjectDto?
+  open val projectOrNull: ProjectDto?
     get() = _project
 }

@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
+import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
 import io.tolgee.development.testDataBuilder.data.TaskTestData
 import io.tolgee.development.testDataBuilder.data.TranslationSourceChangeStateTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
@@ -548,6 +549,32 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
       node("_embedded.keys") {
         isArray.hasSize(1)
         node("[0].keyName").isEqualTo("key 0")
+      }
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters by suggestion`() {
+    val testData = SuggestionsTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.projectTranslator.self
+    projectSupplier = { testData.relatedProject.self }
+    performProjectAuthGet(
+      "/translations?filterHasSuggestionsInLang=${testData.czechLanguage.tag}",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(2)
+        node("[0].keyName").isEqualTo("key 0")
+      }
+    }
+
+    performProjectAuthGet(
+      "/translations?filterHasNoSuggestionsInLang=${testData.czechLanguage.tag}",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        isArray.hasSize(3)
+        node("[0].keyName").isEqualTo("key 1")
       }
     }
   }

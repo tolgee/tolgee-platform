@@ -3,6 +3,7 @@ package io.tolgee.model.dataImport
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.enums.ConflictType
 import io.tolgee.model.translation.Translation
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -46,6 +47,12 @@ class ImportTranslation(
    */
   @field:NotNull
   var override: Boolean = false
+
+  /**
+   * Conflict type (translation can be disabled or reviewed (with suggestions mode enforced))
+   */
+  @Enumerated(EnumType.STRING)
+  var conflictType: ConflictType? = null
 
   /**
    * Whether user explicitely resolved this conflict

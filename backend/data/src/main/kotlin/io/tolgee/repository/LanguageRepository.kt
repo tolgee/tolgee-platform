@@ -179,6 +179,15 @@ interface LanguageRepository : JpaRepository<Language, Long> {
 
   @Query(
     """
+    select l
+    from Language l
+    where l.project.id = :projectId and l.tag = :languageTag and l.deletedAt is null
+  """,
+  )
+  fun find(projectId: Long, languageTag: String): Language?
+
+  @Query(
+    """
     select new io.tolgee.dtos.cacheable.LanguageDto(
       l.id,
       l.name,

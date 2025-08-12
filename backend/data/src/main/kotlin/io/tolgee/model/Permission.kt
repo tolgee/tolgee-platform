@@ -80,15 +80,22 @@ class Permission(
   var translateLanguages: MutableSet<Language> = mutableSetOf()
 
   /**
-   * Languages for TRANSLATIONS_EDIT scope.
-   * When specified, user is restricted to edit specific language translations.
+   * Languages for TRANSLATIONS_SUGGEST scope.
+   * When specified, user is restricted to suggest specific language translations.
+   */
+  @ManyToMany(fetch = FetchType.EAGER)
+  var suggestLanguages: MutableSet<Language> = mutableSetOf()
+
+  /**
+   * Languages for TRANSLATIONS_VIEW scope.
+   * When specified, user is restricted to view specific language translations.
    */
   @ManyToMany(fetch = FetchType.EAGER)
   var viewLanguages: MutableSet<Language> = mutableSetOf()
 
   /**
-   * Languages for TRANSLATIONS_EDIT scope.
-   * When specified, user is restricted to edit specific language translations.
+   * Languages for TRANSLATIONS_STATE_EDIT scope.
+   * When specified, user is restricted to change state only to specific language translations.
    */
   @ManyToMany(fetch = FetchType.EAGER)
   var stateChangeLanguages: MutableSet<Language> = mutableSetOf()
@@ -116,6 +123,7 @@ class Permission(
     this.viewLanguages = languagePermissions?.view?.toMutableSet() ?: mutableSetOf()
     this.translateLanguages = languagePermissions?.translate?.toMutableSet() ?: mutableSetOf()
     this.stateChangeLanguages = languagePermissions?.stateChange?.toMutableSet() ?: mutableSetOf()
+    this.suggestLanguages = languagePermissions?.suggest?.toMutableSet() ?: mutableSetOf()
     this.agency = agency
   }
 
@@ -134,6 +142,9 @@ class Permission(
 
   override val stateChangeLanguageIds: Set<Long>?
     get() = this.stateChangeLanguages.map { it.id }.toSet()
+
+  override val suggestLanguageIds: Set<Long>?
+    get() = this.suggestLanguages.map { it.id }.toSet()
 
   companion object {
     @Configurable

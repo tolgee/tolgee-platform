@@ -1,6 +1,7 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.*
     "/v2/projects/prompts",
   ],
 )
+@Tag(name = "Ai prompt controller")
 @OpenApiOrderExtension(6)
 class PromptController(
   private val promptService: PromptServiceEeImpl,
@@ -50,6 +52,7 @@ class PromptController(
 ) {
   @GetMapping("")
   @RequiresProjectPermissions([Scope.PROMPTS_VIEW])
+  @Operation(summary = "Get all prompts")
   fun getAllPaged(
     @ParameterObject pageable: Pageable,
     @RequestParam search: String?,
@@ -60,12 +63,14 @@ class PromptController(
 
   @GetMapping("default")
   @RequiresProjectPermissions([Scope.PROMPTS_VIEW])
+  @Operation(summary = "Get default prompt")
   fun getDefaultPrompt(): PromptDto {
     return promptService.getDefaultPrompt()
   }
 
   @PostMapping("")
   @RequiresProjectPermissions([Scope.PROMPTS_EDIT])
+  @Operation(summary = "Create prompt")
   fun createPrompt(
     @RequestBody @Valid dto: PromptDto,
   ): PromptModel {
@@ -90,6 +95,7 @@ class PromptController(
 
   @GetMapping("/{promptId}")
   @RequiresProjectPermissions([Scope.PROMPTS_VIEW])
+  @Operation(summary = "Get prompt by id")
   fun getPrompt(
     @PathVariable promptId: Long,
   ): PromptModel {
@@ -99,6 +105,7 @@ class PromptController(
 
   @PutMapping("/{promptId}")
   @RequiresProjectPermissions([Scope.PROMPTS_EDIT])
+  @Operation(summary = "Update prompt")
   fun updatePrompt(
     @PathVariable promptId: Long,
     @RequestBody @Valid dto: PromptDto,
@@ -123,6 +130,7 @@ class PromptController(
 
   @DeleteMapping("/{promptId}")
   @RequiresProjectPermissions([Scope.PROMPTS_EDIT])
+  @Operation(summary = "Delete prompt")
   fun deletePrompt(
     @PathVariable promptId: Long,
   ) {
@@ -138,6 +146,7 @@ class PromptController(
 
   @PostMapping("run")
   @RequiresProjectPermissions([Scope.PROMPTS_EDIT])
+  @Operation(summary = "Run prompt")
   fun run(
     @Valid @RequestBody data: PromptRunDto,
   ): PromptResponseDto {

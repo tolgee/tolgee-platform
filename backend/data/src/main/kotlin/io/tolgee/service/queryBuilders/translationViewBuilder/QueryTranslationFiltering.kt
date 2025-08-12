@@ -62,6 +62,16 @@ class QueryTranslationFiltering(
     }
   }
 
+  fun apply(language: LanguageDto, commentsExpression: Expression<Long>) {
+    if (params.filterHasSuggestionsInLang?.contains(language.tag) == true) {
+      queryBase.translationConditions.add(cb.greaterThan(commentsExpression, cb.literal(0L)))
+    }
+
+    if (params.filterHasNoSuggestionsInLang?.contains(language.tag) == true) {
+      queryBase.translationConditions.add(cb.equal(commentsExpression, cb.literal(0L)))
+    }
+  }
+
   fun apply(languageSourceChangeMap: MutableMap<String, Expression<Boolean>>) {
     val conditions =
       (
@@ -69,12 +79,12 @@ class QueryTranslationFiltering(
           val field = languageSourceChangeMap[it] ?: return@mapNotNull null
           cb.isTrue(field)
         }?.toList() ?: listOf()
-      ) + (
+        ) + (
         params.filterNotOutdatedLanguage?.mapNotNull {
           val field = languageSourceChangeMap[it] ?: return@mapNotNull null
           cb.isFalse(field)
         }?.toList() ?: listOf()
-      )
+        )
 
     if (conditions.isNotEmpty()) {
       queryBase.translationConditions.add(cb.or(*conditions.toTypedArray()))

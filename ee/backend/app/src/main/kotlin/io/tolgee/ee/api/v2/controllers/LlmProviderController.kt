@@ -1,5 +1,7 @@
 package io.tolgee.ee.api.v2.controllers
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
 import io.tolgee.ee.api.v2.hateoas.assemblers.LlmProviderModelAssembler
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/organizations/{organizationId:[0-9]+}/llm-providers"])
+@Tag(name = "Llm providers")
 @OpenApiOrderExtension(6)
 class LlmProviderController(
   private val providerService: LlmProviderService,
@@ -25,6 +28,10 @@ class LlmProviderController(
 ) {
   @GetMapping("all-available")
   @UseDefaultPermissions
+  @Operation(
+    summary = "Get all available llm providers",
+    description = "Combines llm providers from organization-specific and server-configured"
+  )
   fun getAvailableProviders(
     @PathVariable organizationId: Long,
   ): CollectionModel<LlmProviderSimpleModel> {
@@ -49,6 +56,7 @@ class LlmProviderController(
 
   @GetMapping("")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(summary = "Get all organization-specific providers")
   fun getAll(
     @PathVariable organizationId: Long,
   ): CollectionModel<LlmProviderModel> {
@@ -58,6 +66,7 @@ class LlmProviderController(
 
   @GetMapping("server-providers")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(summary = "Get all server-configured providers")
   fun getServerProviders(
     @PathVariable organizationId: Long,
   ): CollectionModel<LlmProviderSimpleModel> {
@@ -67,6 +76,7 @@ class LlmProviderController(
 
   @PostMapping("")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(summary = "Create organization-specific provider")
   fun createProvider(
     @PathVariable organizationId: Long,
     @RequestBody @Valid dto: LlmProviderRequest,
@@ -77,6 +87,7 @@ class LlmProviderController(
 
   @PutMapping("/{providerId:[0-9]+}")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(summary = "Update organization-specific provider")
   fun updateProvider(
     @PathVariable organizationId: Long,
     @PathVariable providerId: Long,
@@ -88,6 +99,7 @@ class LlmProviderController(
 
   @DeleteMapping("/{providerId:[0-9]+}")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+  @Operation(summary = "Delete organization-specific provider")
   fun deleteProvider(
     @PathVariable organizationId: Long,
     @PathVariable providerId: Long,

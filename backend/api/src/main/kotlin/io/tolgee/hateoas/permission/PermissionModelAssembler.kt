@@ -15,9 +15,10 @@ class PermissionModelAssembler() : RepresentationModelAssemblerSupport<IPermissi
     return PermissionModel(
       scopes = Scope.expand(entity.scopes),
       permittedLanguageIds = entity.translateLanguageIds,
+      viewLanguageIds = entity.viewLanguageIds,
       translateLanguageIds = entity.translateLanguageIds,
       stateChangeLanguageIds = entity.stateChangeLanguageIds,
-      viewLanguageIds = entity.viewLanguageIds,
+      suggestLanguageIds = entity.suggestLanguageIds,
       type = entity.type,
     )
   }

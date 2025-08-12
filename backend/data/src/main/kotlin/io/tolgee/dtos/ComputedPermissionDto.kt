@@ -29,6 +29,12 @@ class ComputedPermissionDto(
       stateChangeLanguageIds,
     )
 
+  fun checkSuggestPermitted(vararg languageIds: Long) =
+    checkLanguagePermitted(
+      languageIds.toList(),
+      suggestLanguageIds,
+    )
+
   private fun isAllLanguagesPermitted(languageIds: Collection<Long>?): Boolean {
     if (scopes.isEmpty()) {
       return false
@@ -93,6 +99,8 @@ class ComputedPermissionDto(
         override val viewLanguageIds: Set<Long>?
           get() = null
         override val stateChangeLanguageIds: Set<Long>?
+          get() = null
+        override val suggestLanguageIds: Set<Long>?
           get() = null
         override val type: ProjectPermissionType
           get() = type

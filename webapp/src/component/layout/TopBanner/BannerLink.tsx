@@ -1,5 +1,5 @@
 import { styled, Link as MuiLink } from '@mui/material';
-import { usePosthog } from 'tg.hooks/usePosthog';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 const StyledMuiLink = styled(MuiLink)`
   color: ${({ theme }) => theme.palette.topBanner.linkText};
@@ -9,14 +9,14 @@ const StyledMuiLink = styled(MuiLink)`
 type Props = React.ComponentProps<typeof MuiLink>;
 
 export const BannerLink = ({ ...props }: Props) => {
-  const pg = usePosthog();
+  const report = useReportEvent();
   return (
     <StyledMuiLink
       rel="noopener noreferrer"
       target="_blank"
       {...props}
       onClick={() => {
-        pg?.capture('ANNOUNCEMENT_LINK_CLICK', { link: props.href });
+        report('ANNOUNCEMENT_LINK_CLICK', { link: props.href });
       }}
     />
   );

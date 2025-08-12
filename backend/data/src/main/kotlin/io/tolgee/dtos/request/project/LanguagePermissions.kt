@@ -3,7 +3,8 @@ package io.tolgee.dtos.request.project
 import io.tolgee.model.Language
 
 class LanguagePermissions(
-  var translate: Set<Language>?,
-  var view: Set<Language>?,
-  var stateChange: Set<Language>?,
+  var translate: Set<Language>? = null,
+  var view: Set<Language>? = null,
+  var stateChange: Set<Language>? = null,
+  var suggest: Set<Language>? = null,
 )

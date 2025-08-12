@@ -57,7 +57,7 @@ describe('disabled placeholders translation plurals', () => {
     getPluralEditor('other').type(text, {
       parseSpecialCharSequences: false,
     });
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
     cy.gcy('global-editor').should('not.exist');
     cy.gcy('translation-plural-variant').contains(text);

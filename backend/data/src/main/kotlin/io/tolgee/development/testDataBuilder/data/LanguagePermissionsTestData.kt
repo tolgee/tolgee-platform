@@ -9,10 +9,16 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.SuggestionsMode
+import io.tolgee.model.enums.TranslationProtection
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
 import java.util.*
 
-class LanguagePermissionsTestData {
+class LanguagePermissionsTestData(
+  val projectSuggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED,
+  val projectTranslationProtection: TranslationProtection = TranslationProtection.NONE
+) {
   lateinit var project: Project
   lateinit var englishLanguage: Language
   lateinit var germanLanguage: Language
@@ -132,6 +138,8 @@ class LanguagePermissionsTestData {
       project = this
       name = "Project"
       organizationOwner = organization.self
+      suggestionsMode = projectSuggestionsMode
+      translationProtection = projectTranslationProtection
     }.build {
       projectBuilder = this
       englishLanguage = addEnglish().self
@@ -155,6 +163,22 @@ class LanguagePermissionsTestData {
       }
       addKey {
         name = "key2"
+      }
+      addKey {
+        name = "reviewedKey"
+      }.build {
+        addTranslation {
+          language = englishLanguage
+          text = "english_reviewed_translation"
+          englishTranslation = this
+          state = TranslationState.REVIEWED
+        }
+        addTranslation {
+          language = germanLanguage
+          text = "german_reviewed_translation"
+          germanTranslation = this
+          state = TranslationState.REVIEWED
+        }
       }
     }
   }

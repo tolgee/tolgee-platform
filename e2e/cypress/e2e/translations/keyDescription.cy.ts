@@ -18,7 +18,7 @@ describe('Key description', () => {
     const description = 'This cool key is just for e2e tests';
     cy.gcy('translations-table-cell').contains('Cool key 01').click();
     cy.gcy('translations-key-edit-description-field').type(description);
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
 
     cy.gcy('translations-key-cell-description')
@@ -33,7 +33,7 @@ describe('Key description', () => {
     cy.gcy('translations-key-edit-description-field')
       .clear()
       .type(markdownDescription);
-    cy.gcy('translations-cell-save-button').click();
+    cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();
 
     cy.gcy('translations-key-cell-description').within(() => {

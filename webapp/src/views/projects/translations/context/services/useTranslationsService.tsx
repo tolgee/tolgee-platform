@@ -17,6 +17,7 @@ import {
   ChangeScreenshotNum,
   KeyUpdateData,
   UpdateTranslation,
+  ValueUpdate,
 } from '../types';
 import { PrefilterType } from '../../prefilters/usePrefilter';
 import { useConfig } from 'tg.globalContext/helpers';
@@ -350,7 +351,7 @@ export const useTranslationsService = (props: Props) => {
     data: {
       keyId: number;
       language: string;
-      value: Partial<TranslationModel> | undefined;
+      value: ValueUpdate<Partial<TranslationModel>> | undefined;
     }[]
   ) => {
     setFixedTranslations((fixedTranslations) => {
@@ -358,6 +359,10 @@ export const useTranslationsService = (props: Props) => {
       data.forEach((mod) => {
         result = result?.map((k) => {
           if (k.keyId === mod.keyId) {
+            const value =
+              typeof mod.value === 'function'
+                ? mod.value(k.translations[mod.language])
+                : mod.value;
             return {
               ...k,
               translations: {
@@ -365,7 +370,7 @@ export const useTranslationsService = (props: Props) => {
                 [mod.language]: mod.value
                   ? {
                       ...k.translations[mod.language],
-                      ...mod.value,
+                      ...value,
                     }
                   : (undefined as any),
               },
@@ -378,10 +383,11 @@ export const useTranslationsService = (props: Props) => {
     });
   };
 
-  const updateTranslation = (data: UpdateTranslation) =>
+  const updateTranslation = (data: UpdateTranslation) => {
     changeTranslations([
       { keyId: data.keyId, language: data.lang, value: data.data },
     ]);
+  };
 
   const totalCount = translations.data?.pages[0].page?.totalElements;
 

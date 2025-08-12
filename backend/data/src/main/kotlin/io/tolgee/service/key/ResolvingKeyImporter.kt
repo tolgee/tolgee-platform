@@ -9,14 +9,12 @@ import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslation
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslationResolvableDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
 import io.tolgee.formats.convertToIcuPlurals
 import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
 import io.tolgee.model.Screenshot
-import io.tolgee.model.UploadedImage
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
@@ -24,7 +22,6 @@ import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
@@ -47,7 +44,6 @@ class ResolvingKeyImporter(
   private val translationService = applicationContext.getBean(TranslationService::class.java)
   private val screenshotService = applicationContext.getBean(ScreenshotService::class.java)
   private val imageUploadService = applicationContext.getBean(ImageUploadService::class.java)
-  private val authenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
   private val securityService = applicationContext.getBean(SecurityService::class.java)
 
   private val errors = mutableListOf<List<Serializable?>>()
@@ -154,7 +150,7 @@ class ResolvingKeyImporter(
   ) {
     val translationsToModifyMap = translationsToModify.associateWith { it.text }
 
-    // when existing key is plural, we are converting all to plurals
+    // when an existing key is plural, we are converting all to plurals
     if (isExistingKeyPlural) {
       translationsToModifyMap.convertToIcuPlurals(null).convertedStrings.forEach {
         it.key.text = it.value
@@ -201,7 +197,7 @@ class ResolvingKeyImporter(
       }
 
     val images = imageUploadService.find(uploadedImagesIds)
-    checkImageUploadPermissions(images)
+    securityService.checkImageUploadPermissions(projectEntity.id, images)
 
     val createdScreenshots =
       images.associate {
@@ -251,17 +247,6 @@ class ResolvingKeyImporter(
       .map { (uploadedImageId, screenshotResult) ->
         uploadedImageId to screenshotResult.screenshot
       }.toMap()
-  }
-
-  private fun checkImageUploadPermissions(images: List<UploadedImage>) {
-    if (images.isNotEmpty()) {
-      securityService.checkScreenshotsUploadPermission(projectEntity.id)
-    }
-    images.forEach { image ->
-      if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
-        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
-      }
-    }
   }
 
   private fun checkLanguagePermissions(keys: List<ImportKeysResolvableItemDto>) {

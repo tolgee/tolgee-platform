@@ -27,5 +27,13 @@ export const useOpenPanels = () => {
     localStorage.setItem(OPEN_PANELS_KEY, JSON.stringify(value));
   }
 
-  return [openPanels, setOpenPanels] as const;
+  function togglePanelOpen(id: string) {
+    if (openPanels.includes(id)) {
+      setOpenPanels(openPanels.filter((i) => i !== id));
+    } else {
+      setOpenPanels([...openPanels, id]);
+    }
+  }
+
+  return { openPanels, setOpenPanels, togglePanelOpen } as const;
 };
