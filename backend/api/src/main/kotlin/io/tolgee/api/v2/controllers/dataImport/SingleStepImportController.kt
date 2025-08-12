@@ -20,6 +20,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.dataImport.SingleStepImportService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
 import io.tolgee.util.filterFiles
@@ -39,10 +40,10 @@ import org.springframework.web.multipart.MultipartFile
 @RequestMapping(value = ["/v2/projects/{projectId:\\d+}", "/v2/projects"])
 @ImportDocsTag
 class SingleStepImportController(
-  private val importService: ImportService,
   private val authenticationFacade: AuthenticationFacade,
   private val projectHolder: ProjectHolder,
   private val securityService: SecurityService,
+  private val singleStepImportService: SingleStepImportService,
 ) : Logging {
   @PostMapping("single-step-import", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(
@@ -82,7 +83,7 @@ class SingleStepImportController(
       securityService.checkProjectPermission(projectHolder.project.id, Scope.KEYS_DELETE)
     }
 
-    return importService.singleStepImport(
+    return singleStepImportService.singleStepImport(
       files = fileDtos,
       project = projectHolder.projectEntity,
       userAccount = authenticationFacade.authenticatedUserEntity,
@@ -101,7 +102,7 @@ class SingleStepImportController(
   fun singleStepResolvableImport(
     @RequestBody @Valid params: SingleStepImportResolvableRequest,
   ): ImportResult {
-    return importService.singleStepImportResolvable(
+    return singleStepImportService.singleStepImportResolvable(
       project = projectHolder.projectEntity,
       userAccount = authenticationFacade.authenticatedUserEntity,
       params = params,
