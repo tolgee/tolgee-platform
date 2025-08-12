@@ -325,6 +325,7 @@ class TaskController(
   }
 
   @GetMapping("/possible-assignees")
+  @Operation(summary = "Get possible assignees")
   @RequiresProjectPermissions([Scope.TASKS_EDIT])
   @AllowApiAccess
   fun getPossibleAssignees(

@@ -1,5 +1,7 @@
 package io.tolgee.ee.api.v2.controllers
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.ee.api.v2.hateoas.assemblers.AiPlaygroundResultModelAssembler
 import io.tolgee.ee.data.AiPlaygroundResultRequest
 import io.tolgee.ee.service.AiPlaygroundResultServiceEeImpl
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*
     "/v2/projects/ai-playground-result",
   ],
 )
+@Tag(name = "Ai Playground result controller")
 @OpenApiOrderExtension(6)
 class AiPlaygroundResultController(
   private val aiPlaygroundResultService: AiPlaygroundResultServiceEeImpl,
@@ -29,6 +32,7 @@ class AiPlaygroundResultController(
 ) {
   @PostMapping("")
   @RequiresProjectPermissions([io.tolgee.model.enums.Scope.PROMPTS_EDIT])
+  @Operation(summary = "Get ai playground result")
   fun getAiPlaygroundResult(
     @RequestBody @Valid
     body: AiPlaygroundResultRequest,

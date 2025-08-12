@@ -25,6 +25,7 @@ class PreferredOrganizationController(
 ) {
   @GetMapping("")
   @Operation(
+    summary = "Get preferred organization",
     description =
       "Returns preferred organization. " +
         "If server allows users to create organization, preferred organization is automatically created " +

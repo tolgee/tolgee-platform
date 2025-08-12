@@ -247,6 +247,7 @@ export interface paths {
     post: operations["createProvider"];
   };
   "/v2/organizations/{organizationId}/llm-providers/all-available": {
+    /** Combines llm providers from organization-specific and server-configured */
     get: operations["getAvailableProviders"];
   };
   "/v2/organizations/{organizationId}/llm-providers/server-providers": {
@@ -9987,6 +9988,7 @@ export interface operations {
       };
     };
   };
+  /** Combines llm providers from organization-specific and server-configured */
   getAvailableProviders: {
     parameters: {
       path: {
