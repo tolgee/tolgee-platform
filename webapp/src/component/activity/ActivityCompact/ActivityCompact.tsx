@@ -100,7 +100,7 @@ export const ActivityCompact = ({ data, diffEnabled, onDetailOpen }: Props) => {
   }
 
   return (
-    <StyledContainer data-cy="activity-compact">
+    <StyledContainer data-cy="activity-compact" data-cy-type={data.type}>
       <StyledUser>
         <ActivityUser item={data} onlyTime />
       </StyledUser>

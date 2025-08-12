@@ -1,7 +1,11 @@
 import { login } from '../../../common/apiCalls/common';
 import { suggestionsTestData } from '../../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../../common/loading';
-import { assertMessage, gcyAdvanced } from '../../../common/shared';
+import {
+  assertMessage,
+  gcyAdvanced,
+  visitProjectDashboard,
+} from '../../../common/shared';
 import { assertHasState } from '../../../common/state';
 import {
   getPluralEditor,
@@ -94,6 +98,11 @@ describe('Suggestions reviewer', () => {
     cy.gcy('suggestions-list')
       .findDcy('translation-suggestion')
       .should('have.length', 1);
+    visitProjectDashboard(projectId);
+    gcyAdvanced({
+      value: 'activity-compact',
+      type: 'SUGGESTION_SET_ACTIVE',
+    }).should('contain', 'Navržený překlad 0-1');
   });
 
   it('reviewer can decline suggestion', () => {
@@ -109,6 +118,12 @@ describe('Suggestions reviewer', () => {
     cy.gcy('suggestions-list')
       .findDcy('translation-suggestion')
       .should('have.length', 1);
+
+    visitProjectDashboard(projectId);
+    gcyAdvanced({
+      value: 'activity-compact',
+      type: 'DECLINE_SUGGESTION',
+    }).should('contain', 'Navržený překlad 0-1');
   });
 
   it('reviewer can delete his own suggestion', () => {
@@ -124,6 +139,12 @@ describe('Suggestions reviewer', () => {
     cy.gcy('translation-suggestion')
       .contains('Navržený překlad 0-2')
       .should('not.exist');
+
+    visitProjectDashboard(projectId);
+    gcyAdvanced({
+      value: 'activity-compact',
+      type: 'DELETE_SUGGESTION',
+    }).should('contain', 'Navržený překlad 0-1');
   });
 
   it('reviewer can accept his own suggestion', () => {
@@ -143,6 +164,12 @@ describe('Suggestions reviewer', () => {
       .contains('Navržený překlad 0-2')
       .should('not.exist');
     assertMessage('Suggestion accepted, other variants declined (1)');
+
+    visitProjectDashboard(projectId);
+    gcyAdvanced({
+      value: 'activity-compact',
+      type: 'ACCEPT_SUGGESTION',
+    }).should('contain', 'Navržený překlad 0-1');
   });
 
   function acceptSuggestion() {
