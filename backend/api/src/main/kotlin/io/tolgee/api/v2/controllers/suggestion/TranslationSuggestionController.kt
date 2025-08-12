@@ -37,7 +37,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/projects/{projectId:[0-9]+}/suggest", "/v2/projects/suggest"])
-@Tag(name = "Translation suggestion")
+@Tag(name = "Translation suggestion panel tools")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection", "MVCPathVariableInspection")
 class TranslationSuggestionController(
   private val projectHolder: ProjectHolder,

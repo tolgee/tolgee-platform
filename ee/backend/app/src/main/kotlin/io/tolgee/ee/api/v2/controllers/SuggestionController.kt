@@ -12,6 +12,7 @@ import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionModel
 import io.tolgee.hateoas.translations.suggestions.TranslationSuggestionModelAssembler
 import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.enums.Scope
+import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -41,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController
     "/v2/projects/languages/{languageId:[0-9]+}/key/{keyId:[0-9]+}/suggestion",
   ],
 )
-@Tag(name = "Translation suggestion")
+@Tag(name = "Suggestions")
 class SuggestionController(
   private val translationSuggestionService: TranslationSuggestionServiceEeImpl,
   private val projectHolder: ProjectHolder,
@@ -50,35 +51,11 @@ class SuggestionController(
   private val authenticationFacade: AuthenticationFacade,
   private val securityService: SecurityService,
 ) {
-  @PostMapping("")
-  @Operation(summary = "Create translation suggestion")
-  @AllowApiAccess
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_SUGGEST])
-  @RequestActivity(ActivityType.CREATE_SUGGESTION)
-  fun createSuggestion(
-    @RequestBody @Valid
-    dto: CreateTranslationSuggestionRequest,
-    @PathVariable languageId: Long,
-    @PathVariable keyId: Long,
-  ): TranslationSuggestionModel {
-    val project = projectHolder.projectEntity
-    securityService.checkLanguageSuggestPermission(
-      project.id,
-      listOf(languageId)
-    )
-    val suggestion = translationSuggestionService.createSuggestion(
-      project,
-      languageId,
-      keyId,
-      dto
-    )
-    return translationSuggestionModelAssembler.toModel(suggestion)
-  }
-
   @GetMapping("")
   @Operation(summary = "Get suggestions")
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
+  @OpenApiOrderExtension(2)
   fun getSuggestions(
     @ParameterObject
     pageable: Pageable,
@@ -102,6 +79,56 @@ class SuggestionController(
     return arrayResourcesAssembler.toModel(
       suggestions,
       translationSuggestionModelAssembler
+    )
+  }
+
+  @PostMapping("")
+  @Operation(summary = "Create translation suggestion")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_SUGGEST])
+  @RequestActivity(ActivityType.CREATE_SUGGESTION)
+  @OpenApiOrderExtension(3)
+  fun createSuggestion(
+    @RequestBody @Valid
+    dto: CreateTranslationSuggestionRequest,
+    @PathVariable languageId: Long,
+    @PathVariable keyId: Long,
+  ): TranslationSuggestionModel {
+    val project = projectHolder.projectEntity
+    securityService.checkLanguageSuggestPermission(
+      project.id,
+      listOf(languageId)
+    )
+    val suggestion = translationSuggestionService.createSuggestion(
+      project,
+      languageId,
+      keyId,
+      dto
+    )
+    return translationSuggestionModelAssembler.toModel(suggestion)
+  }
+
+  @DeleteMapping("/{suggestionId:[0-9]+}")
+  @Operation(
+    summary = "Delete suggestion",
+    description = "User can only delete suggestion created by them"
+  )
+  @AllowApiAccess
+  // user can only delete suggestion created by them; it's checked in the service
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
+  @RequestActivity(ActivityType.DELETE_SUGGESTION)
+  @OpenApiOrderExtension(4)
+  fun deleteSuggestion(
+    @PathVariable languageId: Long,
+    @PathVariable keyId: Long,
+    @PathVariable suggestionId: Long,
+  ) {
+    val projectId = projectHolder.project.id
+    translationSuggestionService.deleteSuggestionCreatedByUser(
+      projectId,
+      keyId,
+      suggestionId,
+      authenticationFacade.authenticatedUser.id
     )
   }
 
@@ -172,28 +199,5 @@ class SuggestionController(
     val projectId = projectHolder.project.id
     val suggestion = translationSuggestionService.suggestionSetActive(projectId, keyId, suggestionId)
     return translationSuggestionModelAssembler.toModel(suggestion)
-  }
-
-  @DeleteMapping("/{suggestionId:[0-9]+}")
-  @Operation(
-    summary = "Delete suggestion",
-    description = "User can only delete suggestion created by them"
-  )
-  @AllowApiAccess
-  // user can only delete suggestion created by them; it's checked in the service
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
-  @RequestActivity(ActivityType.DELETE_SUGGESTION)
-  fun deleteSuggestion(
-    @PathVariable languageId: Long,
-    @PathVariable keyId: Long,
-    @PathVariable suggestionId: Long,
-  ) {
-    val projectId = projectHolder.project.id
-    translationSuggestionService.deleteSuggestionCreatedByUser(
-      projectId,
-      keyId,
-      suggestionId,
-      authenticationFacade.authenticatedUser.id
-    )
   }
 }
