@@ -273,7 +273,7 @@ export const SuggestionsList = ({
                 size="small"
                 checked={showAll}
                 onChange={(e) => {
-                  setShowAll(!showAll);
+                  setShowAll(e.target.checked);
                   setHidden(false);
                 }}
                 sx={{ height: 34, width: 34, marginRight: '2px' }}
