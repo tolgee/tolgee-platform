@@ -9,14 +9,12 @@ import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslation
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslationResolvableDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
 import io.tolgee.formats.convertToIcuPlurals
 import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
 import io.tolgee.model.Screenshot
-import io.tolgee.model.UploadedImage
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
@@ -24,7 +22,6 @@ import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
