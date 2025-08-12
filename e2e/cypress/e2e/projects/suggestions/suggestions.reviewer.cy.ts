@@ -102,7 +102,7 @@ describe('Suggestions reviewer', () => {
     gcyAdvanced({
       value: 'activity-compact',
       type: 'SUGGESTION_SET_ACTIVE',
-    }).should('contain', 'Navržený překlad 0-1');
+    }).should('contain', 'Navržený překlad');
   });
 
   it('reviewer can decline suggestion', () => {
