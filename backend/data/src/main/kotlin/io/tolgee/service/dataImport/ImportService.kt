@@ -120,7 +120,7 @@ class ImportService(
     project: Project,
     userAccount: UserAccount,
     params: SingleStepImportRequest,
-    reportStatus: ((ImportApplicationStatus) -> Unit)? = null,
+    reportStatus: ((ImportApplicationStatus) -> Unit) = {},
     screenshots: List<ScreenshotToImport> = emptyList(),
     resolveConflict: ((translation: ImportTranslation) -> ForceMode?)? = null
   ): ImportResult {
@@ -179,7 +179,7 @@ class ImportService(
     project: Project,
     userAccount: UserAccount,
     params: SingleStepImportResolvableRequest,
-    reportStatus: ((ImportApplicationStatus) -> Unit)? = null,
+    reportStatus: ((ImportApplicationStatus) -> Unit) = {},
   ): ImportResult {
     val keysToFilesManager = KeysToFilesManager()
     keysToFilesManager.processKeys(params.keys)

@@ -1,5 +1,6 @@
 package io.tolgee.ee.service
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.suggestion.SuggestionFilters
 import io.tolgee.ee.data.translationSuggestion.CreateTranslationSuggestionRequest
@@ -37,6 +38,7 @@ class TranslationSuggestionServiceEeImpl(
   private val entityManager: EntityManager,
   private val authenticationFacade: AuthenticationFacade,
   private val translationService: TranslationService,
+  private val tolgeeProperties: TolgeeProperties,
 ) : TranslationSuggestionService {
   override fun getKeysWithSuggestions(
     projectId: Long,
@@ -75,6 +77,8 @@ class TranslationSuggestionServiceEeImpl(
       } catch (e: StringIsNotPluralException) {
         throw BadRequestException(Message.INVALID_PLURAL_FORM)
       }
+
+    checkSuggestionValid(normalizedTranslation)
 
     val existingSuggestion = translationSuggestionRepository.findSuggestion(
       project.id,
@@ -196,5 +200,11 @@ class TranslationSuggestionServiceEeImpl(
   override fun deleteAllByProject(id: Long) {
     val suggestions = translationSuggestionRepository.getAllByProject(id)
     translationSuggestionRepository.deleteAll(suggestions)
+  }
+
+  private fun checkSuggestionValid(text: String) {
+    if (text.length > tolgeeProperties.maxTranslationTextLength) {
+      throw BadRequestException(Message.TRANSLATION_TEXT_TOO_LONG, listOf(tolgeeProperties.maxTranslationTextLength))
+    }
   }
 }

@@ -44,7 +44,7 @@ class StoredDataImporter(
   applicationContext: ApplicationContext,
   private val import: Import,
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
-  private val reportStatus: ((ImportApplicationStatus) -> Unit)? = null,
+  private val reportStatus: ((ImportApplicationStatus) -> Unit) = {},
   private val importSettings: IImportSettings,
   private val overrideMode: OverrideMode = OverrideMode.RECOMMENDED,
   private val errorOnUnresolvedConflict: Boolean? = null,
@@ -130,26 +130,19 @@ class StoredDataImporter(
   }
 
   fun doImport(): ImportResult {
-    reportStatus?.invoke(ImportApplicationStatus.PREPARING_AND_VALIDATING)
+    reportStatus(ImportApplicationStatus.PREPARING_AND_VALIDATING)
 
     importDataManager.storedLanguages.forEach {
       it.prepareImport()
     }
 
-    val shouldThrowError = errorOnUnresolvedConflict ?: when (forceMode) {
-      ForceMode.NO_FORCE -> true
-      else -> false
-    }
-
-    if (unresolvedConflicts.isNotEmpty() && shouldThrowError) {
-      throw ImportConflictNotResolvedException(params = getUnresolvedConflicts(unresolvedConflicts))
-    }
+    throwOnUnresolvedConflicts(unresolvedConflicts)
 
     addKeysAndCheckPermissions()
 
     handleKeyMetas()
 
-    reportStatus?.invoke(ImportApplicationStatus.STORING_KEYS)
+    reportStatus(ImportApplicationStatus.STORING_KEYS)
 
     namespaceService.saveAll(namespacesToSave.values)
 
@@ -161,11 +154,11 @@ class StoredDataImporter(
 
     saveKeyMetaData(keyEntitiesToSave)
 
-    reportStatus?.invoke(ImportApplicationStatus.STORING_TRANSLATIONS)
+    reportStatus(ImportApplicationStatus.STORING_TRANSLATIONS)
 
     saveTranslations()
 
-    reportStatus?.invoke(ImportApplicationStatus.FINALIZING)
+    reportStatus(ImportApplicationStatus.FINALIZING)
 
     entityManager.flush()
 
@@ -179,9 +172,11 @@ class StoredDataImporter(
 
     entityManager.flushAndClear()
 
-    val failedKeys = if (unresolvedConflicts.isNotEmpty()) getUnresolvedConflicts(unresolvedConflicts) else null
-
-    return ImportResult(failedKeys)
+    return ImportResult(
+      unresolvedConflicts.nullIfEmpty()?.let {
+        getUnresolvedConflicts(unresolvedConflicts)
+      }
+    )
   }
 
   private fun addScreenshots() {
@@ -239,6 +234,22 @@ class StoredDataImporter(
     }
 
     screenshotService.removeScreenshotReferences(referencesToDelete)
+  }
+
+  /**
+   * Throws error when `errorOnUnresolvedConflict` is set on the API request
+   * and there are some unresolved conflicts
+   */
+  private fun throwOnUnresolvedConflicts(unresolvedConflicts: List<ImportTranslation>) {
+    // when force mode is `NO_FORCE` default value is true, otherwise false
+    val shouldThrowError = errorOnUnresolvedConflict ?: when (forceMode) {
+      ForceMode.NO_FORCE -> true
+      else -> false
+    }
+
+    if (unresolvedConflicts.isNotEmpty() && shouldThrowError) {
+      throw ImportConflictNotResolvedException(params = getUnresolvedConflicts(unresolvedConflicts))
+    }
   }
 
   private fun checkImageUploadPermissions(images: List<UploadedImage>) {
