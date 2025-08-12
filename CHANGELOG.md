@@ -1,3 +1,10 @@
+# [3.127.0](https://github.com/tolgee/tolgee-platform/compare/v3.126.0...v3.127.0) (2025-08-12)
+
+
+### Features
+
+* suggestions ([#3134](https://github.com/tolgee/tolgee-platform/issues/3134)) ([369fa3d](https://github.com/tolgee/tolgee-platform/commit/369fa3ddcc3acbcf648020870ee985411f34867f))
+
 # [3.126.0](https://github.com/tolgee/tolgee-platform/compare/v3.125.1...v3.126.0) (2025-08-08)
 
 
