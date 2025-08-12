@@ -263,10 +263,11 @@ class StoredDataImporter(
 
   private fun getUnresolvedConflicts(conflicts: List<ImportTranslation>): List<SimpleImportConflictResult> {
     return conflicts.map {
+      val conflict = it.conflict ?: throw IllegalStateException("Unresolved conflict should have conflict data")
       SimpleImportConflictResult(
         keyName = it.key.name,
-        keyNamespace = it.conflict?.key?.namespace?.name,
-        language = it.conflict!!.language.tag,
+        keyNamespace = conflict.key.namespace?.name,
+        language = conflict.language.tag,
         isOverridable = ConflictType.isOverridable(it.conflictType)
       )
     }
