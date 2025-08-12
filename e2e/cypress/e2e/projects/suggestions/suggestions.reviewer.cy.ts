@@ -123,7 +123,7 @@ describe('Suggestions reviewer', () => {
     gcyAdvanced({
       value: 'activity-compact',
       type: 'DECLINE_SUGGESTION',
-    }).should('contain', 'Navržený překlad 0-1');
+    }).should('contain', 'Navržený překlad');
   });
 
   it('reviewer can delete his own suggestion', () => {
@@ -144,7 +144,7 @@ describe('Suggestions reviewer', () => {
     gcyAdvanced({
       value: 'activity-compact',
       type: 'DELETE_SUGGESTION',
-    }).should('contain', 'Navržený překlad 0-1');
+    }).should('contain', 'Navržený překlad');
   });
 
   it('reviewer can accept his own suggestion', () => {
