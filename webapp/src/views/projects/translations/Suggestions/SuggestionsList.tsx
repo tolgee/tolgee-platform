@@ -100,7 +100,7 @@ export const SuggestionsList = ({
   });
 
   const reverseLoadable = useApiMutation({
-    url: '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/reverse',
+    url: '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/set-active',
     method: 'put',
     invalidatePrefix:
       '/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion',

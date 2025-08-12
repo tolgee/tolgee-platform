@@ -635,6 +635,7 @@ export interface paths {
     post: operations["createSuggestion"];
   };
   "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}": {
+    /** User can only delete suggestion created by them */
     delete: operations["deleteSuggestion"];
   };
   "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/accept": {
@@ -643,8 +644,8 @@ export interface paths {
   "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/decline": {
     put: operations["declineSuggestion"];
   };
-  "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/reverse": {
-    put: operations["reverseSuggestion"];
+  "/v2/projects/{projectId}/languages/{languageId}/key/{keyId}/suggestion/{suggestionId}/set-active": {
+    put: operations["suggestionSetActive"];
   };
   "/v2/projects/{projectId}/leave": {
     put: operations["leaveProject"];
@@ -2873,9 +2874,9 @@ export interface components {
       conflictId?: number;
       conflictText?: string;
       conflictType?:
+        | "SHOULD_NOT_EDIT_REVIEWED"
         | "CANNOT_EDIT_REVIEWED"
-        | "CANNOT_EDIT_DISABLED"
-        | "SHOULD_NOT_EDIT_REVIEWED";
+        | "CANNOT_EDIT_DISABLED";
       existingKeyIsPlural: boolean;
       /** Format: int64 */
       id: number;
@@ -4269,7 +4270,8 @@ export interface components {
         | "DECLINE_SUGGESTION"
         | "ACCEPT_SUGGESTION"
         | "REVERSE_SUGGESTION"
-        | "DELETE_SUGGESTION";
+        | "DELETE_SUGGESTION"
+        | "SUGGESTION_SET_ACTIVE";
     };
     ProjectAiPromptCustomizationModel: {
       /**
@@ -16475,6 +16477,7 @@ export interface operations {
       };
     };
   };
+  /** User can only delete suggestion created by them */
   deleteSuggestion: {
     parameters: {
       path: {
@@ -16624,7 +16627,7 @@ export interface operations {
       };
     };
   };
-  reverseSuggestion: {
+  suggestionSetActive: {
     parameters: {
       path: {
         languageId: number;

@@ -496,4 +496,16 @@ export const actionsConfiguration: Partial<
         ?.translation as any as string;
     },
   },
+  SUGGESTION_SET_ACTIVE: {
+    label(params) {
+      return <T keyName="activity_suggestions_set_active" params={params} />;
+    },
+    entities: {
+      TranslationSuggestion: true,
+    },
+    description(data) {
+      return data.modifiedEntities?.TranslationSuggestion?.[0]?.description
+        ?.translation as any as string;
+    },
+  },
 };

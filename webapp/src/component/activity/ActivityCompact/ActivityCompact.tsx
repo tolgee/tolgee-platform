@@ -81,7 +81,7 @@ export const ActivityCompact = ({ data, diffEnabled, onDetailOpen }: Props) => {
 
   let fieldsNum = 0;
 
-  const description = activity.options.description?.(data);
+  const description = activity.options?.description?.(data);
 
   const limitedFields: Field[] = [];
 

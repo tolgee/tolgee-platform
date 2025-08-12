@@ -28,7 +28,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `returns list of suggestions`() {
     initTestData()
-    performProjectAuthGet("language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion")
+    performProjectAuthGet("languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion")
       .andAssertThatJson {
         node("_embedded.suggestions") {
           node("[0].translation").isEqualTo("Navržený překlad 0-1")
@@ -49,7 +49,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `creates suggestion`() {
     initTestData()
     performProjectAuthPost(
-      "language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion",
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
       CreateTranslationSuggestionRequest(
         translation = "New suggestion"
       )
@@ -63,7 +63,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `refuses plain suggestion on plural key`() {
     initTestData()
     performProjectAuthPost(
-      "language/${testData.czechLanguage.tag}/key/${testData.pluralKey.self.id}/suggestion",
+      "languages/${testData.czechLanguage.id}/key/${testData.pluralKey.self.id}/suggestion",
       CreateTranslationSuggestionRequest(
         translation = "New suggestion"
       )
@@ -77,7 +77,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `accepts suggestion`() {
     initTestData()
     performProjectAuthPut(
-      "language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
     )
       .andAssertThatJson {
         node("accepted") {
@@ -104,7 +104,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     )
       .andIsOk
     performProjectAuthPut(
-      "language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
     )
       .andIsBadRequest.andAssertThatJson {
         node("code").isEqualTo("suggestion_must_be_plural")
@@ -126,7 +126,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsOk
 
     performProjectAuthPut(
-      "language/${testData.czechLanguage.tag}/key/${pluralKey.id}/suggestion/${testData.pluralSuggestion.self.id}/accept"
+      "languages/${testData.czechLanguage.id}/key/${pluralKey.id}/suggestion/${testData.pluralSuggestion.self.id}/accept"
     )
       .andIsBadRequest.andAssertThatJson {
         node("code").isEqualTo("suggestion_cant_be_plural")
@@ -138,7 +138,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `accepts suggestion and declines other`() {
     initTestData()
     performProjectAuthPut(
-      "language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept?declineOther=true"
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept?declineOther=true"
     )
       .andAssertThatJson {
         node("accepted") {
@@ -157,7 +157,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     initTestData()
     val firstKey = testData.keys[0].self
     performProjectAuthPut(
-      "language/${testData.czechLanguage.tag}/key/${firstKey.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
+      "languages/${testData.czechLanguage.id}/key/${firstKey.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
     ).andIsOk
     performProjectAuthGet("/translations?sort=id&filterKeyId=${firstKey.id}")
       .andIsOk.andAssertThatJson {
@@ -174,7 +174,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     initTestData()
     userAccount = testData.projectTranslator.self
     performProjectAuthPut(
-      "language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
     ).andIsForbidden
   }
 
@@ -184,7 +184,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     initTestData()
     userAccount = testData.projectTranslator.self
     performProjectAuthDelete(
-      "language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}"
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}"
     ).andIsOk
   }
 
@@ -194,7 +194,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     initTestData()
     userAccount = testData.projectTranslator.self
     performProjectAuthDelete(
-      "language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[1].self.id}"
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[1].self.id}"
     ).andIsForbidden
   }
 
@@ -204,7 +204,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     initTestData()
     userAccount = testData.czechReviewer.self
     performProjectAuthPut(
-      "language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
     ).andIsOk
   }
 
@@ -214,7 +214,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     initTestData()
     userAccount = testData.czechReviewer.self
     performProjectAuthPut(
-      "language/${testData.englishLanguage.tag}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
+      "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
     ).andIsForbidden
   }
 
@@ -224,7 +224,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     initTestData()
     userAccount = testData.czechTranslator.self
     performProjectAuthPost(
-      "language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion",
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
       CreateTranslationSuggestionRequest("Nový návrh překladu")
     ).andAssertThatJson {
       node("translation").isEqualTo("Nový návrh překladu")
@@ -238,7 +238,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     initTestData()
     userAccount = testData.czechTranslator.self
     performProjectAuthPost(
-      "language/${testData.englishLanguage.tag}/key/${testData.keys[0].self.id}/suggestion",
+      "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion",
       CreateTranslationSuggestionRequest("New translation suggestion")
     ).andIsForbidden
   }
@@ -249,10 +249,10 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     initTestData()
     userAccount = testData.czechTranslator.self
     performProjectAuthPut(
-      "language/${testData.englishLanguage.tag}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
+      "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
     ).andIsForbidden
     performProjectAuthPut(
-      "language/${testData.czechLanguage.tag}/key/${testData.keys[0].self.id}/suggestion/${testData.englishSuggestions[0].self.id}/accept"
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.englishSuggestions[0].self.id}/accept"
     ).andIsForbidden
   }
 }
