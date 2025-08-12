@@ -185,7 +185,7 @@ class StoredDataImporter(
     }
     val uploadedImagesIds = screenshots.map { it -> it.screenshot.uploadedImageId }
     val images = imageUploadService.find(uploadedImagesIds)
-    checkImageUploadPermissions(images)
+    securityService.checkImageUploadPermissions(import.project.id, images)
     val createdScreenshots =
       images.associate {
         it.id to screenshotService.saveScreenshot(it)
@@ -249,17 +249,6 @@ class StoredDataImporter(
 
     if (unresolvedConflicts.isNotEmpty() && shouldThrowError) {
       throw ImportConflictNotResolvedException(params = getUnresolvedConflicts(unresolvedConflicts))
-    }
-  }
-
-  private fun checkImageUploadPermissions(images: List<UploadedImage>) {
-    if (images.isNotEmpty()) {
-      securityService.checkScreenshotsUploadPermission(import.project.id)
-    }
-    images.forEach { image ->
-      if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
-        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
-      }
     }
   }
 

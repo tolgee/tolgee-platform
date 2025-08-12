@@ -127,7 +127,7 @@ class SuggestionController(
   @PutMapping("/{suggestionId:[0-9]+}/accept")
   @Operation(summary = "Accept suggestion")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.TRANSLATIONS_STATE_EDIT])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @RequestActivity(ActivityType.ACCEPT_SUGGESTION)
   fun acceptSuggestion(
     @PathVariable languageId: Long,
@@ -135,6 +135,10 @@ class SuggestionController(
     @PathVariable suggestionId: Long,
     @RequestParam declineOther: Boolean = false
   ): TranslationSuggestionAcceptResponse {
+    securityService.checkLanguageTranslatePermission(
+      projectHolder.project.id,
+      listOf(languageId)
+    )
     securityService.checkLanguageStateChangePermission(
       projectHolder.project.id,
       listOf(languageId)

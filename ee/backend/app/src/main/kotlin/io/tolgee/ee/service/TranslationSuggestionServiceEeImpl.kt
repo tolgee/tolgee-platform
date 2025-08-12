@@ -75,7 +75,7 @@ class TranslationSuggestionServiceEeImpl(
           dto.translation
         }
       } catch (e: StringIsNotPluralException) {
-        throw BadRequestException(Message.INVALID_PLURAL_FORM)
+        throw BadRequestException(Message.INVALID_PLURAL_FORM, e)
       }
 
     checkSuggestionValid(normalizedTranslation)

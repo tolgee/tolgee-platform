@@ -214,7 +214,7 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     initTestData()
     userAccount = testData.czechReviewer.self
     performProjectAuthPut(
-      "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
+      "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.englishSuggestions[0].self.id}/accept"
     ).andIsForbidden
   }
 
@@ -249,10 +249,10 @@ class SuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     initTestData()
     userAccount = testData.czechTranslator.self
     performProjectAuthPut(
-      "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
+      "languages/${testData.englishLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.englishSuggestions[0].self.id}/accept"
     ).andIsForbidden
     performProjectAuthPut(
-      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.englishSuggestions[0].self.id}/accept"
+      "languages/${testData.czechLanguage.id}/key/${testData.keys[0].self.id}/suggestion/${testData.czechSuggestions[0].self.id}/accept"
     ).andIsForbidden
   }
 }

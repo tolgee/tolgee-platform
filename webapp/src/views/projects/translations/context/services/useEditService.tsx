@@ -128,24 +128,20 @@ export const useEditService = ({
         value,
       });
 
-      const language = allLanguages.find(
-        (lang) => lang.id === result?.languageId
-      );
+      const lang = allLanguages.find((lang) => lang.id === result?.languageId);
 
-      if (result && language) {
-        if (language) {
-          translationService.updateTranslation({
-            keyId: result.keyId,
-            lang: language.tag,
-            data(value) {
-              return {
-                suggestions: [result],
-                activeSuggestionCount: (value.activeSuggestionCount ?? 0) + 1,
-                totalSuggestionCount: (value.totalSuggestionCount ?? 0) + 1,
-              } satisfies Partial<TranslationViewModel>;
-            },
-          });
-        }
+      if (result && lang) {
+        translationService.updateTranslation({
+          keyId: result.keyId,
+          lang: lang.tag,
+          data(value) {
+            return {
+              suggestions: [result],
+              activeSuggestionCount: (value.activeSuggestionCount ?? 0) + 1,
+              totalSuggestionCount: (value.totalSuggestionCount ?? 0) + 1,
+            } satisfies Partial<TranslationViewModel>;
+          },
+        });
       }
     } else if (language) {
       // update translation

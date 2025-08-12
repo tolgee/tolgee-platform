@@ -47,7 +47,6 @@ class ResolvingKeyImporter(
   private val translationService = applicationContext.getBean(TranslationService::class.java)
   private val screenshotService = applicationContext.getBean(ScreenshotService::class.java)
   private val imageUploadService = applicationContext.getBean(ImageUploadService::class.java)
-  private val authenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
   private val securityService = applicationContext.getBean(SecurityService::class.java)
 
   private val errors = mutableListOf<List<Serializable?>>()
@@ -154,7 +153,7 @@ class ResolvingKeyImporter(
   ) {
     val translationsToModifyMap = translationsToModify.associateWith { it.text }
 
-    // when existing key is plural, we are converting all to plurals
+    // when an existing key is plural, we are converting all to plurals
     if (isExistingKeyPlural) {
       translationsToModifyMap.convertToIcuPlurals(null).convertedStrings.forEach {
         it.key.text = it.value
@@ -201,7 +200,7 @@ class ResolvingKeyImporter(
       }
 
     val images = imageUploadService.find(uploadedImagesIds)
-    checkImageUploadPermissions(images)
+    securityService.checkImageUploadPermissions(projectEntity.id, images)
 
     val createdScreenshots =
       images.associate {
@@ -251,17 +250,6 @@ class ResolvingKeyImporter(
       .map { (uploadedImageId, screenshotResult) ->
         uploadedImageId to screenshotResult.screenshot
       }.toMap()
-  }
-
-  private fun checkImageUploadPermissions(images: List<UploadedImage>) {
-    if (images.isNotEmpty()) {
-      securityService.checkScreenshotsUploadPermission(projectEntity.id)
-    }
-    images.forEach { image ->
-      if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
-        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
-      }
-    }
   }
 
   private fun checkLanguagePermissions(keys: List<ImportKeysResolvableItemDto>) {

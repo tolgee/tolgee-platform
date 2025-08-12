@@ -8,6 +8,7 @@ import io.tolgee.exceptions.LanguageNotPermittedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
+import io.tolgee.model.UploadedImage
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TaskType
@@ -22,6 +23,7 @@ import io.tolgee.service.task.ITaskService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import kotlin.collections.forEach
 
 @Service
 class SecurityService(
@@ -256,7 +258,7 @@ class SecurityService(
     languageIds: Collection<Long>,
     keyId: Long? = null,
   ) {
-    tryPermissions(
+    passIfAnyPermissionCheckSucceeds(
       {
         checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
         checkLanguagePermission(
@@ -509,14 +511,25 @@ class SecurityService(
     }
   }
 
+  fun checkImageUploadPermissions(projectId: Long, images: List<UploadedImage>) {
+    if (images.isNotEmpty()) {
+      checkScreenshotsUploadPermission(projectId)
+    }
+    images.forEach { image ->
+      if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
+        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
+      }
+    }
+  }
+
   /**
    * Perform multiple permission checks
    * if any of them pass, pass the whole check
    * if all fail, return error from the first one
    */
-  private fun tryPermissions(vararg tests: () -> Unit) {
+  private fun passIfAnyPermissionCheckSucceeds(vararg permissionChecks: () -> Unit) {
     var error: PermissionException? = null
-    for (test in tests) {
+    for (test in permissionChecks) {
       try {
         test()
         return
