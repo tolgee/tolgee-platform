@@ -177,7 +177,7 @@ class StoredDataImporter(
   private fun addScreenshots() {
     screenshotImporter.importScreenshots(
       screenshots,
-      existingKeys = importDataManager.existingKeys,
+      existingKeys = importDataManager.existingKeys.values.toList(),
       newKeys = newKeys,
       addKeyToSave = {
         namespace: String?, key: String ->

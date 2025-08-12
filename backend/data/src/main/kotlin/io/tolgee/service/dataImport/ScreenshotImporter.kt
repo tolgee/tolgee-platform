@@ -22,7 +22,7 @@ class ScreenshotImporter(
 
   fun importScreenshots(
     screenshots: List<ScreenshotToImport>,
-    existingKeys: MutableMap<Pair<String?, String>, Key>,
+    existingKeys: List<Key>,
     addKeyToSave: (namespace: String?, key: String) -> Key,
     newKeys: MutableList<Key>,
     projectId: Long,
@@ -39,8 +39,6 @@ class ScreenshotImporter(
       }
 
     val locations = images.map { it.location }
-
-    val existingKeys = existingKeys.entries.map { it.value }
 
     val allReferences =
       screenshotService
