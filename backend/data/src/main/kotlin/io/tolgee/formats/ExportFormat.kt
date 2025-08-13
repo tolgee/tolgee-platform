@@ -25,17 +25,17 @@ enum class ExportFormat(
   ANDROID_XML(
     "xml",
     "application/xml",
-    defaultFileStructureTemplate = "values-{androidLanguageTag}/strings.{extension}",
+    defaultFileStructureTemplate = "{namespace}/values-{androidLanguageTag}/strings.{extension}",
   ),
   COMPOSE_XML(
     "xml",
     "application/xml",
-    defaultFileStructureTemplate = "values-{androidLanguageTag}/strings.{extension}",
+    defaultFileStructureTemplate = "{namespace}/values-{androidLanguageTag}/strings.{extension}",
   ),
   FLUTTER_ARB(
     "arb",
     "application/json",
-    defaultFileStructureTemplate = "app_{snakeLanguageTag}.{extension}",
+    defaultFileStructureTemplate = "{namespace}/app_{snakeLanguageTag}.{extension}",
   ),
   PROPERTIES("properties", "text/plain"),
   YAML_RUBY("yaml", "application/x-yaml"),
@@ -47,7 +47,7 @@ enum class ExportFormat(
   APPLE_XCSTRINGS(
     "xcstrings",
     "application/json",
-    defaultFileStructureTemplate = "Localizable.{extension}",
+    defaultFileStructureTemplate = "{namespace}/Localizable.{extension}",
     multiLanguage = true,
   ),
 }
