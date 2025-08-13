@@ -1637,7 +1637,7 @@
   "project_settings_suggestions_mode_label": "Suggestiemodus",
   "project_settings_title": "Projectinstellingen",
   "project_settings_tolgee_placeholders_hint": "Tolgee universele placeholders zijn een subset van ICU placeholders, die automatisch worden omgezet naar doelformaten bij exporteren. <LearnMore></LearnMore>",
-  "project_settings_translation_protection_hint": "Behoudt beoordelingsstatussen. Alleen gebruikers met beoordelingsrechten kunnen beoordeelde vertalingen bewerken.",
+  "project_settings_translation_protection_hint": "Behoudt beoordelingsstatussen. Alleen gebruikers met beoordelingsrechten (of \"Status wijzigen\" scope) kunnen beoordeelde vertalingen bewerken.",
   "project_settings_translation_protection_label": "Vertalingsbescherming",
   "project_settings_use_namespaces": "Namespaces gebruiken",
   "project_settings_use_namespaces_hint": "Namespaces zijn een manier om vertalingen te scheiden in meerdere bestanden, die alleen gedownload kunnen worden wanneer nodig.\n\nNamespaces kunnen niet worden uitgeschakeld als er al een of meer bestaan.\n\n<LearnMore></LearnMore>",

@@ -1,3 +1,10 @@
+## [3.127.1](https://github.com/tolgee/tolgee-platform/compare/v3.127.0...v3.127.1) (2025-08-13)
+
+
+### Bug Fixes
+
+* report suggestions settings change ([#3200](https://github.com/tolgee/tolgee-platform/issues/3200)) ([59640c7](https://github.com/tolgee/tolgee-platform/commit/59640c74b2a1ac0e67d62d42219c9f97838ce6bd))
+
 # [3.127.0](https://github.com/tolgee/tolgee-platform/compare/v3.126.0...v3.127.0) (2025-08-12)
 
 

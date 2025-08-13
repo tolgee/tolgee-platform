@@ -1637,7 +1637,7 @@
   "project_settings_suggestions_mode_label": "Forslagstilstand",
   "project_settings_title": "Projektindstillinger",
   "project_settings_tolgee_placeholders_hint": "Tolgee universelle placeholders er en undergruppe af ICU placeholders, som automatisk bliver transformeret til målformater, når de eksporteres. <LearnMore></LearnMore>",
-  "project_settings_translation_protection_hint": "Bevarer gennemgangstilstande. Kun brugere med gennemgangstilladelse kan redigere gennemgåede oversættelser.",
+  "project_settings_translation_protection_hint": "Bevarer gennemgangstilstande. Kun brugere med gennemgangstilladelse (eller \"Skift tilstand\"-område) kan redigere gennemgåede oversættelser.",
   "project_settings_translation_protection_label": "Oversættelsesbeskyttelse",
   "project_settings_use_namespaces": "Brug navnerum",
   "project_settings_use_namespaces_hint": "Navnerum er en måde at opdele oversættelser i flere filer, som kun kan downloades, når de er nødvendige.\n\nNavnerum kan ikke deaktiveres, hvis der allerede findes nogen.\n\n<LearnMore></LearnMore>",
