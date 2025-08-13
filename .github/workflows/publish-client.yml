@@ -35,3 +35,5 @@ jobs:
       - name: publish
         run: npm publish --tag prerelease
         working-directory: ./client
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
