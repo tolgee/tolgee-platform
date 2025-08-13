@@ -74,7 +74,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation('org.springframework.boot:spring-boot-starter-mail') {
+        exclude group: 'org.eclipse.angus', module: 'jakarta.mail'
+    }
+    implementation libs.jakartaMail
     implementation('org.springframework.boot:spring-boot-starter-test')
     implementation "org.springframework.boot:spring-boot-starter-actuator"
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

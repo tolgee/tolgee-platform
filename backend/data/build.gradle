@@ -102,7 +102,10 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation("org.springframework.data:spring-data-envers")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation('org.springframework.boot:spring-boot-starter-mail') {
+        exclude group: 'org.eclipse.angus', module: 'jakarta.mail'
+    }
+    implementation libs.jakartaMail
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
@@ -166,7 +169,7 @@ dependencies {
     implementation libs.jjwtImpl
     implementation libs.jjwtJackson
     implementation libs.jacksonModuleKotlin
-    implementation 'net.datafaker:datafaker:1.5.0'
+    implementation 'net.datafaker:datafaker:2.4.4'
     implementation 'jaxen:jaxen:1.2.0'
     implementation libs.sendInBlue
     implementation(libs.mailjet)
