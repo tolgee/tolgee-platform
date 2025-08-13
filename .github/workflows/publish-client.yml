@@ -32,6 +32,7 @@ jobs:
           if npm view @tginternal/client@$VERSION versions --json >/dev/null 2>&1; then
             echo "Version $VERSION already exists, skipping publish."
           else
+            npm run update-version -- $VERSION
             npm run build
             npm publish --tag prerelease
           fi
