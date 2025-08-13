@@ -310,6 +310,70 @@ jobs:
       - name: Run ktlint
         run: ./gradlew ktlintCheck
 
+  publish-client:
+    needs: [frontend-build, backend-build, e2e-install-deps]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: "${{ secrets.TOLGEE_MACHINE_PAT }}"
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Download backend build result
+        uses: ./.github/actions/download-backend-build
+
+      - name: Download frontend build result
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp
+          path: ./webapp/dist
+
+      - name: Untar node modules
+        run: |
+          tar --zstd -xf ~/node_modules.tar.zst ./e2e/node_modules
+
+      - name: Create cache directory
+        run: |
+          mkdir -p ~/.cache
+
+      - name: Start backend server
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 30
+          max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
+          command: |
+            ./gradlew runDockerE2e -x bootJar -x buildWebapp
+
+      - run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
+
+      # client folder
+
+      - name: Pull newest schema
+        run: npm run schema
+        working-directory: ./client
+
+      - name: install npm dependencies
+        run: npm ci
+        working-directory: ./client
+
+      - name: update version build and publish
+        run: |
+          VERSION=0.0.0-prerelease.$(git rev-parse --short HEAD)
+          if npm view @tginternal/client@$VERSION versions --json >/dev/null 2>&1; then
+            echo "Version $VERSION already exists, skipping publish."
+          else
+            npm run update-version -- $VERSION
+            npm run build
+            npm publish --tag prerelease
+          fi
+        working-directory: ./client
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
   everything-passed:
     name: Everything passed 🎉
     needs:
