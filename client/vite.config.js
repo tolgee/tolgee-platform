@@ -8,7 +8,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, "src/main.ts"),
-      name: "@tolgee/client",
+      name: "client",
       // the proper extensions will be added
       fileName: "client",
     },
