@@ -347,13 +347,12 @@ jobs:
       - run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
 
       # client folder
+      - name: install npm dependencies
+        run: npm install
+        working-directory: ./client
 
       - name: Pull newest schema
         run: npm run schema
-        working-directory: ./client
-
-      - name: install npm dependencies
-        run: npm install
         working-directory: ./client
 
       - name: update version build and publish
