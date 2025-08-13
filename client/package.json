@@ -1,6 +1,6 @@
 {
   "name": "@tginternal/client",
-  "version": "prerelease.c5dd63ac8",
+  "version": "0.0.0-prerelease.45c1441e6",
   "type": "module",
   "files": [
     "dist",
@@ -29,5 +29,8 @@
   "dependencies": {
     "base32-decode": "^1.0.0",
     "openapi-fetch": "^0.14.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
