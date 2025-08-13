@@ -17,6 +17,7 @@ import { DOCS_ROOT } from 'tg.constants/docLinks';
 import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
 import { DefaultNamespaceSelect } from './components/DefaultNamespaceSelect';
 import { LinkReadMore } from 'tg.component/LinkReadMore';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 type EditProjectRequest = components['schemas']['EditProjectRequest'];
 
@@ -24,6 +25,7 @@ export const ProjectSettingsAdvanced = () => {
   const project = useProject();
   const { t } = useTranslate();
   const history = useHistory();
+  const reportEvent = useReportEvent();
 
   const { allNamespacesWithNone } = useProjectNamespaces();
 
@@ -94,12 +96,14 @@ export const ProjectSettingsAdvanced = () => {
           />
         }
         checked={project.suggestionsMode === 'ENABLED'}
-        onSwitch={() =>
+        onSwitch={() => {
+          const value =
+            project.suggestionsMode === 'ENABLED' ? 'DISABLED' : 'ENABLED';
+          reportEvent('PROJECT_SUGGESTIONS_SETTINGS_CHANGE', { value });
           updateSettings({
-            suggestionsMode:
-              project.suggestionsMode === 'ENABLED' ? 'DISABLED' : 'ENABLED',
-          })
-        }
+            suggestionsMode: value,
+          });
+        }}
         disabled={updateLoadable.isLoading}
       />
 
@@ -115,14 +119,18 @@ export const ProjectSettingsAdvanced = () => {
           />
         }
         checked={project.translationProtection === 'PROTECT_REVIEWED'}
-        onSwitch={() =>
+        onSwitch={() => {
+          const value =
+            project.translationProtection === 'PROTECT_REVIEWED'
+              ? 'NONE'
+              : 'PROTECT_REVIEWED';
+          reportEvent('PROJECT_TRANSLATION_PROTECTION_SETTINGS_CHANGE', {
+            value,
+          });
           updateSettings({
-            translationProtection:
-              project.translationProtection === 'PROTECT_REVIEWED'
-                ? 'NONE'
-                : 'PROTECT_REVIEWED',
-          })
-        }
+            translationProtection: value,
+          });
+        }}
         disabled={updateLoadable.isLoading}
       />
 
