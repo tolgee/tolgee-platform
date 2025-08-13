@@ -40,16 +40,22 @@ export const ProjectSettingsAdvanced = () => {
     invalidatePrefix: '/v2/projects',
   });
 
-  const updateSettings = (values: Partial<EditProjectRequest>) => {
-    updateLoadable.mutate({
-      path: { projectId: project.id },
-      content: {
-        'application/json': {
-          ...project,
-          ...values,
+  const updateSettings = (
+    values: Partial<EditProjectRequest>,
+    onSuccess?: () => void
+  ) => {
+    updateLoadable.mutate(
+      {
+        path: { projectId: project.id },
+        content: {
+          'application/json': {
+            ...project,
+            ...values,
+          },
         },
       },
-    });
+      { onSuccess }
+    );
   };
 
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
@@ -99,10 +105,12 @@ export const ProjectSettingsAdvanced = () => {
         onSwitch={() => {
           const value =
             project.suggestionsMode === 'ENABLED' ? 'DISABLED' : 'ENABLED';
-          reportEvent('PROJECT_SUGGESTIONS_SETTINGS_CHANGE', { value });
-          updateSettings({
-            suggestionsMode: value,
-          });
+          updateSettings(
+            {
+              suggestionsMode: value,
+            },
+            () => reportEvent('PROJECT_SUGGESTIONS_SETTINGS_CHANGE', { value })
+          );
         }}
         disabled={updateLoadable.isLoading}
       />
@@ -124,12 +132,15 @@ export const ProjectSettingsAdvanced = () => {
             project.translationProtection === 'PROTECT_REVIEWED'
               ? 'NONE'
               : 'PROTECT_REVIEWED';
-          reportEvent('PROJECT_TRANSLATION_PROTECTION_SETTINGS_CHANGE', {
-            value,
-          });
-          updateSettings({
-            translationProtection: value,
-          });
+          updateSettings(
+            {
+              translationProtection: value,
+            },
+            () =>
+              reportEvent('PROJECT_TRANSLATION_PROTECTION_SETTINGS_CHANGE', {
+                value,
+              })
+          );
         }}
         disabled={updateLoadable.isLoading}
       />
