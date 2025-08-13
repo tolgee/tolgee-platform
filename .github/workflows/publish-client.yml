@@ -26,14 +26,15 @@ jobs:
         run: npm ci
         working-directory: ./client
 
-      - name: update version and build
+      - name: update version build and publish
         run: |
-          npm run update-version -- 0.0.0-prerelease.$(git rev-parse --short HEAD)
-          npm run build
-        working-directory: ./client
-
-      - name: publish
-        run: npm publish --tag prerelease
+          VERSION=0.0.0-prerelease.$(git rev-parse --short HEAD)
+          if npm view @tginternal/client@$VERSION versions --json >/dev/null 2>&1; then
+            echo "Version $VERSION already exists, skipping publish."
+          else
+            npm run build
+            npm publish --tag prerelease
+          fi
         working-directory: ./client
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
