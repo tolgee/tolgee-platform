@@ -10,9 +10,9 @@ jobs:
   publish-client-prerelease:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup environment
-        uses: ./.github/actions/setup-env
+      - uses: actions/checkout@v3
+        with:
+          token: "${{ secrets.TOLGEE_MACHINE_PAT }}"
 
       - name: Setup node
         uses: actions/setup-node@v3
