@@ -4,8 +4,6 @@ const packageJson = fs.readFileSync("./package.json");
 
 const version = String(process.argv[2]).replace(/^v/, "");
 
-console.log({ version });
-
 const replaced = packageJson
   .toString()
   .replaceAll(/"version": ".*"/g, `"version": "${version}"`);
