@@ -1,0 +1,37 @@
+name: Publish client prerelease
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, release]
+  pull_request:
+
+jobs:
+  publish-client-prerelease:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22.x"
+
+      - run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
+
+      # client folder
+      - name: install npm dependencies
+        run: npm ci
+        working-directory: ./client
+
+      - name: update version and build
+        run: |
+          npm run update-version -- prerelease.$(git rev-parse --short HEAD)
+          npm run build
+        working-directory: ./client
+
+      - name: publish
+        run: npm publish --tag prerelease
+        working-directory: ./client

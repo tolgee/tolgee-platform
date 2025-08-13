@@ -1,0 +1,34 @@
+{
+  "name": "@tginternal/client",
+  "private": true,
+  "version": "prerelease.c5dd63ac8",
+  "type": "module",
+  "files": [
+    "dist",
+    "lib"
+  ],
+  "main": "./dist/client.umd.cjs",
+  "module": "./dist/client.js",
+  "types": "./lib/main.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/main.d.ts",
+      "import": "./dist/client.js",
+      "require": "./dist/client.umd.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "update-version": "node scripts/updateVersion.js"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3",
+    "vite": "^7.1.2"
+  },
+  "dependencies": {
+    "base32-decode": "^1.0.0",
+    "openapi-fetch": "^0.14.0"
+  }
+}
