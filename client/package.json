@@ -1,6 +1,5 @@
 {
   "name": "@tginternal/client",
-  "private": true,
   "version": "prerelease.c5dd63ac8",
   "type": "module",
   "files": [
