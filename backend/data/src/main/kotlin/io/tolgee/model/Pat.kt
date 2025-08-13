@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import io.tolgee.security.PAT_PREFIX
 import jakarta.persistence.Entity
 import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
@@ -41,4 +42,6 @@ class Pat(
   @ManyToOne
   @NotNull
   lateinit var userAccount: UserAccount
+
+  val tokenWithPrefix get() = "$PAT_PREFIX$token"
 }
