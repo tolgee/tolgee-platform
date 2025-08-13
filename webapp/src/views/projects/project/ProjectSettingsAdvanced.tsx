@@ -17,6 +17,7 @@ import { DOCS_ROOT } from 'tg.constants/docLinks';
 import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
 import { DefaultNamespaceSelect } from './components/DefaultNamespaceSelect';
 import { LinkReadMore } from 'tg.component/LinkReadMore';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 type EditProjectRequest = components['schemas']['EditProjectRequest'];
 
@@ -24,6 +25,7 @@ export const ProjectSettingsAdvanced = () => {
   const project = useProject();
   const { t } = useTranslate();
   const history = useHistory();
+  const reportEvent = useReportEvent();
 
   const { allNamespacesWithNone } = useProjectNamespaces();
 
@@ -38,16 +40,22 @@ export const ProjectSettingsAdvanced = () => {
     invalidatePrefix: '/v2/projects',
   });
 
-  const updateSettings = (values: Partial<EditProjectRequest>) => {
-    updateLoadable.mutate({
-      path: { projectId: project.id },
-      content: {
-        'application/json': {
-          ...project,
-          ...values,
+  const updateSettings = (
+    values: Partial<EditProjectRequest>,
+    onSuccess?: () => void
+  ) => {
+    updateLoadable.mutate(
+      {
+        path: { projectId: project.id },
+        content: {
+          'application/json': {
+            ...project,
+            ...values,
+          },
         },
       },
-    });
+      { onSuccess }
+    );
   };
 
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
@@ -94,12 +102,16 @@ export const ProjectSettingsAdvanced = () => {
           />
         }
         checked={project.suggestionsMode === 'ENABLED'}
-        onSwitch={() =>
-          updateSettings({
-            suggestionsMode:
-              project.suggestionsMode === 'ENABLED' ? 'DISABLED' : 'ENABLED',
-          })
-        }
+        onSwitch={() => {
+          const value =
+            project.suggestionsMode === 'ENABLED' ? 'DISABLED' : 'ENABLED';
+          updateSettings(
+            {
+              suggestionsMode: value,
+            },
+            () => reportEvent('PROJECT_SUGGESTIONS_SETTINGS_CHANGE', { value })
+          );
+        }}
         disabled={updateLoadable.isLoading}
       />
 
@@ -115,14 +127,21 @@ export const ProjectSettingsAdvanced = () => {
           />
         }
         checked={project.translationProtection === 'PROTECT_REVIEWED'}
-        onSwitch={() =>
-          updateSettings({
-            translationProtection:
-              project.translationProtection === 'PROTECT_REVIEWED'
-                ? 'NONE'
-                : 'PROTECT_REVIEWED',
-          })
-        }
+        onSwitch={() => {
+          const value =
+            project.translationProtection === 'PROTECT_REVIEWED'
+              ? 'NONE'
+              : 'PROTECT_REVIEWED';
+          updateSettings(
+            {
+              translationProtection: value,
+            },
+            () =>
+              reportEvent('PROJECT_TRANSLATION_PROTECTION_SETTINGS_CHANGE', {
+                value,
+              })
+          );
+        }}
         disabled={updateLoadable.isLoading}
       />
 
