@@ -353,7 +353,7 @@ jobs:
         working-directory: ./client
 
       - name: install npm dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./client
 
       - name: update version build and publish
