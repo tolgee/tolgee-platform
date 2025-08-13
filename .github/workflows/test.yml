@@ -332,10 +332,6 @@ jobs:
           name: webapp
           path: ./webapp/dist
 
-      - name: Untar node modules
-        run: |
-          tar --zstd -xf ~/node_modules.tar.zst
-
       - name: Create cache directory
         run: |
           mkdir -p ~/.cache
