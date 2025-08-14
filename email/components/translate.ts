@@ -39,7 +39,7 @@ export type MessageProps = Record<
 const GLOBALS = {
   isCloud: true,
   instanceQualifier: 'Tolgee',
-  instanceUrl: 'https://app.tolgee.io',
+  backendUrl: 'https://app.tolgee.io',
 };
 
 let Counter = 0;

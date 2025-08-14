@@ -52,6 +52,7 @@ class EmailService(
     locale: Locale,
     properties: Map<String, Any> = mapOf(),
     attachments: List<EmailAttachment> = listOf(),
+    subject: String? = null,
   ) {
     val globalVariables = emailGlobalVariablesProvider()
     val context = Context(locale, properties)
@@ -63,7 +64,7 @@ class EmailService(
     context.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME, tec)
 
     val html = templateEngine.process(template, context)
-    val subject = extractEmailTitle(html)
+    val subject = subject ?: extractEmailTitle(html)
     sendEmail(recipient, subject, html, attachments)
   }
 
