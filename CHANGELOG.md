@@ -1,3 +1,10 @@
+## [3.127.2](https://github.com/tolgee/tolgee-platform/compare/v3.127.1...v3.127.2) (2025-08-14)
+
+
+### Bug Fixes
+
+* Cannot export to several formats using UI when a project contain… ([#3205](https://github.com/tolgee/tolgee-platform/issues/3205)) ([5804c48](https://github.com/tolgee/tolgee-platform/commit/5804c48105a03954f4a8403f883241b3cb6bc2c2))
+
 ## [3.127.1](https://github.com/tolgee/tolgee-platform/compare/v3.127.0...v3.127.1) (2025-08-13)
 
 

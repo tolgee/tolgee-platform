@@ -1659,6 +1659,7 @@
   "regenerate_api_key_title": "Regerar chave API do Projeto",
   "regenerate_pat_title": "Regerar token",
   "registrations_not_allowed": "Os registros não estão habilitados",
+  "registration-welcome-text": "Bem-vindo(a) e obrigado(a) por criar uma conta! Para começar a usar Tolgee, você precisa confirmar seu e-mail.",
   "request_parse_error": "Ocorreu um erro interno",
   "reset_password_back_to_login": "Voltar para o login",
   "reset_password_email_field": "E-mail",

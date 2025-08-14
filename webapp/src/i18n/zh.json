@@ -1657,6 +1657,7 @@
   "regenerate_api_key_title": "重新生成项目 API 密钥",
   "regenerate_pat_title": "重新生成令牌",
   "registrations_not_allowed": "未启用注册功能",
+  "registration-welcome-text": "欢迎并感谢您创建账户！要开始使用 Tolgee ，您需要确认您的邮箱。",
   "request_parse_error": "发生了内部错误",
   "reset_password_back_to_login": "返回登录界面",
   "reset_password_email_field": "电子邮箱地址",

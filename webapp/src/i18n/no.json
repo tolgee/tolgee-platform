@@ -1659,6 +1659,7 @@
   "regenerate_api_key_title": "Regenerer prosjekt-API-nøkkel",
   "regenerate_pat_title": "Regenerer token",
   "registrations_not_allowed": "Registreringer er ikke aktivert",
+  "registration-welcome-text": "Velkommen og takk for at du opprettet en konto! For å begynne å bruke Tolgee, må du bekrefte e-posten din.",
   "request_parse_error": "Intern feil oppstod",
   "reset_password_back_to_login": "Tilbake til innlogging",
   "reset_password_email_field": "E-post",

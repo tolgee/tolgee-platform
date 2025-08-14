@@ -1663,6 +1663,7 @@
   "regenerate_api_key_title": "Regenerare cheie API proiect",
   "regenerate_pat_title": "Regenerează token-ul",
   "registrations_not_allowed": "Înregistrările nu sunt activate",
+  "registration-welcome-text": "Bun venit și mulțumim că ți-ai creat un cont! Pentru a începe să folosești Tolgee, trebuie să îți confirmi adresa de email.",
   "request_parse_error": "A apărut o eroare internă",
   "reset_password_back_to_login": "Înapoi la autentificare",
   "reset_password_email_field": "Email",

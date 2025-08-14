@@ -1669,6 +1669,7 @@
   "registration-confirm-link": "Oder kopieren Sie diese URL und fügen Sie sie in Ihren Browser ein:\n<link>{confirmUrl}</link>",
   "registration-confirm-subject": "Bestätigen Sie Ihr Konto",
   "registrations_not_allowed": "Registrierungen sind nicht möglich",
+  "registration-welcome-text": "Willkommen und danke, dass du ein Konto erstellt hast!\nUm Tolgee zu verwenden, musst du deine E-Mail bestätigen.",
   "request_parse_error": "Interner Fehler aufgetreten",
   "reset_password_back_to_login": "Zurück zur Anmeldung",
   "reset_password_email_field": "E-Mail",

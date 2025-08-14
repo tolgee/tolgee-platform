@@ -1659,6 +1659,7 @@
   "regenerate_api_key_title": "Projekt API-kulcs újragenerálása",
   "regenerate_pat_title": "Token újragenerálása",
   "registrations_not_allowed": "A regisztráció jelenleg nem engedélyezett",
+  "registration-welcome-text": "Üdvözlünk, és köszönjük, hogy létrehoztad a fiókodat! Ahhoz, hogy elkezdhesd használni a Tolgee-t, meg kell erősítened az e-mail címedet.",
   "request_parse_error": "Belső hiba történt",
   "reset_password_back_to_login": "Vissza a bejelentkezéshez",
   "reset_password_email_field": "E-mail",
