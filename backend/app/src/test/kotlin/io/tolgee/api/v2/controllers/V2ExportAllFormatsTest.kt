@@ -54,11 +54,11 @@ class V2ExportAllFormatsTest : ProjectAuthControllerTest("/v2/projects/") {
     if (mvcResult.response.contentType?.contains("zip") == true) {
       val parsedFiles = parseZip(responseContent)
       assertThat(parsedFiles).isNotEmpty()
-      
+
       // Verify we have files for both the default namespace and ns-1
       val fileNames = parsedFiles.keys
       assertThat(fileNames).hasSizeGreaterThan(0)
-      
+
       // For formats that support namespaces, verify namespace structure
       if (!format.multiLanguage) {
         assertThat(fileNames.any { it.contains("ns-1") || it.contains("en.") }).isTrue()
@@ -71,7 +71,7 @@ class V2ExportAllFormatsTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private fun initTestData() {
     testData = NamespacesTestData()
-    
+
     // Add Czech language to make exports more comprehensive
     testData!!.apply {
       projectBuilder.addLanguage {
@@ -80,7 +80,7 @@ class V2ExportAllFormatsTest : ProjectAuthControllerTest("/v2/projects/") {
         originalName = "Čeština"
       }
     }
-    
+
     testDataService.saveTestData(testData!!.root)
     projectSupplier = { testData!!.projectBuilder.self }
     userAccount = testData!!.user
