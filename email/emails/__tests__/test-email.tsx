@@ -38,7 +38,7 @@ export default function TestEmail() {
       <Text>
         <_LocalizedText
           keyName="email-test-string"
-          defaultValue="Testing ICU strings -- {testVar}"
+          defaultValue="[DEFAULT] Testing ICU strings -- {testVar}"
           demoParams={{
             link: (c) => (
               <TolgeeLink href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
@@ -74,7 +74,7 @@ export default function TestEmail() {
               <li>
                 <_LocalizedText
                   keyName="email-test-it"
-                  defaultValue="ICU test: {item__name}"
+                  defaultValue="[DEFAULT] ICU test: {item__name}"
                   demoParams={{ item__name: 'demo...' }}
                 />
               </li>
@@ -84,14 +84,15 @@ export default function TestEmail() {
       </ul>
 
       <_LocalizedText
-        keyName="powered-by"
-        defaultValue="Powered by <link>Tolgee</link> 🐁"
+        keyName="email-test-powered-by"
+        defaultValue="[DEFAULT] Powered by <link>{tolgee}</link> 🐁"
         demoParams={{
           link: (c) => (
             <Link href="https://tolgee.io" className="text-inherit underline">
               {c}
             </Link>
           ),
+          tolgee: 'Tolgee',
         }}
       />
     </ClassicLayout>

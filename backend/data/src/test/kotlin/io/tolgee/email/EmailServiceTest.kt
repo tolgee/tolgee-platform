@@ -67,7 +67,7 @@ class EmailServiceTest {
       mapOf(
         "isCloud" to true,
         "instanceQualifier" to "Tolgee",
-        "instanceUrl" to "https://tolgee.test",
+        "backendUrl" to "https://tolgee.test",
       )
     )
   }
@@ -95,6 +95,8 @@ class EmailServiceTest {
       // Might be a bit brittle but does the trick for now.
       .doesNotContain(" th:")
       .doesNotContain(" data-th")
+      // All default values have been replaced
+      .doesNotContain("[DEFAULT]")
   }
 
   @Test
@@ -157,6 +159,7 @@ class EmailServiceTest {
             mapOf("name" to "Name #2"),
             mapOf("name" to "Name #3"),
           ),
+        "tolgee" to "Tolgee",
       )
 
     private val TEST_PROPERTIES_MEOW =

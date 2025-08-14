@@ -70,22 +70,14 @@ export default function ClassicLayout({
     <LayoutCore subject={subject}>
       <Body className="bg-white my-auto mx-auto font-sans">
         <Container className="mx-auto my-[40px] max-w-[465px] rounded border border-[#eaeaea] border-solid">
-          <Section className="p-[20px]">
-            <Row>
-              <Column>
-                <ImgResource
-                  resourceName="tolgee_logo_text.png"
-                  alt="Tolgee logo"
-                />
-              </Column>
-              <Column className="text-right">
-                <Heading className="text-xl text-brand m-0">
+          <Section className="border-y border-solid border-[#eaeaea] p-[20px]">
+            <Row className="p-[20px]">
+              <Column className="text-center">
+                <Heading as="h2" className="font-light m-0">
                   {t.render(subject)}
                 </Heading>
               </Column>
             </Row>
-          </Section>
-          <Section className="border-y border-solid border-[#eaeaea] p-[20px]">
             {children}
           </Section>
           <Hr className="hidden" />

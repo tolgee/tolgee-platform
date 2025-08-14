@@ -16,6 +16,7 @@
 
 package io.tolgee.email
 
+import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.stereotype.Component
@@ -27,6 +28,7 @@ class EmailGlobalVariablesProvider(
   // Used to identify whether we're Tolgee Cloud or not
   private val billingConfigProvider: PublicBillingConfProvider,
   private val tolgeeProperties: TolgeeProperties,
+  private val frontendUrlProvider: FrontendUrlProvider,
 ) {
   operator fun invoke(): Map<String, Any?> {
     val isCloud = billingConfigProvider().enabled
@@ -34,7 +36,7 @@ class EmailGlobalVariablesProvider(
     return mapOf(
       "isCloud" to isCloud,
       "instanceQualifier" to if (isCloud) tolgeeProperties.appName else tolgeeProperties.frontEndUrl.intoQualifier(),
-      "instanceUrl" to "http://localhost:8080",
+      "backendUrl" to (tolgeeProperties.backEndUrl ?: frontendUrlProvider.url)
     )
   }
 
