@@ -160,9 +160,10 @@ export function createApiClient(props: ApiClientProps) {
       if (response.data?.accessToken) {
         self.setUserToken(response.data.accessToken);
       } else if (response.error) {
-        printError(response.error as any);
+        const errorMessage = printError(response as any);
+        throw new Error(errorMessage);
       } else {
-        throw Error("Couldn't fetch access token", response.error);
+        throw new Error("Couldn't fetch access token", response.error);
       }
       return response;
     },

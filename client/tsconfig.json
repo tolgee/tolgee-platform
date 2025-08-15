@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "module": "preserve",
+    "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
     "types": ["vitest/globals", "node"],
@@ -26,5 +26,6 @@
     "noEmit": false,
     "outDir": "./lib"
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["*.test.*"]
 }
