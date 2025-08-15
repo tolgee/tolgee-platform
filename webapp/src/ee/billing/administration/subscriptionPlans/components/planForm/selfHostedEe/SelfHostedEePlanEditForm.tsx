@@ -9,6 +9,7 @@ import {
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useHistory } from 'react-router-dom';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
+import { getSelfHostedPlanInitialValues } from 'tg.ee.module/billing/administration/subscriptionPlans/components/planForm/selfHostedEe/getSelfHostedPlanInitialValues';
 
 type EditSelfHostedEePlanFormProps = { planId: number };
 
@@ -35,6 +36,8 @@ export const SelfHostedEePlanEditForm: FC<EditSelfHostedEePlanFormProps> = ({
   }
 
   const planData = planLoadable.data;
+
+  const initialData = getSelfHostedPlanInitialValues(planData);
 
   const onSubmit: React.ComponentProps<
     typeof SelfHostedEePlanForm
@@ -68,9 +71,7 @@ export const SelfHostedEePlanEditForm: FC<EditSelfHostedEePlanFormProps> = ({
   return (
     <SelfHostedEePlanForm
       loading={false}
-      initialData={{
-        ...planData,
-      }}
+      initialData={initialData}
       isUpdate={true}
       onSubmit={onSubmit}
       canEditPrices={planData.canEditPrices}
