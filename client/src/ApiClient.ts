@@ -5,6 +5,11 @@ import base32Decode from "base32-decode";
 import { API_KEY_PAK_PREFIX, USER_AGENT } from "./constants";
 import { getApiKeyInformation } from "./getApiKeyInformation";
 import { errorFromLoadable } from "./errorFromLoadable";
+import type { BodyOf } from "./schema.utils";
+
+export type LoadableData = Awaited<ReturnType<ApiClient["GET"]>> & {
+  data?: any;
+};
 
 async function parseResponse(response: Response, parseAs: ParseAs) {
   // handle empty content
@@ -55,22 +60,26 @@ export type ApiClientProps = {
   projectId?: number | undefined;
   autoThrow?: boolean;
   verbose?: boolean;
+  userToken?: string;
+  printError?: (loadable: LoadableData) => string;
 };
 
-export function createApiClient({
-  baseUrl,
-  apiKey,
-  projectId,
-  autoThrow = false,
-  verbose,
-}: ApiClientProps) {
+export function createApiClient(props: ApiClientProps) {
+  let {
+    projectId,
+    baseUrl,
+    apiKey,
+    autoThrow,
+    userToken,
+    verbose,
+    printError = errorFromLoadable,
+  } = props;
   const computedProjectId =
     projectId ?? (apiKey ? projectIdFromKey(apiKey) : undefined);
   const apiClient = createClient<paths>({
     baseUrl,
     headers: {
       "user-agent": USER_AGENT,
-      "x-api-key": apiKey,
     },
   });
 
@@ -83,6 +92,11 @@ export function createApiClient({
   apiClient.use({
     onRequest: ({ request }) => {
       debug(`[HTTP] Requesting: ${request.method} ${request.url}`);
+      if (apiKey) {
+        request.headers.set("x-api-key", apiKey);
+      } else if (userToken) {
+        request.headers.set("Authorization", "Bearer " + userToken);
+      }
     },
     onResponse: async ({ response, options }) => {
       let responseText = `[HTTP] Response: ${response.url} [${response.status}]`;
@@ -90,7 +104,7 @@ export function createApiClient({
       if (apiVersion) {
         responseText += ` [${response.headers.get("x-tolgee-version")}]`;
       }
-      if (!response.ok && verbose) {
+      if (!response.ok && verbose && response.body) {
         const clonedBody = await response.clone().text();
         if (clonedBody) {
           responseText += ` [${clonedBody}]`;
@@ -108,7 +122,7 @@ export function createApiClient({
     },
   });
 
-  return {
+  const self = {
     ...apiClient,
     getProjectId() {
       return computedProjectId!;
@@ -117,9 +131,32 @@ export function createApiClient({
       return getApiKeyInformation(apiClient, apiKey!);
     },
     getSettings(): ApiClientProps {
-      return { baseUrl, apiKey, projectId, autoThrow };
+      return { projectId, baseUrl, apiKey, autoThrow, userToken, verbose };
+    },
+    setProjectId(id: number) {
+      projectId = id;
+    },
+    setApiKey(key: string) {
+      apiKey = key;
+    },
+    setUserToken(token: string) {
+      userToken = token;
+    },
+    async login(body: BodyOf<"/api/public/generatetoken", "post">) {
+      const response = await apiClient.POST("/api/public/generatetoken", {
+        body,
+      });
+      if (response.data?.accessToken) {
+        self.setUserToken(response.data.accessToken);
+      } else if (response.error) {
+        printError(response.error as any);
+      } else {
+        throw Error("Couldn't fetch access token", response.error);
+      }
+      return response;
     },
   };
+  return self;
 }
 
 export type ApiClient = ReturnType<typeof createApiClient>;

@@ -29,7 +29,7 @@ export function getUnresolvedConflictsMessage(
   result.push("");
   if (someOverridable) {
     result.push(
-      "HINT: Overridable translations can be updated with the `--override-mode ALL`"
+      "HINT: Overridable translations can be updated with the `overrideMode: ALL`"
     );
     result.push("");
   }

@@ -1,5 +1,5 @@
 import { getUnresolvedConflictsMessage } from "./printFailedKeys";
-import { type LoadableData } from "./TolgeeClient";
+import { type LoadableData } from "./ApiClient";
 
 export const addErrorDetails = (loadable: LoadableData, showBeError = true) => {
   let additionalInfo = "";

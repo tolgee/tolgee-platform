@@ -1,8 +1,8 @@
 export {
-  type TolgeeClient,
-  createTolgeeClient,
-  type TolgeeClientProps,
-} from "./TolgeeClient";
+  type ApiClient,
+  createApiClient,
+  type ApiClientProps,
+} from "./ApiClient";
 
 export * from "./schema.generated";
 export * from "./schema.utils";
