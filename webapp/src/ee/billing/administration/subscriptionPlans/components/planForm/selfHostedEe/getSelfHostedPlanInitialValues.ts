@@ -2,7 +2,8 @@ import { SelfHostedEePlanFormData } from '../cloud/types';
 import { components } from 'tg.service/billingApiSchema.generated';
 
 export function getSelfHostedPlanInitialValues(
-  planData?: components['schemas']['SelfHostedEePlanAdministrationModel']
+  planData?: components['schemas']['SelfHostedEePlanAdministrationModel'],
+  withOrganizationIds: boolean = false
 ): SelfHostedEePlanFormData {
   if (planData) {
     return {
@@ -10,12 +11,16 @@ export function getSelfHostedPlanInitialValues(
       stripeProductId: planData.stripeProductId,
       prices: planData.prices,
       includedUsage: planData.includedUsage,
-      forOrganizationIds: [],
+      forOrganizationIds: withOrganizationIds
+        ? planData.forOrganizationIds
+        : [],
       enabledFeatures: planData.enabledFeatures,
       public: planData.public,
       free: planData.free,
       nonCommercial: planData.nonCommercial,
       isPayAsYouGo: planData.isPayAsYouGo,
+      canEditPrices: planData.canEditPrices,
+      archived: planData.archivedAt != null,
     };
   }
 
@@ -40,5 +45,7 @@ export function getSelfHostedPlanInitialValues(
     free: false,
     nonCommercial: false,
     isPayAsYouGo: true,
+    archived: false,
+    canEditPrices: true,
   };
 }
