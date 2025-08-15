@@ -2,7 +2,6 @@ package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.activity.ActivityService
 import io.tolgee.component.AllCachesProvider
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.SchedulingManager
@@ -18,7 +17,6 @@ import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.repository.EmailVerificationRepository
-import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.repository.ProjectRepository
@@ -79,9 +77,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   protected lateinit var languageService: LanguageService
-
-  @Autowired
-  protected lateinit var keyRepository: KeyRepository
 
   @Autowired
   protected lateinit var userAccountService: UserAccountService
@@ -188,9 +183,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var mtServiceManager: MtServiceManager
-
-  @Autowired
-  lateinit var activityService: ActivityService
 
   @Autowired
   lateinit var userPreferencesService: UserPreferencesService
