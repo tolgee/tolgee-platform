@@ -2,9 +2,10 @@
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "module": "ESNext",
+    "module": "preserve",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
+    "types": ["vitest/globals", "node"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",

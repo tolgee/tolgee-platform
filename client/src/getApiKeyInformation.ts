@@ -2,7 +2,7 @@ import createClient from "openapi-fetch";
 
 import { API_KEY_PAK_PREFIX } from "./constants";
 import { type paths } from "./schema.generated";
-import { handleLoadableError } from "./TolgeeClient.js";
+import { handleLoadableError } from "./errorFromLoadable";
 
 export type ApiKeyProject = {
   name: string;

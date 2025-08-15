@@ -1,7 +1,13 @@
 import { getUnresolvedConflictsMessage } from "./printFailedKeys";
 import { type LoadableData } from "./ApiClient";
 
-export const addErrorDetails = (loadable: LoadableData, showBeError = true) => {
+export const handleLoadableError = (loadable: LoadableData) => {
+  if (loadable.error) {
+    throw new Error(errorFromLoadable(loadable));
+  }
+};
+
+const addErrorDetails = (loadable: LoadableData, showBeError = true) => {
   let additionalInfo = "";
   const items: string[] = [];
   items.push(`status: ${loadable.response.status}`);

@@ -13,4 +13,7 @@ export default defineConfig({
       fileName: "client",
     },
   },
+  test: {
+    globals: true,
+  },
 });
