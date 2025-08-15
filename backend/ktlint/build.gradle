@@ -11,6 +11,7 @@ buildscript {
 plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
+    id 'io.spring.dependency-management'
 }
 
 group = 'io.tolgee.testing.ktlint'
@@ -45,4 +46,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+dependencyManagement {
+    applyMavenExclusions = false
+    imports {
+        mavenBom 'org.junit:junit-bom:5.11.4'
+    }
 }

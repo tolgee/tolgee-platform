@@ -117,7 +117,7 @@ class OpenApiConfiguration {
         val parameterIsMissingAtAll = !pathContainsProjectId && !isParameterConsumed
         val otherMethodPathContainsProjectId =
           handlerPaths[
-            operationHandlers[operation.operationId]
+            operationHandlers[operation]
               ?.method,
           ]?.any { it.contains("{projectId}") }
             ?: false

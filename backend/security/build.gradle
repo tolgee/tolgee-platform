@@ -96,6 +96,7 @@ dependencyManagement {
     applyMavenExclusions = false
     imports {
         mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+        mavenBom 'org.junit:junit-bom:5.11.4'
     }
 }
 
