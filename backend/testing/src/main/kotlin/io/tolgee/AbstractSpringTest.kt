@@ -81,9 +81,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   protected lateinit var languageService: LanguageService
 
   @Autowired
-  protected lateinit var keyRepository: KeyRepository
-
-  @Autowired
   protected lateinit var userAccountService: UserAccountService
 
   @Autowired
@@ -188,9 +185,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var mtServiceManager: MtServiceManager
-
-  @Autowired
-  lateinit var activityService: ActivityService
 
   @Autowired
   lateinit var userPreferencesService: UserPreferencesService

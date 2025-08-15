@@ -24,9 +24,6 @@ class DbPopulatorTest : AbstractTransactionalTest() {
   lateinit var userAccountRepository: UserAccountRepository
 
   @Autowired
-  lateinit var projectRepository: ProjectRepository
-
-  @Autowired
   lateinit var apiKeyService: ApiKeyService
 
   @Autowired
