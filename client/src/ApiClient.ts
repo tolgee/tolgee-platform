@@ -14,9 +14,12 @@ export type LoadableData = Awaited<ReturnType<ApiClient["GET"]>> & {
 async function parseResponse(response: Response, parseAs: ParseAs) {
   // handle empty content
   // note: we return `{}` because we want user truthy checks for `.data` or `.error` to succeed
+  const clonedBody = await response.clone().text();
   if (
     response.status === 204 ||
-    response.headers.get("Content-Length") === "0"
+    response.headers.get("Content-Length") === "0" ||
+    !response.body ||
+    !clonedBody
   ) {
     return response.ok ? { data: {}, response } : { error: {}, response };
   }
