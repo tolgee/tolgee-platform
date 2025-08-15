@@ -1624,7 +1624,7 @@ export interface components {
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
-      escapeHtml: boolean;
+      escapeHtml?: boolean;
       /**
        * @description This is a template that defines the structure of the resulting .zip file content.
        *
@@ -1678,7 +1678,9 @@ export interface components {
         | "CSV"
         | "RESX_ICU"
         | "XLSX"
-        | "APPLE_XCSTRINGS";
+        | "APPLE_XCSTRINGS"
+        | "ANDROID_SDK"
+        | "APPLE_SDK";
       /** Format: int64 */
       id: number;
       /**
@@ -1742,7 +1744,7 @@ export interface components {
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
-      escapeHtml: boolean;
+      escapeHtml?: boolean;
       /**
        * @description This is a template that defines the structure of the resulting .zip file content.
        *
@@ -1796,7 +1798,9 @@ export interface components {
         | "CSV"
         | "RESX_ICU"
         | "XLSX"
-        | "APPLE_XCSTRINGS";
+        | "APPLE_XCSTRINGS"
+        | "ANDROID_SDK"
+        | "APPLE_SDK";
       /**
        * @description Languages to be contained in export.
        *
@@ -2463,7 +2467,9 @@ export interface components {
         | "CSV"
         | "RESX_ICU"
         | "XLSX"
-        | "APPLE_XCSTRINGS";
+        | "APPLE_XCSTRINGS"
+        | "ANDROID_SDK"
+        | "APPLE_SDK";
       mediaType: string;
     };
     ExportParams: {
@@ -2472,7 +2478,7 @@ export interface components {
        *
        * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
        */
-      escapeHtml: boolean;
+      escapeHtml?: boolean;
       /**
        * @description This is a template that defines the structure of the resulting .zip file content.
        *
@@ -2526,7 +2532,9 @@ export interface components {
         | "CSV"
         | "RESX_ICU"
         | "XLSX"
-        | "APPLE_XCSTRINGS";
+        | "APPLE_XCSTRINGS"
+        | "ANDROID_SDK"
+        | "APPLE_SDK";
       /**
        * @description Languages to be contained in export.
        *
@@ -13254,7 +13262,9 @@ export interface operations {
           | "CSV"
           | "RESX_ICU"
           | "XLSX"
-          | "APPLE_XCSTRINGS";
+          | "APPLE_XCSTRINGS"
+          | "ANDROID_SDK"
+          | "APPLE_SDK";
         /**
          * Delimiter to structure file content.
          *

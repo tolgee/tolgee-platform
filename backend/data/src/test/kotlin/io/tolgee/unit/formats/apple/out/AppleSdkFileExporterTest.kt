@@ -1,4 +1,4 @@
-package io.tolgee.unit.formats.i18next.out
+package io.tolgee.unit.formats.apple.out
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.export.ExportParams
@@ -13,7 +13,7 @@ import io.tolgee.unit.util.getExported
 import io.tolgee.util.buildExportTranslationList
 import org.junit.jupiter.api.Test
 
-class I18nextFileExporterTest {
+class AppleSdkFileExporterTest {
   @Test
   fun `exports with placeholders (ICU placeholders disabled)`() {
     val exporter = getIcuPlaceholdersDisabledExporter()
@@ -22,10 +22,16 @@ class I18nextFileExporterTest {
       "cs.json",
       """
     |{
-    |  "key3_one": "# den {icuParam}",
-    |  "key3_few": "# dny",
-    |  "key3_other": "# dní",
-    |  "item": "I will be first {icuParam, number}"
+    |  "key3": {
+    |    "variations": {
+    |      "plural": {
+    |        "one": "%lld den %@",
+    |        "few": "%lld dny",
+    |        "other": "%lld dní"
+    |      }
+    |    }
+    |  },
+    |  "item": "I will be first %lld"
     |}
       """.trimMargin(),
     )
@@ -37,20 +43,20 @@ class I18nextFileExporterTest {
         add(
           languageTag = "cs",
           keyName = "key3",
-          text = "{count, plural, one {'#' den '{'icuParam'}'} few {'#' dny} other {'#' dní}}",
+          text = "{0, plural, one {%lld den %@} few {%lld dny} other {%lld dní}}",
         ) {
           key.isPlural = true
         }
         add(
           languageTag = "cs",
           keyName = "item",
-          text = "I will be first {icuParam, number}",
+          text = "I will be first %lld",
         )
       }
     return getExporter(
       built.translations,
       false,
-      exportParams = ExportParams(format = ExportFormat.JSON_I18NEXT)
+      exportParams = ExportParams(format = ExportFormat.APPLE_SDK),
     )
   }
 
@@ -62,10 +68,16 @@ class I18nextFileExporterTest {
       "cs.json",
       """
     |{
-    |  "key3_one": "{{count, number}} den {{icuParam, number}}",
-    |  "key3_few": "{{count, number}} dny",
-    |  "key3_other": "{{count, number}} dní",
-    |  "item": "I will be first {icuParam} {{hello, number}}"
+    |  "key3": {
+    |    "variations": {
+    |      "plural": {
+    |        "one": "%lld den %2${'$'}lld",
+    |        "few": "%lld dny",
+    |        "other": "%lld dní"
+    |      }
+    |    }
+    |  },
+    |  "item": "I will be first {icuParam} %lld"
     |}
       """.trimMargin(),
     )
@@ -76,14 +88,14 @@ class I18nextFileExporterTest {
     val exporter =
       getExporter(
         getTranslationWithColon(),
-        exportParams = ExportParams(format = ExportFormat.JSON_I18NEXT)
+        exportParams = ExportParams(format = ExportFormat.APPLE_SDK),
       )
     val data = getExported(exporter)
     data.assertFile(
       "cs.json",
       """
     |{
-    |  "item": "name : {{name}}"
+    |  "item": "name : %@"
     |}
       """.trimMargin(),
     )
@@ -95,7 +107,7 @@ class I18nextFileExporterTest {
         add(
           languageTag = "cs",
           keyName = "item",
-          text = "name : {name}",
+          text = "name : {0}",
         )
       }
     return built.translations
@@ -107,20 +119,20 @@ class I18nextFileExporterTest {
         add(
           languageTag = "cs",
           keyName = "key3",
-          text = "{count, plural, one {# den {icuParam, number}} few {# dny} other {# dní}}",
+          text = "{0, plural, one {# den {1, number}} few {# dny} other {# dní}}",
         ) {
           key.isPlural = true
         }
         add(
           languageTag = "cs",
           keyName = "item",
-          text = "I will be first '{'icuParam'}' {hello, number}",
+          text = "I will be first '{'icuParam'}' {0, number}",
         )
       }
     return getExporter(
       built.translations,
       true,
-      exportParams = ExportParams(format = ExportFormat.JSON_I18NEXT),
+      exportParams = ExportParams(format = ExportFormat.APPLE_SDK),
     )
   }
 

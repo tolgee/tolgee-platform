@@ -43,8 +43,9 @@ class StructureModelBuilder(
     languageTag: String,
     key: String,
     value: String?,
+    nestInside: List<ObjectPathItem> = emptyList(),
   ) {
-    val path = getPathItems(languageTag, key)
+    val path = getPathItems(languageTag, key) + nestInside
     addValueToPath(path, value)
   }
 
@@ -52,9 +53,10 @@ class StructureModelBuilder(
     languageTag: String,
     key: String,
     pluralForms: Map<String, String>,
+    nestInside: List<ObjectPathItem> = emptyList(),
   ) {
     pluralForms.forEach { (keyword, form) ->
-      val path = getPathItems(languageTag, key) + ObjectPathItem(keyword, keyword)
+      val path = getPathItems(languageTag, key) + nestInside + ObjectPathItem(keyword, keyword)
       addValueToPath(path, form)
     }
   }

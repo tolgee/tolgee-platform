@@ -67,7 +67,7 @@ class XliffFileExporter(
   ): String? {
     val processedText =
       text?.let {
-        if (exportParams.escapeHtml) {
+        if (exportParams.escapeHtml == true) {
           StringEscapeUtils.escapeXml10(text)
         } else {
           text
