@@ -53,8 +53,12 @@ export function projectIdFromKey(key: string) {
     "RFC4648"
   );
 
-  const decoded = Buffer.from(keyBuffer).toString("utf8");
-  return Number(decoded.split("_")[0]);
+  const decoded = new TextDecoder("utf-8").decode(
+    keyBuffer as unknown as Uint8Array
+  );
+  const idStr = decoded.split("_", 1)[0];
+  const id = Number.parseInt(idStr, 10);
+  return Number.isFinite(id) ? id : undefined;
 }
 
 export type ApiClientProps = {
@@ -127,8 +131,10 @@ export function createApiClient(props: ApiClientProps) {
     ...apiClient,
     getProjectId() {
       const id = projectId ?? (apiKey ? projectIdFromKey(apiKey) : undefined);
-      if (id === undefined) {
-        throw Error("Project id is not set");
+      if (id == null) {
+        throw new Error(
+          "Project ID is not available. Provide `projectId` in settings or use a PAK key that encodes the project ID."
+        );
       }
       return id;
     },
