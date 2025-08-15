@@ -74,8 +74,6 @@ export function createApiClient(props: ApiClientProps) {
     verbose,
     printError = errorFromLoadable,
   } = props;
-  const computedProjectId =
-    projectId ?? (apiKey ? projectIdFromKey(apiKey) : undefined);
   const apiClient = createClient<paths>({
     baseUrl,
     headers: {
@@ -125,7 +123,7 @@ export function createApiClient(props: ApiClientProps) {
   const self = {
     ...apiClient,
     getProjectId() {
-      return computedProjectId!;
+      return projectId ?? (apiKey ? projectIdFromKey(apiKey) : undefined);
     },
     getApiKeyInfo() {
       return getApiKeyInformation(apiClient, apiKey!);
