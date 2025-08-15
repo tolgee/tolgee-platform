@@ -67,9 +67,9 @@ export type ApiClientProps = {
 export function createApiClient(props: ApiClientProps) {
   let {
     projectId,
-    baseUrl,
+    baseUrl = "https://app.tolgee.io",
     apiKey,
-    autoThrow,
+    autoThrow = true,
     userToken,
     verbose,
     printError = errorFromLoadable,
