@@ -123,7 +123,11 @@ export function createApiClient(props: ApiClientProps) {
   const self = {
     ...apiClient,
     getProjectId() {
-      return projectId ?? (apiKey ? projectIdFromKey(apiKey) : undefined)!;
+      const id = projectId ?? (apiKey ? projectIdFromKey(apiKey) : undefined);
+      if (id === undefined) {
+        throw Error("Project id is not set");
+      }
+      return id;
     },
     getApiKeyInfo() {
       return getApiKeyInformation(apiClient, apiKey!);
