@@ -114,6 +114,7 @@
   "activity_entity_project.language": "basis sprog",
   "activity_entity_project.name": "navn",
   "activity_entity_project.suggestion_mode": "forslagstilstand",
+  "activity_entity_project.translation_protection": "oversættelsesbeskyttelse",
   "activity_entity_screenshot": "Skærmbillede",
   "activity_entity_suggestion": "Forslag",
   "activity_entity_suggestion.state": "status",

@@ -114,6 +114,7 @@
   "activity_entity_project.language": "alap nyelv",
   "activity_entity_project.name": "név",
   "activity_entity_project.suggestion_mode": "Javaslatok mód",
+  "activity_entity_project.translation_protection": "fordításvédelem",
   "activity_entity_screenshot": "Képernyőkép",
   "activity_entity_suggestion": "Javaslat",
   "activity_entity_suggestion.state": "állapot",

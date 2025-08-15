@@ -114,6 +114,7 @@
   "activity_entity_project.language": "limba de bază",
   "activity_entity_project.name": "nume",
   "activity_entity_project.suggestion_mode": "mod sugestie",
+  "activity_entity_project.translation_protection": "protecție traducere",
   "activity_entity_screenshot": "Captură de ecran",
   "activity_entity_suggestion": "Sugestie",
   "activity_entity_suggestion.state": "stare",

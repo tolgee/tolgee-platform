@@ -114,6 +114,7 @@
   "activity_entity_project.language": "基本言語",
   "activity_entity_project.name": "名前",
   "activity_entity_project.suggestion_mode": "プロジェクト提案モード",
+  "activity_entity_project.translation_protection": "翻訳 保護",
   "activity_entity_screenshot": "スクリーンショット",
   "activity_entity_suggestion": "提案",
   "activity_entity_suggestion.state": "状態",

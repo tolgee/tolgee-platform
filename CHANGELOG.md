@@ -1,3 +1,10 @@
+## [3.127.3](https://github.com/tolgee/tolgee-platform/compare/v3.127.2...v3.127.3) (2025-08-15)
+
+
+### Bug Fixes
+
+* Update dependencies ([#3204](https://github.com/tolgee/tolgee-platform/issues/3204)) ([f939f72](https://github.com/tolgee/tolgee-platform/commit/f939f72f38b4cae2a88e4d0ea46fb8380b495195))
+
 ## [3.127.2](https://github.com/tolgee/tolgee-platform/compare/v3.127.1...v3.127.2) (2025-08-14)
 
 

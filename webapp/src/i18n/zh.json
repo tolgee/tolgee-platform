@@ -114,6 +114,7 @@
   "activity_entity_project.language": "原始语言",
   "activity_entity_project.name": "名称",
   "activity_entity_project.suggestion_mode": "建议模式",
+  "activity_entity_project.translation_protection": "翻译保护",
   "activity_entity_screenshot": "屏幕截图",
   "activity_entity_suggestion": "建议",
   "activity_entity_suggestion.state": "状态",

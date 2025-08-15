@@ -114,6 +114,7 @@
   "activity_entity_project.language": "base language",
   "activity_entity_project.name": "name",
   "activity_entity_project.suggestion_mode": "suggestion mode",
+  "activity_entity_project.translation_protection": "translation protection",
   "activity_entity_screenshot": "Screenshot",
   "activity_entity_suggestion": "Suggestion",
   "activity_entity_suggestion.state": "state",

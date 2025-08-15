@@ -114,6 +114,7 @@
   "activity_entity_project.language": "basistaal",
   "activity_entity_project.name": "naam",
   "activity_entity_project.suggestion_mode": "Suggestiemodus",
+  "activity_entity_project.translation_protection": "vertalingsbescherming",
   "activity_entity_screenshot": "Schermafbeelding",
   "activity_entity_suggestion": "Suggestie",
   "activity_entity_suggestion.state": "staat",

@@ -114,6 +114,7 @@
   "activity_entity_project.language": "základní jazyk",
   "activity_entity_project.name": "název",
   "activity_entity_project.suggestion_mode": "režim návrhů",
+  "activity_entity_project.translation_protection": "ochrana překladu",
   "activity_entity_screenshot": "Screenshot",
   "activity_entity_suggestion": "Návrh",
   "activity_entity_suggestion.state": "stav",
