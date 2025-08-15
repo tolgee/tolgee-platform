@@ -13,7 +13,7 @@ import org.springdoc.core.models.GroupedOpenApi
 import org.springframework.web.method.HandlerMethod
 import java.lang.reflect.Method
 
-typealias OperationHandlers = HashMap<String, HandlerMethod>
+typealias OperationHandlers = java.util.IdentityHashMap<Operation, HandlerMethod>
 typealias HandlerPaths = HashMap<Method, MutableList<String>>
 
 class OpenApiGroupBuilder(
@@ -157,7 +157,7 @@ class OpenApiGroupBuilder(
 
   private fun extractOperationHandlers() {
     builder.addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
-      operationHandlers[operation.operationId] = handlerMethod
+      operationHandlers[operation] = handlerMethod
       operation
     }
   }
@@ -176,7 +176,7 @@ class OpenApiGroupBuilder(
           val newOperation =
             fn(
               operation,
-              operationHandlers[operation.operationId] ?: throw RuntimeException("Operation handler not found"),
+              operationHandlers[operation] ?: throw RuntimeException("Operation handler not found for ${operation.operationId}"),
               pathEntry.key,
             )
           if (newOperation != null) {
@@ -217,7 +217,7 @@ class OpenApiGroupBuilder(
     builder.addOpenApiCustomizer { openApi ->
       openApi.paths.forEach { (path, value) ->
         value.readOperations().forEach { operation ->
-          operationHandlers[operation.operationId]?.method?.let { method ->
+          operationHandlers[operation]?.method?.let { method ->
             handlerPaths[method] =
               handlerPaths[method].let {
                 it?.run {
