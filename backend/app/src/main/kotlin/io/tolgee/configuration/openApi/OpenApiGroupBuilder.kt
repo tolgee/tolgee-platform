@@ -102,7 +102,7 @@ class OpenApiGroupBuilder(
   ) {
     val annotation =
       handlerMethod.getMethodAnnotation(annotationClass)
-        ?: handlerMethod.method.declaringClass.getAnnotation(annotationClass) ?: null
+        ?: handlerMethod.method.declaringClass.getAnnotation(annotationClass)
     if (annotation == null) {
       return
     }
@@ -176,7 +176,8 @@ class OpenApiGroupBuilder(
           val newOperation =
             fn(
               operation,
-              operationHandlers[operation] ?: throw RuntimeException("Operation handler not found for ${operation.operationId}"),
+              operationHandlers[operation]
+                ?: throw RuntimeException("Operation handler not found for ${operation.operationId}"),
               pathEntry.key,
             )
           if (newOperation != null) {
