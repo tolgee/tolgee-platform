@@ -67,6 +67,7 @@ jobs:
           else
             npm run update-version -- $VERSION
             npm run build
+            npm run test
             npm publish --tag latest
           fi
         working-directory: ./client
@@ -82,6 +83,7 @@ jobs:
           else
             npm run update-version -- $VERSION
             npm run build
+            npm run test
             npm publish --tag prerelease
           fi
         working-directory: ./client
