@@ -163,7 +163,7 @@ export function createApiClient(props: ApiClientProps) {
         const errorMessage = printError(response as any);
         throw new Error(errorMessage);
       } else {
-        throw new Error("Couldn't fetch access token", response.error);
+        throw new Error("Couldn't fetch access token");
       }
       return response;
     },
