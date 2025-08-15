@@ -90,10 +90,10 @@ export function createApiClient(props: ApiClientProps) {
   apiClient.use({
     onRequest: ({ request }) => {
       debug(`[HTTP] Requesting: ${request.method} ${request.url}`);
-      if (apiKey) {
-        request.headers.set("x-api-key", apiKey);
-      } else if (userToken) {
+      if (userToken) {
         request.headers.set("Authorization", "Bearer " + userToken);
+      } else if (apiKey) {
+        request.headers.set("x-api-key", apiKey);
       }
     },
     onResponse: async ({ response, options }) => {
