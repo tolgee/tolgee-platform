@@ -12,7 +12,6 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
-import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.language.LanguageService
@@ -34,7 +33,6 @@ import java.util.*
 @Service
 class DbPopulatorReal(
   private val entityManager: EntityManager,
-  private val userAccountRepository: UserAccountRepository,
   private val userAccountService: UserAccountService,
   private val languageService: LanguageService,
   private val tolgeeProperties: TolgeeProperties,
@@ -55,7 +53,7 @@ class DbPopulatorReal(
   @Transactional
   fun autoPopulate() {
     // do not populate if db is not empty
-    if (userAccountRepository.count() == 0L) {
+    if (userAccountService.countAll() == 0L) {
       this.populate()
     }
   }
