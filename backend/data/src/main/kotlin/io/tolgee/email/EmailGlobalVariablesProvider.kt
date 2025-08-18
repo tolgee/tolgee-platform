@@ -32,11 +32,12 @@ class EmailGlobalVariablesProvider(
 ) {
   operator fun invoke(): Map<String, Any?> {
     val isCloud = billingConfigProvider().enabled
+    val backendUrl = tolgeeProperties.backEndUrl ?: frontendUrlProvider.url
 
     return mapOf(
       "isCloud" to isCloud,
-      "instanceQualifier" to if (isCloud) tolgeeProperties.appName else tolgeeProperties.frontEndUrl.intoQualifier(),
-      "backendUrl" to (tolgeeProperties.backEndUrl ?: frontendUrlProvider.url)
+      "instanceQualifier" to if (isCloud) tolgeeProperties.appName else backendUrl.intoQualifier(),
+      "backendUrl" to backendUrl
     )
   }
 

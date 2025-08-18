@@ -5,9 +5,10 @@ class EmailParams(
   var from: String? = null,
   var bcc: Array<String>? = null,
   var text: String? = null,
+  var header: String? = null,
   var subject: String,
   var attachments: List<EmailAttachment> = listOf(),
   var replyTo: String? = null,
   var templateName: String? = null,
-  var properties: Map<String, Any>? = null,
+  var recipientName: String? = null,
 )

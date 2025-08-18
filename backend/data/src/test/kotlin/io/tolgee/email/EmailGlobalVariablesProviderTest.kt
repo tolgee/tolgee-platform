@@ -16,6 +16,7 @@
 
 package io.tolgee.email
 
+import io.tolgee.component.FrontendUrlProvider
 import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.response.PublicBillingConfigurationDTO
@@ -35,6 +36,9 @@ class EmailGlobalVariablesProviderTest {
   @MockBean
   private lateinit var tolgeeProperties: TolgeeProperties
 
+  @MockBean
+  private lateinit var frontendUrlProvider: FrontendUrlProvider
+
   @Autowired
   private lateinit var emailGlobalVariablesProvider: EmailGlobalVariablesProvider
 
@@ -42,7 +46,7 @@ class EmailGlobalVariablesProviderTest {
   fun `it returns the correct properties based on config in cloud`() {
     whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(true))
     whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
-    whenever(tolgeeProperties.frontEndUrl).thenReturn("https://tolgee.test")
+    whenever(tolgeeProperties.backEndUrl).thenReturn("https://tolgee.test")
 
     emailGlobalVariablesProvider().assert
       .containsEntry("isCloud", true)
@@ -55,7 +59,7 @@ class EmailGlobalVariablesProviderTest {
   fun `it returns the correct properties based on config in self-hosted`() {
     whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(false))
     whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
-    whenever(tolgeeProperties.frontEndUrl).thenReturn("https://tolgee.test")
+    whenever(tolgeeProperties.backEndUrl).thenReturn("https://tolgee.test")
 
     emailGlobalVariablesProvider().assert
       .containsEntry("isCloud", false)
@@ -68,7 +72,7 @@ class EmailGlobalVariablesProviderTest {
   fun `it gracefully handles bad frontend url configuration`() {
     whenever(publicBillingConfProvider.invoke()).thenReturn(PublicBillingConfigurationDTO(false))
     whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
-    whenever(tolgeeProperties.frontEndUrl).thenReturn("https:/tolgee.test")
+    whenever(tolgeeProperties.backEndUrl).thenReturn("https:/tolgee.test")
 
     emailGlobalVariablesProvider().assert
       .containsEntry("isCloud", false)

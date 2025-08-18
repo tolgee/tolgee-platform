@@ -92,6 +92,8 @@ class EmailServiceTest {
       )
       // Makes sure resources have been added as expected
       .contains("<img aria-hidden=\"true\" src=\"https://tolgee.test/static/emails/")
+      // Header is taken from variable
+      .contains("Test header from var")
       // Might be a bit brittle but does the trick for now.
       .doesNotContain(" th:")
       .doesNotContain(" data-th")
@@ -160,6 +162,7 @@ class EmailServiceTest {
             mapOf("name" to "Name #3"),
           ),
         "tolgee" to "Tolgee",
+        "header" to "Test header from var",
       )
 
     private val TEST_PROPERTIES_MEOW =

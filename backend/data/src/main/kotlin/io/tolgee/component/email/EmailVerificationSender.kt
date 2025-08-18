@@ -20,8 +20,13 @@ class EmailVerificationSender(
       EmailParams(
         to = email,
         subject = "Tolgee e-mail verification",
-        templateName = "registration-confirm",
-        properties = mapOf("confirmUrl" to url, "username" to user.name, "isSignUp" to isSignUp),
+        header = "Verify your e-mail",
+        text = """
+          ${if (isSignUp) "Welcome to Tolgee. Thanks for signing up. \uD83C\uDF89<br/><br/>" else ""}
+          
+          To verify your e-mail, <b>follow this link</b>:<br/>
+          <a href="$url">$url</a><br/><br/>
+          """.trimIndent(),
       )
     tolgeeEmailSender.sendEmail(params)
   }

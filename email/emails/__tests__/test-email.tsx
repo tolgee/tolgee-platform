@@ -27,6 +27,7 @@ export default function TestEmail() {
   return (
     <ClassicLayout
       subject="Test email (written with React Email)"
+      header={<Var demoValue={'test'} variable={'header'} />}
       sendReason="This email was sent for no reason. Hehe!"
     >
       <Text style={{ margin: '0 0 16px' }}>

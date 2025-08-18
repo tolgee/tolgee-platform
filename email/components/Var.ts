@@ -27,18 +27,12 @@ export default function Var({
   demoValue,
   dangerouslyInjectValueAsHtmlWithoutSanitization: injectHtml,
 }: Props) {
-  if (injectHtml) {
-    return React.createElement('span', {
-      [injectHtml ? 'th:utext' : 'th:text']: `\${${variable}}`,
-      dangerouslySetInnerHTML: { __html: demoValue },
-    });
-  }
-
-  // eslint-disable-next-line react/no-danger-with-children
   return React.createElement(
     'span',
     {
-      [injectHtml ? 'th:utext' : 'th:text']: `\${${variable}}`,
+      'th:utext': injectHtml
+        ? `\${${variable}}`
+        : `\${#strings.escapeXml(${variable})}`,
     },
     demoValue
   );
