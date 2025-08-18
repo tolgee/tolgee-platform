@@ -5,6 +5,7 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.security.ProjectHolder
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.executeInNewTransaction
@@ -15,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired
 class LanguageStatsListenerTest : AbstractControllerTest() {
   @Autowired
   private lateinit var projectHolder: ProjectHolder
+
+  @Autowired
+  lateinit var languageStatsService: LanguageStatsService
 
   @Test
   fun `updates stats when added key`() {

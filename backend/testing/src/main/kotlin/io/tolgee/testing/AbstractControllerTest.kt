@@ -53,7 +53,7 @@ abstract class AbstractControllerTest :
         .andReturn().response.contentAsString
     val userAccount = userAccountService.findActive(userName) ?: throw NotFoundException()
     return DefaultAuthenticationResult(
-      mapper.readValue(response, HashMap::class.java)["accessToken"] as String,
+      objectMapper.readValue(response, HashMap::class.java)["accessToken"] as String,
       userAccount,
     )
   }
@@ -65,7 +65,7 @@ abstract class AbstractControllerTest :
     val request = LoginRequest()
     request.username = username
     request.password = password
-    val jsonRequest = mapper.writeValueAsString(request)
+    val jsonRequest = objectMapper.writeValueAsString(request)
     return mvc.perform(
       MockMvcRequestBuilders.post("/api/public/generatetoken")
         .content(jsonRequest)
@@ -79,7 +79,7 @@ abstract class AbstractControllerTest :
     type: JavaType?,
   ): T {
     return try {
-      mapper.readValue(result.response.contentAsString, type)
+      objectMapper.readValue(result.response.contentAsString, type)
     } catch (e: JsonProcessingException) {
       throw RuntimeException(e)
     } catch (e: UnsupportedEncodingException) {
@@ -92,7 +92,7 @@ abstract class AbstractControllerTest :
     clazz: Class<T>?,
   ): T {
     return try {
-      mapper.readValue(result.response.contentAsString, clazz)
+      objectMapper.readValue(result.response.contentAsString, clazz)
     } catch (e: JsonProcessingException) {
       throw RuntimeException(e)
     } catch (e: UnsupportedEncodingException) {
@@ -106,7 +106,7 @@ abstract class AbstractControllerTest :
     elementType: Class<E>?,
   ): C {
     return try {
-      mapper.readValue(
+      objectMapper.readValue(
         result.response.contentAsString,
         TypeFactory.defaultInstance().constructCollectionType(collectionType, elementType),
       )

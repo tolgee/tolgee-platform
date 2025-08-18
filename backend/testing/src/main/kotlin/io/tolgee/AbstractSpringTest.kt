@@ -2,12 +2,9 @@ package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.activity.ActivityService
 import io.tolgee.component.AllCachesProvider
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.component.SchedulingManager
 import io.tolgee.component.fileStorage.FileStorage
-import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -17,13 +14,9 @@ import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.repository.EmailVerificationRepository
-import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.OrganizationRepository
-import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.InitialPasswordManager
-import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.invitation.InvitationService
@@ -32,20 +25,15 @@ import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
 import io.tolgee.service.language.LanguageService
-import io.tolgee.service.machineTranslation.MtService
-import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditBucketService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.organization.OrganizationService
-import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.ApiKeyService
-import io.tolgee.service.security.MfaService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.security.UserAccountService
 import io.tolgee.service.security.UserPreferencesService
-import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.testing.AbstractTransactionalTest
 import org.junit.jupiter.api.BeforeEach
@@ -96,7 +84,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   open lateinit var tolgeeProperties: TolgeeProperties
 
   @Autowired
-  lateinit var mapper: ObjectMapper
+  lateinit var objectMapper: ObjectMapper
 
   @Autowired
   protected lateinit var initialPasswordManager: InitialPasswordManager
@@ -121,9 +109,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   protected lateinit var organizationRoleService: OrganizationRoleService
 
   @Autowired
-  open lateinit var organizationRoleRepository: OrganizationRoleRepository
-
-  @Autowired
   open lateinit var projectRepository: ProjectRepository
 
   @Autowired
@@ -131,9 +116,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var testDataService: TestDataService
-
-  @Autowired
-  lateinit var translationCommentService: TranslationCommentService
 
   @Autowired
   lateinit var tagService: TagService
@@ -165,26 +147,11 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   open lateinit var internalProperties: InternalProperties
 
-  @Autowired
-  lateinit var mtServiceConfigService: MtServiceConfigService
-
-  @set:Autowired
-  lateinit var emailVerificationService: EmailVerificationService
-
-  @set:Autowired
-  lateinit var emailVerificationRepository: EmailVerificationRepository
-
   @set:Autowired
   lateinit var applicationContext: ApplicationContext
 
   @Autowired
   open lateinit var mtCreditBucketService: MtCreditBucketService
-
-  @Autowired
-  open lateinit var mtService: MtService
-
-  @Autowired
-  lateinit var mtServiceManager: MtServiceManager
 
   @Autowired
   lateinit var userPreferencesService: UserPreferencesService
@@ -193,16 +160,10 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var transactionTemplate: TransactionTemplate
 
   @Autowired
-  lateinit var languageStatsService: LanguageStatsService
-
-  @Autowired
   lateinit var platformTransactionManager: PlatformTransactionManager
 
   @Autowired
   lateinit var patService: PatService
-
-  @Autowired
-  lateinit var mfaService: MfaService
 
   @Autowired
   lateinit var namespaceService: NamespaceService
@@ -215,12 +176,6 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var allCachesProvider: AllCachesProvider
-
-  @Autowired
-  lateinit var objectMapper: ObjectMapper
-
-  @Autowired
-  lateinit var schedulingManager: SchedulingManager
 
   @BeforeEach
   fun clearCaches() {

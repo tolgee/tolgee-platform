@@ -8,6 +8,8 @@ import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.fixtures.*
 import io.tolgee.model.UserAccount
 import io.tolgee.model.notifications.NotificationType.PASSWORD_CHANGED
+import io.tolgee.service.security.MfaService
+import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.NotificationTestUtil
@@ -36,6 +38,12 @@ class V2UserControllerTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var notificationUtil: NotificationTestUtil
+
+  @Autowired
+  lateinit var mfaService: MfaService
+
+  @Autowired
+  lateinit var translationCommentService: TranslationCommentService
 
   @BeforeEach
   fun init() {

@@ -1,6 +1,7 @@
 package io.tolgee.cache
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslationParams
 import io.tolgee.component.machineTranslation.providers.AwsMtValueProvider
@@ -35,6 +36,10 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractCacheTest : AbstractSpringTest() {
+
+  @Autowired
+  lateinit var mtServiceManager: MtServiceManager
+
   // Mocking this is necessary to avoid entering org creation logic
   // Otherwise, the org creation during initial user creation will cause everything to fail
   @Suppress("LateinitVarOverridesLateinitVar")

@@ -26,7 +26,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
   @Suppress("LateinitVarOverridesLateinitVar")
   @SpyBean
   @Autowired
-  override lateinit var mtService: MtService
+  lateinit var mtService: MtService
 
   lateinit var testData: BaseTestData
 
