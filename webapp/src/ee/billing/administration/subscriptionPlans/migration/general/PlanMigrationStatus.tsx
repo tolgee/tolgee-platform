@@ -1,11 +1,13 @@
 import { components } from 'tg.service/billingApiSchema.generated';
-import { Chip } from '@mui/material';
+import { Chip, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
+import { useDateFormatter } from 'tg.hooks/useLocale';
 
 type Status = components['schemas']['PlanMigrationHistoryModel']['status'];
 
 type Props = {
   status: Status;
+  date?: number;
 };
 
 const colors = {
@@ -17,9 +19,24 @@ const translates = {
   SCHEDULED: 'administration_plan_migration_status_scheduled',
 };
 
-export const PlanMigrationStatus = ({ status }: Props) => {
+export const PlanMigrationStatus = ({ status, date }: Props) => {
   const { t } = useTranslate();
-  return (
+  const formatDate = useDateFormatter();
+
+  const chip = (
     <Chip label={t(translates[status])} color={colors[status] || 'default'} />
+  );
+  return date ? (
+    <Tooltip
+      title={formatDate(date, {
+        timeZone: 'UTC',
+        dateStyle: 'short',
+        timeStyle: 'short',
+      })}
+    >
+      {chip}
+    </Tooltip>
+  ) : (
+    chip
   );
 };

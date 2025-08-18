@@ -166,7 +166,10 @@ export const AdministrationSelfHostedEePlanMigrationEdit = () => {
                 })}
               </TableCell>
               <TableCell>
-                <PlanMigrationStatus status={item.status} />
+                <PlanMigrationStatus
+                  status={item.status}
+                  date={item.finalizedAt}
+                />
               </TableCell>
             </TableRow>
           )}
