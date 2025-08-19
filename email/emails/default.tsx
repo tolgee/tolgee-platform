@@ -39,7 +39,7 @@ export default function DefaultEmail() {
             <LocalizedText
               keyName="email-greetings"
               defaultValue="Hello {recipientName}! 👋,"
-              demoParams={{ username: 'Bob' }}
+              demoParams={{ recipientName: 'Bob' }}
             />
           </If.Then>
           <If.Else>

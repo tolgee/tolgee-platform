@@ -48,7 +48,7 @@ export default function RegistrationConfirmEmail() {
               defaultValue="Welcome and thank you for creating an account!"
             />{' '}
           </If.Then>
-          <If.Else></If.Else>
+          <If.Else />
         </If>
         <LocalizedText
           keyName="registration-confirm-email-text"

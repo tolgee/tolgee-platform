@@ -17,6 +17,7 @@
 package io.tolgee.email
 
 import io.tolgee.configuration.tolgee.SmtpProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assert
 import jakarta.mail.internet.MimeMessage
 import jakarta.mail.internet.MimeMultipart
@@ -40,7 +41,7 @@ import java.util.*
 @SpringJUnitConfig(EmailService::class, EmailTemplateConfig::class)
 class EmailServiceTest {
   @MockBean
-  private lateinit var smtpProperties: SmtpProperties
+  private lateinit var tolgeeProperties: TolgeeProperties
 
   @MockBean
   private lateinit var mailSender: JavaMailSender
@@ -57,7 +58,9 @@ class EmailServiceTest {
   @BeforeEach
   fun beforeEach() {
     val sender = JavaMailSenderImpl()
-    whenever(smtpProperties.from).thenReturn("Tolgee Test <robomouse+test@tolgee.test>")
+    val smtp = SmtpProperties()
+    smtp.from = "Tolgee Test <robomouse+test@tolgee.test>"
+    whenever(tolgeeProperties.smtp).thenReturn(smtp)
     whenever(mailSender.createMimeMessage()).let {
       val msg = sender.createMimeMessage()
       it.thenReturn(msg)
