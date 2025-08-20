@@ -11,8 +11,8 @@ It provides a set of best practices, coding standards, and workflows to follow w
 Before you begin contributing to Tolgee, make sure you have:
 
 1. Read the [README.md](README.md) to understand what Tolgee is and its core features
-2. Followed the setup instructions in [DEVELOPMENT.md](DEVELOPMENT.md) to set up your development environment
-3. Familiarized yourself with the [CONTRIBUTING.md](CONTRIBUTING.md) guidelines
+2. Followed the setup instructions in [DEVELOPMENT.md](../DEVELOPMENT.md) to set up your development environment
+3. Familiarized yourself with the [CONTRIBUTING.md](../CONTRIBUTING.md) guidelines
 
 ## Project Structure
 
