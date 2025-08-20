@@ -88,7 +88,7 @@ export const TaskSearchSelectPopover: React.FC<Props> = ({
     filterState: TASK_ACTIVE_STATES,
     size: 20,
     sort: ['name'],
-  } as const satisfies operations['getTasks_1']['parameters']['query'];
+  } as const satisfies operations['getTasks_2']['parameters']['query'];
 
   const usersLoadable = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/tasks',
