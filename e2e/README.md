@@ -12,7 +12,7 @@ To just run it, you can execute the runE2e Gradle task. This command runs a comp
 
 ## Step-by-step run
 
-1. Prepare the environment by the [development guide](DEVELOPMENT.md)
+1. Prepare the environment by the [development guide](../DEVELOPMENT.md)
 2. Install dependencies
    ```shell
    cd e2e && npm i
