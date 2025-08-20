@@ -63,7 +63,7 @@ tolgee:
 ```
 
 You can check `application-e2e.yaml` for further inspiration.
-To learn more about externalized configuration in Spring boot, read [the docs](https://docs.spring.io/spring-boot/docs/2.1.8.RELEASE/reference/html/boot-features-external-config.html).
+To learn more about externalized configuration in Spring boot, read [the docs](https://docs.spring.io/spring-boot/3.4/reference/features/external-config.html).
 
 Since we set the active profile to `dev`, Spring uses the `application-dev.yaml` configuration file.
 
