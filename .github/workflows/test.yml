@@ -96,6 +96,31 @@ jobs:
           fail-on-error: false
           reporter: java-junit
 
+      - name: Setup Node
+        if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Convert JUnit to CTRF
+        if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        continue-on-error: true
+        run: npx --yes junit-to-ctrf "**/build/test-results/**/TEST-*.xml" --output "ctrf/ctrf-report.json"
+
+      - name: Flaky tests report (CTRF)
+        if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        uses: ctrf-io/github-test-reporter@v1
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          title: CTRF Test report for ${{ matrix.command }}
+          report-path: |
+            ctrf/ctrf-report.json
+          github-report: true
+          flaky-report: true
+          flaky-rate-report: true
+
   e2e:
     needs: [frontend-build, backend-build, e2e-install-deps]
     runs-on: ubuntu-24.04
