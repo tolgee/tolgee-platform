@@ -1,3 +1,11 @@
+## [3.127.4](https://github.com/tolgee/tolgee-platform/compare/v3.127.3...v3.127.4) (2025-08-21)
+
+
+### Bug Fixes
+
+* change base for UnsupportedXliffVersionException to avoid 500 ([#3199](https://github.com/tolgee/tolgee-platform/issues/3199)) ([af41cc2](https://github.com/tolgee/tolgee-platform/commit/af41cc2b7dc7ee49f2878702d691439c67d9bbe0))
+* increase max part count - allow uploading more files in single request ([#3214](https://github.com/tolgee/tolgee-platform/issues/3214)) ([091b809](https://github.com/tolgee/tolgee-platform/commit/091b8090b131f79ed12e8cf1d11b3e79780fd5b0))
+
 ## [3.127.3](https://github.com/tolgee/tolgee-platform/compare/v3.127.2...v3.127.3) (2025-08-15)
 
 
