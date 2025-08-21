@@ -47,6 +47,8 @@ server:
   error:
     include-exception: false
     include-stacktrace: never
+  tomcat:
+    max-part-count: 500
 sentry:
   dsn: ${tolgee.sentry.server-dsn:}
   traces-sample-rate: ${tolgee.sentry.traces-sample-rate:}
