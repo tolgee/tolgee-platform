@@ -195,7 +195,7 @@ class ExceptionHandlers : Logging {
   @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
   fun handleMediaTypeNotSupported(ex: HttpMediaTypeNotSupportedException): ResponseEntity<ErrorResponseBody> {
     return ResponseEntity(
-      ErrorResponseBody(Message.UNSUPPORTED_MEDIA_TYPE.code, listOf(ex.contentType)),
+      ErrorResponseBody(Message.UNSUPPORTED_MEDIA_TYPE.code, listOf(ex.contentType?.toString())),
       HttpStatus.UNSUPPORTED_MEDIA_TYPE,
     )
   }
