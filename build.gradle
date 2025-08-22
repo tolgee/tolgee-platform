@@ -94,6 +94,10 @@ project(':server-app').afterEvaluate {
     task startDbChangelogContainer {
         doLast {
             exec {
+                ignoreExitValue = true
+                commandLine "docker", "rm", "--force", "--volumes", dbSchemaContainerName
+            }
+            exec {
                 commandLine "docker", "run", "-e", "POSTGRES_PASSWORD=postgres", "-d", "-p55538:5432", "--name", dbSchemaContainerName, "postgres:13"
             }
             Thread.sleep(5000)

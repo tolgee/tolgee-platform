@@ -40,6 +40,8 @@ declare namespace DataCy {
         "administration-cloud-plan-field-type" |
         "administration-cloud-plan-field-type-item" |
         "administration-cloud-plans-item" |
+        "administration-cloud-plans-item-archive" |
+        "administration-cloud-plans-item-archived-badge" |
         "administration-cloud-plans-item-delete" |
         "administration-cloud-plans-item-edit" |
         "administration-cloud-plans-item-public-badge" |
@@ -52,6 +54,7 @@ declare namespace DataCy {
         "administration-ee-license-release-key-button" |
         "administration-ee-plan-cancel-button" |
         "administration-ee-plans-item" |
+        "administration-ee-plans-item-archive" |
         "administration-ee-plans-item-delete" |
         "administration-ee-plans-item-edit" |
         "administration-ee-plans-item-public-badge" |
@@ -65,6 +68,7 @@ declare namespace DataCy {
         "administration-organizations-list-item" |
         "administration-organizations-projects-button" |
         "administration-organizations-settings-button" |
+        "administration-plan-field-archived" |
         "administration-plan-field-feature" |
         "administration-plan-field-name" |
         "administration-plan-field-non-commercial" |

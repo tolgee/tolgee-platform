@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSetter
 import io.tolgee.constants.Feature
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
+import java.util.Date
 
 @Suppress("unused")
 @Relation(collectionRelation = "plans", itemRelation = "plan")
@@ -21,6 +22,7 @@ open class SelfHostedEePlanModel(
   val free: Boolean,
   val nonCommercial: Boolean,
   val isPayAsYouGo: Boolean,
+  val archivedAt: Date? = null,
 ) : RepresentationModel<SelfHostedEePlanModel>() {
   /**
    * We need to provide this setter so unrecognized features are ignored in situation

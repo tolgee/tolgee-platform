@@ -24,6 +24,9 @@ export interface paths {
     put: operations["updatePlan_1"];
     delete: operations["deletePlan_1"];
   };
+  "/v2/administration/billing/cloud-plans/{planId}/archive": {
+    put: operations["archivePlan_1"];
+  };
   "/v2/administration/billing/cloud-plans/{planId}/organizations": {
     get: operations["getPlanOrganizations_1"];
   };
@@ -45,6 +48,9 @@ export interface paths {
     get: operations["getPlan"];
     put: operations["updatePlan"];
     delete: operations["deletePlan"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/{planId}/archive": {
+    put: operations["archivePlan"];
   };
   "/v2/administration/billing/self-hosted-ee-plans/{planId}/organizations": {
     get: operations["getPlanOrganizations"];
@@ -212,6 +218,8 @@ export interface paths {
 export interface components {
   schemas: {
     AdministrationCloudPlanModel: {
+      /** Format: date-time */
+      archivedAt?: string;
       canEditPrices: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
@@ -252,6 +260,8 @@ export interface components {
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
       stripeProductId: string;
+      /** Format: int64 */
+      subscriptionCount: number;
       type: "PAY_AS_YOU_GO" | "FIXED";
     };
     AdministrationCloudSubscriptionModel: {
@@ -329,6 +339,8 @@ export interface components {
       ids: components["schemas"]["SubscriptionId"][];
     };
     CloudPlanModel: {
+      /** Format: date-time */
+      archivedAt?: string;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -364,6 +376,7 @@ export interface components {
       type: "PAY_AS_YOU_GO" | "FIXED";
     };
     CloudPlanRequest: {
+      archived?: boolean;
       /** Format: date-time */
       availableUntil?: string;
       enabledFeatures: (
@@ -1131,6 +1144,8 @@ export interface components {
       planId: number;
     };
     SelfHostedEePlanAdministrationModel: {
+      /** Format: date-time */
+      archivedAt?: string;
       canEditPrices: boolean;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
@@ -1171,8 +1186,12 @@ export interface components {
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
       stripeProductId: string;
+      /** Format: int64 */
+      subscriptionCount: number;
     };
     SelfHostedEePlanModel: {
+      /** Format: date-time */
+      archivedAt?: string;
       enabledFeatures: (
         | "GRANULAR_PERMISSIONS"
         | "PRIORITIZED_FEATURE_REQUESTS"
@@ -1207,6 +1226,7 @@ export interface components {
       public: boolean;
     };
     SelfHostedEePlanRequest: {
+      archived?: boolean;
       /** Format: date-time */
       availableUntil?: string;
       enabledFeatures: (
@@ -1750,6 +1770,53 @@ export interface operations {
       };
     };
   };
+  archivePlan_1: {
+    parameters: {
+      path: {
+        planId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AdministrationCloudPlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+    };
+  };
   getPlanOrganizations_1: {
     parameters: {
       path: {
@@ -2136,6 +2203,53 @@ export interface operations {
       404: {
         content: {
           "application/json": string;
+        };
+      };
+    };
+  };
+  archivePlan: {
+    parameters: {
+      path: {
+        planId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelfHostedEePlanAdministrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json":
+            | components["schemas"]["ErrorResponseTyped"]
+            | components["schemas"]["ErrorResponseBody"];
         };
       };
     };
