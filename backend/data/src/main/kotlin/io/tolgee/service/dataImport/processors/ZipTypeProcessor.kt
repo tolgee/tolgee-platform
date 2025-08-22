@@ -6,7 +6,6 @@ import java.io.InputStream
 import java.io.ByteArrayOutputStream
 import java.util.zip.ZipException
 import java.util.zip.ZipInputStream
-import kotlin.collections.set
 
 class ZipTypeProcessor(
   private val maxUncompressedBytes: Long,
