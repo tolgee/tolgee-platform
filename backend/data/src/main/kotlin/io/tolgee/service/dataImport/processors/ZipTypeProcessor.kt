@@ -82,7 +82,7 @@ class ZipTypeProcessor(
     }
   }
 
-  private fun String.replaceRootSlash() = this.replace("^/".toRegex(), "")
+  private fun String.replaceRootSlash() = removePrefix("/")
 
   class MaxSizeExceededException : Exception("Archive exceeds maximum allowed size")
 }
