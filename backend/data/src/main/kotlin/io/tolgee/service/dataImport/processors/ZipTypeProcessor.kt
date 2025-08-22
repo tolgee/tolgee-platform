@@ -4,6 +4,7 @@ import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
 import java.io.InputStream
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 import java.util.zip.ZipException
 import java.util.zip.ZipInputStream
 
@@ -76,6 +77,8 @@ class ZipTypeProcessor(
     try {
       return readFiles(file.data.inputStream())
     } catch (e: ZipException) {
+      throw ImportCannotParseFileException(file.name, e.message, e)
+    } catch (e: IOException) {
       throw ImportCannotParseFileException(file.name, e.message, e)
     } catch (e: MaxSizeExceededException) {
       throw ImportCannotParseFileException(file.name, e.message, e)
