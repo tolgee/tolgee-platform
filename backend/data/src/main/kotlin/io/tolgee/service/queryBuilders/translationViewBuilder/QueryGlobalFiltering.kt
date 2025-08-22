@@ -73,19 +73,19 @@ class QueryGlobalFiltering(
   }
 
   private fun filterHasNoScreenshot() {
-    if (params.filterHasNoScreenshot) {
+    if (params.filterHasNoScreenshot == true) {
       queryBase.whereConditions.add(cb.lt(queryBase.screenshotCountExpression, 1))
     }
   }
 
   private fun filterHasScreenshot() {
-    if (params.filterHasScreenshot) {
+    if (params.filterHasScreenshot == true) {
       queryBase.whereConditions.add(cb.gt(queryBase.screenshotCountExpression, 0))
     }
   }
 
   private fun filterTranslatedAny() {
-    if (params.filterTranslatedAny) {
+    if (params.filterTranslatedAny == true) {
       val predicates =
         queryBase.translationsTextFields
           .map { with(queryBase) { it.isNotNullOrBlank } }
@@ -95,7 +95,7 @@ class QueryGlobalFiltering(
   }
 
   private fun filterUntranslatedAny() {
-    if (params.filterUntranslatedAny) {
+    if (params.filterUntranslatedAny == true) {
       val predicates =
         queryBase.translationsTextFields
           .map { with(queryBase) { it.isNullOrBlank } }

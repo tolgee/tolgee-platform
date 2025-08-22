@@ -96,10 +96,8 @@ export const OrganizationPopover: React.FC<Props> = ({
   }, [open]);
 
   const query = {
-    params: {
-      filterCurrentUserOwner: Boolean(ownedOnly),
-      search: search || undefined,
-    },
+    filterCurrentUserOwner: Boolean(ownedOnly),
+    search: search || undefined,
     size: 20,
     sort: ['name'],
   };

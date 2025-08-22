@@ -41,10 +41,10 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
       "Selects only keys for which the translation is missing in any returned language. " +
         "It only filters for translations included in returned languages.",
   )
-  var filterUntranslatedAny: Boolean = false
+  var filterUntranslatedAny: Boolean? = false
 
   @field:Parameter(description = "Selects only keys, where translation is provided in any language")
-  var filterTranslatedAny: Boolean = false
+  var filterTranslatedAny: Boolean? = false
 
   @field:Parameter(
     description =
@@ -67,10 +67,10 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
   var filterAutoTranslatedInLang: List<String>? = null
 
   @field:Parameter(description = "Selects only keys with screenshots")
-  var filterHasScreenshot: Boolean = false
+  var filterHasScreenshot: Boolean? = false
 
   @field:Parameter(description = "Selects only keys without screenshots")
-  var filterHasNoScreenshot: Boolean = false
+  var filterHasNoScreenshot: Boolean? = false
 
   @field:Parameter(
     description = """Selects only keys with provided namespaces. 

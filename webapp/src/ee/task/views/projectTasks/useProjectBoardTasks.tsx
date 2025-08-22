@@ -1,7 +1,7 @@
 import { components, operations } from 'tg.service/apiSchema.generated';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 
-type QueryParameters = operations['getTasks_1']['parameters']['query'];
+type QueryParameters = operations['getTasks_2']['parameters']['query'];
 type TaskModel = components['schemas']['TaskModel'];
 
 type Props = {

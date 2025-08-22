@@ -6,7 +6,7 @@ import { TasksBoard } from 'tg.ee.module/task/components/TasksBoard';
 import { useProjectBoardTasks } from './useProjectBoardTasks';
 
 type TaskModel = components['schemas']['TaskModel'];
-type QueryParameters = operations['getTasks_1']['parameters']['query'];
+type QueryParameters = operations['getTasks_2']['parameters']['query'];
 
 type Props = {
   showAll: boolean;

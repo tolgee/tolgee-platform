@@ -24,7 +24,7 @@ export const handlebarsTooltip = (
 
       let variable: PromptVariableDto | undefined = {
         name: '',
-        props: variablesRef.current,
+        props: variablesRef.current ?? undefined,
         type: 'OBJECT',
       };
       path.forEach(
