@@ -14,18 +14,28 @@ const colors = {
   COMPLETED: 'success',
 };
 
-const translates = {
-  COMPLETED: 'administration_plan_migration_status_completed',
-  SCHEDULED: 'administration_plan_migration_status_scheduled',
-};
-
 export const PlanMigrationStatus = ({ status, date }: Props) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
 
+  const getStatusLabel = (s: Status): string => {
+    switch (s) {
+      case 'COMPLETED':
+        return t('administration_plan_migration_status_completed');
+      case 'SCHEDULED':
+        return t('administration_plan_migration_status_scheduled');
+      default:
+        return String(s);
+    }
+  };
+
   const chip = (
-    <Chip label={t(translates[status])} color={colors[status] || 'default'} />
+    <Chip
+      label={getStatusLabel(status)}
+      color={(colors as any)[status] || 'default'}
+    />
   );
+
   return date ? (
     <Tooltip
       title={formatDate(date, {
