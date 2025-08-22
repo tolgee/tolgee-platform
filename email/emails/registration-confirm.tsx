@@ -21,6 +21,7 @@ import ClassicLayout from '../components/layouts/ClassicLayout';
 import TolgeeLink from '../components/atoms/TolgeeLink';
 import TolgeeButton from '../components/atoms/TolgeeButton';
 import LocalizedText from '../components/LocalizedText';
+import If from '../components/If';
 
 export default function RegistrationConfirmEmail() {
   return (
@@ -40,9 +41,18 @@ export default function RegistrationConfirmEmail() {
         />
       </Text>
       <Text>
+        <If condition="${isSignup}">
+          <If.Then>
+            <LocalizedText
+              keyName="registration-welcome-text"
+              defaultValue="Welcome and thank you for creating an account!"
+            />{' '}
+          </If.Then>
+          <If.Else />
+        </If>
         <LocalizedText
-          keyName="registration-welcome-text"
-          defaultValue="Welcome and thank you for creating an account! To start using Tolgee, you need to confirm your email."
+          keyName="registration-confirm-email-text"
+          defaultValue="To start using Tolgee, you need to confirm your email."
         />
       </Text>
       <Section className="text-center my-[24px]">
