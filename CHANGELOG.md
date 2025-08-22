@@ -1,3 +1,10 @@
+# [3.128.0](https://github.com/tolgee/tolgee-platform/compare/v3.127.5...v3.128.0) (2025-08-22)
+
+
+### Features
+
+* administration plans UI improvements ([#3152](https://github.com/tolgee/tolgee-platform/issues/3152)) ([34608ee](https://github.com/tolgee/tolgee-platform/commit/34608eeedaff52d387d8e3c6ff3005c8ddfc7059))
+
 ## [3.127.5](https://github.com/tolgee/tolgee-platform/compare/v3.127.4...v3.127.5) (2025-08-22)
 
 
