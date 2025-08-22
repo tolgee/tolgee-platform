@@ -1792,33 +1792,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -2229,33 +2221,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };

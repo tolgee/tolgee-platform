@@ -37,8 +37,6 @@ export const SelfHostedEePlanEditForm: FC<EditSelfHostedEePlanFormProps> = ({
 
   const planData = getSelfHostedPlanInitialValues(planLoadable.data, true);
 
-  const initialData = getSelfHostedPlanInitialValues(planData);
-
   const onSubmit: React.ComponentProps<
     typeof SelfHostedEePlanForm
   >['onSubmit'] = (values) => {
@@ -71,7 +69,7 @@ export const SelfHostedEePlanEditForm: FC<EditSelfHostedEePlanFormProps> = ({
   return (
     <SelfHostedEePlanForm
       loading={false}
-      initialData={initialData}
+      initialData={planData}
       isUpdate={true}
       onSubmit={onSubmit}
       canEditPrices={planData.canEditPrices}
