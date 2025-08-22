@@ -1,3 +1,10 @@
+## [3.127.5](https://github.com/tolgee/tolgee-platform/compare/v3.127.4...v3.127.5) (2025-08-22)
+
+
+### Bug Fixes
+
+* api schemas after dependencies update ([#3212](https://github.com/tolgee/tolgee-platform/issues/3212)) ([ac1842b](https://github.com/tolgee/tolgee-platform/commit/ac1842b296db71aa350048eec6044677f719d364))
+
 ## [3.127.4](https://github.com/tolgee/tolgee-platform/compare/v3.127.3...v3.127.4) (2025-08-21)
 
 
