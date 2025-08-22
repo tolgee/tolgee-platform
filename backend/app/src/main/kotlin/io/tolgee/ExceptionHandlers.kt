@@ -26,6 +26,7 @@ import org.springframework.transaction.TransactionSystemException
 import org.springframework.validation.BindException
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
+import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingServletRequestParameterException
@@ -189,6 +190,14 @@ class ExceptionHandlers : Logging {
   fun handleNotFound(ex: NotFoundException): ResponseEntity<ErrorResponseBody> {
     logger.debug(ex.message, ex)
     return ResponseEntity(ErrorResponseBody(ex.msg.code, null), HttpStatus.NOT_FOUND)
+  }
+
+  @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
+  fun handleMediaTypeNotSupported(ex: HttpMediaTypeNotSupportedException): ResponseEntity<ErrorResponseBody> {
+    return ResponseEntity(
+      ErrorResponseBody(Message.UNSUPPORTED_MEDIA_TYPE.code, listOf(ex.contentType)),
+      HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+    )
   }
 
   @ExceptionHandler(MaxUploadSizeExceededException::class)
