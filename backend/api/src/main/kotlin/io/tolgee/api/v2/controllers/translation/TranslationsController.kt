@@ -15,6 +15,7 @@ import io.tolgee.activity.ActivityService
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
+import io.tolgee.component.ProjectLastModifiedManager
 import io.tolgee.component.ProjectTranslationLastModifiedManager
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.TranslationHistoryView
@@ -106,6 +107,7 @@ class TranslationsController(
   private val createOrUpdateTranslationsFacade: CreateOrUpdateTranslationsFacade,
   private val taskService: ITaskService,
   private val translationSuggestionService: TranslationSuggestionService,
+  private val projectLastModifiedManager: ProjectLastModifiedManager,
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(
@@ -162,17 +164,11 @@ When null, resulting file will be a flat key-value object.
     filterTag: List<String>? = null,
     request: WebRequest,
   ): ResponseEntity<Map<String, Any>>? {
-    val lastModified: Long = projectTranslationLastModifiedManager.getLastModified(projectHolder.project.id)
+    return projectLastModifiedManager.onlyWhenProjectDataChanged(request) {
+      val permittedTags =
+        securityService
+          .filterViewPermissionByTag(projectId = projectHolder.project.id, languageTags = languages)
 
-    if (request.checkNotModified(lastModified)) {
-      return null
-    }
-
-    val permittedTags =
-      securityService
-        .filterViewPermissionByTag(projectId = projectHolder.project.id, languageTags = languages)
-
-    val response =
       translationService.getTranslations(
         languageTags = permittedTags,
         namespace = ns,
@@ -180,14 +176,7 @@ When null, resulting file will be a flat key-value object.
         structureDelimiter = request.getStructureDelimiter(),
         filterTag = filterTag,
       )
-
-    return ResponseEntity
-      .ok()
-      .lastModified(lastModified)
-      .cacheControl(CacheControl.maxAge(0, TimeUnit.SECONDS))
-      .body(
-        response,
-      )
+    }
   }
 
   @PutMapping("")

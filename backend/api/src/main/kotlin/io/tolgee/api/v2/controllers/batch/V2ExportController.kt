@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.batch
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.component.ProjectLastModifiedManager
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.exceptions.BadRequestException
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.InputStream
 import java.io.OutputStream
@@ -46,30 +48,76 @@ class V2ExportController(
   private val languageService: LanguageService,
   private val authenticationFacade: AuthenticationFacade,
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
+  private val projectLastModifiedManager: ProjectLastModifiedManager,
 ) {
   @GetMapping(value = [""])
-  @Operation(summary = "Export data")
+  @Operation(
+    summary = "Export data",
+    description = """
+      Exports project data in various formats (JSON, properties, YAML, etc.).
+      
+      ## HTTP Conditional Requests Support
+      
+      This endpoint supports HTTP conditional requests using the If-Modified-Since header:
+      
+      - **If-Modified-Since header provided**: The server checks if the project data has been modified since the specified date
+      - **Data not modified**: Returns HTTP 304 Not Modified with empty body
+      - **Data modified or no header**: Returns HTTP 200 OK with the exported data and Last-Modified header
+      
+      The Last-Modified header in the response contains the timestamp of the last project modification, 
+      which can be used for subsequent conditional requests to avoid unnecessary data transfer when the 
+      project hasn't changed.
+      
+      Cache-Control header is set to max-age=0 to ensure validation on each request.
+    """
+  )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @ExportApiResponse
   fun exportData(
     @ParameterObject params: ExportParams,
-  ): ResponseEntity<StreamingResponseBody> {
-    params.languages =
-      languageService
-        .getLanguagesForExport(params.languages, projectHolder.project.id, authenticationFacade.authenticatedUser.id)
-        .toList()
-        .map { language -> language.tag }
-        .toSet()
-    val exported = exportService.export(projectHolder.project.id, params)
-    checkExportNotEmpty(exported)
-    return getExportResponse(params, exported)
+    request: WebRequest
+  ): ResponseEntity<StreamingResponseBody>? {
+    return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
+      params.languages =
+        languageService
+          .getLanguagesForExport(params.languages, projectHolder.project.id, authenticationFacade.authenticatedUser.id)
+          .toList()
+          .map { language -> language.tag }
+          .toSet()
+      val exported = exportService.export(projectHolder.project.id, params)
+      checkExportNotEmpty(exported)
+      val responseEntity = getExportResponse(params, exported)
+      headersBuilder.headers(responseEntity.headers)
+      responseEntity.body
+    }
   }
 
   @PostMapping(value = [""])
   @Operation(
     summary = "Export data (post)",
-    description = """Exports data (post). Useful when exceeding allowed URL size.""",
+    description = """
+      Exports project data in various formats (JSON, properties, YAML, etc.). 
+      Useful when exceeding allowed URL size with GET requests.
+      
+      ## HTTP Conditional Requests Support
+      
+      This endpoint supports HTTP conditional requests using the If-Modified-Since header:
+      
+      - **If-Modified-Since header provided**: The server checks if the project data has been modified since the specified date
+      - **Data not modified**: Returns HTTP 412 Precondition Failed with empty body (as per HTTP specification for POST requests)
+      - **Data modified or no header**: Returns HTTP 200 OK with the exported data and Last-Modified header
+      
+      Note: Unlike GET requests which return 304 Not Modified, POST requests return 412 Precondition Failed 
+      when the If-Modified-Since condition is not met, as POST is considered a modifying method according 
+      to HTTP specifications.
+      
+      The Last-Modified header in the response contains the timestamp of the last project modification, 
+      which can be used for subsequent conditional requests to avoid unnecessary data transfer when the 
+      project hasn't changed.
+      
+      Cache-Control header is set to max-age=0 to ensure validation on each request.
+    """,
   )
   @ReadOnlyOperation
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
@@ -77,8 +125,9 @@ class V2ExportController(
   @ExportApiResponse
   fun exportPost(
     @RequestBody params: ExportParams,
-  ): ResponseEntity<StreamingResponseBody> {
-    return exportData(params)
+    request: WebRequest
+  ): ResponseEntity<StreamingResponseBody>? {
+    return exportData(params, request)
   }
 
   private fun getZipHeaders(projectName: String): HttpHeaders {

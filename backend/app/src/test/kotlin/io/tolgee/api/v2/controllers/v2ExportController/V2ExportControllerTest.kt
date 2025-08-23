@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.v2ExportController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -17,14 +17,15 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.retry
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.enums.Scope
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.addDays
 import io.tolgee.util.addSeconds
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.assertj.core.api.AbstractIntegerAssert
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -120,9 +121,9 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       response.andPrettyPrint.andAssertThatJson {
         node("Z key").isEqualTo("A translation")
       }
-      assertThat(response.andReturn().response.getHeaderValue("content-type"))
+      Assertions.assertThat(response.andReturn().response.getHeaderValue("content-type"))
         .isEqualTo("application/json")
-      assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
+      Assertions.assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
         .isEqualTo("""attachment; filename="en.json"""")
     }
   }
@@ -139,9 +140,9 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
           .andDo { obj: MvcResult -> obj.getAsyncResult(30000) }
 
-      assertThat(response.andReturn().response.getHeaderValue("content-type"))
+      Assertions.assertThat(response.andReturn().response.getHeaderValue("content-type"))
         .isEqualTo("application/x-xliff+xml")
-      assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
+      Assertions.assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
         .isEqualTo("""attachment; filename="en.xliff"""")
     }
   }
@@ -173,7 +174,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           }
         }
 
-      assertThat(time).isLessThan(2000)
+      Assertions.assertThat(time).isLessThan(2000)
     }
   }
 
@@ -352,6 +353,62 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun prepareUserAndProject(testData: TranslationsTestData) {
     userAccount = testData.user
     projectSupplier = { testData.project }
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `returns 304 for POST export when data not modified`() {
+    retryingOnCommonIssues {
+        initBaseData()
+
+      // First request - should return data
+      val firstResponse = performProjectAuthGet("export?languages=en&zip=false")
+        .andIsOk
+        .andReturn()
+
+      val lastModifiedHeader = firstResponse.response.getHeaderValue("Last-Modified") as String
+      Assertions.assertThat(lastModifiedHeader).isNotNull()
+
+      // Second request with If-Modified-Since header - should return 304
+      val headers = org.springframework.http.HttpHeaders()
+      headers["If-Modified-Since"] = lastModifiedHeader
+      headers["x-api-key"] = apiKeyService.create(userAccount!!, scopes = setOf(Scope.TRANSLATIONS_VIEW), project).key
+      val secondResponse = performGet("/v2/projects/${project.id}/export?languages=en&zip=false", headers).andReturn()
+
+      Assertions.assertThat(secondResponse.response.status).isEqualTo(304)
+      Assertions.assertThat(secondResponse.response.contentAsByteArray).isEmpty()
+      Assertions.assertThat(secondResponse.response.contentAsString).isEmpty()
+    }
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `returns 412 for POST export when data not modified`() {
+    retryingOnCommonIssues {
+        initBaseData()
+
+      // First request - should return data
+      val firstResponse = performProjectAuthPost("export", mapOf("languages" to setOf("en"), "zip" to false))
+        .andIsOk
+        .andReturn()
+
+      val lastModifiedHeader = firstResponse.response.getHeaderValue("Last-Modified") as String
+      Assertions.assertThat(lastModifiedHeader).isNotNull()
+
+      // Second request with If-Modified-Since header - should return 304
+      val headers = org.springframework.http.HttpHeaders()
+      headers["If-Modified-Since"] = lastModifiedHeader
+      headers["x-api-key"] = apiKeyService.create(userAccount!!, scopes = setOf(Scope.TRANSLATIONS_VIEW), project).key
+      val secondResponse = performPost("/v2/projects/${project.id}/export", mapOf("languages" to setOf("en"), "zip" to false), headers).andReturn()
+
+      // Since this is POST request Spring returns 412 as it is according to the spec for modifying methods.
+      // In our case, we are using POST only since we cannot provide all the params in the query.
+      Assertions.assertThat(secondResponse.response.status).isEqualTo(412)
+      Assertions.assertThat(secondResponse.response.contentAsByteArray).isEmpty()
+      Assertions.assertThat(secondResponse.response.contentAsString).isEmpty()
+    }
   }
 
   private fun retryingOnCommonIssues(fn: () -> Unit) {

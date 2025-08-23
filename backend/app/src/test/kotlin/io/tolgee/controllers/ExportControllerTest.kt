@@ -2,31 +2,46 @@ package io.tolgee.controllers
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
+import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotModified
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Language
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assert
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpHeaders
 import org.springframework.test.web.servlet.MvcResult
+import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
 import java.util.function.Consumer
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 class ExportControllerTest : ProjectAuthControllerTest() {
+  private lateinit var testData: TranslationsTestData
+
+  @BeforeEach
+  fun setup() {
+    testData = TranslationsTestData()
+    testDataService.saveTestData(testData.root)
+    projectSupplier = { testData.project }
+    userAccount = testData.user
+  }
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
   fun exportZipJson() {
-    val base = dbPopulator.populate()
-    commitTransaction()
-    projectSupplier = { base.project }
-    userAccount = base.userAccount
     val mvcResult =
       performProjectAuthGet("export/jsonZip")
         .andIsOk
@@ -46,9 +61,6 @@ class ExportControllerTest : ProjectAuthControllerTest() {
   @Transactional
   @ProjectApiKeyAuthTestMethod
   fun exportZipJsonWithApiKey() {
-    val base = dbPopulator.populate()
-    commitTransaction()
-    projectSupplier = { base.project }
     val mvcResult =
       performProjectAuthGet("export/jsonZip")
         .andExpect(MockMvcResultMatchers.status().isOk)
@@ -82,6 +94,52 @@ class ExportControllerTest : ProjectAuthControllerTest() {
         .andReturn()
     val fileSizes = parseZip(result.response.contentAsByteArray)
     Assertions.assertThat(fileSizes).containsOnlyKeys("en.json")
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns export with last modified header`() {
+    val now = Date()
+    setForcedDate(now)
+    val lastModified = performAndGetLastModified()
+    assertEqualsDate(lastModified, now)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns 304 when export not modified`() {
+    val now = Date()
+    setForcedDate(now)
+    val lastModified = performAndGetLastModified()
+    performWithIfModifiedSince(lastModified).andIsNotModified
+  }
+
+
+  @AfterEach
+  fun clearDate() {
+    clearForcedDate()
+    testDataService.cleanTestData(testData.root)
+  }
+
+  private fun performWithIfModifiedSince(lastModified: String?): ResultActions {
+    val headers = HttpHeaders()
+    headers["x-api-key"] = apiKeyService.create(userAccount!!, scopes = setOf(Scope.TRANSLATIONS_VIEW), project).key
+    headers["If-Modified-Since"] = lastModified
+    return performGet("/api/project/export/jsonZip", headers)
+  }
+
+  private fun performAndGetLastModified(): String? =
+    performProjectAuthGet("export/jsonZip")
+      .andIsOk.lastModified()
+
+  private fun ResultActions.lastModified() = this.andReturn().response.getHeader("Last-Modified")
+
+  private fun assertEqualsDate(
+    lastModified: String?,
+    now: Date,
+  ) {
+    val zdt: ZonedDateTime = ZonedDateTime.parse(lastModified, DateTimeFormatter.RFC_1123_DATE_TIME)
+    (zdt.toInstant().toEpochMilli() / 1000).assert.isEqualTo(now.time / 1000)
   }
 
   private fun parseZip(responseContent: ByteArray): Map<String, Long> {

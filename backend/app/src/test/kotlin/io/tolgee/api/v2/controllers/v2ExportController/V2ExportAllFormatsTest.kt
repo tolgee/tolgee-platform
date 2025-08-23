@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.v2ExportController
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
@@ -7,7 +7,7 @@ import io.tolgee.fixtures.ignoreTestOnSpringBug
 import io.tolgee.formats.ExportFormat
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
-import io.tolgee.testing.assertions.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
@@ -54,24 +54,24 @@ class V2ExportAllFormatsTest : ProjectAuthControllerTest("/v2/projects/") {
 
     // Verify we get some content back
     val responseContent = mvcResult.response.contentAsByteArray
-    assertThat(responseContent).isNotEmpty()
+    Assertions.assertThat(responseContent).isNotEmpty()
 
     // For ZIP responses, verify we can parse the content
     if (mvcResult.response.contentType?.contains("zip") == true) {
       val parsedFiles = parseZip(responseContent)
-      assertThat(parsedFiles).isNotEmpty()
+      Assertions.assertThat(parsedFiles).isNotEmpty()
 
       // Verify we have files for both the default namespace and ns-1
       val fileNames = parsedFiles.keys
-      assertThat(fileNames).hasSizeGreaterThan(0)
+      Assertions.assertThat(fileNames).hasSizeGreaterThan(0)
 
       // For formats that support namespaces, verify namespace structure
       if (!format.multiLanguage) {
-        assertThat(fileNames.any { it.contains("ns-1") || it.contains("en.") }).isTrue()
+        Assertions.assertThat(fileNames.any { it.contains("ns-1") || it.contains("en.") }).isTrue()
       }
     } else {
       // For single file responses, verify we have content
-      assertThat(responseContent.size).isGreaterThan(0)
+      Assertions.assertThat(responseContent.size).isGreaterThan(0)
     }
   }
 
