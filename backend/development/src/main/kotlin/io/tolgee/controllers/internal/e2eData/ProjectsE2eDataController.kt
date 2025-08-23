@@ -1,6 +1,6 @@
 package io.tolgee.controllers.internal.e2eData
 
-import io.swagger.v3.oas.annotations.Hidden
+import io.tolgee.controllers.internal.InternalController
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.key.CreateKeyDto
@@ -25,13 +25,11 @@ import io.tolgee.util.executeInNewRepeatableTransaction
 import jakarta.persistence.EntityManager
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestParam
 
-@RestController
-@CrossOrigin(origins = ["*"])
-@Hidden
-@RequestMapping(value = ["internal/e2e-data/projects"])
-@Transactional
+@InternalController(["internal/e2e-data/projects"])
 class ProjectsE2eDataController(
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,

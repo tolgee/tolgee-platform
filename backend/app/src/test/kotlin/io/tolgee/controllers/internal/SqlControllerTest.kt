@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 @AutoConfigureMockMvc
 @ContextRecreatingTest
-@SpringBootTest(properties = ["tolgee.internal.controllerEnabled=true"])
+@SpringBootTest(properties = ["tolgee.internal.controller-enabled=true"])
 class SqlControllerTest : AbstractControllerTest(), Logging {
   @Suppress("RedundantModalityModifier")
   final inline fun <reified T> MvcResult.parseResponseTo(): T {
