@@ -55,11 +55,10 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     )
   }
 
-
+  // we need at least keys.view permission when using JWT
   @Test
   @ProjectJWTAuthTestMethod
-  // we need at least keys.view permission when using JWT
-  fun `forbidden with insufficient scopes on user with JWT`() {
+fun `forbidden with insufficient scopes on user with JWT`() {
     saveTestData()
     // This test should work with valid JWT but might fail due to insufficient permissions
     // for websocket access - this is intentionally designed to potentially fail
@@ -67,7 +66,6 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
       auth = WebsocketTestHelper.Auth(jwtToken = "invalid-jwt-token")
     )
   }
-
 
   @Test
   @ProjectApiKeyAuthTestMethod
@@ -104,11 +102,10 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     )
   }
 
-
+  /** for api key we need at least translations.view scope */
   @Test
   @ProjectApiKeyAuthTestMethod(scopes = []) // No scopes
-    /** for api key we need at least translations.view scope */
-  fun `forbidden with insufficient scopes on PAT`() {
+fun `forbidden with insufficient scopes on PAT`() {
     saveTestData()
     testItIsForbiddenWithAuth(
       auth = WebsocketTestHelper.Auth(apiKey = apiKey.key)
@@ -148,10 +145,10 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     )
   }
 
+  // we need at least keys.view permission when using PAT
   @Test
   @ProjectJWTAuthTestMethod
-  // we need at least keys.view permission when using PAT
-  fun `forbidden with insufficient scopes on user with PAT`() {
+fun `forbidden with insufficient scopes on user with PAT`() {
     saveTestData()
     // This test should fail with insufficient permissions - intentionally designed to fail
     testItIsForbiddenWithAuth(
@@ -171,7 +168,8 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
       { createKey() },
       {
         assertThatJson(it.poll()).node("data").isObject
-      })
+      }
+    )
   }
 
   fun testItIsForbiddenWithAuth(auth: WebsocketTestHelper.Auth) {

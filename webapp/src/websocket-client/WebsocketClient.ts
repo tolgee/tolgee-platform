@@ -96,7 +96,8 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
       options.onError?.();
     };
 
-    const headers: Record<string, string> | null = options.authentication.jwtToken
+    const headers: Record<string, string> | null = options.authentication
+      .jwtToken
       ? {
           jwtToken: options.authentication.jwtToken,
           Authorization: `Bearer ${options.authentication.jwtToken}`,

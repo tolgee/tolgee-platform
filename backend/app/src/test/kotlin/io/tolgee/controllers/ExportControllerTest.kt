@@ -38,6 +38,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
     projectSupplier = { testData.project }
     userAccount = testData.user
   }
+
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
@@ -113,7 +114,6 @@ class ExportControllerTest : ProjectAuthControllerTest() {
     val lastModified = performAndGetLastModified()
     performWithIfModifiedSince(lastModified).andIsNotModified
   }
-
 
   @AfterEach
   fun clearDate() {
