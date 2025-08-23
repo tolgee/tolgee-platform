@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.v2ExportController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -20,10 +20,10 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.addDays
 import io.tolgee.util.addSeconds
 import net.javacrumbs.jsonunit.assertj.assertThatJson
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,8 +34,8 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
@@ -53,7 +53,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   var namespacesTestData: NamespacesTestData? = null
   var languagePermissionsTestData: LanguagePermissionsTestData? = null
 
-  @MockBean
+  @MockitoBean
   @Autowired
   lateinit var postHog: PostHog
 
@@ -123,9 +123,9 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       response.andPrettyPrint.andAssertThatJson {
         node("Z key").isEqualTo("A translation")
       }
-      assertThat(response.andReturn().response.getHeaderValue("content-type"))
+      Assertions.assertThat(response.andReturn().response.getHeaderValue("content-type"))
         .isEqualTo("application/json")
-      assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
+      Assertions.assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
         .isEqualTo("""attachment; filename="en.json"""")
     }
   }
@@ -142,9 +142,9 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
           .andDo { obj: MvcResult -> obj.getAsyncResult(30000) }
 
-      assertThat(response.andReturn().response.getHeaderValue("content-type"))
+      Assertions.assertThat(response.andReturn().response.getHeaderValue("content-type"))
         .isEqualTo("application/x-xliff+xml")
-      assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
+      Assertions.assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
         .isEqualTo("""attachment; filename="en.xliff"""")
     }
   }
@@ -175,7 +175,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           }
         }
 
-      assertThat(time).isLessThan(2000)
+      Assertions.assertThat(time).isLessThan(2000)
     }
   }
 
