@@ -233,6 +233,16 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
           );
         },
       },
+      translationProtection: {
+        label(params) {
+          return (
+            <T
+              keyName="activity_entity_project.translation_protection"
+              params={params}
+            />
+          );
+        },
+      },
       baseLanguage: {
         type: 'project_language',
         label(params) {

@@ -11,6 +11,7 @@ import { ProjectSettingsGeneral } from './ProjectSettingsGeneral';
 import { ProjectSettingsAdvanced } from './ProjectSettingsAdvanced';
 import { useAddProjectSettingsTabs } from 'tg.ee';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
 
 export type ProjectSettingsTab = {
   value: string;
@@ -34,6 +35,7 @@ export const ProjectSettingsView = () => {
   const project = useProject();
   const { t } = useTranslate();
   const { satisfiesPermission } = useProjectPermissions();
+  const reportEvent = useReportEvent();
 
   let tabs = [
     {
@@ -97,6 +99,11 @@ export const ProjectSettingsView = () => {
                 component={Link}
                 to={tab.link}
                 data-cy={tab.dataCy}
+                onClick={() => {
+                  reportEvent('PROJECT_SETTINGS_TAB_CLICK', {
+                    value: tab.value,
+                  });
+                }}
               />
             ))}
         </StyledTabs>
