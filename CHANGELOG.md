@@ -1,3 +1,10 @@
+# [3.130.0](https://github.com/tolgee/tolgee-platform/compare/v3.129.0...v3.130.0) (2025-08-25)
+
+
+### Features
+
+* add export formats Apple SDK and Android SDK + integration steps for Android SDK ([#3186](https://github.com/tolgee/tolgee-platform/issues/3186)) ([775b4e2](https://github.com/tolgee/tolgee-platform/commit/775b4e2d596959c9f5881b7642bf352f36e126a9))
+
 # [3.129.0](https://github.com/tolgee/tolgee-platform/compare/v3.128.1...v3.129.0) (2025-08-25)
 
 
