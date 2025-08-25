@@ -132,5 +132,5 @@ class ContentDeliveryConfig(
 
   @ColumnDefault("false")
   @ActivityLoggedProp
-  override var escapeHtml: Boolean = false
+  override var escapeHtml: Boolean? = false
 }

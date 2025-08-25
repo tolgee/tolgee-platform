@@ -70,4 +70,14 @@ export const guides = [
     icon: getTechnologyImgComponent('unreal'),
     guide: React.lazy(() => import('./guides/Unreal.mdx')),
   },
+  {
+    name: 'Android Views',
+    icon: getTechnologyImgComponent('android'),
+    guide: React.lazy(() => import('./guides/AndroidViews.mdx')),
+  },
+  {
+    name: 'Android Jetpack',
+    icon: getTechnologyImgComponent('jetpackcompose'),
+    guide: React.lazy(() => import('./guides/AndroidJetpackCompose.mdx')),
+  },
 ] as Guide[];
