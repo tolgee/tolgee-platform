@@ -406,12 +406,15 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
       metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
+      /** @description If true, a new Stripe product will be created with name specified in [stripeProductName] and [stripeProductId] will be automatically populated with the ID of the newly created Stripe product. */
+      newStripeProduct: boolean;
       nonCommercial: boolean;
       /** Format: date-time */
       notAvailableBefore?: string;
       prices: components["schemas"]["PlanPricesRequest"];
       public: boolean;
       stripeProductId: string;
+      stripeProductName?: string;
       type: "PAY_AS_YOU_GO" | "FIXED";
       /** Format: date-time */
       usableUntil?: string;
@@ -1256,6 +1259,8 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
       isPayAsYouGo: boolean;
       name: string;
+      /** @description If true, a new Stripe product will be created with name specified in [stripeProductName] and [stripeProductId] will be automatically populated with the ID of the newly created Stripe product. */
+      newStripeProduct: boolean;
       nonCommercial: boolean;
       /** Format: date-time */
       notAvailableBefore?: string;
@@ -1263,6 +1268,7 @@ export interface components {
       prices: components["schemas"]["PlanPricesRequest"];
       public: boolean;
       stripeProductId?: string;
+      stripeProductName?: string;
       /** Format: date-time */
       usableUntil?: string;
     };
@@ -1786,33 +1792,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };
@@ -2223,33 +2221,25 @@ export interface operations {
       /** Bad Request */
       400: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Unauthorized */
       401: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Forbidden */
       403: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
       /** Not Found */
       404: {
         content: {
-          "application/json":
-            | components["schemas"]["ErrorResponseTyped"]
-            | components["schemas"]["ErrorResponseBody"];
+          "application/json": string;
         };
       };
     };

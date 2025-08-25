@@ -37,6 +37,7 @@ declare namespace DataCy {
         "administration-cloud-plan-field-price-per-thousand-keys" |
         "administration-cloud-plan-field-price-per-thousand-mt-credits" |
         "administration-cloud-plan-field-price-per-thousand-translations" |
+        "administration-cloud-plan-field-select-existing-stripe-product" |
         "administration-cloud-plan-field-type" |
         "administration-cloud-plan-field-type-item" |
         "administration-cloud-plans-item" |
@@ -77,6 +78,7 @@ declare namespace DataCy {
         "administration-plan-field-price-yearly" |
         "administration-plan-field-public" |
         "administration-plan-field-stripe-product" |
+        "administration-plan-field-stripe-product-name" |
         "administration-plan-selector" |
         "administration-subscriptions-active-self-hosted-ee-plan" |
         "administration-subscriptions-assign-plan-save-button" |

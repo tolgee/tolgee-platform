@@ -69,9 +69,7 @@ export const SelfHostedEePlanEditForm: FC<EditSelfHostedEePlanFormProps> = ({
   return (
     <SelfHostedEePlanForm
       loading={false}
-      initialData={{
-        ...planData,
-      }}
+      initialData={planData}
       isUpdate={true}
       onSubmit={onSubmit}
       canEditPrices={planData.canEditPrices}
