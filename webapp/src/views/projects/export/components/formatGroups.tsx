@@ -195,6 +195,12 @@ export const formatGroups: FormatGroup[] = [
         name: <T keyName="export-format-apple-xcstrings" />,
         format: 'APPLE_XCSTRINGS',
       },
+      {
+        id: 'apple_sdk',
+        extension: 'json',
+        name: <T keyName="export-format-apple-sdk" />,
+        format: 'APPLE_SDK',
+      },
     ],
   },
   {
@@ -205,6 +211,12 @@ export const formatGroups: FormatGroup[] = [
         extension: 'xml',
         name: <T keyName="export-format-android-xml" />,
         format: 'ANDROID_XML',
+      },
+      {
+        id: 'android_sdk',
+        extension: 'json',
+        name: <T keyName="export-format-android-sdk" />,
+        format: 'ANDROID_SDK',
       },
     ],
   },

@@ -1,0 +1,141 @@
+import { GoToDocsButton } from '../component/GoToDocsButton';
+
+<GoToDocsButton
+  href="https://tolgee.io/android-sdk/integrations/jetpackcompose/installation"
+  style={{ float: 'right' }}
+/>
+
+To read full documentation about Tolgee for Android Jetpack Compose, visit [docs](https://tolgee.io/android-sdk/integrations/jetpackcompose/installation).
+
+## Load static translations with Tolgee CLI
+
+For managing static translations, we recommend using [Tolgee CLI](https://github.com/tolgee/tolgee-cli).
+
+To install Tolgee CLI globally run:
+
+```sh
+npm install --global @tolgee/cli
+```
+
+Create a project-specific configuration file:
+
+```json
+// .tolgeerc
+{
+  "$schema": "https://docs.tolgee.io/cli-schema.json",
+  "apiUrl": "{{{apiUrl}}}",
+  "projectId": "{{{projectId}}}",
+  "format": "ANDROID_XML",
+  "push": {
+    "filesTemplate": "./src/main/res/values-{languageTag}/strings.xml",
+    "language": ["en", "cs", "fr", ...]
+  },
+  "pull": {
+    "path": ".",
+    "fileStructureTemplate": "./src/main/res/values-{languageTag}/strings.{extension}"
+  }
+}
+```
+
+Login with a project API key:
+
+```sh
+tolgee login "{{{apiKey}}}"
+```
+
+Pull/push translations:
+
+```sh
+tolgee pull
+# or
+tolgee push
+```
+
+## Add Dependency
+
+```toml
+# gradle/libs.versions.toml
+[libraries]
+tolgee = { group = "io.tolgee.mobile-kotlin-sdk", name = "compose", version.ref = "tolgee" }
+```
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation(libs.tolgee)
+}
+```
+
+## Add network security config
+
+Create a network security config file `network_security.xml` in your `res/xml` folder:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <domain-config>
+        <domain includeSubdomains="true">tolgee.io</domain>
+        <domain includeSubdomains="true">tolg.ee</domain>
+    </domain-config>
+</network-security-config>
+```
+
+Add network security config to your `AndroidManifest.xml`:
+
+```xml
+<application
+        android:networkSecurityConfig="@xml/network_security"> <!-- Add this line to your existing application tag -->
+</application>
+```
+
+## Setup CDN
+
+In Developer settings create a new CDN deployment for the project with the format set to `Android SDK` and use the URL in the next step.
+
+## Setup Project
+
+Initialize Tolgee in your Application class:
+
+```kotlin
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+
+        Tolgee.init {
+            contentDelivery {
+                url = "https://cdn.tolg.ee/your-cdn-url-prefix"
+                storage = TolgeeStorageProviderAndroid(this@MyApplication, BuildConfig.VERSION_CODE)
+            }
+        }
+    }
+}
+```
+
+## Use Tolgee!
+
+```kotlin
+@Composable
+fun SimpleText() {
+    // Use the stringResource extension function
+    Text(text = stringResource(R.string.welcome_message))
+}
+
+@Composable
+fun TextWithParameters(name: String) {
+    // Pass parameters to your translations
+    Text(text = stringResource(R.string.welcome_user, name))
+}
+
+@Composable
+fun PluralText(count: Int) {
+    // Handle plural forms
+    Text(text = pluralStringResource(R.plurals.item_count, count, count))
+}
+```
+
+or get access to the underlying Flow directly
+
+```kotlin
+// Get a translation with fallback to Android resources as a Flow
+val textFlow = tolgee.tFlow(context, R.string.string_key)
+```
