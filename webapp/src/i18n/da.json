@@ -278,6 +278,7 @@
   "administration_plan_migration_monthly_offset_days": "Antal dage for månedlige abonnementer",
   "administration_plan_migration_monthly_timing": "{days, plural, one {Månedligt abonnement: <b>{days} dag</b> før fornyelse} other {Månedligt abonnement: <b>{days} dage</b> før fornyelse}}",
   "administration_plan_migration_no_migrated_subscriptions": "Ingen abonnementer endnu",
+  "administration_plan_migration_not_found": "Planoverførsel ikke fundet",
   "administration_plan_migration_pending": "Inaktiv",
   "administration_plan_migration_run_configuration": "Tidskonfiguration",
   "administration_plan_migration_source_plan": "Kildeplan",

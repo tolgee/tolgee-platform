@@ -278,6 +278,7 @@
   "administration_plan_migration_monthly_offset_days": "Monthly subscriptions",
   "administration_plan_migration_monthly_timing": "{days, plural, one {Monthly subscription: <b>{days} day</b> before renewal} other {Monthly subscription: <b>{days} days</b> before renewal}}",
   "administration_plan_migration_no_migrated_subscriptions": "No subscriptions yet",
+  "administration_plan_migration_not_found": "Plan migration not found",
   "administration_plan_migration_pending": "Inactive",
   "administration_plan_migration_run_configuration": "Timing configuration",
   "administration_plan_migration_source_plan": "Source plan",

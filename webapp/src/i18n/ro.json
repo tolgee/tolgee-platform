@@ -278,6 +278,7 @@
   "administration_plan_migration_monthly_offset_days": "Număr de zile pentru abonamentele lunare",
   "administration_plan_migration_monthly_timing": "{days, plural, one {Abonament lunar: <b>{days} zi</b> înainte de reînnoire} few {Abonament lunar: <b>{days} zile</b> înainte de reînnoire} other {Abonament lunar: <b>{days} de zile</b> înainte de reînnoire}}",
   "administration_plan_migration_no_migrated_subscriptions": "Niciun abonament încă",
+  "administration_plan_migration_not_found": "Migrare de plan negăsită",
   "administration_plan_migration_pending": "Inactiv",
   "administration_plan_migration_run_configuration": "Configurație de temporizare",
   "administration_plan_migration_source_plan": "Plan sursă",

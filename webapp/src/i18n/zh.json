@@ -277,6 +277,7 @@
   "administration_plan_migration_monthly_offset_days": "月度订阅",
   "administration_plan_migration_monthly_timing": "{days, plural, other {月度订阅：<b>{days}</b> 天前续订} }",
   "administration_plan_migration_no_migrated_subscriptions": "暂无订阅",
+  "administration_plan_migration_not_found": "未找到 Plan 迁移",
   "administration_plan_migration_pending": "未激活",
   "administration_plan_migration_run_configuration": "定时配置",
   "administration_plan_migration_source_plan": "源计划",

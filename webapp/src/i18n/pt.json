@@ -277,6 +277,7 @@
   "administration_plan_migration_monthly_offset_days": "Número de dias para assinaturas mensais",
   "administration_plan_migration_monthly_timing": "{days, plural, one {Assinatura mensal: <b>{days} dia</b> antes da renovação} other {Assinatura mensal: <b>{days} dias</b> antes da renovação} }",
   "administration_plan_migration_no_migrated_subscriptions": "Nenhuma assinatura ainda",
+  "administration_plan_migration_not_found": "Migração de plano não encontrada",
   "administration_plan_migration_pending": "Inativo",
   "administration_plan_migration_run_configuration": "Configuração de tempo",
   "administration_plan_migration_source_plan": "Plano de origem",

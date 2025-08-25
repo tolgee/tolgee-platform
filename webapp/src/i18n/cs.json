@@ -278,6 +278,7 @@
   "administration_plan_migration_monthly_offset_days": "Počet dní pro měsíční předplatné",
   "administration_plan_migration_monthly_timing": "{days, plural, one {Měsíční předplatné: <b>{days} den</b> před obnovením} few {Měsíční předplatné: <b>{days} dny</b> před obnovením} other {Měsíční předplatné: <b>{days} dní</b> před obnovením} }",
   "administration_plan_migration_no_migrated_subscriptions": "Žádná předplatná zatím",
+  "administration_plan_migration_not_found": "Migrace plánu nenalezena",
   "administration_plan_migration_pending": "Neaktivní",
   "administration_plan_migration_run_configuration": "Nastavení časování",
   "administration_plan_migration_source_plan": "Zdrojový plán",

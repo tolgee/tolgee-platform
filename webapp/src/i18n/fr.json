@@ -277,6 +277,7 @@
   "administration_plan_migration_monthly_offset_days": "Nombre de jours pour les abonnements mensuels",
   "administration_plan_migration_monthly_timing": "{days, plural, one {Abonnement mensuela: <b># jour</b> avant le renouvellement} other {Abonnement mensuela: <b># jours</b> avant le renouvellement} }",
   "administration_plan_migration_no_migrated_subscriptions": "Aucun abonnement pour le moment",
+  "administration_plan_migration_not_found": "Migration du plan introuvable",
   "administration_plan_migration_pending": "Inactif",
   "administration_plan_migration_run_configuration": "Configuration du calendrier",
   "administration_plan_migration_source_plan": "Plan source",

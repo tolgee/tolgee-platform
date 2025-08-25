@@ -277,6 +277,7 @@
   "administration_plan_migration_monthly_offset_days": "Número de días para suscripciones mensuales",
   "administration_plan_migration_monthly_timing": "{days, plural, one {Suscripción mensual: {days} día antes de la renovación} other {} othe {Suscripción mensual: {days} días antes de la renovación}}",
   "administration_plan_migration_no_migrated_subscriptions": "Aún no hay suscripciones",
+  "administration_plan_migration_not_found": "Migración de plan no encontrada",
   "administration_plan_migration_pending": "Inactivo",
   "administration_plan_migration_run_configuration": "Configuración de sincronización",
   "administration_plan_migration_source_plan": "Plan de origen",

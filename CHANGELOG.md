@@ -1,3 +1,10 @@
+## [3.128.1](https://github.com/tolgee/tolgee-platform/compare/v3.128.0...v3.128.1) (2025-08-25)
+
+
+### Bug Fixes
+
+* handle MediaTypeNotSupported properly ([#3219](https://github.com/tolgee/tolgee-platform/issues/3219)) ([169fec1](https://github.com/tolgee/tolgee-platform/commit/169fec1173226fd016c89a16a5d18a42c43aa82a))
+
 # [3.128.0](https://github.com/tolgee/tolgee-platform/compare/v3.127.5...v3.128.0) (2025-08-22)
 
 

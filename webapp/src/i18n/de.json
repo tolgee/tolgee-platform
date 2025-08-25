@@ -277,6 +277,7 @@
   "administration_plan_migration_monthly_offset_days": "Monatliche Abonnements",
   "administration_plan_migration_monthly_timing": "{days, plural, one {Monatliches Abonnement: <b>{days} Tag</b> vor Verlängerung} other {Monatliches Abonnement: <b>{days} Tage</b> vor Verlängerung}}",
   "administration_plan_migration_no_migrated_subscriptions": "Noch keine Abonnements",
+  "administration_plan_migration_not_found": "Planmigration nicht gefunden",
   "administration_plan_migration_pending": "Inaktiv",
   "administration_plan_migration_run_configuration": "Timing-Konfiguration",
   "administration_plan_migration_source_plan": "Quellenplan",

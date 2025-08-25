@@ -278,6 +278,7 @@
   "administration_plan_migration_monthly_offset_days": "Aantal dagen voor maandelijkse abonnementen",
   "administration_plan_migration_monthly_timing": "{days, plural, one {Maandabonnement: <b>{days} dag</b> voor verlenging} other {Maandabonnement: <b>{days} dagen</b> voor verlenging}}",
   "administration_plan_migration_no_migrated_subscriptions": "Nog geen abonnementen",
+  "administration_plan_migration_not_found": "Planmigratie niet gevonden",
   "administration_plan_migration_pending": "Inactief",
   "administration_plan_migration_run_configuration": "Tijdconfiguratie",
   "administration_plan_migration_source_plan": "Bronplan",

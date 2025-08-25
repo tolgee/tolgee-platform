@@ -278,6 +278,7 @@
   "administration_plan_migration_monthly_offset_days": "月額 サブスクリプション",
   "administration_plan_migration_monthly_timing": "{days, plural, other {月額 サブスクリプション : 更新 の前 に <b># 日間</b>} }",
   "administration_plan_migration_no_migrated_subscriptions": "サブスクリプションはまだありません",
+  "administration_plan_migration_not_found": "プラン 移行 が見つかりません",
   "administration_plan_migration_pending": "非 アクティブ",
   "administration_plan_migration_run_configuration": "タイミング構成",
   "administration_plan_migration_source_plan": "ソース プラン",
