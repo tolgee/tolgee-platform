@@ -1,3 +1,10 @@
+# [3.129.0](https://github.com/tolgee/tolgee-platform/compare/v3.128.1...v3.129.0) (2025-08-25)
+
+
+### Features
+
+* subscription name consistency ([#3155](https://github.com/tolgee/tolgee-platform/issues/3155)) ([6848a44](https://github.com/tolgee/tolgee-platform/commit/6848a44ae00c95611e4365c036d3add2ae42a149))
+
 ## [3.128.1](https://github.com/tolgee/tolgee-platform/compare/v3.128.0...v3.128.1) (2025-08-25)
 
 
