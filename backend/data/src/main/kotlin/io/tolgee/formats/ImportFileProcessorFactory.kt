@@ -2,6 +2,7 @@ package io.tolgee.formats
 
 import StringsdictFileProcessor
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.formats.apple.`in`.strings.StringsFileProcessor
@@ -28,10 +29,11 @@ class ImportFileProcessorFactory(
   private val objectMapper: ObjectMapper,
   @Qualifier("yamlObjectMapper")
   private val yamlObjectMapper: ObjectMapper,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   fun getArchiveProcessor(file: ImportFileDto): ImportArchiveProcessor {
     return when (file.name.fileNameExtension) {
-      "zip" -> ZipTypeProcessor()
+      "zip" -> ZipTypeProcessor(tolgeeProperties.maxUploadFileSize.toLong() * 1024L)
       else -> throw ImportCannotParseFileException(file.name, "No matching processor")
     }
   }
