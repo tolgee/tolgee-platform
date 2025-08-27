@@ -1,3 +1,12 @@
+## [3.130.1](https://github.com/tolgee/tolgee-platform/compare/v3.130.0...v3.130.1) (2025-08-27)
+
+
+### Bug Fixes
+
+* avoid constraint violation from marking transaction rollback-only - fixes flaky SeatCountLimitTest ([#3225](https://github.com/tolgee/tolgee-platform/issues/3225)) ([eef1106](https://github.com/tolgee/tolgee-platform/commit/eef1106a569a42628076110e6ecd2ec18aa30d65))
+* fallback to key if PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY unavailable ([#3224](https://github.com/tolgee/tolgee-platform/issues/3224)) ([2ce8fa9](https://github.com/tolgee/tolgee-platform/commit/2ce8fa9efd29b82a084d327892d3092622e47541)), closes [#3011](https://github.com/tolgee/tolgee-platform/issues/3011)
+* remove spaces around equals in plurals rules for PO exports ([#3223](https://github.com/tolgee/tolgee-platform/issues/3223)) ([1f33ecc](https://github.com/tolgee/tolgee-platform/commit/1f33ecc7387e8e18aa78f636437a26331a183849)), closes [#3011](https://github.com/tolgee/tolgee-platform/issues/3011)
+
 # [3.130.0](https://github.com/tolgee/tolgee-platform/compare/v3.129.0...v3.130.0) (2025-08-25)
 
 
