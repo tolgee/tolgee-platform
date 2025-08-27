@@ -10,7 +10,9 @@ import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
@@ -24,6 +26,8 @@ import java.util.*
 @Service
 @Suppress("SelfReferenceConstructorParameter")
 class UsageToReportService(
+  @Lazy
+  private val self: UsageToReportService,
   private val entityManager: EntityManager,
   private val currentDateProvider: CurrentDateProvider,
   private val keyService: KeyService,
@@ -47,7 +51,7 @@ class UsageToReportService(
       val dto = findDto()
 
       if (dto == null) {
-        create()
+        self.create()
       }
 
       findDto() ?: throw IllegalStateException("Usage to report should be present in database")
@@ -76,7 +80,8 @@ class UsageToReportService(
       UsageToReportDto::class.java,
     ).resultList.singleOrNull()
 
-  private fun create() {
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  protected fun create() {
     val entity =
       UsageToReport().apply {
         keysToReport = keyService.countAllOnInstance()
