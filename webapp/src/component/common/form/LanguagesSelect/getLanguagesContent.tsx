@@ -45,7 +45,7 @@ export const getLanguagesContent = ({
       .map((lang) => lang.tag);
     const baseLang = languages.find((l) => l.base)?.tag;
     const result = putBaseLangFirst(availableLanguages, baseLang);
-    onChange(result);
+    onChange(result || []);
   };
 
   const handleSelectNone = () => {
