@@ -823,8 +823,10 @@ declare namespace DataCy {
         "translations-key-edit-description-field" |
         "translations-key-edit-key-field" |
         "translations-key-name" |
+        "translations-language-select-all" |
         "translations-language-select-form-control" |
         "translations-language-select-item" |
+        "translations-language-select-none" |
         "translations-namespace-banner" |
         "translations-outdated-clear-button" |
         "translations-outdated-indicator" |

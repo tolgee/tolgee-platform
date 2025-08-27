@@ -1,5 +1,5 @@
-import { Checkbox, ListItemText, MenuItem } from '@mui/material';
-import { T } from '@tolgee/react';
+import { Checkbox, ListItemText, MenuItem, Divider } from '@mui/material';
+import { T, useTranslate } from '@tolgee/react';
 
 import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
 import { components } from 'tg.service/apiSchema.generated';
@@ -13,6 +13,7 @@ type Props = {
   value: string[];
   disabledLanguages: number[] | undefined;
   enableEmpty?: boolean;
+  context?: string;
 };
 
 export const getLanguagesContent = ({
@@ -21,7 +22,10 @@ export const getLanguagesContent = ({
   onChange,
   disabledLanguages,
   enableEmpty,
+  context,
 }: Props) => {
+  const { t } = useTranslate();
+
   const handleLanguageChange = (lang: string) => () => {
     const baseLang = languages.find((l) => l.base)?.tag;
     const result = value.includes(lang)
@@ -35,7 +39,34 @@ export const getLanguagesContent = ({
     onChange(result || []);
   };
 
-  return languages.map((lang) => (
+  const handleSelectAll = () => {
+    const availableLanguages = languages
+      .filter((lang) => !disabledLanguages?.includes(lang.id))
+      .map((lang) => lang.tag);
+    const baseLang = languages.find((l) => l.base)?.tag;
+    const result = putBaseLangFirst(availableLanguages, baseLang);
+    onChange(result);
+  };
+
+  const handleSelectNone = () => {
+    if (!enableEmpty) {
+      messageService.error(<T keyName="set_at_least_one_language_error" />);
+      return;
+    }
+    onChange([]);
+  };
+
+  const availableLanguages = languages.filter(
+    (lang) => !disabledLanguages?.includes(lang.id)
+  );
+  const allSelected = availableLanguages.every((lang) =>
+    value.includes(lang.tag)
+  );
+
+  // Показываем кнопки "All" и "None" только для batch операций
+  const isBatchOperation = context === 'batch-operations';
+
+  const languageItems = languages.map((lang) => (
     <MenuItem
       key={lang.tag}
       value={lang.tag}
@@ -47,4 +78,34 @@ export const getLanguagesContent = ({
       <ListItemText primary={lang.name} />
     </MenuItem>
   ));
+
+  if (isBatchOperation) {
+    return [
+      // All button
+      <MenuItem
+        key="select-all"
+        onClick={handleSelectAll}
+        data-cy="translations-language-select-all"
+      >
+        <Checkbox checked={allSelected} size="small" />
+        <ListItemText primary={t('languages_permitted_list_select_all')} />
+      </MenuItem>,
+      // None button
+      <MenuItem
+        key="select-none"
+        onClick={handleSelectNone}
+        data-cy="translations-language-select-none"
+      >
+        <Checkbox checked={false} size="small" />
+        <ListItemText primary={t('llm_provider_form_select_priority_none')} />
+      </MenuItem>,
+      // Divider
+      <Divider key="divider" />,
+      // Individual language items
+      ...languageItems,
+    ];
+  }
+
+  // Для обычного фильтра языков возвращаем только список языков без кнопок "All" и "None"
+  return languageItems;
 };
