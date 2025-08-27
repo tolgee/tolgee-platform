@@ -26,7 +26,7 @@ class PoMessageFormatsExporterTest {
     |"MIME-Version: 1.0\n"
     |"Content-Type: text/plain; charset=UTF-8\n"
     |"Content-Transfer-Encoding: 8bit\n"
-    |"Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+    |"Plural-Forms: nplurals=3; plural=(n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
     |"X-Generator: Tolgee\n"
     |
     |msgid "key3"
@@ -49,7 +49,7 @@ class PoMessageFormatsExporterTest {
     |"MIME-Version: 1.0\n"
     |"Content-Type: text/plain; charset=UTF-8\n"
     |"Content-Transfer-Encoding: 8bit\n"
-    |"Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+    |"Plural-Forms: nplurals=3; plural=(n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
     |"X-Generator: Tolgee\n"
     |
     |msgid "key3"
@@ -72,7 +72,7 @@ class PoMessageFormatsExporterTest {
     |"MIME-Version: 1.0\n"
     |"Content-Type: text/plain; charset=UTF-8\n"
     |"Content-Transfer-Encoding: 8bit\n"
-    |"Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
+    |"Plural-Forms: nplurals=3; plural=(n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
     |"X-Generator: Tolgee\n"
     |
     |msgid "key3"
