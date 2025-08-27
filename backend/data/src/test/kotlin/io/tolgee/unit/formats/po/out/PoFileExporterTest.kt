@@ -117,7 +117,6 @@ class PoFileExporterTest {
       "Plural-Forms: nplurals = 3; plural = (n === 1 ? 0 : (n >= 2 && n <= 4) ? 1 : 2)\n"
       "X-Generator: Tolgee\n"
 
-
       msgid ""
       "I am key\n"
       "Look at me\n"
