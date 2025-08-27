@@ -36,6 +36,7 @@ class PoFileExporterTest {
       "X-Generator: Tolgee\n"
 
       msgid "key"
+      msgid_plural "key"
       msgstr[0] "%d den"
       msgstr[1] "dny"
       msgstr[2] "%d dnů"${"\n"}
@@ -53,6 +54,7 @@ class PoFileExporterTest {
       "X-Generator: Tolgee\n"
 
       msgid "key"
+      msgid_plural "key"
       msgstr[0] "%d day"
       msgstr[1] "%d days"${"\n"}
       """.trimIndent(),
@@ -116,6 +118,10 @@ class PoFileExporterTest {
       "X-Generator: Tolgee\n"
 
       msgid ""
+      "I am key\n"
+      "Look at me\n"
+      "Hello!"
+      msgid_plural ""
       "I am key\n"
       "Look at me\n"
       "Hello!"
@@ -274,6 +280,7 @@ class PoFileExporterTest {
     |"X-Generator: Tolgee\n"
     |
     |msgid "key3"
+    |msgid_plural "key3"
     |msgstr[0] "%d den %s"
     |msgstr[1] "%d dny"
     |msgstr[2] "%d dní"
@@ -321,6 +328,7 @@ class PoFileExporterTest {
     |"X-Generator: Tolgee\n"
     |
     |msgid "key3"
+    |msgid_plural "key3"
     |msgstr[0] "# den {icuParam}"
     |msgstr[1] "# dny"
     |msgstr[2] "# dní"
