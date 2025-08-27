@@ -99,7 +99,7 @@ class PoFileExporter(
     translation: ExportTranslationView,
     converted: ToPoConversionResult,
   ) {
-    val msgIdPlural = translation.key.custom?.get(PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY) as? String ?: return
+    val msgIdPlural = translation.key.custom?.get(PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY) as? String ?: translation.key.name
     if (converted.isPlural()) {
       this.append(
         convertToPoMultilineString(
