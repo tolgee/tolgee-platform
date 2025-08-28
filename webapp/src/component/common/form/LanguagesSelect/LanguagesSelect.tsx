@@ -97,6 +97,7 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
           value: props.value,
           disabledLanguages: props.disabledLanguages,
           enableEmpty: props.enableEmpty,
+          context: props.context,
         })}
       </StyledSelect>
     </FormControl>
