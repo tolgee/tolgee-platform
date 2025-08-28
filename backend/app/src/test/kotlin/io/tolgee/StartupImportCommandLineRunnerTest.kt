@@ -10,12 +10,11 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.Base
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.core.io.Resource
 
 @Suppress("LateinitVarOverridesLateinitVar")
@@ -27,7 +26,6 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
   lateinit var importDir: Resource
 
   @Autowired
-  @SpyBean
   override lateinit var tolgeeProperties: TolgeeProperties
 
   @Autowired
@@ -35,17 +33,20 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
 
   @BeforeAll
   fun setup() {
+    tolgeeProperties.import = ImportProperties().apply {
+      dir = importDir.file.absolutePath
+      createImplicitApiKey = true
+      baseLanguageTag = "de"
+    }
     executeInNewTransaction {
-      whenever(tolgeeProperties.import).thenReturn(
-        ImportProperties().apply {
-          dir = importDir.file.absolutePath
-          createImplicitApiKey = true
-          baseLanguageTag = "de"
-        },
-      )
       base = dbPopulator.createBase("admin")
       startupImportCommandLineRunner.run()
     }
+  }
+
+  @AfterAll
+  fun tearDown() {
+    tolgeeProperties.import = ImportProperties()
   }
 
   @Test
