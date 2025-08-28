@@ -3,7 +3,6 @@ package io.tolgee.ee.selfHostedLimitsAndReporting
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.configuration.tolgee.InternalProperties
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BaseTestData
@@ -45,10 +44,6 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   @SpyBean
   override lateinit var internalProperties: InternalProperties
-
-  @Autowired
-  @SpyBean
-  override lateinit var tolgeeProperties: TolgeeProperties
 
   @MockBean
   @Autowired
