@@ -1,3 +1,10 @@
+# [3.131.0](https://github.com/tolgee/tolgee-platform/compare/v3.130.1...v3.131.0) (2025-08-28)
+
+
+### Features
+
+* Add ability to select All or None languages for batch operations ([#3221](https://github.com/tolgee/tolgee-platform/issues/3221)) ([28b2aa6](https://github.com/tolgee/tolgee-platform/commit/28b2aa6c7e01d82ed8aec740c56a50ec779bbc1f))
+
 ## [3.130.1](https://github.com/tolgee/tolgee-platform/compare/v3.130.0...v3.130.1) (2025-08-27)
 
 
