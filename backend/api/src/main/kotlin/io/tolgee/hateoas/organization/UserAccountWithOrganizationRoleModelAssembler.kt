@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.organization
 
+import io.tolgee.api.isMfaEnabled
 import io.tolgee.api.v2.controllers.V2UserController
 import io.tolgee.hateoas.project.SimpleProjectModelAssembler
 import io.tolgee.model.Project
@@ -29,6 +30,7 @@ class UserAccountWithOrganizationRoleModelAssembler(
       username = data.first.username,
       organizationRole = data.first.organizationRole,
       projectsWithDirectPermission = data.second.map { simpleProjectModelAssembler.toModel(it) },
+      mfaEnabled = data.first.isMfaEnabled,
       avatar = avatarService.getAvatarLinks(data.first.avatarHash),
     )
   }

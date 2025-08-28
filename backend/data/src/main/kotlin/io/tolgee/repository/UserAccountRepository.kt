@@ -188,8 +188,9 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   ): UserAccount?
 
   @Query(
-    """ select ua.id as id, ua.name as name, ua.username as username, mr.type as organizationRole,
-          ua.avatarHash as avatarHash
+    """
+        select ua.id as id, ua.name as name, ua.username as username, mr.type as organizationRole,
+          ua.totpKey as totpKey, ua.avatarHash as avatarHash
         from UserAccount ua 
         left join ua.organizationRoles mr on mr.organization.id = :organizationId
         left join ua.permissions pp
@@ -200,7 +201,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
         and ua.deletedAt is null
         group by ua.id, mr.type
-        """,
+      """,
   )
   fun getAllInOrganization(
     organizationId: Long,
@@ -211,7 +212,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   @Query(
     """
         select ua.id as id, ua.name as name, ua.username as username, p as directPermission,
-          orl.type as organizationRole, ua.avatarHash as avatarHash 
+          ua.totpKey as totpKey, orl.type as organizationRole, ua.avatarHash as avatarHash
         from UserAccount ua
         left join Project r on r.id = :projectId
         left join ua.permissions p on p.project.id = :projectId

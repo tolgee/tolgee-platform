@@ -39,6 +39,7 @@ class UserAccountInProjectModelAssembler(
       organizationBasePermission = permissionModelAssembler.toModel(view.organizationBasePermission),
       directPermission = view.directPermission?.let { permissionWithAgencyModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
+      mfaEnabled = view.mfaEnabled,
       avatar = avatar,
     )
   }

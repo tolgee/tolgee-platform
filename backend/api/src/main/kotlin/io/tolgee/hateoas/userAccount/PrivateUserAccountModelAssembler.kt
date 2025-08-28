@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.userAccount
 
+import io.tolgee.api.isMfaEnabled
 import io.tolgee.api.v2.controllers.V2UserController
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.model.UserAccount

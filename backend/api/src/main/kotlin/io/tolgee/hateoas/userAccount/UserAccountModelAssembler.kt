@@ -1,5 +1,6 @@
 package io.tolgee.hateoas.userAccount
 
+import io.tolgee.api.isMfaEnabled
 import io.tolgee.api.v2.controllers.V2UserController
 import io.tolgee.model.UserAccount
 import io.tolgee.service.AvatarService
@@ -23,6 +24,7 @@ class UserAccountModelAssembler(
       emailAwaitingVerification = entity.emailVerification?.newEmail,
       avatar = avatar,
       globalServerRole = entity.role ?: UserAccount.Role.USER,
+      mfaEnabled = entity.isMfaEnabled,
       deleted = entity.deletedAt != null,
       disabled = entity.disabledAt != null,
     )

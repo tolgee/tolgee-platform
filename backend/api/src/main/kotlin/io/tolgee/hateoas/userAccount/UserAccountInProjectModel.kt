@@ -23,4 +23,5 @@ data class UserAccountInProjectModel(
     example = "EDIT",
   )
   val computedPermission: ComputedPermissionModel,
+  val mfaEnabled: Boolean,
 ) : RepresentationModel<UserAccountInProjectModel>()

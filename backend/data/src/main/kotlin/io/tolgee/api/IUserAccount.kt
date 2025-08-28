@@ -2,15 +2,12 @@ package io.tolgee.api
 
 import io.tolgee.model.UserAccount
 
-interface IUserAccount {
+interface IUserAccount : IMfa {
   val username: String
   var isInitialUser: Boolean
 
   val isDeletable: Boolean
     get() = this.accountType != UserAccount.AccountType.MANAGED && !this.isInitialUser
-
-  val isMfaEnabled: Boolean
-    get() = this.totpKey?.isNotEmpty() ?: false
 
   val needsSuperJwt: Boolean
     get() = this.accountType == UserAccount.AccountType.LOCAL || isMfaEnabled
@@ -25,8 +22,6 @@ interface IUserAccount {
       val (_, domain) = username.split('@')
       return domain
     }
-
-  val totpKey: ByteArray?
 
   val accountType: UserAccount.AccountType?
 }

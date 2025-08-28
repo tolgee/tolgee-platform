@@ -20,6 +20,7 @@ import { UpdateRoleButton } from './UpdateRoleButton';
 import { useLeaveOrganization } from '../useLeaveOrganization';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { MfaBadge } from 'tg.component/MfaBadge';
 
 type UserAccountWithOrganizationRoleModel =
   components['schemas']['UserAccountWithOrganizationRoleModel'];
@@ -39,6 +40,10 @@ const StyledListItem = styled('div')`
 
 const StyledItemText = styled('div')`
   flex-grow: 1;
+  padding: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledMfaBadgeWrapper = styled('div')`
   padding: ${({ theme }) => theme.spacing(1)};
 `;
 
@@ -79,6 +84,11 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
         <StyledItemText>
           {user.name} ({user.username}){' '}
         </StyledItemText>
+        {user.mfaEnabled && (
+          <StyledMfaBadgeWrapper>
+            <MfaBadge />
+          </StyledMfaBadgeWrapper>
+        )}
       </StyledItemUser>
       <StyledItemActions>
         {user.organizationRole ? (

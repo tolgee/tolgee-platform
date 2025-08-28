@@ -1,6 +1,7 @@
 package io.tolgee.service.security
 
 import com.eatthepath.otp.TimeBasedOneTimePasswordGenerator
+import io.tolgee.api.isMfaEnabled
 import io.tolgee.component.KeyGenerator
 import io.tolgee.configuration.SecurityConfiguration
 import io.tolgee.constants.Message
