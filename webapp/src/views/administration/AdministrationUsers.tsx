@@ -71,10 +71,10 @@ export const AdministrationUsers = ({
                 sx={{ display: 'grid', gridTemplateColumns: '1fr auto' }}
               >
                 <ListItemText>
-                  {u.name} | {u.username} <Chip size="small" label={u.id} />{' '}
-                  {u.mfaEnabled && <MfaBadge />}
+                  {u.name} | {u.username} <Chip size="small" label={u.id} />
                 </ListItemText>
                 <Box display="flex" justifyContent="center" gap={1}>
+                  {u.mfaEnabled && <MfaBadge />}
                   <DebugCustomerAccountButton userId={u.id} />
                   <RoleSelector
                     user={u}
