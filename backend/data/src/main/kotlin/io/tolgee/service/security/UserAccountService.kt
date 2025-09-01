@@ -1,5 +1,6 @@
 package io.tolgee.service.security
 
+import io.tolgee.api.isMfaEnabled
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.demoProject.DemoProjectData
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -453,6 +454,7 @@ class UserAccountService(
         directPermission = it.directPermission,
         organizationBasePermission = organizationBasePermission,
         permittedLanguageIds = permittedLanguageMap[it.id],
+        mfaEnabled = it.isMfaEnabled,
         avatarHash = it.avatarHash,
       )
     }

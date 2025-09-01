@@ -5931,6 +5931,7 @@ export interface components {
       directPermission?: components["schemas"]["PermissionWithAgencyModel"];
       /** Format: int64 */
       id: number;
+      mfaEnabled: boolean;
       name?: string;
       organizationBasePermission: components["schemas"]["PermissionModel"];
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
@@ -5944,6 +5945,7 @@ export interface components {
       globalServerRole: "USER" | "ADMIN";
       /** Format: int64 */
       id: number;
+      mfaEnabled: boolean;
       name?: string;
       username: string;
     };
@@ -5951,6 +5953,7 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
       /** Format: int64 */
       id: number;
+      mfaEnabled: boolean;
       name: string;
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
@@ -12176,7 +12179,7 @@ export interface operations {
          *
          * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
          */
-        escapeHtml: boolean;
+        escapeHtml?: boolean;
       };
       path: {
         projectId: number;

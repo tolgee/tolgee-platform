@@ -10,6 +10,7 @@ import { DebugCustomerAccountButton } from './components/DebugCustomerAccountBut
 import { RoleSelector } from './components/RoleSelector';
 import { BaseAdministrationView } from './components/BaseAdministrationView';
 import { OptionsButton } from './components/OptionsButton';
+import { MfaBadge } from 'tg.component/MfaBadge';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -73,6 +74,7 @@ export const AdministrationUsers = ({
                   {u.name} | {u.username} <Chip size="small" label={u.id} />
                 </ListItemText>
                 <Box display="flex" justifyContent="center" gap={1}>
+                  {u.mfaEnabled && <MfaBadge />}
                   <DebugCustomerAccountButton userId={u.id} />
                   <RoleSelector
                     user={u}

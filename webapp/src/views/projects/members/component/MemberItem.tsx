@@ -15,6 +15,7 @@ import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { LanguagePermissionSummary } from 'tg.component/PermissionsSettings/LanguagePermissionsSummary';
 import { ScopesInfo } from 'tg.component/PermissionsSettings/ScopesInfo';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { MfaBadge } from 'tg.component/MfaBadge';
 
 type UserAccountInProjectModel =
   components['schemas']['UserAccountInProjectModel'];
@@ -109,6 +110,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
         </StyledItemText>
       </StyledItemUser>
       <StyledItemActions>
+        {user.mfaEnabled && <MfaBadge />}
         <ScopesInfo scopes={user.computedPermission.scopes} />
         <LanguagePermissionSummary
           permissions={user.computedPermission}

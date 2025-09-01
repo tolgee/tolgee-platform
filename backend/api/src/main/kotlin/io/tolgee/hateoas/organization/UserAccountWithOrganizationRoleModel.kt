@@ -11,7 +11,8 @@ data class UserAccountWithOrganizationRoleModel(
   val id: Long,
   val name: String,
   var username: String,
-  var organizationRole: OrganizationRoleType?,
-  var projectsWithDirectPermission: List<SimpleProjectModel>,
-  var avatar: Avatar?,
+  val organizationRole: OrganizationRoleType?,
+  val projectsWithDirectPermission: List<SimpleProjectModel>,
+  val mfaEnabled: Boolean,
+  val avatar: Avatar?,
 ) : RepresentationModel<UserAccountWithOrganizationRoleModel>()
