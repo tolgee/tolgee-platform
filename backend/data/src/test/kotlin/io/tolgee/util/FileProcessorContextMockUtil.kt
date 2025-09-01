@@ -90,9 +90,11 @@ class FileProcessorContextMockUtil {
   }
 
   private fun mockImportFileProcessorFactory(applicationContextMock: ApplicationContext): ImportFileProcessorFactory {
+    val tolgeeProps = mockTolgeeProperties(applicationContextMock)
     return ImportFileProcessorFactory(
       objectMapper = jacksonObjectMapper(),
       yamlObjectMapper = ObjectMapper(YAMLFactory()),
+      tolgeeProperties = tolgeeProps,
     ).also {
       whenever(applicationContextMock.getBean(ImportFileProcessorFactory::class.java))
         .thenReturn(it)
