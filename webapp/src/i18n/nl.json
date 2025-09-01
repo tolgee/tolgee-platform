@@ -1910,6 +1910,7 @@
   "time_difference_right_now": "nu",
   "token-regenerate-message": "Het huidige token wordt vervangen. U kunt het niet meer gebruiken.",
   "tools_panel_hint": "Tip",
+  "tooltip_user_mfa_enabled": "Account is beveiligd met tweestapsverificatie",
   "too_many_requests": "Te veel verzoeken. Probeer het later opnieuw.",
   "topbar-trial-chip": "Proefversie",
   "topbar-trial-chip-tooltip": "{daysLeft, plural, one {U heeft één dag voordat uw proefperiode eindigt.} other {U heeft {daysLeft} dagen voordat uw proefperiode eindigt.}}",

@@ -1910,6 +1910,7 @@
   "time_difference_right_now": "nu",
   "token-regenerate-message": "Den nuværende token vil blive erstattet. Denne vil ikke længere kunne bruges.",
   "tools_panel_hint": "Tip",
+  "tooltip_user_mfa_enabled": "Konto er beskyttet med to-faktor-godkendelse",
   "too_many_requests": "For mange forespørgsler. Prøv igen senere.",
   "topbar-trial-chip": "Prøveversion",
   "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Du har én dag før din prøveperiode slutter.} other {Du har {daysLeft} dage før din prøveperiode slutter.}}",

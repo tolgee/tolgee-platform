@@ -1894,6 +1894,7 @@
   "time_difference_right_now": "ahora",
   "token-regenerate-message": "El token actual será reemplazado. Ya no podrás usarlo más.",
   "tools_panel_hint": "Pista",
+  "tooltip_user_mfa_enabled": "La cuenta está protegida con autenticación de dos factores",
   "too_many_requests": "Demasiadas solicitudes. Por favor, inténtelo de nuevo más tarde.",
   "topbar-trial-chip": "Prueba",
   "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Tiene un día antes de que termine su prueba.} other {Tiene {daysLeft} días antes de que termine su prueba.}}",

@@ -1893,6 +1893,7 @@
   "time_difference_right_now": "现在",
   "token-regenerate-message": "当前令牌将被替换。您将无法再使用它。",
   "tools_panel_hint": "提示",
+  "tooltip_user_mfa_enabled": "账户受 双因素身份验证 保护",
   "too_many_requests": "请求过多。请稍后再试。",
   "topbar-trial-chip": "试用",
   "topbar-trial-chip-tooltip": "{daysLeft, plural, one {您的试用期还有一天。} other {您的试用期还有 {daysLeft} 天。}}",

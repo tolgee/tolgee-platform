@@ -1895,6 +1895,7 @@
   "time_difference_right_now": "nå",
   "token-regenerate-message": "Den nåværende nøkkelen vil bli erstattet. Du vil ikke lenger kunne bruke den.",
   "tools_panel_hint": "Hint",
+  "tooltip_user_mfa_enabled": "Kontoen er beskyttet med tofaktorautentisering",
   "too_many_requests": "For mange forespørsler. Vennligst prøv igjen senere.",
   "topbar-trial-chip": "Prøveperiode",
   "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Du har én dag før prøveperioden din avsluttes.} other {Du har {daysLeft} dager før prøveperioden din avsluttes.}}",

@@ -1906,6 +1906,7 @@
   "time_difference_right_now": "jetzt",
   "token-regenerate-message": "Das aktuelle Token wird ersetzt. Sie werden es nicht mehr benutzen können.",
   "tools_panel_hint": "Hinweis",
+  "tooltip_user_mfa_enabled": "Konto ist durch Zwei-Faktor-Authentifizierung geschützt",
   "too_many_requests": "Zu viele Anfragen. Bitte versuchen Sie es später erneut.",
   "topbar-trial-chip": "Testversion",
   "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Sie haben einen Tag, bevor Ihre Testversion endet.} other {Sie haben {daysLeft} Tage, bevor Ihre Testversion endet.}}",

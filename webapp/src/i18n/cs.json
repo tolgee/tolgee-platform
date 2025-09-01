@@ -1910,6 +1910,7 @@
   "time_difference_right_now": "nyní",
   "token-regenerate-message": "Současná hodnota tokenu bude nahrazena novou hodnotou. Předchozí token už nebudete moci používat.",
   "tools_panel_hint": "Nápověda",
+  "tooltip_user_mfa_enabled": "Účet je chráněn dvoufaktorovým ověřováním",
   "too_many_requests": "Příliš mnoho požadavků. Zkuste to prosím později.",
   "topbar-trial-chip": "Zkušební verze",
   "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Máte jeden den před vypršením vaší zkušební verze.} few {Máte {daysLeft} dny před vypršením vaší zkušební verze.} other {Máte {daysLeft} dní před vypršením vaší zkušební verze.} }",

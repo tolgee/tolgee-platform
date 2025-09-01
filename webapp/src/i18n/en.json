@@ -1910,6 +1910,7 @@
   "time_difference_right_now": "now",
   "token-regenerate-message": "The current token will be replaced. You won't be able to use it any more.",
   "tools_panel_hint": "Hint",
+  "tooltip_user_mfa_enabled": "Account is protected with Two-Factor Authentication",
   "too_many_requests": "Too many requests. Please try again later.",
   "topbar-trial-chip": "Trial",
   "topbar-trial-chip-tooltip": "{daysLeft, plural, one {You have one day before your trial ends.} other {You have {daysLeft} days before your trial ends.}}",

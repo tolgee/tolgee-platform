@@ -1856,6 +1856,7 @@
   "time_difference_right_now": "ora",
   "token-regenerate-message": "Il token attuale verrà sostituito. Non sarà più possibile utilizzarlo.",
   "tools_panel_hint": "Suggerimento",
+  "tooltip_user_mfa_enabled": "L'account è protetto con l'autenticazione a due fattori",
   "too_many_requests": "Troppe richieste. Per favore riprova più tardi.",
   "topbar-trial-chip": "Prova",
   "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Hai un giorno prima che termini la tua prova.} other {Hai {daysLeft} giorni prima che termini la tua prova.}}",

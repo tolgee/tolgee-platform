@@ -1895,6 +1895,7 @@
   "time_difference_right_now": "most",
   "token-regenerate-message": "Az aktuális token helyettesítve lesz. Többé nem lesz használható.",
   "tools_panel_hint": "Tipp",
+  "tooltip_user_mfa_enabled": "A fiók kétfaktoros azonosítással védett",
   "too_many_requests": "Túl sok kérés. Kérjük, próbálja meg később újra.",
   "topbar-trial-chip": "Próba",
   "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Egy nap van hátra a próbaidőszakból.} other {Már csak {daysLeft} nap van hátra a próbaidőszakból.}}",

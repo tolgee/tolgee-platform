@@ -1900,6 +1900,7 @@
   "time_difference_right_now": "acum",
   "token-regenerate-message": "Token-ul curent va fi înlocuit. Nu veți mai putea să-l utilizați.",
   "tools_panel_hint": "Sugestie",
+  "tooltip_user_mfa_enabled": "Contul este protejat cu autentificare cu doi factori",
   "too_many_requests": "Prea multe cereri. Vă rugăm să încercați din nou mai târziu.",
   "topbar-trial-chip": "Perioadă de încercare",
   "topbar-trial-chip-tooltip": "{daysLeft, plural, one {Aveți o zi înainte de încheierea perioadei de încercare.} other {Aveți {daysLeft} zile înainte de încheierea perioadei de încercare.} }",

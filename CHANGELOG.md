@@ -1,3 +1,15 @@
+# [3.132.0](https://github.com/tolgee/tolgee-platform/compare/v3.131.0...v3.132.0) (2025-09-01)
+
+
+### Bug Fixes
+
+* handle reading invalid zip files properly ([#3220](https://github.com/tolgee/tolgee-platform/issues/3220)) ([1ef36e5](https://github.com/tolgee/tolgee-platform/commit/1ef36e508acbdd4d0df2d5dd8d4b150ce6015c4d))
+
+
+### Features
+
+* show MFA badges in the lists of users ([#3228](https://github.com/tolgee/tolgee-platform/issues/3228)) ([2e11291](https://github.com/tolgee/tolgee-platform/commit/2e11291fd5a84c16ba016d02e733e2ad3713e88c)), closes [#3222](https://github.com/tolgee/tolgee-platform/issues/3222)
+
 # [3.131.0](https://github.com/tolgee/tolgee-platform/compare/v3.130.1...v3.131.0) (2025-08-28)
 
 
