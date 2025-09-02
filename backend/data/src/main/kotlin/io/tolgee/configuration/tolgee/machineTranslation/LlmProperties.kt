@@ -24,7 +24,7 @@ class LlmProperties : MachineTranslationServiceProperties {
     description = """
     List of LLM providers. Example:
     
-    ```
+    ``` yaml
     providers:
       - name: openai-gpt-4o-mini
         type: OPENAI
@@ -32,6 +32,17 @@ class LlmProperties : MachineTranslationServiceProperties {
         api-url: "https://api.openai.com"
         model: gpt-4o-mini
         format: "json_schema"
+    ```
+    
+    or using environment variables:
+    
+    ```
+    TOLGEE_LLM_PROVIDERS_0_NAME=MySuperDuperAI
+    TOLGEE_LLM_PROVIDERS_0_TYPE=OPENAI
+    TOLGEE_LLM_PROVIDERS_0_API_KEY=myApiKey
+    TOLGEE_LLM_PROVIDERS_0_API_URL=https://api.openai.com
+    TOLGEE_LLM_PROVIDERS_0_MODEL=gpt-4o-mini
+    TOLGEE_LLM_PROVIDERS_0_FORMAT=json_schema
     ```
     
     Check [llm providers documentation](/platform/projects_and_organizations/llm-providers#self-hosted-server-configuration) for more information.
