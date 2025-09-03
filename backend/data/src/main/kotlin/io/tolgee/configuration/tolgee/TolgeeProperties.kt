@@ -43,7 +43,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
             DocProperty(
               name = "url",
               description =
-                "The url of the datasource in format `jdbc:postgresql://<host>:<port>/<dbname>`. " +
+                "The url of the datasource in format `jdbc:postgresql://host:port/dbname`. " +
                   "e.g. `jdbc:postgresql://db:5432/postgres`",
               defaultValue = "",
             ),
@@ -66,7 +66,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 )
 @ConfigurationProperties(prefix = "tolgee")
 @DocProperty(description = "Configuration specific to Tolgee.", displayName = "Tolgee")
-open class TolgeeProperties(
+class TolgeeProperties(
   var authentication: AuthenticationProperties = AuthenticationProperties(),
   var smtp: SmtpProperties = SmtpProperties(),
   var sentry: SentryProperties = SentryProperties(),
@@ -104,12 +104,8 @@ open class TolgeeProperties(
   @DocProperty(description = "Name of the application.", hidden = true)
   var appName: String = "Tolgee",
   @DocProperty(description = "Maximum length of translations.")
-  open var maxTranslationTextLength: Long = 10000,
-  @DocProperty(
-    description = "Properties related to batch jobs",
-    displayName = "Batch jobs",
-  )
-  open var batch: BatchProperties = BatchProperties(),
+  var maxTranslationTextLength: Long = 10000,
+  var batch: BatchProperties = BatchProperties(),
   var cache: CacheProperties = CacheProperties(),
   var recaptcha: ReCaptchaProperties = ReCaptchaProperties(),
   var machineTranslation: MachineTranslationProperties = MachineTranslationProperties(),
@@ -118,7 +114,7 @@ open class TolgeeProperties(
   var sendInBlue: SendInBlueProperties = SendInBlueProperties(),
   @DocProperty(hidden = true)
   var mailjet: MailjetProperties = MailjetProperties(),
-  open var import: ImportProperties = ImportProperties(),
+  var import: ImportProperties = ImportProperties(),
   var rateLimit: RateLimitProperties = RateLimitProperties(),
   @DocProperty(hidden = true)
   var postHog: PostHogProperties = PostHogProperties(),
