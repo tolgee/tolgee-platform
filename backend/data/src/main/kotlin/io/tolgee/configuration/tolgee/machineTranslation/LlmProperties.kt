@@ -8,10 +8,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.llm")
 @DocProperty(
+  name = "llm",
   displayName = "LLM Providers",
 )
 class LlmProperties : MachineTranslationServiceProperties {
-  @DocProperty("Enable/disable AI translator (default: enabled if there is at least one provider)")
+  @DocProperty(description = "Enable/disable AI translator (default: enabled if there is at least one provider)")
   var enabled: Boolean? = null
 
   @DocProperty(description = "Whether llm-powered machine translation is enabled.")
@@ -28,7 +29,7 @@ class LlmProperties : MachineTranslationServiceProperties {
     providers:
       - name: openai-gpt-4o-mini
         type: OPENAI
-        api-key: "<api key>"
+        api-key: "myApiKey"
         api-url: "https://api.openai.com"
         model: gpt-4o-mini
         format: "json_schema"
@@ -50,28 +51,31 @@ class LlmProperties : MachineTranslationServiceProperties {
   )
   var providers: MutableList<LlmProvider> = mutableListOf()
 
-  open class LlmProvider(
-    @DocProperty("Enable/disable provider")
+  class LlmProvider(
+    @DocProperty(description = "Enable/disable provider")
     var enabled: Boolean = true,
-    @DocProperty("User visible provider name")
+    @DocProperty(description = "User visible provider name")
     override var name: String = "default",
-    @DocProperty("Provider type, an API type")
-    override var type: LlmProviderType,
-    @DocProperty("Provider API Key (optional for some providers)")
+    @DocProperty(description = "Provider type, an API type")
+    override var type: LlmProviderType = LlmProviderType.OPENAI,
+    @DocProperty(description = "Provider API Key (optional for some providers)")
     override var apiKey: String? = null,
-    @DocProperty("Provider API Url")
+    @DocProperty(description = "Provider API Url")
     override var apiUrl: String? = null,
-    @DocProperty("Provider model (optional for some providers)")
+    @DocProperty(description = "Provider model (optional for some providers)")
     override var model: String? = null,
-    @DocProperty("Provider deployment (optional for some providers)")
+    @DocProperty(description = "Provider deployment (optional for some providers)")
     override var deployment: String? = null,
     @DocProperty(description = "ChatGPT reasoning effort")
     override var reasoningEffort: String? = null,
     override var format: String? = null,
-    @DocProperty("Load-balancing instruction HIGH = used for suggestions, LOW = used for batch operations")
+    @DocProperty(
+      description = "Load-balancing instruction HIGH = used for suggestions, LOW = used for batch operations"
+    )
     override var priority: LlmProviderPriority? = null,
     @DocProperty(
-      "Specify attempts timeout(s) (Example: [30, 30] - Tolgee will make two attempts, each with timeout of 30s)"
+      description =
+        "Specify attempts timeout(s) (Example: [30, 30] - Tolgee will make two attempts, each with timeout of 30s)"
     )
     override var attempts: List<Int>? = null,
     @DocProperty(hidden = true)

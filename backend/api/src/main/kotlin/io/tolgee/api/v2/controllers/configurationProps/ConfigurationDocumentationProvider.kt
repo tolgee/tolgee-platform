@@ -7,62 +7,54 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
+import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotations
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.javaType
+import kotlin.reflect.jvm.jvmErasure
 import kotlin.reflect.typeOf
 
 class ConfigurationDocumentationProvider {
   private val globalItems: MutableList<DocItem> = mutableListOf()
   val docs by lazy {
-    globalItems + listOf(handleObject(TolgeeProperties(), null))
+    globalItems + listOf(handleObject(TolgeeProperties(), null, null))
   }
 
   private fun handleObject(
     obj: Any,
     parent: KProperty<*>?,
+    annotation: DocProperty?,
+    isList: Boolean = false,
   ): Group {
-    val additionalProps: MutableList<DocItem> = mutableListOf()
-    obj::class.findAnnotations(AdditionalDocsProperties::class).forEach { additionalProp ->
-      if (additionalProp.global) {
-        additionalProp.properties.forEach {
-          globalItems.add(getPropertyTree(it))
-        }
-        return@forEach
-      }
-      additionalProp.properties.forEach {
-        additionalProps.add(getPropertyTree(it))
-      }
-    }
+    val additionalProps = obj::class.findAnnotations(AdditionalDocsProperties::class)
+      .buildPropertiesTree().sortedByGroupAndName()
 
     val objDef = obj::class.findAnnotations(DocProperty::class).singleOrNull()
     val confPropsDef = obj::class.findAnnotations(ConfigurationProperties::class).singleOrNull()
     val props =
       obj::class.declaredMemberProperties.mapNotNull {
         handleProperty(it, obj)
-      }.sortedWith(
-        compareBy(
-          { it is Group },
-          { it.name },
-        ),
-      )
+      }.sortedByGroupAndName()
+
+    // Sort is stable - additional props will be added at the end, but props not part of a group will be moved before groups
+    // Docs renderer expects groups to be always at the end of the list
+    val allProps = (props + additionalProps).sortedByGroup()
 
     val name =
-      objDef?.name?.nullIfEmpty ?: parent?.name ?: confPropsDef?.prefix?.replace(
+      annotation?.name?.nullIfEmpty ?: objDef?.name?.nullIfEmpty ?: parent?.name ?: confPropsDef?.prefix?.replace(
         "(.*)\\.(.+?)\$".toRegex(),
         "$1",
       )?.nullIfEmpty
         ?: throw RuntimeException("No name for $obj with parent $parent")
     return Group(
       name = name,
-      displayName = objDef?.displayName?.nullIfEmpty,
-      description = objDef?.description?.nullIfEmpty,
-      children = props + additionalProps,
-      prefix =
-        objDef?.prefix?.nullIfEmpty ?: confPropsDef?.prefix?.nullIfEmpty
-          ?: throw NullPointerException("No prefix for ${obj::class.simpleName}"),
+      displayName = annotation?.displayName?.nullIfEmpty ?: objDef?.displayName?.nullIfEmpty,
+      description = annotation?.description?.nullIfEmpty ?: objDef?.description?.nullIfEmpty,
+      children = allProps,
+      prefix = annotation?.prefix?.nullIfEmpty ?: objDef?.prefix?.nullIfEmpty ?: confPropsDef?.prefix?.nullIfEmpty,
+      isList = isList,
     )
   }
 
@@ -76,17 +68,24 @@ class ConfigurationDocumentationProvider {
     if (annotation?.hidden == true) {
       return null
     }
+    val returnTypeFirstArgument = it.returnType.arguments.firstOrNull()?.type
 
-    return when {
-      it.returnType.isSubtypeOfOneOf(
-        typeOf<String?>(),
-        typeOf<Int?>(),
-        typeOf<Long?>(),
-        typeOf<Double?>(),
-        typeOf<List<*>?>(),
-        typeOf<Boolean?>(),
-        typeOf<Map<*, *>?>()
-      ) || (it.returnType.javaType as? Class<*>)?.isEnum == true -> {
+    when {
+      it.returnType.isSubtypeOf(typeOf<List<*>?>()) && returnTypeFirstArgument?.isPrimitive() == false -> {
+        // we expect this is a list of some configuration property classes, so we need to dig deeper
+        val items = it.getter.call(obj)
+        val child = (items as? List<*>)?.firstOrNull()
+          ?: try {
+            // if the list is empty, we try to instantiate an object ourselves
+            returnTypeFirstArgument.instantiate()
+          } catch (e: Exception) {
+            throw RuntimeException("Property ${it.name} failed to instantiate", e)
+          }
+
+        return handleObject(child, it, annotation, isList = true)
+      }
+
+      it.returnType.isPrimitive() -> {
         // For these simple types, we cannot dig deeper, so we store them as a property
         val name = getPropertyName(annotation, it)
         return Property(
@@ -104,9 +103,13 @@ class ConfigurationDocumentationProvider {
         val child =
           it.getter.call(obj)
             ?: throw RuntimeException("Property ${it.name} is null")
-        handleObject(child, it)
+        return handleObject(child, it, annotation)
       }
     }
+  }
+
+  private fun KType.isPrimitive(): Boolean {
+    return this.isSubtypeOfPrimitiveType() || (this.javaType as? Class<*>)?.isEnum == true
   }
 
   private fun KType.isSubtypeOfOneOf(vararg types: KType): Boolean {
@@ -116,6 +119,65 @@ class ConfigurationDocumentationProvider {
       }
     }
     return false
+  }
+
+  private fun KType.isSubtypeOfPrimitiveType(): Boolean {
+    return isSubtypeOfOneOf(
+      typeOf<String?>(),
+      typeOf<Int?>(),
+      typeOf<Long?>(),
+      typeOf<Double?>(),
+      typeOf<List<*>?>(),
+      typeOf<Boolean?>(),
+      typeOf<Map<*, *>?>()
+    )
+  }
+
+  private fun KType.instantiate(): Any {
+    val kClass = jvmErasure
+
+    return try {
+      // Works if there’s a true no-arg constructor OR all constructor params are optional.
+      kClass.createInstance()
+    } catch (e1: Exception) {
+      // Fallback to raw Java no-arg.
+      try {
+        val ctor = kClass.java.getDeclaredConstructor()
+        ctor.newInstance()
+      } catch (e2: Exception) {
+        e2.addSuppressed(e1)
+        throw RuntimeException("Could not instantiate $kClass", e2)
+      }
+    }
+  }
+
+  private fun List<AdditionalDocsProperties>.buildPropertiesTree(): List<DocItem> = buildList {
+    this@buildPropertiesTree.forEach {
+      if (it.global) {
+        it.properties.forEach {
+          globalItems.add(getPropertyTree(it))
+        }
+        return@forEach
+      }
+      it.properties.forEach {
+        add(getPropertyTree(it))
+      }
+    }
+  }
+
+  private fun List<DocItem>.sortedByGroup(): List<DocItem> {
+    return this.sortedBy(
+      { it is Group },
+    )
+  }
+
+  private fun List<DocItem>.sortedByGroupAndName(): List<DocItem> {
+    return this.sortedWith(
+      compareBy(
+        { it is Group },
+        { it.name },
+      ),
+    )
   }
 
   private fun getPropertyName(
@@ -129,7 +191,7 @@ class ConfigurationDocumentationProvider {
     property: KProperty<*>,
   ): String {
     if (!annotation?.defaultValue.isNullOrEmpty()) {
-      return annotation?.defaultValue ?: ""
+      return annotation.defaultValue
     }
     return property.getter.call(obj)?.toString() ?: ""
   }
@@ -144,6 +206,7 @@ class ConfigurationDocumentationProvider {
         description = docProperty.description,
         children = docProperty.children.map { getPropertyTree(it) },
         prefix = docProperty.prefix.nullIfEmpty,
+        isList = docProperty.isList,
       )
     }
     return Property(
