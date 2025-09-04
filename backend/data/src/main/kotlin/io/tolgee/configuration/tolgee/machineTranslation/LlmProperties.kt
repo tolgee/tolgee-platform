@@ -69,10 +69,13 @@ class LlmProperties : MachineTranslationServiceProperties {
     @DocProperty(description = "ChatGPT reasoning effort")
     override var reasoningEffort: String? = null,
     override var format: String? = null,
-    @DocProperty(description = "Load-balancing instruction HIGH = used for suggestions, LOW = used for batch operations")
+    @DocProperty(
+      description = "Load-balancing instruction HIGH = used for suggestions, LOW = used for batch operations"
+    )
     override var priority: LlmProviderPriority? = null,
     @DocProperty(
-      description = "Specify attempts timeout(s) (Example: [30, 30] - Tolgee will make two attempts, each with timeout of 30s)"
+      description =
+        "Specify attempts timeout(s) (Example: [30, 30] - Tolgee will make two attempts, each with timeout of 30s)"
     )
     override var attempts: List<Int>? = null,
     @DocProperty(hidden = true)
