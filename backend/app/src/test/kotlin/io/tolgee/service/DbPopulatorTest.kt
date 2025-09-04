@@ -4,7 +4,6 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
-import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.testing.AbstractTransactionalTest
@@ -22,9 +21,6 @@ class DbPopulatorTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var userAccountRepository: UserAccountRepository
-
-  @Autowired
-  lateinit var projectRepository: ProjectRepository
 
   @Autowired
   lateinit var apiKeyService: ApiKeyService

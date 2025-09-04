@@ -36,7 +36,7 @@ class OrganizationRoleCachingTest : AbstractSpringTest() {
   @Suppress("LateinitVarOverridesLateinitVar")
   @SpyBean
   @Autowired
-  override lateinit var organizationRoleRepository: OrganizationRoleRepository
+  lateinit var organizationRoleRepository: OrganizationRoleRepository
 
   private lateinit var testData: OrganizationTestData
 

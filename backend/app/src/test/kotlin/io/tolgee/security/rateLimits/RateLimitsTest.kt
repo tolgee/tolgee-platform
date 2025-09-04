@@ -5,6 +5,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsRateLimited
 import io.tolgee.fixtures.andIsUnauthorized
 import io.tolgee.security.ratelimit.RateLimitedException
+import io.tolgee.service.EmailVerificationService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
 import jakarta.servlet.http.HttpServletRequest
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -30,6 +32,10 @@ import org.springframework.boot.test.context.SpringBootTest
   ],
 )
 class RateLimitsTest : AuthorizedControllerTest() {
+
+  @set:Autowired
+  lateinit var emailVerificationService: EmailVerificationService
+
   @BeforeEach
   fun clearCache() {
     cacheManager.getCache(Caches.RATE_LIMITS)?.clear()

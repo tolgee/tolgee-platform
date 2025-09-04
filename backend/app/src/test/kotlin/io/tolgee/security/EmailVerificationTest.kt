@@ -4,6 +4,8 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.EmailTestUtil
+import io.tolgee.repository.EmailVerificationRepository
+import io.tolgee.service.EmailVerificationService
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -23,6 +25,12 @@ class EmailVerificationTest : AbstractControllerTest() {
 
   @Autowired
   override lateinit var tolgeeProperties: TolgeeProperties
+
+  @set:Autowired
+  lateinit var emailVerificationService: EmailVerificationService
+
+  @set:Autowired
+  lateinit var emailVerificationRepository: EmailVerificationRepository
 
   private var defaultFrontendUrl: String? = null
 
@@ -108,7 +116,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   protected fun perform(): MvcResult {
     return mvc.perform(
       post("/api/public/sign_up")
-        .content(mapper.writeValueAsString(signUpDto))
+        .content(objectMapper.writeValueAsString(signUpDto))
         .accept(MediaType.ALL)
         .contentType(MediaType.APPLICATION_JSON),
     )

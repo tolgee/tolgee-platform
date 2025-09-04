@@ -1,6 +1,6 @@
 package io.tolgee.controllers.internal.e2eData
 
-import io.swagger.v3.oas.annotations.Hidden
+import io.tolgee.controllers.internal.InternalController
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.NotificationsTestData
 import io.tolgee.model.notifications.NotificationType
@@ -8,13 +8,10 @@ import io.tolgee.service.notification.NotificationService
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 
-@RestController
-@CrossOrigin(origins = ["*"])
-@Hidden
-@RequestMapping(value = ["internal/e2e-data/notification"])
-@Transactional
+@InternalController(["internal/e2e-data/notification"])
 class NotificationE2eDataController : AbstractE2eDataController() {
   @Autowired
   private lateinit var notificationService: NotificationService
