@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 import {
   Box,
   styled,
@@ -8,6 +8,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Pagination,
 } from '@mui/material';
 import { T } from '@tolgee/react';
 
@@ -31,6 +32,8 @@ const StyledTable = styled(Table)`
   }
 `;
 
+const ITEMS_PER_PAGE = 20;
+
 export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
   const project = useProject();
   const rows = props.result?._embedded?.languages;
@@ -40,10 +43,30 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
   const [showDataRow, setShowDataRow] = useState(
     undefined as components['schemas']['ImportLanguageModel'] | undefined
   );
+  const [currentPage, setCurrentPage] = useState(1);
 
-  if (!rows) {
+  // Reset pagination when new data arrives
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [rows?.length]);
+
+  if (!rows || rows.length === 0) {
     return null;
   }
+
+  // Calculate pagination
+  const totalItems = rows.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentPageRows = rows.slice(startIndex, endIndex);
+
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setCurrentPage(page);
+  };
 
   return (
     <ProjectLanguagesProvider>
@@ -83,7 +106,7 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
+              {currentPageRows.map((row) => (
                 <ImportResultRow
                   onShowFileIssues={() => setViewFileIssuesRow(row)}
                   onResolveConflicts={() => props.onResolveRow(row)}
@@ -95,6 +118,17 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
             </TableBody>
           </StyledTable>
         </TableContainer>
+        {totalPages > 1 && (
+          <Box display="flex" justifyContent="flex-end" mt={1} mb={1}>
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+              data-cy="import-result-pagination"
+            />
+          </Box>
+        )}
       </Box>
     </ProjectLanguagesProvider>
   );
