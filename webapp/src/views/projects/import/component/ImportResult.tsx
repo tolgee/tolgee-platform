@@ -73,7 +73,7 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
     setCurrentPage(page);
   };
 
-  // Keep previous behavior: render nothing when there are no rows
+  // Render nothing when there are no rows
   if (totalItems === 0) {
     return null;
   }
