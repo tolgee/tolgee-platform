@@ -54,19 +54,16 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
     setCurrentPage((p) => Math.min(Math.max(p, 1), newTotalPages));
   }, [rows?.length]);
 
-  if (!rows || rows.length === 0) {
-    return null;
-  }
-
-  // Calculate pagination
-  const totalItems = rows.length;
+  // Calculate pagination (safe when rows is undefined)
+  const totalItems = rows?.length ?? 0;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
-  // Memoize page slice for performance
+  // Memoize page slice for performance (always call hooks at top level)
   const currentPageRows = useMemo(() => {
+    const data = rows ?? [];
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    return rows.slice(startIndex, endIndex);
+    return data.slice(startIndex, endIndex);
   }, [rows, currentPage]);
 
   const handlePageChange = (
@@ -75,6 +72,11 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
   ) => {
     setCurrentPage(page);
   };
+
+  // Keep previous behavior: render nothing when there are no rows
+  if (totalItems === 0) {
+    return null;
+  }
 
   return (
     <ProjectLanguagesProvider>
