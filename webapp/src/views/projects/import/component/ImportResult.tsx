@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { FunctionComponent, useState, useEffect, useMemo } from 'react';
 import {
   Box,
   styled,
@@ -45,9 +45,13 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
   );
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Reset pagination when new data arrives
+  // Clamp current page when data size changes (preserve page when possible)
   useEffect(() => {
-    setCurrentPage(1);
+    const newTotalPages = Math.max(
+      1,
+      Math.ceil((rows?.length ?? 0) / ITEMS_PER_PAGE)
+    );
+    setCurrentPage((p) => Math.min(Math.max(p, 1), newTotalPages));
   }, [rows?.length]);
 
   if (!rows || rows.length === 0) {
@@ -57,9 +61,13 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
   // Calculate pagination
   const totalItems = rows.length;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentPageRows = rows.slice(startIndex, endIndex);
+
+  // Memoize page slice for performance
+  const currentPageRows = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return rows.slice(startIndex, endIndex);
+  }, [rows, currentPage]);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
