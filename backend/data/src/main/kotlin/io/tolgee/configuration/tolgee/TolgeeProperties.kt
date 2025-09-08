@@ -38,7 +38,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
           description =
             "Since Tolgee is built on Spring framework, you have to edit following configuration props\n" +
               "to configure its database connection. These properties can be omitted when using\n" +
-              "[Postgres autostart](#tolgee-postgresautostart-_-postgresautostart), which is enabled by default.",
+              "[Postgres autostart](#tolgee-_-postgres-autostart), which is enabled by default.",
           children = [
             DocProperty(
               name = "url",

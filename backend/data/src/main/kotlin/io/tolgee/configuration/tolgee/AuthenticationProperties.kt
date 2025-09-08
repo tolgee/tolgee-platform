@@ -89,7 +89,7 @@ class AuthenticationProperties(
   @DocProperty(
     description =
       "Whether users need to verify their email addresses when creating their account. " +
-        "Requires a valid [SMTP configuration](#tolgee-smtp-_-smtp).",
+        "Requires a valid [SMTP configuration](#tolgee-_-smtp).",
   )
   var needsEmailVerification: Boolean = false,
   @DocProperty(
