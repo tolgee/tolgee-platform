@@ -25,6 +25,7 @@ import jakarta.persistence.OrderBy
 import jakarta.persistence.Transient
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
+import org.hibernate.annotations.Formula
 import org.hibernate.annotations.Type
 import java.util.*
 
@@ -140,6 +141,9 @@ data class UserAccount(
 
   @ManyToMany(mappedBy = "assignees")
   var tasks: MutableSet<Task> = mutableSetOf()
+
+  @Formula("(select max(ar.timestamp) from activity_revision ar where ar.author_id = id)")
+  var lastActivity: Date? = null
 
   constructor(
     id: Long?,

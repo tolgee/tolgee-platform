@@ -25,6 +25,7 @@ class UserAccountModelAssembler(
       avatar = avatar,
       globalServerRole = entity.role ?: UserAccount.Role.USER,
       mfaEnabled = entity.isMfaEnabled,
+      lastActivity = entity.lastActivity,
       deleted = entity.deletedAt != null,
       disabled = entity.disabledAt != null,
     )
