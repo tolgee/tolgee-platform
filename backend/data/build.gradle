@@ -214,8 +214,9 @@ dependencies {
      * AZURE
      */
     implementation(libs.azureBlob)
-    implementation('io.netty:netty-codec-http:4.1.125.Final')
-    implementation('io.netty:netty-codec-http2:4.1.125.Final')
+    implementation('io.netty:netty-codec-http:4.2.5.Final')
+    implementation('io.netty:netty-codec-http2:4.2.5.Final')
+    implementation('io.netty:netty-handler:4.2.5.Final')
 
     /**
      * SLACK SDK

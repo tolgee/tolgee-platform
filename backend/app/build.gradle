@@ -112,8 +112,9 @@ dependencies {
     testImplementation libs.sendInBlue
     testImplementation "org.springframework.boot:spring-boot-starter-websocket"
     testImplementation(libs.azureBlob)
-    testImplementation('io.netty:netty-codec-http:4.1.125.Final')
-    testImplementation('io.netty:netty-codec-http2:4.1.125.Final')
+    testImplementation('io.netty:netty-codec-http:4.2.5.Final')
+    testImplementation('io.netty:netty-codec-http2:4.2.5.Final')
+    testImplementation('io.netty:netty-handler:4.2.5.Final')
     ktlint(project(":ktlint"))
 
 
