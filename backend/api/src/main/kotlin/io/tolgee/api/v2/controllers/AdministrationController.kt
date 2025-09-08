@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
+import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.organization.OrganizationModel
@@ -50,7 +51,7 @@ class AdministrationController(
   private val organizationModelAssembler: OrganizationModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
-  private val pagedResourcesAssembler: PagedResourcesAssembler<UserAccount>,
+  private val pagedResourcesAssembler: PagedResourcesAssembler<UserAccountView>,
   private val userAccountModelAssembler: UserAccountModelAssembler,
   private val jwtService: JwtService,
 ) : IController {
