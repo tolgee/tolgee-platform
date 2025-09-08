@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { Box, Chip, ListItem, ListItemText, styled } from '@mui/material';
+import { Box, Chip, ListItem, ListItemText, Typography, styled } from '@mui/material';
 
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
@@ -71,7 +71,19 @@ export const AdministrationUsers = ({
                 sx={{ display: 'grid', gridTemplateColumns: '1fr auto' }}
               >
                 <ListItemText>
-                  {u.name} | {u.username} <Chip size="small" label={u.id} />
+                  <Typography variant="body1" component="div">
+                    {u.name} | {u.username} <Chip size="small" label={u.id} />
+                  </Typography>
+                  <Typography 
+                    variant="caption" 
+                    color="text.secondary"
+                    sx={{ fontStyle: 'italic', display: 'block' }}
+                  >
+                    {u.lastActivity 
+                      ? `Last Activity: ${new Date(u.lastActivity).toLocaleString()}` 
+                      : "No activity yet"
+                    }
+                  </Typography>
                 </ListItemText>
                 <Box display="flex" justifyContent="center" gap={1}>
                   <MfaBadge enabled={u.mfaEnabled} />
