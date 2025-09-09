@@ -39,8 +39,6 @@ export const MandatoryDataProvider = (props: any) => {
         replaysSessionSampleRate: 1.0,
         replaysOnErrorSampleRate: 1.0,
       });
-      // eslint-disable-next-line no-console
-      console.info('Using Sentry!');
     }
   }, [config?.clientSentryDsn]);
 
