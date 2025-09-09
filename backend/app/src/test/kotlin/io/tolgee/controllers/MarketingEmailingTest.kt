@@ -2,8 +2,6 @@ package io.tolgee.controllers
 
 import io.tolgee.component.emailContacts.EmailServiceManager
 import io.tolgee.component.emailContacts.MailJetEmailServiceManager
-import io.tolgee.component.emailContacts.SendInBlueEmailServiceManager
-import io.tolgee.configuration.tolgee.SendInBlueProperties
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.EmailTestUtil
@@ -35,16 +33,10 @@ import org.springframework.web.client.RestTemplate
 @SpringBootTest
 @AutoConfigureMockMvc
 class MarketingEmailingTest : AuthorizedControllerTest() {
-  @Autowired
-  lateinit var sendInBlueProperties: SendInBlueProperties
 
   @Autowired
   @MockBean
   lateinit var mailjetEmailServiceManager: MailJetEmailServiceManager
-
-  @Autowired
-  @MockBean
-  lateinit var sendInBlueEmailServiceManager: SendInBlueEmailServiceManager
 
   @MockBean
   @Autowired
@@ -79,7 +71,6 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   @AfterEach
   fun cleanUp() {
-    sendInBlueProperties.listId = null
     tolgeeProperties.authentication.needsEmailVerification = false
   }
 
@@ -183,6 +174,5 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   private fun forServiceManagers(fn: (EmailServiceManager) -> Unit) {
     fn(mailjetEmailServiceManager)
-    fn(sendInBlueEmailServiceManager)
   }
 }

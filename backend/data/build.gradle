@@ -171,7 +171,6 @@ dependencies {
     implementation libs.jacksonModuleKotlin
     implementation 'net.datafaker:datafaker:2.4.4'
     implementation 'jaxen:jaxen:1.2.0'
-    implementation libs.sendInBlue
     implementation(libs.mailjet)
     implementation libs.hibernateTypes
     liquibaseRuntime libs.hibernateTypes
