@@ -27,11 +27,6 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
 
   fun getAllByProjectAndUserNotNull(project: io.tolgee.model.Project?): Set<Permission>
 
-  fun deleteByIdIn(ids: Collection<Long>)
-
-  @Query("select p.id from Permission p where p.project.id = :projectId")
-  fun getIdsByProject(projectId: Long): List<Long>
-
   @Query(
     """select p from Permission p
         left join fetch p.viewLanguages
@@ -79,13 +74,6 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
     projectIds: List<Long>,
     userId: Long,
   ): List<Array<Long>>
-
-  @Query(
-    """
-      from Permission p where p.organization.id in :ids
-    """,
-  )
-  fun getOrganizationBasePermissions(ids: Iterable<Long>): List<Permission>
 
   @Query(
     """

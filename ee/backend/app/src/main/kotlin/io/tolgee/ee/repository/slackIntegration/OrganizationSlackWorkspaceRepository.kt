@@ -18,11 +18,6 @@ interface OrganizationSlackWorkspaceRepository : JpaRepository<OrganizationSlack
     workspaceId: Long,
   ): OrganizationSlackWorkspace?
 
-  fun findByOrganizationIdAndSlackTeamId(
-    organizationId: Long,
-    teamId: String,
-  ): OrganizationSlackWorkspace?
-
   @Query(
     """
     from OrganizationSlackWorkspace osw

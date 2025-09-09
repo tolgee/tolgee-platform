@@ -35,30 +35,6 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
     left join GlossaryTermTranslation tr on tr.term.id = te.id
       and tr.languageTag = te.glossary.baseLanguageTag
       and (:languageTags is null or tr.languageTag in :languageTags)
-    where te.glossary.organizationOwner.id = :organizationId
-      and te.glossary.organizationOwner.deletedAt is null
-      and te.glossary.id = :glossaryId
-      and (
-        lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or
-        lower(tr.text) like lower(concat('%', coalesce(:search, '') , '%')) or
-        :search is null
-      )
-  """,
-  )
-  fun findPaged(
-    organizationId: Long,
-    glossaryId: Long,
-    pageable: Pageable,
-    search: String?,
-    languageTags: Set<String>?,
-  ): Page<GlossaryTerm>
-
-  @Query(
-    """
-    from GlossaryTerm te
-    left join GlossaryTermTranslation tr on tr.term.id = te.id
-      and tr.languageTag = te.glossary.baseLanguageTag
-      and (:languageTags is null or tr.languageTag in :languageTags)
     where te.glossary = :glossary
       and (
         lower(te.description) like lower(concat('%', coalesce(:search, ''), '%')) or

@@ -20,8 +20,6 @@ interface TranslationCommentRepository : JpaRepository<TranslationComment, Long>
     pageable: Pageable,
   ): Page<TranslationComment>
 
-  fun deleteAllByTranslationIdIn(translationIds: Collection<Long>)
-
   fun deleteByTranslationIdIn(ids: Collection<Long>)
 
   @Query(
