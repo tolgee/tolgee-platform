@@ -22,4 +22,5 @@ data class Group(
   override val description: String?,
   val children: List<DocItem>,
   val prefix: String?,
+  val isList: Boolean,
 ) : DocItem
