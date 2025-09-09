@@ -1,7 +1,6 @@
 package io.tolgee.repository.dataImport
 
 import io.tolgee.model.Language
-import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.views.ImportTranslationView
@@ -78,14 +77,6 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
   @Query("delete from ImportTranslation it where it.language = :language")
   @Modifying
   fun deleteAllByLanguage(language: ImportLanguage)
-
-  @Transactional
-  @Query(
-    """delete from ImportTranslation it where it.key.id in 
-        (select k.id from ImportKey k join k.file f where f.import = :import)""",
-  )
-  @Modifying
-  fun deleteAllByImport(import: Import)
 
   fun findByIdAndLanguageId(
     translationId: Long,

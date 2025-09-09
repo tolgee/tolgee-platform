@@ -1,7 +1,6 @@
 package io.tolgee.repository.dataImport
 
 import io.tolgee.model.Language
-import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.views.ImportLanguageView
 import org.springframework.context.annotation.Lazy
@@ -70,14 +69,6 @@ LEFT JOIN il.existingLanguage el
     pageable: Pageable,
   ): Page<ImportLanguageView>
 
-  @Modifying
-  @Transactional
-  @Query(
-    """delete from ImportLanguage l where l.file in 
-        (select f from ImportFile f where f.import = :import)""",
-  )
-  fun deleteAllByImport(import: Import)
-
   @Query(
     """
       $VIEW_BASE_QUERY
@@ -86,15 +77,4 @@ LEFT JOIN il.existingLanguage el
             """,
   )
   fun findViewById(languageId: Long): Optional<ImportLanguageView>
-
-  @Query(
-    """
-      select distinct il.existingLanguage.id 
-        from ImportLanguage il 
-        join il.file if 
-        where if.import.id = :importId 
-          and il.existingLanguage.id is not null
-    """,
-  )
-  fun findAssignedExistingLanguageIds(importId: Long): List<Long>
 }

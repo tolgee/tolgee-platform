@@ -45,27 +45,6 @@ interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
 
   @Query(
     """
-    from KeyScreenshotReference ksr
-    join fetch ksr.key k
-    left join fetch k.namespace
-    where ksr.screenshot in :screenshots
-    order by k.id, ksr.screenshot.id
-  """,
-  )
-  fun getScreenshotReferences(screenshots: Collection<Screenshot>): List<KeyScreenshotReference>
-
-  @Query(
-    """
-    from Screenshot s
-    join fetch s.keyScreenshotReferences ksr
-    join fetch ksr.key k
-    where s in :screenshots
-  """,
-  )
-  fun getScreenshotsWithReferences(screenshots: Collection<Screenshot>): List<Screenshot>
-
-  @Query(
-    """
     from Screenshot s 
       join fetch s.keyScreenshotReferences ksr
     where s.id in :ids

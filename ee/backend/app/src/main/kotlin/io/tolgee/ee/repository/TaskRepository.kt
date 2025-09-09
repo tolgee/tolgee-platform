@@ -390,19 +390,4 @@ interface TaskRepository : JpaRepository<Task, Long> {
     """,
   )
   fun getByAgencyId(agencyId: Long): List<Task>
-
-  @Query(
-    """
-      select t.agency_id
-      from Task t
-        left join translation_agency a on t.agency_id = a.id
-      where t.agency_id is not null
-        and t.project_id = :projectId
-        and a.deleted_at is null
-      order by t.number desc
-      limit 1
-    """,
-    nativeQuery = true,
-  )
-  fun getLastTaskWithAgency(projectId: Long): Long?
 }
