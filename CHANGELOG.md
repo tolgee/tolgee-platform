@@ -1,3 +1,11 @@
+## [3.132.1](https://github.com/tolgee/tolgee-platform/compare/v3.132.0...v3.132.1) (2025-09-09)
+
+
+### Bug Fixes
+
+* add support for lists in plaform docs + fixes for rendering existing config ([#3231](https://github.com/tolgee/tolgee-platform/issues/3231)) ([4c1eaf9](https://github.com/tolgee/tolgee-platform/commit/4c1eaf9ed7e7571b7a21461eb7fdeb538ce16b3d))
+* suggestion fixes ([#3208](https://github.com/tolgee/tolgee-platform/issues/3208)) ([c61bf46](https://github.com/tolgee/tolgee-platform/commit/c61bf467fe79826440cce9d40d08f86591458f50))
+
 # [3.132.0](https://github.com/tolgee/tolgee-platform/compare/v3.131.0...v3.132.0) (2025-09-01)
 
 
