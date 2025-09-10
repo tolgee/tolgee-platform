@@ -466,10 +466,19 @@ type Email = {
   subject: string;
 };
 
-export const getAllEmails = () =>
-  cy
-    .request('http://localhost:21080/api/emails')
-    .then((r) => r.body as Email[]);
+function fetchEmails(attempt = 1) {
+  return cy.request('http://localhost:21080/api/emails').then((r) => {
+    const emails = r.body as Email[];
+    if (emails.length === 0 && attempt < 3) {
+      cy.wait(1000); // wait a bit before retrying
+      return fetchEmails(attempt + 1);
+    }
+    return emails;
+  });
+}
+
+export const getAllEmails = () => fetchEmails();
+
 export const deleteAllEmails = () =>
   cy.request({ url: 'http://localhost:21080/api/emails', method: 'DELETE' });
 
