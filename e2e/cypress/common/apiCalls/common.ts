@@ -411,16 +411,15 @@ export const getParsedEmailVerificationByIndex = (index: number) => {
       };
     });
   } else {
-    const id = getAllEmails().then((emails) => {
-      return emails[index].ID;
-    });
-    return getEmail(id).then((email) => {
-      return {
-        verifyEmailLink: email.HTML.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
-        fromAddress: email.From.Address,
-        toAddress: email.To[0].Address,
-        content: email.HTML,
-      };
+    return getAllEmails().then((emails) => {
+      return getEmail(emails[index].ID).then((email) => {
+        return {
+          verifyEmailLink: email.HTML.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
+          fromAddress: email.From.Address,
+          toAddress: email.To[0].Address,
+          content: email.HTML,
+        };
+      });
     });
   }
 };
