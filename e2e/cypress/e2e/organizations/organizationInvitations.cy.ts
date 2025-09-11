@@ -6,12 +6,14 @@ import {
   gcy,
 } from '../../common/shared';
 import {
+  deleteAllEmails,
   getParsedEmailInvitationLink,
   login,
   logout,
   setBypassSeatCountCheck,
 } from '../../common/apiCalls/common';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
+import { waitForGlobalLoading } from '../../common/loading';
 
 describe('Organization Invitations', () => {
   let organizationData: Record<string, { slug: string }>;
@@ -28,6 +30,7 @@ describe('Organization Invitations', () => {
 
   beforeEach(() => {
     setBypassSeatCountCheck(true);
+    deleteAllEmails();
   });
 
   afterEach(() => {
@@ -145,6 +148,7 @@ describe('Organization Invitations', () => {
         return clipboard;
       });
     } else {
+      waitForGlobalLoading();
       return assertMessage('Invitation was sent').then(() => {
         return getParsedEmailInvitationLink();
       });

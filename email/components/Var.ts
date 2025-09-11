@@ -29,7 +29,11 @@ export default function Var({
 }: Props) {
   return React.createElement(
     'span',
-    { [injectHtml ? 'th:utext' : 'th:text']: `\${${variable}}` },
+    {
+      'th:utext': injectHtml
+        ? `\${${variable}}`
+        : `\${#strings.escapeXml(${variable})}`,
+    },
     demoValue
   );
 }
