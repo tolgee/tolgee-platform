@@ -502,10 +502,39 @@ function fetchEmails(limit = 0) {
 
 export const getAllEmails = () => fetchEmails();
 
-export const getLatestEmail = () =>
-  cy
-    .request({ url: `http://localhost:21080/api/v1/message/latest` })
-    .then((r) => r.body as EmailSummary);
+export const getLatestEmail = (): Cypress.Chainable<EmailSummary> => {
+  const promise = new Cypress.Promise<EmailSummary>((resolve, reject) => {
+    const attempt = (count: number) => {
+      cy.request({
+        url: 'http://localhost:21080/api/v1/message/latest',
+        failOnStatusCode: false,
+      }).then((r) => {
+        const body = r.body as EmailSummary | undefined;
+        const hasMessage =
+          r.status === 200 && body && (body.HTML || body.Subject);
+
+        if (hasMessage) {
+          resolve(body!);
+          return;
+        }
+
+        if (count < 3) {
+          cy.wait(250).then(() => attempt(count + 1));
+        } else {
+          reject(
+            new Error(
+              `Failed to fetch latest email after ${count + 1} attempt(s).`
+            )
+          );
+        }
+      });
+    };
+
+    attempt(0);
+  });
+
+  return cy.wrap(promise);
+};
 
 export const getEmail = (id) =>
   cy
