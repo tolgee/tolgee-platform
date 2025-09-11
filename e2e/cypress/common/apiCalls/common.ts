@@ -368,126 +368,162 @@ export const addScreenshot = (
 };
 
 export const getLastEmail = () =>
-  getAllEmails().then((r) => {
+  getLatestEmail().then((r) => {
     return {
-      fromAddress: r[0].from.value[0].address,
-      toAddress: r[0].to.value[0].address,
-      subject: r[0].subject,
-      html: r[0].html,
+      fromAddress: r.From.Address,
+      toAddress: r.To[0].Address,
+      subject: r.Subject,
+      html: r.HTML,
     };
   });
 
 export const getAssignedEmailNotification = () =>
-  getAllEmails().then((r) => {
-    const content = r[0].html;
+  getLatestEmail().then((r) => {
+    const content = r.HTML;
     const result = [...content.matchAll(/href="(.*?)"/g)];
     return {
       taskLink: result[0][1],
       myTasksLink: result[2][1],
-      fromAddress: r[0].from.value[0].address,
-      toAddress: r[0].to.value[0].address,
-      content: r[0].html,
+      fromAddress: r.From.Address,
+      toAddress: r.To[0].Address,
+      content: r.HTML,
     };
   });
 
 export const getParsedEmailVerification = () =>
-  getAllEmails().then((r) => {
+  getLatestEmail().then((r) => {
     return {
-      verifyEmailLink: r[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
-      fromAddress: r[0].from.value[0].address,
-      toAddress: r[0].to.value[0].address,
-      content: r[0].html,
+      verifyEmailLink: r.HTML.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
+      fromAddress: r.From.Address,
+      toAddress: r.To[0].Address,
+      content: r.HTML,
     };
   });
 
-export const getParsedEmailVerificationByIndex = (index: number) =>
-  getAllEmails().then((r) => {
-    return {
-      verifyEmailLink: r[index].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
-      fromAddress: r[index].from.value[0].address,
-      toAddress: r[index].to.value[0].address,
-      content: r[index].html,
-    };
-  });
+export const getParsedEmailVerificationByIndex = (index: number) => {
+  if (index === 0) {
+    return getLatestEmail().then((email) => {
+      return {
+        verifyEmailLink: email.HTML.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
+        fromAddress: email.From.Address,
+        toAddress: email.To[0].Address,
+        content: email.HTML,
+      };
+    });
+  } else {
+    const id = getAllEmails().then((emails) => {
+      return emails[index].ID;
+    });
+    return getEmail(id).then((email) => {
+      return {
+        verifyEmailLink: email.HTML.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
+        fromAddress: email.From.Address,
+        toAddress: email.To[0].Address,
+        content: email.HTML,
+      };
+    });
+  }
+};
 
 export const getParsedEmailInvitationLink = () =>
-  getAllEmails().then(
-    (emails) =>
-      emails[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1') as string
+  getLatestEmail().then(
+    (email) => email.HTML.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1') as string
   );
 
 export const getAgencyInvitationLinks = () =>
   getAllEmails().then((emails) => {
     const email = emails.find((e) =>
-      e.html.includes('New translation request')
+      e.Subject.includes('New translation request')
     );
-    const links = Array.from(
-      email.html.matchAll(/(http:\/\/[\w:/]*)/g),
-      (m) => m[0]
-    );
-    const invitation = links.find((l) => l.includes('accept_invitation'));
-    const project = links.find(
-      (l) => l.includes('/projects/') && !l.includes('/task')
-    );
-    const tasks = links.filter((l) => l.includes('/task'));
-    return {
-      invitation,
-      project,
-      tasks,
-    };
+    return getEmail(email.ID).then((e) => {
+      const links = Array.from(
+        e.HTML.matchAll(/(http:\/\/[\w:/]*)/g),
+        (m) => m[0]
+      );
+
+      const invitation = links.find((l) => l.includes('accept_invitation'));
+      const project = links.find(
+        (l) => l.includes('/projects/') && !l.includes('/task')
+      );
+      const tasks = links.filter((l) => l.includes('/task'));
+      return {
+        invitation,
+        project,
+        tasks,
+      };
+    });
   });
 
 export const getOrderConfirmation = () =>
   getAllEmails().then((emails) => {
     const email = emails.find((e) =>
-      e.html.includes(
-        'The Agency will review your request and will get back to you'
-      )
+      e.Subject.includes('Your translation order to')
     );
-    const links = Array.from(
-      email.html.matchAll(/(http:\/\/[\w:/]*)/g),
-      (m) => m[0]
-    );
-    const project = links.find(
-      (l) => l.includes('/projects/') && !l.includes('/task')
-    );
-    const tasks = links.filter((l) => l.includes('/task'));
-    return {
-      project,
-      tasks,
-      content: email.html,
-    };
+    return getEmail(email.ID).then((e) => {
+      const links = Array.from(
+        e.HTML.matchAll(/(http:\/\/[\w:/]*)/g),
+        (m) => m[0]
+      );
+      const project = links.find(
+        (l) => l.includes('/projects/') && !l.includes('/task')
+      );
+      const tasks = links.filter((l) => l.includes('/task'));
+      return {
+        project,
+        tasks,
+        content: e.HTML,
+      };
+    });
   });
 
 type Email = {
-  to: any;
-  from: any;
-  html: string;
-  subject: string;
+  ID: string;
+  To: any;
+  From: any;
+  Subject: string;
 };
 
-function fetchEmails(attempt = 1) {
-  return cy.request('http://localhost:21080/api/emails').then((r) => {
-    const emails = r.body as Email[];
-    if (emails.length === 0 && attempt < 3) {
-      cy.wait(1000); // wait a bit before retrying
-      return fetchEmails(attempt + 1);
-    }
-    return emails;
+type EmailSummary = {
+  HTML: string;
+  Subject: string;
+  To: any;
+  From: any;
+};
+
+function fetchEmails(limit = 0) {
+  let options = { url: 'http://localhost:21080/api/v1/messages' };
+  if (limit) {
+    options = { ...options, ...{ qs: { limit } } };
+  }
+  return cy.request(options).then((r) => {
+    return r.body.messages as Email[];
   });
 }
 
 export const getAllEmails = () => fetchEmails();
 
+export const getLatestEmail = () =>
+  cy
+    .request({ url: `http://localhost:21080/api/v1/message/latest` })
+    .then((r) => r.body as EmailSummary);
+
+export const getEmail = (id) =>
+  cy
+    .request({ url: `http://localhost:21080/api/v1/message/${id}` })
+    .then((r) => r.body as EmailSummary);
+
 export const deleteAllEmails = () =>
-  cy.request({ url: 'http://localhost:21080/api/emails', method: 'DELETE' });
+  cy.request({
+    url: 'http://localhost:21080/api/v1/messages',
+    method: 'DELETE',
+  });
 
 export const getParsedResetPasswordEmail = () =>
-  getAllEmails().then((r) => {
+  getLatestEmail().then((r) => {
     return {
-      resetLink: r[0].html.replace(/.*(http:\/\/[\w:/=]*).*/gs, '$1'),
-      fromAddress: r[0].from.value[0].address,
-      toAddress: r[0].to.value[0].address,
+      resetLink: r.HTML.replace(/.*(http:\/\/[\w:/=]*).*/gs, '$1'),
+      fromAddress: r.From.Address,
+      toAddress: r.To[0].Address,
     };
   });
 
