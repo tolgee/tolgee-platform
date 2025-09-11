@@ -409,6 +409,7 @@
   "announcement_feature_tasks": "Wir haben eine neue Funktion veröffentlicht: Aufgaben!",
   "announcement_general_link_text": "Mehr anzeigen",
   "announcement_glossaries_and_playground": "Wir haben <linkGlossaries>Glossare</linkGlossaries> und <linkPlayground>AI Playground</linkPlayground> veröffentlicht!",
+  "announcement_improved_figma_android_and_ios": "Wir haben ein verbessertes <linkFigma>Figma-Plugin</linkFigma> sowie <linkAndroid>Android</linkAndroid>- und <linkIos>iOS</linkIos>-SDKs veröffentlicht!",
   "announcement_labels": "Wir haben Übersetzungsbeschriftungen veröffentlicht!",
   "announcement_llm_providers_and_playground": "Wir haben <linkPlayground>AI Playground</linkPlayground> und <linkProviders>Custom LLM Providers</linkProviders> veröffentlicht!",
   "announcement_new_pricing": "Tolgee führt neue Preise für selbst gehostete Instanzen ein",

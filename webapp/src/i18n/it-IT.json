@@ -409,6 +409,7 @@
   "announcement_feature_tasks": "Abbiamo rilasciato una nuova funzionalità: Attività!",
   "announcement_general_link_text": "Mostra altro",
   "announcement_glossaries_and_playground": "Abbiamo rilasciato <linkGlossaries>Glossari</linkGlossaries> e <linkPlayground>AI Playground</linkPlayground>!",
+  "announcement_improved_figma_android_and_ios": "Abbiamo rilasciato un <linkFigma>plugin Figma</linkFigma>, SDK <linkAndroid>Android</linkAndroid> e <linkIos>iOS</linkIos> migliorati!",
   "announcement_labels": "Abbiamo rilasciato le etichette di traduzione!",
   "announcement_llm_providers_and_playground": "Abbiamo rilasciato <linkPlayground>AI Playground</linkPlayground> e <linkProviders>Fornitori LLM Personalizzati</linkProviders>!",
   "announcement_new_pricing": "Tolgee sta introducendo nuovi prezzi per le istanze self-hosted",

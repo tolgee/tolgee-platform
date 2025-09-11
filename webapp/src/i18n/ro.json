@@ -410,6 +410,7 @@
   "announcement_feature_tasks": "Am lansat o nouă funcționalitate: Sarcini!",
   "announcement_general_link_text": "Afișează mai mult",
   "announcement_glossaries_and_playground": "Am lansat <linkGlossaries>Glosare</linkGlossaries> și <linkPlayground>AI Playground</linkPlayground>!",
+  "announcement_improved_figma_android_and_ios": "Am lansat un <linkFigma>plugin Figma</linkFigma> îmbunătățit și SDK-uri <linkAndroid>Android</linkAndroid> și <linkIos>iOS</linkIos>!",
   "announcement_labels": "Am lansat etichetele de traducere!",
   "announcement_llm_providers_and_playground": "Am lansat <linkPlayground>AI Playground</linkPlayground> și <linkProviders>Furnizori LLM Personalizați</linkProviders>!",
   "announcement_new_pricing": "Tolgee introduce noi prețuri pentru instanțele auto-găzduite",

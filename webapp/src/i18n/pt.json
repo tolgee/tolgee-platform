@@ -409,6 +409,7 @@
   "announcement_feature_tasks": "Lançamos um novo recurso: Tarefas!",
   "announcement_general_link_text": "Mostrar mais",
   "announcement_glossaries_and_playground": "Lançamos <linkGlossaries>Glossários</linkGlossaries> e <linkPlayground>AI Playground</linkPlayground>!",
+  "announcement_improved_figma_android_and_ios": "Lançámos um <linkFigma>plugin Figma</linkFigma> aprimorado e SDKs para <linkAndroid>Android</linkAndroid> e <linkIos>iOS</linkIos>!",
   "announcement_labels": "Lançamos etiquetas de tradução!",
   "announcement_llm_providers_and_playground": "Lançamos <linkPlayground>AI Playground</linkPlayground> e <linkProviders>Provedores LLM Personalizados</linkProviders>!",
   "announcement_new_pricing": "O Tolgee está introduzindo novos preços para instâncias auto-hospedadas",

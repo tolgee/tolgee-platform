@@ -410,6 +410,7 @@
   "announcement_feature_tasks": "Vi har udgivet en ny funktion: Opgaver!",
   "announcement_general_link_text": "Vis mere",
   "announcement_glossaries_and_playground": "Vi har lanceret <linkGlossaries>glossaries</linkGlossaries> og <linkPlayground>AI Playground</linkPlayground>!",
+  "announcement_improved_figma_android_and_ios": "Vi har udgivet en forbedret <linkFigma>Figma-plugin</linkFigma>, <linkAndroid>Android</linkAndroid> og <linkIos>iOS</linkIos> SDK'er!",
   "announcement_labels": "Vi har udgivet oversættelsesetiketter!",
   "announcement_llm_providers_and_playground": "Vi har lanceret <linkPlayground>AI Playground</linkPlayground> og <linkProviders>Brugerdefinerede LLM-udbydere</linkProviders>!",
   "announcement_new_pricing": "Tolgee introducerer ny prissætning for selvhostede instanser",

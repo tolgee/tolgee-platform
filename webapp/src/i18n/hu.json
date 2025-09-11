@@ -409,6 +409,7 @@
   "announcement_feature_tasks": "Új funkciót adtunk ki: Feladatok!",
   "announcement_general_link_text": "Továbbiak megjelenítése",
   "announcement_glossaries_and_playground": "Kiadásra került a <linkGlossaries>glossaries</linkGlossaries> és az <linkPlayground>AI Játszótér</linkPlayground>!",
+  "announcement_improved_figma_android_and_ios": "Kiadtunk egy továbbfejlesztett <linkFigma>Figma bővítményt</linkFigma>, valamint <linkAndroid>Android</linkAndroid> és <linkIos>iOS</linkIos> SDK-kat!",
   "announcement_labels": "Megjelentek a fordítási címkék!",
   "announcement_llm_providers_and_playground": "Kiadásra került az <linkPlayground>AI Játszótér</linkPlayground> és az <linkProviders>Egyedi LLM Szolgáltatók</linkProviders>!",
   "announcement_new_pricing": "A Tolgee új árazást vezet be a saját szerveren futó példányokhoz",

@@ -1,3 +1,10 @@
+## [3.132.2](https://github.com/tolgee/tolgee-platform/compare/v3.132.1...v3.132.2) (2025-09-11)
+
+
+### Bug Fixes
+
+* add top banner announcement - improved figma plugin and released android and ios sdks ([#3244](https://github.com/tolgee/tolgee-platform/issues/3244)) ([9e20c3d](https://github.com/tolgee/tolgee-platform/commit/9e20c3d87a042491b9b2d454a733084eb16eae2e))
+
 ## [3.132.1](https://github.com/tolgee/tolgee-platform/compare/v3.132.0...v3.132.1) (2025-09-09)
 
 
