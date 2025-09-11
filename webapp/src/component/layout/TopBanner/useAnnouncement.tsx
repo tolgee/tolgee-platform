@@ -148,6 +148,26 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_IMPROVED_FIGMA_ANDROID_AND_IOS':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_improved_figma_android_and_ios"
+                params={{
+                  linkFigma: (
+                    <BannerLink href="https://docs.tolgee.io/platform/integrations/figma_plugin/setup" />
+                  ),
+                  linkAndroid: (
+                    <BannerLink href="https://docs.tolgee.io/android-sdk" />
+                  ),
+                  linkIos: <BannerLink href="https://docs.tolgee.io/ios-sdk" />,
+                }}
+              />
+            }
+          />
+        );
+
       default:
         return assertUnreachableReturnNull(value);
     }
