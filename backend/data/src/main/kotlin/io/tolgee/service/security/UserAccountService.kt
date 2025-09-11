@@ -569,7 +569,7 @@ class UserAccountService(
   fun findAllWithDisabledPaged(
     pageable: Pageable,
     search: String?,
-  ): Page<UserAccount> {
+  ): Page<UserAccountView> {
     return userAccountRepository.findAllWithDisabledPaged(search, pageable)
   }
 
