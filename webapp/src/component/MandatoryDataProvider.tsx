@@ -1,6 +1,6 @@
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useEffect } from 'react';
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '@sentry/react';
 import { useGlobalLoading } from './GlobalLoading';
 import { useIdentify } from 'tg.hooks/useIdentify';
 import { useIsFetching, useIsMutating } from 'react-query';
@@ -36,8 +36,16 @@ export const MandatoryDataProvider = (props: any) => {
     if (config?.clientSentryDsn) {
       Sentry.init({
         dsn: config.clientSentryDsn,
-        replaysSessionSampleRate: 1.0,
-        replaysOnErrorSampleRate: 1.0,
+        replaysSessionSampleRate: 0.1, // 10% of sessions
+        replaysOnErrorSampleRate: 1.0, // 100% of sessions that end in an error
+        integrations: [
+          Sentry.browserTracingIntegration(),
+          Sentry.replayIntegration({
+            maskAllText: false,
+            blockAllMedia: false,
+          }),
+        ],
+        tracesSampleRate: 1.0,
       });
     }
   }, [config?.clientSentryDsn]);
@@ -52,7 +60,7 @@ export const MandatoryDataProvider = (props: any) => {
         id: userData.id.toString(),
       });
     }
-  }, [userData?.id]);
+  }, [userData?.id, userData?.username]);
 
   return props.children;
 };
