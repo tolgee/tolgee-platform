@@ -17,8 +17,8 @@
     "@mui/material": "^5.5.3",
     "@mui/x-date-pickers": "^7.9.0",
     "@openreplay/tracker": "^3.5.4",
-    "@sentry/browser": "^7.120.4",
-    "@sentry/vite-plugin": "^4.0.1",
+    "@sentry/react": "^10.11.0",
+    "@sentry/vite-plugin": "^4.3.0",
     "@stomp/stompjs": "^6.1.2",
     "@tginternal/editor": "1.15.2",
     "@tolgee/format-icu": "^5.27.0",
@@ -63,7 +63,6 @@
     "use-debounce": "^10.0.0",
     "usehooks-ts": "^3.0.2",
     "uuid": "9.0.0",
-    "web-vitals": "^2.1.0",
     "yup": "^0.32.9",
     "zustand": "^4.5.5",
     "zxcvbn": "^4.4.2"
@@ -108,7 +107,7 @@
   },
   "devDependencies": {
     "@mdx-js/loader": "1.6.22",
-    "@sentry/types": "^6.5.1",
+    "@sentry/types": "^10.11.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.0.0",
     "@testing-library/user-event": "^13.2.1",
