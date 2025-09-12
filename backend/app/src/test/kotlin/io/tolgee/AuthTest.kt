@@ -84,7 +84,7 @@ class AuthTest : AbstractControllerTest() {
     val response =
       doAuthentication(initialUsername, initialPassword)
         .andReturn().response.contentAsString
-    val token = mapper.readValue(response, HashMap::class.java)["accessToken"] as String?
+    val token = objectMapper.readValue(response, HashMap::class.java)["accessToken"] as String?
     val mvcResult =
       mvc.perform(
         MockMvcRequestBuilders.get("/api/projects")

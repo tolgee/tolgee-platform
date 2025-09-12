@@ -3,6 +3,7 @@ package io.tolgee.ee.service
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.AbstractSpringTest
 import io.tolgee.api.SubscriptionStatus
+import io.tolgee.component.SchedulingManager
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.ee.EeLicensingMockRequestUtil
@@ -27,6 +28,10 @@ import kotlin.properties.Delegates
 
 @Suppress("SpringBootApplicationProperties")
 class EeSubscriptionProviderImplTest : AbstractSpringTest() {
+
+  @Autowired
+  lateinit var schedulingManager: SchedulingManager
+
   @Autowired
   private lateinit var eeProperties: EeProperties
 

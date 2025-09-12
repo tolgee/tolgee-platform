@@ -5,12 +5,17 @@ import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.BeforeEach
+import org.springframework.beans.factory.annotation.Autowired
 
 class BaseOrganizationControllerTest : AuthorizedControllerTest() {
   protected lateinit var dummyDto: OrganizationDto
   protected lateinit var dummyDto2: OrganizationDto
+
+  @Autowired
+  open lateinit var organizationRoleRepository: OrganizationRoleRepository
 
   @BeforeEach
   fun setup() {

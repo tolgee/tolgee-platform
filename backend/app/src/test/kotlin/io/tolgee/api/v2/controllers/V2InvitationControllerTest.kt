@@ -165,7 +165,7 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
         ),
       ).andIsOk
 
-    return mapper.readValue(result.andReturn().response.contentAsByteArray, ProjectInvitationModel::class.java)
+    return objectMapper.readValue(result.andReturn().response.contentAsByteArray, ProjectInvitationModel::class.java)
   }
 
   private fun createOrganizationInvitation(organization: Organization): OrganizationInvitationModel {
@@ -179,6 +179,9 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
         ),
       ).andIsOk
 
-    return mapper.readValue(result.andReturn().response.contentAsByteArray, OrganizationInvitationModel::class.java)
+    return objectMapper.readValue(
+      result.andReturn().response.contentAsByteArray,
+      OrganizationInvitationModel::class.java
+    )
   }
 }

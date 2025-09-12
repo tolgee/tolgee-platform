@@ -13,11 +13,13 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.model.Language
 import io.tolgee.model.mtServiceConfig.Formality
+import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.machineTranslation.MtServiceInfo
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -25,6 +27,9 @@ import org.springframework.boot.test.context.SpringBootTest
 @AutoConfigureMockMvc
 class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
   lateinit var testData: MtSettingsTestData
+
+  @Autowired
+  lateinit var mtServiceConfigService: MtServiceConfigService
 
   @BeforeEach
   fun setup() {

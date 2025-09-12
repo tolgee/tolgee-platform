@@ -13,10 +13,12 @@ import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.service.translation.TranslationCommentService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import java.math.BigDecimal
@@ -25,6 +27,9 @@ import java.math.BigDecimal
 @AutoConfigureMockMvc
 class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationCommentsTestData
+
+  @Autowired
+  lateinit var translationCommentService: TranslationCommentService
 
   @BeforeEach
   fun setup() {

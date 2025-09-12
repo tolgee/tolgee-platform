@@ -9,6 +9,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.retry
 import io.tolgee.model.notifications.NotificationType.MFA_DISABLED
 import io.tolgee.model.notifications.NotificationType.MFA_ENABLED
+import io.tolgee.service.security.MfaService
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.NotificationTestUtil
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -25,6 +26,9 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
   }
 
   private val encodedKey: ByteArray = Base32().decode(TOTP_KEY)
+
+  @Autowired
+  lateinit var mfaService: MfaService
 
   @Autowired
   private lateinit var notificationUtil: NotificationTestUtil

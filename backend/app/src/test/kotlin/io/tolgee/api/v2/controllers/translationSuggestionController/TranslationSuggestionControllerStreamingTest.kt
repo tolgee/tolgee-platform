@@ -11,22 +11,15 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.model.Language
 import io.tolgee.model.enums.LlmProviderType
-import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 
 class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("/v2/projects/") {
-  @Suppress("LateinitVarOverridesLateinitVar")
-  @SpyBean
-  @Autowired
-  override lateinit var mtService: MtService
 
   lateinit var testData: BaseTestData
 
@@ -43,7 +36,6 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
       freeCreditsAmount = -1,
       enabledServices = setOf(MtServiceType.GOOGLE, MtServiceType.PROMPT, MtServiceType.DEEPL),
     )
-    Mockito.clearInvocations(mtService)
     internalProperties.fakeMtProviders = true
     llmProperties.enabled = true
     llmProperties.providers = mutableListOf(

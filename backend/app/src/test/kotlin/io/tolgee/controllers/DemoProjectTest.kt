@@ -5,16 +5,21 @@ import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Project
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 
 @AutoConfigureMockMvc
 class DemoProjectTest :
   AbstractControllerTest() {
   val demoOrganizationName = "Oh my organization"
+
+  @Autowired
+  lateinit var languageStatsService: LanguageStatsService
 
   @Test
   fun `creates demo project`() {
