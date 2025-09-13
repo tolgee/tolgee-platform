@@ -111,8 +111,6 @@ class TolgeeProperties(
   var machineTranslation: MachineTranslationProperties = MachineTranslationProperties(),
   var postgresAutostart: PostgresAutostartProperties = PostgresAutostartProperties(),
   @DocProperty(hidden = true)
-  var sendInBlue: SendInBlueProperties = SendInBlueProperties(),
-  @DocProperty(hidden = true)
   var mailjet: MailjetProperties = MailjetProperties(),
   var import: ImportProperties = ImportProperties(),
   var rateLimit: RateLimitProperties = RateLimitProperties(),

@@ -37,7 +37,6 @@ dependencyResolutionManagement {
     versionCatalogs {
         libs {
             library('stripe', 'com.stripe', 'stripe-java').version('22.11.0')
-            library('sendInBlue', 'com.sendinblue', 'sib-api-v3-sdk').version('5.3.0')
             library('jacksonModuleKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version(jacksonVersion)
             library('jacksonDataFormatXml', 'com.fasterxml.jackson.dataformat', 'jackson-dataformat-xml').version(jacksonVersion)
             library('kotlin', 'org.jetbrains.kotlin', 'kotlin-gradle-plugin').version(kotlinVersion)

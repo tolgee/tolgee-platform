@@ -171,7 +171,6 @@ dependencies {
     implementation libs.jacksonModuleKotlin
     implementation 'net.datafaker:datafaker:2.4.4'
     implementation 'jaxen:jaxen:1.2.0'
-    implementation libs.sendInBlue
     implementation(libs.mailjet)
     implementation libs.hibernateTypes
     liquibaseRuntime libs.hibernateTypes
@@ -214,8 +213,9 @@ dependencies {
      * AZURE
      */
     implementation(libs.azureBlob)
-    implementation('io.netty:netty-codec-http:4.1.118.Final')
-    implementation('io.netty:netty-codec-http2:4.1.118.Final')
+    implementation('io.netty:netty-codec-http:4.2.5.Final')
+    implementation('io.netty:netty-codec-http2:4.2.5.Final')
+    implementation('io.netty:netty-handler:4.2.5.Final')
 
     /**
      * SLACK SDK
