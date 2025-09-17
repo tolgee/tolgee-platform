@@ -8,4 +8,11 @@ class BranchServiceOssStub : BranchService {
   override fun getAllBranches(projectId: Long, page: Pageable, search: String?): Page<Branch> {
     return Page.empty()
   }
+  override fun createBranch(projectId: Long, name: String, originBranchId: Long): Branch {
+    throw UnsupportedOperationException()
+  }
+
+  override fun deleteBranch(projectId: Long, branchId: Long) {
+    throw UnsupportedOperationException()
+  }
 }
