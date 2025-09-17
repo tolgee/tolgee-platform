@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.model.branching.Branch
 import net.datafaker.Faker
 import java.util.UUID
 
@@ -12,6 +13,11 @@ class KeySearchTestData : BaseTestData() {
       addKeyWithTranslations("this-is-key", "Hallo!", "Hello!")
       addKeyWithTranslations("this-is-key-2", "Aj!", "Oh!")
       addKeyWithTranslations("beauty", "Krása!", "Oh!")
+      addBranch {
+        name = "feature-branch"
+      }.build {
+        addKeyWithTranslations("this-is-branched-key", "Branched key", "Branched", self)
+      }
     }
 
     root.apply {
@@ -27,9 +33,11 @@ class KeySearchTestData : BaseTestData() {
     keyName: String,
     translation: String?,
     baseTranslation: String,
+    branch: Branch? = null,
   ) {
     addKey {
       name = keyName
+      this.branch = branch
       addTranslation {
         key = this@addKey
         language = getLanguageByTag("en")!!.self
