@@ -23,11 +23,13 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     """select t.text as text, l.tag as languageTag, k.name as key
         from Translation t
         join t.key k
+        left join k.branch b
         left join k.namespace n
         left join k.keyMeta km
         left join km.tags kmt
         join t.language l
         where t.key.project.id = :projectId
+         and (b.name = :branch or (:branch is null and (b is null or b.isDefault))) 
          and l.tag in :languages
          and ((n.name is null and :namespace is null) or n.name = :namespace)
          and (:filterTags is null or kmt.name in :filterTags)
@@ -38,6 +40,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getTranslations(
     languages: Set<String>,
     namespace: String?,
+    branch: String?,
     projectId: Long,
     filterTags: List<String>?,
   ): List<SimpleTranslationView>
