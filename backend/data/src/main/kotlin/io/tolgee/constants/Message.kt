@@ -316,6 +316,7 @@ enum class Message {
   BRANCH_NOT_FOUND,
   CANNOT_DELETE_DEFAULT_BRANCH,
   BRANCH_ALREADY_EXISTS,
+  ORIGIN_BRANCH_NOT_FOUND,
   ;
 
   val code: String

@@ -107,6 +107,50 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `return translations from non-branched keys`() {
+    testData.generateBranchedData(10)
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
+      // 2 keys from the default branch, 10 keys from the feature branch should be filtered out
+      node("_embedded.keys").isArray.hasSize(2)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `return translations from default branch only`() {
+    testData.generateBranchedData(5, "main", true)
+    testData.generateBranchedData(10)
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
+      // 2 non-branched keys + 5 keys from the default branch, 10 keys from the feature branch should be filtered out
+      node("_embedded.keys").isArray.hasSize(7)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `return translations from featured branch only`() {
+    testData.generateBranchedData(10)
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?sort=id&branch=feature-branch").andPrettyPrint.andIsOk.andAssertThatJson {
+      // 10 keys from the feature branch should be returned
+      node("_embedded.keys").isArray.hasSize(10)
+      node("_embedded.keys[0].keyName").isEqualTo("key from branch feature-branch 1")
+      node("_embedded.keys[0].translations.en") {
+        node("text").isEqualTo("I am key 1's english translation from branch feature-branch.")
+      }
+      node("_embedded.keys[1].translations.de") {
+        node("text").isEqualTo("I am key 2's german translation from branch feature-branch.")
+      }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `returns correct comment counts`() {
     testData.generateCommentTestData()
     testDataService.saveTestData(testData.root)

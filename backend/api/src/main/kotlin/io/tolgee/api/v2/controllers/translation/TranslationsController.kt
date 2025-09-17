@@ -158,6 +158,8 @@ When null, resulting file will be a flat key-value object.
     )
     @RequestParam(value = "filterTag", required = false)
     filterTag: List<String>? = null,
+    @Parameter(description = "Branch name to return translations from")
+    branch: String? = null,
     request: WebRequest,
   ): ResponseEntity<Map<String, Any>>? {
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) {
@@ -168,6 +170,7 @@ When null, resulting file will be a flat key-value object.
       translationService.getTranslations(
         languageTags = permittedTags,
         namespace = ns,
+        branch = branch,
         projectId = projectHolder.project.id,
         structureDelimiter = request.getStructureDelimiter(),
         filterTag = filterTag,

@@ -82,6 +82,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
         k.name as name, bt.text as baseTranslation, t.text as translation 
         from key k
        join project p on p.id = k.project_id and p.id = :projectId
+       left join branch br on k.branch_id = br.id
        left join namespace ns on k.namespace_id = ns.id
        left join key_meta km on k.id = km.key_id
        left join language l on p.id = l.project_id and l.tag = :languageTag
@@ -93,7 +94,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
           or lower(f_unaccent(k.name)) %> searchUnaccent
           or lower(f_unaccent(t.text)) %> searchUnaccent
           or lower(f_unaccent(bt.text)) %> searchUnaccent
-          )
+          ) and (br.id is null or br.is_default)
        order by 
        (
        3 * (ns.name <-> searchUnaccent) + 
@@ -109,6 +110,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
       select count(k.id) 
       from key k
        join project p on p.id = k.project_id and p.id = :projectId
+       left join branch br on k.branch_id = br.id
        left join namespace ns on k.namespace_id = ns.id
        left join language l on p.id = l.project_id and l.tag = :languageTag
        left join translation bt on bt.key_id = k.id and (bt.language_id = p.base_language_id)
@@ -119,7 +121,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
           or lower(f_unaccent(k.name)) %> searchUnaccent
           or lower(f_unaccent(t.text)) %> searchUnaccent
           or lower(f_unaccent(bt.text)) %> searchUnaccent
-          )
+          ) and (br.id is null or br.is_default)
       """,
   )
   fun searchKeys(
@@ -139,7 +141,8 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """,
     countQuery = """
       select count(k) from Key k 
-      where k.project.id = :projectId
+      left join k.branch b
+      where k.project.id = :projectId and (k.branch.id is null or b.isDefault)
     """,
   )
   fun getAllByProjectId(
