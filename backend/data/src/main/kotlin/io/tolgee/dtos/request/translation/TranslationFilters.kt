@@ -157,4 +157,9 @@ To filter default namespace, set to empty string.
     description = "Filter keys with no suggestions in lang",
   )
   var filterHasNoSuggestionsInLang: List<String>? = null
+
+  @field:Parameter(
+    description = "Selects only keys from specified branch",
+  )
+  var branch: String? = null
 }
