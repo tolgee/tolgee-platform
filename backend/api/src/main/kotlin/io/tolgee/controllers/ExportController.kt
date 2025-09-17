@@ -64,6 +64,7 @@ class ExportController(
             translationService.getTranslations(
               allLanguages.map { it.tag }.toSet(),
               null,
+              null,
               projectHolder.project.id,
               '.',
             )
