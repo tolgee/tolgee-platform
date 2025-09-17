@@ -127,6 +127,22 @@ class KeysTestData {
     }
   }
 
+  fun addNBranchedKeys(n: Int, branchName: String = "feature") {
+    projectBuilder.apply {
+      addBranch {
+        name = branchName
+        project = projectBuilder.self
+      }.build {
+        (1..n).forEach {
+          addKey {
+            name = "branch_key_$it"
+            this.branch = self
+          }
+        }
+      }
+    }
+  }
+
   fun addThirdKey(): Key {
     return projectBuilder.addKey("third_key").self
   }
