@@ -325,6 +325,7 @@ class TestDataService(
     saveAiPlaygroundResults(builder)
     saveLabels(builder)
     saveSuggestions(builder)
+    saveBranches(builder)
   }
 
   private fun saveImportSettings(builder: ProjectBuilder) {
@@ -611,6 +612,12 @@ class TestDataService(
 
   private fun saveLabels(builder: ProjectBuilder) {
     builder.data.labels.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveBranches(builder: ProjectBuilder) {
+    builder.data.branches.forEach {
       entityManager.persist(it.self)
     }
   }

@@ -11,6 +11,7 @@ import io.tolgee.events.OnKeyPrePersist
 import io.tolgee.events.OnKeyPreRemove
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.task.TaskKey
@@ -21,6 +22,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
@@ -45,6 +47,7 @@ import org.springframework.context.ApplicationEventPublisher
   indexes = [
     Index(columnList = "project_id"),
     Index(columnList = "namespace_id"),
+    Index(columnList = "branch_id"),
   ],
 )
 class Key(
@@ -63,6 +66,12 @@ class Key(
   @ManyToOne
   @ActivityLoggedProp
   var namespace: Namespace? = null
+
+  // Nullable for backward compatibility: NULL represents default branch for legacy data
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "branch_id")
+  @ActivityLoggedProp
+  var branch: Branch? = null
 
   @OneToMany(mappedBy = "key")
   var translations: MutableList<Translation> = mutableListOf()
