@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.builders.slack.SlackConfigBuilder
 import io.tolgee.model.*
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.batch.BatchJob
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.dataImport.Import
@@ -65,6 +66,7 @@ class ProjectBuilder(
     val aiPlaygroundResults = mutableListOf<AiPlaygroundResultBuilder>()
     val labels = mutableListOf<LabelBuilder>()
     val suggestions = mutableListOf<SuggestionBuilder>()
+    val branches = mutableListOf<BranchBuilder>()
   }
 
   var data = DATA()
@@ -84,6 +86,8 @@ class ProjectBuilder(
   fun addTaskKey(ft: FT<TaskKey>) = addOperation(data.taskKeys, ft)
 
   fun addLabel(ft: FT<Label>) = addOperation(data.labels, ft)
+
+  fun addBranch(ft: FT<Branch>) = addOperation(data.branches, ft)
 
   fun inviteUser(buildPermission: PermissionBuilder.() -> Unit = {}): InvitationBuilder {
     val invitationBuilder = InvitationBuilder()
