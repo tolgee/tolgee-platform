@@ -18,7 +18,7 @@ import java.util.*
 @JsonIgnoreProperties(value = ["createdAt", "updatedAt"], allowGetters = true)
 abstract class AuditModel : Serializable {
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(name = "created_at", nullable = false, updatable = false)
+  @Column(name = "created_at", nullable = false, updatable = true)
   @CreatedDate
   @ActivityIgnoredProp
   var createdAt: Date? = null
