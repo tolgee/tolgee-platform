@@ -4,6 +4,7 @@ import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.api.ISimpleProject
 import io.tolgee.model.automations.Automation
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.enums.SuggestionsMode
@@ -147,6 +148,10 @@ class Project(
 
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var slackConfigs: MutableList<SlackConfig> = mutableListOf()
+
+  // Branches belonging to this project (back-reference of Branch.project)
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
+  var branches: MutableList<Branch> = mutableListOf()
 
   @ColumnDefault("true")
   override var icuPlaceholders: Boolean = true
