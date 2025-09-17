@@ -250,6 +250,32 @@ class TranslationsTestData {
     }
   }
 
+  fun generateBranchedData(count: Long, branchName: String = "feature-branch", isBranchDefault: Boolean = false) {
+    root.data.projects[0].apply {
+      addBranch {
+        name = branchName
+        project = this@apply.self
+        isDefault = isBranchDefault
+      }.build {
+        (1..count).forEach {
+          addKey {
+            name = "key from branch $branchName $it"
+            branch = this@build.self
+          }.build {
+            addTranslation {
+              language = germanLanguage
+              text = "I am key $it's german translation from branch $branchName."
+            }
+            addTranslation {
+              language = englishLanguage
+              text = "I am key $it's english translation from branch $branchName."
+            }
+          }
+        }
+      }
+    }
+  }
+
   fun addFewKeysWithTags() {
     root.data.projects[0].apply {
       addKey {

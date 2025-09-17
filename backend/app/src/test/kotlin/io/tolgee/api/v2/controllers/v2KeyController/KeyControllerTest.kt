@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import java.math.BigDecimal
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -43,6 +44,7 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `returns all keys`() {
     testData.addNKeys(120)
+    testData.addNBranchedKeys(10)
     saveTestDataAndPrepare()
     performProjectAuthGet("keys")
       .andIsOk
@@ -54,6 +56,7 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("[2].namespace").isEqualTo("null")
           node("[1].description").isEqualTo("description")
         }
+        node("page.totalElements").isNumber.isEqualTo(BigDecimal(123))
       }
     performProjectAuthGet("keys?page=1")
       .andIsOk
