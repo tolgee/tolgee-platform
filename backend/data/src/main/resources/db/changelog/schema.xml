@@ -4677,4 +4677,64 @@
             ON tolgee_batch_job (created_at);
         </sql>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-1">
+        <createTable tableName="branch">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="branchPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="archived_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="is_default" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_protected" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(200)"/>
+            <column name="origin_branch_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-2">
+        <addColumn tableName="key">
+            <column name="branch_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-3">
+        <addUniqueConstraint columnNames="origin_branch_id" constraintName="UC_BRANCHORIGIN_BRANCH_ID_COL" tableName="branch"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-4">
+        <addUniqueConstraint columnNames="project_id, name" constraintName="UKnw2fc76ly83tb8fsqpqkbhm4m" tableName="branch"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-5">
+        <createIndex indexName="IDX2qdmejoguc37exo9i2fjxb0qo" tableName="branch">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-6">
+        <createIndex indexName="IDXcnxnkidwa096ndrfgijylnqar" tableName="branch">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-7">
+        <createIndex indexName="IDXd8omyxfow1rcm177dxgdpabwn" tableName="key">
+            <column name="branch_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-8">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="branch" constraintName="FK1sg3b030lhwn3huugkpnja4sh" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-9">
+        <addForeignKeyConstraint baseColumnNames="branch_id" baseTableName="key" constraintName="FKncoig3r2h5515bow46r0f8b67" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-10">
+        <addForeignKeyConstraint baseColumnNames="origin_branch_id" baseTableName="branch" constraintName="FKr1rv3tnqib0bpad7mjna0qvo0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
 </databaseChangeLog>
