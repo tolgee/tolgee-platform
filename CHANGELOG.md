@@ -1,3 +1,10 @@
+## [3.132.3](https://github.com/tolgee/tolgee-platform/compare/v3.132.2...v3.132.3) (2025-09-17)
+
+
+### Bug Fixes
+
+* ConcurrentModificationException in V2ExportAllFormatsTest ([#3233](https://github.com/tolgee/tolgee-platform/issues/3233)) ([8f40eed](https://github.com/tolgee/tolgee-platform/commit/8f40eedcded92627d5af22b81e4a2754fce32798)), closes [/github.com/spring-projects/spring-security/issues/11452#issuecomment-1172491187](https://github.com//github.com/spring-projects/spring-security/issues/11452/issues/issuecomment-1172491187)
+
 ## [3.132.2](https://github.com/tolgee/tolgee-platform/compare/v3.132.1...v3.132.2) (2025-09-11)
 
 
