@@ -39,7 +39,7 @@ class SignUpService(
       emailVerificationService.createForUser(user, dto.callbackUrl)
     }
 
-    return JwtAuthenticationResponse(jwtService.emitToken(user.id, true))
+    return JwtAuthenticationResponse(jwtService.emitToken(user.id, isSuper = true))
   }
 
   private fun checkNotManagedByOrganization(domain: String?) {

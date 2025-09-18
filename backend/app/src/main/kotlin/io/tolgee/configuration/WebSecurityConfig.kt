@@ -94,7 +94,8 @@ class WebSecurityConfig(
           },
         )
         it.requestMatchers(*PUBLIC_ENDPOINTS).permitAll()
-        it.requestMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("ADMIN")
+        // TODO: not all endpoints should be available to supporters - per endpoint limit to ADMIN only
+        it.requestMatchers("/v2/administration/**", "/v2/ee-license/**").hasRole("SUPPORTER")
         it.requestMatchers("/api/**", "/v2/**").authenticated()
         it.anyRequest().permitAll()
       }.headers { headers ->
