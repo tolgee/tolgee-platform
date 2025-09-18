@@ -63,11 +63,20 @@ class ComputedPermissionDto(
     }
   }
 
-  val isAllPermitted = this.expandedScopes.toSet().containsAll(Scope.values().toList())
+  val isAllPermitted = this.expandedScopes.toSet().containsAll(Scope.entries)
 
   fun getAdminPermissions(userRole: UserAccount.Role?): ComputedPermissionDto {
     if (userRole == UserAccount.Role.ADMIN && !this.isAllPermitted) {
       return SERVER_ADMIN
+    }
+    if (userRole == UserAccount.Role.SUPPORTER) {
+      if (this === NONE) {
+        return SERVER_SUPPORTER
+      }
+      return ComputedPermissionDto(
+        getExtendedPermission(this, arrayOf(Scope.ALL_VIEW)),
+        origin = ComputedPermissionOrigin.SERVER_SUPPORTER,
+      )
     }
     return this
   }
@@ -109,6 +118,13 @@ class ComputedPermissionDto(
       }
     }
 
+    private fun getExtendedPermission(base: IPermission, extendedScopes: Array<Scope>): IPermission {
+      return object : IPermission by base {
+        override val scopes: Array<Scope>
+          get() = base.scopes + extendedScopes
+      }
+    }
+
     val NONE
       get() = ComputedPermissionDto(getEmptyPermission(scopes = arrayOf(), ProjectPermissionType.NONE))
     val ORGANIZATION_OWNER
@@ -128,6 +144,15 @@ class ComputedPermissionDto(
             type = ProjectPermissionType.MANAGE,
           ),
           origin = ComputedPermissionOrigin.SERVER_ADMIN,
+        )
+    val SERVER_SUPPORTER
+      get() =
+        ComputedPermissionDto(
+          getEmptyPermission(
+            scopes = arrayOf(Scope.ALL_VIEW),
+            type = ProjectPermissionType.VIEW,
+          ),
+          origin = ComputedPermissionOrigin.SERVER_SUPPORTER,
         )
   }
 }

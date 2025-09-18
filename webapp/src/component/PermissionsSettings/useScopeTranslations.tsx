@@ -50,6 +50,7 @@ export const useScopeTranslations = () => {
     'translation-labels.assign': t(
       'permissions_item_translation_labels_assign'
     ),
+    'all.view': t('permissions_item_all_view'),
   };
 
   return {

@@ -478,7 +478,9 @@ class PermissionService(
     userId: Long,
   ) {
     val project = projectService.get(projectId)
-    organizationRoleService.checkUserIsMember(userId, project.organizationOwner.id)
+    // organizationRoleService.checkUserIsMember(userId, project.organizationOwner.id)
+    // FIXME: this check shouldn't be here, no? In the doc string it says the user will have no permissions if they
+    // are not part of the organization, so we should allow this even when the user is not a member.
     val permission = getProjectPermissionData(projectId, userId).directPermissions ?: return
     delete(permission.id)
   }

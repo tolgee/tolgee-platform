@@ -43,3 +43,19 @@ data class UserAccountDto(
     return username
   }
 }
+
+fun UserAccountDto.isAdmin(): Boolean {
+  return role == UserAccount.Role.ADMIN
+}
+
+fun UserAccountDto.isSupporter(): Boolean {
+  return role == UserAccount.Role.SUPPORTER
+}
+
+fun UserAccountDto.isSupporterOrAdmin(): Boolean {
+  return role == UserAccount.Role.SUPPORTER || role == UserAccount.Role.ADMIN
+}
+
+fun UserAccountDto.hasAdminAccess(isReadonlyAccess: Boolean): Boolean {
+  return role?.hasAdminAccess(isReadonlyAccess) ?: false
+}

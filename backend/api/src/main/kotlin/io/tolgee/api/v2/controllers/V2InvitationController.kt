@@ -78,7 +78,10 @@ class V2InvitationController(
     }
 
     invitation.organizationRole?.let {
-      organizationRoleService.checkUserIsOwner(invitation.organizationRole!!.organization!!.id)
+      organizationRoleService.checkUserIsOwner(
+        invitation.organizationRole!!.organization!!.id,
+        isReadOnlyAccess = false,
+      )
     }
 
     invitationService.delete(invitation)
