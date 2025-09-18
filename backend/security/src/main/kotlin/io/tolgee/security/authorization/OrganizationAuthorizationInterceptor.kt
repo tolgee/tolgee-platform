@@ -16,9 +16,9 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.dtos.cacheable.hasAdminAccess
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
@@ -52,7 +52,8 @@ class OrganizationAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
-    val userId = authenticationFacade.authenticatedUser.id
+    val user = authenticationFacade.authenticatedUser
+    val userId = user.id
     val organization =
       requestContextService.getTargetOrganization(request)
         // Two possible scenarios: we're on `GET/POST /v2/organization`, or the organization was not found.
@@ -61,7 +62,6 @@ class OrganizationAuthorizationInterceptor(
         ?: return true
 
     var bypassed = false
-    val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
     val requiredRole = getRequiredRole(request, handler)
     logger.debug(
       "Checking access to org#{} by user#{} (Requires {})",
@@ -71,7 +71,7 @@ class OrganizationAuthorizationInterceptor(
     )
 
     if (!organizationRoleService.canUserViewStrict(userId, organization.id)) {
-      if (!isAdmin) {
+      if (!user.hasAdminAccess(isReadonlyAccess = true)) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - No view permissions",
           organization.id,
@@ -86,7 +86,7 @@ class OrganizationAuthorizationInterceptor(
     }
 
     if (requiredRole != null && !organizationRoleService.isUserOfRole(userId, organization.id, requiredRole)) {
-      if (!isAdmin) {
+      if (!user.hasAdminAccess(isReadonlyAccess = requiredRole.isReadOnly)) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - Insufficient role",
           organization.id,

@@ -18,10 +18,10 @@ package io.tolgee.security.authorization
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.hasAdminAccess
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.exceptions.ProjectNotFoundException
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectHolder
@@ -56,6 +56,7 @@ class ProjectAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
+    val user = authenticationFacade.authenticatedUser
     val userId = authenticationFacade.authenticatedUser.id
     val project =
       requestContextService.getTargetProject(request)
@@ -65,7 +66,6 @@ class ProjectAuthorizationInterceptor(
         ?: return true
 
     var bypassed = false
-    val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
     val requiredScopes = getRequiredScopes(request, handler)
 
     val formattedRequirements = requiredScopes?.joinToString(", ") { it.value } ?: "read-only"
@@ -74,7 +74,7 @@ class ProjectAuthorizationInterceptor(
     val scopes = securityService.getCurrentPermittedScopes(project.id)
 
     if (scopes.isEmpty()) {
-      if (!isAdmin) {
+      if (!user.hasAdminAccess(isReadonlyAccess = true)) {
         logger.debug(
           "Rejecting access to proj#{} for user#{} - No view permissions",
           project.id,
@@ -91,7 +91,10 @@ class ProjectAuthorizationInterceptor(
     val missingScopes = getMissingScopes(requiredScopes, scopes.toSet())
 
     if (missingScopes.isNotEmpty()) {
-      if (!isAdmin || authenticationFacade.isProjectApiKeyAuth) {
+      val hasAdminAccess = user.hasAdminAccess(isReadonlyAccess = Scope.areAllReadOnly(requiredScopes))
+      val canUseAdminRights = !authenticationFacade.isProjectApiKeyAuth
+      val canBypass = hasAdminAccess && canUseAdminRights
+      if (!canBypass) {
         logger.debug(
           "Rejecting access to proj#{} for user#{} - Insufficient permissions",
           project.id,
