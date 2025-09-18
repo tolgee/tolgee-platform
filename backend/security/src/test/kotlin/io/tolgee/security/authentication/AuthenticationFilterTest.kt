@@ -135,6 +135,8 @@ class AuthenticationFilterTest {
           "uwu",
           userAccountDto,
           null,
+          false,
+          null,
         ),
       )
 

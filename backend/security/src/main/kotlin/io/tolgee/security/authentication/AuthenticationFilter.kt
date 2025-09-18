@@ -117,6 +117,8 @@ class AuthenticationFilter(
         TolgeeAuthentication(
           null,
           initialUser,
+          null,
+          false,
           TolgeeAuthenticationDetails(true),
         )
     }
@@ -165,6 +167,8 @@ class AuthenticationFilter(
       TolgeeAuthentication(
         pak,
         userAccount,
+        null,
+        false,
         TolgeeAuthenticationDetails(false),
       )
   }
@@ -190,6 +194,8 @@ class AuthenticationFilter(
       TolgeeAuthentication(
         pat,
         userAccount,
+        null,
+        false,
         TolgeeAuthenticationDetails(false),
       )
   }

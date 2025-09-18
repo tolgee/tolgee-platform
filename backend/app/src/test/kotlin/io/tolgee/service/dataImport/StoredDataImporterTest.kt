@@ -46,7 +46,9 @@ class StoredDataImporterTest : AbstractSpringTest() {
       TolgeeAuthentication(
         null,
         UserAccountDto.fromEntity(importTestData.userAccount),
-        TolgeeAuthenticationDetails(false),
+        actingAsUserAccount = null,
+        readOnly = false,
+        details = TolgeeAuthenticationDetails(false),
       )
   }
 

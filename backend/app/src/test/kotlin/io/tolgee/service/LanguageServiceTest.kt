@@ -155,7 +155,9 @@ class LanguageServiceTest : AbstractSpringTest() {
       TolgeeAuthentication(
         null,
         UserAccountDto.fromEntity(user),
-        null,
+        actingAsUserAccount = null,
+        readOnly = false,
+        details = null,
       )
   }
 

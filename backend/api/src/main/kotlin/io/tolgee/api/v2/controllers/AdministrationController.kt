@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.organization.OrganizationModel
@@ -147,7 +148,13 @@ class AdministrationController(
   fun generateUserToken(
     @PathVariable userId: Long,
   ): String {
+    val actingUser = authenticationFacade.authenticatedUser
     val user = userAccountService.get(userId)
-    return jwtService.emitToken(user.id, true)
+    return jwtService.emitToken(
+      user.id,
+      actingAsUserAccountId = actingUser.id,
+      isReadOnly = !actingUser.isAdmin(),
+      isSuper = true
+    )
   }
 }

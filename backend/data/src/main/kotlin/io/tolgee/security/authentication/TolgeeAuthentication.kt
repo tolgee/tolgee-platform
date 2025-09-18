@@ -28,6 +28,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 class TolgeeAuthentication(
   private val credentials: Any?,
   private val userAccount: UserAccountDto,
+  val actingAsUserAccount: UserAccountDto?,
+  val readOnly: Boolean,
   private val details: TolgeeAuthenticationDetails?,
 ) : Authentication {
   var userAccountEntity: UserAccount? = null
@@ -41,10 +43,19 @@ class TolgeeAuthentication(
 
   override fun getAuthorities(): Collection<GrantedAuthority> {
     return when (userAccount.role) {
-      UserAccount.Role.USER -> listOf(SimpleGrantedAuthority(ROLE_USER))
+      UserAccount.Role.USER ->
+        listOf(
+          SimpleGrantedAuthority(ROLE_USER),
+        )
+      UserAccount.Role.SUPPORTER ->
+        listOf(
+          SimpleGrantedAuthority(ROLE_USER),
+          SimpleGrantedAuthority(ROLE_SUPPORTER),
+        )
       UserAccount.Role.ADMIN ->
         listOf(
           SimpleGrantedAuthority(ROLE_USER),
+          SimpleGrantedAuthority(ROLE_SUPPORTER),
           SimpleGrantedAuthority(ROLE_ADMIN),
         )
       null -> emptyList()
@@ -73,6 +84,7 @@ class TolgeeAuthentication(
 
   companion object {
     const val ROLE_USER = "ROLE_USER"
+    const val ROLE_SUPPORTER = "ROLE_SUPPORTER"
     const val ROLE_ADMIN = "ROLE_ADMIN"
   }
 }

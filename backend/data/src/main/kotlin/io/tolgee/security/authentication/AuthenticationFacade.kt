@@ -79,7 +79,14 @@ class AuthenticationFacade(
         return authentication.userAccountView
       }
 
+  // -- ACTING USER
+  val actingUser: UserAccountDto?
+    get() = authentication.actingAsUserAccount
+
   // -- AUTHENTICATION METHOD AND DETAILS
+  val isReadOnly: Boolean
+    get() = authentication.readOnly
+
   val isUserSuperAuthenticated: Boolean
     get() = if (isAuthenticated) authentication.details?.isSuperToken == true else false
 
