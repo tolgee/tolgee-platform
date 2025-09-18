@@ -62,10 +62,28 @@ tolgee:
   file-storage-url: http://localhost:8080
 ```
 
+To enable authentication, add following properties:
+
+```yaml
+tolgee:
+  authentication:
+    enabled: true
+    initial-username: <YOUR_REAL_EMAIL>
+    initial-password: admin
+```
+
 You can check `application-e2e.yaml` for further inspiration.
 To learn more about externalized configuration in Spring boot, read [the docs](https://docs.spring.io/spring-boot/3.4/reference/features/external-config.html).
 
 Since we set the active profile to `dev`, Spring uses the `application-dev.yaml` configuration file.
+
+## API schema changes
+
+After you change the API schema, you need to run the webapp schema script to update Frontend:
+
+```bash
+cd webapp && npm run schema
+```
 
 ## Updating the database changelog
 
