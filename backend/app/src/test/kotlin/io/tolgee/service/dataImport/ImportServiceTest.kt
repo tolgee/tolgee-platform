@@ -124,7 +124,9 @@ class ImportServiceTest : AbstractSpringTest() {
           TolgeeAuthentication(
             null,
             UserAccountDto.fromEntity(testData.userAccount),
-            TolgeeAuthenticationDetails(false),
+            actingAsUserAccount = null,
+            readOnly = false,
+            details = TolgeeAuthenticationDetails(false),
           )
         testData
       }

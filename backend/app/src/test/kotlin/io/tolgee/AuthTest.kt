@@ -257,14 +257,14 @@ class AuthTest : AbstractControllerTest() {
   @Test
   fun `super token endpoints require super token`() {
     val admin = userAccountService[initialUsername]
-    var token = jwtService.emitToken(admin.id, false)
+    var token = jwtService.emitToken(admin.id, isSuper = false)
     assertExpired(token)
 
     val baseline = Date()
     val newDate = baseline.time - tolgeeProperties.authentication.jwtSuperExpiration - 10_000
 
     setForcedDate(Date(newDate))
-    token = jwtService.emitToken(admin.id, true)
+    token = jwtService.emitToken(admin.id, isSuper = true)
     setForcedDate(baseline)
 
     assertExpired(token)

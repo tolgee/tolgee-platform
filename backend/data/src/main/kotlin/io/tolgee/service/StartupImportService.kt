@@ -84,6 +84,8 @@ class StartupImportService(
       TolgeeAuthentication(
         credentials = null,
         userAccount = UserAccountDto.fromEntity(userAccount),
+        actingAsUserAccount = null,
+        readOnly = false,
         details = TolgeeAuthenticationDetails(false),
       )
   }

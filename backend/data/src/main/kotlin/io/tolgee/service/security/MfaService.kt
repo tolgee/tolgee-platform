@@ -38,7 +38,7 @@ class MfaService(
       throw PermissionException(Message.BAD_CREDENTIALS)
     }
 
-    if (user.totpKey?.isNotEmpty() == true) {
+    if (user.isMfaEnabled) {
       throw BadRequestException(Message.MFA_ENABLED)
     }
 

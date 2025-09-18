@@ -28,6 +28,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 class TolgeeAuthentication(
   private val credentials: Any?,
   private val userAccount: UserAccountDto,
+  val actingAsUserAccount: UserAccountDto?,
+  val readOnly: Boolean,
   private val details: TolgeeAuthenticationDetails?,
 ) : Authentication {
   var userAccountEntity: UserAccount? = null

@@ -43,6 +43,7 @@ class JwtService(
   private val authenticationProperties: AuthenticationProperties,
   private val currentDateProvider: CurrentDateProvider,
   private val userAccountService: UserAccountService,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   private val jwtParser: JwtParser =
     Jwts.parserBuilder()
@@ -54,11 +55,15 @@ class JwtService(
    * Emits an authentication token for the given user.
    *
    * @param userAccountId The user account ID this token belongs to.
+   * @param actingAsUserAccountId The user account ID of the actor who initiated impersonation.
+   * @param isReadOnly Whether the token allows read-only access or full read-write access.
    * @param isSuper Whether to emit a super-powered token or not.
    * @return An authentication token.
    */
   fun emitToken(
     userAccountId: Long,
+    actingAsUserAccountId: Long? = null,
+    isReadOnly: Boolean = false,
     isSuper: Boolean = false,
   ): String {
     val now = currentDateProvider.date
@@ -72,12 +77,31 @@ class JwtService(
         .setSubject(userAccountId.toString())
         .setExpiration(expiration)
 
+    if (actingAsUserAccountId != null) {
+      builder.claim(JWT_TOKEN_ACTING_USER_ID_CLAIM, actingAsUserAccountId)
+    }
+
+    if (isReadOnly) {
+      builder.claim(JWT_TOKEN_READ_ONLY_CLAIM, true)
+    }
+
     if (isSuper) {
       val superExpiration = Date(now.time + authenticationProperties.jwtSuperExpiration)
       builder.claim(SUPER_JWT_TOKEN_EXPIRATION_CLAIM, superExpiration)
     }
 
     return builder.compact()
+  }
+
+  fun emitTokenRefreshForCurrentUser(
+    isSuper: Boolean? = false,
+  ): String {
+    return emitToken(
+      userAccountId = authenticationFacade.authenticatedUser.id,
+      actingAsUserAccountId = authenticationFacade.actingUser?.id,
+      isReadOnly = authenticationFacade.isReadOnly,
+      isSuper = isSuper ?: authenticationFacade.isUserSuperAuthenticated,
+    )
   }
 
   /**
@@ -133,13 +157,19 @@ class JwtService(
       throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
 
+    val actor = validateActor(jws.body)
+
     val steClaim = jws.body[SUPER_JWT_TOKEN_EXPIRATION_CLAIM] as? Long
     val hasSuperPowers = steClaim != null && steClaim > currentDateProvider.date.time
 
+    val roClaim = jws.body[JWT_TOKEN_READ_ONLY_CLAIM] as? Boolean ?: false
+
     return TolgeeAuthentication(
-      jws,
-      account,
-      TolgeeAuthenticationDetails(hasSuperPowers),
+      credentials = jws,
+      userAccount = account,
+      actingAsUserAccount = actor,
+      readOnly = roClaim,
+      details = TolgeeAuthenticationDetails(hasSuperPowers),
     )
   }
 
@@ -190,6 +220,13 @@ class JwtService(
     return account
   }
 
+  private fun validateActor(claims: Claims): UserAccountDto? {
+    val actorId = claims[JWT_TOKEN_ACTING_USER_ID_CLAIM] as? String ?: return null
+    val account = userAccountService.findDto(actorId.toLong())
+      ?: throw AuthenticationException(Message.USER_NOT_FOUND)
+    return account
+  }
+
   private fun parseJwt(token: String): Jws<Claims> {
     try {
       return jwtParser.parseClaimsJws(token)
@@ -212,6 +249,8 @@ class JwtService(
     const val JWT_TICKET_TYPE_CLAIM = "t.typ"
     const val JWT_TICKET_DATA_CLAIM = "t.dat"
     const val SUPER_JWT_TOKEN_EXPIRATION_CLAIM = "ste"
+    const val JWT_TOKEN_ACTING_USER_ID_CLAIM = "act.sub"
+    const val JWT_TOKEN_READ_ONLY_CLAIM = "ro"
 
     const val DEFAULT_TICKET_EXPIRATION_TIME = 5 * 60 * 1000L // 5 minutes
   }
