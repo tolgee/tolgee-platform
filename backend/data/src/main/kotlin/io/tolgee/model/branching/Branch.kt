@@ -53,6 +53,9 @@ class Branch(
   @ActivityLoggedProp
   var archivedAt: Date? = null,
 
+  @Column(name = "pending")
+  var pending: Boolean = false,
+
 ) : StandardAuditModel() {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "project_id")

@@ -7,6 +7,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
+import io.tolgee.service.branching.BranchCopyService
 import io.tolgee.service.branching.BranchService
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
@@ -21,6 +22,7 @@ class BranchServiceImpl(
   private val branchRepository: BranchRepository,
   private val currentDateProvider: CurrentDateProvider,
   private val entityManager: EntityManager,
+  private val branchCopyService: BranchCopyService,
 ) : BranchService {
   override fun getAllBranches(projectId: Long, page: Pageable, search: String?): Page<Branch> {
     return branchRepository.getAllProjectBranches(projectId, page, search)
@@ -31,10 +33,22 @@ class BranchServiceImpl(
     val originBranch = branchRepository.findById(originBranchId)
       .orElseThrow { BadRequestException(Message.ORIGIN_BRANCH_NOT_FOUND) }
 
+    if (originBranch.project.id != projectId) {
+      throw BadRequestException(Message.ORIGIN_BRANCH_NOT_FOUND)
+    }
+
     val branch = createBranch(projectId, name).also {
       it.originBranch = originBranch
+      it.pending = true
     }
     branchRepository.save(branch)
+
+    val sourceIsDefault = originBranch.isDefault
+    branchCopyService.copy(projectId, originBranch, branch)
+
+    branch.pending = false
+    branchRepository.save(branch)
+
     return branch
   }
 

@@ -16,6 +16,13 @@ import java.util.Optional
 @Repository
 @Lazy
 interface KeyRepository : JpaRepository<Key, Long> {
+
+  @Query(
+    value = "select count(k.id) from key k where k.project_id = :projectId and k.branch_id = :branchId",
+    nativeQuery = true
+  )
+  fun countByProjectAndBranch(projectId: Long, branchId: Long): Long
+
   @Query(
     """
     from Key k
