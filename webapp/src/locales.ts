@@ -6,6 +6,8 @@ import deDateLocale from 'date-fns/locale/de';
 import ptDateLocale from 'date-fns/locale/pt';
 import daDateLocale from 'date-fns/locale/da';
 import jaDateLocale from 'date-fns/locale/ja';
+import zhCNDateLocale from 'date-fns/locale/zh-CN';
+
 
 export const locales = {
   en: {
@@ -48,4 +50,9 @@ export const locales = {
     flag: '🇯🇵',
     dateFnsLocale: jaDateLocale,
   },
+  zh: {
+    name: '简体中文',
+    flag: '🇨🇳',
+    dateFnsLocale: zhCNDateLocale,
+  }
 };
