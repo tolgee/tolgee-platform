@@ -4746,4 +4746,19 @@
     <changeSet author="danielkrizan (generated)" id="1758015935878-10">
         <addForeignKeyConstraint baseColumnNames="origin_branch_id" baseTableName="branch" constraintName="FKr1rv3tnqib0bpad7mjna0qvo0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758202102054-1">
+        <addColumn tableName="branch">
+            <column name="pending" type="BOOLEAN"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758202102054-2" runInTransaction="false">
+        <sql>
+            create unique index concurrently on public.key (project_id, "name", branch_id) where namespace_id is null;
+        </sql>
+        <sql>
+            create unique index concurrently on public.key (project_id, "name", branch_id, namespace_id) where namespace_id is not null;
+        </sql>
+        <dropIndex indexName="key_project_id_name_idx" tableName="key"/>
+        <dropIndex indexName="key_project_id_name_namespace_id_idx" tableName="key"/>
+    </changeSet>
 </databaseChangeLog>
