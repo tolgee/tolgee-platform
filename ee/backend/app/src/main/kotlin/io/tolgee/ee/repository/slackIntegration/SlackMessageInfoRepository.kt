@@ -7,10 +7,4 @@ import org.springframework.stereotype.Repository
 
 @Repository
 @Lazy
-interface SlackMessageInfoRepository : JpaRepository<SlackMessageInfo, Long> {
-  fun findBySlackMessageSlackConfigIdAndLanguageTagAndSlackMessageKeyId(
-    configId: Long,
-    langTag: String,
-    keyId: Long,
-  ): List<SlackMessageInfo>
-}
+interface SlackMessageInfoRepository : JpaRepository<SlackMessageInfo, Long>

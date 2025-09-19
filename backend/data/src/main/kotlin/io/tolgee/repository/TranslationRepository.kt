@@ -87,18 +87,6 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getAllByKeyIdIn(keyIds: Collection<Long>): Collection<Translation>
 
   @Query(
-    """
-    from Translation t
-    where t.language.id = :languageId
-        and t.key.id in :ids 
-  """,
-  )
-  fun findAllByLanguageIdAndKeyIdIn(
-    languageId: Long,
-    ids: Collection<Long>,
-  ): List<Translation>
-
-  @Query(
     """from Translation t 
     join fetch t.key k 
     left join fetch k.keyMeta 
@@ -111,12 +99,6 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     keyIds: Collection<Long>,
     excludeTranslationIds: List<Long>? = null,
   ): Collection<Translation>
-
-  @Query(
-    """select t.id from Translation t where t.key.id in 
-        (select k.id from t.key k where k.project.id = :projectId)""",
-  )
-  fun selectIdsByProject(projectId: Long): List<Long>
 
   fun deleteByIdIn(ids: Collection<Long>)
 

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository
 @Repository
 @Lazy
 interface SlackUserConnectionRepository : JpaRepository<SlackUserConnection, Long> {
-  fun findBySlackUserId(slackUserId: String): SlackUserConnection?
 
   fun findBySlackUserIdAndSlackTeamId(
     slackUserId: String,

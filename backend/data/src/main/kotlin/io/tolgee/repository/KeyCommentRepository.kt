@@ -15,14 +15,6 @@ interface KeyCommentRepository : JpaRepository<KeyComment?, Long?> {
   @Transactional
   @Query(
     "delete from KeyComment kc " +
-      "where kc.keyMeta in (select km from kc.keyMeta km where km.importKey.id in :keyIds)",
-  )
-  fun deleteAllByImportKeyIds(keyIds: List<Long>)
-
-  @Modifying
-  @Transactional
-  @Query(
-    "delete from KeyComment kc " +
       "where kc.keyMeta in (select km from kc.keyMeta km where km.key.id in :keyIds)",
   )
   fun deleteAllByKeyIds(keyIds: Collection<Long>)

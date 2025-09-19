@@ -231,28 +231,6 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     currentUserId: Long,
   ): OrganizationView?
 
-  /**
-   * Returns all organizations where user is counted as seat
-   * For translation agencies, we don't count them as seats
-   */
-  @Query(
-    """
-      select distinct o.id from Organization o
-        left join o.memberRoles orl
-        left join o.projects pr
-        left join pr.permissions perm on perm.agency is null
-        where orl.user.id = :userId or perm.user.id = :userId
-  """,
-  )
-  fun getAllUsersOrganizationsToCountUsageFor(userId: Long): Set<Long>
-
-  @Query(
-    """
-      select ua.id $ALL_USERS_IN_ORGANIZATION_QUERY_TO_COUNT_USAGE_FOR
-    """,
-  )
-  fun getAllUserIdsInOrganizationToCountSeats(organizationId: Long): Set<Long>
-
   companion object {
     /**
      * Query to count all users in organization to count seats
