@@ -77,4 +77,6 @@ class ContentDeliveryConfigRequest : IExportParams {
     description = ExportParamsDocs.HTML_ESCAPE_DESCRIPTION,
   )
   override var escapeHtml: Boolean? = false
+
+  override var filterBranch: String? = null
 }
