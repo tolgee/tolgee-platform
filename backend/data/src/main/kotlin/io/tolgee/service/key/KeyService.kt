@@ -68,8 +68,9 @@ class KeyService(
     projectId: Long,
     name: String,
     namespace: String?,
+    branchName: String? = null,
   ): Key {
-    return keyRepository.getByNameAndNamespace(projectId, name, namespace)
+    return keyRepository.getByNameAndNamespace(projectId, name, namespace, branchName)
       .orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }!!
   }
 
@@ -77,16 +78,18 @@ class KeyService(
     projectId: Long,
     name: String,
     namespace: String?,
+    branch: String? = null,
   ): Key? {
-    return this.findOptional(projectId, name, namespace).orElseGet { null }
+    return this.findOptional(projectId, name, namespace, branch).orElseGet { null }
   }
 
   private fun findOptional(
     projectId: Long,
     name: String,
     namespace: String?,
+    branch: String?
   ): Optional<Key> {
-    return keyRepository.getByNameAndNamespace(projectId, name, namespace)
+    return keyRepository.getByNameAndNamespace(projectId, name, namespace, branch)
   }
 
   fun get(id: Long): Key {
@@ -191,9 +194,10 @@ class KeyService(
     project: Project,
     name: String,
     namespace: String?,
+    branch: String? = null,
     isPlural: Boolean = false,
   ): Key {
-    checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace)
+    checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace, branch = branch)
     return createWithoutExistenceCheck(project, name, namespace, isPlural)
   }
 
@@ -220,19 +224,20 @@ class KeyService(
     keyMetaService.getOrCreateForKey(key).apply {
       description = dto.description
     }
-    return edit(key, dto.name, dto.namespace)
+    return edit(key, dto.name, dto.namespace, dto.branch)
   }
 
   fun edit(
     key: Key,
     newName: String,
     newNamespace: String?,
+    branch: String?,
   ): Key {
     if (key.name == newName && key.namespace?.name == newNamespace) {
       return key
     }
 
-    checkKeyNotExisting(key.project.id, newName, newNamespace)
+    checkKeyNotExisting(key.project.id, newName, newNamespace, branch)
 
     key.name = newName
 
@@ -281,8 +286,9 @@ class KeyService(
     projectId: Long,
     name: String,
     namespace: String?,
+    branch: String?
   ) {
-    if (findOptional(projectId, name, namespace).isPresent) {
+    if (findOptional(projectId, name, namespace, branch).isPresent) {
       throw ValidationException(Message.KEY_EXISTS)
     }
   }

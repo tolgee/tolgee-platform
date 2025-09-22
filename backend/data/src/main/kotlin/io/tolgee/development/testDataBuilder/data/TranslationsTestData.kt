@@ -59,27 +59,34 @@ class TranslationsTestData {
             originalName = "Deutsch"
           }.self
 
-        addKey {
-          name = "A key"
-          aKey = this
+        aKey = addBasicKey()
+        aKeyGermanTranslation = aKey.translations.first()
+        addBranch {
+          name = "test-branch"
+          project = this@project.self
         }.build {
-          setDescription("A key description")
-          addTranslation {
-            language = germanLanguage
-            text = "Z translation"
-            state = TranslationState.REVIEWED
-            auto = true
-            outdated = true
-            mtProvider = MtServiceType.GOOGLE
-            aKeyGermanTranslation = this
+          addKey {
+            name = "branch key"
+            branch = this@build.self
           }.build {
-            addComment {
-              author = user
-              text = "Comment"
-              state = TranslationCommentState.RESOLVED
+            addTranslation {
+              language = germanLanguage
+              text = "Branched german key."
+            }
+            addTranslation {
+              language = englishLanguage
+              text = "Branched english key."
             }
           }
-          addTag("Cool tag")
+        }
+        // create same key as in different branch
+        addBranch {
+          name = "from-default"
+          project = this@project.self
+        }.build {
+          addBasicKey().apply {
+            branch = self
+          }
         }
 
         val zKeyBuilder =
@@ -100,6 +107,30 @@ class TranslationsTestData {
         projectBuilder = this
       }.self
     }
+
+  private fun ProjectBuilder.addBasicKey(): Key {
+    return addKey {
+      name = "A key"
+    }.build key@{
+      setDescription("A key description")
+      addTranslation {
+        language = germanLanguage
+        text = "Z translation"
+        state = TranslationState.REVIEWED
+        auto = true
+        outdated = true
+        mtProvider = MtServiceType.GOOGLE
+        self.translations.add(this)
+      }.build {
+        addComment {
+          author = user
+          text = "Comment"
+          state = TranslationCommentState.RESOLVED
+        }
+      }
+      addTag("Cool tag")
+    }.self
+  }
 
   fun addKeysViewOnlyUser() {
     root.apply {
