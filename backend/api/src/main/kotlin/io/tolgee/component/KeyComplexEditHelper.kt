@@ -150,7 +150,7 @@ class KeyComplexEditHelper(
     }
 
     if (isKeyNameModified || isNamespaceChanged) {
-      edited = keyService.edit(key, dto.name, dto.namespace)
+      edited = keyService.edit(key, dto.name, dto.namespace, dto.branch)
     }
 
     return keyWithDataModelAssembler.toModel(edited)

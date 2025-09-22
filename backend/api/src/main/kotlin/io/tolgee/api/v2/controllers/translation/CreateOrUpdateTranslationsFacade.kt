@@ -32,7 +32,7 @@ class CreateOrUpdateTranslationsFacade(
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
-    val key = keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace) ?: return create(dto)
+    val key = keyService.find(projectHolder.projectEntity.id, dto.key, dto.namespace, dto.branch) ?: return create(dto)
     return setTranslations(dto, key)
   }
 
@@ -74,7 +74,7 @@ class CreateOrUpdateTranslationsFacade(
     dto: SetTranslationsWithKeyDto,
     key: Key? = null,
   ): SetTranslationsResponseModel {
-    val keyNotNull = key ?: keyService.get(projectHolder.project.id, dto.key, dto.namespace)
+    val keyNotNull = key ?: keyService.get(projectHolder.project.id, dto.key, dto.namespace, dto.branch)
     securityService.checkLanguageTranslatePermissionsByTag(
       dto.translations.keys,
       projectHolder.project.id,
