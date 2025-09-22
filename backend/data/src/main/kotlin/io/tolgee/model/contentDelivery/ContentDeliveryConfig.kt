@@ -138,4 +138,7 @@ class ContentDeliveryConfig(
   @ColumnDefault("false")
   @ActivityLoggedProp
   override var escapeHtml: Boolean? = false
+
+  @ActivityLoggedProp
+  override var filterBranch: String? = null
 }

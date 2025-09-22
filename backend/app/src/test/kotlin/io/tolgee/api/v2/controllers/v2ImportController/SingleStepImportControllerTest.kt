@@ -121,6 +121,7 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
       listOf(Pair(jsonFileName, simpleJson)),
       params = mapOf("createNewKeys" to false),
     )
+
     executeInNewTransaction {
       keyService.find(testData.project.id, "test", null).assert.isNull()
     }

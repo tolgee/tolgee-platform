@@ -27,16 +27,19 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
     from Key k
     left join k.namespace ns
+    left join k.branch br
     where 
       k.name = :name 
       and k.project.id = :projectId 
       and (ns.name = :namespace or (ns is null and :namespace is null))
+      and (br.name = :branch or (:branch is null and (br is null or br.isDefault)))
   """,
   )
   fun getByNameAndNamespace(
     projectId: Long,
     name: String,
     namespace: String?,
+    branch: String?,
   ): Optional<Key>
 
   @Query(
