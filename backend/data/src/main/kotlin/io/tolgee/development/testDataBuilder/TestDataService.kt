@@ -284,6 +284,7 @@ class TestDataService(
     savePermissions(builder)
     saveMtServiceConfigs(builder)
     saveAllNamespaces(builder)
+    saveBranches(builder)
     saveKeyData(builder)
     saveTranslationData(builder)
     saveImportData(builder)
@@ -304,7 +305,6 @@ class TestDataService(
     saveAiPlaygroundResults(builder)
     saveLabels(builder)
     saveSuggestions(builder)
-    saveBranches(builder)
   }
 
   private fun saveImportSettings(builder: ProjectBuilder) {
