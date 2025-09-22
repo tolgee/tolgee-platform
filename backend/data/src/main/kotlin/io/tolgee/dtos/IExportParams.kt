@@ -19,6 +19,7 @@ import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_EXAMPLE
 import io.tolgee.dtos.ExportParamsDocs.MESSAGE_FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.STRUCTURE_DELIMITER_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.SUPPORT_ARRAYS_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_BRANCH_DESCRIPTION
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.model.enums.TranslationState
@@ -99,6 +100,11 @@ interface IExportParams {
     description = HTML_ESCAPE_DESCRIPTION,
   )
   var escapeHtml: Boolean?
+
+  @get:Schema(
+    description = FILTER_BRANCH_DESCRIPTION,
+  )
+  var filterBranch: String?
 
   fun copyPropsFrom(other: IExportParams) {
     this.languages = other.languages

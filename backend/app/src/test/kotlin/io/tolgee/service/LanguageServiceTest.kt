@@ -180,6 +180,6 @@ class LanguageServiceTest : AbstractSpringTest() {
         """,
         ).setParameter("type", ActivityType.HARD_DELETE_LANGUAGE)
         .resultList
-    result.assert.hasSize(3)
+    result.assert.hasSize(6)
   }
 }

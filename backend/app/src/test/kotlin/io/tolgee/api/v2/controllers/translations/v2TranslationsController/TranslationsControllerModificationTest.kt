@@ -7,6 +7,7 @@ import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
@@ -396,6 +397,56 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     val translation = testData.aKeyGermanTranslation
     testOutdated(translation, false)
     testOutdated(translation, true)
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `sets translations for existing key in branch`() {
+    saveTestData()
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "branch key",
+        null,
+        mutableMapOf("en" to "English branch key"),
+        branch = "test-branch",
+      ),
+    ).andIsOk
+      .andAssertThatJson {
+        node("translations.en.text").isEqualTo("English branch key")
+        node("translations.en.id").isValidId
+        node("keyId").isValidId
+        node("keyName").isEqualTo("branch key")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `cannot set translations for key in branch without branch provided`() {
+    saveTestData()
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "branch key",
+        null,
+        mutableMapOf("en" to "Cannot do that"),
+      ),
+    ).andIsNotFound
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `cannot set translations for key in default branch with different branch provided`() {
+    saveTestData()
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "A key",
+        null,
+        mutableMapOf("en" to "Cannot do that"),
+        branch = "test-branch",
+      ),
+    ).andIsNotFound
   }
 
   private fun testOutdated(
