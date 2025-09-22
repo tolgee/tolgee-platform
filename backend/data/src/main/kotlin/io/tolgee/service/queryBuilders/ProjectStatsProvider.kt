@@ -7,6 +7,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.Project_
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserAccount_
+import io.tolgee.model.branching.Branch_
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
@@ -52,7 +53,16 @@ open class ProjectStatsProvider(
   private fun getKeyCountSelection(): Selection<Long> {
     val sub = query.subquery(Long::class.java)
     val key = sub.from(Key::class.java)
-    sub.where(key.get(Key_.project) equal project)
+    val branch = key.join(Key_.branch, JoinType.LEFT)
+    sub.where(
+      cb.and(
+        key.get(Key_.project) equal project,
+        cb.or(
+          cb.isNull(key.get(Key_.branch)),
+          cb.isTrue(branch.get(Branch_.isDefault))
+        )
+      )
+    )
     return sub.select(cb.countDistinct(key.get(Key_.id)))
   }
 
