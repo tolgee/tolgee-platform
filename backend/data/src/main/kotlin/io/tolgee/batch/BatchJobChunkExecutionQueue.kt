@@ -63,14 +63,21 @@ class BatchJobChunkExecutionQueue(
         from BatchJobChunkExecution bjce
         join bjce.batchJob bk
         where bjce.status = :executionStatus
-        order by bjce.createdAt asc, bjce.executeAfter asc, bjce.id asc
+        order by 
+          case when bk.status = 'RUNNING' then 0 else 1 end,
+          bjce.createdAt asc, 
+          bjce.executeAfter asc, 
+          bjce.id asc
         """.trimIndent(),
         BatchJobChunkExecutionDto::class.java,
       ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
         .setHint(
           "jakarta.persistence.lock.timeout",
           LockOptions.SKIP_LOCKED,
-        ).resultList
+        )
+        // Limit to get pending batches faster
+        .setMaxResults(1_000)
+        .resultList
 
     if (data.size > 0) {
       logger.debug("Attempt to add ${data.size} items to queue ${System.identityHashCode(this)}")
