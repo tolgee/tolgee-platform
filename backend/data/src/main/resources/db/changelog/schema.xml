@@ -4715,12 +4715,20 @@
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1758202102054-2" runInTransaction="false">
         <sql>
-            create unique index concurrently on public.key (project_id, "name", branch_id) where namespace_id is null;
+            create unique index concurrently on public.key (project_id, "name", coalesce(branch_id, -1)) where namespace_id is null;
         </sql>
         <sql>
-            create unique index concurrently on public.key (project_id, "name", branch_id, namespace_id) where namespace_id is not null;
+            create unique index concurrently on public.key (project_id, "name", coalesce(branch_id, -1), namespace_id) where namespace_id is not null;
+        </sql>
+        <sql>
+            create unique index concurrently on public.branch (project_id, is_default) where is_default is TRUE;
         </sql>
         <dropIndex indexName="key_project_id_name_idx" tableName="key"/>
         <dropIndex indexName="key_project_id_name_namespace_id_idx" tableName="key"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758531127134-1">
+        <addColumn tableName="content_delivery_config">
+            <column name="filter_branch" type="VARCHAR(255)"/>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>
