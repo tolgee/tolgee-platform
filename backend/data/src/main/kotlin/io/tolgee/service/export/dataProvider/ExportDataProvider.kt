@@ -5,6 +5,8 @@ import io.tolgee.model.Language
 import io.tolgee.model.Language_
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.Branch_
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
@@ -48,6 +50,7 @@ class ExportDataProvider(
   private lateinit var languageJoin: SetJoin<Project, Language>
   private lateinit var projectJoin: Join<Key, Project>
   private lateinit var namespaceJoin: Join<Key, Namespace>
+  private lateinit var branchJoin: Join<Key, Branch>
 
   private var whereConditions: MutableList<Predicate> = mutableListOf()
 
@@ -64,6 +67,7 @@ class ExportDataProvider(
     translationJoin = joinTranslation(key, languageJoin)
     keyMetaJoin = key.join(Key_.keyMeta, JoinType.LEFT)
     tagJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
+    branchJoin = key.join(Key_.branch, JoinType.LEFT)
   }
 
   private fun addSelect() {
@@ -90,6 +94,7 @@ class ExportDataProvider(
     filterKeyPrefix()
     filterState()
     filterNamespaces()
+    filterBranch()
 
     query.where(*whereConditions.toTypedArray())
     query.orderBy(cb.asc(key.get(Key_.name)))
@@ -147,6 +152,19 @@ class ExportDataProvider(
         condition = cb.or(condition, namespaceName.isNull)
       }
       whereConditions.add(condition)
+    }
+  }
+
+  private fun filterBranch() {
+    if (exportParams.filterBranch != null) {
+      whereConditions.add(cb.equal(branchJoin.get(Branch_.name), exportParams.filterBranch))
+    } else {
+      whereConditions.add(
+        cb.or(
+          branchJoin.get(Branch_.id).isNull,
+          cb.isTrue(branchJoin.get(Branch_.isDefault))
+        )
+      )
     }
   }
 
