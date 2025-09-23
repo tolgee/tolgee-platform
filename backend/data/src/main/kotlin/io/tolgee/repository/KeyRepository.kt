@@ -275,4 +275,19 @@ interface KeyRepository : JpaRepository<Key, Long> {
   """,
   )
   fun countAllOnInstance(): Long
+
+  @Query(
+    """
+      from Key k
+      left join fetch k.translations t
+      left join fetch k.keyMeta km
+      left join fetch k.namespace ns
+      left join fetch k.branch br
+      left join fetch t.labels l
+      where k.project.id = :projectId 
+        and k.name = :keyName
+        and (br.name = :branchName or (:branchName is null and (br is null or br.isDefault)))
+    """
+  )
+  fun findPrefetchedByNameAndBranch(projectId: Long, keyName: String, branchName: String?): Key?
 }
