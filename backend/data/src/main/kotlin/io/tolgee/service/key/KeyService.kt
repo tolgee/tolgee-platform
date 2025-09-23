@@ -403,8 +403,9 @@ class KeyService(
 
   fun getPaged(
     projectId: Long,
+    branch: String?,
     pageable: Pageable,
-  ): Page<KeyView> = keyRepository.getAllByProjectId(projectId, pageable)
+  ): Page<KeyView> = keyRepository.getAllByProjectId(projectId, branch, pageable)
 
   fun getKeysWithTags(keys: Set<Key>): List<Key> = keyRepository.getWithTags(keys)
 

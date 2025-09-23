@@ -617,7 +617,7 @@ class TestDataService(
   }
 
   private fun saveBranches(builder: ProjectBuilder) {
-    builder.data.branches.forEach {
+    builder.data.branches.filter { it.self.id == 0L }.forEach {
       entityManager.persist(it.self)
     }
   }
