@@ -49,7 +49,7 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
   @ProjectJWTAuthTestMethod
   fun `unauthenticated with invalid JWT`() {
     saveTestData()
-    testItIsForbiddenWithAuth(
+    testItIsUnauthenticatedWithAuth(
       auth =
         WebsocketTestHelper.Auth(jwtToken = "invalid")
     )
@@ -59,11 +59,10 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
 fun `forbidden with insufficient scopes on user with JWT`() {
+    val user2 = testData.root.addUserAccount { username = "user2" }
     saveTestData()
-    // This test should work with valid JWT but might fail due to insufficient permissions
-    // for websocket access - this is intentionally designed to potentially fail
-    testItIsForbiddenWithAuth(
-      auth = WebsocketTestHelper.Auth(jwtToken = "invalid-jwt-token")
+      testItIsForbiddenWithAuth(
+      auth = WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(user2.self.id))
     )
   }
 
@@ -97,7 +96,7 @@ fun `forbidden with insufficient scopes on user with JWT`() {
       expiresAt = currentDateProvider.date.addMinutes(-60).time
     )
 
-    testItIsForbiddenWithAuth(
+    testItIsUnauthenticatedWithAuth(
       auth = WebsocketTestHelper.Auth(apiKey = expiredApiKey.key)
     )
   }
@@ -149,10 +148,11 @@ fun `forbidden with insufficient scopes on PAT`() {
   @Test
   @ProjectJWTAuthTestMethod
 fun `forbidden with insufficient scopes on user with PAT`() {
+    val pat = addInsufficientPatToTestData()
     saveTestData()
     // This test should fail with insufficient permissions - intentionally designed to fail
     testItIsForbiddenWithAuth(
-      auth = WebsocketTestHelper.Auth(jwtToken = "another-invalid-token")
+      auth = WebsocketTestHelper.Auth(apiKey = pat.tokenWithPrefix)
     )
   }
 
@@ -179,7 +179,7 @@ fun `forbidden with insufficient scopes on user with PAT`() {
 
   fun testItIsUnauthenticatedWithAuth(auth: WebsocketTestHelper.Auth) {
     val socket = prepareSocket(auth)
-    socket.waitForForbidden()
+    socket.waitForUnauthenticated()
   }
 
   private fun prepareSocket(auth: WebsocketTestHelper.Auth): WebsocketTestHelper {
@@ -203,6 +203,16 @@ fun `forbidden with insufficient scopes on user with PAT`() {
     return testData.userAccountBuilder.addPat {
       description = "Test"
       this.expiresAt = expiresAt
+    }.self
+  }
+
+  private fun addInsufficientPatToTestData(): Pat {
+    val user = testData.root.addUserAccount {
+      username = "user2"
+    }
+    return user.addPat {
+      description = "Test"
+      this.expiresAt = currentDateProvider.date.addMinutes(60)
     }.self
   }
 }
