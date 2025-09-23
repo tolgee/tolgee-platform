@@ -72,6 +72,34 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `returns all keys from branch`() {
+    testData.addNKeys(5)
+    testData.addNBranchedKeys(110)
+    saveTestDataAndPrepare()
+    performProjectAuthGet("keys?branch=feature")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(20)
+          node("[0].id").isValidId
+          node("[1].name").isEqualTo("branch_key_2")
+          node("[1].description").isEqualTo("description of branched key")
+          node("[2].namespace").isEqualTo("null")
+        }
+        node("page.totalElements").isNumber.isEqualTo(BigDecimal(110))
+      }
+    performProjectAuthGet("keys?page=1&branch=feature")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(20)
+          node("[0].id").isValidId
+          node("[1].name").isEqualTo("branch_key_22")
+          node("[2].namespace").isEqualTo("null")
+        }
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `returns single key`() {
     saveTestDataAndPrepare()
     val keyId = testData.keyWithReferences.id
