@@ -104,6 +104,15 @@ class KeysTestData {
               custom = mutableMapOf("custom" to "value")
             }
           }
+
+          addBranch {
+            name = "dev"
+          }.build {
+            addKey {
+              name = "first_key"
+              branch = self
+            }
+          }
         }
 
       addUserAccountWithoutOrganization {
@@ -137,6 +146,8 @@ class KeysTestData {
           addKey {
             name = "branch_key_$it"
             this.branch = self
+          }.build {
+            setDescription("description of branched key")
           }
         }
       }
