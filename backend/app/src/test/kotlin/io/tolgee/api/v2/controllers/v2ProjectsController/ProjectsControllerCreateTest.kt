@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.constants.Branches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
@@ -17,6 +18,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -81,6 +83,28 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
     createProjectWithSlug().andPrettyPrint.andIsOk.andAssertThatJson {
       node("name").isString.isEqualTo("What a project")
       node("slug").isString.isEqualTo("my-slug-11")
+    }
+  }
+
+  @Test
+  fun `create project creates a default branch`() {
+    val userAccount = dbPopulator.createUserIfNotExists("testuser")
+    val organization = dbPopulator.createOrganization("Test Organization", userAccount)
+    loginAsUser("testuser")
+    val request =
+      CreateProjectRequest("branched", listOf(languageDTO), organizationId = organization.id, icuPlaceholders = true)
+    performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
+      node("icuPlaceholders").isBoolean.isTrue
+      node("id").asNumber().satisfies {
+        projectService.get(it.toLong()).let { it ->
+          it.branches.size.assert.isEqualTo(1)
+          it.branches.first().let { branch ->
+            branch.isDefault.assert.isTrue
+            branch.isProtected.assert.isTrue
+            branch.name.assert.isEqualTo(Branches.DEFAULT.name)
+          }
+        }
+      }
     }
   }
 
