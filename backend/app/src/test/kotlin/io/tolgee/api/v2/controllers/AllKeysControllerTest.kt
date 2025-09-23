@@ -31,11 +31,17 @@ class AllKeysControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `returns all keys sorted`() {
     performProjectAuthGet("all-keys").andPrettyPrint.andIsOk.andAssertThatJson {
       node("_embedded.keys") {
-        isArray.hasSize(3)
+        isArray.hasSize(4)
         node("[0]") {
           node("id").isValidId
           node("namespace").isNull()
           node("name").isEqualTo("first_key")
+        }
+        node("[3]") {
+          node("id").isValidId
+          node("namespace").isNull()
+          node("name").isEqualTo("first_key")
+          node("branch").isEqualTo("dev")
         }
       }
     }
