@@ -28,6 +28,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.service.security.UserAccountService
@@ -67,8 +68,8 @@ class JwtService(
     isSuper: Boolean = false,
   ): String {
     val now = currentDateProvider.date
-
     val expiration = Date(now.time + authenticationProperties.jwtExpiration)
+
     val builder =
       Jwts.builder()
         .signWith(signingKey)
@@ -80,6 +81,9 @@ class JwtService(
     if (actingAsUserAccountId != null) {
       builder.claim(JWT_TOKEN_ACTING_USER_ID_CLAIM, actingAsUserAccountId)
     }
+
+    val deviceId = UUID.randomUUID().toString()
+    builder.claim(JWT_TOKEN_DEVICE_ID_CLAIM, deviceId)
 
     if (isReadOnly) {
       builder.claim(JWT_TOKEN_READ_ONLY_CLAIM, true)
@@ -159,17 +163,27 @@ class JwtService(
 
     val actor = validateActor(jws.body)
 
+    // to avoid mass sign-out on update, we allow tokens without a device id
+    // maybe we should consider changing this later on
+    val deviceId = jws.body[JWT_TOKEN_DEVICE_ID_CLAIM] as? String
+
     val steClaim = jws.body[SUPER_JWT_TOKEN_EXPIRATION_CLAIM] as? Long
     val hasSuperPowers = steClaim != null && steClaim > currentDateProvider.date.time
 
     val roClaim = jws.body[JWT_TOKEN_READ_ONLY_CLAIM] as? Boolean ?: false
 
+    if (roClaim && account.isAdmin()) {
+      // we don't allow read-only admin impersonation to make our lives easier
+      throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    }
+
     return TolgeeAuthentication(
       credentials = jws,
+      deviceId = deviceId,
       userAccount = account,
       actingAsUserAccount = actor,
       readOnly = roClaim,
-      details = TolgeeAuthenticationDetails(hasSuperPowers),
+      isSuperToken = hasSuperPowers,
     )
   }
 
@@ -251,6 +265,7 @@ class JwtService(
     const val SUPER_JWT_TOKEN_EXPIRATION_CLAIM = "ste"
     const val JWT_TOKEN_ACTING_USER_ID_CLAIM = "act.sub"
     const val JWT_TOKEN_READ_ONLY_CLAIM = "ro"
+    const val JWT_TOKEN_DEVICE_ID_CLAIM = "d.id"
 
     const val DEFAULT_TICKET_EXPIRATION_TIME = 5 * 60 * 1000L // 5 minutes
   }

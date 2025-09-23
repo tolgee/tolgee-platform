@@ -241,11 +241,11 @@ class ProjectsController(
   )
   @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
   @RequiresSuperAuthentication
-  fun setOrganizationBase(
+  fun removeDirectProjectPermissions(
     @PathVariable("userId") userId: Long,
   ) {
     projectPermissionFacade.checkNotCurrentUser(userId)
-    permissionService.setOrganizationBasePermissions(
+    permissionService.removeDirectProjectPermissions(
       projectId = projectHolder.project.id,
       userId = userId,
     )

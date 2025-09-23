@@ -44,11 +44,12 @@ class StoredDataImporterTest : AbstractSpringTest() {
   fun login() {
     SecurityContextHolder.getContext().authentication =
       TolgeeAuthentication(
-        null,
-        UserAccountDto.fromEntity(importTestData.userAccount),
+        credentials = null,
+        deviceId = null,
+        userAccount = UserAccountDto.fromEntity(importTestData.userAccount),
         actingAsUserAccount = null,
         readOnly = false,
-        details = TolgeeAuthenticationDetails(false),
+        isSuperToken = false,
       )
   }
 

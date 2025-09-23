@@ -153,11 +153,12 @@ class LanguageServiceTest : AbstractSpringTest() {
   private fun setAuthentication(user: UserAccount) {
     SecurityContextHolder.getContext().authentication =
       TolgeeAuthentication(
-        null,
-        UserAccountDto.fromEntity(user),
+        credentials = null,
+        deviceId = null,
+        userAccount = UserAccountDto.fromEntity(user),
         actingAsUserAccount = null,
         readOnly = false,
-        details = null,
+        isSuperToken = false,
       )
   }
 

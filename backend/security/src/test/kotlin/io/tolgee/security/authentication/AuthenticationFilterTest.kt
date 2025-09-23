@@ -132,11 +132,12 @@ class AuthenticationFilterTest {
     Mockito.`when`(jwtService.validateToken(TEST_VALID_TOKEN))
       .thenReturn(
         TolgeeAuthentication(
-          "uwu",
-          userAccountDto,
-          null,
-          false,
-          null,
+          credentials = "uwu",
+          deviceId = null,
+          userAccount = userAccountDto,
+          actingAsUserAccount = null,
+          readOnly = false,
+          isSuperToken = false,
         ),
       )
 

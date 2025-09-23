@@ -83,10 +83,11 @@ class StartupImportService(
     SecurityContextHolder.getContext().authentication =
       TolgeeAuthentication(
         credentials = null,
+        deviceId = null,
         userAccount = UserAccountDto.fromEntity(userAccount),
         actingAsUserAccount = null,
         readOnly = false,
-        details = TolgeeAuthenticationDetails(false),
+        isSuperToken = false,
       )
   }
 
