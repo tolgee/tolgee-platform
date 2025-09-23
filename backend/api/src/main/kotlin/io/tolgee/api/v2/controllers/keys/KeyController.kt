@@ -147,8 +147,10 @@ class KeyController(
     @ParameterObject
     @SortDefault("id")
     pageable: Pageable,
+    @RequestParam
+    branch: String? = null,
   ): PagedModel<KeyModel> {
-    val data = keyService.getPaged(projectHolder.project.id, pageable)
+    val data = keyService.getPaged(projectHolder.project.id, branch, pageable)
     return keyPagedResourcesAssembler.toModel(data, keyModelAssembler)
   }
 
@@ -168,7 +170,8 @@ class KeyController(
     key.checkInProject()
     checkNamespaceFeature(dto.namespace)
     keyService.edit(id, dto)
-    val view = KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description, key.keyMeta?.custom)
+    val view =
+      KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description, key.keyMeta?.custom, key.branch?.name)
     return keyModelAssembler.toModel(view)
   }
 

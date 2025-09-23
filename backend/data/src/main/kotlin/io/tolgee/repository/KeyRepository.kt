@@ -51,10 +51,11 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom)
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom, k.branch.name)
      from Key k
      left join k.keyMeta km
      left join k.namespace ns
+     left join k.branch br
      where k.project.id = :projectId order by k.id
     """,
   )
@@ -143,29 +144,34 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom)
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom, b.name)
      from Key k
      left join k.keyMeta km
      left join k.namespace ns
+     left join k.branch b
      where k.project.id = :projectId
+        and (k.branch.name = :branch or (:branch is null and (b is null or b.isDefault)))
     """,
     countQuery = """
       select count(k) from Key k 
       left join k.branch b
-      where k.project.id = :projectId and (k.branch.id is null or b.isDefault)
+      where k.project.id = :projectId 
+        and (k.branch.name = :branch or (:branch is null and (b is null or b.isDefault)))
     """,
   )
   fun getAllByProjectId(
     projectId: Long,
+    branch: String?,
     pageable: Pageable,
   ): Page<KeyView>
 
   @Query(
     """
-     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom)
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom, br.name)
      from Key k
      left join k.keyMeta km
      left join k.namespace ns
+     left join k.branch br
      where k.project.id = :projectId
      and k.id = :id
     """,
@@ -251,10 +257,11 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom)
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom, br.name)
      from Key k
      left join k.keyMeta km
      left join k.namespace ns
+     left join k.branch br
       where k.id in :ids
   """,
   )
