@@ -14,7 +14,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.TolgeeAuthentication
-import io.tolgee.security.authentication.TolgeeAuthenticationDetails
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectService

@@ -19,14 +19,10 @@ package io.tolgee.security.authentication
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.authorization.AbstractAuthorizationInterceptor
-import jakarta.servlet.DispatcherType
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.core.Ordered
-import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
-import org.springframework.web.servlet.HandlerInterceptor
 
 /**
  * Blocks write requests when the current authentication is read-only.
