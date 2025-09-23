@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.hasAdminAccess
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -63,6 +64,8 @@ class OrganizationAuthorizationInterceptor(
 
     var bypassed = false
     val requiredRole = getRequiredRole(request, handler)
+    val isReadOnlyMethod = isReadOnlyMethod(request, handler)
+    val isReadOnly = requiredRole?.isReadOnly != false || isReadOnlyMethod
     logger.debug(
       "Checking access to org#{} by user#{} (Requires {})",
       organization.id,
@@ -71,7 +74,7 @@ class OrganizationAuthorizationInterceptor(
     )
 
     if (!organizationRoleService.canUserViewStrict(userId, organization.id)) {
-      if (!user.hasAdminAccess(isReadonlyAccess = true)) {
+      if (!user.hasAdminAccess(isReadonlyAccess = isReadOnlyMethod)) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - No view permissions",
           organization.id,
@@ -86,7 +89,7 @@ class OrganizationAuthorizationInterceptor(
     }
 
     if (requiredRole != null && !organizationRoleService.isUserOfRole(userId, organization.id, requiredRole)) {
-      if (!user.hasAdminAccess(isReadonlyAccess = requiredRole.isReadOnly)) {
+      if (!user.hasAdminAccess(isReadonlyAccess = isReadOnly)) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - Insufficient role",
           organization.id,
@@ -97,6 +100,17 @@ class OrganizationAuthorizationInterceptor(
       }
 
       bypassed = true
+    }
+
+    if (authenticationFacade.isReadOnly && !isReadOnly) {
+      // This one can't be bypassed
+      logger.debug(
+        "Rejecting access to org#{} for user#{} - Write operation is not allowed in read-only mode",
+        organization.id,
+        userId,
+      )
+
+      throw PermissionException()
     }
 
     if (bypassed) {

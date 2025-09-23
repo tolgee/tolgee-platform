@@ -122,11 +122,12 @@ class ImportServiceTest : AbstractSpringTest() {
         testDataService.saveTestData(testData.root)
         SecurityContextHolder.getContext().authentication =
           TolgeeAuthentication(
-            null,
-            UserAccountDto.fromEntity(testData.userAccount),
+            credentials = null,
+            deviceId = null,
+            userAccount = UserAccountDto.fromEntity(testData.userAccount),
             actingAsUserAccount = null,
             readOnly = false,
-            details = TolgeeAuthenticationDetails(false),
+            isSuperToken = false,
           )
         testData
       }

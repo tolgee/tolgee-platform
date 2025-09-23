@@ -16,6 +16,8 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.security.authentication.AllowInReadOnlyMode
+import io.tolgee.security.authentication.RequiresReadWriteMode
 import jakarta.servlet.DispatcherType
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -23,8 +25,11 @@ import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
+import kotlin.jvm.java
 
-abstract class AbstractAuthorizationInterceptor : HandlerInterceptor, Ordered {
+abstract class AbstractAuthorizationInterceptor(
+  val allowGlobalRoutes: Boolean = true,
+) : HandlerInterceptor, Ordered {
   override fun preHandle(
     request: HttpServletRequest,
     response: HttpServletResponse,
@@ -40,7 +45,7 @@ abstract class AbstractAuthorizationInterceptor : HandlerInterceptor, Ordered {
     }
 
     // Global route; abort here
-    if (isGlobal(handler)) return true
+    if (allowGlobalRoutes && isGlobal(handler)) return true
 
     return preHandleInternal(request, response, handler)
   }
@@ -58,5 +63,21 @@ abstract class AbstractAuthorizationInterceptor : HandlerInterceptor, Ordered {
   private fun isGlobal(handler: HandlerMethod): Boolean {
     val annotation = AnnotationUtils.getAnnotation(handler.method, IsGlobalRoute::class.java)
     return annotation != null
+  }
+
+  fun isReadOnlyMethod(request: HttpServletRequest, handler: HandlerMethod): Boolean {
+    if (AnnotationUtils.getAnnotation(handler.method, RequiresReadWriteMode::class.java) != null) {
+      return false
+    }
+
+    if (request.method in READ_ONLY_METHODS) {
+      return true
+    }
+
+    return AnnotationUtils.getAnnotation(handler.method, AllowInReadOnlyMode::class.java) != null
+  }
+
+  companion object {
+    val READ_ONLY_METHODS = arrayOf("GET", "HEAD", "OPTIONS")
   }
 }

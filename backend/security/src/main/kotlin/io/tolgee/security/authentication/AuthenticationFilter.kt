@@ -115,11 +115,12 @@ class AuthenticationFilter(
     if (!authenticationProperties.enabled) {
       SecurityContextHolder.getContext().authentication =
         TolgeeAuthentication(
-          null,
-          initialUser,
-          null,
-          false,
-          TolgeeAuthenticationDetails(true),
+          credentials = null,
+          deviceId = null,
+          userAccount = initialUser,
+          actingAsUserAccount = null,
+          readOnly = false,
+          isSuperToken = true,
         )
     }
   }
@@ -165,11 +166,12 @@ class AuthenticationFilter(
     apiKeyService.updateLastUsedAsync(pak.id)
     SecurityContextHolder.getContext().authentication =
       TolgeeAuthentication(
-        pak,
-        userAccount,
-        null,
-        false,
-        TolgeeAuthenticationDetails(false),
+        credentials = pak,
+        deviceId = null,
+        userAccount = userAccount,
+        actingAsUserAccount = null,
+        readOnly = false,
+        isSuperToken = false,
       )
   }
 
@@ -192,11 +194,12 @@ class AuthenticationFilter(
     patService.updateLastUsedAsync(pat.id)
     SecurityContextHolder.getContext().authentication =
       TolgeeAuthentication(
-        pat,
-        userAccount,
-        null,
-        false,
-        TolgeeAuthenticationDetails(false),
+        credentials = pat,
+        deviceId = null,
+        userAccount = userAccount,
+        actingAsUserAccount = null,
+        readOnly = false,
+        isSuperToken = false,
       )
   }
 

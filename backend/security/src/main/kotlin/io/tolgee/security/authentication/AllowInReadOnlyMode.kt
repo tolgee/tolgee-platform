@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 Tolgee s.r.o. and contributors
+ * Copyright (C) 2025 Tolgee s.r.o. and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,12 @@
 
 package io.tolgee.security.authentication
 
-import java.io.Serializable
-
-class TolgeeAuthenticationDetails : Serializable
+/**
+ * Overrides read-only request method restriction for the annotated controller or handler method.
+ *
+ * When current authentication has readOnly flag set, only GET/HEAD/OPTIONS HTTP methods are allowed by default.
+ * Applying this annotation to a controller class or method allows non-safe methods as well.
+ */
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class AllowInReadOnlyMode

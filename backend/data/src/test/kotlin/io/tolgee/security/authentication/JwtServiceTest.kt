@@ -50,6 +50,8 @@ class JwtServiceTest {
 
   private val userAccountService = Mockito.mock(UserAccountService::class.java)
 
+  private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
+
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
   private val jwtService: JwtService =
@@ -110,8 +112,8 @@ class JwtServiceTest {
     val auth = jwtService.validateToken(token)
     val superAuth = jwtService.validateToken(superToken)
 
-    assertThat(auth.details?.isSuperToken).isFalse()
-    assertThat(superAuth.details?.isSuperToken).isTrue()
+    assertThat(auth.isSuperToken).isFalse()
+    assertThat(superAuth.isSuperToken).isTrue()
   }
 
   @Test
@@ -122,7 +124,7 @@ class JwtServiceTest {
     Mockito.`when`(currentDateProvider.date).thenReturn(Date(now + SUPER_JWT_LIFETIME + 1000))
 
     val superAuth = jwtService.validateToken(superToken)
-    assertThat(superAuth.details?.isSuperToken).isFalse()
+    assertThat(superAuth.isSuperToken).isFalse()
   }
 
   @Test

@@ -80,7 +80,6 @@ class ApiKeyController(
     if (!authenticationFacade.authenticatedUser.isAdmin()) {
       securityService.checkApiKeyScopes(dto.scopes, project)
     }
-    // TODO: read only token for supporter
     return apiKeyService.create(
       userAccount = authenticationFacade.authenticatedUserEntity,
       scopes = dto.scopes,
