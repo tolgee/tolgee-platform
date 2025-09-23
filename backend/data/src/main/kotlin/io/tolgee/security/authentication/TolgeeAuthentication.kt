@@ -79,7 +79,13 @@ class TolgeeAuthentication(
 
   private val readOnlyAsAuthority: GrantedAuthority
     get() {
-      return SimpleGrantedAuthority( if (readOnly) { ROLE_RO } else { ROLE_RW })
+      return SimpleGrantedAuthority(
+        if (readOnly) {
+        ROLE_RO
+      } else {
+        ROLE_RW
+      }
+      )
     }
 
   override fun getCredentials(): Any? {

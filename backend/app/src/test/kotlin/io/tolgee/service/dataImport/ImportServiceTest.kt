@@ -8,7 +8,6 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.security.authentication.TolgeeAuthentication
-import io.tolgee.security.authentication.TolgeeAuthenticationDetails
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
