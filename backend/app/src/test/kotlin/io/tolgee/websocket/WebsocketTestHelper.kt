@@ -1,5 +1,6 @@
 package io.tolgee.websocket
 
+import io.tolgee.fixtures.WaitNotSatisfiedException
 import io.tolgee.fixtures.waitFor
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -77,13 +78,17 @@ class WebsocketTestHelper(val port: Int?, val auth: Auth, val projectId: Long, v
     logger.info("Stopped websocket listener")
   }
 
-  private class MySessionHandler(
+  class MySessionHandler(
     val dest: String,
     val receivedMessages: LinkedBlockingDeque<String>,
   ) : StompSessionHandlerAdapter(), Logging {
     var subscription: StompSession.Subscription? = null
-    var forbidden = false
-    val unauthenticated = false
+    var authenticationStatus: AuthenticationStatus? = null
+
+    enum class AuthenticationStatus {
+      UNAUTHENTICATED,
+      FORBIDDEN
+    }
 
     override fun afterConnected(
       session: StompSession,
@@ -143,13 +148,13 @@ class WebsocketTestHelper(val port: Int?, val auth: Auth, val projectId: Long, v
 
     private fun handleForbidden(stompHeaders: StompHeaders) {
       if (stompHeaders.get("message")?.single() == "Forbidden") {
-        forbidden = true
+        authenticationStatus = AuthenticationStatus.FORBIDDEN
       }
     }
 
     private fun handleUnauthenticated(stompHeaders: StompHeaders) {
       if (stompHeaders.get("message")?.single() == "Unauthenticated") {
-        forbidden = true
+        authenticationStatus = AuthenticationStatus.UNAUTHENTICATED
       }
     }
   }
@@ -171,14 +176,22 @@ class WebsocketTestHelper(val port: Int?, val auth: Auth, val projectId: Long, v
   }
 
   fun waitForForbidden() {
-    waitFor(500) {
-      sessionHandler?.forbidden ?: true
-    }
+    waitForAuthenticationStatus(MySessionHandler.AuthenticationStatus.FORBIDDEN)
   }
 
   fun waitForUnauthenticated() {
-    waitFor(500) {
-      sessionHandler?.unauthenticated ?: true
+      waitForAuthenticationStatus(MySessionHandler.AuthenticationStatus.UNAUTHENTICATED)
+
+  }
+
+  fun waitForAuthenticationStatus(status: MySessionHandler.AuthenticationStatus) {
+    try {
+      waitFor(500) {
+        sessionHandler?.authenticationStatus == status
+      }
+    } catch (e: WaitNotSatisfiedException) {
+      logger.info("Authentication status was not $status, was: ${sessionHandler?.authenticationStatus}")
+      throw e
     }
   }
 
