@@ -39,6 +39,7 @@ class KeysDistanceUnitTestData {
           id = index.toLong(),
           name = relatedKeyDto.keyName,
           namespace = relatedKeyDto.namespace,
+          branch = relatedKeyDto.branch,
         )
       }
     }
