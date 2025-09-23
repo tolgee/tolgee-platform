@@ -2,6 +2,7 @@ package io.tolgee.model.branching
 
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.constants.Branches
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import jakarta.persistence.Column
@@ -56,7 +57,18 @@ class Branch(
   @Column(name = "pending")
   var pending: Boolean = false,
 
-) : StandardAuditModel() {
+  ) : StandardAuditModel() {
+  companion object {
+
+    fun createMainBranch(): Branch {
+      return Branch(
+        name = Branches.DEFAULT.name,
+        isDefault = true,
+        isProtected = true,
+      )
+    }
+  }
+
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "project_id")
   lateinit var project: Project
