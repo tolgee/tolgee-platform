@@ -10,11 +10,10 @@ import io.tolgee.exceptions.FileStoreException
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.generateImage
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.core.io.InputStreamSource
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -25,9 +24,13 @@ class ImageUploadServiceTest : AbstractSpringTest() {
     generateImage(100, 100)
   }
 
-  @SpyBean
   @Autowired
   lateinit var dateProvider: CurrentDateProvider
+
+  @AfterEach
+  fun cleanup() {
+      dateProvider.forcedDate = null
+  }
 
   @Test
   fun testCleanOldImages() {
@@ -36,14 +39,12 @@ class ImageUploadServiceTest : AbstractSpringTest() {
     Thread.sleep(1000)
     val storedNewer = imageUploadService.store(screenshotFile, user, null)
 
-    whenever(dateProvider.date)
-      .thenReturn(
-        Date.from(
-          Instant.now()
-            .plus(2, ChronoUnit.HOURS)
-            .minus(500, ChronoUnit.MILLIS),
-        ),
-      )
+    dateProvider.forcedDate = Date.from(
+      Instant.now()
+        .plus(2, ChronoUnit.HOURS)
+        .minus(500, ChronoUnit.MILLIS),
+    )
+
     imageUploadService.cleanOldImages()
     val after = imageUploadService.find(listOf(storedNewer.id, storedOlder.id))
     assertThat(after).hasSize(1)

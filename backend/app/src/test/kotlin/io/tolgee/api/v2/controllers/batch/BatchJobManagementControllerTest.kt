@@ -1,103 +1,27 @@
 package io.tolgee.api.v2.controllers.batch
 
-import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.batch.BatchJobActivityFinalizer
-import io.tolgee.batch.BatchJobChunkExecutionQueue
-import io.tolgee.batch.BatchJobConcurrentLauncher
-import io.tolgee.batch.BatchJobService
-import io.tolgee.batch.BatchJobTestUtil
 import io.tolgee.batch.data.BatchJobDto
-import io.tolgee.batch.processors.MachineTranslationChunkProcessor
-import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
-import io.tolgee.batch.state.BatchJobStateProvider
-import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsForbidden
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
-import io.tolgee.fixtures.isValidId
-import io.tolgee.fixtures.node
-import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.fixtures.*
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
-import io.tolgee.service.machineTranslation.mtCreditsConsumption.MtCreditBucketService
-import io.tolgee.service.translation.AutoTranslationService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import io.tolgee.util.BatchDumper
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.ConcurrentHashMap
 
-class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
-  lateinit var testData: BatchJobsTestData
-
-  @Autowired
-  lateinit var batchJobService: BatchJobService
-
-  @Autowired
-  @SpyBean
-  lateinit var preTranslationByTmChunkProcessor: PreTranslationByTmChunkProcessor
-
-  @Autowired
-  @SpyBean
-  lateinit var machineTranslationChunkProcessor: MachineTranslationChunkProcessor
-
-  @Autowired
-  lateinit var batchJobStateProvider: BatchJobStateProvider
-
-  @Autowired
-  lateinit var batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue
-
-  @Autowired
-  lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher
-
-  @Suppress("LateinitVarOverridesLateinitVar")
-  @Autowired
-  @SpyBean
-  override lateinit var mtCreditBucketService: MtCreditBucketService
+class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTest("/v2/projects/"), Logging {
 
   @Autowired
   lateinit var throwingService: ThrowingService
-
-  @Autowired
-  @SpyBean
-  lateinit var autoTranslationService: AutoTranslationService
-
-  @SpyBean
-  @Autowired
-  lateinit var batchJobActivityFinalizer: BatchJobActivityFinalizer
-
-  @Autowired
-  lateinit var batchDumper: BatchDumper
-
-  lateinit var util: BatchJobTestUtil
-
-  @BeforeEach
-  fun setup() {
-    batchJobChunkExecutionQueue.clear()
-    testData = BatchJobsTestData()
-    batchJobChunkExecutionQueue.populateQueue()
-    Mockito.reset(
-      mtCreditBucketService,
-      autoTranslationService,
-      machineTranslationChunkProcessor,
-      preTranslationByTmChunkProcessor,
-      batchJobActivityFinalizer,
-    )
-    util = BatchJobTestUtil(applicationContext, testData)
-  }
 
   @AfterEach
   fun after() {
@@ -333,12 +257,6 @@ class BatchJobManagementControllerTest : ProjectAuthControllerTest("/v2/projects
 
     performProjectAuthGet("batch-jobs/${job.id}")
       .andIsForbidden
-  }
-
-  private fun saveAndPrepare() {
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
-    this.projectSupplier = { testData.projectBuilder.self }
   }
 }
 
