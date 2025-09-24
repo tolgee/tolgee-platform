@@ -33,11 +33,11 @@ export const MandatoryDataProvider = (props: any) => {
   useIdentify(userData?.id);
 
   useEffect(() => {
-    if (config?.clientSentryDsn) {
+    if (config?.clientSentryDsn && !Sentry.getClient()) {
       Sentry.init({
         dsn: config.clientSentryDsn,
-        replaysSessionSampleRate: 0.1, // 10% of sessions
-        replaysOnErrorSampleRate: 1.0, // 100% of sessions that end in an error
+        replaysSessionSampleRate: 0.1,
+        replaysOnErrorSampleRate: 1.0,
         integrations: [
           Sentry.browserTracingIntegration(),
           Sentry.replayIntegration({
