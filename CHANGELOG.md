@@ -1,3 +1,11 @@
+## [3.132.4](https://github.com/tolgee/tolgee-platform/compare/v3.132.3...v3.132.4) (2025-09-24)
+
+
+### Bug Fixes
+
+* get back accidently removed billing methods from jpa repos ([#3250](https://github.com/tolgee/tolgee-platform/issues/3250)) ([5a8a6d2](https://github.com/tolgee/tolgee-platform/commit/5a8a6d2c83f95618dbc95f59b6b3266e2a9665a5))
+* prevent duplicate Sentry initialization in MandatoryDataProvider ([#3251](https://github.com/tolgee/tolgee-platform/issues/3251)) ([c764f11](https://github.com/tolgee/tolgee-platform/commit/c764f11271ad85aa69c8bb74cf21bb2e19f0cb14))
+
 ## [3.132.3](https://github.com/tolgee/tolgee-platform/compare/v3.132.2...v3.132.3) (2025-09-17)
 
 
