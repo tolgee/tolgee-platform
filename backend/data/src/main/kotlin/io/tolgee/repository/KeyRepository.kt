@@ -284,6 +284,9 @@ interface KeyRepository : JpaRepository<Key, Long> {
       left join fetch k.namespace ns
       left join fetch k.branch br
       left join fetch t.labels l
+      left join fetch km.tags tg
+      left join fetch t.comments c
+      left join fetch c.author ca
       where k.project.id = :projectId 
         and k.name = :keyName
         and (br.name = :branchName or (:branchName is null and (br is null or br.isDefault)))
