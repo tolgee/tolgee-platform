@@ -81,7 +81,7 @@ class Translation(
   var mtProvider: MtServiceType? = null
 
   @OneToMany(mappedBy = "translation", orphanRemoval = true)
-  var comments: MutableList<TranslationComment> = mutableListOf()
+  var comments: MutableSet<TranslationComment> = mutableSetOf()
 
   var wordCount: Int? = null
 
