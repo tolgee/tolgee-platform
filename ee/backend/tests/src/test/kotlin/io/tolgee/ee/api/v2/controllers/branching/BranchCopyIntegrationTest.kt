@@ -6,6 +6,8 @@ import io.tolgee.ee.repository.BranchRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.key.Key
+import io.tolgee.repository.KeyMetaRepository
+import io.tolgee.repository.KeyScreenshotReferenceRepository
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -22,6 +24,12 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var branchRepository: BranchRepository
+
+  @Autowired
+  lateinit var keyMetaRepository: KeyMetaRepository
+
+  @Autowired
+  lateinit var keyScreenshotReferenceRepository: KeyScreenshotReferenceRepository
 
   @BeforeEach
   fun setup() {
@@ -44,7 +52,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     val newBranchId = branchRepository.findByProjectIdAndName(projectId, "feature-x")!!.id
     val newBranchKeyCount = keyRepository.countByProjectAndBranch(projectId, newBranchId)
 
-    newBranchKeyCount.assert.isEqualTo(500)
+    newBranchKeyCount.assert.isEqualTo(50)
 
     val firstMainKey = keyRepository.findPrefetchedByNameAndBranch(projectId, "branched key 1", "main")
     val firstBranchKey = keyRepository.findPrefetchedByNameAndBranch(projectId, "branched key 1", "feature-x")
@@ -110,5 +118,43 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     // labels are the same
     mainTranslationLabels.assert.hasSize(branchTranslationLabels.size)
     mainTranslationLabels.assert.containsAll(branchTranslationLabels)
+
+    // tags are the same
+    this.keyMeta!!.tags.assert.hasSize(other.keyMeta!!.tags.size)
+    this.keyMeta!!.tags.assert.containsAll(other.keyMeta!!.tags)
+
+    // translation comments are the same
+    mainTranslation.comments.assert.hasSize(branchTranslation.comments.size)
+    mainTranslation.comments.first().let { comment ->
+      val branchComment = branchTranslation.comments.first()
+      comment.id.assert.isNotEqualTo(branchComment.id)
+      comment.text.assert.isEqualTo(branchComment.text)
+      comment.state.assert.isEqualTo(branchComment.state)
+      comment.author.assert.isEqualTo(branchComment.author)
+    }
+
+    // key screenshots are the same
+    val mainKeyScreenshots = keyScreenshotReferenceRepository.getAllByKeyIdIn(listOf(this.id))
+    val branchKeyScreenshots = keyScreenshotReferenceRepository.getAllByKeyIdIn(listOf(other.id))
+    mainKeyScreenshots.first().let { screenshotReference ->
+      val branchScreenshotReference = branchKeyScreenshots.first()
+      screenshotReference.screenshot.assert.isEqualTo(branchScreenshotReference.screenshot)
+      screenshotReference.originalText.assert.isEqualTo(branchScreenshotReference.originalText)
+      screenshotReference.positions.assert.isEqualTo(branchScreenshotReference.positions)
+    }
+
+    val mainKeyMetaCodeReferences = keyMetaRepository.getCodeReferencesByKeyMetaId(this.keyMeta!!.id)
+    val branchKeyMetaCodeReferences = keyMetaRepository.getCodeReferencesByKeyMetaId(other.keyMeta!!.id)
+
+    mainKeyMetaCodeReferences.assert.hasSizeGreaterThan(0)
+    mainKeyMetaCodeReferences.assert.hasSize(branchKeyMetaCodeReferences.size)
+    mainKeyMetaCodeReferences.first().let { codeReference ->
+      val branchCodeReference = branchKeyMetaCodeReferences.first()
+      codeReference.id.assert.isNotEqualTo(branchCodeReference.id)
+      codeReference.line.assert.isEqualTo(branchCodeReference.line)
+      codeReference.path.assert.isEqualTo(branchCodeReference.path)
+      codeReference.author.assert.isEqualTo(branchCodeReference.author)
+      codeReference.fromImport.assert.isEqualTo(branchCodeReference.fromImport)
+    }
   }
 }
