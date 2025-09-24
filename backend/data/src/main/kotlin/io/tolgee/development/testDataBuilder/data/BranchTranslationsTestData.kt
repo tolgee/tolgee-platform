@@ -7,6 +7,8 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.key.Tag
+import io.tolgee.model.translation.Label
 
 class BranchTranslationsTestData {
   lateinit var project: Project
@@ -14,6 +16,10 @@ class BranchTranslationsTestData {
   lateinit var de: Language
   lateinit var user: UserAccount
   lateinit var mainBranch: Branch
+  lateinit var firstLabel: Label
+  lateinit var secondLabel: Label
+  lateinit var firstTag: Tag
+  lateinit var secondTag: Tag
 
   val root: TestDataBuilder =
     TestDataBuilder().apply {
@@ -33,13 +39,29 @@ class BranchTranslationsTestData {
         }
         en = addEnglish().self
         de = addGerman().self
+        firstTag = Tag().apply {
+          name = "draft"
+          project = this@project.self
+        }
+        secondTag = Tag().apply {
+          name = "feature"
+          project = this@project.self
+        }
+        firstLabel = addLabel {
+          name = "first"
+          color = "#FF5555"
+        }.self
+        secondLabel = addLabel {
+          name = "wohoo"
+          color = "#FF0000"
+        }.self
         mainBranch = addBranch {
           name = "main"
           project = this@project.self
           isDefault = true
           isProtected = true
         }.build {
-          (1..500).forEach {
+          (1..50).forEach {
             this@project.addBranchKey(it, "branched key", this@build.self)
           }
         }.self
@@ -59,13 +81,34 @@ class BranchTranslationsTestData {
       name = "$prefix $num"
       this.branch = branch
     }.build {
+      addMeta {
+        description = "description of key number $num"
+        tags.add(firstTag)
+        tags.add(secondTag)
+        addComment {
+          text = "text comment"
+        }
+        addCodeReference {
+          line = 20
+          path = "./code/exist.extension"
+          author = user
+        }
+      }.build {
+        addScreenshot { }
+      }
       addTranslation {
         language = en
         text = "I am key number $num - english"
+        labels = mutableSetOf(firstLabel, secondLabel)
+      }.build {
+        addComment {
+          text = "comment $num"
+        }
       }
       addTranslation {
         language = de
         text = "I am key number $num - german"
+        labels = mutableSetOf(secondLabel)
       }
     }
   }
