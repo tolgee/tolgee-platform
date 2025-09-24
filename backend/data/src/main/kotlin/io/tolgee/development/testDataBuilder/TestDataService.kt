@@ -17,6 +17,7 @@ import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
 import io.tolgee.model.Project
+import io.tolgee.repository.KeyCodeReferenceRepository
 import io.tolgee.service.TenantService
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
@@ -92,6 +93,7 @@ class TestDataService(
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
   private val languageStatsListener: LanguageStatsListener,
   private val invitationService: InvitationService,
+  private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
 ) : Logging {
   @Transactional
   fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
@@ -487,6 +489,7 @@ class TestDataService(
   private fun saveAllKeyDependants(keyBuilders: List<KeyBuilder>) {
     val metas = keyBuilders.map { it.data.meta?.self }.filterNotNull()
     tagService.saveAll(metas.flatMap { it.tags })
+    keyCodeReferenceRepository.saveAll(metas.flatMap { it.codeReferences })
     keyMetaService.saveAll(metas)
   }
 

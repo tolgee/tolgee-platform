@@ -100,6 +100,7 @@ class KeysTestData {
               addCodeReference {
                 line = 20
                 path = "./code/exist.extension"
+                author = user
               }
               custom = mutableMapOf("custom" to "value")
             }
