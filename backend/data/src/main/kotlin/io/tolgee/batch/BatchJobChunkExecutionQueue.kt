@@ -199,4 +199,8 @@ class BatchJobChunkExecutionQueue(
   fun getQueuedJobItems(jobId: Long): List<ExecutionQueueItem> {
     return queue.filter { it.jobId == jobId }
   }
+
+  fun getAllQueueItems(): List<ExecutionQueueItem> {
+    return queue.toList()
+  }
 }
