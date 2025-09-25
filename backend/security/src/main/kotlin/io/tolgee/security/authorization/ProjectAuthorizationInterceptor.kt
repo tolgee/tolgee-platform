@@ -18,10 +18,10 @@ package io.tolgee.security.authorization
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.hasAdminAccess
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.exceptions.ProjectNotFoundException
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectHolder
@@ -56,6 +56,7 @@ class ProjectAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
+    val user = authenticationFacade.authenticatedUser
     val userId = authenticationFacade.authenticatedUser.id
     val project =
       requestContextService.getTargetProject(request)
@@ -65,8 +66,9 @@ class ProjectAuthorizationInterceptor(
         ?: return true
 
     var bypassed = false
-    val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
     val requiredScopes = getRequiredScopes(request, handler)
+    val isReadOnlyMethod = isReadOnlyMethod(request, handler)
+    val isReadOnly = Scope.areAllReadOnly(requiredScopes) || isReadOnlyMethod
 
     val formattedRequirements = requiredScopes?.joinToString(", ") { it.value } ?: "read-only"
     logger.debug("Checking access to proj#${project.id} by user#$userId (Requires $formattedRequirements)")
@@ -74,7 +76,7 @@ class ProjectAuthorizationInterceptor(
     val scopes = securityService.getCurrentPermittedScopes(project.id)
 
     if (scopes.isEmpty()) {
-      if (!isAdmin) {
+      if (!user.hasAdminAccess(isReadonlyAccess = isReadOnlyMethod)) {
         logger.debug(
           "Rejecting access to proj#{} for user#{} - No view permissions",
           project.id,
@@ -88,10 +90,13 @@ class ProjectAuthorizationInterceptor(
       bypassed = true
     }
 
-    val missingScopes = getMissingScopes(requiredScopes, scopes.toSet())
+    val missingScopes = getMissingScopes(requiredScopes, scopes)
 
     if (missingScopes.isNotEmpty()) {
-      if (!isAdmin || authenticationFacade.isProjectApiKeyAuth) {
+      val hasAdminAccess = user.hasAdminAccess(isReadonlyAccess = isReadOnly)
+      val canUseAdminRights = !authenticationFacade.isProjectApiKeyAuth
+      val canBypass = hasAdminAccess && canUseAdminRights
+      if (!canBypass) {
         logger.debug(
           "Rejecting access to proj#{} for user#{} - Insufficient permissions",
           project.id,
@@ -120,6 +125,17 @@ class ProjectAuthorizationInterceptor(
 
         throw PermissionException(Message.PAK_CREATED_FOR_DIFFERENT_PROJECT)
       }
+    }
+
+    if (authenticationFacade.isReadOnly && !isReadOnly) {
+      // This one can't be bypassed
+      logger.debug(
+        "Rejecting access to proj#{} for user#{} - Write operation is not allowed in read-only mode",
+        project.id,
+        userId,
+      )
+
+      throw PermissionException()
     }
 
     if (bypassed) {

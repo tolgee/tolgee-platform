@@ -79,9 +79,7 @@ class AuthProviderChangeController(
     val user = authenticationFacade.authenticatedUserEntity
     authProviderChangeService.accept(user, request.id)
     userAccountService.invalidateTokens(user)
-    return JwtAuthenticationResponse(
-      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
-    )
+    return JwtAuthenticationResponse(jwtService.emitTokenRefreshForCurrentUser(isSuper = true))
   }
 
   @DeleteMapping("/change")

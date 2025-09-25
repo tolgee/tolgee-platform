@@ -117,7 +117,7 @@ class V2UserController(
   ): JwtAuthenticationResponse {
     userAccountService.updatePassword(authenticationFacade.authenticatedUserEntity, dto!!)
     return JwtAuthenticationResponse(
-      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
+      jwtService.emitTokenRefreshForCurrentUser(isSuper = true),
     )
   }
 
@@ -282,7 +282,7 @@ class V2UserController(
       if (!matches) throw AuthenticationException(Message.WRONG_CURRENT_PASSWORD)
     }
 
-    val jwt = jwtService.emitToken(entity.id, true)
+    val jwt = jwtService.emitTokenRefreshForCurrentUser(isSuper = true)
     return ResponseEntity.ok(JwtAuthenticationResponse(jwt))
   }
 }

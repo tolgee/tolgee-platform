@@ -4,6 +4,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.cacheable.hasAdminAccess
 import io.tolgee.exceptions.LanguageNotPermittedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -48,10 +49,10 @@ class SecurityService(
   @Autowired
   private lateinit var labelService: LabelService
 
-  fun checkAnyProjectPermission(projectId: Long) {
+  fun checkAnyProjectPermission(projectId: Long, isReadonlyAccess: Boolean) {
     if (
       getProjectPermissionScopesNoApiKey(projectId).isNullOrEmpty() &&
-      !isCurrentUserServerAdmin()
+      !hasCurrentUserServerAdminAccess(isReadonlyAccess)
     ) {
       throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
@@ -154,7 +155,7 @@ class SecurityService(
     requiredScope: Scope,
     userAccountDto: UserAccountDto,
   ) {
-    if (isUserAdmin(userAccountDto)) {
+    if (userAccountDto.hasAdminAccess(isReadonlyAccess = requiredScope.isReadOnly())) {
       return
     }
 
@@ -217,6 +218,7 @@ class SecurityService(
     checkProjectPermission(projectId, Scope.TRANSLATIONS_SUGGEST)
     checkLanguagePermission(
       projectId,
+      isReadonlyAccess = false,
     ) { data -> data.checkSuggestPermitted(*languageIds.toLongArray()) }
   }
 
@@ -227,6 +229,7 @@ class SecurityService(
     checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
     checkLanguagePermission(
       projectId,
+      isReadonlyAccess = true,
     ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
   }
 
@@ -239,6 +242,7 @@ class SecurityService(
     checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
     checkLanguagePermission(
       projectId,
+      isReadonlyAccess = true,
     ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
 
     if (keyId != null && languageIds.isNotEmpty()) {
@@ -263,6 +267,7 @@ class SecurityService(
         checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
         checkLanguagePermission(
           projectId,
+          isReadonlyAccess = false,
         ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
       },
       {
@@ -294,6 +299,7 @@ class SecurityService(
       checkProjectPermission(projectId, Scope.TRANSLATIONS_STATE_EDIT)
       checkLanguagePermission(
         projectId,
+        isReadonlyAccess = false,
       ) { data -> data.checkStateChangePermitted(*languageIds.toLongArray()) }
     } catch (e: PermissionException) {
       if (!translationsInTask(projectId, TaskType.REVIEW, languageIds, keyId)) {
@@ -332,9 +338,10 @@ class SecurityService(
 
   private fun checkLanguagePermission(
     projectId: Long,
+    isReadonlyAccess: Boolean,
     permissionCheckFn: (data: ComputedPermissionDto) -> Unit,
   ) {
-    if (isCurrentUserServerAdmin()) {
+    if (hasCurrentUserServerAdminAccess(isReadonlyAccess)) {
       return
     }
     val usersPermission =
@@ -544,12 +551,8 @@ class SecurityService(
     }
   }
 
-  private fun isCurrentUserServerAdmin(): Boolean {
-    return isUserAdmin(activeUser)
-  }
-
-  private fun isUserAdmin(user: UserAccountDto): Boolean {
-    return user.role == UserAccount.Role.ADMIN
+  private fun hasCurrentUserServerAdminAccess(isReadonlyAccess: Boolean): Boolean {
+    return activeUser.hasAdminAccess(isReadonlyAccess)
   }
 
   private val activeUser: UserAccountDto

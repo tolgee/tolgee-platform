@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
 import io.tolgee.dtos.request.apiKey.RegenerateApiKeyDto
 import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
@@ -21,7 +22,6 @@ import io.tolgee.hateoas.apiKey.RevealedApiKeyModel
 import io.tolgee.hateoas.apiKey.RevealedApiKeyModelAssembler
 import io.tolgee.hateoas.project.SimpleProjectModelAssembler
 import io.tolgee.model.ApiKey
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
@@ -77,7 +77,7 @@ class ApiKeyController(
     dto: CreateApiKeyDto,
   ): RevealedApiKeyModel {
     val project = projectService.get(dto.projectId)
-    if (authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN) {
+    if (!authenticationFacade.authenticatedUser.isAdmin()) {
       securityService.checkApiKeyScopes(dto.scopes, project)
     }
     return apiKeyService.create(
@@ -312,7 +312,7 @@ class ApiKeyController(
   )
   @Deprecated(message = "Don't use this endpoint, it's useless.")
   val scopes: Map<String, List<String>> by lazy {
-    ProjectPermissionType.values()
+    ProjectPermissionType.entries
       .associate { it -> it.name to it.availableScopes.map { it.value }.toList() }
   }
 }

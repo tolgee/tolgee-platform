@@ -27,8 +27,25 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 
 class TolgeeAuthentication(
   private val credentials: Any?,
+  /**
+   * Device id - unique for each token. For activity logging.
+   */
+  val deviceId: String?,
   private val userAccount: UserAccountDto,
-  private val details: TolgeeAuthenticationDetails?,
+  /**
+   * If this is an impersonation token, this property will contain
+   * the user account, which initiated the impersonation.
+   */
+  val actingAsUserAccount: UserAccountDto?,
+  /**
+   * Whether the token can be used only for read-only requests.
+   */
+  val readOnly: Boolean,
+  /**
+   * Whether the user is super-authenticated
+   */
+  val isSuperToken: Boolean = false,
+  private val details: TolgeeAuthenticationDetails? = null,
 ) : Authentication {
   var userAccountEntity: UserAccount? = null
   var userAccountView: UserAccountView? = null
@@ -41,15 +58,35 @@ class TolgeeAuthentication(
 
   override fun getAuthorities(): Collection<GrantedAuthority> {
     return when (userAccount.role) {
-      UserAccount.Role.USER -> listOf(SimpleGrantedAuthority(ROLE_USER))
+      UserAccount.Role.USER ->
+        listOf(
+          SimpleGrantedAuthority(ROLE_USER),
+        )
+      UserAccount.Role.SUPPORTER ->
+        listOf(
+          SimpleGrantedAuthority(ROLE_USER),
+          SimpleGrantedAuthority(ROLE_SUPPORTER),
+        )
       UserAccount.Role.ADMIN ->
         listOf(
           SimpleGrantedAuthority(ROLE_USER),
+          SimpleGrantedAuthority(ROLE_SUPPORTER),
           SimpleGrantedAuthority(ROLE_ADMIN),
         )
       null -> emptyList()
-    }
+    } + readOnlyAsAuthority
   }
+
+  private val readOnlyAsAuthority: GrantedAuthority
+    get() {
+      return SimpleGrantedAuthority(
+        if (readOnly) {
+        ROLE_RO
+      } else {
+        ROLE_RW
+      }
+      )
+    }
 
   override fun getCredentials(): Any? {
     return credentials
@@ -73,6 +110,9 @@ class TolgeeAuthentication(
 
   companion object {
     const val ROLE_USER = "ROLE_USER"
+    const val ROLE_SUPPORTER = "ROLE_SUPPORTER"
     const val ROLE_ADMIN = "ROLE_ADMIN"
+    const val ROLE_RO = "ROLE_RO"
+    const val ROLE_RW = "ROLE_RW"
   }
 }

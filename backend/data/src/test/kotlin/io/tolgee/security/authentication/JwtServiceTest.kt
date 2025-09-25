@@ -50,6 +50,8 @@ class JwtServiceTest {
 
   private val userAccountService = Mockito.mock(UserAccountService::class.java)
 
+  private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
+
   private val userAccount = Mockito.mock(UserAccountDto::class.java)
 
   private val jwtService: JwtService =
@@ -58,6 +60,7 @@ class JwtServiceTest {
       authenticationProperties,
       currentDateProvider,
       userAccountService,
+      authenticationFacade,
     )
 
   @BeforeEach
@@ -104,24 +107,24 @@ class JwtServiceTest {
   @Test
   fun `it stores the super powers of tokens when it has them`() {
     val token = jwtService.emitToken(TEST_USER_ID)
-    val superToken = jwtService.emitToken(TEST_USER_ID, true)
+    val superToken = jwtService.emitToken(TEST_USER_ID, isSuper = true)
 
     val auth = jwtService.validateToken(token)
     val superAuth = jwtService.validateToken(superToken)
 
-    assertThat(auth.details?.isSuperToken).isFalse()
-    assertThat(superAuth.details?.isSuperToken).isTrue()
+    assertThat(auth.isSuperToken).isFalse()
+    assertThat(superAuth.isSuperToken).isTrue()
   }
 
   @Test
   fun `it ignores super powers when they are expired`() {
     val now = currentDateProvider.date.time
-    val superToken = jwtService.emitToken(TEST_USER_ID, true)
+    val superToken = jwtService.emitToken(TEST_USER_ID, isSuper = true)
 
     Mockito.`when`(currentDateProvider.date).thenReturn(Date(now + SUPER_JWT_LIFETIME + 1000))
 
     val superAuth = jwtService.validateToken(superToken)
-    assertThat(superAuth.details?.isSuperToken).isFalse()
+    assertThat(superAuth.isSuperToken).isFalse()
   }
 
   @Test

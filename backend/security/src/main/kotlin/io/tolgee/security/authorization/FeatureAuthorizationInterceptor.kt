@@ -21,7 +21,7 @@ import org.springframework.web.method.HandlerMethod
 class FeatureAuthorizationInterceptor(
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val organizationHolder: OrganizationHolder,
-) : AbstractAuthorizationInterceptor() {
+) : AbstractAuthorizationInterceptor(allowGlobalRoutes = false) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun preHandleInternal(
