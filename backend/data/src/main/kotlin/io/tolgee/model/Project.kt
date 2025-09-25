@@ -4,6 +4,7 @@ import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.api.ISimpleProject
 import io.tolgee.model.automations.Automation
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.enums.SuggestionsMode
@@ -143,6 +144,10 @@ class Project(
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var slackConfigs: MutableList<SlackConfig> = mutableListOf()
 
+  // Branches belonging to this project (back-reference of Branch.project)
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
+  var branches: MutableList<Branch> = mutableListOf()
+
   @ColumnDefault("true")
   override var icuPlaceholders: Boolean = true
 
@@ -197,9 +202,21 @@ class Project(
       lateinit var projectService: ObjectFactory<ProjectService>
 
       @PrePersist
+      fun prePersist(project: Project) {
+        if (project.branches.isEmpty()) {
+          project.branches.add(Branch.createMainBranch())
+        }
+        validateOwnership(project)
+      }
+
       @PreUpdate
-      fun preSave(project: Project) {
-        if (!(!project::organizationOwner.isInitialized).xor(project.userOwner == null)) {
+      fun preUpdate(project: Project) {
+        validateOwnership(project)
+      }
+
+      private fun validateOwnership(project: Project) {
+        val exactlyOneOwner = (!project::organizationOwner.isInitialized).xor(project.userOwner == null)
+        if (!exactlyOneOwner) {
           throw Exception("Exactly one of organizationOwner or userOwner must be set!")
         }
       }

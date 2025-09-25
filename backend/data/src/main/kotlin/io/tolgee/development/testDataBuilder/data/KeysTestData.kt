@@ -100,8 +100,18 @@ class KeysTestData {
               addCodeReference {
                 line = 20
                 path = "./code/exist.extension"
+                author = user
               }
               custom = mutableMapOf("custom" to "value")
+            }
+          }
+
+          addBranch {
+            name = "dev"
+          }.build {
+            addKey {
+              name = "first_key"
+              branch = self
             }
           }
         }
@@ -122,6 +132,24 @@ class KeysTestData {
       projectBuilder.apply {
         addKey {
           name = "key_$it"
+        }
+      }
+    }
+  }
+
+  fun addNBranchedKeys(n: Int, branchName: String = "feature") {
+    projectBuilder.apply {
+      addBranch {
+        name = branchName
+        project = projectBuilder.self
+      }.build {
+        (1..n).forEach {
+          addKey {
+            name = "branch_key_$it"
+            this.branch = self
+          }.build {
+            setDescription("description of branched key")
+          }
         }
       }
     }
