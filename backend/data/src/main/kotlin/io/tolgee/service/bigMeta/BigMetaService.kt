@@ -82,12 +82,18 @@ class BigMetaService(
         toStore.partition { it.key1Id == forKeyId || it.key2Id == forKeyId }
       }
 
-    metrics.bigMetaStoringTimer.recordCallable {
-      insertNewDistances(toStoreSync)
+    if (toStoreSync.isNotEmpty()) {
+      metrics.bigMetaStoringTimer.recordCallable {
+        insertNewDistances(toStoreSync)
+      }
     }
 
-    self.asyncInsertNewDistances(toStoreAsync)
-    self.asyncDeleteDistances(toDelete)
+    if (toStoreAsync.isNotEmpty()) {
+      self.asyncInsertNewDistances(toStoreAsync)
+    }
+    if (toDelete.isNotEmpty()) {
+      self.asyncDeleteDistances(toDelete)
+    }
   }
 
   @Async
@@ -102,22 +108,21 @@ class BigMetaService(
     if (toDelete.isEmpty()) {
       return
     }
-    jdbcTemplate.batchUpdate(
-      """
-      delete from keys_distance where key1id = ? and key2id = ?
-      """,
-      toDelete,
-      10000,
-    ) { ps, dto ->
-      ps.setLong(1, dto.key1Id)
-      ps.setLong(2, dto.key2Id)
+    metrics.bigMetaDeletingAsyncTimer.recordCallable {
+      jdbcTemplate.batchUpdate(
+        """
+            delete from keys_distance where key1id = ? and key2id = ?
+            """,
+        toDelete,
+        10000,
+      ) { ps, dto ->
+        ps.setLong(1, dto.key1Id)
+        ps.setLong(2, dto.key2Id)
+      }
     }
   }
 
   private fun insertNewDistances(toInsert: Collection<KeysDistanceDto>) {
-    if (toInsert.isEmpty()) {
-      return
-    }
     val timestamp = Timestamp(currentDateProvider.date.time)
     jdbcTemplate.batchUpdate(
       """

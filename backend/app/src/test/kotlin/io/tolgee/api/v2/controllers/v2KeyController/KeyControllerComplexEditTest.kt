@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
+import io.tolgee.Metrics
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.KeysTestData
@@ -19,7 +20,6 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationState
-import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
@@ -44,6 +44,9 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
 
   @Autowired
   lateinit var bigMetaService: BigMetaService
+
+  @Autowired
+  lateinit var metrics: Metrics
 
   val screenshotFile: InputStreamSource by lazy {
     generateImage(2000, 3000)
@@ -307,21 +310,21 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
     this.userAccount = testData.enOnlyUserAccount
     val thirdKey = testData.addThirdKey()
     testDataService.saveTestData(testData.root)
-    performProjectAuthPut(
-      "keys/${testData.firstKey.id}/complex-update",
-      ComplexEditKeyDto(
-        name = testData.firstKey.name,
-        relatedKeysInOrder =
-          mutableListOf(
-            RelatedKeyDto(null, testData.firstKey.name),
-            RelatedKeyDto(null, testData.secondKey.name),
-            RelatedKeyDto(null, thirdKey.name),
+    verifyKeysDistancesStoredAsynchronously {
+        performProjectAuthPut(
+          "keys/${testData.firstKey.id}/complex-update",
+          ComplexEditKeyDto(
+            name = testData.firstKey.name,
+            relatedKeysInOrder =
+              mutableListOf(
+                RelatedKeyDto(null, testData.firstKey.name),
+                RelatedKeyDto(null, testData.secondKey.name),
+                RelatedKeyDto(null, thirdKey.name),
+              ),
           ),
-      ),
-    ).andIsOk
-
+        ).andIsOk
+    }
     bigMetaService.getCloseKeyIds(testData.firstKey.id).assert.hasSize(2)
-    verifyKeysDistancesStoredAsynchronously()
   }
 
   @Test
@@ -524,11 +527,11 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
     )
   }
 
-  private fun verifyKeysDistancesStoredAsynchronously() {
-    entityManager.createQuery("from KeysDistance kd", KeysDistance::class.java)
-      .resultList.map { it.createdAt }
-      // this means the data is stored in 2 different transactions executed with different timestamps
-      .distinct()
-      .assert.hasSize(2)
+  private fun verifyKeysDistancesStoredAsynchronously(storeBigMeta: () -> ResultActions) {
+    val synMetricBefore = metrics.bigMetaStoringTimer.count()
+    val asynMetricBefore = metrics.bigMetaStoringAsyncTimer.count()
+    storeBigMeta()
+    assertThat(metrics.bigMetaStoringTimer.count()).isEqualTo(synMetricBefore + 1)
+    assertThat(metrics.bigMetaStoringAsyncTimer.count()).isEqualTo(asynMetricBefore + 1)
   }
 }
