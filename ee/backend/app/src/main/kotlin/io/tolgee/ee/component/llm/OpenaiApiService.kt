@@ -24,7 +24,7 @@ import org.springframework.web.client.RestTemplate
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : AbstractLlmApiService(), Logging {
-  override fun defaultAttempts(): List<Int> = listOf(30)
+  override fun defaultAttempts(): List<Int> = listOf(60, 120)
 
   override fun translate(
     params: LlmParams,
