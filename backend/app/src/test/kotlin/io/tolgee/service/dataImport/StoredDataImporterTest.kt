@@ -47,7 +47,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
         deviceId = null,
         userAccount = UserAccountDto.fromEntity(importTestData.userAccount),
         actingAsUserAccount = null,
-        readOnly = false,
+        isReadOnly = false,
         isSuperToken = false,
       )
   }

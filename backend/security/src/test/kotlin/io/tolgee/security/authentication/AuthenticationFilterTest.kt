@@ -136,7 +136,7 @@ class AuthenticationFilterTest {
           deviceId = null,
           userAccount = userAccountDto,
           actingAsUserAccount = null,
-          readOnly = false,
+          isReadOnly = false,
           isSuperToken = false,
         ),
       )

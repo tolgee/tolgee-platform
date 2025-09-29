@@ -182,7 +182,7 @@ class JwtService(
       deviceId = deviceId,
       userAccount = account,
       actingAsUserAccount = actor,
-      readOnly = roClaim,
+      isReadOnly = roClaim,
       isSuperToken = hasSuperPowers,
     )
   }

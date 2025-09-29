@@ -50,13 +50,16 @@ export const RoleSelector: FC<{
       disabled={currentUser?.id === user.id}
       size="small"
       value={user.globalServerRole}
-      onChange={(e) => setRole(user.id, e.target.value as any)}
+      onChange={(e) => setRole(user.id, e.target.value as Role)}
       inputProps={{ style: { padding: 0 } }}
     >
-      <MenuItem value={'USER'}>
+      <MenuItem value={'USER' satisfies Role}>
         <T keyName="administration_user_role_user" />
       </MenuItem>
-      <MenuItem value={'ADMIN'}>
+      <MenuItem value={'SUPPORTER' satisfies Role}>
+        <T keyName="administration_user_role_supporter" />
+      </MenuItem>
+      <MenuItem value={'ADMIN' satisfies Role}>
         <T keyName="administration_user_role_admin" />
       </MenuItem>
     </Select>

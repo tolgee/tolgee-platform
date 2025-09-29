@@ -40,7 +40,7 @@ class TolgeeAuthentication(
   /**
    * Whether the token can be used only for read-only requests.
    */
-  val readOnly: Boolean,
+  val isReadOnly: Boolean,
   /**
    * Whether the user is super-authenticated
    */
@@ -74,13 +74,13 @@ class TolgeeAuthentication(
           SimpleGrantedAuthority(ROLE_ADMIN),
         )
       null -> emptyList()
-    } + readOnlyAsAuthority
+    } + authorityFromIsReadOnly
   }
 
-  private val readOnlyAsAuthority: GrantedAuthority
+  private val authorityFromIsReadOnly: GrantedAuthority
     get() {
       return SimpleGrantedAuthority(
-        if (readOnly) {
+        if (isReadOnly) {
         ROLE_RO
       } else {
         ROLE_RW

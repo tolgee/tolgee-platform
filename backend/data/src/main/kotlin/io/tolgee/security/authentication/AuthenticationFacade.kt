@@ -87,7 +87,7 @@ class AuthenticationFacade(
   val deviceId: String?
     get() = authentication.deviceId
   val isReadOnly: Boolean
-    get() = authentication.readOnly
+    get() = authentication.isReadOnly
 
   val isUserSuperAuthenticated: Boolean
     get() = if (isAuthenticated) authentication.isSuperToken else false

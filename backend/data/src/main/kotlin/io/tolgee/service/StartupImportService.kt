@@ -85,7 +85,7 @@ class StartupImportService(
         deviceId = null,
         userAccount = UserAccountDto.fromEntity(userAccount),
         actingAsUserAccount = null,
-        readOnly = false,
+        isReadOnly = false,
         isSuperToken = false,
       )
   }
