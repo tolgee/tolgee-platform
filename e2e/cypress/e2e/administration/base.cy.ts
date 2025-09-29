@@ -115,7 +115,7 @@ function getUserRoleSelect(user: string) {
   return getUserListItem(user).findDcy('administration-user-role-select');
 }
 
-function changeUserRole(user: string, role: 'Admin' | 'User') {
+function changeUserRole(user: string, role: 'Admin' | 'Supporter' | 'User') {
   selectInSelect(getUserRoleSelect(user), role);
   confirmStandard();
   assertMessage('Role changed');

@@ -125,7 +125,7 @@ class ImportServiceTest : AbstractSpringTest() {
             deviceId = null,
             userAccount = UserAccountDto.fromEntity(testData.userAccount),
             actingAsUserAccount = null,
-            readOnly = false,
+            isReadOnly = false,
             isSuperToken = false,
           )
         testData

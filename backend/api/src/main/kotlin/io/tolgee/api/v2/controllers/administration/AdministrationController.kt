@@ -150,6 +150,12 @@ class AdministrationController(
   fun generateUserToken(
       @PathVariable userId: Long,
   ): String {
+    val isAlreadyImpersonating = authenticationFacade.actingUser != null
+    if (isAlreadyImpersonating) {
+      // We don't want to recreate the Inception movie here
+      throw BadRequestException(Message.ALREADY_IMPERSONATING_USER)
+    }
+
     val actingUser = authenticationFacade.authenticatedUser
     val user = userAccountService.get(userId)
     val isAdmin = actingUser.isAdmin()

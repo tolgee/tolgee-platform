@@ -12,7 +12,7 @@ import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSetti
 import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
 import {
   useConfig,
-  useIsAdmin,
+  useIsAdminOrSupporter,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import { CriticalUsageCircle } from 'tg.ee';
@@ -36,7 +36,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
   const { t } = useTranslate();
   const history = useHistory();
   const { preferredOrganization } = usePreferredOrganization();
-  const isAdmin = useIsAdmin();
+  const isAdminOrSupporter = useIsAdminOrSupporter();
 
   const handleOrganizationSelect = (organization: OrganizationModel) => {
     const redirectLink =
@@ -50,7 +50,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
   };
 
   const canManageOrganization =
-    preferredOrganization?.currentUserRole === 'OWNER' || isAdmin;
+    preferredOrganization?.currentUserRole === 'OWNER' || isAdminOrSupporter;
 
   const menuItems: SettingsMenuItem[] = [
     {

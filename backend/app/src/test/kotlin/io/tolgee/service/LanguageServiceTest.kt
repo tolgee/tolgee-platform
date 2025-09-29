@@ -157,7 +157,7 @@ class LanguageServiceTest : AbstractSpringTest() {
         deviceId = null,
         userAccount = UserAccountDto.fromEntity(user),
         actingAsUserAccount = null,
-        readOnly = false,
+        isReadOnly = false,
         isSuperToken = false,
       )
   }

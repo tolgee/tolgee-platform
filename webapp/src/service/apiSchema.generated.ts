@@ -906,7 +906,7 @@ export interface paths {
   };
   "/v2/projects/{projectId}/users/{userId}/set-by-organization": {
     /** Removes user's direct project permission, explicitly set for the project. User will have now base permissions from organization or no permission if they're not organization member. */
-    put: operations["setOrganizationBase"];
+    put: operations["removeDirectProjectPermissions"];
   };
   "/v2/projects/{projectId}/users/{userId}/set-permissions": {
     /** Set user's granular (scope-based) direct project permission */
@@ -1195,6 +1195,7 @@ export interface components {
         | "prompts.edit"
         | "translation-labels.manage"
         | "translation-labels.assign"
+        | "all.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1253,6 +1254,9 @@ export interface components {
       scopes: string[];
       userFullName?: string;
       username?: string;
+    };
+    AuthInfoModel: {
+      isReadOnly: boolean;
     };
     AuthMethodsDTO: {
       github: components["schemas"]["OAuthPublicConfigDTO"];
@@ -1597,7 +1601,8 @@ export interface components {
         | "DIRECT"
         | "ORGANIZATION_OWNER"
         | "NONE"
-        | "SERVER_ADMIN";
+        | "SERVER_ADMIN"
+        | "SERVER_SUPPORTER";
       permissionModel?: components["schemas"]["PermissionModel"];
       /**
        * @deprecated
@@ -1651,6 +1656,7 @@ export interface components {
         | "prompts.edit"
         | "translation-labels.manage"
         | "translation-labels.assign"
+        | "all.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -2534,7 +2540,9 @@ export interface components {
         | "suggestion_cant_be_plural"
         | "suggestion_must_be_plural"
         | "duplicate_suggestion"
-        | "unsupported_media_type";
+        | "unsupported_media_type"
+        | "impersonation_of_admin_by_supporter_not_allowed"
+        | "already_impersonating_user";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -2780,7 +2788,8 @@ export interface components {
         | "prompts.view"
         | "prompts.edit"
         | "translation-labels.manage"
-        | "translation-labels.assign";
+        | "translation-labels.assign"
+        | "all.view";
     };
     IdentifyRequest: {
       anonymousUserId: string;
@@ -3050,6 +3059,7 @@ export interface components {
     };
     InitialDataModel: {
       announcement?: components["schemas"]["AnnouncementDto"];
+      authInfo?: components["schemas"]["AuthInfoModel"];
       eeSubscription?: components["schemas"]["InitialDataEeSubscriptionModel"];
       languageTag?: string;
       preferredOrganization?: components["schemas"]["PrivateOrganizationModel"];
@@ -4178,6 +4188,7 @@ export interface components {
         | "prompts.edit"
         | "translation-labels.manage"
         | "translation-labels.assign"
+        | "all.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -4271,6 +4282,7 @@ export interface components {
         | "prompts.edit"
         | "translation-labels.manage"
         | "translation-labels.assign"
+        | "all.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -4403,7 +4415,7 @@ export interface components {
       domain?: string;
       emailAwaitingVerification?: string;
       /** @enum {string} */
-      globalServerRole: "USER" | "ADMIN";
+      globalServerRole: "USER" | "ADMIN" | "SUPPORTER";
       /** Format: int64 */
       id: number;
       mfaEnabled: boolean;
@@ -5804,7 +5816,9 @@ export interface components {
         | "suggestion_cant_be_plural"
         | "suggestion_must_be_plural"
         | "duplicate_suggestion"
-        | "unsupported_media_type";
+        | "unsupported_media_type"
+        | "impersonation_of_admin_by_supporter_not_allowed"
+        | "already_impersonating_user";
       params?: unknown[];
       success: boolean;
     };
@@ -6268,7 +6282,7 @@ export interface components {
       disabled: boolean;
       emailAwaitingVerification?: string;
       /** @enum {string} */
-      globalServerRole: "USER" | "ADMIN";
+      globalServerRole: "USER" | "ADMIN" | "SUPPORTER";
       /** Format: int64 */
       id: number;
       mfaEnabled: boolean;
@@ -7129,7 +7143,7 @@ export interface operations {
     parameters: {
       path: {
         userId: number;
-        role: "USER" | "ADMIN";
+        role: "USER" | "ADMIN" | "SUPPORTER";
       };
     };
     responses: {
@@ -19159,7 +19173,7 @@ export interface operations {
     };
   };
   /** Removes user's direct project permission, explicitly set for the project. User will have now base permissions from organization or no permission if they're not organization member. */
-  setOrganizationBase: {
+  removeDirectProjectPermissions: {
     parameters: {
       path: {
         userId: number;
@@ -19875,6 +19889,7 @@ export interface operations {
               | "prompts.edit"
               | "translation-labels.manage"
               | "translation-labels.assign"
+              | "all.view"
             )[];
           };
         };

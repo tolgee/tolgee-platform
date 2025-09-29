@@ -22,7 +22,9 @@ export const ProjectPage: React.FC<Props> = ({
 }) => {
   const project = useProject();
 
-  const isAdminAccess = project.computedPermission.origin === 'SERVER_ADMIN';
+  const isAdminAccess =
+    project.computedPermission.origin === 'SERVER_ADMIN' ||
+    project.computedPermission.origin === 'SERVER_SUPPORTER';
 
   return (
     <DashboardPage

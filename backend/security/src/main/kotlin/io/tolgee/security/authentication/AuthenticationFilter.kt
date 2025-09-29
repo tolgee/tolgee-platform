@@ -119,7 +119,7 @@ class AuthenticationFilter(
           deviceId = null,
           userAccount = initialUser,
           actingAsUserAccount = null,
-          readOnly = false,
+          isReadOnly = false,
           isSuperToken = true,
         )
     }
@@ -170,7 +170,7 @@ class AuthenticationFilter(
         deviceId = null,
         userAccount = userAccount,
         actingAsUserAccount = null,
-        readOnly = false,
+        isReadOnly = false,
         isSuperToken = false,
       )
   }
@@ -198,7 +198,7 @@ class AuthenticationFilter(
         deviceId = null,
         userAccount = userAccount,
         actingAsUserAccount = null,
-        readOnly = false,
+        isReadOnly = false,
         isSuperToken = false,
       )
   }
