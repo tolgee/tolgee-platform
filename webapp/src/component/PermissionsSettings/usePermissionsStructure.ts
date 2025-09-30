@@ -33,6 +33,9 @@ export const usePermissionsStructure = () => {
     value: 'admin',
     children: [
       {
+        value: 'all.view',
+      },
+      {
         label: t('permissions_item_keys'),
         children: [
           {
