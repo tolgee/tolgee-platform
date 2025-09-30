@@ -259,24 +259,6 @@ bootJar {
     }
 }
 
-def unpackTarget = "build/dependency"
-
-task unpack(type: Copy) {
-    from(zipTree(project.tasks.findByName("bootJar").outputs.files.singleFile))
-    into(unpackTarget)
-    if (System.getenv("SKIP_SERVER_BUILD") != "true") {
-        dependsOn "bootJar"
-    }
-}
-
-task addVersionFile(type: Task) {
-    mustRunAfter unpack
-    doLast {
-        def file = new File("${project.buildDir}/dependency/BOOT-INF/classes/.VERSION")
-        file.write(project.version.toString())
-    }
-}
-
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']

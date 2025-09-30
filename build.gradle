@@ -46,6 +46,11 @@ def unpackTarget = "${project.buildDir}/dependency"
 
 project(':server-app').afterEvaluate {
     task unpack(type: Copy) {
+        // cleanup the unpackTarget first so we don't have duplicated dependencies or other files, which
+        // can be there from previous builds
+        doFirst {
+            delete(unpackTarget)
+        }
         from(zipTree(project(':server-app').tasks.findByName("bootJar").outputs.files.singleFile))
         into(unpackTarget)
         if (System.getenv("SKIP_SERVER_BUILD") != "true") {
