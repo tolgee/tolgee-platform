@@ -11,4 +11,7 @@ class BatchProperties {
 
   @DocProperty(description = "How many job chunks are added to the internal queue on each scheduled run")
   var chunkQueuePopulationSize: Int = 1_000
+
+  @DocProperty(description = "How many parallel jobs can be run at once per project across all Tolgee instances")
+  var projectConcurrency: Int = 1
 }
