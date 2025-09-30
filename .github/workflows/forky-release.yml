@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: 'Version to release'
+        required: true
+jobs:
+  main:
+    # We want to keep this repository an official fork
+    # So this needs to stay public...
+    # Target only public infra (cloud runners, github packages, etc)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: adopt
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22.x"
+
+      - name: Install node modules
+        run: npm ci
+
+      - name: Run get new version
+        run: npm run release-dry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: BootJar with version
+        run: ./gradlew bootJar
+        env:
+          VERSION: ${{ github.event.inputs.releaseVersion }}
+
+      - name: Prepare for docker build
+        run: ./gradlew dockerPrepare
+        env:
+          VERSION: ${{ github.event.inputs.releaseVersion }}
+
+      - name: Create docker image
+        env:
+          DOCKER_REGISTRY: "ghcr.io"
+          IMAGE_PATH: "rakutenfrance/tolgee"
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.DOCKER_REGISTRY }} -u $ --password-stdin
+          docker build . -t ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PATH }}:${{ github.event.inputs.releaseVersion }} --platform linux/amd64
+          docker push ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PATH }}:${{ github.event.inputs.releaseVersion }}
+        working-directory: build/docker
+
+      - name: Pack with webapp
+        run: ./gradlew packResources
+        env:
+          VERSION: ${{ github.event.inputs.releaseVersion }}
