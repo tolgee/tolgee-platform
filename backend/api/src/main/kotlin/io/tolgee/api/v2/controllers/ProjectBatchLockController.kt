@@ -45,40 +45,41 @@ class ProjectBatchLockController(
     logger.debug("Retrieving all project batch locks")
     
     val locks = batchJobProjectLockingManager.getMap()
-    val lockModels = locks.map { (projectId, lockedJobId) ->
-      val lockStatus = when (lockedJobId) {
-        null -> LockStatus.UNINITIALIZED
-        0L -> LockStatus.UNLOCKED
-        else -> LockStatus.LOCKED
-      }
-      
-      val jobInfo = if (lockedJobId != null && lockedJobId > 0L) {
-        try {
-          val jobDto = batchJobService.getJobDto(lockedJobId)
-          JobInfo(
-            jobId = jobDto.id,
-            status = jobDto.status,
-            type = jobDto.type,
-            createdAt = jobDto.createdAt
-          )
-        } catch (e: Exception) {
-          logger.warn("Could not retrieve job info for locked job $lockedJobId in project $projectId", e)
-          null
-        }
-      } else {
-        null
-      }
-      
-      ProjectLockModel(
-        projectId = projectId,
-        lockedJobId = lockedJobId,
-        lockStatus = lockStatus,
-        jobInfo = jobInfo
-      )
+    val lockModels = locks.entries.map { (projectId, lockedJobIds) ->
+      createProjectLockModel(projectId, lockedJobIds)
     }
-    
+
     logger.debug("Retrieved ${lockModels.size} project batch locks")
     return CollectionModel.of(lockModels)
+  }
+
+  private fun createProjectLockModel(projectId: Long, lockedJobIds: Set<Long>): ProjectLockModel {
+    val lockStatus = when {
+      lockedJobIds.isEmpty() -> LockStatus.UNLOCKED
+      else -> LockStatus.LOCKED
+    }
+
+    val jobInfos = lockedJobIds.mapNotNull { jobId ->
+      try {
+        val jobDto = batchJobService.getJobDto(jobId)
+        JobInfo(
+          jobId = jobDto.id,
+          status = jobDto.status,
+          type = jobDto.type,
+          createdAt = jobDto.createdAt
+        )
+      } catch (e: Exception) {
+        logger.warn("Could not retrieve job info for locked job $jobId in project $projectId", e)
+        null
+      }
+    }
+
+    return ProjectLockModel(
+      projectId = projectId,
+      lockedJobIds = lockedJobIds,
+      lockStatus = lockStatus,
+      jobInfos = jobInfos
+    )
   }
 
   @GetMapping("/batch-job-queue")
@@ -111,9 +112,9 @@ class ProjectBatchLockController(
  */
 data class ProjectLockModel(
   val projectId: Long,
-  val lockedJobId: Long?,
+  val lockedJobIds: Set<Long>,
   val lockStatus: LockStatus,
-  val jobInfo: JobInfo?
+  val jobInfos: List<JobInfo>
 )
 
 /**
@@ -130,11 +131,10 @@ data class JobInfo(
  * Status of the project lock
  */
 enum class LockStatus {
-  /** Lock is explicitly cleared (value = 0L) */
+  /** Project lock is explicitly cleared (value = empty set) */
   UNLOCKED,
-  /** Lock has never been initialized (value = null) */
-  UNINITIALIZED, 
-  /** Lock is held by a specific job (value = jobId) */
+
+  /** Project lock is held by one or more jobs (value = set of job IDs) */
   LOCKED
 }
 

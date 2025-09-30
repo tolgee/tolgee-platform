@@ -173,7 +173,7 @@ class BatchJobConcurrentLauncher(
     }
 
     /**
-     * Only single job can run in project at the same time
+     * There is a project level lock with configurable n concurrent locks allowed.
      */
     if (!batchJobProjectLockingManager.canLockJobForProject(executionItem.jobId)) {
       logger.debug(

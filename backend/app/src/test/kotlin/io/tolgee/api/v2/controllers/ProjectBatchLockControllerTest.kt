@@ -47,10 +47,10 @@ class ProjectBatchLockControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `GET project-batch-locks returns locks with super auth`() {
-    val testLocks = ConcurrentHashMap<Long, Long?>().apply {
-      put(1L, 123L) // Project 1 locked to job 123
-      put(2L, 0L) // Project 2 explicitly unlocked
-      put(3L, null) // Project 3 uninitialized
+    val testLocks = ConcurrentHashMap<Long, Set<Long>>().apply {
+      put(1L, setOf(123L)) // Project 1 locked to job 123
+      put(2L, emptySet()) // Project 2 explicitly unlocked
+      put(3L, emptySet()) // Project 3 no jobs locked
     }
 
     whenever(batchJobProjectLockingManager.getMap()).thenReturn(testLocks)
@@ -82,7 +82,7 @@ class ProjectBatchLockControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `PUT clear project lock works with super auth`() {
-    val testLocks = ConcurrentHashMap<Long, Long?>()
+    val testLocks = ConcurrentHashMap<Long, Set<Long>>()
     whenever(batchJobProjectLockingManager.getMap()).thenReturn(testLocks)
 
     performAuthPut("/v2/administration/project-batch-locks/123/clear", null)
@@ -91,8 +91,8 @@ class ProjectBatchLockControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `DELETE project lock works with super auth`() {
-    val testLocks = ConcurrentHashMap<Long, Long?>().apply {
-      put(123L, 456L)
+    val testLocks = ConcurrentHashMap<Long, Set<Long>>().apply {
+      put(123L, setOf(456L))
     }
     whenever(batchJobProjectLockingManager.getMap()).thenReturn(testLocks)
 
