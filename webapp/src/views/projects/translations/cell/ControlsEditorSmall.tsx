@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslate } from '@tolgee/react';
 import { Box, styled } from '@mui/material';
-import { Code01, ClipboardCheck, Copy06 } from '@untitled-ui/icons-react';
+import { Code01, ClipboardCheck } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { StateInType } from 'tg.constants/translationStates';
@@ -11,6 +11,7 @@ import { useTranslationsSelector } from '../context/TranslationsContext';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useProject } from 'tg.hooks/useProject';
 import { useTaskTransitionTranslation } from 'tg.translationTools/useTaskTransitionTranslation';
+import { CopyBase } from 'tg.component/CustomIcons';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 type TaskModel = components['schemas']['KeyTaskViewModel'];
@@ -107,7 +108,7 @@ export const ControlsEditorSmall: React.FC<ControlsProps> = ({
             data-cy="translations-cell-insert-base-button"
             tooltip={t('translations_cell_insert_base')}
           >
-            <Copy06 />
+            <CopyBase />
           </ControlsButton>
         )}
 
