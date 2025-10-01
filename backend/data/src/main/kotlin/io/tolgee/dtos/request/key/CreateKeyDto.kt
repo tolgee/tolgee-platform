@@ -48,6 +48,7 @@ class CreateKeyDto(
         "If null, value will be guessed from the values provided in translations.",
   )
   val pluralArgName: String? = null,
+  val branch: String? = null,
 ) : WithRelatedKeysInOrder {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {
