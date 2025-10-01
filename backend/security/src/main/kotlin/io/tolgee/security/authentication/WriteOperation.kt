@@ -16,12 +16,12 @@
 
 package io.tolgee.security.authentication
 
+import org.springframework.security.access.prepost.PreAuthorize
+
 /**
- * Overrides read-only request method restriction for the annotated controller or handler method.
- *
- * When current authentication has readOnly flag set, only GET/HEAD/OPTIONS HTTP methods are allowed by default.
- * Applying this annotation to a controller class or method allows non-safe methods as well.
+ * Marks a component method that requires read-write mode (i.e. current authentication must not be read-only).
  */
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class AllowInReadOnlyMode
+@PreAuthorize("hasRole('RW')")
+annotation class WriteOperation

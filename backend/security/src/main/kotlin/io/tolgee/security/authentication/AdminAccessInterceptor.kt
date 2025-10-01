@@ -28,7 +28,7 @@ import org.springframework.web.method.HandlerMethod
 
 /**
  * Blocks write requests when the current authentication is read-only.
- * Annotate class or method with [AllowInReadOnlyMode] to override.
+ * Annotate class or method with [ReadOnlyOperation] to override.
  */
 @Component
 class AdminAccessInterceptor(
