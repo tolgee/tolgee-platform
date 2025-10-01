@@ -68,7 +68,8 @@ class ProjectAuthorizationInterceptor(
     var bypassed = false
     val requiredScopes = getRequiredScopes(request, handler)
     val isReadOnlyMethod = isReadOnlyMethod(request, handler)
-    val isReadOnly = Scope.areAllReadOnly(requiredScopes) || isReadOnlyMethod
+    val isReadOnlyOperation =
+      isReadOnlyMethod(request, handler, usesWritePermissions = !Scope.areAllReadOnly(requiredScopes))
 
     val formattedRequirements = requiredScopes?.joinToString(", ") { it.value } ?: "read-only"
     logger.debug("Checking access to proj#${project.id} by user#$userId (Requires $formattedRequirements)")
@@ -93,7 +94,7 @@ class ProjectAuthorizationInterceptor(
     val missingScopes = getMissingScopes(requiredScopes, scopes)
 
     if (missingScopes.isNotEmpty()) {
-      val hasAdminAccess = user.hasAdminAccess(isReadonlyAccess = isReadOnly)
+      val hasAdminAccess = user.hasAdminAccess(isReadonlyAccess = isReadOnlyOperation)
       val canUseAdminRights = !authenticationFacade.isProjectApiKeyAuth
       val canBypass = hasAdminAccess && canUseAdminRights
       if (!canBypass) {
@@ -127,7 +128,7 @@ class ProjectAuthorizationInterceptor(
       }
     }
 
-    if (authenticationFacade.isReadOnly && !isReadOnly) {
+    if (authenticationFacade.isReadOnly && !isReadOnlyOperation) {
       // This one can't be bypassed
       logger.debug(
         "Rejecting access to proj#{} for user#{} - Write operation is not allowed in read-only mode",
