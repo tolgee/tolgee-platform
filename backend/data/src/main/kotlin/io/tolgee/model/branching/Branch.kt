@@ -2,7 +2,6 @@ package io.tolgee.model.branching
 
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
-import io.tolgee.constants.Branches
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import jakarta.persistence.Column
@@ -59,13 +58,17 @@ class Branch(
 
   ) : StandardAuditModel() {
   companion object {
+    const val DEFAULT_BRANCH_NAME = "main"
 
-    fun createMainBranch(): Branch {
-      return Branch(
-        name = Branches.DEFAULT.name,
+    fun createMainBranch(project: Project): Branch {
+      val branch = Branch(
+        name = DEFAULT_BRANCH_NAME,
         isDefault = true,
         isProtected = true,
       )
+      branch.project = project
+      project.branches.add(branch)
+      return branch
     }
   }
 

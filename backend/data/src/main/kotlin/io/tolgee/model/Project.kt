@@ -149,8 +149,7 @@ class Project(
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var slackConfigs: MutableList<SlackConfig> = mutableListOf()
 
-  // Branches belonging to this project (back-reference of Branch.project)
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST], mappedBy = "project")
   var branches: MutableList<Branch> = mutableListOf()
 
   @ColumnDefault("true")
@@ -189,6 +188,14 @@ class Project(
     return findLanguageOptional(tag).orElse(null)
   }
 
+  fun hasDefaultBranch(): Boolean {
+    return branches.any { it.isDefault }
+  }
+
+  fun getDefaultBranch(): Branch? {
+    return branches.find { it.isDefault }
+  }
+
   /**
    * organizationOwner is a lateinit var, and in should never be null, but for some edge cases on some old
    * instances it can still be missing.
@@ -208,10 +215,10 @@ class Project(
 
       @PrePersist
       fun prePersist(project: Project) {
-        if (project.branches.isEmpty()) {
-          project.branches.add(Branch.createMainBranch())
-        }
         validateOwnership(project)
+        if (project.branches.isEmpty()) {
+          Branch.createMainBranch(project)
+        }
       }
 
       @PreUpdate
