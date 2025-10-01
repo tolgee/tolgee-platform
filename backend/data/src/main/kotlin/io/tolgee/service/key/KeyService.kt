@@ -126,7 +126,7 @@ class KeyService(
     project: Project,
     dto: CreateKeyDto,
   ): Key {
-    val key = create(project, dto.name, dto.namespace)
+    val key = create(project, dto.name, dto.namespace, dto.branch)
     key.isPlural = dto.isPlural
     if (key.isPlural) {
       key.pluralArgName = dto.pluralArgName
@@ -201,7 +201,7 @@ class KeyService(
     isPlural: Boolean = false,
   ): Key {
     checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace, branch = branch)
-    return createWithoutExistenceCheck(project, name, namespace, isPlural)
+    return createWithoutExistenceCheck(project, name, namespace, branch, isPlural)
   }
 
   @Transactional
@@ -209,11 +209,17 @@ class KeyService(
     project: Project,
     name: String,
     namespace: String?,
+    branch: String?,
     isPlural: Boolean,
   ): Key {
     val key = Key(name = name, project = project).apply { this.isPlural = isPlural }
     if (!namespace.isNullOrBlank()) {
       key.namespace = namespaceService.findOrCreate(namespace, project.id)
+    }
+    if (!branch.isNullOrEmpty()) {
+      key.branch = project.branches.find { it.name == branch } ?: throw BadRequestException(Message.BRANCH_NOT_FOUND)
+    } else if (project.hasDefaultBranch()) {
+      key.branch = project.getDefaultBranch()
     }
     return save(key)
   }
