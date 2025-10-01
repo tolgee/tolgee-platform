@@ -18,6 +18,7 @@ package io.tolgee.security.authentication
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isAdmin
+import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.authorization.AbstractAuthorizationInterceptor
 import jakarta.servlet.http.HttpServletRequest
@@ -49,8 +50,9 @@ class AdminAccessInterceptor(
       return true
     }
 
-    if (isReadOnlyMethod(request, handler)) {
-      // These methods should be read-only - safe to call from read-only mode
+    val hasReadAccess = authenticationFacade.authenticatedUser.isSupporterOrAdmin()
+    if (hasReadAccess && isReadOnlyMethod(request, handler)) {
+      // These methods should be read-only - safe to call
       return true
     }
 

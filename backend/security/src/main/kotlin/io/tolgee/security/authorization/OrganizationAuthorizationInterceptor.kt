@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 
 /**
- * This interceptor performs authorization step to access organization-related endpoints.
+ * This interceptor performs an authorization step to access organization-related endpoints.
  * By default, the user needs to have access to at least 1 project on the target org to access it.
  */
 @Component
