@@ -62,6 +62,7 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
       .andIsCreated.andPrettyPrint.andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("super_key")
+        node("branch").isEqualTo("main")
       }
   }
 
@@ -80,6 +81,17 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
         .keyMeta!!
         .description.assert.isEqualTo("description")
     }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creates key with default branch (branch parameter not provided)`() {
+    performProjectAuthPost("keys", CreateKeyDto(name = "super_key_to_main_branch", branch = "dev"))
+      .andIsCreated.andAssertThatJson {
+        node("id").isValidId
+        node("name").isEqualTo("super_key_to_main_branch")
+        node("branch").isEqualTo("dev")
+      }
   }
 
   @ProjectJWTAuthTestMethod

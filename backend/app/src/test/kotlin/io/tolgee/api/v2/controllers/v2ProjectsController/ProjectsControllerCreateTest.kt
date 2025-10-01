@@ -1,12 +1,12 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.tolgee.constants.Branches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.fixtures.*
 import io.tolgee.model.Project
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AuthorizedControllerTest
@@ -93,7 +93,7 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
           it.branches.first().let { branch ->
             branch.isDefault.assert.isTrue
             branch.isProtected.assert.isTrue
-            branch.name.assert.isEqualTo(Branches.DEFAULT.name)
+            branch.name.assert.isEqualTo(Branch.Companion.DEFAULT_BRANCH_NAME)
           }
         }
       }
