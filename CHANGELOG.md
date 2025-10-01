@@ -1,3 +1,10 @@
+# [3.133.0](https://github.com/tolgee/tolgee-platform/compare/v3.132.4...v3.133.0) (2025-10-01)
+
+
+### Features
+
+* Copy base text icon in translation edit mode changed ([#3258](https://github.com/tolgee/tolgee-platform/issues/3258)) ([0c24f25](https://github.com/tolgee/tolgee-platform/commit/0c24f25238a6e58650ca8808777ff8dd04325674)), closes [#3255](https://github.com/tolgee/tolgee-platform/issues/3255)
+
 ## [3.132.4](https://github.com/tolgee/tolgee-platform/compare/v3.132.3...v3.132.4) (2025-09-24)
 
 
