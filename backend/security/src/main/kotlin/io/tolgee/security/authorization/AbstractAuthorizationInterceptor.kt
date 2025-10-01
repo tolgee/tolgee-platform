@@ -65,12 +65,23 @@ abstract class AbstractAuthorizationInterceptor(
     return annotation != null
   }
 
-  fun isReadOnlyMethod(request: HttpServletRequest, handler: HandlerMethod): Boolean {
+  /**
+   * Determines if the target endpoint is read-only. Can be overridden by annotating the method with
+   * [AllowInReadOnlyMode] or [RequiresReadWriteMode] annotation.
+   *
+   * @param usesWritePermissions whether the request uses write permissions; if false, the method is
+   * considered read-only; ignored if null
+   */
+  fun isReadOnlyMethod(
+    request: HttpServletRequest,
+    handler: HandlerMethod,
+    usesWritePermissions: Boolean? = null
+  ): Boolean {
     if (AnnotationUtils.getAnnotation(handler.method, RequiresReadWriteMode::class.java) != null) {
       return false
     }
 
-    if (request.method in READ_ONLY_METHODS) {
+    if (request.method in READ_ONLY_METHODS || usesWritePermissions == false) {
       return true
     }
 

@@ -64,7 +64,12 @@ class OrganizationAuthorizationInterceptor(
     var bypassed = false
     val requiredRole = getRequiredRole(request, handler)
     val isReadOnlyMethod = isReadOnlyMethod(request, handler)
-    val isReadOnly = requiredRole?.isReadOnly != false || isReadOnlyMethod
+    val isReadOnlyOperation = isReadOnlyMethod(
+      request,
+      handler,
+      usesWritePermissions =
+      requiredRole?.isReadOnly == false
+    )
     logger.debug(
       "Checking access to org#{} by user#{} (Requires {})",
       organization.id,
@@ -88,7 +93,7 @@ class OrganizationAuthorizationInterceptor(
     }
 
     if (requiredRole != null && !organizationRoleService.isUserOfRole(userId, organization.id, requiredRole)) {
-      if (!user.hasAdminAccess(isReadonlyAccess = isReadOnly)) {
+      if (!user.hasAdminAccess(isReadonlyAccess = isReadOnlyOperation)) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - Insufficient role",
           organization.id,
@@ -101,7 +106,7 @@ class OrganizationAuthorizationInterceptor(
       bypassed = true
     }
 
-    if (authenticationFacade.isReadOnly && !isReadOnly) {
+    if (authenticationFacade.isReadOnly && !isReadOnlyOperation) {
       // This one can't be bypassed
       logger.debug(
         "Rejecting access to org#{} for user#{} - Write operation is not allowed in read-only mode",
