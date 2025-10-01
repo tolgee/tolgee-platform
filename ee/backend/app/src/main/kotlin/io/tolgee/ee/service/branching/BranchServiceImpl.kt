@@ -43,7 +43,6 @@ class BranchServiceImpl(
     }
     branchRepository.save(branch)
 
-    val sourceIsDefault = originBranch.isDefault
     branchCopyService.copy(projectId, originBranch, branch)
 
     branch.pending = false
