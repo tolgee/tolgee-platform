@@ -80,6 +80,9 @@ declare namespace DataCy {
         "administration-plan-field-stripe-product" |
         "administration-plan-field-stripe-product-name" |
         "administration-plan-selector" |
+        "administration-plans-create-migration" |
+        "administration-plans-edit-migration" |
+        "administration-plans-item-is-migrating-badge" |
         "administration-subscriptions-active-self-hosted-ee-plan" |
         "administration-subscriptions-assign-plan-save-button" |
         "administration-subscriptions-cloud-plan-name" |
@@ -263,6 +266,7 @@ declare namespace DataCy {
         "create-task-submit" |
         "dashboard-projects-list-item" |
         "default-namespace-select" |
+        "delete-plan-migration-button" |
         "delete-user-button" |
         "developer-menu-content-delivery" |
         "developer-menu-storage" |
@@ -558,6 +562,7 @@ declare namespace DataCy {
         "permissions-menu-save" |
         "plan-limit-dialog-close" |
         "plan-limit-exceeded-popover" |
+        "plan-migration-tooltip-detail" |
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |
@@ -677,6 +682,7 @@ declare namespace DataCy {
         "signup-error-free-seat-limit" |
         "signup-error-plan-seat-limit" |
         "signup-error-seats-spending-limit" |
+        "source-plan-selector" |
         "spending-limit-dialog-close" |
         "spending-limit-exceeded-popover" |
         "sso-migration-info-text" |
@@ -708,6 +714,7 @@ declare namespace DataCy {
         "suggestions-list" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
+        "target-plan-selector" |
         "task-date-picker" |
         "task-detail" |
         "task-detail-author" |
