@@ -18,6 +18,7 @@ class ImportKeysResolvableItemDto(
   @Schema(description = "The namespace of the key. (When empty or null default namespace will be used)")
   val namespace: String? = null,
   val screenshots: List<KeyScreenshotDto>? = null,
+  val branch: String? = null,
   /**
    * Map of language tag -> text
    */

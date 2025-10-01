@@ -311,6 +311,7 @@ class ResolvingKeyImporter(
           project = projectEntity,
           name = keyToImport.name,
           namespace = keyToImport.namespace,
+          branch = keyToImport.branch,
           isPlural = false,
         )
       }
