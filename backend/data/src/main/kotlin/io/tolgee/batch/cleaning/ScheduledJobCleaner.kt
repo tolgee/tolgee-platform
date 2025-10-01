@@ -45,8 +45,10 @@ class ScheduledJobCleaner(
   }
 
   private fun handleStuckJobs() {
-    batchJobService.getStuckJobIds(batchJobStateProvider.getCachedJobIds()).forEach {
-      logger.warn("Removing stuck job state it using scheduled task")
+    val stuckJobIds = batchJobService.getStuckJobIds(batchJobStateProvider.getCachedJobIds())
+    logger.warn("Removing stuck job state using scheduled task for ${stuckJobIds.size} jobs")
+    stuckJobIds.forEach {
+      logger.trace("Removing stuck job state using scheduled task for job $it")
       batchJobStateProvider.removeJobState(it)
     }
   }
