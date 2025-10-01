@@ -128,12 +128,12 @@ class ReadOnlyModeInterceptorTest {
   }
 
   @Test
-  fun `it denies GET annotated with RequiresReadWriteMode`() {
+  fun `it denies GET annotated with WriteOperation`() {
     mockMvc.perform(get("/test/read-requires-rw")).andIsForbidden
   }
 
   @Test
-  fun `it denies HEAD annotated with RequiresReadWriteMode`() {
+  fun `it denies HEAD annotated with WriteOperation`() {
     mockMvc.perform(head("/test/read-requires-rw")).andIsForbidden
   }
 
@@ -178,23 +178,23 @@ class ReadOnlyModeInterceptorTest {
     @DeleteMapping("/test/write")
     fun delete() = "ok"
 
-    @AllowInReadOnlyMode
+    @ReadOnlyOperation
     @PostMapping("/test/write-allowed")
     fun writeAllowed() = "ok"
 
-    @AllowInReadOnlyMode
+    @ReadOnlyOperation
     @PutMapping("/test/write-allowed")
     fun putAllowed() = "ok"
 
-    @AllowInReadOnlyMode
+    @ReadOnlyOperation
     @PatchMapping("/test/write-allowed")
     fun patchAllowed() = "ok"
 
-    @AllowInReadOnlyMode
+    @ReadOnlyOperation
     @DeleteMapping("/test/write-allowed")
     fun deleteAllowed() = "ok"
 
-    @RequiresReadWriteMode
+    @WriteOperation
     @GetMapping("/test/read-requires-rw")
     fun readRequiresRw() = "ok"
   }

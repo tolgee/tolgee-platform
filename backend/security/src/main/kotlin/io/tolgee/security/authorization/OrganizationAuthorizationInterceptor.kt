@@ -57,19 +57,18 @@ class OrganizationAuthorizationInterceptor(
     val organization =
       requestContextService.getTargetOrganization(request)
         // Two possible scenarios: we're on `GET/POST /v2/organization`, or the organization was not found.
-        // In both cases, there is no authorization to perform and we simply continue.
+        // In both cases, there is no authorization to perform, and we simply continue.
         // It is not the job of the interceptor to return a 404 error.
         ?: return true
 
     var bypassed = false
     val requiredRole = getRequiredRole(request, handler)
-    val isReadOnlyMethod = isReadOnlyMethod(request, handler)
     val isReadOnlyOperation = isReadOnlyMethod(
       request,
       handler,
-      usesWritePermissions =
-      requiredRole?.isReadOnly == false
+      usesWritePermissions = requiredRole?.isReadOnly == false
     )
+    val canBypass = user.hasAdminAccess(isReadonlyAccess = isReadOnlyOperation)
     logger.debug(
       "Checking access to org#{} by user#{} (Requires {})",
       organization.id,
@@ -78,22 +77,28 @@ class OrganizationAuthorizationInterceptor(
     )
 
     if (!organizationRoleService.canUserViewStrict(userId, organization.id)) {
-      if (!user.hasAdminAccess(isReadonlyAccess = isReadOnlyMethod)) {
+      if (!canBypass) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - No view permissions",
           organization.id,
           userId,
         )
 
-        // Security consideration: if the user cannot see the organization, pretend it does not exist.
-        throw NotFoundException()
+        val canBypassReadOnly = user.hasAdminAccess(isReadonlyAccess = true)
+        if (!canBypassReadOnly) {
+          // Security consideration: if the user cannot see the organization, pretend it does not exist.
+          throw NotFoundException()
+        }
+
+        // Admin access for read-only operations is allowed, but it's not enough for the current operation.
+        throw PermissionException()
       }
 
       bypassed = true
     }
 
     if (requiredRole != null && !organizationRoleService.isUserOfRole(userId, organization.id, requiredRole)) {
-      if (!user.hasAdminAccess(isReadonlyAccess = isReadOnlyOperation)) {
+      if (!canBypass) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - Insufficient role",
           organization.id,

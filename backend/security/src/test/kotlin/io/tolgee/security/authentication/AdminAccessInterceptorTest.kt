@@ -175,13 +175,13 @@ class AdminAccessInterceptorTest {
   }
 
   @Test
-  fun `it denies GET from supporter when method annotated with RequiresReadWriteMode`() {
+  fun `it denies GET from supporter when method annotated with WriteOperation`() {
     whenever(userAccount.role).thenReturn(UserAccount.Role.SUPPORTER)
     mockMvc.perform(get("/admin/read-requires-rw")).andIsForbidden
   }
 
   @Test
-  fun `it denies HEAD from supporter when method annotated with RequiresReadWriteMode`() {
+  fun `it denies HEAD from supporter when method annotated with WriteOperation`() {
     whenever(userAccount.role).thenReturn(UserAccount.Role.SUPPORTER)
     mockMvc.perform(head("/admin/read-requires-rw")).andIsForbidden
   }
@@ -239,23 +239,23 @@ class AdminAccessInterceptorTest {
     @DeleteMapping("/admin/write")
     fun delete() = "ok"
 
-    @RequiresReadWriteMode
+    @WriteOperation
     @GetMapping("/admin/read-requires-rw")
     fun readRequiresRw() = "ok"
 
-    @AllowInReadOnlyMode
+    @ReadOnlyOperation
     @PostMapping("/admin/write-allowed")
     fun writeAllowed() = "ok"
 
-    @AllowInReadOnlyMode
+    @ReadOnlyOperation
     @PutMapping("/admin/write-allowed")
     fun putAllowed() = "ok"
 
-    @AllowInReadOnlyMode
+    @ReadOnlyOperation
     @PatchMapping("/admin/write-allowed")
     fun patchAllowed() = "ok"
 
-    @AllowInReadOnlyMode
+    @ReadOnlyOperation
     @DeleteMapping("/admin/write-allowed")
     fun deleteAllowed() = "ok"
   }

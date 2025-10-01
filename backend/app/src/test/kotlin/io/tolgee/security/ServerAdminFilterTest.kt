@@ -16,6 +16,20 @@ class ServerAdminFilterTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun allowsAccessToServerSupporter() {
+    val serverAdmin =
+      userAccountService.createUser(
+        UserAccount(
+          username = "serverSupporter",
+          password = "admin",
+          role = UserAccount.Role.SUPPORTER,
+        ),
+      )
+    loginAsUser(serverAdmin)
+    performAuthGet("/v2/administration/organizations").andIsOk
+  }
+
+  @Test
   fun allowsAccessToServerAdmin() {
     val serverAdmin =
       userAccountService.createUser(

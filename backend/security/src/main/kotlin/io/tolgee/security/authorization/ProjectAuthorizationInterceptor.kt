@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 
 /**
- * This interceptor performs authorization step to perform operations on a project or organization.
+ * This interceptor performs an authorization step to perform operations on a project or organization.
  */
 @Component
 class ProjectAuthorizationInterceptor(
@@ -67,9 +67,10 @@ class ProjectAuthorizationInterceptor(
 
     var bypassed = false
     val requiredScopes = getRequiredScopes(request, handler)
-    val isReadOnlyMethod = isReadOnlyMethod(request, handler)
-    val isReadOnlyOperation =
-      isReadOnlyMethod(request, handler, usesWritePermissions = !Scope.areAllReadOnly(requiredScopes))
+    val isReadOnly = isReadOnlyMethod(request, handler, usesWritePermissions = !Scope.areAllReadOnly(requiredScopes))
+    val hasAdminAccess = user.hasAdminAccess(isReadonlyAccess = isReadOnly)
+    val canUseAdminRights = !authenticationFacade.isProjectApiKeyAuth
+    val canBypass = hasAdminAccess && canUseAdminRights
 
     val formattedRequirements = requiredScopes?.joinToString(", ") { it.value } ?: "read-only"
     logger.debug("Checking access to proj#${project.id} by user#$userId (Requires $formattedRequirements)")
@@ -77,15 +78,22 @@ class ProjectAuthorizationInterceptor(
     val scopes = securityService.getCurrentPermittedScopes(project.id)
 
     if (scopes.isEmpty()) {
-      if (!user.hasAdminAccess(isReadonlyAccess = isReadOnlyMethod)) {
+      if (!canBypass) {
         logger.debug(
           "Rejecting access to proj#{} for user#{} - No view permissions",
           project.id,
           userId,
         )
 
-        // Security consideration: if the user cannot see the project, pretend it does not exist.
-        throw ProjectNotFoundException(project.id)
+        val hasReadOnlyAdminAccess = user.hasAdminAccess(isReadonlyAccess = true)
+        val canBypassReadOnly = hasReadOnlyAdminAccess && canUseAdminRights
+        if (!canBypassReadOnly) {
+            // Security consideration: if the user cannot see the project, pretend it does not exist.
+            throw ProjectNotFoundException(project.id)
+        }
+
+        // Admin access for read-only operations is allowed, but it's not enough for the current operation.
+        throw PermissionException()
       }
 
       bypassed = true
@@ -94,9 +102,6 @@ class ProjectAuthorizationInterceptor(
     val missingScopes = getMissingScopes(requiredScopes, scopes)
 
     if (missingScopes.isNotEmpty()) {
-      val hasAdminAccess = user.hasAdminAccess(isReadonlyAccess = isReadOnlyOperation)
-      val canUseAdminRights = !authenticationFacade.isProjectApiKeyAuth
-      val canBypass = hasAdminAccess && canUseAdminRights
       if (!canBypass) {
         logger.debug(
           "Rejecting access to proj#{} for user#{} - Insufficient permissions",
@@ -128,7 +133,7 @@ class ProjectAuthorizationInterceptor(
       }
     }
 
-    if (authenticationFacade.isReadOnly && !isReadOnlyOperation) {
+    if (authenticationFacade.isReadOnly && !isReadOnly) {
       // This one can't be bypassed
       logger.debug(
         "Rejecting access to proj#{} for user#{} - Write operation is not allowed in read-only mode",

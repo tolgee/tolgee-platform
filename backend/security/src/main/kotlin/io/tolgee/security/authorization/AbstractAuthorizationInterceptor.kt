@@ -16,8 +16,8 @@
 
 package io.tolgee.security.authorization
 
-import io.tolgee.security.authentication.AllowInReadOnlyMode
-import io.tolgee.security.authentication.RequiresReadWriteMode
+import io.tolgee.security.authentication.ReadOnlyOperation
+import io.tolgee.security.authentication.WriteOperation
 import jakarta.servlet.DispatcherType
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -67,7 +67,7 @@ abstract class AbstractAuthorizationInterceptor(
 
   /**
    * Determines if the target endpoint is read-only. Can be overridden by annotating the method with
-   * [AllowInReadOnlyMode] or [RequiresReadWriteMode] annotation.
+   * [ReadOnlyOperation] or [WriteOperation] annotation.
    *
    * @param usesWritePermissions whether the request uses write permissions; if false, the method is
    * considered read-only; ignored if null
@@ -77,15 +77,25 @@ abstract class AbstractAuthorizationInterceptor(
     handler: HandlerMethod,
     usesWritePermissions: Boolean? = null
   ): Boolean {
-    if (AnnotationUtils.getAnnotation(handler.method, RequiresReadWriteMode::class.java) != null) {
+    val forceReadOnly = AnnotationUtils.getAnnotation(handler.method, ReadOnlyOperation::class.java) != null
+    val forceWrite = AnnotationUtils.getAnnotation(handler.method, WriteOperation::class.java) != null
+
+    if (forceReadOnly && forceWrite) {
+      // This doesn't make sense
+      throw RuntimeException(
+        "Both `@ReadOnlyOperation` and `@WriteOperation` have been set for this endpoint!",
+      )
+    }
+
+    if (forceWrite) {
       return false
     }
 
-    if (request.method in READ_ONLY_METHODS || usesWritePermissions == false) {
+    if (forceReadOnly) {
       return true
     }
 
-    return AnnotationUtils.getAnnotation(handler.method, AllowInReadOnlyMode::class.java) != null
+    return request.method in READ_ONLY_METHODS || usesWritePermissions == false
   }
 
   companion object {
