@@ -132,12 +132,12 @@ class BatchJobProjectLockingManager(
       val initialJobId = getInitialJobId(projectId)
       logger.info("Initial locked job $initialJobId for project ${toLock.projectId}")
       if (initialJobId == null) {
-        logger.debug("No initial job found, locking only ${toLock.id}")
+        logger.info("No initial job found, locking only ${toLock.id}")
         return setOf(toLock.id)
       }
       val newLockedJobIds = mutableSetOf<Long>(initialJobId)
       if (newLockedJobIds.size < batchProperties.projectConcurrency) {
-        logger.debug("Locking job ${toLock.id} for project $projectId. Active jobs before: $newLockedJobIds")
+        logger.info("Locking job ${toLock.id} for project $projectId. Active jobs before: $newLockedJobIds")
         newLockedJobIds.add(toLock.id)
       } else {
         logger.debug("Cannot lock job ${toLock.id} for project $projectId, limit reached. Active jobs: $newLockedJobIds")
@@ -147,7 +147,7 @@ class BatchJobProjectLockingManager(
 
     // standard case - there are some jobs locked
     if (lockedJobIds.size < batchProperties.projectConcurrency) {
-      logger.debug("Locking job ${toLock.id} for project $projectId. Active jobs before: $lockedJobIds")
+      logger.info("Locking job ${toLock.id} for project $projectId. Active jobs before: $lockedJobIds")
       return lockedJobIds + toLock.id
     }
 
