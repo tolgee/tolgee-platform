@@ -27,6 +27,7 @@ import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.isReadOnly
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
 import jakarta.servlet.http.HttpServletRequest
@@ -186,9 +187,12 @@ class ProjectAuthorizationInterceptor(
   private val canUseAdminRights
     get() = !authenticationFacade.isProjectApiKeyAuth
 
-  private fun canBypass(request: HttpServletRequest, handler: HandlerMethod, isReadOnly: Boolean? = null): Boolean {
-    val isReadonlyAccess = isReadOnly ?: isReadOnlyMethod(request, handler)
-    val hasAdminAccess = authenticationFacade.authenticatedUser.hasAdminAccess(isReadonlyAccess = isReadonlyAccess)
+  private fun canBypass(
+    request: HttpServletRequest,
+    handler: HandlerMethod,
+    isReadOnly: Boolean = handler.isReadOnly(request.method),
+  ): Boolean {
+    val hasAdminAccess = authenticationFacade.authenticatedUser.hasAdminAccess(isReadonlyAccess = isReadOnly)
     return hasAdminAccess && canUseAdminRights
   }
 }

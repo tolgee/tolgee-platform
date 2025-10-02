@@ -51,7 +51,7 @@ class AdminAccessInterceptor(
     }
 
     val hasReadAccess = authenticationFacade.authenticatedUser.isSupporterOrAdmin()
-    if (hasReadAccess && isReadOnlyMethod(request, handler)) {
+    if (hasReadAccess && handler.isReadOnly(request.method)) {
       // These methods should be read-only - safe to call
       return true
     }

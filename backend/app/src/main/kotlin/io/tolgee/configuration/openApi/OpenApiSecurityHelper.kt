@@ -17,7 +17,7 @@ class OpenApiSecurityHelper(private val groupBuilder: OpenApiGroupBuilder) {
   }
 
   private fun addSecurityToOperations() {
-    groupBuilder.customizeOperations { operation, handlerMethod, path ->
+    groupBuilder.customizeOperations { operation, handlerMethod, path, _ ->
       if (path.matches(OpenApiGroupBuilder.PUBLIC_ENDPOINT_REGEX)) {
         return@customizeOperations operation
       }
