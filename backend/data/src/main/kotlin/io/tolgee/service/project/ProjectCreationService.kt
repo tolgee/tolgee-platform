@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
+import io.tolgee.model.branching.Branch
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationService
 import org.springframework.cache.annotation.CacheEvict
@@ -28,6 +29,8 @@ class ProjectCreationService(
     project.organizationOwner = organizationService.get(dto.organizationId)
 
     project.slug = getSlug(dto)
+
+    Branch.createMainBranch(project)
 
     projectService.save(project)
 
