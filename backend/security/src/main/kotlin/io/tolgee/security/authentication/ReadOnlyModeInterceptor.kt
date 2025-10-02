@@ -52,6 +52,6 @@ class ReadOnlyModeInterceptor(
       return true
     }
 
-    throw PermissionException(Message.OPERATION_NOT_PERMITTED)
+    throw PermissionException(Message.OPERATION_NOT_PERMITTED_IN_READ_ONLY_MODE)
   }
 }

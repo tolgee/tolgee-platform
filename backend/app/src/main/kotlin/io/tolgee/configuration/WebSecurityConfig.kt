@@ -134,13 +134,18 @@ class WebSecurityConfig(
       .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)
 
     registry.addInterceptor(organizationAuthorizationInterceptor)
-      .addPathPatterns("/v2/organizations/**")
+      .addPathPatterns(*ORGANIZATION_ENDPOINTS)
     registry.addInterceptor(projectAuthorizationInterceptor)
-      .addPathPatterns("/v2/projects/**", "/api/project/**", "/api/repository/**")
+      .addPathPatterns(*PROJECT_ENDPOINTS)
     registry.addInterceptor(adminAccessInterceptor)
       .addPathPatterns(*ADMIN_ENDPOINTS)
     registry.addInterceptor(readOnlyModeInterceptor)
-      .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)
+      .excludePathPatterns(
+        *PUBLIC_ENDPOINTS,
+        *INTERNAL_ENDPOINTS,
+        *PROJECT_ENDPOINTS,
+        *ORGANIZATION_ENDPOINTS
+      )
     registry.addInterceptor(featureAuthorizationInterceptor)
   }
 
@@ -165,5 +170,7 @@ class WebSecurityConfig(
       )
     private val ADMIN_ENDPOINTS = arrayOf("/v2/administration/**", "/v2/ee-license/**")
     private val INTERNAL_ENDPOINTS = arrayOf("/internal/**")
+    private val PROJECT_ENDPOINTS = arrayOf("/v2/projects/**", "/api/project/**", "/api/repository/**")
+    private val ORGANIZATION_ENDPOINTS = arrayOf("/v2/organizations/**")
   }
 }
