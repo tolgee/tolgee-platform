@@ -28,10 +28,16 @@ class BranchServiceImpl(
     return branchRepository.getAllProjectBranches(projectId, page, search)
   }
 
+  override fun getBranch(projectId: Long, branchId: Long): Branch {
+    return branchRepository.findByProjectIdAndId(projectId, branchId)
+      ?: throw BadRequestException(Message.BRANCH_NOT_FOUND)
+  }
+
   @Transactional
   override fun createBranch(projectId: Long, name: String, originBranchId: Long): Branch {
-    val originBranch = branchRepository.findById(originBranchId)
-      .orElseThrow { BadRequestException(Message.ORIGIN_BRANCH_NOT_FOUND) }
+    val originBranch = branchRepository.findByProjectIdAndId(projectId, originBranchId) ?: throw BadRequestException(
+      Message.ORIGIN_BRANCH_NOT_FOUND
+    )
 
     if (originBranch.project.id != projectId) {
       throw BadRequestException(Message.ORIGIN_BRANCH_NOT_FOUND)
@@ -65,8 +71,7 @@ class BranchServiceImpl(
 
   @Transactional
   override fun deleteBranch(projectId: Long, branchId: Long) {
-    val branch =
-      branchRepository.findByProjectIdAndId(projectId, branchId) ?: throw BadRequestException(Message.BRANCH_NOT_FOUND)
+    val branch = getBranch(projectId, branchId)
     if (branch.isDefault) throw PermissionException(Message.CANNOT_DELETE_DEFAULT_BRANCH)
     branch.archivedAt = currentDateProvider.date
   }

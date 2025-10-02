@@ -13,4 +13,6 @@ open class BranchModel(
   val name: String,
   @Schema(description = "Is branch active")
   val active: Boolean,
+  @Schema(description = "Is branch default")
+  val isDefault: Boolean,
   ) : RepresentationModel<BranchModel>()

@@ -43,6 +43,10 @@ export const ProjectRouter = () => {
           <TranslationsView />
         </Route>
 
+        <Route exact path={LINKS.PROJECT_TRANSLATIONS_BRANCHED.template}>
+          <TranslationsView />
+        </Route>
+
         <Route path={LINKS.PROJECT_EDIT.template}>
           <ProjectSettingsView />
         </Route>
