@@ -214,21 +214,9 @@ class Project(
       lateinit var projectService: ObjectFactory<ProjectService>
 
       @PrePersist
-      fun prePersist(project: Project) {
-        validateOwnership(project)
-        if (project.branches.isEmpty()) {
-          Branch.createMainBranch(project)
-        }
-      }
-
       @PreUpdate
-      fun preUpdate(project: Project) {
-        validateOwnership(project)
-      }
-
-      private fun validateOwnership(project: Project) {
-        val exactlyOneOwner = (!project::organizationOwner.isInitialized).xor(project.userOwner == null)
-        if (!exactlyOneOwner) {
+      fun preSave(project: Project) {
+        if (!(!project::organizationOwner.isInitialized).xor(project.userOwner == null)) {
           throw Exception("Exactly one of organizationOwner or userOwner must be set!")
         }
       }
