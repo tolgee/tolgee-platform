@@ -45,6 +45,7 @@ import { usePreventPageLeave } from 'tg.hooks/usePreventPageLeave';
 import { QUERY } from 'tg.constants/links';
 import { useLabelsService } from 'tg.views/projects/translations/context/services/useLabelsService';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
 
 type Props = {
   projectId: number;
@@ -154,11 +155,16 @@ export const [
     [languagesLoadable.data]
   );
 
+  const branchesService = useBranchesService({
+    projectId: props.projectId,
+  });
+
   const editService = useEditService({
     positionService,
     translationService,
     viewRefs,
     taskService,
+    branchesService,
     allLanguages: allLanguagesData,
   });
 
@@ -379,6 +385,11 @@ export const [
     aiPlaygroundData: aiPlaygroundService.data,
     aiPlaygroundEnabled: props.aiPlayground,
     labels: labelService.labels,
+    branches: {
+      available: branchesService.branches,
+      selected: branchesService.selected,
+      loadable: branchesService.loadable,
+    },
   };
 
   return [state, actions];

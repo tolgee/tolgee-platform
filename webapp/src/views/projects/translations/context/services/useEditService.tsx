@@ -20,6 +20,7 @@ import { useTaskService } from './useTaskService';
 import { composeValue, taskEditControlsShouldBeVisible } from './utils';
 import { usePositionService } from './usePositionService';
 import { TranslationViewModel } from '../../ToolsPanel/common/types';
+import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -28,6 +29,7 @@ type Props = {
   translationService: ReturnType<typeof useTranslationsService>;
   viewRefs: ReturnType<typeof useRefsService>;
   taskService: ReturnType<typeof useTaskService>;
+  branchesService: ReturnType<typeof useBranchesService>;
   allLanguages: LanguageModel[];
 };
 
@@ -35,6 +37,7 @@ export const useEditService = ({
   positionService,
   translationService,
   taskService,
+  branchesService,
   allLanguages,
 }: Props) => {
   const {
@@ -82,6 +85,7 @@ export const useEditService = ({
               'application/json': {
                 key: keyName,
                 namespace: keyNamespace,
+                branch: branchesService.selected?.name,
                 translations: {
                   [language!]: value,
                 },
