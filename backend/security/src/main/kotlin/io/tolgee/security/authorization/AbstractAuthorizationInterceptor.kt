@@ -60,7 +60,7 @@ abstract class AbstractAuthorizationInterceptor(
     handler: HandlerMethod,
   ): Boolean
 
-  private fun isGlobal(handler: HandlerMethod): Boolean {
+  fun isGlobal(handler: HandlerMethod): Boolean {
     val annotation = AnnotationUtils.getAnnotation(handler.method, IsGlobalRoute::class.java)
     return annotation != null
   }

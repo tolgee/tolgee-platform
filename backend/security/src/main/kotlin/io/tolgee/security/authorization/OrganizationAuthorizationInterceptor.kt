@@ -16,7 +16,6 @@
 
 package io.tolgee.security.authorization
 
-import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.hasAdminAccess
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -64,12 +63,6 @@ class OrganizationAuthorizationInterceptor(
 
     var bypassed = false
     val requiredRole = getRequiredRole(request, handler)
-    val isReadOnly = isReadOnlyMethod(
-      request,
-      handler,
-      usesWritePermissions = requiredRole?.isReadOnly == false
-    )
-    val canBypass = user.hasAdminAccess(isReadonlyAccess = isReadOnly)
     logger.debug(
       "Checking access to org#{} by user#{} (Requires {})",
       organization.id,
@@ -78,15 +71,14 @@ class OrganizationAuthorizationInterceptor(
     )
 
     if (!organizationRoleService.canUserViewStrict(userId, organization.id)) {
-      if (!canBypass) {
+      if (!canBypass(request, handler)) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - No view permissions",
           organization.id,
           userId,
         )
 
-        val canBypassReadOnly = user.hasAdminAccess(isReadonlyAccess = true)
-        if (!canBypassReadOnly) {
+        if (!canBypass(request, handler, isReadOnly = true)) {
           // Security consideration: if the user cannot see the organization, pretend it does not exist.
           throw NotFoundException()
         }
@@ -99,7 +91,7 @@ class OrganizationAuthorizationInterceptor(
     }
 
     if (requiredRole != null && !organizationRoleService.isUserOfRole(userId, organization.id, requiredRole)) {
-      if (!canBypass) {
+      if (!canBypass(request, handler)) {
         logger.debug(
           "Rejecting access to org#{} for user#{} - Insufficient role",
           organization.id,
@@ -110,17 +102,6 @@ class OrganizationAuthorizationInterceptor(
       }
 
       bypassed = true
-    }
-
-    if (authenticationFacade.isReadOnly && !isReadOnly) {
-      // This check can't be bypassed
-      logger.debug(
-        "Rejecting access to org#{} for user#{} - Write operation is not allowed in read-only mode",
-        organization.id,
-        userId,
-      )
-
-      throw PermissionException(Message.OPERATION_NOT_PERMITTED_IN_READ_ONLY_MODE)
     }
 
     if (bypassed) {
@@ -157,5 +138,13 @@ class OrganizationAuthorizationInterceptor(
     }
 
     return orgPermission?.role
+  }
+
+  private fun canBypass(
+    request: HttpServletRequest,
+    handler: HandlerMethod,
+    isReadOnly: Boolean = isReadOnlyMethod(request, handler)
+  ): Boolean {
+    return authenticationFacade.authenticatedUser.hasAdminAccess(isReadonlyAccess = isReadOnly)
   }
 }
