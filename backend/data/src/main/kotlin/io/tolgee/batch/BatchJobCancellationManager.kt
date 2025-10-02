@@ -136,7 +136,7 @@ class BatchJobCancellationManager(
 
   private fun tryWaitForBatchJobCompletedStatus(jobId: Long) {
     waitFor(pollTime = 200, timeout = 2000) {
-      executeInNewTransaction(transactionManager) {
+      executeInNewTransaction(transactionManager, readOnly = true) {
         batchJobService.getJobDto(jobId).status.completed
       }
     }

@@ -94,6 +94,7 @@ class BatchJobStateProvider(
       executeInNewTransaction(
         platformTransactionManager,
         isolationLevel = TransactionDefinition.ISOLATION_READ_COMMITTED,
+        readOnly = true,
       ) {
         entityManager.createQuery(
           """
