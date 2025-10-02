@@ -12,6 +12,7 @@ class BranchModelAssembler : RepresentationModelAssembler<Branch, BranchModel> {
       id = entity.id,
       name = entity.name,
       active = entity.archivedAt == null,
+      isDefault = entity.isDefault,
     )
   }
 }
