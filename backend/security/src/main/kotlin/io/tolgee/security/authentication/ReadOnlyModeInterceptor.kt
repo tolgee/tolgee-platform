@@ -21,6 +21,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.authorization.AbstractAuthorizationInterceptor
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 
@@ -32,6 +33,8 @@ import org.springframework.web.method.HandlerMethod
 class ReadOnlyModeInterceptor(
   private val authenticationFacade: AuthenticationFacade,
 ) : AbstractAuthorizationInterceptor(allowGlobalRoutes = false) {
+  private val logger = LoggerFactory.getLogger(this::class.java)
+
   override fun preHandleInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
@@ -52,6 +55,10 @@ class ReadOnlyModeInterceptor(
       return true
     }
 
+    logger.debug(
+      "Rejecting access for user#{} - Write operation is not allowed in read-only mode",
+      authenticationFacade.authenticatedUser.id,
+    )
     throw PermissionException(Message.OPERATION_NOT_PERMITTED_IN_READ_ONLY_MODE)
   }
 }
