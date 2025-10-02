@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable
 
 interface BranchService {
   fun getAllBranches(projectId: Long, page: Pageable, search: String? = null): Page<Branch>
+  fun getBranch(projectId: Long, branchId: Long): Branch
   fun createBranch(projectId: Long, name: String, originBranchId: Long): Branch
   fun deleteBranch(projectId: Long, branchId: Long)
 }
