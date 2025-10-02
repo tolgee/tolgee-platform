@@ -17,6 +17,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
+import io.tolgee.security.authentication.WriteOperation
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.TranslationAgencyService
@@ -53,6 +54,7 @@ class V2InvitationController(
   private val publicInvitationModelAssembler: PublicInvitationModelAssembler,
 ) {
   @GetMapping("/v2/invitations/{code}/accept")
+  @WriteOperation
   @Operation(summary = "Accepts invitation to project or organization")
   fun acceptInvitation(
     @PathVariable("code") code: String?,
