@@ -23,6 +23,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.isReadOnly
 import io.tolgee.service.organization.OrganizationRoleService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -143,7 +144,7 @@ class OrganizationAuthorizationInterceptor(
   private fun canBypass(
     request: HttpServletRequest,
     handler: HandlerMethod,
-    isReadOnly: Boolean = isReadOnlyMethod(request, handler)
+    isReadOnly: Boolean = handler.isReadOnly(request.method)
   ): Boolean {
     return authenticationFacade.authenticatedUser.hasAdminAccess(isReadonlyAccess = isReadOnly)
   }

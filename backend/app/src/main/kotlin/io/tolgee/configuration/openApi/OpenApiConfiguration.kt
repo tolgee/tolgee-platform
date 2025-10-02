@@ -110,7 +110,7 @@ class OpenApiConfiguration {
     return OpenApiGroupBuilder(name) {
       builder.pathsToExclude(*excludedPaths, "/api/project/{$PROJECT_ID_PARAMETER}/sources/**")
       builder.pathsToMatch(*paths)
-      customizeOperations { operation, _, path ->
+      customizeOperations { operation, _, path, _ ->
         val isParameterConsumed =
           operation.isProjectIdConsumed()
         val pathContainsProjectId = path.contains("{$PROJECT_ID_PARAMETER}")
@@ -168,7 +168,7 @@ class OpenApiConfiguration {
     return OpenApiGroupBuilder(name) {
       builder.pathsToExclude(*excludedPaths)
         .pathsToMatch(*paths)
-      customizeOperations { operation, handler, path ->
+      customizeOperations { operation, handler, path, _ ->
         if (isApiAccessAllowed(handler)) {
           if (!path.matches(PATH_WITH_PROJECT_ID_REGEX)) {
             if (!containsProjectIdParam(path)) {
@@ -190,7 +190,7 @@ class OpenApiConfiguration {
     return OpenApiGroupBuilder(name) {
       builder.pathsToExclude(*excludedPaths)
         .pathsToMatch(*paths)
-      customizeOperations { operation, handler, path ->
+      customizeOperations { operation, handler, path, _ ->
         val isProjectPath = isProjectPath(path)
         val containsProjectIdParam = containsProjectIdParam(path)
         if (isProjectPath && !containsProjectIdParam) {

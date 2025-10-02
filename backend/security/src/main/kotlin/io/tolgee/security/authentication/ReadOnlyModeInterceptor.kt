@@ -50,7 +50,7 @@ class ReadOnlyModeInterceptor(
       return true
     }
 
-    if (isReadOnlyMethod(request, handler)) {
+    if (handler.isReadOnly(request.method)) {
       // These methods should be read-only - safe to call from read-only mode
       return true
     }
