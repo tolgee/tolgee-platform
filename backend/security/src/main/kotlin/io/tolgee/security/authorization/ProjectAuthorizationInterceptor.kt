@@ -134,14 +134,14 @@ class ProjectAuthorizationInterceptor(
     }
 
     if (authenticationFacade.isReadOnly && !isReadOnly) {
-      // This one can't be bypassed
+      // This check can't be bypassed
       logger.debug(
         "Rejecting access to proj#{} for user#{} - Write operation is not allowed in read-only mode",
         project.id,
         userId,
       )
 
-      throw PermissionException()
+      throw PermissionException(Message.OPERATION_NOT_PERMITTED_IN_READ_ONLY_MODE)
     }
 
     if (bypassed) {

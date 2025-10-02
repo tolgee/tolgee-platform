@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authorization
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.hasAdminAccess
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -63,12 +64,12 @@ class OrganizationAuthorizationInterceptor(
 
     var bypassed = false
     val requiredRole = getRequiredRole(request, handler)
-    val isReadOnlyOperation = isReadOnlyMethod(
+    val isReadOnly = isReadOnlyMethod(
       request,
       handler,
       usesWritePermissions = requiredRole?.isReadOnly == false
     )
-    val canBypass = user.hasAdminAccess(isReadonlyAccess = isReadOnlyOperation)
+    val canBypass = user.hasAdminAccess(isReadonlyAccess = isReadOnly)
     logger.debug(
       "Checking access to org#{} by user#{} (Requires {})",
       organization.id,
@@ -111,15 +112,15 @@ class OrganizationAuthorizationInterceptor(
       bypassed = true
     }
 
-    if (authenticationFacade.isReadOnly && !isReadOnlyOperation) {
-      // This one can't be bypassed
+    if (authenticationFacade.isReadOnly && !isReadOnly) {
+      // This check can't be bypassed
       logger.debug(
         "Rejecting access to org#{} for user#{} - Write operation is not allowed in read-only mode",
         organization.id,
         userId,
       )
 
-      throw PermissionException()
+      throw PermissionException(Message.OPERATION_NOT_PERMITTED_IN_READ_ONLY_MODE)
     }
 
     if (bypassed) {
