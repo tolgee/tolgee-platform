@@ -140,12 +140,7 @@ class WebSecurityConfig(
     registry.addInterceptor(adminAccessInterceptor)
       .addPathPatterns(*ADMIN_ENDPOINTS)
     registry.addInterceptor(readOnlyModeInterceptor)
-      .excludePathPatterns(
-        *PUBLIC_ENDPOINTS,
-        *INTERNAL_ENDPOINTS,
-        *PROJECT_ENDPOINTS,
-        *ORGANIZATION_ENDPOINTS
-      )
+      .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)
     registry.addInterceptor(featureAuthorizationInterceptor)
   }
 
