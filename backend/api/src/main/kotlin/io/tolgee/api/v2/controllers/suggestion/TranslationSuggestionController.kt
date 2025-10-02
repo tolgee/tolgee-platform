@@ -14,6 +14,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeyService
@@ -96,6 +97,7 @@ class TranslationSuggestionController(
       "Suggests machine translations from translation memory. " +
         "The result is always sorted by similarity, so sorting is not supported.",
   )
+  @ReadOnlyOperation
   @UseDefaultPermissions
   @AllowApiAccess
   fun suggestTranslationMemory(

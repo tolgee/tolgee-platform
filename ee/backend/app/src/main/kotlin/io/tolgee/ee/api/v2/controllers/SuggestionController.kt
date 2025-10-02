@@ -47,6 +47,7 @@ class SuggestionController(
   private val translationSuggestionService: TranslationSuggestionServiceEeImpl,
   private val projectHolder: ProjectHolder,
   private val translationSuggestionModelAssembler: TranslationSuggestionModelAssembler,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val arrayResourcesAssembler: PagedResourcesAssembler<TranslationSuggestion>,
   private val authenticationFacade: AuthenticationFacade,
   private val securityService: SecurityService,
