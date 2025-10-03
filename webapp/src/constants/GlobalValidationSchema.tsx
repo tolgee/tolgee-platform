@@ -521,6 +521,18 @@ export class Validation {
         .required()
         .matches(/^#[0-9A-F]{6}$/i, t('validation_invalid_hex_color')),
     });
+
+  static readonly BRANCH = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string()
+        .required()
+        .min(3)
+        .max(100)
+        .matches(
+          /^[a-z0-9]([a-z0-9-_]*[a-z0-9])?$/i,
+          t('validation_invalid_branch_name')
+        ),
+    });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

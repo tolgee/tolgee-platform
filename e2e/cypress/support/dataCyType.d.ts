@@ -613,6 +613,7 @@ declare namespace DataCy {
         "project-members-invitation-item" |
         "project-menu-item" |
         "project-menu-item-ai" |
+        "project-menu-item-branches" |
         "project-menu-item-dashboard" |
         "project-menu-item-developer" |
         "project-menu-item-export" |
@@ -629,6 +630,11 @@ declare namespace DataCy {
         "project-name-field" |
         "project-select" |
         "project-settings" |
+        "project-settings-branch-item" |
+        "project-settings-branch-item-name" |
+        "project-settings-branch-item-properties" |
+        "project-settings-branches-add" |
+        "project-settings-branchs-remove-button" |
         "project-settings-button" |
         "project-settings-delete-button" |
         "project-settings-description" |
