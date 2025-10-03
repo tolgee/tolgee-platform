@@ -9,6 +9,7 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.NdJsonParser
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.ignoreTestOnSpringBug
 import io.tolgee.model.Language
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.service.machineTranslation.MtService
@@ -107,15 +108,17 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
   @ProjectJWTAuthTestMethod
   fun `it does not return unsupporting services`() {
     val response =
-      performProjectAuthPost(
-        "suggest/machine-translations-streaming",
-        mapOf(
-          "targetLanguageId" to hindiLanguage.id,
-          "baseText" to "text",
-        ),
-      ).andDo {
-        it.asyncResult
-      }.andReturn().response.contentAsString
+      ignoreTestOnSpringBug {
+            performProjectAuthPost(
+              "suggest/machine-translations-streaming",
+              mapOf(
+                "targetLanguageId" to hindiLanguage.id,
+                "baseText" to "text",
+              ),
+            ).andDo {
+              it.asyncResult
+            }.andReturn().response.contentAsString
+        }
 
     response.split("\n").filter { it.isNotBlank() }.map {
       jacksonObjectMapper().readValue(it, Any::class.java)
