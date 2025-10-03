@@ -1,3 +1,10 @@
+## [3.133.1](https://github.com/tolgee/tolgee-platform/compare/v3.133.0...v3.133.1) (2025-10-03)
+
+
+### Bug Fixes
+
+* TranslationSuggestionControllerStreamingTest - spring bug on async processing (ignore test, when it happens) ([#3261](https://github.com/tolgee/tolgee-platform/issues/3261)) ([642aa61](https://github.com/tolgee/tolgee-platform/commit/642aa613e2176e7781f5326c986e76900182d721))
+
 # [3.133.0](https://github.com/tolgee/tolgee-platform/compare/v3.132.4...v3.133.0) (2025-10-01)
 
 
