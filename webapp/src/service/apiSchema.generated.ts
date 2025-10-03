@@ -2542,7 +2542,8 @@ export interface components {
         | "duplicate_suggestion"
         | "unsupported_media_type"
         | "impersonation_of_admin_by_supporter_not_allowed"
-        | "already_impersonating_user";
+        | "already_impersonating_user"
+        | "operation_not_permitted_in_read_only_mode";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -5818,7 +5819,8 @@ export interface components {
         | "duplicate_suggestion"
         | "unsupported_media_type"
         | "impersonation_of_admin_by_supporter_not_allowed"
-        | "already_impersonating_user";
+        | "already_impersonating_user"
+        | "operation_not_permitted_in_read_only_mode";
       params?: unknown[];
       success: boolean;
     };
