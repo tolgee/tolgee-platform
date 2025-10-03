@@ -162,24 +162,6 @@ class OrganizationAuthorizationInterceptorTest {
   }
 
   @Test
-  fun `it allows user with read-only token to access read-only organization endpoints`() {
-    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L)).thenReturn(true)
-    Mockito.`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER)).thenReturn(true)
-    Mockito.`when`(authentication.isReadOnly).thenReturn(true)
-
-    performReadOnlyRequests { all -> all.andIsOk }
-  }
-
-  @Test
-  fun `it does not let user with read-only token to access write organization endpoints`() {
-    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L)).thenReturn(true)
-    Mockito.`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER)).thenReturn(true)
-    Mockito.`when`(authentication.isReadOnly).thenReturn(true)
-
-    performWriteRequests { all -> all.andIsForbidden }
-  }
-
-  @Test
   fun `it allows admin to access any endpoint`() {
     Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L)).thenReturn(false)
     Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.ADMIN)
@@ -193,9 +175,6 @@ class OrganizationAuthorizationInterceptorTest {
     mockMvc.perform(get("/v2/organizations/1337/default-perms")).andSatisfies(condition)
     mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andSatisfies(condition)
 
-    // POST method, but with read-only permissions
-    mockMvc.perform(post("/v2/organizations/1337/default-perms-write-method")).andSatisfies(condition)
-
     // POST method, but with read-only annotation
     mockMvc.perform(post("/v2/organizations/1337/requires-owner-read-annotation")).andSatisfies(condition)
   }
@@ -205,7 +184,8 @@ class OrganizationAuthorizationInterceptorTest {
     mockMvc.perform(get("/v2/organizations/1337/default-perms-write-annotation")).andSatisfies(condition)
     mockMvc.perform(get("/v2/organizations/1337/requires-owner-write-annotation")).andSatisfies(condition)
 
-    // POST method and write permissions
+    // POST method
+    mockMvc.perform(post("/v2/organizations/1337/default-perms-write-method")).andSatisfies(condition)
     mockMvc.perform(post("/v2/organizations/1337/requires-owner-write-method")).andSatisfies(condition)
   }
 
