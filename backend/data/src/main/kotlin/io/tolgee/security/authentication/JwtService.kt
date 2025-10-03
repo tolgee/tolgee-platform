@@ -80,7 +80,7 @@ class JwtService(
         .setExpiration(expiration)
 
     if (actingAsUserAccountId != null) {
-      builder.claim(JWT_TOKEN_ACTING_USER_ID_CLAIM, actingAsUserAccountId)
+      builder.claim(JWT_TOKEN_ACTING_USER_ID_CLAIM, actingAsUserAccountId.toString())
     }
 
     val deviceId = UUID.randomUUID().toString()
