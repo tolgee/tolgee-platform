@@ -29,6 +29,7 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.cacheable.isAdmin
+import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.service.security.UserAccountService
@@ -181,8 +182,16 @@ class JwtService(
     val roClaim = jws.body[JWT_TOKEN_READ_ONLY_CLAIM] as? Boolean ?: false
 
     if (roClaim && account.isAdmin()) {
-      // we don't allow read-only admin impersonation to make our lives easier
+      // we don't allow admin accounts to be impersonated in read-only mode to make our lives easier
       throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    }
+
+    if (actor != null) {
+      val canImpersonate = actor.isAdmin() || (roClaim && actor.isSupporterOrAdmin())
+      if (!canImpersonate) {
+        // actor got demoted and is no longer admin/supporter; impersonation not allowed
+        throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+      }
     }
 
     return TolgeeAuthentication(
