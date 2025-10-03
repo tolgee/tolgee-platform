@@ -97,6 +97,14 @@ class JwtService(
     return builder.compact()
   }
 
+  /**
+   * Emits a refreshed authentication token for the currently authenticated user, propagating existing
+   * authentication flags if applicable.
+   *
+   * @param isSuper Whether to emit a super-powered token. Pass `null` to inherit the current
+   *                authentication's super-token state. Defaults to `false`.
+   * @return A refreshed authentication token.
+   */
   fun emitTokenRefreshForCurrentUser(
     isSuper: Boolean? = false,
   ): String {
