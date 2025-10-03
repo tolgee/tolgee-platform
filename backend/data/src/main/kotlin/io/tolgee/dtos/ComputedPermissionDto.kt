@@ -130,7 +130,7 @@ class ComputedPermissionDto(
     }
 
     val ComputedPermissionDto.isAllReadOnlyPermitted: Boolean
-      get() = expandedScopes.toSet().containsAll(Scope.entries.filter { it.isReadOnly() })
+      get() = expandedScopes.toSet().containsAll(Scope.readOnlyScopes.toList())
 
     val NONE
       get() = ComputedPermissionDto(getEmptyPermission(scopes = arrayOf(), ProjectPermissionType.NONE))

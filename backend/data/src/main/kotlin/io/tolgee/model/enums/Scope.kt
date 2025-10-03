@@ -52,7 +52,7 @@ enum class Scope(
 
   companion object {
 
-    private val readOnlyScopes by lazy { ALL_VIEW.expand() }
+    val readOnlyScopes by lazy { ALL_VIEW.expand() }
 
     private val keysView = HierarchyItem(KEYS_VIEW)
     private val translationsView = HierarchyItem(TRANSLATIONS_VIEW, listOf(keysView))
