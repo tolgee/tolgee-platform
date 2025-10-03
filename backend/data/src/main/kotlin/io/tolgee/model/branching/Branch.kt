@@ -10,7 +10,6 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import java.util.Date
@@ -76,7 +75,7 @@ class Branch(
   @JoinColumn(name = "project_id")
   lateinit var project: Project
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "origin_branch_id")
   var originBranch: Branch? = null
 }

@@ -14,7 +14,7 @@ interface BranchRepository : JpaRepository<Branch, Long> {
     select b
     from Branch b
     where b.project.id = :projectId
-    order by b.archivedAt desc nulls first, b.createdAt desc, b.id desc
+    order by b.isDefault desc, b.archivedAt desc nulls first, b.createdAt desc, b.id desc
   """
   )
   fun getAllProjectBranches(projectId: Long, page: Pageable?, search: String?): Page<Branch>

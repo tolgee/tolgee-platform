@@ -15,4 +15,6 @@ open class BranchModel(
   val active: Boolean,
   @Schema(description = "Is branch default")
   val isDefault: Boolean,
+  @Schema(description = "Is branch protected")
+  val isProtected: Boolean,
   ) : RepresentationModel<BranchModel>()
