@@ -107,6 +107,11 @@ class KeysTestData {
           }
 
           addBranch {
+            name = "main"
+            isDefault = true
+          }
+
+          addBranch {
             name = "dev"
           }.build {
             addKey {
