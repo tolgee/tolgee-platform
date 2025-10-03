@@ -2,7 +2,11 @@
 import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoView';
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { T, useTranslate } from '@tolgee/react';
-import { BookClosed, ClipboardCheck } from '@untitled-ui/icons-react';
+import {
+  BookClosed,
+  ClipboardCheck,
+  GitBranch02,
+} from '@untitled-ui/icons-react';
 import { Link, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { Badge, Box, MenuItem } from '@mui/material';
 
@@ -68,6 +72,7 @@ import { ProjectSettingsTab } from '../views/projects/project/ProjectSettingsVie
 import { OperationAssignTranslationLabel } from '../ee/batchOperations/OperationAssignTranslationLabel';
 import { OperationUnassignTranslationLabel } from '../ee/batchOperations/OperationUnassignTranslationLabel';
 import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
+import { BranchesView } from '../ee/branching/BranchesView';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -207,6 +212,9 @@ export const routes = {
     <Switch>
       <Route path={LINKS.PROJECT_TASKS.template}>
         <ProjectTasksView />
+      </Route>
+      <Route path={LINKS.PROJECT_BRANCHES.template}>
+        <BranchesView />
       </Route>
     </Switch>
   ),
@@ -393,6 +401,15 @@ export const useAddProjectMenuItems = () => {
 
   return addProjectMenuItems(
     [
+      {
+        id: 'branches',
+        condition: ({ satisfiesPermission }) => true, // TODO change to permission
+        link: LINKS.PROJECT_BRANCHES,
+        icon: GitBranch02,
+        text: t('project_menu_branches'),
+        dataCy: 'project-menu-item-branches',
+        matchAsPrefix: true,
+      },
       {
         id: 'tasks',
         condition: ({ satisfiesPermission }) =>
