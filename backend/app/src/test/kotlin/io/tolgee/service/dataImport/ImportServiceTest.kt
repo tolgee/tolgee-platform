@@ -8,7 +8,6 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.security.authentication.TolgeeAuthentication
-import io.tolgee.security.authentication.TolgeeAuthenticationDetails
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -122,9 +121,12 @@ class ImportServiceTest : AbstractSpringTest() {
         testDataService.saveTestData(testData.root)
         SecurityContextHolder.getContext().authentication =
           TolgeeAuthentication(
-            null,
-            UserAccountDto.fromEntity(testData.userAccount),
-            TolgeeAuthenticationDetails(false),
+            credentials = null,
+            deviceId = null,
+            userAccount = UserAccountDto.fromEntity(testData.userAccount),
+            actingAsUserAccount = null,
+            isReadOnly = false,
+            isSuperToken = false,
           )
         testData
       }

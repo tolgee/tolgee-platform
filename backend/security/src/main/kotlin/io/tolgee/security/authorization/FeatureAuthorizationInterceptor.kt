@@ -21,7 +21,7 @@ import org.springframework.web.method.HandlerMethod
 class FeatureAuthorizationInterceptor(
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val organizationHolder: OrganizationHolder,
-) : AbstractAuthorizationInterceptor() {
+) : AbstractAuthorizationInterceptor(allowGlobalRoutes = false) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun preHandleInternal(
@@ -59,29 +59,29 @@ class FeatureAuthorizationInterceptor(
     organizationId: Long,
     features: List<Feature>,
   ) {
-    for (feature in features) {
-      if (!enabledFeaturesProvider.isFeatureEnabled(organizationId, feature)) {
-        logger.debug(
-          "Feature {} is not enabled for org#{}",
-          feature,
-          organizationId,
-        )
-        throw BadRequestException(Message.FEATURE_NOT_ENABLED, listOf(feature))
-      }
-    }
+    val missing = features.filter { !enabledFeaturesProvider.isFeatureEnabled(organizationId, it) }
+    if (missing.isEmpty()) return
+
+    logger.debug(
+      "Rejecting request for org#{} - Features {} are not enabled",
+      organizationId,
+      missing,
+    )
+    throw BadRequestException(Message.FEATURE_NOT_ENABLED, missing)
   }
 
   private fun checkOneOfFeaturesEnabled(
     organizationId: Long,
     features: List<Feature>,
   ) {
-    if (features.find { enabledFeaturesProvider.isFeatureEnabled(organizationId, it) } == null) {
-      logger.debug(
-        "None of the features {} are enabled for org#{}",
-        features,
-        organizationId,
-      )
-      throw BadRequestException(Message.FEATURE_NOT_ENABLED, features)
-    }
+    val anyEnabled = features.any { enabledFeaturesProvider.isFeatureEnabled(organizationId, it) }
+    if (anyEnabled) return
+
+    logger.debug(
+      "Rejecting request for org#{} - None of the features {} are enabled",
+      organizationId,
+      features,
+    )
+    throw BadRequestException(Message.FEATURE_NOT_ENABLED, features)
   }
 }

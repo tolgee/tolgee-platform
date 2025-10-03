@@ -26,14 +26,14 @@ class SensitiveOperationProtectionE2eDataController(
 
     val baseline = currentDateProvider.date
     currentDateProvider.forcedDate = Date(baseline.time - authenticationProperties.jwtSuperExpiration - 10_000)
-    val expiredToken = jwtService.emitToken(data.franta.id, true)
+    val expiredToken = jwtService.emitToken(data.franta.id, isSuper = true)
     currentDateProvider.forcedDate = null
 
     return mapOf(
       "frantasProjectId" to data.frantasProject.id,
       "pepasProjectId" to data.pepasProject.id,
       "frantaExpiredSuperJwt" to expiredToken,
-      "pepaExpiredSuperJwt" to jwtService.emitToken(data.pepa.id, false),
+      "pepaExpiredSuperJwt" to jwtService.emitToken(data.pepa.id, isSuper = false),
     )
   }
 

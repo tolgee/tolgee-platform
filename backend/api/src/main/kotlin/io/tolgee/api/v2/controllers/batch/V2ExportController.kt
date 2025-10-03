@@ -10,6 +10,7 @@ import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.export.ExportService
 import io.tolgee.service.language.LanguageService
@@ -70,6 +71,7 @@ class V2ExportController(
     summary = "Export data (post)",
     description = """Exports data (post). Useful when exceeding allowed URL size.""",
   )
+  @ReadOnlyOperation
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @ExportApiResponse

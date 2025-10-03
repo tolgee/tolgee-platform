@@ -22,6 +22,7 @@ import io.tolgee.model.views.TaskWithScopeView
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOneOfFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
@@ -313,6 +314,7 @@ class TaskController(
 
   @PostMapping("/calculate-scope")
   @Operation(summary = "Calculate scope")
+  @ReadOnlyOperation
   @RequiresProjectPermissions([Scope.TASKS_VIEW])
   @AllowApiAccess
   fun calculateScope(

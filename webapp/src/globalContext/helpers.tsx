@@ -21,6 +21,17 @@ export const useEmailAwaitingVerification = () =>
 export const useIsAdmin = () =>
   useGlobalContext((c) => c.initialData.userInfo?.globalServerRole === 'ADMIN');
 
+export const useIsSupporter = () =>
+  useGlobalContext(
+    (c) => c.initialData.userInfo?.globalServerRole === 'SUPPORTER'
+  );
+
+export const useIsAdminOrSupporter = () =>
+  useGlobalContext((c) => {
+    const role = c.initialData.userInfo?.globalServerRole;
+    return role === 'ADMIN' || role === 'SUPPORTER';
+  });
+
 export const useIsSsoMigrationRequired = () =>
   useGlobalContext(
     (c) =>

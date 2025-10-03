@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.organization.OrganizationModel
@@ -10,6 +11,7 @@ import io.tolgee.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.hateoas.userAccount.UserAccountModel
 import io.tolgee.hateoas.userAccount.UserAccountModelAssembler
 import io.tolgee.model.UserAccount
+import io.tolgee.model.isAdmin
 import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
@@ -147,7 +149,24 @@ class AdministrationController(
   fun generateUserToken(
     @PathVariable userId: Long,
   ): String {
+    val isAlreadyImpersonating = authenticationFacade.actingUser != null
+    if (isAlreadyImpersonating) {
+      // We don't want to recreate the Inception movie here
+      throw BadRequestException(Message.ALREADY_IMPERSONATING_USER)
+    }
+
+    val actingUser = authenticationFacade.authenticatedUser
     val user = userAccountService.get(userId)
-    return jwtService.emitToken(user.id, true)
+    val isAdmin = actingUser.isAdmin()
+    if (user.isAdmin() > actingUser.isAdmin()) {
+      // We don't allow impersonation of admin by supporters
+      throw BadRequestException(Message.IMPERSONATION_OF_ADMIN_BY_SUPPORTER_NOT_ALLOWED)
+    }
+    return jwtService.emitToken(
+      userAccountId = user.id,
+      actingAsUserAccountId = actingUser.id,
+      isReadOnly = !isAdmin,
+      isSuper = isAdmin
+    )
   }
 }
