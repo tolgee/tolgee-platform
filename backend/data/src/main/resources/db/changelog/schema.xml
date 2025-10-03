@@ -4769,4 +4769,7 @@
             <column name="filter_branch" type="VARCHAR(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1759504369747-1">
+        <dropUniqueConstraint constraintName="uc_branchorigin_branch_id_col" tableName="branch"/>
+    </changeSet>
 </databaseChangeLog>
