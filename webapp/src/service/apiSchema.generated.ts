@@ -46,8 +46,16 @@ export interface paths {
     /** It checks whether the code from email is valid */
     get: operations["verifyEmail"];
   };
+  "/v2/administration/batch-job-queue": {
+    /** Returns all chunk execution items currently in the batch job queue */
+    get: operations["getBatchJobQueue"];
+  };
   "/v2/administration/organizations": {
     get: operations["getOrganizations"];
+  };
+  "/v2/administration/project-batch-locks": {
+    /** Returns current project batch job locks from Redis or local storage based on configuration */
+    get: operations["getProjectLocks"];
   };
   "/v2/administration/users": {
     get: operations["getUsers"];
@@ -300,6 +308,7 @@ export interface paths {
     get: operations["getUsage"];
   };
   "/v2/organizations/{organizationId}/users/{userId}": {
+    /** Remove user from organization. If user is managed by the organization, their account is disabled instead. */
     delete: operations["removeUser"];
   };
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
@@ -936,6 +945,9 @@ export interface paths {
     /** Returns initial data required by the UI to load */
     get: operations["get_17"];
   };
+  "/v2/public/llm/prompt": {
+    post: operations["prompt"];
+  };
   "/v2/public/machine-translation-providers": {
     /** Get machine translation providers */
     get: operations["getInfo_4"];
@@ -1489,9 +1501,19 @@ export interface components {
         invitations?: components["schemas"]["ProjectInvitationModel"][];
       };
     };
+    CollectionModelProjectLockModel: {
+      _embedded?: {
+        projectLockModelList?: components["schemas"]["ProjectLockModel"][];
+      };
+    };
     CollectionModelProjectTransferOptionModel: {
       _embedded?: {
         transferOptions?: components["schemas"]["ProjectTransferOptionModel"][];
+      };
+    };
+    CollectionModelQueueItemModel: {
+      _embedded?: {
+        queueItemModelList?: components["schemas"]["QueueItemModel"][];
       };
     };
     CollectionModelScreenshotModel: {
@@ -3035,6 +3057,37 @@ export interface components {
       ssoInfo?: components["schemas"]["PublicSsoTenantModel"];
       userInfo?: components["schemas"]["PrivateUserAccountModel"];
     };
+    JobInfo: {
+      /** Format: int64 */
+      createdAt?: number;
+      /** Format: int64 */
+      jobId: number;
+      /** @enum {string} */
+      status:
+        | "PENDING"
+        | "RUNNING"
+        | "SUCCESS"
+        | "FAILED"
+        | "CANCELLED"
+        | "DEBOUNCED";
+      /** @enum {string} */
+      type:
+        | "AI_PLAYGROUND_TRANSLATE"
+        | "PRE_TRANSLATE_BT_TM"
+        | "MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "DELETE_KEYS"
+        | "SET_TRANSLATIONS_STATE"
+        | "CLEAR_TRANSLATIONS"
+        | "COPY_TRANSLATIONS"
+        | "TAG_KEYS"
+        | "UNTAG_KEYS"
+        | "SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "BILLING_TRIAL_EXPIRATION_NOTICE"
+        | "ASSIGN_TRANSLATION_LABEL"
+        | "UNASSIGN_TRANSLATION_LABEL";
+    };
     JsonNode: unknown;
     JwtAuthenticationResponse: {
       accessToken?: string;
@@ -3504,6 +3557,18 @@ export interface components {
       untranslatedPercentage: number;
       /** Format: int64 */
       untranslatedWordCount: number;
+    };
+    LlmMessage: {
+      image?: string;
+      text?: string;
+      /** @enum {string} */
+      type: "TEXT" | "IMAGE";
+    };
+    LlmParams: {
+      messages: components["schemas"]["LlmMessage"][];
+      /** @enum {string} */
+      priority: "LOW" | "HIGH";
+      shouldOutputJson: boolean;
     };
     LlmProviderModel: {
       apiKey?: string;
@@ -4512,6 +4577,15 @@ export interface components {
       /** @description Languages user can view */
       viewLanguages?: number[];
     };
+    ProjectLockModel: {
+      jobInfo?: components["schemas"]["JobInfo"];
+      /** @enum {string} */
+      lockStatus: "UNLOCKED" | "UNINITIALIZED" | "LOCKED";
+      /** Format: int64 */
+      lockedJobId?: number;
+      /** Format: int64 */
+      projectId: number;
+    };
     ProjectModel: {
       avatar?: components["schemas"]["Avatar"];
       baseLanguage?: components["schemas"]["LanguageModel"];
@@ -4655,6 +4729,13 @@ export interface components {
       inputTokens?: number;
       /** Format: int64 */
       outputTokens?: number;
+    };
+    PromptResult: {
+      parsedJson?: components["schemas"]["JsonNode"];
+      /** Format: int32 */
+      price: number;
+      response: string;
+      usage?: components["schemas"]["PromptResponseUsageDto"];
     };
     PromptRunDto: {
       basicPromptOptions?: (
@@ -4891,6 +4972,18 @@ export interface components {
        * @description Currently used credits including credits used over the limit
        */
       usedMtCredits: number;
+    };
+    QueueItemModel: {
+      /** Format: int64 */
+      chunkExecutionId: number;
+      /** Format: int64 */
+      executeAfter?: number;
+      /** @enum {string} */
+      jobCharacter: "SLOW" | "FAST";
+      /** Format: int64 */
+      jobId: number;
+      /** Format: int32 */
+      managementErrorRetrials: number;
     };
     QuickStartModel: {
       completedSteps: string[];
@@ -6724,6 +6817,41 @@ export interface operations {
       };
     };
   };
+  /** Returns all chunk execution items currently in the batch job queue */
+  getBatchJobQueue: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelQueueItemModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   getOrganizations: {
     parameters: {
       query: {
@@ -6741,6 +6869,41 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns current project batch job locks from Redis or local storage based on configuration */
+  getProjectLocks: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelProjectLockModel"];
         };
       };
       /** Bad Request */
@@ -10196,6 +10359,7 @@ export interface operations {
       };
     };
   };
+  /** Remove user from organization. If user is managed by the organization, their account is disabled instead. */
   removeUser: {
     parameters: {
       path: {
@@ -19551,6 +19715,45 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  prompt: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PromptResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LlmParams"];
       };
     };
   };

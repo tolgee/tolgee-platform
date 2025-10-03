@@ -1,11 +1,17 @@
-const path = require('path');
-// script.js
-require('dotenv-flow').config({
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+import { exec } from 'node:child_process';
+import process from 'node:process';
+import { config } from 'dotenv-flow';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+config({
   default_node_env: 'development',
-  path: path.resolve(__dirname, '../'),
+  path: resolve(__dirname, '../'),
 });
 
-const { exec } = require('child_process');
 const apiUrl = process.env.VITE_APP_API_URL || 'http://localhost:8080';
 
 const definitions = {
