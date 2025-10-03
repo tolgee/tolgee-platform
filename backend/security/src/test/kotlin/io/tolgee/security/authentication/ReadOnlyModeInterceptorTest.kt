@@ -16,6 +16,7 @@
 
 package io.tolgee.security.authentication
 
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import org.junit.jupiter.api.AfterEach
@@ -51,6 +52,7 @@ class ReadOnlyModeInterceptorTest {
 
   @BeforeEach
   fun setupMocks() {
+    whenever(authenticationFacade.authenticatedUser).thenReturn(Mockito.mock(UserAccountDto::class.java))
     whenever(authenticationFacade.authentication).thenReturn(authentication)
     whenever(authenticationFacade.isAuthenticated).thenReturn(true)
     whenever(authenticationFacade.isReadOnly).thenCallRealMethod()
