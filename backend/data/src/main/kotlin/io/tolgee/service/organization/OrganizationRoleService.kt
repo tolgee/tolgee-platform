@@ -268,10 +268,35 @@ class OrganizationRoleService(
     userId: Long,
     organizationId: Long,
   ) {
-    val managedBy = getManagedBy(userId)
-    if (managedBy != null && managedBy.id == organizationId) {
+    if (!canRemoveUser(userId, organizationId)) {
       throw ValidationException(Message.USER_IS_MANAGED_BY_ORGANIZATION)
     }
+
+    forceRemoveUser(userId, organizationId)
+  }
+
+  @Transactional
+  fun removeOrDeactivateUser(
+    userId: Long,
+    organizationId: Long,
+  ) {
+    if (!canRemoveUser(userId, organizationId)) {
+      userAccountService.disable(userId)
+      return
+    }
+
+    removeUser(userId, organizationId)
+  }
+
+  private fun canRemoveUser(userId: Long, organizationId: Long): Boolean {
+    val managedBy = getManagedBy(userId)
+    return managedBy == null || managedBy.id != organizationId
+  }
+
+  private fun forceRemoveUser(
+    userId: Long,
+    organizationId: Long,
+  ) {
     val role =
       organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
         organizationRoleRepository.delete(it)

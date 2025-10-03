@@ -252,14 +252,16 @@ class OrganizationController(
   }
 
   @DeleteMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}")
-  @Operation(summary = "Remove user from organization")
+  @Operation(
+    summary = "Remove user from organization; if user is managed by the organization, their account is disabled instead"
+  )
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
   fun removeUser(
     @PathVariable("organizationId") organizationId: Long,
     @PathVariable("userId") userId: Long,
   ) {
-    organizationRoleService.removeUser(userId, organizationId)
+    organizationRoleService.removeOrDeactivateUser(userId, organizationId)
   }
 
   @PutMapping("/{id:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
