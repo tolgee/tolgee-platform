@@ -273,23 +273,6 @@ class ProjectAuthorizationInterceptorTest {
   }
 
   @Test
-  fun `it allows user with read-only token to access read-only project endpoints`() {
-    Mockito.`when`(authentication.isReadOnly).thenReturn(true)
-
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L)).thenReturn(setOf(Scope.KEYS_CREATE))
-
-    performReadOnlyRequests { all -> all.andIsOk }
-  }
-
-  @Test
-  fun `it does not let user with read-only token to access write project endpoints`() {
-    Mockito.`when`(authentication.isReadOnly).thenReturn(true)
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L)).thenReturn(setOf(Scope.KEYS_CREATE))
-
-    performWriteRequests { all -> all.andIsForbidden }
-  }
-
-  @Test
   fun `it allows admin to access any endpoint`() {
     Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.ADMIN)
     Mockito.`when`(securityService.getCurrentPermittedScopes(1337L)).thenReturn(emptySet())
@@ -302,9 +285,6 @@ class ProjectAuthorizationInterceptorTest {
     // GET method
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/default-perms")).andSatisfies(condition)
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andSatisfies(condition)
-
-    // POST method, but with read-only permissions
-    mockMvc.perform(MockMvcRequestBuilders.post("/v2/projects/1337/default-perms-write-method")).andSatisfies(condition)
 
     // POST method, but with read-only annotation
     mockMvc.perform(
@@ -321,7 +301,8 @@ class ProjectAuthorizationInterceptorTest {
       MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope-write-annotation")
     ).andSatisfies(condition)
 
-    // POST method and write permissions
+    // POST method
+    mockMvc.perform(MockMvcRequestBuilders.post("/v2/projects/1337/default-perms-write-method")).andSatisfies(condition)
     mockMvc.perform(
       MockMvcRequestBuilders.post("/v2/projects/1337/requires-single-scope-write-method")
     ).andSatisfies(condition)
