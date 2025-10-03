@@ -63,6 +63,7 @@ export enum PARAMS {
   TRANSLATION_ID = 'translationId',
   PLAN_ID = 'planId',
   TA_ID = 'taId',
+  TRANSLATIONS_BRANCH = 'branch',
 }
 
 export class LINKS {
@@ -348,6 +349,10 @@ export class LINKS {
   static PROJECT_ADD = Link.ofParent(LINKS.PROJECTS, 'add');
 
   static PROJECT_TRANSLATIONS = Link.ofParent(LINKS.PROJECT, 'translations');
+  static PROJECT_TRANSLATIONS_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS,
+    'tree/' + p(PARAMS.TRANSLATIONS_BRANCH)
+  );
 
   static PROJECT_TRANSLATIONS_SINGLE = Link.ofParent(
     LINKS.PROJECT_TRANSLATIONS,
@@ -355,6 +360,8 @@ export class LINKS {
   );
 
   static PROJECT_TASKS = Link.ofParent(LINKS.PROJECT, 'tasks');
+
+  static PROJECT_BRANCHES = Link.ofParent(LINKS.PROJECT, 'branches');
 
   static PROJECT_EXPORT = Link.ofParent(LINKS.PROJECT, 'export');
 

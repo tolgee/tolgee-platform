@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, IconButton, Menu, styled } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  InputBaseComponentProps,
+  Menu,
+  styled,
+} from '@mui/material';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { InfiniteSearchSelectContent } from 'tg.component/searchSelect/InfiniteSearchSelectContent';
 import { components } from 'tg.service/apiSchema.generated';
@@ -41,6 +47,12 @@ type Props<T, S> = {
   searchPlaceholder?: string;
   displaySearch?: boolean;
   disabled?: boolean;
+  minHeight?: boolean;
+  inputComponent?: React.ComponentType<InputBaseComponentProps>;
+  menuAnchorOrigin?: {
+    vertical: 'top' | 'bottom';
+    horizontal: 'left' | 'right';
+  };
 };
 
 export function InfiniteSearchSelect<T, S>({
@@ -59,6 +71,9 @@ export function InfiniteSearchSelect<T, S>({
   searchPlaceholder,
   displaySearch,
   disabled,
+  minHeight,
+  inputComponent,
+  menuAnchorOrigin,
 }: Props<T, S>) {
   const [showSearchHint, setShowSearchHint] = useState(false);
 
@@ -102,6 +117,7 @@ export function InfiniteSearchSelect<T, S>({
         disabled={disabled}
         error={!!error}
         helperText={error}
+        minHeight={minHeight}
         InputProps={{
           placeholder: searchPlaceholder,
           onClick: () => setOpen(true),
@@ -112,11 +128,15 @@ export function InfiniteSearchSelect<T, S>({
             cursor: 'pointer',
           },
           readOnly: true,
-          inputComponent: FakeInput,
+          inputComponent: inputComponent || FakeInput,
           margin: 'dense',
           endAdornment: (
             <Box sx={{ display: 'flex', marginRight: -0.5 }}>
-              {Boolean(selected !== undefined && !disabled) && (
+              {Boolean(
+                selected !== undefined &&
+                  !disabled &&
+                  onClearSelected != undefined
+              ) && (
                 <StyledClearButton
                   size="small"
                   onClick={stopAndPrevent(() => onClearSelected?.())}
@@ -143,10 +163,12 @@ export function InfiniteSearchSelect<T, S>({
         <Menu
           open={open}
           anchorEl={anchorEl.current!}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'left',
-          }}
+          anchorOrigin={
+            menuAnchorOrigin || {
+              vertical: 'top',
+              horizontal: 'left',
+            }
+          }
           transformOrigin={{
             vertical: 'top',
             horizontal: 'left',

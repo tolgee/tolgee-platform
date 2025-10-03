@@ -17,6 +17,8 @@ data class EditKeyDto(
   @Schema(description = "The namespace of the key. (When empty or null default namespace will be used)")
   @JsonProperty(access = JsonProperty.Access.READ_ONLY)
   var namespace: String? = null,
+  @Schema(description = "The branch of the key. (When empty or null default branch will be used)")
+  var branch: String? = null,
   @Size(max = 2000)
   @Schema(
     description = "Description of the key",

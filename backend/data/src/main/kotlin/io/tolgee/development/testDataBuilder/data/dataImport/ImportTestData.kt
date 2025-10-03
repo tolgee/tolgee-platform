@@ -351,6 +351,7 @@ class ImportTestData {
         path = "./code/exist.extension"
         line = 10
         fromImport = true
+        author = userAccount
       }
     }
 
@@ -371,10 +372,12 @@ class ImportTestData {
         path = "./code/exist.extension"
         line = 10
         fromImport = true
+        author = userAccount
       }
       addCodeReference(userAccount) {
         path = "./code/notExist.extendison"
         fromImport = false
+        author = userAccount
       }
     }
 
@@ -387,6 +390,7 @@ class ImportTestData {
         path = "./code/exist.extension"
         line = 10
         fromImport = true
+        author = userAccount
       }
     }
   }
