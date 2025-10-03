@@ -1356,6 +1356,8 @@ export interface components {
       id: number;
       /** @description Is branch default */
       isDefault: boolean;
+      /** @description Is branch protected */
+      isProtected: boolean;
       /** @description Branch name */
       name: string;
     };
