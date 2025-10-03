@@ -101,7 +101,9 @@ class BatchJobConcurrentLauncher(
             return@repeatForever false
           }
 
-          logger.trace("Jobs to launch: $jobsToLaunch")
+          // This trace will spam the logging output
+          // (one log every 100ms), so it's commented out for now
+          // logger.trace("Jobs to launch: $jobsToLaunch")
           val items =
             (1..jobsToLaunch)
               .mapNotNull { batchJobChunkExecutionQueue.poll() }
@@ -171,7 +173,7 @@ class BatchJobConcurrentLauncher(
     }
 
     /**
-     * Only single job can run in project at the same time
+     * There is a project level lock with configurable n concurrent locks allowed.
      */
     if (!batchJobProjectLockingManager.canLockJobForProject(executionItem.jobId)) {
       logger.debug(

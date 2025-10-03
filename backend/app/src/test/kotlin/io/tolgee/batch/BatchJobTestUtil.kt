@@ -409,7 +409,7 @@ class BatchJobTestUtil(
 
   fun verifyProjectJobLockReleased() {
     waitFor(pollTime = 200, timeout = 1000) {
-      batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id) == 0L
+      batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).isEmpty()
     }
   }
 
