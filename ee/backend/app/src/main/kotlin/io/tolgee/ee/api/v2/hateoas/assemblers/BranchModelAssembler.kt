@@ -13,6 +13,7 @@ class BranchModelAssembler : RepresentationModelAssembler<Branch, BranchModel> {
       name = entity.name,
       active = entity.archivedAt == null,
       isDefault = entity.isDefault,
+      isProtected = entity.isProtected,
     )
   }
 }

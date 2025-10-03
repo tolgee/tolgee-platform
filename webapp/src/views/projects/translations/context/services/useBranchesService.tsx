@@ -19,6 +19,7 @@ const defaultBranchObject: BranchModel = {
   id: 0,
   active: true,
   name: DEFAULT_BRANCH_NAME,
+  isProtected: true,
   isDefault: true,
 };
 
@@ -55,14 +56,16 @@ export const useBranchesService = ({ projectId, enabled = true }: Props) => {
     ? data?.find((b) => b.name === routeBranch)
     : undefined;
 
-  const defaultBranch =
-    loadedBranches?.find((b) => b.isDefault) || defaultBranchObject;
+  const defaultBranch = loadableBranches.isFetched
+    ? loadedBranches?.find((b) => b.isDefault) || defaultBranchObject
+    : null;
 
   const selected = routeBranch ? (urlBranch ? urlBranch : null) : defaultBranch;
 
   return {
     branches: data,
     selected: selected,
+    default: defaultBranch,
     selectedName: routeBranch,
     loadable: loadableBranches,
   };
