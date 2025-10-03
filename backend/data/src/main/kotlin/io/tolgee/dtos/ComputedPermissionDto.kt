@@ -69,8 +69,11 @@ class ComputedPermissionDto(
     if (userRole == UserAccount.Role.ADMIN && !this.isAllPermitted) {
       return SERVER_ADMIN
     }
-    if (userRole == UserAccount.Role.SUPPORTER) {
-      if (this === NONE) {
+    if (userRole == UserAccount.Role.SUPPORTER && !this.isAllReadOnlyPermitted) {
+      if (this.type == ProjectPermissionType.NONE && this.scopes.isEmpty()) {
+        // optimization - if a user doesn't have any permissions,
+        // we can return static override the same as we do for admin,
+        // otherwise we have to calculate permissions specific for them
         return SERVER_SUPPORTER
       }
       return ComputedPermissionDto(
@@ -120,10 +123,14 @@ class ComputedPermissionDto(
 
     private fun getExtendedPermission(base: IPermission, extendedScopes: Array<Scope>): IPermission {
       return object : IPermission by base {
-        override val scopes: Array<Scope>
-          get() = base.scopes + extendedScopes
+        override val scopes: Array<Scope> by lazy {
+          (base.scopes + extendedScopes).toSet().toTypedArray()
+        }
       }
     }
+
+    val ComputedPermissionDto.isAllReadOnlyPermitted: Boolean
+      get() = expandedScopes.toSet().containsAll(Scope.entries.filter { it.isReadOnly() })
 
     val NONE
       get() = ComputedPermissionDto(getEmptyPermission(scopes = arrayOf(), ProjectPermissionType.NONE))
