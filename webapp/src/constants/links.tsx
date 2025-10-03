@@ -361,6 +361,8 @@ export class LINKS {
 
   static PROJECT_TASKS = Link.ofParent(LINKS.PROJECT, 'tasks');
 
+  static PROJECT_BRANCHES = Link.ofParent(LINKS.PROJECT, 'branches');
+
   static PROJECT_EXPORT = Link.ofParent(LINKS.PROJECT, 'export');
 
   static PROJECT_WEBSOCKETS_PREVIEW = Link.ofParent(

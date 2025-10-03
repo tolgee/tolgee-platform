@@ -15,7 +15,6 @@ import { messageService } from 'tg.service/MessageService';
 import { TolgeeFormat, tolgeeFormatGenerateIcu } from '@tginternal/editor';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { useHistory } from 'react-router-dom';
-import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
 import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
