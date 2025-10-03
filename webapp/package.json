@@ -122,7 +122,7 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.24.0",
     "husky": "^9.0.11",
-    "openapi-typescript": "^4.0.2",
+    "openapi-typescript": "^5.4.2",
     "prettier": "^2.3.1",
     "rehype-highlight": "^7.0.0",
     "ts-unused-exports": "^9.0.4",
