@@ -28,16 +28,17 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.EnumSet
 
 @Service
+@Suppress("SelfReferenceConstructorParameter")
 class OrganizationRoleService(
   private val organizationRoleRepository: OrganizationRoleRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
-  @Lazy
+  @param:Lazy
   private val permissionService: PermissionService,
   private val organizationRepository: OrganizationRepository,
-  @Lazy
+  @param:Lazy
   private val userPreferencesService: UserPreferencesService,
-  @Suppress("SelfReferenceConstructorParameter") @Lazy
+  @param:Lazy
   private val self: OrganizationRoleService,
   private val cacheManager: CacheManager,
 ) {
@@ -260,7 +261,7 @@ class OrganizationRoleService(
   }
 
   fun leave(organizationId: Long) {
-    this.removeUser(authenticationFacade.authenticatedUser.id, organizationId)
+    self.removeUser(authenticationFacade.authenticatedUser.id, organizationId)
   }
 
   @Transactional
@@ -281,6 +282,8 @@ class OrganizationRoleService(
     organizationId: Long,
   ) {
     if (!canRemoveUser(userId, organizationId)) {
+      // if a user is managed by an organization, we can't remove the account from organization
+      // so we just deactivate the account instead
       userAccountService.disable(userId)
       return
     }

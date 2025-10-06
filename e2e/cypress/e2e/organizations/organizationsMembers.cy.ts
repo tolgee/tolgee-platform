@@ -73,6 +73,17 @@ describe('Organization Members', () => {
     assertMessage('User removed from organization');
   });
 
+  it('Can remove users managed by the organization', () => {
+    gcy('global-paginated-list').within(() => {
+      cy.contains('Lonely Developer')
+        .closestDcy('organization-member-item')
+        .findDcy('organization-members-remove-user-button')
+        .click();
+    });
+    confirmStandard();
+    assertMessage('User removed from organization');
+  });
+
   it('Can leave', () => {
     leaveOrganization();
     assertMessage('Organization left');
