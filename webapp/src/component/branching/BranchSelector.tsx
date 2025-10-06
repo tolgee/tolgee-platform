@@ -33,7 +33,7 @@ export const BranchSelector = () => {
 
   return (
     <Box display="grid">
-      <BranchSelect onSelect={changeBranch} />
+      <BranchSelect branch={selected} onSelect={changeBranch} />
     </Box>
   );
 };
