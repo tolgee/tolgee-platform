@@ -7,7 +7,7 @@ export const BranchSelectField = ({ name }: { name: string }) => {
 
   return (
     <BranchSelect
-      branchId={field.value || undefined}
+      branch={field.value || undefined}
       onDefaultValue={(branch) => setFieldValue(name, branch.id)}
       onSelect={(branch) => setFieldValue(name, branch.id)}
     />
