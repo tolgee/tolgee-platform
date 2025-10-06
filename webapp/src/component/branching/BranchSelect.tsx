@@ -17,12 +17,12 @@ const StyledLabel = styled('div')`
 `;
 
 type Props = {
-  branchId?: number;
+  branch?: BranchModel | number | null;
   onSelect: (branch: BranchModel) => void;
   onDefaultValue?: (branch: BranchModel) => void;
 };
 
-export const BranchSelect = ({ branchId, onSelect, onDefaultValue }: Props) => {
+export const BranchSelect = ({ branch, onSelect, onDefaultValue }: Props) => {
   const project = useProject();
   const {
     default: defaultBranch,
@@ -32,8 +32,10 @@ export const BranchSelect = ({ branchId, onSelect, onDefaultValue }: Props) => {
     projectId: project.id,
   });
 
-  const defaultValue = branchId
-    ? branches.find((b) => b.id === branchId)
+  const defaultValue = branch
+    ? branches.find((b) =>
+        typeof branch === 'number' ? b.id === branch : b.id === branch.id
+      )
     : defaultBranch;
 
   const [selected, setSelected] = useState<BranchModel | undefined>(
