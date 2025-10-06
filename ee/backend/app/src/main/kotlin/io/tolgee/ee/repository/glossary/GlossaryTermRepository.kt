@@ -29,6 +29,8 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
 
   fun findByGlossary(glossary: Glossary): List<GlossaryTerm>
 
+  fun deleteAllByGlossary(glossary: Glossary)
+
   @Query(
     """
     from GlossaryTerm te
