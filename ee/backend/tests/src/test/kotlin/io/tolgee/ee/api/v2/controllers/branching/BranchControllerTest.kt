@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import java.math.BigDecimal
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -38,15 +39,12 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `returns list of branches`() {
     performProjectAuthGet("branches").andAssertThatJson {
+      node("page.totalElements").isNumber.isEqualTo(BigDecimal(2))
       node("_embedded.branches") {
-        node("[0].name").isEqualTo("feature-branch")
+        node("[0].name").isEqualTo("main")
         node("[0].active").isEqualTo(true)
-        node("[1].name").isEqualTo("main")
+        node("[1].name").isEqualTo("feature-branch")
         node("[1].active").isEqualTo(true)
-        node("[2].name").isEqualTo("merged-branch")
-        node("[2].active").isEqualTo(false)
-        node("[3].name").isEqualTo("merged-branch-older")
-        node("[3].active").isEqualTo(false)
       }
     }
   }
