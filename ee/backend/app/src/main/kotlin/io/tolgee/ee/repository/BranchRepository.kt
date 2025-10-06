@@ -13,13 +13,27 @@ interface BranchRepository : JpaRepository<Branch, Long> {
     """
     select b
     from Branch b
-    where b.project.id = :projectId
-    order by b.isDefault desc, b.archivedAt desc nulls first, b.createdAt desc, b.id desc
+    where b.project.id = :projectId and b.archivedAt IS NULL
+    order by b.isDefault desc, b.createdAt desc, b.id desc
   """
   )
   fun getAllProjectBranches(projectId: Long, page: Pageable?, search: String?): Page<Branch>
 
+  @Query(
+    """
+    select b
+    from Branch b
+    where b.project.id = :projectId and b.id = :branchId and b.archivedAt IS NULL
+    """
+  )
   fun findByProjectIdAndId(projectId: Long, branchId: Long): Branch?
 
+  @Query(
+    """
+    select b
+    from Branch b
+    where b.project.id = :projectId and b.archivedAt IS NULL and lower(b.name) = lower(:name)
+    """
+  )
   fun findByProjectIdAndName(projectId: Long, name: String): Branch?
 }

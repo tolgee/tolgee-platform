@@ -25,25 +25,16 @@ class BranchTestData(
           isProtected = false
           isDefault = false
           originBranch = this
-          createdAt = currentDateProvider.date.addDays(1)
         }.build {
           featureBranch = self
         }
         addBranch {
-          name = "merged-branch"
+          name = "merged-and-deleted-branch"
           project = projectBuilder.self
           isProtected = false
           isDefault = false
-          createdAt = currentDateProvider.date.addDays(-2)
           archivedAt = currentDateProvider.date.addDays(-1)
           originBranch = this
-        }
-        addBranch {
-          name = "merged-branch-older"
-          project = projectBuilder.self
-          isProtected = false
-          createdAt = currentDateProvider.date.addDays(-3)
-          archivedAt = currentDateProvider.date.addDays(-2)
         }
       }
     }
