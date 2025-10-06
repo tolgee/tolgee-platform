@@ -211,6 +211,18 @@ class GlossaryTermService(
     glossaryTermRepository.deleteByGlossaryAndIdIn(glossary, termIds)
   }
 
+  @Transactional
+  fun deleteAllByGlossary(
+    glossary: Glossary,
+  ) {
+    glossaryTermRepository.deleteAllByGlossary(glossary)
+  }
+
+  @Transactional
+  fun saveAll(terms: Iterable<GlossaryTerm>) {
+    glossaryTermRepository.saveAll(terms)
+  }
+
   fun getHighlights(
     organizationId: Long,
     projectId: Long,
