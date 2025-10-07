@@ -25,6 +25,14 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
+    select k.id from Key k
+    where k.project.id = :projectId and k.branch.id = :branchId
+    """
+  )
+  fun findIdsByProjectAndBranch(projectId: Long, branchId: Long, pageable: Pageable): Page<Long>
+
+  @Query(
+    """
     from Key k
     left join k.namespace ns
     left join k.branch br
