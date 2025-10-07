@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
@@ -26,9 +27,15 @@ class BranchServiceImpl(
   private val entityManager: EntityManager,
   private val branchCopyService: BranchCopyService,
   private val applicationContext: ApplicationContext,
+  private val defaultBranchCreator: DefaultBranchCreator,
 ) : BranchService {
   override fun getAllBranches(projectId: Long, page: Pageable, search: String?): Page<Branch> {
-    return branchRepository.getAllProjectBranches(projectId, page, search)
+    val branches = branchRepository.getAllProjectBranches(projectId, page, search)
+    if (branches.isEmpty) {
+      val defaultBranch = defaultBranchCreator.create(projectId)
+      return PageImpl(listOf(defaultBranch))
+    }
+    return branches
   }
 
   override fun getBranch(projectId: Long, branchId: Long): Branch {
