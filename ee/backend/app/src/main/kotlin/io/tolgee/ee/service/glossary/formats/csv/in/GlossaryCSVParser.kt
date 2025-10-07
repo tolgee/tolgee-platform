@@ -63,6 +63,7 @@ class GlossaryCSVParser(
 
     fun Array<String>.getSafe(idx: Int?): String? {
         if (idx == null) return null
+        if (idx >= size) return null
         return this[idx]
     }
 
