@@ -1,11 +1,13 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.administration
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.api.v2.controllers.IController
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobProjectLockingManager
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.JobCharacter
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
 import io.tolgee.security.authentication.RequiresSuperAuthentication
@@ -122,7 +124,7 @@ data class ProjectLockModel(
 data class JobInfo(
   val jobId: Long,
   val status: BatchJobStatus,
-  val type: io.tolgee.batch.data.BatchJobType,
+  val type: BatchJobType,
   val createdAt: Long?
 )
 

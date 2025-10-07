@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.administration
 
 import io.tolgee.development.testDataBuilder.data.AdministrationTestData
 import io.tolgee.fixtures.andAssertThatJson

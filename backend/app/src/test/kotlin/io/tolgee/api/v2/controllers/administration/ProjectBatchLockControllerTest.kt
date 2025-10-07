@@ -1,16 +1,12 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.administration
 
-import io.tolgee.batch.BatchJobChunkExecutionQueue
-import io.tolgee.batch.BatchJobProjectLockingManager
-import io.tolgee.batch.BatchJobService
 import io.tolgee.development.testDataBuilder.data.AdministrationTestData
 import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 
