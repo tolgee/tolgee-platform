@@ -157,7 +157,12 @@ class ExportDataProvider(
 
   private fun filterBranch() {
     if (exportParams.filterBranch != null) {
-      whereConditions.add(cb.equal(branchJoin.get(Branch_.name), exportParams.filterBranch))
+      whereConditions.add(
+        cb.and(
+          cb.equal(branchJoin.get(Branch_.name), exportParams.filterBranch),
+            cb.isNull(branchJoin.get(Branch_.archivedAt)),
+        )
+      )
     } else {
       whereConditions.add(
         cb.or(

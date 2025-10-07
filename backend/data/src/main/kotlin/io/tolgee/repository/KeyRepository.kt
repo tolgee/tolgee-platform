@@ -40,7 +40,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
       k.name = :name 
       and k.project.id = :projectId 
       and (ns.name = :namespace or (ns is null and :namespace is null))
-      and (br.name = :branch or (:branch is null and (br is null or br.isDefault)))
+      and ((br.name = :branch and br.archivedAt is null) or (:branch is null and (br is null or br.isDefault)))
   """,
   )
   fun getByNameAndNamespace(
@@ -64,7 +64,8 @@ interface KeyRepository : JpaRepository<Key, Long> {
      left join k.keyMeta km
      left join k.namespace ns
      left join k.branch br
-     where k.project.id = :projectId order by k.id
+     where k.project.id = :projectId and (br is null or br.archivedAt is null) 
+     order by k.id
     """,
   )
   fun getAllByProjectIdSortedById(projectId: Long): List<KeyView>
@@ -158,13 +159,13 @@ interface KeyRepository : JpaRepository<Key, Long> {
      left join k.namespace ns
      left join k.branch b
      where k.project.id = :projectId
-        and (k.branch.name = :branch or (:branch is null and (b is null or b.isDefault)))
+        and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault)))
     """,
     countQuery = """
       select count(k) from Key k 
       left join k.branch b
       where k.project.id = :projectId 
-        and (k.branch.name = :branch or (:branch is null and (b is null or b.isDefault)))
+        and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault)))
     """,
   )
   fun getAllByProjectId(
@@ -290,14 +291,14 @@ interface KeyRepository : JpaRepository<Key, Long> {
       left join fetch k.translations t
       left join fetch k.keyMeta km
       left join fetch k.namespace ns
-      left join fetch k.branch br
+      left join fetch k.branch b
       left join fetch t.labels l
       left join fetch km.tags tg
       left join fetch t.comments c
       left join fetch c.author ca
       where k.project.id = :projectId 
         and k.name = :keyName
-        and (br.name = :branchName or (:branchName is null and (br is null or br.isDefault)))
+        and ((b.name = :branchName and b.archivedAt is null) or (:branchName is null and (b is null or b.isDefault)))
     """
   )
   fun findPrefetchedByNameAndBranch(projectId: Long, keyName: String, branchName: String?): Key?
