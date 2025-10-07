@@ -98,6 +98,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
         testData.toBeDeletedBranch.id
       ).assert.isEqualTo(0)
     }
+    branchRepository.findByIdOrNull(testData.toBeDeletedBranch.id).assert.isNull()
   }
 
   private fun performBranchCreation(): ResultActions {

@@ -62,5 +62,6 @@ class BranchCleanupService(
       }
       page++
     }
+    branchRepository.delete(branch)
   }
 }
