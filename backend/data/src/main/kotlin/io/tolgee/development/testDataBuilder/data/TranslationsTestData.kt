@@ -18,6 +18,7 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.screenshotReference.KeyInScreenshotPosition
 import io.tolgee.model.translation.Translation
+import java.util.Date
 
 class TranslationsTestData {
   lateinit var project: Project
@@ -83,6 +84,17 @@ class TranslationsTestData {
         addBranch {
           name = "from-default"
           project = this@project.self
+        }.build {
+          addBasicKey().apply {
+            branch = self
+          }
+        }
+
+        // deleted branch
+        addBranch {
+          name = "from-default"
+          project = this@project.self
+          archivedAt = Date(1759834567)
         }.build {
           addBasicKey().apply {
             branch = self
