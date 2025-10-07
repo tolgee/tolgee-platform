@@ -253,7 +253,8 @@ class OrganizationController(
 
   @DeleteMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}")
   @Operation(
-    summary = "Remove user from organization; if user is managed by the organization, their account is disabled instead"
+    summary = "Remove user from organization",
+    description = "Remove user from organization. If user is managed by the organization, their account is disabled instead."
   )
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
