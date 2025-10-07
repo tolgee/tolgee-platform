@@ -245,7 +245,10 @@ class BigMetaService(
           cb.equal(root.get(Key_.name), key.keyName),
           cb.equalNullable(namespace.get(Namespace_.name), key.namespace),
           cb.or(
-            cb.equalNullable(branch.get(Branch_.name), key.branch),
+            cb.and(
+              cb.equalNullable(branch.get(Branch_.name), key.branch),
+              cb.isNull(branch.get(Branch_.archivedAt)),
+            ),
             cb.or(
               cb.isNull(root.get(Key_.branch)),
               cb.isTrue(branch.get(Branch_.isDefault)),

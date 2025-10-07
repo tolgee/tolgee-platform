@@ -43,6 +43,7 @@ import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Filter
+import org.hibernate.annotations.SQLRestriction
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
@@ -150,6 +151,7 @@ class Project(
   var slackConfigs: MutableList<SlackConfig> = mutableListOf()
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST], mappedBy = "project")
+  @SQLRestriction("archived_at IS NULL")
   var branches: MutableList<Branch> = mutableListOf()
 
   @ColumnDefault("true")
