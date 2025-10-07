@@ -273,7 +273,7 @@ class OrganizationRoleService(
       throw ValidationException(Message.USER_IS_MANAGED_BY_ORGANIZATION)
     }
 
-    forceRemoveUser(userId, organizationId)
+    removeUserForReal(userId, organizationId)
   }
 
   @Transactional
@@ -282,21 +282,36 @@ class OrganizationRoleService(
     organizationId: Long,
   ) {
     if (!canRemoveUser(userId, organizationId)) {
-      // if a user is managed by an organization, we can't remove the account from organization
-      // so we just deactivate the account instead
       userAccountService.disable(userId)
       return
     }
 
-    removeUser(userId, organizationId)
+    removeUserForReal(userId, organizationId)
   }
 
+  /**
+   * Checks if a user is managed by the organization.
+   * We can't remove managed users from their organization.
+   */
   private fun canRemoveUser(userId: Long, organizationId: Long): Boolean {
     val managedBy = getManagedBy(userId)
-    return managedBy == null || managedBy.id != organizationId
+    val isManaged = managedBy != null
+
+    if (!isManaged) {
+      // Not managed by any organization
+      return true
+    }
+
+    if (managedBy.id != organizationId) {
+      // Managed by another organization
+      return true
+    }
+
+    // User is managed by the organization - we can't remove them
+    return false
   }
 
-  private fun forceRemoveUser(
+  private fun removeUserForReal(
     userId: Long,
     organizationId: Long,
   ) {
