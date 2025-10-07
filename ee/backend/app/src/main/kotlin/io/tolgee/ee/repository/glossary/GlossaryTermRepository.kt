@@ -87,7 +87,7 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
     """
     from GlossaryTerm te
     left join fetch te.translations
-    where te.glossary.id = :glossaryId
+    where te.glossary = :glossary
   """,
   )
   fun findByGlossaryWithTranslations(glossary: Glossary): List<GlossaryTerm>
