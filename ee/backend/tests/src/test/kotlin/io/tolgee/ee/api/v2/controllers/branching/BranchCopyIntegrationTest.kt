@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyMetaRepository
+import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.KeyScreenshotReferenceRepository
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -36,6 +37,9 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var keyScreenshotReferenceRepository: KeyScreenshotReferenceRepository
+
+  @Autowired
+  lateinit var keyRepository: KeyRepository
 
   @BeforeEach
   fun setup() {
