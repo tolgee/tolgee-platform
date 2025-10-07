@@ -30,6 +30,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.ThirdPartyAuthType
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.openApiDocs.OpenApiOrderExtension
+import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -78,8 +79,8 @@ class OrganizationController(
   private val organizationService: OrganizationService,
   private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
   private val arrayUserResourcesAssembler: PagedResourcesAssembler<
-    Pair<UserAccountWithOrganizationRoleView, List<Project>>,
-    >,
+      Pair<UserAccountWithOrganizationRoleView, List<Project>>,
+      >,
   private val organizationModelAssembler: OrganizationModelAssembler,
   private val userAccountWithOrganizationRoleModelAssembler: UserAccountWithOrganizationRoleModelAssembler,
   private val tolgeeProperties: TolgeeProperties,
@@ -92,6 +93,7 @@ class OrganizationController(
   private val limitsProvider: LimitsProvider,
   private val projectService: ProjectService,
   private val payAsYouGoCreditsProvider: PayAsYouGoCreditsProvider,
+  private val organizationHolder: OrganizationHolder,
 ) {
   @PostMapping
   @Transactional
@@ -241,28 +243,31 @@ class OrganizationController(
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
   fun setUserRole(
-    @PathVariable("organizationId") organizationId: Long,
+    @PathVariable organizationId: Long,
     @PathVariable("userId") userId: Long,
     @RequestBody dto: SetOrganizationRoleDto,
   ) {
     if (authenticationFacade.authenticatedUser.id == userId) {
       throw BadRequestException(Message.CANNOT_SET_YOUR_OWN_ROLE)
     }
-    organizationRoleService.setMemberRole(organizationId, userId, dto)
+    organizationRoleService.setMemberRole(organizationHolder.organization.id, userId, dto)
   }
 
   @DeleteMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}")
   @Operation(
     summary = "Remove user from organization",
-    description = "Remove user from organization. If user is managed by the organization, their account is disabled instead."
+    description = (
+      "Remove user from organization. " +
+        "If user is managed by the organization, their account is disabled instead."
+    )
   )
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication
   fun removeUser(
-    @PathVariable("organizationId") organizationId: Long,
+    @PathVariable organizationId: Long,
     @PathVariable("userId") userId: Long,
   ) {
-    organizationRoleService.removeOrDeactivateUser(userId, organizationId)
+    organizationRoleService.removeOrDeactivateUser(userId, organizationHolder.organization.id)
   }
 
   @PutMapping("/{id:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -303,7 +308,7 @@ class OrganizationController(
     @PathVariable organizationId: Long,
     @PathVariable permissionType: ProjectPermissionType,
   ) {
-    organizationService.setBasePermission(organizationId, permissionType)
+    organizationService.setBasePermission(organizationHolder.organization.id, permissionType)
   }
 
   @GetMapping(value = ["/{organizationId:[0-9]+}/usage"])
@@ -312,18 +317,18 @@ class OrganizationController(
   fun getUsage(
     @PathVariable organizationId: Long,
   ): PublicUsageModel {
-    val organization = organizationService.get(organizationId)
+    val organization = organizationHolder.organizationEntity
     val creditBalances = mtCreditConsumer.getCreditBalances(organization.id)
     val currentPayAsYouGoMtCredits = payAsYouGoCreditsProvider.getUsedPayAsYouGoCredits(organization)
     val availablePayAsYouGoMtCredits = payAsYouGoCreditsProvider.getPayAsYouGoAvailableCredits(organization)
-    val currentTranslations = organizationStatsService.getTranslationCount(organizationId)
-    val currentSeats = organizationStatsService.getSeatCountToCountSeats(organizationId)
-    val currentKeys = organizationStatsService.getKeyCount(organizationId)
-    val limits = limitsProvider.getLimits(organizationId)
+    val currentTranslations = organizationStatsService.getTranslationCount(organization.id)
+    val currentSeats = organizationStatsService.getSeatCountToCountSeats(organization.id)
+    val currentKeys = organizationStatsService.getKeyCount(organization.id)
+    val limits = limitsProvider.getLimits(organization.id)
 
     return PublicUsageModel(
       isPayAsYouGo = limits.isPayAsYouGo,
-      organizationId = organizationId,
+      organizationId = organization.id,
       creditBalance = creditBalances.creditBalance / 100,
       includedMtCredits = creditBalances.bucketSize / 100,
       creditBalanceRefilledAt = creditBalances.refilledAt.time,
