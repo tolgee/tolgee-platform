@@ -16,6 +16,7 @@ class BranchTranslationsTestData {
   lateinit var de: Language
   lateinit var user: UserAccount
   lateinit var mainBranch: Branch
+  lateinit var toBeDeletedBranch: Branch
   lateinit var firstLabel: Label
   lateinit var secondLabel: Label
   lateinit var firstTag: Tag
@@ -68,10 +69,24 @@ class BranchTranslationsTestData {
       }.self
     }
 
-  fun generateBunchData(n: Int): ProjectBuilder {
+  fun generateBunchData(n: Int, branch: Branch = mainBranch): ProjectBuilder {
     return root.data.projects[0].apply {
       (1..n).forEach {
-        addBranchKey(it, "branched additional key", mainBranch)
+        addBranchKey(it, "branched additional key", branch)
+      }
+    }
+  }
+
+  fun addBranchToBeDeleted(name: String = "to-be-deleted"): ProjectBuilder {
+    return root.data.projects[0].apply {
+      addBranch {
+        this.name = name
+        project = root.data.projects[0].self
+      }.build {
+        toBeDeletedBranch = self
+        (1..500).forEach {
+          addBranchKey(it, "branched key to delete", this@build.self)
+        }
       }
     }
   }
