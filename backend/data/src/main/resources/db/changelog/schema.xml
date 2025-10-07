@@ -4772,4 +4772,8 @@
     <changeSet author="danielkrizan (generated)" id="1759504369747-1">
         <dropUniqueConstraint constraintName="uc_branchorigin_branch_id_col" tableName="branch"/>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1759830410260-1">
+        <dropUniqueConstraint constraintName="UKnw2fc76ly83tb8fsqpqkbhm4m" tableName="branch"/>
+        <sql>create unique index on public.branch (project_id, name) where archived_at is NULL;</sql>
+    </changeSet>
 </databaseChangeLog>
