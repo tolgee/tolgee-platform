@@ -8,7 +8,7 @@ export const SelfHostedEePlanSelector: FC<
     GenericPlanSelector<
       components['schemas']['SelfHostedEePlanAdministrationModel']
     >,
-    'plans'
+    'plans' | 'loading'
   > & { organizationId?: number }
 > = ({ organizationId, ...props }) => {
   const plansLoadable = useBillingApiQuery({
@@ -22,6 +22,7 @@ export const SelfHostedEePlanSelector: FC<
   return (
     <GenericPlanSelector
       plans={plansLoadable.data?._embedded?.plans}
+      loading={plansLoadable.isLoading}
       {...props}
     />
   );

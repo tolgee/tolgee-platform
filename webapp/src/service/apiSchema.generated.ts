@@ -1032,6 +1032,10 @@ export interface paths {
   "/v2/user-preferences/set-preferred-organization/{organizationId}": {
     put: operations["setPreferredOrganization"];
   };
+  "/v2/user-preferences/storage/{fieldName}": {
+    get: operations["getStorageField"];
+    put: operations["setStorageField"];
+  };
   "/v2/user-tasks": {
     get: operations["getTasks_2"];
   };
@@ -6306,6 +6310,10 @@ export interface components {
       language?: string;
       /** Format: int64 */
       preferredOrganizationId?: number;
+    };
+    UserStorageResponse: {
+      /** @description The data stored for the field */
+      data?: unknown;
     };
     UserTotpDisableRequestDto: {
       password: string;
@@ -20751,6 +20759,85 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  getStorageField: {
+    parameters: {
+      path: {
+        fieldName: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["UserStorageResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  setStorageField: {
+    parameters: {
+      path: {
+        fieldName: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": { [key: string]: unknown };
       };
     };
   };
