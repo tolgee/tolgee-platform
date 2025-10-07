@@ -3,6 +3,7 @@ package io.tolgee.service.queryBuilders
 import io.tolgee.model.Language_
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
+import io.tolgee.model.branching.Branch_
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
@@ -107,7 +108,7 @@ open class LanguageStatsProvider(
     subquery.where(
       cb.or(
         cb.isNull(join.get(Key_.branch)),
-        cb.isTrue(branchJoin.get(io.tolgee.model.branching.Branch_.isDefault)),
+        cb.isTrue(branchJoin.get(Branch_.isDefault)),
       ),
     )
   }
