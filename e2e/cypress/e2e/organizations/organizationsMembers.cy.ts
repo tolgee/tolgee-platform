@@ -82,6 +82,16 @@ describe('Organization Members', () => {
     });
     confirmStandard();
     assertMessage('User removed from organization');
+
+    gcy('global-paginated-list').within(() => {
+      cy.gcy('organization-member-item').contains('Cukrberg').should('exist');
+    });
+
+    gcy('global-paginated-list').within(() => {
+      cy.gcy('organization-member-item')
+        .contains('Lonely Developer')
+        .should('not.exist');
+    });
   });
 
   it('Can leave', () => {
