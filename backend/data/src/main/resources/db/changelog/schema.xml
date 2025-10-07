@@ -4643,4 +4643,9 @@
     <changeSet author="anty (generated)" id="1762964560931-2">
         <modifyDataType columnName="api_url" newDataType="varchar(2047)" tableName="llm_provider"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1759495253156-1">
+        <addColumn tableName="user_preferences">
+            <column name="storage_json" type="JSONB"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
