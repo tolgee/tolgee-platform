@@ -9,11 +9,13 @@ import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import jakarta.transaction.Transactional
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
 class GlossaryTermTranslationService(
+  @param:Lazy
   private val glossaryService: GlossaryService,
   private val glossaryTermTranslationRepository: GlossaryTermTranslationRepository,
 ) {
