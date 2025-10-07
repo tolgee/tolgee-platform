@@ -95,7 +95,9 @@ function useSortPlans(plans: GenericPlanType[]) {
 }
 
 /**
- * Returns user's preferred plans and a function to increment a plan's count.
+ * Returns a user's preferred plans and a function to increment a plan's count.
+ *
+ * The setting is stored on the server in the storageJson filed on the UserPreference entity.
  */
 function usePreferredPlans() {
   const { loadable, update } = useUserPreferenceStorage(
