@@ -40,9 +40,10 @@ class GlossaryCSVExporter(
 
     fun export(): InputStream {
         val output = StringWriter()
-        val writer = CSVWriterBuilder(output).withSeparator(delimiter).build()
-        writer.writeNext(headers)
-        terms.forEach { writer.writeNext(it.asColumns()) }
-        return output.toString().byteInputStream()
+        CSVWriterBuilder(output).withSeparator(delimiter).build().use { writer ->
+            writer.writeNext(headers)
+            terms.forEach { writer.writeNext(it.asColumns()) }
+        }
+        return output.toString().byteInputStream(Charsets.UTF_8)
     }
 }
