@@ -391,7 +391,7 @@ class BatchJobService(
 
   fun getAllIncompleteJobIds(projectId: Long): List<AllIncompleteJobsResult> {
     return entityManager.createQuery(
-      """select new io.tolgee.batch.data.AllIncompleteJobsResult(j.id, j.totalChunks) from BatchJob j
+      """select new io.tolgee.batch.data.AllIncompleteJobsResult(j.id, j.status, j.totalChunks) from BatchJob j
       where j.project.id = :projectId
       and j.status not in :completedStatuses
     """,

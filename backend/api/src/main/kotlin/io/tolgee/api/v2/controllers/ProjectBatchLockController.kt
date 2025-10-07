@@ -53,17 +53,17 @@ class ProjectBatchLockController(
       }
 
       val jobInfo = if (lockedJobId != null && lockedJobId > 0L) {
-        try {
-          val jobDto = batchJobService.getJobDto(lockedJobId)
+        val jobDto = batchJobService.findJobDto(lockedJobId)
+        if (jobDto == null) {
+          logger.warn("Locked job $lockedJobId in project $projectId not found")
+          null
+        } else {
           JobInfo(
             jobId = jobDto.id,
             status = jobDto.status,
             type = jobDto.type,
             createdAt = jobDto.createdAt
           )
-        } catch (e: Exception) {
-          logger.warn("Could not retrieve job info for locked job $lockedJobId in project $projectId", e)
-          null
         }
       } else {
         null

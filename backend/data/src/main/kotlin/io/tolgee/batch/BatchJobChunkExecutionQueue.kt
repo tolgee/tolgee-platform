@@ -7,8 +7,10 @@ import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.component.UsingRedisProvider
+import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
+import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
 import io.tolgee.util.debug
@@ -27,6 +29,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 @Component
 class BatchJobChunkExecutionQueue(
+  private val batchProperties: BatchProperties,
   private val entityManager: EntityManager,
   private val usingRedisProvider: UsingRedisProvider,
   @Lazy
@@ -64,19 +67,20 @@ class BatchJobChunkExecutionQueue(
         join bjce.batchJob bk
         where bjce.status = :executionStatus
         order by 
-          case when bk.status = 'RUNNING' then 0 else 1 end,
+          case when bk.status = :runningStatus then 0 else 1 end,
           bjce.createdAt asc, 
           bjce.executeAfter asc, 
           bjce.id asc
         """.trimIndent(),
         BatchJobChunkExecutionDto::class.java,
       ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
+        .setParameter("runningStatus", BatchJobStatus.RUNNING)
         .setHint(
           "jakarta.persistence.lock.timeout",
           LockOptions.SKIP_LOCKED,
         )
         // Limit to get pending batches faster
-        .setMaxResults(1_000)
+        .setMaxResults(batchProperties.chunkQueuePopulationSize)
         .resultList
 
     if (data.size > 0) {

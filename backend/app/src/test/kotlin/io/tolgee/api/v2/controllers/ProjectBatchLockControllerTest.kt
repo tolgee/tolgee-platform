@@ -18,15 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @AutoConfigureMockMvc
 class ProjectBatchLockControllerTest : AuthorizedControllerTest() {
 
-  @Autowired
-  private lateinit var batchJobProjectLockingManager: BatchJobProjectLockingManager
-
-  @Autowired
-  private lateinit var batchJobService: BatchJobService
-
-  @Autowired
-  private lateinit var batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue
-
   lateinit var testData: AdministrationTestData
 
   @BeforeEach
