@@ -11,7 +11,6 @@ import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
 import java.util.Date
 
 /**
@@ -33,9 +32,9 @@ import java.util.Date
     Index(columnList = "project_id"),
     Index(columnList = "name"),
   ],
-  uniqueConstraints = [
-    UniqueConstraint(columnNames = ["project_id", "name"]),
-  ]
+  // unique indexes are created in schema.xml
+  // - project_id, name where archived_at IS NULL
+  // - project_id, is_default where is_default is TRUE
 )
 @ActivityLoggedEntity
 class Branch(
