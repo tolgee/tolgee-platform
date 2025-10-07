@@ -1,6 +1,12 @@
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { UseQueryResult } from 'react-query';
 
+/**
+ * Hook returning the methods to get an update user preference storage.
+ * The data is stored on the server as a JSONB field.
+ *
+ * Use it anywhere you need to store some not-big data for the specific user.
+ */
 export function useUserPreferenceStorage(fieldName: string) {
   const loadable = useApiQuery({
     url: '/v2/user-preferences/storage/{fieldName}',
