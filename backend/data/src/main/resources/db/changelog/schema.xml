@@ -4637,4 +4637,9 @@
             <column name="key_id"/>
         </createIndex>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1759495253156-1">
+        <addColumn tableName="user_preferences">
+            <column name="storage_json" type="JSONB"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
