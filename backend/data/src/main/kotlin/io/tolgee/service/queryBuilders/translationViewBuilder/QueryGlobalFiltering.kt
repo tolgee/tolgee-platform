@@ -274,7 +274,12 @@ class QueryGlobalFiltering(
         )
       )
     } else {
-      queryBase.whereConditions.add(cb.equal(branchJoin.get(Branch_.name), cb.literal(params.branch)))
+      queryBase.whereConditions.add(
+        cb.and(
+          cb.equal(branchJoin.get(Branch_.name), cb.literal(params.branch)),
+          cb.isNull(branchJoin.get(Branch_.archivedAt)),
+        )
+      )
     }
   }
 }
