@@ -14,13 +14,20 @@ import java.util.*
 
 @Service
 class GlossaryTermTranslationService(
+  private val glossaryService: GlossaryService,
   private val glossaryTermTranslationRepository: GlossaryTermTranslationRepository,
 ) {
   fun getDistinctLanguageTags(
     organizationId: Long,
     glossaryId: Long,
   ): Set<String> {
-    return glossaryTermTranslationRepository.findDistinctLanguageTagsByGlossary(organizationId, glossaryId)
+    val glossary = glossaryService.get(organizationId, glossaryId)
+    return getDistinctLanguageTags(glossary)
+  }
+  fun getDistinctLanguageTags(
+    glossary: Glossary,
+  ): Set<String> {
+    return glossaryTermTranslationRepository.findDistinctLanguageTagsByGlossary(glossary)
   }
 
   @Transactional
