@@ -52,6 +52,28 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `creates default branch on project without branches`() {
+    testData.projectBuilder.self = testData.secondProject
+    performProjectAuthGet("branches").andAssertThatJson {
+      node("page.totalElements").isNumber.isEqualTo(BigDecimal(1))
+      node("_embedded.branches") {
+        node("[0].name").isEqualTo("main")
+        node("[0].active").isEqualTo(true)
+        node("[0].isDefault").isEqualTo(true)
+      }
+    }
+    keyService.getAll(testData.secondProject.id).first().branch!!.id.let { it ->
+      it.assert.isNotNull()
+      branchRepository.findByIdOrNull(it)!!.let { branch ->
+        branch.name.assert.isEqualTo(Branch.DEFAULT_BRANCH_NAME)
+        branch.isDefault.assert.isTrue
+        branch.isProtected.assert.isTrue
+      }
+    }
+  }
+
   @Test()
   @ProjectJWTAuthTestMethod
   fun `creates branch`() {
