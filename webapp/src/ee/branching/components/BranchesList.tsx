@@ -9,6 +9,7 @@ import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasL
 import { components } from 'tg.service/apiSchema.generated';
 import { BranchModal } from 'tg.ee.module/branching/components/BranchModal';
 import { BranchFormValues } from 'tg.ee.module/branching/components/BranchForm';
+import { confirmation } from 'tg.hooks/confirmation';
 
 const TableGrid = styled('div')`
   display: grid;
@@ -33,6 +34,12 @@ export const BranchesList = () => {
     invalidatePrefix: '/v2/projects/{projectId}/branches',
   });
 
+  const deleteMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/{branchId}',
+    method: 'delete',
+    invalidatePrefix: '/v2/projects/{projectId}/branches',
+  });
+
   const submit = async (values: BranchFormValues) => {
     await createMutation.mutateAsync({
       path: { projectId: project.id },
@@ -43,6 +50,23 @@ export const BranchesList = () => {
       },
     });
     setAddBranchOpen(false);
+  };
+
+  const deleteBranch = async (branch: BranchModel) => {
+    confirmation({
+      message: (
+        <T
+          keyName="project_branch_delete_confirmation"
+          params={{ branchName: branch.name, b: <b /> }}
+        />
+      ),
+      confirmButtonText: <T keyName="confirmation_dialog_delete" />,
+      async onConfirm() {
+        await deleteMutation.mutateAsync({
+          path: { projectId: project.id, branchId: branch.id },
+        });
+      },
+    });
   };
 
   const canEditBranches = true; // TODO satisfiesPermission('branches.edit')
@@ -95,7 +119,12 @@ export const BranchesList = () => {
               </Typography>
             </Box>
           }
-          renderItem={(l: BranchModel) => <BranchItem branch={l} />}
+          renderItem={(l: BranchModel) => (
+            <BranchItem
+              branch={l}
+              onRemove={!l.isDefault ? deleteBranch : undefined}
+            />
+          )}
         />
       </Box>
       {addBranchOpen && branchesLoadable.data && (

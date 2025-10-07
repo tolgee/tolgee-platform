@@ -1,7 +1,7 @@
 import { components } from 'tg.service/apiSchema.generated';
 import { Box, IconButton, styled } from '@mui/material';
 import React from 'react';
-import { ShieldTick, XClose } from '@untitled-ui/icons-react';
+import { ShieldTick, Trash01 } from '@untitled-ui/icons-react';
 import { DefaultBranchChip } from 'tg.component/branching/DefaultBranchChip';
 import { BranchNameChip } from 'tg.ee.module/branching/components/BranchNameChip';
 import { T } from '@tolgee/react';
@@ -41,7 +41,7 @@ type BranchModel = components['schemas']['BranchModel'];
 
 type Props = {
   branch: BranchModel;
-  onRemove?: () => void;
+  onRemove?: (branch: BranchModel) => void;
 };
 
 export const BranchItem: React.FC<Props> = ({ branch, onRemove }) => {
@@ -65,9 +65,9 @@ export const BranchItem: React.FC<Props> = ({ branch, onRemove }) => {
           <IconButton
             data-cy="project-settings-branchs-remove-button"
             size="small"
-            onClick={onRemove}
+            onClick={() => onRemove(branch)}
           >
-            <XClose />
+            <Trash01 width={20} height={20} />
           </IconButton>
         )}
       </StyledItemActions>
