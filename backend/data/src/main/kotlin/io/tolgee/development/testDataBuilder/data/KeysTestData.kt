@@ -9,6 +9,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import java.util.Date
 
 class KeysTestData {
   lateinit var enOnlyUserAccount: UserAccount
@@ -113,6 +114,17 @@ class KeysTestData {
 
           addBranch {
             name = "dev"
+          }.build {
+            addKey {
+              name = "first_key"
+              branch = self
+            }
+          }
+
+          // deleted branch with the same name
+          addBranch {
+            name = "dev"
+            archivedAt = Date(1759833439)
           }.build {
             addKey {
               name = "first_key"
