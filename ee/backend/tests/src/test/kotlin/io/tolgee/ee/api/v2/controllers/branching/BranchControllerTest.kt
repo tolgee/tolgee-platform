@@ -1,9 +1,12 @@
 package io.tolgee.ee.api.v2.controllers.branching
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BranchTestData
 import io.tolgee.ee.repository.BranchRepository
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
@@ -63,6 +66,18 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("active").isEqualTo(true)
     }
     branchRepository.findByProjectIdAndName(testData.project.id, "new-branch").assert.isNotNull()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `unable to create branch with name of existing branch`() {
+    performProjectAuthPost(
+      "branches",
+      mapOf(
+        "name" to "feature-branch",
+        "originBranchId" to testData.mainBranch.id,
+      )
+    ).andIsBadRequest.andHasErrorMessage(Message.BRANCH_ALREADY_EXISTS)
   }
 
   @Test
