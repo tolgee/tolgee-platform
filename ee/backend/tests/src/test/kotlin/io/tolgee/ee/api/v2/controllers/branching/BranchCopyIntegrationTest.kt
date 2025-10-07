@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.BranchTranslationsTestData
 import io.tolgee.ee.repository.BranchRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyMetaRepository
 import io.tolgee.repository.KeyScreenshotReferenceRepository
@@ -14,9 +15,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.ResultActions
 import kotlin.system.measureTimeMillis
 
+@ActiveProfiles(profiles = ["test"])
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
@@ -35,13 +38,13 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   fun setup() {
     testData = BranchTranslationsTestData()
     projectSupplier = { testData.project }
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `copies keys and translations to new branch`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
     val projectId = testData.project.id
 
     performBranchCreation().andIsOk.andAssertThatJson {
@@ -68,14 +71,33 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `copying a lot data is not slow`() {
-    val data = testData.generateBunchData(2000)
-    testDataService.saveTestData { data.build {} }
+    testData.generateBunchData(2000)
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+
     var response: ResultActions
     val time = measureTimeMillis {
       response = performBranchCreation()
     }
     response.andIsOk
     time.assert.isLessThan(3000)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `delete branch and its related data`() {
+    testData.addBranchToBeDeleted()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+
+    performBranchDeletion(testData.toBeDeletedBranch.id).andIsOk
+
+    waitForNotThrowing(timeout = 10000, pollTime = 250) {
+      keyRepository.countByProjectAndBranch(
+        testData.project.id,
+        testData.toBeDeletedBranch.id
+      ).assert.isEqualTo(0)
+    }
   }
 
   private fun performBranchCreation(): ResultActions {
@@ -86,6 +108,10 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
         "originBranchId" to testData.mainBranch.id,
       )
     )
+  }
+
+  private fun performBranchDeletion(id: Long): ResultActions {
+    return performProjectAuthDelete("branches/$id")
   }
 
   private fun Key.assertIsCopyOf(other: Key) {
