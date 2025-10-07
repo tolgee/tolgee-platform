@@ -14,13 +14,16 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.ResultActions
 import kotlin.system.measureTimeMillis
 
-@ActiveProfiles(profiles = ["test"])
-@Suppress("SpringJavaInjectionPointsAutowiringInspection")
+@SpringBootTest(
+  properties = [
+    "logging.level.io.tolgee.ee.service.branching=TRACE",
+  ],
+)
 class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: BranchTranslationsTestData
