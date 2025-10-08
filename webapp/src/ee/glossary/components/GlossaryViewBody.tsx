@@ -5,18 +5,15 @@ import { GlossaryViewToolbar } from 'tg.ee.module/glossary/components/GlossaryVi
 import { GlossaryTermsList } from 'tg.ee.module/glossary/components/GlossaryTermsList';
 import { useSelectedGlossaryLanguages } from 'tg.ee.module/glossary/hooks/useSelectedGlossaryLanguages';
 import { useGlossaryTerms } from 'tg.ee.module/glossary/hooks/useGlossaryTerms';
+import { useGlossaryTermCreateDialog } from 'tg.ee.module/glossary/hooks/useGlossaryTermCreateDialog';
+import { useGlossaryImportDialog } from 'tg.ee.module/glossary/hooks/useGlossaryImportDialog';
 
 type Props = {
-  onCreate?: () => void;
   onSearch?: (search: string) => void;
   search?: string;
 };
 
-export const GlossaryViewBody: React.VFC<Props> = ({
-  onCreate,
-  onSearch,
-  search,
-}) => {
+export const GlossaryViewBody: React.VFC<Props> = ({ onSearch, search }) => {
   const verticalScrollRef = useRef<HTMLDivElement>(null);
   const clearSearchRef = useRef<(() => void) | null>(null);
 
@@ -34,11 +31,19 @@ export const GlossaryViewBody: React.VFC<Props> = ({
     itemsAll: getAllTermsIds,
   });
 
+  const { onCreateTerm, createTermDialog } = useGlossaryTermCreateDialog();
+
+  const hasExistingTerms = total !== undefined && total > 0;
+  const { onImport, importDialog } = useGlossaryImportDialog(hasExistingTerms);
+
   return (
     <>
+      {createTermDialog}
+      {importDialog}
       {terms && (
         <GlossaryViewTopbar
-          onCreate={onCreate}
+          onCreateTerm={onCreateTerm}
+          onImport={onImport}
           onSearch={onSearch}
           search={search}
           selectedLanguages={selectedLanguages}
@@ -52,7 +57,8 @@ export const GlossaryViewBody: React.VFC<Props> = ({
         total={total}
         selectedLanguages={selectedLanguages}
         selectionService={selectionService}
-        onCreate={onCreate}
+        onCreateTerm={onCreateTerm}
+        onImport={onImport}
         onFetchNextPageHint={onFetchNextPageHint}
         clearSearchRef={clearSearchRef}
         verticalScrollRef={verticalScrollRef}

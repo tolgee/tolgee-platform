@@ -6,8 +6,7 @@ export const downloadExported = async (
   format: FormatItem,
   projectName: string
 ) => {
-  const res = response as unknown as Response;
-  const data = await res.blob();
+  const data = await response.blob();
   const url = URL.createObjectURL(data);
   const a = document.createElement('a');
   const onlyPossibleLanguageString =
@@ -17,7 +16,7 @@ export const downloadExported = async (
   if (data.type === 'application/zip') {
     a.download = projectName + dateStr + '.zip';
   } else {
-    const extension = parseExtension(res) || format.extension;
+    const extension = parseExtension(response) || format.extension;
     a.download =
       projectName + onlyPossibleLanguageString + dateStr + '.' + extension;
   }
