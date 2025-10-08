@@ -34,7 +34,7 @@ class BusinessEventController(
     @RequestBody eventData: BusinessEventReportRequest,
   ) {
     try {
-      eventData.projectId?.let { securityService.checkAnyProjectPermission(it, isReadonlyAccess = true) }
+      eventData.projectId?.let { securityService.checkAnyProjectPermission(it) }
       eventData.organizationId?.let { organizationRoleService.checkUserCanView(it) }
       businessEventPublisher.publish(eventData)
     } catch (e: Throwable) {
