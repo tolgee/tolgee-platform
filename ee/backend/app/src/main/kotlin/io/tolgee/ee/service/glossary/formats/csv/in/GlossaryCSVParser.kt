@@ -64,7 +64,7 @@ class GlossaryCSVParser(
     }
 
     private fun findHeaderIndex(name: String): Int? {
-        return headers?.indexOfFirst { it.equals(name, ignoreCase = true) }
+        return headers?.indexOfFirst { it.equals(name, ignoreCase = true) }?.takeIf { it >= 0 }
     }
 
     fun Array<String>.getSafe(idx: Int?): String? {
