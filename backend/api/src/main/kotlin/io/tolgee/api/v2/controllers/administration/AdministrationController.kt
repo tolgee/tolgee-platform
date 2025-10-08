@@ -158,16 +158,10 @@ class AdministrationController(
 
     val actingUser = authenticationFacade.authenticatedUser
     val user = userAccountService.get(userId)
-    val isAdmin = actingUser.isAdmin()
-    if (user.isAdmin() > actingUser.isAdmin()) {
+    if (user.isAdmin() && !actingUser.isAdmin()) {
       // We don't allow impersonation of admin by supporters
       throw BadRequestException(Message.IMPERSONATION_OF_ADMIN_BY_SUPPORTER_NOT_ALLOWED)
     }
-    return jwtService.emitToken(
-      userAccountId = user.id,
-      actingAsUserAccountId = actingUser.id,
-      isReadOnly = !isAdmin,
-      isSuper = isAdmin
-    )
+    return jwtService.emitImpersonationToken(user.id)
   }
 }

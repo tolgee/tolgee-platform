@@ -32,6 +32,7 @@ import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.service.security.UserAccountService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
@@ -115,6 +116,36 @@ class JwtService(
       isReadOnly = authenticationFacade.isReadOnly,
       isSuper = isSuper ?: authenticationFacade.isUserSuperAuthenticated,
     )
+  }
+
+  fun emitAdminImpersonationToken(userAccountId: Long): String {
+    return emitToken(
+      userAccountId = userAccountId,
+      actingAsUserAccountId = authenticationFacade.authenticatedUser.id,
+      isReadOnly = false,
+      isSuper = true,
+    )
+  }
+
+  fun emitSupporterImpersonationToken(userAccountId: Long): String {
+    return emitToken(
+      userAccountId = userAccountId,
+      actingAsUserAccountId = authenticationFacade.authenticatedUser.id,
+      isReadOnly = true,
+      isSuper = false,
+    )
+  }
+
+  fun emitImpersonationToken(userAccountId: Long): String {
+    if (authenticationFacade.authenticatedUser.isAdmin()) {
+      return emitAdminImpersonationToken(userAccountId)
+    }
+
+    if (authenticationFacade.authenticatedUser.isSupporterOrAdmin()) {
+      return emitSupporterImpersonationToken(userAccountId)
+    }
+
+    throw PermissionException()
   }
 
   /**
