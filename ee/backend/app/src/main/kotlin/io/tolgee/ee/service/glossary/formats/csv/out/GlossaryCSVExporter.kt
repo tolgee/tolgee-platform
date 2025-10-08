@@ -1,6 +1,7 @@
 package io.tolgee.ee.service.glossary.formats.csv.out
 
 import com.opencsv.CSVWriterBuilder
+import io.tolgee.ee.service.glossary.formats.csv.GLOSSARY_CSV_HEADER_NAMES
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
 import java.io.InputStream
@@ -15,24 +16,17 @@ class GlossaryCSVExporter(
     val languageTagsWithoutBaseLanguage by lazy { (languageTags - glossary.baseLanguageTag).sorted() }
 
     val headers by lazy {
-        arrayOf(
-            "Term",
-            "Description",
-            "Flagged as non-translatable",
-            "Flagged as case-sensitive",
-            "Flagged as abbreviation",
-            "Flagged as forbidden term",
-        ) + languageTagsWithoutBaseLanguage
+        (GLOSSARY_CSV_HEADER_NAMES + languageTagsWithoutBaseLanguage).toTypedArray()
     }
 
     fun GlossaryTerm.asColumns(): Array<String> {
         return arrayOf(
             translations.find { it.languageTag == glossary.baseLanguageTag }?.text ?: "",
             description,
-            flagNonTranslatable.toString(),
-            flagCaseSensitive.toString(),
-            flagAbbreviation.toString(),
-            flagForbiddenTerm.toString(),
+            (!flagNonTranslatable).asYesOrNo(), // stored inverted - as translatable
+            flagCaseSensitive.asYesOrNo(),
+            flagAbbreviation.asYesOrNo(),
+            flagForbiddenTerm.asYesOrNo(),
         ) + languageTagsWithoutBaseLanguage.map { languageTag ->
             translations.find { it.languageTag == languageTag }?.text ?: ""
         }
@@ -45,5 +39,9 @@ class GlossaryCSVExporter(
             terms.forEach { writer.writeNext(it.asColumns()) }
         }
         return output.toString().byteInputStream(Charsets.UTF_8)
+    }
+
+    fun Boolean.asYesOrNo(): String {
+        return if (this) "Yes" else "No"
     }
 }
