@@ -53,8 +53,14 @@ class GlossaryCSVParser(
             flagCaseSensitive = parseBoolean(getSafe(idxCaseSensitive)),
             flagAbbreviation = parseBoolean(getSafe(idxAbbreviation)),
             flagForbiddenTerm = parseBoolean(getSafe(idxForbiddenTerm)),
-            translations = idxTranslations.map { headers!![it] to get(it) }.filter { it.second.isNotEmpty() }.toMap(),
-        ).takeIf { !it.term.isNullOrBlank() || !it.description.isNullOrBlank() || it.translations.isNotEmpty() }
+            translations = idxTranslations
+                .map { headers!![it] to getSafe(it).orEmpty() }
+                .filter { it.second.isNotEmpty() }
+                .toMap(),
+        ).takeIf {
+            // Ignore empty rows
+            !it.term.isNullOrBlank() || !it.description.isNullOrBlank() || it.translations.isNotEmpty()
+        }
     }
 
     private fun findHeaderIndex(name: String): Int? {
