@@ -66,7 +66,7 @@ class BranchCopyServiceSql(
   private fun copyKeyMetas(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
     val sql = """
       insert into key_meta (id, key_id, description, custom, created_at, updated_at)
-      select nextval('hibernate_sequence'), tk.id, km.description, km.custom, km.created_at, km.updated_at
+      select nextval('hibernate_sequence'), tk.id, km.description, km.custom, :targetBranchCreatedAt, :targetBranchCreatedAt
       from key_meta km
       join key sk on sk.id = km.key_id and sk.project_id = :projectId
       join key tk on tk.project_id = sk.project_id
@@ -81,6 +81,7 @@ class BranchCopyServiceSql(
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
       .setParameter("targetBranchId", targetBranch.id)
+      .setParameter("targetBranchCreatedAt", targetBranch.createdAt)
       .executeUpdate()
   }
 
@@ -110,7 +111,7 @@ class BranchCopyServiceSql(
   private fun copyKeyMetaComments(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
     val sql = """
       insert into key_comment (id, key_meta_id, author_id, text, from_import, created_at, updated_at)
-      select nextval('hibernate_sequence'), tkm.id, kc.author_id, kc.text, kc.from_import, kc.created_at, kc.updated_at
+      select nextval('hibernate_sequence'), tkm.id, kc.author_id, kc.text, kc.from_import, :targetBranchCreatedAt, :targetBranchCreatedAt
       from key_comment kc
       join key_meta km on km.id = kc.key_meta_id
       join key sk on sk.id = km.key_id and sk.project_id = :projectId
@@ -127,13 +128,14 @@ class BranchCopyServiceSql(
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
       .setParameter("targetBranchId", targetBranch.id)
+      .setParameter("targetBranchCreatedAt", targetBranch.createdAt)
       .executeUpdate()
   }
 
   private fun copyKeyMetaCodeReferences(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
     val sql = """
       insert into key_code_reference (id, key_meta_id, author_id, path, line, from_import, created_at, updated_at)
-      select nextval('hibernate_sequence'), tkm.id, kcr.author_id, kcr.path, kcr.line, kcr.from_import, kcr.created_at, kcr.updated_at
+      select nextval('hibernate_sequence'), tkm.id, kcr.author_id, kcr.path, kcr.line, kcr.from_import, :targetBranchCreatedAt, :targetBranchCreatedAt
       from key_code_reference kcr
       join key_meta km on km.id = kcr.key_meta_id
       join key sk on sk.id = km.key_id and sk.project_id = :projectId
@@ -150,6 +152,7 @@ class BranchCopyServiceSql(
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
       .setParameter("targetBranchId", targetBranch.id)
+      .setParameter("targetBranchCreatedAt", targetBranch.createdAt)
       .executeUpdate()
   }
 
@@ -177,7 +180,7 @@ class BranchCopyServiceSql(
   private fun copyTranslationComments(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
     val sql = """
       insert into translation_comment (id, text, state, translation_id, author_id, created_at, updated_at)
-      select nextval('hibernate_sequence'), tc.text, tc.state, tgt_t.id, tc.author_id, tc.created_at, tc.updated_at
+      select nextval('hibernate_sequence'), tc.text, tc.state, tgt_t.id, tc.author_id, :targetBranchCreatedAt, :targetBranchCreatedAt
       from translation_comment tc
       join translation src_t on src_t.id = tc.translation_id
       join key sk on sk.id = src_t.key_id and sk.project_id = :projectId
@@ -196,13 +199,14 @@ class BranchCopyServiceSql(
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
       .setParameter("targetBranchId", targetBranch.id)
+      .setParameter("targetBranchCreatedAt", targetBranch.createdAt)
       .executeUpdate()
   }
 
   private fun copyKeys(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
     val sql = """
       with source_keys as (
-        select k.id as old_id, k.name, k.namespace_id, k.is_plural, k.plural_arg_name, k.created_at, k.updated_at
+        select k.id as old_id, k.name, k.namespace_id, k.is_plural, k.plural_arg_name
         from key k
         where k.project_id = :projectId
           and (
@@ -220,7 +224,7 @@ class BranchCopyServiceSql(
       )
       insert into key (id, name, project_id, namespace_id, branch_id, is_plural, plural_arg_name, created_at, updated_at)
       select nextval('hibernate_sequence') as id,
-             ti.name, :projectId, ti.namespace_id, :targetBranchId, ti.is_plural, ti.plural_arg_name, ti.created_at, ti.updated_at
+             ti.name, :projectId, ti.namespace_id, :targetBranchId, ti.is_plural, ti.plural_arg_name, :targetBranchCreatedAt, :targetBranchCreatedAt
       from to_insert ti
     """
     entityManager.createNativeQuery(sql)
@@ -228,6 +232,7 @@ class BranchCopyServiceSql(
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
       .setParameter("targetBranchId", targetBranch.id)
+      .setParameter("targetBranchCreatedAt", targetBranch.createdAt)
       .executeUpdate()
   }
 
@@ -242,7 +247,7 @@ class BranchCopyServiceSql(
       )
       select nextval('hibernate_sequence') as id,
              t.text, tk.id, t.language_id, t.state, t.auto, t.mt_provider,
-             t.word_count, t.character_count, t.outdated, t.created_at, t.updated_at
+             t.word_count, t.character_count, t.outdated, :targetBranchCreatedAt, :targetBranchCreatedAt
       from translation t
       join key sk on sk.id = t.key_id and sk.project_id = :projectId
       join key tk on tk.project_id = sk.project_id 
@@ -259,6 +264,7 @@ class BranchCopyServiceSql(
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
       .setParameter("targetBranchId", targetBranch.id)
+      .setParameter("targetBranchCreatedAt", targetBranch.createdAt)
       .executeUpdate()
   }
 
