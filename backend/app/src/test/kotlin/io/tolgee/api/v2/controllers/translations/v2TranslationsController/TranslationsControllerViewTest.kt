@@ -42,10 +42,11 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `returns correct data`() {
     testData.generateLotOfData()
+    testData.addDeletedBranch()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
-      node("page.totalElements").isNumber.isGreaterThan(BigDecimal(100))
+      node("page.totalElements").isNumber.isEqualTo(BigDecimal(101))
       node("page.size").isEqualTo(20)
       node("selectedLanguages") {
         isArray.hasSize(2)
@@ -146,6 +147,23 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
       node("_embedded.keys[1].translations.de") {
         node("text").isEqualTo("I am key 2's german translation from branch feature-branch.")
       }
+    }
+  }
+
+  /**
+   * Edge-case testing returning correct translations if there is soft-deleted branch with same name as active branch
+   * (deleted is in the process of hard-deleting)
+   */
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `return translations from active branch only`() {
+    testData.generateBranchedData(10)
+    testData.addDeletedBranch()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?sort=id&branch=feature-branch").andPrettyPrint.andIsOk.andAssertThatJson {
+      // 10 keys from feature-branch (translation from soft-deleted feature-branch is ignored)
+      node("_embedded.keys").isArray.hasSize(10)
     }
   }
 
