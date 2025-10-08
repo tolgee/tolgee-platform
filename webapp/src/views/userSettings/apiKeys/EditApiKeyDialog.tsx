@@ -52,11 +52,6 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
     },
   });
 
-  const availableScopesLoadable = useApiQuery({
-    url: '/v2/api-keys/availableScopes',
-    method: 'get',
-  });
-
   const editMutation = useApiMutation({
     url: '/v2/api-keys/{apiKeyId}',
     method: 'put',
@@ -117,40 +112,38 @@ export const EditApiKeyDialog: FunctionComponent<Props> = (props) => {
       </DialogTitle>
       <DialogContent>
         <>
-          {(availableScopesLoadable.isLoading ||
-            apiKeyLoadable.isLoading ||
-            projectLoadable.isLoading) && <BoxLoading />}
-          {projectLoadable.data &&
-            availableScopesLoadable.data &&
-            apiKeyLoadable.data && (
-              <StandardForm
-                onSubmit={handleEdit}
-                saveActionLoadable={editMutation}
-                onCancel={() => onDialogClose()}
-                initialValues={getInitialValues()}
-                validationSchema={Validation.EDIT_API_KEY}
-              >
-                <>
-                  <TextField
-                    inputProps={{
-                      'data-cy': 'generate-api-key-dialog-description-input',
-                    }}
-                    autoFocus
-                    name="description"
-                    placeholder={t('api-key-description-placeholder')}
-                    label={<T keyName="api-key-form-description" />}
-                  />
+          {(apiKeyLoadable.isLoading || projectLoadable.isLoading) && (
+            <BoxLoading />
+          )}
+          {projectLoadable.data && apiKeyLoadable.data && (
+            <StandardForm
+              onSubmit={handleEdit}
+              saveActionLoadable={editMutation}
+              onCancel={() => onDialogClose()}
+              initialValues={getInitialValues()}
+              validationSchema={Validation.EDIT_API_KEY}
+            >
+              <>
+                <TextField
+                  inputProps={{
+                    'data-cy': 'generate-api-key-dialog-description-input',
+                  }}
+                  autoFocus
+                  name="description"
+                  placeholder={t('api-key-description-placeholder')}
+                  label={<T keyName="api-key-form-description" />}
+                />
 
-                  <Box mt={2}>
-                    <CheckBoxGroupMultiSelect
-                      label="Scopes"
-                      name="scopes"
-                      options={availableScopes}
-                    />
-                  </Box>
-                </>
-              </StandardForm>
-            )}
+                <Box mt={2}>
+                  <CheckBoxGroupMultiSelect
+                    label="Scopes"
+                    name="scopes"
+                    options={availableScopes}
+                  />
+                </Box>
+              </>
+            </StandardForm>
+          )}
         </>
       </DialogContent>
     </Dialog>

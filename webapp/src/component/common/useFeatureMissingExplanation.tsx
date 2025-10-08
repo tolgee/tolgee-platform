@@ -1,12 +1,11 @@
 import { useTranslate } from '@tolgee/react';
 import { LINKS } from 'tg.constants/links';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
+import { useIsAdmin } from 'tg.globalContext/helpers';
 
 export function useFeatureMissingExplanation() {
   const subscription = useGlobalContext((c) => c.initialData.eeSubscription);
-  const isAdmin = useGlobalContext(
-    (c) => c.initialData.userInfo?.globalServerRole === 'ADMIN'
-  );
+  const isAdmin = useIsAdmin();
   const billingEnabled = useGlobalContext(
     (c) => c.initialData.serverConfiguration.billing.enabled
   );

@@ -473,12 +473,10 @@ class PermissionService(
   }
 
   @Transactional
-  fun setOrganizationBasePermissions(
+  fun removeDirectProjectPermissions(
     projectId: Long,
     userId: Long,
   ) {
-    val project = projectService.get(projectId)
-    organizationRoleService.checkUserIsMember(userId, project.organizationOwner.id)
     val permission = getProjectPermissionData(projectId, userId).directPermissions ?: return
     delete(permission.id)
   }

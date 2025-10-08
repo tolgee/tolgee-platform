@@ -37,7 +37,7 @@ class UserMfaController(
   ): JwtAuthenticationResponse {
     mfaService.enableTotpFor(authenticationFacade.authenticatedUserEntity, dto)
     return JwtAuthenticationResponse(
-      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
+      jwtService.emitTokenRefreshForCurrentUser(isSuper = true),
     )
   }
 
@@ -53,7 +53,7 @@ class UserMfaController(
   ): JwtAuthenticationResponse {
     mfaService.disableTotpFor(authenticationFacade.authenticatedUserEntity, dto)
     return JwtAuthenticationResponse(
-      jwtService.emitToken(authenticationFacade.authenticatedUser.id, true),
+      jwtService.emitTokenRefreshForCurrentUser(isSuper = true),
     )
   }
 

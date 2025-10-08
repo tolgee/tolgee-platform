@@ -23,8 +23,11 @@ import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
+import kotlin.jvm.java
 
-abstract class AbstractAuthorizationInterceptor : HandlerInterceptor, Ordered {
+abstract class AbstractAuthorizationInterceptor(
+  val allowGlobalRoutes: Boolean = true,
+) : HandlerInterceptor, Ordered {
   override fun preHandle(
     request: HttpServletRequest,
     response: HttpServletResponse,
@@ -40,7 +43,7 @@ abstract class AbstractAuthorizationInterceptor : HandlerInterceptor, Ordered {
     }
 
     // Global route; abort here
-    if (isGlobal(handler)) return true
+    if (allowGlobalRoutes && isGlobal(handler)) return true
 
     return preHandleInternal(request, response, handler)
   }
@@ -55,7 +58,7 @@ abstract class AbstractAuthorizationInterceptor : HandlerInterceptor, Ordered {
     handler: HandlerMethod,
   ): Boolean
 
-  private fun isGlobal(handler: HandlerMethod): Boolean {
+  fun isGlobal(handler: HandlerMethod): Boolean {
     val annotation = AnnotationUtils.getAnnotation(handler.method, IsGlobalRoute::class.java)
     return annotation != null
   }

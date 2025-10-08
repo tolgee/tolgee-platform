@@ -28,8 +28,11 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.cacheable.isAdmin
+import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.service.security.UserAccountService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
@@ -43,6 +46,7 @@ class JwtService(
   private val authenticationProperties: AuthenticationProperties,
   private val currentDateProvider: CurrentDateProvider,
   private val userAccountService: UserAccountService,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   private val jwtParser: JwtParser =
     Jwts.parserBuilder()
@@ -54,16 +58,20 @@ class JwtService(
    * Emits an authentication token for the given user.
    *
    * @param userAccountId The user account ID this token belongs to.
+   * @param actingAsUserAccountId The user account ID of the actor who initiated impersonation.
+   * @param isReadOnly Whether the token allows read-only access or full read-write access.
    * @param isSuper Whether to emit a super-powered token or not.
    * @return An authentication token.
    */
   fun emitToken(
     userAccountId: Long,
+    actingAsUserAccountId: Long? = null,
+    isReadOnly: Boolean = false,
     isSuper: Boolean = false,
   ): String {
     val now = currentDateProvider.date
-
     val expiration = Date(now.time + authenticationProperties.jwtExpiration)
+
     val builder =
       Jwts.builder()
         .signWith(signingKey)
@@ -72,12 +80,72 @@ class JwtService(
         .setSubject(userAccountId.toString())
         .setExpiration(expiration)
 
+    if (actingAsUserAccountId != null) {
+      builder.claim(JWT_TOKEN_ACTING_USER_ID_CLAIM, actingAsUserAccountId.toString())
+    }
+
+    val deviceId = UUID.randomUUID().toString()
+    builder.claim(JWT_TOKEN_DEVICE_ID_CLAIM, deviceId)
+
+    if (isReadOnly) {
+      builder.claim(JWT_TOKEN_READ_ONLY_CLAIM, true)
+    }
+
     if (isSuper) {
       val superExpiration = Date(now.time + authenticationProperties.jwtSuperExpiration)
       builder.claim(SUPER_JWT_TOKEN_EXPIRATION_CLAIM, superExpiration)
     }
 
     return builder.compact()
+  }
+
+  /**
+   * Emits a refreshed authentication token for the currently authenticated user, propagating existing
+   * authentication flags if applicable.
+   *
+   * @param isSuper Whether to emit a super-powered token. Pass `null` to inherit the current
+   *                authentication's super-token state. Defaults to `false`.
+   * @return A refreshed authentication token.
+   */
+  fun emitTokenRefreshForCurrentUser(
+    isSuper: Boolean? = false,
+  ): String {
+    return emitToken(
+      userAccountId = authenticationFacade.authenticatedUser.id,
+      actingAsUserAccountId = authenticationFacade.actingUser?.id,
+      isReadOnly = authenticationFacade.isReadOnly,
+      isSuper = isSuper ?: authenticationFacade.isUserSuperAuthenticated,
+    )
+  }
+
+  fun emitAdminImpersonationToken(userAccountId: Long): String {
+    return emitToken(
+      userAccountId = userAccountId,
+      actingAsUserAccountId = authenticationFacade.authenticatedUser.id,
+      isReadOnly = false,
+      isSuper = true,
+    )
+  }
+
+  fun emitSupporterImpersonationToken(userAccountId: Long): String {
+    return emitToken(
+      userAccountId = userAccountId,
+      actingAsUserAccountId = authenticationFacade.authenticatedUser.id,
+      isReadOnly = true,
+      isSuper = false,
+    )
+  }
+
+  fun emitImpersonationToken(userAccountId: Long): String {
+    if (authenticationFacade.authenticatedUser.isAdmin()) {
+      return emitAdminImpersonationToken(userAccountId)
+    }
+
+    if (authenticationFacade.authenticatedUser.isSupporterOrAdmin()) {
+      return emitSupporterImpersonationToken(userAccountId)
+    }
+
+    throw PermissionException()
   }
 
   /**
@@ -133,13 +201,37 @@ class JwtService(
       throw AuthExpiredException(Message.EXPIRED_JWT_TOKEN)
     }
 
+    val actor = validateActor(jws.body)
+
+    // to avoid mass sign-out on update, we allow tokens without a device id
+    // maybe we should consider changing this later on
+    val deviceId = jws.body[JWT_TOKEN_DEVICE_ID_CLAIM] as? String
+
     val steClaim = jws.body[SUPER_JWT_TOKEN_EXPIRATION_CLAIM] as? Long
     val hasSuperPowers = steClaim != null && steClaim > currentDateProvider.date.time
 
+    val roClaim = jws.body[JWT_TOKEN_READ_ONLY_CLAIM] as? Boolean ?: false
+
+    if (roClaim && account.isAdmin()) {
+      // we don't allow admin accounts to be impersonated in read-only mode to make our lives easier
+      throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+    }
+
+    if (actor != null) {
+      val canImpersonate = actor.isAdmin() || (roClaim && actor.isSupporterOrAdmin())
+      if (!canImpersonate) {
+        // actor got demoted and is no longer admin/supporter; impersonation not allowed
+        throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+      }
+    }
+
     return TolgeeAuthentication(
-      jws,
-      account,
-      TolgeeAuthenticationDetails(hasSuperPowers),
+      credentials = jws,
+      deviceId = deviceId,
+      userAccount = account,
+      actingAsUserAccount = actor,
+      isReadOnly = roClaim,
+      isSuperToken = hasSuperPowers,
     )
   }
 
@@ -190,6 +282,13 @@ class JwtService(
     return account
   }
 
+  private fun validateActor(claims: Claims): UserAccountDto? {
+    val actorId = claims[JWT_TOKEN_ACTING_USER_ID_CLAIM] as? String ?: return null
+    val account = userAccountService.findDto(actorId.toLong())
+      ?: throw AuthenticationException(Message.USER_NOT_FOUND)
+    return account
+  }
+
   private fun parseJwt(token: String): Jws<Claims> {
     try {
       return jwtParser.parseClaimsJws(token)
@@ -212,6 +311,9 @@ class JwtService(
     const val JWT_TICKET_TYPE_CLAIM = "t.typ"
     const val JWT_TICKET_DATA_CLAIM = "t.dat"
     const val SUPER_JWT_TOKEN_EXPIRATION_CLAIM = "ste"
+    const val JWT_TOKEN_ACTING_USER_ID_CLAIM = "act.sub"
+    const val JWT_TOKEN_READ_ONLY_CLAIM = "ro"
+    const val JWT_TOKEN_DEVICE_ID_CLAIM = "d.id"
 
     const val DEFAULT_TICKET_EXPIRATION_TIME = 5 * 60 * 1000L // 5 minutes
   }

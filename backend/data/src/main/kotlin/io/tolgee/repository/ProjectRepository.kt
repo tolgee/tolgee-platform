@@ -63,7 +63,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
         where (
             (p is not null and (p.type <> 'NONE' or p.type is null)) or 
             (role is not null and (o.basePermission.type <> 'NONE' or o.basePermission.type is null) and p is null) or
-            (ua.role = 'ADMIN' and :organizationId is not null))
+            ((ua.role = 'ADMIN' or ua.role = 'SUPPORTER') and :organizationId is not null))
         and (
             :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
             or lower(o.name) like lower(concat('%', cast(:search as text),'%')))

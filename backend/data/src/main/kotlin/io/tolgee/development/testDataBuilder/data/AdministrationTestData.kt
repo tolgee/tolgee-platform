@@ -6,6 +6,7 @@ import io.tolgee.model.UserAccount
 
 class AdministrationTestData {
   lateinit var admin: UserAccount
+  lateinit var supporter: UserAccount
   lateinit var user: UserAccount
   var adminBuilder: UserAccountBuilder
 
@@ -18,6 +19,13 @@ class AdministrationTestData {
           role = UserAccount.Role.ADMIN
           admin = this
         }
+
+      addUserAccount {
+        username = "supporter@supporter.com"
+        name = "Matthew Supporter"
+        role = UserAccount.Role.SUPPORTER
+        supporter = this
+      }
 
       addUserAccount {
         username = "user@user.com"

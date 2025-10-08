@@ -32,6 +32,7 @@ import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeySearchResultView
@@ -293,6 +294,7 @@ class KeyController(
       "Returns information about keys. (KeyData, Screenshots, Translation in specified language)" +
         "If key is not found, it's not included in the response.",
   )
+  @ReadOnlyOperation
   @RequiresProjectPermissions([Scope.KEYS_VIEW, Scope.SCREENSHOTS_VIEW, Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   fun getInfo(
