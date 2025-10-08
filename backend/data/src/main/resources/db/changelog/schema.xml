@@ -4776,4 +4776,9 @@
         <dropUniqueConstraint constraintName="UKnw2fc76ly83tb8fsqpqkbhm4m" tableName="branch"/>
         <sql>create unique index on public.branch (project_id, name) where archived_at is NULL;</sql>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1759924061136-1">
+        <addColumn tableName="branch">
+            <column name="revision" type="INTEGER" defaultValue="0"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
