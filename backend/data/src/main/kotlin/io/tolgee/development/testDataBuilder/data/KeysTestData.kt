@@ -6,6 +6,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
@@ -22,6 +23,8 @@ class KeysTestData {
   lateinit var english: Language
   lateinit var german: Language
   lateinit var screenshot: Screenshot
+  lateinit var firstDevKey: Key
+  lateinit var devBranch: Branch
 
   var projectBuilder: ProjectBuilder
 
@@ -122,15 +125,19 @@ class KeysTestData {
           }
 
           // deleted branch with the same name
-          addBranch {
+          devBranch = addBranch {
             name = "dev"
             archivedAt = Date(1759833439)
           }.build {
-            addKey {
+            firstDevKey = addKey {
               name = "first_key"
               branch = self
-            }
-          }
+            }.build {
+              addMeta {
+                description = "default"
+              }
+            }.self
+          }.self
         }
 
       addUserAccountWithoutOrganization {

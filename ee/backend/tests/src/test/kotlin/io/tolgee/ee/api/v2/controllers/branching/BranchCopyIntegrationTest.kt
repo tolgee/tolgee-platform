@@ -136,6 +136,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     this.name.assert.isEqualTo(other.name)
     this.isPlural.assert.isEqualTo(other.isPlural)
     this.pluralArgName.assert.isEqualTo(other.pluralArgName)
+    this.createdAt.assert.isEqualTo(this.branch!!.createdAt)
 
     // translations are the same
     mainTranslations.assert.hasSize(branchTranslations.size)
@@ -148,6 +149,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     mainTranslation.outdated.assert.isEqualTo(branchTranslation.outdated)
     mainTranslation.wordCount.assert.isEqualTo(branchTranslation.wordCount)
     mainTranslation.characterCount.assert.isEqualTo(branchTranslation.characterCount)
+    mainTranslation.createdAt.assert.isEqualTo(this.branch!!.createdAt)
 
     // labels are the same
     mainTranslationLabels.assert.hasSize(branchTranslationLabels.size)
@@ -156,6 +158,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     // tags are the same
     this.keyMeta!!.tags.assert.hasSize(other.keyMeta!!.tags.size)
     this.keyMeta!!.tags.assert.containsAll(other.keyMeta!!.tags)
+    this.keyMeta!!.createdAt.assert.isEqualTo(this.branch!!.createdAt)
 
     // translation comments are the same
     mainTranslation.comments.assert.hasSize(branchTranslation.comments.size)
@@ -165,6 +168,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
       comment.text.assert.isEqualTo(branchComment.text)
       comment.state.assert.isEqualTo(branchComment.state)
       comment.author.assert.isEqualTo(branchComment.author)
+      comment.createdAt.assert.isEqualTo(this.branch!!.createdAt)
     }
 
     // key screenshots are the same
@@ -189,6 +193,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
       codeReference.path.assert.isEqualTo(branchCodeReference.path)
       codeReference.author.assert.isEqualTo(branchCodeReference.author)
       codeReference.fromImport.assert.isEqualTo(branchCodeReference.fromImport)
+      codeReference.createdAt.assert.isEqualTo(this.branch!!.createdAt)
     }
   }
 }
