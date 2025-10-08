@@ -90,17 +90,6 @@ class TranslationsTestData {
           }
         }
 
-        // deleted branch
-        addBranch {
-          name = "from-default"
-          project = this@project.self
-          archivedAt = Date(1759834567)
-        }.build {
-          addBasicKey().apply {
-            branch = self
-          }
-        }
-
         val zKeyBuilder =
           addKey {
             name = "Z key"
@@ -314,6 +303,20 @@ class TranslationsTestData {
               text = "I am key $it's english translation from branch $branchName."
             }
           }
+        }
+      }
+    }
+  }
+
+  fun addDeletedBranch(name: String = "feature-branch") {
+    root.data.projects[0].apply {
+      addBranch {
+        this.name = name
+        project = this@apply.self
+        archivedAt = Date(1759834567)
+      }.build {
+        addBasicKey().apply {
+          branch = self
         }
       }
     }
