@@ -4,6 +4,12 @@ import com.opencsv.CSVParserBuilder
 import com.opencsv.CSVReader
 import com.opencsv.CSVReaderBuilder
 import io.tolgee.ee.service.glossary.formats.ImportGlossaryTerm
+import io.tolgee.ee.service.glossary.formats.csv.GLOSSARY_CSV_HEADER_DESCRIPTION
+import io.tolgee.ee.service.glossary.formats.csv.GLOSSARY_CSV_HEADER_FLAG_ABBREVIATION
+import io.tolgee.ee.service.glossary.formats.csv.GLOSSARY_CSV_HEADER_FLAG_CASE_SENSITIVE
+import io.tolgee.ee.service.glossary.formats.csv.GLOSSARY_CSV_HEADER_FLAG_FORBIDDEN
+import io.tolgee.ee.service.glossary.formats.csv.GLOSSARY_CSV_HEADER_FLAG_TRANSLATABLE
+import io.tolgee.ee.service.glossary.formats.csv.GLOSSARY_CSV_HEADER_TERM
 import java.io.InputStream
 
 class GlossaryCSVParser(
@@ -27,15 +33,15 @@ class GlossaryCSVParser(
     }
 
     val specialHeaderIndices by lazy {
-        listOfNotNull(idxTerm, idxDescription, idxNonTranslatable, idxCaseSensitive, idxAbbreviation, idxForbiddenTerm)
+        listOfNotNull(idxTerm, idxDescription, idxTranslatable, idxCaseSensitive, idxAbbreviation, idxForbiddenTerm)
     }
 
-    val idxTerm by lazy { findHeaderIndex("Term") }
-    val idxDescription by lazy { findHeaderIndex("Description") }
-    val idxNonTranslatable by lazy { findHeaderIndex("Flagged as non-translatable") }
-    val idxCaseSensitive by lazy { findHeaderIndex("Flagged as case-sensitive") }
-    val idxAbbreviation by lazy { findHeaderIndex("Flagged as abbreviation") }
-    val idxForbiddenTerm by lazy { findHeaderIndex("Flagged as forbidden term") }
+    val idxTerm by lazy { findHeaderIndex(GLOSSARY_CSV_HEADER_TERM) }
+    val idxDescription by lazy { findHeaderIndex(GLOSSARY_CSV_HEADER_DESCRIPTION) }
+    val idxTranslatable by lazy { findHeaderIndex(GLOSSARY_CSV_HEADER_FLAG_TRANSLATABLE) }
+    val idxCaseSensitive by lazy { findHeaderIndex(GLOSSARY_CSV_HEADER_FLAG_CASE_SENSITIVE) }
+    val idxAbbreviation by lazy { findHeaderIndex(GLOSSARY_CSV_HEADER_FLAG_ABBREVIATION) }
+    val idxForbiddenTerm by lazy { findHeaderIndex(GLOSSARY_CSV_HEADER_FLAG_FORBIDDEN) }
 
     val idxTranslations by lazy {
         (0 until (headers?.size ?: 0)).filter { it !in specialHeaderIndices }
@@ -49,7 +55,8 @@ class GlossaryCSVParser(
         return ImportGlossaryTerm(
             term = getSafe(idxTerm),
             description = getSafe(idxDescription),
-            flagNonTranslatable = parseBoolean(getSafe(idxNonTranslatable)),
+            // stored inverted - as translatable
+            flagNonTranslatable = parseBoolean(getSafe(idxTranslatable))?.let { !it },
             flagCaseSensitive = parseBoolean(getSafe(idxCaseSensitive)),
             flagAbbreviation = parseBoolean(getSafe(idxAbbreviation)),
             flagForbiddenTerm = parseBoolean(getSafe(idxForbiddenTerm)),
