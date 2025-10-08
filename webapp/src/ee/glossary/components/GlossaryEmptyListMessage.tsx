@@ -87,7 +87,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
             </Typography>
           </Link>
         </StyledCard>
-        <StyledCard elevation={0} sx={{ display: 'none' }}>
+        <StyledCard elevation={0}>
           <StyledUploadCloud02 />
           <Typography variant="h4">
             <T keyName="glossary_empty_placeholder_import_terms_title" />

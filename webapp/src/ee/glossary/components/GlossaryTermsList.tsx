@@ -150,7 +150,7 @@ export const GlossaryTermsList = ({
         <GlossaryEmptyListMessage
           loading={loading}
           onCreate={onCreate}
-          onImport={undefined}
+          onImport={undefined} /* TODO: handle import */
         />
       </StyledContainer>
     );
