@@ -48,14 +48,14 @@ const StyledDescription = styled(Typography)`
 type Props = {
   loading?: boolean;
   wrapperProps?: ComponentProps<typeof Box>;
-  onCreate?: () => void;
+  onCreateTerm?: () => void;
   onImport?: () => void;
 };
 
 export const GlossaryEmptyListMessage: React.VFC<Props> = ({
   loading,
   wrapperProps,
-  onCreate,
+  onCreateTerm,
   onImport,
 }) => {
   return (
@@ -70,8 +70,8 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
             <T keyName="glossary_empty_placeholder_add_term_description" />
           </StyledDescription>
           <Button
-            onClick={onCreate}
-            disabled={!onCreate}
+            onClick={onCreateTerm}
+            disabled={!onCreateTerm}
             variant="contained"
             color="primary"
             data-cy="glossary-empty-add-term-button"

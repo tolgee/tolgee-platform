@@ -13,6 +13,7 @@ import kotlin.reflect.KMutableProperty0
 @Service
 class GlossaryImportService(
   private val glossaryTermService: GlossaryTermService,
+  private val glossaryTermTranslationService: GlossaryTermTranslationService,
 ) {
   @Transactional
   fun importCsv(
@@ -28,14 +29,20 @@ class GlossaryImportService(
       }.applyFrom(it)
     }
 
+    val translations = terms.flatMap { it.translations }
+
     glossaryTermService.saveAll(terms)
+    glossaryTermTranslationService.saveAll(translations)
 
     return terms.size
   }
 
   private fun GlossaryTerm.applyFrom(glossaryTerm: ImportGlossaryTerm): GlossaryTerm {
     if (glossaryTerm.term != null) {
-      translations.add(GlossaryTermTranslation(glossary.baseLanguageTag, glossaryTerm.term))
+      translations.add(
+        GlossaryTermTranslation(glossary.baseLanguageTag, glossaryTerm.term)
+          .apply { term = this@applyFrom }
+      )
     }
 
     ::description setIfNotNull glossaryTerm.description
@@ -45,7 +52,7 @@ class GlossaryImportService(
     ::flagForbiddenTerm setIfNotNull glossaryTerm.flagForbiddenTerm
 
     glossaryTerm.translations.forEach { (languageTag, text) ->
-      translations.add(GlossaryTermTranslation(languageTag, text))
+      translations.add(GlossaryTermTranslation(languageTag, text).apply { term = this@applyFrom })
     }
 
     return this

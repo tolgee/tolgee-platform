@@ -50,7 +50,7 @@ class GlossaryExportController(
       contentType = MediaType.parseMediaType("text/csv;charset=UTF-8")
       accessControlExposeHeaders = listOf("Content-Disposition")
       contentDisposition = ContentDisposition.attachment()
-        .filename("glossary-${glossary.id}.csv")
+        .filename("glossary-${glossary.name}.csv")
         .build()
     }
 

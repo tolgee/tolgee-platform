@@ -108,6 +108,10 @@ class GlossaryTermTranslationService(
     return find(term, languageTag) ?: throw NotFoundException(Message.GLOSSARY_TERM_TRANSLATION_NOT_FOUND)
   }
 
+  fun saveAll(translations: List<GlossaryTermTranslation>) {
+    glossaryTermTranslationRepository.saveAll(translations)
+  }
+
   @Transactional
   fun updateBaseLanguage(
     glossary: Glossary,

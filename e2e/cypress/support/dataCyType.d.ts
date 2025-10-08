@@ -329,6 +329,16 @@ declare namespace DataCy {
         "glossary-edit-button" |
         "glossary-empty-add-term-button" |
         "glossary-empty-import-terms-button" |
+        "glossary-export-button" |
+        "glossary-import-button" |
+        "glossary-import-cancel-button" |
+        "glossary-import-dialog" |
+        "glossary-import-dropzone" |
+        "glossary-import-mode-add" |
+        "glossary-import-mode-replace" |
+        "glossary-import-remove-file-button" |
+        "glossary-import-select-file-button" |
+        "glossary-import-submit-button" |
         "glossary-list-item" |
         "glossary-list-languages" |
         "glossary-panel-container" |
