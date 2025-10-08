@@ -10,6 +10,7 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.branching.BranchVersionedEntity
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.util.TranslationStatsUtil
@@ -53,7 +54,7 @@ class Translation(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var text: String? = null,
-) : StandardAuditModel() {
+) : StandardAuditModel(), BranchVersionedEntity {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @NotNull
   lateinit var key: Key
@@ -203,5 +204,11 @@ class Translation(
         }
       }
     }
+  }
+
+  override fun resolveBranchId(): Long? = key.branch?.id
+
+  override fun isDifferent(oldState: Map<String, Any>): Boolean {
+    return oldState["text"] != this.text || oldState["state"] != this.state || oldState["labels"] != this.labels
   }
 }

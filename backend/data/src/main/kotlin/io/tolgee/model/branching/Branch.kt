@@ -11,6 +11,7 @@ import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import org.springframework.boot.context.properties.bind.DefaultValue
 import java.util.Date
 
 /**
@@ -53,6 +54,10 @@ class Branch(
 
   @Column(name = "pending")
   var pending: Boolean = false,
+
+  @Column(name = "revision")
+  @DefaultValue("0")
+  var revision: Int = 0
 
   ) : StandardAuditModel() {
   companion object {
