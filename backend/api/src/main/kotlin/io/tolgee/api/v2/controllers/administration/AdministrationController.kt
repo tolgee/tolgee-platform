@@ -12,7 +12,6 @@ import io.tolgee.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.hateoas.userAccount.UserAccountModel
 import io.tolgee.hateoas.userAccount.UserAccountModelAssembler
 import io.tolgee.model.UserAccount
-import io.tolgee.model.isAdmin
 import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
@@ -157,7 +156,7 @@ class AdministrationController(
     }
 
     val actingUser = authenticationFacade.authenticatedUser
-    val user = userAccountService.get(userId)
+    val user = userAccountService.getDto(userId)
     if (user.isAdmin() && !actingUser.isAdmin()) {
       // We don't allow impersonation of admin by supporters
       throw BadRequestException(Message.IMPERSONATION_OF_ADMIN_BY_SUPPORTER_NOT_ALLOWED)
