@@ -12,6 +12,7 @@ import io.tolgee.events.OnKeyPreRemove
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchVersionedEntity
 import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.task.TaskKey
@@ -57,7 +58,7 @@ class Key(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var name: String = "",
-) : StandardAuditModel(), WithKeyMeta {
+) : StandardAuditModel(), WithKeyMeta, BranchVersionedEntity {
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -127,5 +128,11 @@ class Key(
 
   fun toSimpleKey(): SimpleKeyResult {
     return SimpleKeyResult(id, name, namespace?.name)
+  }
+
+  override fun resolveBranchId(): Long? = branch?.id
+
+  override fun isDifferent(oldState: Map<String, Any>): Boolean {
+    return oldState["isPlural"] != this.isPlural
   }
 }
