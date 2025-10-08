@@ -12,7 +12,7 @@ class GlossaryCSVExporter(
     val languageTags: Set<String>,
     val delimiter: Char,
 ) {
-    val languageTagsWithoutBaseLanguage by lazy { languageTags - glossary.baseLanguageTag }
+    val languageTagsWithoutBaseLanguage by lazy { (languageTags - glossary.baseLanguageTag).sorted() }
 
     val headers by lazy {
         arrayOf(
