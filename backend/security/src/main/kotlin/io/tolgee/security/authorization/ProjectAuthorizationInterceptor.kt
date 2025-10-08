@@ -18,7 +18,8 @@ package io.tolgee.security.authorization
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
-import io.tolgee.dtos.cacheable.hasAdminAccess
+import io.tolgee.dtos.cacheable.isAdmin
+import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.exceptions.ProjectNotFoundException
@@ -57,7 +58,6 @@ class ProjectAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
-    val user = authenticationFacade.authenticatedUser
     val userId = authenticationFacade.authenticatedUser.id
     val project =
       requestContextService.getTargetProject(request)
@@ -82,7 +82,7 @@ class ProjectAuthorizationInterceptor(
           userId,
         )
 
-        if (!canBypass(request, handler, isReadOnly = true)) {
+        if (!canBypassForReadOnly()) {
             // Security consideration: if the user cannot see the project, pretend it does not exist.
             throw ProjectNotFoundException(project.id)
         }
@@ -190,9 +190,20 @@ class ProjectAuthorizationInterceptor(
   private fun canBypass(
     request: HttpServletRequest,
     handler: HandlerMethod,
-    isReadOnly: Boolean = handler.isReadOnly(request.method),
   ): Boolean {
-    val hasAdminAccess = authenticationFacade.authenticatedUser.hasAdminAccess(isReadonlyAccess = isReadOnly)
-    return hasAdminAccess && canUseAdminRights
+    if (!canUseAdminRights) {
+      return false
+    }
+
+    if (authenticationFacade.authenticatedUser.isAdmin()) {
+      return true
+    }
+
+    val forReadOnly = handler.isReadOnly(request.method)
+    return forReadOnly && canBypassForReadOnly()
+  }
+
+  private fun canBypassForReadOnly(): Boolean {
+    return canUseAdminRights && authenticationFacade.authenticatedUser.isSupporterOrAdmin()
   }
 }

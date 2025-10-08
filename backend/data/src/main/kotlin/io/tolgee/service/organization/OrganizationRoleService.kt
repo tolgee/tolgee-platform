@@ -4,7 +4,7 @@ import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.cacheable.UserOrganizationRoleDto
-import io.tolgee.dtos.cacheable.hasAdminAccess
+import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -113,60 +113,46 @@ class OrganizationRoleService(
     }
   }
 
-  fun checkUserIsOwner(
-    userId: Long,
-    organizationId: Long,
-    isReadOnlyAccess: Boolean,
-  ) {
-    if (this.isUserOwner(userId, organizationId)) {
+  fun checkUserIsOwnerOrServerAdmin(organizationId: Long) {
+    val user = authenticationFacade.authenticatedUser
+    if (this.isUserOwner(user.id, organizationId)) {
       return
     }
 
-    if (userAccountService.getDto(userId).hasAdminAccess(isReadOnlyAccess)) {
+    if (user.isAdmin()) {
       return
     }
 
     throw PermissionException(Message.USER_IS_NOT_OWNER_OF_ORGANIZATION)
   }
 
-  fun checkUserIsOwnerOrMaintainer(
-    userId: Long,
+  fun checkUserCanDeleteInvitation(
     organizationId: Long,
-    isReadOnlyAccess: Boolean,
   ) {
-    if (this.isUserOwnerOrMaintainer(userId, organizationId)) {
+    checkUserIsOwnerOrServerAdmin(organizationId)
+  }
+
+  fun checkUserCanTransferProjectToOrganization(
+    organizationId: Long,
+  ) {
+    checkUserIsOwnerOrServerAdmin(organizationId)
+  }
+
+  fun checkUserIsOwnerOrMaintainerOrServerAdmin(organizationId: Long) {
+    val user = authenticationFacade.authenticatedUser
+    if (this.isUserOwnerOrMaintainer(user.id, organizationId)) {
       return
     }
 
-    if (userAccountService.getDto(userId).hasAdminAccess(isReadOnlyAccess)) {
+    if (user.isAdmin()) {
       return
     }
 
     throw PermissionException(Message.USER_IS_NOT_OWNER_OR_MAINTAINER_OF_ORGANIZATION)
   }
 
-  fun checkUserIsOwner(organizationId: Long, isReadOnlyAccess: Boolean) {
-    this.checkUserIsOwner(authenticationFacade.authenticatedUser.id, organizationId, isReadOnlyAccess)
-  }
-
-  fun checkUserIsOwnerOrMaintainer(organizationId: Long, isReadOnlyAccess: Boolean) {
-    this.checkUserIsOwnerOrMaintainer(authenticationFacade.authenticatedUser.id, organizationId, isReadOnlyAccess)
-  }
-
-  fun checkUserIsMember(
-    userId: Long,
-    organizationId: Long,
-    isReadOnlyAccess: Boolean,
-  ) {
-    if (hasAnyOrganizationRole(userId, organizationId)) {
-      return
-    }
-
-    if (userAccountService.getDto(userId).hasAdminAccess(isReadOnlyAccess)) {
-      return
-    }
-
-    throw PermissionException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
+  fun checkUserCanCreateProject(organizationId: Long) {
+    this.checkUserIsOwnerOrMaintainerOrServerAdmin(organizationId)
   }
 
   fun hasAnyOrganizationRole(

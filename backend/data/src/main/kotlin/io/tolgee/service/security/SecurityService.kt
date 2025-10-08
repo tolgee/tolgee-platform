@@ -4,7 +4,8 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.UserAccountDto
-import io.tolgee.dtos.cacheable.hasAdminAccess
+import io.tolgee.dtos.cacheable.isAdmin
+import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.LanguageNotPermittedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -49,10 +50,10 @@ class SecurityService(
   @Autowired
   private lateinit var labelService: LabelService
 
-  fun checkAnyProjectPermission(projectId: Long, isReadonlyAccess: Boolean) {
+  fun checkAnyProjectPermission(projectId: Long) {
     if (
       getProjectPermissionScopesNoApiKey(projectId).isNullOrEmpty() &&
-      !hasCurrentUserServerAdminAccess(isReadonlyAccess)
+      !activeUser.isSupporterOrAdmin()
     ) {
       throw PermissionException(Message.USER_HAS_NO_PROJECT_ACCESS)
     }
@@ -155,7 +156,12 @@ class SecurityService(
     requiredScope: Scope,
     userAccountDto: UserAccountDto,
   ) {
-    if (userAccountDto.hasAdminAccess(isReadonlyAccess = requiredScope.isReadOnly())) {
+    if (userAccountDto.isAdmin()) {
+      return
+    }
+
+    val isReadonlyAccess = requiredScope.isReadOnly()
+    if (isReadonlyAccess && userAccountDto.isSupporterOrAdmin()) {
       return
     }
 
@@ -200,26 +206,16 @@ class SecurityService(
     ) { data, languageIds -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
   }
 
-  fun checkStateEditPermissionByTag(
-    projectId: Long,
-    languageTags: Collection<String>,
-  ) {
-    checkProjectPermission(projectId, Scope.TRANSLATIONS_STATE_EDIT)
-    checkLanguagePermissionByTag(
-      projectId,
-      languageTags,
-    ) { data, languageIds -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
-  }
-
   fun checkLanguageSuggestPermission(
     projectId: Long,
     languageIds: Collection<Long>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_SUGGEST)
-    checkLanguagePermission(
-      projectId,
-      isReadonlyAccess = false,
-    ) { data -> data.checkSuggestPermitted(*languageIds.toLongArray()) }
+    runIfUserNotServerAdmin {
+      checkLanguagePermission(
+        projectId,
+      ) { data -> data.checkSuggestPermitted(*languageIds.toLongArray()) }
+    }
   }
 
   fun checkLanguageViewPermission(
@@ -227,10 +223,11 @@ class SecurityService(
     languageIds: Collection<Long>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
-    checkLanguagePermission(
-      projectId,
-      isReadonlyAccess = true,
-    ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
+    runIfUserNotServerSupporterOrAdmin {
+      checkLanguagePermission(
+        projectId,
+      ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
+    }
   }
 
   private fun translationsInTask(
@@ -240,10 +237,11 @@ class SecurityService(
     keyId: Long? = null,
   ): Boolean {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
-    checkLanguagePermission(
-      projectId,
-      isReadonlyAccess = true,
-    ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
+    runIfUserNotServerSupporterOrAdmin {
+      checkLanguagePermission(
+        projectId,
+      ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
+    }
 
     if (keyId != null && languageIds.isNotEmpty()) {
       languageIds.forEach {
@@ -265,10 +263,11 @@ class SecurityService(
     passIfAnyPermissionCheckSucceeds(
       {
         checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
-        checkLanguagePermission(
-          projectId,
-          isReadonlyAccess = false,
-        ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+        runIfUserNotServerAdmin {
+          checkLanguagePermission(
+            projectId,
+          ) { data -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+        }
       },
       {
         if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
@@ -297,10 +296,11 @@ class SecurityService(
   ) {
     try {
       checkProjectPermission(projectId, Scope.TRANSLATIONS_STATE_EDIT)
-      checkLanguagePermission(
-        projectId,
-        isReadonlyAccess = false,
-      ) { data -> data.checkStateChangePermitted(*languageIds.toLongArray()) }
+      runIfUserNotServerAdmin {
+        checkLanguagePermission(
+          projectId,
+        ) { data -> data.checkStateChangePermitted(*languageIds.toLongArray()) }
+      }
     } catch (e: PermissionException) {
       if (!translationsInTask(projectId, TaskType.REVIEW, languageIds, keyId)) {
         throw e
@@ -338,12 +338,8 @@ class SecurityService(
 
   private fun checkLanguagePermission(
     projectId: Long,
-    isReadonlyAccess: Boolean,
     permissionCheckFn: (data: ComputedPermissionDto) -> Unit,
   ) {
-    if (hasCurrentUserServerAdminAccess(isReadonlyAccess)) {
-      return
-    }
     val usersPermission =
       permissionService.getProjectPermissionData(
         projectId,
@@ -551,8 +547,16 @@ class SecurityService(
     }
   }
 
-  private fun hasCurrentUserServerAdminAccess(isReadonlyAccess: Boolean): Boolean {
-    return activeUser.hasAdminAccess(isReadonlyAccess)
+  private fun runIfUserNotServerAdmin(runnable: () -> Unit) {
+    if (!activeUser.isAdmin()) {
+      runnable()
+    }
+  }
+
+  private fun runIfUserNotServerSupporterOrAdmin(runnable: () -> Unit) {
+    if (!activeUser.isSupporterOrAdmin()) {
+      runnable()
+    }
   }
 
   private val activeUser: UserAccountDto

@@ -164,15 +164,7 @@ data class UserAccount(
   enum class Role {
     USER,
     ADMIN,
-    SUPPORTER;
-
-    fun hasAdminAccess(isReadonlyAccess: Boolean): Boolean {
-      return when (this) {
-        ADMIN -> true
-        SUPPORTER -> isReadonlyAccess
-        else -> false
-      }
-    }
+    SUPPORTER,
   }
 
   enum class AccountType {
@@ -195,8 +187,4 @@ fun UserAccount.isSupporter(): Boolean {
 
 fun UserAccount.isSupporterOrAdmin(): Boolean {
   return role == UserAccount.Role.SUPPORTER || role == UserAccount.Role.ADMIN
-}
-
-fun UserAccount.hasAdminAccess(isReadonlyAccess: Boolean): Boolean {
-  return role?.hasAdminAccess(isReadonlyAccess) ?: false
 }

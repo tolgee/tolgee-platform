@@ -55,7 +55,3 @@ fun UserAccountDto.isSupporter(): Boolean {
 fun UserAccountDto.isSupporterOrAdmin(): Boolean {
   return role == UserAccount.Role.SUPPORTER || role == UserAccount.Role.ADMIN
 }
-
-fun UserAccountDto.hasAdminAccess(isReadonlyAccess: Boolean): Boolean {
-  return role?.hasAdminAccess(isReadonlyAccess) ?: false
-}

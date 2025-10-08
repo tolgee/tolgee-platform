@@ -16,7 +16,8 @@
 
 package io.tolgee.security.authorization
 
-import io.tolgee.dtos.cacheable.hasAdminAccess
+import io.tolgee.dtos.cacheable.isAdmin
+import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.enums.OrganizationRoleType
@@ -53,8 +54,7 @@ class OrganizationAuthorizationInterceptor(
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
-    val user = authenticationFacade.authenticatedUser
-    val userId = user.id
+    val userId = authenticationFacade.authenticatedUser.id
     val organization =
       requestContextService.getTargetOrganization(request)
         // Two possible scenarios: we're on `GET/POST /v2/organization`, or the organization was not found.
@@ -79,7 +79,7 @@ class OrganizationAuthorizationInterceptor(
           userId,
         )
 
-        if (!canBypass(request, handler, isReadOnly = true)) {
+        if (!canBypassForReadOnly()) {
           // Security consideration: if the user cannot see the organization, pretend it does not exist.
           throw NotFoundException()
         }
@@ -144,8 +144,16 @@ class OrganizationAuthorizationInterceptor(
   private fun canBypass(
     request: HttpServletRequest,
     handler: HandlerMethod,
-    isReadOnly: Boolean = handler.isReadOnly(request.method)
   ): Boolean {
-    return authenticationFacade.authenticatedUser.hasAdminAccess(isReadonlyAccess = isReadOnly)
+    if (authenticationFacade.authenticatedUser.isAdmin()) {
+      return true
+    }
+
+    val forReadOnly = handler.isReadOnly(request.method)
+    return forReadOnly && canBypassForReadOnly()
+  }
+
+  private fun canBypassForReadOnly(): Boolean {
+    return authenticationFacade.authenticatedUser.isSupporterOrAdmin()
   }
 }

@@ -85,7 +85,7 @@ class ProjectsController(
     @RequestBody @Valid
     dto: CreateProjectRequest,
   ): ProjectModel {
-    organizationRoleService.checkUserIsOwnerOrMaintainer(dto.organizationId, isReadOnlyAccess = false)
+    organizationRoleService.checkUserCanCreateProject(dto.organizationId)
     val project = projectCreationService.createProject(dto)
     if (organizationRoleService.getType(dto.organizationId) == OrganizationRoleType.MAINTAINER) {
       // Maintainers get full access to projects they create
