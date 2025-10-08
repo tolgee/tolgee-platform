@@ -189,10 +189,12 @@ class SecurityService(
     languageTags: Collection<String>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
-    checkLanguagePermissionByTag(
-      projectId,
-      languageTags,
-    ) { data, languageIds -> data.checkViewPermitted(*languageIds.toLongArray()) }
+    runIfUserNotServerSupporterOrAdmin {
+      checkLanguagePermissionByTag(
+        projectId,
+        languageTags,
+      ) { data, languageIds -> data.checkViewPermitted(*languageIds.toLongArray()) }
+    }
   }
 
   fun checkLanguageTranslatePermissionByTag(
@@ -200,10 +202,12 @@ class SecurityService(
     languageTags: Collection<String>,
   ) {
     checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
-    checkLanguagePermissionByTag(
-      projectId,
-      languageTags,
-    ) { data, languageIds -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+    runIfUserNotServerAdmin {
+      checkLanguagePermissionByTag(
+        projectId,
+        languageTags,
+      ) { data, languageIds -> data.checkTranslatePermitted(*languageIds.toLongArray()) }
+    }
   }
 
   fun checkLanguageSuggestPermission(
@@ -236,12 +240,7 @@ class SecurityService(
     languageIds: Collection<Long>,
     keyId: Long? = null,
   ): Boolean {
-    checkProjectPermission(projectId, Scope.TRANSLATIONS_VIEW)
-    runIfUserNotServerSupporterOrAdmin {
-      checkLanguagePermission(
-        projectId,
-      ) { data -> data.checkViewPermitted(*languageIds.toLongArray()) }
-    }
+    checkLanguageViewPermission(projectId, languageIds)
 
     if (keyId != null && languageIds.isNotEmpty()) {
       languageIds.forEach {
