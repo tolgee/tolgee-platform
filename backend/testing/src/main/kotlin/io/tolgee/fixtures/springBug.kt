@@ -12,6 +12,8 @@ import org.opentest4j.TestAbortedException
  *
  * You can see in this method where the ConcurrentModification actually happens ("addHeader" <-> "setHeader").
  * Also for more details check the pull request discussion: https://github.com/tolgee/tolgee-platform/pull/3233
+ *
+ * TODO(spring upgrade), check if the bug is fixed in spring and remove this ugly workaround
  */
 fun <T> ignoreTestOnSpringBug(fn: () -> T): T {
     return try {
