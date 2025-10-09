@@ -17,14 +17,16 @@ export const useGlossaryImportDialog = (hasExistingTerms: boolean) => {
       preferredOrganization?.currentUserRole || ''
     ) || isUserAdmin;
 
-  const importDialog = canImport && importDialogOpen && (
-    <GlossaryImportDialog
-      open={importDialogOpen}
-      onClose={() => setImportDialogOpen(false)}
-      onFinished={() => setImportDialogOpen(false)}
-      hasExistingTerms={hasExistingTerms}
-    />
-  );
+  const importDialog = canImport &&
+    importDialogOpen &&
+    preferredOrganization !== undefined && (
+      <GlossaryImportDialog
+        open={importDialogOpen}
+        onClose={() => setImportDialogOpen(false)}
+        onFinished={() => setImportDialogOpen(false)}
+        hasExistingTerms={hasExistingTerms}
+      />
+    );
 
   return {
     onImport,
