@@ -30,7 +30,7 @@ class KeyMeta(
   var key: Key? = null,
   @OneToOne
   var importKey: ImportKey? = null,
-) : StandardAuditModel(), BranchVersionedEntity {
+) : StandardAuditModel(), BranchVersionedEntity<KeyMeta> {
   @OneToMany(mappedBy = "keyMeta")
   @OrderBy("id")
   var comments = mutableListOf<KeyComment>()
@@ -100,9 +100,18 @@ class KeyMeta(
     }
   }
 
-  override fun resolveBranchId(): Long? = key?.branch?.id
+  override fun resolveKeyId(): Long? = key?.id
 
-  override fun isDifferent(oldState: Map<String, Any>): Boolean {
-    return oldState["description"] != this.description
+  override fun isModified(oldState: Map<String, Any>): Boolean {
+    return oldState["description"] != this.description || oldState["custom"] != this.custom
+  }
+
+  override fun differsInBranchVersion(entity: KeyMeta): Boolean {
+    return this.description != entity.description || this.custom != entity.custom
+  }
+
+  override fun merge(source: KeyMeta) {
+    this.description = source.description
+    this.custom = source.custom
   }
 }

@@ -2,9 +2,13 @@ package io.tolgee.ee.api.v2.controllers.branching
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.ee.api.v2.hateoas.assemblers.BranchModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.CreateBranchModel
+import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
+import io.tolgee.dtos.request.branching.MergeBranchRequest
+import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeModelAssembler
+import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeModel
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
@@ -41,6 +45,7 @@ class BranchController(
   private val projectHolder: ProjectHolder,
   private val branchModelAssembler: BranchModelAssembler,
   private val pagedResourceAssembler: PagedResourcesAssembler<Branch>,
+  private val branchMergeModelAssembler: BranchMergeModelAssembler,
 ) {
   @GetMapping(value = [""])
   @Operation(summary = "Get all branches")
@@ -78,5 +83,30 @@ class BranchController(
   @OpenApiOrderExtension(3)
   fun delete(@PathVariable branchId: Long) {
     branchService.deleteBranch(projectHolder.project.id, branchId)
+  }
+
+  @PostMapping(value = ["/{branchId}/merge"])
+  @Operation(summary = "Merge source branch to target branch")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @OpenApiOrderExtension(4)
+  fun merge(
+    @PathVariable branchId: Long,
+    @RequestBody request: MergeBranchRequest,
+  ) {
+    branchService.mergeBranch(projectHolder.project.id, branchId, request)
+  }
+
+  @PostMapping(value = ["/{branchId}/merge/preview"])
+  @Operation(summary = "Dry-run merge source branch to target branch and return preview")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @OpenApiOrderExtension(5)
+  fun dryRunMerge(
+    @PathVariable branchId: Long,
+    @RequestBody request: DryRunMergeBranchRequest,
+    ): BranchMergeModel {
+    val merge = branchService.dryRunMergeBranch(projectHolder.project.id, branchId, request)
+    return branchMergeModelAssembler.toModel(merge)
   }
 }

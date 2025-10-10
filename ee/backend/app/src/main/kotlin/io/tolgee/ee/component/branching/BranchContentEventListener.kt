@@ -8,8 +8,8 @@ import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 
 @Service
-class BranchVersionedEntityListener(
-  private val branchRevisionUpdater: BranchRevisionUpdater,
+class BranchContentEventListener(
+  private val branchRevisionUpdater: BranchMetaUpdater,
 ) {
 
   @EventListener
@@ -34,12 +34,12 @@ class BranchVersionedEntityListener(
 
   fun onChange(entity: Any?, oldState: Map<String, Any>? = null) {
     if (entity == null) return
-    if (entity !is BranchVersionedEntity) return
+    if (entity !is BranchVersionedEntity<*>) return
 
-    val branchId = entity.resolveBranchId() ?: return
+    val keyId = entity.resolveKeyId() ?: return
 
-    if (oldState == null || entity.isDifferent(oldState)) {
-      branchRevisionUpdater.update(branchId)
+    if (oldState == null || entity.isModified(oldState)) {
+      branchRevisionUpdater.snapshot(keyId)
     }
   }
 }
