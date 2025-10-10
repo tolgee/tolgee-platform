@@ -88,6 +88,14 @@ export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
     }
   };
 
+  const onDragOver = (e: React.DragEvent) => {
+    if (!props.active) {
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   const onDragLeave = (e: React.DragEvent) => {
     if (!props.active) {
       return;
@@ -117,6 +125,7 @@ export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
         position="relative"
         onDrop={onDrop}
         onDragEnter={onDragEnter}
+        onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         overflow="visible"
         data-cy="dropzone"

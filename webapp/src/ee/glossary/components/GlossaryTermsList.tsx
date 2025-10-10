@@ -77,7 +77,8 @@ type Props = {
   total?: number;
   selectedLanguages?: string[];
   selectionService: SelectionService<number>;
-  onCreate?: () => void;
+  onCreateTerm?: () => void;
+  onImport?: () => void;
   onFetchNextPageHint?: () => void;
   clearSearchRef: React.RefObject<(() => void) | undefined>;
   verticalScrollRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -90,7 +91,8 @@ export const GlossaryTermsList = ({
   total,
   selectedLanguages,
   selectionService,
-  onCreate,
+  onCreateTerm,
+  onImport,
   onFetchNextPageHint,
   clearSearchRef,
   verticalScrollRef,
@@ -149,8 +151,8 @@ export const GlossaryTermsList = ({
       <StyledContainer data-cy="translations-view-table">
         <GlossaryEmptyListMessage
           loading={loading}
-          onCreate={onCreate}
-          onImport={undefined}
+          onCreateTerm={onCreateTerm}
+          onImport={onImport}
         />
       </StyledContainer>
     );

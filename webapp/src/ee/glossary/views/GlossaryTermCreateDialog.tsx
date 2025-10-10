@@ -31,7 +31,6 @@ export const GlossaryTermCreateDialog = ({
   onClose,
   onFinished,
 }: Props) => {
-  const { preferredOrganization } = usePreferredOrganization();
   const glossary = useGlossary();
 
   const mutation = useApiMutation({
@@ -44,7 +43,7 @@ export const GlossaryTermCreateDialog = ({
     mutation.mutate(
       {
         path: {
-          organizationId: preferredOrganization!.id,
+          organizationId: glossary.organizationOwner.id,
           glossaryId: glossary.id,
         },
         content: {
