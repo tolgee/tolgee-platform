@@ -20,9 +20,11 @@ fun createTerm(description: String? = null): GlossaryTerm {
 }
 
 fun GlossaryTerm.addTranslation(languageTag: String, text: String): GlossaryTerm {
-  translations.add(GlossaryTermTranslation(languageTag, text).apply {
+  translations.add(
+    GlossaryTermTranslation(languageTag, text).apply {
     term = this@addTranslation
-  })
+  }
+  )
   return this
 }
 
