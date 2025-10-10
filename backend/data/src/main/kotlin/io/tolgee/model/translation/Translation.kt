@@ -54,7 +54,7 @@ class Translation(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var text: String? = null,
-) : StandardAuditModel(), BranchVersionedEntity {
+) : StandardAuditModel(), BranchVersionedEntity<Translation> {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @NotNull
   lateinit var key: Key
@@ -206,9 +206,19 @@ class Translation(
     }
   }
 
-  override fun resolveBranchId(): Long? = key.branch?.id
+  override fun resolveKeyId(): Long? = key.id
 
-  override fun isDifferent(oldState: Map<String, Any>): Boolean {
+  override fun isModified(oldState: Map<String, Any>): Boolean {
     return oldState["text"] != this.text || oldState["state"] != this.state || oldState["labels"] != this.labels
+  }
+
+  override fun differsInBranchVersion(entity: Translation): Boolean {
+    return true
+  }
+
+  override fun merge(source: Translation) {
+    this.text = source.text
+    this.state = source.state
+    this.labels = source.labels
   }
 }

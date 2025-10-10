@@ -4772,4 +4772,71 @@
             <column name="revision" type="INTEGER" defaultValue="0"/>
         </addColumn>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-1">
+        <createTable tableName="branch_merge">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="branch_mergePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_revision" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_revision" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_branch_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_branch_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-2">
+        <createTable tableName="branch_merge_change">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="branch_merge_changePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="change" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resolution" type="VARCHAR(255)"/>
+            <column name="branch_merge_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_key_id" type="BIGINT"/>
+            <column name="target_key_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-3">
+        <addColumn tableName="key">
+            <column name="cascade_updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-4">
+        <addForeignKeyConstraint baseColumnNames="source_branch_id" baseTableName="branch_merge" constraintName="FK3jm93ogvu4cm5eom5bghlspul" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-5">
+        <addForeignKeyConstraint baseColumnNames="branch_merge_id" baseTableName="branch_merge_change" constraintName="FK506698uwde6m0vh8mdmh7i27" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch_merge" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-6">
+        <addForeignKeyConstraint baseColumnNames="target_branch_id" baseTableName="branch_merge" constraintName="FK60sjoh1t5n5olrrn3jik0fkct" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-7">
+        <addForeignKeyConstraint baseColumnNames="target_key_id" baseTableName="branch_merge_change" constraintName="FK94kksu80fathi13wll04u4u1m" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-8">
+        <addForeignKeyConstraint baseColumnNames="source_key_id" baseTableName="branch_merge_change" constraintName="FKgj7gopnadk65ph9l7x5kixsaf" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
+    </changeSet>
 </databaseChangeLog>
