@@ -7,6 +7,9 @@ services:
       - POSTGRES_PASSWORD=postgres
   app:
     image: tolgee/tolgee
+    #build:
+    #  context: ../build/docker
+    #  dockerfile: Dockerfile.lite
     ports:
       - ${exposePort}:8080
     env_file:
