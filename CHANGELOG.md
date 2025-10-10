@@ -1,3 +1,10 @@
+## [3.133.3](https://github.com/tolgee/tolgee-platform/compare/v3.133.2...v3.133.3) (2025-10-10)
+
+
+### Bug Fixes
+
+* batch job processing ([#3265](https://github.com/tolgee/tolgee-platform/issues/3265)) ([24d2f0c](https://github.com/tolgee/tolgee-platform/commit/24d2f0c49fc4c0024e4d9c8bfb8525426195c1a5))
+
 ## [3.133.2](https://github.com/tolgee/tolgee-platform/compare/v3.133.1...v3.133.2) (2025-10-10)
 
 
