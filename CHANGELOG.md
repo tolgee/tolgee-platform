@@ -1,3 +1,10 @@
+## [3.133.2](https://github.com/tolgee/tolgee-platform/compare/v3.133.1...v3.133.2) (2025-10-10)
+
+
+### Bug Fixes
+
+* allow disabling accounts of managed users when user cannot be removed - allows owners of organizations with sso to remove users ([#3263](https://github.com/tolgee/tolgee-platform/issues/3263)) ([fa0a37f](https://github.com/tolgee/tolgee-platform/commit/fa0a37f2571568cbaf4a29c7783567bbd181d56b))
+
 ## [3.133.1](https://github.com/tolgee/tolgee-platform/compare/v3.133.0...v3.133.1) (2025-10-03)
 
 
