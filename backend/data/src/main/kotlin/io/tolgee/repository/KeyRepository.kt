@@ -302,4 +302,22 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
   )
   fun findPrefetchedByNameAndBranch(projectId: Long, keyName: String, branchName: String?): Key?
+
+  @Query(
+    """
+      from Key k
+      left join fetch k.branch
+      where k.id = :keyId
+    """
+  )
+  fun findByIdWithBranch(keyId: Long): Key?
+
+  @Query(
+    """
+      from Key k
+      join fetch k.branch b
+      where b.id = :branchId
+    """
+  )
+  fun findAllByBranchId(branchId: Long): List<Key>
 }
