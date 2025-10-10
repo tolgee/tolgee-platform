@@ -134,12 +134,31 @@ class BatchJobProjectLockingManager(
 
   private fun getInitialJobId(projectId: Long): Long? {
     val jobs = batchJobService.getAllIncompleteJobIds(projectId)
+
+    // First priority: Find actually RUNNING jobs from database
+    // This prevents phantom locks from PENDING jobs that have chunks in queue but aren't executing
+    val runningJob = jobs.find { incompleteJob ->
+      incompleteJob.status == io.tolgee.model.batch.BatchJobStatus.RUNNING
+    }
+    if (runningJob != null) {
+      logger.debug("Found RUNNING job ${runningJob.jobId} for project $projectId")
+      return runningJob.jobId
+    }
+
+    // Fallback: Use original logic for jobs that have started processing
     val unlockedChunkCounts =
       batchJobService
         .getAllUnlockedChunksForJobs(jobs.map { it.jobId })
         .groupBy { it.batchJobId }.map { it.key to it.value.count() }.toMap()
     // we are looking for a job that has already started and preferably for a locked one
-    return jobs.find { it.totalChunks != unlockedChunkCounts[it.jobId] }?.jobId ?: jobs.firstOrNull()?.jobId
+    val startedJob = jobs.find { it.totalChunks != unlockedChunkCounts[it.jobId] }
+    if (startedJob != null) {
+      logger.debug("Found started job ${startedJob.jobId} for project $projectId (fallback logic)")
+      return startedJob.jobId
+    }
+
+    logger.debug("No RUNNING or PENDING jobs found for project $projectId, allowing new job to acquire lock")
+    return null
   }
 
   private fun getRedissonProjectLocks(): RMap<Long, Long> {

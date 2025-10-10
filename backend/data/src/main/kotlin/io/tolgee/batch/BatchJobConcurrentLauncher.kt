@@ -101,7 +101,6 @@ class BatchJobConcurrentLauncher(
             return@repeatForever false
           }
 
-          logger.trace("Jobs to launch: $jobsToLaunch")
           val items =
             (1..jobsToLaunch)
               .mapNotNull { batchJobChunkExecutionQueue.poll() }
