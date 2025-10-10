@@ -19,7 +19,7 @@ package io.tolgee
 import com.zaxxer.hikari.HikariDataSource
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.retry
+import io.tolgee.fixtures.ignoreTestOnSpringBug
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -54,15 +54,7 @@ class StreamingBodyDatabasePoolHealthTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `streaming responses do not cause a database connection pool exhaustion`() {
-    // there is the bug in spring, co it throws the concurrent modification exception
-    // to avoid this, we will retry the test until it passes,
-    // I know, it's ugly. Sorry. If you have time to spare, remove the repeats and the sleep, maybe it will pass
-    // in future spring versions
-    // https://github.com/spring-projects/spring-security/issues/9175
-    retry(
-      retries = 100,
-      exceptionMatcher = { it is ConcurrentModificationException || it is IllegalStateException },
-    ) {
+    ignoreTestOnSpringBug {
       val hikariDataSource = dataSource as HikariDataSource
       val pool = hikariDataSource.hikariPoolMXBean
 

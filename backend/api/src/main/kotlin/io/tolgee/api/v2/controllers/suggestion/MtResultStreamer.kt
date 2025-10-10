@@ -151,7 +151,17 @@ class MtResultStreamer(
     logger.debug { "Sending to client: $string" }
     synchronized(this) {
       this.write(string + "\n")
-      this.flush()
+        try {
+          this.flush()
+        } catch (e: ConcurrentModificationException) {
+          // TODO(spring upgrade), check if the bug is fixed in spring and remove this ugly workaround
+          // Check io.tolgee.fixtures.springBug for more info.
+          // And yes, this happens not only in tests, but it is possible in production.
+          // You can't precisely predict when it happens, but here when stream is flushed and headers are
+          // added for the response, it happens most often. Just retrying works fine here.
+          logger.error("Error while streaming to client, bug in spring-security/issues/9175: ${e.message}", e)
+          this.flush()
+        }
     }
     logger.debug { "Sent to client using sync writer" }
   }
