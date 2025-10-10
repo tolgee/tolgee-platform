@@ -2,7 +2,7 @@
     <b>
         <a href="https://tolgee.io">Tolgee</a><br>
     </b>
-    An open-source localization platform<br/> developers enjoy to working with
+    An open-source localization platform<br/> developers enjoy working with
     <br>
 </h1>
 
