@@ -73,6 +73,27 @@ describe('Organization Members', () => {
     assertMessage('User removed from organization');
   });
 
+  it('Can remove users managed by the organization', () => {
+    gcy('global-paginated-list').within(() => {
+      cy.contains('Lonely Developer')
+        .closestDcy('organization-member-item')
+        .findDcy('organization-members-remove-user-button')
+        .click();
+    });
+    confirmStandard();
+    assertMessage('User removed from organization');
+
+    gcy('global-paginated-list').within(() => {
+      cy.gcy('organization-member-item').contains('Cukrberg').should('exist');
+    });
+
+    gcy('global-paginated-list').within(() => {
+      cy.gcy('organization-member-item')
+        .contains('Lonely Developer')
+        .should('not.exist');
+    });
+  });
+
   it('Can leave', () => {
     leaveOrganization();
     assertMessage('Organization left');

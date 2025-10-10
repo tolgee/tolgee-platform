@@ -28,16 +28,17 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.EnumSet
 
 @Service
+@Suppress("SelfReferenceConstructorParameter")
 class OrganizationRoleService(
   private val organizationRoleRepository: OrganizationRoleRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
-  @Lazy
+  @param:Lazy
   private val permissionService: PermissionService,
   private val organizationRepository: OrganizationRepository,
-  @Lazy
+  @param:Lazy
   private val userPreferencesService: UserPreferencesService,
-  @Suppress("SelfReferenceConstructorParameter") @Lazy
+  @param:Lazy
   private val self: OrganizationRoleService,
   private val cacheManager: CacheManager,
 ) {
@@ -260,7 +261,7 @@ class OrganizationRoleService(
   }
 
   fun leave(organizationId: Long) {
-    this.removeUser(authenticationFacade.authenticatedUser.id, organizationId)
+    self.removeUser(authenticationFacade.authenticatedUser.id, organizationId)
   }
 
   @Transactional
@@ -268,10 +269,52 @@ class OrganizationRoleService(
     userId: Long,
     organizationId: Long,
   ) {
-    val managedBy = getManagedBy(userId)
-    if (managedBy != null && managedBy.id == organizationId) {
+    if (!canRemoveUser(userId, organizationId)) {
       throw ValidationException(Message.USER_IS_MANAGED_BY_ORGANIZATION)
     }
+
+    removeUserForReal(userId, organizationId)
+  }
+
+  @Transactional
+  fun removeOrDeactivateUser(
+    userId: Long,
+    organizationId: Long,
+  ) {
+    if (!canRemoveUser(userId, organizationId)) {
+      userAccountService.disable(userId)
+      return
+    }
+
+    removeUserForReal(userId, organizationId)
+  }
+
+  /**
+   * Checks if a user is managed by the organization.
+   * We can't remove managed users from their organization.
+   */
+  private fun canRemoveUser(userId: Long, organizationId: Long): Boolean {
+    val managedBy = getManagedBy(userId)
+    val isManaged = managedBy != null
+
+    if (!isManaged) {
+      // Not managed by any organization
+      return true
+    }
+
+    if (managedBy.id != organizationId) {
+      // Managed by another organization
+      return true
+    }
+
+    // User is managed by the organization - we can't remove them
+    return false
+  }
+
+  private fun removeUserForReal(
+    userId: Long,
+    organizationId: Long,
+  ) {
     val role =
       organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
         organizationRoleRepository.delete(it)

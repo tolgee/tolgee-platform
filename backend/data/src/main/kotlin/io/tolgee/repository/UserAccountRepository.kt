@@ -200,6 +200,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         like lower(concat('%', cast(:search as text),'%')) 
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
         and ua.deletedAt is null
+        and ua.disabledAt is null
         group by ua.id, mr.type
       """,
   )
@@ -223,6 +224,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         like lower(concat('%', cast(:search as text),'%'))
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
         and ua.deletedAt is null
+        and ua.disabledAt is null
         and $USER_FILTERS
     """,
   )

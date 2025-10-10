@@ -40,13 +40,19 @@ class OrganizationE2eDataController(
           organizationRoleService.grantMemberRoleToUser(user, organization)
         }
 
+        dataItem.managedMembers.forEach { memberUserName ->
+          val user = userAccountService.findActive(memberUserName) ?: throw NotFoundException()
+          organizationRoleService.grantMemberRoleToUser(user, organization)
+          organizationRoleService.setManaged(user, organization, true)
+        }
+
         dataItem.otherOwners.forEach { memberUserName ->
           val user = userAccountService.findActive(memberUserName) ?: throw NotFoundException()
           organizationRoleService.grantOwnerRoleToUser(user, organization)
         }
       }
     }
-    return organizations.map { it.name to mapOf("slug" to it.slug) }.toMap()
+    return organizations.associate { it.name to mapOf("slug" to it.slug) }
   }
 
   @GetMapping(value = ["/clean"])
@@ -97,6 +103,7 @@ class OrganizationE2eDataController(
       val owner: UserData,
       val otherOwners: MutableList<String> = mutableListOf(),
       val members: MutableList<String> = mutableListOf(),
+      val managedMembers: MutableList<String> = mutableListOf(),
     )
 
     val data =
@@ -135,6 +142,15 @@ class OrganizationE2eDataController(
           owner = UserData("admin"),
           otherOwners = mutableListOf("evan@netsuite.com"),
           members = mutableListOf("gates@microsoft.com", "cukrberg@facebook.com"),
+          managedMembers = mutableListOf("LonelyDev@tolgee.io"),
+        ),
+        OrganizationDataItem(
+          dto =
+            OrganizationDto(
+              name = "What a nice organization",
+              description = "We are very nice",
+            ),
+          owner = UserData("LonelyDev@tolgee.io", "Lonely Developer"),
         ),
         OrganizationDataItem(
           dto =
