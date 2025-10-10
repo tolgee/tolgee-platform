@@ -38,6 +38,7 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.context.ApplicationEventPublisher
+import java.util.Date
 
 @Entity
 @ActivityLoggedEntity
@@ -60,7 +61,7 @@ class Key(
   var name: String = "",
 ) : StandardAuditModel(),
   WithKeyMeta,
-  BranchVersionedEntity {
+  BranchVersionedEntity<Key> {
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -94,6 +95,9 @@ class Key(
   @ActivityLoggedProp
   var pluralArgName: String? = null
 
+  @Column(nullable = true)
+  var cascadeUpdatedAt: Date? = null
+
   constructor(
     name: String,
     project: Project,
@@ -105,6 +109,9 @@ class Key(
 
   val path: PathDTO
     get() = PathDTO.fromFullPath(name)
+
+  val modifiedAt: Date
+    get() = cascadeUpdatedAt ?: updatedAt!!
 
   companion object {
     @Configurable
@@ -132,9 +139,18 @@ class Key(
     return SimpleKeyResult(id, name, namespace?.name)
   }
 
-  override fun resolveBranchId(): Long? = branch?.id
+  override fun resolveKeyId(): Long? = id
 
-  override fun isDifferent(oldState: Map<String, Any>): Boolean {
-    return oldState["isPlural"] != this.isPlural
+  override fun isModified(oldState: Map<String, Any>): Boolean {
+    return oldState["isPlural"] != this.isPlural || oldState["pluralArgName"] != this.pluralArgName
+  }
+
+  override fun differsInBranchVersion(entity: Key): Boolean {
+    return true
+  }
+
+  override fun merge(source: Key) {
+    this.isPlural = source.isPlural
+    this.pluralArgName = source.pluralArgName
   }
 }
