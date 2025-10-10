@@ -146,7 +146,10 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     ua.thirdPartyAuthType,
     ua.role,
     ua.isInitialUser,
-    ua.totpKey
+    ua.totpKey,
+    ua.deletedAt,
+    ua.disabledAt,
+    null
   ) from UserAccount ua
   left join ua.emailVerification ev
   where ua.id = :userAccountId and ua.deletedAt is null and ua.disabledAt is null
@@ -260,7 +263,29 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     """
+    with lastActivityCTE as (
+      select ar.authorId as authorId, max(ar.timestamp) as lastActivity 
+      from ActivityRevision ar 
+      group by ar.authorId
+    )
+    select new io.tolgee.dtos.queryResults.UserAccountView(
+      userAccount.id,
+      userAccount.username,
+      userAccount.name,
+      case when ev is not null then coalesce(ev.newEmail, userAccount.username) else null end,
+      userAccount.avatarHash,
+      userAccount.accountType,
+      userAccount.thirdPartyAuthType,
+      userAccount.role,
+      userAccount.isInitialUser,
+      userAccount.totpKey,
+      userAccount.deletedAt,
+      userAccount.disabledAt,
+      la.lastActivity
+    )
     from UserAccount userAccount
+    left join userAccount.emailVerification ev
+    left join lastActivityCTE la on la.authorId = userAccount.id
     where ((lower(userAccount.name)
       like lower(concat('%', cast(:search as text),'%')) 
       or lower(userAccount.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
@@ -270,7 +295,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   fun findAllWithDisabledPaged(
     search: String?,
     pageable: Pageable,
-  ): Page<UserAccount>
+  ): Page<UserAccountView>
 
   @Query(
     value = """
