@@ -64,6 +64,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         node("[0].isDefault").isEqualTo(true)
       }
     }
+    // a default branch should be created and all keys moved under this branch
     keyService.getAll(testData.secondProject.id).first().branch!!.id.let { it ->
       it.assert.isNotNull()
       branchRepository.findByIdOrNull(it)!!.let { branch ->
@@ -114,6 +115,20 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `cannot delete default branch`() {
     performProjectAuthDelete("branches/${testData.mainBranch.id}").andIsForbidden
     testData.mainBranch.refresh().archivedAt.assert.isNull()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `dry-run merges feature branch into main`() {
+    performProjectAuthPost(
+      "branches/${testData.featureBranch.id}/merge/preview",
+      mapOf("targetBranchId" to testData.mainBranch.id)
+    ).andIsOk.andAssertThatJson {
+      node("keyModificationsCount").isEqualTo(1)
+      node("keyAdditionsCount").isEqualTo(1)
+      node("keyDeletionsCount").isEqualTo(1)
+      node("keyConflictsCount").isEqualTo(1)
+    }
   }
 
   private fun Branch.refresh(): Branch {

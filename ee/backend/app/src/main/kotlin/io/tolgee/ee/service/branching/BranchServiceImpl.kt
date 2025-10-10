@@ -2,12 +2,14 @@ package io.tolgee.ee.service.branching
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
+import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.ee.repository.BranchRepository
 import io.tolgee.events.OnBranchDeleted
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchMerge
 import io.tolgee.service.branching.BranchCopyService
 import io.tolgee.service.branching.BranchService
 import jakarta.persistence.EntityManager
@@ -28,6 +30,7 @@ class BranchServiceImpl(
   private val branchCopyService: BranchCopyService,
   private val applicationContext: ApplicationContext,
   private val defaultBranchCreator: DefaultBranchCreator,
+  private val branchMergeService: BranchMergeService,
 ) : BranchService {
   override fun getAllBranches(projectId: Long, page: Pageable, search: String?): Page<Branch> {
     val branches = branchRepository.getAllProjectBranches(projectId, page, search)
@@ -85,5 +88,12 @@ class BranchServiceImpl(
     if (branch.isDefault) throw PermissionException(Message.CANNOT_DELETE_DEFAULT_BRANCH)
     branch.archivedAt = currentDateProvider.date
     applicationContext.publishEvent(OnBranchDeleted(branch))
+  }
+
+  @Transactional
+  override fun dryRunMergeBranch(projectId: Long, branchId: Long, request: DryRunMergeBranchRequest): BranchMerge {
+    val sourceBranch = getBranch(projectId, branchId)
+    val targetBranch = getBranch(projectId, request.targetBranchId)
+    return branchMergeService.dryRun(sourceBranch, targetBranch)
   }
 }
