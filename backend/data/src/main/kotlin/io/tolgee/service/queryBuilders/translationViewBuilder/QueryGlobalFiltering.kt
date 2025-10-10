@@ -269,6 +269,9 @@ class QueryGlobalFiltering(
 
   private fun filterBranch() {
     val branchJoin = queryBase.root.join(Key_.branch, JoinType.LEFT)
+    if (params.filterKeyId?.isNotEmpty() == true) {
+      return
+    }
     if (params.branch.isNullOrEmpty()) {
       queryBase.whereConditions.add(
         cb.or(

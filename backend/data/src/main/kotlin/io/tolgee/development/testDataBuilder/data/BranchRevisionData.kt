@@ -69,6 +69,10 @@ class BranchRevisionData {
               name = "first_key"
               branch = self
             }.build {
+              translation = addTranslation {
+                language = english
+                text = "first key translation"
+              }.self
               addMeta {
                 description = "default"
               }
@@ -78,15 +82,15 @@ class BranchRevisionData {
             addKey {
               name = "key_with_references"
               branch = self
-              this@BranchRevisionData.keyWithReferences = this
+              keyWithReferences = this
             }.build {
-              translation = addTranslation {
+              addTranslation {
                 language = english
                 text = "Term"
               }.self
               addScreenshotReference {
                 screenshot = this@BranchRevisionData.screenshot
-                key = this@build.self
+                key = self
               }
               addMeta {
                 tags.add(
