@@ -72,12 +72,14 @@ class TranslationService(
   fun getTranslations(
     languageTags: Set<String>,
     namespace: String?,
+    branch: String?,
     projectId: Long,
     structureDelimiter: Char?,
     filterTag: List<String>? = null,
   ): Map<String, Any> {
     val safeNamespace = if (namespace == "") null else namespace
-    val allByLanguages = translationRepository.getTranslations(languageTags, safeNamespace, projectId, filterTag)
+    val allByLanguages =
+      translationRepository.getTranslations(languageTags, safeNamespace, branch, projectId, filterTag)
     val langTranslations: HashMap<String, Any> = LinkedHashMap()
     for (translation in allByLanguages) {
       val map =
@@ -128,7 +130,7 @@ class TranslationService(
     keyId: Long,
     languageId: Long,
     projectId: Long? = null,
-    ): Translation {
+  ): Translation {
     val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     if (projectId != null && key.project.id != projectId) {
       throw BadRequestException(Message.KEY_NOT_FROM_PROJECT)

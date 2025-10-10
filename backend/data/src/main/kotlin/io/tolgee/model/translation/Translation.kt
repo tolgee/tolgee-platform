@@ -10,6 +10,7 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.branching.BranchVersionedEntity
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.util.TranslationStatsUtil
@@ -53,7 +54,7 @@ class Translation(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var text: String? = null,
-) : StandardAuditModel() {
+) : StandardAuditModel(), BranchVersionedEntity<Translation> {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @NotNull
   lateinit var key: Key
@@ -81,7 +82,7 @@ class Translation(
   var mtProvider: MtServiceType? = null
 
   @OneToMany(mappedBy = "translation", orphanRemoval = true)
-  var comments: MutableList<TranslationComment> = mutableListOf()
+  var comments: MutableSet<TranslationComment> = mutableSetOf()
 
   var wordCount: Int? = null
 
@@ -198,5 +199,21 @@ class Translation(
         }
       }
     }
+  }
+
+  override fun resolveKeyId(): Long? = key.id
+
+  override fun isModified(oldState: Map<String, Any>): Boolean {
+    return oldState["text"] != this.text || oldState["state"] != this.state || oldState["labels"] != this.labels
+  }
+
+  override fun differsInBranchVersion(entity: Translation): Boolean {
+    return true
+  }
+
+  override fun merge(source: Translation) {
+    this.text = source.text
+    this.state = source.state
+    this.labels = source.labels
   }
 }

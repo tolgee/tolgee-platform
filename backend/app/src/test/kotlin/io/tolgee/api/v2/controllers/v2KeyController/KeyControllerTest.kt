@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import java.math.BigDecimal
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -43,6 +44,7 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `returns all keys`() {
     testData.addNKeys(120)
+    testData.addNBranchedKeys(10)
     saveTestDataAndPrepare()
     performProjectAuthGet("keys")
       .andIsOk.andAssertThatJson {
@@ -53,6 +55,7 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("[2].namespace").isEqualTo("null")
           node("[1].description").isEqualTo("description")
         }
+        node("page.totalElements").isNumber.isEqualTo(BigDecimal(123))
       }
     performProjectAuthGet("keys?page=1")
       .andIsOk.andAssertThatJson {
@@ -60,6 +63,34 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           isArray.hasSize(20)
           node("[0].id").isValidId
           node("[1].name").isEqualTo("key_19")
+          node("[2].namespace").isEqualTo("null")
+        }
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `returns all keys from branch`() {
+    testData.addNKeys(5)
+    testData.addNBranchedKeys(110)
+    saveTestDataAndPrepare()
+    performProjectAuthGet("keys?branch=feature")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(20)
+          node("[0].id").isValidId
+          node("[1].name").isEqualTo("branch_key_2")
+          node("[1].description").isEqualTo("description of branched key")
+          node("[2].namespace").isEqualTo("null")
+        }
+        node("page.totalElements").isNumber.isEqualTo(BigDecimal(110))
+      }
+    performProjectAuthGet("keys?page=1&branch=feature")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.keys") {
+          isArray.hasSize(20)
+          node("[0].id").isValidId
+          node("[1].name").isEqualTo("branch_key_22")
           node("[2].namespace").isEqualTo("null")
         }
       }

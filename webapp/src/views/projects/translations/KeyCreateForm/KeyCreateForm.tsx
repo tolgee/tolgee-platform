@@ -15,6 +15,7 @@ import { messageService } from 'tg.service/MessageService';
 import { TolgeeFormat, tolgeeFormatGenerateIcu } from '@tginternal/editor';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { useHistory } from 'react-router-dom';
+import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 
@@ -47,6 +48,7 @@ export const KeyCreateForm: React.FC<Props> = ({
   const permissions = useProjectPermissions();
   const { refetchUsage } = useGlobalActions();
   const history = useHistory();
+  const { selected } = useTranslationsSelector((c) => c.branches);
 
   const keyName = useUrlSearch().key as string;
   const namespace =
@@ -70,6 +72,7 @@ export const KeyCreateForm: React.FC<Props> = ({
           'application/json': {
             ...values,
             isPlural: Boolean(values.isPlural),
+            branch: selected?.name,
             translations: {
               [baseLanguage]: tolgeeFormatGenerateIcu(
                 {

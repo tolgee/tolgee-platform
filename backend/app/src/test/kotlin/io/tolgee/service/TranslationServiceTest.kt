@@ -18,8 +18,9 @@ class TranslationServiceTest : AbstractSpringTest() {
     val id = dbPopulator.populate().project.id
     val data =
       translationService.getTranslations(
-        languageTags = HashSet(Arrays.asList("en", "de")),
+        languageTags = HashSet(listOf("en", "de")),
         namespace = null,
+        branch = null,
         projectId = id,
         structureDelimiter = '.',
       )
@@ -35,8 +36,9 @@ class TranslationServiceTest : AbstractSpringTest() {
 
     val viewData =
       translationService.getTranslations(
-        languageTags = HashSet(Arrays.asList("en", "de")),
+        languageTags = HashSet(listOf("en", "de")),
         namespace = null,
+        branch = null,
         projectId = project.id,
         structureDelimiter = '.',
       )
@@ -77,5 +79,54 @@ class TranslationServiceTest : AbstractSpringTest() {
     val translation = translationService.get(testData.aKeyGermanTranslation.id)
     assertThat(translation.auto).isFalse
     assertThat(translation.mtProvider).isNull()
+  }
+
+  @Test
+  fun `returns translations for default branch`() {
+    val testData = TranslationsTestData()
+    testData.generateBranchedData(10)
+    testDataService.saveTestData(testData.root)
+    val translations = translationService.getTranslations(
+      languageTags = HashSet(listOf("en", "de")),
+      namespace = null,
+      branch = null,
+      projectId = testData.project.id,
+      structureDelimiter = '.',
+    )
+    assertThat(translations).hasSize(2)
+    assertThat(translations["en"] as LinkedHashMap<*, *>).hasSize(1)
+  }
+
+  @Test
+  @Transactional
+  fun `returns translations for feature branch`() {
+    val testData = TranslationsTestData()
+    testData.generateBranchedData(10)
+    testDataService.saveTestData(testData.root)
+    val translations = translationService.getTranslations(
+      languageTags = HashSet(listOf("en", "de")),
+      namespace = null,
+      branch = "feature-branch",
+      projectId = testData.project.id,
+      structureDelimiter = '.',
+    )
+    assertThat(translations).hasSize(2)
+    assertThat(translations["en"] as LinkedHashMap<*, *>).hasSize(10)
+  }
+
+  @Test
+  @Transactional
+  fun `returns empty translations for invalid branch name`() {
+    val testData = TranslationsTestData()
+    testData.generateBranchedData(5)
+    testDataService.saveTestData(testData.root)
+    val translations = translationService.getTranslations(
+      languageTags = HashSet(listOf("en", "de")),
+      namespace = null,
+      branch = "invalid-branch",
+      projectId = testData.project.id,
+      structureDelimiter = '.',
+    )
+    assertThat(translations).hasSize(0)
   }
 }
