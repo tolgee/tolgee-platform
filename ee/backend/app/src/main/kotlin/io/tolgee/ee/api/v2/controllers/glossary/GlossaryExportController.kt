@@ -44,8 +44,6 @@ class GlossaryExportController(
     val organization = organizationHolder.organization
     val glossary = glossaryService.get(organization.id, glossaryId)
 
-    val stream = glossaryExportService.exportCsv(glossary)
-
     val headers = HttpHeaders().apply {
       contentType = MediaType.parseMediaType("text/csv;charset=UTF-8")
       accessControlExposeHeaders = listOf("Content-Disposition")
@@ -54,10 +52,11 @@ class GlossaryExportController(
         .build()
     }
 
+    val stream = glossaryExportService.exportCsv(glossary)
+
     return ResponseEntity.ok().headers(headers).body(
       streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
-        IOUtils.copy(stream, out)
-        stream.close()
+        stream.use { IOUtils.copy(stream, out) }
         out.close()
       },
     )

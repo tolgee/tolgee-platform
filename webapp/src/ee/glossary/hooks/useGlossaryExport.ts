@@ -4,11 +4,15 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 const downloadExported = async (response: Response, glossaryName: string) => {
   const data = await response.blob();
   const url = URL.createObjectURL(data);
-  const a = document.createElement('a');
-  a.href = url;
-  const dateStr = new Date().toISOString().split('T')[0];
-  a.download = 'glossary_' + glossaryName + '_' + dateStr + '.csv';
-  a.click();
+  try {
+    const a = document.createElement('a');
+    a.href = url;
+    const dateStr = new Date().toISOString().split('T')[0];
+    a.download = 'glossary_' + glossaryName + '_' + dateStr + '.csv';
+    a.click();
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 };
 
 export const useGlossaryExport = () => {
