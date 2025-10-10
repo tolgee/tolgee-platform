@@ -8,19 +8,23 @@ export const downloadExported = async (
 ) => {
   const data = await response.blob();
   const url = URL.createObjectURL(data);
-  const a = document.createElement('a');
-  const onlyPossibleLanguageString =
-    languages.length === 1 ? `_${languages[0]}` : '';
-  a.href = url;
-  const dateStr = '_' + new Date().toISOString().split('T')[0];
-  if (data.type === 'application/zip') {
-    a.download = projectName + dateStr + '.zip';
-  } else {
-    const extension = parseExtension(response) || format.extension;
-    a.download =
-      projectName + onlyPossibleLanguageString + dateStr + '.' + extension;
+  try {
+    const a = document.createElement('a');
+    const onlyPossibleLanguageString =
+      languages.length === 1 ? `_${languages[0]}` : '';
+    a.href = url;
+    const dateStr = '_' + new Date().toISOString().split('T')[0];
+    if (data.type === 'application/zip') {
+      a.download = projectName + dateStr + '.zip';
+    } else {
+      const extension = parseExtension(response) || format.extension;
+      a.download =
+        projectName + onlyPossibleLanguageString + dateStr + '.' + extension;
+    }
+    a.click();
+  } finally {
+    URL.revokeObjectURL(url);
   }
-  a.click();
 };
 
 const parseExtension = (response: Response) => {
