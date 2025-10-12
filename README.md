@@ -8,6 +8,13 @@
 
 <div align="center">
 
+
+<h3 align="center">
+  <a href="https://tolgee.io/career" target="_blank" style="text-decoration: none;">
+    🤫 Psst... We're hiring engineers!
+  </a>
+</h3>
+
 [![Logo](https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg)](https://tolgee.io)
 
 An open-source alternative to Crowdin, Phrase, or Lokalise
