@@ -107,7 +107,7 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
     }
   };
 
-  const renderFile = (file: FilesType[0], index: number) => {
+  const renderFile = (file: FilesType[number], index: number) => {
     const FileIcon = findFileType(file.name)?.icon || File02;
     return (
       <FileDropzoneSelectedFile

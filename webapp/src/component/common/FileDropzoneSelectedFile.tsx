@@ -29,7 +29,7 @@ const StyledFileIcon = styled('div')`
 
 export type FileDropzoneSelectedFileProps = {
   icon: ReactNode;
-  file: FilesType[0];
+  file: FilesType[number];
   onRemove?: () => void;
 };
 
