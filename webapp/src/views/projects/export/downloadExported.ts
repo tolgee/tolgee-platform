@@ -30,6 +30,7 @@ export const downloadExported = async (
 const parseExtension = (response: Response) => {
   const contentDisposition = response.headers.get('Content-Disposition');
   if (contentDisposition) {
+    extensionRegex.lastIndex = 0; // Reset the regex to the start of the string
     const match = extensionRegex.exec(contentDisposition);
     if (match) {
       return match[1];
