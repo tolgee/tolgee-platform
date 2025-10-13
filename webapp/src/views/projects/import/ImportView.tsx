@@ -22,9 +22,11 @@ import { BaseProjectView } from '../BaseProjectView';
 import { ImportResultLoadingOverlay } from './component/ImportResultLoadingOverlay';
 import { ImportSettingsPanel } from './component/ImportSettingsPanel';
 import { TranslatedWarningBox } from 'tg.translationTools/TranslatedWarningBox';
+import { useOnFilePaste } from 'tg.fixtures/useOnFilePaste';
 
 export const ImportView: FunctionComponent = () => {
   const dataHelper = useImportDataHelper();
+  useOnFilePaste(dataHelper.onNewFiles);
 
   const project = useProject();
 

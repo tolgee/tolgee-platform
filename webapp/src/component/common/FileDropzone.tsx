@@ -7,6 +7,7 @@ import { messageService } from 'tg.service/MessageService';
 import { DragDropArea } from './DragDropArea';
 import { FilesType } from 'tg.fixtures/FileUploadFixtures';
 import { FileDropzoneSelectedFile } from 'tg.component/common/FileDropzoneSelectedFile';
+import { useOnFilePaste } from 'tg.fixtures/useOnFilePaste';
 
 const StyledContainer = styled(Box)`
   border: 2px dashed ${({ theme }) => theme.palette.tokens.border.secondary};
@@ -53,6 +54,8 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
   acceptedFileTypes,
   helpLink,
 }) => {
+  useOnFilePaste(onFilesSelect);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const findFileType = (fileName: string) =>
@@ -62,10 +65,6 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
 
   const isValidFileType = (fileName: string) => {
     return findFileType(fileName) !== undefined;
-  };
-
-  const getFileIcon = (fileName: string) => {
-    return findFileType(fileName)?.icon || File02;
   };
 
   const handleFilesReceived = (receivedFiles: FilesType) => {
@@ -109,10 +108,10 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
   };
 
   const renderFile = (file: FilesType[0], index: number) => {
-    const FileIconComponent = getFileIcon(file.name);
+    const FileIcon = findFileType(file.name)?.icon || File02;
     return (
       <FileDropzoneSelectedFile
-        icon={<FileIconComponent />}
+        icon={<FileIcon />}
         file={file}
         key={`${file.name}-${index}`}
         onRemove={() => handleRemoveFile(index)}
