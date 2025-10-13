@@ -22,5 +22,5 @@ export const useOnFilePaste = (onFilePaste: (files: FilesType) => void) => {
     return () => {
       document.removeEventListener('paste', pasteListener);
     };
-  }, []);
+  }, [onFilePaste]);
 };
