@@ -54,8 +54,6 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
   acceptedFileTypes,
   helpLink,
 }) => {
-  useOnFilePaste(onFilesSelect);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const findFileType = (fileName: string) =>
@@ -102,6 +100,8 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
       fileInputRef.current.value = '';
     }
   };
+
+  useOnFilePaste(handleFilesReceived);
 
   const canAddMoreFiles = files.length < maxFiles;
 
