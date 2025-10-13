@@ -87,6 +87,10 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
     if (selectedFiles && selectedFiles.length > 0) {
       const fileArray = Array.from(selectedFiles);
       handleFilesReceived(fileArray.map((f) => ({ file: f, name: f.name })));
+
+      // reset the input value to allow selecting the same file again
+      // since we can't sync the 'files' prop with the input value directly
+      e.currentTarget.value = '';
     }
   };
 
