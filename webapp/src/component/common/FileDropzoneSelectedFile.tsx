@@ -2,6 +2,7 @@ import { FilesType } from 'tg.fixtures/FileUploadFixtures';
 import { Box, IconButton, styled, Typography } from '@mui/material';
 import { XClose } from '@untitled-ui/icons-react';
 import React, { ReactNode } from 'react';
+import { useTranslate } from '@tolgee/react';
 
 const StyledFileChip = styled(Box)`
   display: flex;
@@ -36,6 +37,7 @@ export type FileDropzoneSelectedFileProps = {
 export const FileDropzoneSelectedFile: React.FC<
   FileDropzoneSelectedFileProps
 > = ({ icon, file, onRemove }) => {
+  const { t } = useTranslate();
   return (
     <StyledFileChip>
       <StyledFileIcon>{icon}</StyledFileIcon>
@@ -48,6 +50,7 @@ export const FileDropzoneSelectedFile: React.FC<
           e.stopPropagation();
           onRemove?.();
         }}
+        aria-label={t('file-dropzone-remove-file-button')}
         data-cy={`file-dropzone-remove-button`}
       >
         <XClose style={{ width: 20, height: 20 }} />
