@@ -59,7 +59,6 @@ export function ModeSelector<T extends React.Key>({
                 </Typography>
                 <Radio
                   checked={value === option.value}
-                  onChange={() => onChange(option.value)}
                   data-cy={option.dataCy}
                   size="small"
                   sx={{ padding: 0.5 }}
