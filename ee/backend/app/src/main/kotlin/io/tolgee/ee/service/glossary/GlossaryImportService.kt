@@ -1,11 +1,13 @@
 package io.tolgee.ee.service.glossary
 
+import io.tolgee.constants.Message
 import io.tolgee.model.glossary.Glossary
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.io.InputStream
 import io.tolgee.ee.service.glossary.formats.ImportGlossaryTerm
 import io.tolgee.ee.service.glossary.formats.csv.`in`.GlossaryCSVParser
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import kotlin.reflect.KMutableProperty0
@@ -21,7 +23,11 @@ class GlossaryImportService(
     inputStream: InputStream,
     delimiter: Char = ',',
   ): Int {
-    val parsed = GlossaryCSVParser(inputStream, delimiter).parse()
+    val parsed = try {
+      GlossaryCSVParser(inputStream, delimiter).parse()
+    } catch (e: Exception) {
+      throw BadRequestException(Message.FILE_PROCESSING_FAILED, cause = e)
+    }
 
     val terms = parsed.map {
       GlossaryTerm().apply {
