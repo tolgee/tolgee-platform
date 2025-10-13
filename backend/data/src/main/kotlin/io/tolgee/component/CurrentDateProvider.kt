@@ -88,7 +88,7 @@ class CurrentDateProvider(
 
   val localDate: LocalDate
       get() {
-        return (forcedDate ?: date).toInstant().atZone(systemDefault()).toLocalDate()
+        return date.toInstant().atZone(systemDefault()).toLocalDate()
       }
 
   override fun getNow(): Optional<TemporalAccessor> {

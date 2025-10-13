@@ -1,4 +1,4 @@
-import { Box, Link, TableCell, TableRow, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
@@ -13,18 +13,14 @@ import React, { useState } from 'react';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
-import { PaginatedHateoasTable } from 'tg.component/common/table/PaginatedHateoasTable';
-import { PlanMigrationStatus } from 'tg.ee.module/billing/administration/subscriptionPlans/migration/general/PlanMigrationStatus';
-import { EmptyState } from 'tg.component/common/EmptyState';
-import { useDateFormatter } from 'tg.hooks/useLocale';
 import { EditPlanMigrationForm } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/EditPlanMigrationForm';
+import { PlanMigrationHistoryList } from 'tg.ee.module/billing/administration/subscriptionPlans/migration/general/PlanMigrationHistoryList';
 
 export const AdministrationSelfHostedEePlanMigrationEdit = () => {
   const { t } = useTranslate();
   const match = useRouteMatch();
   const messaging = useMessage();
   const history = useHistory();
-  const formatDate = useDateFormatter();
   const migrationId = match.params[PARAMS.PLAN_MIGRATION_ID] as number;
   const [subscriptionsPage, setSubscriptionsPage] = useState(0);
 
@@ -130,57 +126,9 @@ export const AdministrationSelfHostedEePlanMigrationEdit = () => {
             {t('administration_plan_migration_migrated_subscriptions')}
           </Typography>
         </Box>
-        <PaginatedHateoasTable
-          wrapperComponentProps={{ className: 'listWrapper' }}
-          loadable={subscriptions}
-          onPageChange={setSubscriptionsPage}
-          tableHead={
-            <>
-              <TableCell>{t('global_organization')}</TableCell>
-              <TableCell>{t('administration_plan_migration_from')}</TableCell>
-              <TableCell>{t('administration_plan_migration_to')}</TableCell>
-              <TableCell>{t('administration_plan_migrated_at')}</TableCell>
-              <TableCell>
-                {t('administration_plan_migrated_subscription_status')}
-              </TableCell>
-            </>
-          }
-          renderItem={(item) => (
-            <TableRow>
-              <TableCell>
-                <Link
-                  href={LINKS.ORGANIZATION_PROFILE.build({
-                    [PARAMS.ORGANIZATION_SLUG]: item.organizationSlug,
-                  })}
-                >
-                  {item.organizationName}
-                </Link>{' '}
-              </TableCell>
-              <TableCell>{item.originPlan}</TableCell>
-              <TableCell>{item.plan}</TableCell>
-              <TableCell>
-                {formatDate(item.scheduledAt, {
-                  timeZone: 'UTC',
-                  dateStyle: 'short',
-                  timeStyle: 'short',
-                })}
-              </TableCell>
-              <TableCell>
-                <PlanMigrationStatus
-                  status={item.status}
-                  date={item.finalizedAt}
-                />
-              </TableCell>
-            </TableRow>
-          )}
-          emptyPlaceholder={
-            <EmptyState
-              loading={subscriptions.isLoading}
-              wrapperProps={{ py: 1 }}
-            >
-              <T keyName="administration_plan_migration_no_migrated_subscriptions" />
-            </EmptyState>
-          }
+        <PlanMigrationHistoryList
+          subscriptions={subscriptions}
+          setPage={setSubscriptionsPage}
         />
       </BaseAdministrationView>
     </DashboardPage>
