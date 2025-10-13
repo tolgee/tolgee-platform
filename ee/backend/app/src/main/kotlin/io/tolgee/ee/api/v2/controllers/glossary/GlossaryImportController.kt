@@ -40,12 +40,12 @@ class GlossaryImportController(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,
     @RequestPart("file") file: MultipartFile,
-    @RequestParam(name = "override_existing_terms", required = false, defaultValue = "false")
-    overrideExistingTerms: Boolean,
+    @RequestParam(name = "remove_existing_terms", required = false, defaultValue = "false")
+    removeExistingTerms: Boolean,
   ): GlossaryImportResult {
     val organization = organizationHolder.organization
     val glossary = glossaryService.get(organization.id, glossaryId)
-    if (overrideExistingTerms) {
+    if (removeExistingTerms) {
       glossaryTermService.deleteAllByGlossary(glossary)
     }
 

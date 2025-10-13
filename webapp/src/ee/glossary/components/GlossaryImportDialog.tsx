@@ -49,7 +49,7 @@ export const GlossaryImportDialog: React.VFC<Props> = ({
 }) => {
   const glossary = useGlossary();
 
-  const [file, setFile] = useState<FilesType | null>(null);
+  const [file, setFile] = useState<FilesType[0] | null>(null);
   const [importMode, setImportMode] = useState<ImportMode>('add');
 
   const importMutation = useApiMutation({
@@ -70,11 +70,11 @@ export const GlossaryImportDialog: React.VFC<Props> = ({
         },
         content: {
           'multipart/form-data': {
-            file: file as any,
+            file: file.file as any,
           },
         },
         query: {
-          override_existing_terms: importMode === 'replace',
+          remove_existing_terms: importMode === 'replace',
         },
       },
       {
@@ -105,18 +105,10 @@ export const GlossaryImportDialog: React.VFC<Props> = ({
           file={file}
           onFileSelect={setFile}
           acceptedFileTypes={[{ extension: '.csv', icon: CsvLogo }]}
-          dropzoneText={<T keyName="glossary_import_drop_file_text" />}
-          selectButtonText={<T keyName="glossary_import_select_file_button" />}
           helpLink={{
             href: 'https://docs.tolgee.io/platform/projects_and_organizations/glossary/import/csv-format',
             text: <T keyName="glossary_import_csv_formatting_guide" />,
           }}
-          invalidFileTypeMessage={
-            <T keyName="glossary_import_invalid_file_type" />
-          }
-          dataCyDropzone="glossary-import-dropzone"
-          dataCySelectButton="glossary-import-select-file-button"
-          dataCyRemoveButton="glossary-import-remove-file-button"
         />
 
         {file && hasExistingTerms && (

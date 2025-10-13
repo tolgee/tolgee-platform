@@ -6,8 +6,8 @@ export type SingleFileDropzoneProps = Omit<
   FileDropzoneProps,
   'files' | 'onFilesSelect' | 'maxFiles'
 > & {
-  file: FilesType | null;
-  onFileSelect: (file: FilesType | null) => void;
+  file: FilesType[0] | null;
+  onFileSelect: (file: FilesType[0] | null) => void;
 };
 
 export const SingleFileDropzone: React.FC<SingleFileDropzoneProps> = ({
@@ -17,7 +17,7 @@ export const SingleFileDropzone: React.FC<SingleFileDropzoneProps> = ({
 }) => {
   const files = file ? [file] : [];
 
-  const handleFilesSelect = (newFiles: FilesType[]) => {
+  const handleFilesSelect = (newFiles: FilesType) => {
     onFileSelect(newFiles.length > 0 ? newFiles[0] : null);
   };
 

@@ -1,48 +1,33 @@
 import React, { useRef, ReactNode } from 'react';
-import {
-  Box,
-  Button,
-  Typography,
-  styled,
-  IconButton,
-  Link,
-} from '@mui/material';
+import { Box, Button, Typography, styled, Link } from '@mui/material';
 import { T } from '@tolgee/react';
-import { XClose, Upload01, File02 } from '@untitled-ui/icons-react';
+import { Upload01, File02 } from '@untitled-ui/icons-react';
 
 import { messageService } from 'tg.service/MessageService';
 import { DragDropArea } from './DragDropArea';
-import { ImportFileDropzone } from 'tg.views/projects/import/component/ImportFileDropzone';
 import { FilesType } from 'tg.fixtures/FileUploadFixtures';
+import { FileDropzoneSelectedFile } from 'tg.component/common/FileDropzoneSelectedFile';
 
-const StyledFileChip = styled(Box)`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing(1)};
-  padding: ${({ theme }) => theme.spacing(1, 2)};
-  background-color: ${({ theme }) => theme.palette.background.paper};
+const StyledContainer = styled(Box)`
+  border: 2px dashed ${({ theme }) => theme.palette.tokens.border.secondary};
   border-radius: ${({ theme }) => theme.shape.borderRadius}px;
-  border: 1px solid ${({ theme }) => theme.palette.divider};
+  padding: ${({ theme }) => theme.spacing(6, 4)};
+  text-align: center;
+  background-color: ${({ theme }) =>
+    theme.palette.tokens.background['paper-3']};
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(2)};
+  margin-bottom: ${({ theme }) => theme.spacing(3)};
 `;
 
 const StyledUploadIcon = styled(Upload01)`
   width: 32px;
   height: 32px;
   color: ${({ theme }) => theme.palette.text.secondary};
-`;
-
-const StyledFileIcon = styled('div')`
-  width: 20px;
-  height: 20px;
-  color: ${({ theme }) => theme.palette.text.secondary};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  svg {
-    width: 100%;
-    height: 100%;
-  }
 `;
 
 export type FileType = {
@@ -55,16 +40,10 @@ export type FileDropzoneProps = {
   onFilesSelect: (files: FilesType) => void;
   maxFiles?: number;
   acceptedFileTypes: FileType[];
-  dropzoneText: ReactNode;
-  selectButtonText: ReactNode;
   helpLink?: {
     href: string;
     text: ReactNode;
   };
-  invalidFileTypeMessage?: ReactNode;
-  dataCyDropzone?: string;
-  dataCySelectButton?: string;
-  dataCyRemoveButton?: string;
 };
 
 export const FileDropzone: React.FC<FileDropzoneProps> = ({
@@ -72,40 +51,27 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
   onFilesSelect,
   maxFiles = Infinity,
   acceptedFileTypes,
-  dropzoneText,
-  selectButtonText,
   helpLink,
-  invalidFileTypeMessage,
-  dataCyDropzone,
-  dataCySelectButton,
-  dataCyRemoveButton,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const getExtensions = () => {
-    return acceptedFileTypes.map((config) => config.extension);
-  };
+  const findFileType = (fileName: string) =>
+    acceptedFileTypes.find((config) =>
+      fileName.toLowerCase().endsWith(config.extension.toLowerCase())
+    );
 
   const isValidFileType = (fileName: string) => {
-    return getExtensions().some((type) =>
-      fileName.toLowerCase().endsWith(type.toLowerCase())
-    );
+    return findFileType(fileName) !== undefined;
   };
 
   const getFileIcon = (fileName: string) => {
-    const fileConfig = acceptedFileTypes.find((config) =>
-      fileName.toLowerCase().endsWith(config.extension.toLowerCase())
-    );
-    // Return the configured icon for the file type, or File02 as the default file icon fallback
-    return fileConfig?.icon || File02;
+    return findFileType(fileName)?.icon || File02;
   };
 
   const handleFilesReceived = (receivedFiles: FilesType) => {
     const validFiles = receivedFiles.filter((receivedFile) => {
       if (!isValidFileType(receivedFile.name)) {
-        if (invalidFileTypeMessage) {
-          messageService.error(invalidFileTypeMessage);
-        }
+        messageService.error(<T keyName="error_message_invalid_file_type" />);
         return false;
       }
       return true;
@@ -134,20 +100,32 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
     }
   };
 
+  const canAddMoreFiles = files.length < maxFiles;
+
   const handleClick = () => {
-    if (files.length < maxFiles) {
+    if (canAddMoreFiles) {
       fileInputRef.current?.click();
     }
   };
 
-  const canAddMoreFiles = files.length < maxFiles;
+  const renderFile = (file: FilesType[0], index: number) => {
+    const FileIconComponent = getFileIcon(file.name);
+    return (
+      <FileDropzoneSelectedFile
+        icon={<FileIconComponent />}
+        file={file}
+        key={`${file.name}-${index}`}
+        onRemove={() => handleRemoveFile(index)}
+      />
+    );
+  };
 
   return (
     <>
       <input
         ref={fileInputRef}
         type="file"
-        accept={getExtensions().join(',')}
+        accept={acceptedFileTypes.map((config) => config.extension).join(',')}
         multiple={maxFiles > 1}
         style={{ display: 'none' }}
         onChange={handleFileChange}
@@ -156,69 +134,16 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
       <DragDropArea
         onFilesReceived={handleFilesReceived}
         onClick={handleClick}
-        data-cy={dataCyDropzone}
+        data-cy="file-dropzone"
+        maxItems={maxFiles - files.length}
       >
-        {files.length === 0 ? (
-          <>
-            <StyledUploadIcon />
-            <Typography variant="body1" color="text.primary">
-              {dropzoneText}
-            </Typography>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={(e) => {
-                e.stopPropagation();
-                fileInputRef.current?.click();
-              }}
-              data-cy={dataCySelectButton}
-            >
-              {selectButtonText}
-            </Button>
-            {helpLink && (
-              <Link
-                href={helpLink.href}
-                target="_blank"
-                rel="noopener"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Typography variant="body2" color="primary">
-                  {helpLink.text}
-                </Typography>
-              </Link>
-            )}
-          </>
-        ) : (
-          <Box width="100%">
-            <Typography variant="subtitle2" mb={2}>
-              <T keyName="glossary_import_file_to_import_label" />
-            </Typography>
-            <Box display="flex" flexDirection="column" gap={1}>
-              {files.map((selectedFile, index) => {
-                const FileIconComponent = getFileIcon(selectedFile.name);
-                return (
-                  <StyledFileChip key={`${selectedFile.name}-${index}`}>
-                    <StyledFileIcon>
-                      <FileIconComponent />
-                    </StyledFileIcon>
-                    <Typography variant="body2" sx={{ flex: 1 }}>
-                      {selectedFile.name}
-                    </Typography>
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveFile(index);
-                      }}
-                      data-cy={`${dataCyRemoveButton}-${index}`}
-                    >
-                      <XClose style={{ width: 20, height: 20 }} />
-                    </IconButton>
-                  </StyledFileChip>
-                );
-              })}
-            </Box>
-            {canAddMoreFiles && (
+        <StyledContainer>
+          {files.length === 0 ? (
+            <>
+              <StyledUploadIcon />
+              <Typography variant="body1" color="text.primary">
+                <T keyName="upload_drop_file_text" />
+              </Typography>
               <Button
                 variant="outlined"
                 color="primary"
@@ -226,27 +151,48 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
-                sx={{ mt: 2 }}
-                data-cy={`${dataCySelectButton}-add-more`}
+                data-cy="file-dropzone-select-button"
               >
-                <T keyName="add_more_files" />
+                <T keyName="upload_select_file_button" />
               </Button>
-            )}
-            {helpLink && (
-              <Link
-                href={helpLink.href}
-                target="_blank"
-                rel="noopener"
-                onClick={(e) => e.stopPropagation()}
-                sx={{ mt: 2, display: 'inline-block' }}
-              >
-                <Typography variant="body2" color="primary">
-                  {helpLink.text}
-                </Typography>
-              </Link>
-            )}
-          </Box>
-        )}
+            </>
+          ) : (
+            <Box width="100%">
+              <Typography variant="subtitle2" mb={2}>
+                <T keyName="upload_file_to_import_label" />
+              </Typography>
+              <Box display="flex" flexDirection="column" gap={1}>
+                {files.map(renderFile)}
+              </Box>
+              {canAddMoreFiles && (
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fileInputRef.current?.click();
+                  }}
+                  sx={{ mt: 2 }}
+                  data-cy="file-dropzone-add-more-button"
+                >
+                  <T keyName="upload_add_more_files" />
+                </Button>
+              )}
+            </Box>
+          )}
+          {helpLink && (
+            <Link
+              href={helpLink.href}
+              target="_blank"
+              rel="noopener"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Typography variant="body2" color="primary">
+                {helpLink.text}
+              </Typography>
+            </Link>
+          )}
+        </StyledContainer>
       </DragDropArea>
     </>
   );

@@ -4,7 +4,6 @@ import { T, useTranslate } from '@tolgee/react';
 
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { useConfig } from 'tg.globalContext/helpers';
-import { ImportFileDropzone } from './ImportFileDropzone';
 import { ImportProgressOverlay } from './ImportProgressOverlay';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { FilesType } from 'tg.fixtures/FileUploadFixtures';
@@ -17,6 +16,7 @@ import {
   ImportInputAreaLayoutTop,
 } from './ImportInputAreaLayout';
 import { ImportSupportedFormats } from './ImportSupportedFormats';
+import { DragDropArea } from 'tg.component/common/DragDropArea';
 
 export const MAX_FILE_COUNT = 20;
 
@@ -150,9 +150,11 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
 
   /* @ts-ignore */
   return (
-    <ImportFileDropzone
-      onNewFiles={onNewFiles}
+    <DragDropArea
+      onFilesReceived={onNewFiles}
+      data-cy="dropzone"
       active={!props.isProgressOverlayActive}
+      maxItems={MAX_FILE_COUNT}
     >
       <QuickStartHighlight
         offset={10}
@@ -204,7 +206,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
           </ImportInputAreaLayout>
         </StyledRoot>
       </QuickStartHighlight>
-    </ImportFileDropzone>
+    </DragDropArea>
   );
 };
 export default ImportFileInput;

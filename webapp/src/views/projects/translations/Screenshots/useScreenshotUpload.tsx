@@ -6,6 +6,7 @@ import { useConfig } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useTranslationsActions } from '../context/TranslationsContext';
 import { messageService } from 'tg.service/MessageService';
+import { FilesType } from 'tg.fixtures/FileUploadFixtures';
 
 type Props = {
   keyId: number;
@@ -31,17 +32,17 @@ export const useScreenshotUpload = ({ keyId, fileRef }: Props) => {
     if (!files) {
       return;
     }
-    const toUpload: File[] = [];
+    const toUpload: FilesType = [];
     for (let i = 0; i < files.length; i++) {
       const item = files.item(i);
       if (item) {
-        toUpload.push(item);
+        toUpload.push({ file: item, name: item.name });
       }
     }
     validateAndUpload(toUpload);
   }
 
-  const validate = (files: File[]) => {
+  const validate = (files: FilesType) => {
     const result = {
       valid: false,
       errors: [] as ReactNode[],
@@ -54,7 +55,7 @@ export const useScreenshotUpload = ({ keyId, fileRef }: Props) => {
     }
 
     files.forEach((file) => {
-      if (file.size > config.maxUploadFileSize * 1024) {
+      if (file.file.size > config.maxUploadFileSize * 1024) {
         result.errors.push(
           <T
             keyName="translations.screenshots.validation.file_too_big"
@@ -62,7 +63,7 @@ export const useScreenshotUpload = ({ keyId, fileRef }: Props) => {
           />
         );
       }
-      if (ALLOWED_UPLOAD_TYPES.indexOf(file.type) < 0) {
+      if (ALLOWED_UPLOAD_TYPES.indexOf(file.file.type) < 0) {
         result.errors.push(
           <T
             keyName="translations.screenshots.validation.unsupported_format"
@@ -76,7 +77,7 @@ export const useScreenshotUpload = ({ keyId, fileRef }: Props) => {
     return { ...result, valid };
   };
 
-  const validateAndUpload = async (files: File[]) => {
+  const validateAndUpload = async (files: FilesType) => {
     const validation = validate(files);
     let errorHappened = false;
     if (validation.valid) {
@@ -87,7 +88,7 @@ export const useScreenshotUpload = ({ keyId, fileRef }: Props) => {
               path: { projectId: project.id, keyId },
               content: {
                 'multipart/form-data': {
-                  screenshot: file as any,
+                  screenshot: file.file as any,
                 },
               },
             })

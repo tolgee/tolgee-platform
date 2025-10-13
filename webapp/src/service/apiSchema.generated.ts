@@ -9204,7 +9204,7 @@ export interface operations {
         glossaryId: number;
       };
       query: {
-        override_existing_terms?: boolean;
+        remove_existing_terms?: boolean;
       };
     };
     responses: {
