@@ -75,7 +75,13 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
     });
 
     if (validFiles.length > 0) {
-      const newFiles = [...files, ...validFiles].slice(0, maxFiles);
+      const allFiles = [...files, ...validFiles];
+      const newFiles = allFiles.slice(0, maxFiles);
+      if (newFiles.length !== allFiles.length) {
+        messageService.error(
+          <T keyName="error_message_too_many_files" params={{ maxFiles }} />
+        );
+      }
       onFilesSelect(newFiles);
     }
   };
