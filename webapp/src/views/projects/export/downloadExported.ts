@@ -7,23 +7,27 @@ export const downloadExported = async (
   projectName: string
 ) => {
   const data = await response.blob();
+  const onlyPossibleLanguageString =
+    languages.length === 1 ? `_${languages[0]}` : '';
+  const dateStr = '_' + new Date().toISOString().split('T')[0];
   const url = URL.createObjectURL(data);
   try {
     const a = document.createElement('a');
-    const onlyPossibleLanguageString =
-      languages.length === 1 ? `_${languages[0]}` : '';
-    a.href = url;
-    const dateStr = '_' + new Date().toISOString().split('T')[0];
-    if (data.type === 'application/zip') {
-      a.download = projectName + dateStr + '.zip';
-    } else {
-      const extension = parseExtension(response) || format.extension;
-      a.download =
-        projectName + onlyPossibleLanguageString + dateStr + '.' + extension;
+    try {
+      a.href = url;
+      if (data.type === 'application/zip') {
+        a.download = projectName + dateStr + '.zip';
+      } else {
+        const extension = parseExtension(response) || format.extension;
+        a.download =
+          projectName + onlyPossibleLanguageString + dateStr + '.' + extension;
+      }
+      a.click();
+    } finally {
+      a.remove();
     }
-    a.click();
   } finally {
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 7000);
   }
 };
 

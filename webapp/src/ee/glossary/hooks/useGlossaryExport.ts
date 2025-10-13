@@ -6,12 +6,16 @@ const downloadExported = async (response: Response, glossaryName: string) => {
   const url = URL.createObjectURL(data);
   try {
     const a = document.createElement('a');
-    a.href = url;
-    const dateStr = new Date().toISOString().split('T')[0];
-    a.download = 'glossary_' + glossaryName + '_' + dateStr + '.csv';
-    a.click();
+    try {
+      a.href = url;
+      const dateStr = new Date().toISOString().split('T')[0];
+      a.download = 'glossary_' + glossaryName + '_' + dateStr + '.csv';
+      a.click();
+    } finally {
+      a.remove();
+    }
   } finally {
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 7000);
   }
 };
 
