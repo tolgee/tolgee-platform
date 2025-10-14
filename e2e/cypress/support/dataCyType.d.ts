@@ -885,5 +885,4 @@ declare namespace DataCy {
         "webhooks-item-test" |
         "webhooks-list-item" |
         "webhooks-subtitle"
-}     "webhooks-subtitle"
 }

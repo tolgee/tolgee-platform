@@ -2550,7 +2550,8 @@ export interface components {
         | "unsupported_media_type"
         | "impersonation_of_admin_by_supporter_not_allowed"
         | "already_impersonating_user"
-        | "operation_not_permitted_in_read_only_mode";
+        | "operation_not_permitted_in_read_only_mode"
+        | "file_processing_failed";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -5836,7 +5837,8 @@ export interface components {
         | "unsupported_media_type"
         | "impersonation_of_admin_by_supporter_not_allowed"
         | "already_impersonating_user"
-        | "operation_not_permitted_in_read_only_mode";
+        | "operation_not_permitted_in_read_only_mode"
+        | "file_processing_failed";
       params?: unknown[];
       success: boolean;
     };
