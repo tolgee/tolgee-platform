@@ -22,7 +22,7 @@ const StyledOverlay = styled(Box)`
     border-color: ${({ theme }) =>
       theme.palette.tokens.error._states.outlinedBorder};
     background-color: ${({ theme }) =>
-      theme.palette.tokens._components.alert.error.color};
+      theme.palette.tokens._components.alert.error.background};
   }
 `;
 
@@ -46,7 +46,7 @@ const StyledValidIcon = styled(UploadCloud01)`
 const StyledInvalidIcon = styled(XCircle)`
   width: 32px;
   height: 32px;
-  color: ${({ theme }) => theme.palette.text.primary};
+  color: ${({ theme }) => theme.palette.error.main};
 `;
 
 export type DragDropAreaProps = {
