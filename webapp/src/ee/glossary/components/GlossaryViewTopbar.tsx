@@ -1,4 +1,4 @@
-import { Box, IconButton, styled } from '@mui/material';
+import { Box, IconButton, styled, Tooltip } from '@mui/material';
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
 import { GlossaryViewLanguageSelect } from 'tg.ee.module/glossary/components/GlossaryViewLanguageSelect';
 import { BaseViewAddButton } from 'tg.component/layout/BaseViewAddButton';
@@ -60,26 +60,30 @@ export const GlossaryViewTopbar = ({
               }}
             />
             {onImport && (
+              <Tooltip title={t('glossary_import_button')}>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={onImport}
+                  data-cy="glossary-import-button"
+                  aria-label={t('glossary_import_button')}
+                >
+                  <UploadCloud02 height={20} width={20} />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Tooltip title={t('glossary_export_button')}>
               <IconButton
                 size="small"
                 color="primary"
-                onClick={onImport}
-                data-cy="glossary-import-button"
-                aria-label={t('glossary_import_button')}
+                onClick={triggerExport}
+                data-cy="glossary-export-button"
+                disabled={exportLoading}
+                aria-label={t('glossary_export_button')}
               >
-                <UploadCloud02 height={20} width={20} />
+                <FileDownload03 height={20} width={20} />
               </IconButton>
-            )}
-            <IconButton
-              size="small"
-              color="primary"
-              onClick={triggerExport}
-              data-cy="glossary-export-button"
-              disabled={exportLoading}
-              aria-label={t('glossary_export_button')}
-            >
-              <FileDownload03 height={20} width={20} />
-            </IconButton>
+            </Tooltip>
             {onCreateTerm && (
               <BaseViewAddButton
                 onClick={onCreateTerm}
