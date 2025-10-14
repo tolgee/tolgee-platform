@@ -1,5 +1,6 @@
 import { HOST } from '../../common/constants';
 import { E2GlossaryTermCreateEditDialog } from './E2GlossaryTermCreateEditDialog';
+import { E2GlossaryImportDialog } from './E2GlossaryImportDialog';
 import { confirmStandard, gcy } from '../../common/shared';
 import {
   getGlossaryByNameFromOrganizationData,
@@ -75,5 +76,21 @@ export class E2GlossaryView {
       .click();
     gcy('create-glossary-term-dialog').should('be.visible');
     return new E2GlossaryTermCreateEditDialog();
+  }
+
+  openImportDialogWhenGlossaryIsEmpty() {
+    gcy('glossary-empty-import-terms-button').click();
+    gcy('glossary-import-dialog').should('be.visible');
+    return new E2GlossaryImportDialog();
+  }
+
+  openImportDialog() {
+    gcy('glossary-import-button').click();
+    gcy('glossary-import-dialog').should('be.visible');
+    return new E2GlossaryImportDialog();
+  }
+
+  clickExport() {
+    gcy('glossary-export-button').click();
   }
 }
