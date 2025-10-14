@@ -8,7 +8,7 @@ class CsvDelimiterDetector(private val inputStream: InputStream) {
   }
 
   val delimiter by lazy {
-    val headerLine = inputStream.reader().buffered().lineSequence().firstOrNull() ?: ""
+    val headerLine = inputStream.use { it.reader().buffered().lineSequence().firstOrNull() ?: "" }
     val counts =
       DELIMITERS.map { delimiter ->
         headerLine.count { it == delimiter }
