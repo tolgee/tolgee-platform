@@ -50,7 +50,7 @@ export const GlossaryImportDialog: React.VFC<Props> = ({
   const glossary = useGlossary();
 
   const [file, setFile] = useState<FilesType[number] | null>(null);
-  const [importMode, setImportMode] = useState<ImportMode>('add');
+  const [importMode, setImportMode] = useState<ImportMode>('replace');
 
   const importMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/import',
