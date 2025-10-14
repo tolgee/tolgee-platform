@@ -1,7 +1,7 @@
 import React, { useRef, ReactNode } from 'react';
 import { Box, Button, Typography, styled, Link } from '@mui/material';
 import { T } from '@tolgee/react';
-import { Upload01, File02 } from '@untitled-ui/icons-react';
+import { File02 } from '@untitled-ui/icons-react';
 
 import { messageService } from 'tg.service/MessageService';
 import { DragDropArea } from './DragDropArea';
@@ -25,10 +25,25 @@ const StyledContainer = styled(Box)`
   margin-bottom: ${({ theme }) => theme.spacing(3)};
 `;
 
-const StyledUploadIcon = styled(Upload01)`
+const StyledIconWrapper = styled(Box)`
   width: 32px;
   height: 32px;
   color: ${({ theme }) => theme.palette.text.secondary};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+`;
+
+const StyledSupportedFilesIconsContainer = styled(Box)`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spacing(1)};
+  justify-content: center;
 `;
 
 export type FileType = {
@@ -129,6 +144,18 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
     );
   };
 
+  const renderIcon = (config: FileType) => {
+    const FileIcon = config.icon;
+    if (FileIcon === undefined) {
+      return null;
+    }
+    return (
+      <StyledIconWrapper key={config.extension}>
+        <FileIcon />
+      </StyledIconWrapper>
+    );
+  };
+
   return (
     <>
       <input
@@ -148,7 +175,9 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
         <StyledContainer>
           {files.length === 0 ? (
             <>
-              <StyledUploadIcon />
+              <StyledSupportedFilesIconsContainer>
+                {acceptedFileTypes.map(renderIcon)}
+              </StyledSupportedFilesIconsContainer>
               <Typography variant="body1" color="text.primary">
                 <T keyName="upload_drop_file_text" />
               </Typography>
