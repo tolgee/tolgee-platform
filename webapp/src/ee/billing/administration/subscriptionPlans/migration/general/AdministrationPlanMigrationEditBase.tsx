@@ -4,7 +4,7 @@ import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
 import { useHistory } from 'react-router-dom';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
-import { PlanMigrationHistoryList } from 'tg.ee.module/billing/administration/subscriptionPlans/migration/general/PlanMigrationHistoryList';
+import { PlanMigrationRecordList } from 'tg.ee.module/billing/administration/subscriptionPlans/migration/general/PlanMigrationRecordList';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { UseQueryResult } from 'react-query';
 import { HateoasListData } from 'tg.service/response.types';
@@ -12,7 +12,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { NavigationItem } from 'tg.component/navigation/Navigation';
 import { ComponentType } from 'react';
 
-type PlanMigrationHistory = components['schemas']['PlanMigrationHistoryModel'];
+type PlanMigrationRecord = components['schemas']['PlanMigrationRecordModel'];
 
 type EditFormComponentProps<M> = {
   migration: M;
@@ -22,7 +22,7 @@ type EditFormComponentProps<M> = {
 
 type Props<M> = {
   migrations: UseQueryResult<M>;
-  subscriptions: UseQueryResult<HateoasListData<PlanMigrationHistory>>;
+  subscriptions: UseQueryResult<HateoasListData<PlanMigrationRecord>>;
   navigation: NavigationItem[];
   listLink: string;
   form: ComponentType<EditFormComponentProps<M>>;
@@ -84,7 +84,7 @@ export const AdministrationPlanMigrationEditBase = <M,>({
             {t('administration_plan_migration_migrated_subscriptions')}
           </Typography>
         </Box>
-        <PlanMigrationHistoryList
+        <PlanMigrationRecordList
           subscriptions={subscriptions}
           setPage={onPage}
         />
