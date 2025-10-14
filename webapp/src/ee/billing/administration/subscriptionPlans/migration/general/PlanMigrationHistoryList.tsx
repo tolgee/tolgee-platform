@@ -47,7 +47,7 @@ export const PlanMigrationHistoryList = ({ subscriptions, setPage }: Props) => {
               })}
             >
               {item.organizationName}
-            </Link>{' '}
+            </Link>
           </TableCell>
           <TableCell>{item.originPlan}</TableCell>
           <TableCell>{item.plan}</TableCell>
