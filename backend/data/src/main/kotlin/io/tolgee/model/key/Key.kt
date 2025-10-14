@@ -11,6 +11,8 @@ import io.tolgee.events.OnKeyPrePersist
 import io.tolgee.events.OnKeyPreRemove
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchVersionedEntity
 import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.task.TaskKey
@@ -21,6 +23,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
@@ -35,6 +38,7 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.context.ApplicationEventPublisher
+import java.util.Date
 
 @Entity
 @ActivityLoggedEntity
@@ -45,6 +49,7 @@ import org.springframework.context.ApplicationEventPublisher
   indexes = [
     Index(columnList = "project_id"),
     Index(columnList = "namespace_id"),
+    Index(columnList = "branch_id"),
   ],
 )
 class Key(
@@ -54,7 +59,7 @@ class Key(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var name: String = "",
-) : StandardAuditModel(), WithKeyMeta {
+) : StandardAuditModel(), WithKeyMeta, BranchVersionedEntity<Key> {
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -62,6 +67,12 @@ class Key(
   @ManyToOne
   @ActivityLoggedProp
   var namespace: Namespace? = null
+
+  // Nullable for backward compatibility: NULL represents default branch for legacy data
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "branch_id")
+  @ActivityLoggedProp
+  var branch: Branch? = null
 
   @OneToMany(mappedBy = "key")
   var translations: MutableList<Translation> = mutableListOf()
@@ -82,6 +93,9 @@ class Key(
   @ActivityLoggedProp
   var pluralArgName: String? = null
 
+  @Column(nullable = true)
+  var cascadeUpdatedAt: Date? = null
+
   constructor(
     name: String,
     project: Project,
@@ -93,6 +107,9 @@ class Key(
 
   val path: PathDTO
     get() = PathDTO.fromFullPath(name)
+
+  val modifiedAt: Date
+    get() = cascadeUpdatedAt ?: updatedAt!!
 
   companion object {
     @Configurable
@@ -118,5 +135,20 @@ class Key(
 
   fun toSimpleKey(): SimpleKeyResult {
     return SimpleKeyResult(id, name, namespace?.name)
+  }
+
+  override fun resolveKeyId(): Long? = id
+
+  override fun isModified(oldState: Map<String, Any>): Boolean {
+    return oldState["isPlural"] != this.isPlural || oldState["pluralArgName"] != this.pluralArgName
+  }
+
+  override fun differsInBranchVersion(entity: Key): Boolean {
+    return true
+  }
+
+  override fun merge(source: Key) {
+    this.isPlural = source.isPlural
+    this.pluralArgName = source.pluralArgName
   }
 }

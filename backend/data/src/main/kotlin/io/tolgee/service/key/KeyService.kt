@@ -68,8 +68,9 @@ class KeyService(
     projectId: Long,
     name: String,
     namespace: String?,
+    branchName: String? = null,
   ): Key {
-    return keyRepository.getByNameAndNamespace(projectId, name, namespace)
+    return keyRepository.getByNameAndNamespace(projectId, name, namespace, branchName)
       .orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }!!
   }
 
@@ -77,16 +78,18 @@ class KeyService(
     projectId: Long,
     name: String,
     namespace: String?,
+    branch: String? = null,
   ): Key? {
-    return this.findOptional(projectId, name, namespace).orElseGet { null }
+    return this.findOptional(projectId, name, namespace, branch).orElseGet { null }
   }
 
   private fun findOptional(
     projectId: Long,
     name: String,
     namespace: String?,
+    branch: String?
   ): Optional<Key> {
-    return keyRepository.getByNameAndNamespace(projectId, name, namespace)
+    return keyRepository.getByNameAndNamespace(projectId, name, namespace, branch)
   }
 
   fun get(id: Long): Key {
@@ -122,7 +125,7 @@ class KeyService(
     project: Project,
     dto: CreateKeyDto,
   ): Key {
-    val key = create(project, dto.name, dto.namespace)
+    val key = create(project, dto.name, dto.namespace, dto.branch)
     key.isPlural = dto.isPlural
     if (key.isPlural) {
       key.pluralArgName = dto.pluralArgName
@@ -191,10 +194,11 @@ class KeyService(
     project: Project,
     name: String,
     namespace: String?,
+    branch: String? = null,
     isPlural: Boolean = false,
   ): Key {
-    checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace)
-    return createWithoutExistenceCheck(project, name, namespace, isPlural)
+    checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace, branch = branch)
+    return createWithoutExistenceCheck(project, name, namespace, branch, isPlural)
   }
 
   @Transactional
@@ -202,11 +206,17 @@ class KeyService(
     project: Project,
     name: String,
     namespace: String?,
+    branch: String?,
     isPlural: Boolean,
   ): Key {
     val key = Key(name = name, project = project).apply { this.isPlural = isPlural }
     if (!namespace.isNullOrBlank()) {
       key.namespace = namespaceService.findOrCreate(namespace, project.id)
+    }
+    if (!branch.isNullOrEmpty()) {
+      key.branch = project.branches.find { it.name == branch } ?: throw BadRequestException(Message.BRANCH_NOT_FOUND)
+    } else if (project.hasDefaultBranch()) {
+      key.branch = project.getDefaultBranch()
     }
     return save(key)
   }
@@ -220,19 +230,20 @@ class KeyService(
     keyMetaService.getOrCreateForKey(key).apply {
       description = dto.description
     }
-    return edit(key, dto.name, dto.namespace)
+    return edit(key, dto.name, dto.namespace, dto.branch)
   }
 
   fun edit(
     key: Key,
     newName: String,
     newNamespace: String?,
+    branch: String?,
   ): Key {
     if (key.name == newName && key.namespace?.name == newNamespace) {
       return key
     }
 
-    checkKeyNotExisting(key.project.id, newName, newNamespace)
+    checkKeyNotExisting(key.project.id, newName, newNamespace, branch)
 
     key.name = newName
 
@@ -281,8 +292,9 @@ class KeyService(
     projectId: Long,
     name: String,
     namespace: String?,
+    branch: String?
   ) {
-    if (findOptional(projectId, name, namespace).isPresent) {
+    if (findOptional(projectId, name, namespace, branch).isPresent) {
       throw ValidationException(Message.KEY_EXISTS)
     }
   }
@@ -393,8 +405,9 @@ class KeyService(
 
   fun getPaged(
     projectId: Long,
+    branch: String?,
     pageable: Pageable,
-  ): Page<KeyView> = keyRepository.getAllByProjectId(projectId, pageable)
+  ): Page<KeyView> = keyRepository.getAllByProjectId(projectId, branch, pageable)
 
   fun getKeysWithTags(keys: Set<Key>): List<Key> = keyRepository.getWithTags(keys)
 
