@@ -26,7 +26,7 @@ import { PlanSubscriptionCount } from 'tg.ee.module/billing/component/Plan/PlanS
 import { PlanListPriceInfo } from 'tg.ee.module/billing/component/Plan/PlanListPriceInfo';
 import { PlanArchivedChip } from 'tg.ee.module/billing/component/Plan/PlanArchivedChip';
 import clsx from 'clsx';
-import { PlanMigratingChip } from 'tg.ee.module/billing/component/Plan/PlanMigratingChip';
+import { CloudPlanMigratingChip } from 'tg.ee.module/billing/component/Plan/migration/CloudPlanMigratingChip';
 
 type CloudPlanModel = components['schemas']['CloudPlanModel'];
 
@@ -145,7 +145,7 @@ export const AdministrationCloudPlansView = () => {
                   </StyledListItemText>
                   <PlanArchivedChip isArchived={plan.archivedAt != null} />
                   <PlanPublicChip isPublic={plan.public} />
-                  <PlanMigratingChip
+                  <CloudPlanMigratingChip
                     migrationId={plan.migrationId}
                     isEnabled={plan.activeMigration}
                   />
