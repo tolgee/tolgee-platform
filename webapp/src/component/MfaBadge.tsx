@@ -1,4 +1,4 @@
-import { ShieldTick } from '@untitled-ui/icons-react';
+import { ShieldTick, ShieldOff } from '@untitled-ui/icons-react';
 import { styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
@@ -21,14 +21,32 @@ const StyledShieldTick = styled(ShieldTick)`
   color: ${({ theme }) => theme.palette.success.main};
 `;
 
-export const MfaBadge = () => {
+const StyledShieldOff = styled(ShieldOff)`
+  width: 14px;
+  height: 14px;
+  color: ${({ theme }) => theme.palette.error.main};
+`;
+
+type Props = {
+  enabled: boolean;
+};
+
+export const MfaBadge = ({ enabled }: Props) => {
   const { t } = useTranslate();
 
   return (
-    <Tooltip title={t('tooltip_user_mfa_enabled')}>
+    <Tooltip
+      title={
+        enabled ? t('tooltip_user_mfa_enabled') : t('tooltip_user_mfa_disabled')
+      }
+    >
       <StyledTextWrapper>
-        <StyledShieldTick aria-hidden="true" focusable="false" />
-        <StyledText>2FA</StyledText>
+        {enabled ? (
+          <StyledShieldTick aria-hidden="true" focusable="false" />
+        ) : (
+          <StyledShieldOff aria-hidden="true" focusable="false" />
+        )}
+        <StyledText>{t('user_mfa')}</StyledText>
       </StyledTextWrapper>
     </Tooltip>
   );

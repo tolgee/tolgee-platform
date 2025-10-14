@@ -74,7 +74,7 @@ export const AdministrationUsers = ({
                   {u.name} | {u.username} <Chip size="small" label={u.id} />
                 </ListItemText>
                 <Box display="flex" justifyContent="center" gap={1}>
-                  {u.mfaEnabled && <MfaBadge />}
+                  <MfaBadge enabled={u.mfaEnabled} />
                   <DebugCustomerAccountButton userId={u.id} />
                   <RoleSelector
                     user={u}

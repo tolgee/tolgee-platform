@@ -110,7 +110,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
         </StyledItemText>
       </StyledItemUser>
       <StyledItemActions>
-        {user.mfaEnabled && <MfaBadge />}
+        <MfaBadge enabled={user.mfaEnabled} />
         <ScopesInfo scopes={user.computedPermission.scopes} />
         <LanguagePermissionSummary
           permissions={user.computedPermission}
