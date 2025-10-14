@@ -2,9 +2,7 @@ import { glossaryTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 import { gcy } from '../../common/shared';
 import { TestDataStandardResponse } from '../../common/apiCalls/testData/generator';
-import { E2GlossariesView } from '../../compounds/glossaries/E2GlossariesView';
 import { E2GlossaryView } from '../../compounds/glossaries/E2GlossaryView';
-import { E2GlossaryCreateEditDialog } from '../../compounds/glossaries/E2GlossaryCreateEditDialog';
 
 describe('Glossary import and export', () => {
   let data: TestDataStandardResponse;
