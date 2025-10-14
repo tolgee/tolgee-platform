@@ -10,15 +10,14 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { HateoasListData } from 'tg.service/response.types';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 
-type PlanMigrationHistoryModel =
-  components['schemas']['PlanMigrationHistoryModel'];
+type PlanMigrationRecord = components['schemas']['PlanMigrationRecordModel'];
 
 type Props = {
-  subscriptions: UseQueryResult<HateoasListData<PlanMigrationHistoryModel>>;
+  subscriptions: UseQueryResult<HateoasListData<PlanMigrationRecord>>;
   setPage: (page: number) => void;
 };
 
-export const PlanMigrationHistoryList = ({ subscriptions, setPage }: Props) => {
+export const PlanMigrationRecordList = ({ subscriptions, setPage }: Props) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
 

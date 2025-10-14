@@ -3,7 +3,7 @@ import { Chip, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 
-type Status = components['schemas']['PlanMigrationHistoryModel']['status'];
+type Status = components['schemas']['PlanMigrationRecordModel']['status'];
 
 type Props = {
   status: Status;
