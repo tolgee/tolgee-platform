@@ -1,4 +1,4 @@
-package io.tolgee.formats.csv.`in`
+package io.tolgee.util
 
 import java.io.InputStream
 

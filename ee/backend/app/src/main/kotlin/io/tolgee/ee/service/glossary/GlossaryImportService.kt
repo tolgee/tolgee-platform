@@ -8,6 +8,7 @@ import java.io.InputStream
 import io.tolgee.ee.service.glossary.formats.ImportGlossaryTerm
 import io.tolgee.ee.service.glossary.formats.csv.`in`.GlossaryCSVParser
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.util.CsvDelimiterDetector
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import kotlin.reflect.KMutableProperty0
@@ -21,10 +22,11 @@ class GlossaryImportService(
   fun importCsv(
     glossary: Glossary,
     inputStream: InputStream,
-    delimiter: Char = ',',
   ): Int {
+    val data = inputStream.readAllBytes()
     val parsed = try {
-      GlossaryCSVParser(inputStream, delimiter).parse()
+      val detector = CsvDelimiterDetector(data.inputStream())
+      GlossaryCSVParser(data.inputStream(), detector.delimiter).parse()
     } catch (e: Exception) {
       throw BadRequestException(Message.FILE_PROCESSING_FAILED, cause = e)
     }
