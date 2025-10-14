@@ -18,18 +18,18 @@ export const SelfHostedEePlanEditPlanMigrationForm = ({
   onSubmit,
   onDelete,
 }: Props) => {
-  const updatePlanMigrationLoadable = useBillingApiMutation({
+  const updateLoadable = useBillingApiMutation({
     url: '/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}',
     method: 'put',
   });
 
-  const deletePlanMigrationMutation = useBillingApiMutation({
+  const deleteLoadable = useBillingApiMutation({
     url: '/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}',
     method: 'delete',
   });
 
   const remove = (migrationId: number) => {
-    deletePlanMigrationMutation.mutate(
+    deleteLoadable.mutate(
       { path: { migrationId } },
       {
         onSuccess: onDelete,
@@ -38,7 +38,7 @@ export const SelfHostedEePlanEditPlanMigrationForm = ({
   };
 
   const submit = (values: PlanMigrationFormData) => {
-    updatePlanMigrationLoadable.mutate(
+    updateLoadable.mutate(
       {
         path: { migrationId: migration.id },
         content: { 'application/json': values },
@@ -54,7 +54,7 @@ export const SelfHostedEePlanEditPlanMigrationForm = ({
       migration={migration}
       onSubmit={submit}
       onDelete={remove}
-      loading={updatePlanMigrationLoadable.isLoading}
+      loading={updateLoadable.isLoading}
       planType={'self-hosted'}
     />
   );
