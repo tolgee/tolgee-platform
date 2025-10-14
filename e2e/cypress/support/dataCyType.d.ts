@@ -269,6 +269,7 @@ declare namespace DataCy {
         "developer-menu-webhooks" |
         "disabled-feature-banner" |
         "dropzone" |
+        "dropzone-inner" |
         "edit-pat-dialog-content" |
         "edit-pat-dialog-description-input" |
         "edit-pat-dialog-title" |
@@ -291,7 +292,6 @@ declare namespace DataCy {
         "export-state-selector-item" |
         "export-submit-button" |
         "export-support_arrays-selector" |
-        "file-dropzone" |
         "file-dropzone-add-more-button" |
         "file-dropzone-remove-button" |
         "file-dropzone-select-button" |
@@ -885,4 +885,5 @@ declare namespace DataCy {
         "webhooks-item-test" |
         "webhooks-list-item" |
         "webhooks-subtitle"
+}     "webhooks-subtitle"
 }

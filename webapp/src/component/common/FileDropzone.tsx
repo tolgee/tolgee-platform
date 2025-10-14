@@ -143,7 +143,6 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
       <DragDropArea
         onFilesReceived={handleFilesReceived}
         onClick={handleClick}
-        data-cy="file-dropzone"
         maxItems={maxFiles - files.length}
       >
         <StyledContainer>

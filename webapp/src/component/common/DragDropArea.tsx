@@ -56,7 +56,6 @@ export type DragDropAreaProps = {
   showOverlay?: boolean;
   maxItems?: number;
   children: ReactNode;
-  'data-cy'?: string;
 };
 
 export const DragDropArea: React.FC<DragDropAreaProps> = ({
@@ -66,7 +65,6 @@ export const DragDropArea: React.FC<DragDropAreaProps> = ({
   showOverlay,
   maxItems,
   children,
-  'data-cy': dataCy,
 }) => {
   const [dragOver, setDragOver] = useState<null | 'valid' | 'invalid'>(null);
   const [dragEnterTarget, setDragEnterTarget] = useState<EventTarget | null>(
@@ -124,7 +122,7 @@ export const DragDropArea: React.FC<DragDropAreaProps> = ({
       position="relative"
       overflow="visible"
       onClick={onClick}
-      data-cy={dataCy}
+      data-cy="dropzone"
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
@@ -143,6 +141,7 @@ export const DragDropArea: React.FC<DragDropAreaProps> = ({
         display="flex"
         alignItems="center"
         justifyContent="center"
+        data-cy="dropzone-inner"
       >
         {dragOver === 'valid' && (
           <StyledIconWrapper>

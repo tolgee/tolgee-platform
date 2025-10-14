@@ -31,7 +31,6 @@ export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({
     <DragDropArea
       onFilesReceived={validateAndUpload}
       onClick={() => {}}
-      data-cy="dropzone"
       active={projectPermissions.satisfiesPermission('screenshots.upload')}
       maxItems={MAX_FILE_COUNT}
       showOverlay

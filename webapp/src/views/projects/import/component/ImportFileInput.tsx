@@ -136,7 +136,6 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
   return (
     <DragDropArea
       onFilesReceived={onNewFiles}
-      data-cy="dropzone"
       active={!props.isProgressOverlayActive}
       maxItems={MAX_FILE_COUNT}
     >
