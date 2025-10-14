@@ -4,17 +4,13 @@ import { T, useTranslate } from '@tolgee/react';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { PlanMigrationFormData } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/PlanMigrationForm';
-import {
-  useBillingApiMutation,
-  useBillingApiQuery,
-} from 'tg.service/http/useQueryApi';
+import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import React, { useState } from 'react';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { SpinnerProgress } from 'tg.component/SpinnerProgress';
-import { EditPlanMigrationForm } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/EditPlanMigrationForm';
 import { PlanMigrationHistoryList } from 'tg.ee.module/billing/administration/subscriptionPlans/migration/general/PlanMigrationHistoryList';
+import { SelfHostedEePlanEditPlanMigrationForm } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/SelfHostedEePlanEditPlanMigrationForm';
 
 export const AdministrationSelfHostedEePlanMigrationEdit = () => {
   const { t } = useTranslate();
@@ -43,28 +39,18 @@ export const AdministrationSelfHostedEePlanMigrationEdit = () => {
     },
   });
 
-  const updatePlanMigrationLoadable = useBillingApiMutation({
-    url: '/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}',
-    method: 'put',
-  });
-
-  const deletePlanMigrationMutation = useBillingApiMutation({
-    url: '/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}',
-    method: 'delete',
-  });
-
-  const onDelete = (migrationId: number) => {
-    deletePlanMigrationMutation.mutate(
-      { path: { migrationId } },
-      {
-        onSuccess: () => {
-          messaging.success(
-            <T keyName="administration_plan_migration_deleted_success" />
-          );
-          history.push(LINKS.ADMINISTRATION_BILLING_EE_PLANS.build());
-        },
-      }
+  const onDelete = () => {
+    messaging.success(
+      <T keyName="administration_plan_migration_deleted_success" />
     );
+    history.push(LINKS.ADMINISTRATION_BILLING_EE_PLANS.build());
+  };
+
+  const onSubmit = () => {
+    messaging.success(
+      <T keyName="administration_plan_migration_updated_success" />
+    );
+    history.push(LINKS.ADMINISTRATION_BILLING_EE_PLANS.build());
   };
 
   if (migrationLoadable.isLoading) {
@@ -72,23 +58,6 @@ export const AdministrationSelfHostedEePlanMigrationEdit = () => {
   }
 
   const migration = migrationLoadable.data!;
-
-  const submit = (values: PlanMigrationFormData) => {
-    updatePlanMigrationLoadable.mutate(
-      {
-        path: { migrationId },
-        content: { 'application/json': values },
-      },
-      {
-        onSuccess: () => {
-          messaging.success(
-            <T keyName="administration_plan_migration_updated_success" />
-          );
-          history.push(LINKS.ADMINISTRATION_BILLING_EE_PLANS.build());
-        },
-      }
-    );
-  };
 
   return (
     <DashboardPage>
@@ -114,12 +83,10 @@ export const AdministrationSelfHostedEePlanMigrationEdit = () => {
             {t('administration_plan_migration_configure_existing')}
           </Typography>
         </Box>
-        <EditPlanMigrationForm
+        <SelfHostedEePlanEditPlanMigrationForm
           migration={migration}
-          onSubmit={submit}
+          onSubmit={onSubmit}
           onDelete={onDelete}
-          loading={updatePlanMigrationLoadable.isLoading}
-          planType="self-hosted"
         />
         <Box my={2}>
           <Typography variant="h6">
