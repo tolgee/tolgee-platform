@@ -26,7 +26,7 @@ import { PlanSubscriptionCount } from 'tg.ee.module/billing/component/Plan/PlanS
 import { PlanListPriceInfo } from 'tg.ee.module/billing/component/Plan/PlanListPriceInfo';
 import { PlanArchivedChip } from 'tg.ee.module/billing/component/Plan/PlanArchivedChip';
 import clsx from 'clsx';
-import { PlanMigratingChip } from 'tg.ee.module/billing/component/Plan/PlanMigratingChip';
+import { SelfHostedEePlanMigratingChip } from 'tg.ee.module/billing/component/Plan/migration/SelfHostedEePlanMigratingChip';
 
 type SelfHostedEePlanAdministrationModel =
   components['schemas']['SelfHostedEePlanAdministrationModel'];
@@ -152,10 +152,9 @@ export const AdministrationEePlansView = () => {
                       label={t('administration_ee_plan_public_badge')}
                     />
                   )}
-                  <PlanMigratingChip
+                  <SelfHostedEePlanMigratingChip
                     migrationId={plan.migrationId}
                     isEnabled={plan.activeMigration}
-                    planType="self-hosted"
                   />
                 </Box>
                 <Box display="flex" gap={2}>
