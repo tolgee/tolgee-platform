@@ -23,5 +23,5 @@ import org.springframework.security.access.prepost.PreAuthorize
  */
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-@PreAuthorize("hasRole('RW')")
+@PreAuthorize("hasRole('READ_WRITE')")
 annotation class WriteOperation

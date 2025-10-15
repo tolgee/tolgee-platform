@@ -81,9 +81,9 @@ class TolgeeAuthentication(
     get() {
       return SimpleGrantedAuthority(
         if (isReadOnly) {
-        ROLE_RO
+        ROLE_READ_ONLY
       } else {
-        ROLE_RW
+        ROLE_READ_WRITE
       }
       )
     }
@@ -112,7 +112,7 @@ class TolgeeAuthentication(
     const val ROLE_USER = "ROLE_USER"
     const val ROLE_SUPPORTER = "ROLE_SUPPORTER"
     const val ROLE_ADMIN = "ROLE_ADMIN"
-    const val ROLE_RO = "ROLE_RO"
-    const val ROLE_RW = "ROLE_RW"
+    const val ROLE_READ_ONLY = "ROLE_READ_ONLY"
+    const val ROLE_READ_WRITE = "ROLE_READ_WRITE"
   }
 }
