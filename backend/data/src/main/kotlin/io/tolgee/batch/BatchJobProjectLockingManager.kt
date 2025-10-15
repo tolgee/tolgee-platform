@@ -56,7 +56,6 @@ class BatchJobProjectLockingManager(
   ) {
     projectId ?: return
     getMap().compute(projectId) { _, lockedJobIds ->
-      logger.debug("Unlocking job: $jobId for project $projectId")
       val currentJobs = lockedJobIds ?: emptySet()
       if (currentJobs.contains(jobId)) {
         logger.debug("Unlocking job: $jobId for project $projectId")
@@ -79,7 +78,7 @@ class BatchJobProjectLockingManager(
     val projectId = batchJobDto.projectId ?: return true
     val computedJobIds =
       getRedissonProjectLocks().compute(projectId) { _, lockedJobIds ->
-        val newLockedJobIds = computeFnBody(batchJobDto, lockedJobIds ?: emptySet())
+        val newLockedJobIds = computeLockedJobIdsForProject(batchJobDto, lockedJobIds ?: emptySet())
         logger.debug(
           "While trying to lock on redis {} for project {} new lock value is {}",
           batchJobDto.id,
@@ -102,7 +101,7 @@ class BatchJobProjectLockingManager(
     val projectId = batchJobDto.projectId ?: return true
     val computedJobIds =
       localProjectLocks.compute(projectId) { _, lockedJobIds ->
-        val newLockedJobIds = computeFnBody(batchJobDto, lockedJobIds ?: emptySet())
+        val newLockedJobIds = computeLockedJobIdsForProject(batchJobDto, lockedJobIds ?: emptySet())
         logger.debug(
           "While trying to lock locally {} for project {} new lock value is {}",
           batchJobDto.id,
@@ -114,7 +113,7 @@ class BatchJobProjectLockingManager(
     return computedJobIds.contains(batchJobDto.id)
   }
 
-  private fun computeFnBody(
+  private fun computeLockedJobIdsForProject(
     toLock: BatchJobDto,
     lockedJobIds: Set<Long>,
   ): Set<Long> {
@@ -136,14 +135,8 @@ class BatchJobProjectLockingManager(
         return setOf(toLock.id)
       }
       val newLockedJobIds = mutableSetOf<Long>(initialJobId)
-      if (newLockedJobIds.size < batchProperties.projectConcurrency) {
-        logger.debug("Locking job ${toLock.id} for project $projectId. Active jobs before: $newLockedJobIds")
-        newLockedJobIds.add(toLock.id)
-      } else {
-        logger.debug(
-          "Cannot lock job ${toLock.id} for project $projectId, limit reached. Active jobs: $newLockedJobIds"
-        )
-      }
+      logger.debug("Locking job ${toLock.id} for project $projectId. Active jobs before: $newLockedJobIds")
+      newLockedJobIds.add(toLock.id)
       return newLockedJobIds
     }
 
