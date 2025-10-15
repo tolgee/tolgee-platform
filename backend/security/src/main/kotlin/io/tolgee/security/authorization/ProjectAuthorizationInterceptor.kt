@@ -184,14 +184,14 @@ class ProjectAuthorizationInterceptor(
     return projectPerms?.scopes
   }
 
-  private val canUseAdminRights
+  private val canUseAdminPermissions
     get() = !authenticationFacade.isProjectApiKeyAuth
 
   private fun canBypass(
     request: HttpServletRequest,
     handler: HandlerMethod,
   ): Boolean {
-    if (!canUseAdminRights) {
+    if (!canUseAdminPermissions) {
       return false
     }
 
@@ -204,6 +204,6 @@ class ProjectAuthorizationInterceptor(
   }
 
   private fun canBypassForReadOnly(): Boolean {
-    return canUseAdminRights && authenticationFacade.authenticatedUser.isSupporterOrAdmin()
+    return canUseAdminPermissions && authenticationFacade.authenticatedUser.isSupporterOrAdmin()
   }
 }
