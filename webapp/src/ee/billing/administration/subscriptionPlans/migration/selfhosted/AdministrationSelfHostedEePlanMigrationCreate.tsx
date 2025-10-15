@@ -50,8 +50,8 @@ export const AdministrationSelfHostedEePlanMigrationCreate = () => {
         hideChildrenOnLoading={false}
         navigation={[
           [
-            t('administration_cloud_plans'),
-            LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build(),
+            t('administration_ee_plans'),
+            LINKS.ADMINISTRATION_BILLING_EE_PLANS.build(),
           ],
           [
             t('administration_plan_migration_configure'),
