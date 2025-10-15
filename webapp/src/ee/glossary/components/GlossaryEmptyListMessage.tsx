@@ -79,7 +79,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
             <T keyName="glossary_empty_placeholder_add_term_button" />
           </Button>
           <Link
-            href="https://docs.tolgee.io/platform/projects_and_organizations/glossary"
+            href="https://docs.tolgee.io/platform/projects_and_organizations/managing_glossaries"
             sx={{ visibility: 'hidden' }}
           >
             <Typography variant="body2">
@@ -87,6 +87,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
             </Typography>
           </Link>
         </StyledCard>
+        {/* TODO: enable when docs are ready */}
         <StyledCard elevation={0} sx={{ display: 'none' }}>
           <StyledUploadCloud02 />
           <Typography variant="h4">
@@ -104,7 +105,8 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
           >
             <T keyName="glossary_empty_placeholder_import_terms_button" />
           </Button>
-          <Link href="https://docs.tolgee.io/platform/projects_and_organizations/glossary/import/csv-format">
+          {/* TODO: update url when docs are ready */}
+          <Link href="https://docs.tolgee.io/platform/projects_and_organizations/managing_glossaries/import/csv-format">
             <Typography variant="body2">
               <T keyName="glossary_empty_placeholder_import_terms_csv_format" />
             </Typography>
