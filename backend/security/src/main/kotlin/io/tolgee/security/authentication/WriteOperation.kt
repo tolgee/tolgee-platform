@@ -20,8 +20,11 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 /**
  * Marks a component method that requires read-write mode (i.e. current authentication must not be read-only).
+ *
+ * This annotation also works as an override to administration endpoint handling.
+ * Applying this annotation to a handler method forbids it from being called by supporters.
  */
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.ANNOTATION_CLASS)
+@Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @PreAuthorize("hasRole('READ_WRITE')")
 annotation class WriteOperation

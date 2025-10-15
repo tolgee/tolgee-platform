@@ -17,10 +17,13 @@
 package io.tolgee.security.authentication
 
 /**
- * Overrides read-only request method restriction for the annotated controller or handler method.
+ * Overrides read-only request method restriction for the annotated handler method.
  *
  * When current authentication has readOnly flag set, only GET/HEAD/OPTIONS HTTP methods are allowed by default.
- * Applying this annotation to a controller class or method allows non-safe methods as well.
+ * Applying this annotation to a handler method allows them to be called in read-only mode as well.
+ *
+ * This also applies to administration endpoint handling. Supporter role has only access to GET/HEAD/OPTIONS methods.
+ * Applying this annotation to a handler method allows them to be called by supporters as well.
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
