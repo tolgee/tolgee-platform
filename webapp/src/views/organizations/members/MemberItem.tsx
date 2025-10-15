@@ -84,11 +84,9 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
         <StyledItemText>
           {user.name} ({user.username}){' '}
         </StyledItemText>
-        {user.mfaEnabled && (
-          <StyledMfaBadgeWrapper>
-            <MfaBadge />
-          </StyledMfaBadgeWrapper>
-        )}
+        <StyledMfaBadgeWrapper>
+          <MfaBadge enabled={user.mfaEnabled} />
+        </StyledMfaBadgeWrapper>
       </StyledItemUser>
       <StyledItemActions>
         {user.organizationRole ? (
