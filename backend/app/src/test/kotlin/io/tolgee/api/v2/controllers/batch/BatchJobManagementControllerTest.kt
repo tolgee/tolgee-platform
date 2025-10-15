@@ -9,6 +9,7 @@ import io.tolgee.testing.assert
 import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -32,6 +33,11 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
   lateinit var batchJobProjectLockingManager: io.tolgee.batch.BatchJobProjectLockingManager
 
   var originalProjectConcurrency = 1
+
+  @BeforeEach
+  fun setup() {
+    originalProjectConcurrency = batchProperties.projectConcurrency
+  }
 
   @AfterEach
   fun after() {
