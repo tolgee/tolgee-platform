@@ -79,7 +79,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
             <T keyName="glossary_empty_placeholder_add_term_button" />
           </Button>
           <Link
-            href="https://docs.tolgee.io/platform/projects_and_organizations/glossary"
+            href="https://docs.tolgee.io/platform/projects_and_organizations/managing_glossaries"
             sx={{ visibility: 'hidden' }}
           >
             <Typography variant="body2">
