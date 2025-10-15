@@ -117,7 +117,7 @@ class V2UserController(
   ): JwtAuthenticationResponse {
     userAccountService.updatePassword(authenticationFacade.authenticatedUserEntity, dto!!)
     return JwtAuthenticationResponse(
-      jwtService.emitTokenRefreshForCurrentUser(isSuper = true),
+      jwtService.emitTokenRefreshForCurrentUser(),
     )
   }
 
