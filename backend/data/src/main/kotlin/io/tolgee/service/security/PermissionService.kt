@@ -235,9 +235,7 @@ class PermissionService(
         else -> ComputedPermissionDto.NONE
       }
 
-    return userRole?.let {
-      computed.getAdminPermissions(userRole)
-    } ?: computed
+    return computed.getAdminOrSupporterPermissions(userRole)
   }
 
   fun createForInvitation(

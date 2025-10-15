@@ -65,7 +65,11 @@ class ComputedPermissionDto(
 
   val isAllPermitted = this.expandedScopes.toSet().containsAll(Scope.entries)
 
-  fun getAdminPermissions(userRole: UserAccount.Role?): ComputedPermissionDto {
+  /**
+   * Admin and Supporter users have some additional permissions on all projects compared to other users.
+   * This function adds all the additional permissions the user has the right to use based on their role.
+   */
+  fun getAdminOrSupporterPermissions(userRole: UserAccount.Role?): ComputedPermissionDto {
     if (userRole == UserAccount.Role.ADMIN && !this.isAllPermitted) {
       return SERVER_ADMIN
     }
