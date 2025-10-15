@@ -1,3 +1,10 @@
+# [3.135.0](https://github.com/tolgee/tolgee-platform/compare/v3.134.0...v3.135.0) (2025-10-15)
+
+
+### Features
+
+* update openapi-typescript from v4.0.2 to v5.4.2 ([#3264](https://github.com/tolgee/tolgee-platform/issues/3264)) ([c68b109](https://github.com/tolgee/tolgee-platform/commit/c68b109158a9fc818281e4a1f729ee7d241bfe6e))
+
 # [3.134.0](https://github.com/tolgee/tolgee-platform/compare/v3.133.3...v3.134.0) (2025-10-15)
 
 
