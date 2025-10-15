@@ -124,6 +124,20 @@ export const HelpMenu = () => {
         name: user!.name,
         url: window.location,
       });
+
+      // Set custom attributes for paying customers
+      if (preferredOrganization) {
+        const subscription = preferredOrganization.activeCloudSubscription;
+        // @ts-ignore
+        window.$chatwoot.setCustomAttributes({
+          plan: subscription?.plan?.name || 'free',
+          subscriptionStatus: subscription?.status || 'inactive',
+          organizationId: preferredOrganization.id,
+          organizationName: preferredOrganization.name,
+          enabledFeatures: preferredOrganization.enabledFeatures.join(', '),
+        });
+      }
+
       // @ts-ignore
       window.$chatwoot.toggle();
     });
