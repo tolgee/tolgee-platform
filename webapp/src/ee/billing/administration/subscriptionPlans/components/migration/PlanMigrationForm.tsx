@@ -80,7 +80,7 @@ export const PlanMigrationForm = <
       initialValues={initValues}
       enableReinitialize
       onSubmit={onSubmit}
-      validationSchema={Validation.PLAN_MIRATION_FORM}
+      validationSchema={Validation.PLAN_MIGRATION_FORM}
     >
       <Form>
         <Box mt={2}>
