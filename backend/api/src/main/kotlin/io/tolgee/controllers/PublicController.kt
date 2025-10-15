@@ -104,7 +104,7 @@ class PublicController(
     @PathVariable("code") @NotBlank code: String,
   ): JwtAuthenticationResponse {
     emailVerificationService.verify(userId, code)
-    return JwtAuthenticationResponse(jwtService.emitToken(userId, isSuper = false))
+    return JwtAuthenticationResponse(jwtService.emitToken(userId))
   }
 
   @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])
