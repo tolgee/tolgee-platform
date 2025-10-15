@@ -578,7 +578,7 @@ export class Validation {
 
   static readonly BRANCH_MERGE = (t: TranslateFunction) => Yup.object({});
 
-  static readonly PLAN_MIRATION_FORM = () =>
+  static readonly PLAN_MIGRATION_FORM = () =>
     Yup.object().shape({
       monthlyOffsetDays: Yup.number().required().min(0),
       yearlyOffsetDays: Yup.number().required().min(0),
