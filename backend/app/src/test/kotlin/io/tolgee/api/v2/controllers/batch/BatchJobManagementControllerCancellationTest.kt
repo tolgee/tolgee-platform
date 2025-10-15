@@ -15,6 +15,8 @@ import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -52,107 +54,14 @@ class BatchJobManagementControllerCancellationTest :
     batchProperties.projectConcurrency = originalProjectConcurrency
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(ints = [1, 2])
   @ProjectJWTAuthTestMethod
-  fun `cancels a job`() {
-    batchDumper.finallyDump {
-      val keys = testData.addTranslationOperationData(100)
-      saveAndPrepare()
-
-      val keyIds = keys.map { it.id }.toList()
-
-      val count = AtomicInteger(0)
-
-      doAnswer {
-        if (count.incrementAndGet() > 5) {
-          while (simulateLongRunningChunkRun) {
-            // this simulates long-running operation, which checks for active context
-            val context = it.arguments[2] as CoroutineContext
-            context.ensureActive()
-            Thread.sleep(10)
-          }
-        }
-        it.callRealMethod()
-      }.whenever(machineTranslationChunkProcessor).process(any(), any(), any(), any())
-
-      performProjectAuthPost(
-        "start-batch-job/machine-translate",
-        mapOf(
-          "keyIds" to keyIds,
-          "targetLanguageIds" to
-            listOf(
-              testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
-            ),
-        ),
-      ).andIsOk
-
-      waitFor {
-        batchJobConcurrentLauncher.runningJobs.size >= 5
-      }
-
-      val job = util.getSingleJob()
-      performProjectAuthPut("batch-jobs/${job.id}/cancel")
-        .andIsOk
-
-      waitForNotThrowing(pollTime = 100) {
-        executeInNewTransaction {
-          util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
-          verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
-
-          // assert activity stored
-          entityManager.createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
-            .setParameter("id", job.id).resultList
-            .assert.hasSize(1)
-        }
-      }
-    }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `cannot cancel other's job`() {
-    saveAndPrepare()
-
-    batchJobConcurrentLauncher.pause = true
-
-    val job = util.runChunkedJob(100)
-
-    userAccount = testData.anotherUser
-
-    performProjectAuthPut("batch-jobs/${job.id}/cancel")
-      .andIsForbidden
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `stuck job can be cancelled`() {
-    saveAndPrepare()
-    batchJobConcurrentLauncher.pause = true
-    val job =
-      stuckBatchJobTestUtil.createBatchJobWithExecutionStatuses(
-        testData.project,
-        BatchJobStatus.RUNNING,
-        setOf(BatchJobChunkExecutionStatus.CANCELLED),
-      )
-
-    executeInNewTransaction {
-      val merged = entityManager.merge(job)
-      merged.author = testData.user
-      entityManager.persist(merged)
-    }
-
-    performProjectAuthPut("batch-jobs/${job.id}/cancel").andIsOk
-
-    util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `cancels a job with projectConcurrency=2`() {
+  fun `cancels a job`(projectConcurrency: Int) {
     val keys = testData.addTranslationOperationData(100)
     saveAndPrepare()
 
-    batchProperties.projectConcurrency = 2
+    batchProperties.projectConcurrency = projectConcurrency
 
     val keyIds = keys.map { it.id }.toList()
 
@@ -209,6 +118,44 @@ class BatchJobManagementControllerCancellationTest :
     // Verify the job lock was released
     val lockedJobsAfterCancel = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
     lockedJobsAfterCancel.assert.doesNotContain(job.id)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `cannot cancel other's job`() {
+    saveAndPrepare()
+
+    batchJobConcurrentLauncher.pause = true
+
+    val job = util.runChunkedJob(100)
+
+    userAccount = testData.anotherUser
+
+    performProjectAuthPut("batch-jobs/${job.id}/cancel")
+      .andIsForbidden
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `stuck job can be cancelled`() {
+    saveAndPrepare()
+    batchJobConcurrentLauncher.pause = true
+    val job =
+      stuckBatchJobTestUtil.createBatchJobWithExecutionStatuses(
+        testData.project,
+        BatchJobStatus.RUNNING,
+        setOf(BatchJobChunkExecutionStatus.CANCELLED),
+      )
+
+    executeInNewTransaction {
+      val merged = entityManager.merge(job)
+      merged.author = testData.user
+      entityManager.persist(merged)
+    }
+
+    performProjectAuthPut("batch-jobs/${job.id}/cancel").andIsOk
+
+    util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
   }
 
   @Test

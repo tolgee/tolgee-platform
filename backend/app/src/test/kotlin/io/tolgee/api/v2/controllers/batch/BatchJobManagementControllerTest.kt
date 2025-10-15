@@ -10,6 +10,8 @@ import io.tolgee.util.Logging
 import io.tolgee.util.addMinutes
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
@@ -79,10 +81,12 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
     }
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(ints = [1, 2])
   @ProjectJWTAuthTestMethod
-  fun `returns list of jobs`() {
+  fun `returns list of jobs`(projectConcurrency: Int) {
     saveAndPrepare()
+    batchProperties.projectConcurrency = projectConcurrency
 
     val jobIds = ConcurrentHashMap.newKeySet<Long>()
     var wait = true
@@ -90,7 +94,7 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
     try {
       doAnswer {
         val id = it.getArgument<BatchJobDto>(0).id
-        if (jobIds.size == 2 && !jobIds.contains(id)) {
+        if (jobIds.size == projectConcurrency && !jobIds.contains(id)) {
           while (wait) {
             Thread.sleep(100)
           }
@@ -103,6 +107,7 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
 
       val jobs = (1..3).map { util.runChunkedJob(50) }
 
+      // With projectConcurrency=N, we should be able to run N jobs concurrently
       waitForNotThrowing(pollTime = 1000, timeout = 10000) {
         val dtos = jobs.map { batchJobService.getJobDto(it.id) }
         dtos.forEach {
@@ -111,9 +116,13 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
             "Job ${it.id} status ${it.status} progress: ${state?.values?.sumOf { it.successTargets.size }}",
           )
         }
-        dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(2)
+        dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(projectConcurrency)
         dtos.count { it.status == BatchJobStatus.RUNNING }.assert.isEqualTo(1)
       }
+
+      // Verify that N jobs are locked for the project
+      val lockedJobs = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
+      lockedJobs.size.assert.isEqualTo(projectConcurrency)
 
       performProjectAuthGet("batch-jobs?sort=status&sort=id")
         .andIsOk.andAssertThatJson {
@@ -140,6 +149,10 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
             node("[0].status").isEqualTo("SUCCESS")
           }
         }
+
+      // Verify all locks are released after completion
+      val lockedJobsAfter = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
+      lockedJobsAfter.assert.isEmpty()
     } finally {
       wait = false
     }
@@ -173,10 +186,12 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
       }
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(ints = [1, 2])
   @ProjectJWTAuthTestMethod
-  fun `returns list of current jobs`() {
+  fun `returns list of current jobs`(projectConcurrency: Int) {
     saveAndPrepare()
+    batchProperties.projectConcurrency = projectConcurrency
 
     var wait = true
     doAnswer {
@@ -194,12 +209,22 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
           .andIsOk.andPrettyPrint.andAssertThatJson {
             node("_embedded.batchJobs") {
               isArray.hasSize(6)
+              // With projectConcurrency=N, we should have N RUNNING jobs and (6-N) PENDING
               node("[0].status").isEqualTo("RUNNING")
-              node("[1].status").isEqualTo("PENDING")
-              node("[2].status").isEqualTo("PENDING")
+              if (projectConcurrency == 2) {
+                node("[1].status").isEqualTo("RUNNING")
+                node("[2].status").isEqualTo("PENDING")
+              } else {
+                node("[1].status").isEqualTo("PENDING")
+                node("[2].status").isEqualTo("PENDING")
+              }
             }
           }
       }
+
+      // Verify that N jobs are locked for the project
+      val lockedJobs = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
+      lockedJobs.size.assert.isEqualTo(projectConcurrency)
 
       wait = false
 
@@ -229,6 +254,10 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
         .andIsOk.andAssertThatJson {
           node("_embedded.batchJobs").isAbsent()
         }
+
+      // Verify all locks are released after completion
+      val lockedJobsAfter = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
+      lockedJobsAfter.assert.isEmpty()
     } finally {
       wait = false
     }
@@ -266,154 +295,6 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
 
     performProjectAuthGet("batch-jobs/${job.id}")
       .andIsForbidden
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `returns list of jobs with projectConcurrency=2`() {
-    saveAndPrepare()
-    batchProperties.projectConcurrency = 2
-
-    val jobIds = ConcurrentHashMap.newKeySet<Long>()
-    var wait = true
-
-    try {
-      doAnswer {
-        val id = it.getArgument<BatchJobDto>(0).id
-        if (jobIds.size == 2 && !jobIds.contains(id)) {
-          while (wait) {
-            Thread.sleep(100)
-          }
-        } else {
-          jobIds.add(id)
-        }
-      }
-        .whenever(preTranslationByTmChunkProcessor)
-        .process(any(), any(), any(), any())
-
-      val jobs = (1..3).map { util.runChunkedJob(50) }
-
-      // With projectConcurrency=2, we should be able to run 2 jobs concurrently
-      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-        val dtos = jobs.map { batchJobService.getJobDto(it.id) }
-        dtos.forEach {
-          val state = batchJobStateProvider.getCached(it.id)
-          println(
-            "Job ${it.id} status ${it.status} progress: ${state?.values?.sumOf { it.successTargets.size }}",
-          )
-        }
-        dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(2)
-        dtos.count { it.status == BatchJobStatus.RUNNING }.assert.isEqualTo(1)
-      }
-
-      // Verify that 2 jobs are locked for the project
-      val lockedJobs = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
-      lockedJobs.assert.hasSize(2)
-
-      performProjectAuthGet("batch-jobs?sort=status&sort=id")
-        .andIsOk.andAssertThatJson {
-          node("_embedded.batchJobs") {
-            isArray.hasSize(3)
-            node("[0].status").isEqualTo("RUNNING")
-            node("[0].progress").isEqualTo(0)
-            node("[1].id").isValidId
-            node("[1].status").isEqualTo("SUCCESS")
-            node("[1].progress").isEqualTo(50)
-          }
-        }
-      wait = false
-
-      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-        val dtos = jobs.map { batchJobService.getJobDto(it.id) }
-        dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(3)
-      }
-
-      performProjectAuthGet("batch-jobs?sort=status&sort=id")
-        .andIsOk.andAssertThatJson {
-          node("_embedded.batchJobs") {
-            isArray.hasSize(3)
-            node("[0].status").isEqualTo("SUCCESS")
-          }
-        }
-
-      // Verify all locks are released after completion
-      val lockedJobsAfter = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
-      lockedJobsAfter.assert.isEmpty()
-    } finally {
-      wait = false
-    }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `returns list of current jobs with projectConcurrency=2`() {
-    saveAndPrepare()
-    batchProperties.projectConcurrency = 2
-
-    var wait = true
-    doAnswer {
-      while (wait) {
-        Thread.sleep(100)
-      }
-    }.whenever(preTranslationByTmChunkProcessor).process(any(), any(), any(), any())
-
-    val adminsJobs = (1..3).map { util.runChunkedJob(50) }
-    val anotherUsersJobs = (1..3).map { util.runChunkedJob(50, testData.anotherUser) }
-
-    try {
-      waitForNotThrowing {
-        performProjectAuthGet("current-batch-jobs")
-          .andIsOk.andPrettyPrint.andAssertThatJson {
-            node("_embedded.batchJobs") {
-              isArray.hasSize(6)
-              // With projectConcurrency=2, we should have 2 RUNNING jobs and 4 PENDING
-              node("[0].status").isEqualTo("RUNNING")
-              node("[1].status").isEqualTo("RUNNING")
-              node("[2].status").isEqualTo("PENDING")
-              node("[3].status").isEqualTo("PENDING")
-            }
-          }
-      }
-
-      // Verify that 2 jobs are locked for the project (one per user is allowed)
-      val lockedJobs = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
-      lockedJobs.assert.hasSize(2)
-
-      wait = false
-
-      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-        val dtos = (adminsJobs + anotherUsersJobs).map { batchJobService.getJobDto(it.id) }
-        dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(6)
-      }
-
-      performProjectAuthGet("current-batch-jobs")
-        .andIsOk.andAssertThatJson {
-          node("_embedded.batchJobs") {
-            isArray.hasSize(6)
-            node("[0].status").isEqualTo("SUCCESS")
-          }
-        }
-
-      userAccount = testData.anotherUser
-
-      performProjectAuthGet("current-batch-jobs")
-        .andIsOk.andAssertThatJson {
-          node("_embedded.batchJobs").isArray.hasSize(3)
-        }
-
-      setForcedDate(currentDateProvider.date.addMinutes(61))
-
-      performProjectAuthGet("current-batch-jobs")
-        .andIsOk.andAssertThatJson {
-          node("_embedded.batchJobs").isAbsent()
-        }
-
-      // Verify all locks are released after completion
-      val lockedJobsAfter = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
-      lockedJobsAfter.assert.isEmpty()
-    } finally {
-      wait = false
-    }
   }
 }
 
