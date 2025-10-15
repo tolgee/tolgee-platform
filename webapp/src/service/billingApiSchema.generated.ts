@@ -254,6 +254,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      /** @enum {string} */
       metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
@@ -262,12 +263,14 @@ export interface components {
       stripeProductId: string;
       /** Format: int64 */
       subscriptionCount: number;
+      /** @enum {string} */
       type: "PAY_AS_YOU_GO" | "FIXED";
     };
     AdministrationCloudSubscriptionModel: {
       cancelAtPeriodEnd: boolean;
       /** Format: int64 */
       createdAt: number;
+      /** @enum {string} */
       currentBillingPeriod?: "MONTHLY" | "YEARLY";
       /** Format: int64 */
       currentPeriodEnd?: number;
@@ -277,6 +280,7 @@ export interface components {
       /** Format: int64 */
       organizationId: number;
       plan: components["schemas"]["AdministrationCloudPlanModel"];
+      /** @enum {string} */
       status:
         | "ACTIVE"
         | "CANCELED"
@@ -368,11 +372,13 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      /** @enum {string} */
       metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
+      /** @enum {string} */
       type: "PAY_AS_YOU_GO" | "FIXED";
     };
     CloudPlanRequest: {
@@ -404,6 +410,7 @@ export interface components {
       forOrganizationIds: number[];
       free: boolean;
       includedUsage: components["schemas"]["PlanIncludedUsageRequest"];
+      /** @enum {string} */
       metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       /** @description If true, a new Stripe product will be created with name specified in [stripeProductName] and [stripeProductId] will be automatically populated with the ID of the newly created Stripe product. */
@@ -415,11 +422,13 @@ export interface components {
       public: boolean;
       stripeProductId: string;
       stripeProductName?: string;
+      /** @enum {string} */
       type: "PAY_AS_YOU_GO" | "FIXED";
       /** Format: date-time */
       usableUntil?: string;
     };
     CloudSubscribeRequest: {
+      /** @enum {string} */
       period: "MONTHLY" | "YEARLY";
       /**
        * Format: int64
@@ -431,6 +440,7 @@ export interface components {
       cancelAtPeriodEnd: boolean;
       /** Format: int64 */
       createdAt: number;
+      /** @enum {string} */
       currentBillingPeriod?: "MONTHLY" | "YEARLY";
       /** Format: int64 */
       currentPeriodEnd?: number;
@@ -440,6 +450,7 @@ export interface components {
       /** Format: int64 */
       organizationId: number;
       plan: components["schemas"]["CloudPlanModel"];
+      /** @enum {string} */
       status:
         | "ACTIVE"
         | "CANCELED"
@@ -509,6 +520,7 @@ export interface components {
        */
       languageId: number;
       name?: string;
+      /** @enum {string} */
       type: "TRANSLATE" | "REVIEW";
     };
     CreateTranslationAgencyRequest: {
@@ -546,6 +558,7 @@ export interface components {
       params?: unknown[];
     };
     ErrorResponseTyped: {
+      /** @enum {string} */
       code:
         | "unauthenticated"
         | "api_access_forbidden"
@@ -846,7 +859,8 @@ export interface components {
         | "expect_no_conflict_failed"
         | "suggestion_cant_be_plural"
         | "suggestion_must_be_plural"
-        | "duplicate_suggestion";
+        | "duplicate_suggestion"
+        | "unsupported_media_type";
       params?: unknown[];
     };
     ExampleItem: {
@@ -872,6 +886,7 @@ export interface components {
       organizationId: number;
       stripeSubscriptionId: string;
       stripeSubscriptionStatus: string;
+      /** @enum {string} */
       tolgeeSubscriptionStatus:
         | "ACTIVE"
         | "CANCELED"
@@ -897,6 +912,7 @@ export interface components {
       total: number;
     };
     LegacyTolgeeTranslateRequest: {
+      /** @enum {string} */
       formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
       isBatch: boolean;
       keyName?: string;
@@ -995,12 +1011,18 @@ export interface components {
        * @description Deprecated (use translateLanguageIds).
        *
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
-       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       * @example [
+       *   "KEYS_EDIT",
+       *   "TRANSLATIONS_VIEW"
+       * ]
        */
       scopes: (
         | "translations.view"
@@ -1039,24 +1061,39 @@ export interface components {
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       stateChangeLanguageIds?: number[];
       /**
        * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       translateLanguageIds?: number[];
-      /** @description The user's permission type. This field is null if uses granular permissions */
+      /**
+       * @description The user's permission type. This field is null if uses granular permissions
+       * @enum {string}
+       */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       viewLanguageIds?: number[];
     };
@@ -1273,6 +1310,7 @@ export interface components {
       usableUntil?: string;
     };
     SelfHostedEeSubscribeRequest: {
+      /** @enum {string} */
       period: "MONTHLY" | "YEARLY";
       /**
        * Format: int64
@@ -1283,6 +1321,7 @@ export interface components {
     SelfHostedEeSubscriptionAdministrationModel: {
       /** Format: int64 */
       createdAt: number;
+      /** @enum {string} */
       currentBillingPeriod: "MONTHLY" | "YEARLY";
       /** Format: int64 */
       currentPeriodEnd?: number;
@@ -1294,6 +1333,7 @@ export interface components {
       licenseKey?: string;
       limits: components["schemas"]["SelfHostedUsageLimitsModel"];
       plan: components["schemas"]["SelfHostedEePlanAdministrationModel"];
+      /** @enum {string} */
       status:
         | "ACTIVE"
         | "CANCELED"
@@ -1307,6 +1347,7 @@ export interface components {
     SelfHostedEeSubscriptionModel: {
       /** Format: int64 */
       createdAt: number;
+      /** @enum {string} */
       currentBillingPeriod: "MONTHLY" | "YEARLY";
       /** Format: int64 */
       currentPeriodEnd?: number;
@@ -1318,6 +1359,7 @@ export interface components {
       licenseKey?: string;
       limits: components["schemas"]["SelfHostedUsageLimitsModel"];
       plan: components["schemas"]["SelfHostedEePlanModel"];
+      /** @enum {string} */
       status:
         | "ACTIVE"
         | "CANCELED"
@@ -1369,6 +1411,7 @@ export interface components {
     SubscriptionId: {
       /** Format: int64 */
       id: number;
+      /** @enum {string} */
       type: "CLOUD" | "SELF_HOSTED";
     };
     SubscriptionUpdatePreviewItem: {
@@ -1428,6 +1471,7 @@ export interface components {
       url?: string;
     };
     UpdateSubscriptionPrepareRequest: {
+      /** @enum {string} */
       period: "MONTHLY" | "YEARLY";
       /**
        * Format: int64

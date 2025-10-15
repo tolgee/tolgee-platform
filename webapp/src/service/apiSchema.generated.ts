@@ -46,8 +46,16 @@ export interface paths {
     /** It checks whether the code from email is valid */
     get: operations["verifyEmail"];
   };
+  "/v2/administration/batch-job-queue": {
+    /** Returns all chunk execution items currently in the batch job queue */
+    get: operations["getBatchJobQueue"];
+  };
   "/v2/administration/organizations": {
     get: operations["getOrganizations"];
+  };
+  "/v2/administration/project-batch-locks": {
+    /** Returns current project batch job locks from Redis or local storage based on configuration */
+    get: operations["getProjectLocks"];
   };
   "/v2/administration/users": {
     get: operations["getUsers"];
@@ -300,6 +308,7 @@ export interface paths {
     get: operations["getUsage"];
   };
   "/v2/organizations/{organizationId}/users/{userId}": {
+    /** Remove user from organization. If user is managed by the organization, their account is disabled instead. */
     delete: operations["removeUser"];
   };
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
@@ -1080,6 +1089,7 @@ export interface components {
       languages: number[];
     };
     AnnouncementDto: {
+      /** @enum {string} */
       type:
         | "FEATURE_BATCH_OPERATIONS"
         | "FEATURE_MT_FORMALITY"
@@ -1122,7 +1132,14 @@ export interface components {
       projectName: string;
       /**
        * @description Api key's permission scopes
-       * @example screenshots.upload,screenshots.delete,translations.edit,screenshots.view,translations.view,keys.edit
+       * @example [
+       *   "screenshots.upload",
+       *   "screenshots.delete",
+       *   "translations.edit",
+       *   "screenshots.view",
+       *   "translations.view",
+       *   "keys.edit"
+       * ]
        */
       scopes: string[];
       /** @description Full name of user owner */
@@ -1139,7 +1156,10 @@ export interface components {
       projectId: number;
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
-       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       * @example [
+       *   "KEYS_EDIT",
+       *   "TRANSLATIONS_VIEW"
+       * ]
        */
       scopes: (
         | "translations.view"
@@ -1178,24 +1198,39 @@ export interface components {
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       stateChangeLanguageIds?: number[];
       /**
        * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       translateLanguageIds?: number[];
-      /** @description The user's permission type. This field is null if user has assigned granular permissions or if returning API key's permissions */
+      /**
+       * @description The user's permission type. This field is null if user has assigned granular permissions or if returning API key's permissions
+       * @enum {string}
+       */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       viewLanguageIds?: number[];
     };
@@ -1227,6 +1262,7 @@ export interface components {
       ssoOrganizations: components["schemas"]["SsoOrganizationsPublicConfigDTO"];
     };
     AuthProviderDto: {
+      /** @enum {string} */
       authType?: "GOOGLE" | "GITHUB" | "OAUTH2" | "SSO" | "SSO_GLOBAL";
       id?: string;
       ssoDomain?: string;
@@ -1299,7 +1335,10 @@ export interface components {
        * @description Total items, that have been processed so far
        */
       progress: number;
-      /** @description Status of the batch job */
+      /**
+       * @description Status of the batch job
+       * @enum {string}
+       */
       status:
         | "PENDING"
         | "RUNNING"
@@ -1312,7 +1351,10 @@ export interface components {
        * @description Total items
        */
       totalItems: number;
-      /** @description Type of the batch job */
+      /**
+       * @description Type of the batch job
+       * @enum {string}
+       */
       type:
         | "AI_PLAYGROUND_TRANSLATE"
         | "PRE_TRANSLATE_BT_TM"
@@ -1352,6 +1394,7 @@ export interface components {
       keys: number[];
       /** Format: int64 */
       languageId: number;
+      /** @enum {string} */
       type: "TRANSLATE" | "REVIEW";
     };
     ClearTranslationsRequest: {
@@ -1458,9 +1501,19 @@ export interface components {
         invitations?: components["schemas"]["ProjectInvitationModel"][];
       };
     };
+    CollectionModelProjectLockModel: {
+      _embedded?: {
+        projectLockModelList?: components["schemas"]["ProjectLockModel"][];
+      };
+    };
     CollectionModelProjectTransferOptionModel: {
       _embedded?: {
         transferOptions?: components["schemas"]["ProjectTransferOptionModel"][];
+      };
+    };
+    CollectionModelQueueItemModel: {
+      _embedded?: {
+        queueItemModelList?: components["schemas"]["QueueItemModel"][];
       };
     };
     CollectionModelScreenshotModel: {
@@ -1538,6 +1591,7 @@ export interface components {
       untagOther?: string[];
     };
     ComputedPermissionModel: {
+      /** @enum {string} */
       origin:
         | "ORGANIZATION_BASE"
         | "DIRECT"
@@ -1550,12 +1604,18 @@ export interface components {
        * @description Deprecated (use translateLanguageIds).
        *
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
-       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       * @example [
+       *   "KEYS_EDIT",
+       *   "TRANSLATIONS_VIEW"
+       * ]
        */
       scopes: (
         | "translations.view"
@@ -1594,24 +1654,39 @@ export interface components {
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       stateChangeLanguageIds?: number[];
       /**
        * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       translateLanguageIds?: number[];
-      /** @description The user's permission type. This field is null if uses granular permissions */
+      /**
+       * @description The user's permission type. This field is null if uses granular permissions
+       * @enum {string}
+       */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       viewLanguageIds?: number[];
     };
@@ -1664,7 +1739,10 @@ export interface components {
       filterTagIn?: string[];
       /** @description Filter keys not tagged by one of provided tags */
       filterTagNotIn?: string[];
-      /** @description Format to export to */
+      /**
+       * @description Format to export to
+       * @enum {string}
+       */
       format:
         | "JSON"
         | "JSON_TOLGEE"
@@ -1704,6 +1782,7 @@ export interface components {
        *
        * This property is honored only for generic formats like JSON or YAML.
        * For specific formats like `YAML_RUBY` it's ignored.
+       * @enum {string}
        */
       messageFormat?:
         | "C_SPRINTF"
@@ -1784,7 +1863,10 @@ export interface components {
       filterTagIn?: string[];
       /** @description Filter keys not tagged by one of provided tags */
       filterTagNotIn?: string[];
-      /** @description Format to export to */
+      /**
+       * @description Format to export to
+       * @enum {string}
+       */
       format:
         | "JSON"
         | "JSON_TOLGEE"
@@ -1819,6 +1901,7 @@ export interface components {
        *
        * This property is honored only for generic formats like JSON or YAML.
        * For specific formats like `YAML_RUBY` it's ignored.
+       * @enum {string}
        */
       messageFormat?:
         | "C_SPRINTF"
@@ -2003,6 +2086,7 @@ export interface components {
        */
       languageId: number;
       name?: string;
+      /** @enum {string} */
       type: "TRANSLATE" | "REVIEW";
     };
     CreateTranslationSuggestionRequest: {
@@ -2080,9 +2164,15 @@ export interface components {
       icuPlaceholders: boolean;
       name: string;
       slug?: string;
-      /** @description Suggestions can be DISABLED (hidden from UI) or ENABLED (visible in the UI) */
+      /**
+       * @description Suggestions can be DISABLED (hidden from UI) or ENABLED (visible in the UI)
+       * @enum {string}
+       */
       suggestionsMode: "DISABLED" | "ENABLED";
-      /** @description Protects reviewed translations, so translators can't change them by default and others will receive warning. */
+      /**
+       * @description Protects reviewed translations, so translators can't change them by default and others will receive warning.
+       * @enum {string}
+       */
       translationProtection: "NONE" | "PROTECT_REVIEWED";
       useNamespaces: boolean;
     };
@@ -2120,6 +2210,7 @@ export interface components {
       licenseKey: string;
       name: string;
       nonCommerical: boolean;
+      /** @enum {string} */
       status:
         | "ACTIVE"
         | "CANCELED"
@@ -2141,6 +2232,7 @@ export interface components {
       params?: unknown[];
     };
     ErrorResponseTyped: {
+      /** @enum {string} */
       code:
         | "unauthenticated"
         | "api_access_forbidden"
@@ -2458,6 +2550,7 @@ export interface components {
     ExportFormatModel: {
       defaultFileStructureTemplate: string;
       extension: string;
+      /** @enum {string} */
       format:
         | "JSON"
         | "JSON_TOLGEE"
@@ -2522,7 +2615,10 @@ export interface components {
       filterTagIn?: string[];
       /** @description Filter keys not tagged by one of provided tags */
       filterTagNotIn?: string[];
-      /** @description Format to export to */
+      /**
+       * @description Format to export to
+       * @enum {string}
+       */
       format:
         | "JSON"
         | "JSON_TOLGEE"
@@ -2557,6 +2653,7 @@ export interface components {
        *
        * This property is honored only for generic formats like JSON or YAML.
        * For specific formats like `YAML_RUBY` it's ignored.
+       * @enum {string}
        */
       messageFormat?:
         | "C_SPRINTF"
@@ -2649,6 +2746,7 @@ export interface components {
     };
     HierarchyItem: {
       requires: components["schemas"]["HierarchyItem"][];
+      /** @enum {string} */
       scope:
         | "translations.view"
         | "translations.edit"
@@ -2699,6 +2797,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       params: components["schemas"]["ImportFileIssueParamModel"][];
+      /** @enum {string} */
       type:
         | "KEY_IS_NOT_STRING"
         | "MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE"
@@ -2715,6 +2814,7 @@ export interface components {
         | "DESCRIPTION_TOO_LONG";
     };
     ImportFileIssueParamModel: {
+      /** @enum {string} */
       type:
         | "KEY_NAME"
         | "KEY_ID"
@@ -2733,6 +2833,7 @@ export interface components {
        * @description Format of the file. If not provided, Tolgee will try to guess the format from the file name or file contents.
        *
        * It is recommended to provide these values to prevent any issues with format detection.
+       * @enum {string}
        */
       format?:
         | "CSV_ICU"
@@ -2808,12 +2909,18 @@ export interface components {
       namespace?: string;
       /**
        * @description Tags of the key
-       * @example homepage,user-profile
+       * @example [
+       *   "homepage",
+       *   "user-profile"
+       * ]
        */
       tags?: string[];
       /**
        * @description Object mapping language tag to translation
-       * @example [object Object]
+       * @example {
+       *   "en": "What a translated value!",
+       *   "cs": "Jaká to přeložená hodnota!"
+       * }
        */
       translations: { [key: string]: string };
     };
@@ -2893,6 +3000,7 @@ export interface components {
       /** Format: int64 */
       conflictId?: number;
       conflictText?: string;
+      /** @enum {string} */
       conflictType?:
         | "SHOULD_NOT_EDIT_REVIEWED"
         | "CANNOT_EDIT_REVIEWED"
@@ -2919,6 +3027,7 @@ export interface components {
        *       - FORCE_OVERRIDE: Translation is updated, created or kept.
        *
        * @example OVERRIDE
+       * @enum {string}
        */
       resolution: "KEEP" | "OVERRIDE" | "NEW" | "FORCE_OVERRIDE";
       /**
@@ -2928,6 +3037,7 @@ export interface components {
       text: string;
     };
     InitialDataEeSubscriptionModel: {
+      /** @enum {string} */
       status:
         | "ACTIVE"
         | "CANCELED"
@@ -2946,6 +3056,37 @@ export interface components {
       serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
       ssoInfo?: components["schemas"]["PublicSsoTenantModel"];
       userInfo?: components["schemas"]["PrivateUserAccountModel"];
+    };
+    JobInfo: {
+      /** Format: int64 */
+      createdAt?: number;
+      /** Format: int64 */
+      jobId: number;
+      /** @enum {string} */
+      status:
+        | "PENDING"
+        | "RUNNING"
+        | "SUCCESS"
+        | "FAILED"
+        | "CANCELLED"
+        | "DEBOUNCED";
+      /** @enum {string} */
+      type:
+        | "AI_PLAYGROUND_TRANSLATE"
+        | "PRE_TRANSLATE_BT_TM"
+        | "MACHINE_TRANSLATE"
+        | "AUTO_TRANSLATE"
+        | "DELETE_KEYS"
+        | "SET_TRANSLATIONS_STATE"
+        | "CLEAR_TRANSLATIONS"
+        | "COPY_TRANSLATIONS"
+        | "TAG_KEYS"
+        | "UNTAG_KEYS"
+        | "SET_KEYS_NAMESPACE"
+        | "AUTOMATION"
+        | "BILLING_TRIAL_EXPIRATION_NOTICE"
+        | "ASSIGN_TRANSLATION_LABEL"
+        | "UNASSIGN_TRANSLATION_LABEL";
     };
     JsonNode: unknown;
     JwtAuthenticationResponse: {
@@ -3082,6 +3223,7 @@ export interface components {
       languageTag: string;
       /** Format: int64 */
       number: number;
+      /** @enum {string} */
       type: "TRANSLATE" | "REVIEW";
       userAssigned: boolean;
     };
@@ -3140,7 +3282,12 @@ export interface components {
       tags: components["schemas"]["TagModel"][];
       /**
        * @description Translations object containing values updated in this request
-       * @example [object Object]
+       * @example {
+       *   "en": {
+       *     "id": 100000003,
+       *     "text": "This is super translation!"
+       *   }
+       * }
        */
       translations: {
         [key: string]: components["schemas"]["TranslationModel"];
@@ -3291,6 +3438,7 @@ export interface components {
       /**
        * @deprecated
        * @description Service used for automated translating (deprecated: use primaryServiceInfo)
+       * @enum {string}
        */
       primaryService?:
         | "GOOGLE"
@@ -3332,7 +3480,10 @@ export interface components {
       platformLanguageTag: string;
     };
     LanguageModel: {
-      /** @description Whether is base language of project */
+      /**
+       * @description Whether is base language of project
+       * @example false
+       */
       base: boolean;
       /**
        * @description Language flag emoji as UTF-8 emoji
@@ -3410,10 +3561,12 @@ export interface components {
     LlmMessage: {
       image?: string;
       text?: string;
+      /** @enum {string} */
       type: "TEXT" | "IMAGE";
     };
     LlmParams: {
       messages: components["schemas"]["LlmMessage"][];
+      /** @enum {string} */
       priority: "LOW" | "HIGH";
       shouldOutputJson: boolean;
     };
@@ -3426,8 +3579,10 @@ export interface components {
       id: number;
       model?: string;
       name: string;
+      /** @enum {string} */
       priority?: "LOW" | "HIGH";
       reasoningEffort?: string;
+      /** @enum {string} */
       type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE" | "ANTHROPIC" | "GOOGLE_AI";
     };
     LlmProviderRequest: {
@@ -3438,13 +3593,16 @@ export interface components {
       keepAlive?: string;
       model?: string;
       name: string;
+      /** @enum {string} */
       priority?: "LOW" | "HIGH";
       reasoningEffort?: string;
+      /** @enum {string} */
       type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE" | "ANTHROPIC" | "GOOGLE_AI";
     };
     LlmProviderSimpleModel: {
       name: string;
       source?: string;
+      /** @enum {string} */
       type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE" | "ANTHROPIC" | "GOOGLE_AI";
     };
     LoginRequest: {
@@ -3470,6 +3628,7 @@ export interface components {
       /**
        * @deprecated
        * @description This service will be used for automated translation
+       * @enum {string}
        */
       primaryService?:
         | "GOOGLE"
@@ -3519,9 +3678,11 @@ export interface components {
       enabled: boolean;
     };
     MtServiceInfo: {
+      /** @enum {string} */
       formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
       /** Format: int64 */
       promptId?: number;
+      /** @enum {string} */
       serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
     };
     MtServicesDTO: {
@@ -3529,6 +3690,7 @@ export interface components {
     };
     MtSupportedService: {
       formalitySupported: boolean;
+      /** @enum {string} */
       serviceType: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
     };
     NamespaceModel: {
@@ -3549,6 +3711,7 @@ export interface components {
       linkedTask?: components["schemas"]["TaskModel"];
       originatingUser?: components["schemas"]["SimpleUserAccountModel"];
       project?: components["schemas"]["SimpleProjectModel"];
+      /** @enum {string} */
       type:
         | "TASK_ASSIGNED"
         | "TASK_FINISHED"
@@ -3566,17 +3729,30 @@ export interface components {
       tasks: components["schemas"]["NotificationSettingGroupModel"];
     };
     NotificationSettingsRequest: {
-      /** @example IN_APP */
+      /**
+       * @example IN_APP
+       * @enum {string}
+       */
       channel: "IN_APP" | "EMAIL";
-      /** @description True if the setting should be enabled, false for disabled */
+      /**
+       * @description True if the setting should be enabled, false for disabled
+       * @example false
+       */
       enabled: boolean;
-      /** @example TASKS */
+      /**
+       * @example TASKS
+       * @enum {string}
+       */
       group: "ACCOUNT_SECURITY" | "TASKS";
     };
     NotificationsMarkSeenRequest: {
       /**
        * @description Notification IDs to be marked as seen
-       * @example 1,2,3
+       * @example [
+       *   1,
+       *   2,
+       *   3
+       * ]
        */
       notificationIds: number[];
     };
@@ -3607,6 +3783,7 @@ export interface components {
       id: number;
       invitedUserEmail?: string;
       invitedUserName?: string;
+      /** @enum {string} */
       type: "MEMBER" | "OWNER" | "MAINTAINER";
     };
     OrganizationInviteUserDto: {
@@ -3614,10 +3791,14 @@ export interface components {
       email?: string;
       /** @description Name of invited user */
       name?: string;
+      /** @enum {string} */
       roleType: "MEMBER" | "OWNER" | "MAINTAINER";
     };
     OrganizationLanguageModel: {
-      /** @description Whether is base language of any project */
+      /**
+       * @description Whether is base language of any project
+       * @example false
+       */
       base: boolean;
       /**
        * @description Language flag emoji as UTF-8 emoji
@@ -3648,6 +3829,7 @@ export interface components {
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
+       * @enum {string}
        */
       currentUserRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       /** @example This is a beautiful organization full of beautiful and clever people */
@@ -3949,12 +4131,18 @@ export interface components {
        * @description Deprecated (use translateLanguageIds).
        *
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
-       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       * @example [
+       *   "KEYS_EDIT",
+       *   "TRANSLATIONS_VIEW"
+       * ]
        */
       scopes: (
         | "translations.view"
@@ -3993,24 +4181,39 @@ export interface components {
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       stateChangeLanguageIds?: number[];
       /**
        * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       translateLanguageIds?: number[];
-      /** @description The user's permission type. This field is null if uses granular permissions */
+      /**
+       * @description The user's permission type. This field is null if uses granular permissions
+       * @enum {string}
+       */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       viewLanguageIds?: number[];
     };
@@ -4021,12 +4224,18 @@ export interface components {
        * @description Deprecated (use translateLanguageIds).
        *
        * List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       permittedLanguageIds?: number[];
       /**
        * @description Granted scopes to the user. When user has type permissions, this field contains permission scopes of the type.
-       * @example KEYS_EDIT,TRANSLATIONS_VIEW
+       * @example [
+       *   "KEYS_EDIT",
+       *   "TRANSLATIONS_VIEW"
+       * ]
        */
       scopes: (
         | "translations.view"
@@ -4065,24 +4274,39 @@ export interface components {
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       stateChangeLanguageIds?: number[];
       /**
        * @description List of languages user can suggest to. If null, suggesting to all languages is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       suggestLanguageIds?: number[];
       /**
        * @description List of languages user can translate to. If null, all languages editing is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       translateLanguageIds?: number[];
-      /** @description The user's permission type. This field is null if uses granular permissions */
+      /**
+       * @description The user's permission type. This field is null if uses granular permissions
+       * @enum {string}
+       */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /**
        * @description List of languages user can view. If null, all languages view is permitted.
-       * @example 200001,200004
+       * @example [
+       *   200001,
+       *   200004
+       * ]
        */
       viewLanguageIds?: number[];
     };
@@ -4133,6 +4357,7 @@ export interface components {
        * @description The role of currently authorized user.
        *
        * Can be null when user has direct access to one of the projects owned by the organization.
+       * @enum {string}
        */
       currentUserRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       /** @example This is a beautiful organization full of beautiful and clever people */
@@ -4171,17 +4396,20 @@ export interface components {
       slug: string;
     };
     PrivateUserAccountModel: {
+      /** @enum {string} */
       accountType: "LOCAL" | "MANAGED" | "THIRD_PARTY";
       avatar?: components["schemas"]["Avatar"];
       deletable: boolean;
       domain?: string;
       emailAwaitingVerification?: string;
+      /** @enum {string} */
       globalServerRole: "USER" | "ADMIN";
       /** Format: int64 */
       id: number;
       mfaEnabled: boolean;
       name?: string;
       needsSuperJwtToken: boolean;
+      /** @enum {string} */
       thirdPartyAuthType?:
         | "GOOGLE"
         | "GITHUB"
@@ -4210,6 +4438,7 @@ export interface components {
       revisionId: number;
       /** Format: int64 */
       timestamp: number;
+      /** @enum {string} */
       type:
         | "UNKNOWN"
         | "SET_TRANSLATION_STATE"
@@ -4310,6 +4539,7 @@ export interface components {
       /**
        * @deprecated
        * @description Use permission object instead
+       * @enum {string}
        */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
     };
@@ -4330,7 +4560,10 @@ export interface components {
       name?: string;
       /**
        * @description Granted scopes for the invited user
-       * @example translations.view,translations.edit
+       * @example [
+       *   "translations.view",
+       *   "translations.edit"
+       * ]
        */
       scopes?: string[];
       /** @description Languages user can change translation state (review) */
@@ -4339,9 +4572,19 @@ export interface components {
       suggestLanguages?: number[];
       /** @description Languages user can translate to */
       translateLanguages?: number[];
+      /** @enum {string} */
       type?: "NONE" | "VIEW" | "TRANSLATE" | "REVIEW" | "EDIT" | "MANAGE";
       /** @description Languages user can view */
       viewLanguages?: number[];
+    };
+    ProjectLockModel: {
+      jobInfo?: components["schemas"]["JobInfo"];
+      /** @enum {string} */
+      lockStatus: "UNLOCKED" | "UNINITIALIZED" | "LOCKED";
+      /** Format: int64 */
+      lockedJobId?: number;
+      /** Format: int64 */
+      projectId: number;
     };
     ProjectModel: {
       avatar?: components["schemas"]["Avatar"];
@@ -4360,11 +4603,18 @@ export interface components {
       id: number;
       name: string;
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
+      /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       slug?: string;
-      /** @description Suggestions for translations */
+      /**
+       * @description Suggestions for translations
+       * @enum {string}
+       */
       suggestionsMode: "DISABLED" | "ENABLED";
-      /** @description Level of protection of translations */
+      /**
+       * @description Level of protection of translations
+       * @enum {string}
+       */
       translationProtection: "NONE" | "PROTECT_REVIEWED";
       useNamespaces: boolean;
     };
@@ -4425,6 +4675,7 @@ export interface components {
       languages: components["schemas"]["LanguageModel"][];
       name: string;
       organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
+      /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       slug?: string;
       stats: components["schemas"]["ProjectStatistics"];
@@ -4508,6 +4759,7 @@ export interface components {
       description?: string;
       name: string;
       props?: components["schemas"]["PromptVariableDto"][];
+      /** @enum {string} */
       type: "FRAGMENT" | "OBJECT" | "STRING";
       value?: string;
     };
@@ -4547,16 +4799,20 @@ export interface components {
       /** Format: int64 */
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
+      /** @enum {string} */
       metricType: "KEYS_SEATS" | "STRINGS";
       name: string;
       nonCommercial: boolean;
       public: boolean;
+      /** @enum {string} */
       type: "PAY_AS_YOU_GO" | "FIXED";
     };
     PublicCloudSubscriptionModel: {
       cancelAtPeriodEnd: boolean;
+      /** @enum {string} */
       currentBillingPeriod?: "MONTHLY" | "YEARLY";
       plan: components["schemas"]["PublicCloudPlanModel"];
+      /** @enum {string} */
       status:
         | "ACTIVE"
         | "CANCELED"
@@ -4717,6 +4973,18 @@ export interface components {
        */
       usedMtCredits: number;
     };
+    QueueItemModel: {
+      /** Format: int64 */
+      chunkExecutionId: number;
+      /** Format: int64 */
+      executeAfter?: number;
+      /** @enum {string} */
+      jobCharacter: "SLOW" | "FAST";
+      /** Format: int64 */
+      jobId: number;
+      /** Format: int32 */
+      managementErrorRetrials: number;
+    };
     QuickStartModel: {
       completedSteps: string[];
       finished: boolean;
@@ -4785,6 +5053,7 @@ export interface components {
     S3ContentStorageConfigDto: {
       accessKey?: string;
       bucketName: string;
+      /** @enum {string} */
       contentStorageType?: "S3" | "AZURE";
       enabled?: boolean;
       endpoint: string;
@@ -4897,6 +5166,7 @@ export interface components {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
     };
     SetOrganizationRoleDto: {
+      /** @enum {string} */
       roleType: "MEMBER" | "OWNER" | "MAINTAINER";
     };
     SetProjectPromptCustomizationRequest: {
@@ -4925,7 +5195,12 @@ export interface components {
       keyNamespace?: string;
       /**
        * @description Translations object containing values updated in this request
-       * @example [object Object]
+       * @example {
+       *   "en": {
+       *     "id": 100000003,
+       *     "text": "This is super translation!"
+       *   }
+       * }
        */
       translations: {
         [key: string]: components["schemas"]["TranslationModel"];
@@ -4934,6 +5209,7 @@ export interface components {
     SetTranslationsStateStateRequest: {
       keyIds: number[];
       languageIds: number[];
+      /** @enum {string} */
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
     };
     SetTranslationsWithKeyDto: {
@@ -4947,14 +5223,21 @@ export interface components {
        *
        * If not provided, only modified translation will be provided.
        *
-       * @example en,de,fr
+       * @example [
+       *   "en",
+       *   "de",
+       *   "fr"
+       * ]
        */
       languagesToReturn?: string[];
       /** @description The namespace of the key. (When empty or null default namespace will be used) */
       namespace?: string;
       /**
        * @description Object mapping language tag to translation
-       * @example [object Object]
+       * @example {
+       *   "en": "What a translated value!",
+       *   "cs": "Jaká to přeložená hodnota!"
+       * }
        */
       translations: { [key: string]: string };
     };
@@ -5086,6 +5369,7 @@ export interface components {
        * When set to `KEEP`, existing translations will be kept.
        * When set to `NO_FORCE`, error will be thrown on conflict.
        * When set to `OVERRIDE`, existing translations will be overwritten
+       * @enum {string}
        */
       forceMode: "OVERRIDE" | "KEEP" | "NO_FORCE";
       /**
@@ -5105,6 +5389,8 @@ export interface components {
        *
        * When set to `RECOMMENDED` it will fail for DISABLED translations and protected REVIEWED translations.
        * When set to `ALL` it will fail for DISABLED translations, but will try to update protected REVIEWED translations (fails only if user has no permission)
+       *
+       * @enum {string}
        */
       overrideMode?: "RECOMMENDED" | "ALL";
       /** @description If yes, keys from project that were not included in import will be deleted (only within namespaces which are included in the import). */
@@ -5146,6 +5432,8 @@ export interface components {
        *
        * When set to `RECOMMENDED` it will fail for DISABLED translations and protected REVIEWED translations.
        * When set to `ALL` it will fail for DISABLED translations, but will try to update protected REVIEWED translations (fails only if user has no permission)
+       *
+       * @enum {string}
        */
       overrideMode?: "RECOMMENDED" | "ALL";
     };
@@ -5158,6 +5446,7 @@ export interface components {
        *       - OVERRIDE: New translation is applied over the existing in every case (Default)
        *
        * @example OVERRIDE
+       * @enum {string}
        */
       resolution?: "EXPECT_NO_CONFLICT" | "OVERRIDE";
       /**
@@ -5213,6 +5502,7 @@ export interface components {
       redirectUrl: string;
     };
     StorageTestResult: {
+      /** @enum {string} */
       message?:
         | "unauthenticated"
         | "api_access_forbidden"
@@ -5550,7 +5840,16 @@ export interface components {
       machineTranslations?: { [key: string]: string };
       /**
        * @description Results provided by enabled services.
-       * @example [object Object]
+       * @example {
+       *   "GOOGLE": {
+       *     "output": "This was translated by Google",
+       *     "contextDescription": null
+       *   },
+       *   "TOLGEE": {
+       *     "output": "This was translated by Tolgee Translator",
+       *     "contextDescription": "This is an example in swagger"
+       *   }
+       * }
        */
       result?: { [key: string]: components["schemas"]["TranslationItemModel"] };
     };
@@ -5605,9 +5904,11 @@ export interface components {
       name?: string;
       /** Format: int64 */
       number: number;
+      /** @enum {string} */
       state: "NEW" | "IN_PROGRESS" | "FINISHED" | "CANCELED";
       /** Format: int64 */
       totalItems: number;
+      /** @enum {string} */
       type: "TRANSLATE" | "REVIEW";
     };
     TaskPerUserReportModel: {
@@ -5641,9 +5942,11 @@ export interface components {
       /** Format: int64 */
       number: number;
       project: components["schemas"]["SimpleProjectModel"];
+      /** @enum {string} */
       state: "NEW" | "IN_PROGRESS" | "FINISHED" | "CANCELED";
       /** Format: int64 */
       totalItems: number;
+      /** @enum {string} */
       type: "TRANSLATE" | "REVIEW";
     };
     TextNode: unknown;
@@ -5655,6 +5958,7 @@ export interface components {
       url?: string;
     };
     TranslationCommentDto: {
+      /** @enum {string} */
       state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
       text: string;
     };
@@ -5671,7 +5975,10 @@ export interface components {
        * @description Id of translation comment record
        */
       id: number;
-      /** @description State of translation */
+      /**
+       * @description State of translation
+       * @enum {string}
+       */
       state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
       /** @description Text of comment */
       text: string;
@@ -5686,6 +5993,7 @@ export interface components {
       keyId: number;
       /** Format: int64 */
       languageId: number;
+      /** @enum {string} */
       state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
       text: string;
     };
@@ -5696,6 +6004,7 @@ export interface components {
       modifications?: {
         [key: string]: components["schemas"]["PropertyModification"];
       };
+      /** @enum {string} */
       revisionType: "ADD" | "MOD" | "DEL";
       /**
        * Format: int64
@@ -5730,11 +6039,17 @@ export interface components {
        * @description Id of translation record
        */
       id: number;
-      /** @description Which machine translation service was used to auto translate this */
+      /**
+       * @description Which machine translation service was used to auto translate this
+       * @enum {string}
+       */
       mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
       /** @description Whether base language translation was changed after this translation was updated */
       outdated: boolean;
-      /** @description State of translation */
+      /**
+       * @description State of translation
+       * @enum {string}
+       */
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
       /** @description Translation text */
       text?: string;
@@ -5754,6 +6069,7 @@ export interface components {
       keyId: number;
       /** Format: int64 */
       languageId: number;
+      /** @enum {string} */
       state: "ACTIVE" | "ACCEPTED" | "DECLINED";
       translation?: string;
       /** Format: date-time */
@@ -5764,6 +6080,7 @@ export interface components {
       /** Format: int64 */
       id: number;
       isPlural: boolean;
+      /** @enum {string} */
       state: "ACTIVE" | "ACCEPTED" | "DECLINED";
       translation?: string;
     };
@@ -5789,11 +6106,17 @@ export interface components {
       id?: number;
       /** @description Labels assigned to this translation */
       labels?: components["schemas"]["LabelModel"][];
-      /** @description Which machine translation service was used to auto translate this */
+      /**
+       * @description Which machine translation service was used to auto translate this
+       * @enum {string}
+       */
       mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
       /** @description Whether base language translation was changed after this translation was updated */
       outdated: boolean;
-      /** @description State of translation */
+      /**
+       * @description State of translation
+       * @enum {string}
+       */
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
       /** @description First suggestion */
       suggestions?: components["schemas"]["TranslationSuggestionSimpleModel"][];
@@ -5935,6 +6258,7 @@ export interface components {
       mfaEnabled: boolean;
       name?: string;
       organizationBasePermission: components["schemas"]["PermissionModel"];
+      /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       username: string;
     };
@@ -5943,6 +6267,7 @@ export interface components {
       deleted: boolean;
       disabled: boolean;
       emailAwaitingVerification?: string;
+      /** @enum {string} */
       globalServerRole: "USER" | "ADMIN";
       /** Format: int64 */
       id: number;
@@ -5956,6 +6281,7 @@ export interface components {
       id: number;
       mfaEnabled: boolean;
       name: string;
+      /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
       projectsWithDirectPermission: components["schemas"]["SimpleProjectModel"][];
       username: string;
@@ -6491,6 +6817,41 @@ export interface operations {
       };
     };
   };
+  /** Returns all chunk execution items currently in the batch job queue */
+  getBatchJobQueue: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelQueueItemModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   getOrganizations: {
     parameters: {
       query: {
@@ -6508,6 +6869,41 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns current project batch job locks from Redis or local storage based on configuration */
+  getProjectLocks: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelProjectLockModel"];
         };
       };
       /** Bad Request */
@@ -9963,6 +10359,7 @@ export interface operations {
       };
     };
   };
+  /** Remove user from organization. If user is managed by the organization, their account is disabled instead. */
   removeUser: {
     parameters: {
       path: {
