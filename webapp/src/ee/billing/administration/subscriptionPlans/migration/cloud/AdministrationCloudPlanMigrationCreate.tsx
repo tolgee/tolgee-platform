@@ -4,10 +4,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
 import { LINKS } from 'tg.constants/links';
-import {
-  CreatePlanMigrationFormData,
-  PlanMigrationFormData,
-} from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/PlanMigrationForm';
+import { CreatePlanMigrationFormData } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/PlanMigrationForm';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import React from 'react';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
@@ -19,12 +16,10 @@ export const AdministrationCloudPlanMigrationCreate = () => {
   const messaging = useMessage();
   const history = useHistory();
 
-  const submit = (
-    values: CreatePlanMigrationFormData | PlanMigrationFormData
-  ) => {
+  const submit = (values: CreatePlanMigrationFormData) => {
     createPlanMigrationLoadable.mutate(
       {
-        content: { 'application/json': values as CreatePlanMigrationFormData },
+        content: { 'application/json': values },
       },
       {
         onSuccess: () => {

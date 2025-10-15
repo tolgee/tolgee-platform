@@ -9,7 +9,7 @@ import { CloudPlanEditPlanMigrationForm } from 'tg.ee.module/billing/administrat
 export const AdministrationCloudPlanMigrationEdit = () => {
   const { t } = useTranslate();
   const match = useRouteMatch();
-  const migrationId = match.params[PARAMS.PLAN_MIGRATION_ID] as number;
+  const migrationId = Number(match.params[PARAMS.PLAN_MIGRATION_ID]);
   const [subscriptionsPage, setSubscriptionsPage] = useState(0);
 
   const migrations = useBillingApiQuery({

@@ -530,7 +530,7 @@ export class Validation {
         .matches(/^#[0-9A-F]{6}$/i, t('validation_invalid_hex_color')),
     });
 
-  static readonly PLAN_MIRATION_FORM = () =>
+  static readonly PLAN_MIGRATION_FORM = () =>
     Yup.object().shape({
       monthlyOffsetDays: Yup.number().required().min(0),
       yearlyOffsetDays: Yup.number().required().min(0),

@@ -9,7 +9,7 @@ import { useRouteMatch } from 'react-router-dom';
 export const AdministrationSelfHostedEePlanMigrationEdit = () => {
   const { t } = useTranslate();
   const match = useRouteMatch();
-  const migrationId = match.params[PARAMS.PLAN_MIGRATION_ID] as number;
+  const migrationId = Number(match.params[PARAMS.PLAN_MIGRATION_ID]);
   const [subscriptionsPage, setSubscriptionsPage] = useState(0);
   const migrations = useBillingApiQuery({
     url: '/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}',
