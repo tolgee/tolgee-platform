@@ -1,3 +1,10 @@
+# [3.134.0](https://github.com/tolgee/tolgee-platform/compare/v3.133.3...v3.134.0) (2025-10-15)
+
+
+### Features
+
+* Added indication to accounts without 2FA ([#3274](https://github.com/tolgee/tolgee-platform/issues/3274)) ([0723e59](https://github.com/tolgee/tolgee-platform/commit/0723e5924fd1bb1e39712b74d998819914c5b5d2))
+
 ## [3.133.3](https://github.com/tolgee/tolgee-platform/compare/v3.133.2...v3.133.3) (2025-10-10)
 
 
