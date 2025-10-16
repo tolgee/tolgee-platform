@@ -20,15 +20,21 @@ class GlossaryCSVExporter(
   }
 
   fun GlossaryTerm.asColumns(): Array<String> {
+    val baseTranslation = translations.find { it.languageTag == glossary.baseLanguageTag }
     return arrayOf(
-      translations.find { it.languageTag == glossary.baseLanguageTag }?.text ?: "",
+      baseTranslation?.text ?: "",
       description,
       (!flagNonTranslatable).asYesOrNo(), // stored inverted - as translatable
       flagCaseSensitive.asYesOrNo(),
       flagAbbreviation.asYesOrNo(),
       flagForbiddenTerm.asYesOrNo(),
     ) + languageTagsWithoutBaseLanguage.map { languageTag ->
-      translations.find { it.languageTag == languageTag }?.text ?: ""
+      if (flagNonTranslatable) {
+        // if the term is non-translatable, we use the base translation text for all languages
+        baseTranslation?.text ?: ""
+      } else {
+        translations.find { it.languageTag == languageTag }?.text ?: ""
+      }
     }
   }
 

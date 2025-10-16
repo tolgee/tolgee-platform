@@ -46,10 +46,12 @@ class GlossaryImportService(
   }
 
   private fun GlossaryTerm.applyFrom(glossaryTerm: ImportGlossaryTerm): GlossaryTerm {
-    val hasBaseTranslation = glossaryTerm.term != null
-    if (hasBaseTranslation) {
+    val baseTranslation = glossaryTerm.term ?: glossaryTerm.translations[glossary.baseLanguageTag]
+
+    baseTranslation?.let {
+      // We've found a base translation.
       translations.add(
-        GlossaryTermTranslation(glossary.baseLanguageTag, glossaryTerm.term)
+        GlossaryTermTranslation(glossary.baseLanguageTag, it)
           .apply { term = this@applyFrom }
       )
     }
@@ -60,10 +62,14 @@ class GlossaryImportService(
     ::flagAbbreviation setIfNotNull glossaryTerm.flagAbbreviation
     ::flagForbiddenTerm setIfNotNull glossaryTerm.flagForbiddenTerm
 
+    if (flagNonTranslatable) {
+      // The term is non-translatable, so we only care about the base translation.
+      return this
+    }
+
     glossaryTerm.translations.forEach { (languageTag, text) ->
-      if (hasBaseTranslation && languageTag == glossary.baseLanguageTag) {
-        // This term has two translations for base language.
-        // Let's just ignore the second one for now and prefer the 'term' value.
+      if (languageTag == glossary.baseLanguageTag) {
+        // We've already dealt with the base translation.
         return@forEach
       }
       translations.add(GlossaryTermTranslation(languageTag, text).apply { term = this@applyFrom })
