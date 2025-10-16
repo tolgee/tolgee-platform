@@ -64,6 +64,7 @@ describe('Administration', () => {
     visitAdministration();
     gcy('settings-menu-item').contains('Users').click();
     changeUserRole('John User', 'Admin');
+    changeUserRole('John User', 'Supporter');
     changeUserRole('John User', 'User');
     getUserRoleSelect('Peter Administrator')
       .find('div')
