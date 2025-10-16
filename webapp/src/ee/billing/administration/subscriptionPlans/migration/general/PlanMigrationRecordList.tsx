@@ -9,6 +9,7 @@ import { UseQueryResult } from 'react-query';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { HateoasListData } from 'tg.service/response.types';
 import { useDateFormatter } from 'tg.hooks/useLocale';
+import { Link as RouterLink } from 'react-router-dom';
 
 type PlanMigrationRecord = components['schemas']['PlanMigrationRecordModel'];
 
@@ -27,7 +28,7 @@ export const PlanMigrationRecordList = ({ subscriptions, setPage }: Props) => {
       loadable={subscriptions}
       onPageChange={setPage}
       tableHead={
-        <>
+        <TableRow>
           <TableCell>{t('global_organization')}</TableCell>
           <TableCell>{t('administration_plan_migration_from')}</TableCell>
           <TableCell>{t('administration_plan_migration_to')}</TableCell>
@@ -35,13 +36,14 @@ export const PlanMigrationRecordList = ({ subscriptions, setPage }: Props) => {
           <TableCell>
             {t('administration_plan_migrated_subscription_status')}
           </TableCell>
-        </>
+        </TableRow>
       }
       renderItem={(item) => (
         <TableRow>
           <TableCell>
             <Link
-              href={LINKS.ORGANIZATION_PROFILE.build({
+              component={RouterLink}
+              to={LINKS.ORGANIZATION_PROFILE.build({
                 [PARAMS.ORGANIZATION_SLUG]: item.organizationSlug,
               })}
             >
