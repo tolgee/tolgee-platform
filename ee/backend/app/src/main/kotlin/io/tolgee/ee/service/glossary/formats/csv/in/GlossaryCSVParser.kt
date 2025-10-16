@@ -62,11 +62,11 @@ class GlossaryCSVParser(
       flagForbiddenTerm = parseBoolean(getSafe(idxForbiddenTerm)),
       translations = idxTranslations
         .map { headers!![it] to getSafe(it).orEmpty() }
-        .filter { it.second.isNotEmpty() }
+        .filter { it.second.isNotBlank() }
         .toMap(),
     ).takeIf {
       // Ignore empty rows
-      !it.term.isNullOrBlank() || !it.description.isNullOrBlank() || it.translations.isNotEmpty()
+      it.term != null || it.description != null || it.translations.isNotEmpty()
     }
   }
 
@@ -77,7 +77,7 @@ class GlossaryCSVParser(
   fun Array<String>.getSafe(idx: Int?): String? {
     if (idx == null) return null
     if (idx >= size) return null
-    return this[idx]
+    return this[idx].ifBlank { null }
   }
 
   private fun parseBoolean(value: String?): Boolean? {
