@@ -1,9 +1,8 @@
-import { GlossaryTermCreateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateDialog';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useIsAdmin, usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
-export const useGlossaryTermCreateDialog = () => {
+export const useGlossaryTermCreateDialogController = () => {
   const { preferredOrganization } = usePreferredOrganization();
   const glossary = useGlossary();
   const isUserAdmin = useIsAdmin();
@@ -24,17 +23,13 @@ export const useGlossaryTermCreateDialog = () => {
 
   const isOpen = createTermDialogOpen && canCreate;
 
-  const createTermDialog = isOpen && (
-    <GlossaryTermCreateDialog
-      open={createTermDialogOpen}
-      onClose={() => setCreateTermDialogOpen(false)}
-      onFinished={() => setCreateTermDialogOpen(false)}
-    />
-  );
-
   return {
     onCreateTerm: canCreate ? onCreateTerm : undefined,
     createTermDialogOpen: isOpen,
-    createTermDialog,
+    createTermDialogProps: {
+      open: isOpen,
+      onClose: () => setCreateTermDialogOpen(false),
+      onFinished: () => setCreateTermDialogOpen(false),
+    },
   };
 };

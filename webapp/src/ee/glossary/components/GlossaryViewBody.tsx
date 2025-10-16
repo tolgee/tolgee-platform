@@ -5,8 +5,10 @@ import { GlossaryViewToolbar } from 'tg.ee.module/glossary/components/GlossaryVi
 import { GlossaryTermsList } from 'tg.ee.module/glossary/components/GlossaryTermsList';
 import { useSelectedGlossaryLanguages } from 'tg.ee.module/glossary/hooks/useSelectedGlossaryLanguages';
 import { useGlossaryTerms } from 'tg.ee.module/glossary/hooks/useGlossaryTerms';
-import { useGlossaryTermCreateDialog } from 'tg.ee.module/glossary/hooks/useGlossaryTermCreateDialog';
-import { useGlossaryImportDialog } from 'tg.ee.module/glossary/hooks/useGlossaryImportDialog';
+import { useGlossaryTermCreateDialogController } from 'tg.ee.module/glossary/hooks/useGlossaryTermCreateDialogController';
+import { useGlossaryImportDialogController } from 'tg.ee.module/glossary/hooks/useGlossaryImportDialogController';
+import { GlossaryTermCreateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateDialog';
+import { GlossaryImportDialog } from 'tg.ee.module/glossary/components/GlossaryImportDialog';
 
 type Props = {
   onSearch?: (search: string) => void;
@@ -31,15 +33,24 @@ export const GlossaryViewBody: React.VFC<Props> = ({ onSearch, search }) => {
     itemsAll: getAllTermsIds,
   });
 
-  const { onCreateTerm, createTermDialog } = useGlossaryTermCreateDialog();
+  const { onCreateTerm, createTermDialogOpen, createTermDialogProps } =
+    useGlossaryTermCreateDialogController();
 
   const hasExistingTerms = total !== undefined && total > 0;
-  const { onImport, importDialog } = useGlossaryImportDialog(hasExistingTerms);
+  const { onImport, importDialogOpen, importDialogProps } =
+    useGlossaryImportDialogController();
 
   return (
     <>
-      {createTermDialog}
-      {importDialog}
+      {createTermDialogOpen && (
+        <GlossaryTermCreateDialog {...createTermDialogProps} />
+      )}
+      {importDialogOpen && (
+        <GlossaryImportDialog
+          {...importDialogProps}
+          hasExistingTerms={hasExistingTerms}
+        />
+      )}
       {terms && (
         <GlossaryViewTopbar
           onCreateTerm={onCreateTerm}

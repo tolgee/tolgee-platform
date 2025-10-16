@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useIsAdmin, usePreferredOrganization } from 'tg.globalContext/helpers';
-import { GlossaryImportDialog } from 'tg.ee.module/glossary/components/GlossaryImportDialog';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
-export const useGlossaryImportDialog = (hasExistingTerms: boolean) => {
+export const useGlossaryImportDialogController = () => {
   const { preferredOrganization } = usePreferredOrganization();
   const glossary = useGlossary();
   const isUserAdmin = useIsAdmin();
@@ -24,18 +23,13 @@ export const useGlossaryImportDialog = (hasExistingTerms: boolean) => {
 
   const isOpen = importDialogOpen && canImport;
 
-  const importDialog = isOpen && (
-    <GlossaryImportDialog
-      open={importDialogOpen}
-      onClose={() => setImportDialogOpen(false)}
-      onFinished={() => setImportDialogOpen(false)}
-      hasExistingTerms={hasExistingTerms}
-    />
-  );
-
   return {
     onImport: canImport ? onImport : undefined,
     importDialogOpen: isOpen,
-    importDialog,
+    importDialogProps: {
+      open: isOpen,
+      onClose: () => setImportDialogOpen(false),
+      onFinished: () => setImportDialogOpen(false),
+    },
   };
 };
