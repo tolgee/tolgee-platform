@@ -226,27 +226,27 @@ class OrganizationAuthorizationInterceptorTest {
 
     @GetMapping("/v2/organizations/{id}/requires-owner")
     @RequiresOrganizationRole(OrganizationRoleType.OWNER)
-    fun requiresAdmin(
+    fun requiresOwner(
       @PathVariable id: Long,
     ) = "hello from org #$id!"
 
     @PostMapping("/v2/organizations/{id}/requires-owner-write-method")
     @RequiresOrganizationRole(OrganizationRoleType.OWNER)
-    fun requiresAdminWriteMethod(
+    fun requiresOwnerWriteMethod(
       @PathVariable id: Long,
     ) = "hello from org #$id!"
 
     @GetMapping("/v2/organizations/{id}/requires-owner-write-annotation")
     @WriteOperation
     @RequiresOrganizationRole(OrganizationRoleType.OWNER)
-    fun requiresAdminWriteAnnotation(
+    fun requiresOwnerWriteAnnotation(
       @PathVariable id: Long,
     ) = "hello from org #$id!"
 
     @PostMapping("/v2/organizations/{id}/requires-owner-read-annotation")
     @ReadOnlyOperation
     @RequiresOrganizationRole(OrganizationRoleType.OWNER)
-    fun requiresAdminReadAnnotation(
+    fun requiresOwnerReadAnnotation(
       @PathVariable id: Long,
     ) = "hello from org #$id!"
 
