@@ -9206,7 +9206,7 @@ export interface operations {
         glossaryId: number;
       };
       query: {
-        remove_existing_terms?: boolean;
+        removeExistingTerms?: boolean;
       };
     };
     responses: {

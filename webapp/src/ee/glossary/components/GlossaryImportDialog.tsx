@@ -74,7 +74,7 @@ export const GlossaryImportDialog: React.VFC<Props> = ({
           },
         },
         query: {
-          remove_existing_terms: importMode === 'replace',
+          removeExistingTerms: importMode === 'replace',
         },
       },
       {

@@ -40,7 +40,7 @@ class GlossaryImportController(
     @PathVariable organizationId: Long,
     @PathVariable glossaryId: Long,
     @RequestPart("file") file: MultipartFile,
-    @RequestParam(name = "remove_existing_terms", required = false, defaultValue = "false")
+    @RequestParam(required = false, defaultValue = "false")
     removeExistingTerms: Boolean,
   ): GlossaryImportResult {
     val organization = organizationHolder.organization
