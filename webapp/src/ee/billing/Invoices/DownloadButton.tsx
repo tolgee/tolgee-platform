@@ -35,15 +35,21 @@ export const DownloadButton: FC<DownloadButtonProps> = (props) => {
           const res = response as unknown as Response;
           const data = await res.blob();
           const url = URL.createObjectURL(data as any as Blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${config.appName.toLowerCase()}-${
-            props.invoice.number
-          }.pdf`;
+          try {
+            const a = document.createElement('a');
+            try {
+              a.href = url;
+              a.download = `${config.appName.toLowerCase()}-${
+                props.invoice.number
+              }.pdf`;
 
-          a.click();
-          a.remove();
-          setTimeout(() => URL.revokeObjectURL(a.href), 7000);
+              a.click();
+            } finally {
+              a.remove();
+            }
+          } finally {
+            setTimeout(() => URL.revokeObjectURL(url), 7000);
+          }
         },
       }
     );
