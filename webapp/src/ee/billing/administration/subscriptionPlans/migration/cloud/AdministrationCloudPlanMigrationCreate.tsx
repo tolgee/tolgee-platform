@@ -1,69 +1,47 @@
-import { Box, Typography } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
-
-import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { BaseAdministrationView } from 'tg.views/administration/components/BaseAdministrationView';
+import { useTranslate } from '@tolgee/react';
 import { LINKS } from 'tg.constants/links';
-import { CreatePlanMigrationFormData } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/PlanMigrationForm';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
 import React from 'react';
-import { useMessage } from 'tg.hooks/useSuccessMessage';
-import { useHistory } from 'react-router-dom';
-import { CreatePlanMigrationForm } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/CreatePlanMigrationForm';
+import { AdministrationPlanMigrationCreateBase } from 'tg.ee.module/billing/administration/subscriptionPlans/migration/general/AdministrationPlanMigrationCreateBase';
+import { CreatePlanMigrationFormData } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/PlanMigrationForm';
 
 export const AdministrationCloudPlanMigrationCreate = () => {
   const { t } = useTranslate();
-  const messaging = useMessage();
-  const history = useHistory();
 
-  const submit = (values: CreatePlanMigrationFormData) => {
-    createPlanMigrationLoadable.mutate(
+  const onSubmit = (
+    values: CreatePlanMigrationFormData,
+    callbacks: { onSuccess: () => void }
+  ) => {
+    createMutation.mutate(
       {
         content: { 'application/json': values },
       },
       {
-        onSuccess: () => {
-          messaging.success(
-            <T keyName="administration_plan_migration_created_success" />
-          );
-          history.push(LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build());
-        },
+        onSuccess: callbacks?.onSuccess,
       }
     );
   };
 
-  const createPlanMigrationLoadable = useBillingApiMutation({
+  const createMutation = useBillingApiMutation({
     url: '/v2/administration/billing/cloud-plans/migration',
     method: 'post',
   });
 
   return (
-    <DashboardPage>
-      <BaseAdministrationView
-        windowTitle={t('administration_plan_migration_configure')}
-        allCentered
-        hideChildrenOnLoading={false}
-        navigation={[
-          [
-            t('administration_cloud_plans'),
-            LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build(),
-          ],
-          [
-            t('administration_plan_migration_configure'),
-            LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_MIGRATION_CREATE.build(),
-          ],
-        ]}
-      >
-        <Box>
-          <Typography variant="h5">
-            {t('administration_plan_migration_configure')}
-          </Typography>
-        </Box>
-        <CreatePlanMigrationForm
-          onSubmit={submit}
-          loading={createPlanMigrationLoadable.isLoading}
-        />
-      </BaseAdministrationView>
-    </DashboardPage>
+    <AdministrationPlanMigrationCreateBase
+      onSubmit={onSubmit}
+      navigation={[
+        [
+          t('administration_cloud_plans'),
+          LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build(),
+        ],
+        [
+          t('administration_plan_migration_configure'),
+          LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_MIGRATION_CREATE.build(),
+        ],
+      ]}
+      successLink={LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS}
+      isLoading={createMutation.isLoading}
+    />
   );
 };
