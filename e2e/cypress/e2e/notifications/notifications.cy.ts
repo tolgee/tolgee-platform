@@ -23,8 +23,14 @@ function assertNewestEmail(
   expectedTextFragment: string
 ) {
   getLastEmail().then(({ subject, html }) => {
-    assert(subject === expectedSubject, 'mail subject');
-    assert(html.includes(expectedTextFragment), 'mail text');
+    assert(
+      subject === expectedSubject,
+      'Subject does not match, expected: ' +
+        expectedSubject +
+        ', actual: ' +
+        subject
+    );
+    assert(html.includes(expectedTextFragment), 'Mail does not contain text');
   });
 }
 
@@ -76,7 +82,9 @@ describe('notifications', () => {
       .scrollIntoView();
     notifications.assertUnseenNotificationsCount(0);
     cy.get('@notificationList').should('have.length', 25);
-    getAllEmails().then((emails) => assert(emails.length === 25, 'mail count'));
+    getAllEmails().then((emails) =>
+      assert(emails.length === 25, 'Expected 25 emails, got ' + emails.length)
+    );
   });
 
   it('notifications are clickable and correct mails are sent', () => {
