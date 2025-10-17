@@ -246,7 +246,7 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     ).andIsOk.andAssertThatJson {
       node("accessToken").isString.satisfies { token: String ->
         val authentication = jwtService.validateToken(token)
-        authentication.isSuperToken
+        assertThat(authentication.isSuperToken).isTrue
       }
     }
   }
@@ -264,7 +264,7 @@ class V2UserControllerTest : AuthorizedControllerTest() {
     ).andIsOk.andAssertThatJson {
       node("accessToken").isString.satisfies { token: String ->
         val authentication = jwtService.validateToken(token)
-        authentication.isSuperToken
+        assertThat(authentication.isSuperToken).isTrue
       }
     }
   }
