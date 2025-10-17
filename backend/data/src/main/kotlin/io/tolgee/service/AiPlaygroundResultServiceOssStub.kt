@@ -1,6 +1,5 @@
 package io.tolgee.service
 
-import io.tolgee.exceptions.NotImplementedInOss
 import org.springframework.stereotype.Service
 
 @Service
@@ -13,26 +12,26 @@ class AiPlaygroundResultServiceOssStub : AiPlaygroundResultService {
     translation: String?,
     contextDescription: String?
   ) {
-    throw NotImplementedInOss()
+    // No-op: OSS doesn't have AI Playground functionality, so there are no results to set
   }
 
   override fun removeResults(projectId: Long, userId: Long) {
-    throw NotImplementedInOss()
+    // No-op: OSS doesn't have AI Playground functionality, so there are no results to remove
   }
 
   override fun deleteResultsByLanguage(languageId: Long) {
-    throw NotImplementedInOss()
+    // No-op: OSS doesn't have AI Playground functionality, so there are no results to delete
   }
 
   override fun deleteResultsByProject(projectId: Long) {
-    throw NotImplementedInOss()
+    // No-op: OSS doesn't have AI Playground functionality, so there are no results to delete
   }
 
   override fun deleteResultsByUser(userId: Long) {
-    throw NotImplementedInOss()
+    // No-op: OSS doesn't have AI Playground functionality, so there are no results to delete
   }
 
   override fun deleteResultsByKeys(keys: Collection<Long>) {
-    throw NotImplementedInOss()
+    // No-op: OSS doesn't have AI Playground functionality, so there are no results to delete
   }
 }
