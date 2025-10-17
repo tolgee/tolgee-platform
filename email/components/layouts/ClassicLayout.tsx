@@ -36,6 +36,7 @@ import t, { TranslatedText } from '../translate';
 type Props = {
   children: React.ReactNode;
   subject: TranslatedText | string;
+  header?: React.ReactNode | string;
   sendReason: TranslatedText | string;
 };
 
@@ -64,6 +65,7 @@ function SocialLink({ social, link, resourceName }: SocialLinkProps) {
 export default function ClassicLayout({
   children,
   subject,
+  header,
   sendReason,
 }: Props) {
   return (
@@ -78,11 +80,13 @@ export default function ClassicLayout({
                   alt="Tolgee logo"
                 />
               </Column>
-              <Column className="text-right">
-                <Heading className="text-xl text-brand m-0">
-                  {t.render(subject)}
-                </Heading>
-              </Column>
+              {header && (
+                <Column className="text-right">
+                  <Heading className="text-xl text-brand m-0">
+                    {typeof header === 'string' ? t.render(header) : header}
+                  </Heading>
+                </Column>
+              )}
             </Row>
           </Section>
           <Section className="border-y border-solid border-[#eaeaea] p-[20px]">
@@ -152,16 +156,6 @@ export default function ClassicLayout({
                               link="https://www.linkedin.com/company/tolgee"
                               resourceName="linkedin.png"
                             />
-                          </Column>
-                        </Row>
-                        <Row>
-                          <Column>
-                            <Text className="text-xs m-0">
-                              <LocalizedText
-                                keyName="footer-cloud-address"
-                                defaultValue="Letovická 1421/22, Řečkovice, 621 00 Brno, Czech Republic"
-                              />
-                            </Text>
                           </Column>
                         </Row>
                       </Container>

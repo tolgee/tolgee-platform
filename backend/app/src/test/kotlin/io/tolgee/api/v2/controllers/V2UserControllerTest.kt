@@ -147,7 +147,9 @@ class V2UserControllerTest : AuthorizedControllerTest() {
       )
     performAuthPut("/v2/user", requestDTO).andIsOk
 
-    emailTestUtil.verifyEmailSent()
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      emailTestUtil.verifyEmailSent()
+    }
     assertThat(emailTestUtil.messageContents.single())
       .contains(tolgeeProperties.frontEndUrl.toString())
 
