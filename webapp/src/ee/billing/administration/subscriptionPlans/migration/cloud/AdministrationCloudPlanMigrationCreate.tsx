@@ -22,7 +22,7 @@ export const AdministrationCloudPlanMigrationCreate = () => {
         content: { 'application/json': values },
       },
       {
-        onSuccess: callbacks?.onSuccess,
+        onSuccess: callbacks.onSuccess,
       }
     );
   };
