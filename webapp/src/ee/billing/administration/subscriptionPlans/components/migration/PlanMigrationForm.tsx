@@ -1,10 +1,9 @@
 import { Form, Formik } from 'formik';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, InputAdornment, Typography } from '@mui/material';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import React, { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/billingApiSchema.generated';
-import { ArrowRightIcon } from '@mui/x-date-pickers';
 import { PlanSelectorField } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/fields/PlanSelectorField';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Switch } from 'tg.component/common/form/fields/Switch';
@@ -12,6 +11,7 @@ import { PlanType } from 'tg.ee.module/billing/administration/subscriptionPlans/
 import { confirmation } from 'tg.hooks/confirmation';
 import { LabelHint } from 'tg.component/common/LabelHint';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { ChevronRight } from '@untitled-ui/icons-react';
 
 type CloudPlanMigrationModel = components['schemas']['CloudPlanMigrationModel'];
 type SelfHostedEePlanMigrationModel =
@@ -54,7 +54,7 @@ export const PlanMigrationForm = <
 
   const defaultSourcePlan = migration
     ? {
-        id: migration && migration.sourcePlan.id,
+        id: migration.sourcePlan.id,
         free: migration.sourcePlan.free,
       }
     : undefined;
@@ -110,9 +110,9 @@ export const PlanMigrationForm = <
             }}
             filterHasMigration={false}
             type={planType}
-            {...(migration && { plans: [migration.sourcePlan] })}
+            {...(isUpdate && { plans: [migration.sourcePlan] })}
           />
-          <ArrowRightIcon style={{ marginTop: 25 }} />
+          <ChevronRight style={{ marginTop: 25 }} />
           <PlanSelectorField
             name="targetPlanId"
             selectProps={{
@@ -144,7 +144,11 @@ export const PlanMigrationForm = <
             type="number"
             label={t('administration_plan_migration_monthly_offset_days')}
             InputProps={{
-              endAdornment: <Box>{t('global_days')}</Box>,
+              endAdornment: (
+                <InputAdornment position={'end'}>
+                  <Box>{t('global_days')}</Box>
+                </InputAdornment>
+              ),
             }}
           />
           <TextField
@@ -152,7 +156,11 @@ export const PlanMigrationForm = <
             type="number"
             label={t('administration_plan_migration_yearly_offset_days')}
             InputProps={{
-              endAdornment: <Box>{t('global_days')}</Box>,
+              endAdornment: (
+                <InputAdornment position={'end'}>
+                  <Box>{t('global_days')}</Box>
+                </InputAdornment>
+              ),
             }}
           />
         </Box>
