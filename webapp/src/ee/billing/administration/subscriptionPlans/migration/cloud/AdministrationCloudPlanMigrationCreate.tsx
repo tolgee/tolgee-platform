@@ -8,6 +8,11 @@ import { CreatePlanMigrationFormData } from 'tg.ee.module/billing/administration
 export const AdministrationCloudPlanMigrationCreate = () => {
   const { t } = useTranslate();
 
+  const createMutation = useBillingApiMutation({
+    url: '/v2/administration/billing/cloud-plans/migration',
+    method: 'post',
+  });
+
   const onSubmit = (
     values: CreatePlanMigrationFormData,
     callbacks: { onSuccess: () => void }
@@ -21,11 +26,6 @@ export const AdministrationCloudPlanMigrationCreate = () => {
       }
     );
   };
-
-  const createMutation = useBillingApiMutation({
-    url: '/v2/administration/billing/cloud-plans/migration',
-    method: 'post',
-  });
 
   return (
     <AdministrationPlanMigrationCreateBase
