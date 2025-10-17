@@ -1,10 +1,7 @@
 ext {
-    def osName = System.getProperty("os.name").toLowerCase(Locale.ROOT)
-    if (osName.contains("windows")) {
+    if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows")) {
         npmCommandName = "npm.cmd"
     } else {
-        def whichNpm = ["bash", "-c", "command -v npm"].execute()
-        def npmPath = whichNpm.text.trim()
-        npmCommandName = npmPath ?: "npm"
+        npmCommandName = "npm"
     }
 }
