@@ -45,7 +45,7 @@ export default function ImgResource(props: Props) {
   if (process.env.NODE_ENV === 'production') {
     // Resources will be copied during final assembly.
     newProps['data-th-src'] =
-      `\${instanceUrl} + '/static/emails/${props.resourceName}'`;
+      `\${backendUrl} + '/static/emails/${props.resourceName}'`;
   } else {
     const blob = readFileSync(file);
     const ext = extname(file).slice(1);

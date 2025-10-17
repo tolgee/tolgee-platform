@@ -9,7 +9,7 @@ ext {
     BILLING_E2E_DIR = "${project.projectDir}/../billing/e2e"
     WEBAPP_DIR = "${project.projectDir}/webapp"
 }
-
+def dockerPath = ["which", "docker"].execute().text.trim()
 
 def getE2eChunks() {
     def totalJobs = System.getenv("E2E_TOTAL_JOBS")
@@ -136,31 +136,31 @@ tasks.register('openE2eDev', Exec) {
 tasks.register('runDockerE2e', Exec) {
     group = 'e2e'
     dependsOn "tagDockerLocal"
-    commandLine "docker", "compose", "up", "-d"
+    commandLine dockerPath, "compose", "up", "-d"
     workingDir E2E_DIR
     finalizedBy "waitForRunningContainer"
 }
 
 tasks.register('runDockerE2eDev', Exec) {
     group = 'e2e'
-    commandLine "docker", "compose", "up", "-d", "fakesmtp"
+    commandLine dockerPath, "compose", "up", "-d", "fakesmtp"
     workingDir E2E_DIR
 }
 
 tasks.register('stopDockerE2e', Exec) {
     group = 'e2e'
-    commandLine "docker", "compose", "stop"
+    commandLine dockerPath, "compose", "stop"
     workingDir E2E_DIR
 }
 
 tasks.register('cleanupDockerE2e', Exec) {
     group = 'e2e'
-    commandLine "docker", "compose", "rm", "-f"
+    commandLine dockerPath, "compose", "rm", "-f"
     workingDir E2E_DIR
 }
 
 tasks.register('tagDockerLocal', Exec) {
     group = 'e2e'
     dependsOn "docker"
-    commandLine "docker", "tag", "tolgee/tolgee", "tolgee/tolgee:local"
+    commandLine dockerPath, "tag", "tolgee/tolgee", "tolgee/tolgee:local"
 }

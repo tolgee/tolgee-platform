@@ -168,7 +168,7 @@ This component receives the following properties:
 The following global variables are available:
 - `isCloud` (boolean): Whether this is Tolgee Cloud or not
 - `instanceQualifier`: Either "Tolgee" for Tolgee Cloud, or the domain name used for the instance
-- `instanceUrl`: Base URL of the instance
+- `backendUrl`: Base URL of the backend
 
 They still need to be passed as demo values, except for localized strings as a default value is provided then.
 The default value can be overridden.
