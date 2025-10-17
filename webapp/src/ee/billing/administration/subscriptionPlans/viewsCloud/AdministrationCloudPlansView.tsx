@@ -124,7 +124,7 @@ export const AdministrationCloudPlansView = () => {
             to={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_MIGRATION_CREATE.build()}
             data-cy="administration-plans-create-migration"
           >
-            {t('administration_cloud_plan_create_migration')}
+            {t('administration_plan_create_migration')}
           </Button>,
         ]}
       >
