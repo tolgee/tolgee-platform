@@ -426,7 +426,11 @@ export const getParsedEmailVerificationByIndex = (index: number) => {
 
 export const getParsedEmailInvitationLink = () =>
   getLatestEmail().then(
-    (email) => email.HTML.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1') as string
+    (email) =>
+      email.HTML.replace(
+        /.*(https?:\/\/[\w:/.-]*accept_invitation[\w:/.-]*).*/gs,
+        '$1'
+      ) as string
   );
 
 export const getAgencyInvitationLinks = () =>
