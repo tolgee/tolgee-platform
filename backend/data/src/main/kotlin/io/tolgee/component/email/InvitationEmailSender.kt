@@ -23,14 +23,10 @@ class InvitationEmailSender(
         subject = "Invitation to Tolgee",
         text =
           """
-          Hello! 👋<br/><br/>
           Good news. ${getInvitationSentence(invitation)}<br/><br/>
           
           To accept the invitation, <b>follow this link</b>:<br/>
           <a href="$url">$url</a><br/><br/>
-          
-          Regards,<br/>
-          Tolgee
           """.trimIndent(),
       )
     tolgeeEmailSender.sendEmail(params)

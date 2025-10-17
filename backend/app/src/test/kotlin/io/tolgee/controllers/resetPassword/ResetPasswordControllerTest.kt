@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.request.auth.ResetPasswordRequest
 import io.tolgee.fixtures.EmailTestUtil
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.AfterEach
@@ -40,18 +41,22 @@ class ResetPasswordControllerTest : AbstractControllerTest() {
   @Test
   fun `email contains correct callback url with frontend url provided`() {
     executePasswordChangeRequest()
-    emailTestUtil.firstMessageContent.assert.contains("https://dummy-url.com/reset_password/")
-    // We don't want double slashes
-    emailTestUtil.firstMessageContent.assert.doesNotContain("reset_password//")
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      emailTestUtil.firstMessageContent.assert.contains("https://dummy-url.com/reset_password/")
+      // We don't want double slashes
+      emailTestUtil.firstMessageContent.assert.doesNotContain("reset_password//")
+    }
   }
 
   @Test
   fun `email contains correct callback url without frontend url provided`() {
     tolgeeProperties.frontEndUrl = null
     executePasswordChangeRequest()
-    emailTestUtil.firstMessageContent.assert.contains("https://hello.com/aa/")
-    // We don't want double slashes
-    emailTestUtil.firstMessageContent.assert.doesNotContain("aa//")
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      emailTestUtil.firstMessageContent.assert.contains("https://hello.com/aa/")
+      // We don't want double slashes
+      emailTestUtil.firstMessageContent.assert.doesNotContain("aa//")
+    }
   }
 
   private fun executePasswordChangeRequest() {
