@@ -15,6 +15,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.notifications.NotificationType.TASK_CANCELED
 import io.tolgee.model.notifications.NotificationType.TASK_FINISHED
@@ -105,7 +106,11 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     executeInNewTransaction {
       assertThat(notificationUtil.newestInAppNotification().linkedTask?.name).isEqualTo("Another task")
-      assertThat(notificationUtil.newestEmailNotification()).contains("/projects/${testData.project.id}/task?number=3")
+      waitForNotThrowing(timeout = 2000, pollTime = 25) {
+        assertThat(
+          notificationUtil.newestEmailNotification()
+        ).contains("/projects/${testData.project.id}/task?number=3")
+      }
     }
   }
 

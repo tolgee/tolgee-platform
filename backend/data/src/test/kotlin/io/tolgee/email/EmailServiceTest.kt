@@ -17,6 +17,7 @@
 package io.tolgee.email
 
 import io.tolgee.configuration.tolgee.SmtpProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assert
 import jakarta.mail.internet.MimeMessage
 import jakarta.mail.internet.MimeMultipart
@@ -40,7 +41,7 @@ import java.util.*
 @SpringJUnitConfig(EmailService::class, EmailTemplateConfig::class)
 class EmailServiceTest {
   @MockBean
-  private lateinit var smtpProperties: SmtpProperties
+  private lateinit var tolgeeProperties: TolgeeProperties
 
   @MockBean
   private lateinit var mailSender: JavaMailSender
@@ -57,7 +58,9 @@ class EmailServiceTest {
   @BeforeEach
   fun beforeEach() {
     val sender = JavaMailSenderImpl()
-    whenever(smtpProperties.from).thenReturn("Tolgee Test <robomouse+test@tolgee.test>")
+    val smtp = SmtpProperties()
+    smtp.from = "Tolgee Test <robomouse+test@tolgee.test>"
+    whenever(tolgeeProperties.smtp).thenReturn(smtp)
     whenever(mailSender.createMimeMessage()).let {
       val msg = sender.createMimeMessage()
       it.thenReturn(msg)
@@ -67,7 +70,7 @@ class EmailServiceTest {
       mapOf(
         "isCloud" to true,
         "instanceQualifier" to "Tolgee",
-        "instanceUrl" to "https://tolgee.test",
+        "backendUrl" to "https://tolgee.test",
       )
     )
   }
@@ -92,9 +95,13 @@ class EmailServiceTest {
       )
       // Makes sure resources have been added as expected
       .contains("<img aria-hidden=\"true\" src=\"https://tolgee.test/static/emails/")
+      // Header is taken from variable
+      .contains("Test header from var")
       // Might be a bit brittle but does the trick for now.
       .doesNotContain(" th:")
       .doesNotContain(" data-th")
+      // All default values have been replaced
+      .doesNotContain("[DEFAULT]")
   }
 
   @Test
@@ -157,6 +164,8 @@ class EmailServiceTest {
             mapOf("name" to "Name #2"),
             mapOf("name" to "Name #3"),
           ),
+        "tolgee" to "Tolgee",
+        "header" to "Test header from var",
       )
 
     private val TEST_PROPERTIES_MEOW =

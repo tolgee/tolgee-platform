@@ -42,7 +42,7 @@ class EmailTemplateConfig {
   @Bean("emailIcuMessageSource")
   fun messageSource(): MessageSource {
     val messageSource = ICUReloadableResourceBundleMessageSource()
-    messageSource.setBasenames("email-i18n/messages", "email-i18n-test/messages")
+    messageSource.setBasenames("classpath:email-i18n/messages", "email-i18n-test/messages")
     messageSource.setDefaultEncoding("UTF-8")
     messageSource.setDefaultLocale(Locale.ENGLISH)
     return messageSource
