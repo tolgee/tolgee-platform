@@ -1,6 +1,5 @@
 package io.tolgee.service
 
-import io.tolgee.exceptions.NotImplementedInOss
 import org.springframework.stereotype.Service
 
 @Service
