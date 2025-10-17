@@ -55,8 +55,21 @@ class V2InvitationController(
 ) {
   @GetMapping("/v2/invitations/{code}/accept")
   @WriteOperation
-  @Operation(summary = "Accepts invitation to project or organization")
+  @Operation(
+    summary = "Accepts invitation to project or organization " +
+      "(deprecated: use PUT method instead)",
+    deprecated = true
+  )
   fun acceptInvitation(
+    @PathVariable("code") code: String?,
+  ): ResponseEntity<Void> {
+    invitationService.accept(code)
+    return ResponseEntity(HttpStatus.OK)
+  }
+
+  @PutMapping("/v2/invitations/{code}/accept")
+  @Operation(summary = "Accepts invitation to project or organization")
+  fun acceptInvitationPut(
     @PathVariable("code") code: String?,
   ): ResponseEntity<Void> {
     invitationService.accept(code)

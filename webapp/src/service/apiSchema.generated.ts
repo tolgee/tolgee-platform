@@ -152,6 +152,7 @@ export interface paths {
   };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
+    put: operations["acceptInvitationPut"];
   };
   "/v2/invitations/{invitationId}": {
     delete: operations["deleteInvitation"];
@@ -8055,6 +8056,41 @@ export interface operations {
     };
   };
   acceptInvitation: {
+    parameters: {
+      path: {
+        code: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  acceptInvitationPut: {
     parameters: {
       path: {
         code: string;
