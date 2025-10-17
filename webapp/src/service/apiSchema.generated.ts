@@ -2534,7 +2534,9 @@ export interface components {
         | "suggestion_cant_be_plural"
         | "suggestion_must_be_plural"
         | "duplicate_suggestion"
-        | "unsupported_media_type";
+        | "unsupported_media_type"
+        | "plan_migration_not_found"
+        | "plan_has_migrations";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -5804,7 +5806,9 @@ export interface components {
         | "suggestion_cant_be_plural"
         | "suggestion_must_be_plural"
         | "duplicate_suggestion"
-        | "unsupported_media_type";
+        | "unsupported_media_type"
+        | "plan_migration_not_found"
+        | "plan_has_migrations";
       params?: unknown[];
       success: boolean;
     };
