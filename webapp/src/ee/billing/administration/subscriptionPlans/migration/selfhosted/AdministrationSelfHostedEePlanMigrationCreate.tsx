@@ -8,6 +8,11 @@ import { AdministrationPlanMigrationCreateBase } from 'tg.ee.module/billing/admi
 export const AdministrationSelfHostedEePlanMigrationCreate = () => {
   const { t } = useTranslate();
 
+  const createMutation = useBillingApiMutation({
+    url: '/v2/administration/billing/self-hosted-ee-plans/migration',
+    method: 'post',
+  });
+
   const onSubmit = (
     values: CreatePlanMigrationFormData,
     callbacks: { onSuccess: () => void }
@@ -21,11 +26,6 @@ export const AdministrationSelfHostedEePlanMigrationCreate = () => {
       }
     );
   };
-
-  const createMutation = useBillingApiMutation({
-    url: '/v2/administration/billing/self-hosted-ee-plans/migration',
-    method: 'post',
-  });
 
   return (
     <AdministrationPlanMigrationCreateBase
