@@ -16,7 +16,7 @@
 
 package io.tolgee.email
 
-import io.tolgee.configuration.tolgee.SmtpProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.misc.EmailAttachment
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationContext
@@ -32,14 +32,14 @@ import java.util.*
 @Service
 class EmailService(
   private val applicationContext: ApplicationContext,
-  private val smtpProperties: SmtpProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val mailSender: JavaMailSender,
   private val emailGlobalVariablesProvider: EmailGlobalVariablesProvider,
   @Qualifier("emailTemplateEngine") private val templateEngine: TemplateEngine,
 ) {
   private val smtpFrom
     get() =
-      smtpProperties.from
+      tolgeeProperties.smtp.from
         ?: throw IllegalStateException(
           "SMTP sender is not configured. " +
             "See https://docs.tolgee.io/platform/self_hosting/configuration#smtp",
@@ -52,6 +52,9 @@ class EmailService(
     locale: Locale,
     properties: Map<String, Any> = mapOf(),
     attachments: List<EmailAttachment> = listOf(),
+    subject: String? = null,
+    bcc: Array<String>? = null,
+    replyTo: String? = null,
   ) {
     val globalVariables = emailGlobalVariablesProvider()
     val context = Context(locale, properties)
@@ -63,8 +66,8 @@ class EmailService(
     context.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME, tec)
 
     val html = templateEngine.process(template, context)
-    val subject = extractEmailTitle(html)
-    sendEmail(recipient, subject, html, attachments)
+    val subject = subject ?: extractEmailTitle(html)
+    sendEmail(recipient, subject, html, attachments, bcc, replyTo)
   }
 
   @Async
@@ -73,6 +76,8 @@ class EmailService(
     subject: String,
     contents: String,
     attachments: List<EmailAttachment> = listOf(),
+    bcc: Array<String>? = null,
+    replyTo: String? = null,
   ) {
     val message = mailSender.createMimeMessage()
     val helper = MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF8")
@@ -81,6 +86,12 @@ class EmailService(
     helper.setTo(recipient)
     helper.setSubject(subject)
     helper.setText(contents, true)
+    if (!bcc.isNullOrEmpty()) {
+      helper.setBcc(bcc)
+    }
+    replyTo?.let {
+      helper.setReplyTo(it)
+    }
     attachments.forEach { helper.addAttachment(it.name, it.inputStreamSource) }
 
     mailSender.send(message)

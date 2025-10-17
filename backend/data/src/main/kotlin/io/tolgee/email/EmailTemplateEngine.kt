@@ -23,6 +23,9 @@ class EmailTemplateEngine() : SpringTemplateEngine() {
   lateinit var emailMessageResolver: IMessageResolver
 
   override fun initializeSpringSpecific() {
-    setMessageResolver(emailMessageResolver)
+    super.initializeSpringSpecific()
+    if (this::emailMessageResolver.isInitialized) {
+      setMessageResolver(emailMessageResolver)
+    }
   }
 }
