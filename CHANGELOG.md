@@ -1,3 +1,10 @@
+# [3.136.0](https://github.com/tolgee/tolgee-platform/compare/v3.135.0...v3.136.0) (2025-10-17)
+
+
+### Features
+
+* supporter user role ([#3248](https://github.com/tolgee/tolgee-platform/issues/3248)) ([d031bff](https://github.com/tolgee/tolgee-platform/commit/d031bff0b8ed9511ce330ab42be0e8fd982da405)), closes [#3218](https://github.com/tolgee/tolgee-platform/issues/3218)
+
 # [3.135.0](https://github.com/tolgee/tolgee-platform/compare/v3.134.0...v3.135.0) (2025-10-15)
 
 
