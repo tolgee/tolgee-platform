@@ -70,13 +70,13 @@ export const PlanMigrationDetail = ({ migration, editLink }: Props) => {
             <TooltipText>
               <T
                 keyName="administration_plan_migration_monthly_timing"
-                params={{ days: migration?.monthlyOffsetDays, b: <b /> }}
+                params={{ days: migration.monthlyOffsetDays, b: <b /> }}
               />
             </TooltipText>
             <TooltipText>
               <T
                 keyName="administration_plan_migration_yearly_timing"
-                params={{ days: migration?.yearlyOffsetDays, b: <b /> }}
+                params={{ days: migration.yearlyOffsetDays, b: <b /> }}
               />
             </TooltipText>
           </Box>
