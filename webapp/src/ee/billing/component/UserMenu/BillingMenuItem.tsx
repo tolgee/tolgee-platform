@@ -28,7 +28,8 @@ export const BillingMenuItem: FC<BillingMenuItemsProps> = ({ onClose }) => {
     config.billing.enabled &&
     preferredOrganization &&
     (preferredOrganization?.currentUserRole === 'OWNER' ||
-      user.globalServerRole === 'ADMIN');
+      user.globalServerRole === 'ADMIN' ||
+      user.globalServerRole === 'SUPPORTER');
 
   if (!showBilling) {
     return null;

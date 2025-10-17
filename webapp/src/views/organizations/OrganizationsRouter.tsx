@@ -5,7 +5,7 @@ import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
-import { useIsAdmin } from 'tg.globalContext/helpers';
+import { useIsAdminOrSupporter } from 'tg.globalContext/helpers';
 
 import { OrganizationCreateView } from './OrganizationCreateView';
 import { OrganizationMemberPrivilegesView } from './OrganizationMemberPrivilegesView';
@@ -17,9 +17,11 @@ import { routes } from 'tg.ee';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
-  const isAdmin = useIsAdmin();
+  const isAdminOrSupporter = useIsAdminOrSupporter();
   const isAdminAccess =
-    organization && organization?.currentUserRole !== 'OWNER' && isAdmin;
+    organization &&
+    organization?.currentUserRole !== 'OWNER' &&
+    isAdminOrSupporter;
 
   return (
     <DashboardPage isAdminAccess={isAdminAccess}>

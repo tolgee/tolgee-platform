@@ -75,7 +75,7 @@ export const useAuthService = (
 
   const acceptInvitationLoadable = useApiMutation({
     url: '/v2/invitations/{code}/accept',
-    method: 'get',
+    method: 'put',
   });
 
   const signupLoadable = useApiMutation({

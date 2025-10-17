@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 Tolgee s.r.o. and contributors
+ * Copyright (C) 2025 Tolgee s.r.o. and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,15 @@
 
 package io.tolgee.security.authentication
 
-import java.io.Serializable
+import org.springframework.security.access.prepost.PreAuthorize
 
-class TolgeeAuthenticationDetails : Serializable
+/**
+ * Marks a component method that requires read-write mode (i.e. current authentication must not be read-only).
+ *
+ * This annotation also works as an override to administration endpoint handling.
+ * Applying this annotation to a handler method forbids it from being called by supporters.
+ */
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@PreAuthorize("hasRole('READ_WRITE')")
+annotation class WriteOperation

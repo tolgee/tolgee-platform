@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.*
 class PromptController(
   private val promptService: PromptServiceEeImpl,
   private val promptModelAssembler: PromptModelAssembler,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val arrayResourcesAssembler: PagedResourcesAssembler<Prompt>,
   private val projectHolder: ProjectHolder,
   private val promptVariablesHelper: PromptVariablesHelper,

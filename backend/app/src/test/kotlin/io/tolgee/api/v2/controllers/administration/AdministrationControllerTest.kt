@@ -1,8 +1,10 @@
 package io.tolgee.api.v2.controllers.administration
 
 import io.tolgee.development.testDataBuilder.data.AdministrationTestData
+import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
+import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
@@ -87,6 +89,40 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
         set("Authorization", "Bearer $token")
       },
     ).andIsOk
+
+    val org = OrganizationDto(name = "my lil organization 1")
+    performPost(
+      "/v2/organizations",
+      org,
+      HttpHeaders().apply {
+        set("Authorization", "Bearer $token")
+      }
+    ).andIsCreated
+  }
+
+  @Test
+  fun `generates read-only user jwt token for supporter`() {
+    userAccount = testData.supporter
+
+    val token =
+      performAuthGet("/v2/administration/users/${testData.user.id}/generate-token")
+        .andIsOk.andGetContentAsString
+
+    performGet(
+      "/v2/organizations",
+      HttpHeaders().apply {
+        set("Authorization", "Bearer $token")
+      },
+    ).andIsOk
+
+    val org = OrganizationDto(name = "my lil organization 2")
+    performPost(
+      "/v2/organizations",
+      org,
+      HttpHeaders().apply {
+        set("Authorization", "Bearer $token")
+      }
+    ).andIsForbidden
   }
 
   @Test
@@ -96,5 +132,20 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/administration/users").andIsForbidden
     performAuthPut("/v2/administration/users/${testData.user.id}/set-role/ADMIN", null).andIsForbidden
     performAuthGet("/v2/administration/users/${testData.user.id}/generate-token").andIsForbidden
+  }
+
+  @Test
+  fun `read only endpoints are allowed for supporter`() {
+    userAccount = testData.supporter
+    performAuthGet("/v2/administration/organizations").andIsOk
+    performAuthGet("/v2/administration/users").andIsOk
+  }
+
+  @Test
+  fun `write endpoints are forbidden for supporter`() {
+    userAccount = testData.supporter
+    performAuthPut("/v2/administration/users/${testData.user.id}/set-role/ADMIN", null).andIsForbidden
+    performAuthPut("/v2/administration/users/${testData.user.id}/enable", null).andIsForbidden
+    performAuthPut("/v2/administration/users/${testData.user.id}/disable", null).andIsForbidden
   }
 }

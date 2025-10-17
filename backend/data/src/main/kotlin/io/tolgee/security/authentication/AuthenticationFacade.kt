@@ -79,9 +79,18 @@ class AuthenticationFacade(
         return authentication.userAccountView
       }
 
+  // -- ACTING USER
+  val actingUser: UserAccountDto?
+    get() = authentication.actingAsUserAccount
+
   // -- AUTHENTICATION METHOD AND DETAILS
+  val deviceId: String?
+    get() = authentication.deviceId
+  val isReadOnly: Boolean
+    get() = authentication.isReadOnly
+
   val isUserSuperAuthenticated: Boolean
-    get() = if (isAuthenticated) authentication.details?.isSuperToken == true else false
+    get() = if (isAuthenticated) authentication.isSuperToken else false
 
   val isApiAuthentication: Boolean
     get() = isProjectApiKeyAuth || isPersonalAccessTokenAuth

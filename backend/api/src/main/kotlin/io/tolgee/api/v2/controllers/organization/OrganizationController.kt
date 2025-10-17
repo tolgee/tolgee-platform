@@ -10,6 +10,7 @@ import io.tolgee.component.mtBucketSizeProvider.PayAsYouGoCreditsProvider
 import io.tolgee.component.translationsLimitProvider.LimitsProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
@@ -24,7 +25,6 @@ import io.tolgee.hateoas.organization.PublicUsageModel
 import io.tolgee.hateoas.organization.UserAccountWithOrganizationRoleModel
 import io.tolgee.hateoas.organization.UserAccountWithOrganizationRoleModelAssembler
 import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.ThirdPartyAuthType
@@ -106,12 +106,12 @@ class OrganizationController(
     dto: OrganizationDto,
   ): ResponseEntity<OrganizationModel> {
     if (!this.tolgeeProperties.authentication.userCanCreateOrganizations &&
-      authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN
+      !authenticationFacade.authenticatedUser.isAdmin()
     ) {
       throw PermissionException()
     }
     if (authenticationFacade.authenticatedUserEntity.thirdPartyAuthType === ThirdPartyAuthType.SSO &&
-      authenticationFacade.authenticatedUser.role != UserAccount.Role.ADMIN
+      !authenticationFacade.authenticatedUser.isAdmin()
     ) {
       throw PermissionException(Message.SSO_USER_CANNOT_CREATE_ORGANIZATION)
     }

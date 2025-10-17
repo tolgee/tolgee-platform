@@ -53,7 +53,9 @@ class GlossaryController(
   private val glossaryModelAssembler: GlossaryModelAssembler,
   private val simpleGlossaryModelAssembler: SimpleGlossaryModelAssembler,
   private val simpleGlossaryWithStatsModelAssembler: SimpleGlossaryWithStatsModelAssembler,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedAssembler: PagedResourcesAssembler<Glossary>,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedWithStatsAssembler: PagedResourcesAssembler<GlossaryWithStats>,
   private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
   private val organizationHolder: OrganizationHolder,

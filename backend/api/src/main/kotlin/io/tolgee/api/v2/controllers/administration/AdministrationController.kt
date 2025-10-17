@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.organization.OrganizationModel
@@ -148,7 +149,18 @@ class AdministrationController(
   fun generateUserToken(
       @PathVariable userId: Long,
   ): String {
-    val user = userAccountService.get(userId)
-    return jwtService.emitToken(user.id, true)
+    val isAlreadyImpersonating = authenticationFacade.actingUser != null
+    if (isAlreadyImpersonating) {
+      // We don't want to recreate the Inception movie here
+      throw BadRequestException(Message.ALREADY_IMPERSONATING_USER)
+    }
+
+    val actingUser = authenticationFacade.authenticatedUser
+    val user = userAccountService.getDto(userId)
+    if (user.isAdmin() && !actingUser.isAdmin()) {
+      // We don't allow impersonation of admin by supporters
+      throw BadRequestException(Message.IMPERSONATION_OF_ADMIN_BY_SUPPORTER_NOT_ALLOWED)
+    }
+    return jwtService.emitImpersonationToken(user.id)
   }
 }

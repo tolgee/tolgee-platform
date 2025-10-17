@@ -72,7 +72,7 @@ class ProjectsTransferringController(
     @PathVariable projectId: Long,
     @PathVariable organizationId: Long,
   ) {
-    organizationRoleService.checkUserIsOwner(organizationId)
+    organizationRoleService.checkUserCanTransferProjectToOrganization(organizationId)
     projectService.transferToOrganization(projectId, organizationId)
   }
 }

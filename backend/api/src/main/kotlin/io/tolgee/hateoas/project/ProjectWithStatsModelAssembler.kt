@@ -6,7 +6,6 @@ import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.hateoas.permission.PermissionModelAssembler
-import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService
@@ -41,8 +40,8 @@ class ProjectWithStatsModelAssembler(
         view.organizationRole,
         view.organizationOwner.basePermission,
         view.directPermission,
-        UserAccount.Role.USER,
-      ).getAdminPermissions(userRole = authenticationFacade.authenticatedUserOrNull?.role)
+        authenticationFacade.authenticatedUserOrNull?.role,
+      )
 
     return ProjectWithStatsModel(
       id = view.id,

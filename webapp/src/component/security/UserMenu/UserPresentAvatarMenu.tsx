@@ -4,6 +4,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
 import {
+  useIsAdminOrSupporter,
   useIsSsoMigrationRequired,
   usePreferredOrganization,
   useUser,
@@ -51,6 +52,7 @@ export const UserPresentAvatarMenu: React.FC = () => {
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
   const user = useUser()!;
+  const isAdminOrSupporter = useIsAdminOrSupporter();
 
   const isSsoMigrationRequired = useIsSsoMigrationRequired();
 
@@ -159,7 +161,7 @@ export const UserPresentAvatarMenu: React.FC = () => {
         <ThemeItem />
         <StyledDivider />
 
-        {user.globalServerRole == 'ADMIN' && (
+        {isAdminOrSupporter && (
           <MenuItem
             component={Link}
             to={LINKS.ADMINISTRATION_ORGANIZATIONS.build()}

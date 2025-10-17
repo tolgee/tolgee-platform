@@ -11,7 +11,10 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
 import { Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { useIsAdmin, usePreferredOrganization } from 'tg.globalContext/helpers';
+import {
+  useIsAdminOrSupporter,
+  usePreferredOrganization,
+} from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
 import { CriticalUsageCircle } from 'tg.ee';
@@ -53,9 +56,10 @@ export const ProjectListView = () => {
     preferredOrganization?.currentUserRole || ''
   );
 
-  const isAdmin = useIsAdmin();
+  const isAdminOrSupporter = useIsAdminOrSupporter();
 
-  const isAdminAccess = !preferredOrganization?.currentUserRole && isAdmin;
+  const isAdminAccess =
+    !preferredOrganization?.currentUserRole && isAdminOrSupporter;
 
   const addAllowed = isOrganizationOwnerOrMaintainer || isAdminAccess;
 

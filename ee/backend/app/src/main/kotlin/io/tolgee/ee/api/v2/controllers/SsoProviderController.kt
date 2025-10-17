@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.sso.SsoTenantDto
 import io.tolgee.dtos.sso.toDto
 import io.tolgee.ee.api.v2.hateoas.assemblers.SsoTenantAssembler
@@ -12,7 +13,6 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.ee.SsoTenantModel
 import io.tolgee.model.SsoTenant
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
@@ -46,7 +46,7 @@ class SsoProviderController(
   ): SsoTenantModel {
     validateProvider(request)
 
-    val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
+    val isAdmin = authenticationFacade.authenticatedUser.isAdmin()
     val organization = organizationService.get(organizationId)
     return ssoTenantAssembler.toModel(
       tenantService.createOrUpdate(request.toDto(), organization, allowChangeDomain = isAdmin).toDto(),

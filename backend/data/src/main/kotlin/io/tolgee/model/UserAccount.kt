@@ -164,6 +164,7 @@ data class UserAccount(
   enum class Role {
     USER,
     ADMIN,
+    SUPPORTER,
   }
 
   enum class AccountType {
@@ -174,4 +175,16 @@ data class UserAccount(
 
   @Transient
   override var disableActivityLogging: Boolean = false
+}
+
+fun UserAccount.isAdmin(): Boolean {
+  return role == UserAccount.Role.ADMIN
+}
+
+fun UserAccount.isSupporter(): Boolean {
+  return role == UserAccount.Role.SUPPORTER
+}
+
+fun UserAccount.isSupporterOrAdmin(): Boolean {
+  return role == UserAccount.Role.SUPPORTER || role == UserAccount.Role.ADMIN
 }

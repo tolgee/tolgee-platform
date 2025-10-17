@@ -18,15 +18,17 @@ package io.tolgee.security.authorization
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.isAdmin
+import io.tolgee.dtos.cacheable.isSupporterOrAdmin
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.exceptions.ProjectNotFoundException
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.isReadOnly
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
 import jakarta.servlet.http.HttpServletRequest
@@ -37,7 +39,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 
 /**
- * This interceptor performs authorization step to perform operations on a project or organization.
+ * This interceptor performs an authorization step to perform operations on a project or organization.
  */
 @Component
 class ProjectAuthorizationInterceptor(
@@ -65,7 +67,6 @@ class ProjectAuthorizationInterceptor(
         ?: return true
 
     var bypassed = false
-    val isAdmin = authenticationFacade.authenticatedUser.role == UserAccount.Role.ADMIN
     val requiredScopes = getRequiredScopes(request, handler)
 
     val formattedRequirements = requiredScopes?.joinToString(", ") { it.value } ?: "read-only"
@@ -74,24 +75,29 @@ class ProjectAuthorizationInterceptor(
     val scopes = securityService.getCurrentPermittedScopes(project.id)
 
     if (scopes.isEmpty()) {
-      if (!isAdmin) {
+      if (!canBypass(request, handler)) {
         logger.debug(
           "Rejecting access to proj#{} for user#{} - No view permissions",
           project.id,
           userId,
         )
 
-        // Security consideration: if the user cannot see the project, pretend it does not exist.
-        throw ProjectNotFoundException(project.id)
+        if (!canBypassForReadOnly()) {
+            // Security consideration: if the user cannot see the project, pretend it does not exist.
+            throw ProjectNotFoundException(project.id)
+        }
+
+        // Admin access for read-only operations is allowed, but it's not enough for the current operation.
+        throw PermissionException()
       }
 
       bypassed = true
     }
 
-    val missingScopes = getMissingScopes(requiredScopes, scopes.toSet())
+    val missingScopes = getMissingScopes(requiredScopes, scopes)
 
     if (missingScopes.isNotEmpty()) {
-      if (!isAdmin || authenticationFacade.isProjectApiKeyAuth) {
+      if (!canBypass(request, handler)) {
         logger.debug(
           "Rejecting access to proj#{} for user#{} - Insufficient permissions",
           project.id,
@@ -176,5 +182,28 @@ class ProjectAuthorizationInterceptor(
     }
 
     return projectPerms?.scopes
+  }
+
+  private val canUseAdminPermissions
+    get() = !authenticationFacade.isProjectApiKeyAuth
+
+  private fun canBypass(
+    request: HttpServletRequest,
+    handler: HandlerMethod,
+  ): Boolean {
+    if (!canUseAdminPermissions) {
+      return false
+    }
+
+    if (authenticationFacade.authenticatedUser.isAdmin()) {
+      return true
+    }
+
+    val forReadOnly = handler.isReadOnly(request.method)
+    return forReadOnly && canBypassForReadOnly()
+  }
+
+  private fun canBypassForReadOnly(): Boolean {
+    return canUseAdminPermissions && authenticationFacade.authenticatedUser.isSupporterOrAdmin()
   }
 }

@@ -81,7 +81,7 @@ class AiPromptCustomizationController(
   }
 
   @GetMapping("projects/{projectId:[0-9]+}/language-ai-prompt-customizations")
-  @Operation(summary = "Sets project level prompt customization")
+  @Operation(summary = "Returns language level prompt customization")
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresProjectPermissions(scopes = [Scope.PROJECT_EDIT, Scope.LANGUAGES_EDIT])
   fun getLanguagePromptCustomizations(): CollectionModel<LanguageAiPromptCustomizationModel> {

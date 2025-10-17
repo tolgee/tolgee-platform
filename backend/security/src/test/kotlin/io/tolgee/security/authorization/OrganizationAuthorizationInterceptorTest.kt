@@ -21,10 +21,12 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.organization.OrganizationRoleService
 import org.junit.jupiter.api.AfterEach
@@ -34,13 +36,19 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import io.tolgee.security.authentication.WriteOperation
+import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 
 class OrganizationAuthorizationInterceptorTest {
   private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
+
+  private val authentication = Mockito.mock(TolgeeAuthentication::class.java)
 
   private val organizationRoleService = Mockito.mock(OrganizationRoleService::class.java)
 
@@ -65,13 +73,17 @@ class OrganizationAuthorizationInterceptorTest {
 
   @BeforeEach
   fun setupMocks() {
-    Mockito.`when`(authenticationFacade.authentication).thenReturn(Mockito.mock(TolgeeAuthentication::class.java))
+    Mockito.`when`(authenticationFacade.authentication).thenReturn(authentication)
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
+    Mockito.`when`(authenticationFacade.isReadOnly).thenCallRealMethod()
+
+    Mockito.`when`(authentication.isReadOnly).thenReturn(false)
 
     Mockito.`when`(requestContextService.getTargetOrganization(any())).thenReturn(organization)
 
+    Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.USER)
     Mockito.`when`(userAccount.id).thenReturn(1337L)
     Mockito.`when`(organization.id).thenReturn(1337L)
   }
@@ -80,6 +92,7 @@ class OrganizationAuthorizationInterceptorTest {
   fun resetMocks() {
     Mockito.reset(
       authenticationFacade,
+      authentication,
       organizationRoleService,
       requestContextService,
       organization,
@@ -109,7 +122,7 @@ class OrganizationAuthorizationInterceptorTest {
       .thenReturn(false)
 
     mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsNotFound
-    mockMvc.perform(get("/v2/organizations/1337/requires-admin")).andIsNotFound
+    mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsNotFound
 
     Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
       .thenReturn(true)
@@ -124,12 +137,61 @@ class OrganizationAuthorizationInterceptorTest {
     Mockito.`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
       .thenReturn(false)
 
-    mockMvc.perform(get("/v2/organizations/1337/requires-admin")).andIsForbidden
+    mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsForbidden
 
     Mockito.`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
       .thenReturn(true)
 
-    mockMvc.perform(get("/v2/organizations/1337/requires-admin")).andIsOk
+    mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsOk
+  }
+
+  @Test
+  fun `it allows supporter to bypass checks for read-only organization endpoints`() {
+    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L)).thenReturn(false)
+    Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.SUPPORTER)
+
+    performReadOnlyRequests { all -> all.andIsOk }
+  }
+
+  @Test
+  fun `it does not let supporter bypass checks for write organization endpoints`() {
+    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L)).thenReturn(false)
+    Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.SUPPORTER)
+
+    performWriteRequests { all -> all.andIsForbidden }
+  }
+
+  @Test
+  fun `it allows admin to access any endpoint`() {
+    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L)).thenReturn(false)
+    Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.ADMIN)
+
+    performReadOnlyRequests { all -> all.andIsOk }
+    performWriteRequests { all -> all.andIsOk }
+  }
+
+  private fun performReadOnlyRequests(condition: (ResultActions) -> Unit) {
+    // GET method
+    mockMvc.perform(get("/v2/organizations/1337/default-perms")).andSatisfies(condition)
+    mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andSatisfies(condition)
+
+    // POST method, but with read-only annotation
+    mockMvc.perform(post("/v2/organizations/1337/requires-owner-read-annotation")).andSatisfies(condition)
+  }
+
+  private fun performWriteRequests(condition: (ResultActions) -> Unit) {
+    // GET method, but with write annotation
+    mockMvc.perform(get("/v2/organizations/1337/default-perms-write-annotation")).andSatisfies(condition)
+    mockMvc.perform(get("/v2/organizations/1337/requires-owner-write-annotation")).andSatisfies(condition)
+
+    // POST method
+    mockMvc.perform(post("/v2/organizations/1337/default-perms-write-method")).andSatisfies(condition)
+    mockMvc.perform(post("/v2/organizations/1337/requires-owner-write-method")).andSatisfies(condition)
+  }
+
+  private fun ResultActions.andSatisfies(condition: (ResultActions) -> Unit): ResultActions {
+    condition(this)
+    return this
   }
 
   @RestController
@@ -141,25 +203,58 @@ class OrganizationAuthorizationInterceptorTest {
     @GetMapping("/v2/organizations/{id}/not-annotated")
     fun notAnnotated(
       @PathVariable id: Long,
-    ) = "henlo from org #$id!"
+    ) = "hello from org #$id!"
 
     @GetMapping("/v2/organizations/{id}/default-perms")
     @UseDefaultPermissions
     fun defaultPerms(
       @PathVariable id: Long,
-    ) = "henlo from org #$id!"
+    ) = "hello from org #$id!"
 
-    @GetMapping("/v2/organizations/{id}/requires-admin")
-    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
-    fun requiresAdmin(
+    @PostMapping("/v2/organizations/{id}/default-perms-write-method")
+    @UseDefaultPermissions
+    fun defaultPermsWriteMethod(
       @PathVariable id: Long,
-    ) = "henlo from org #$id!"
+    ) = "hello from org #$id!"
+
+    @GetMapping("/v2/organizations/{id}/default-perms-write-annotation")
+    @UseDefaultPermissions
+    @WriteOperation
+    fun defaultPermsWriteAnnotation(
+      @PathVariable id: Long,
+    ) = "hello from org #$id!"
+
+    @GetMapping("/v2/organizations/{id}/requires-owner")
+    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    fun requiresOwner(
+      @PathVariable id: Long,
+    ) = "hello from org #$id!"
+
+    @PostMapping("/v2/organizations/{id}/requires-owner-write-method")
+    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    fun requiresOwnerWriteMethod(
+      @PathVariable id: Long,
+    ) = "hello from org #$id!"
+
+    @GetMapping("/v2/organizations/{id}/requires-owner-write-annotation")
+    @WriteOperation
+    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    fun requiresOwnerWriteAnnotation(
+      @PathVariable id: Long,
+    ) = "hello from org #$id!"
+
+    @PostMapping("/v2/organizations/{id}/requires-owner-read-annotation")
+    @ReadOnlyOperation
+    @RequiresOrganizationRole(OrganizationRoleType.OWNER)
+    fun requiresOwnerReadAnnotation(
+      @PathVariable id: Long,
+    ) = "hello from org #$id!"
 
     @GetMapping("/v2/organizations/{id}/nonsense-perms")
     @RequiresOrganizationRole(OrganizationRoleType.OWNER)
     @UseDefaultPermissions
     fun nonsensePerms(
       @PathVariable id: Long,
-    ) = "henlo from org #$id!"
+    ) = "hello from org #$id!"
   }
 }

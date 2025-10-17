@@ -32,6 +32,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
@@ -42,13 +43,18 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import io.tolgee.security.authentication.WriteOperation
+import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 
 class ProjectAuthorizationInterceptorTest {
   private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
+
+  private val authentication = Mockito.mock(TolgeeAuthentication::class.java)
 
   private val organizationService = Mockito.mock(OrganizationService::class.java)
 
@@ -82,17 +88,21 @@ class ProjectAuthorizationInterceptorTest {
 
   @BeforeEach
   fun setupMocks() {
-    Mockito.`when`(authenticationFacade.authentication).thenReturn(Mockito.mock(TolgeeAuthentication::class.java))
+    Mockito.`when`(authenticationFacade.authentication).thenReturn(authentication)
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(authenticationFacade.isProjectApiKeyAuth).thenReturn(false)
     Mockito.`when`(authenticationFacade.isUserSuperAuthenticated).thenReturn(false)
     Mockito.`when`(authenticationFacade.projectApiKey).thenReturn(apiKey)
+    Mockito.`when`(authenticationFacade.isReadOnly).thenCallRealMethod()
+
+    Mockito.`when`(authentication.isReadOnly).thenReturn(false)
 
     val mockOrganizationDto = Mockito.mock(OrganizationDto::class.java)
     Mockito.`when`(organizationService.findDto(Mockito.anyLong())).thenReturn(mockOrganizationDto)
     Mockito.`when`(requestContextService.getTargetProject(any())).thenReturn(projectDto)
 
+    Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.USER)
     Mockito.`when`(userAccount.id).thenReturn(1337L)
     Mockito.`when`(projectDto.id).thenReturn(1337L)
     Mockito.`when`(project.id).thenReturn(1337L)
@@ -106,9 +116,12 @@ class ProjectAuthorizationInterceptorTest {
   fun resetMocks() {
     Mockito.reset(
       authenticationFacade,
+      authentication,
+      organizationService,
       securityService,
       requestContextService,
       project,
+      projectDto,
       userAccount,
       apiKey,
     )
@@ -243,6 +256,63 @@ class ProjectAuthorizationInterceptorTest {
     assertThrows<Exception> { mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/implicit-access")) }
   }
 
+  @Test
+  fun `it allows supporter to bypass checks for read-only project endpoints`() {
+    Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.SUPPORTER)
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L)).thenReturn(emptySet())
+
+    performReadOnlyRequests { all -> all.andIsOk }
+  }
+
+  @Test
+  fun `it does not let supporter to bypass checks for write project endpoints`() {
+    Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.SUPPORTER)
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L)).thenReturn(emptySet())
+
+    performWriteRequests { all -> all.andIsForbidden }
+  }
+
+  @Test
+  fun `it allows admin to access any endpoint`() {
+    Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.ADMIN)
+    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L)).thenReturn(emptySet())
+
+    performReadOnlyRequests { all -> all.andIsOk }
+    performWriteRequests { all -> all.andIsOk }
+  }
+
+  private fun performReadOnlyRequests(condition: (ResultActions) -> Unit) {
+    // GET method
+    mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/default-perms")).andSatisfies(condition)
+    mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andSatisfies(condition)
+
+    // POST method, but with read-only annotation
+    mockMvc.perform(
+      MockMvcRequestBuilders.post("/v2/projects/1337/requires-single-scope-read-annotation")
+    ).andSatisfies(condition)
+  }
+
+  private fun performWriteRequests(condition: (ResultActions) -> Unit) {
+    // GET method, but with write annotation
+    mockMvc.perform(
+      MockMvcRequestBuilders.get("/v2/projects/1337/default-perms-write-annotation")
+    ).andSatisfies(condition)
+    mockMvc.perform(
+      MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope-write-annotation")
+    ).andSatisfies(condition)
+
+    // POST method
+    mockMvc.perform(MockMvcRequestBuilders.post("/v2/projects/1337/default-perms-write-method")).andSatisfies(condition)
+    mockMvc.perform(
+      MockMvcRequestBuilders.post("/v2/projects/1337/requires-single-scope-write-method")
+    ).andSatisfies(condition)
+  }
+
+  private fun ResultActions.andSatisfies(condition: (ResultActions) -> Unit): ResultActions {
+    condition(this)
+    return this
+  }
+
   @RestController
   class TestController {
     @GetMapping("/v2/projects")
@@ -252,35 +322,68 @@ class ProjectAuthorizationInterceptorTest {
     @GetMapping("/v2/projects/{id}/not-annotated")
     fun notAnnotated(
       @PathVariable id: Long,
-    ) = "henlo from project $id!"
+    ) = "hello from project $id!"
 
     @GetMapping("/v2/projects/{id}/default-perms")
     @UseDefaultPermissions
     fun defaultPerms(
       @PathVariable id: Long,
-    ) = "henlo from project $id!"
+    ) = "hello from project $id!"
+
+    @GetMapping("/v2/projects/{id}/default-perms-write-annotation")
+    @UseDefaultPermissions
+    @WriteOperation
+    fun defaultPermsWriteAnnotation(
+      @PathVariable id: Long,
+    ) = "hello from project $id!"
+
+    @PostMapping("/v2/projects/{id}/default-perms-write-method")
+    @UseDefaultPermissions
+    fun defaultPermsWriteMethod(
+      @PathVariable id: Long,
+    ) = "hello from project $id!"
 
     @GetMapping("/v2/projects/{id}/requires-single-scope")
     @RequiresProjectPermissions([ Scope.KEYS_CREATE ])
     fun requiresSingleScope(
       @PathVariable id: Long,
-    ) = "henlo from project $id!"
+    ) = "hello from project $id!"
+
+    @GetMapping("/v2/projects/{id}/requires-single-scope-write-annotation")
+    @WriteOperation
+    @RequiresProjectPermissions([ Scope.KEYS_CREATE ])
+    fun requiresSingleScopeWriteAnnotation(
+      @PathVariable id: Long,
+    ) = "hello from project $id!"
+
+    @PostMapping("/v2/projects/{id}/requires-single-scope-write-method")
+    @RequiresProjectPermissions([ Scope.KEYS_CREATE ])
+    fun requiresSingleScopeWriteMethod(
+      @PathVariable id: Long,
+    ) = "hello from project $id!"
+
+    @PostMapping("/v2/projects/{id}/requires-single-scope-read-annotation")
+    @ReadOnlyOperation
+    @RequiresProjectPermissions([ Scope.KEYS_CREATE ])
+    fun requiresSingleScopeReadAnnotation(
+      @PathVariable id: Long,
+    ) = "hello from project $id!"
 
     @GetMapping("/v2/projects/{id}/requires-multiple-scopes")
     @RequiresProjectPermissions([ Scope.KEYS_CREATE, Scope.MEMBERS_EDIT ])
     fun requiresMultipleScopes(
       @PathVariable id: Long,
-    ) = "henlo from project $id!"
+    ) = "hello from project $id!"
 
     @GetMapping("/v2/projects/{id}/nonsense-perms")
     @UseDefaultPermissions
     @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
     fun nonsensePerms(
       @PathVariable id: Long,
-    ) = "henlo from project $id!"
+    ) = "hello from project $id!"
 
     @GetMapping("/v2/projects/implicit-access")
     @RequiresProjectPermissions([ Scope.KEYS_CREATE ])
-    fun implicitProject() = "henlo from implicit project!"
+    fun implicitProject() = "hello from implicit project!"
   }
 }

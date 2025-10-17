@@ -12,6 +12,7 @@ import io.tolgee.exceptions.DisabledFunctionalityException
 import io.tolgee.hateoas.invitation.PublicInvitationModel
 import io.tolgee.hateoas.invitation.PublicInvitationModelAssembler
 import io.tolgee.openApiDocs.OpenApiHideFromPublicDocs
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.ratelimit.RateLimited
@@ -51,6 +52,7 @@ class PublicController(
   private val thirdPartyAuthenticationService: ThirdPartyAuthenticationService,
   private val publicInvitationModelAssembler: PublicInvitationModelAssembler,
   private val invitationService: InvitationService,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   @Operation(summary = "Generate JWT token")
   @PostMapping("/generatetoken")
@@ -67,7 +69,7 @@ class PublicController(
     mfaService.checkMfa(userAccount, loginRequest.otp)
 
     // two factor passed, so we can generate super token
-    val jwt = jwtService.emitToken(userAccount.id, true)
+    val jwt = jwtService.emitToken(userAccount.id, isSuper = true)
     return JwtAuthenticationResponse(jwt)
   }
 

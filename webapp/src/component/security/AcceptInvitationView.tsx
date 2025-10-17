@@ -55,7 +55,7 @@ const AcceptInvitationView: React.FC = () => {
 
   const acceptCode = useApiMutation({
     url: '/v2/invitations/{code}/accept',
-    method: 'get',
+    method: 'put',
     fetchOptions: {
       disableErrorNotification: true,
     },

@@ -85,7 +85,7 @@ class ProjectsController(
     @RequestBody @Valid
     dto: CreateProjectRequest,
   ): ProjectModel {
-    organizationRoleService.checkUserIsOwnerOrMaintainer(dto.organizationId)
+    organizationRoleService.checkUserCanCreateProject(dto.organizationId)
     val project = projectCreationService.createProject(dto)
     if (organizationRoleService.getType(dto.organizationId) == OrganizationRoleType.MAINTAINER) {
       // Maintainers get full access to projects they create
@@ -241,11 +241,11 @@ class ProjectsController(
   )
   @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
   @RequiresSuperAuthentication
-  fun setOrganizationBase(
+  fun removeDirectProjectPermissions(
     @PathVariable("userId") userId: Long,
   ) {
     projectPermissionFacade.checkNotCurrentUser(userId)
-    permissionService.setOrganizationBasePermissions(
+    permissionService.removeDirectProjectPermissions(
       projectId = projectHolder.project.id,
       userId = userId,
     )

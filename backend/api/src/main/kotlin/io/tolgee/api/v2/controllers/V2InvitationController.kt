@@ -17,6 +17,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
+import io.tolgee.security.authentication.WriteOperation
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.TranslationAgencyService
@@ -53,8 +54,22 @@ class V2InvitationController(
   private val publicInvitationModelAssembler: PublicInvitationModelAssembler,
 ) {
   @GetMapping("/v2/invitations/{code}/accept")
-  @Operation(summary = "Accepts invitation to project or organization")
+  @WriteOperation
+  @Operation(
+    summary = "Accepts invitation to project or organization " +
+      "(deprecated: use PUT method instead)",
+    deprecated = true
+  )
   fun acceptInvitation(
+    @PathVariable("code") code: String?,
+  ): ResponseEntity<Void> {
+    invitationService.accept(code)
+    return ResponseEntity(HttpStatus.OK)
+  }
+
+  @PutMapping("/v2/invitations/{code}/accept")
+  @Operation(summary = "Accepts invitation to project or organization")
+  fun acceptInvitationPut(
     @PathVariable("code") code: String?,
   ): ResponseEntity<Void> {
     invitationService.accept(code)
@@ -78,7 +93,9 @@ class V2InvitationController(
     }
 
     invitation.organizationRole?.let {
-      organizationRoleService.checkUserIsOwner(invitation.organizationRole!!.organization!!.id)
+      organizationRoleService.checkUserCanDeleteInvitation(
+        invitation.organizationRole!!.organization!!.id,
+      )
     }
 
     invitationService.delete(invitation)

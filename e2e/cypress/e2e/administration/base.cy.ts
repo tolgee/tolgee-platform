@@ -64,6 +64,7 @@ describe('Administration', () => {
     visitAdministration();
     gcy('settings-menu-item').contains('Users').click();
     changeUserRole('John User', 'Admin');
+    changeUserRole('John User', 'Supporter');
     changeUserRole('John User', 'User');
     getUserRoleSelect('Peter Administrator')
       .find('div')
@@ -115,7 +116,7 @@ function getUserRoleSelect(user: string) {
   return getUserListItem(user).findDcy('administration-user-role-select');
 }
 
-function changeUserRole(user: string, role: 'Admin' | 'User') {
+function changeUserRole(user: string, role: 'Admin' | 'Supporter' | 'User') {
   selectInSelect(getUserRoleSelect(user), role);
   confirmStandard();
   assertMessage('Role changed');
