@@ -58,66 +58,68 @@ class BatchJobManagementControllerCancellationTest :
   @ValueSource(ints = [1, 2])
   @ProjectJWTAuthTestMethod
   fun `cancels a job`(projectConcurrency: Int) {
-    val keys = testData.addTranslationOperationData(100)
-    saveAndPrepare()
-
     batchProperties.projectConcurrency = projectConcurrency
 
-    val keyIds = keys.map { it.id }.toList()
+    batchDumper.finallyDumpAll {
+      val keys = testData.addTranslationOperationData(100)
+      saveAndPrepare()
 
-    val count = AtomicInteger(0)
+      val keyIds = keys.map { it.id }.toList()
 
-    doAnswer {
-      if (count.incrementAndGet() > 5) {
-        while (simulateLongRunningChunkRun) {
-          // this simulates long-running operation, which checks for active context
-          val context = it.arguments[2] as CoroutineContext
-          context.ensureActive()
-          Thread.sleep(10)
+      val count = AtomicInteger(0)
+
+      doAnswer {
+        if (count.incrementAndGet() > 5) {
+          while (simulateLongRunningChunkRun) {
+            // this simulates long-running operation, which checks for active context
+            val context = it.arguments[2] as CoroutineContext
+            context.ensureActive()
+            Thread.sleep(10)
+          }
+        }
+        it.callRealMethod()
+      }.whenever(machineTranslationChunkProcessor).process(any(), any(), any(), any())
+
+      performProjectAuthPost(
+        "start-batch-job/machine-translate",
+        mapOf(
+          "keyIds" to keyIds,
+          "targetLanguageIds" to
+            listOf(
+              testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+            ),
+        ),
+      ).andIsOk
+
+      waitFor {
+        batchJobConcurrentLauncher.runningJobs.size >= 5
+      }
+
+      val job = util.getSingleJob()
+
+      // Verify the job is locked
+      val lockedJobs = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
+      lockedJobs.assert.contains(job.id)
+
+      performProjectAuthPut("batch-jobs/${job.id}/cancel")
+        .andIsOk
+
+      waitForNotThrowing(pollTime = 100) {
+        executeInNewTransaction {
+          util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+          verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
+
+          // assert activity stored
+          entityManager.createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
+            .setParameter("id", job.id).resultList
+            .assert.hasSize(1)
         }
       }
-      it.callRealMethod()
-    }.whenever(machineTranslationChunkProcessor).process(any(), any(), any(), any())
 
-    performProjectAuthPost(
-      "start-batch-job/machine-translate",
-      mapOf(
-        "keyIds" to keyIds,
-        "targetLanguageIds" to
-          listOf(
-            testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
-          ),
-      ),
-    ).andIsOk
-
-    waitFor {
-      batchJobConcurrentLauncher.runningJobs.size >= 5
+      // Verify the job lock was released
+      val lockedJobsAfterCancel = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
+      lockedJobsAfterCancel.assert.doesNotContain(job.id)
     }
-
-    val job = util.getSingleJob()
-
-    // Verify the job is locked
-    val lockedJobs = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
-    lockedJobs.assert.contains(job.id)
-
-    performProjectAuthPut("batch-jobs/${job.id}/cancel")
-      .andIsOk
-
-    waitForNotThrowing(pollTime = 100) {
-      executeInNewTransaction {
-        util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
-        verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
-
-        // assert activity stored
-        entityManager.createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
-          .setParameter("id", job.id).resultList
-          .assert.hasSize(1)
-      }
-    }
-
-    // Verify the job lock was released
-    val lockedJobsAfterCancel = batchJobProjectLockingManager.getLockedForProject(testData.project.id)
-    lockedJobsAfterCancel.assert.doesNotContain(job.id)
   }
 
   @Test

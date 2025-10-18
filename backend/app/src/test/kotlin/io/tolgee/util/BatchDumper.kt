@@ -78,7 +78,19 @@ class BatchDumper(
     }
   }
 
+  fun <T> finallyDumpAll(fn: () -> T): T {
+    return try {
+      fn()
+    } finally {
+      getAllJobs().forEach {
+        this.dump(it.id)
+      }
+    }
+  }
+
   fun getSingleJob(): BatchJob = entityManager.createQuery("""from BatchJob""", BatchJob::class.java).singleResult
+
+  fun getAllJobs(): List<BatchJob> = entityManager.createQuery("""from BatchJob""", BatchJob::class.java).resultList
 
   private fun dumpQueuedItems(
     jobId: Long,
