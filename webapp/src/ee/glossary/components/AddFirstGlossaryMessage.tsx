@@ -51,7 +51,7 @@ export const AddFirstGlossaryMessage: React.VFC<
             keyName="glossaries_list_empty_message"
             params={{
               bestPractice: (
-                <Link href="https://docs.tolgee.io/platform/projects_and_organizations/glossary" />
+                <Link href="https://docs.tolgee.io/platform/projects_and_organizations/managing_glossaries" />
               ),
             }}
           />
