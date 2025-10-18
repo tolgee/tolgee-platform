@@ -57,7 +57,7 @@ class StructureModelBuilder(
   ) {
     pluralForms.forEach { (keyword, form) ->
       val path = getPathItems(languageTag, key) + nestInside + ObjectPathItem(keyword, keyword)
-      addValueToPath(path, form)
+      addValueToPath(path, form, isPluralChild = true)
     }
   }
 
@@ -69,9 +69,10 @@ class StructureModelBuilder(
   private fun addValueToPath(
     path: List<PathItem>,
     value: String?,
+    isPluralChild: Boolean = false,
   ) {
-    model = model ?: path.first().createNode(null, null)
-    addToContent(model!!, path, path, value)
+    model = model ?: path.first().createNode(null, null, isPluralChild)
+    addToContent(model!!, path, path, value, isPluralChild = isPluralChild)
   }
 
   private fun getLanguageTagPath(languageTag: String): MutableList<PathItem> {
@@ -86,11 +87,12 @@ class StructureModelBuilder(
     pathItems: List<PathItem>,
     fullPath: List<PathItem>,
     value: String?,
+    isPluralChild: Boolean = false,
   ) {
     val pathItemsMutable = pathItems.toMutableList()
 
     if (pathItems.size == 1) {
-      putText(parentNode, value, pathItems.first(), fullPath)
+      putText(parentNode, value, pathItems.first(), fullPath, isPluralChild)
       return
     }
 
@@ -104,9 +106,11 @@ class StructureModelBuilder(
       is ObjectPathItem -> {
         when (parentNode) {
           is ObjectStructuredModelItem -> {
+            val isPlural = isPluralChild && pathItemsMutable.size == 1
+
             val targetNode =
-              getTargetNodeForObjectItem(parentNode, pathItem, pathItemsMutable) ?: return
-            addToContent(targetNode, pathItemsMutable, fullPath, value)
+              getTargetNodeForObjectItem(parentNode, pathItem, pathItemsMutable, isPlural) ?: return
+            addToContent(targetNode, pathItemsMutable, fullPath, value, isPluralChild)
           }
 
           is ArrayStructuredModelItem -> {
@@ -135,10 +139,11 @@ class StructureModelBuilder(
     parentNode: ObjectStructuredModelItem,
     currentPathItem: ObjectPathItem,
     restPathItems: MutableList<PathItem>,
+    isDirectPluralParent: Boolean,
   ): StructuredModelItem {
     var targetNode = parentNode[currentPathItem.key]
     if (targetNode == null) {
-      targetNode = restPathItems.first().createNode(parentNode, currentPathItem.key)
+      targetNode = restPathItems.first().createNode(parentNode, currentPathItem.key, isDirectPluralParent)
       parentNode[currentPathItem.key] = targetNode
     }
     return targetNode
@@ -164,11 +169,22 @@ class StructureModelBuilder(
     text: String?,
     pathItem: PathItem,
     fullPath: List<PathItem>,
+    isPluralChild: Boolean,
   ) {
     handleCollisions(pathItem, parentNode, fullPath, text)
 
     if (pathItem is ObjectPathItem && parentNode is ObjectStructuredModelItem) {
       parentNode.compute(pathItem.key) { _, value ->
+        // This handles the case when export has keys in collision one is a plural: e.g.
+        // dogs: "{count, plural, one {dog} other {dogs}}""
+        // and
+        // dogs.one: "One dog".
+        // In this case, we don't want to overwrite the plural key with the non-plural one, so we will return
+        // the correct plural without throwing a collision exception.
+        if (parentNode.isPlural && !isPluralChild) {
+          return@compute value
+        }
+
         throwIfExists(value, fullPath)
         ValueStructuredModelItem(text, parentNode, pathItem.key)
       }
@@ -233,10 +249,11 @@ class StructureModelBuilder(
   private fun PathItem.createNode(
     parentNode: ContainerNode<*>?,
     key: Any?,
+    isDirectPluralParent: Boolean = false,
   ): StructuredModelItem {
     return when (this) {
       is ArrayPathItem -> ArrayStructuredModelItem(parentNode, key)
-      is ObjectPathItem -> ObjectStructuredModelItem(parentNode, key)
+      is ObjectPathItem -> ObjectStructuredModelItem(parentNode, key, isDirectPluralParent)
       else -> throw IllegalStateException("Root item must be array or object")
     }
   }
