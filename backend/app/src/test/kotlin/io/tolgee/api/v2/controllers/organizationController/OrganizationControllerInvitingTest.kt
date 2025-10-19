@@ -162,7 +162,9 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
     val organization = prepareTestOrganization()
 
     val code = inviteWithUserWithNameAndEmail(organization.id)
-    emailTestUtil.verifyEmailSent()
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      emailTestUtil.verifyEmailSent()
+    }
 
     val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).contains(code)
@@ -176,7 +178,9 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
     val organization = prepareTestOrganization()
 
     inviteWithUserWithNameAndEmail(organization.id)
-    emailTestUtil.verifyEmailSent()
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      emailTestUtil.verifyEmailSent()
+    }
 
     val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).doesNotContain("<a href='https://evil.local")
