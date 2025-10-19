@@ -1,3 +1,10 @@
+## [3.136.1](https://github.com/tolgee/tolgee-platform/compare/v3.136.0...v3.136.1) (2025-10-19)
+
+
+### Bug Fixes
+
+* Plural collisions in structured formats ([#3280](https://github.com/tolgee/tolgee-platform/issues/3280)) ([b2b6f16](https://github.com/tolgee/tolgee-platform/commit/b2b6f16e197b55127e3751a6d4dd7c188afac0cd))
+
 # [3.136.0](https://github.com/tolgee/tolgee-platform/compare/v3.135.0...v3.136.0) (2025-10-17)
 
 
