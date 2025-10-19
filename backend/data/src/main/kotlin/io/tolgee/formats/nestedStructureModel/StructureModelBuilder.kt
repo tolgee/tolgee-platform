@@ -113,10 +113,12 @@ class StructureModelBuilder(
       is ObjectPathItem -> {
         when (parentNode) {
           is ObjectStructuredModelItem -> {
-            val isPlural = isPluralChild && pathItemsMutable.size == 1
+
+            // Whether the new parent node is a parent for plural forms.
+            val isDirectPluralParent = isPluralChild && pathItemsMutable.size == 1
 
             val targetNode =
-              getTargetNodeForObjectItem(parentNode, pathItem, pathItemsMutable, isPlural) ?: return
+              getTargetNodeForObjectItem(parentNode, pathItem, pathItemsMutable, isDirectPluralParent)
             addToContent(targetNode, pathItemsMutable, fullPath, value, isPluralChild)
           }
 
