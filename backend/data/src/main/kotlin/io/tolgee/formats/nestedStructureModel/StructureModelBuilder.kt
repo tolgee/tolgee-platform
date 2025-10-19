@@ -113,7 +113,6 @@ class StructureModelBuilder(
       is ObjectPathItem -> {
         when (parentNode) {
           is ObjectStructuredModelItem -> {
-
             // Whether the new parent node is a parent for plural forms.
             val isDirectPluralParent = isPluralChild && pathItemsMutable.size == 1
 
