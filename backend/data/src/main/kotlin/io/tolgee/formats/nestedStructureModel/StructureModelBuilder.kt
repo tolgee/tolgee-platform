@@ -71,7 +71,7 @@ class StructureModelBuilder(
     value: String?,
     isPluralChild: Boolean = false,
   ) {
-    model = model ?: path.first().createNode(null, null, isPluralChild)
+    model = model ?: path.first().createNode(null, null)
     addToContent(model!!, path, path, value, isPluralChild = isPluralChild)
   }
 
