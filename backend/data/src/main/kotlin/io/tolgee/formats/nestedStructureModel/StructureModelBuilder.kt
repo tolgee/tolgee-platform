@@ -6,6 +6,13 @@ import io.tolgee.formats.path.PathItem
 import io.tolgee.formats.path.buildPath
 import io.tolgee.formats.path.getPathItems
 
+/**
+ * Builds the structure model from the parsed data.
+ *
+ * Before using the addValue methods, always sort the keys by name alphabetically.
+ *
+ * Otherwise, it can throw exceptions or return wrong results.
+ */
 class StructureModelBuilder(
   private var structureDelimiter: Char?,
   private var supportArrays: Boolean,
@@ -181,6 +188,8 @@ class StructureModelBuilder(
         // dogs.one: "One dog".
         // In this case, we don't want to overwrite the plural key with the non-plural one, so we will return
         // the correct plural without throwing a collision exception.
+        // The keys are always ordered by name, so it's not possible that
+        // non-plural would come after a plural one.
         if (parentNode.isPlural && !isPluralChild) {
           return@compute value
         }
