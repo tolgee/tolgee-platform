@@ -35,13 +35,13 @@ export const PlanMigrationChip = ({
       onOpen={onOpen}
       title={
         loadable.isLoading ? (
-          <Box padding={3}>
+          <Box p={3}>
             <SpinnerProgress size={24} />
           </Box>
         ) : migration ? (
           <PlanMigrationDetail migration={migration} editLink={editLink} />
         ) : (
-          <Box padding={3}>
+          <Box p={3}>
             <Typography variant={'subtitle2'}>
               {t('administration_plan_migration_not_found')}
             </Typography>
