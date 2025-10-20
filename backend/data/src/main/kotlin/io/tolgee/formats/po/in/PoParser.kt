@@ -126,14 +126,18 @@ class PoParser(
 
   private fun Char.handleOther() {
     if (currentEscaped) {
-      val specialEscape: Char? = if (quoted) when (this) {
-        'n'  -> '\n'
-        'r'  -> '\r'
-        't'  -> '\t'
-        '"'  -> '"'
+      val specialEscape: Char? = if (quoted) {
+        when (this) {
+        'n' -> '\n'
+        'r' -> '\r'
+        't' -> '\t'
+        '"' -> '"'
         '\\' -> '\\'
         else -> null
-      } else null
+      }
+      } else {
+        null
+      }
 
       if (specialEscape != null) {
         currentSequence.append(specialEscape)
