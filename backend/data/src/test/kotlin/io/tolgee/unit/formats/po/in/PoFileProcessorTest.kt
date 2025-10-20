@@ -29,7 +29,7 @@ class PoFileProcessorTest {
     mockImportFile("example.po")
     PoFileProcessor(mockUtil.fileProcessorContext).process()
     assertThat(mockUtil.fileProcessorContext.languages).hasSize(1)
-    assertThat(mockUtil.fileProcessorContext.translations).hasSize(9)
+    assertThat(mockUtil.fileProcessorContext.translations).hasSize(11)
     val text = mockUtil.fileProcessorContext.translations["%d page read."]?.get(0)?.text
     assertThat(text)
       .isEqualTo(
