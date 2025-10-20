@@ -27,5 +27,7 @@ class PoParserTest {
     assertThat(result.translations[2].meta.extractedComments).hasSize(4)
     assertThat(result.translations[9].msgstr.toString()).isEqualTo("Dies ist ein \"zitat\"")
     assertThat(result.translations[9].msgid.toString()).isEqualTo("This is a \"quote\"")
+    assertThat(result.translations[10].msgstr.toString()).isEqualTo("This\nis\na\nmultiline\nstring")
+    assertThat(result.translations[11].msgstr.toString()).isEqualTo("This\r\nis\r\na\r\nmultiline\r\nstring")
   }
 }

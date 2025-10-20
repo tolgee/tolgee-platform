@@ -51,7 +51,7 @@ class PoParser(
   private fun processHeader(): PoParserMeta {
     val result = PoParserMeta()
     translations.filter { it.msgid.toString() == "" }.forEach {
-      it.msgstr.split("\\n").map { metaLine ->
+      it.msgstr.split("\n").map { metaLine ->
         val trimmed = metaLine.trim()
         if (trimmed.isBlank()) {
           return@map
@@ -126,8 +126,25 @@ class PoParser(
 
   private fun Char.handleOther() {
     if (currentEscaped) {
-      currentSequence.append('\\')
-      currentSequence.append(this)
+      val specialEscape: Char? = if (quoted) {
+        when (this) {
+        'n' -> '\n'
+        'r' -> '\r'
+        't' -> '\t'
+        '"' -> '"'
+        '\\' -> '\\'
+        else -> null
+      }
+      } else {
+        null
+      }
+
+      if (specialEscape != null) {
+        currentSequence.append(specialEscape)
+      } else {
+        currentSequence.append('\\')
+        currentSequence.append(this)
+      }
       return
     }
 
