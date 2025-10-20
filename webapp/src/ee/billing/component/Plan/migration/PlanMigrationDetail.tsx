@@ -31,7 +31,7 @@ export const PlanMigrationDetail = ({ migration, editLink }: Props) => {
   const { t } = useTranslate();
   if (!migration) {
     return (
-      <Box padding={3}>
+      <Box p={3}>
         <Typography variant={'subtitle2'}>
           {t('administration_plan_migration_not_found')}
         </Typography>
@@ -56,11 +56,22 @@ export const PlanMigrationDetail = ({ migration, editLink }: Props) => {
           />
         )}
       </Box>
-      <MigrationDetailBox className={clsx(!migration.enabled && 'inactive')}>
+      <MigrationDetailBox className={clsx({ inactive: !migration.enabled })}>
         <Box display="flex" gap={1} alignItems="center" mb={1}>
-          <PlanMigrationPlanPriceDetail plan={migration.sourcePlan} />
-          <ArrowRight width={18} height={18} />
-          <PlanMigrationPlanPriceDetail plan={migration.targetPlan} />
+          <PlanMigrationPlanPriceDetail
+            plan={migration.sourcePlan}
+            label={t('administration_plan_migration_from')}
+          />
+          <ArrowRight
+            width={18}
+            height={18}
+            aria-hidden="true"
+            focusable="false"
+          />
+          <PlanMigrationPlanPriceDetail
+            plan={migration.targetPlan}
+            label={t('administration_plan_migration_to')}
+          />
         </Box>
         <Box mt={2}>
           <Typography variant={'subtitle2'}>
@@ -84,7 +95,6 @@ export const PlanMigrationDetail = ({ migration, editLink }: Props) => {
       </MigrationDetailBox>
       <Box display="flex" justifyContent="center" mt={3}>
         <Button
-          key="edit-migration"
           variant="contained"
           size="medium"
           startIcon={<Settings01 width={19} height={19} />}

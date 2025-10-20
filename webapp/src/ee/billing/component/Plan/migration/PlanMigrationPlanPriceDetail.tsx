@@ -1,7 +1,6 @@
 import { Box, Chip, styled, Typography } from '@mui/material';
 import { PricePrimary } from 'tg.ee.module/billing/component/Price/PricePrimary';
 import React from 'react';
-import { useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/billingApiSchema.generated';
 
 type CloudPlan = components['schemas']['CloudPlanModel'];
@@ -16,14 +15,15 @@ const TooltipTitle = styled('div')`
 
 const TooltipText = styled('div')`
   white-space: nowrap;
+  overflow-wrap: anywhere;
 `;
 
 type Props = {
   plan: CloudPlan | SelfHostedEePlanAdministrationModel;
+  label: string;
 };
 
-export const PlanMigrationPlanPriceDetail = ({ plan }: Props) => {
-  const { t } = useTranslate();
+export const PlanMigrationPlanPriceDetail = ({ plan, label }: Props) => {
   return (
     <Chip
       sx={{
@@ -36,9 +36,7 @@ export const PlanMigrationPlanPriceDetail = ({ plan }: Props) => {
       }}
       label={
         <Box>
-          <Typography variant="caption">
-            {t('administration_plan_migration_from')}
-          </Typography>
+          <Typography variant="caption">{label}</Typography>
           <TooltipTitle>{plan.name}</TooltipTitle>
           {plan.prices && (
             <TooltipText>
