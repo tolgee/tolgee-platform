@@ -11,14 +11,14 @@ class TableParser(
   }
 
   val languages: List<String> by lazy {
-    headers?.takeIf { it.size > 1 }?.drop(1) ?: emptyList()
+    headers?.drop(1) ?: emptyList()
   }
 
   val languagesWithFallback: Sequence<String>
     get() = languages.asSequence().plus(generateSequence { languageFallback })
 
   val rows: List<List<String>> by lazy {
-    rawData.takeIf { it.size > 1 }?.drop(1) ?: emptyList()
+    rawData.drop(1)
   }
 
   fun List<String>.rowToTableEntries(): Sequence<TableEntry> {

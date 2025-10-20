@@ -4,7 +4,6 @@ import { T } from '@tolgee/react';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { messageService } from 'tg.service/MessageService';
 import React from 'react';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 import {
   GlossaryTermCreateEditForm,
@@ -31,7 +30,6 @@ export const GlossaryTermCreateDialog = ({
   onClose,
   onFinished,
 }: Props) => {
-  const { preferredOrganization } = usePreferredOrganization();
   const glossary = useGlossary();
 
   const mutation = useApiMutation({
@@ -44,7 +42,7 @@ export const GlossaryTermCreateDialog = ({
     mutation.mutate(
       {
         path: {
-          organizationId: preferredOrganization!.id,
+          organizationId: glossary.organizationOwner.id,
           glossaryId: glossary.id,
         },
         content: {
