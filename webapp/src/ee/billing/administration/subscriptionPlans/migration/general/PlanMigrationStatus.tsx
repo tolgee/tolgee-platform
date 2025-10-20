@@ -30,10 +30,7 @@ export const PlanMigrationStatus = ({ status, date }: Props) => {
   };
 
   const chip = (
-    <Chip
-      label={getStatusLabel(status)}
-      color={(colors as any)[status] || 'default'}
-    />
+    <Chip label={getStatusLabel(status)} color={colors[status] || 'default'} />
   );
 
   return date ? (

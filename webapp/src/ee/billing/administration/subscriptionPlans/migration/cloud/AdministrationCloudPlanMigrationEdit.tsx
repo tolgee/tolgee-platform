@@ -3,13 +3,19 @@ import { useTranslate } from '@tolgee/react';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { AdministrationPlanMigrationEditBase } from 'tg.ee.module/billing/administration/subscriptionPlans/migration/general/AdministrationPlanMigrationEditBase';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
-import { useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { CloudPlanEditPlanMigrationForm } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/CloudPlanEditPlanMigrationForm';
 
 export const AdministrationCloudPlanMigrationEdit = () => {
   const { t } = useTranslate();
   const match = useRouteMatch();
   const migrationId = Number(match.params[PARAMS.PLAN_MIGRATION_ID]);
+  const history = useHistory();
+
+  if (isNaN(migrationId)) {
+    history.replace(LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build());
+  }
+
   const [subscriptionsPage, setSubscriptionsPage] = useState(0);
 
   const migrations = useBillingApiQuery({

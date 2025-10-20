@@ -4,13 +4,19 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { AdministrationPlanMigrationEditBase } from 'tg.ee.module/billing/administration/subscriptionPlans/migration/general/AdministrationPlanMigrationEditBase';
 import { SelfHostedEePlanEditPlanMigrationForm } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/SelfHostedEePlanEditPlanMigrationForm';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
-import { useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 
 export const AdministrationSelfHostedEePlanMigrationEdit = () => {
   const { t } = useTranslate();
   const match = useRouteMatch();
-  const migrationId = Number(match.params[PARAMS.PLAN_MIGRATION_ID]);
   const [subscriptionsPage, setSubscriptionsPage] = useState(0);
+  const migrationId = Number(match.params[PARAMS.PLAN_MIGRATION_ID]);
+  const history = useHistory();
+
+  if (isNaN(migrationId)) {
+    history.replace(LINKS.ADMINISTRATION_BILLING_EE_PLANS.build());
+  }
+
   const migrations = useBillingApiQuery({
     url: '/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}',
     method: 'get',
