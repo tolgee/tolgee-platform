@@ -923,6 +923,9 @@ export interface components {
         | "suggestion_must_be_plural"
         | "duplicate_suggestion"
         | "unsupported_media_type"
+        | "impersonation_of_admin_by_supporter_not_allowed"
+        | "already_impersonating_user"
+        | "operation_not_permitted_in_read_only_mode"
         | "plan_migration_not_found"
         | "plan_has_migrations";
       params?: unknown[];
@@ -1128,6 +1131,7 @@ export interface components {
         | "prompts.edit"
         | "translation-labels.manage"
         | "translation-labels.assign"
+        | "all.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
