@@ -111,6 +111,8 @@ export function useErrorTranslation() {
         return t('plan_has_subscribers');
       case 'plan_has_migrations':
         return t('plan_has_migrations');
+      case 'plan_migration_not_found':
+        return t('plan_migration_not_found');
       case 'cannot_store_file_to_content_storage':
         return t('cannot_store_file_to_content_storage');
       case 'unexpected_error_while_publishing_to_content_storage':
