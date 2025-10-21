@@ -79,7 +79,7 @@ Since we set the active profile to `dev`, Spring uses the `application-dev.yaml`
 
 ## API schema changes
 
-After you change the API schema, you need to run the webapp schema script to update frontend:
+After you change the API schema, you need to have backend running and invoke the webapp schema script to update frontend:
 
 ```shell
 cd webapp && npm run schema
