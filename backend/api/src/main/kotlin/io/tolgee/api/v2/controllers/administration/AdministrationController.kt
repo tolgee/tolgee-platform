@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RestController
   name = "Server Administration",
   description =
     "**Only for self-hosted instances** \n\n" +
-      "Managees global Tolgee Platform instance data e.g., user accounts and organizations.",
+      "Manages global Tolgee Platform instance data, e.g. user accounts and organizations.",
 )
 @OpenApiSelfHostedExtension
 class AdministrationController(
@@ -141,7 +141,7 @@ class AdministrationController(
 
   @GetMapping(value = ["/users/{userId:[0-9]+}/generate-token"])
   @Operation(
-    summary = "Geneate user's JWT token",
+    summary = "Generate user's JWT token",
     description =
       "Generates a JWT token for the user with provided ID. This is useful, when need to debug of the " +
         "user's account. Or when an operation is required to be executed on behalf of the user.",
