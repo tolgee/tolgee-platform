@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import { useTranslate } from '@tolgee/react';
-import { Box, Chip, ListItem, Typography, styled } from '@mui/material';
+import {
+  Box,
+  Chip,
+  ListItem,
+  Typography,
+  styled,
+  useTheme,
+} from '@mui/material';
 
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
@@ -47,6 +54,7 @@ export const AdministrationUsers = ({
   });
 
   const formatDate = useDateFormatter();
+  const theme = useTheme();
   const { t } = useTranslate();
 
   return (
@@ -79,7 +87,10 @@ export const AdministrationUsers = ({
                     </Typography>
                   </Box>
                   <Box>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography
+                      variant="body2"
+                      color={theme.palette.text.secondary}
+                    >
                       {!u.lastActivity
                         ? t('administration_user_no_activity')
                         : t('administration_user_last_activity', {
