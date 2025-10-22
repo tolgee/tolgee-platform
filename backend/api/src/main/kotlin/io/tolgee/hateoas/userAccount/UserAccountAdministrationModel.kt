@@ -7,7 +7,7 @@ import org.springframework.hateoas.server.core.Relation
 import java.util.Date
 
 @Relation(collectionRelation = "users", itemRelation = "user")
-data class UserAccountModel(
+data class UserAccountAdministrationModel(
   val id: Long,
   val username: String,
   val name: String?,
@@ -15,7 +15,7 @@ data class UserAccountModel(
   val avatar: Avatar?,
   val globalServerRole: UserAccount.Role,
   val mfaEnabled: Boolean,
-  val lastActivity: Date?,
   val deleted: Boolean,
   val disabled: Boolean,
-) : RepresentationModel<UserAccountModel>()
+  val lastActivity: Date?,
+) : RepresentationModel<UserAccountAdministrationModel>()

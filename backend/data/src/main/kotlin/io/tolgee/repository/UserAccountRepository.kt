@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.dtos.queryResults.UserAccountAdministrationView
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.dtos.request.task.UserAccountFilters
 import io.tolgee.model.UserAccount
@@ -146,10 +147,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     ua.thirdPartyAuthType,
     ua.role,
     ua.isInitialUser,
-    ua.totpKey,
-    ua.deletedAt,
-    ua.disabledAt,
-    null
+    ua.totpKey
   ) from UserAccount ua
   left join ua.emailVerification ev
   where ua.id = :userAccountId and ua.deletedAt is null and ua.disabledAt is null
@@ -268,14 +266,13 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
       from ActivityRevision ar 
       group by ar.authorId
     )
-    select new io.tolgee.dtos.queryResults.UserAccountView(
+    select new io.tolgee.dtos.queryResults.UserAccountAdministrationView(
       userAccount.id,
       userAccount.username,
       userAccount.name,
       case when ev is not null then coalesce(ev.newEmail, userAccount.username) else null end,
       userAccount.avatarHash,
       userAccount.accountType,
-      userAccount.thirdPartyAuthType,
       userAccount.role,
       userAccount.isInitialUser,
       userAccount.totpKey,
@@ -295,7 +292,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   fun findAllWithDisabledPaged(
     search: String?,
     pageable: Pageable,
-  ): Page<UserAccountView>
+  ): Page<UserAccountAdministrationView>
 
   @Query(
     value = """

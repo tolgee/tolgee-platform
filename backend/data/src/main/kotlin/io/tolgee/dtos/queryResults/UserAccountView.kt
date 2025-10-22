@@ -3,7 +3,6 @@ package io.tolgee.dtos.queryResults
 import io.tolgee.api.IUserAccount
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
-import java.util.*
 
 class UserAccountView(
   val id: Long,
@@ -16,12 +15,9 @@ class UserAccountView(
   val role: UserAccount.Role?,
   override var isInitialUser: Boolean,
   override val totpKey: ByteArray?,
-  val deletedAt: Date?,
-  val disabledAt: Date?,
-  val lastActivity: Date?
 ) : IUserAccount {
   companion object {
-    fun fromEntity(entity: UserAccount, lastActivity: Date?): UserAccountView {
+    fun fromEntity(entity: UserAccount): UserAccountView {
       return UserAccountView(
         id = entity.id,
         username = entity.username,
@@ -33,9 +29,6 @@ class UserAccountView(
         role = entity.role ?: UserAccount.Role.USER,
         isInitialUser = entity.isInitialUser,
         totpKey = entity.totpKey,
-        deletedAt = entity.deletedAt,
-        disabledAt = entity.disabledAt,
-        lastActivity = lastActivity,
       )
     }
   }

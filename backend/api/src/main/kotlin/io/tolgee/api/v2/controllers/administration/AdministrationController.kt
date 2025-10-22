@@ -5,13 +5,13 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isAdmin
-import io.tolgee.dtos.queryResults.UserAccountView
+import io.tolgee.dtos.queryResults.UserAccountAdministrationView
 import io.tolgee.dtos.queryResults.organization.OrganizationView
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.organization.OrganizationModel
 import io.tolgee.hateoas.organization.OrganizationModelAssembler
-import io.tolgee.hateoas.userAccount.UserAccountModel
-import io.tolgee.hateoas.userAccount.UserAccountModelAssembler
+import io.tolgee.hateoas.userAccount.UserAccountAdministrationModel
+import io.tolgee.hateoas.userAccount.UserAccountAdministrationModelAssembler
 import io.tolgee.model.UserAccount
 import io.tolgee.openApiDocs.OpenApiSelfHostedExtension
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -48,14 +48,14 @@ import org.springframework.web.bind.annotation.RestController
 )
 @OpenApiSelfHostedExtension
 class AdministrationController(
-    private val organizationService: OrganizationService,
-    private val pagedOrganizationResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
-    private val organizationModelAssembler: OrganizationModelAssembler,
-    private val authenticationFacade: AuthenticationFacade,
-    private val userAccountService: UserAccountService,
-    private val pagedResourcesAssembler: PagedResourcesAssembler<UserAccountView>,
-    private val userAccountModelAssembler: UserAccountModelAssembler,
-    private val jwtService: JwtService,
+  private val organizationService: OrganizationService,
+  private val pagedOrganizationResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
+  private val organizationModelAssembler: OrganizationModelAssembler,
+  private val authenticationFacade: AuthenticationFacade,
+  private val userAccountService: UserAccountService,
+  private val pagedUserResourcesAssembler: PagedResourcesAssembler<UserAccountAdministrationView>,
+  private val userModelAssembler: UserAccountAdministrationModelAssembler,
+  private val jwtService: JwtService,
 ) : IController {
   @GetMapping(value = ["/organizations"])
   @Operation(summary = "Get all server organizations")
@@ -83,9 +83,9 @@ class AdministrationController(
     @SortDefault(sort = ["name"])
     pageable: Pageable,
       search: String? = null,
-  ): PagedModel<UserAccountModel> {
+  ): PagedModel<UserAccountAdministrationModel> {
     val users = userAccountService.findAllWithDisabledPaged(pageable, search)
-    return pagedResourcesAssembler.toModel(users, userAccountModelAssembler)
+    return pagedUserResourcesAssembler.toModel(users, userModelAssembler)
   }
 
   @DeleteMapping(value = ["/users/{userId}"])
