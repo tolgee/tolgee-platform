@@ -90,6 +90,7 @@ export const AdministrationUsers = ({
                     <Typography
                       variant="body2"
                       color={theme.palette.text.secondary}
+                      data-cy="administration-user-activity"
                     >
                       {!u.lastActivity
                         ? t('administration_user_no_activity')

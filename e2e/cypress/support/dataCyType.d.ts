@@ -87,6 +87,7 @@ declare namespace DataCy {
         "administration-subscriptions-custom-plans-item" |
         "administration-subscriptions-plan-popover" |
         "administration-trial-end-date-field" |
+        "administration-user-activity" |
         "administration-user-debug-account" |
         "administration-user-delete-user" |
         "administration-user-disable-user" |
