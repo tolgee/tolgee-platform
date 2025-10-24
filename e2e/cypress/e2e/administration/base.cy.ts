@@ -82,7 +82,7 @@ describe('Administration', () => {
     getUserListItem('Peter Administrator')
       .findDcy('administration-user-activity')
       .contains('No activity yet');
-    forceDate(new Date('2023-08-28').getTime());
+    forceDate(new Date('2023-08-28T02:30').getTime()); // app displays local time, set this one in local timezone
     createProject({
       name: 'just.to.record.activity',
       languages: [{ name: 'čj', originalName: 'cs', tag: 'cs' }],
@@ -90,7 +90,7 @@ describe('Administration', () => {
     gcy('settings-menu-item').contains('Users').click(); // reload
     getUserListItem('Peter Administrator')
       .findDcy('administration-user-activity')
-      .contains('Last activity on August 28, 2023 at 2:00 AM');
+      .contains('Last activity on August 28, 2023 at 2:30 AM');
     releaseForcedDate();
   });
 
