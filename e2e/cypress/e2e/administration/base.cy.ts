@@ -85,7 +85,7 @@ describe('Administration', () => {
     forceDate(new Date('2023-08-28T02:30').getTime()); // app displays local time, set this one in local timezone
     createProject({
       name: 'just.to.record.activity',
-      languages: [{ name: 'čj', originalName: 'cs', tag: 'cs' }],
+      languages: [{ name: 'cs', originalName: 'čj', tag: 'cs' }],
     });
     gcy('settings-menu-item').contains('Users').click(); // reload
     getUserListItem('Peter Administrator')

@@ -1,7 +1,9 @@
 package io.tolgee.api.v2.controllers.administration
 
 import io.tolgee.development.testDataBuilder.data.AdministrationTestData
+import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.organization.OrganizationDto
+import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsCreated
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
+import java.util.Date
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -67,6 +70,41 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
         }
       }
     }
+  }
+
+  @Test
+  fun `returns last activity`() {
+    val prevForcedDate = currentDateProvider.forcedDate
+    val forcedDate = Date()
+    currentDateProvider.forcedDate = forcedDate
+
+    performAuthGet("/v2/administration/users?search=${userAccount!!.username}").andAssertThatJson {
+      node("_embedded.users") {
+        node("[0]") {
+          node("lastActivity").isNull()
+        }
+      }
+    }
+
+    val organization = dbPopulator.createOrganization("just.to.record.activity", userAccount!!)
+    loginAsUser(userAccount!!.username)
+    val projectRequest = CreateProjectRequest(
+      "just.to.record.activity",
+      listOf(LanguageRequest("cs", "čj", "cs")),
+      organizationId = organization.id,
+      icuPlaceholders = true
+    )
+    performAuthPost("/v2/projects", projectRequest)
+
+    performAuthGet("/v2/administration/users?search=${userAccount!!.username}").andAssertThatJson {
+      node("_embedded.users") {
+        node("[0]") {
+          node("lastActivity").isEqualTo(forcedDate.time)
+        }
+      }
+    }
+
+    currentDateProvider.forcedDate = prevForcedDate
   }
 
   @Test
