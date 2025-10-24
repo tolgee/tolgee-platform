@@ -7,6 +7,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.dtos.queryResults.UserAccountAdministrationView
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.dtos.request.UserUpdatePasswordRequestDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
@@ -569,7 +570,7 @@ class UserAccountService(
   fun findAllWithDisabledPaged(
     pageable: Pageable,
     search: String?,
-  ): Page<UserAccount> {
+  ): Page<UserAccountAdministrationView> {
     return userAccountRepository.findAllWithDisabledPaged(search, pageable)
   }
 

@@ -7,8 +7,9 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { T } from '@tolgee/react';
 import { MenuItem, Select } from '@mui/material';
 
-type Role = components['schemas']['UserAccountModel']['globalServerRole'];
-type User = components['schemas']['UserAccountModel'];
+type Role =
+  components['schemas']['UserAccountAdministrationModel']['globalServerRole'];
+type User = components['schemas']['UserAccountAdministrationModel'];
 
 export const RoleSelector: FC<{
   onSuccess: () => void;

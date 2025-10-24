@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.dtos.queryResults.UserAccountAdministrationView
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.dtos.request.task.UserAccountFilters
 import io.tolgee.model.UserAccount
@@ -260,7 +261,28 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
 
   @Query(
     """
+    with lastActivityCTE as (
+      select ar.authorId as authorId, max(ar.timestamp) as lastActivity 
+      from ActivityRevision ar 
+      group by ar.authorId
+    )
+    select new io.tolgee.dtos.queryResults.UserAccountAdministrationView(
+      userAccount.id,
+      userAccount.username,
+      userAccount.name,
+      case when ev is not null then coalesce(ev.newEmail, userAccount.username) else null end,
+      userAccount.avatarHash,
+      userAccount.accountType,
+      userAccount.role,
+      userAccount.isInitialUser,
+      userAccount.totpKey,
+      userAccount.deletedAt,
+      userAccount.disabledAt,
+      la.lastActivity
+    )
     from UserAccount userAccount
+    left join userAccount.emailVerification ev
+    left join lastActivityCTE la on la.authorId = userAccount.id
     where ((lower(userAccount.name)
       like lower(concat('%', cast(:search as text),'%')) 
       or lower(userAccount.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
@@ -270,7 +292,7 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   fun findAllWithDisabledPaged(
     search: String?,
     pageable: Pageable,
-  ): Page<UserAccount>
+  ): Page<UserAccountAdministrationView>
 
   @Query(
     value = """

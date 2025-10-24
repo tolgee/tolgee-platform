@@ -9,7 +9,7 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useUser } from 'tg.globalContext/helpers';
 import { confirmation } from 'tg.hooks/confirmation';
 
-type UserAccountModel = components['schemas']['UserAccountModel'];
+type UserAccountModel = components['schemas']['UserAccountAdministrationModel'];
 
 type Props = {
   user: UserAccountModel;

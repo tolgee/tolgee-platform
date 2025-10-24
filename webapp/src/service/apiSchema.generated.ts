@@ -946,9 +946,6 @@ export interface paths {
     /** Returns initial data required by the UI to load */
     get: operations["get_17"];
   };
-  "/v2/public/llm/prompt": {
-    post: operations["prompt"];
-  };
   "/v2/public/machine-translation-providers": {
     /** Get machine translation providers */
     get: operations["getInfo_4"];
@@ -3570,18 +3567,6 @@ export interface components {
       /** Format: int64 */
       untranslatedWordCount: number;
     };
-    LlmMessage: {
-      image?: string;
-      text?: string;
-      /** @enum {string} */
-      type: "TEXT" | "IMAGE";
-    };
-    LlmParams: {
-      messages: components["schemas"]["LlmMessage"][];
-      /** @enum {string} */
-      priority: "LOW" | "HIGH";
-      shouldOutputJson: boolean;
-    };
     LlmProviderModel: {
       apiKey?: string;
       apiUrl?: string;
@@ -4074,15 +4059,15 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    PagedModelUserAccountInProjectModel: {
+    PagedModelUserAccountAdministrationModel: {
       _embedded?: {
-        users?: components["schemas"]["UserAccountInProjectModel"][];
+        users?: components["schemas"]["UserAccountAdministrationModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    PagedModelUserAccountModel: {
+    PagedModelUserAccountInProjectModel: {
       _embedded?: {
-        users?: components["schemas"]["UserAccountModel"][];
+        users?: components["schemas"]["UserAccountInProjectModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -4743,13 +4728,6 @@ export interface components {
       inputTokens?: number;
       /** Format: int64 */
       outputTokens?: number;
-    };
-    PromptResult: {
-      parsedJson?: components["schemas"]["JsonNode"];
-      /** Format: int32 */
-      price: number;
-      response: string;
-      usage?: components["schemas"]["PromptResponseUsageDto"];
     };
     PromptRunDto: {
       basicPromptOptions?: (
@@ -6262,6 +6240,21 @@ export interface components {
        */
       name?: string;
     };
+    UserAccountAdministrationModel: {
+      avatar?: components["schemas"]["Avatar"];
+      deleted: boolean;
+      disabled: boolean;
+      emailAwaitingVerification?: string;
+      /** @enum {string} */
+      globalServerRole: "USER" | "ADMIN" | "SUPPORTER";
+      /** Format: int64 */
+      id: number;
+      /** Format: date-time */
+      lastActivity?: string;
+      mfaEnabled: boolean;
+      name?: string;
+      username: string;
+    };
     UserAccountInProjectModel: {
       avatar?: components["schemas"]["Avatar"];
       /**
@@ -6277,19 +6270,6 @@ export interface components {
       organizationBasePermission: components["schemas"]["PermissionModel"];
       /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
-      username: string;
-    };
-    UserAccountModel: {
-      avatar?: components["schemas"]["Avatar"];
-      deleted: boolean;
-      disabled: boolean;
-      emailAwaitingVerification?: string;
-      /** @enum {string} */
-      globalServerRole: "USER" | "ADMIN" | "SUPPORTER";
-      /** Format: int64 */
-      id: number;
-      mfaEnabled: boolean;
-      name?: string;
       username: string;
     };
     UserAccountWithOrganizationRoleModel: {
@@ -6965,7 +6945,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelUserAccountModel"];
+          "application/json": components["schemas"]["PagedModelUserAccountAdministrationModel"];
         };
       };
       /** Bad Request */
@@ -19767,45 +19747,6 @@ export interface operations {
         content: {
           "application/json": string;
         };
-      };
-    };
-  };
-  prompt: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PromptResult"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["LlmParams"];
       };
     };
   };
