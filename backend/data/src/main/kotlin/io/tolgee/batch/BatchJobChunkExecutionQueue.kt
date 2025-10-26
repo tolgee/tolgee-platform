@@ -20,7 +20,6 @@ import org.hibernate.LockMode
 import org.hibernate.LockOptions
 import org.hibernate.Session
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -51,12 +50,6 @@ class BatchJobChunkExecutionQueue(
       QueueEventType.ADD -> this.addItemsToLocalQueue(event.items)
       QueueEventType.REMOVE -> queue.removeAll(event.items.toSet())
     }
-  }
-
-  @EventListener
-  @Transactional
-  fun onApplicationReady(event: ApplicationReadyEvent) {
-    populateQueue()
   }
 
   @Scheduled(fixedDelay = 60000)
