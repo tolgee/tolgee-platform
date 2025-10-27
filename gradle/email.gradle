@@ -40,8 +40,6 @@ tasks.register('copyTestEmailTemplates', Copy) {
 }
 
 tasks.register('copyEmailLocaleData', Copy) {
-    dependsOn 'updateEmailTranslations'
-
     from "${emailPath}/i18n"
     into "${project.projectDir}/build/generated/resources/main/email-i18n"
 }
@@ -85,18 +83,4 @@ tasks.register('buildTestEmails', Exec) {
     inputs.file("${emailPath}/package.json")
     inputs.file("${emailPath}/package-lock.json")
     outputs.dir("${emailPath}/out/__tests__")
-}
-
-tasks.register('updateEmailTranslations', Exec) {
-    dependsOn 'installEmailDeps'
-    onlyIf {
-        System.getenv("SKIP_EMAIL_BUILD") != "true" &&
-                System.getenv("TOLGEE_API_URL") != null &&
-                System.getenv("TOLGEE_API_URL") != ""
-    }
-
-    workingDir = emailPath
-    commandLine npmCommandName, "run", "tg:pull"
-
-    outputs.dir("${emailPath}/i18n")
 }
