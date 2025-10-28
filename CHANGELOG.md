@@ -1,3 +1,10 @@
+# [3.137.0](https://github.com/tolgee/tolgee-platform/compare/v3.136.1...v3.137.0) (2025-10-27)
+
+
+### Features
+
+* display language option for Chinese on the UI ([#3249](https://github.com/tolgee/tolgee-platform/issues/3249)) ([9756b8c](https://github.com/tolgee/tolgee-platform/commit/9756b8cae2952f11d66a0070985089044af1b6a7))
+
 ## [3.136.1](https://github.com/tolgee/tolgee-platform/compare/v3.136.0...v3.136.1) (2025-10-19)
 
 

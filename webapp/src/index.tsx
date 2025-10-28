@@ -54,6 +54,7 @@ const tolgee = Tolgee()
       pt: () => import('./i18n/pt.json').then((m) => m.default),
       da: () => import('./i18n/da.json').then((m) => m.default),
       ja: () => import('./i18n/ja.json').then((m) => m.default),
+      zh: () => import('./i18n/zh.json').then((m) => m.default),
     },
   });
 

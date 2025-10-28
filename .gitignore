@@ -50,6 +50,7 @@ e2e/cypress/integration/examples/
 /webapp/yarn-error.log*
 
 /**/.vscode
+/**/.history
 
 /**/.idea
 .VERSION
