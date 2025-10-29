@@ -3,7 +3,6 @@ package io.tolgee.component.email
 import io.tolgee.dtos.misc.EmailParams
 import io.tolgee.email.EmailService
 import org.springframework.stereotype.Component
-import java.util.Locale
 
 @Component
 class TolgeeEmailSender(
@@ -18,7 +17,7 @@ class TolgeeEmailSender(
       recipient = params.to,
       subject = params.subject,
       template = params.templateName ?: "default",
-      locale = Locale.ENGLISH,
+      locale = params.locale,
       properties = properties,
       attachments = params.attachments,
       bcc = params.bcc,

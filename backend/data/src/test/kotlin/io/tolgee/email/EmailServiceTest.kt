@@ -38,7 +38,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
-@SpringJUnitConfig(EmailService::class, EmailTemplateConfig::class)
+@SpringJUnitConfig(EmailService::class, EmailTemplateConfig::class, EmailTemplateTestConfig::class)
 class EmailServiceTest {
   @MockBean
   private lateinit var tolgeeProperties: TolgeeProperties
