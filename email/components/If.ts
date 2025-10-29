@@ -36,7 +36,7 @@ export default function If({
     );
   }
 
-  if (children[1].type !== If.Else) {
+  if (children.length > 1 && children[1].type !== If.Else) {
     // eslint-disable-next-line no-console
     console.warn(
       'Warning: not using <If.Else /> as second child of <If /> is discouraged.'
