@@ -1,5 +1,8 @@
 package io.tolgee.ee.service.branching
 
+import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
+import io.tolgee.dtos.queryResults.branching.BranchMergeView
+import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
@@ -8,27 +11,38 @@ import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyRepository
 import io.tolgee.util.Logging
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
 class BranchMergeService(
   private val keyRepository: KeyRepository,
+  private val branchMergeRepository: BranchMergeRepository,
 ) : Logging {
 
-  fun dryRun(sourceBranch: Branch, targetBranch: Branch): BranchMerge {
+  fun dryRun(branchMerge: BranchMerge, sourceBranch: Branch, targetBranch: Branch) {
     val sourceKeys = keyRepository.findAllByBranchId(sourceBranch.id)
     val targetKeys = keyRepository.findAllByBranchId(targetBranch.id)
 
     val sourceKeyPairs: Map<Pair<String, Long?>, Key> = sourceKeys.associateBy { Pair(it.name, it.namespace?.id) }
     val targetKeyPairs: Map<Pair<String, Long?>, Key> = targetKeys.associateBy { Pair(it.name, it.namespace?.id) }
 
-    return BranchMerge().apply {
+    branchMerge.apply {
+      this.changes = computeChange(this, sourceKeyPairs, targetKeyPairs)
+    }
+  }
+
+  fun dryRun(sourceBranch: Branch, targetBranch: Branch): BranchMerge {
+    val branchMerge = BranchMerge().apply {
       this.sourceBranch = sourceBranch
       this.targetBranch = targetBranch
       this.sourceRevision = sourceBranch.revision
       this.targetRevision = targetBranch.revision
-      this.changes = computeChange(this, sourceKeyPairs, targetKeyPairs)
     }
+    dryRun(branchMerge, sourceBranch, targetBranch)
+    branchMergeRepository.save(branchMerge)
+    return branchMerge
   }
 
   private fun computeChange(
@@ -39,8 +53,6 @@ class BranchMergeService(
     val resolutions = mutableListOf<BranchMergeChange>()
 
     val (pairs, sourceOnly, targetOnly) = diffKeysByName(sourceKeys, targetKeys)
-    // changes are compared to timestamp when the source branch was created
-    val sourceBranchCreatedAt = merge.sourceBranch.createdAt
 
     // compute keys existing in both branches
     pairs.forEach { (sourceKey, targetKey) ->
@@ -49,26 +61,7 @@ class BranchMergeService(
         this.sourceKey = sourceKey
         this.targetKey = targetKey
       }
-      if (sourceKey.modifiedAt > sourceBranchCreatedAt && targetKey.modifiedAt > sourceBranchCreatedAt) {
-        // conflict
-        change.apply {
-          change.change = BranchKeyMergeChangeType.CONFLICT
-        }
-      }
-      if (sourceKey.modifiedAt > sourceBranchCreatedAt) {
-        // accept the source key
-        change.apply {
-          change.change = BranchKeyMergeChangeType.UPDATE
-          change.resolution = BranchKeyMergeResolutionType.SOURCE
-        }
-      }
-      if (targetKey.modifiedAt > sourceBranchCreatedAt) {
-        // accept the target key
-        change.apply {
-          change.change = BranchKeyMergeChangeType.UPDATE
-          change.resolution = BranchKeyMergeResolutionType.TARGET
-        }
-      }
+      decideResolution(change, merge.sourceBranch, sourceKey, targetKey)
       resolutions.add(change)
     }
 
@@ -101,7 +94,42 @@ class BranchMergeService(
     return resolutions
   }
 
-  fun diffKeysByName(
+  private fun decideResolution(change: BranchMergeChange, sourceBranch: Branch, sourceKey: Key, targetKey: Key) {
+    // changes are compared to timestamp when the source branch was created
+    val sourceBranchCreatedAt = sourceBranch.createdAt
+
+    // if both keys were updated after the branch creation date
+    if (sourceKey.modifiedAt > sourceBranchCreatedAt && targetKey.modifiedAt > sourceBranchCreatedAt) {
+      // mark as conflict
+      change.apply {
+        change.change = BranchKeyMergeChangeType.CONFLICT
+      }
+      return
+    }
+    // if the source key was modified after the branch creation date
+    if (sourceKey.modifiedAt > sourceBranchCreatedAt) {
+      // accept the source key
+      change.apply {
+        change.change = BranchKeyMergeChangeType.UPDATE
+        change.resolution = BranchKeyMergeResolutionType.SOURCE
+      }
+      return
+    }
+    // accept the target key
+    if (targetKey.modifiedAt > sourceBranchCreatedAt) {
+      change.apply {
+        change.change = BranchKeyMergeChangeType.UPDATE
+        change.resolution = BranchKeyMergeResolutionType.TARGET
+      }
+      return
+    }
+    // default behavior (no changes in either of branches)
+    change.apply {
+      change.change = BranchKeyMergeChangeType.SKIP
+    }
+  }
+
+  private fun diffKeysByName(
     sourceKeys: Map<Pair<String, Long?>, Key>,
     targetKeys: Map<Pair<String, Long?>, Key>
   ): Triple<List<Pair<Key, Key>>, List<Key>, List<Key>> {
@@ -123,5 +151,22 @@ class BranchMergeService(
     }
 
     return Triple(same, sourceOnly, targetOnly)
+  }
+
+  fun getMerge(
+    projectId: Long,
+    branchId: Long,
+    mergeId: Long,
+  ): BranchMergeView? {
+    return branchMergeRepository.findBranchMergeView(projectId, branchId, mergeId)
+  }
+
+  fun getConflicts(
+    projectId: Long,
+    branchId: Long,
+    mergeId: Long,
+    pageable: Pageable,
+    ): Page<BranchMergeConflictView> {
+    return branchMergeRepository.findBranchMergeConflicts(projectId, branchId, mergeId, pageable)
   }
 }
