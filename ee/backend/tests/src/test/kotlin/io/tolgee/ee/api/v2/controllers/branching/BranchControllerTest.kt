@@ -3,16 +3,21 @@ package io.tolgee.ee.api.v2.controllers.branching
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BranchTestData
-import io.tolgee.ee.repository.BranchRepository
+import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
 import io.tolgee.model.branching.Branch
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
+import io.tolgee.util.addDays
+import io.tolgee.util.addMinutes
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -120,14 +125,115 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `dry-run merges feature branch into main`() {
+    createConflictKeys()
+
+    var mergeId: Int
     performProjectAuthPost(
       "branches/${testData.featureBranch.id}/merge/preview",
       mapOf("targetBranchId" to testData.mainBranch.id)
+    ).let {
+      it.andIsOk.andAssertThatJson {
+        node("id").isValidId
+      }
+      mergeId = it.andReturn().mapResponseTo<Map<String, Int>>()["id"]!!
+    }
+
+    // test merge stats
+    performProjectAuthGet(
+      "branches/${testData.featureBranch.id}/merge/preview/$mergeId",
     ).andIsOk.andAssertThatJson {
       node("keyModificationsCount").isEqualTo(1)
       node("keyAdditionsCount").isEqualTo(1)
       node("keyDeletionsCount").isEqualTo(1)
       node("keyConflictsCount").isEqualTo(1)
+    }
+
+    // test conflicted keys data
+    performProjectAuthGet(
+      "branches/${testData.featureBranch.id}/merge/preview/$mergeId/conflicts",
+    ).andIsOk.andAssertThatJson {
+      node("page.totalElements").isNumber.isEqualTo(BigDecimal(1))
+      node("_embedded.branchMergeConflicts") {
+        isArray.hasSize(1)
+        node("[0]") {
+          node("resolution").isNull()
+          node("sourceKey") {
+            node("keyName").isEqualTo("conflict-key")
+            node("keyId").isValidId
+            node("keyDescription").isEqualTo("conflict feature key description")
+            node("translations.en.text").isEqualTo("new translation")
+          }
+          node("targetKey") {
+            node("keyName").isEqualTo("conflict-key")
+            node("keyId").isValidId
+            node("keyDescription").isEqualTo("conflict key description")
+            node("translations.en.text").isEqualTo("old translation")
+          }
+        }
+      }
+    }
+  }
+
+  private fun createConflictKeys() {
+    val date = currentDateProvider.date
+
+    fun createKey(
+      name: String,
+      branch: Branch,
+      translation: String,
+      description: String
+    ) = testData.projectBuilder.addKey {
+      this.name = name
+      this.branch = branch
+    }.build keyBuilder@{
+      addTranslation("en", translation).build {
+        this@keyBuilder.self.translations.add(self)
+      }
+      addMeta { this.description = description }
+    }.self
+
+    val toBeModifiedKey = createKey(
+      name = "key-to-change",
+      branch = testData.mainBranch,
+      translation = "key-to-be-change-translation-when-merged",
+      description = "Main key description to be updated by merge"
+    )
+
+    val toModifyKey = createKey(
+      name = "key-to-change",
+      branch = testData.featureBranch,
+      translation = "key-to-change-translation",
+      description = "Featured key description to update key in main branch"
+    )
+
+    val conflictKeyMain = createKey(
+      name = "conflict-key",
+      branch = testData.mainBranch,
+      translation = "old translation",
+      description = "conflict key description"
+    )
+
+    val conflictKeyFeature = createKey(
+      name = "conflict-key",
+      branch = testData.featureBranch,
+      translation = "new translation",
+      description = "conflict feature key description"
+    )
+
+    currentDateProvider.run {
+      forcedDate = date.addDays(-1)
+      keyService.save(toBeModifiedKey)
+      forcedDate = date.addMinutes(1)
+      keyService.save(toModifyKey)
+
+      forcedDate = date.addMinutes(1)
+      keyService.save(conflictKeyMain)
+      translationService.save(conflictKeyMain.translations.first { it.language.tag == "en" })
+      forcedDate = date.addMinutes(2)
+      keyService.save(conflictKeyFeature)
+      translationService.save(conflictKeyFeature.translations.first { it.language.tag == "en" })
+
+      forcedDate = date
     }
   }
 
