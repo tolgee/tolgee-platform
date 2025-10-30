@@ -67,19 +67,6 @@ class BranchTestData(
 
   private fun ProjectBuilder.addMergeData() {
     addKey {
-      name = "test-key"
-      branch = mainBranch
-    }.build {
-      addTranslation("en", "main-key-target-translation")
-      addMeta {
-        description = "Main key description"
-        addComment {
-          text = "Main key comment"
-        }
-      }
-    }
-
-    addKey {
       name = "test-key-to-delete"
       branch = mainBranch
     }.build {
@@ -88,19 +75,6 @@ class BranchTestData(
         description = "Main key description to delete"
         addComment {
           text = "Main key comment to delete"
-        }
-      }
-    }
-
-    addKey {
-      name = "test-key"
-      branch = featureBranch
-    }.build {
-      addTranslation("en", "feature-key-target-translation")
-      addMeta {
-        description = "Feature key description"
-        addComment {
-          text = "Feature key comment"
         }
       }
     }
