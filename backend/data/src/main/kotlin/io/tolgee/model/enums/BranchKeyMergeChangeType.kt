@@ -5,4 +5,5 @@ enum class BranchKeyMergeChangeType(value: String) {
   UPDATE("UPDATE"),
   DELETE("DELETE"),
   CONFLICT("CONFLICT"),
+  SKIP("SKIP"),
 }
