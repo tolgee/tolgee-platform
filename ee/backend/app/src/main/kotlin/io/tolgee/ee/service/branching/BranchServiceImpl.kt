@@ -2,24 +2,31 @@ package io.tolgee.ee.service.branching
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
+import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
-import io.tolgee.ee.repository.BranchRepository
+import io.tolgee.dtos.queryResults.branching.BranchMergeView
+import io.tolgee.dtos.request.translation.TranslationFilters
+import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.events.OnBranchDeleted
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchCopyService
 import io.tolgee.service.branching.BranchService
+import io.tolgee.service.language.LanguageService
+import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
 import jakarta.persistence.EntityManager
-import jakarta.transaction.Transactional
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Primary
 @Service
@@ -31,6 +38,9 @@ class BranchServiceImpl(
   private val applicationContext: ApplicationContext,
   private val defaultBranchCreator: DefaultBranchCreator,
   private val branchMergeService: BranchMergeService,
+  private val translationViewDataProvider: TranslationViewDataProvider,
+  private val languageService: LanguageService,
+  private val authenticationFacade: AuthenticationFacade,
 ) : BranchService {
   override fun getAllBranches(projectId: Long, page: Pageable, search: String?): Page<Branch> {
     val branches = branchRepository.getAllProjectBranches(projectId, page, search)
@@ -95,5 +105,44 @@ class BranchServiceImpl(
     val sourceBranch = getBranch(projectId, branchId)
     val targetBranch = getBranch(projectId, request.targetBranchId)
     return branchMergeService.dryRun(sourceBranch, targetBranch)
+  }
+
+  override fun getBranchMerge(projectId: Long, branchId: Long, branchMergeId: Long): BranchMergeView {
+    return branchMergeService.getMerge(projectId, branchId, branchMergeId)
+      ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+  }
+
+  @Transactional
+  override fun getBranchMergeConflicts(
+    projectId: Long,
+    branchId: Long,
+    branchMergeId: Long,
+    pageable: Pageable
+  ): Page<BranchMergeConflictView> {
+    val project = entityManager.getReference(Project::class.java, projectId)
+    val conflicts = branchMergeService.getConflicts(projectId, branchId, branchMergeId, pageable)
+    val languages =
+      languageService.getLanguagesForTranslationsView(
+        project.languages.map { it.tag }.toSet(),
+        project.id,
+        authenticationFacade.authenticatedUser.id,
+      )
+
+    val sourceFilter = TranslationFilters().apply { filterKeyId = conflicts.map { it.sourceBranchKeyId }.toList() }
+    val targetFilter = TranslationFilters().apply { filterKeyId = conflicts.map { it.targetBranchKeyId }.toList() }
+
+    val sourceKeys = translationViewDataProvider
+      .getData(projectId, languages, pageable, sourceFilter)
+      .associateBy { it.keyId }
+
+    val targetKeys = translationViewDataProvider
+      .getData(projectId, languages, pageable, targetFilter)
+      .associateBy { it.keyId }
+
+    conflicts.forEach { conflict ->
+      conflict.sourceBranchKey = sourceKeys[conflict.sourceBranchKeyId]!!
+      conflict.targetBranchKey = targetKeys[conflict.targetBranchKeyId]!!
+    }
+    return conflicts
   }
 }

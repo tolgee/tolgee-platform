@@ -3,6 +3,7 @@ package io.tolgee.model.branching
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.StandardAuditModel
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.JoinColumn
@@ -35,6 +36,11 @@ class BranchMerge : StandardAuditModel(), EntityWithId {
   @Column(nullable = false)
   var targetRevision: Int = 0
 
-  @OneToMany(targetEntity = BranchMergeChange::class, orphanRemoval = true, mappedBy = "branchMerge")
+  @OneToMany(
+    targetEntity = BranchMergeChange::class,
+    orphanRemoval = true,
+    mappedBy = "branchMerge",
+    cascade = [CascadeType.ALL]
+  )
   var changes: MutableList<BranchMergeChange> = mutableListOf()
 }

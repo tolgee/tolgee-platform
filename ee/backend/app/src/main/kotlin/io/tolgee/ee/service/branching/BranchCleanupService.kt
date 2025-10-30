@@ -1,6 +1,6 @@
 package io.tolgee.ee.service.branching
 
-import io.tolgee.ee.repository.BranchRepository
+import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.events.OnBranchDeleted
 import io.tolgee.service.key.KeyService
 import io.tolgee.repository.KeyRepository

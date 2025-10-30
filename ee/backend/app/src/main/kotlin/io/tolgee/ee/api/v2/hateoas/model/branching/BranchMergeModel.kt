@@ -11,14 +11,14 @@ open class BranchMergeModel(
   val id: Long,
   @Schema(description = "Source branch")
   val sourceBranch: BranchModel,
-  @Schema(description = "Targe branch")
+  @Schema(description = "Target branch")
   val targetBranch: BranchModel,
-  @Schema(description = "Key additions")
+  @Schema(description = "Key additions count")
   val keyAdditionsCount: Int,
-  @Schema(description = "Key deletions")
+  @Schema(description = "Key deletions count")
   val keyDeletionsCount: Int,
-  @Schema(description = "Key updates")
+  @Schema(description = "Key updates count")
   val keyModificationsCount: Int,
-  @Schema(description = "Key conflicts")
+  @Schema(description = "Key conflicts count")
   val keyConflictsCount: Int,
 ) : RepresentationModel<BranchMergeModel>()
