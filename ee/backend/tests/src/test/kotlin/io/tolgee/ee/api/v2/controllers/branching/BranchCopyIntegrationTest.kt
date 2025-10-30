@@ -2,7 +2,7 @@ package io.tolgee.ee.api.v2.controllers.branching
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BranchTranslationsTestData
-import io.tolgee.ee.repository.BranchRepository
+import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing

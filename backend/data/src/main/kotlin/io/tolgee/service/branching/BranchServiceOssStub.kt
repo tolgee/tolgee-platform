@@ -1,7 +1,8 @@
 package io.tolgee.service.branching
 
+import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
-import io.tolgee.dtos.request.branching.MergeBranchRequest
+import io.tolgee.dtos.queryResults.branching.BranchMergeView
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import org.springframework.data.domain.Page
@@ -26,11 +27,20 @@ class BranchServiceOssStub : BranchService {
     throw UnsupportedOperationException()
   }
 
-  override fun mergeBranch(projectId: Long, branchId: Long, request: MergeBranchRequest) {
+  override fun dryRunMergeBranch(projectId: Long, branchId: Long, request: DryRunMergeBranchRequest): BranchMerge {
     throw UnsupportedOperationException()
   }
 
-  override fun dryRunMergeBranch(projectId: Long, branchId: Long, request: DryRunMergeBranchRequest): BranchMerge {
+  override fun getBranchMerge(projectId: Long, branchId: Long, branchMergeId: Long): BranchMergeView {
+    throw UnsupportedOperationException()
+  }
+
+  override fun getBranchMergeConflicts(
+    projectId: Long,
+    branchId: Long,
+    branchMergeId: Long,
+    pageable: Pageable
+  ): Page<BranchMergeConflictView> {
     throw UnsupportedOperationException()
   }
 }
