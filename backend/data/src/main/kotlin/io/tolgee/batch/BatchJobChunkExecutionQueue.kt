@@ -13,18 +13,19 @@ import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
 import io.tolgee.util.Logging
-import io.tolgee.util.debug
 import io.tolgee.util.logger
 import io.tolgee.util.trace
 import jakarta.persistence.EntityManager
+import org.hibernate.LockMode
 import org.hibernate.LockOptions
+import org.hibernate.Session
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.EventListener
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.ConcurrentLinkedQueue
 
 @Component
@@ -51,16 +52,14 @@ class BatchJobChunkExecutionQueue(
     }
   }
 
-  @EventListener
-  fun onApplicationReady(event: ApplicationReadyEvent) {
-    populateQueue()
-  }
-
   @Scheduled(fixedDelay = 60000)
+  @Transactional
   fun populateQueue() {
     logger.debug("Running scheduled populate queue")
     val data =
-      entityManager.createQuery(
+      // creating query from hibernate session, in order to use the setLockMode per table,
+      // which is not available in the jpa Query class.
+      entityManager.unwrap(Session::class.java).createQuery(
         """
         select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
         from BatchJobChunkExecution bjce
@@ -75,6 +74,10 @@ class BatchJobChunkExecutionQueue(
         BatchJobChunkExecutionDto::class.java,
       ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
         .setParameter("runningStatus", BatchJobStatus.RUNNING)
+        // setLockMode here is per alias of the tables from the queryString.
+        // will generate: "select ... for no key update of bjce skip locked"
+        .setLockMode("bjce", LockMode.PESSIMISTIC_WRITE) // block selected rows from the chunk table
+        .setLockMode("bk", LockMode.NONE) // don't block job table, so that other pods could select smth too
         .setHint(
           "jakarta.persistence.lock.timeout",
           LockOptions.SKIP_LOCKED,
