@@ -1935,6 +1935,7 @@
   "theme_system_label": "システム",
   "third-party-authentication-options": "サードパーティの認証プロバイダー",
   "third_party_auth_error_message": "サードパーティ認証エラー",
+  "third_party_auth_no_email": "ログインサービスがメールアドレスを共有しなかったため、アカウントを確認できませんでした。プロバイダーがメールアドレスを共有するよう設定されていることを確認し、もう一度お試しください。",
   "third_party_auth_non_matching_email": "メールアドレスのドメインが SSO ドメインと一致しません",
   "third_party_switch_conflict": "サインインに使用したメールが現在のアカウントと一致しません",
   "third_party_switch_initiated": "このメール アドレスを持つユーザーは既に存在します。組織の SSO (シングル サインオン) でアカウントを移行するには、既存の資格情報を使用してログインすると、変更を承認するように求められます。",

@@ -1919,6 +1919,7 @@
   "theme_system_label": "Sistema",
   "third-party-authentication-options": "Proveedores de autenticación de terceros",
   "third_party_auth_error_message": "Problema al iniciar sesión con servicios de tercero",
+  "third_party_auth_no_email": "No pudimos verificar tu cuenta porque el servicio de inicio de sesión no compartió tu dirección de correo electrónico. Asegúrate de que tu proveedor esté configurado para compartir tu correo electrónico e inténtalo de nuevo",
   "third_party_auth_non_matching_email": "El dominio de la dirección de correo electrónico no coincide con el dominio SSO",
   "third_party_switch_conflict": "El correo electrónico utilizado para iniciar sesión no coincide con su cuenta actual",
   "third_party_switch_initiated": "El usuario con este e-mail ya existe. Para migrar su cuenta bajo el SSO (Inicio de sesión único) de su organización, inicie sesión con sus credenciales existentes y se le pedirá que acepte el cambio.",

@@ -1920,6 +1920,7 @@
   "theme_system_label": "Sistema",
   "third-party-authentication-options": "Provedores de autenticação de terceiros",
   "third_party_auth_error_message": "Erro na autenticação de terceiros",
+  "third_party_auth_no_email": "Não foi possível verificar sua conta porque o serviço de login não compartilhou seu endereço de email. Verifique se seu provedor está configurado para compartilhar seu email e tente novamente",
   "third_party_auth_non_matching_email": "O domínio do endereço de e-mail não corresponde ao domínio SSO",
   "third_party_switch_conflict": "O email usado para iniciar sessão não corresponde à sua conta atual",
   "third_party_switch_initiated": "Usuário com este email já existe. Para migrar sua conta para o SSO (Single Sign-On) da sua organização, faça login com suas credenciais existentes e você será solicitado a aceitar a mudança.",

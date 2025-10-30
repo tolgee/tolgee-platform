@@ -1921,6 +1921,7 @@
   "theme_system_label": "系统",
   "third-party-authentication-options": "第三方身份验证提供商",
   "third_party_auth_error_message": "第三方身份验证错误",
+  "third_party_auth_no_email": "我们无法验证你的账号，因为登录服务未共享你的电子邮箱地址。请确保你的提供方已设置共享你的电子邮箱，然后重试",
   "third_party_auth_non_matching_email": "电子邮件地址域与 SSO 域不匹配",
   "third_party_switch_conflict": "用于登录的电子邮件与您当前的账户不匹配",
   "third_party_switch_initiated": "使用此电子邮箱地址的用户已存在。要将您的帐户迁移到您的组织 SSO（单点登录）下，请使用现有凭据登录，系统会提示您接受更改。",

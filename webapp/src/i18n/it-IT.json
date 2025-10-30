@@ -1881,6 +1881,7 @@
   "theme_system_label": "Sistema",
   "third-party-authentication-options": "Provider di autenticazione di terze parti",
   "third_party_auth_error_message": "Errore di autenticazione di terze parti",
+  "third_party_auth_no_email": "Non è stato possibile verificare il tuo account perché il servizio di accesso non ha condiviso il tuo indirizzo email. Assicurati che il tuo provider sia configurato per condividere la tua email e riprova",
   "third_party_auth_non_matching_email": "Il dominio dell'indirizzo e-mail non corrisponde al dominio SSO",
   "third_party_switch_conflict": "L'email utilizzata per l'accesso non corrisponde al tuo account attuale",
   "third_party_switch_initiated": "Un utente con questa email esiste già. Per migrare il tuo account sotto l'SSO (Single Sign-On) della tua organizzazione, accedi con le tue credenziali esistenti e ti verrà chiesto di accettare il cambiamento.",

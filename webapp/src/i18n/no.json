@@ -1920,6 +1920,7 @@
   "theme_system_label": "System",
   "third-party-authentication-options": "Autentiseringsleverandører for tredjepart",
   "third_party_auth_error_message": "Feil ved autentisering av tredjepart",
+  "third_party_auth_no_email": "Vi kunne ikke verifisere kontoen din fordi påloggingstjenesten ikke delte e-postadressen din. Sørg for at leverandøren din er satt til å dele e-posten din, og prøv igjen",
   "third_party_auth_non_matching_email": "E-postdomenet samsvarer ikke med SSO-domenet",
   "third_party_switch_conflict": "E-posten som ble brukt for pålogging samsvarer ikke med din nåværende konto",
   "third_party_switch_initiated": "Bruker med denne e-posten eksisterer allerede. For å migrere kontoen din under organisasjonens SSO (Single Sign-On), logg inn med dine eksisterende legitimasjoner, og du vil bli bedt om å godta endringen.",

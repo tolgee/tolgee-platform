@@ -1923,6 +1923,7 @@
   "theme_system_label": "Système",
   "third-party-authentication-options": "Fournisseurs d'authentification tiers",
   "third_party_auth_error_message": "Erreur d'authentification d'un tiers",
+  "third_party_auth_no_email": "Nous n'avons pas pu vérifier votre compte car le service de connexion n'a pas partagé votre adresse e-mail. Veuillez vous assurer que votre fournisseur est configuré pour partager votre e-mail et réessayez.",
   "third_party_auth_non_matching_email": "Le domaine de l'adresse e-mail ne correspond pas au domaine SSO",
   "third_party_switch_conflict": "L'email utilisé pour la connexion ne correspond pas à votre compte actuel",
   "third_party_switch_initiated": "Un utilisateur avec cet e-mail existe déjà. Pour migrer votre compte sous le SSO (Single Sign-On) de votre organisation, connectez-vous avec vos identifiants existants et vous serez invité à accepter le changement.",

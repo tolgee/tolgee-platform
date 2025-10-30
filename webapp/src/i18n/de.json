@@ -1931,6 +1931,7 @@
   "theme_system_label": "System",
   "third-party-authentication-options": "Authentifizierungsanbieter von Drittanbietern",
   "third_party_auth_error_message": "Fehler bei der Authentifizierung durch Dritte",
+  "third_party_auth_no_email": "Wir konnten Ihr Konto nicht verifizieren, weil der Anmeldedienst Ihre Email-Adresse nicht geteilt hat. Bitte stellen Sie sicher, dass Ihr Anbieter das Teilen Ihrer Email aktiviert hat, und versuchen Sie es erneut.",
   "third_party_auth_non_matching_email": "Die E-Mail-Adressdomäne stimmt nicht mit der SSO-Domäne überein",
   "third_party_switch_conflict": "Die für die Anmeldung verwendete E-Mail-Adresse stimmt nicht mit Ihrem aktuellen Konto überein",
   "third_party_switch_initiated": "Ein Benutzer mit dieser Email existiert bereits. Um Ihr Konto unter dem SSO (Single Sign-On) Ihrer Organisation zu migrieren, melden Sie sich mit Ihren vorhandenen Anmeldeinformationen an, und Sie werden aufgefordert, die Änderung zu akzeptieren.",

@@ -1935,6 +1935,7 @@
   "theme_system_label": "System",
   "third-party-authentication-options": "Tredjeparts godkendelsesudbydere",
   "third_party_auth_error_message": "Fejl ved tredjeparts godkendelse",
+  "third_party_auth_no_email": "Vi kunne ikke bekræfte din konto, fordi login-tjenesten ikke delte din e-mailadresse. Sørg for, at din udbyder er indstillet til at dele din e-mail, og prøv igen.",
   "third_party_auth_non_matching_email": "E-mail-adressens domæne stemmer ikke overens med SSO-domænet",
   "third_party_switch_conflict": "Den e-mail, der blev brugt til at logge ind, stemmer ikke overens med din nuværende konto",
   "third_party_switch_initiated": "Bruger med denne e-mail findes allerede. For at migrere din konto under din organisations SSO (Single Sign-On), log ind med dine eksisterende legitimationsoplysninger, og du vil blive bedt om at acceptere ændringen.",

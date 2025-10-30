@@ -1935,6 +1935,7 @@
   "theme_system_label": "Systeem",
   "third-party-authentication-options": "Authenticatieproviders van derde partijen",
   "third_party_auth_error_message": "Fout bij authenticatie van derde partij",
+  "third_party_auth_no_email": "We konden je account niet verifiëren omdat de inlogdienst je e-mailadres niet heeft gedeeld. Zorg ervoor dat je provider is ingesteld om je e-mailadres te delen en probeer het opnieuw",
   "third_party_auth_non_matching_email": "Het e-mailadresdomein komt niet overeen met het SSO-domein",
   "third_party_switch_conflict": "Het e-mailadres dat is gebruikt voor het aanmelden komt niet overeen met uw huidige account",
   "third_party_switch_initiated": "Gebruiker met dit e-mailadres bestaat al. Om uw account te migreren naar de SSO (Single Sign-On) van uw organisatie, log in met uw bestaande inloggegevens en u wordt gevraagd om de wijziging te accepteren.",

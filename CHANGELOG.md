@@ -1,3 +1,10 @@
+## [3.137.1](https://github.com/tolgee/tolgee-platform/compare/v3.137.0...v3.137.1) (2025-10-30)
+
+
+### Bug Fixes
+
+* Optimize batch queue population ([#3287](https://github.com/tolgee/tolgee-platform/issues/3287)) ([05bff5e](https://github.com/tolgee/tolgee-platform/commit/05bff5e24329961255507481e12ca841d42f5741))
+
 # [3.137.0](https://github.com/tolgee/tolgee-platform/compare/v3.136.1...v3.137.0) (2025-10-27)
 
 

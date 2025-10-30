@@ -1935,6 +1935,7 @@
   "theme_system_label": "Systém",
   "third-party-authentication-options": "Poskytovatelé autentizace třetích stran",
   "third_party_auth_error_message": "Problém s přihlášení pomocí služeb třetích stran",
+  "third_party_auth_no_email": "Nemohli jsme ověřit váš účet, protože přihlašovací služba nesdílela vaši e-mailovou adresu. Ujistěte se prosím, že je váš poskytovatel nastaven tak, aby sdílel váš e-mail, a zkuste to znovu.",
   "third_party_auth_non_matching_email": "Doména e-mailové adresy neodpovídá doméně SSO",
   "third_party_switch_conflict": "E-mail použitý pro přihlášení neodpovídá vašemu aktuálnímu účtu",
   "third_party_switch_initiated": "Uživatel s tímto e-mailem již existuje. Chcete-li migrovat svůj účet pod SSO (Single Sign-On) vaší organizace, přihlaste se pomocí stávajících přihlašovacích údajů a budete vyzváni k přijetí změny.",

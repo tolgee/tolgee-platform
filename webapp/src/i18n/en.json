@@ -1936,6 +1936,7 @@
   "theme_system_label": "System",
   "third-party-authentication-options": "Third-party authentication providers",
   "third_party_auth_error_message": "Third party authentication error",
+  "third_party_auth_no_email": "We couldn't verify your account because the login service didn't share your email address. Please make sure your provider is set to share your email and try again.",
   "third_party_auth_non_matching_email": "The e-mail address domain does not match the SSO domain",
   "third_party_switch_conflict": "The email used for sign-in does not match your current account",
   "third_party_switch_initiated": "User with this email already exists. To migrate your account under your organization SSO (Single Sign-On), log in with your existing credentials, and you will be prompted to accept the change.",

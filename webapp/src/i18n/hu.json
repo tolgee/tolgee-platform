@@ -1920,6 +1920,7 @@
   "theme_system_label": "Rendszer",
   "third-party-authentication-options": "Harmadik fél hitelesítési szolgáltatók",
   "third_party_auth_error_message": "Harmadik fél hitelesítési hiba",
+  "third_party_auth_no_email": "Nem tudtuk ellenőrizni a fiókját, mert a bejelentkezési szolgáltatás nem osztotta meg az e-mail-címét. Kérjük, ellenőrizze, hogy a szolgáltatója be van-e állítva az e-mail megosztására, és próbálja meg újra",
   "third_party_auth_non_matching_email": "Az e-mail cím domainje nem egyezik az SSO domainnel",
   "third_party_switch_conflict": "A bejelentkezéshez használt e-mail nem egyezik a jelenlegi fiókjával",
   "third_party_switch_initiated": "Ezzel az e-mail címmel már létezik felhasználó. Ha át szeretné vinni fiókját a szervezete SSO (Single Sign-On) alá, jelentkezzen be meglévő hitelesítő adataival, és felkérést kap a változtatás elfogadására.",

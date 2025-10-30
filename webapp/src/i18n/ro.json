@@ -1925,6 +1925,7 @@
   "theme_system_label": "Sistem",
   "third-party-authentication-options": "Furnizori de autentificare terți",
   "third_party_auth_error_message": "Eroare de autentificare a terților",
+  "third_party_auth_no_email": "Nu v-am putut verifica contul deoarece serviciul de autentificare nu v-a partajat adresa de email. Asigurați-vă că furnizorul este setat să partajeze emailul și încercați din nou.",
   "third_party_auth_non_matching_email": "Domeniul adresei de e-mail nu se potrivește cu domeniul SSO",
   "third_party_switch_conflict": "Emailul folosit pentru autentificare nu se potrivește cu contul dvs. actual",
   "third_party_switch_initiated": "Un utilizator cu acest email există deja. Pentru a migra contul dvs. sub SSO (Single Sign-On) al organizației dvs., autentificați-vă cu datele dvs. existente și vi se va solicita să acceptați schimbarea.",
