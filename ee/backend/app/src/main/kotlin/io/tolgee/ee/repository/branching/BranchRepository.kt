@@ -1,4 +1,4 @@
-package io.tolgee.ee.repository
+package io.tolgee.ee.repository.branching
 
 import io.tolgee.model.branching.Branch
 import org.springframework.data.domain.Page
