@@ -3,17 +3,23 @@ package io.tolgee.ee.api.v2.controllers.branching
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BranchTestData
+import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
+import io.tolgee.ee.repository.branching.BranchMergeChangeRepository
+import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchMergeChange
+import io.tolgee.model.enums.BranchKeyMergeChangeType
+import io.tolgee.model.enums.BranchKeyMergeResolutionType
+import io.tolgee.model.key.Key
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.addDays
@@ -31,6 +37,12 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var branchRepository: BranchRepository
+
+  @Autowired
+  lateinit var branchMergeRepository: BranchMergeRepository
+
+  @Autowired
+  lateinit var branchMergeChangeRepository: BranchMergeChangeRepository
 
   @BeforeEach
   fun setup() {
@@ -129,8 +141,11 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     var mergeId: Int
     performProjectAuthPost(
-      "branches/${testData.featureBranch.id}/merge/preview",
-      mapOf("targetBranchId" to testData.mainBranch.id)
+      "branches/merge/preview",
+      mapOf(
+        "targetBranchId" to testData.mainBranch.id,
+        "sourceBranchId" to testData.featureBranch.id
+      )
     ).let {
       it.andIsOk.andAssertThatJson {
         node("id").isValidId
@@ -140,7 +155,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     // test merge stats
     performProjectAuthGet(
-      "branches/${testData.featureBranch.id}/merge/preview/$mergeId",
+      "branches/merge/$mergeId/preview",
     ).andIsOk.andAssertThatJson {
       node("keyModificationsCount").isEqualTo(1)
       node("keyAdditionsCount").isEqualTo(1)
@@ -150,7 +165,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     // test conflicted keys data
     performProjectAuthGet(
-      "branches/${testData.featureBranch.id}/merge/preview/$mergeId/conflicts",
+      "branches/merge/$mergeId/conflicts",
     ).andIsOk.andAssertThatJson {
       node("page.totalElements").isNumber.isEqualTo(BigDecimal(1))
       node("_embedded.branchMergeConflicts") {
@@ -174,7 +189,38 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
-  private fun createConflictKeys() {
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `resolves merge conflict`() {
+    val keys = createConflictKeys()
+    val change = createMergeWithConflict(keys.first, keys.second)
+    val mergeId = change.branchMerge.id
+
+    performProjectAuthGet("branches/merge/$mergeId/conflicts")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.branchMergeConflicts") {
+          node("[0].id").isEqualTo(change.id)
+          node("[0].resolution").isNull()
+        }
+      }
+
+    performProjectAuthPut(
+      "branches/merge/$mergeId/resolve",
+      ResolveBranchMergeConflictRequest(
+        changeId = change.id,
+        resolve = BranchKeyMergeResolutionType.SOURCE,
+      )
+    ).andIsOk
+
+    performProjectAuthGet("branches/merge/$mergeId/conflicts")
+      .andIsOk.andAssertThatJson {
+        node("_embedded.branchMergeConflicts") {
+          node("[0].resolution").isEqualTo("SOURCE")
+        }
+      }
+  }
+
+  private fun createConflictKeys(): Pair<Key, Key> {
     val date = currentDateProvider.date
 
     fun createKey(
@@ -235,6 +281,27 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
       forcedDate = date
     }
+    return Pair(conflictKeyMain, conflictKeyFeature)
+  }
+
+  private fun createMergeWithConflict(sourceKey: Key, targetKey: Key): BranchMergeChange {
+    lateinit var change: BranchMergeChange
+    val branchMerge = testData.projectBuilder.addBranchMerge {
+      sourceBranch = testData.featureBranch
+      targetBranch = testData.mainBranch
+      sourceRevision = 2
+      targetRevision = 1
+    }.build {
+      change = addChange {
+        this.change = BranchKeyMergeChangeType.CONFLICT
+        this.sourceKey = sourceKey
+        this.targetKey = targetKey
+        branchMerge.changes.add(this)
+      }.self
+    }.self
+    branchMergeRepository.save(branchMerge)
+    branchMergeChangeRepository.save(change)
+    return change
   }
 
   private fun Branch.refresh(): Branch {
