@@ -14,6 +14,8 @@ import io.tolgee.model.Screenshot
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchMerge
+import io.tolgee.model.branching.BranchMergeChange
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.dataImport.Import
@@ -78,6 +80,8 @@ class ProjectBuilder(
     val labels = mutableListOf<LabelBuilder>()
     val suggestions = mutableListOf<SuggestionBuilder>()
     val branches = mutableListOf<BranchBuilder>()
+    val branchMerges = mutableListOf<BranchMergeBuilder>()
+    val branchMergeChanges = mutableListOf<BranchMergeChangeBuilder>()
   }
 
   var data = DATA()
@@ -99,6 +103,18 @@ class ProjectBuilder(
   fun addLabel(ft: FT<Label>) = addOperation(data.labels, ft)
 
   fun addBranch(ft: FT<Branch>) = addOperation(data.branches, ft)
+
+  fun addBranchMerge(ft: FT<BranchMerge>) = addOperation(data.branchMerges, ft)
+
+  fun addBranchMergeChange(ft: FT<BranchMergeChange>) = addOperation(data.branchMergeChanges, ft)
+
+  fun addBranchMergeChange(
+    branchMergeBuilder: BranchMergeBuilder,
+    ft: FT<BranchMergeChange>,
+  ): BranchMergeChangeBuilder {
+    val builder = BranchMergeChangeBuilder(this, branchMergeBuilder)
+    return addOperation(data.branchMergeChanges, builder, ft)
+  }
 
   fun inviteUser(buildPermission: PermissionBuilder.() -> Unit = {}): InvitationBuilder {
     val invitationBuilder = InvitationBuilder()
