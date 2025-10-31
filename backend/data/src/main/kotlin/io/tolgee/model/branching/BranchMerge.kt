@@ -43,4 +43,13 @@ class BranchMerge : StandardAuditModel(), EntityWithId {
     cascade = [CascadeType.ALL]
   )
   var changes: MutableList<BranchMergeChange> = mutableListOf()
+
+  val isRevisionValid: Boolean
+    get() = sourceRevision == sourceBranch.revision && targetRevision == targetBranch.revision
+
+  val isResolved: Boolean
+    get() = changes.none { !it.isResolved }
+
+  val isReadyToMerge: Boolean
+    get() = isRevisionValid && isResolved
 }
