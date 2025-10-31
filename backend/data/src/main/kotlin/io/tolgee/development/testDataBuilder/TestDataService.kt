@@ -308,7 +308,9 @@ class TestDataService(
     saveMtServiceConfigs(builder)
     saveAllNamespaces(builder)
     saveBranches(builder)
+    saveBranchMerges(builder)
     saveKeyData(builder)
+    saveBranchMergeChanges(builder)
     saveTranslationData(builder)
     saveImportData(builder)
     saveAutoTranslationConfigs(builder)
@@ -621,6 +623,18 @@ class TestDataService(
 
   private fun saveBranches(builder: ProjectBuilder) {
     builder.data.branches.filter { it.self.id == 0L }.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveBranchMerges(builder: ProjectBuilder) {
+    builder.data.branchMerges.filter { it.self.id == 0L }.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveBranchMergeChanges(builder: ProjectBuilder) {
+    builder.data.branchMergeChanges.filter { it.self.id == 0L }.forEach {
       entityManager.persist(it.self)
     }
   }
