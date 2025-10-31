@@ -43,6 +43,7 @@ class BranchTestData(
       isProtected = true
       isDefault = true
       createdAt = currentDateProvider.date
+      revision = 10
     }.build {
       mainBranch = self
       addBranch {
@@ -51,6 +52,7 @@ class BranchTestData(
         isProtected = false
         isDefault = false
         originBranch = this
+        revision = 15
       }.build {
         featureBranch = self
       }
