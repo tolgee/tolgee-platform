@@ -113,7 +113,7 @@ class BranchController(
   fun getBranchMergeSessionPreview(
     @PathVariable mergeId: Long,
   ): BranchMergeModel {
-    val merge = branchService.getBranchMerge(projectHolder.project.id, mergeId)
+    val merge = branchService.getBranchMergeView(projectHolder.project.id, mergeId)
     return branchMergeModelAssembler.toModel(merge)
   }
 
