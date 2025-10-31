@@ -7,6 +7,7 @@ import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.CreateBranchModel
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
+import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeConflictModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeConflictModel
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -91,45 +93,31 @@ class BranchController(
     branchService.deleteBranch(projectHolder.project.id, branchId)
   }
 
-//  @PostMapping(value = ["/{branchId}/merge"])
-//  @Operation(summary = "Merge source branch to target branch")
-//  @AllowApiAccess
-//  @RequiresProjectPermissions([Scope.KEYS_EDIT])
-//  @OpenApiOrderExtension(4)
-//  fun merge(
-//    @PathVariable branchId: Long,
-//    @RequestBody request: MergeBranchRequest,
-//  ) {
-//    branchService.mergeBranch(projectHolder.project.id, branchId, request)
-//  }
-
-  @PostMapping(value = ["/{branchId}/merge/preview"])
+  @PostMapping(value = ["/merge/preview"])
   @Operation(summary = "Dry-run merge source branch to target branch and return preview")
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @OpenApiOrderExtension(5)
   fun dryRunMerge(
-    @PathVariable branchId: Long,
     @RequestBody request: DryRunMergeBranchRequest,
   ): BranchMergeRefModel {
-    val merge = branchService.dryRunMergeBranch(projectHolder.project.id, branchId, request)
+    val merge = branchService.dryRunMergeBranch(projectHolder.project.id, request)
     return BranchMergeRefModel(merge.id)
   }
 
-  @GetMapping(value = ["/{branchId}/merge/preview/{mergeId}"])
+  @GetMapping(value = ["/merge/{mergeId}/preview"])
   @Operation(summary = "Get branch merge session preview")
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @OpenApiOrderExtension(6)
   fun getBranchMergeSessionPreview(
-    @PathVariable branchId: Long,
     @PathVariable mergeId: Long,
   ): BranchMergeModel {
-    val merge = branchService.getBranchMerge(projectHolder.project.id, branchId, mergeId)
+    val merge = branchService.getBranchMerge(projectHolder.project.id, mergeId)
     return branchMergeModelAssembler.toModel(merge)
   }
 
-  @GetMapping(value = ["/{branchId}/merge/preview/{mergeId}/conflicts"])
+  @GetMapping(value = ["/merge/{mergeId}/conflicts"])
   @Operation(summary = "Get branch merge session conflicts")
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
@@ -137,10 +125,32 @@ class BranchController(
   fun getBranchMergeSessionConflicts(
     @ParameterObject
     pageable: Pageable,
-    @PathVariable branchId: Long,
     @PathVariable mergeId: Long,
   ): PagedModel<BranchMergeConflictModel> {
-    val conflicts = branchService.getBranchMergeConflicts(projectHolder.project.id, branchId, mergeId, pageable)
+    val conflicts = branchService.getBranchMergeConflicts(projectHolder.project.id, mergeId, pageable)
     return pagedBranchMergeConflictResourceAssembler.toModel(conflicts, branchMergeConflictModelAssembler)
+  }
+
+  @PutMapping(value = ["/merge/{mergeId}/resolve"])
+  @Operation(summary = "Resolve branch merge session conflicts")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @OpenApiOrderExtension(8)
+  fun resolveConflict(
+    @PathVariable mergeId: Long,
+    @RequestBody request: ResolveBranchMergeConflictRequest
+  ) {
+    branchService.resolveConflict(projectHolder.project.id, mergeId, request)
+  }
+
+  @PostMapping(value = ["/merge/{mergeId}/apply"])
+  @Operation(summary = "Merge source branch to target branch")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @OpenApiOrderExtension(9)
+  fun merge(
+    @PathVariable mergeId: Long,
+  ) {
+    branchService.applyMerge(projectHolder.project.id, mergeId)
   }
 }
