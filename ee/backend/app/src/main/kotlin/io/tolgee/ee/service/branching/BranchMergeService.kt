@@ -160,8 +160,17 @@ class BranchMergeService(
   fun getMerge(
     projectId: Long,
     mergeId: Long,
-  ): BranchMergeView? {
+  ): BranchMerge {
+    return branchMergeRepository.findMerge(projectId, mergeId)
+      ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+  }
+
+  fun getMergeView(
+    projectId: Long,
+    mergeId: Long,
+  ): BranchMergeView {
     return branchMergeRepository.findBranchMergeView(projectId, mergeId)
+      ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
   }
 
   fun getConflicts(

@@ -52,4 +52,7 @@ class BranchMergeChange : StandardAuditModel(), EntityWithId {
   @Column(nullable = true)
   @Enumerated(EnumType.STRING)
   var resolution: BranchKeyMergeResolutionType? = null
+
+  val isResolved: Boolean
+    get() = resolution != null
 }

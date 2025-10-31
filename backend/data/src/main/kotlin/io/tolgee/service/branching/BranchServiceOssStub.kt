@@ -32,7 +32,7 @@ class BranchServiceOssStub : BranchService {
     throw UnsupportedOperationException()
   }
 
-  override fun getBranchMerge(projectId: Long, mergeId: Long): BranchMergeView {
+  override fun getBranchMergeView(projectId: Long, mergeId: Long): BranchMergeView {
     throw UnsupportedOperationException()
   }
 
