@@ -5,6 +5,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
+import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.events.OnBranchDeleted
@@ -101,26 +102,25 @@ class BranchServiceImpl(
   }
 
   @Transactional
-  override fun dryRunMergeBranch(projectId: Long, branchId: Long, request: DryRunMergeBranchRequest): BranchMerge {
-    val sourceBranch = getBranch(projectId, branchId)
+  override fun dryRunMergeBranch(projectId: Long, request: DryRunMergeBranchRequest): BranchMerge {
+    val sourceBranch = getBranch(projectId, request.sourceBranchId)
     val targetBranch = getBranch(projectId, request.targetBranchId)
     return branchMergeService.dryRun(sourceBranch, targetBranch)
   }
 
-  override fun getBranchMerge(projectId: Long, branchId: Long, branchMergeId: Long): BranchMergeView {
-    return branchMergeService.getMerge(projectId, branchId, branchMergeId)
+  override fun getBranchMerge(projectId: Long, mergeId: Long): BranchMergeView {
+    return branchMergeService.getMerge(projectId, mergeId)
       ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
   }
 
   @Transactional
   override fun getBranchMergeConflicts(
     projectId: Long,
-    branchId: Long,
     branchMergeId: Long,
     pageable: Pageable
   ): Page<BranchMergeConflictView> {
     val project = entityManager.getReference(Project::class.java, projectId)
-    val conflicts = branchMergeService.getConflicts(projectId, branchId, branchMergeId, pageable)
+    val conflicts = branchMergeService.getConflicts(projectId, branchMergeId, pageable)
     val languages =
       languageService.getLanguagesForTranslationsView(
         project.languages.map { it.tag }.toSet(),
@@ -145,4 +145,12 @@ class BranchServiceImpl(
     }
     return conflicts
   }
+
+  @Transactional
+  override fun resolveConflict(projectId: Long, mergeId: Long, request: ResolveBranchMergeConflictRequest) {
+    val conflict = branchMergeService.getConflict(projectId, mergeId, request.changeId)
+    conflict.resolution = request.resolve
+  }
+
+  override fun applyMerge(projectId: Long, mergeId: Long) {}
 }
