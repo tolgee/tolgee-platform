@@ -152,5 +152,13 @@ class Key(
   override fun merge(source: Key) {
     this.isPlural = source.isPlural
     this.pluralArgName = source.pluralArgName
+    this.translations.forEach { translation ->
+      translation.merge(source.translations.find { it.language == translation.language }!!)
+    }
+    this.keyMeta?.let { meta ->
+      source.keyMeta?.let { sourceMeta ->
+        meta.merge(sourceMeta)
+      }
+    }
   }
 }
