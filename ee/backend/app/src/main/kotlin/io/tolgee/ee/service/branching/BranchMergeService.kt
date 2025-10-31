@@ -1,8 +1,11 @@
 package io.tolgee.ee.service.branching
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
+import io.tolgee.ee.repository.branching.BranchMergeChangeRepository
 import io.tolgee.ee.repository.branching.BranchMergeRepository
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service
 class BranchMergeService(
   private val keyRepository: KeyRepository,
   private val branchMergeRepository: BranchMergeRepository,
+  private val branchMergeChangeRepository: BranchMergeChangeRepository,
 ) : Logging {
 
   fun dryRun(branchMerge: BranchMerge, sourceBranch: Branch, targetBranch: Branch) {
@@ -123,7 +127,7 @@ class BranchMergeService(
       }
       return
     }
-    // default behavior (no changes in either of branches)
+    // default behavior (no changes in either of the branches)
     change.apply {
       change.change = BranchKeyMergeChangeType.SKIP
     }
@@ -155,18 +159,25 @@ class BranchMergeService(
 
   fun getMerge(
     projectId: Long,
-    branchId: Long,
     mergeId: Long,
   ): BranchMergeView? {
-    return branchMergeRepository.findBranchMergeView(projectId, branchId, mergeId)
+    return branchMergeRepository.findBranchMergeView(projectId, mergeId)
   }
 
   fun getConflicts(
     projectId: Long,
-    branchId: Long,
     mergeId: Long,
     pageable: Pageable,
-    ): Page<BranchMergeConflictView> {
-    return branchMergeRepository.findBranchMergeConflicts(projectId, branchId, mergeId, pageable)
+  ): Page<BranchMergeConflictView> {
+    return branchMergeChangeRepository.findBranchMergeConflicts(projectId, mergeId, pageable)
+  }
+
+  fun getConflict(
+    projectId: Long,
+    mergeId: Long,
+    changeId: Long,
+  ): BranchMergeChange {
+    return branchMergeChangeRepository.findConflict(projectId, mergeId, changeId)
+      ?: throw NotFoundException(Message.BRANCH_MERGE_CHANGE_NOT_FOUND)
   }
 }
