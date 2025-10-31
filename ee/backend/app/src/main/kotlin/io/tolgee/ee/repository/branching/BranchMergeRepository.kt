@@ -9,6 +9,16 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
 
   @Query(
     """
+      select bm from BranchMerge bm 
+      join fetch bm.sourceBranch sb
+      join fetch bm.targetBranch tb
+      where sb.project.id = :projectId and bm.id = :mergeId
+    """
+  )
+  fun findMerge(projectId: Long, mergeId: Long): BranchMerge?
+
+  @Query(
+    """
     select new io.tolgee.dtos.queryResults.branching.BranchMergeView(
       bm.id,
       sb,
