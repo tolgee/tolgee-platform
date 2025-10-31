@@ -219,6 +219,7 @@ class Translation(
   override fun merge(source: Translation) {
     this.text = source.text
     this.state = source.state
-    this.labels = source.labels
+    this.labels.clear()
+    this.labels.addAll(source.labels)
   }
 }

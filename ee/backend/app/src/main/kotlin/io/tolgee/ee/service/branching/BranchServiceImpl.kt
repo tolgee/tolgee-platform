@@ -10,11 +10,11 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.events.OnBranchDeleted
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
+import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchCopyService
 import io.tolgee.service.branching.BranchService
@@ -108,9 +108,8 @@ class BranchServiceImpl(
     return branchMergeService.dryRun(sourceBranch, targetBranch)
   }
 
-  override fun getBranchMerge(projectId: Long, mergeId: Long): BranchMergeView {
-    return branchMergeService.getMerge(projectId, mergeId)
-      ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+  override fun getBranchMergeView(projectId: Long, mergeId: Long): BranchMergeView {
+    return branchMergeService.getMergeView(projectId, mergeId)
   }
 
   @Transactional
@@ -152,5 +151,21 @@ class BranchServiceImpl(
     conflict.resolution = request.resolve
   }
 
-  override fun applyMerge(projectId: Long, mergeId: Long) {}
+  @Transactional
+  override fun applyMerge(projectId: Long, mergeId: Long) {
+    val merge = branchMergeService.getMerge(projectId, mergeId)
+    if (!merge.isReadyToMerge) {
+      if (!merge.isRevisionValid) {
+        throw BadRequestException(Message.BRANCH_MERGE_REVISION_NOT_VALID)
+      }
+      if (!merge.isResolved) {
+        throw BadRequestException(Message.BRANCH_MERGE_CONFLICTS_NOT_RESOLVED)
+      }
+    }
+    merge.changes.forEach { change ->
+      if (change.resolution == BranchKeyMergeResolutionType.SOURCE) {
+        change.targetKey.merge(change.sourceKey)
+      }
+    }
+  }
 }

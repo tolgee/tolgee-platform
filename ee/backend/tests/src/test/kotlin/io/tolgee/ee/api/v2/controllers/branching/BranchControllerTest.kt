@@ -15,6 +15,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMergeChange
 import io.tolgee.model.enums.BranchKeyMergeChangeType
@@ -193,7 +194,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `resolves merge conflict`() {
     val keys = createConflictKeys()
-    val change = createMergeWithConflict(keys.first, keys.second)
+    val change = createMergeWithConflict(keys.second, keys.first)
     val mergeId = change.branchMerge.id
 
     performProjectAuthGet("branches/merge/$mergeId/conflicts")
@@ -218,6 +219,26 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("[0].resolution").isEqualTo("SOURCE")
         }
       }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `merges resolved feature branch into main`() {
+    val keys = createConflictKeys()
+    // wait for revision numbers of branches to increase after conflict keys are created
+    waitForNotThrowing(timeout = 10000, pollTime = 250) {
+      testData.featureBranch.refresh().revision.assert.isGreaterThan(15)
+      testData.mainBranch.refresh().revision.assert.isGreaterThan(10)
+    }
+    val change = createMergeWithConflict(
+      keys.second,
+      keys.first,
+      BranchKeyMergeResolutionType.SOURCE
+    )
+    val mergeId = change.branchMerge.id
+
+    performProjectAuthPost("branches/merge/$mergeId/apply").andIsOk
+    translationService.find(keys.first.translations.first().id)!!.text.assert.isEqualTo("new translation")
   }
 
   private fun createConflictKeys(): Pair<Key, Key> {
@@ -284,18 +305,25 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     return Pair(conflictKeyMain, conflictKeyFeature)
   }
 
-  private fun createMergeWithConflict(sourceKey: Key, targetKey: Key): BranchMergeChange {
+  private fun createMergeWithConflict(
+    sourceKey: Key,
+    targetKey: Key,
+    resolutionType: BranchKeyMergeResolutionType? = null
+  ): BranchMergeChange {
     lateinit var change: BranchMergeChange
+    val sourceBranch = testData.featureBranch.refresh()
+    val targetBranch = testData.mainBranch.refresh()
     val branchMerge = testData.projectBuilder.addBranchMerge {
-      sourceBranch = testData.featureBranch
-      targetBranch = testData.mainBranch
-      sourceRevision = 2
-      targetRevision = 1
+      this.sourceBranch = sourceBranch
+      this.targetBranch = targetBranch
+      sourceRevision = sourceBranch.revision
+      targetRevision = targetBranch.revision
     }.build {
       change = addChange {
         this.change = BranchKeyMergeChangeType.CONFLICT
         this.sourceKey = sourceKey
         this.targetKey = targetKey
+        this.resolution = resolutionType
         branchMerge.changes.add(this)
       }.self
     }.self
