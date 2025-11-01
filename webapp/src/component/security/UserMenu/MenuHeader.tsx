@@ -3,7 +3,7 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
 
 type UserAccountModel =
-  | components['schemas']['UserAccountAdministrationModel']
+  | components['schemas']['SimpleUserAccountModel']
   | components['schemas']['PrivateUserAccountModel'];
 type OrganizationModel = components['schemas']['OrganizationModel'];
 

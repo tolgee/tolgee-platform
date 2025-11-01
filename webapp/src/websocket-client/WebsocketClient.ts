@@ -194,7 +194,7 @@ export type WebsocketEvent<Data> = {
   activityId: number;
   actor: {
     type: 'user';
-    data: components['schemas']['UserAccountAdministrationModel'];
+    data: components['schemas']['SimpleUserAccountModel'];
   };
   data: Data;
 };
