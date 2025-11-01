@@ -14,6 +14,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -31,6 +32,11 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
     testData = AdministrationTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.admin
+  }
+
+  @AfterEach
+  fun cleanup() {
+    currentDateProvider.forcedDate = null
   }
 
   @Test
@@ -74,38 +80,33 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `returns last activity`() {
-    val prevForcedDate = currentDateProvider.forcedDate
     val forcedDate = Date()
-    try {
-      currentDateProvider.forcedDate = forcedDate
+    currentDateProvider.forcedDate = forcedDate
 
-      performAuthGet("/v2/administration/users?search=${userAccount!!.username}").andAssertThatJson {
-        node("_embedded.users") {
-          node("[0]") {
-            node("lastActivity").isNull()
-          }
+    performAuthGet("/v2/administration/users?search=${userAccount!!.username}").andAssertThatJson {
+      node("_embedded.users") {
+        node("[0]") {
+          node("lastActivity").isNull()
         }
       }
+    }
 
-      val organization = dbPopulator.createOrganization("just.to.record.activity", userAccount!!)
-      loginAsUser(userAccount!!.username)
-      val projectRequest = CreateProjectRequest(
-        "just.to.record.activity",
-        listOf(LanguageRequest("cs", "čj", "cs")),
-        organizationId = organization.id,
-        icuPlaceholders = true
-      )
-      performAuthPost("/v2/projects", projectRequest)
+    val organization = dbPopulator.createOrganization("just.to.record.activity", userAccount!!)
+    loginAsUser(userAccount!!.username)
+    val projectRequest = CreateProjectRequest(
+      "just.to.record.activity",
+      listOf(LanguageRequest("cs", "čj", "cs")),
+      organizationId = organization.id,
+      icuPlaceholders = true
+    )
+    performAuthPost("/v2/projects", projectRequest)
 
-      performAuthGet("/v2/administration/users?search=${userAccount!!.username}").andAssertThatJson {
-        node("_embedded.users") {
-          node("[0]") {
-            node("lastActivity").isEqualTo(forcedDate.time)
-          }
+    performAuthGet("/v2/administration/users?search=${userAccount!!.username}").andAssertThatJson {
+      node("_embedded.users") {
+        node("[0]") {
+          node("lastActivity").isEqualTo(forcedDate.time)
         }
       }
-    } finally {
-      currentDateProvider.forcedDate = prevForcedDate
     }
   }
 
