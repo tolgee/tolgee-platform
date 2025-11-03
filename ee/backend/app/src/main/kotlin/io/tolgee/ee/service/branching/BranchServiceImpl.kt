@@ -112,6 +112,10 @@ class BranchServiceImpl(
     return branchMergeService.getMergeView(projectId, mergeId)
   }
 
+  override fun getBranchMerges(projectId: Long, pageable: Pageable): Page<BranchMergeView> {
+    return branchMergeService.getMerges(projectId, pageable)
+  }
+
   @Transactional
   override fun getBranchMergeConflicts(
     projectId: Long,
