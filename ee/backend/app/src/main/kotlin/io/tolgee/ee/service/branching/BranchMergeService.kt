@@ -165,6 +165,13 @@ class BranchMergeService(
       ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
   }
 
+  fun getMerges(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<BranchMergeView> {
+    return branchMergeRepository.findBranchMerges(projectId, pageable)
+  }
+
   fun getMergeView(
     projectId: Long,
     mergeId: Long,

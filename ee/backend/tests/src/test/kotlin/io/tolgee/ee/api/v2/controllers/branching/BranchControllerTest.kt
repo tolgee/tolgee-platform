@@ -137,6 +137,36 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `lists branch merges`() {
+    createConflictKeys()
+
+    performProjectAuthPost(
+      "branches/merge/preview",
+      mapOf(
+        "targetBranchId" to testData.mainBranch.id,
+        "sourceBranchId" to testData.featureBranch.id
+      )
+    ).andIsOk
+
+    performProjectAuthGet("branches/merge")
+      .andIsOk.andAssertThatJson {
+        node("page.totalElements").isNumber.isEqualTo(BigDecimal(1))
+        node("_embedded.branchMerges") {
+          isArray.hasSize(1)
+          node("[0]") {
+            node("sourceBranch.name").isEqualTo("feature-branch")
+            node("targetBranch.name").isEqualTo("main")
+            node("keyAdditionsCount").isEqualTo(1)
+            node("keyDeletionsCount").isEqualTo(1)
+            node("keyModificationsCount").isEqualTo(1)
+            node("keyConflictsCount").isEqualTo(1)
+          }
+        }
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `dry-run merges feature branch into main`() {
     createConflictKeys()
 
