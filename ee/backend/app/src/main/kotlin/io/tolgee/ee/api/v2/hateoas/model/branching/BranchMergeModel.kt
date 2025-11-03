@@ -5,7 +5,7 @@ import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
 @Suppress("unused")
-@Relation(itemRelation = "branchMerge")
+@Relation(itemRelation = "branchMerge", collectionRelation = "branchMerges")
 open class BranchMergeModel(
   @Schema(description = "Branch merge session id")
   val id: Long,
