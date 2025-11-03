@@ -3,6 +3,7 @@ package io.tolgee.ee.api.v2.controllers.branching
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
+import io.tolgee.dtos.queryResults.branching.BranchMergeView
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.CreateBranchModel
@@ -51,10 +52,11 @@ class BranchController(
   private val branchModelAssembler: BranchModelAssembler,
   private val pagedBranchResourceAssembler: PagedResourcesAssembler<Branch>,
   private val branchMergeModelAssembler: BranchMergeModelAssembler,
+  private val pagedBranchMergeResourceAssembler: PagedResourcesAssembler<BranchMergeView>,
   private val branchMergeConflictModelAssembler: BranchMergeConflictModelAssembler,
   private val pagedBranchMergeConflictResourceAssembler: PagedResourcesAssembler<BranchMergeConflictView>,
 
-  ) {
+) {
   @GetMapping(value = [""])
   @Operation(summary = "Get all branches")
   @AllowApiAccess
@@ -93,8 +95,21 @@ class BranchController(
     branchService.deleteBranch(projectHolder.project.id, branchId)
   }
 
+  @GetMapping(value = ["/merge"])
+  @Operation(summary = "Get branch merges")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @OpenApiOrderExtension(4)
+  fun getBranchMerges(
+    @ParameterObject
+    pageable: Pageable,
+  ): PagedModel<BranchMergeModel> {
+    val merges = branchService.getBranchMerges(projectHolder.project.id, pageable)
+    return pagedBranchMergeResourceAssembler.toModel(merges, branchMergeModelAssembler)
+  }
+
   @PostMapping(value = ["/merge/preview"])
-  @Operation(summary = "Dry-run merge source branch to target branch and return preview")
+  @Operation(summary = "Creates a merge, dry-runs source branch to target branch and return preview")
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @OpenApiOrderExtension(5)
