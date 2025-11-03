@@ -860,7 +860,18 @@ export interface components {
         | "suggestion_cant_be_plural"
         | "suggestion_must_be_plural"
         | "duplicate_suggestion"
-        | "unsupported_media_type";
+        | "unsupported_media_type"
+        | "impersonation_of_admin_by_supporter_not_allowed"
+        | "already_impersonating_user"
+        | "operation_not_permitted_in_read_only_mode"
+        | "branch_not_found"
+        | "cannot_delete_default_branch"
+        | "branch_already_exists"
+        | "origin_branch_not_found"
+        | "branch_merge_not_found"
+        | "branch_merge_change_not_found"
+        | "branch_merge_revision_not_valid"
+        | "branch_merge_conflicts_not_resolved";
       params?: unknown[];
     };
     ExampleItem: {
@@ -1058,6 +1069,7 @@ export interface components {
         | "prompts.edit"
         | "translation-labels.manage"
         | "translation-labels.assign"
+        | "all.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
