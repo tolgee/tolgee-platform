@@ -91,12 +91,11 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
       }
     }
 
-    val organization = dbPopulator.createOrganization("just.to.record.activity", userAccount!!)
     loginAsUser(userAccount!!.username)
     val projectRequest = CreateProjectRequest(
       "just.to.record.activity",
       listOf(LanguageRequest("cs", "čj", "cs")),
-      organizationId = organization.id,
+      organizationId = testData.adminBuilder.defaultOrganizationBuilder.self.id,
       icuPlaceholders = true
     )
     performAuthPost("/v2/projects", projectRequest)
