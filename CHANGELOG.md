@@ -1,3 +1,10 @@
+## [3.137.2](https://github.com/tolgee/tolgee-platform/compare/v3.137.1...v3.137.2) (2025-11-03)
+
+
+### Bug Fixes
+
+* missing error translation when third party provider doesn't send over user e-mail ([#3293](https://github.com/tolgee/tolgee-platform/issues/3293)) ([202f440](https://github.com/tolgee/tolgee-platform/commit/202f440ed55837d47f7d340caa7871a1dedeff2f))
+
 ## [3.137.1](https://github.com/tolgee/tolgee-platform/compare/v3.137.0...v3.137.1) (2025-10-30)
 
 
