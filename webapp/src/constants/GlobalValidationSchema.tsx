@@ -533,6 +533,23 @@ export class Validation {
           t('validation_invalid_branch_name')
         ),
     });
+
+  static readonly BRANCH_MERGE = (t: TranslateFunction) =>
+    Yup.object({
+      name: Yup.string().required(t('branch_merges_name_required')),
+      sourceBranchId: Yup.number()
+        .nullable()
+        .typeError(t('branch_merges_select_branch_error'))
+        .required(t('branch_merges_select_branch_error')),
+      targetBranchId: Yup.number()
+        .nullable()
+        .typeError(t('branch_merges_select_branch_error'))
+        .required(t('branch_merges_select_branch_error'))
+        .notOneOf(
+          [Yup.ref('sourceBranchId')],
+          t('branch_merges_same_branch_error')
+        ),
+    });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

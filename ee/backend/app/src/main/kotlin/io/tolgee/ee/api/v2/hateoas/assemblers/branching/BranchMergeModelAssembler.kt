@@ -12,12 +12,15 @@ class BranchMergeModelAssembler(
   override fun toModel(entity: BranchMergeView): BranchMergeModel {
     return BranchMergeModel(
       id = entity.id,
+      name = entity.name,
       sourceBranch = branchModelAssembler.toModel(entity.sourceBranch),
       targetBranch = branchModelAssembler.toModel(entity.targetBranch),
+      outdated = !entity.revisionsMatch,
       keyAdditionsCount = entity.keyAdditionsCount.toInt(),
       keyDeletionsCount = entity.keyDeletionsCount.toInt(),
       keyModificationsCount = entity.keyModificationsCount.toInt(),
-      keyConflictsCount = entity.keyConflictsCount.toInt(),
+      keyUnresolvedConflictsCount = entity.keyUnresolvedConflictsCount.toInt(),
+      keyResolvedConflictsCount = entity.keyResolvedConflictsCount.toInt(),
     )
   }
 }
