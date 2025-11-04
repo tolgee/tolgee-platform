@@ -1,3 +1,10 @@
+# [3.138.0](https://github.com/tolgee/tolgee-platform/compare/v3.137.2...v3.138.0) (2025-11-04)
+
+
+### Features
+
+* glossary import and export ([#3268](https://github.com/tolgee/tolgee-platform/issues/3268)) ([70ac9e6](https://github.com/tolgee/tolgee-platform/commit/70ac9e6296a3dafdb741d6ce21cd1d2457c56713)), closes [#3103](https://github.com/tolgee/tolgee-platform/issues/3103)
+
 ## [3.137.2](https://github.com/tolgee/tolgee-platform/compare/v3.137.1...v3.137.2) (2025-11-03)
 
 
