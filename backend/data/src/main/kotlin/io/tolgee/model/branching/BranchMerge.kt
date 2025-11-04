@@ -20,6 +20,9 @@ import jakarta.validation.constraints.NotNull
 @Table()
 @ActivityLoggedEntity
 class BranchMerge : StandardAuditModel(), EntityWithId {
+  @Column(nullable = false)
+  var name: String = ""
+
   @ManyToOne(targetEntity = Branch::class)
   @JoinColumn(name = "source_branch_id", nullable = false)
   @NotNull

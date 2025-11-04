@@ -213,6 +213,9 @@ export const routes = {
       <Route path={LINKS.PROJECT_TASKS.template}>
         <ProjectTasksView />
       </Route>
+      <Route path={LINKS.PROJECT_BRANCHES_MERGES.template}>
+        <BranchesView />
+      </Route>
       <Route path={LINKS.PROJECT_BRANCHES.template}>
         <BranchesView />
       </Route>
