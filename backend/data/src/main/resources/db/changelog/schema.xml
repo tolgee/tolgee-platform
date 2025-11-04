@@ -4848,4 +4848,11 @@
     <changeSet author="danielkrizan (generated)" id="1760095023333-8">
         <addForeignKeyConstraint baseColumnNames="source_key_id" baseTableName="branch_merge_change" constraintName="FKgj7gopnadk65ph9l7x5kixsaf" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762184590118-1">
+        <addColumn tableName="branch_merge">
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

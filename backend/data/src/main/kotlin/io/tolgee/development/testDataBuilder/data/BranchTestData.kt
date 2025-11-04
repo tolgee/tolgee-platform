@@ -5,6 +5,9 @@ import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchMerge
+import io.tolgee.model.enums.BranchKeyMergeChangeType
+import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.util.addDays
 
 class BranchTestData(
@@ -13,6 +16,7 @@ class BranchTestData(
   lateinit var mainBranch: Branch
   lateinit var featureBranch: Branch
   lateinit var secondProject: Project
+  lateinit var featureBranchMerge: BranchMerge
   init {
     this.root.apply {
       projectBuilder.apply {
@@ -81,7 +85,7 @@ class BranchTestData(
       }
     }
 
-    addKey {
+    val featureKey = addKey {
       name = "key-to-add"
       branch = featureBranch
     }.build {
@@ -92,6 +96,20 @@ class BranchTestData(
           text = "Feature key comment to add"
         }
       }
-    }
+    }.self
+
+    featureBranchMerge = addBranchMerge {
+      name = "feature-to-main"
+      sourceBranch = featureBranch
+      targetBranch = mainBranch
+      sourceRevision = 15
+      targetRevision = 10
+    }.build {
+      addChange {
+        sourceKey = featureKey
+        change = BranchKeyMergeChangeType.ADD
+        resolution = BranchKeyMergeResolutionType.SOURCE
+      }
+    }.self
   }
 }
