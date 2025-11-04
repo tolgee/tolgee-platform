@@ -424,8 +424,14 @@ export interface paths {
     get: operations["all"];
     post: operations["create_11"];
   };
+  "/v2/projects/{projectId}/branches/merge": {
+    get: operations["getBranchMerges"];
+  };
   "/v2/projects/{projectId}/branches/merge/preview": {
     post: operations["dryRunMerge"];
+  };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}": {
+    delete: operations["deleteBranchMerge"];
   };
   "/v2/projects/{projectId}/branches/merge/{mergeId}/apply": {
     post: operations["merge"];
@@ -1427,7 +1433,7 @@ export interface components {
     BranchMergeModel: {
       /**
        * Format: int64
-       * @description Branch merge session id
+       * @description Branch merge id
        */
       id: number;
       /**
@@ -1435,11 +1441,6 @@ export interface components {
        * @description Key additions count
        */
       keyAdditionsCount: number;
-      /**
-       * Format: int32
-       * @description Key conflicts count
-       */
-      keyConflictsCount: number;
       /**
        * Format: int32
        * @description Key deletions count
@@ -1450,6 +1451,20 @@ export interface components {
        * @description Key updates count
        */
       keyModificationsCount: number;
+      /**
+       * Format: int32
+       * @description Key resolved conflicts count
+       */
+      keyResolvedConflictsCount: number;
+      /**
+       * Format: int32
+       * @description Key unresoled conflicts count
+       */
+      keyUnresolvedConflictsCount: number;
+      /** @description Branch merge name */
+      name: string;
+      /** @description Is merge outdated. If true, it means, that either source or target branch data were changed */
+      outdated: boolean;
       /** @description Source branch */
       sourceBranch: components["schemas"]["BranchModel"];
       /** @description Target branch */
@@ -2268,6 +2283,8 @@ export interface components {
       state: string;
     };
     DryRunMergeBranchRequest: {
+      /** @description Name of branch merge */
+      name: string;
       /**
        * Format: int64
        * @description Source branch id
@@ -4036,6 +4053,12 @@ export interface components {
     PagedModelBranchMergeConflictModel: {
       _embedded?: {
         branchMergeConflicts?: components["schemas"]["BranchMergeConflictModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelBranchMergeModel: {
+      _embedded?: {
+        branchMerges?: components["schemas"]["BranchMergeModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -12203,6 +12226,53 @@ export interface operations {
       };
     };
   };
+  getBranchMerges: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelBranchMergeModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   dryRunMerge: {
     parameters: {
       path: {
@@ -12244,6 +12314,42 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["DryRunMergeBranchRequest"];
+      };
+    };
+  };
+  deleteBranchMerge: {
+    parameters: {
+      path: {
+        mergeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
       };
     };
   };

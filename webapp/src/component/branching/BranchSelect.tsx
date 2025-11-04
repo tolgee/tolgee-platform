@@ -20,9 +20,15 @@ type Props = {
   branch?: BranchModel | number | null;
   onSelect: (branch: BranchModel) => void;
   onDefaultValue?: (branch: BranchModel) => void;
+  hideDefault?: boolean;
 };
 
-export const BranchSelect = ({ branch, onSelect, onDefaultValue }: Props) => {
+export const BranchSelect = ({
+  branch,
+  onSelect,
+  onDefaultValue,
+  hideDefault,
+}: Props) => {
   const project = useProject();
   const {
     default: defaultBranch,
@@ -32,11 +38,15 @@ export const BranchSelect = ({ branch, onSelect, onDefaultValue }: Props) => {
     projectId: project.id,
   });
 
-  const defaultValue = branch
-    ? branches.find((b) =>
-        typeof branch === 'number' ? b.id === branch : b.id === branch.id
-      )
-    : defaultBranch;
+  const items = branches.filter((b) => !b.isDefault || !hideDefault);
+
+  const defaultValue = !hideDefault
+    ? branch
+      ? items.find((b) =>
+          typeof branch === 'number' ? b.id === branch : b.id === branch.id
+        )
+      : defaultBranch
+    : items[0] || undefined;
 
   const [selected, setSelected] = useState<BranchModel | undefined>(
     defaultValue || undefined
@@ -72,7 +82,7 @@ export const BranchSelect = ({ branch, onSelect, onDefaultValue }: Props) => {
 
   return (
     <InfiniteSearchSelect
-      items={branches}
+      items={items}
       queryResult={loadable}
       itemKey={(item) => item.id}
       selected={selected}

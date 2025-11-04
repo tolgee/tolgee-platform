@@ -363,6 +363,11 @@ export class LINKS {
 
   static PROJECT_BRANCHES = Link.ofParent(LINKS.PROJECT, 'branches');
 
+  static PROJECT_BRANCHES_MERGES = Link.ofParent(
+    LINKS.PROJECT_BRANCHES,
+    'merge'
+  );
+
   static PROJECT_EXPORT = Link.ofParent(LINKS.PROJECT, 'export');
 
   static PROJECT_WEBSOCKETS_PREVIEW = Link.ofParent(

@@ -105,7 +105,7 @@ class BranchServiceImpl(
   override fun dryRunMergeBranch(projectId: Long, request: DryRunMergeBranchRequest): BranchMerge {
     val sourceBranch = getBranch(projectId, request.sourceBranchId)
     val targetBranch = getBranch(projectId, request.targetBranchId)
-    return branchMergeService.dryRun(sourceBranch, targetBranch)
+    return branchMergeService.dryRun(request.name, sourceBranch, targetBranch)
   }
 
   override fun getBranchMergeView(projectId: Long, mergeId: Long): BranchMergeView {
@@ -171,5 +171,10 @@ class BranchServiceImpl(
         change.targetKey.merge(change.sourceKey)
       }
     }
+  }
+
+  @Transactional
+  override fun deleteMerge(projectId: Long, mergeId: Long) {
+    branchMergeService.deleteMerge(projectId, mergeId)
   }
 }
