@@ -158,11 +158,20 @@ class BranchController(
     branchService.resolveConflict(projectHolder.project.id, mergeId, request)
   }
 
+  @DeleteMapping(value = ["/merge/{mergeId}"])
+  @Operation(summary = "Delete branch merge session")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @OpenApiOrderExtension(9)
+  fun deleteBranchMerge(@PathVariable mergeId: Long) {
+    branchService.deleteMerge(projectHolder.project.id, mergeId)
+  }
+
   @PostMapping(value = ["/merge/{mergeId}/apply"])
   @Operation(summary = "Merge source branch to target branch")
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
-  @OpenApiOrderExtension(9)
+  @OpenApiOrderExtension(10)
   fun merge(
     @PathVariable mergeId: Long,
   ) {

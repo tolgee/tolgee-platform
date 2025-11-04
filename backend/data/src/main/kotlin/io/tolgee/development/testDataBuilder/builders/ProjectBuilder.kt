@@ -106,13 +106,11 @@ class ProjectBuilder(
 
   fun addBranchMerge(ft: FT<BranchMerge>) = addOperation(data.branchMerges, ft)
 
-  fun addBranchMergeChange(ft: FT<BranchMergeChange>) = addOperation(data.branchMergeChanges, ft)
-
   fun addBranchMergeChange(
     branchMergeBuilder: BranchMergeBuilder,
     ft: FT<BranchMergeChange>,
   ): BranchMergeChangeBuilder {
-    val builder = BranchMergeChangeBuilder(this, branchMergeBuilder)
+    val builder = BranchMergeChangeBuilder(branchMergeBuilder)
     return addOperation(data.branchMergeChanges, builder, ft)
   }
 

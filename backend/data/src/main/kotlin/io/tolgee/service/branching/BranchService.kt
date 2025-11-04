@@ -24,4 +24,5 @@ interface BranchService {
   ): Page<BranchMergeConflictView>
   fun resolveConflict(projectId: Long, mergeId: Long, request: ResolveBranchMergeConflictRequest)
   fun applyMerge(projectId: Long, mergeId: Long)
+  fun deleteMerge(projectId: Long, mergeId: Long)
 }
