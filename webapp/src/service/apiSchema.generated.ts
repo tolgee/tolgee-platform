@@ -219,6 +219,12 @@ export interface paths {
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/assigned-projects": {
     get: operations["getAssignedProjects"];
   };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}/export": {
+    get: operations["export"];
+  };
+  "/v2/organizations/{organizationId}/glossaries/{glossaryId}/import": {
+    post: operations["importCsv"];
+  };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/languages": {
     get: operations["getLanguages"];
   };
@@ -2541,7 +2547,8 @@ export interface components {
         | "unsupported_media_type"
         | "impersonation_of_admin_by_supporter_not_allowed"
         | "already_impersonating_user"
-        | "operation_not_permitted_in_read_only_mode";
+        | "operation_not_permitted_in_read_only_mode"
+        | "file_processing_failed";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -2704,6 +2711,14 @@ export interface components {
        */
       languageTag: string;
       text: string;
+    };
+    GlossaryImportResult: {
+      /**
+       * Format: int32
+       * @description Number of imported terms
+       * @example 42
+       */
+      imported: number;
     };
     GlossaryLanguageDto: {
       /**
@@ -4497,6 +4512,7 @@ export interface components {
         | "GLOSSARY_CREATE"
         | "GLOSSARY_UPDATE"
         | "GLOSSARY_DELETE"
+        | "GLOSSARY_IMPORT"
         | "GLOSSARY_TERM_CREATE"
         | "GLOSSARY_TERM_UPDATE"
         | "GLOSSARY_TERM_DELETE"
@@ -5799,7 +5815,8 @@ export interface components {
         | "unsupported_media_type"
         | "impersonation_of_admin_by_supporter_not_allowed"
         | "already_impersonating_user"
-        | "operation_not_permitted_in_read_only_mode";
+        | "operation_not_permitted_in_read_only_mode"
+        | "file_processing_failed";
       params?: unknown[];
       success: boolean;
     };
@@ -9116,6 +9133,97 @@ export interface operations {
       404: {
         content: {
           "application/json": string;
+        };
+      };
+    };
+  };
+  export: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  importCsv: {
+    parameters: {
+      path: {
+        organizationId: number;
+        glossaryId: number;
+      };
+      query: {
+        removeExistingTerms?: boolean;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GlossaryImportResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string;
         };
       };
     };

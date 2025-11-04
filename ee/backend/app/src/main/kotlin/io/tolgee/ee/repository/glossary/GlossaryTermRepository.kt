@@ -29,6 +29,8 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
 
   fun findByGlossary(glossary: Glossary): List<GlossaryTerm>
 
+  fun deleteAllByGlossary(glossary: Glossary)
+
   @Query(
     """
     from GlossaryTerm te
@@ -80,6 +82,15 @@ interface GlossaryTermRepository : JpaRepository<GlossaryTerm, Long> {
   """,
   )
   fun findByIdsWithTranslations(ids: Collection<Long>): List<GlossaryTerm>
+
+  @Query(
+    """
+    from GlossaryTerm te
+    left join fetch te.translations
+    where te.glossary = :glossary
+  """,
+  )
+  fun findByGlossaryWithTranslations(glossary: Glossary): List<GlossaryTerm>
 
   @Query(
     """

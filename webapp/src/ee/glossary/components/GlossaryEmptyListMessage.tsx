@@ -48,14 +48,14 @@ const StyledDescription = styled(Typography)`
 type Props = {
   loading?: boolean;
   wrapperProps?: ComponentProps<typeof Box>;
-  onCreate?: () => void;
+  onCreateTerm?: () => void;
   onImport?: () => void;
 };
 
 export const GlossaryEmptyListMessage: React.VFC<Props> = ({
   loading,
   wrapperProps,
-  onCreate,
+  onCreateTerm,
   onImport,
 }) => {
   return (
@@ -70,8 +70,8 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
             <T keyName="glossary_empty_placeholder_add_term_description" />
           </StyledDescription>
           <Button
-            onClick={onCreate}
-            disabled={!onCreate}
+            onClick={onCreateTerm}
+            disabled={!onCreateTerm}
             variant="contained"
             color="primary"
             data-cy="glossary-empty-add-term-button"
@@ -87,7 +87,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
             </Typography>
           </Link>
         </StyledCard>
-        <StyledCard elevation={0} sx={{ display: 'none' }}>
+        <StyledCard elevation={0}>
           <StyledUploadCloud02 />
           <Typography variant="h4">
             <T keyName="glossary_empty_placeholder_import_terms_title" />
@@ -104,7 +104,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
           >
             <T keyName="glossary_empty_placeholder_import_terms_button" />
           </Button>
-          <Link href="https://docs.tolgee.io/platform/projects_and_organizations/glossary/import/csv-format">
+          <Link href="https://docs.tolgee.io/platform/projects_and_organizations/managing_glossaries#importing-terms-to-a-glossary">
             <Typography variant="body2">
               <T keyName="glossary_empty_placeholder_import_terms_csv_format" />
             </Typography>

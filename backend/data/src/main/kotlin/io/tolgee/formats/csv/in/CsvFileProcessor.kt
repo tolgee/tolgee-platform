@@ -5,6 +5,7 @@ import io.tolgee.formats.genericTable.TableEntry
 import io.tolgee.formats.genericTable.`in`.TableProcessor
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.util.CsvDelimiterDetector
 
 class CsvFileProcessor(
   override val context: FileProcessorContext,

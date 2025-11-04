@@ -3,8 +3,8 @@ import { Box, Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { QuickStartHighlight } from 'tg.component/layout/QuickStartGuide/QuickStartHighlight';
+import { DragDropArea } from 'tg.component/common/DragDropArea';
 import { useConfig } from 'tg.globalContext/helpers';
-import { ImportFileDropzone } from './ImportFileDropzone';
 import { ImportProgressOverlay } from './ImportProgressOverlay';
 import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { FilesType } from 'tg.fixtures/FileUploadFixtures';
@@ -71,28 +71,12 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
       e.preventDefault();
     };
 
-    const pasteListener = (e: ClipboardEvent) => {
-      const files: File[] = [];
-      if (!e.clipboardData?.files.length) {
-        return;
-      }
-      for (let i = 0; i < e.clipboardData.files.length; i++) {
-        const item = e.clipboardData.files.item(i);
-        if (item) {
-          files.push(item);
-        }
-      }
-      props.onNewFiles(files.map((f) => ({ file: f, name: f.name })));
-    };
-
     window.addEventListener('dragover', listener, false);
     window.addEventListener('drop', listener, false);
-    document.addEventListener('paste', pasteListener);
 
     return () => {
       window.removeEventListener('dragover', listener, false);
       window.removeEventListener('drop', listener, false);
-      document.removeEventListener('paste', pasteListener);
     };
   }, []);
 
@@ -150,9 +134,10 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
 
   /* @ts-ignore */
   return (
-    <ImportFileDropzone
-      onNewFiles={onNewFiles}
+    <DragDropArea
+      onFilesReceived={onNewFiles}
       active={!props.isProgressOverlayActive}
+      maxItems={MAX_FILE_COUNT}
     >
       <QuickStartHighlight
         offset={10}
@@ -204,7 +189,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
           </ImportInputAreaLayout>
         </StyledRoot>
       </QuickStartHighlight>
-    </ImportFileDropzone>
+    </DragDropArea>
   );
 };
 export default ImportFileInput;

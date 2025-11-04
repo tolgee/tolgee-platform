@@ -292,6 +292,9 @@ declare namespace DataCy {
         "export-state-selector-item" |
         "export-submit-button" |
         "export-support_arrays-selector" |
+        "file-dropzone-add-more-button" |
+        "file-dropzone-remove-button" |
+        "file-dropzone-select-button" |
         "filter-item" |
         "filter-item-exclude" |
         "form-submit-button" |
@@ -329,6 +332,13 @@ declare namespace DataCy {
         "glossary-edit-button" |
         "glossary-empty-add-term-button" |
         "glossary-empty-import-terms-button" |
+        "glossary-export-button" |
+        "glossary-import-button" |
+        "glossary-import-cancel-button" |
+        "glossary-import-dialog" |
+        "glossary-import-mode-add" |
+        "glossary-import-mode-replace" |
+        "glossary-import-submit-button" |
         "glossary-list-item" |
         "glossary-list-languages" |
         "glossary-panel-container" |

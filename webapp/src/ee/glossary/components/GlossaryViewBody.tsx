@@ -5,18 +5,17 @@ import { GlossaryViewToolbar } from 'tg.ee.module/glossary/components/GlossaryVi
 import { GlossaryTermsList } from 'tg.ee.module/glossary/components/GlossaryTermsList';
 import { useSelectedGlossaryLanguages } from 'tg.ee.module/glossary/hooks/useSelectedGlossaryLanguages';
 import { useGlossaryTerms } from 'tg.ee.module/glossary/hooks/useGlossaryTerms';
+import { useGlossaryTermCreateDialogController } from 'tg.ee.module/glossary/hooks/useGlossaryTermCreateDialogController';
+import { useGlossaryImportDialogController } from 'tg.ee.module/glossary/hooks/useGlossaryImportDialogController';
+import { GlossaryTermCreateDialog } from 'tg.ee.module/glossary/views/GlossaryTermCreateDialog';
+import { GlossaryImportDialog } from 'tg.ee.module/glossary/components/GlossaryImportDialog';
 
 type Props = {
-  onCreate?: () => void;
   onSearch?: (search: string) => void;
   search?: string;
 };
 
-export const GlossaryViewBody: React.VFC<Props> = ({
-  onCreate,
-  onSearch,
-  search,
-}) => {
+export const GlossaryViewBody: React.VFC<Props> = ({ onSearch, search }) => {
   const verticalScrollRef = useRef<HTMLDivElement>(null);
   const clearSearchRef = useRef<(() => void) | null>(null);
 
@@ -34,11 +33,28 @@ export const GlossaryViewBody: React.VFC<Props> = ({
     itemsAll: getAllTermsIds,
   });
 
+  const { onCreateTerm, createTermDialogOpen, createTermDialogProps } =
+    useGlossaryTermCreateDialogController();
+
+  const hasExistingTerms = total !== undefined && total > 0;
+  const { onImport, importDialogOpen, importDialogProps } =
+    useGlossaryImportDialogController();
+
   return (
     <>
+      {createTermDialogOpen && (
+        <GlossaryTermCreateDialog {...createTermDialogProps} />
+      )}
+      {importDialogOpen && (
+        <GlossaryImportDialog
+          {...importDialogProps}
+          hasExistingTerms={hasExistingTerms}
+        />
+      )}
       {terms && (
         <GlossaryViewTopbar
-          onCreate={onCreate}
+          onCreateTerm={onCreateTerm}
+          onImport={onImport}
           onSearch={onSearch}
           search={search}
           selectedLanguages={selectedLanguages}
@@ -52,7 +68,8 @@ export const GlossaryViewBody: React.VFC<Props> = ({
         total={total}
         selectedLanguages={selectedLanguages}
         selectionService={selectionService}
-        onCreate={onCreate}
+        onCreateTerm={onCreateTerm}
+        onImport={onImport}
         onFetchNextPageHint={onFetchNextPageHint}
         clearSearchRef={clearSearchRef}
         verticalScrollRef={verticalScrollRef}
