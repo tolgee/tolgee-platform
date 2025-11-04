@@ -104,7 +104,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
           >
             <T keyName="glossary_empty_placeholder_import_terms_button" />
           </Button>
-          <Link href="https://docs.tolgee.io/platform/projects_and_organizations/glossary/import/csv-format">
+          <Link href="https://docs.tolgee.io/platform/projects_and_organizations/managing_glossaries#importing-terms-to-a-glossary">
             <Typography variant="body2">
               <T keyName="glossary_empty_placeholder_import_terms_csv_format" />
             </Typography>
