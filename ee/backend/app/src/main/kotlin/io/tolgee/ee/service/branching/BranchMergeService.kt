@@ -37,8 +37,9 @@ class BranchMergeService(
     }
   }
 
-  fun dryRun(sourceBranch: Branch, targetBranch: Branch): BranchMerge {
+  fun dryRun(name: String, sourceBranch: Branch, targetBranch: Branch): BranchMerge {
     val branchMerge = BranchMerge().apply {
+      this.name = name
       this.sourceBranch = sourceBranch
       this.targetBranch = targetBranch
       this.sourceRevision = sourceBranch.revision
@@ -195,5 +196,11 @@ class BranchMergeService(
   ): BranchMergeChange {
     return branchMergeChangeRepository.findConflict(projectId, mergeId, changeId)
       ?: throw NotFoundException(Message.BRANCH_MERGE_CHANGE_NOT_FOUND)
+  }
+
+  fun deleteMerge(projectId: Long, mergeId: Long) {
+    val merge = branchMergeRepository.findMerge(projectId, mergeId)
+      ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    branchMergeRepository.delete(merge)
   }
 }

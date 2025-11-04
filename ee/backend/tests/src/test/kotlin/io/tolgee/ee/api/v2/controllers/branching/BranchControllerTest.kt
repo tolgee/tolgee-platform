@@ -140,14 +140,6 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `lists branch merges`() {
     createConflictKeys()
 
-    performProjectAuthPost(
-      "branches/merge/preview",
-      mapOf(
-        "targetBranchId" to testData.mainBranch.id,
-        "sourceBranchId" to testData.featureBranch.id
-      )
-    ).andIsOk
-
     performProjectAuthGet("branches/merge")
       .andIsOk.andAssertThatJson {
         node("page.totalElements").isNumber.isEqualTo(BigDecimal(1))
@@ -157,12 +149,20 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
             node("sourceBranch.name").isEqualTo("feature-branch")
             node("targetBranch.name").isEqualTo("main")
             node("keyAdditionsCount").isEqualTo(1)
-            node("keyDeletionsCount").isEqualTo(1)
-            node("keyModificationsCount").isEqualTo(1)
-            node("keyConflictsCount").isEqualTo(1)
+            node("keyDeletionsCount").isEqualTo(0)
+            node("keyModificationsCount").isEqualTo(0)
+            node("keyUnresolvedConflictsCount").isEqualTo(0)
           }
         }
       }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `deletes branch merge`() {
+    performProjectAuthDelete("branches/merge/${testData.featureBranchMerge.id}").andIsOk
+
+    branchMergeRepository.findMerge(testData.project.id, testData.featureBranchMerge.id).assert.isNull()
   }
 
   @Test
@@ -174,6 +174,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost(
       "branches/merge/preview",
       mapOf(
+        "name" to "new-merge",
         "targetBranchId" to testData.mainBranch.id,
         "sourceBranchId" to testData.featureBranch.id
       )
@@ -191,7 +192,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       node("keyModificationsCount").isEqualTo(1)
       node("keyAdditionsCount").isEqualTo(1)
       node("keyDeletionsCount").isEqualTo(1)
-      node("keyConflictsCount").isEqualTo(1)
+      node("keyUnresolvedConflictsCount").isEqualTo(1)
     }
 
     // test conflicted keys data
@@ -344,6 +345,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val sourceBranch = testData.featureBranch.refresh()
     val targetBranch = testData.mainBranch.refresh()
     val branchMerge = testData.projectBuilder.addBranchMerge {
+      name = "merge-branch"
       this.sourceBranch = sourceBranch
       this.targetBranch = targetBranch
       sourceRevision = sourceBranch.revision
