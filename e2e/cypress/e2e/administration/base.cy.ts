@@ -22,22 +22,14 @@ import {
   visitAdministrationUsers,
 } from '../../common/administration';
 
-const activityTest = "can display user's last activity";
-
 describe('Administration', () => {
   beforeEach(() => {
-    if (Cypress.currentTest.title === activityTest) {
-      forceDate(new Date('2023-08-28T02:30').getTime()); // app displays local time, set this one in local timezone
-    }
     administrationTestData.clean();
     administrationTestData.generate().then((res) => {});
     login('admin@admin.com');
   });
 
   afterEach(() => {
-    if (Cypress.currentTest.title === activityTest) {
-      releaseForcedDate();
-    }
     administrationTestData.clean();
     setProperty('authentication.userCanCreateOrganizations', true);
   });
@@ -85,21 +77,28 @@ describe('Administration', () => {
       .should('have.attr', 'aria-disabled', 'true');
   });
 
-  it(activityTest, () => {
-    visitAdministrationUsers();
-    getUserListItem('Peter Administrator')
-      .findDcy('administration-user-activity')
-      .contains('No activity yet');
-
-    createProject({
-      name: 'just.to.record.activity',
-      languages: [{ name: 'cs', originalName: 'čj', tag: 'cs' }],
+  describe('User last activity', () => {
+    afterEach(() => {
+      releaseForcedDate();
     });
 
-    gcy('settings-menu-item').contains('Users').click(); // reload
-    getUserListItem('Peter Administrator')
-      .findDcy('administration-user-activity')
-      .contains('Last activity on August 28, 2023 at 2:30 AM'); // this time was forced in beforeEach
+    it("can display user's last activity", () => {
+      visitAdministrationUsers();
+      getUserListItem('Peter Administrator')
+        .findDcy('administration-user-activity')
+        .contains('No activity yet');
+
+      forceDate(new Date('2023-08-28T02:30').getTime()); // app displays local time, set this one in local timezone
+      createProject({
+        name: 'just.to.record.activity',
+        languages: [{ name: 'cs', originalName: 'čj', tag: 'cs' }],
+      });
+
+      gcy('settings-menu-item').contains('Users').click(); // reload
+      getUserListItem('Peter Administrator')
+        .findDcy('administration-user-activity')
+        .contains('Last activity on August 28, 2023 at 2:30 AM'); // this time was forced above
+    });
   });
 
   it('can delete user', () => {
