@@ -323,13 +323,19 @@ class CoreImportFilesProcessor(
   }
 
   private fun FileProcessorContext.processTranslations() {
-    this.translations.forEach { entry ->
-      val keyEntity = getOrCreateKey(entry.key)
-      entry.value.forEach { newTranslation ->
-        processTranslation(newTranslation, keyEntity)
+    val translationsByKeys = translations.mapKeys { (keyName, _) ->
+      getOrCreateKey(keyName).apply {
+        shouldBeImported = shouldImportKey(name)
       }
-      keyEntity.shouldBeImported = shouldImportKey(keyEntity.name)
     }
+
+    translationsByKeys.forEach { (key, translations) ->
+      translations.forEach {
+        it.key = key
+        processTranslation(it)
+      }
+    }
+
     if (saveData) {
       importDataManager.saveAllStoredTranslations()
     }
@@ -344,9 +350,7 @@ class CoreImportFilesProcessor(
 
   private fun FileProcessorContext.processTranslation(
     newTranslation: ImportTranslation,
-    keyEntity: ImportKey,
   ) {
-    newTranslation.key = keyEntity
     val (isCollision, fileCollisions) = checkForInFileCollisions(newTranslation)
     if (isCollision) {
       fileEntity.addIssues(fileCollisions)
