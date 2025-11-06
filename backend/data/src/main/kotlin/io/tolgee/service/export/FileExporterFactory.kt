@@ -169,10 +169,13 @@ class FileExporterFactory(
   fun getFilePathProvider(
     exportParams: IExportParams,
     translations: List<ExportTranslationView>,
-    extension: String = exportParams.format.extension
+    extension: String = exportParams.format.extension,
   ): ExportFilePathProvider {
     return ExportFilePathProvider(
-      template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+      template = ExportFileStructureTemplateProvider(
+        exportParams,
+        translations
+      ).validateAndGetTemplate(),
       extension = extension,
     )
   }
