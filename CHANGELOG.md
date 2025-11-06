@@ -1,3 +1,10 @@
+## [3.138.1](https://github.com/tolgee/tolgee-platform/compare/v3.138.0...v3.138.1) (2025-11-06)
+
+
+### Bug Fixes
+
+* make extension placeholder for fileStructureTemplate optional ([#3299](https://github.com/tolgee/tolgee-platform/issues/3299)) ([04b5f83](https://github.com/tolgee/tolgee-platform/commit/04b5f8330037472f3113eb10881d6b17153102d3)), closes [#3291](https://github.com/tolgee/tolgee-platform/issues/3291)
+
 # [3.138.0](https://github.com/tolgee/tolgee-platform/compare/v3.137.2...v3.138.0) (2025-11-04)
 
 
