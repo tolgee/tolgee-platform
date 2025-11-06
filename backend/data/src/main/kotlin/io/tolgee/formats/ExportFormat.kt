@@ -7,6 +7,7 @@ enum class ExportFormat(
   val mediaType: String,
   val defaultFileStructureTemplate: String = ExportFilePathProvider.DEFAULT_TEMPLATE,
   val multiLanguage: Boolean = false,
+  val fileStructureExtensionRequired: Boolean = false,
 ) {
   JSON("json", "application/json"),
   JSON_TOLGEE("json", "application/json"),
@@ -16,6 +17,7 @@ enum class ExportFormat(
     "",
     "",
     defaultFileStructureTemplate = "{namespace}/{languageTag}.lproj/Localizable.{extension}",
+    fileStructureExtensionRequired = true,
   ),
   APPLE_XLIFF(
     "xliff",

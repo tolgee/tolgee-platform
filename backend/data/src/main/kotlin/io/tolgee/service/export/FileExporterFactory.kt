@@ -116,18 +116,8 @@ class FileExporterFactory(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
-          stringsFilePathProvider = getFilePathProvider(
-            exportParams,
-            data,
-            "strings",
-            extensionPlaceholderRequired = true
-          ),
-          stringsdictFilePathProvider = getFilePathProvider(
-            exportParams,
-            data,
-            "stringsdict",
-            extensionPlaceholderRequired = true
-          )
+          stringsFilePathProvider = getFilePathProvider(exportParams, data, "strings"),
+          stringsdictFilePathProvider = getFilePathProvider(exportParams, data, "stringsdict")
         )
 
       ExportFormat.APPLE_XCSTRINGS ->
@@ -180,13 +170,11 @@ class FileExporterFactory(
     exportParams: IExportParams,
     translations: List<ExportTranslationView>,
     extension: String = exportParams.format.extension,
-    extensionPlaceholderRequired: Boolean = false,
   ): ExportFilePathProvider {
     return ExportFilePathProvider(
       template = ExportFileStructureTemplateProvider(
         exportParams,
-        translations,
-        extensionPlaceholderRequired
+        translations
       ).validateAndGetTemplate(),
       extension = extension,
     )
