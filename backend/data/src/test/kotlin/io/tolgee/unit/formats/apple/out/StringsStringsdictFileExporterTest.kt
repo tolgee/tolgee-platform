@@ -376,7 +376,8 @@ class StringsStringsdictFileExporterTest {
     isProjectIcuPlaceholdersEnabled: Boolean = true,
     params: ExportParams = getExportParams(),
   ): AppleStringsStringsdictExporter {
-    val template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate()
+    val template = ExportFileStructureTemplateProvider(params, translations, extensionPlaceholderRequired = true)
+      .validateAndGetTemplate()
     return AppleStringsStringsdictExporter(
       translations = translations,
       exportParams = params,

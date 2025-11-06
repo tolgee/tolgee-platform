@@ -6,7 +6,9 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 
 class ExportFileStructureTemplateProvider(
-  val params: IExportParams, translations: List<ExportTranslationView>
+  val params: IExportParams,
+  translations: List<ExportTranslationView>,
+  val extensionPlaceholderRequired: Boolean = false,
 ) {
   fun validateAndGetTemplate(): String {
     validateTemplate()
@@ -62,7 +64,7 @@ class ExportFileStructureTemplateProvider(
 
   private fun validateExtensionInTemplate() {
     val containsExtension = getTemplate().contains(ExportFilePathPlaceholder.EXTENSION.placeholder)
-    if (!containsExtension) {
+    if (!containsExtension && extensionPlaceholderRequired) {
       throw getMissingPlaceholderException(ExportFilePathPlaceholder.EXTENSION)
     }
   }
