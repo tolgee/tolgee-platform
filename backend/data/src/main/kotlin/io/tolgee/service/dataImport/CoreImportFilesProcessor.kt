@@ -231,18 +231,24 @@ class CoreImportFilesProcessor(
   private fun FileProcessorContext.processLanguages() {
     this.languages.forEach { entry ->
       val languageEntity = entry.value
-      importDataManager.storedLanguages.add(languageEntity)
-
       if (!shouldBeImported(languageEntity)) {
         languageEntity.ignored = true
-        return@forEach
       }
+    }
 
-      preselectExistingLanguage(languageEntity)
-      if (saveData) {
-        importService.saveLanguages(this.languages.values)
+    if (saveData) {
+      importService.saveLanguages(this.languages.values.filterNot { it.ignored })
+    }
+
+    this.languages.forEach { entry ->
+      val languageEntity = entry.value
+      importDataManager.storedLanguages.add(languageEntity)
+
+      if (!languageEntity.ignored) {
+        preselectExistingLanguage(languageEntity)
+
+        importDataManager.populateStoredTranslations(languageEntity)
       }
-      importDataManager.populateStoredTranslations(entry.value)
     }
   }
 
