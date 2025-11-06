@@ -325,7 +325,7 @@ class CoreImportFilesProcessor(
   private fun FileProcessorContext.processTranslations() {
     this.translations.forEach { entry ->
       val keyEntity = getOrCreateKey(entry.key)
-      entry.value.forEach translationForeach@{ newTranslation ->
+      entry.value.forEach { newTranslation ->
         processTranslation(newTranslation, keyEntity)
       }
       keyEntity.shouldBeImported = shouldImportKey(keyEntity.name)
