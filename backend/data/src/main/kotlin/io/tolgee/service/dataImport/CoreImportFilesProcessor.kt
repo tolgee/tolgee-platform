@@ -65,8 +65,12 @@ class CoreImportFilesProcessor(
   val errors = mutableListOf<ErrorResponseBody>()
   val warnings = mutableListOf<ErrorResponseBody>()
 
+  private val importedTranslations =
+    mutableMapOf<ImportLanguage, MutableMap<ImportKey, MutableList<ImportTranslation>>>()
+
   fun processFiles(files: Collection<ImportFileDto>?) {
     errors.addAll(processFilesRecursive(files))
+    importDataManager.populateStoredTranslationsFrom(importedTranslations)
     renderPossibleNamespacesWarning()
   }
 
@@ -330,9 +334,17 @@ class CoreImportFilesProcessor(
     }
 
     translationsByKeys.forEach { (key, translations) ->
-      translations.forEach {
-        it.key = key
-        processTranslation(it)
+      translations.forEach { translation ->
+        importedTranslations.putIfAbsent(translation.language, mutableMapOf())
+        importedTranslations.getValue(translation.language).putIfAbsent(key, mutableListOf())
+        importedTranslations.getValue(translation.language).getValue(key).add(translation)
+      }
+    }
+
+    translationsByKeys.forEach { (key, translations) ->
+      translations.forEach { translation ->
+        translation.key = key
+        processTranslation(translation)
       }
     }
 
@@ -371,9 +383,8 @@ class CoreImportFilesProcessor(
     var isCollision = false
     val issues =
       mutableListOf<Pair<FileIssueType, Map<FileIssueParamType, String>>>()
-    val storedTranslations =
-      importDataManager
-        .getStoredTranslations(newTranslation.key, newTranslation.language)
+    val storedTranslations = importedTranslations[newTranslation.language]?.get(newTranslation.key) ?: emptyList()
+
     if (storedTranslations.isNotEmpty()) {
       isCollision = true
       storedTranslations.forEach { collision ->

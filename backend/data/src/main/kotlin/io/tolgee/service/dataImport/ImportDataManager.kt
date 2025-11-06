@@ -160,6 +160,21 @@ class ImportDataManager(
     return languageData
   }
 
+  fun populateStoredTranslationsFrom(
+    importedTranslations: MutableMap<ImportLanguage, MutableMap<ImportKey, MutableList<ImportTranslation>>>
+  ) {
+    importedTranslations.forEach { (importLanguage, translationsByKey) ->
+      storedTranslations.putIfAbsent(importLanguage, mutableMapOf())
+      translationsByKey.forEach { (key, translations) ->
+        storedTranslations.getValue(importLanguage).putIfAbsent(key, mutableListOf())
+        storedTranslations.getValue(importLanguage)[key] = buildSet {
+          addAll(storedTranslations.getValue(importLanguage).getValue(key))
+          addAll(translations)
+        }.toMutableList()
+      }
+    }
+  }
+
   private fun populateStoredTranslationsToConvertPlaceholders() {
     val translations = importService.findTranslationsForPlaceholderConversion(import.id)
     translations.forEach {
