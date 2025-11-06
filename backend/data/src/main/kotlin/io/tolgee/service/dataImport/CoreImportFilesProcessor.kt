@@ -246,8 +246,6 @@ class CoreImportFilesProcessor(
 
       if (!languageEntity.ignored) {
         preselectExistingLanguage(languageEntity)
-
-        importDataManager.populateStoredTranslations(languageEntity)
       }
     }
   }
