@@ -26,5 +26,7 @@ class EmailNotificationComposer(
       -> mfaEmailComposer
       NotificationType.PASSWORD_CHANGED,
       -> passwordChangedEmailComposer
+      // TODO: Add notification types for activity notification and remove line below
+      else -> throw IllegalArgumentException("Unsupported notification type for email composition")
     }.composeEmail(notification)
 }

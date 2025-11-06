@@ -2991,7 +2991,10 @@ export interface components {
         | "TASK_CLOSED"
         | "MFA_ENABLED"
         | "MFA_DISABLED"
-        | "PASSWORD_CHANGED";
+        | "PASSWORD_CHANGED"
+        | "KEY_CREATED"
+        | "STRING_TRANSLATED"
+        | "STRING_REVIEWED";
     };
     NotificationSettingGroupModel: {
       email: boolean;
@@ -2999,6 +3002,9 @@ export interface components {
     };
     NotificationSettingModel: {
       accountSecurity: components["schemas"]["NotificationSettingGroupModel"];
+      keysAdded: components["schemas"]["NotificationSettingGroupModel"];
+      stringsReviewed: components["schemas"]["NotificationSettingGroupModel"];
+      stringsTranslated: components["schemas"]["NotificationSettingGroupModel"];
       tasks: components["schemas"]["NotificationSettingGroupModel"];
     };
     NotificationSettingsRequest: {
@@ -3007,7 +3013,7 @@ export interface components {
       /** @description True if the setting should be enabled, false for disabled */
       enabled: boolean;
       /** @example TASKS */
-      group: "ACCOUNT_SECURITY" | "TASKS";
+      group: "ACCOUNT_SECURITY" | "TASKS" | "KEYS" | "TRANSLATIONS" | "REVIEWS";
     };
     NotificationsMarkSeenRequest: {
       /**
