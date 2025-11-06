@@ -108,7 +108,7 @@ project(':server-app').afterEvaluate {
                         "-d",
                         "-p55538:5432",
                         "--name", dbSchemaContainerName,
-                        "postgres:16.8"
+                        "postgres:18.0"
             }
             Thread.sleep(5000)
         }

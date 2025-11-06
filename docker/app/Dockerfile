@@ -1,4 +1,4 @@
-FROM postgres:16.8
+FROM postgres:18.0
 
 ENTRYPOINT []
 
