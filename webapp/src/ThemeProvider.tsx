@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { createTheme, PaletteMode, useMediaQuery } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 
-import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
+import { TOP_BAR_HEIGHT } from 'tg.globalContext/useLayoutService';
 // @ts-ignore
 import RighteousLatinExtWoff2 from './fonts/Righteous/righteous-latin-ext.woff2';
 // @ts-ignore
@@ -235,8 +235,10 @@ const getTheme = (mode: PaletteMode) => {
             },
           },
           sizeSmall: {
-            minHeight: 32,
-            padding: '4px 16px',
+            minHeight: 30,
+            padding: '4px 10px',
+            fontSize: '13px',
+            lineHeight: 'normal',
           },
         },
       },

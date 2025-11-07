@@ -1,6 +1,6 @@
 import { keyframes, styled } from '@mui/material';
 
-import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
+import { TOP_BAR_HEIGHT } from 'tg.globalContext/useLayoutService';
 
 export type PositionType = 'left' | 'right';
 

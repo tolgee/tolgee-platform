@@ -1,5 +1,5 @@
 import { Global, css } from '@emotion/react';
-import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
+import { TOP_BAR_HEIGHT } from 'tg.globalContext/useLayoutService';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const GlobalStyles = () => {
