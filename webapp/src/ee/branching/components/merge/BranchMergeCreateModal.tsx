@@ -1,13 +1,5 @@
-import React from 'react';
-import {
-  Box,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Typography,
-  styled,
-} from '@mui/material';
-import { ArrowRight } from '@untitled-ui/icons-react';
+import React, { useMemo } from 'react';
+import { Box, Dialog, DialogContent, DialogTitle, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { StandardForm } from 'tg.component/common/form/StandardForm';
@@ -17,9 +9,10 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { LoadableType } from 'tg.component/common/form/StandardForm';
 import { BranchSelectField } from 'tg.component/branching/BranchSelectField';
-import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { BranchNameChipNode } from 'tg.ee.module/branching/components/BranchNameChip';
 
+type BranchModel = components['schemas']['BranchModel'];
 type DryRunMergeBranchRequest =
   components['schemas']['DryRunMergeBranchRequest'];
 
@@ -28,10 +21,10 @@ type Props = {
   close: () => void;
   submit: (values: DryRunMergeBranchRequest) => void;
   saveActionLoadable?: LoadableType;
+  sourceBranch?: BranchModel | null;
 };
 
 const defaultValues: DryRunMergeBranchRequest = {
-  name: '',
   sourceBranchId: 0,
   targetBranchId: 0,
 };
@@ -52,15 +45,12 @@ const SelectorColumn = styled(Box)`
   flex: 1;
 `;
 
-const Placeholder = styled(Typography)`
-  color: ${({ theme }) => theme.palette.text.secondary};
-`;
-
 export const BranchMergeCreateModal: React.FC<Props> = ({
   open,
   close,
   submit,
   saveActionLoadable,
+  sourceBranch,
 }) => {
   const { t } = useTranslate();
   const project = useProject();
@@ -78,14 +68,21 @@ export const BranchMergeCreateModal: React.FC<Props> = ({
   const branches = branchesLoadable.data?._embedded?.branches ?? [];
 
   const handleSubmit = (values: DryRunMergeBranchRequest) => {
-    if (values.sourceBranchId != null && values.targetBranchId != null) {
+    if (sourceBranch && values.targetBranchId) {
       submit({
-        name: values.name,
-        sourceBranchId: values.sourceBranchId,
+        sourceBranchId: sourceBranch.id,
         targetBranchId: values.targetBranchId,
       });
     }
   };
+
+  const initialValues = useMemo(
+    () => ({
+      ...defaultValues,
+      sourceBranchId: sourceBranch?.id ?? 0,
+    }),
+    [sourceBranch]
+  );
 
   const isDisabled =
     branches.length < 2 ||
@@ -94,10 +91,15 @@ export const BranchMergeCreateModal: React.FC<Props> = ({
 
   return (
     <Dialog open={open} onClose={close} maxWidth="sm" fullWidth>
-      <DialogTitle>{t('branch_merges_create_title')}</DialogTitle>
+      <DialogTitle>
+        <T
+          keyName="branch_merges_create_title"
+          params={{ name: sourceBranch?.name, branch: <BranchNameChipNode /> }}
+        />
+      </DialogTitle>
       <DialogContent data-cy="branch-merge-create-modal">
         <StandardForm<DryRunMergeBranchRequest>
-          initialValues={defaultValues}
+          initialValues={initialValues}
           onSubmit={handleSubmit}
           onCancel={close}
           validationSchema={Validation.BRANCH_MERGE(t)}
@@ -107,46 +109,14 @@ export const BranchMergeCreateModal: React.FC<Props> = ({
         >
           {(_) => (
             <FormLayout>
-              <Box>
-                <Box>
-                  <FieldLabel>
-                    <T keyName="project_branch_merge_name" />
-                  </FieldLabel>
-                  <TextField size="small" name="name" required={true} />
+              <SelectorColumn>
+                <FieldLabel>
+                  <T keyName="branch_merges_target_branch" />
+                </FieldLabel>
+                <Box data-cy="branch-merge-target-select">
+                  <BranchSelectField name="targetBranchId" />
                 </Box>
-                {branches.length < 2 && !branchesLoadable.isLoading && (
-                  <Placeholder variant="body2">
-                    <T keyName="branch_merges_not_enough_branches" />
-                  </Placeholder>
-                )}
-
-                <Box display="flex" columnGap={3}>
-                  <SelectorColumn>
-                    <FieldLabel>
-                      <T keyName="branch_merges_source_branch" />
-                    </FieldLabel>
-                    <Box data-cy="branch-merge-source-select">
-                      <BranchSelectField
-                        name="sourceBranchId"
-                        hideDefault={true}
-                      />
-                    </Box>
-                  </SelectorColumn>
-
-                  <Box mt={5}>
-                    <ArrowRight width={22} height={22} />
-                  </Box>
-
-                  <SelectorColumn>
-                    <FieldLabel>
-                      <T keyName="branch_merges_target_branch" />
-                    </FieldLabel>
-                    <Box data-cy="branch-merge-target-select">
-                      <BranchSelectField name="targetBranchId" />
-                    </Box>
-                  </SelectorColumn>
-                </Box>
-              </Box>
+              </SelectorColumn>
             </FormLayout>
           )}
         </StandardForm>

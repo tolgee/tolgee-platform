@@ -18,9 +18,10 @@ const StyledLabel = styled('div')`
 
 type Props = {
   branch?: BranchModel | number | null;
-  onSelect: (branch: BranchModel) => void;
+  onSelect?: (branch: BranchModel) => void;
   onDefaultValue?: (branch: BranchModel) => void;
   hideDefault?: boolean;
+  disabled?: boolean;
 };
 
 export const BranchSelect = ({
@@ -28,6 +29,7 @@ export const BranchSelect = ({
   onSelect,
   onDefaultValue,
   hideDefault,
+  disabled,
 }: Props) => {
   const project = useProject();
   const {
@@ -76,7 +78,7 @@ export const BranchSelect = ({
   }
 
   function select(item: BranchModel) {
-    onSelect(item);
+    onSelect?.(item);
     setSelected(item);
   }
 
@@ -97,6 +99,7 @@ export const BranchSelect = ({
         vertical: 'bottom',
         horizontal: 'left',
       }}
+      disabled={disabled}
     />
   );
 };
