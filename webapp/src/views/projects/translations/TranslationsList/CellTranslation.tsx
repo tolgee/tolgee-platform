@@ -28,6 +28,7 @@ type Props = {
   active: boolean;
   lastFocusable: boolean;
   className?: string;
+  readonly?: boolean;
 };
 
 export const CellTranslation: React.FC<Props> = ({
@@ -39,6 +40,7 @@ export const CellTranslation: React.FC<Props> = ({
   active,
   lastFocusable,
   className,
+  readonly,
 }) => {
   const cellRef = useRef<HTMLDivElement>(null);
 
@@ -65,8 +67,9 @@ export const CellTranslation: React.FC<Props> = ({
       className={clsx(
         {
           [CELL_PLAIN]: true,
-          [aiPlaygroundEnabled ? CELL_LOWERED : CELL_RAISED]: isEditing,
-          [CELL_CLICKABLE]: cellClickable,
+          [aiPlaygroundEnabled ? CELL_LOWERED : CELL_RAISED]:
+            !readonly && isEditing,
+          [CELL_CLICKABLE]: !readonly && cellClickable,
         },
         className
       )}
@@ -76,7 +79,7 @@ export const CellTranslation: React.FC<Props> = ({
       data-cy-lang={language.tag}
     >
       <CellStateBar state={state} onResize={handleResize} />
-      {isEditing && !aiPlaygroundEnabled ? (
+      {!readonly && isEditing && !aiPlaygroundEnabled ? (
         <TranslationWrite tools={tools} />
       ) : (
         <TranslationRead
@@ -85,6 +88,7 @@ export const CellTranslation: React.FC<Props> = ({
           tools={tools}
           width={width}
           colIndex={colIndex}
+          readonly={readonly}
         />
       )}
     </StyledCell>

@@ -214,10 +214,7 @@ declare namespace DataCy {
         "billing-usage-table-translations" |
         "billing_period_annual" |
         "branch-merge-create-modal" |
-        "branch-merge-source-select" |
         "branch-merge-target-select" |
-        "branches-tab-branches" |
-        "branches-tab-merges" |
         "cell-key-screenshot-dropzone" |
         "cell-key-screenshot-file-input" |
         "checkbox-group-multiselect" |
@@ -576,11 +573,9 @@ declare namespace DataCy {
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |
-        "project-branch-merge-delete" |
-        "project-branch-merge-item" |
-        "project-branch-merge-status" |
-        "project-branch-merges-add" |
-        "project-branch-merges-list" |
+        "project-branch-merge-accept" |
+        "project-branch-merge-conflict" |
+        "project-branch-merge-detail" |
         "project-dashboard-activity-chart" |
         "project-dashboard-activity-list" |
         "project-dashboard-base-word-count" |
@@ -638,7 +633,8 @@ declare namespace DataCy {
         "project-settings-branch-item-name" |
         "project-settings-branch-item-properties" |
         "project-settings-branches-add" |
-        "project-settings-branchs-remove-button" |
+        "project-settings-branches-merge-into-button" |
+        "project-settings-branches-remove-button" |
         "project-settings-button" |
         "project-settings-delete-button" |
         "project-settings-description" |

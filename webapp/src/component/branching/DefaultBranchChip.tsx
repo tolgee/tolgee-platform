@@ -4,5 +4,5 @@ import { useTranslate } from '@tolgee/react';
 
 export const DefaultBranchChip = () => {
   const { t } = useTranslate();
-  return <Chip size={'small'} label={t('default_branch')} />;
+  return <Chip size={'small'} label={t('default_branch')} color="primary" />;
 };
