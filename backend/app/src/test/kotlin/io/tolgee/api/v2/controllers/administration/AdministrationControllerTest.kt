@@ -1,7 +1,9 @@
 package io.tolgee.api.v2.controllers.administration
 
 import io.tolgee.development.testDataBuilder.data.AdministrationTestData
+import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.organization.OrganizationDto
+import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsCreated
@@ -12,11 +14,13 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
+import java.util.Date
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -28,6 +32,11 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
     testData = AdministrationTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.admin
+  }
+
+  @AfterEach
+  fun cleanup() {
+    currentDateProvider.forcedDate = null
   }
 
   @Test
@@ -64,6 +73,37 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
         isArray.hasSizeGreaterThan(1)
         node("[0]") {
           node("name").isEqualTo("John User")
+        }
+      }
+    }
+  }
+
+  @Test
+  fun `returns last activity`() {
+    val forcedDate = Date()
+    currentDateProvider.forcedDate = forcedDate
+
+    performAuthGet("/v2/administration/users?search=${userAccount!!.username}").andAssertThatJson {
+      node("_embedded.users") {
+        node("[0]") {
+          node("lastActivity").isNull()
+        }
+      }
+    }
+
+    loginAsUser(userAccount!!.username)
+    val projectRequest = CreateProjectRequest(
+      "just.to.record.activity",
+      listOf(LanguageRequest("cs", "čj", "cs")),
+      organizationId = testData.adminBuilder.defaultOrganizationBuilder.self.id,
+      icuPlaceholders = true
+    )
+    performAuthPost("/v2/projects", projectRequest)
+
+    performAuthGet("/v2/administration/users?search=${userAccount!!.username}").andAssertThatJson {
+      node("_embedded.users") {
+        node("[0]") {
+          node("lastActivity").isEqualTo(forcedDate.time)
         }
       }
     }

@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.dtos.queryResults.UserAccountAdministrationView
 import io.tolgee.dtos.queryResults.UserAccountView
 import io.tolgee.dtos.request.task.UserAccountFilters
 import io.tolgee.model.UserAccount
@@ -259,18 +260,53 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   fun findAllWithoutAnyOrganizationIds(): List<Long>
 
   @Query(
-    """
+    value = """
+    with lastActivityCTE as (
+      select ar.authorId as authorId, max(ar.timestamp) as lastActivity 
+      from ActivityRevision ar 
+      group by ar.authorId
+    )
+    select new io.tolgee.dtos.queryResults.UserAccountAdministrationView(
+      userAccount.id,
+      userAccount.username,
+      userAccount.name,
+      case when ev is not null then coalesce(ev.newEmail, userAccount.username) else null end,
+      userAccount.avatarHash,
+      userAccount.accountType,
+      userAccount.role,
+      userAccount.isInitialUser,
+      userAccount.totpKey,
+      userAccount.deletedAt,
+      userAccount.disabledAt,
+      la.lastActivity
+    )
     from UserAccount userAccount
-    where ((lower(userAccount.name)
-      like lower(concat('%', cast(:search as text),'%')) 
-      or lower(userAccount.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
+    left join userAccount.emailVerification ev
+    left join lastActivityCTE la on la.authorId = userAccount.id
+    where (
+      (:search is null or
+        :search = '' or
+        lower(userAccount.name) like lower(concat('%', :search, '%')) or
+        lower(userAccount.username) like lower(concat('%', :search, '%')))
+      )
       and userAccount.deletedAt is null
   """,
+    countQuery = """
+    select count(userAccount.id)
+    from UserAccount userAccount
+    where (
+      (:search is null or
+        :search = '' or
+        lower(userAccount.name) like lower(concat('%', :search, '%')) or
+        lower(userAccount.username) like lower(concat('%', :search, '%')))
+      )
+      and userAccount.deletedAt is null
+  """
   )
   fun findAllWithDisabledPaged(
     search: String?,
     pageable: Pageable,
-  ): Page<UserAccount>
+  ): Page<UserAccountAdministrationView>
 
   @Query(
     value = """

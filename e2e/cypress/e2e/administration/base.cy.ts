@@ -1,6 +1,12 @@
 /// <reference types="cypress" />
 
-import { login, setProperty } from '../../common/apiCalls/common';
+import {
+  createProject,
+  forceDate,
+  login,
+  releaseForcedDate,
+  setProperty,
+} from '../../common/apiCalls/common';
 import {
   assertMessage,
   confirmStandard,
@@ -12,7 +18,8 @@ import { administrationTestData } from '../../common/apiCalls/testData/testData'
 import { HOST } from '../../common/constants';
 import {
   getUserListItem,
-  visitAdministration,
+  visitAdministrationOrganizations,
+  visitAdministrationUsers,
 } from '../../common/administration';
 
 describe('Administration', () => {
@@ -20,7 +27,6 @@ describe('Administration', () => {
     administrationTestData.clean();
     administrationTestData.generate().then((res) => {});
     login('admin@admin.com');
-    visitAdministration();
   });
 
   afterEach(() => {
@@ -43,7 +49,7 @@ describe('Administration', () => {
   });
 
   it('can access organization projects', () => {
-    visitAdministration();
+    visitAdministrationOrganizations();
     getOrganizationListItem()
       .findDcy('administration-organizations-projects-button')
       .click();
@@ -52,7 +58,7 @@ describe('Administration', () => {
   });
 
   it('can access organization settings', () => {
-    visitAdministration();
+    visitAdministrationOrganizations();
     getOrganizationListItem()
       .findDcy('administration-organizations-settings-button')
       .click();
@@ -61,7 +67,7 @@ describe('Administration', () => {
   });
 
   it('can change user permission', () => {
-    visitAdministration();
+    visitAdministrationOrganizations();
     gcy('settings-menu-item').contains('Users').click();
     changeUserRole('John User', 'Admin');
     changeUserRole('John User', 'Supporter');
@@ -71,9 +77,32 @@ describe('Administration', () => {
       .should('have.attr', 'aria-disabled', 'true');
   });
 
+  describe('User last activity', () => {
+    afterEach(() => {
+      releaseForcedDate();
+    });
+
+    it("can display user's last activity", () => {
+      visitAdministrationUsers();
+      getUserListItem('Peter Administrator')
+        .findDcy('administration-user-activity')
+        .contains('No activity yet');
+
+      forceDate(new Date('2023-08-28T02:30').getTime()); // app displays local time, set this one in local timezone
+      createProject({
+        name: 'just.to.record.activity',
+        languages: [{ name: 'cs', originalName: 'čj', tag: 'cs' }],
+      });
+
+      gcy('settings-menu-item').contains('Users').click(); // reload
+      getUserListItem('Peter Administrator')
+        .findDcy('administration-user-activity')
+        .contains('Last activity on August 28, 2023 at 2:30 AM'); // this time was forced above
+    });
+  });
+
   it('can delete user', () => {
-    visitAdministration();
-    gcy('settings-menu-item').contains('Users').click();
+    visitAdministrationUsers();
     getUserListItem('John User').findDcy('administration-user-menu').click();
     cy.gcy('administration-user-delete-user').click();
     confirmStandard();

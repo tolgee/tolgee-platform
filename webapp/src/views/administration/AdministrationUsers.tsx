@@ -1,16 +1,13 @@
 import { useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { Box, Chip, ListItem, ListItemText, styled } from '@mui/material';
+import { styled } from '@mui/material';
 
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { LINKS } from 'tg.constants/links';
-import { DebugCustomerAccountButton } from './components/DebugCustomerAccountButton';
-import { RoleSelector } from './components/RoleSelector';
+import { AdministrationUserItem } from './components/AdministrationUserItem';
 import { BaseAdministrationView } from './components/BaseAdministrationView';
-import { OptionsButton } from './components/OptionsButton';
-import { MfaBadge } from 'tg.component/MfaBadge';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -66,23 +63,10 @@ export const AdministrationUsers = ({
             searchText={search}
             loadable={listPermitted}
             renderItem={(u) => (
-              <ListItem
-                data-cy="administration-users-list-item"
-                sx={{ display: 'grid', gridTemplateColumns: '1fr auto' }}
-              >
-                <ListItemText>
-                  {u.name} | {u.username} <Chip size="small" label={u.id} />
-                </ListItemText>
-                <Box display="flex" justifyContent="center" gap={1}>
-                  <MfaBadge enabled={u.mfaEnabled} />
-                  <DebugCustomerAccountButton userId={u.id} />
-                  <RoleSelector
-                    user={u}
-                    onSuccess={() => listPermitted.refetch()}
-                  />
-                  <OptionsButton user={u} />
-                </Box>
-              </ListItem>
+              <AdministrationUserItem
+                user={u}
+                onRoleSelect={() => listPermitted.refetch()}
+              ></AdministrationUserItem>
             )}
           />
         </BaseAdministrationView>

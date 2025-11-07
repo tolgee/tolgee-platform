@@ -6,7 +6,7 @@ import 'cypress-file-upload';
 import { administrationTestData } from '../../common/apiCalls/testData/testData';
 import {
   getUserListItem,
-  visitAdministration,
+  visitAdministrationUsers,
 } from '../../common/administration';
 import { createProject } from '../../common/projects';
 
@@ -15,7 +15,7 @@ describe('Debug customer account', () => {
     administrationTestData.clean();
     administrationTestData.generate().then((res) => {});
     login('admin@admin.com');
-    visitAdministration();
+    visitAdministrationUsers();
   });
 
   afterEach(() => {
@@ -23,7 +23,7 @@ describe('Debug customer account', () => {
   });
 
   it('can login as user and exit', () => {
-    debugUserAccount();
+    getUserListItem().findDcy('administration-user-debug-account').click();
     assertDebugFrameVisible();
     gcy('administration-debug-customer-exit-button').click();
     assertDebugFrameNotVisible();
@@ -31,7 +31,7 @@ describe('Debug customer account', () => {
   });
 
   it('can create project in users organization', () => {
-    debugUserAccount();
+    getUserListItem().findDcy('administration-user-debug-account').click();
     cy.waitForDom();
     gcy('organization-switch').contains('John User');
     createProject('Test project', 'John User');
@@ -47,10 +47,4 @@ function assertDebugFrameVisible() {
 function assertDebugFrameNotVisible() {
   gcy('administration-frame').should('not.exist');
   gcy('administration-debug-customer-account-message').should('not.exist');
-}
-
-function debugUserAccount() {
-  visitAdministration();
-  gcy('settings-menu-item').contains('Users').click();
-  getUserListItem().findDcy('administration-user-debug-account').click();
 }

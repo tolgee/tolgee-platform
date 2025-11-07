@@ -192,7 +192,10 @@ export type EntityModification<T> = T extends keyof schemas
 
 export type WebsocketEvent<Data> = {
   activityId: number;
-  actor: { type: 'user'; data: components['schemas']['UserAccountModel'] };
+  actor: {
+    type: 'user';
+    data: components['schemas']['SimpleUserAccountModel'];
+  };
   data: Data;
 };
 

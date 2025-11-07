@@ -4074,15 +4074,15 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    PagedModelUserAccountInProjectModel: {
+    PagedModelUserAccountAdministrationModel: {
       _embedded?: {
-        users?: components["schemas"]["UserAccountInProjectModel"][];
+        users?: components["schemas"]["UserAccountAdministrationModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    PagedModelUserAccountModel: {
+    PagedModelUserAccountInProjectModel: {
       _embedded?: {
-        users?: components["schemas"]["UserAccountModel"][];
+        users?: components["schemas"]["UserAccountInProjectModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -6257,6 +6257,21 @@ export interface components {
        */
       name?: string;
     };
+    UserAccountAdministrationModel: {
+      avatar?: components["schemas"]["Avatar"];
+      deleted: boolean;
+      disabled: boolean;
+      emailAwaitingVerification?: string;
+      /** @enum {string} */
+      globalServerRole: "USER" | "ADMIN" | "SUPPORTER";
+      /** Format: int64 */
+      id: number;
+      /** Format: date-time */
+      lastActivity?: string;
+      mfaEnabled: boolean;
+      name?: string;
+      username: string;
+    };
     UserAccountInProjectModel: {
       avatar?: components["schemas"]["Avatar"];
       /**
@@ -6272,19 +6287,6 @@ export interface components {
       organizationBasePermission: components["schemas"]["PermissionModel"];
       /** @enum {string} */
       organizationRole?: "MEMBER" | "OWNER" | "MAINTAINER";
-      username: string;
-    };
-    UserAccountModel: {
-      avatar?: components["schemas"]["Avatar"];
-      deleted: boolean;
-      disabled: boolean;
-      emailAwaitingVerification?: string;
-      /** @enum {string} */
-      globalServerRole: "USER" | "ADMIN" | "SUPPORTER";
-      /** Format: int64 */
-      id: number;
-      mfaEnabled: boolean;
-      name?: string;
       username: string;
     };
     UserAccountWithOrganizationRoleModel: {
@@ -6960,7 +6962,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelUserAccountModel"];
+          "application/json": components["schemas"]["PagedModelUserAccountAdministrationModel"];
         };
       };
       /** Bad Request */

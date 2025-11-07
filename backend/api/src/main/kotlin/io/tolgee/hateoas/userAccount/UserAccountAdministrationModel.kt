@@ -4,9 +4,10 @@ import io.tolgee.dtos.Avatar
 import io.tolgee.model.UserAccount
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
+import java.util.Date
 
 @Relation(collectionRelation = "users", itemRelation = "user")
-data class UserAccountModel(
+data class UserAccountAdministrationModel(
   val id: Long,
   val username: String,
   val name: String?,
@@ -16,4 +17,5 @@ data class UserAccountModel(
   val mfaEnabled: Boolean,
   val deleted: Boolean,
   val disabled: Boolean,
-) : RepresentationModel<UserAccountModel>()
+  val lastActivity: Date?,
+) : RepresentationModel<UserAccountAdministrationModel>()
