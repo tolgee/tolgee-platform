@@ -90,6 +90,7 @@ class BranchServiceImpl(
     return Branch().apply {
       this.project = project
       this.name = name
+      this.author = authenticationFacade.authenticatedUserEntity
     }
   }
 
@@ -105,7 +106,7 @@ class BranchServiceImpl(
   override fun dryRunMergeBranch(projectId: Long, request: DryRunMergeBranchRequest): BranchMerge {
     val sourceBranch = getBranch(projectId, request.sourceBranchId)
     val targetBranch = getBranch(projectId, request.targetBranchId)
-    return branchMergeService.dryRun(request.name, sourceBranch, targetBranch)
+    return branchMergeService.dryRun(sourceBranch, targetBranch)
   }
 
   override fun getBranchMergeView(projectId: Long, mergeId: Long): BranchMergeView {

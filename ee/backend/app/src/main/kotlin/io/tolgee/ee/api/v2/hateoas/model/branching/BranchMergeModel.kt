@@ -9,8 +9,6 @@ import org.springframework.hateoas.server.core.Relation
 open class BranchMergeModel(
   @Schema(description = "Branch merge id")
   val id: Long,
-  @Schema(description = "Branch merge name")
-  val name: String,
   @Schema(description = "Source branch")
   val sourceBranch: BranchModel,
   @Schema(description = "Target branch")
