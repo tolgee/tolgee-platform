@@ -2,11 +2,7 @@
 import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoView';
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { T, useTranslate } from '@tolgee/react';
-import {
-  BookClosed,
-  ClipboardCheck,
-  GitBranch02,
-} from '@untitled-ui/icons-react';
+import { BookClosed, ClipboardCheck } from '@untitled-ui/icons-react';
 import { Link, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { Badge, Box, MenuItem } from '@mui/material';
 
@@ -73,6 +69,8 @@ import { OperationAssignTranslationLabel } from '../ee/batchOperations/Operation
 import { OperationUnassignTranslationLabel } from '../ee/batchOperations/OperationUnassignTranslationLabel';
 import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
 import { BranchesView } from '../ee/branching/BranchesView';
+import { BranchMergePage } from '../ee/branching/BranchMergePage';
+import { Branch } from '../component/CustomIcons';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
@@ -215,6 +213,9 @@ export const routes = {
       </Route>
       <Route path={LINKS.PROJECT_BRANCHES_MERGES.template}>
         <BranchesView />
+      </Route>
+      <Route path={LINKS.PROJECT_BRANCHES_MERGE.template}>
+        <BranchMergePage />
       </Route>
       <Route path={LINKS.PROJECT_BRANCHES.template}>
         <BranchesView />
@@ -408,7 +409,7 @@ export const useAddProjectMenuItems = () => {
         id: 'branches',
         condition: ({ satisfiesPermission }) => true, // TODO change to permission
         link: LINKS.PROJECT_BRANCHES,
-        icon: GitBranch02,
+        icon: Branch,
         text: t('project_menu_branches'),
         dataCy: 'project-menu-item-branches',
         matchAsPrefix: true,
