@@ -235,8 +235,10 @@ export const getTheme = (mode: PaletteMode) => {
             },
           },
           sizeSmall: {
-            minHeight: 32,
-            padding: '4px 16px',
+            minHeight: 30,
+            padding: '4px 10px',
+            fontSize: '13px',
+            lineHeight: 'normal',
           },
         },
       },
