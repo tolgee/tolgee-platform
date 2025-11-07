@@ -536,11 +536,6 @@ export class Validation {
 
   static readonly BRANCH_MERGE = (t: TranslateFunction) =>
     Yup.object({
-      name: Yup.string().required(t('branch_merges_name_required')),
-      sourceBranchId: Yup.number()
-        .nullable()
-        .typeError(t('branch_merges_select_branch_error'))
-        .required(t('branch_merges_select_branch_error')),
       targetBranchId: Yup.number()
         .nullable()
         .typeError(t('branch_merges_select_branch_error'))
