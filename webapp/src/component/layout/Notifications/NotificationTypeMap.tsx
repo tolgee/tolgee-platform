@@ -4,6 +4,9 @@ import { TaskClosedItem } from 'tg.component/layout/Notifications/TaskClosedItem
 import { MfaEnabledItem } from 'tg.component/layout/Notifications/MfaEnabledItem';
 import { MfaDisabledItem } from 'tg.component/layout/Notifications/MfaDisabledItem';
 import { PasswordChangedItem } from 'tg.component/layout/Notifications/PasswordChangedItem';
+import { KeyCreatedItem } from 'tg.component/layout/Notifications/KeyCreatedItem';
+import { StringTranslatedItem } from 'tg.component/layout/Notifications/StringTranslatedItem';
+import { StringReviewedItem } from 'tg.component/layout/Notifications/StringReviewedItem';
 import { components } from 'tg.service/apiSchema.generated';
 import { NotificationItemProps } from 'tg.component/layout/Notifications/NotificationItem';
 import React from 'react';
@@ -20,4 +23,7 @@ export const notificationComponents: NotificationsComponentMap = {
   MFA_ENABLED: MfaEnabledItem,
   MFA_DISABLED: MfaDisabledItem,
   PASSWORD_CHANGED: PasswordChangedItem,
+  KEY_CREATED: KeyCreatedItem,
+  STRING_TRANSLATED: StringTranslatedItem,
+  STRING_REVIEWED: StringReviewedItem,
 };

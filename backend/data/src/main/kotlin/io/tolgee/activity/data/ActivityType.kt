@@ -74,4 +74,7 @@ enum class ActivityType(
   TASK_REOPEN,
   TASK_KEY_UPDATE(hideInList = true),
   ORDER_TRANSLATION,
+  ACTIVITY_NOTIFICATION_KEY_CREATED(onlyCountsInList = true, hideInList = true),
+  ACTIVITY_NOTIFICATION_STRING_TRANSLATED(onlyCountsInList = true, hideInList = true),
+  ACTIVITY_NOTIFICATION_STRING_REVIEWED(onlyCountsInList = true, hideInList = true),
 }

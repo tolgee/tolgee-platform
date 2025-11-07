@@ -79,4 +79,19 @@ enum class BatchJobType(
     maxRetries = 3,
     processor = TrialExpirationNoticeProcessor::class,
   ),
+  NOTIFY_KEY_CREATED(
+    activityType = ActivityType.ACTIVITY_NOTIFICATION_KEY_CREATED,
+    maxRetries = 3,
+    processor = ActivityNotificationChunkProcessor::class,
+  ),
+  NOTIFY_STRING_TRANSLATED(
+    activityType = ActivityType.SET_TRANSLATIONS,
+    maxRetries = 3,
+    processor = ActivityNotificationChunkProcessor::class,
+  ),
+  NOTIFY_STRING_REVIEWED(
+    activityType = ActivityType.SET_TRANSLATION_STATE,
+    maxRetries = 3,
+    processor = ActivityNotificationChunkProcessor::class,
+  ),
 }

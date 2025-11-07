@@ -79,6 +79,33 @@ export const NotificationsView: React.FC = () => {
             afterChange={() => settingsLoadable.refetch()}
           />
         )}
+        <SettingsRow
+          description={t('settings_notifications_keys_added_description')}
+          subdescription={t('settings_notifications_keys_added_subdescription')}
+          group="KEYS"
+          channels={settings.keysAdded}
+          afterChange={() => settingsLoadable.refetch()}
+        />
+        <SettingsRow
+          description={t(
+            'settings_notifications_strings_translated_description'
+          )}
+          subdescription={t(
+            'settings_notifications_strings_translated_subdescription'
+          )}
+          group="TRANSLATIONS"
+          channels={settings.stringsTranslated}
+          afterChange={() => settingsLoadable.refetch()}
+        />
+        <SettingsRow
+          description={t('settings_notifications_strings_reviewed_description')}
+          subdescription={t(
+            'settings_notifications_strings_reviewed_subdescription'
+          )}
+          group="REVIEWS"
+          channels={settings.stringsReviewed}
+          afterChange={() => settingsLoadable.refetch()}
+        />
       </StyledRoot>
     </BaseUserSettingsView>
   );

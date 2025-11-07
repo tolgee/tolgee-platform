@@ -17,6 +17,9 @@ class NotificationSettingsModelAssembler :
     NotificationSettingModel(
       accountSecurity = view.groupModel(NotificationTypeGroup.ACCOUNT_SECURITY),
       tasks = view.groupModel(NotificationTypeGroup.TASKS),
+      keysAdded = view.groupModel(NotificationTypeGroup.KEYS),
+      stringsTranslated = view.groupModel(NotificationTypeGroup.TRANSLATIONS),
+      stringsReviewed = view.groupModel(NotificationTypeGroup.REVIEWS),
     )
 
   private fun List<NotificationSetting>.groupModel(group: NotificationTypeGroup) =
