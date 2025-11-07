@@ -12,7 +12,6 @@ class BranchMergeModelAssembler(
   override fun toModel(entity: BranchMergeView): BranchMergeModel {
     return BranchMergeModel(
       id = entity.id,
-      name = entity.name,
       sourceBranch = branchModelAssembler.toModel(entity.sourceBranch),
       targetBranch = branchModelAssembler.toModel(entity.targetBranch),
       outdated = !entity.revisionsMatch,

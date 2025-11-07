@@ -22,7 +22,6 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
     """
     select new io.tolgee.dtos.queryResults.branching.BranchMergeView(
       bm.id,
-      bm.name,
       sb,
       tb,
       case when sb.revision = bm.sourceRevision and tb.revision = bm.targetRevision then true else false end,
@@ -47,7 +46,6 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
     value = """
     select new io.tolgee.dtos.queryResults.branching.BranchMergeView(
       bm.id,
-      bm.name,
       sb,
       tb,
       case when sb.revision = bm.sourceRevision and tb.revision = bm.targetRevision then true else false end,

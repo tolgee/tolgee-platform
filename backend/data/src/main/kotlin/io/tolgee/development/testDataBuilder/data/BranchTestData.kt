@@ -99,7 +99,6 @@ class BranchTestData(
     }.self
 
     featureBranchMerge = addBranchMerge {
-      name = "feature-to-main"
       sourceBranch = featureBranch
       targetBranch = mainBranch
       sourceRevision = 15
