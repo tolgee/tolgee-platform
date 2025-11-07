@@ -1,3 +1,10 @@
+## [3.138.2](https://github.com/tolgee/tolgee-platform/compare/v3.138.1...v3.138.2) (2025-11-07)
+
+
+### Bug Fixes
+
+* update glossary documentation links and temporarily hide import section ([#3278](https://github.com/tolgee/tolgee-platform/issues/3278)) ([1bcaf4e](https://github.com/tolgee/tolgee-platform/commit/1bcaf4e630485b162a18b57d20c55fe647867d61))
+
 ## [3.138.1](https://github.com/tolgee/tolgee-platform/compare/v3.138.0...v3.138.1) (2025-11-06)
 
 
