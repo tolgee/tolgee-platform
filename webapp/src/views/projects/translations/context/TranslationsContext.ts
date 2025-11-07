@@ -342,9 +342,7 @@ export const [
     },
   };
 
-  const dataReady = Boolean(
-    languagesLoadable.data && translationService.fixedTranslations
-  );
+  const dataReady = languagesLoadable.isFetched;
 
   const state = {
     baseLanguage: props.baseLang!,

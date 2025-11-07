@@ -1461,8 +1461,6 @@ export interface components {
        * @description Key unresoled conflicts count
        */
       keyUnresolvedConflictsCount: number;
-      /** @description Branch merge name */
-      name: string;
       /** @description Is merge outdated. If true, it means, that either source or target branch data were changed */
       outdated: boolean;
       /** @description Source branch */
@@ -1480,6 +1478,13 @@ export interface components {
     BranchModel: {
       /** @description Is branch active */
       active: boolean;
+      /** @description Author of the branch */
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      /**
+       * Format: int64
+       * @description Date of branch creation
+       */
+      createdAt?: number;
       /**
        * Format: int64
        * @description Branch id
@@ -2283,8 +2288,6 @@ export interface components {
       state: string;
     };
     DryRunMergeBranchRequest: {
-      /** @description Name of branch merge */
-      name: string;
       /**
        * Format: int64
        * @description Source branch id

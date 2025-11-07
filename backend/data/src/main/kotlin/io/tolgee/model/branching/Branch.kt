@@ -4,6 +4,7 @@ import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.UserAccount
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -78,6 +79,10 @@ class Branch(
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "project_id")
   lateinit var project: Project
+
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  @JoinColumn(name = "author_id", nullable = true)
+  var author: UserAccount? = null
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "origin_branch_id")

@@ -37,9 +37,8 @@ class BranchMergeService(
     }
   }
 
-  fun dryRun(name: String, sourceBranch: Branch, targetBranch: Branch): BranchMerge {
+  fun dryRun(sourceBranch: Branch, targetBranch: Branch): BranchMerge {
     val branchMerge = BranchMerge().apply {
-      this.name = name
       this.sourceBranch = sourceBranch
       this.targetBranch = targetBranch
       this.sourceRevision = sourceBranch.revision

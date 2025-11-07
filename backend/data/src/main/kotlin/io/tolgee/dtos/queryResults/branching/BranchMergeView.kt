@@ -4,7 +4,6 @@ import io.tolgee.model.branching.Branch
 
 data class BranchMergeView(
   val id: Long,
-  val name: String,
   val sourceBranch: Branch,
   val targetBranch: Branch,
   val revisionsMatch: Boolean,

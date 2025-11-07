@@ -16,3 +16,4 @@ export { default as CheckBoxOutlineBlank } from '../svgs/icons/check-box-outline
 export { default as Google } from '../svgs/icons/google.svg?react';
 export { default as Sort } from '../svgs/icons/sort.svg?react';
 export { default as CopyBase } from '../svgs/icons/copy-base.svg?react';
+export { default as Branch } from '../svgs/icons/branch.svg?react';

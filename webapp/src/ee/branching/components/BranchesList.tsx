@@ -10,6 +10,9 @@ import { components } from 'tg.service/apiSchema.generated';
 import { BranchModal } from 'tg.ee.module/branching/components/BranchModal';
 import { BranchFormValues } from 'tg.ee.module/branching/components/BranchForm';
 import { confirmation } from 'tg.hooks/confirmation';
+import { BranchMergeCreateModal } from 'tg.ee.module/branching/components/merge/BranchMergeCreateModal';
+import { useHistory } from 'react-router-dom';
+import { LINKS } from 'tg.constants/links';
 
 const TableGrid = styled('div')`
   display: grid;
@@ -17,14 +20,21 @@ const TableGrid = styled('div')`
 `;
 
 type BranchModel = components['schemas']['BranchModel'];
+type DryRunMergeBranchRequest =
+  components['schemas']['DryRunMergeBranchRequest'];
 
 export const BranchesList = () => {
   const project = useProject();
   const { t } = useTranslate();
+  const history = useHistory();
+
   const [addBranchOpen, setAddBranchOpen] = useState(false);
+  const [mergeIntoOpen, setMergeIntoOpen] = useState(false);
+  const [mergeIntoSourceBranch, setMergeIntoSourceBranch] =
+    useState<BranchModel | null>(null);
   const [page, setPage] = useState(0);
 
-  function handleClose() {
+  function handleCloseMergeIntoModal() {
     setAddBranchOpen(false);
   }
 
@@ -34,13 +44,18 @@ export const BranchesList = () => {
     invalidatePrefix: '/v2/projects/{projectId}/branches',
   });
 
+  const createMergeMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/merge/preview',
+    method: 'post',
+  });
+
   const deleteMutation = useApiMutation({
     url: '/v2/projects/{projectId}/branches/{branchId}',
     method: 'delete',
     invalidatePrefix: '/v2/projects/{projectId}/branches',
   });
 
-  const submit = async (values: BranchFormValues) => {
+  const createBranchSubmit = async (values: BranchFormValues) => {
     await createMutation.mutateAsync({
       path: { projectId: project.id },
       content: {
@@ -50,6 +65,24 @@ export const BranchesList = () => {
       },
     });
     setAddBranchOpen(false);
+  };
+
+  const mergeIntoSubmit = async (values: DryRunMergeBranchRequest) => {
+    const response = await createMergeMutation.mutateAsync({
+      path: { projectId: project.id },
+      content: {
+        'application/json': {
+          sourceBranchId: values.sourceBranchId,
+          targetBranchId: values.targetBranchId,
+        },
+      },
+    });
+    history.push(
+      LINKS.PROJECT_BRANCHES_MERGE.build({
+        projectId: project.id,
+        mergeId: response.id,
+      })
+    );
   };
 
   const deleteBranch = async (branch: BranchModel) => {
@@ -67,6 +100,11 @@ export const BranchesList = () => {
         });
       },
     });
+  };
+
+  const handleOpenMergeIntoModal = (branch: BranchModel) => {
+    setMergeIntoOpen(true);
+    setMergeIntoSourceBranch(branch);
   };
 
   const canEditBranches = true; // TODO satisfiesPermission('branches.edit')
@@ -91,7 +129,7 @@ export const BranchesList = () => {
           justifyContent="space-between"
           alignItems="center"
         >
-          <Typography variant="h5">
+          <Typography variant="h4">
             <T keyName="branches_title" />
           </Typography>
           {canEditBranches && (
@@ -123,12 +161,26 @@ export const BranchesList = () => {
             <BranchItem
               branch={l}
               onRemove={!l.isDefault ? deleteBranch : undefined}
+              onMergeInto={!l.isDefault && (() => handleOpenMergeIntoModal(l))}
             />
           )}
         />
       </Box>
-      {addBranchOpen && branchesLoadable.data && (
-        <BranchModal open={addBranchOpen} close={handleClose} submit={submit} />
+      {branchesLoadable.data && (
+        <>
+          <BranchModal
+            open={addBranchOpen}
+            close={handleCloseMergeIntoModal}
+            submit={createBranchSubmit}
+          />
+          <BranchMergeCreateModal
+            open={mergeIntoOpen}
+            close={() => setMergeIntoOpen(false)}
+            submit={mergeIntoSubmit}
+            saveActionLoadable={createMergeMutation}
+            sourceBranch={mergeIntoSourceBranch}
+          />
+        </>
       )}
     </Box>
   );

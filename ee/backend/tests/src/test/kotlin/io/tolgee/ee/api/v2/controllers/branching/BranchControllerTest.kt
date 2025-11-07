@@ -345,7 +345,6 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val sourceBranch = testData.featureBranch.refresh()
     val targetBranch = testData.mainBranch.refresh()
     val branchMerge = testData.projectBuilder.addBranchMerge {
-      name = "merge-branch"
       this.sourceBranch = sourceBranch
       this.targetBranch = targetBranch
       sourceRevision = sourceBranch.revision

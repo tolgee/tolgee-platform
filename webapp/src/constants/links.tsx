@@ -64,6 +64,7 @@ export enum PARAMS {
   PLAN_ID = 'planId',
   TA_ID = 'taId',
   TRANSLATIONS_BRANCH = 'branch',
+  MERGE_ID = 'mergeId',
 }
 
 export class LINKS {
@@ -365,7 +366,12 @@ export class LINKS {
 
   static PROJECT_BRANCHES_MERGES = Link.ofParent(
     LINKS.PROJECT_BRANCHES,
-    'merge'
+    'merges'
+  );
+
+  static PROJECT_BRANCHES_MERGE = Link.ofParent(
+    LINKS.PROJECT_BRANCHES,
+    'merge/' + p(PARAMS.MERGE_ID)
   );
 
   static PROJECT_EXPORT = Link.ofParent(LINKS.PROJECT, 'export');
