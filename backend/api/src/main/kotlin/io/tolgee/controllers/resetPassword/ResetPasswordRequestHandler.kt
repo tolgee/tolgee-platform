@@ -47,15 +47,12 @@ class ResetPasswordRequestHandler(
       EmailParams(
         to = request.email,
         subject = if (isInitial) "Initial password configuration" else "Password reset",
-        text =
+        header = "Password reset",
+          text =
           """
-          Hello! 👋<br/><br/>
           ${if (isInitial) "To set a password for your account, <b>follow this link</b>:<br/>" else "To reset your password, <b>follow this link</b>:<br/>"}
           <a href="$url">$url</a><br/><br/>
           If you have not requested this e-mail, please ignore it.<br/><br/>
-          
-          Regards,<br/>
-          Tolgee
           """.trimIndent(),
       )
 
@@ -67,15 +64,12 @@ class ResetPasswordRequestHandler(
       EmailParams(
         to = request.email,
         subject = "Password reset - SSO managed account",
+        header = "Password reset",
         text =
           """
-          Hello! 👋<br/><br/>
           We received a request to reset the password for your account. However, your account is managed by your organization and uses a single sign-on (SSO) service to log in.<br/><br/>
           To access your account, please use the "SSO Login" button on the Tolgee login page. No password reset is needed.<br/><br/>
           If you did not make this request, you may safely ignore this email.<br/><br/>
-          
-          Regards,<br/>
-          Tolgee
           """.trimIndent(),
       )
 
