@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import com.posthog.java.PostHog
+import com.posthog.PostHogInterface
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andAssertResponse
@@ -47,7 +47,7 @@ class PublicControllerTest : AbstractControllerTest() {
 
   @MockBean
   @Autowired
-  lateinit var postHog: PostHog
+  lateinit var postHog: PostHogInterface
 
   @Test
   fun `creates organization`() {

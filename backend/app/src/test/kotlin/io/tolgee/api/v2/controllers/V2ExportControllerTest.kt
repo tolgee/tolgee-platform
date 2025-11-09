@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.posthog.java.PostHog
+import com.posthog.PostHog
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder

@@ -1,6 +1,6 @@
 package io.tolgee.activity
 
-import com.posthog.java.PostHog
+import com.posthog.PostHog
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobService
 import io.tolgee.development.testDataBuilder.data.BaseTestData

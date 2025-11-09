@@ -1,6 +1,8 @@
 package io.tolgee.configuration
 
-import com.posthog.java.PostHog
+import com.posthog.server.PostHog
+import com.posthog.server.PostHogConfig
+import com.posthog.server.PostHogInterface
 import io.tolgee.configuration.tolgee.PostHogProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -9,10 +11,13 @@ import org.springframework.context.annotation.Configuration
 class PostHogConfiguration(
   private val properties: PostHogProperties,
 ) {
-  @Bean(destroyMethod = "shutdown")
-  fun postHog(): PostHog? {
+  @Bean(destroyMethod = "close")
+  fun postHog(): PostHogInterface? {
     return properties.apiKey?.let { postHogApiKey ->
-      PostHog.Builder(postHogApiKey).also { builder -> properties.host?.let { builder.host(it) } }.build()
+      val configBuilder = PostHogConfig.builder(postHogApiKey)
+      properties.host?.let { configBuilder.host(it) }
+      val config = configBuilder.build()
+      PostHog.with(config)
     }
   }
 }

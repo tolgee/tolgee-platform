@@ -1,10 +1,12 @@
 package io.tolgee.component.reporting
 
-import com.posthog.java.PostHog
+import com.posthog.server.PostHogInterface
+import io.tolgee.component.reporting.PostHogGroupIdentifier.Companion.GROUP_TYPE
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.filterValueNotNull
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -14,11 +16,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class PostHogBusinessEventReporter(
-  private val postHog: PostHog?,
+  private val postHog: PostHogInterface?,
   private val projectService: ProjectService,
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,
   private val entityManager: EntityManager,
+  private var postHogGroupIdentifier: PostHogGroupIdentifier?
 ) {
   @Lazy
   @Autowired
@@ -52,19 +55,22 @@ class PostHogBusinessEventReporter(
     val id = data.userAccountDto?.id ?: data.instanceId ?: data.anonymousUserId
     val setEntry = getIdentificationMapForPostHog(data)
 
+    val map = mapOf(
+      "${'$'}groups" to mapOf(
+        "project" to data.projectDto?.id,
+        GROUP_TYPE to data.organizationId,
+      ),
+      "organizationId" to data.organizationId,
+      "organizationName" to data.organizationName,
+    ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap()) + setEntry
+
     postHog?.capture(
       id.toString(),
       data.eventName,
-      mapOf(
-        "${'$'}groups" to
-          mapOf(
-            "project" to data.projectDto?.id,
-            "organization" to data.organizationId,
-          ),
-        "organizationId" to data.organizationId,
-        "organizationName" to data.organizationName,
-      ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap()) + setEntry,
+      map.filterValueNotNull()
     )
+
+    postHogGroupIdentifier?.identifyOrganization(organizationId = data.organizationId ?: return)
   }
 
   /**

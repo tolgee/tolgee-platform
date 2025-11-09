@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers
 
-import com.posthog.java.PostHog
+import com.posthog.PostHogInterface
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.AuthorizedRequestFactory
@@ -24,7 +24,7 @@ class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @MockBean
   @Autowired
-  lateinit var postHog: PostHog
+  lateinit var postHog: PostHogInterface
 
   @BeforeEach
   fun setup() {
