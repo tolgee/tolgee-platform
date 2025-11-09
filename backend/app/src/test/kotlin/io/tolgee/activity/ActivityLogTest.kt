@@ -1,6 +1,6 @@
 package io.tolgee.activity
 
-import com.posthog.PostHog
+import com.posthog.server.PostHog
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobService
 import io.tolgee.development.testDataBuilder.data.BaseTestData
@@ -144,12 +144,12 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
       },
     ).andIsOk
 
-    var params: Map<String, Any?> = emptyMap()
+    var params: Map<String, Any> = emptyMap()
     waitForNotThrowing(timeout = 10000) {
       verify(postHog, times(1)).capture(
-        any(),
+        any<String>(),
         eq("SET_TRANSLATIONS"),
-        argThat {
+        argThat<Map<String, Any>> {
           params = this
           true
         },

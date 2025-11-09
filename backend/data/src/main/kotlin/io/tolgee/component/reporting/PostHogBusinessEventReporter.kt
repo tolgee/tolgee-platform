@@ -1,5 +1,6 @@
 package io.tolgee.component.reporting
 
+import com.posthog.server.PostHog
 import com.posthog.server.PostHogInterface
 import io.tolgee.component.reporting.PostHogGroupIdentifier.Companion.GROUP_TYPE
 import io.tolgee.dtos.cacheable.UserAccountDto
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PostHogBusinessEventReporter(
-  private val postHog: PostHogInterface?,
+  private val postHog: PostHog?,
   private val projectService: ProjectService,
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,

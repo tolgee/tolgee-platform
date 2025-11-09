@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.posthog.PostHog
+import com.posthog.server.PostHog
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
@@ -24,6 +24,7 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.addDays
 import io.tolgee.util.addSeconds
 import net.javacrumbs.jsonunit.assertj.assertThatJson
+import org.assertj.core.api.AbstractIntegerAssert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -96,12 +97,12 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         performExport()
         performExport()
         waitForNotThrowing(pollTime = 50, timeout = 3000) {
-          verify(postHog, times(1)).capture(any(), eq("EXPORT"), any())
+          assertPostHogCaptureCalledTimes(1)
         }
         setForcedDate(currentDateProvider.date.addDays(1).addSeconds(1))
         performExport()
         waitForNotThrowing(pollTime = 50, timeout = 3000) {
-          verify(postHog, times(2)).capture(any(), eq("EXPORT"), any())
+          assertPostHogCaptureCalledTimes(2)
         }
       } finally {
         Mockito.reset(postHog)
@@ -386,4 +387,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       }
     }
   }
+
+  private fun assertPostHogCaptureCalledTimes(i: Int): AbstractIntegerAssert<*>? =
+    Mockito.mockingDetails(postHog).invocations.filter { it.method.name == "capture" }.size.assert.isEqualTo(i)
 }
