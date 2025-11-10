@@ -6,8 +6,6 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
-import io.tolgee.model.enums.BranchKeyMergeChangeType
-import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.util.addDays
 
 class BranchTestData(
@@ -15,8 +13,9 @@ class BranchTestData(
 ) : BaseTestData("branch", "Project with branches") {
   lateinit var mainBranch: Branch
   lateinit var featureBranch: Branch
+  lateinit var mergeBranch: Branch
   lateinit var secondProject: Project
-  lateinit var featureBranchMerge: BranchMerge
+  lateinit var mergedBranchMerge: BranchMerge
   init {
     this.root.apply {
       projectBuilder.apply {
@@ -59,6 +58,16 @@ class BranchTestData(
         revision = 15
       }.build {
         featureBranch = self
+        addBranch {
+          name = "merge-branch"
+          project = projectBuilder.self
+          isProtected = false
+          isDefault = false
+          originBranch = this
+          revision = 20
+        }.build {
+          mergeBranch = self
+        }
       }
       addBranch {
         name = "merged-and-deleted-branch"
@@ -72,43 +81,11 @@ class BranchTestData(
   }
 
   private fun ProjectBuilder.addMergeData() {
-    addKey {
-      name = "test-key-to-delete"
-      branch = mainBranch
-    }.build {
-      addTranslation("en", "main-key-target-translation-to-delete")
-      addMeta {
-        description = "Main key description to delete"
-        addComment {
-          text = "Main key comment to delete"
-        }
-      }
-    }
-
-    val featureKey = addKey {
-      name = "key-to-add"
-      branch = featureBranch
-    }.build {
-      addTranslation("en", "key-to-add-translation")
-      addMeta {
-        description = "Feature key description to add"
-        addComment {
-          text = "Feature key comment to add"
-        }
-      }
-    }.self
-
-    featureBranchMerge = addBranchMerge {
-      sourceBranch = featureBranch
+    mergedBranchMerge = addBranchMerge {
+      sourceBranch = mergeBranch
       targetBranch = mainBranch
       sourceRevision = 15
       targetRevision = 10
-    }.build {
-      addChange {
-        sourceKey = featureKey
-        change = BranchKeyMergeChangeType.ADD
-        resolution = BranchKeyMergeResolutionType.SOURCE
-      }
     }.self
   }
 }

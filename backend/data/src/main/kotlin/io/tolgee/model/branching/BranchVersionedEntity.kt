@@ -7,7 +7,7 @@ package io.tolgee.model.branching
  * across different branches. This includes entities that are directly or indirectly related to [io.tolgee.model.key.Key] entities
  * that support branching.
  */
-interface BranchVersionedEntity<T> {
+interface BranchVersionedEntity<T, U> {
 
   /**
    * Resolves the unique identifier of the branch associated with the entity in the branching model.
@@ -17,20 +17,23 @@ interface BranchVersionedEntity<T> {
   fun resolveKeyId(): Long?
 
   /**
-   * Determines if an entity has relevant changes in data in terms of branch versioning.
+   * Determines whether the entity has been modified based on the provided state.
    *
-   * @param oldState The original object data to compare.
-   * @return True if the update actually modified data
+   * This method evaluates the given state map to decide if changes have occurred
+   * compared to the internal state of the entity.
+   *
+   * @param oldState A map representing the previous state of the entity.
+   * @return True if the entity has been modified; false otherwise.
    */
   fun isModified(oldState: Map<String, Any>): Boolean = true
 
   /**
-   * Determines if the provided entity is different in terms of branch versioning.
+   * Determines if the provided entity is different compared to its snapshot version
    *
-   * @param entity The original entity to compare.
+   * @param snapshot The original entity snapshot to compare.
    * @return True if the two objects are different, false otherwise.
    */
-  fun differsInBranchVersion(entity: T): Boolean
+  fun hasChanged(snapshot: U): Boolean
 
   /**
    * Merges the properties from the specified source entity into the current entity.
