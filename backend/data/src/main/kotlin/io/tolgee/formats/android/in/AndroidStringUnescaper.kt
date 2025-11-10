@@ -46,12 +46,15 @@ class AndroidStringUnescaper(
           val lastSpace = space
           if (lastSpace != null && !isLast) append(lastSpace)
         }
+
         State.ESCAPED -> {
           // Android deletes the last backslash if it is the last character
         }
+
         State.QUOTED -> {
           // Quoted text was not closed
         }
+
         State.QUOTED_ESCAPED -> {}
       }
     }
@@ -70,11 +73,13 @@ class AndroidStringUnescaper(
             space = char
             State.AFTER_SPACE
           }
+
           else -> {
             append(char)
             State.NORMAL
           }
         }
+
       State.AFTER_SPACE -> {
         when (char) {
           in spacesToTrim -> State.AFTER_SPACE
@@ -88,6 +93,7 @@ class AndroidStringUnescaper(
           }
         }
       }
+
       State.ESCAPED -> {
         append(char.unescape())
         when (char) {
@@ -95,6 +101,7 @@ class AndroidStringUnescaper(
           else -> State.NORMAL
         }
       }
+
       State.QUOTED ->
         when (char) {
           escapeMark -> State.QUOTED_ESCAPED
@@ -104,6 +111,7 @@ class AndroidStringUnescaper(
             State.QUOTED
           }
         }
+
       State.QUOTED_ESCAPED -> {
         append(char.unescape())
         State.QUOTED

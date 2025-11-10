@@ -9,7 +9,7 @@ import io.tolgee.security.authentication.JwtService
 import io.tolgee.service.security.MfaService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
-import java.util.*
+import java.util.Date
 
 @InternalController(["internal/e2e-data/sensitive-operation-protection"])
 class SensitiveOperationProtectionE2eDataController(

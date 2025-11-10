@@ -8,7 +8,7 @@ class TranslationSuggestionServiceOssImpl : TranslationSuggestionService {
   override fun getKeysWithSuggestions(
     projectId: Long,
     keyIds: List<Long>,
-    languageIds: List<Long>
+    languageIds: List<Long>,
   ): Map<Pair<Long, String>, List<TranslationSuggestionView>> {
     return mutableMapOf()
   }

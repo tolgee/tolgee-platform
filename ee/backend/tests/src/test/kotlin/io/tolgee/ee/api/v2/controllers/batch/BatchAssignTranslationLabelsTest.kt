@@ -21,7 +21,6 @@ class BatchAssignTranslationLabelsTest(
   @Autowired
   private var enabledFeaturesProvider: PublicEnabledFeaturesProvider,
 ) : ProjectAuthControllerTest("/v2/projects/") {
-
   @BeforeEach
   fun setup() {
     batchJobTestBase.setup()
@@ -42,7 +41,9 @@ class BatchAssignTranslationLabelsTest(
     batchJobTestBase.saveAndPrepare(this)
 
     val allKeyIds = keys.map { it.id }.toList()
-    val allLanguageIds = testData.projectBuilder.data.languages.map { it.self.id }
+    val allLanguageIds =
+      testData.projectBuilder.data.languages
+        .map { it.self.id }
 
     val keyIds = allKeyIds.take(50)
     val languageIds = allLanguageIds.take(2)
@@ -57,11 +58,14 @@ class BatchAssignTranslationLabelsTest(
       ),
     ).andIsOk
 
-      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-          translationService.getTranslationsWithLabels(keyIds, languageIds).forEach { translation: Translation ->
-              translation.labels.map { it.id }.containsAll(labelIds).assert.isTrue
-          }
+    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      translationService.getTranslationsWithLabels(keyIds, languageIds).forEach { translation: Translation ->
+        translation.labels
+          .map { it.id }
+          .containsAll(labelIds)
+          .assert.isTrue
       }
+    }
   }
 
   @Test
@@ -73,7 +77,9 @@ class BatchAssignTranslationLabelsTest(
 
     val allKeyIds = keys.map { it.id }.toList()
     val keyIds = allKeyIds.take(10)
-    val languageIds = testData.projectBuilder.data.languages.map { it.self.id }
+    val languageIds =
+      testData.projectBuilder.data.languages
+        .map { it.self.id }
 
     performProjectAuthPost(
       "start-batch-job/assign-translation-label",
@@ -107,7 +113,9 @@ class BatchAssignTranslationLabelsTest(
 
     val allKeyIds = keys.map { it.id }.toList()
     val keyIds = allKeyIds.take(10)
-    val languageIds = testData.projectBuilder.data.languages.map { it.self.id }
+    val languageIds =
+      testData.projectBuilder.data.languages
+        .map { it.self.id }
 
     performProjectAuthPost(
       "start-batch-job/assign-translation-label",
@@ -130,7 +138,9 @@ class BatchAssignTranslationLabelsTest(
     batchJobTestBase.saveAndPrepare(this)
 
     val allKeyIds = keys.map { it.id }.toList()
-    val allLanguageIds = testData.projectBuilder.data.languages.map { it.self.id }
+    val allLanguageIds =
+      testData.projectBuilder.data.languages
+        .map { it.self.id }
 
     val keyIds = allKeyIds.take(50)
     val languageIds = allLanguageIds.take(2)
@@ -147,13 +157,13 @@ class BatchAssignTranslationLabelsTest(
       ),
     ).andIsOk
 
-      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-          translationService.getTranslationsWithLabels(keyIds, languageIds).forEach { translation: Translation ->
-              val actualLabelIds = translation.labels.map { it.id }
-              actualLabelIds.assert.doesNotContainSequence(unassignLabelsIds)
-              actualLabelIds.containsAll(assignedLabelsIds).assert.isTrue
-          }
+    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      translationService.getTranslationsWithLabels(keyIds, languageIds).forEach { translation: Translation ->
+        val actualLabelIds = translation.labels.map { it.id }
+        actualLabelIds.assert.doesNotContainSequence(unassignLabelsIds)
+        actualLabelIds.containsAll(assignedLabelsIds).assert.isTrue
       }
+    }
   }
 
   @Test
@@ -165,7 +175,9 @@ class BatchAssignTranslationLabelsTest(
 
     val allKeyIds = keys.map { it.id }.toList()
     val keyIds = allKeyIds.take(10)
-    val languageIds = testData.projectBuilder.data.languages.map { it.self.id }
+    val languageIds =
+      testData.projectBuilder.data.languages
+        .map { it.self.id }
 
     performProjectAuthPost(
       "start-batch-job/unassign-translation-label",
@@ -200,7 +212,9 @@ class BatchAssignTranslationLabelsTest(
     batchJobTestBase.saveAndPrepare(this)
 
     val allKeyIds = keys.map { it.id }.toList()
-    val allLanguageIds = testData.projectBuilder.data.languages.map { it.self.id }
+    val allLanguageIds =
+      testData.projectBuilder.data.languages
+        .map { it.self.id }
 
     val keyIds = allKeyIds.take(50)
     val languageIds = allLanguageIds.take(2)
@@ -215,13 +229,16 @@ class BatchAssignTranslationLabelsTest(
       ),
     ).andIsOk
 
-      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-          val translations = translationService.getTranslationsWithLabels(keyIds, languageIds)
-          translations.assert.hasSize(keyIds.size * languageIds.size)
-          translations.forEach {
-              it.labels.map { it.id }.containsAll(labelIds).assert.isTrue
-          }
+    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      val translations = translationService.getTranslationsWithLabels(keyIds, languageIds)
+      translations.assert.hasSize(keyIds.size * languageIds.size)
+      translations.forEach {
+        it.labels
+          .map { it.id }
+          .containsAll(labelIds)
+          .assert.isTrue
       }
+    }
   }
 
   @Test
@@ -237,7 +254,9 @@ class BatchAssignTranslationLabelsTest(
     batchJobTestBase.saveAndPrepare(this)
 
     val allKeyIds = keys.map { it.id }.toList()
-    val allLanguageIds = testData.projectBuilder.data.languages.map { it.self.id }
+    val allLanguageIds =
+      testData.projectBuilder.data.languages
+        .map { it.self.id }
 
     val keyIds = allKeyIds.take(1)
     val languageIds = allLanguageIds.take(2)

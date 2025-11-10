@@ -22,11 +22,11 @@ import io.tolgee.security.authentication.AdminAccessInterceptor
 import io.tolgee.security.authentication.AuthenticationFilter
 import io.tolgee.security.authentication.AuthenticationInterceptor
 import io.tolgee.security.authentication.EmailValidationInterceptor
+import io.tolgee.security.authentication.ReadOnlyModeInterceptor
 import io.tolgee.security.authentication.SsoAuthenticationInterceptor
 import io.tolgee.security.authorization.FeatureAuthorizationInterceptor
 import io.tolgee.security.authorization.OrganizationAuthorizationInterceptor
 import io.tolgee.security.authorization.ProjectAuthorizationInterceptor
-import io.tolgee.security.authentication.ReadOnlyModeInterceptor
 import io.tolgee.security.ratelimit.GlobalIpRateLimitFilter
 import io.tolgee.security.ratelimit.GlobalUserRateLimitFilter
 import io.tolgee.security.ratelimit.RateLimitInterceptor
@@ -128,18 +128,24 @@ class WebSecurityConfig(
   override fun addInterceptors(registry: InterceptorRegistry) {
     registry.addInterceptor(rateLimitInterceptor)
     registry.addInterceptor(authenticationInterceptor)
-    registry.addInterceptor(ssoAuthenticationInterceptor)
+    registry
+      .addInterceptor(ssoAuthenticationInterceptor)
       .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)
-    registry.addInterceptor(emailValidationInterceptor)
+    registry
+      .addInterceptor(emailValidationInterceptor)
       .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)
 
-    registry.addInterceptor(organizationAuthorizationInterceptor)
+    registry
+      .addInterceptor(organizationAuthorizationInterceptor)
       .addPathPatterns(*ORGANIZATION_ENDPOINTS)
-    registry.addInterceptor(projectAuthorizationInterceptor)
+    registry
+      .addInterceptor(projectAuthorizationInterceptor)
       .addPathPatterns(*PROJECT_ENDPOINTS)
-    registry.addInterceptor(adminAccessInterceptor)
+    registry
+      .addInterceptor(adminAccessInterceptor)
       .addPathPatterns(*ADMIN_ENDPOINTS)
-    registry.addInterceptor(readOnlyModeInterceptor)
+    registry
+      .addInterceptor(readOnlyModeInterceptor)
       .excludePathPatterns(*PUBLIC_ENDPOINTS, *INTERNAL_ENDPOINTS)
     registry.addInterceptor(featureAuthorizationInterceptor)
   }

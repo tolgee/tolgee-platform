@@ -20,7 +20,7 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
-class AzureContentStorageConfigCachePurgingTest() {
+class AzureContentStorageConfigCachePurgingTest {
   @Test
   fun `correctly purges`() {
     val config =

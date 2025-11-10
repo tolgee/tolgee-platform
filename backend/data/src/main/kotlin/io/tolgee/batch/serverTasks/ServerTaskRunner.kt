@@ -1,6 +1,6 @@
 package io.tolgee.batch.serverTasks
 
-import java.util.*
+import java.util.Date
 
 interface ServerTaskRunner {
   fun plan(

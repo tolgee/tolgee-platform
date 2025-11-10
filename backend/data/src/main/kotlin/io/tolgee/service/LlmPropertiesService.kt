@@ -29,8 +29,8 @@ class LlmPropertiesService(
           LlmProvider(
             type = LlmProviderType.TOLGEE,
             name = "Tolgee",
-            apiUrl = eeSubscriptionProvider?.getLicensingUrl() ?: throw InvalidStateException()
-          )
+            apiUrl = eeSubscriptionProvider?.getLicensingUrl() ?: throw InvalidStateException(),
+          ),
         )
       }
     }

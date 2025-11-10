@@ -67,7 +67,8 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
   fun `normalizes plurals on set for existing`() {
     testData.addPluralKey()
     saveTestData()
-    performUpdatePluralKey("Hello! {count, plural, other {test}}").andIsOk
+    performUpdatePluralKey("Hello! {count, plural, other {test}}")
+      .andIsOk
       .andAssertThatJson {
         node("translations.en.text").isString.isEqualTo("{count, plural,\nother {Hello! test}\n}")
         node("keyIsPlural").isBoolean.isTrue
@@ -112,13 +113,19 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
   fun `works with empty string`() {
     val key = testData.addPluralKey()
     saveTestData()
-    performUpdatePluralKey("").andIsOk
+    performUpdatePluralKey("")
+      .andIsOk
       .andAssertThatJson {
         node("translations.en.text").isEqualTo(null)
       }
 
     executeInNewTransaction {
-      keyService.get(key.id).translations.find { it.language.tag == "en" }!!.text.assert.isNull()
+      keyService
+        .get(key.id)
+        .translations
+        .find { it.language.tag == "en" }!!
+        .text.assert
+        .isNull()
     }
   }
 
@@ -201,7 +208,8 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
   fun `sets translation state`() {
     saveTestData()
     val id = testData.aKeyGermanTranslation.id
-    performProjectAuthPut("/translations/$id/set-state/TRANSLATED", null).andIsOk
+    performProjectAuthPut("/translations/$id/set-state/TRANSLATED", null)
+      .andIsOk
       .andAssertThatJson {
         node("state").isEqualTo("TRANSLATED")
         node("id").isValidId.satisfies { id ->

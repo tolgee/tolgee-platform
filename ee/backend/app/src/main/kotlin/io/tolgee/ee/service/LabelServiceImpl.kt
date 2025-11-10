@@ -3,12 +3,12 @@ package io.tolgee.ee.service
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Message
 import io.tolgee.ee.data.label.LabelRequest
+import io.tolgee.ee.repository.LabelRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
-import io.tolgee.ee.repository.LabelRepository
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.translation.TranslationService
@@ -29,8 +29,12 @@ class LabelServiceImpl(
   private val translationRepository: TranslationRepository,
   @Lazy private val translationService: TranslationService,
   private val activityHolder: ActivityHolder,
-  ) : LabelService {
-  override fun getProjectLabels(projectId: Long, pageable: Pageable, search: String?): Page<Label> {
+) : LabelService {
+  override fun getProjectLabels(
+    projectId: Long,
+    pageable: Pageable,
+    search: String?,
+  ): Page<Label> {
     return labelRepository.findByProjectId(projectId, pageable, search)
   }
 
@@ -49,15 +53,12 @@ class LabelServiceImpl(
     return labelRepository.findByTranslationsIdIn(translationIds)
   }
 
-  override fun getByTranslationIdsIndexed(
-    translationIds: List<Long>,
-  ): Map<Long, List<Label>> {
+  override fun getByTranslationIdsIndexed(translationIds: List<Long>): Map<Long, List<Label>> {
     return findByTranslationIds(translationIds)
       .asSequence()
       .flatMap { label ->
         label.translations.asSequence().map { it.id to label }
-      }
-      .groupBy({ it.first }, { it.second })
+      }.groupBy({ it.first }, { it.second })
   }
 
   private fun getByProjectIdAndId(
@@ -66,7 +67,7 @@ class LabelServiceImpl(
   ): Label {
     return labelRepository.findByProjectIdAndId(
       projectId,
-      labelId
+      labelId,
     ) ?: throw NotFoundException(Message.LABEL_NOT_FOUND)
   }
 
@@ -117,19 +118,27 @@ class LabelServiceImpl(
   }
 
   @Transactional
-  fun deleteLabel(projectId: Long, labelId: Long) {
+  fun deleteLabel(
+    projectId: Long,
+    labelId: Long,
+  ) {
     val label = getByProjectIdAndId(projectId, labelId)
     label.clearTranslations()
     labelRepository.delete(label)
   }
 
   @Transactional
-  fun assignLabel(projectId: Long, translationId: Long, labelId: Long): Label {
+  fun assignLabel(
+    projectId: Long,
+    translationId: Long,
+    labelId: Long,
+  ): Label {
     val label = getByProjectIdAndId(projectId, labelId)
-    val translation = translationRepository.find(
-      projectId,
-      translationId
-    ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+    val translation =
+      translationRepository.find(
+        projectId,
+        translationId,
+      ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
     translation.addLabel(label)
     translationRepository.save(translation)
     labelRepository.save(label)
@@ -137,7 +146,11 @@ class LabelServiceImpl(
   }
 
   @Transactional
-  fun assignLabel(projectId: Long, translation: Translation, labelId: Long): Label {
+  fun assignLabel(
+    projectId: Long,
+    translation: Translation,
+    labelId: Long,
+  ): Label {
     val label = getByProjectIdAndId(projectId, labelId)
     translation.addLabel(label)
     translationRepository.save(translation)
@@ -146,12 +159,17 @@ class LabelServiceImpl(
   }
 
   @Transactional
-  fun unassignLabel(projectId: Long, translationId: Long, labelId: Long) {
+  fun unassignLabel(
+    projectId: Long,
+    translationId: Long,
+    labelId: Long,
+  ) {
     val label = getByProjectIdAndId(projectId, labelId)
-    val translation = translationRepository.find(
-      projectId,
-      translationId
-    ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+    val translation =
+      translationRepository.find(
+        projectId,
+        translationId,
+      ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
     translation.removeLabel(label)
     labelRepository.save(label)
   }
@@ -160,7 +178,7 @@ class LabelServiceImpl(
   override fun batchAssignLabels(
     keyIds: List<Long>,
     languageIds: List<Long>,
-    labelIds: List<Long>
+    labelIds: List<Long>,
   ) {
     val labels = labelRepository.findAllById(labelIds)
     if (labels.isEmpty()) {
@@ -169,9 +187,10 @@ class LabelServiceImpl(
 
     val existingTranslations = translationRepository.findAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
 
-    val existingTranslationsMap = existingTranslations.groupBy {
-      Pair(it.key.id, it.language.id)
-    }
+    val existingTranslationsMap =
+      existingTranslations.groupBy {
+        Pair(it.key.id, it.language.id)
+      }
 
     val allTranslations = mutableListOf<Translation>()
     allTranslations.addAll(existingTranslations)
@@ -201,7 +220,7 @@ class LabelServiceImpl(
   override fun batchUnassignLabels(
     keyIds: List<Long>,
     languageIds: List<Long>,
-    labelIds: List<Long>
+    labelIds: List<Long>,
   ) {
     val labels = labelRepository.findAllById(labelIds)
     if (labels.isEmpty()) {

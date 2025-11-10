@@ -25,8 +25,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.web.client.RestTemplate
-import java.util.HashMap
-import kotlin.collections.get
 
 class AuthProviderChangeTest : AuthorizedControllerTest() {
   @Autowired

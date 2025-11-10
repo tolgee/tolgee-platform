@@ -44,13 +44,16 @@ class GlossaryExportController(
     val organization = organizationHolder.organization
     val glossary = glossaryService.get(organization.id, glossaryId)
 
-    val headers = HttpHeaders().apply {
-      contentType = MediaType.parseMediaType("text/csv;charset=UTF-8")
-      accessControlExposeHeaders = listOf("Content-Disposition")
-      contentDisposition = ContentDisposition.attachment()
-        .filename("glossary-${glossary.name}.csv")
-        .build()
-    }
+    val headers =
+      HttpHeaders().apply {
+        contentType = MediaType.parseMediaType("text/csv;charset=UTF-8")
+        accessControlExposeHeaders = listOf("Content-Disposition")
+        contentDisposition =
+          ContentDisposition
+            .attachment()
+            .filename("glossary-${glossary.name}.csv")
+            .build()
+      }
 
     val stream = glossaryExportService.exportCsv(glossary)
 

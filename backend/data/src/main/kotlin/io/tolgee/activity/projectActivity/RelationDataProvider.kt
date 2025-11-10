@@ -37,25 +37,28 @@ class RelationDataProvider(
   }
 
   private fun getInitialMissingRelationData() =
-    rawModifiedEntities.asSequence().flatMap {
-      it.describingRelations?.map { dr ->
-        Triple(it.activityRevision.id, dr.value.entityClass, dr.value.entityId)
-      } ?: listOf()
-    }.toMutableSet()
+    rawModifiedEntities
+      .asSequence()
+      .flatMap {
+        it.describingRelations?.map { dr ->
+          Triple(it.activityRevision.id, dr.value.entityClass, dr.value.entityId)
+        } ?: listOf()
+      }.toMutableSet()
 
   private fun getMissingRelationData(): Set<Triple<Long, String, Long>> {
     val missing =
-      allRelationData.entries.flatMap { entry ->
-        entry.value.flatMap { relation ->
-          relation.describingRelations?.values?.map {
-            Triple(
-              entry.key,
-              it.entityClass,
-              it.entityId,
-            )
-          } ?: listOf()
-        }
-      }.toMutableSet()
+      allRelationData.entries
+        .flatMap { entry ->
+          entry.value.flatMap { relation ->
+            relation.describingRelations?.values?.map {
+              Triple(
+                entry.key,
+                it.entityClass,
+                it.entityId,
+              )
+            } ?: listOf()
+          }
+        }.toMutableSet()
 
     missing.removeIf { missingItem ->
       allRelationData[missingItem.first]?.any {
@@ -74,15 +77,16 @@ class RelationDataProvider(
     val root = query.from(ActivityDescribingEntity::class.java)
     val revision = root.join(ActivityDescribingEntity_.activityRevision)
 
-    missing.map { (revisionId, entityClass, entityId) ->
-      cb.and(
-        cb.equal(revision.get(ActivityRevision_.id), revisionId),
-        cb.equal(root.get(ActivityDescribingEntity_.entityClass), entityClass),
-        cb.equal(root.get(ActivityDescribingEntity_.entityId), entityId),
-      )
-    }.let {
-      query.where(cb.or(*it.toTypedArray()))
-    }
+    missing
+      .map { (revisionId, entityClass, entityId) ->
+        cb.and(
+          cb.equal(revision.get(ActivityRevision_.id), revisionId),
+          cb.equal(root.get(ActivityDescribingEntity_.entityClass), entityClass),
+          cb.equal(root.get(ActivityDescribingEntity_.entityId), entityId),
+        )
+      }.let {
+        query.where(cb.or(*it.toTypedArray()))
+      }
 
     return entityManager.createQuery(query).resultList
   }

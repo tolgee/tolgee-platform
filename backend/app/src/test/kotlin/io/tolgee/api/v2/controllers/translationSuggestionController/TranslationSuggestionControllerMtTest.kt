@@ -6,14 +6,24 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.component.EeSubscriptionInfoProvider
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.component.machineTranslation.TranslateResult
-import io.tolgee.component.machineTranslation.providers.*
+import io.tolgee.component.machineTranslation.providers.AzureCognitiveApiService
+import io.tolgee.component.machineTranslation.providers.BaiduApiService
+import io.tolgee.component.machineTranslation.providers.DeeplApiService
+import io.tolgee.component.machineTranslation.providers.LlmTranslationProvider
+import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.mapResponseTo
+import io.tolgee.fixtures.node
 import io.tolgee.model.mtServiceConfig.Formality
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -23,7 +33,14 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.mockito.kotlin.*
+import org.mockito.kotlin.KArgumentCaptor
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.cache.Cache
@@ -32,7 +49,7 @@ import org.springframework.test.web.servlet.ResultActions
 import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
 import software.amazon.awssdk.services.translate.model.TranslateTextResponse
-import java.util.*
+import java.util.Date
 import software.amazon.awssdk.services.translate.model.Formality as AwsFormality
 
 class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/projects/") {
@@ -182,14 +199,17 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
       SuggestRequestDto(
         keyId = testData.beautifulKey.id,
         targetLanguageId = testData.germanLanguage.id,
-        services = setOf(MtServiceType.GOOGLE)
+        services = setOf(MtServiceType.GOOGLE),
       ),
     ).andIsOk.andPrettyPrint.andAssertThatJson {
       node("machineTranslations") {
         node("GOOGLE").isEqualTo("Translated with Google")
       }
-      mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).creditBalance
-        .assert.isEqualTo((1000 - "Beautiful".length * 100).toLong())
+      mtCreditBucketService
+        .getCreditBalances(testData.projectBuilder.self.organizationOwner.id)
+        .creditBalance
+        .assert
+        .isEqualTo((1000 - "Beautiful".length * 100).toLong())
     }
   }
 
@@ -241,11 +261,13 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
         node("PROMPT").isEqualTo("Translated with LLM Prompt")
       }
 
-      mtCreditBucketService.getCreditBalances(
-        testData.projectBuilder.self.organizationOwner.id,
-      ).creditBalance.assert.isEqualTo(
-        600,
-      )
+      mtCreditBucketService
+        .getCreditBalances(
+          testData.projectBuilder.self.organizationOwner.id,
+        ).creditBalance.assert
+        .isEqualTo(
+          600,
+        )
     }
   }
 
@@ -378,7 +400,12 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
     testData.enableDeepL(Formality.FORMAL)
     saveTestData()
     performMtRequest()
-    val formality = Mockito.mockingDetails(deeplApiService).invocations.first().arguments[3] as? Formality
+    val formality =
+      Mockito
+        .mockingDetails(deeplApiService)
+        .invocations
+        .first()
+        .arguments[3] as? Formality
     formality.assert.isEqualTo(Formality.FORMAL)
   }
 
@@ -390,9 +417,17 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
     saveTestData()
     performMtRequest()
     val request =
-      Mockito.mockingDetails(amazonTranslate).invocations.first().arguments[0]
+      Mockito
+        .mockingDetails(amazonTranslate)
+        .invocations
+        .first()
+        .arguments[0]
         as TranslateTextRequest
-    request.settings().formality().assert.isEqualTo(AwsFormality.FORMAL)
+    request
+      .settings()
+      .formality()
+      .assert
+      .isEqualTo(AwsFormality.FORMAL)
   }
 
   private fun testMtCreditConsumption() {
@@ -403,8 +438,11 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
 
   private fun performMtRequestAndExpectAfterBalance(creditBalance: Long) {
     performMtRequest(listOf(MtServiceType.GOOGLE)).andIsOk
-    mtCreditBucketService.getCreditBalances(testData.projectBuilder.self.organizationOwner.id).creditBalance
-      .assert.isEqualTo(creditBalance * 100)
+    mtCreditBucketService
+      .getCreditBalances(testData.projectBuilder.self.organizationOwner.id)
+      .creditBalance
+      .assert
+      .isEqualTo(creditBalance * 100)
   }
 
   private fun performMtRequestAndExpectBadRequest(): ResultActions {

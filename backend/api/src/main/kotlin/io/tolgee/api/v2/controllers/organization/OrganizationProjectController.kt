@@ -51,7 +51,8 @@ class OrganizationProjectController(
     @RequestParam("search") search: String?,
   ): PagedModel<ProjectModel> {
     return organizationService.find(id)?.let { organization ->
-      projectService.findPermittedInOrganizationPaged(pageable, search, organizationId = organization.id)
+      projectService
+        .findPermittedInOrganizationPaged(pageable, search, organizationId = organization.id)
         .let { projects ->
           pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
         }

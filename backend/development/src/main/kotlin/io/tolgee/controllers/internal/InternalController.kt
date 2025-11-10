@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping
 @Transactional
 @ConditionalOnProperty(
-    value = ["tolgee.internal.controller-enabled"],
-    havingValue = "true",
-    matchIfMissing = false
+  value = ["tolgee.internal.controller-enabled"],
+  havingValue = "true",
+  matchIfMissing = false,
 )
 annotation class InternalController(
-    @get:AliasFor(annotation = RequestMapping::class)
-    val value: Array<String> = []
+  @get:AliasFor(annotation = RequestMapping::class)
+  val value: Array<String> = [],
 )

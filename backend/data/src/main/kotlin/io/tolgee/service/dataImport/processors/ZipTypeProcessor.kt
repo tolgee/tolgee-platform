@@ -2,9 +2,9 @@ package io.tolgee.service.dataImport.processors
 
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
-import java.io.InputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.util.zip.ZipException
 import java.util.zip.ZipInputStream
 
@@ -67,7 +67,10 @@ class ZipTypeProcessor(
     return files.values.sortedBy { it.name }
   }
 
-  private fun readFile(archive: ZipInputStream, maxSize: Long): ByteArray {
+  private fun readFile(
+    archive: ZipInputStream,
+    maxSize: Long,
+  ): ByteArray {
     var size: Long = 0
 
     val buffer = ByteArray(DEFAULT_BUFFER_SIZE)

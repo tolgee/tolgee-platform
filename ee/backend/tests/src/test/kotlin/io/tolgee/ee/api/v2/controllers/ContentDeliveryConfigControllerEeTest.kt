@@ -127,7 +127,9 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
     }
 
     executeInNewTransaction {
-      contentDeliveryConfigService.get(id!!).automationActions.assert.isNotEmpty
+      contentDeliveryConfigService
+        .get(id!!)
+        .automationActions.assert.isNotEmpty
     }
 
     assertPruned(mock)
@@ -162,7 +164,8 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
     executeInNewTransaction {
       contentDeliveryConfigService
         .get(testData.defaultServerContentDeliveryConfig.self.id)
-        .automationActions.assert.isEmpty()
+        .automationActions.assert
+        .isEmpty()
     }
   }
 
@@ -193,7 +196,8 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
   @Test
   @ProjectJWTAuthTestMethod
   fun `get single`() {
-    performProjectAuthGet("content-delivery-configs/${testData.s3ContentDeliveryConfig.self.id}").andIsOk
+    performProjectAuthGet("content-delivery-configs/${testData.s3ContentDeliveryConfig.self.id}")
+      .andIsOk
       .andAssertThatJson {
         node("name").isEqualTo("S3")
       }
@@ -327,8 +331,10 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
   }
 
   private fun resetServerProperties() {
-    tolgeeProperties.contentDelivery.storage.s3.clear()
-    tolgeeProperties.contentDelivery.storage.azure.clear()
+    tolgeeProperties.contentDelivery.storage.s3
+      .clear()
+    tolgeeProperties.contentDelivery.storage.azure
+      .clear()
   }
 
   private fun mockS3FileStorage(): S3FileStorage {

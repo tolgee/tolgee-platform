@@ -17,7 +17,7 @@ import org.apache.commons.codec.digest.MurmurHash3
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import java.nio.ByteBuffer
-import java.util.*
+import java.util.Base64
 
 @Entity
 @Table(
@@ -97,11 +97,15 @@ class ImportTranslation(
       return "__null_value"
     }
     val hash =
-      MurmurHash3.hash128(this.toByteArray()).asSequence().flatMap {
-        val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
-        buffer.putLong(it)
-        buffer.array().asSequence()
-      }.toList().toByteArray()
+      MurmurHash3
+        .hash128(this.toByteArray())
+        .asSequence()
+        .flatMap {
+          val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
+          buffer.putLong(it)
+          buffer.array().asSequence()
+        }.toList()
+        .toByteArray()
     return Base64.getEncoder().encodeToString(hash)
   }
 }

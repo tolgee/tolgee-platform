@@ -273,10 +273,11 @@ class ResxExporterTest {
       translations = translations,
       exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
-      pathProvider = ExportFilePathProvider(
-        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-        extension = params.format?.extension ?: "resx",
-      ),
+      pathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+          extension = params.format?.extension ?: "resx",
+        ),
     )
   }
 

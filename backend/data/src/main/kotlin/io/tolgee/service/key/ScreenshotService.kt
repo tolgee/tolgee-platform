@@ -53,7 +53,7 @@ class ScreenshotService(
   ): Screenshot {
     if (getScreenshotsCountForKey(key) >= tolgeeProperties.maxScreenshotsPerKey) {
       throw BadRequestException(
-        io.tolgee.constants.Message.MAX_SCREENSHOTS_EXCEEDED,
+        Message.MAX_SCREENSHOTS_EXCEEDED,
         listOf(tolgeeProperties.maxScreenshotsPerKey),
       )
     }
@@ -107,10 +107,14 @@ class ScreenshotService(
       this.originalText = info.text
       it.positions?.forEach { positionDto ->
         val xRatio =
-          newDimension?.width?.toDouble()
+          newDimension
+            ?.width
+            ?.toDouble()
             ?.div(originalDimension?.width?.toDouble() ?: 1.0) ?: 1.0
         val yRatio =
-          newDimension?.height?.toDouble()
+          newDimension
+            ?.height
+            ?.toDouble()
             ?.div(originalDimension?.height?.toDouble() ?: 1.0) ?: 1.0
         positions = positions ?: mutableListOf()
         positions!!.add(
@@ -150,26 +154,27 @@ class ScreenshotService(
   ): Map<Long, Screenshot> {
     val imageIds = screenshots.map { it.uploadedImageId }
     val images = imageUploadService.find(imageIds).associateBy { it.id }
-    return screenshots.map { screenshotInfo ->
-      val image =
-        images[screenshotInfo.uploadedImageId]
-          ?: throw NotFoundException(io.tolgee.constants.Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
+    return screenshots
+      .map { screenshotInfo ->
+        val image =
+          images[screenshotInfo.uploadedImageId]
+            ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
 
-      if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
-        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
-      }
-
-      val info =
-        screenshotInfo.let {
-          ScreenshotInfoDto(it.text, it.positions)
+        if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
+          throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
         }
 
-      val (screenshot, originalDimension, targetDimension) = saveScreenshot(image)
+        val info =
+          screenshotInfo.let {
+            ScreenshotInfoDto(it.text, it.positions)
+          }
 
-      addReference(key, screenshot, info, originalDimension, targetDimension)
+        val (screenshot, originalDimension, targetDimension) = saveScreenshot(image)
 
-      screenshotInfo.uploadedImageId to screenshot
-    }.toMap()
+        addReference(key, screenshot, info, originalDimension, targetDimension)
+
+        screenshotInfo.uploadedImageId to screenshot
+      }.toMap()
   }
 
   /**
@@ -314,24 +319,26 @@ class ScreenshotService(
     val all = screenshotRepository.getAllByKeyProjectId(projectId)
     all.forEach { this.deleteFile(it) }
 
-    entityManager.createNativeQuery(
-      """
+    entityManager
+      .createNativeQuery(
+        """
       DELETE FROM key_screenshot_reference WHERE key_id IN (
         SELECT id FROM key WHERE project_id = :projectId
       )
     """,
-    ).setParameter("projectId", projectId)
+      ).setParameter("projectId", projectId)
       .executeUpdate()
 
-    entityManager.createNativeQuery(
-      """
+    entityManager
+      .createNativeQuery(
+        """
       DELETE FROM screenshot WHERE id IN (
         SELECT screenshot_id FROM key_screenshot_reference WHERE key_id IN (
           SELECT id FROM key WHERE project_id = :projectId
         )
       )
     """,
-    ).setParameter("projectId", projectId)
+      ).setParameter("projectId", projectId)
       .executeUpdate()
   }
 
@@ -381,8 +388,15 @@ class ScreenshotService(
   }
 
   fun getScreenshotsForKeys(keyIds: Collection<Long>): Map<Long, List<Screenshot>> {
-    return this.getKeysWithScreenshots(keyIds)
-      .associate { it.id to it.keyScreenshotReferences.map { it.screenshot }.toSet().toList() }
+    return this
+      .getKeysWithScreenshots(keyIds)
+      .associate {
+        it.id to
+          it.keyScreenshotReferences
+            .map { it.screenshot }
+            .toSet()
+            .toList()
+      }
   }
 
   fun getKeyScreenshotReferences(

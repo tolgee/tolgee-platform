@@ -116,25 +116,35 @@ class SlackChannelMessagesOperations(
 
   sealed interface MessageSendResult<R : SlackApiTextResponse>
 
-  data class ChatSuccess<R : SlackApiTextResponse>(val response: R) : MessageSendResult<R>
+  data class ChatSuccess<R : SlackApiTextResponse>(
+    val response: R,
+  ) : MessageSendResult<R>
 
   sealed interface ChatFailure<R : SlackApiTextResponse> : MessageSendResult<R> {
     val error: String
   }
 
-  data class ChatFailureResponseNotOk<R : SlackApiTextResponse>(val response: R) : ChatFailure<R> {
+  data class ChatFailureResponseNotOk<R : SlackApiTextResponse>(
+    val response: R,
+  ) : ChatFailure<R> {
     override val error: String
       get() = response.error
   }
 
-  data class ChatFailureException<R : SlackApiTextResponse>(val exception: SlackApiException) : ChatFailure<R> {
+  data class ChatFailureException<R : SlackApiTextResponse>(
+    val exception: SlackApiException,
+  ) : ChatFailure<R> {
     override val error: String
       get() = exception.error?.toString() ?: exception.message ?: "Unknown error"
   }
 
   sealed interface SlackToken
 
-  data class SlackTeamId(val teamId: String) : SlackToken
+  data class SlackTeamId(
+    val teamId: String,
+  ) : SlackToken
 
-  data class SlackWorkspaceToken(val token: String) : SlackToken
+  data class SlackWorkspaceToken(
+    val token: String,
+  ) : SlackToken
 }

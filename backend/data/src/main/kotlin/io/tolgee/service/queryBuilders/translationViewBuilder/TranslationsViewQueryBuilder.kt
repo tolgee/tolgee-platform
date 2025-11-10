@@ -3,14 +3,17 @@ package io.tolgee.service.queryBuilders.translationViewBuilder
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.dtos.response.CursorValue
-import io.tolgee.model.*
 import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
-import jakarta.persistence.criteria.*
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.Order
+import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
 import org.hibernate.query.NullPrecedence
 import org.hibernate.query.sqm.tree.select.SqmSortSpecification
-import org.springframework.data.domain.*
-import java.util.*
+import org.springframework.data.domain.Sort
 
 class TranslationsViewQueryBuilder(
   private val cb: CriteriaBuilder,
@@ -66,13 +69,16 @@ class TranslationsViewQueryBuilder(
 
   private fun getOrderList(queryBase: QueryBase<Array<Any?>>): MutableList<Order> {
     val orderList =
-      sort.asSequence().filter { queryBase.querySelection[it.property] != null }.map {
-        val expression = queryBase.querySelection[it.property] as Expression<*>
-        when (it.direction) {
-          Sort.Direction.DESC -> cb.desc(expression)
-          else -> cb.asc(expression)
-        }
-      }.toMutableList()
+      sort
+        .asSequence()
+        .filter { queryBase.querySelection[it.property] != null }
+        .map {
+          val expression = queryBase.querySelection[it.property] as Expression<*>
+          when (it.direction) {
+            Sort.Direction.DESC -> cb.desc(expression)
+            else -> cb.asc(expression)
+          }
+        }.toMutableList()
 
     if (orderList.isEmpty()) {
       orderList.add(cb.asc(queryBase.keyNameExpression))

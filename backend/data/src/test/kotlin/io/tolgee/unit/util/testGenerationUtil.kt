@@ -10,7 +10,7 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
  */
 @Suppress("unused")
 fun generateTestsForImportResult(fileProcessorContext: FileProcessorContext): String {
-  val translations = fileProcessorContext.translations
+  fileProcessorContext.translations
   val languageCount = fileProcessorContext.languages.size
   val code = StringBuilder()
   val i = { i: Int -> (1..i).joinToString("") { "  " } }
@@ -21,12 +21,15 @@ fun generateTestsForImportResult(fileProcessorContext: FileProcessorContext): St
     code.appendLine("""${i(indent)}${"\"\"\""}.trimIndent()""")
   }
   val escape = { str: String?, newLines: Boolean ->
-    str?.replace("\\", "\\\\")?.replace("\"", "\\\"").let {
-      if (newLines) {
-        return@let it?.replace("\n", "\\n")
-      }
-      it
-    }?.replace("\$", "\${'$'}")
+    str
+      ?.replace("\\", "\\\\")
+      ?.replace("\"", "\\\"")
+      .let {
+        if (newLines) {
+          return@let it?.replace("\n", "\\n")
+        }
+        it
+      }?.replace("\$", "\${'$'}")
   }
   code.appendLine("${i(2)}mockUtil.fileProcessorContext.assertLanguagesCount($languageCount)")
   fileProcessorContext.translations.forEach { (keyName, translations) ->
@@ -93,14 +96,14 @@ private fun List<ImportTranslation>.firstIfAllSameOrNull(): ImportTranslation? {
  */
 @Suppress("unused")
 fun generateTestsForExportResult(data: Map<String, String>): String {
-  return data.map {
-    "data.assertFile(\"${it.key}\", \"\"\"\n" +
-      "    |${
-        it.value
-          .replace("\$", "\${'$'}")
-          .replace("\n", "\n    |")
-      }\n" +
-      "    \"\"\".trimMargin())"
-  }
-    .joinToString("\n")
+  return data
+    .map {
+      "data.assertFile(\"${it.key}\", \"\"\"\n" +
+        "    |${
+          it.value
+            .replace("\$", "\${'$'}")
+            .replace("\n", "\n    |")
+        }\n" +
+        "    \"\"\".trimMargin())"
+    }.joinToString("\n")
 }

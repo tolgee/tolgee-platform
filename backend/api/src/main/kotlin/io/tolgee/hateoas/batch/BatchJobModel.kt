@@ -31,4 +31,5 @@ open class BatchJobModel(
   val activityRevisionId: Long?,
   @Schema(description = "If the job failed, this is the error message")
   val errorMessage: String?,
-) : RepresentationModel<BatchJobModel>(), Serializable
+) : RepresentationModel<BatchJobModel>(),
+  Serializable

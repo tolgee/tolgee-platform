@@ -53,26 +53,27 @@ class PromptTestData : BaseTestData() {
       }
 
     organization =
-      root.addOrganization {
-        name = "my organization"
-      }.build {
-        addRole {
-          user = organizationMember.self
-          organization = this.organization
-          type = OrganizationRoleType.MEMBER
-        }
-
-        addRole {
-          user = organizationOwner.self
-          organization = this.organization
-          type = OrganizationRoleType.OWNER
-        }
-
-        llmProvider =
-          addLlmProvider {
-            name = "organization-provider"
+      root
+        .addOrganization {
+          name = "my organization"
+        }.build {
+          addRole {
+            user = organizationMember.self
+            organization = this.organization
+            type = OrganizationRoleType.MEMBER
           }
-      }
+
+          addRole {
+            user = organizationOwner.self
+            organization = this.organization
+            type = OrganizationRoleType.OWNER
+          }
+
+          llmProvider =
+            addLlmProvider {
+              name = "organization-provider"
+            }
+        }
 
     projectEditor =
       root.addUserAccount {
@@ -94,46 +95,49 @@ class PromptTestData : BaseTestData() {
       english = addEnglish()
       czech = addCzech()
 
-      german = addLanguage {
-        name = "German"
-        originalName = "Deutsch"
-        tag = "de"
-      }
+      german =
+        addLanguage {
+          name = "German"
+          originalName = "Deutsch"
+          tag = "de"
+        }
 
-      chinese = addLanguage {
-        name = "Chinese"
-        tag = "zh"
-      }
+      chinese =
+        addLanguage {
+          name = "Chinese"
+          tag = "zh"
+        }
 
       czech.self.apply {
         aiTranslatorPromptDescription = "Language used for testing llms"
       }
 
       keys =
-        listOf(1, 2, 3, 4).map { i ->
-          addKey("Key $i") {}.also {
-            addTranslation {
-              key = it.self
-              text = "English translation $i"
-              language = english.self
+        listOf(1, 2, 3, 4)
+          .map { i ->
+            addKey("Key $i") {}.also {
+              addTranslation {
+                key = it.self
+                text = "English translation $i"
+                language = english.self
+              }
+              addTranslation {
+                key = it.self
+                text = "Czech translation $i"
+                language = czech.self
+              }
+              addTranslation {
+                key = it.self
+                text = "German translation $i"
+                language = german.self
+              }
+              addTranslation {
+                key = it.self
+                text = "Chinese translation $i"
+                language = chinese.self
+              }
             }
-            addTranslation {
-              key = it.self
-              text = "Czech translation $i"
-              language = czech.self
-            }
-            addTranslation {
-              key = it.self
-              text = "German translation $i"
-              language = german.self
-            }
-            addTranslation {
-              key = it.self
-              text = "Chinese translation $i"
-              language = chinese.self
-            }
-          }
-        }.toMutableList()
+          }.toMutableList()
 
       keys[0].apply {
         val screenshotResource =
@@ -172,35 +176,36 @@ class PromptTestData : BaseTestData() {
           providerName = "organization-provider"
           template =
             """
-              Test prompt
-              {{fragment.intro}}
-              """.trimIndent()
+            Test prompt
+            {{fragment.intro}}
+            """.trimIndent()
         }
     }
   }
 
   fun addGlossary() {
-    organization.addGlossary {
-      name = "Test Glossary"
-      baseLanguageTag = "en"
-    }.build {
-      assignProject(promptProject.self)
-      addTerm {
-        description = "The description"
-        flagCaseSensitive = true
-        flagAbbreviation = true
+    organization
+      .addGlossary {
+        name = "Test Glossary"
+        baseLanguageTag = "en"
       }.build {
-        this.addTranslation {
-          languageTag = "en"
-          text = "translation"
-        }
+        assignProject(promptProject.self)
+        addTerm {
+          description = "The description"
+          flagCaseSensitive = true
+          flagAbbreviation = true
+        }.build {
+          this.addTranslation {
+            languageTag = "en"
+            text = "translation"
+          }
 
-        this.addTranslation {
-          languageTag = "cs"
-          text = "překlad"
+          this.addTranslation {
+            languageTag = "cs"
+            text = "překlad"
+          }
         }
       }
-    }
   }
 
   fun addLanguageConfig() {

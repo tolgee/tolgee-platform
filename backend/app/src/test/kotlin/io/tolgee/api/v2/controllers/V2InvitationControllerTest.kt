@@ -4,7 +4,13 @@ import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.EmailTestUtil
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.equalsPermissionType
+import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.hateoas.invitation.OrganizationInvitationModel
 import io.tolgee.hateoas.invitation.ProjectInvitationModel
 import io.tolgee.model.Organization
@@ -108,12 +114,13 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
     val base = dbPopulator.createBase()
     val project = base.project
     val code =
-      invitationService.create(
-        CreateProjectInvitationParams(
-          project,
-          ProjectPermissionType.EDIT,
-        ),
-      ).code
+      invitationService
+        .create(
+          CreateProjectInvitationParams(
+            project,
+            ProjectPermissionType.EDIT,
+          ),
+        ).code
 
     val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
     loginAsUser(newUser.username)
@@ -127,14 +134,15 @@ class V2InvitationControllerTest : AuthorizedControllerTest() {
     val base = dbPopulator.createBase()
     val project = base.project
     val code =
-      invitationService.create(
-        CreateProjectInvitationParams(
-          project,
-          ProjectPermissionType.TRANSLATE,
-          LanguagePermissions(translate = project.languages, null, null, null),
-          null,
-        ),
-      ).code
+      invitationService
+        .create(
+          CreateProjectInvitationParams(
+            project,
+            ProjectPermissionType.TRANSLATE,
+            LanguagePermissions(translate = project.languages, null, null, null),
+            null,
+          ),
+        ).code
     val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
     loginAsUser(newUser.username)
 

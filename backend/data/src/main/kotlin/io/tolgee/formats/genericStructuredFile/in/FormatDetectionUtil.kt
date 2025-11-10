@@ -62,7 +62,10 @@ object FormatDetectionUtil {
     return scores.filter { it.second != 0.0 }.maxByOrNull { it.second }?.first
   }
 
-  data class Factor(val weight: Double, val matcher: (Any?) -> Double)
+  data class Factor(
+    val weight: Double,
+    val matcher: (Any?) -> Double,
+  )
 
   val ICU_DETECTION_REGEX =
     (
@@ -71,6 +74,5 @@ object FormatDetectionUtil {
         "\\w+(\\s*,\\s*)?(((plural)\\s*,\\s*)?(.*other\\s*\\{.*\\}.*)|number,?.*)?" +
         "\\}" +
         "(?:\\W|\$)"
-    )
-      .toRegex()
+    ).toRegex()
 }

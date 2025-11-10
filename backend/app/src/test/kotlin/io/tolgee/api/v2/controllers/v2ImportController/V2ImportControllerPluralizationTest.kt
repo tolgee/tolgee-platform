@@ -17,17 +17,21 @@ class V2ImportControllerPluralizationTest : ProjectAuthControllerTest("/v2/proje
     saveTestDataAndApplyImport()
     // new value is migrated
     getTranslation("cs", "existing plural key")
-      .text.assert.isEqualTo("{count, plural,\nother {No plural}\n}")
+      .text.assert
+      .isEqualTo("{count, plural,\nother {No plural}\n}")
 
     // migrates old existing values
     getTranslation("en", "existing non plural key")
-      .text.assert.isEqualTo("{count, plural,\nother {I am not a plural!}\n}")
+      .text.assert
+      .isEqualTo("{count, plural,\nother {I am not a plural!}\n}")
 
     // keeps non-plurals
     getTranslation("en", "existing non plural key 2")
-      .text.assert.isEqualTo("I am not a plural!")
+      .text.assert
+      .isEqualTo("I am not a plural!")
     getTranslation("cs", "existing non plural key 2")
-      .text.assert.isEqualTo("Nejsem plurál!")
+      .text.assert
+      .isEqualTo("Nejsem plurál!")
   }
 
   private fun saveTestDataAndApplyImport() {
@@ -42,17 +46,18 @@ class V2ImportControllerPluralizationTest : ProjectAuthControllerTest("/v2/proje
     language: String,
     key: String,
   ): Translation {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       from Translation t
       join t.key k
       join t.language l
       where k.name = :key and l.tag = :language and k.project.id = :projectId
     """,
-      Translation::class.java,
-    )
-      .setParameter("key", key)
+        Translation::class.java,
+      ).setParameter("key", key)
       .setParameter("projectId", testData.projectBuilder.self.id)
-      .setParameter("language", language).singleResult
+      .setParameter("language", language)
+      .singleResult
   }
 }

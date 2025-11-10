@@ -20,20 +20,21 @@ fun getExported(exporter: FileExporter): Map<String, String> {
 fun getExportedCompressed(exporter: FileExporter): Map<String, String> {
   val files = exporter.produceFiles()
   val data =
-    files.map {
-      it.key to
-        buildString {
-          val stream = ZipInputStream(it.value)
-          var entry = stream.nextEntry
-          while (entry != null) {
-            appendLine("====================")
-            appendLine(entry.name)
-            appendLine("--------------------")
-            append(stream.bufferedReader().readText())
-            appendLine()
-            entry = stream.nextEntry
+    files
+      .map {
+        it.key to
+          buildString {
+            val stream = ZipInputStream(it.value)
+            var entry = stream.nextEntry
+            while (entry != null) {
+              appendLine("====================")
+              appendLine(entry.name)
+              appendLine("--------------------")
+              append(stream.bufferedReader().readText())
+              appendLine()
+              entry = stream.nextEntry
+            }
           }
-        }
-    }.toMap()
+      }.toMap()
   return data
 }

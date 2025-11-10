@@ -9,7 +9,12 @@ import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.service.ContentStorageService
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.node
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -92,9 +97,14 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
       ),
     ).andIsOk
     val all =
-      contentStorageService.getAllInProject(project.id, Pageable.ofSize(100))
+      contentStorageService
+        .getAllInProject(project.id, Pageable.ofSize(100))
         .sortedBy { it.id }
-    all.last().s3ContentStorageConfig!!.path.assert.isEqualTo("custom/path")
+    all
+      .last()
+      .s3ContentStorageConfig!!
+      .path.assert
+      .isEqualTo("custom/path")
   }
 
   @Test
@@ -138,11 +148,21 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
 
     executeInNewTransaction {
       val updatedStorage = contentStorageService.get(storage.id)
-      updatedStorage.s3ContentStorageConfig!!.bucketName.assert.isEqualTo("new bucketName")
-      updatedStorage.s3ContentStorageConfig!!.accessKey.assert.isEqualTo("new accessKey")
-      updatedStorage.s3ContentStorageConfig!!.secretKey.assert.isEqualTo("new secretKey")
-      updatedStorage.s3ContentStorageConfig!!.endpoint.assert.isEqualTo("new endpoint")
-      updatedStorage.s3ContentStorageConfig!!.signingRegion.assert.isEqualTo("new signingRegion")
+      updatedStorage.s3ContentStorageConfig!!
+        .bucketName.assert
+        .isEqualTo("new bucketName")
+      updatedStorage.s3ContentStorageConfig!!
+        .accessKey.assert
+        .isEqualTo("new accessKey")
+      updatedStorage.s3ContentStorageConfig!!
+        .secretKey.assert
+        .isEqualTo("new secretKey")
+      updatedStorage.s3ContentStorageConfig!!
+        .endpoint.assert
+        .isEqualTo("new endpoint")
+      updatedStorage.s3ContentStorageConfig!!
+        .signingRegion.assert
+        .isEqualTo("new signingRegion")
       updatedStorage.azureContentStorageConfig.assert.isNull()
     }
 
@@ -164,8 +184,12 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
 
     executeInNewTransaction {
       val updatedStorage = contentStorageService.get(storage.id)
-      updatedStorage.s3ContentStorageConfig!!.accessKey.assert.isEqualTo("new accessKey")
-      updatedStorage.s3ContentStorageConfig!!.secretKey.assert.isEqualTo("new secretKey")
+      updatedStorage.s3ContentStorageConfig!!
+        .accessKey.assert
+        .isEqualTo("new accessKey")
+      updatedStorage.s3ContentStorageConfig!!
+        .secretKey.assert
+        .isEqualTo("new secretKey")
       updatedStorage.azureContentStorageConfig.assert.isNull()
     }
   }

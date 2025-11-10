@@ -14,7 +14,11 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.ByteArrayInputStream
 import java.io.OutputStream
@@ -39,7 +43,7 @@ class ExportController(
 ) : IController {
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
   @Operation(summary = "Export to ZIP of jsons", description = "Exports data as ZIP of jsons", deprecated = true)
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_VIEW ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @Deprecated("Use v2 export controller")
   fun doExportJsonZip(
@@ -56,8 +60,7 @@ class ExportController(
       .header(
         "Content-Disposition",
         String.format("attachment; filename=\"%s.zip\"", projectHolder.project.name),
-      )
-      .body(
+      ).body(
         streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
           val zipOutputStream = ZipOutputStream(out)
           val translations =

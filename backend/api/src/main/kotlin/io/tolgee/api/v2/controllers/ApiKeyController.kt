@@ -80,15 +80,16 @@ class ApiKeyController(
     if (!authenticationFacade.authenticatedUser.isAdmin()) {
       securityService.checkApiKeyScopes(dto.scopes, project)
     }
-    return apiKeyService.create(
-      userAccount = authenticationFacade.authenticatedUserEntity,
-      scopes = dto.scopes,
-      project = project,
-      expiresAt = dto.expiresAt,
-      description = dto.description,
-    ).let {
-      revealedApiKeyModelAssembler.toModel(it)
-    }
+    return apiKeyService
+      .create(
+        userAccount = authenticationFacade.authenticatedUserEntity,
+        scopes = dto.scopes,
+        project = project,
+        expiresAt = dto.expiresAt,
+        description = dto.description,
+      ).let {
+        revealedApiKeyModelAssembler.toModel(it)
+      }
   }
 
   @Operation(summary = "Get one API key", description = "Returns specific API key info")
@@ -142,7 +143,8 @@ class ApiKeyController(
     pageable: Pageable,
     @RequestParam filterProjectId: Long?,
   ): PagedModel<ApiKeyModel> {
-    return apiKeyService.getAllByUser(authenticationFacade.authenticatedUser.id, filterProjectId, pageable)
+    return apiKeyService
+      .getAllByUser(authenticationFacade.authenticatedUser.id, filterProjectId, pageable)
       .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
   }
 
@@ -151,7 +153,8 @@ class ApiKeyController(
   @RequiresProjectPermissions([Scope.ADMIN])
   @OpenApiOrderExtension(5)
   fun allByProject(pageable: Pageable): PagedModel<ApiKeyModel> {
-    return apiKeyService.getAllByProject(projectHolder.project.id, pageable)
+    return apiKeyService
+      .getAllByProject(projectHolder.project.id, pageable)
       .let { pagedResourcesAssembler.toModel(it, apiKeyModelAssembler) }
   }
 

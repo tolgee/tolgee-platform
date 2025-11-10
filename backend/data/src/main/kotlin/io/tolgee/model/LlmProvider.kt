@@ -3,7 +3,15 @@ package io.tolgee.model
 import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
-import jakarta.persistence.*
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Index
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
 
 @Entity()

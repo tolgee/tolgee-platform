@@ -3,7 +3,14 @@ package io.tolgee.ee.service
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.ee.component.TaskReportHelper
-import io.tolgee.ee.data.task.*
+import io.tolgee.ee.data.task.CalculateScopeRequest
+import io.tolgee.ee.data.task.CreateTaskRequest
+import io.tolgee.ee.data.task.TaskFilters
+import io.tolgee.ee.data.task.TranslationScopeFilters
+import io.tolgee.ee.data.task.UpdateTaskKeyRequest
+import io.tolgee.ee.data.task.UpdateTaskKeyResponse
+import io.tolgee.ee.data.task.UpdateTaskKeysRequest
+import io.tolgee.ee.data.task.UpdateTaskRequest
 import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -43,7 +50,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
-import java.util.*
+import java.util.Date
 import kotlin.math.max
 
 @Primary
@@ -120,9 +127,11 @@ class TaskService(
 
   fun getNextTaskNumber(projectId: Long): Long {
     val lastTaskNumber =
-      taskRepository.findByProjectOrderByNumberDesc(
-        entityManager.getReference(Project::class.java, projectId),
-      ).firstOrNull()?.number ?: 0L
+      taskRepository
+        .findByProjectOrderByNumberDesc(
+          entityManager.getReference(Project::class.java, projectId),
+        ).firstOrNull()
+        ?.number ?: 0L
     val projectLastTaskNumber = projectService.get(projectId).lastTaskNumber
     // use whichever is larger
     return max(lastTaskNumber, projectLastTaskNumber) + 1
@@ -266,11 +275,12 @@ class TaskService(
 
     dto.removeKeys?.let { toRemove ->
       val taskKeysToRemove =
-        task.keys.filter {
-          toRemove.contains(
-            it.key.id,
-          )
-        }.toMutableSet()
+        task.keys
+          .filter {
+            toRemove.contains(
+              it.key.id,
+            )
+          }.toMutableSet()
       task.keys = task.keys.subtract(taskKeysToRemove).toMutableSet()
       taskKeyRepository.deleteAll(taskKeysToRemove)
     }
@@ -431,26 +441,28 @@ class TaskService(
     keys: Collection<Long>,
     filters: TranslationScopeFilters,
   ): MutableSet<Long> {
-    return taskRepository.getKeysWithoutConflicts(
-      projectId,
-      languageId,
-      type.toString(),
-      keys,
-      filters,
-    ).toMutableSet()
+    return taskRepository
+      .getKeysWithoutConflicts(
+        projectId,
+        languageId,
+        type.toString(),
+        keys,
+        filters,
+      ).toMutableSet()
   }
 
   private fun checkAssignees(
     assignees: MutableSet<Long>,
     projectId: Long,
   ): MutableSet<UserAccount> {
-    return assignees.map {
-      val permission = securityService.getProjectPermissionScopesNoApiKey(projectId, it)
-      if (permission.isNullOrEmpty()) {
-        throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
-      }
-      entityManager.getReference(UserAccount::class.java, it)
-    }.toMutableSet()
+    return assignees
+      .map {
+        val permission = securityService.getProjectPermissionScopesNoApiKey(projectId, it)
+        if (permission.isNullOrEmpty()) {
+          throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
+        }
+        entityManager.getReference(UserAccount::class.java, it)
+      }.toMutableSet()
   }
 
   private fun checkLanguage(

@@ -42,7 +42,7 @@ class LlmTranslationProviderEeImpl(
         organizationId,
         promptParams,
         provider,
-        attempts
+        attempts,
       )
     return promptService.getTranslationFromPromptResult(result)
   }

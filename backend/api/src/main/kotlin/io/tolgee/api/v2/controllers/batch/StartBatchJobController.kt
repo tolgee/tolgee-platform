@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
-import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
-import io.tolgee.constants.Feature
 import io.tolgee.batch.request.ClearTranslationsRequest
 import io.tolgee.batch.request.CopyTranslationRequest
 import io.tolgee.batch.request.DeleteKeysRequest
@@ -15,6 +13,8 @@ import io.tolgee.batch.request.SetKeysNamespaceRequest
 import io.tolgee.batch.request.SetTranslationsStateStateRequest
 import io.tolgee.batch.request.TagKeysRequest
 import io.tolgee.batch.request.UntagKeysRequest
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.batch.BatchJobModel
@@ -61,12 +61,13 @@ class StartBatchJobController(
   ): BatchJobModel {
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.PRE_TRANSLATE_BT_TM,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.PRE_TRANSLATE_BT_TM,
+      ).model
   }
 
   @PostMapping(value = ["/machine-translate"])
@@ -82,12 +83,13 @@ class StartBatchJobController(
   ): BatchJobModel {
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.MACHINE_TRANSLATE,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.MACHINE_TRANSLATE,
+      ).model
   }
 
   @PostMapping(value = ["/ai-playground-translate"])
@@ -108,12 +110,13 @@ class StartBatchJobController(
     }
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     aiPlaygroundResultService.removeResults(projectHolder.project.id, authenticationFacade.authenticatedUserEntity.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.AI_PLAYGROUND_TRANSLATE,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.AI_PLAYGROUND_TRANSLATE,
+      ).model
   }
 
   @PostMapping(value = ["/delete-keys"])
@@ -125,12 +128,13 @@ class StartBatchJobController(
     data: DeleteKeysRequest,
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.DELETE_KEYS,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.DELETE_KEYS,
+      ).model
   }
 
   @PostMapping(value = ["/set-translation-state"])
@@ -143,12 +147,13 @@ class StartBatchJobController(
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLanguageStateChangePermission(projectHolder.project.id, data.languageIds)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.SET_TRANSLATIONS_STATE,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.SET_TRANSLATIONS_STATE,
+      ).model
   }
 
   @PostMapping(value = ["/clear-translations"])
@@ -164,12 +169,13 @@ class StartBatchJobController(
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.languageIds)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.CLEAR_TRANSLATIONS,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.CLEAR_TRANSLATIONS,
+      ).model
   }
 
   @PostMapping(value = ["/copy-translations"])
@@ -186,12 +192,13 @@ class StartBatchJobController(
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLanguageTranslatePermission(projectHolder.project.id, data.targetLanguageIds)
     securityService.checkLanguageViewPermission(projectHolder.project.id, listOf(data.sourceLanguageId))
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.COPY_TRANSLATIONS,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.COPY_TRANSLATIONS,
+      ).model
   }
 
   @PostMapping(value = ["/tag-keys"])
@@ -204,12 +211,13 @@ class StartBatchJobController(
   ): BatchJobModel {
     data.tags.validate()
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.TAG_KEYS,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.TAG_KEYS,
+      ).model
   }
 
   @PostMapping(value = ["/untag-keys"])
@@ -221,12 +229,13 @@ class StartBatchJobController(
     data: UntagKeysRequest,
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.UNTAG_KEYS,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.UNTAG_KEYS,
+      ).model
   }
 
   @PostMapping(value = ["/set-keys-namespace"])
@@ -238,12 +247,13 @@ class StartBatchJobController(
     data: SetKeysNamespaceRequest,
   ): BatchJobModel {
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.SET_KEYS_NAMESPACE,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.SET_KEYS_NAMESPACE,
+      ).model
   }
 
   val BatchJob.model

@@ -9,8 +9,11 @@ class UnassignTranslationLabelChunkProcessor(
   entityManager: EntityManager,
   private val labelService: LabelService,
 ) : AbstractTranslationLabelChunkProcessor(entityManager) {
-
-  override fun process(subChunk: List<Long>, languageIds: List<Long>, labelIds: List<Long>) {
+  override fun process(
+    subChunk: List<Long>,
+    languageIds: List<Long>,
+    labelIds: List<Long>,
+  ) {
     labelService.batchUnassignLabels(subChunk, languageIds, labelIds)
   }
 }

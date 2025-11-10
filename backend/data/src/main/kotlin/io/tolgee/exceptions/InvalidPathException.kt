@@ -1,3 +1,5 @@
 package io.tolgee.exceptions
 
-class InvalidPathException(message: String) : BadRequestException(message)
+class InvalidPathException(
+  message: String,
+) : BadRequestException(message)

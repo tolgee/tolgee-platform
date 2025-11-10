@@ -126,15 +126,11 @@ class OrganizationRoleService(
     throw PermissionException(Message.USER_IS_NOT_OWNER_OF_ORGANIZATION)
   }
 
-  fun checkUserCanDeleteInvitation(
-    organizationId: Long,
-  ) {
+  fun checkUserCanDeleteInvitation(organizationId: Long) {
     checkUserIsOwnerOrServerAdmin(organizationId)
   }
 
-  fun checkUserCanTransferProjectToOrganization(
-    organizationId: Long,
-  ) {
+  fun checkUserCanTransferProjectToOrganization(organizationId: Long) {
     checkUserIsOwnerOrServerAdmin(organizationId)
   }
 
@@ -284,7 +280,10 @@ class OrganizationRoleService(
    * Checks if a user is managed by the organization.
    * We can't remove managed users from their organization.
    */
-  private fun canRemoveUser(userId: Long, organizationId: Long): Boolean {
+  private fun canRemoveUser(
+    userId: Long,
+    organizationId: Long,
+  ): Boolean {
     val managedBy = getManagedBy(userId)
     val isManaged = managedBy != null
 

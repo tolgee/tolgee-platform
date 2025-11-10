@@ -48,10 +48,11 @@ class XliffFileExporterTest {
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
-        filePathProvider = ExportFilePathProvider(
-          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-          extension = params.format?.extension ?: "xliff",
-        )
+        filePathProvider =
+          ExportFilePathProvider(
+            template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+            extension = params.format?.extension ?: "xliff",
+          ),
       ).produceFiles()
 
     assertThat(files).hasSize(2)
@@ -125,10 +126,11 @@ class XliffFileExporterTest {
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
-        filePathProvider = ExportFilePathProvider(
-          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-          extension = params.format?.extension ?: "xliff",
-        ),
+        filePathProvider =
+          ExportFilePathProvider(
+            template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+            extension = params.format?.extension ?: "xliff",
+          ),
       ).produceFiles()
 
     assertThat(files).hasSize(2)
@@ -159,21 +161,23 @@ class XliffFileExporterTest {
         baseTranslationsProvider = { listOf() },
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
-        filePathProvider = ExportFilePathProvider(
-          template = ExportFileStructureTemplateProvider(
-            params,
-              listOf(
-              ExportTranslationView(
-                1,
-                "<p>Sweat jesus, this is HTML!</p>",
-                TranslationState.TRANSLATED,
-                ExportKeyView(1, "html_key", description = "Omg!\n  This is really.    \n preserved"),
-                "en",
-              )
-            )
-          ).validateAndGetTemplate(),
-          extension = params.format?.extension ?: "xliff",
-        )
+        filePathProvider =
+          ExportFilePathProvider(
+            template =
+              ExportFileStructureTemplateProvider(
+                params,
+                listOf(
+                  ExportTranslationView(
+                    1,
+                    "<p>Sweat jesus, this is HTML!</p>",
+                    TranslationState.TRANSLATED,
+                    ExportKeyView(1, "html_key", description = "Omg!\n  This is really.    \n preserved"),
+                    "en",
+                  ),
+                ),
+              ).validateAndGetTemplate(),
+            extension = params.format?.extension ?: "xliff",
+          ),
       ).produceFiles()
 
     val fileContent = files["en.xliff"]!!.bufferedReader().readText()
@@ -263,14 +267,16 @@ class XliffFileExporterTest {
         baseTranslationsProvider = baseProvider,
         baseLanguage = Language().apply { tag = "en" },
         projectIcuPlaceholdersSupport = true,
-        filePathProvider = ExportFilePathProvider(
-          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-          extension = params.format?.extension ?: "xliff",
-        )
+        filePathProvider =
+          ExportFilePathProvider(
+            template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+            extension = params.format?.extension ?: "xliff",
+          ),
       ).produceFiles()
 
     val validator: Validator
-    javaClass.classLoader.getResourceAsStream("import/xliff/xliff-core-1.2-transitional.xsd")
+    javaClass.classLoader
+      .getResourceAsStream("import/xliff/xliff-core-1.2-transitional.xsd")
       .use { xsdInputStream ->
         validator =
           try {
@@ -408,10 +414,11 @@ class XliffFileExporterTest {
     val exporter =
       getExporter(
         built.translations,
-        exportParams = ExportParams(
-          messageFormat = ExportMessageFormat.RUBY_SPRINTF,
-          format = ExportFormat.XLIFF
-        ),
+        exportParams =
+          ExportParams(
+            messageFormat = ExportMessageFormat.RUBY_SPRINTF,
+            format = ExportFormat.XLIFF,
+          ),
       )
     val data = getExported(exporter)
     data.assertFile(
@@ -513,10 +520,11 @@ class XliffFileExporterTest {
       baseLanguage = Language().apply { tag = "en" },
       baseTranslationsProvider = { listOf() },
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
-      filePathProvider = ExportFilePathProvider(
-        template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
-        extension = exportParams.format.extension,
-      )
+      filePathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+          extension = exportParams.format.extension,
+        ),
     )
   }
 

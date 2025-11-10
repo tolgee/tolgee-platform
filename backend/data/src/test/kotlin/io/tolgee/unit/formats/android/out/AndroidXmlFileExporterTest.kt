@@ -323,7 +323,7 @@ class AndroidXmlFileExporterTest {
       ExportFilePathProvider(
         template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
         extension = params.format.extension,
-      )
+      ),
     )
   }
 

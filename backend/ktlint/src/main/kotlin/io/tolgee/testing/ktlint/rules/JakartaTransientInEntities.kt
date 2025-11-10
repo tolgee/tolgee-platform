@@ -30,7 +30,10 @@ class JakartaTransientInEntities :
   private var seenEntityAnnotation = false
   private var exploringClass: ASTNode? = null
 
-  override fun beforeVisitChildNodes(node: ASTNode, emit: (Int, String, Boolean) -> AutocorrectDecision) {
+  override fun beforeVisitChildNodes(
+    node: ASTNode,
+    emit: (Int, String, Boolean) -> AutocorrectDecision,
+  ) {
     when (node.elementType) {
       ElementType.IMPORT_DIRECTIVE -> {
         val qual = node.children().last().text
@@ -45,7 +48,8 @@ class JakartaTransientInEntities :
       }
 
       ElementType.ANNOTATION_ENTRY -> {
-        node.children()
+        node
+          .children()
           .find { it.elementType == ElementType.CONSTRUCTOR_CALLEE }
           ?.children()
           ?.toList()
@@ -64,7 +68,10 @@ class JakartaTransientInEntities :
     }
   }
 
-  override fun afterVisitChildNodes(node: ASTNode, emit: (Int, String, Boolean) -> AutocorrectDecision) {
+  override fun afterVisitChildNodes(
+    node: ASTNode,
+    emit: (Int, String, Boolean) -> AutocorrectDecision,
+  ) {
     if (node == exploringClass) {
       exploringClass = null
       seenEntityAnnotation = false

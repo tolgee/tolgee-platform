@@ -83,7 +83,7 @@ class TranslationLabelsControllerTest(
   @ProjectJWTAuthTestMethod
   fun `get labels by ids`() {
     performProjectAuthGet(
-      "labels/ids?id=${testData.firstLabel.id}&id=${testData.unassignedLabel.id}"
+      "labels/ids?id=${testData.firstLabel.id}&id=${testData.unassignedLabel.id}",
     ).andAssertThatJson {
       isArray.hasSize(2)
       node("[0].id").isValidId
@@ -102,11 +102,12 @@ class TranslationLabelsControllerTest(
     scopes = [Scope.TRANSLATION_LABEL_MANAGE],
   )
   fun `creates label`() {
-    val requestBody = mapOf<String, Any>(
-      "name" to "New label",
-      "description" to "This is a new label",
-      "color" to "#00FF00",
-    )
+    val requestBody =
+      mapOf<String, Any>(
+        "name" to "New label",
+        "description" to "This is a new label",
+        "color" to "#00FF00",
+      )
 
     performProjectAuthPost("labels", requestBody).andAssertThatJson {
       node("name").isString.isEqualTo("New label")
@@ -123,11 +124,12 @@ class TranslationLabelsControllerTest(
     scopes = [Scope.TRANSLATION_LABEL_MANAGE],
   )
   fun `updates label`() {
-    val requestBody = mapOf<String, Any>(
-      "name" to "Updated label",
-      "description" to "This is an updated label",
-      "color" to "#0000FF",
-    )
+    val requestBody =
+      mapOf<String, Any>(
+        "name" to "Updated label",
+        "description" to "This is an updated label",
+        "color" to "#0000FF",
+      )
 
     performProjectAuthPut("labels/${testData.firstLabel.id}", requestBody).andAssertThatJson {
       node("name").isString.isEqualTo("Updated label")
@@ -144,14 +146,17 @@ class TranslationLabelsControllerTest(
     scopes = [Scope.TRANSLATION_LABEL_MANAGE],
   )
   fun `does not update label with invalid color`() {
-    val requestBody = mapOf<String, Any>(
-      "name" to "Updated label",
-      "description" to "This is an updated label",
-      "color" to "#ZZZZZZ",
-    )
+    val requestBody =
+      mapOf<String, Any>(
+        "name" to "Updated label",
+        "description" to "This is an updated label",
+        "color" to "#ZZZZZZ",
+      )
 
     performProjectAuthPut("labels/${testData.firstLabel.id}", requestBody)
-      .andAssertError.isStandardValidation.onField("color").isEqualTo("hex color required")
+      .andAssertError.isStandardValidation
+      .onField("color")
+      .isEqualTo("hex color required")
     val label = labelService.find(testData.firstLabel.id).orElse(null)
     assert(label.name == "First label")
     assert(label.description == "This is a description")
@@ -164,8 +169,18 @@ class TranslationLabelsControllerTest(
   )
   fun `deletes label`() {
     performProjectAuthDelete("labels/${testData.firstLabel.id}").andIsOk
-    labelService.find(testData.firstLabel.id).orElse(null).assert.isNull()
-    translationService.find(testData.firstLabel.translations.first().id).assert.isNotNull()
+    labelService
+      .find(testData.firstLabel.id)
+      .orElse(null)
+      .assert
+      .isNull()
+    translationService
+      .find(
+        testData.firstLabel.translations
+          .first()
+          .id,
+      ).assert
+      .isNotNull()
   }
 
   @Test
@@ -173,15 +188,20 @@ class TranslationLabelsControllerTest(
     scopes = [Scope.TRANSLATION_LABEL_MANAGE],
   )
   fun `cannot update label of another project`() {
-    val requestBody = mapOf<String, Any>(
-      "name" to "Updated label",
-      "description" to "This is an updated label",
-      "color" to "#0000FF",
-    )
+    val requestBody =
+      mapOf<String, Any>(
+        "name" to "Updated label",
+        "description" to "This is an updated label",
+        "color" to "#0000FF",
+      )
     // just to make sure the test is not run with the same project
     projectSupplier = { testData.project }
     performProjectAuthPut("labels/${testData.secondLabel.id}", requestBody).andIsNotFound
-    labelService.find(testData.secondLabel.id).orElse(null).assert.isNotNull()
+    labelService
+      .find(testData.secondLabel.id)
+      .orElse(null)
+      .assert
+      .isNotNull()
   }
 
   @Test
@@ -192,7 +212,11 @@ class TranslationLabelsControllerTest(
     // just to make sure the test is not run with the same project
     projectSupplier = { testData.project }
     performProjectAuthDelete("labels/${testData.secondLabel.id}").andIsNotFound
-    labelService.find(testData.secondLabel.id).orElse(null).assert.isNotNull()
+    labelService
+      .find(testData.secondLabel.id)
+      .orElse(null)
+      .assert
+      .isNotNull()
   }
 
   @Test
@@ -238,11 +262,12 @@ class TranslationLabelsControllerTest(
     scopes = [Scope.TRANSLATION_LABEL_ASSIGN],
   )
   fun `cannot create label with assign permission`() {
-    val requestBody = mapOf<String, Any>(
-      "name" to "New label",
-      "description" to "This is a new label",
-      "color" to "#00FF00",
-    )
+    val requestBody =
+      mapOf<String, Any>(
+        "name" to "New label",
+        "description" to "This is a new label",
+        "color" to "#00FF00",
+      )
 
     performProjectAuthPost("labels", requestBody).andIsForbidden
     val labels = labelService.getProjectLabels(testData.projectBuilder.self.id, Pageable.unpaged())
@@ -255,11 +280,12 @@ class TranslationLabelsControllerTest(
     scopes = [Scope.TRANSLATION_LABEL_ASSIGN],
   )
   fun `cannot update label with assign permission`() {
-    val requestBody = mapOf<String, Any>(
-      "name" to "Updated label",
-      "description" to "This is an updated label",
-      "color" to "#0000FF",
-    )
+    val requestBody =
+      mapOf<String, Any>(
+        "name" to "Updated label",
+        "description" to "This is an updated label",
+        "color" to "#0000FF",
+      )
 
     performProjectAuthPut("labels/${testData.firstLabel.id}", requestBody).andIsForbidden
     val labels = labelService.getProjectLabels(testData.projectBuilder.self.id, Pageable.unpaged())
@@ -273,8 +299,18 @@ class TranslationLabelsControllerTest(
   )
   fun `cannot delete label with assign permission`() {
     performProjectAuthDelete("labels/${testData.firstLabel.id}").andIsForbidden
-    labelService.find(testData.firstLabel.id).orElse(null).assert.isNotNull()
-    translationService.find(testData.firstLabel.translations.first().id).assert.isNotNull()
+    labelService
+      .find(testData.firstLabel.id)
+      .orElse(null)
+      .assert
+      .isNotNull()
+    translationService
+      .find(
+        testData.firstLabel.translations
+          .first()
+          .id,
+      ).assert
+      .isNotNull()
   }
 
   @Test
@@ -296,7 +332,7 @@ class TranslationLabelsControllerTest(
   @Test
   @Transactional
   @ProjectApiKeyAuthTestMethod(
-    scopes = [Scope.TRANSLATION_LABEL_MANAGE]
+    scopes = [Scope.TRANSLATION_LABEL_MANAGE],
   )
   fun `cannot unassign label from translation with manage permission only`() {
     performProjectAuthDelete(
@@ -311,20 +347,24 @@ class TranslationLabelsControllerTest(
 
   @Test
   @ProjectApiKeyAuthTestMethod(
-    scopes = [Scope.TRANSLATION_LABEL_ASSIGN]
+    scopes = [Scope.TRANSLATION_LABEL_ASSIGN],
   )
   fun `assign label to empty translation`() {
-    val requestBody = mapOf<String, Any>(
-      "keyId" to testData.keyWithoutCzTranslation.id,
-      "languageId" to testData.czechLanguage.id,
-      "labelId" to testData.firstLabel.id
-    )
+    val requestBody =
+      mapOf<String, Any>(
+        "keyId" to testData.keyWithoutCzTranslation.id,
+        "languageId" to testData.czechLanguage.id,
+        "labelId" to testData.firstLabel.id,
+      )
     performProjectAuthPut("translations/label", requestBody).andIsOk
     executeInNewTransaction {
       val translation = translationService.find(testData.keyWithoutCzTranslation, testData.czechLanguage).get()
       translation.assert.isNotNull
       translation.labels.assert.hasSize(1)
-      translation.labels.first().assert.isEqualTo(testData.firstLabel)
+      translation.labels
+        .first()
+        .assert
+        .isEqualTo(testData.firstLabel)
     }
   }
 }

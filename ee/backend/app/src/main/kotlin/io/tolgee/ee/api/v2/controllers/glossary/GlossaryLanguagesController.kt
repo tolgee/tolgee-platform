@@ -36,8 +36,9 @@ class GlossaryLanguagesController(
   ): CollectionModel<GlossaryLanguageDto> {
     val glossary = glossaryService.get(organizationId, glossaryId)
     val languages = glossaryTermTranslationService.getDistinctLanguageTags(organizationId, glossaryId)
-    return languages.map {
-      GlossaryLanguageDto(it, glossary.baseLanguageTag == it)
-    }.let { CollectionModel.of(it) }
+    return languages
+      .map {
+        GlossaryLanguageDto(it, glossary.baseLanguageTag == it)
+      }.let { CollectionModel.of(it) }
   }
 }

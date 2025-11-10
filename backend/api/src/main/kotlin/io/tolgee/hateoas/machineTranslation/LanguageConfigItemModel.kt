@@ -30,4 +30,5 @@ class LanguageConfigItemModel(
   val enabledServices: Set<MtServiceType>,
   @Schema(description = "Info about enabled services")
   var enabledServicesInfo: Set<MtServiceInfo>,
-) : RepresentationModel<LanguageConfigItemModel>(), Serializable
+) : RepresentationModel<LanguageConfigItemModel>(),
+  Serializable

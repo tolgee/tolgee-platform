@@ -46,7 +46,7 @@ interface PromptRepository : JpaRepository<Prompt, Long> {
   @Query(
     """
       delete from Prompt p where p.project.id = :projectId
-    """
+    """,
   )
   fun deleteAllByProjectId(projectId: Long)
 }

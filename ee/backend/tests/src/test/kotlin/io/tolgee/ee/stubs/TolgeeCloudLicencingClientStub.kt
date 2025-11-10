@@ -9,14 +9,16 @@ import org.springframework.stereotype.Component
 
 @Primary
 @Component
-class TolgeeCloudLicencingClientStub(httpClient: HttpClient, eeProperties: EeProperties) :
-  TolgeeCloudLicencingClient(httpClient, eeProperties) {
+class TolgeeCloudLicencingClientStub(
+  httpClient: HttpClient,
+  eeProperties: EeProperties,
+) : TolgeeCloudLicencingClient(httpClient, eeProperties) {
   var enableReporting = false
 
   override fun reportUsageRemote(
     subscription: EeSubscriptionDto,
     keys: Long?,
-    seats: Long?
+    seats: Long?,
   ) {
     // no-op reporting unless told otherwise
     if (enableReporting) {

@@ -118,10 +118,19 @@ class LanguageCachingTest : AbstractSpringTest() {
   }
 
   private fun assertCachePopulated() {
-    cacheManager.getCache(Caches.LANGUAGES)!!.get(testData.project.id)?.get().assert.isNotNull
+    cacheManager
+      .getCache(Caches.LANGUAGES)!!
+      .get(testData.project.id)
+      ?.get()
+      .assert.isNotNull
   }
 
   private fun assertCacheEvicted() {
-    cacheManager.getCache(Caches.LANGUAGES)!!.get(testData.project.id)?.get().assert.isNull()
+    cacheManager
+      .getCache(Caches.LANGUAGES)!!
+      .get(testData.project.id)
+      ?.get()
+      .assert
+      .isNull()
   }
 }

@@ -6,7 +6,24 @@ import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.translationAgency.TranslationAgency
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
+import jakarta.persistence.PrePersist
+import jakarta.persistence.PreUpdate
+import jakarta.persistence.Table
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
 import org.springframework.beans.factory.annotation.Configurable
@@ -36,7 +53,8 @@ class Permission(
   var invitation: Invitation? = null,
   @ManyToOne(fetch = FetchType.LAZY, optional = true)
   var agency: TranslationAgency? = null,
-) : AuditModel(), IPermission {
+) : AuditModel(),
+  IPermission {
   @Type(
     EnumArrayType::class,
     parameters = [
@@ -158,7 +176,8 @@ class Permission(
         if (!((permission._scopes == null) xor (permission.type == null))) {
           throw IllegalStateException("Exactly one of scopes or type has to be set")
         }
-        if (permission.organization != null && (
+        if (permission.organization != null &&
+          (
             permission.viewLanguages.isNotEmpty() ||
               permission.translateLanguages.isNotEmpty() ||
               permission.stateChangeLanguages.isNotEmpty()

@@ -53,7 +53,8 @@ class ScheduledJobCleaner(
 
   private fun handleCompletedJobsCacheState() {
     val lockedJobIds = lockingManager.getLockedJobIds() + batchJobStateProvider.getCachedJobIds()
-    batchJobService.getJobsCompletedBefore(lockedJobIds, currentDateProvider.date.addSeconds(-10))
+    batchJobService
+      .getJobsCompletedBefore(lockedJobIds, currentDateProvider.date.addSeconds(-10))
       .forEach {
         unlockAndRemoveState(it.project?.id, it.id)
       }
@@ -82,7 +83,8 @@ class ScheduledJobCleaner(
     stuckJob: StuckCompletedJob,
     newStatus: BatchJobStatus,
   ) {
-    entityManager.createNativeQuery("update tolgee_batch_job set status = :newStatus where id = :id")
+    entityManager
+      .createNativeQuery("update tolgee_batch_job set status = :newStatus where id = :id")
       .setParameter("newStatus", newStatus.name)
       .setParameter("id", stuckJob.id)
       .executeUpdate()
@@ -97,8 +99,9 @@ class ScheduledJobCleaner(
     // - have all chunks completed
     // - and we are obtaining the resulting chunk status by preferably filtering out chunks which have success status
     val data =
-      entityManager.createNativeQuery(
-        """
+      entityManager
+        .createNativeQuery(
+          """
         select tbj.id as id, tbj.project_id as projectId, tbjce2.status as status
         from tolgee_batch_job tbj
                  left join tolgee_batch_job_chunk_execution tbjce
@@ -114,9 +117,8 @@ class ScheduledJobCleaner(
           and tbjce.id is null and tbjce_success.id is null
         group by  tbj.id, tbj.project_id, tbjce2.status
       """,
-        Array<Any>::class.java,
-      )
-        .setParameter("chunkIncompleteStatuses", chunkIncompleteStatuses)
+          Array<Any>::class.java,
+        ).setParameter("chunkIncompleteStatuses", chunkIncompleteStatuses)
         .setParameter("jobIncompleteStatuses", jobIncompleteStatuses)
         .setParameter("successStatus", BatchJobChunkExecutionStatus.SUCCESS.name)
         .resultList as List<Array<Any>>

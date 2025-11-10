@@ -6,7 +6,14 @@ import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.enums.TranslationSuggestionState
 import io.tolgee.model.key.Key
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
@@ -22,24 +29,19 @@ class TranslationSuggestion(
   @ManyToOne
   @JoinColumn(nullable = false)
   var project: Project,
-
   @ManyToOne
   @JoinColumn(nullable = false)
   var language: Language? = null,
-
   @ManyToOne
   @JoinColumn(nullable = false)
   var author: UserAccount? = null,
-
   @Column(columnDefinition = "text", nullable = false)
   @ActivityLoggedProp
   @ActivityDescribingProp
   var translation: String? = null,
-
   @ActivityLoggedProp
   @ColumnDefault("false")
   var isPlural: Boolean = false,
-
   @Enumerated(EnumType.STRING)
   @ActivityLoggedProp
   var state: TranslationSuggestionState = TranslationSuggestionState.ACTIVE,

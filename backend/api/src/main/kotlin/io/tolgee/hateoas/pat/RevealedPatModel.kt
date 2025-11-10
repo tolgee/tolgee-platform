@@ -9,4 +9,5 @@ open class RevealedPatModel(
   @Schema(hidden = true)
   patModel: PatModel,
   val token: String,
-) : IPatModel by patModel, RepresentationModel<RevealedPatModel>()
+) : RepresentationModel<RevealedPatModel>(),
+  IPatModel by patModel

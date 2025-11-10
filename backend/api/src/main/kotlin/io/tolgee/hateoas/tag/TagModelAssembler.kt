@@ -6,10 +6,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class TagModelAssembler : RepresentationModelAssemblerSupport<Tag, TagModel>(
-  TagsController::class.java,
-  TagModel::class.java,
-) {
+class TagModelAssembler :
+  RepresentationModelAssemblerSupport<Tag, TagModel>(
+    TagsController::class.java,
+    TagModel::class.java,
+  ) {
   override fun toModel(entity: Tag): TagModel {
     return TagModel(entity.id, entity.name)
   }

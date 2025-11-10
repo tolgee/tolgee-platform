@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
-import kotlin.collections.get
 
 @Component
 class GoogleOAuthDelegate(

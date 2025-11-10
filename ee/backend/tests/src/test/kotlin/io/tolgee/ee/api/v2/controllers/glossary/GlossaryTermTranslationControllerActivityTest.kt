@@ -42,15 +42,15 @@ class GlossaryTermTranslationControllerActivityTest : AuthorizedControllerTest()
 
   @Test
   fun `stores activity for glossary term translation creation`() {
-    val request = UpdateGlossaryTermTranslationRequest().apply {
-      languageTag = "de"
-      text = "Neuer Begriff"
-    }
+    val request =
+      UpdateGlossaryTermTranslationRequest().apply {
+        languageTag = "de"
+        text = "Neuer Begriff"
+      }
     performAuthPost(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations",
-      request
-    )
-      .andIsOk
+      request,
+    ).andIsOk
 
     executeInNewTransaction {
       val latestActivityRevision = getLatestActivityRevision()
@@ -77,7 +77,10 @@ class GlossaryTermTranslationControllerActivityTest : AuthorizedControllerTest()
       translationModifications.assert.isNotEmpty()
 
       // Verify that the entity was created (has new values but no old values)
-      translationModifications.values.any { it.new != null }.assert.isTrue()
+      translationModifications.values
+        .any { it.new != null }
+        .assert
+        .isTrue()
 
       // Verify that the right fields were stored in modifications according to annotations
       translationModifications["text"]?.new.assert.isEqualTo("Neuer Begriff")
@@ -97,25 +100,26 @@ class GlossaryTermTranslationControllerActivityTest : AuthorizedControllerTest()
   @Test
   fun `stores activity for glossary term translation update`() {
     // First create a translation
-    val createRequest = UpdateGlossaryTermTranslationRequest().apply {
-      languageTag = "cs"
-      text = "Pojem"
-    }
+    val createRequest =
+      UpdateGlossaryTermTranslationRequest().apply {
+        languageTag = "cs"
+        text = "Pojem"
+      }
     performAuthPost(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations",
-      createRequest
+      createRequest,
     ).andIsOk
 
     // Then update it
-    val updateRequest = UpdateGlossaryTermTranslationRequest().apply {
-      languageTag = "cs"
-      text = "Aktualizovaný pojem"
-    }
+    val updateRequest =
+      UpdateGlossaryTermTranslationRequest().apply {
+        languageTag = "cs"
+        text = "Aktualizovaný pojem"
+      }
     performAuthPost(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations",
-      updateRequest
-    )
-      .andIsOk
+      updateRequest,
+    ).andIsOk
 
     executeInNewTransaction {
       val latestActivityRevision = getLatestActivityRevision()
@@ -142,7 +146,10 @@ class GlossaryTermTranslationControllerActivityTest : AuthorizedControllerTest()
       translationModifications.assert.isNotEmpty()
 
       // Verify that the entity was updated (has both old and new values)
-      translationModifications.values.any { it.old != null && it.new != null }.assert.isTrue()
+      translationModifications.values
+        .any { it.old != null && it.new != null }
+        .assert
+        .isTrue()
 
       // Verify that the right fields were stored in modifications according to annotations
       translationModifications["text"]?.old.assert.isEqualTo("Pojem")

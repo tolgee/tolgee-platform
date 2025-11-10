@@ -8,7 +8,6 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class AesTest {
-
   @Test
   fun `it works`() {
     val aes = Aes("this_is_dummy_jwt_secret_azeazezaezaezaezaezzaezaezaeazeazezaeazezeaeazea".toByteArray())

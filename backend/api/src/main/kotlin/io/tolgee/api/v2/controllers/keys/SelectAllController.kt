@@ -17,7 +17,11 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.springdoc.core.annotations.ParameterObject
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController

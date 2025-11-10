@@ -20,7 +20,7 @@ import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Subquery
-import java.util.*
+import java.util.Locale
 
 class QueryGlobalFiltering(
   private val params: TranslationFilters,
@@ -193,7 +193,8 @@ class QueryGlobalFiltering(
       val subJoin = subRoot.join(Key_.keyMeta).join(KeyMeta_.tags)
       val hasEmptyTag = filterNoTag.contains("")
 
-      subquery.select(subRoot.get(Key_.id))
+      subquery
+        .select(subRoot.get(Key_.id))
         .where(
           cb.equal(subRoot.get(Key_.id), root.get(Key_.id)),
           subJoin.get(Tag_.name).`in`(filterNoTag),
@@ -247,9 +248,11 @@ class QueryGlobalFiltering(
       describingEntitySubquery.where(
         cb.and(
           cb.equal(deRoot.get(ActivityDescribingEntity_.entityClass), "Key"),
-          deRoot.get(
-            ActivityDescribingEntity_.activityRevision,
-          ).get(ActivityRevision_.id).`in`(params.filterRevisionId),
+          deRoot
+            .get(
+              ActivityDescribingEntity_.activityRevision,
+            ).get(ActivityRevision_.id)
+            .`in`(params.filterRevisionId),
         ),
       )
 

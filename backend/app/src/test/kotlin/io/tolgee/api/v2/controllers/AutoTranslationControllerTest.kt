@@ -2,7 +2,11 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.AutoTranslateTestData
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.MachineTranslationTest
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod

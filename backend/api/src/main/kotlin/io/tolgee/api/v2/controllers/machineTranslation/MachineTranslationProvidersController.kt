@@ -30,11 +30,16 @@ class MachineTranslationProvidersController(
   }
 
   val lazyInfo by lazy {
-    mtServiceConfigService.services.mapNotNull {
-      if (!it.value.second.isEnabled) {
-        return@mapNotNull null
-      }
-      it.key.name to MachineTranslationProviderModel(it.value.second.supportedLanguages?.toList())
-    }.toMap()
+    mtServiceConfigService.services
+      .mapNotNull {
+        if (!it.value.second.isEnabled) {
+          return@mapNotNull null
+        }
+        it.key.name to
+          MachineTranslationProviderModel(
+            it.value.second.supportedLanguages
+              ?.toList(),
+          )
+      }.toMap()
   }
 }

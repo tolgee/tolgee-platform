@@ -1,7 +1,12 @@
 package io.tolgee.formats.xmlResources.out
 
 import io.tolgee.formats.ExportFormat
-import io.tolgee.formats.xmlResources.*
+import io.tolgee.formats.xmlResources.PluralUnit
+import io.tolgee.formats.xmlResources.StringArrayUnit
+import io.tolgee.formats.xmlResources.StringUnit
+import io.tolgee.formats.xmlResources.XmlResourcesNode
+import io.tolgee.formats.xmlResources.XmlResourcesStringValue
+import io.tolgee.formats.xmlResources.XmlResourcesStringsModel
 import io.tolgee.util.attr
 import io.tolgee.util.buildDom
 import io.tolgee.util.comment
@@ -9,7 +14,10 @@ import io.tolgee.util.element
 import org.w3c.dom.Element
 import java.io.InputStream
 
-class XmlResourcesFileWriter(private val model: XmlResourcesStringsModel, private val exportFormat: ExportFormat) {
+class XmlResourcesFileWriter(
+  private val model: XmlResourcesStringsModel,
+  private val exportFormat: ExportFormat,
+) {
   fun produceFiles(): InputStream {
     return buildDom {
       element("resources") {

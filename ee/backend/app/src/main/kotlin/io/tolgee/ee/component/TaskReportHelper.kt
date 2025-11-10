@@ -6,7 +6,8 @@ import io.tolgee.model.views.TaskPerUserReportView
 import io.tolgee.model.views.TaskWithScopeView
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.text.DateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class TaskReportHelper(
   private val task: TaskWithScopeView,

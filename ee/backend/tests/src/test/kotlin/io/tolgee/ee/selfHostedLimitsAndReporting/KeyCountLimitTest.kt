@@ -20,7 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import java.util.Date
 
 @SpringBootTest
 class KeyCountLimitTest : AbstractSpringTest() {
@@ -31,13 +31,13 @@ class KeyCountLimitTest : AbstractSpringTest() {
   @MockBean
   private lateinit var restTemplate: RestTemplate
 
-	@BeforeEach
-	fun initMocks() {
-		val mockAny = mock<Any>()
-		val mockResp = mock<ResponseEntity<Any>>()
-		whenever(restTemplate.exchange(any<String>(), any(), any(), any<Class<Any>>())).thenReturn(mockResp)
-		whenever(mockResp.body).thenReturn(mockAny)
-	}
+  @BeforeEach
+  fun initMocks() {
+    val mockAny = mock<Any>()
+    val mockResp = mock<ResponseEntity<Any>>()
+    whenever(restTemplate.exchange(any<String>(), any(), any(), any<Class<Any>>())).thenReturn(mockResp)
+    whenever(mockResp.body).thenReturn(mockAny)
+  }
 
   @Test
   fun `throws when over the limit`() {
@@ -72,7 +72,10 @@ class KeyCountLimitTest : AbstractSpringTest() {
       includedKeys = 0
       keysLimit = 0
     }
-    val keyToDelete = testData.projectBuilder.data.keys.first().self
+    val keyToDelete =
+      testData.projectBuilder.data.keys
+        .first()
+        .self
     keyService.delete(keyToDelete.id)
   }
 

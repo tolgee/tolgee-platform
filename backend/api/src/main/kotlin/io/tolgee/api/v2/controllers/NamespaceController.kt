@@ -24,7 +24,14 @@ import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.PagedModel
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @Suppress("MVCPathVariableInspection")
 @RestController
@@ -70,8 +77,10 @@ class NamespaceController(
   @OpenApiOrderExtension(2)
   fun getUsedNamespaces(): CollectionModel<UsedNamespaceModel> {
     val namespaces =
-      namespaceService.getAllInProject(projectHolder.project.id)
-        .map { it.id as Long? to it.name as String? }.toMutableList()
+      namespaceService
+        .getAllInProject(projectHolder.project.id)
+        .map { it.id as Long? to it.name as String? }
+        .toMutableList()
     val isDefaultUsed = namespaceService.isDefaultUsed(projectHolder.project.id)
     if (isDefaultUsed) {
       namespaces.add(0, null to null)
@@ -82,7 +91,7 @@ class NamespaceController(
   @PutMapping(value = ["/namespaces/{id}"])
   @Operation(summary = "Update namespace")
   @RequestActivity(ActivityType.NAMESPACE_EDIT)
-  @RequiresProjectPermissions([ Scope.KEYS_EDIT ])
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @AllowApiAccess
   @OpenApiOrderExtension(4)
   fun update(

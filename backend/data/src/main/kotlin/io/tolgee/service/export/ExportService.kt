@@ -33,23 +33,25 @@ class ExportService(
         baseLanguage = baseLanguage,
       )
 
-    return fileExporterFactory.create(
-      data = data,
-      exportParams = exportParams,
-      baseTranslationsProvider = baseTranslationsProvider,
-      baseLanguage,
-      projectIcuPlaceholdersSupport = project.icuPlaceholders,
-    ).produceFiles().also {
-      businessEventPublisher.publishOnceInTime(
-        OnBusinessEventToCaptureEvent(
-          eventName = "EXPORT",
-          projectId = projectId,
-        ),
-        Duration.ofDays(1),
-      ) {
-        "EXPORT_$projectId"
+    return fileExporterFactory
+      .create(
+        data = data,
+        exportParams = exportParams,
+        baseTranslationsProvider = baseTranslationsProvider,
+        baseLanguage,
+        projectIcuPlaceholdersSupport = project.icuPlaceholders,
+      ).produceFiles()
+      .also {
+        businessEventPublisher.publishOnceInTime(
+          OnBusinessEventToCaptureEvent(
+            eventName = "EXPORT",
+            projectId = projectId,
+          ),
+          Duration.ofDays(1),
+        ) {
+          "EXPORT_$projectId"
+        }
       }
-    }
   }
 
   /**

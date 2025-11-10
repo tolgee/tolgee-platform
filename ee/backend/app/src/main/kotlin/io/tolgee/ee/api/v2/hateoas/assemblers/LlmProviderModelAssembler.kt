@@ -7,10 +7,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class LlmProviderModelAssembler : RepresentationModelAssemblerSupport<LlmProviderDto, LlmProviderModel>(
-  LlmProviderController::class.java,
-  LlmProviderModel::class.java,
-) {
+class LlmProviderModelAssembler :
+  RepresentationModelAssemblerSupport<LlmProviderDto, LlmProviderModel>(
+    LlmProviderController::class.java,
+    LlmProviderModel::class.java,
+  ) {
   override fun toModel(entity: LlmProviderDto): LlmProviderModel {
     return LlmProviderModel(
       id = entity.id,

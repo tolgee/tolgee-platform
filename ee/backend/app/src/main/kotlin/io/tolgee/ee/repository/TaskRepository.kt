@@ -6,7 +6,10 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
-import io.tolgee.model.views.*
+import io.tolgee.model.views.KeysScopeSimpleView
+import io.tolgee.model.views.TaskPerUserReportView
+import io.tolgee.model.views.TaskScopeView
+import io.tolgee.model.views.TranslationToTaskView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository

@@ -140,11 +140,11 @@ class AppleXliffFileExporterTest {
     |  </file>
     |</xliff>
     |
-    """.trimMargin()
+      """.trimMargin(),
     )
     data.assertFile(
       "homepage/cs.xliff",
-        """
+      """
     |<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     |<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
     |  <file datatype="plaintext" original="homepage.strings" source-language="tag" target-language="cs">
@@ -198,7 +198,7 @@ class AppleXliffFileExporterTest {
     |  </file>
     |</xliff>
     |
-    """.trimMargin()
+      """.trimMargin(),
     )
   }
 
@@ -483,10 +483,11 @@ class AppleXliffFileExporterTest {
       baseTranslationsProvider = { baseTranslations },
       baseLanguageTag = "tag",
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
-      filePathProvider = ExportFilePathProvider(
-        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-        extension = params.format.extension,
-      ),
+      filePathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+          extension = params.format.extension,
+        ),
     )
   }
 

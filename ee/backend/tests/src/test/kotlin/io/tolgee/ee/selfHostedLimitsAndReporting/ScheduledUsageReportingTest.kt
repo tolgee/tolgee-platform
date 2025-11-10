@@ -30,7 +30,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.test.context.TestPropertySource
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
-import java.util.*
+import java.util.Date
 import kotlin.reflect.jvm.javaMethod
 
 @SpringBootTest
@@ -90,10 +90,13 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
   @Order(1)
   fun `it schedules on startup`() {
     val invocations =
-      Mockito.mockingDetails(scheduledReportingManager)
+      Mockito
+        .mockingDetails(scheduledReportingManager)
         .invocations
-    invocations.filter { it.method == ScheduledReportingManager::scheduleReporting.javaMethod }
-      .assert.hasSize(1)
+    invocations
+      .filter { it.method == ScheduledReportingManager::scheduleReporting.javaMethod }
+      .assert
+      .hasSize(1)
   }
 
   @Test

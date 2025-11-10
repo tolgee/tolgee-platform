@@ -99,7 +99,8 @@ class ContentDeliveryFileStorageProvider(
         override fun storeFile(
           storageFilePath: String,
           bytes: ByteArray,
-        ) {}
+        ) {
+        }
 
         override fun fileExists(storageFilePath: String): Boolean = true
 

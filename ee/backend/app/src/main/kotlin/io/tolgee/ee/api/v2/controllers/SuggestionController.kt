@@ -67,19 +67,20 @@ class SuggestionController(
   ): PagedModel<TranslationSuggestionModel> {
     securityService.checkLanguageSuggestPermission(
       projectHolder.project.id,
-      listOf(languageId)
+      listOf(languageId),
     )
     val projectId = projectHolder.project.id
-    val suggestions = translationSuggestionService.getSuggestionsPaged(
-      pageable,
-      projectId,
-      languageId,
-      keyId,
-      filters
-    )
+    val suggestions =
+      translationSuggestionService.getSuggestionsPaged(
+        pageable,
+        projectId,
+        languageId,
+        keyId,
+        filters,
+      )
     return arrayResourcesAssembler.toModel(
       suggestions,
-      translationSuggestionModelAssembler
+      translationSuggestionModelAssembler,
     )
   }
 
@@ -98,21 +99,22 @@ class SuggestionController(
     val project = projectHolder.projectEntity
     securityService.checkLanguageSuggestPermission(
       project.id,
-      listOf(languageId)
+      listOf(languageId),
     )
-    val suggestion = translationSuggestionService.createSuggestion(
-      project,
-      languageId,
-      keyId,
-      dto
-    )
+    val suggestion =
+      translationSuggestionService.createSuggestion(
+        project,
+        languageId,
+        keyId,
+        dto,
+      )
     return translationSuggestionModelAssembler.toModel(suggestion)
   }
 
   @DeleteMapping("/{suggestionId:[0-9]+}")
   @Operation(
     summary = "Delete suggestion",
-    description = "User can only delete suggestion created by them"
+    description = "User can only delete suggestion created by them",
   )
   @AllowApiAccess
   // user can only delete suggestion created by them; it's checked in the service
@@ -129,7 +131,7 @@ class SuggestionController(
       projectId,
       keyId,
       suggestionId,
-      authenticationFacade.authenticatedUser.id
+      authenticationFacade.authenticatedUser.id,
     )
   }
 
@@ -145,7 +147,7 @@ class SuggestionController(
   ): TranslationSuggestionModel {
     securityService.checkLanguageStateChangePermission(
       projectHolder.project.id,
-      listOf(languageId)
+      listOf(languageId),
     )
     val projectId = projectHolder.project.id
     val suggestion = translationSuggestionService.declineSuggestion(projectId, keyId, suggestionId)
@@ -161,24 +163,25 @@ class SuggestionController(
     @PathVariable languageId: Long,
     @PathVariable keyId: Long,
     @PathVariable suggestionId: Long,
-    @RequestParam declineOther: Boolean = false
+    @RequestParam declineOther: Boolean = false,
   ): TranslationSuggestionAcceptResponse {
     securityService.checkLanguageTranslatePermission(
       projectHolder.project.id,
-      listOf(languageId)
+      listOf(languageId),
     )
     securityService.checkLanguageStateChangePermission(
       projectHolder.project.id,
-      listOf(languageId)
+      listOf(languageId),
     )
     val projectId = projectHolder.project.id
-    val (suggestion, declined) = translationSuggestionService.acceptSuggestion(
-      projectId,
-      languageId,
-      keyId,
-      suggestionId,
-      declineOther
-    )
+    val (suggestion, declined) =
+      translationSuggestionService.acceptSuggestion(
+        projectId,
+        languageId,
+        keyId,
+        suggestionId,
+        declineOther,
+      )
     val accepted = translationSuggestionModelAssembler.toModel(suggestion)
     return TranslationSuggestionAcceptResponse(accepted, declined)
   }
@@ -195,7 +198,7 @@ class SuggestionController(
   ): TranslationSuggestionModel {
     securityService.checkLanguageStateChangePermission(
       projectHolder.project.id,
-      listOf(languageId)
+      listOf(languageId),
     )
     val projectId = projectHolder.project.id
     val suggestion = translationSuggestionService.suggestionSetActive(projectId, keyId, suggestionId)

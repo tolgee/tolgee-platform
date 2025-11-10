@@ -56,14 +56,15 @@ class NotificationControllerTest : AuthorizedControllerTest() {
     var nextCursor: String? = null
 
     (0..9).forEach { i ->
-      getNotificationsByCursor(nextCursor).andAssertThatJson {
-        node("_embedded.notificationModelList").isArray.hasSize(10)
-        node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Notification task ${205 - 10 * i}")
-        node("_embedded.notificationModelList[9].linkedTask.name").isEqualTo("Notification task ${205 - 10 * i - 9}")
-        node("nextCursor").isNotNull
-      }.andDo {
-        nextCursor = ObjectMapper().readValue(it.response.contentAsString, Map::class.java)["nextCursor"] as String
-      }
+      getNotificationsByCursor(nextCursor)
+        .andAssertThatJson {
+          node("_embedded.notificationModelList").isArray.hasSize(10)
+          node("_embedded.notificationModelList[0].linkedTask.name").isEqualTo("Notification task ${205 - 10 * i}")
+          node("_embedded.notificationModelList[9].linkedTask.name").isEqualTo("Notification task ${205 - 10 * i - 9}")
+          node("nextCursor").isNotNull
+        }.andDo {
+          nextCursor = ObjectMapper().readValue(it.response.contentAsString, Map::class.java)["nextCursor"] as String
+        }
     }
 
     getNotificationsByCursor(nextCursor).andAssertThatJson {

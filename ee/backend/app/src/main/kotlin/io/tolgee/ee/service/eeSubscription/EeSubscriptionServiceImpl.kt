@@ -48,7 +48,8 @@ class EeSubscriptionServiceImpl(
   private val catchingService: EeSubscriptionErrorCatchingService,
   private val schedulingManager: SchedulingManager,
   private val eeProperties: EeProperties,
-) : EeSubscriptionProvider, Logging {
+) : EeSubscriptionProvider,
+  Logging {
   var bypassSeatCountCheck = false
 
   @Cacheable(Caches.Companion.EE_SUBSCRIPTION, key = "1")

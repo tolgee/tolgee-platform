@@ -26,7 +26,7 @@ import jakarta.persistence.Transient
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
-import java.util.*
+import java.util.Date
 
 @Entity
 @ActivityLoggedEntity
@@ -52,7 +52,10 @@ data class UserAccount(
   @Enumerated(EnumType.STRING)
   @Column(name = "account_type")
   override var accountType: AccountType? = AccountType.LOCAL,
-) : AuditModel(), ModelWithAvatar, IUserAccount, EntityWithId {
+) : AuditModel(),
+  ModelWithAvatar,
+  IUserAccount,
+  EntityWithId {
   @Column(name = "totp_key", columnDefinition = "bytea")
   override var totpKey: ByteArray? = null
 

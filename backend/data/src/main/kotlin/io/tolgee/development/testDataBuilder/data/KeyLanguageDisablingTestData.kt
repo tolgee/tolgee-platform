@@ -7,9 +7,10 @@ class KeyLanguageDisablingTestData {
   val root: TestDataBuilder = TestDataBuilder()
 
   val user =
-    root.addUserAccount {
-      username = "user"
-    }.self
+    root
+      .addUserAccount {
+        username = "user"
+      }.self
 
   val project = root.addProject { name = "project" }
 

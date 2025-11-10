@@ -56,8 +56,7 @@ class AutomationsBatchJobCreator(
     automationTriggersMap.forEach { (trigger, automation) ->
       automation.actions.forEach { action ->
         val debouncingKeyProvider: ((BatchOperationParams) -> Any)? =
-          action.type.debouncingKeyProvider?.let {
-              actionProvider ->
+          action.type.debouncingKeyProvider?.let { actionProvider ->
             { batchOperationParams -> actionProvider(batchOperationParams, action, trigger) }
           }
         startAutomationBatchJob(trigger, action, projectId, activityRevisionId, debouncingKeyProvider)

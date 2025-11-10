@@ -25,7 +25,6 @@ import java.util.zip.ZipInputStream
   ],
 )
 class V2ExportAllFormatsTest : ProjectAuthControllerTest("/v2/projects/") {
-
   private final val log = org.slf4j.LoggerFactory.getLogger(V2ExportAllFormatsTest::class.java)
 
   var testData: NamespacesTestData? = null
@@ -45,12 +44,13 @@ class V2ExportAllFormatsTest : ProjectAuthControllerTest("/v2/projects/") {
   @Transactional
   @ProjectJWTAuthTestMethod
   fun `it exports to all formats`(format: ExportFormat) {
-    val mvcResult = ignoreTestOnSpringBug {
-      performProjectAuthGet("export?format=${format.name}")
-        .andIsOk
-        .andDo { obj: MvcResult -> obj.asyncResult }
-        .andReturn()
-    }
+    val mvcResult =
+      ignoreTestOnSpringBug {
+        performProjectAuthGet("export?format=${format.name}")
+          .andIsOk
+          .andDo { obj: MvcResult -> obj.asyncResult }
+          .andReturn()
+      }
 
     // Verify we get some content back
     val responseContent = mvcResult.response.contentAsByteArray
@@ -100,7 +100,8 @@ class V2ExportAllFormatsTest : ProjectAuthControllerTest("/v2/projects/") {
       generateSequence {
         it.nextEntry
       }.filterNot { it.isDirectory }
-        .map { it.name to zipInputStream.bufferedReader().readText() }.toMap()
+        .map { it.name to zipInputStream.bufferedReader().readText() }
+        .toMap()
     }
   }
 }

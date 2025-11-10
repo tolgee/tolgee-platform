@@ -166,8 +166,12 @@ class TaskControllerActivityTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsOk
 
     executeInNewTransaction {
-      getLastRevisionModificationsOfType(TaskKey::class).single()
-        .modifications["done"]!!.new!!.assert.isEqualTo(true)
+      getLastRevisionModificationsOfType(TaskKey::class)
+        .single()
+        .modifications["done"]!!
+        .new!!
+        .assert
+        .isEqualTo(true)
     }
   }
 

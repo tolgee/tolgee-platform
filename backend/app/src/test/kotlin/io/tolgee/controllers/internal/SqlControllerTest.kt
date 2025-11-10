@@ -20,7 +20,9 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 @AutoConfigureMockMvc
 @ContextRecreatingTest
 @SpringBootTest(properties = ["tolgee.internal.controller-enabled=true"])
-class SqlControllerTest : AbstractControllerTest(), Logging {
+class SqlControllerTest :
+  AbstractControllerTest(),
+  Logging {
   @Suppress("RedundantModalityModifier")
   final inline fun <reified T> MvcResult.parseResponseTo(): T {
     return jacksonObjectMapper().readValue(this.response.contentAsString)
@@ -48,11 +50,13 @@ class SqlControllerTest : AbstractControllerTest(), Logging {
     logger.info("Internal controller enabled: ${tolgeeProperties.internal.controllerEnabled}")
     dbPopulator.createBase()
     val parseResponseTo: List<Any> =
-      mvc.perform(
-        post("/internal/sql/list")
-          .content("select * from user_account"),
-      )
-        .andExpect(status().isOk).andReturn().parseResponseTo()
+      mvc
+        .perform(
+          post("/internal/sql/list")
+            .content("select * from user_account"),
+        ).andExpect(status().isOk)
+        .andReturn()
+        .parseResponseTo()
 
     assertThat(parseResponseTo).isNotEmpty
   }
@@ -61,11 +65,12 @@ class SqlControllerTest : AbstractControllerTest(), Logging {
   fun delete() {
     logger.info("Internal controller enabled: ${tolgeeProperties.internal.controllerEnabled}")
     val project = dbPopulator.createBase().project
-    mvc.perform(
-      post("/internal/sql/execute")
-        .content("delete from permission"),
-    )
-      .andExpect(status().isOk).andReturn()
+    mvc
+      .perform(
+        post("/internal/sql/execute")
+          .content("delete from permission"),
+      ).andExpect(status().isOk)
+      .andReturn()
 
     assertThat(permissionService.getAllOfProject(project)).isEmpty()
   }

@@ -8,9 +8,9 @@ import io.tolgee.model.enums.LlmProviderPriority
 
 interface PromptService {
   fun translate(
-      projectId: Long,
-      data: PromptRunDto,
-      priority: LlmProviderPriority?,
+    projectId: Long,
+    data: PromptRunDto,
+    priority: LlmProviderPriority?,
   ): MtValueProvider.MtResult
 
   fun findPromptOrDefaultDto(

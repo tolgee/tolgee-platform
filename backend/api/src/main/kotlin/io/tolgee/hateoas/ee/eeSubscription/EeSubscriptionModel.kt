@@ -5,7 +5,7 @@ import io.tolgee.constants.Feature
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 
 /**
  * This model is used to present the current EeSubscription on
@@ -26,4 +26,5 @@ open class EeSubscriptionModel(
   val nonCommerical: Boolean,
   var lastValidCheck: Date?,
   val isPayAsYouGo: Boolean,
-) : RepresentationModel<EeSubscriptionModel>(), Serializable
+) : RepresentationModel<EeSubscriptionModel>(),
+  Serializable

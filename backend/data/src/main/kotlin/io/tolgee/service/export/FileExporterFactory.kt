@@ -49,7 +49,8 @@ class FileExporterFactory(
         )
 
       ExportFormat.JSON, ExportFormat.JSON_TOLGEE, ExportFormat.JSON_I18NEXT,
-      ExportFormat.ANDROID_SDK, ExportFormat.APPLE_SDK ->
+      ExportFormat.ANDROID_SDK, ExportFormat.APPLE_SDK,
+      ->
         JsonFileExporter(
           data,
           exportParams,
@@ -88,19 +89,21 @@ class FileExporterFactory(
           filePathProvider = getFilePathProvider(exportParams, data),
         )
 
-      ExportFormat.ANDROID_XML -> XmlResourcesExporter(
-        data,
-        exportParams,
-        projectIcuPlaceholdersSupport,
-        filePathProvider = getFilePathProvider(exportParams, data)
-      )
+      ExportFormat.ANDROID_XML ->
+        XmlResourcesExporter(
+          data,
+          exportParams,
+          projectIcuPlaceholdersSupport,
+          filePathProvider = getFilePathProvider(exportParams, data),
+        )
 
-      ExportFormat.COMPOSE_XML -> XmlResourcesExporter(
-        data,
-        exportParams,
-        projectIcuPlaceholdersSupport,
-        filePathProvider = getFilePathProvider(exportParams, data)
-      )
+      ExportFormat.COMPOSE_XML ->
+        XmlResourcesExporter(
+          data,
+          exportParams,
+          projectIcuPlaceholdersSupport,
+          filePathProvider = getFilePathProvider(exportParams, data),
+        )
 
       ExportFormat.PO ->
         PoFileExporter(
@@ -117,7 +120,7 @@ class FileExporterFactory(
           exportParams,
           projectIcuPlaceholdersSupport,
           stringsFilePathProvider = getFilePathProvider(exportParams, data, "strings"),
-          stringsdictFilePathProvider = getFilePathProvider(exportParams, data, "stringsdict")
+          stringsdictFilePathProvider = getFilePathProvider(exportParams, data, "stringsdict"),
         )
 
       ExportFormat.APPLE_XCSTRINGS ->
@@ -144,7 +147,7 @@ class FileExporterFactory(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
-          filePathProvider = getFilePathProvider(exportParams, data)
+          filePathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.RESX_ICU ->
@@ -152,7 +155,7 @@ class FileExporterFactory(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
-          pathProvider = getFilePathProvider(exportParams, data)
+          pathProvider = getFilePathProvider(exportParams, data),
         )
 
       ExportFormat.XLSX ->
@@ -172,10 +175,11 @@ class FileExporterFactory(
     extension: String = exportParams.format.extension,
   ): ExportFilePathProvider {
     return ExportFilePathProvider(
-      template = ExportFileStructureTemplateProvider(
-        exportParams,
-        translations
-      ).validateAndGetTemplate(),
+      template =
+        ExportFileStructureTemplateProvider(
+          exportParams,
+          translations,
+        ).validateAndGetTemplate(),
       extension = extension,
     )
   }

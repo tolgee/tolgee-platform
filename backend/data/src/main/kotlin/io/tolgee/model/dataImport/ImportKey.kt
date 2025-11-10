@@ -2,7 +2,13 @@ package io.tolgee.model.dataImport
 
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.key.KeyMeta
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Index
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.ColumnDefault
@@ -20,7 +26,8 @@ class ImportKey(
   var name: String,
   @ManyToOne
   var file: ImportFile,
-) : StandardAuditModel(), WithKeyMeta {
+) : StandardAuditModel(),
+  WithKeyMeta {
   @OneToMany(mappedBy = "key", orphanRemoval = true)
   var translations: MutableList<ImportTranslation> = mutableListOf()
 
@@ -39,9 +46,7 @@ class ImportKey(
 
     other as ImportKey
 
-    if (name != other.name) return false
-
-    return true
+    return name == other.name
   }
 
   override fun hashCode(): Int {

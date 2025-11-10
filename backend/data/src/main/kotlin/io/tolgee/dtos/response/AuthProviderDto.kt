@@ -16,7 +16,13 @@ data class AuthProviderDto(
 
       var ssoDomain: String? =
         when (type) {
-          ThirdPartyAuthType.SSO -> organizationRoles.find { it.managed }!!.organization!!.ssoTenant!!.domain
+          ThirdPartyAuthType.SSO ->
+            organizationRoles
+              .find { it.managed }!!
+              .organization!!
+              .ssoTenant!!
+              .domain
+
           ThirdPartyAuthType.SSO_GLOBAL -> properties.authentication.ssoGlobal.domain
           else -> null
         }
@@ -28,7 +34,7 @@ data class AuthProviderDto(
       )
     }
 
-    fun AuthProviderChangeRequest.asAuthProviderDto(): AuthProviderDto? {
+    fun AuthProviderChangeRequest.asAuthProviderDto(): AuthProviderDto {
       return AuthProviderDto(
         identifier,
         authType,

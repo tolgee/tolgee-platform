@@ -47,13 +47,14 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
     Mockito.clearInvocations(mtService)
     internalProperties.fakeMtProviders = true
     llmProperties.enabled = true
-    llmProperties.providers = mutableListOf(
-      LlmProperties.LlmProvider(
-        name = "default",
-        type = LlmProviderType.OPENAI,
-        apiUrl = "https://test.com",
+    llmProperties.providers =
+      mutableListOf(
+        LlmProperties.LlmProvider(
+          name = "default",
+          type = LlmProviderType.OPENAI,
+          apiUrl = "https://test.com",
+        ),
       )
-    )
 
     testData =
       BaseTestData().apply {
@@ -79,7 +80,8 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
         ),
       ).andDo {
         it.asyncResult
-      }.andReturn().response.contentAsString
+      }.andReturn()
+        .response.contentAsString
 
     NdJsonParser(objectMapper).parse(response).assert.hasSize(4)
   }
@@ -87,21 +89,20 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
   @Test
   @ProjectJWTAuthTestMethod
   fun `it returns json error on 400`() {
-    val response =
-      performProjectAuthPost(
-        "suggest/machine-translations-streaming",
-        mapOf(
-          "targetLanguageId" to czechLanguage.id,
-          "keyId" to -1,
-        ),
-      ).andPrettyPrint.andAssertThatJson.isEqualTo(
-        """
-        {
-          "code" : "key_not_found",
-          "params" : null
-        }
-        """.trimIndent(),
-      )
+    performProjectAuthPost(
+      "suggest/machine-translations-streaming",
+      mapOf(
+        "targetLanguageId" to czechLanguage.id,
+        "keyId" to -1,
+      ),
+    ).andPrettyPrint.andAssertThatJson.isEqualTo(
+      """
+      {
+        "code" : "key_not_found",
+        "params" : null
+      }
+      """.trimIndent(),
+    )
   }
 
   @Test
@@ -109,20 +110,25 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
   fun `it does not return unsupporting services`() {
     val response =
       ignoreTestOnSpringBug {
-            performProjectAuthPost(
-              "suggest/machine-translations-streaming",
-              mapOf(
-                "targetLanguageId" to hindiLanguage.id,
-                "baseText" to "text",
-              ),
-            ).andDo {
-              it.asyncResult
-            }.andReturn().response.contentAsString
-        }
+        performProjectAuthPost(
+          "suggest/machine-translations-streaming",
+          mapOf(
+            "targetLanguageId" to hindiLanguage.id,
+            "baseText" to "text",
+          ),
+        ).andDo {
+          it.asyncResult
+        }.andReturn()
+          .response.contentAsString
+      }
 
-    response.split("\n").filter { it.isNotBlank() }.map {
-      jacksonObjectMapper().readValue(it, Any::class.java)
-    }.assert.hasSize(3)
+    response
+      .split("\n")
+      .filter { it.isNotBlank() }
+      .map {
+        jacksonObjectMapper().readValue(it, Any::class.java)
+      }.assert
+      .hasSize(3)
 
     response.assert.doesNotContain("DEEPL")
   }

@@ -54,13 +54,15 @@ class TranslationsControllerProtectedReviewedTranslationsTest : ProjectAuthContr
     performUpdate("key2", "en").andIsOk
   }
 
-  private fun performUpdate(key: String, lang: String) =
-    performProjectAuthPut(
-      "/translations",
-      SetTranslationsWithKeyDto(
-        key,
-        null,
-        mutableMapOf(lang to lang),
-      ),
-    )
+  private fun performUpdate(
+    key: String,
+    lang: String,
+  ) = performProjectAuthPut(
+    "/translations",
+    SetTranslationsWithKeyDto(
+      key,
+      null,
+      mutableMapOf(lang to lang),
+    ),
+  )
 }

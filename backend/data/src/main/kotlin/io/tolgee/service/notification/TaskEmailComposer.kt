@@ -49,7 +49,7 @@ class TaskEmailComposer(
 
   private fun taskType(task: Task): String = i18n.translate("notifications.email.task-type.${task.type}")
 
-  public fun taskName(name: String?): String {
+  fun taskName(name: String?): String {
     return if (name.isNullOrBlank()) "Task" else name
   }
 }

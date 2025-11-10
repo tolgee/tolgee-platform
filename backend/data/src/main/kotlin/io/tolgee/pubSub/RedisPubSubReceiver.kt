@@ -15,10 +15,10 @@ class RedisPubSubReceiver(
 ) : Logging {
   fun receiveWebsocketMessage(message: String) {
     val data = jacksonObjectMapper().readValue(message, RedisWebsocketEventWrapper::class.java)
-		data.message?.let {
-			template.convertAndSend(data.destination, it)
-			logger.debug("Sending message to ${data.destination}")
-		}
+    data.message?.let {
+      template.convertAndSend(data.destination, it)
+      logger.debug("Sending message to ${data.destination}")
+    }
   }
 
   fun receiveJobQueueMessage(message: String) {

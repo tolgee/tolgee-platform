@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.InputStreamSource
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.Date
 
 class ImageUploadServiceTest : AbstractSpringTest() {
   val screenshotFile: InputStreamSource by lazy {
@@ -29,7 +29,7 @@ class ImageUploadServiceTest : AbstractSpringTest() {
 
   @AfterEach
   fun cleanup() {
-      dateProvider.forcedDate = null
+    dateProvider.forcedDate = null
   }
 
   @Test
@@ -39,11 +39,13 @@ class ImageUploadServiceTest : AbstractSpringTest() {
     Thread.sleep(1000)
     val storedNewer = imageUploadService.store(screenshotFile, user, null)
 
-    dateProvider.forcedDate = Date.from(
-      Instant.now()
-        .plus(2, ChronoUnit.HOURS)
-        .minus(500, ChronoUnit.MILLIS),
-    )
+    dateProvider.forcedDate =
+      Date.from(
+        Instant
+          .now()
+          .plus(2, ChronoUnit.HOURS)
+          .minus(500, ChronoUnit.MILLIS),
+      )
 
     imageUploadService.cleanOldImages()
     val after = imageUploadService.find(listOf(storedNewer.id, storedOlder.id))

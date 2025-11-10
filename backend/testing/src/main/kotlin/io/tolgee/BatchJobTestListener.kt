@@ -16,7 +16,9 @@ import org.springframework.test.context.TestExecutionListener
  * To not run the batch jobs with different test context, this class helps us to clean the context and
  * run the batch job runner correctly
  */
-class BatchJobTestListener : Logging, TestExecutionListener {
+class BatchJobTestListener :
+  Logging,
+  TestExecutionListener {
   override fun beforeTestMethod(testContext: TestContext) {
     logger.info("Pausing and clearing batch jobs")
     pauseAndClearBatchJobs(testContext)

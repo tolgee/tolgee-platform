@@ -63,7 +63,8 @@ open class S3FileStorage(
   override fun pruneDirectory(path: String) {
     try {
       val objectsToDelete =
-        s3.listObjectsV2 { it.bucket(bucketName).prefix("$canonicalPath$path".withTrailingSlash()) }
+        s3
+          .listObjectsV2 { it.bucket(bucketName).prefix("$canonicalPath$path".withTrailingSlash()) }
           .contents()
           .map { it.key() }
           .toSet()
@@ -71,12 +72,12 @@ open class S3FileStorage(
 
       if (objectsToDelete.isNotEmpty()) {
         val deleteObjectsRequest =
-          DeleteObjectsRequest.builder()
+          DeleteObjectsRequest
+            .builder()
             .bucket(bucketName)
             .delete {
               it.objects(objectsToDelete)
-            }
-            .build()
+            }.build()
 
         s3.deleteObjects(deleteObjectsRequest)
       }

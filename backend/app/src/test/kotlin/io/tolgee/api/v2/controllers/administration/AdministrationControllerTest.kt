@@ -96,7 +96,7 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
       org,
       HttpHeaders().apply {
         set("Authorization", "Bearer $token")
-      }
+      },
     ).andIsCreated
   }
 
@@ -121,7 +121,7 @@ class AdministrationControllerTest : AuthorizedControllerTest() {
       org,
       HttpHeaders().apply {
         set("Authorization", "Bearer $token")
-      }
+      },
     ).andIsForbidden
   }
 

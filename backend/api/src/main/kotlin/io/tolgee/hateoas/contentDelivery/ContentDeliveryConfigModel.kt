@@ -22,7 +22,9 @@ class ContentDeliveryConfigModel(
   val lastPublished: Long?,
   val lastPublishedFiles: Collection<String>,
   override var escapeHtml: Boolean?,
-) : RepresentationModel<ContentDeliveryConfigModel>(), Serializable, IExportParams {
+) : RepresentationModel<ContentDeliveryConfigModel>(),
+  Serializable,
+  IExportParams {
   override var languages: Set<String>? = null
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = null

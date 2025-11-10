@@ -10,15 +10,19 @@ class GlossaryAssignedProjectsPropChangesProvider : PropChangesProvider {
     old: Any?,
     new: Any?,
   ): PropertyModification? {
-    val baseCollectionChangesProvider = BaseCollectionChangesProvider(
-      old as Collection<Any?>?,
-      new as Collection<Any?>?,
-    ) {
-      val project = (it as? Project) ?: return@BaseCollectionChangesProvider null
-      AssignedProject(project.id, project.name)
-    }
+    val baseCollectionChangesProvider =
+      BaseCollectionChangesProvider(
+        old as Collection<Any?>?,
+        new as Collection<Any?>?,
+      ) {
+        val project = (it as? Project) ?: return@BaseCollectionChangesProvider null
+        AssignedProject(project.id, project.name)
+      }
     return baseCollectionChangesProvider.provide()
   }
 
-  data class AssignedProject(val id: Long, val name: String)
+  data class AssignedProject(
+    val id: Long,
+    val name: String,
+  )
 }

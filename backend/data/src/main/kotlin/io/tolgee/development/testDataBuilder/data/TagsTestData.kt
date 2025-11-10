@@ -45,12 +45,13 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
   }
 
   fun addNamespacedKey() {
-    projectBuilder.addKey {
-      name = "namespaced key"
-    }.build {
-      setNamespace("namespace")
-      addTag("existing tag")
-    }
+    projectBuilder
+      .addKey {
+        name = "namespaced key"
+      }.build {
+        setNamespace("namespace")
+        addTag("existing tag")
+      }
   }
 
   fun generateVeryLotOfData() {

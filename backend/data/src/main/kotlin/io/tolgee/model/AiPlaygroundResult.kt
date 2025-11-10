@@ -1,7 +1,11 @@
 package io.tolgee.model
 
 import io.tolgee.model.key.Key
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Index
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 
 @Entity
 @Table(

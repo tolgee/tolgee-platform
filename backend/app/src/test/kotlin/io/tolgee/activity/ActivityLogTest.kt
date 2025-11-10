@@ -104,7 +104,10 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
 
     val keyIds = keys.map { it.id }.toList()
 
-    val csLanguageId = testData.projectBuilder.getLanguageByTag("cs")!!.self.id
+    val csLanguageId =
+      testData.projectBuilder
+        .getLanguageByTag("cs")!!
+        .self.id
     performProjectAuthPost(
       "start-batch-job/machine-translate",
       mapOf(
@@ -167,11 +170,12 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
       }
     key.setNamespace("ns")
     val translation =
-      key.addTranslation {
-        language = testData.englishLanguage
-        text = "t"
-        state = TranslationState.REVIEWED
-      }.self
+      key
+        .addTranslation {
+          language = testData.englishLanguage
+          text = "t"
+          state = TranslationState.REVIEWED
+        }.self
 
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
@@ -237,10 +241,10 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun ResultActions.waitForJobCompleted() =
     andAssertThatJson {
       node("id").isNumber.satisfies({
-				waitFor(pollTime = 2000) {
-					val job = batchJobService.findJobDto(it.toLong())
-					job?.status?.completed == true
-				}
-			})
-		}
+        waitFor(pollTime = 2000) {
+          val job = batchJobService.findJobDto(it.toLong())
+          job?.status?.completed == true
+        }
+      })
+    }
 }

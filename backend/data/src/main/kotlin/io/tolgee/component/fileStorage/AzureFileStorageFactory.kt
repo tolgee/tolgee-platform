@@ -8,7 +8,7 @@ import io.tolgee.model.contentDelivery.AzureBlobConfig
 import org.springframework.stereotype.Component
 
 @Component
-open class AzureFileStorageFactory {
+class AzureFileStorageFactory {
   fun create(config: AzureBlobConfig): AzureBlobFileStorage {
     try {
       val connectionString = config.connectionString

@@ -21,11 +21,11 @@ import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.SetTranslationTextUtil
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.service.translation.TranslationSuggestionService
-import org.springframework.context.annotation.Primary
-import org.springframework.stereotype.Component
 import jakarta.persistence.EntityManager
+import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import kotlin.jvm.optionals.getOrNull
 
@@ -43,7 +43,7 @@ class TranslationSuggestionServiceEeImpl(
   override fun getKeysWithSuggestions(
     projectId: Long,
     keyIds: List<Long>,
-    languageIds: List<Long>
+    languageIds: List<Long>,
   ): Map<Pair<Long, String>, List<TranslationSuggestionView>> {
     val data = translationSuggestionRepository.getByKeyId(projectId, languageIds, keyIds)
     val result = mutableMapOf<Pair<Long, String>, MutableList<TranslationSuggestionView>>()
@@ -80,46 +80,60 @@ class TranslationSuggestionServiceEeImpl(
 
     checkSuggestionValid(normalizedTranslation)
 
-    val existingSuggestion = translationSuggestionRepository.findSuggestion(
-      project.id,
-      language.id,
-      key.id,
-      normalizedTranslation,
-      key.isPlural
-    )
+    val existingSuggestion =
+      translationSuggestionRepository.findSuggestion(
+        project.id,
+        language.id,
+        key.id,
+        normalizedTranslation,
+        key.isPlural,
+      )
 
     if (existingSuggestion.isNotEmpty()) {
       throw BadRequestException(Message.DUPLICATE_SUGGESTION)
     }
 
-    val suggestion = TranslationSuggestion(
-      project = project,
-      language = language,
-      author = authenticationFacade.authenticatedUserEntity,
-      translation = normalizedTranslation,
-      isPlural = key.isPlural,
-    )
+    val suggestion =
+      TranslationSuggestion(
+        project = project,
+        language = language,
+        author = authenticationFacade.authenticatedUserEntity,
+        translation = normalizedTranslation,
+        isPlural = key.isPlural,
+      )
     suggestion.key = key
 
     translationSuggestionRepository.save(suggestion)
     return suggestion
   }
 
-  fun getSuggestion(projectId: Long, keyId: Long, suggestionId: Long): TranslationSuggestion {
+  fun getSuggestion(
+    projectId: Long,
+    keyId: Long,
+    suggestionId: Long,
+  ): TranslationSuggestion {
     val key = keyService.find(keyId) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
     keyService.checkInProject(key, projectId)
     return translationSuggestionRepository.findById(suggestionId).getOrNull()
       ?: throw NotFoundException(Message.SUGGESTION_NOT_FOUND)
   }
 
-  fun declineSuggestion(projectId: Long, keyId: Long, suggestionId: Long): TranslationSuggestion {
+  fun declineSuggestion(
+    projectId: Long,
+    keyId: Long,
+    suggestionId: Long,
+  ): TranslationSuggestion {
     val suggestion = getSuggestion(projectId, keyId, suggestionId)
     suggestion.state = TranslationSuggestionState.DECLINED
     translationSuggestionRepository.save(suggestion)
     return suggestion
   }
 
-  fun suggestionSetActive(projectId: Long, keyId: Long, suggestionId: Long): TranslationSuggestion {
+  fun suggestionSetActive(
+    projectId: Long,
+    keyId: Long,
+    suggestionId: Long,
+  ): TranslationSuggestion {
     val suggestion = getSuggestion(projectId, keyId, suggestionId)
     suggestion.state = TranslationSuggestionState.ACTIVE
     translationSuggestionRepository.save(suggestion)
@@ -132,7 +146,7 @@ class TranslationSuggestionServiceEeImpl(
     languageId: Long,
     keyId: Long,
     suggestionId: Long,
-    declineOther: Boolean
+    declineOther: Boolean,
   ): Pair<TranslationSuggestion, List<Long>> {
     val language =
       languageService.findEntity(languageId, projectId) ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
@@ -146,43 +160,58 @@ class TranslationSuggestionServiceEeImpl(
       }
     }
     suggestion.state = TranslationSuggestionState.ACCEPTED
-    val declined = if (declineOther) {
-      declineOtherSuggestions(projectId, language.id, keyId, suggestionId)
-    } else {
-      emptyList()
-    }
+    val declined =
+      if (declineOther) {
+        declineOtherSuggestions(projectId, language.id, keyId, suggestionId)
+      } else {
+        emptyList()
+      }
     translationSuggestionRepository.save(suggestion)
     translationService.setForKey(
       entityManager.getReference(Key::class.java, keyId),
       mapOf(language.tag to suggestion.translation),
-      options = SetTranslationTextUtil.Companion.Options(keepState = true)
+      options = SetTranslationTextUtil.Companion.Options(keepState = true),
     )
     return Pair(suggestion, declined)
   }
 
   fun declineOtherSuggestions(
-    projectId: Long, languageId: Long, keyId: Long, suggestionId: Long
+    projectId: Long,
+    languageId: Long,
+    keyId: Long,
+    suggestionId: Long,
   ): List<Long> {
-    val toDecline = translationSuggestionRepository.getAllActive(projectId, languageId, keyId)
-      .filter { it.id != suggestionId }
+    val toDecline =
+      translationSuggestionRepository
+        .getAllActive(projectId, languageId, keyId)
+        .filter { it.id != suggestionId }
     toDecline.forEach { it.state = TranslationSuggestionState.DECLINED }
     translationSuggestionRepository.saveAll(toDecline)
     return toDecline.map { it.id }
   }
 
   fun getSuggestionsPaged(
-    pageable: Pageable, projectId: Long, languageId: Long, keyId: Long, filters: SuggestionFilters,
+    pageable: Pageable,
+    projectId: Long,
+    languageId: Long,
+    keyId: Long,
+    filters: SuggestionFilters,
   ): Page<TranslationSuggestion> {
     return translationSuggestionRepository.getPaged(
       pageable,
       projectId,
       languageId,
       keyId,
-      filters
+      filters,
     )
   }
 
-  fun deleteSuggestionCreatedByUser(projectId: Long, keyId: Long, suggestionId: Long, userId: Long) {
+  fun deleteSuggestionCreatedByUser(
+    projectId: Long,
+    keyId: Long,
+    suggestionId: Long,
+    userId: Long,
+  ) {
     val suggestion = getSuggestion(projectId, keyId, suggestionId)
 
     if (suggestion.author?.id != userId) {

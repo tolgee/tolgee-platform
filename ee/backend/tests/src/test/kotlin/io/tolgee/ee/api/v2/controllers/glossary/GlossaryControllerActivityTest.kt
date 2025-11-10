@@ -45,11 +45,12 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
 
   @Test
   fun `stores activity on creation`() {
-    val request = CreateGlossaryRequest().apply {
-      name = "New Glossary"
-      baseLanguageTag = "en"
-      assignedProjectIds = mutableSetOf(testData.project.id)
-    }
+    val request =
+      CreateGlossaryRequest().apply {
+        name = "New Glossary"
+        baseLanguageTag = "en"
+        assignedProjectIds = mutableSetOf(testData.project.id)
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
       .andIsOk
 
@@ -68,10 +69,11 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
 
   @Test
   fun `stores activity on update`() {
-    val request = UpdateGlossaryRequest().apply {
-      name = "Updated Glossary"
-      baseLanguageTag = "de"
-    }
+    val request =
+      UpdateGlossaryRequest().apply {
+        name = "Updated Glossary"
+        baseLanguageTag = "de"
+      }
     performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
       .andIsOk
 
@@ -118,18 +120,21 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
       glossaryRelation?.data["baseLanguageTag"].assert.isEqualTo("en")
 
       // we need to have the term relation stored to transitively find the id of the glossary
-      latestActivityRevision.describingRelations.filter { it.entityClass == GlossaryTerm::class.simpleName }
-        .assert.hasSize(4)
+      latestActivityRevision.describingRelations
+        .filter { it.entityClass == GlossaryTerm::class.simpleName }
+        .assert
+        .hasSize(4)
     }
   }
 
   @Test
   fun `stores activity on assigned projects update`() {
-    val request = UpdateGlossaryRequest().apply {
-      name = testData.glossary.name
-      baseLanguageTag = testData.glossary.baseLanguageTag
-      assignedProjectIds = mutableSetOf(testData.anotherProject.id, testData.anotherProject2.id)
-    }
+    val request =
+      UpdateGlossaryRequest().apply {
+        name = testData.glossary.name
+        baseLanguageTag = testData.glossary.baseLanguageTag
+        assignedProjectIds = mutableSetOf(testData.anotherProject.id, testData.anotherProject2.id)
+      }
 
     performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
       .andIsOk

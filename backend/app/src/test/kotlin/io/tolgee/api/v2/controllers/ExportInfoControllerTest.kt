@@ -18,19 +18,22 @@ class ExportInfoControllerTest : AbstractControllerTest() {
             node("extension").isEqualTo("json")
             node("mediaType").isEqualTo("application/json")
             node("defaultFileStructureTemplate")
-              .isString.isEqualTo("{namespace}/{languageTag}.{extension}")
+              .isString
+              .isEqualTo("{namespace}/{languageTag}.{extension}")
           }
           node("[1]") {
             node("extension").isEqualTo("json")
             node("mediaType").isEqualTo("application/json")
             node("defaultFileStructureTemplate")
-              .isString.isEqualTo("{namespace}/{languageTag}.{extension}")
+              .isString
+              .isEqualTo("{namespace}/{languageTag}.{extension}")
           }
           node("[4]") {
             node("extension").isEqualTo("")
             node("mediaType").isEqualTo("")
             node("defaultFileStructureTemplate")
-              .isString.isEqualTo("{namespace}/{languageTag}.lproj/Localizable.{extension}")
+              .isString
+              .isEqualTo("{namespace}/{languageTag}.lproj/Localizable.{extension}")
           }
         }
       }

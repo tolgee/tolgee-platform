@@ -12,7 +12,8 @@ enum class ConflictType {
    * and user has no state-edit permission
    */
   CANNOT_EDIT_REVIEWED,
-  CANNOT_EDIT_DISABLED;
+  CANNOT_EDIT_DISABLED,
+  ;
 
   companion object {
     fun isOverridable(conflictType: ConflictType?): Boolean {

@@ -2,7 +2,7 @@ package io.tolgee.formats
 
 import com.ibm.icu.text.MessagePattern
 import com.ibm.icu.text.MessagePatternUtil
-import java.util.*
+import java.util.Collections
 import kotlin.concurrent.Volatile
 
 /**
@@ -324,8 +324,7 @@ object MessagePatternUtil {
     val type: Type,
     start: Int,
     limit: Int,
-  ) :
-    Node(owningPattern, start, limit) {
+  ) : Node(owningPattern, start, limit) {
     /**
      * The type of a piece of MessageNode contents.
      * @stable ICU 49
@@ -613,7 +612,11 @@ object MessagePatternUtil {
     override fun toString(): String {
       val sb = StringBuilder()
       if (isSelectorNumeric) {
-        sb.append(selectorValue).append(" (").append(selector).append(") {")
+        sb
+          .append(selectorValue)
+          .append(" (")
+          .append(selector)
+          .append(") {")
       } else {
         sb.append(selector).append(" {")
       }

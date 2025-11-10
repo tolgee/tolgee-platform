@@ -6,12 +6,17 @@ import io.tolgee.api.PlanWithIncludedKeysAndSeats
 import io.tolgee.api.SubscriptionStatus
 import io.tolgee.constants.Feature
 import io.tolgee.model.AuditModel
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Parameter
 import org.hibernate.annotations.Type
-import java.util.*
+import java.util.Date
 
 /**
  * This entity stores the information about the current Subscription on the Self-Hosted instance.
@@ -20,7 +25,9 @@ import java.util.*
  */
 @Entity
 @Table(schema = "ee")
-class EeSubscription : AuditModel(), PlanWithIncludedKeysAndSeats {
+class EeSubscription :
+  AuditModel(),
+  PlanWithIncludedKeysAndSeats {
   @field:Id
   val id: Int = 1
 

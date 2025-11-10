@@ -30,7 +30,8 @@ import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.Date
+import java.util.Optional
 
 @Service
 class ApiKeyService(
@@ -173,12 +174,22 @@ class ApiKeyService(
     projectId: Long,
   ): String {
     val stringToEncode = "${projectId}_$key"
-    return BaseEncoding.base32().omitPadding().lowerCase().encode(stringToEncode.toByteArray())
+    return BaseEncoding
+      .base32()
+      .omitPadding()
+      .lowerCase()
+      .encode(stringToEncode.toByteArray())
   }
 
   fun decodeKey(raw: String): DecodedApiKey? {
     return try {
-      val decoded = BaseEncoding.base32().omitPadding().lowerCase().decode(raw).decodeToString()
+      val decoded =
+        BaseEncoding
+          .base32()
+          .omitPadding()
+          .lowerCase()
+          .decode(raw)
+          .decodeToString()
       val (projectId, key) = decoded.split("_".toRegex(), 2)
       DecodedApiKey(projectId.toLong(), key)
     } catch (_: IllegalArgumentException) {
@@ -242,7 +253,8 @@ class ApiKeyService(
 
   private fun logTransactionIsolation() {
     val isolationLevel =
-      entityManager.createNativeQuery("show transaction_isolation")
+      entityManager
+        .createNativeQuery("show transaction_isolation")
         .singleResult as String
     val message = "Transaction isolation level: $isolationLevel"
     Sentry.addBreadcrumb(message)

@@ -241,22 +241,24 @@ class SlackSlackCommandBlocksProvider(
           if (config.isGlobalSubscription) {
             val events = config.events.joinToString(", ") { "$it" }
             append(
-              i18n.translate(
-                "slack.common.message.subscribed-successfully-global-subscription",
-              ).format(events),
+              i18n
+                .translate(
+                  "slack.common.message.subscribed-successfully-global-subscription",
+                ).format(events),
             )
           }
 
           val languageInfo =
-            config.preferences.mapNotNull { pref ->
-              pref.languageTag?.let { tag ->
-                val language = languageService.getByTag(tag, config.project)
-                val flagEmoji = language.flagEmoji
-                val fullName = language.name
-                val events = pref.events.joinToString(", ") { "$it" }
-                " - $fullName $flagEmoji : on `$events`"
-              }
-            }.joinToString("\n")
+            config.preferences
+              .mapNotNull { pref ->
+                pref.languageTag?.let { tag ->
+                  val language = languageService.getByTag(tag, config.project)
+                  val flagEmoji = language.flagEmoji
+                  val fullName = language.name
+                  val events = pref.events.joinToString(", ") { "$it" }
+                  " - $fullName $flagEmoji : on `$events`"
+                }
+              }.joinToString("\n")
 
           if (languageInfo.isNotEmpty()) {
             if (config.isGlobalSubscription) {

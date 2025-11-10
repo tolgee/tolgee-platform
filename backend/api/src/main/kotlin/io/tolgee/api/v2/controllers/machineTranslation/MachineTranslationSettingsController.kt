@@ -17,7 +17,13 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import org.springframework.hateoas.CollectionModel
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @Suppress(names = ["MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection"])
 @RestController
@@ -70,13 +76,14 @@ class MachineTranslationSettingsController(
   fun getMachineTranslationLanguageInfo(): CollectionModel<LanguageInfoModel> {
     val data = mtServiceConfigService.getLanguageInfo(projectHolder.project)
     return CollectionModel.of(
-      data.map {
-        LanguageInfoModel(
-          it.language?.id,
-          it.language?.tag,
-          supportedServices = it.supportedServices,
-        )
-      }.sortedBy { it.languageId },
+      data
+        .map {
+          LanguageInfoModel(
+            it.language?.id,
+            it.language?.tag,
+            supportedServices = it.supportedServices,
+          )
+        }.sortedBy { it.languageId },
     )
   }
 }

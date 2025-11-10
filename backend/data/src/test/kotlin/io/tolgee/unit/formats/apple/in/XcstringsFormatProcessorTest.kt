@@ -4,7 +4,13 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.formats.apple.`in`.xcstrings.XcstringsFileProcessor
 import io.tolgee.testing.assert
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
-import io.tolgee.util.*
+import io.tolgee.util.FileProcessorContextMockUtil
+import io.tolgee.util.assertKey
+import io.tolgee.util.assertLanguagesCount
+import io.tolgee.util.assertSingle
+import io.tolgee.util.assertSinglePlural
+import io.tolgee.util.assertTranslations
+import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -21,11 +27,13 @@ class XcstringsFormatProcessorTest {
   fun `returns correct parsed result`() {
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(2) // en, fr
-    mockUtil.fileProcessorContext.assertTranslations("en", "hello-world")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "hello-world")
       .assertSingle {
         hasText("Hello, World!")
       }
-    mockUtil.fileProcessorContext.assertTranslations("fr", "hello-world")
+    mockUtil.fileProcessorContext
+      .assertTranslations("fr", "hello-world")
       .assertSingle {
         hasText("Bonjour le monde!")
       }
@@ -34,7 +42,8 @@ class XcstringsFormatProcessorTest {
   @Test
   fun `handles plural translations correctly`() {
     processFile()
-    mockUtil.fileProcessorContext.assertTranslations("en", "messages-count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "messages-count")
       .assertSinglePlural {
         hasText(
           """
@@ -53,7 +62,8 @@ class XcstringsFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "messages-count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "messages-count")
       .assertSinglePlural {
         hasText(
           """
@@ -72,7 +82,8 @@ class XcstringsFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "messages-count")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "messages-count")
       .assertSinglePlural {
         hasText(
           """
@@ -123,7 +134,8 @@ class XcstringsFormatProcessorTest {
       projectIcuPlaceholdersEnabled = false,
     )
     processFile()
-    mockUtil.fileProcessorContext.assertTranslations("en", "welcome-message-escaped")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "welcome-message-escaped")
       .assertSingle {
         hasText("Hello, %@ {meto}")
       }

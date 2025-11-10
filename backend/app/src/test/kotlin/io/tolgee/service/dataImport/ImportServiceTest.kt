@@ -84,9 +84,13 @@ class ImportServiceTest : AbstractSpringTest() {
 
   private fun checkImportHardDeleted(id: Long) {
     executeInNewTransaction {
-      entityManager.createQuery("from Import i where i.id = :id", Import::class.java)
+      entityManager
+        .createQuery("from Import i where i.id = :id", Import::class.java)
         .setParameter("id", id)
-        .resultList.firstOrNull().assert.isNull()
+        .resultList
+        .firstOrNull()
+        .assert
+        .isNull()
     }
   }
 
@@ -138,7 +142,12 @@ class ImportServiceTest : AbstractSpringTest() {
     executeInNewTransaction {
       keyService.find(testData.project.id, "what a key", "homepage").assert.isNotNull
       val whatAKey = keyService.find(testData.project.id, "what a key", null)
-      whatAKey!!.keyMeta!!.comments.assert.hasSize(2).anyMatch { it.text == "hello1" }.anyMatch { it.text == "hello2" }
+      whatAKey!!
+        .keyMeta!!
+        .comments.assert
+        .hasSize(2)
+        .anyMatch { it.text == "hello1" }
+        .anyMatch { it.text == "hello2" }
     }
   }
 }

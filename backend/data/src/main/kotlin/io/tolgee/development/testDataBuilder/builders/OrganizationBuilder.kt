@@ -1,8 +1,13 @@
 package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.FT
-
-import io.tolgee.model.*
+import io.tolgee.model.LlmProvider
+import io.tolgee.model.MtCreditBucket
+import io.tolgee.model.Organization
+import io.tolgee.model.OrganizationRole
+import io.tolgee.model.Permission
+import io.tolgee.model.SsoTenant
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType.VIEW
 import io.tolgee.model.glossary.Glossary
@@ -74,6 +79,7 @@ class OrganizationBuilder(
     ft(builder.self)
     return builder
   }
+
   val projects get() = testDataBuilder.data.projects.filter { it.self.organizationOwner.id == self.id }
 
   fun addGlossary(ft: FT<Glossary>) = addOperation(data.glossaries, ft)

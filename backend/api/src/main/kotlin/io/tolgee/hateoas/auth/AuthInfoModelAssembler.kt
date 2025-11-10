@@ -6,13 +6,14 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class AuthInfoModelAssembler : RepresentationModelAssemblerSupport<TolgeeAuthentication, AuthInfoModel>(
+class AuthInfoModelAssembler :
+  RepresentationModelAssemblerSupport<TolgeeAuthentication, AuthInfoModel>(
     InitialDataController::class.java,
     AuthInfoModel::class.java,
-) {
-    override fun toModel(entity: TolgeeAuthentication): AuthInfoModel {
-        return AuthInfoModel(
-            isReadOnly = entity.isReadOnly,
-        )
-    }
+  ) {
+  override fun toModel(entity: TolgeeAuthentication): AuthInfoModel {
+    return AuthInfoModel(
+      isReadOnly = entity.isReadOnly,
+    )
+  }
 }

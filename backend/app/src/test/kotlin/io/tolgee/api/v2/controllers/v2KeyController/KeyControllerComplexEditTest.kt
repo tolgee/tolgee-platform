@@ -312,18 +312,18 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
     val thirdKey = testData.addThirdKey()
     testDataService.saveTestData(testData.root)
     verifyKeysDistancesStoredAsynchronously {
-        performProjectAuthPut(
-          "keys/${testData.firstKey.id}/complex-update",
-          ComplexEditKeyDto(
-            name = testData.firstKey.name,
-            relatedKeysInOrder =
-              mutableListOf(
-                RelatedKeyDto(null, testData.firstKey.name),
-                RelatedKeyDto(null, testData.secondKey.name),
-                RelatedKeyDto(null, thirdKey.name),
-              ),
-          ),
-        ).andIsOk
+      performProjectAuthPut(
+        "keys/${testData.firstKey.id}/complex-update",
+        ComplexEditKeyDto(
+          name = testData.firstKey.name,
+          relatedKeysInOrder =
+            mutableListOf(
+              RelatedKeyDto(null, testData.firstKey.name),
+              RelatedKeyDto(null, testData.secondKey.name),
+              RelatedKeyDto(null, thirdKey.name),
+            ),
+        ),
+      ).andIsOk
     }
     bigMetaService.getCloseKeyIds(testData.firstKey.id).assert.hasSize(2)
   }

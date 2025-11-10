@@ -21,7 +21,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
-import java.util.*
+import java.util.Date
 
 @SpringBootTest()
 class KeyUsageReportingTest : AbstractSpringTest() {

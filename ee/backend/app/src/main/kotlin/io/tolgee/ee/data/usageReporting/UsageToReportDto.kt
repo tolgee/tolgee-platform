@@ -1,6 +1,6 @@
 package io.tolgee.ee.data.usageReporting
 
-import java.util.*
+import java.util.Date
 
 data class UsageToReportDto(
   override val lastReportedKeys: Long,

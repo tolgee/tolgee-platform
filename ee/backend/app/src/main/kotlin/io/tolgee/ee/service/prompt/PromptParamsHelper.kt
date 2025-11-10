@@ -10,12 +10,12 @@ import io.tolgee.util.ScreenshotKeysHighlighter
 import io.tolgee.util.regexSplitAndMatch
 import org.springframework.stereotype.Component
 import java.io.ByteArrayInputStream
-import java.util.*
+import java.util.Base64
 
 @Component
 class PromptParamsHelper(
   private val screenshotService: ScreenshotService,
-  private val fileStorage: FileStorage
+  private val fileStorage: FileStorage,
 ) {
   fun getParamsFromPrompt(
     prompt: String,
@@ -64,7 +64,7 @@ class PromptParamsHelper(
   fun getHighlightedScreenshot(
     size: String,
     screenshot: io.tolgee.model.Screenshot,
-    key: Key
+    key: Key,
   ): ByteArray? {
     val file =
       if (size == "full") {

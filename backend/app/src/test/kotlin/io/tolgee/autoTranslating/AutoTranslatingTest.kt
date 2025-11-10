@@ -3,7 +3,11 @@ package io.tolgee.autoTranslating
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.testDataBuilder.data.AutoTranslateTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.MachineTranslationTest
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -141,8 +145,7 @@ class AutoTranslatingTest : MachineTranslationTest() {
           .get(testData.project.id, CREATE_KEY_NAME, null)
           .translations
           .find { it.language == testData.spanishLanguage },
-      )
-        .isNull()
+      ).isNull()
     }
   }
 
@@ -183,7 +186,11 @@ class AutoTranslatingTest : MachineTranslationTest() {
             .find {
               it.language == testData.spanishLanguage
             }
-        spanishTranslation?.text.isNullOrBlank().assert.isFalse()
+        spanishTranslation
+          ?.text
+          .isNullOrBlank()
+          .assert
+          .isFalse()
       }
     }
   }
@@ -256,7 +263,8 @@ class AutoTranslatingTest : MachineTranslationTest() {
     Thread.sleep(2000)
     transactionTemplate.execute {
       val esTranslation =
-        keyService.get(testData.project.id, CREATE_KEY_NAME, null)
+        keyService
+          .get(testData.project.id, CREATE_KEY_NAME, null)
           .translations
           .find { it.language == testData.spanishLanguage }
 
@@ -265,8 +273,10 @@ class AutoTranslatingTest : MachineTranslationTest() {
   }
 
   private fun getCreatedEsTranslation() =
-    keyService.get(testData.project.id, CREATE_KEY_NAME, null)
-      .getLangTranslation(testData.spanishLanguage).text
+    keyService
+      .get(testData.project.id, CREATE_KEY_NAME, null)
+      .getLangTranslation(testData.spanishLanguage)
+      .text
 
   private fun performCreateHalloKeyWithEnAndDeTranslations(keyName: String = CREATE_KEY_NAME) {
     performCreateKey(
@@ -297,8 +307,10 @@ class AutoTranslatingTest : MachineTranslationTest() {
   }
 
   private fun getCreatedDeTranslation() =
-    keyService.get(testData.project.id, CREATE_KEY_NAME, null)
-      .getLangTranslation(testData.germanLanguage).text
+    keyService
+      .get(testData.project.id, CREATE_KEY_NAME, null)
+      .getLangTranslation(testData.germanLanguage)
+      .text
 
   private fun performSetConfig(
     usingTm: Boolean,

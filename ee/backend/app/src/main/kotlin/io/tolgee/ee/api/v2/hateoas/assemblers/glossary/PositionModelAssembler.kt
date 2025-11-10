@@ -7,14 +7,15 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class PositionModelAssembler : RepresentationModelAssemblerSupport<Position, PositionModel>(
-  GlossaryTermHighlightsController::class.java,
-  PositionModel::class.java,
-) {
+class PositionModelAssembler :
+  RepresentationModelAssemblerSupport<Position, PositionModel>(
+    GlossaryTermHighlightsController::class.java,
+    PositionModel::class.java,
+  ) {
   override fun toModel(entity: Position): PositionModel {
     return PositionModel(
       start = entity.start,
-      end = entity.end
+      end = entity.end,
     )
   }
 }

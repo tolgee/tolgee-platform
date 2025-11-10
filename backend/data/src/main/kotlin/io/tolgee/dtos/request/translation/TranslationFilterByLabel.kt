@@ -9,11 +9,12 @@ data class TranslationFilterByLabel(
 ) {
   companion object {
     fun parseList(strings: List<String>): List<TranslationFilterByLabel> {
-      return BaseFilterByKeyValue.parseList(
-        strings,
-        { it.toLong() },
-        { BadRequestException(Message.FILTER_BY_VALUE_LABEL_NOT_VALID) }
-      ).map { TranslationFilterByLabel(it.first, it.second) }
+      return BaseFilterByKeyValue
+        .parseList(
+          strings,
+          { it.toLong() },
+          { BadRequestException(Message.FILTER_BY_VALUE_LABEL_NOT_VALID) },
+        ).map { TranslationFilterByLabel(it.first, it.second) }
     }
   }
 }

@@ -25,7 +25,6 @@ import io.tolgee.service.task.ITaskService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
-import kotlin.collections.forEach
 
 @Service
 class SecurityService(
@@ -73,9 +72,10 @@ class SecurityService(
    */
   fun getCurrentPermittedScopes(projectId: Long): Set<Scope> {
     val projectScopes =
-      Scope.expand(
-        getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
-      ).toSet()
+      Scope
+        .expand(
+          getProjectPermissionScopesNoApiKey(projectId, authenticationFacade.authenticatedUser.id),
+        ).toSet()
     val apiKey = activeApiKey ?: return projectScopes
 
     return Scope.expand(apiKey.scopes).toSet().intersect(projectScopes.toSet())
@@ -272,11 +272,15 @@ class SecurityService(
         if (!translationsInTask(projectId, TaskType.TRANSLATE, languageIds, keyId)) {
           throw PermissionException(Message.OPERATION_NOT_PERMITTED)
         }
-      }
+      },
     )
   }
 
-  fun canEditReviewedTranslation(projectId: Long, languageId: Long, keyId: Long? = null): Boolean {
+  fun canEditReviewedTranslation(
+    projectId: Long,
+    languageId: Long,
+    keyId: Long? = null,
+  ): Boolean {
     if (projectHolder.project.translationProtection != TranslationProtection.PROTECT_REVIEWED) {
       return true
     }
@@ -513,7 +517,10 @@ class SecurityService(
     }
   }
 
-  fun checkImageUploadPermissions(projectId: Long, images: List<UploadedImage>) {
+  fun checkImageUploadPermissions(
+    projectId: Long,
+    images: List<UploadedImage>,
+  ) {
     if (images.isNotEmpty()) {
       checkScreenshotsUploadPermission(projectId)
     }

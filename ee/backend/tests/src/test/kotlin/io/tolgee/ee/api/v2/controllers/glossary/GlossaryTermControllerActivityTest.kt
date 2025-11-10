@@ -44,12 +44,13 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
 
   @Test
   fun `stores activity for glossary term creation`() {
-    val request = CreateGlossaryTermWithTranslationRequest().apply {
-      description = "New Term Description"
-      flagNonTranslatable = true
-      flagCaseSensitive = true
-      text = "New Term"
-    }
+    val request =
+      CreateGlossaryTermWithTranslationRequest().apply {
+        description = "New Term Description"
+        flagNonTranslatable = true
+        flagCaseSensitive = true
+        text = "New Term"
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
       .andIsOk
 
@@ -78,7 +79,10 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
       termModifications.assert.isNotEmpty()
 
       // Verify that the entity was created (has new values but no old values)
-      termModifications.values.any { it.new != null }.assert.isTrue()
+      termModifications.values
+        .any { it.new != null }
+        .assert
+        .isTrue()
 
       // Verify that the right fields were stored in modifications according to annotations
       termModifications["description"]?.new.assert.isEqualTo("New Term Description")
@@ -95,17 +99,17 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
 
   @Test
   fun `stores activity for glossary term update`() {
-    val request = UpdateGlossaryTermWithTranslationRequest().apply {
-      description = "Updated Description"
-      flagNonTranslatable = true
-      flagCaseSensitive = true
-      text = "Updated Term"
-    }
+    val request =
+      UpdateGlossaryTermWithTranslationRequest().apply {
+        description = "Updated Description"
+        flagNonTranslatable = true
+        flagCaseSensitive = true
+        text = "Updated Term"
+      }
     performAuthPut(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
-      request
-    )
-      .andIsOk
+      request,
+    ).andIsOk
 
     executeInNewTransaction {
       val latestActivityRevision = getLatestActivityRevision()
@@ -132,7 +136,10 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
       termModifications.assert.isNotEmpty()
 
       // Verify that the entity was updated (has both old and new values)
-      termModifications.values.any { it.old != null && it.new != null }.assert.isTrue()
+      termModifications.values
+        .any { it.old != null && it.new != null }
+        .assert
+        .isTrue()
 
       // Verify that the right fields were stored in modifications according to annotations
       termModifications["description"]?.new.assert.isEqualTo("Updated Description")
@@ -150,7 +157,7 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
   @Test
   fun `stores activity for glossary term deletion`() {
     performAuthDelete(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
     ).andIsOk
 
     executeInNewTransaction {
@@ -183,7 +190,10 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
       termModifications.assert.isNotEmpty()
 
       // For deletion, we should have old values but no new values
-      termModifications.values.any { it.old != null && it.new == null }.assert.isTrue()
+      termModifications.values
+        .any { it.old != null && it.new == null }
+        .assert
+        .isTrue()
 
       latestActivityRevision.organizationId.assert.isEqualTo(testData.organization.id)
     }
@@ -191,9 +201,10 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
 
   @Test
   fun `stores activity for multiple glossary terms deletion`() {
-    val request = DeleteMultipleGlossaryTermsRequest().apply {
-      termIds = setOf(testData.term.id, testData.trademarkTerm.id)
-    }
+    val request =
+      DeleteMultipleGlossaryTermsRequest().apply {
+        termIds = setOf(testData.term.id, testData.trademarkTerm.id)
+      }
     performAuthDelete("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
       .andIsOk
 
@@ -223,7 +234,10 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
         termModifications.assert.isNotEmpty()
 
         // For deletion, we should have old values but no new values
-        termModifications.values.any { it.old != null && it.new == null }.assert.isTrue()
+        termModifications.values
+          .any { it.old != null && it.new == null }
+          .assert
+          .isTrue()
       }
     }
   }

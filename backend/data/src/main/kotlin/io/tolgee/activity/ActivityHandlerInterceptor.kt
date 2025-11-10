@@ -16,7 +16,7 @@ import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.ModelAndView
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import java.util.*
+import java.util.Base64
 
 @Component
 class ActivityHandlerInterceptor(
@@ -86,7 +86,8 @@ class ActivityHandlerInterceptor(
     val base64Decoded = Base64.getDecoder().decode(urlDecoded)
     val utmParamsJson = String(base64Decoded, StandardCharsets.UTF_8)
     val utmParams = mutableMapOf<String, String>()
-    return jacksonObjectMapper().readValue(utmParamsJson, utmParams::class.java)
+    return jacksonObjectMapper()
+      .readValue(utmParamsJson, utmParams::class.java)
       .filterKeys { it.startsWith("utm_") }
   }
 

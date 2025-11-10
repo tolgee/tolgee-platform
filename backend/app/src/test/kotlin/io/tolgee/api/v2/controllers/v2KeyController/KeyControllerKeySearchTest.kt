@@ -21,7 +21,9 @@ import kotlin.system.measureTimeMillis
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
+class KeyControllerKeySearchTest :
+  ProjectAuthControllerTest("/v2/projects/"),
+  Logging {
   @Value("classpath:screenshot.png")
   lateinit var screenshotFile: Resource
 
@@ -97,9 +99,10 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
       executeInNewTransaction {
         val time =
           measureTimeMillis {
-            performProjectAuthGet("keys/search?search=Hello&languageTag=de").andAssertThatJson {
-              node("page.totalElements").isEqualTo(1)
-            }.andPrettyPrint
+            performProjectAuthGet("keys/search?search=Hello&languageTag=de")
+              .andAssertThatJson {
+                node("page.totalElements").isEqualTo(1)
+              }.andPrettyPrint
           }
 
         logger.info("Completed in: $time ms")
@@ -113,9 +116,10 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
       executeInNewTransaction {
         val time =
           measureTimeMillis {
-            performProjectAuthGet("keys/search?search=dol&languageTag=de").andAssertThatJson {
-              node("page.totalElements").isNumber.isGreaterThan(4000.toBigDecimal())
-            }.andPrettyPrint
+            performProjectAuthGet("keys/search?search=dol&languageTag=de")
+              .andAssertThatJson {
+                node("page.totalElements").isNumber.isGreaterThan(4000.toBigDecimal())
+              }.andPrettyPrint
           }
 
         logger.info("Completed in: $time ms")
@@ -132,12 +136,13 @@ class KeyControllerKeySearchTest : ProjectAuthControllerTest("/v2/projects/"), L
     executeInNewTransaction {
       val time =
         measureTimeMillis {
-          performProjectAuthGet("keys/search?search=krasa&languageTag=de").andAssertThatJson {
-            node("_embedded.keys") {
-              isArray.hasSize(1)
-              node("[0].name").isEqualTo("beauty")
-            }
-          }.andPrettyPrint
+          performProjectAuthGet("keys/search?search=krasa&languageTag=de")
+            .andAssertThatJson {
+              node("_embedded.keys") {
+                isArray.hasSize(1)
+                node("[0].name").isEqualTo("beauty")
+              }
+            }.andPrettyPrint
         }
 
       logger.info("Completed in: $time ms")

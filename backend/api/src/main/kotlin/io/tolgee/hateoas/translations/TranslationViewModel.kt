@@ -34,7 +34,7 @@ open class TranslationViewModel(
   @Schema(description = "Number of all suggestions")
   val totalSuggestionCount: Long,
   @get:Schema(description = "First suggestion")
-  val suggestions: List<TranslationSuggestionSimpleModel>? = null
+  val suggestions: List<TranslationSuggestionSimpleModel>? = null,
 ) : RepresentationModel<TranslationViewModel>() {
   @get:Schema(description = "Was translation memory used to translate this?")
   val fromTranslationMemory: Boolean

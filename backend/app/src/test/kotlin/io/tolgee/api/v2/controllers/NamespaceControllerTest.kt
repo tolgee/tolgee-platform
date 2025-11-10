@@ -105,7 +105,8 @@ class NamespaceControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     projectSupplier = { testData.dotProject }
     val ns = testData.namespaces[testData.dotProject to "ns.1"]
     performProjectAuthGet("namespace-by-name/${ns?.name}")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isEqualTo(ns?.id)
       }
   }

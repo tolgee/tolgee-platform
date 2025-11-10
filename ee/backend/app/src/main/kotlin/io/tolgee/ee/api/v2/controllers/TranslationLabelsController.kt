@@ -56,7 +56,6 @@ class TranslationLabelsController(
   private val translationService: TranslationService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) : IController {
-
   @GetMapping(value = ["labels"])
   @Operation(summary = "Get available project labels")
   @UseDefaultPermissions
@@ -101,7 +100,7 @@ class TranslationLabelsController(
   @AllowApiAccess
   fun createLabel(
     @RequestBody @Valid
-    request: LabelRequest
+    request: LabelRequest,
   ): LabelModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       projectHolder.project.organizationOwnerId,
@@ -151,17 +150,18 @@ class TranslationLabelsController(
   @AllowApiAccess
   fun assignLabel(
     @RequestBody @Valid
-    request: TranslationLabelRequest
+    request: TranslationLabelRequest,
   ): LabelModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       projectHolder.project.organizationOwnerId,
       Feature.TRANSLATION_LABELS,
     )
-    val translation = translationService.getOrCreate(
-      projectHolder.project.id,
-      request.keyId,
-      request.languageId
-    )
+    val translation =
+      translationService.getOrCreate(
+        projectHolder.project.id,
+        request.keyId,
+        request.languageId,
+      )
     val label = labelService.assignLabel(projectHolder.project.id, translation, request.labelId).model
     return label
   }
@@ -175,7 +175,7 @@ class TranslationLabelsController(
     @PathVariable("translationId")
     translationId: Long,
     @PathVariable("labelId")
-    labelId: Long
+    labelId: Long,
   ): LabelModel {
     enabledFeaturesProvider.checkFeatureEnabled(
       projectHolder.project.organizationOwnerId,
@@ -193,7 +193,7 @@ class TranslationLabelsController(
     @PathVariable("translationId")
     translationId: Long,
     @PathVariable("labelId")
-    labelId: Long
+    labelId: Long,
   ) {
     enabledFeaturesProvider.checkFeatureEnabled(
       projectHolder.project.organizationOwnerId,

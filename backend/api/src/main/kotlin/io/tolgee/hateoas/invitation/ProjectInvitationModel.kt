@@ -5,7 +5,7 @@ import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.model.enums.ProjectPermissionType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
-import java.util.*
+import java.util.Date
 
 @Relation(collectionRelation = "invitations", itemRelation = "invitation")
 open class ProjectInvitationModel(

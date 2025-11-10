@@ -171,7 +171,8 @@ class InterceptedEventsManager(
         entity,
       )
     val relations =
-      rootDescription?.relations
+      rootDescription
+        ?.relations
         ?.map { it.key to compressRelation(it.value, activityRevision) }
         ?.toMap()
 
@@ -186,9 +187,10 @@ class InterceptedEventsManager(
       activityHolder
         .getDescribingRelationFromCache(value.entityId, value.entityClass) {
           val compressedRelations =
-            value.relations.map { relation ->
-              relation.key to compressRelation(relation.value, activityRevision)
-            }.toMap()
+            value.relations
+              .map { relation ->
+                relation.key to compressRelation(relation.value, activityRevision)
+              }.toMap()
 
           val activityDescribingEntity =
             ActivityDescribingEntity(
@@ -216,12 +218,14 @@ class InterceptedEventsManager(
       return mapOf()
     }
 
-    return propertyNames.asSequence().mapIndexedNotNull { idx, propertyName ->
-      val old = previousState?.get(idx)
-      val new = currentState?.get(idx)
-      val provider = getChangesProvider(entity, propertyName) ?: return@mapIndexedNotNull null
-      propertyName to (provider.getChanges(old, new) ?: return@mapIndexedNotNull null)
-    }.toMap()
+    return propertyNames
+      .asSequence()
+      .mapIndexedNotNull { idx, propertyName ->
+        val old = previousState?.get(idx)
+        val new = currentState?.get(idx)
+        val provider = getChangesProvider(entity, propertyName) ?: return@mapIndexedNotNull null
+        propertyName to (provider.getChanges(old, new) ?: return@mapIndexedNotNull null)
+      }.toMap()
   }
 
   fun getChangesProvider(
@@ -235,19 +239,24 @@ class InterceptedEventsManager(
 
   private fun getEntityAnnotatedMembers(entity: Any): Map<String, ActivityLoggedProp> {
     return annotatedMembersCache.computeIfAbsent(entity::class.java) {
-      entity::class.members.mapNotNull {
-				if (it !is KProperty<*>) return@mapNotNull null
-        val annotation = it.javaField?.getAnnotation(ActivityLoggedProp::class.java) ?: return@mapNotNull null
-        it.name to annotation
-      }.toMap()
+      entity::class
+        .members
+        .mapNotNull {
+          if (it !is KProperty<*>) return@mapNotNull null
+          val annotation = it.javaField?.getAnnotation(ActivityLoggedProp::class.java) ?: return@mapNotNull null
+          it.name to annotation
+        }.toMap()
     }
   }
 
   private fun getEntityIgnoredMembers(entity: Any): Set<String> {
     return ignoredMembersCache.computeIfAbsent(entity::class.java) {
-      entity::class.members.filter {
-				it is KProperty<*> && (it.javaField?.isAnnotationPresent(ActivityIgnoredProp::class.java) ?: false)
-      }.map { it.name }.toSet()
+      entity::class
+        .members
+        .filter {
+          it is KProperty<*> && (it.javaField?.isAnnotationPresent(ActivityIgnoredProp::class.java) ?: false)
+        }.map { it.name }
+        .toSet()
     }
   }
 
@@ -255,7 +264,8 @@ class InterceptedEventsManager(
   private val ignoredMembersCache: ConcurrentHashMap<Class<*>, Set<String>> = ConcurrentHashMap()
 
   private fun shouldHandleActivity(entity: Any?) =
-    entity is EntityWithId && entity::class.hasAnnotation<ActivityLoggedEntity>() &&
+    entity is EntityWithId &&
+      entity::class.hasAnnotation<ActivityLoggedEntity>() &&
       !entity.disableActivityLogging
 
   private val activityRevision: ActivityRevision

@@ -18,7 +18,8 @@ class EmailValidationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
   @Lazy
   private val emailVerificationService: EmailVerificationService,
-) : HandlerInterceptor, Ordered {
+) : HandlerInterceptor,
+  Ordered {
   override fun preHandle(
     request: HttpServletRequest,
     response: HttpServletResponse,

@@ -99,8 +99,10 @@ class AutomationCachingTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun getEntityManagerInvocationsCount() =
-    Mockito.mockingDetails(entityManager)
-      .invocations.count {
+    Mockito
+      .mockingDetails(entityManager)
+      .invocations
+      .count {
         it.method.name == "createQuery" && (it.arguments[0] as? String)?.contains("Automation") == true
       }
 

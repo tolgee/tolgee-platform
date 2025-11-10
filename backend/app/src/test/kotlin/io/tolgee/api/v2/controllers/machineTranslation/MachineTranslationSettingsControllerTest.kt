@@ -140,7 +140,8 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
 
     executeInNewTransaction {
       val germanSetting =
-        mtServiceConfigService.getProjectSettings(testData.projectBuilder.self)
+        mtServiceConfigService
+          .getProjectSettings(testData.projectBuilder.self)
           .find { it.targetLanguage?.id == testData.germanLanguage.id }
       germanSetting!!.awsFormality.assert.isEqualTo(Formality.FORMAL)
     }
@@ -168,7 +169,8 @@ class MachineTranslationSettingsControllerTest : ProjectAuthControllerTest() {
 
     executeInNewTransaction {
       val germanSetting =
-        mtServiceConfigService.getProjectSettings(testData.projectBuilder.self)
+        mtServiceConfigService
+          .getProjectSettings(testData.projectBuilder.self)
           .find { it.targetLanguage?.id == null }
       germanSetting!!.awsFormality.assert.isEqualTo(Formality.FORMAL)
     }

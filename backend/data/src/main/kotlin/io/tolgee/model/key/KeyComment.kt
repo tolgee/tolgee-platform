@@ -24,7 +24,8 @@ class KeyComment(
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   var author: UserAccount? = null,
-) : StandardAuditModel(), WithKeyMetaReference {
+) : StandardAuditModel(),
+  WithKeyMetaReference {
   var fromImport: Boolean = false
 
   @field:NotBlank

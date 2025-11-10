@@ -36,7 +36,8 @@ class BatchJobChunkExecutionQueue(
   @Lazy
   private val redisTemplate: StringRedisTemplate,
   private val metrics: Metrics,
-) : Logging, InitializingBean {
+) : Logging,
+  InitializingBean {
   companion object {
     /**
      * It's static
@@ -59,20 +60,22 @@ class BatchJobChunkExecutionQueue(
     val data =
       // creating query from hibernate session, in order to use the setLockMode per table,
       // which is not available in the jpa Query class.
-      entityManager.unwrap(Session::class.java).createQuery(
-        """
-        select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
-        from BatchJobChunkExecution bjce
-        join bjce.batchJob bk
-        where bjce.status = :executionStatus
-        order by 
-          case when bk.status = :runningStatus then 0 else 1 end,
-          bjce.createdAt asc, 
-          bjce.executeAfter asc, 
-          bjce.id asc
-        """.trimIndent(),
-        BatchJobChunkExecutionDto::class.java,
-      ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
+      entityManager
+        .unwrap(Session::class.java)
+        .createQuery(
+          """
+          select new io.tolgee.batch.data.BatchJobChunkExecutionDto(bjce.id, bk.id, bjce.executeAfter, bk.jobCharacter)
+          from BatchJobChunkExecution bjce
+          join bjce.batchJob bk
+          where bjce.status = :executionStatus
+          order by 
+            case when bk.status = :runningStatus then 0 else 1 end,
+            bjce.createdAt asc, 
+            bjce.executeAfter asc, 
+            bjce.id asc
+          """.trimIndent(),
+          BatchJobChunkExecutionDto::class.java,
+        ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
         .setParameter("runningStatus", BatchJobStatus.RUNNING)
         // setLockMode here is per alias of the tables from the queryString.
         // will generate: "select ... for no key update of bjce skip locked"

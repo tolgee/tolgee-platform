@@ -13,22 +13,22 @@ class DenyInternalTest : AbstractControllerTest() {
   @Test
   fun getListFail() {
     dbPopulator.createBase()
-    val response =
-      mvc.perform(
-        MockMvcRequestBuilders.post("/internal/sql/list")
+    mvc
+      .perform(
+        MockMvcRequestBuilders
+          .post("/internal/sql/list")
           .content("select * from user_account"),
-      )
-        .andExpect(MockMvcResultMatchers.status().isForbidden)
+      ).andExpect(MockMvcResultMatchers.status().isForbidden)
   }
 
   @Test
   fun setPropertyFail() {
     dbPopulator.createBase()
-    val response =
-      mvc.perform(
-        MockMvcRequestBuilders.post("/internal/properties")
+    mvc
+      .perform(
+        MockMvcRequestBuilders
+          .post("/internal/properties")
           .content("select * from user_account"),
-      )
-        .andExpect(MockMvcResultMatchers.status().isForbidden)
+      ).andExpect(MockMvcResultMatchers.status().isForbidden)
   }
 }

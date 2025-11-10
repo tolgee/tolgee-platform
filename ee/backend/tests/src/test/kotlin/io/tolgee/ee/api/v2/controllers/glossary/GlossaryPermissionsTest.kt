@@ -45,7 +45,8 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   fun `owner can get all glossaries`() {
     userAccount = testData.userOwner
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaries") {
           isArray.hasSize(1)
           node("[0].id").isValidId
@@ -58,7 +59,8 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   fun `maintainer can get all glossaries`() {
     userAccount = testData.userMaintainer
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaries") {
           isArray.hasSize(1)
           node("[0].id").isValidId
@@ -71,7 +73,8 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   fun `member can get all glossaries`() {
     userAccount = testData.userMember
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaries") {
           isArray.hasSize(1)
           node("[0].id").isValidId
@@ -91,7 +94,8 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   fun `owner can get single glossary`() {
     userAccount = testData.userOwner
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("Test Glossary")
         node("baseLanguageTag").isEqualTo("en")
@@ -102,7 +106,8 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   fun `maintainer can get single glossary`() {
     userAccount = testData.userMaintainer
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("Test Glossary")
         node("baseLanguageTag").isEqualTo("en")
@@ -113,7 +118,8 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   fun `member can get single glossary`() {
     userAccount = testData.userMember
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("Test Glossary")
         node("baseLanguageTag").isEqualTo("en")
@@ -130,13 +136,15 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `owner can create glossary`() {
     userAccount = testData.userOwner
-    val request = CreateGlossaryRequest().apply {
-      name = "New Glossary"
-      baseLanguageTag = "en"
-      assignedProjectIds = mutableSetOf(testData.project.id)
-    }
+    val request =
+      CreateGlossaryRequest().apply {
+        name = "New Glossary"
+        baseLanguageTag = "en"
+        assignedProjectIds = mutableSetOf(testData.project.id)
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("New Glossary")
         node("baseLanguageTag").isEqualTo("en")
@@ -146,13 +154,15 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `maintainer can create glossary`() {
     userAccount = testData.userMaintainer
-    val request = CreateGlossaryRequest().apply {
-      name = "New Glossary"
-      baseLanguageTag = "en"
-      assignedProjectIds = mutableSetOf(testData.project.id)
-    }
+    val request =
+      CreateGlossaryRequest().apply {
+        name = "New Glossary"
+        baseLanguageTag = "en"
+        assignedProjectIds = mutableSetOf(testData.project.id)
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("New Glossary")
         node("baseLanguageTag").isEqualTo("en")
@@ -162,11 +172,12 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `member cannot create glossary`() {
     userAccount = testData.userMember
-    val request = CreateGlossaryRequest().apply {
-      name = "New Glossary"
-      baseLanguageTag = "en"
-      assignedProjectIds = mutableSetOf(testData.project.id)
-    }
+    val request =
+      CreateGlossaryRequest().apply {
+        name = "New Glossary"
+        baseLanguageTag = "en"
+        assignedProjectIds = mutableSetOf(testData.project.id)
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
       .andIsForbidden
   }
@@ -174,11 +185,12 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `unaffiliated cannot create glossary`() {
     userAccount = testData.userUnaffiliated
-    val request = CreateGlossaryRequest().apply {
-      name = "New Glossary"
-      baseLanguageTag = "en"
-      assignedProjectIds = mutableSetOf(testData.project.id)
-    }
+    val request =
+      CreateGlossaryRequest().apply {
+        name = "New Glossary"
+        baseLanguageTag = "en"
+        assignedProjectIds = mutableSetOf(testData.project.id)
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
       .andIsNotFound
   }
@@ -186,12 +198,14 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `owner can update glossary`() {
     userAccount = testData.userOwner
-    val request = UpdateGlossaryRequest().apply {
-      name = "Updated Glossary"
-      baseLanguageTag = "de"
-    }
+    val request =
+      UpdateGlossaryRequest().apply {
+        name = "Updated Glossary"
+        baseLanguageTag = "de"
+      }
     performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("Updated Glossary")
         node("baseLanguageTag").isEqualTo("de")
@@ -201,12 +215,14 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `maintainer can update glossary`() {
     userAccount = testData.userMaintainer
-    val request = UpdateGlossaryRequest().apply {
-      name = "Updated Glossary"
-      baseLanguageTag = "de"
-    }
+    val request =
+      UpdateGlossaryRequest().apply {
+        name = "Updated Glossary"
+        baseLanguageTag = "de"
+      }
     performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("Updated Glossary")
         node("baseLanguageTag").isEqualTo("de")
@@ -216,10 +232,11 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `member cannot update glossary`() {
     userAccount = testData.userMember
-    val request = UpdateGlossaryRequest().apply {
-      name = "Updated Glossary"
-      baseLanguageTag = "de"
-    }
+    val request =
+      UpdateGlossaryRequest().apply {
+        name = "Updated Glossary"
+        baseLanguageTag = "de"
+      }
     performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
       .andIsForbidden
   }
@@ -227,10 +244,11 @@ class GlossaryPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `unaffiliated cannot update glossary`() {
     userAccount = testData.userUnaffiliated
-    val request = UpdateGlossaryRequest().apply {
-      name = "Updated Glossary"
-      baseLanguageTag = "de"
-    }
+    val request =
+      UpdateGlossaryRequest().apply {
+        name = "Updated Glossary"
+        baseLanguageTag = "de"
+      }
     performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
       .andIsNotFound
   }

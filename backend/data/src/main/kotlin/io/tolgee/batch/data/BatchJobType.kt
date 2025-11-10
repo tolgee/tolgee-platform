@@ -2,7 +2,21 @@ package io.tolgee.batch.data
 
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.batch.ChunkProcessor
-import io.tolgee.batch.processors.*
+import io.tolgee.batch.processors.AiPlaygroundChunkProcessor
+import io.tolgee.batch.processors.AssignTranslationLabelChunkProcessor
+import io.tolgee.batch.processors.AutoTranslateChunkProcessor
+import io.tolgee.batch.processors.AutomationChunkProcessor
+import io.tolgee.batch.processors.ClearTranslationsChunkProcessor
+import io.tolgee.batch.processors.CopyTranslationsChunkProcessor
+import io.tolgee.batch.processors.DeleteKeysChunkProcessor
+import io.tolgee.batch.processors.MachineTranslationChunkProcessor
+import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
+import io.tolgee.batch.processors.SetKeysNamespaceChunkProcessor
+import io.tolgee.batch.processors.SetTranslationsStateChunkProcessor
+import io.tolgee.batch.processors.TagKeysChunkProcessor
+import io.tolgee.batch.processors.TrialExpirationNoticeProcessor
+import io.tolgee.batch.processors.UnassignTranslationLabelChunkProcessor
+import io.tolgee.batch.processors.UntagKeysChunkProcessor
 import kotlin.reflect.KClass
 
 enum class BatchJobType(
@@ -92,5 +106,5 @@ enum class BatchJobType(
     activityType = ActivityType.BATCH_UNASSIGN_TRANSLATION_LABEL,
     maxRetries = 3,
     processor = UnassignTranslationLabelChunkProcessor::class,
-  )
+  ),
 }

@@ -30,7 +30,7 @@ class MtTranslator(
     val result = MtBatchTranslator(context).translate(batchItems)
     publishAfterEvent(
       context.project,
-      result.sumOf { it.actualPrice }
+      result.sumOf { it.actualPrice },
     )
     return result
   }

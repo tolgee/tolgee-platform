@@ -9,7 +9,11 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.*
+import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.TaskState
+import io.tolgee.model.enums.TaskType
 import io.tolgee.model.key.Key
 import org.springframework.core.io.ClassPathResource
 
@@ -138,15 +142,16 @@ class PermissionsTestData {
 
     root.addUserAccount { username = "another@an.com" }
 
-    root.addProject {
-      name = "unrelated"
-      organizationOwner = user.defaultOrganizationBuilder.self
-    }.build {
-      addPermission {
-        this.user = user.self
-        type = ProjectPermissionType.VIEW
+    root
+      .addProject {
+        name = "unrelated"
+        organizationOwner = user.defaultOrganizationBuilder.self
+      }.build {
+        addPermission {
+          this.user = user.self
+          type = ProjectPermissionType.VIEW
+        }
       }
-    }
   }
 
   fun addTasks(assignees: MutableSet<UserAccount>) {
@@ -204,9 +209,12 @@ class PermissionsTestData {
   }
 
   private fun getLanguagesByTags(tags: List<String>?) =
-    tags?.map { tag ->
-      projectBuilder.data.languages.find { it.self.tag == tag }?.self ?: throw NotFoundException(
-        Message.LANGUAGE_NOT_FOUND,
-      )
-    }?.toMutableSet() ?: mutableSetOf()
+    tags
+      ?.map { tag ->
+        projectBuilder.data.languages
+          .find { it.self.tag == tag }
+          ?.self ?: throw NotFoundException(
+          Message.LANGUAGE_NOT_FOUND,
+        )
+      }?.toMutableSet() ?: mutableSetOf()
 }

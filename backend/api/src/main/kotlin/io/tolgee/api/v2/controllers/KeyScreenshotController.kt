@@ -62,7 +62,7 @@ class KeyScreenshotController(
   @ResponseStatus(HttpStatus.CREATED)
   @RequestActivity(ActivityType.SCREENSHOT_ADD)
   @RequestBody(content = [Content(encoding = [Encoding(name = "info", contentType = "application/json")])])
-  @RequiresProjectPermissions([ Scope.SCREENSHOTS_UPLOAD ])
+  @RequiresProjectPermissions([Scope.SCREENSHOTS_UPLOAD])
   @AllowApiAccess
   fun uploadScreenshot(
     @PathVariable keyId: Long,
@@ -81,7 +81,7 @@ class KeyScreenshotController(
 
   @GetMapping("")
   @Operation(summary = "Get screenshots")
-  @RequiresProjectPermissions([ Scope.SCREENSHOTS_VIEW ])
+  @RequiresProjectPermissions([Scope.SCREENSHOTS_VIEW])
   @AllowApiAccess
   fun getKeyScreenshots(
     @PathVariable keyId: Long,
@@ -94,7 +94,7 @@ class KeyScreenshotController(
   @DeleteMapping("/{ids}")
   @Operation(summary = "Delete screenshots")
   @RequestActivity(ActivityType.SCREENSHOT_DELETE)
-  @RequiresProjectPermissions([ Scope.SCREENSHOTS_DELETE ])
+  @RequiresProjectPermissions([Scope.SCREENSHOTS_DELETE])
   @AllowApiAccess
   fun deleteScreenshots(
     @PathVariable("ids") ids: Set<Long>,

@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.Date
 
 /**
  * Service for managing usage data that needs to be reported to Tolgee Cloud.
@@ -65,8 +65,9 @@ class UsageToReportService(
   }
 
   private fun findDto(): UsageToReportDto? =
-    entityManager.createQuery(
-      """
+    entityManager
+      .createQuery(
+        """
           |select 
           |new io.tolgee.ee.data.usageReporting.UsageToReportDto(
           |    lru.lastReportedKeys, 
@@ -76,9 +77,10 @@ class UsageToReportService(
           |     lru.reportedAt)
           |from UsageToReport lru
           |
-      """.trimMargin(),
-      UsageToReportDto::class.java,
-    ).resultList.singleOrNull()
+        """.trimMargin(),
+        UsageToReportDto::class.java,
+      ).resultList
+      .singleOrNull()
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   protected fun create() {
@@ -95,25 +97,25 @@ class UsageToReportService(
 
   @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
   fun storeCurrentKeysUsage(keys: Long) {
-    entityManager.createQuery(
-      """
+    entityManager
+      .createQuery(
+        """
       update UsageToReport lru
       set lru.keysToReport = :keysToReport
       """,
-    )
-      .setParameter("keysToReport", keys)
+      ).setParameter("keysToReport", keys)
       .executeUpdate()
   }
 
   @CacheEvict(Caches.EE_LAST_REPORTED_USAGE, key = "1")
   fun storeCurrentSeatsUsage(seats: Long) {
-    entityManager.createQuery(
-      """
+    entityManager
+      .createQuery(
+        """
       update UsageToReport lru
       set lru.seatsToReport = :seatsToReport
       """,
-    )
-      .setParameter("seatsToReport", seats)
+      ).setParameter("seatsToReport", seats)
       .executeUpdate()
   }
 
@@ -165,30 +167,30 @@ class UsageToReportService(
   }
 
   private fun storeOnReportKeys(keys: Long) {
-    entityManager.createQuery(
-      """
+    entityManager
+      .createQuery(
+        """
       update UsageToReport lru
       set lru.lastReportedKeys = :lastReportedKeys,
           lru.keysToReport = :keysToReport,
           lru.reportedAt = :reportedAt
       """,
-    )
-      .setParameter("lastReportedKeys", keys)
+      ).setParameter("lastReportedKeys", keys)
       .setParameter("keysToReport", keys)
       .setParameter("reportedAt", currentDateProvider.date)
       .executeUpdate()
   }
 
   private fun storeOnReportSeats(seats: Long) {
-    entityManager.createQuery(
-      """
+    entityManager
+      .createQuery(
+        """
       update UsageToReport lru  
       set lru.lastReportedSeats = :lastReportedSeats,
           lru.seatsToReport = :seatsToReport,
           lru.reportedAt = :reportedAt
       """,
-    )
-      .setParameter("lastReportedSeats", seats)
+      ).setParameter("lastReportedSeats", seats)
       .setParameter("seatsToReport", seats)
       .setParameter("reportedAt", currentDateProvider.date)
       .executeUpdate()

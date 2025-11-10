@@ -15,4 +15,5 @@ open class ProportionalUsageItemModel(
   val unusedQuantity: Long = 0,
   val usedQuantity: Long = 0,
   val usedQuantityOverPlan: Long = 0,
-) : RepresentationModel<ProportionalUsageItemModel>(), Serializable
+) : RepresentationModel<ProportionalUsageItemModel>(),
+  Serializable

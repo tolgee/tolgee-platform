@@ -67,7 +67,8 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
       val requests = mockedSlackClient.chatPostMessageRequests
       requests.assert.hasSize(1)
       val sectionBlock = requests.single().blocks.first() as SectionBlock
-      sectionBlock.text.text.assert.contains("has updated 10 translations")
+      sectionBlock.text.text.assert
+        .contains("has updated 10 translations")
     }
   }
 
@@ -93,7 +94,7 @@ class SlackWithBatchOperationTest : MachineTranslationTest() {
       mockedSlackClient.chatPostMessageRequests.assert.hasSize(3)
     }
 
-		mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
+    mockedSlackClient.chatUpdateRequests.assert.hasSize(0)
 
     mockedSlackClient.clearInvocations()
     performBatchOperation(keyIds)

@@ -1,4 +1,3 @@
-
 /**
  * Copyright (C) 2023 Tolgee s.r.o. and contributors
  *

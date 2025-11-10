@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service
 @Service
 class PromptServiceOssImpl : PromptService {
   override fun translate(
-      projectId: Long,
-      data: PromptRunDto,
-      priority: LlmProviderPriority?,
+    projectId: Long,
+    data: PromptRunDto,
+    priority: LlmProviderPriority?,
   ): MtValueProvider.MtResult {
     throw NotImplementedInOss()
   }

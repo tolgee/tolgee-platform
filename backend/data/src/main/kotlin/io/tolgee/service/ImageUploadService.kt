@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.Date
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
 
@@ -95,7 +95,8 @@ class ImageUploadService(
 
   private fun generateFilename(): String {
     val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-    return ThreadLocalRandom.current()
+    return ThreadLocalRandom
+      .current()
       .ints(100L, 0, charPool.size)
       .asSequence()
       .map(charPool::get)

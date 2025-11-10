@@ -40,7 +40,11 @@ class FileStorageAzureTest {
 
   @Test
   fun testGetFile() {
-    azureFs.readFile(filePath).toString(Charsets.UTF_8).assert.isEqualTo("hello")
+    azureFs
+      .readFile(filePath)
+      .toString(Charsets.UTF_8)
+      .assert
+      .isEqualTo("hello")
     verifyGetsClient()
   }
 
@@ -56,8 +60,17 @@ class FileStorageAzureTest {
     val bytes = content.toByteArray(Charsets.UTF_8)
     azureFs.storeFile(filePath, bytes)
     verify(blobClientMock, times(1)).upload(any<BinaryData>(), eq(true))
-    val binaryData = Mockito.mockingDetails(blobClientMock).invocations.single().arguments[0] as BinaryData
-    binaryData.toBytes().toString(Charsets.UTF_8).assert.isEqualTo(content)
+    val binaryData =
+      Mockito
+        .mockingDetails(blobClientMock)
+        .invocations
+        .single()
+        .arguments[0] as BinaryData
+    binaryData
+      .toBytes()
+      .toString(Charsets.UTF_8)
+      .assert
+      .isEqualTo(content)
     verifyGetsClient()
   }
 

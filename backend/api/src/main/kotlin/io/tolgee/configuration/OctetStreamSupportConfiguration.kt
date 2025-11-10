@@ -7,7 +7,9 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 
 @Configuration
 @Lazy(false)
-class OctetStreamSupportConfiguration(converter: MappingJackson2HttpMessageConverter) {
+class OctetStreamSupportConfiguration(
+  converter: MappingJackson2HttpMessageConverter,
+) {
   init {
     val supportedMediaTypes = converter.supportedMediaTypes.toMutableList()
     supportedMediaTypes.add(MediaType("application", "octet-stream"))

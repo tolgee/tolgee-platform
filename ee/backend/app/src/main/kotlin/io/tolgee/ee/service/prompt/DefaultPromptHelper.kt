@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class DefaultPromptHelper(
-  private val llmPropertiesService: LlmPropertiesService
+  private val llmPropertiesService: LlmPropertiesService,
 ) {
   fun getDefaultPrompt(): PromptDto {
     return PromptDto(

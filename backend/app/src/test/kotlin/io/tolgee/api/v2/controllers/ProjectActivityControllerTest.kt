@@ -42,7 +42,8 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
     performProjectAuthPut("/import/apply").andIsOk
     val revision = activityUtil.getLastRevision()
     performProjectAuthGet("activity/revisions/${revision?.id}")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         assertCountsOnlyResult()
       }
   }
@@ -74,8 +75,7 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
     performProjectAuthPost(
       "start-batch-job/tag-keys",
       mapOf("keyIds" to listOf(key.id), "tags" to listOf("tag1", "tag2", "tag3")),
-    )
-      .andIsOk
+    ).andIsOk
 
     waitForNotThrowing(timeout = 1000) {
       val revisionsWithTag =
@@ -86,13 +86,14 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
   }
 
   fun findBatchTagKeysActivityRevisions(): List<ActivityRevision> {
-    return entityManager.createQuery(
-      """
-      select ar from ActivityRevision ar
-      where ar.type = 'BATCH_TAG_KEYS' and ar.authorId = ${testData.userAccount.id}
-      """.trimIndent(),
-      ActivityRevision::class.java,
-    ).resultList
+    return entityManager
+      .createQuery(
+        """
+        select ar from ActivityRevision ar
+        where ar.type = 'BATCH_TAG_KEYS' and ar.authorId = ${testData.userAccount.id}
+        """.trimIndent(),
+        ActivityRevision::class.java,
+      ).resultList
   }
 
   private fun JsonAssert.assertCountsOnlyResult() {
@@ -109,7 +110,8 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
   fun `large operation data only contain counts`() {
     performProjectAuthPut("/import/apply").andIsOk
     performProjectAuthGet("activity")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.activities") {
           isArray.hasSize(1)
           node("[0]") {
@@ -125,7 +127,8 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
     performProjectAuthPut("/import/apply").andIsOk
     val revision = activityUtil.getLastRevision()
     performProjectAuthGet("activity/revisions/${revision?.id}/modified-entities")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.modifiedEntities") {
           isArray
           node("[1]") {
@@ -141,7 +144,8 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
     performProjectAuthPut("/import/apply").andIsOk
     val revision = activityUtil.getLastRevision()
     performProjectAuthGet("activity/revisions/${revision?.id}/modified-entities?filterEntityClass=Key")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("page.totalElements").isEqualTo(1)
       }
   }

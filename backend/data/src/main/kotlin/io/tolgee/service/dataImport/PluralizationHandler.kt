@@ -21,7 +21,10 @@ class PluralizationHandler(
   fun handlePluralization() {
     val byKey =
       storedDataImporter.translationsToSave
-        .groupBy { it.second.key.namespace?.name to it.second.key.name }
+        .groupBy {
+          it.second.key.namespace
+            ?.name to it.second.key.name
+        }
     byKey.forEach {
       handleKeyPluralization(it)
     }
@@ -55,7 +58,10 @@ class PluralizationHandler(
       return
     }
 
-    val existingOrNewKey = data.value.first().second.key
+    val existingOrNewKey =
+      data.value
+        .first()
+        .second.key
     existingOrNewKey.isPlural = true
     // now we have to migrate the new translations
     val pluralArgName = migrateNewTranslationsToPlurals(data.value, null)
@@ -73,7 +79,12 @@ class PluralizationHandler(
     translationPairs: List<Pair<ImportTranslation, Translation>>,
     pluralArgName: String?,
   ): String {
-    val keyPluralArgName = pluralArgName ?: translationPairs.firstOrNull()?.first?.key?.pluralArgName
+    val keyPluralArgName =
+      pluralArgName ?: translationPairs
+        .firstOrNull()
+        ?.first
+        ?.key
+        ?.pluralArgName
     val map = translationPairs.associateWith { it.second.text }
     val conversionResult = map.convertToIcuPlurals(keyPluralArgName)
     conversionResult.convertedStrings.forEach {

@@ -23,7 +23,8 @@ class MailJetEmailServiceManager(
     }
 
     val options: ClientOptions =
-      ClientOptions.builder()
+      ClientOptions
+        .builder()
         .apiKey(mailjetProperties.apiKey)
         .apiSecretKey(mailjetProperties.secretKey)
         .build()

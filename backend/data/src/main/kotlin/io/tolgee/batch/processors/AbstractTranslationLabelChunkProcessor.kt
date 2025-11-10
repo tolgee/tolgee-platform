@@ -47,9 +47,13 @@ abstract class AbstractTranslationLabelChunkProcessor(
   override fun getParams(data: LabelTranslationsRequest): TranslationLabelParams {
     return TranslationLabelParams(
       labelIds = data.labelIds,
-      languageIds = data.languageIds
+      languageIds = data.languageIds,
     )
   }
 
-  abstract fun process(subChunk: List<Long>, languageIds: List<Long>, labelIds: List<Long>)
+  abstract fun process(
+    subChunk: List<Long>,
+    languageIds: List<Long>,
+    labelIds: List<Long>,
+  )
 }

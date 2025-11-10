@@ -45,7 +45,8 @@ import org.hibernate.annotations.Filter
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import java.util.*
+import java.util.Date
+import java.util.Optional
 
 @Entity
 @Table(
@@ -76,7 +77,11 @@ class Project(
   @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   override var slug: String? = null,
-) : AuditModel(), ModelWithAvatar, EntityWithId, SoftDeletable, ISimpleProject {
+) : AuditModel(),
+  ModelWithAvatar,
+  EntityWithId,
+  SoftDeletable,
+  ISimpleProject {
   @OrderBy("id")
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var languages: MutableSet<Language> = LinkedHashSet()

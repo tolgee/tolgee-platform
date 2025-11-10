@@ -24,4 +24,5 @@ open class TranslationSocketModel(
   @Schema(description = "Which machine translation service was used to auto translate this")
   val mtProvider: MtServiceType?,
   val key: KeyModel,
-) : RepresentationModel<TranslationSocketModel>(), Serializable
+) : RepresentationModel<TranslationSocketModel>(),
+  Serializable

@@ -10,7 +10,9 @@ import java.sql.Statement
 import javax.sql.DataSource
 
 @Component("Database")
-class DatabaseHealthContributor : HealthIndicator, HealthContributor {
+class DatabaseHealthContributor :
+  HealthIndicator,
+  HealthContributor {
   @Autowired
   private lateinit var ds: DataSource
 

@@ -101,20 +101,19 @@ class BatchJobCancellationManager(
     }
 
   private fun getUnlockedPendingExecutions(jobId: Long): MutableList<BatchJobChunkExecution> =
-    entityManager.createQuery(
-      """
+    entityManager
+      .createQuery(
+        """
             from BatchJobChunkExecution bjce  
             where bjce.batchJob.id = :id
             and status = :status
           """,
-      BatchJobChunkExecution::class.java,
-    )
-      .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+        BatchJobChunkExecution::class.java,
+      ).setLockMode(LockModeType.PESSIMISTIC_WRITE)
       .setHint(
         "jakarta.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED,
-      )
-      .setParameter("id", jobId)
+      ).setParameter("id", jobId)
       .setParameter("status", BatchJobChunkExecutionStatus.PENDING)
       .resultList
 
@@ -164,15 +163,15 @@ class BatchJobCancellationManager(
   }
 
   private fun getStatuses(jobId: Long): MutableList<BatchJobChunkExecutionStatus> =
-    entityManager.createQuery(
-      """
+    entityManager
+      .createQuery(
+        """
             select e.status from BatchJobChunkExecution e 
             where e.batchJob.id = :id 
             group by e.status
             """,
-      BatchJobChunkExecutionStatus::class.java,
-    )
-      .setParameter("id", jobId)
+        BatchJobChunkExecutionStatus::class.java,
+      ).setParameter("id", jobId)
       .resultList
 
   fun cancelExecution(execution: BatchJobChunkExecution) {

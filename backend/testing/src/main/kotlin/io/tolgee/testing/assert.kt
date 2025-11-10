@@ -13,7 +13,7 @@ import org.assertj.core.api.MapAssert
 import org.assertj.core.api.ObjectArrayAssert
 import org.assertj.core.api.ObjectAssert
 import java.math.BigDecimal
-import java.util.*
+import java.util.Date
 
 inline val <reified T> T.assert: ObjectAssert<T>
   get() = Assertions.assertThat(this)

@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
-import java.util.*
+import java.util.Optional
 
 @Repository
 @Lazy
@@ -184,7 +184,10 @@ interface LanguageRepository : JpaRepository<Language, Long> {
     where l.project.id = :projectId and l.tag = :languageTag and l.deletedAt is null
   """,
   )
-  fun find(projectId: Long, languageTag: String): Language?
+  fun find(
+    projectId: Long,
+    languageTag: String,
+  ): Language?
 
   @Query(
     """

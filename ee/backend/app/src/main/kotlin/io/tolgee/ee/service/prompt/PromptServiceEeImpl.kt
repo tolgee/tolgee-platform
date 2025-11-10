@@ -6,13 +6,13 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.HandlebarsException
-import io.tolgee.ee.component.PromptLazyMap
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
+import io.tolgee.ee.component.PromptLazyMap
 import io.tolgee.ee.service.LlmProviderService
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
@@ -52,7 +52,7 @@ class PromptServiceEeImpl(
   @Lazy
   private val mtServiceConfigService: MtServiceConfigService,
   private val applicationContext: ApplicationContext,
-  private val promptParamsHelper: PromptParamsHelper
+  private val promptParamsHelper: PromptParamsHelper,
 ) : PromptService {
   fun getAllPaged(
     projectId: Long,
@@ -185,10 +185,11 @@ class PromptServiceEeImpl(
     keyId: Long?,
     priority: LlmProviderPriority,
   ): LlmParams {
-    val key = keyId?.let {
-      keyService.find(it)
-      ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-    }
+    val key =
+      keyId?.let {
+        keyService.find(it)
+          ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+      }
     return promptParamsHelper.getParamsFromPrompt(prompt, key, priority)
   }
 
@@ -215,11 +216,12 @@ class PromptServiceEeImpl(
 
   fun extractJsonFromResponse(content: String): JsonNode? {
     // attempting different strategies to find a json in the response
-    val attempts = listOf<(String) -> String>(
-      { it },
-      { getJsonLike(it) },
-      { getJsonLike(it.substringAfter("```").substringBefore("```")) },
-    )
+    val attempts =
+      listOf<(String) -> String>(
+        { it },
+        { getJsonLike(it) },
+        { getJsonLike(it.substringAfter("```").substringBefore("```")) },
+      )
     for (attempt in attempts) {
       val result = parseJsonSafely(attempt.invoke(content))
       if (result != null) {
@@ -233,9 +235,9 @@ class PromptServiceEeImpl(
     return try {
       val result = jacksonObjectMapper().readValue<JsonNode>(content)
       updateStringsInJson(result) {
-          // gpt-4.1 sometimes includes NIL,
-          // which is invalid utf-8 character breaking DB saving
-          it.replace("\u0000", "")
+        // gpt-4.1 sometimes includes NIL,
+        // which is invalid utf-8 character breaking DB saving
+        it.replace("\u0000", "")
       }
     } catch (_: JsonProcessingException) {
       null

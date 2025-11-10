@@ -37,7 +37,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.Optional
 
 @Service
 class KeyService(
@@ -69,7 +69,8 @@ class KeyService(
     name: String,
     namespace: String?,
   ): Key {
-    return keyRepository.getByNameAndNamespace(projectId, name, namespace)
+    return keyRepository
+      .getByNameAndNamespace(projectId, name, namespace)
       .orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }!!
   }
 
@@ -130,12 +131,14 @@ class KeyService(
 
     val created = createTranslationsOnKeyCreate(dto, key)
 
-    dto.states?.map {
-      val translation =
-        created?.get(it.key)
-          ?: throw BadRequestException(Message.CANNOT_SET_STATE_FOR_MISSING_TRANSLATION)
-      translation to it.value.translationState
-    }?.toMap()?.let { translationService.setStateBatch(it) }
+    dto.states
+      ?.map {
+        val translation =
+          created?.get(it.key)
+            ?: throw BadRequestException(Message.CANNOT_SET_STATE_FOR_MISSING_TRANSLATION)
+        translation to it.value.translationState
+      }?.toMap()
+      ?.let { translationService.setStateBatch(it) }
 
     keyMetaService.getOrCreateForKey(key).apply {
       description = dto.description
@@ -332,7 +335,8 @@ class KeyService(
     keyMetaService.deleteAllByProject(projectId)
     screenshotService.deleteAllByProject(projectId)
 
-    entityManager.createQuery("""delete from Key where project.id = :projectId""")
+    entityManager
+      .createQuery("""delete from Key where project.id = :projectId""")
       .setParameter("projectId", projectId)
       .executeUpdate()
 
@@ -433,18 +437,19 @@ class KeyService(
   @Transactional
   fun getDisabledLanguages(projectId: Long): List<KeyDisabledLanguagesView> {
     val queryResult = keyRepository.getDisabledLanguages(projectId)
-    return queryResult.groupBy {
-      it.id
-    }.map {
-      KeyDisabledLanguagesView(
-        it.key,
-        it.value.first().name,
-        it.value.first().namespace,
-        it.value.map { disabledLanguage ->
-          KeyDisabledLanguagesView.KeyDisabledLanguageModel(disabledLanguage.languageId, disabledLanguage.languageTag)
-        },
-      )
-    }
+    return queryResult
+      .groupBy {
+        it.id
+      }.map {
+        KeyDisabledLanguagesView(
+          it.key,
+          it.value.first().name,
+          it.value.first().namespace,
+          it.value.map { disabledLanguage ->
+            KeyDisabledLanguagesView.KeyDisabledLanguageModel(disabledLanguage.languageId, disabledLanguage.languageTag)
+          },
+        )
+      }
   }
 
   @Transactional

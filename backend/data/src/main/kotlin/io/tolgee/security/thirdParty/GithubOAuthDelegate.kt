@@ -14,9 +14,8 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import java.util.Arrays
 import java.util.stream.Collectors
-import kotlin.collections.get
 
 @Component
 class GithubOAuthDelegate(
@@ -64,12 +63,13 @@ class GithubOAuthDelegate(
 
       // get github user emails
       val emails =
-        restTemplate.exchange(
-          githubConfigurationProperties.userUrl + "/emails",
-          HttpMethod.GET,
-          entity,
-          Array<GithubEmailResponse>::class.java,
-        ).body
+        restTemplate
+          .exchange(
+            githubConfigurationProperties.userUrl + "/emails",
+            HttpMethod.GET,
+            entity,
+            Array<GithubEmailResponse>::class.java,
+          ).body
           ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
       val verifiedEmails = Arrays.stream(emails).filter { it.verified }.collect(Collectors.toList())

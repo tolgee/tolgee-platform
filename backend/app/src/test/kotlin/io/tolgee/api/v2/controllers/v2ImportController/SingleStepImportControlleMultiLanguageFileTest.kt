@@ -30,7 +30,10 @@ class SingleStepImportControlleMultiLanguageFileTest : ProjectAuthControllerTest
     executeInNewTransaction {
       val translations = getTestKeyTranslations()
       translations.assert.hasSize(1)
-      translations.single().text.assert.isEqualTo("Hello, World!")
+      translations
+        .single()
+        .text.assert
+        .isEqualTo("Hello, World!")
     }
   }
 
@@ -42,7 +45,11 @@ class SingleStepImportControlleMultiLanguageFileTest : ProjectAuthControllerTest
     executeInNewTransaction {
       val translations = getTestKeyTranslations()
       translations.assert.hasSize(2)
-      translations.map { it.text }.assert.contains("Hello, World!").contains("Hallo, Welt!")
+      translations
+        .map { it.text }
+        .assert
+        .contains("Hello, World!")
+        .contains("Hallo, Welt!")
     }
   }
 
@@ -54,7 +61,11 @@ class SingleStepImportControlleMultiLanguageFileTest : ProjectAuthControllerTest
     executeInNewTransaction {
       val translations = getTestKeyTranslations()
       translations.assert.hasSize(2)
-      translations.map { it.text }.assert.contains("Hello, World!").contains("Hallo, Welt!")
+      translations
+        .map { it.text }
+        .assert
+        .contains("Hello, World!")
+        .contains("Hallo, Welt!")
     }
   }
 

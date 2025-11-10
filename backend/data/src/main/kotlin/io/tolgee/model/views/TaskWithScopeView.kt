@@ -7,7 +7,7 @@ import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.TaskKey
 import io.tolgee.model.translationAgency.TranslationAgency
-import java.util.*
+import java.util.Date
 
 data class TaskWithScopeView(
   val project: Project,

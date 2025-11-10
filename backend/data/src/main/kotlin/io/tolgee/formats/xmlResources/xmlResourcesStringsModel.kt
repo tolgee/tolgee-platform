@@ -24,7 +24,10 @@ class PluralUnit : XmlResourcesNodeWithComment {
   override var comment: String? = null
 }
 
-data class XmlResourcesStringValue(val string: String, val isWrappedCdata: Boolean)
+data class XmlResourcesStringValue(
+  val string: String,
+  val isWrappedCdata: Boolean,
+)
 
 interface XmlResourcesNodeWithComment : XmlResourcesNode {
   var comment: String?

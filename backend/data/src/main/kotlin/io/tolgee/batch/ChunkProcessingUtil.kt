@@ -17,7 +17,7 @@ import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
-import java.util.*
+import java.util.Date
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
 import kotlin.system.measureTimeMillis
@@ -168,11 +168,12 @@ open class ChunkProcessingUtil(
   }
 
   private val previousSuccessfulTargets by lazy {
-    previousExecutions.flatMap {
-      // this is important!!
-      // we want the equals check to be run on the correct type with correct class instances
-      convertChunkToItsType(it.successTargets)
-    }.toSet()
+    previousExecutions
+      .flatMap {
+        // this is important!!
+        // we want the equals check to be run on the correct type with correct class instances
+        convertChunkToItsType(it.successTargets)
+      }.toSet()
   }
 
   /**
@@ -212,21 +213,20 @@ open class ChunkProcessingUtil(
 
   @Suppress("UNCHECKED_CAST")
   private val previousExecutions: List<BatchJobChunkExecution> by lazy {
-    entityManager.createQuery(
-      """
-      from BatchJobChunkExecution 
-      where chunkNumber = :chunkNumber 
-          and batchJob.id = :batchJobId
-          and status = :status
-      """.trimIndent(),
-    )
-      .setParameter("chunkNumber", execution.chunkNumber)
+    entityManager
+      .createQuery(
+        """
+        from BatchJobChunkExecution 
+        where chunkNumber = :chunkNumber 
+            and batchJob.id = :batchJobId
+            and status = :status
+        """.trimIndent(),
+      ).setParameter("chunkNumber", execution.chunkNumber)
       .setParameter("batchJobId", job.id)
       .setParameter("status", BatchJobChunkExecutionStatus.FAILED)
       .setHint(
         "jakarta.persistence.lock.timeout",
         LockOptions.NO_WAIT,
-      )
-      .resultList as List<BatchJobChunkExecution>
+      ).resultList as List<BatchJobChunkExecution>
   }
 }

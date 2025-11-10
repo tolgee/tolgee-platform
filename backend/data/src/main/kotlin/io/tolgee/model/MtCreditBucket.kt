@@ -6,7 +6,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import org.hibernate.annotations.ColumnDefault
-import java.util.*
+import java.util.Date
 
 @Entity
 @Table(

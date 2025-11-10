@@ -18,14 +18,24 @@ import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference_
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.keyBigMeta.KeysDistance_
-import io.tolgee.model.translation.*
+import io.tolgee.model.translation.Translation
+import io.tolgee.model.translation.TranslationComment
+import io.tolgee.model.translation.TranslationComment_
+import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
 import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.persistence.EntityManager
-import jakarta.persistence.criteria.*
-import java.util.*
-import kotlin.collections.HashSet
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.CriteriaQuery
+import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.ListJoin
+import jakarta.persistence.criteria.Path
+import jakarta.persistence.criteria.Predicate
+import jakarta.persistence.criteria.Root
+import jakarta.persistence.criteria.Subquery
+import java.util.Date
 
 class QueryBase<T>(
   private val cb: CriteriaBuilder,
@@ -148,9 +158,7 @@ class QueryBase<T>(
     return subquery
   }
 
-  private fun addActiveSuggestionsCount(
-    language: LanguageDto,
-  ): Expression<Long> {
+  private fun addActiveSuggestionsCount(language: LanguageDto): Expression<Long> {
     val subquery = this.query.subquery(Long::class.java)
     val subqueryRoot = subquery.from(TranslationSuggestion::class.java)
 
@@ -168,16 +176,14 @@ class QueryBase<T>(
         cb.equal(
           subqueryRoot.get(TranslationSuggestion_.state),
           cb.literal(TranslationSuggestionState.ACTIVE.name),
-        )
-      )
+        ),
+      ),
     )
     this.querySelection[language to TranslationView::activeSuggestionCount] = subquery
     return subquery
   }
 
-  private fun addTotalSuggestionsCount(
-    language: LanguageDto,
-  ): Expression<Long> {
+  private fun addTotalSuggestionsCount(language: LanguageDto): Expression<Long> {
     val subquery = this.query.subquery(Long::class.java)
     val subqueryRoot = subquery.from(TranslationSuggestion::class.java)
 
@@ -192,7 +198,7 @@ class QueryBase<T>(
           subqueryRoot.get(TranslationSuggestion_.language).get(Language_.id),
           cb.literal(language.id),
         ),
-      )
+      ),
     )
     this.querySelection[language to TranslationView::totalSuggestionCount] = subquery
     return subquery

@@ -34,19 +34,22 @@ class PromptLazyMap : AbstractMap<String, Any?>() {
     }
 
   companion object {
-    private class Entry(override val key: String, val valGetter: () -> Any?) : Map.Entry<String, Any?> {
+    private class Entry(
+      override val key: String,
+      val valGetter: () -> Any?,
+    ) : Map.Entry<String, Any?> {
       override val value: Any?
         get() = valGetter()
     }
 
     class Variable(
-        val name: String,
-        var value: Any? = null,
-        var lazyValue: (() -> Any?)? = null,
-        val description: String? = null,
-        val props: MutableList<Variable> = mutableListOf(),
-        val type: PromptVariableType? = null,
-        val option: BasicPromptOption? = null,
+      val name: String,
+      var value: Any? = null,
+      var lazyValue: (() -> Any?)? = null,
+      val description: String? = null,
+      val props: MutableList<Variable> = mutableListOf(),
+      val type: PromptVariableType? = null,
+      val option: BasicPromptOption? = null,
     ) {
       fun toPromptVariableDto(): PromptVariableDto {
         val computedType =

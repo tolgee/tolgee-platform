@@ -9,4 +9,5 @@ import org.springframework.hateoas.server.core.Relation
 open class ImportSettingsModel(
   @Schema(hidden = true)
   settings: IImportSettings,
-) : RepresentationModel<ImportSettingsModel>(), IImportSettings by settings
+) : RepresentationModel<ImportSettingsModel>(),
+  IImportSettings by settings

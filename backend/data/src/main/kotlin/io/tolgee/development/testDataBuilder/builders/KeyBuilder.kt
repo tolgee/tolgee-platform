@@ -107,7 +107,13 @@ class KeyBuilder(
 
     val tags =
       projectBuilder.data.keys
-        .mapNotNull { it.data.meta?.self?.tags }.flatten().filter { it.name == name }.distinct()
+        .mapNotNull {
+          it.data.meta
+            ?.self
+            ?.tags
+        }.flatten()
+        .filter { it.name == name }
+        .distinct()
 
     if (tags.size > 1) {
       throw IllegalStateException("More than one tag with name $name in the project")

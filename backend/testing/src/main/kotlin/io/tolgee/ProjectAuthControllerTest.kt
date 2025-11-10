@@ -16,7 +16,8 @@ import org.springframework.test.web.servlet.ResultActions
 
 abstract class ProjectAuthControllerTest(
   val projectUrlPrefix: String = "/api/project/",
-) : AuthorizedControllerTest(), AuthRequestPerformer {
+) : AuthorizedControllerTest(),
+  AuthRequestPerformer {
   // for api key auth methods
   val apiKey: ApiKeyDTO
     get() {

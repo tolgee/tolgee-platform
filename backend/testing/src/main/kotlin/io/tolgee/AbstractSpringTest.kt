@@ -10,7 +10,13 @@ import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.machineTranslation.*
+import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
@@ -58,7 +64,7 @@ import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
 import java.time.Duration
-import java.util.*
+import java.util.Date
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest

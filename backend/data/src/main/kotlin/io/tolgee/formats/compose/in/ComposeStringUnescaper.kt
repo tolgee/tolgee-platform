@@ -37,6 +37,7 @@ class ComposeStringUnescaper(
                     state
                   }
                 }
+
               State.ESCAPED -> {
                 char.unescape().forEach { append(it) }
                 State.NORMAL

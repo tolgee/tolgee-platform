@@ -83,8 +83,8 @@ class ProjectAuthorizationInterceptor(
         )
 
         if (!canBypassForReadOnly()) {
-            // Security consideration: if the user cannot see the project, pretend it does not exist.
-            throw ProjectNotFoundException(project.id)
+          // Security consideration: if the user cannot see the project, pretend it does not exist.
+          throw ProjectNotFoundException(project.id)
         }
 
         // Admin access for read-only operations is allowed, but it's not enough for the current operation.

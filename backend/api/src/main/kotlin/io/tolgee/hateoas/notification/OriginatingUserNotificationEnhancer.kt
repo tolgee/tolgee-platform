@@ -16,9 +16,11 @@ class OriginatingUserNotificationEnhancer(
 
     notifications.forEach { (source, target) ->
       target.originatingUser =
-        source.originatingUser?.id.let {
-          users[it]
-        }?.let { simpleUserAccountModelAssembler.toModel(it) }
+        source.originatingUser
+          ?.id
+          .let {
+            users[it]
+          }?.let { simpleUserAccountModelAssembler.toModel(it) }
     }
   }
 }

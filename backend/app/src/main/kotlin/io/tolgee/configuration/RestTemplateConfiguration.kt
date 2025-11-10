@@ -18,7 +18,12 @@ class RestTemplateConfiguration {
   fun restTemplate(): RestTemplate {
     return RestTemplate(
       HttpComponentsClientHttpRequestFactory().apply {
-        this.httpClient = HttpClientBuilder.create().disableCookieManagement().useSystemProperties().build()
+        this.httpClient =
+          HttpClientBuilder
+            .create()
+            .disableCookieManagement()
+            .useSystemProperties()
+            .build()
       },
     ).removeXmlConverter()
   }

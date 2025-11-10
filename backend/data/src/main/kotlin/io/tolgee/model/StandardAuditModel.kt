@@ -12,7 +12,9 @@ const val SEQUENCE_NAME = "hibernate_sequence"
 const val ALLOCATION_SIZE = 1000
 
 @MappedSuperclass
-abstract class StandardAuditModel : AuditModel(), EntityWithId {
+abstract class StandardAuditModel :
+  AuditModel(),
+  EntityWithId {
   @Id
   @SequenceGenerator(
     name = "sequenceGenerator",

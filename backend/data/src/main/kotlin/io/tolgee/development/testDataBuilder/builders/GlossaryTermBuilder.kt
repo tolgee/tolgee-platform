@@ -7,10 +7,11 @@ import io.tolgee.model.glossary.GlossaryTermTranslation
 class GlossaryTermBuilder(
   val glossaryBuilder: GlossaryBuilder,
 ) : BaseEntityDataBuilder<GlossaryTerm, GlossaryTermBuilder>() {
-  override var self: GlossaryTerm = GlossaryTerm().apply {
-    glossary = glossaryBuilder.self
-    glossaryBuilder.self.terms.add(this)
-  }
+  override var self: GlossaryTerm =
+    GlossaryTerm().apply {
+      glossary = glossaryBuilder.self
+      glossaryBuilder.self.terms.add(this)
+    }
 
   class DATA {
     val translations = mutableListOf<GlossaryTermTranslationBuilder>()

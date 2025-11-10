@@ -24,4 +24,5 @@ open class UsageModel(
   val credits: SumUsageItemModel?,
   val keys: AverageProportionalUsageItemModel = AverageProportionalUsageItemModel(),
   val total: BigDecimal = 0.toBigDecimal(),
-) : RepresentationModel<UsageModel>(), Serializable
+) : RepresentationModel<UsageModel>(),
+  Serializable

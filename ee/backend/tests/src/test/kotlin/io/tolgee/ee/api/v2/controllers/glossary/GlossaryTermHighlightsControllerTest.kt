@@ -45,13 +45,14 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
     // Text contains "Term" which is in the glossary
     val text = "This is a Term that should be highlighted"
 
-    val result = performAuthPost(
-      "/v2/projects/${testData.project.id}/glossary-highlights",
-      mapOf(
-        "languageTag" to "en",
-        "text" to text,
+    val result =
+      performAuthPost(
+        "/v2/projects/${testData.project.id}/glossary-highlights",
+        mapOf(
+          "languageTag" to "en",
+          "text" to text,
+        ),
       )
-    )
 
     result.andIsOk.andAssertThatJson {
       node("_embedded.glossaryHighlights") {
@@ -74,9 +75,9 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
       mapOf(
         "languageTag" to "en",
         "text" to text,
-      )
-    )
-      .andIsOk.andAssertThatJson {
+      ),
+    ).andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaryHighlights").isArray.hasSize(2)
       }
   }
@@ -91,9 +92,9 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
       mapOf(
         "languageTag" to "en",
         "text" to text,
-      )
-    )
-      .andIsOk.andAssertThatJson {
+      ),
+    ).andIsOk
+      .andAssertThatJson {
         node("_embedded") {
           node("glossaryHighlights") {
             isArray.hasSize(1)
@@ -115,9 +116,9 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
       mapOf(
         "languageTag" to "en",
         "text" to text,
-      )
-    )
-      .andIsOk.andAssertThatJson {
+      ),
+    ).andIsOk
+      .andAssertThatJson {
         node("_embedded").isAbsent()
       }
   }
@@ -131,9 +132,9 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
       mapOf(
         "languageTag" to "en",
         "text" to text,
-      )
-    )
-      .andIsOk.andAssertThatJson {
+      ),
+    ).andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaryHighlights") {
           isArray.hasSize(1)
           node("[0].position.start").isNumber.isEqualTo(BigDecimal(10))
@@ -149,13 +150,14 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
     // Text contains "Term" which is in the glossary
     val text = "Lets work for A.B.C Inc!"
 
-    val result = performAuthPost(
-      "/v2/projects/${testData.project.id}/glossary-highlights",
-      mapOf(
-        "languageTag" to "en",
-        "text" to text,
+    val result =
+      performAuthPost(
+        "/v2/projects/${testData.project.id}/glossary-highlights",
+        mapOf(
+          "languageTag" to "en",
+          "text" to text,
+        ),
       )
-    )
 
     result.andIsOk.andAssertThatJson {
       node("_embedded.glossaryHighlights") {
@@ -176,9 +178,9 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
       mapOf(
         "languageTag" to "en",
         "text" to text,
-      )
-    )
-      .andIsOk.andAssertThatJson {
+      ),
+    ).andIsOk
+      .andAssertThatJson {
         node("_embedded").isAbsent()
       }
   }
@@ -192,8 +194,7 @@ class GlossaryTermHighlightsControllerTest : AuthorizedControllerTest() {
       mapOf(
         "languageTag" to "en",
         "text" to text,
-      )
-    )
-      .andIsBadRequest
+      ),
+    ).andIsBadRequest
   }
 }

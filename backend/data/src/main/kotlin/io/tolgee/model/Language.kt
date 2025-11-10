@@ -26,7 +26,7 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.context.ApplicationEventPublisher
-import java.util.*
+import java.util.Date
 
 @Entity
 @EntityListeners(Language.Companion.LanguageListeners::class)
@@ -48,7 +48,10 @@ import java.util.*
 )
 @ActivityLoggedEntity
 @ActivityReturnsExistence
-class Language : StandardAuditModel(), ILanguage, SoftDeletable {
+class Language :
+  StandardAuditModel(),
+  ILanguage,
+  SoftDeletable {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "language", orphanRemoval = true)
   var translations: MutableList<Translation> = mutableListOf()
 

@@ -35,7 +35,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import java.util.Date
+import java.util.HashMap
 
 @SpringBootTest(
   properties = [

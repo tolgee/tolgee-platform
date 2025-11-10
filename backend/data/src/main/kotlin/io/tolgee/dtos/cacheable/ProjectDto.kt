@@ -18,7 +18,8 @@ data class ProjectDto(
   var useNamespaces: Boolean,
   var suggestionsMode: SuggestionsMode,
   var translationProtection: TranslationProtection,
-) : Serializable, ISimpleProject {
+) : Serializable,
+  ISimpleProject {
   companion object {
     fun fromEntity(entity: Project) =
       ProjectDto(

@@ -39,7 +39,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import java.util.Date
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Primary
@@ -55,9 +55,11 @@ class SsoDelegateEe(
   private val userAccountService: UserAccountService,
   private val currentDateProvider: CurrentDateProvider,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
-) : SsoDelegate, Logging {
+) : SsoDelegate,
+  Logging {
   private val jwtParser: JwtParser =
-    Jwts.parserBuilder()
+    Jwts
+      .parserBuilder()
       .setClock { currentDateProvider.date }
       .build()
 

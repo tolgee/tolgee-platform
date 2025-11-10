@@ -3,7 +3,7 @@ package io.tolgee.hateoas.screenshot
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
-import java.util.*
+import java.util.Date
 
 @Suppress("unused")
 @Relation(collectionRelation = "screenshots", itemRelation = "screenshot")

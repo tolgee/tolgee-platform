@@ -11,7 +11,7 @@ class GlossaryModel(
   val name: String,
   @Schema(
     description = "Language tag for default translations for terms",
-    example = "en"
+    example = "en",
   )
   val baseLanguageTag: String,
   val organizationOwner: SimpleOrganizationModel,

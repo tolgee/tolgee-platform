@@ -24,10 +24,12 @@ class ProjectStatsService(
   }
 
   fun getProjectDailyActivity(projectId: Long): Map<LocalDate, Long> {
-    return activityRevisionRepository.getProjectDailyActivity(projectId).map {
-      val date = LocalDate.parse(it[1] as String)
-      LocalDate.from(date) to it[0] as Long
-    }.toMap()
+    return activityRevisionRepository
+      .getProjectDailyActivity(projectId)
+      .map {
+        val date = LocalDate.parse(it[1] as String)
+        LocalDate.from(date) to it[0] as Long
+      }.toMap()
   }
 
   fun getProjectsTotals(projectIds: Iterable<Long>): Map<Long, ProjectTotals> {

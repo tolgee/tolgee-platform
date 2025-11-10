@@ -7,36 +7,36 @@ import io.tolgee.dtos.response.PublicLlmConfigurationDTO
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class PublicConfigurationDTO(
-    val machineTranslationServices: MtServicesDTO,
-    val billing: PublicBillingConfigurationDTO,
-    val version: String,
-    val authentication: Boolean,
-    val authMethods: AuthMethodsDTO?,
-    val nativeEnabled: Boolean,
-    @Deprecated("Use nativeEnabled instead", ReplaceWith("nativeEnabled"))
+  val machineTranslationServices: MtServicesDTO,
+  val billing: PublicBillingConfigurationDTO,
+  val version: String,
+  val authentication: Boolean,
+  val authMethods: AuthMethodsDTO?,
+  val nativeEnabled: Boolean,
+  @Deprecated("Use nativeEnabled instead", ReplaceWith("nativeEnabled"))
   val passwordResettable: Boolean,
-    val allowRegistrations: Boolean,
-    val screenshotsUrl: String,
-    val maxUploadFileSize: Int,
-    val clientSentryDsn: String?,
-    val needsEmailVerification: Boolean,
-    val userCanCreateOrganizations: Boolean,
-    val appName: String,
-    val showVersion: Boolean,
-    val internalControllerEnabled: Boolean,
-    val maxTranslationTextLength: Long,
-    val recaptchaSiteKey: String?,
-    val chatwootToken: String?,
-    val capterraTracker: String?,
-    val ga4Tag: String?,
-    val postHogApiKey: String?,
-    val postHogHost: String?,
-    val contentDeliveryConfigured: Boolean,
-    val userSourceField: Boolean,
-    val plausible: PlausibleDto,
-    val slack: SlackDTO,
-    val translationsViewLanguagesLimit: Int,
-    val llm: PublicLlmConfigurationDTO,
+  val allowRegistrations: Boolean,
+  val screenshotsUrl: String,
+  val maxUploadFileSize: Int,
+  val clientSentryDsn: String?,
+  val needsEmailVerification: Boolean,
+  val userCanCreateOrganizations: Boolean,
+  val appName: String,
+  val showVersion: Boolean,
+  val internalControllerEnabled: Boolean,
+  val maxTranslationTextLength: Long,
+  val recaptchaSiteKey: String?,
+  val chatwootToken: String?,
+  val capterraTracker: String?,
+  val ga4Tag: String?,
+  val postHogApiKey: String?,
+  val postHogHost: String?,
+  val contentDeliveryConfigured: Boolean,
+  val userSourceField: Boolean,
+  val plausible: PlausibleDto,
+  val slack: SlackDTO,
+  val translationsViewLanguagesLimit: Int,
+  val llm: PublicLlmConfigurationDTO,
 ) {
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,
@@ -46,7 +46,9 @@ class PublicConfigurationDTO(
     val ssoOrganizations: SsoOrganizationsPublicConfigDTO,
   )
 
-  data class OAuthPublicConfigDTO(val clientId: String?) {
+  data class OAuthPublicConfigDTO(
+    val clientId: String?,
+  ) {
     val enabled: Boolean = clientId != null && clientId.isNotEmpty()
   }
 

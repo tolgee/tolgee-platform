@@ -21,9 +21,11 @@ class EmailNotificationComposer(
       NotificationType.TASK_FINISHED,
       NotificationType.TASK_CANCELED,
       -> taskEmailComposer
+
       NotificationType.MFA_ENABLED,
       NotificationType.MFA_DISABLED,
       -> mfaEmailComposer
+
       NotificationType.PASSWORD_CHANGED,
       -> passwordChangedEmailComposer
     }.composeEmail(notification)

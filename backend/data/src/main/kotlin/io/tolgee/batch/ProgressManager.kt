@@ -111,7 +111,8 @@ class ProgressManager(
     val isJobCompleted = state.all { it.value.transactionCommitted && it.value.status.completed }
     logger.debug {
       val incompleteExecutions =
-        state.filter { !(it.value.transactionCommitted && it.value.status.completed) }
+        state
+          .filter { !(it.value.transactionCommitted && it.value.status.completed) }
           .map { it.key }
           .joinToString(", ")
       "Is job ${execution.batchJob.id} " +

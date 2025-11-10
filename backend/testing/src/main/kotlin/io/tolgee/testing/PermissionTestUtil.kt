@@ -70,11 +70,12 @@ class PermissionTestUtil(
           "/$type?$query"
         }
 
-      test.performAuthPut(
-        "/v2/projects/${project.id}/users/${user.id}" +
-          "/set-permissions$typeAndQuery",
-        null,
-      ).andIsOk
+      test
+        .performAuthPut(
+          "/v2/projects/${project.id}/users/${user.id}" +
+            "/set-permissions$typeAndQuery",
+          null,
+        ).andIsOk
 
       checkFn(permissionService.getProjectPermissionData(project.id, user.id), langByTag)
     }

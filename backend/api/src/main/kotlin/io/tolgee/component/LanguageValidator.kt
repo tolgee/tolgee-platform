@@ -8,7 +8,7 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.model.Project
 import io.tolgee.service.language.LanguageService
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.Optional
 
 @Component
 class LanguageValidator(

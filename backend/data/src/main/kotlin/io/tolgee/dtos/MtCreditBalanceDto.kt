@@ -1,6 +1,6 @@
 package io.tolgee.dtos
 
-import java.util.*
+import java.util.Date
 
 data class MtCreditBalanceDto(
   /** Used credits in cents */

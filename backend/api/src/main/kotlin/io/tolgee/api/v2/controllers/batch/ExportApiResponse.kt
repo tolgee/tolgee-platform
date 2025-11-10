@@ -11,4 +11,4 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
       "When a single file is exported, it is returned directly.",
   content = [Content(mediaType = "application/*")],
 )
-annotation class ExportApiResponse()
+annotation class ExportApiResponse

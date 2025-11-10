@@ -55,47 +55,52 @@ class TelemetryService(
   }
 
   private fun getUsersCount(): Long {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select count(u) from UserAccount u
     """,
-      Long::class.javaObjectType,
-    ).singleResult
+        Long::class.javaObjectType,
+      ).singleResult
   }
 
   private fun getDistinctLanguagesCount(): Long {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select count(distinct l.tag) from Language l
     """,
-      Long::class.javaObjectType,
-    ).singleResult
+        Long::class.javaObjectType,
+      ).singleResult
   }
 
   private fun getLanguagesCount(): Long {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select count(l) from Language l
     """,
-      Long::class.javaObjectType,
-    ).singleResult
+        Long::class.javaObjectType,
+      ).singleResult
   }
 
   private fun getTranslationsCount(): Long {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select count(t) from Translation t
     """,
-      Long::class.javaObjectType,
-    ).singleResult
+        Long::class.javaObjectType,
+      ).singleResult
   }
 
   private fun getProjectsCount(): Long {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select count(p) from Project p
     """,
-      Long::class.javaObjectType,
-    ).singleResult
+        Long::class.javaObjectType,
+      ).singleResult
   }
 }

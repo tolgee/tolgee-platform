@@ -47,7 +47,7 @@ class BatchJobManagementController(
 ) {
   @GetMapping(value = ["batch-jobs"])
   @Operation(summary = "List batch operations")
-  @RequiresProjectPermissions([ Scope.BATCH_JOBS_VIEW ])
+  @RequiresProjectPermissions([Scope.BATCH_JOBS_VIEW])
   @AllowApiAccess
   fun list(
     @Valid

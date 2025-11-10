@@ -48,7 +48,8 @@ class KeysDistanceUtil(
         if (index2 >= index1) return@forEach2
         val key2Id = getKeyId(item2.namespace, item2.keyName) ?: return@forEach2
         val distance =
-          distances.get(key1Id, key2Id)
+          distances
+            .get(key1Id, key2Id)
             ?.also {
               it.distance = computeDistance(it.distance, it.hits, index1 = index1, index2 = index2)
               it.hits++
@@ -77,17 +78,20 @@ class KeysDistanceUtil(
     distinctKeys.map { getKeyId(it.namespace, it.keyName) }.forEachIndexed { index, keyId ->
       // by this, we are pushing unprovided keys out of the "focus zone", so they should "converge" to become deleted
       val maxDistance = MAX_STORED
-      otherThanCurrent.asSequence().filter {
-        it.key.first == keyId || it.key.second == keyId
-      }.sortedBy { it.value.distance }.forEachIndexed { index, (key, value) ->
-        value.distance =
-          computeDistance(
-            oldDistance = value.distance,
-            hits = value.hits,
-            newDistance = maxDistance,
-          )
-        value.hits++
-      }
+      otherThanCurrent
+        .asSequence()
+        .filter {
+          it.key.first == keyId || it.key.second == keyId
+        }.sortedBy { it.value.distance }
+        .forEachIndexed { index, (key, value) ->
+          value.distance =
+            computeDistance(
+              oldDistance = value.distance,
+              hits = value.hits,
+              newDistance = maxDistance,
+            )
+          value.hits++
+        }
     }
 
     otherThanCurrent
@@ -106,7 +110,8 @@ class KeysDistanceUtil(
   }
 
   private val existing: DistancesMap by lazy {
-    bigMetaService.findExistingKeyDistances(keys, project)
+    bigMetaService
+      .findExistingKeyDistances(keys, project)
       .associateBy {
         (it.key1Id to it.key2Id)
       }

@@ -69,8 +69,12 @@ class WebSocketConfig(
   ) {
     val projectId =
       destination?.let {
-        "/projects/([0-9]+)".toRegex().find(it)?.groupValues
-          ?.getOrNull(1)?.toLong()
+        "/projects/([0-9]+)"
+          .toRegex()
+          .find(it)
+          ?.groupValues
+          ?.getOrNull(1)
+          ?.toLong()
       } ?: return
 
     if (user == null) {
@@ -90,8 +94,12 @@ class WebSocketConfig(
   ) {
     val userId =
       destination?.let {
-        "/users/([0-9]+)".toRegex().find(it)?.groupValues
-          ?.getOrNull(1)?.toLong()
+        "/users/([0-9]+)"
+          .toRegex()
+          .find(it)
+          ?.groupValues
+          ?.getOrNull(1)
+          ?.toLong()
       } ?: return
 
     if (user?.id != userId) {

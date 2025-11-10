@@ -10,7 +10,9 @@ import io.tolgee.model.enums.ThirdPartyAuthType
 import java.util.Date
 import java.util.UUID
 
-class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestData(currentDate) {
+class AuthProviderChangeEeTestData(
+  currentDate: Date,
+) : AuthProviderChangeTestData(currentDate) {
   var userNoProviderForcedSsoOrganization: UserAccount
   var userSsoGlobal: UserAccount
   var userSsoOrganizations: UserAccount
@@ -32,53 +34,58 @@ class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestDa
   init {
     organization = userAccountBuilder.defaultOrganizationBuilder.self
     tenant =
-      userAccountBuilder.defaultOrganizationBuilder.setTenant {
-        enabled = true
-        domain = "domain-org.com"
-        clientId = "dummy_client_id"
-        clientSecret = "clientSecret"
-        authorizationUri = "https://dummy-url.com"
-        tokenUri = "http://tokenUri"
-      }.self
+      userAccountBuilder.defaultOrganizationBuilder
+        .setTenant {
+          enabled = true
+          domain = "domain-org.com"
+          clientId = "dummy_client_id"
+          clientSecret = "clientSecret"
+          authorizationUri = "https://dummy-url.com"
+          tokenUri = "http://tokenUri"
+        }.self
 
     organizationForced =
-      root.addOrganization {
-        name = "organizationForced"
-      }.build {
-        tenantForced =
-          setTenant {
-            enabled = true
-            force = true
-            domain = "org-forced.com"
-            clientId = "dummy_client_id"
-            clientSecret = "clientSecret"
-            authorizationUri = "https://dummy-url.com"
-            tokenUri = "http://tokenUri"
-          }.self
-      }.self
+      root
+        .addOrganization {
+          name = "organizationForced"
+        }.build {
+          tenantForced =
+            setTenant {
+              enabled = true
+              force = true
+              domain = "org-forced.com"
+              clientId = "dummy_client_id"
+              clientSecret = "clientSecret"
+              authorizationUri = "https://dummy-url.com"
+              tokenUri = "http://tokenUri"
+            }.self
+        }.self
 
     userNoProviderForcedSsoOrganization =
-      root.addUserAccount {
-        username = "userNoProviderForcedSsoOrganization@org-forced.com"
-      }.self
+      root
+        .addUserAccount {
+          username = "userNoProviderForcedSsoOrganization@org-forced.com"
+        }.self
 
     userSsoGlobal =
-      root.addUserAccount {
-        username = "userSsoGlobal@domain.com"
-        accountType = AccountType.MANAGED
-        thirdPartyAuthType = ThirdPartyAuthType.SSO_GLOBAL
-        thirdPartyAuthId = "aaa6"
-        ssoRefreshToken = "bbb"
-        ssoSessionExpiry = validExpirationDate
-      }.self
+      root
+        .addUserAccount {
+          username = "userSsoGlobal@domain.com"
+          accountType = AccountType.MANAGED
+          thirdPartyAuthType = ThirdPartyAuthType.SSO_GLOBAL
+          thirdPartyAuthId = "aaa6"
+          ssoRefreshToken = "bbb"
+          ssoSessionExpiry = validExpirationDate
+        }.self
     userSsoOrganizations =
-      root.addUserAccount {
-        username = "userSsoOrganizations@domain-org.com"
-        accountType = AccountType.MANAGED
-        thirdPartyAuthType = ThirdPartyAuthType.SSO
-        thirdPartyAuthId = "aaa7"
-        ssoSessionExpiry = validExpirationDate
-      }.self
+      root
+        .addUserAccount {
+          username = "userSsoOrganizations@domain-org.com"
+          accountType = AccountType.MANAGED
+          thirdPartyAuthType = ThirdPartyAuthType.SSO
+          thirdPartyAuthId = "aaa7"
+          ssoSessionExpiry = validExpirationDate
+        }.self
     userAccountBuilder.defaultOrganizationBuilder.build {
       addRole {
         user = userSsoOrganizations
@@ -88,75 +95,79 @@ class AuthProviderChangeEeTestData(currentDate: Date) : AuthProviderChangeTestDa
     }
 
     userChangeNoneToSsoGlobal =
-      root.addUserAccount {
-        username = "userChangeNoneToSsoGlobal@domain.com"
-      }.build {
-        changeNoneToSsoGlobal =
-          setAuthProviderChangeRequest {
-            identifier = UUID.randomUUID().toString()
-            authType = ThirdPartyAuthType.SSO_GLOBAL
-            authId = "aaa8"
+      root
+        .addUserAccount {
+          username = "userChangeNoneToSsoGlobal@domain.com"
+        }.build {
+          changeNoneToSsoGlobal =
+            setAuthProviderChangeRequest {
+              identifier = UUID.randomUUID().toString()
+              authType = ThirdPartyAuthType.SSO_GLOBAL
+              authId = "aaa8"
 
-            ssoDomain = "domain.com"
-            ssoRefreshToken = "bbb"
-            expirationDate = validExpirationDate
-            ssoExpiration = validExpirationDate
-          }.self
-      }.self
+              ssoDomain = "domain.com"
+              ssoRefreshToken = "bbb"
+              expirationDate = validExpirationDate
+              ssoExpiration = validExpirationDate
+            }.self
+        }.self
     userChangeNoneToSsoOrganizations =
-      root.addUserAccount {
-        username = "userChangeNoneToSsoOrganizations@domain-org.com"
-      }.build {
-        changeNoneToSsoOrganizations =
-          setAuthProviderChangeRequest {
-            identifier = UUID.randomUUID().toString()
-            authType = ThirdPartyAuthType.SSO
-            authId = "aaa9"
+      root
+        .addUserAccount {
+          username = "userChangeNoneToSsoOrganizations@domain-org.com"
+        }.build {
+          changeNoneToSsoOrganizations =
+            setAuthProviderChangeRequest {
+              identifier = UUID.randomUUID().toString()
+              authType = ThirdPartyAuthType.SSO
+              authId = "aaa9"
 
-            ssoDomain = "domain-org.com"
-            ssoRefreshToken = "bbb"
-            expirationDate = validExpirationDate
-            ssoExpiration = validExpirationDate
-          }.self
-      }.self
+              ssoDomain = "domain-org.com"
+              ssoRefreshToken = "bbb"
+              expirationDate = validExpirationDate
+              ssoExpiration = validExpirationDate
+            }.self
+        }.self
 
     userChangeGoogleToSsoGlobal =
-      root.addUserAccount {
-        username = "userChangeGoogleToSsoGlobal@domain.com"
-        thirdPartyAuthType = ThirdPartyAuthType.GOOGLE
-        thirdPartyAuthId = "aaa10"
-      }.build {
-        changeGoogleToSsoGlobal =
-          setAuthProviderChangeRequest {
-            identifier = UUID.randomUUID().toString()
-            authType = ThirdPartyAuthType.SSO_GLOBAL
-            authId = "aaa11"
+      root
+        .addUserAccount {
+          username = "userChangeGoogleToSsoGlobal@domain.com"
+          thirdPartyAuthType = ThirdPartyAuthType.GOOGLE
+          thirdPartyAuthId = "aaa10"
+        }.build {
+          changeGoogleToSsoGlobal =
+            setAuthProviderChangeRequest {
+              identifier = UUID.randomUUID().toString()
+              authType = ThirdPartyAuthType.SSO_GLOBAL
+              authId = "aaa11"
 
-            ssoDomain = "domain.com"
-            ssoRefreshToken = "bbb"
-            expirationDate = validExpirationDate
-            ssoExpiration = validExpirationDate
-          }.self
-      }.self
+              ssoDomain = "domain.com"
+              ssoRefreshToken = "bbb"
+              expirationDate = validExpirationDate
+              ssoExpiration = validExpirationDate
+            }.self
+        }.self
     userChangeOauth2ToSsoOrganizations =
-      root.addUserAccount {
-        username = "userChangeOauth2ToSsoOrganizations@domain-org.com"
-        accountType = AccountType.THIRD_PARTY
-        thirdPartyAuthType = ThirdPartyAuthType.OAUTH2
-        thirdPartyAuthId = "aaa12"
-      }.build {
-        rawPassword = null
-        changeOauth2ToSsoOrganizations =
-          setAuthProviderChangeRequest {
-            identifier = UUID.randomUUID().toString()
-            authType = ThirdPartyAuthType.SSO
-            authId = "aaa13"
+      root
+        .addUserAccount {
+          username = "userChangeOauth2ToSsoOrganizations@domain-org.com"
+          accountType = AccountType.THIRD_PARTY
+          thirdPartyAuthType = ThirdPartyAuthType.OAUTH2
+          thirdPartyAuthId = "aaa12"
+        }.build {
+          rawPassword = null
+          changeOauth2ToSsoOrganizations =
+            setAuthProviderChangeRequest {
+              identifier = UUID.randomUUID().toString()
+              authType = ThirdPartyAuthType.SSO
+              authId = "aaa13"
 
-            ssoDomain = "domain-org.com"
-            ssoRefreshToken = "bbb"
-            expirationDate = validExpirationDate
-            ssoExpiration = validExpirationDate
-          }.self
-      }.self
+              ssoDomain = "domain-org.com"
+              ssoRefreshToken = "bbb"
+              expirationDate = validExpirationDate
+              ssoExpiration = validExpirationDate
+            }.self
+        }.self
   }
 }

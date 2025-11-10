@@ -8,10 +8,11 @@ import io.tolgee.model.glossary.GlossaryTerm
 class GlossaryBuilder(
   val organizationBuilder: OrganizationBuilder,
 ) : BaseEntityDataBuilder<Glossary, GlossaryBuilder>() {
-  override var self: Glossary = Glossary().apply {
-    organizationOwner = organizationBuilder.self
-    organizationBuilder.self.glossaries.add(this)
-  }
+  override var self: Glossary =
+    Glossary().apply {
+      organizationOwner = organizationBuilder.self
+      organizationBuilder.self.glossaries.add(this)
+    }
 
   class DATA {
     val terms = mutableListOf<GlossaryTermBuilder>()

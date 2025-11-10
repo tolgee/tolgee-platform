@@ -36,9 +36,13 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
         and ts.state = 'ACTIVE'
       order by ts.language_id, ts.key_id, ts.created_at DESC
     """,
-    nativeQuery = true
+    nativeQuery = true,
   )
-  fun getByKeyId(projectId: Long, languageIds: List<Long>, keyIds: List<Long>): List<TranslationSuggestionView>
+  fun getByKeyId(
+    projectId: Long,
+    languageIds: List<Long>,
+    keyIds: List<Long>,
+  ): List<TranslationSuggestionView>
 
   @Query(
     """
@@ -52,14 +56,14 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
             :#{#filters.filterState} is null
             or ts.state in :#{#filters.filterState}
         )
-    """
+    """,
   )
   fun getPaged(
     pageable: Pageable,
     projectId: Long,
     languageId: Long,
     keyId: Long,
-    filters: SuggestionFilters
+    filters: SuggestionFilters,
   ): Page<TranslationSuggestion>
 
   @Query(
@@ -71,7 +75,11 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
             and ts.state = 'ACTIVE'
     """,
   )
-  fun getAllActive(projectId: Long, languageId: Long, keyId: Long): List<TranslationSuggestion>
+  fun getAllActive(
+    projectId: Long,
+    languageId: Long,
+    keyId: Long,
+  ): List<TranslationSuggestion>
 
   @Query(
     """
@@ -91,14 +99,14 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
     languageId: Long,
     keyId: Long,
     translation: String,
-    isPlural: Boolean
+    isPlural: Boolean,
   ): List<TranslationSuggestion>
 
   @Query(
     """
       from TranslationSuggestion ts
       where ts.language.id = :id
-    """
+    """,
   )
   fun getAllByLanguage(id: Long): List<TranslationSuggestion>
 
@@ -106,7 +114,7 @@ interface TranslationSuggestionRepository : JpaRepository<TranslationSuggestion,
     """
       from TranslationSuggestion ts
       where ts.project.id = :id
-    """
+    """,
   )
   fun getAllByProject(id: Long): List<TranslationSuggestion>
 }

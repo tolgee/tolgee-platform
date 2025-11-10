@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpMethod
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import java.util.Date
 
 class EeLicenseControllerTest : AuthorizedControllerTest() {
   @Autowired
@@ -66,7 +66,8 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
 
       verify {
         performAuthPut("/v2/ee-license/set-license-key", mapOf("licenseKey" to "mock-mock"))
-          .andIsOk.andPrettyPrint.andAssertThatJson {
+          .andIsOk.andPrettyPrint
+          .andAssertThatJson {
           }
         val body = captor.allValues.single().body as String
 
@@ -154,7 +155,11 @@ class EeLicenseControllerTest : AuthorizedControllerTest() {
           null,
         ).andIsOk
 
-        eeSubscriptionRepository.findAll().single().status.assert.isEqualTo(SubscriptionStatus.ACTIVE)
+        eeSubscriptionRepository
+          .findAll()
+          .single()
+          .status.assert
+          .isEqualTo(SubscriptionStatus.ACTIVE)
         captor.allValues.assert.hasSize(1)
       }
     }

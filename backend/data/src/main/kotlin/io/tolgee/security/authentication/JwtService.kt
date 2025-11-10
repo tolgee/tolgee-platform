@@ -37,7 +37,8 @@ import io.tolgee.service.security.UserAccountService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import java.security.Key
-import java.util.*
+import java.util.Date
+import java.util.UUID
 
 @Service
 class JwtService(
@@ -49,7 +50,8 @@ class JwtService(
   private val authenticationFacade: AuthenticationFacade,
 ) {
   private val jwtParser: JwtParser =
-    Jwts.parserBuilder()
+    Jwts
+      .parserBuilder()
       .setClock { currentDateProvider.date }
       .setSigningKey(signingKey)
       .build()
@@ -73,7 +75,8 @@ class JwtService(
     val expiration = Date(now.time + authenticationProperties.jwtExpiration)
 
     val builder =
-      Jwts.builder()
+      Jwts
+        .builder()
         .signWith(signingKey)
         .setIssuedAt(now)
         .setAudience(JWT_TOKEN_AUDIENCE)
@@ -107,9 +110,7 @@ class JwtService(
    *                authentication's super-token state. Defaults to `false`.
    * @return A refreshed authentication token.
    */
-  fun emitTokenRefreshForCurrentUser(
-    isSuper: Boolean? = false,
-  ): String {
+  fun emitTokenRefreshForCurrentUser(isSuper: Boolean? = false): String {
     return emitToken(
       userAccountId = authenticationFacade.authenticatedUser.id,
       actingAsUserAccountId = authenticationFacade.actingUser?.id,
@@ -166,7 +167,8 @@ class JwtService(
     val now = currentDateProvider.date
 
     val builder =
-      Jwts.builder()
+      Jwts
+        .builder()
         .signWith(signingKey)
         .setIssuedAt(now)
         .setAudience(JWT_TICKET_AUDIENCE)
@@ -284,8 +286,9 @@ class JwtService(
 
   private fun validateActor(claims: Claims): UserAccountDto? {
     val actorId = claims[JWT_TOKEN_ACTING_USER_ID_CLAIM] as? String ?: return null
-    val account = userAccountService.findDto(actorId.toLong())
-      ?: throw AuthenticationException(Message.USER_NOT_FOUND)
+    val account =
+      userAccountService.findDto(actorId.toLong())
+        ?: throw AuthenticationException(Message.USER_NOT_FOUND)
     return account
   }
 
@@ -299,6 +302,7 @@ class JwtService(
         is UnsupportedJwtException,
         is IllegalArgumentException,
         -> throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+
         is ExpiredJwtException -> throw AuthenticationException(Message.EXPIRED_JWT_TOKEN)
         else -> throw ex
       }

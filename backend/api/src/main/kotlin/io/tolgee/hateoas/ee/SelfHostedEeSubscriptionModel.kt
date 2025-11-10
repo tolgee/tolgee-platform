@@ -25,4 +25,5 @@ open class SelfHostedEeSubscriptionModel(
   val licenseKey: String? = null,
   val estimatedCosts: BigDecimal? = 0.toBigDecimal(),
   val limits: SelfHostedUsageLimitsModel,
-) : RepresentationModel<SelfHostedEeSubscriptionModel>(), Serializable
+) : RepresentationModel<SelfHostedEeSubscriptionModel>(),
+  Serializable

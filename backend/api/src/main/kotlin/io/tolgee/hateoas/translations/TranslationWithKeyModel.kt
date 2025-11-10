@@ -17,4 +17,5 @@ open class TranslationWithKeyModel(
   @Schema(description = "State of translation")
   val state: TranslationState,
   val key: KeyModel,
-) : RepresentationModel<TranslationWithKeyModel>(), Serializable
+) : RepresentationModel<TranslationWithKeyModel>(),
+  Serializable

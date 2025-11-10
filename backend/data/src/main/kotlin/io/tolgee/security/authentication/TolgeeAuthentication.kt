@@ -62,17 +62,20 @@ class TolgeeAuthentication(
         listOf(
           SimpleGrantedAuthority(ROLE_USER),
         )
+
       UserAccount.Role.SUPPORTER ->
         listOf(
           SimpleGrantedAuthority(ROLE_USER),
           SimpleGrantedAuthority(ROLE_SUPPORTER),
         )
+
       UserAccount.Role.ADMIN ->
         listOf(
           SimpleGrantedAuthority(ROLE_USER),
           SimpleGrantedAuthority(ROLE_SUPPORTER),
           SimpleGrantedAuthority(ROLE_ADMIN),
         )
+
       null -> emptyList()
     } + authorityFromIsReadOnly
   }
@@ -81,10 +84,10 @@ class TolgeeAuthentication(
     get() {
       return SimpleGrantedAuthority(
         if (isReadOnly) {
-        ROLE_READ_ONLY
-      } else {
-        ROLE_READ_WRITE
-      }
+          ROLE_READ_ONLY
+        } else {
+          ROLE_READ_WRITE
+        },
       )
     }
 

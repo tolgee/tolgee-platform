@@ -10,11 +10,12 @@ data class TranslationFilterByState(
 ) {
   companion object {
     fun parseList(strings: List<String>): List<TranslationFilterByState> {
-      return BaseFilterByKeyValue.parseList(
-        strings,
-        { TranslationState.valueOf(it) },
-        { BadRequestException(Message.FILTER_BY_VALUE_STATE_NOT_VALID) }
-      ).map { TranslationFilterByState(it.first, it.second) }
+      return BaseFilterByKeyValue
+        .parseList(
+          strings,
+          { TranslationState.valueOf(it) },
+          { BadRequestException(Message.FILTER_BY_VALUE_STATE_NOT_VALID) },
+        ).map { TranslationFilterByState(it.first, it.second) }
     }
   }
 }

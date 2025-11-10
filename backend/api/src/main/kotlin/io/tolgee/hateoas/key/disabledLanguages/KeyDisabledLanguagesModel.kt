@@ -16,4 +16,5 @@ open class KeyDisabledLanguagesModel(
   val namespace: String?,
   @Schema(description = "Disabled languages")
   val disabledLanguages: List<KeyDisabledLanguageModel>,
-) : RepresentationModel<KeyDisabledLanguagesModel>(), Serializable
+) : RepresentationModel<KeyDisabledLanguagesModel>(),
+  Serializable

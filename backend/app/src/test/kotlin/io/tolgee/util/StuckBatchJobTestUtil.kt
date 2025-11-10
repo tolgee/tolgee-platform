@@ -23,9 +23,10 @@ class StuckBatchJobTestUtil(
       project = project,
       batchJobStatus = batchJobStatus,
       executionStatuses =
-        executionStatuses.mapIndexed { index, status ->
-          index to listOf(status)
-        }.toMap(),
+        executionStatuses
+          .mapIndexed { index, status ->
+            index to listOf(status)
+          }.toMap(),
     )
   }
 

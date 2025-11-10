@@ -70,7 +70,9 @@ class PathParserTest {
   @Test
   fun `returns valid original string`() {
     getPathItems("a[10]a.he\\llo.[a10]a.yay\\x.a[10].he\\.llo[10][18]", true)
-      .map { it.originalPathString }.assert.isEqualTo(
+      .map { it.originalPathString }
+      .assert
+      .isEqualTo(
         listOf(
           "a[10]a",
           "he\\llo",
@@ -92,17 +94,19 @@ class PathParserTest {
   @Test
   fun `the escape char is not removed when not used`() {
     val shouldStayTheSamePath = """hello\.\[]\'hello"""
-    val pathItem = getPathItems(shouldStayTheSamePath, arraySupport = false, structureDelimiter = null)
-      .single() as ObjectPathItem
-      // the path should stay the same
-      pathItem.key.assert.isEqualTo(shouldStayTheSamePath)
+    val pathItem =
+      getPathItems(shouldStayTheSamePath, arraySupport = false, structureDelimiter = null)
+        .single() as ObjectPathItem
+    // the path should stay the same
+    pathItem.key.assert.isEqualTo(shouldStayTheSamePath)
   }
 
   @Test
   fun `the escape char is supported when we use array support but not structuring`() {
     val keyName = """hello\.\[]\'hello"""
-    val pathItem = getPathItems(keyName, arraySupport = true, structureDelimiter = null)
-      .single() as ObjectPathItem
+    val pathItem =
+      getPathItems(keyName, arraySupport = true, structureDelimiter = null)
+        .single() as ObjectPathItem
     // the path should stay the same
     pathItem.key.assert.isEqualTo("""hello\.[]\'hello""")
   }

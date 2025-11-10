@@ -5,7 +5,7 @@ import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.model.enums.TranslationCommentState
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
-import java.util.*
+import java.util.Date
 
 @Suppress("unused")
 @Relation(collectionRelation = "translationComments", itemRelation = "translationComment")

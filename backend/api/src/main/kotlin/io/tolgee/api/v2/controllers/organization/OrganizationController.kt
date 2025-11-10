@@ -79,8 +79,8 @@ class OrganizationController(
   private val organizationService: OrganizationService,
   private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
   private val arrayUserResourcesAssembler: PagedResourcesAssembler<
-      Pair<UserAccountWithOrganizationRoleView, List<Project>>,
-      >,
+    Pair<UserAccountWithOrganizationRoleView, List<Project>>,
+  >,
   private val organizationModelAssembler: OrganizationModelAssembler,
   private val userAccountWithOrganizationRoleModelAssembler: UserAccountWithOrganizationRoleModelAssembler,
   private val tolgeeProperties: TolgeeProperties,
@@ -259,7 +259,7 @@ class OrganizationController(
     description = (
       "Remove user from organization. " +
         "If user is managed by the organization, their account is disabled instead."
-    )
+    ),
   )
   @RequiresOrganizationRole(OrganizationRoleType.OWNER)
   @RequiresSuperAuthentication

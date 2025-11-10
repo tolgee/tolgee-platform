@@ -62,9 +62,10 @@ class ImportFile(
   ): ImportFileIssue {
     return ImportFileIssue(file = this, type = type).apply {
       this.params =
-        params.map {
-          ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis())
-        }.toMutableList()
+        params
+          .map {
+            ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis())
+          }.toMutableList()
     }
   }
 

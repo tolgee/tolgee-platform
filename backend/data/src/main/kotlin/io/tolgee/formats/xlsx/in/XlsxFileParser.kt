@@ -11,9 +11,12 @@ class XlsxFileParser(
 ) {
   val rawData: List<List<List<String>>> by lazy {
     val workbook = WorkbookFactory.create(inputStream)
-    return@lazy workbook.sheetIterator().asSequence().map {
-      it.map { it.map { it.stringCellValue } }
-    }.toList()
+    return@lazy workbook
+      .sheetIterator()
+      .asSequence()
+      .map {
+        it.map { it.map { it.stringCellValue } }
+      }.toList()
   }
 
   fun parse(): List<TableEntry> {

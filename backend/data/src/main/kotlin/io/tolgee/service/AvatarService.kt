@@ -75,7 +75,7 @@ class AvatarService(
   }
 
   fun getAvatarLinks(hash: String?): Avatar? {
-    return hash?.let { it ->
+    return hash?.let {
       val paths = getAvatarPaths(it)
       getAvatarLinks(paths)
     }

@@ -7,10 +7,10 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class SimpleGlossaryWithStatsModelAssembler() :
+class SimpleGlossaryWithStatsModelAssembler :
   RepresentationModelAssemblerSupport<GlossaryWithStats, SimpleGlossaryWithStatsModel>(
     GlossaryController::class.java,
-  SimpleGlossaryWithStatsModel::class.java,
+    SimpleGlossaryWithStatsModel::class.java,
   ) {
   override fun toModel(entity: GlossaryWithStats): SimpleGlossaryWithStatsModel =
     SimpleGlossaryWithStatsModel(

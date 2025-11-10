@@ -48,7 +48,8 @@ class StringsdictFormatProcessorTest {
     processFile()
     mockUtil
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("unknown", "what-a-key-plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("unknown", "what-a-key-plural")
       .assertSinglePlural {
         hasText(
           """
@@ -67,7 +68,8 @@ class StringsdictFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("unknown", "what-a-key-plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("unknown", "what-a-key-plural")
       .assertSinglePlural {
         hasText(
           """
@@ -86,7 +88,8 @@ class StringsdictFormatProcessorTest {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("unknown", "what-a-key-plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("unknown", "what-a-key-plural")
       .assertSinglePlural {
         hasText(
           """

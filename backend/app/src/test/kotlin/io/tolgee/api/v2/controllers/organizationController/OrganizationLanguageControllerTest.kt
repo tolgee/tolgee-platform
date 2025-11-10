@@ -20,7 +20,8 @@ class OrganizationLanguageControllerTest : AuthorizedControllerTest() {
     loginAsUser("member@member.com")
 
     performAuthGet("/v2/organizations/${organization.id}/languages")
-      .andIsOk.andPrettyPrint.andAssertThatJson {
+      .andIsOk.andPrettyPrint
+      .andAssertThatJson {
         node("_embedded.languages").isArray.hasSize(3)
         // Order is important
         node("_embedded.languages[0].name").isEqualTo("English")
@@ -43,7 +44,8 @@ class OrganizationLanguageControllerTest : AuthorizedControllerTest() {
     loginAsUser("member@member.com")
 
     performAuthGet("/v2/organizations/${organization.id}/base-languages")
-      .andIsOk.andPrettyPrint.andAssertThatJson {
+      .andIsOk.andPrettyPrint
+      .andAssertThatJson {
         node("_embedded.languages").isArray.hasSize(1)
         // Order is important
         node("_embedded.languages[0].name").isEqualTo("English")

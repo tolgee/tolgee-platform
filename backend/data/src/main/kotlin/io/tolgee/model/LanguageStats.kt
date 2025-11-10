@@ -13,14 +13,15 @@ import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
 import jakarta.persistence.UniqueConstraint
-import java.util.*
+import java.util.Date
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["language_id"], name = "language_stats_language_id_key")])
 class LanguageStats(
   @OneToOne(fetch = FetchType.LAZY)
   val language: Language,
-) : StandardAuditModel(), ILanguageStats {
+) : StandardAuditModel(),
+  ILanguageStats {
   override var untranslatedWords: Long = 0
 
   override var translatedWords: Long = 0

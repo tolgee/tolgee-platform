@@ -8,12 +8,16 @@ import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
-import io.tolgee.util.*
+import io.tolgee.util.Logging
+import io.tolgee.util.addMonths
+import io.tolgee.util.executeInNewTransaction
+import io.tolgee.util.logger
+import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.Date
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
@@ -25,7 +29,8 @@ class MtCreditBucketService(
   private val transactionManager: PlatformTransactionManager,
   private val entityManager: EntityManager,
   private val machineTranslationProperties: MachineTranslationProperties,
-) : Logging, MtCreditsService {
+) : Logging,
+  MtCreditsService {
   override fun consumeCredits(
     organizationId: Long,
     creditsInCents: Int,

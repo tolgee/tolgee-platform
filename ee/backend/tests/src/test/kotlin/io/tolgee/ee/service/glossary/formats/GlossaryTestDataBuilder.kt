@@ -5,7 +5,10 @@ import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.model.glossary.GlossaryTermTranslation
 import io.tolgee.model.glossary.Glossary_.terms
 
-fun createGlossary(baseLanguageTag: String, name: String = "Test Glossary"): Glossary {
+fun createGlossary(
+  baseLanguageTag: String,
+  name: String = "Test Glossary",
+): Glossary {
   return Glossary().apply {
     this.name = name
     this.baseLanguageTag = baseLanguageTag
@@ -19,11 +22,14 @@ fun createTerm(description: String? = null): GlossaryTerm {
   }
 }
 
-fun GlossaryTerm.addTranslation(languageTag: String, text: String): GlossaryTerm {
+fun GlossaryTerm.addTranslation(
+  languageTag: String,
+  text: String,
+): GlossaryTerm {
   translations.add(
     GlossaryTermTranslation(languageTag, text).apply {
-    term = this@addTranslation
-  }
+      term = this@addTranslation
+    },
   )
   return this
 }
@@ -32,7 +38,7 @@ fun GlossaryTerm.withFlags(
   nonTranslatable: Boolean? = null,
   caseSensitive: Boolean? = null,
   abbreviation: Boolean? = null,
-  forbiddenTerm: Boolean? = null
+  forbiddenTerm: Boolean? = null,
 ): GlossaryTerm {
   nonTranslatable?.let { flagNonTranslatable = it }
   caseSensitive?.let { flagCaseSensitive = it }
@@ -46,17 +52,20 @@ class GlossaryBuilder {
   private lateinit var baseLanguageTag: String
   private val terms = mutableListOf<GlossaryTerm>()
 
-  fun withName(name: String) = apply {
-    this.name = name
-  }
+  fun withName(name: String) =
+    apply {
+      this.name = name
+    }
 
-  fun withBaseLanguageTag(baseLanguageTag: String) = apply {
-    this.baseLanguageTag = baseLanguageTag
-  }
+  fun withBaseLanguageTag(baseLanguageTag: String) =
+    apply {
+      this.baseLanguageTag = baseLanguageTag
+    }
 
-  fun withTerm(term: GlossaryTerm) = apply {
-    terms.add(term)
-  }
+  fun withTerm(term: GlossaryTerm) =
+    apply {
+      terms.add(term)
+    }
 
   fun build(): Glossary {
     return createGlossary(baseLanguageTag, name).also {
@@ -78,33 +87,42 @@ class GlossaryTermBuilder {
   private var flagAbbreviation: Boolean = false
   private var flagForbiddenTerm: Boolean = false
 
-  fun withDescription(description: String) = apply {
-    this.description = description
-  }
+  fun withDescription(description: String) =
+    apply {
+      this.description = description
+    }
 
-  fun withTranslation(languageTag: String, text: String) = apply {
+  fun withTranslation(
+    languageTag: String,
+    text: String,
+  ) = apply {
     translations.add(languageTag to text)
   }
 
-  fun withTranslations(vararg translations: Pair<String, String>) = apply {
-    this.translations.addAll(translations)
-  }
+  fun withTranslations(vararg translations: Pair<String, String>) =
+    apply {
+      this.translations.addAll(translations)
+    }
 
-  fun translatable(value: Boolean = true) = apply {
-    flagNonTranslatable = !value
-  }
+  fun translatable(value: Boolean = true) =
+    apply {
+      flagNonTranslatable = !value
+    }
 
-  fun caseSensitive(value: Boolean = true) = apply {
-    flagCaseSensitive = value
-  }
+  fun caseSensitive(value: Boolean = true) =
+    apply {
+      flagCaseSensitive = value
+    }
 
-  fun abbreviation(value: Boolean = true) = apply {
-    flagAbbreviation = value
-  }
+  fun abbreviation(value: Boolean = true) =
+    apply {
+      flagAbbreviation = value
+    }
 
-  fun forbiddenTerm(value: Boolean = true) = apply {
-    flagForbiddenTerm = value
-  }
+  fun forbiddenTerm(value: Boolean = true) =
+    apply {
+      flagForbiddenTerm = value
+    }
 
   fun build(): GlossaryTerm {
     return createTerm(description).let {

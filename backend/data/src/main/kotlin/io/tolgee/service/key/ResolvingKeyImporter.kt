@@ -65,7 +65,7 @@ class ResolvingKeyImporter(
 
     val result =
       keysToImport.map keys@{ keyToImport ->
-        val (key, isKeyNew) = getOrCreateKey(keyToImport)
+        val (key, _) = getOrCreateKey(keyToImport)
         val isExistingKeyPlural = key.isPlural
         val translationsToModify = mutableListOf<TranslationToModify>()
 

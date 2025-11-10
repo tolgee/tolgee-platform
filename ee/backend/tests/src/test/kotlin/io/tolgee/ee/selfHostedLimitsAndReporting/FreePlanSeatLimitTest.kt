@@ -65,9 +65,10 @@ class FreePlanSeatLimitTest : AbstractSpringTest() {
   }
 
   private fun getEnabledUsersCount(): Long? {
-    return entityManager.createQuery(
-      "select count(*) from UserAccount ua where ua.disabledAt is null and ua.deletedAt is null",
-      Long::class.java,
-    ).singleResult
+    return entityManager
+      .createQuery(
+        "select count(*) from UserAccount ua where ua.disabledAt is null and ua.deletedAt is null",
+        Long::class.java,
+      ).singleResult
   }
 }

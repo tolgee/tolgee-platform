@@ -56,11 +56,13 @@ class PropertiesFileExporter(
 
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
-    return result.asSequence().map { (fileName, properties) ->
-      // convert properties to bytes
-      val bytes = properties.asByteArray()
-      fileName to ByteArrayInputStream(bytes)
-    }.toMap()
+    return result
+      .asSequence()
+      .map { (fileName, properties) ->
+        // convert properties to bytes
+        val bytes = properties.asByteArray()
+        fileName to ByteArrayInputStream(bytes)
+      }.toMap()
   }
 
   private fun PropertiesConfiguration.asByteArray(): ByteArray {

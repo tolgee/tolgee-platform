@@ -4,7 +4,7 @@
 package io.tolgee.constants
 
 import com.fasterxml.jackson.annotation.JsonValue
-import java.util.*
+import java.util.Locale
 
 enum class Message {
   UNAUTHENTICATED,

@@ -17,9 +17,10 @@ class GlossaryCSVParser(
   val delimiter: Char = ',',
 ) {
   val reader: CSVReader by lazy {
-    CSVReaderBuilder(input.reader()).withCSVParser(
-      CSVParserBuilder().withSeparator(delimiter).build()
-    ).build()
+    CSVReaderBuilder(input.reader())
+      .withCSVParser(
+        CSVParserBuilder().withSeparator(delimiter).build(),
+      ).build()
   }
 
   val rawRows: List<Array<String>> by lazy { reader.readAll() }
@@ -60,10 +61,11 @@ class GlossaryCSVParser(
       flagCaseSensitive = parseBoolean(getSafe(idxCaseSensitive)),
       flagAbbreviation = parseBoolean(getSafe(idxAbbreviation)),
       flagForbiddenTerm = parseBoolean(getSafe(idxForbiddenTerm)),
-      translations = idxTranslations
-        .map { headers!![it] to getSafe(it).orEmpty() }
-        .filter { it.second.isNotBlank() }
-        .toMap(),
+      translations =
+        idxTranslations
+          .map { headers!![it] to getSafe(it).orEmpty() }
+          .filter { it.second.isNotBlank() }
+          .toMap(),
     ).takeIf {
       // Ignore empty rows
       it.term != null || it.description != null || it.translations.isNotEmpty()

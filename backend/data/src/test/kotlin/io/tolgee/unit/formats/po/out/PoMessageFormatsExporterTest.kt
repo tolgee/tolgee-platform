@@ -94,18 +94,20 @@ class PoMessageFormatsExporterTest {
 
     val baseLanguageMock = mock<ILanguage>()
     whenever(baseLanguageMock.tag).thenAnswer { "en" }
-    val params = ExportParams().also {
-      it.messageFormat = importFormat
-    }
+    val params =
+      ExportParams().also {
+        it.messageFormat = importFormat
+      }
     return PoFileExporter(
       translations = built.translations,
       exportParams = params,
       baseLanguage = baseLanguageMock,
       projectIcuPlaceholdersSupport = true,
-      filePathProvider = ExportFilePathProvider(
-        template = "{languageTag}.{extension}",
-        extension = "po",
-      )
+      filePathProvider =
+        ExportFilePathProvider(
+          template = "{languageTag}.{extension}",
+          extension = "po",
+        ),
     )
   }
 }

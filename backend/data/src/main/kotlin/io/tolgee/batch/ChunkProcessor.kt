@@ -2,7 +2,7 @@ package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.batch.data.BatchJobDto
-import java.util.*
+import java.util.Date
 import kotlin.coroutines.CoroutineContext
 
 interface ChunkProcessor<RequestType, ParamsType, TargetItemType> {

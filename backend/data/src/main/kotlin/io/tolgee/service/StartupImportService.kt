@@ -27,7 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
-import java.util.*
+import java.util.Locale
 
 @Service
 class StartupImportService(
@@ -73,10 +73,14 @@ class StartupImportService(
       ?: throw IllegalStateException("No initial organization")
 
   private fun getImportFileDtos(projectDir: File) =
-    projectDir.walk().filter { !it.isDirectory }.map {
-      val relativePath = it.path.replace(projectDir.path, "")
-      if (relativePath.isBlank()) null else ImportFileDto(relativePath, it.readBytes())
-    }.filterNotNull().toList()
+    projectDir
+      .walk()
+      .filter { !it.isDirectory }
+      .map {
+        val relativePath = it.path.replace(projectDir.path, "")
+        if (relativePath.isBlank()) null else ImportFileDto(relativePath, it.readBytes())
+      }.filterNotNull()
+      .toList()
 
   private fun setAuthentication(userAccount: UserAccount) {
     SecurityContextHolder.getContext().authentication =
@@ -125,10 +129,11 @@ class StartupImportService(
   }
 
   private fun assignProjectHolder(project: Project) {
-    applicationContext.getBean(
-      "transactionProjectHolder",
-      ProjectHolder::class.java,
-    ).project = ProjectDto.fromEntity(project)
+    applicationContext
+      .getBean(
+        "transactionProjectHolder",
+        ProjectHolder::class.java,
+      ).project = ProjectDto.fromEntity(project)
   }
 
   private fun createProject(
@@ -137,11 +142,13 @@ class StartupImportService(
     organization: Organization,
   ): Project {
     val languages =
-      fileDtos.map { file ->
-        // remove extension
-        val name = getLanguageName(file)
-        LanguageRequest(name, name, name)
-      }.toSet().toList()
+      fileDtos
+        .map { file ->
+          // remove extension
+          val name = getLanguageName(file)
+          LanguageRequest(name, name, name)
+        }.toSet()
+        .toList()
 
     val project =
       projectCreationService.createProject(

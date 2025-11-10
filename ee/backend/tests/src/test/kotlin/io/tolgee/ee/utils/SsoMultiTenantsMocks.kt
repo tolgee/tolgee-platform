@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import java.util.Date
 
 class SsoMultiTenantsMocks(
   private var authMvc: MockMvc? = null,
@@ -80,7 +80,8 @@ class SsoMultiTenantsMocks(
     private fun generateTestJwt(claims: Claims): String {
       val testSecret = "test-256-bit-secretAAAAAAAAAAAAAAA"
       val key = Keys.hmacShaKeyFor(testSecret.toByteArray())
-      return Jwts.builder()
+      return Jwts
+        .builder()
         .setClaims(claims)
         .signWith(key, SignatureAlgorithm.HS256)
         .compact()

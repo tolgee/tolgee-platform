@@ -43,7 +43,8 @@ class LanguageStatsService(
               ?: return@tx
           val projectStats = projectStatsService.getProjectStats(projectId)
           val languageStats =
-            languageStatsRepository.getAllByProjectIds(listOf(projectId))
+            languageStatsRepository
+              .getAllByProjectIds(listOf(projectId))
               .associateBy { it.language.id }
               .toMutableMap()
 

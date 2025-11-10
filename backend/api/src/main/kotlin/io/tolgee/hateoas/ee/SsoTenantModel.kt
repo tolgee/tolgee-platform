@@ -18,8 +18,8 @@ class SsoTenantModel(
    */
   override val force: Boolean,
   override val domain: String,
-) : ISsoTenant,
-  RepresentationModel<SsoTenantModel>(),
+) : RepresentationModel<SsoTenantModel>(),
+  ISsoTenant,
   Serializable {
   override val global: Boolean
     get() = false

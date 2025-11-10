@@ -28,14 +28,15 @@ class GlossaryCSVExporter(
       flagCaseSensitive.asYesOrNo(),
       flagAbbreviation.asYesOrNo(),
       flagForbiddenTerm.asYesOrNo(),
-    ) + languageTagsWithoutBaseLanguage.map { languageTag ->
-      if (flagNonTranslatable) {
-        // if the term is non-translatable, we use the base translation text for all languages
-        baseTranslation?.text ?: ""
-      } else {
-        translations.find { it.languageTag == languageTag }?.text ?: ""
+    ) +
+      languageTagsWithoutBaseLanguage.map { languageTag ->
+        if (flagNonTranslatable) {
+          // if the term is non-translatable, we use the base translation text for all languages
+          baseTranslation?.text ?: ""
+        } else {
+          translations.find { it.languageTag == languageTag }?.text ?: ""
+        }
       }
-    }
   }
 
   fun export(): InputStream {

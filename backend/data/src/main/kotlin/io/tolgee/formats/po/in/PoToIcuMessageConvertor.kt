@@ -15,8 +15,7 @@ import io.tolgee.formats.pluralData.PluralData
 class PoToIcuMessageConvertor(
   private val canContainIcu: Boolean = false,
   private val paramConvertorFactory: (() -> ToIcuPlaceholderConvertor)?,
-) :
-  ImportMessageConvertor {
+) : ImportMessageConvertor {
   override fun convert(
     rawData: Any?,
     languageTag: String,
@@ -64,10 +63,11 @@ class PoToIcuMessageConvertor(
       formsConverted.values.firstNotNullOfOrNull { it.pluralArgName }
         ?: DEFAULT_PLURAL_ARGUMENT_NAME
     val form =
-      formsConverted.mapNotNull {
-        val message = it.value.message ?: return@mapNotNull null
-        it.key to message
-      }.toMap()
+      formsConverted
+        .mapNotNull {
+          val message = it.value.message ?: return@mapNotNull null
+          it.key to message
+        }.toMap()
     val converted = FormsToIcuPluralConvertor(form, addNewLines = true, argName = argName).convert()
     return MessageConvertorResult(converted, argName)
   }

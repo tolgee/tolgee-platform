@@ -7,9 +7,13 @@ import io.tolgee.component.machineTranslation.metadata.TranslationGlossaryItem
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
+import io.tolgee.ee.component.PromptLazyMap.Companion.Variable
+import io.tolgee.ee.service.glossary.GlossaryTermService
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.machineTranslation.MetadataKey
 import io.tolgee.service.machineTranslation.MetadataProvider
@@ -18,12 +22,8 @@ import io.tolgee.service.machineTranslation.PluralTranslationUtil
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.context.ApplicationContext
-import org.springframework.transaction.annotation.Transactional
-import io.tolgee.ee.component.PromptLazyMap.Companion.Variable
-import io.tolgee.ee.service.glossary.GlossaryTermService
-import io.tolgee.model.translation.Translation
-import io.tolgee.service.key.ScreenshotService
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 class PromptVariablesHelper(
@@ -87,7 +87,7 @@ class PromptVariablesHelper(
     projectId: Long,
     tLanguage: LanguageDto?,
     sTranslation: Translation?,
-    key: Key?
+    key: Key?,
   ): Variable {
     val translationMemory = Variable("translationMemory")
     translationMemory.props.add(
@@ -155,37 +155,40 @@ class PromptVariablesHelper(
         } else {
           null
         }
-      })
+      }),
     )
 
     glossary.props.add(
       Variable("hasCaseSensitive", description = "Glossary items contain some caseSensitive item", lazyValue = {
         glossaryTerms.any { it.isCaseSensitive ?: false }
-      })
+      }),
     )
 
     glossary.props.add(
       Variable("hasAbbreviation", description = "Glossary items contain some abbreviation item", lazyValue = {
         glossaryTerms.any { it.isAbbreviation ?: false }
-      })
+      }),
     )
 
     glossary.props.add(
       Variable("hasForbiddenTerm", description = "Glossary items contain some forbidden item", lazyValue = {
         glossaryTerms.any { it.isForbiddenTerm ?: false }
-      })
+      }),
     )
 
     glossary.props.add(
       Variable("hasNonTranslatable", description = "Glossary items contain some non-translatable item", lazyValue = {
         glossaryTerms.any { it.isNonTranslatable ?: false }
-      })
+      }),
     )
 
     return glossary
   }
 
-  private fun getStandardLanguageVars(language: LanguageDto?, translation: Translation?): MutableList<Variable> {
+  private fun getStandardLanguageVars(
+    language: LanguageDto?,
+    translation: Translation?,
+  ): MutableList<Variable> {
     val result = mutableListOf<Variable>()
 
     result.add(Variable("languageName", language?.name))
@@ -247,13 +250,14 @@ class PromptVariablesHelper(
   }
 
   private fun getOtherLanguageVars(
-    otherLanguages: List<LanguageDto>, translations: List<Translation>?
+    otherLanguages: List<LanguageDto>,
+    translations: List<Translation>?,
   ): MutableList<Variable> {
     val result = mutableListOf<Variable>()
     otherLanguages.forEach { language ->
       val langVar = Variable(language.tag)
       langVar.props.addAll(
-        getStandardLanguageVars(language, translations?.find { it.language.tag == language.tag })
+        getStandardLanguageVars(language, translations?.find { it.language.tag == language.tag }),
       )
       result.add(langVar)
     }
@@ -265,7 +269,7 @@ class PromptVariablesHelper(
     tLanguage: LanguageDto?,
     key: Key?,
     sLanguage: LanguageDto,
-    sTranslation: Translation?
+    sTranslation: Translation?,
   ): Variable {
     val relatedKeys = Variable("relatedKeys")
     relatedKeys.props.add(
@@ -341,9 +345,10 @@ class PromptVariablesHelper(
     variables.add(target)
 
     val otherVar = Variable("other")
-    val otherLanguages = languages.filter {
-      it.id != sLanguage.id && it.id != tLanguage?.id
-    }
+    val otherLanguages =
+      languages.filter {
+        it.id != sLanguage.id && it.id != tLanguage?.id
+      }
     otherVar.props.addAll(getOtherLanguageVars(otherLanguages, translations))
     variables.add(otherVar)
 
@@ -363,11 +368,11 @@ class PromptVariablesHelper(
 
     variables.add(
       getGlossaryVar(
-      projectDto,
-      sLanguage.tag,
-      tLanguage?.tag,
-      sTranslation?.text
-    )
+        projectDto,
+        sLanguage.tag,
+        tLanguage?.tag,
+        sTranslation?.text,
+      ),
     )
 
     variables.add(getScreenshotVar(key))
@@ -413,7 +418,9 @@ class PromptVariablesHelper(
   }
 
   companion object {
-    enum class ScreenshotSize(val value: String) {
+    enum class ScreenshotSize(
+      val value: String,
+    ) {
       SMALL("small"),
       FULL("full"),
     }

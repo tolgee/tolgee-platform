@@ -1,7 +1,13 @@
 package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.batch.data.BatchJobDto
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -18,8 +24,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.ConcurrentHashMap
 
-class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTest("/v2/projects/"), Logging {
-
+class BatchJobManagementControllerTest :
+  AbstractBatchJobManagementControllerTest("/v2/projects/"),
+  Logging {
   @Autowired
   lateinit var throwingService: ThrowingService
 
@@ -41,7 +48,8 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
       // although it passes once, there should be no successful targets, because the whole transaction is rolled back
       doAnswer { it.callRealMethod() }
         .doAnswer { throwingService.throwExceptionInTransaction() }
-        .whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
+        .whenever(autoTranslationService)
+        .autoTranslateSync(any(), any(), any(), any(), any())
 
       performProjectAuthPost(
         "start-batch-job/machine-translate",
@@ -49,7 +57,9 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
           "keyIds" to keyIds,
           "targetLanguageIds" to
             listOf(
-              testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+              testData.projectBuilder
+                .getLanguageByTag("cs")!!
+                .self.id,
             ),
         ),
       ).andIsOk
@@ -57,7 +67,10 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
       waitForNotThrowing(pollTime = 100) {
         // lets move time fast
         setForcedDate(currentDateProvider.date.addMinutes(1))
-        util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.FAILED)
+        util
+          .getSingleJob()
+          .status.assert
+          .isEqualTo(BatchJobStatus.FAILED)
       }
 
       val executions = batchJobService.getExecutions(util.getSingleJob().id)
@@ -88,8 +101,7 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
         } else {
           jobIds.add(id)
         }
-      }
-        .whenever(preTranslationByTmChunkProcessor)
+      }.whenever(preTranslationByTmChunkProcessor)
         .process(any(), any(), any(), any())
 
       val jobs = (1..3).map { util.runChunkedJob(50) }
@@ -107,7 +119,8 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
       }
 
       performProjectAuthGet("batch-jobs?sort=status&sort=id")
-        .andIsOk.andAssertThatJson {
+        .andIsOk
+        .andAssertThatJson {
           node("_embedded.batchJobs") {
             isArray.hasSize(3)
             node("[0].status").isEqualTo("RUNNING")
@@ -125,7 +138,8 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
       }
 
       performProjectAuthGet("batch-jobs?sort=status&sort=id")
-        .andIsOk.andAssertThatJson {
+        .andIsOk
+        .andAssertThatJson {
           node("_embedded.batchJobs") {
             isArray.hasSize(3)
             node("[0].status").isEqualTo("SUCCESS")
@@ -149,7 +163,8 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
     }
 
     performProjectAuthGet("my-batch-jobs?sort=status&sort=id")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.batchJobs") {
           isArray.hasSize(3)
           node("[0].status").isEqualTo("SUCCESS")
@@ -159,7 +174,8 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
     userAccount = testData.anotherUser
 
     performProjectAuthGet("my-batch-jobs?sort=status&sort=id")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.batchJobs").isAbsent()
       }
   }
@@ -182,7 +198,8 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
     try {
       waitForNotThrowing {
         performProjectAuthGet("current-batch-jobs")
-          .andIsOk.andPrettyPrint.andAssertThatJson {
+          .andIsOk.andPrettyPrint
+          .andAssertThatJson {
             node("_embedded.batchJobs") {
               isArray.hasSize(6)
               node("[0].status").isEqualTo("RUNNING")
@@ -200,7 +217,8 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
       }
 
       performProjectAuthGet("current-batch-jobs")
-        .andIsOk.andAssertThatJson {
+        .andIsOk
+        .andAssertThatJson {
           node("_embedded.batchJobs") {
             isArray.hasSize(6)
             node("[0].status").isEqualTo("SUCCESS")
@@ -210,14 +228,16 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
       userAccount = testData.anotherUser
 
       performProjectAuthGet("current-batch-jobs")
-        .andIsOk.andAssertThatJson {
+        .andIsOk
+        .andAssertThatJson {
           node("_embedded.batchJobs").isArray.hasSize(3)
         }
 
       setForcedDate(currentDateProvider.date.addMinutes(61))
 
       performProjectAuthGet("current-batch-jobs")
-        .andIsOk.andAssertThatJson {
+        .andIsOk
+        .andAssertThatJson {
           node("_embedded.batchJobs").isAbsent()
         }
     } finally {
@@ -233,11 +253,15 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
     val job = util.runChunkedJob(50)
 
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
-      util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+      util
+        .getSingleJob()
+        .status.assert
+        .isEqualTo(BatchJobStatus.SUCCESS)
     }
 
     performProjectAuthGet("batch-jobs/${job.id}")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("status").isEqualTo("SUCCESS")
       }
   }
@@ -250,7 +274,10 @@ class BatchJobManagementControllerTest : AbstractBatchJobManagementControllerTes
     val job = util.runChunkedJob(10)
 
     waitForNotThrowing(pollTime = 100, timeout = 10000) {
-      util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+      util
+        .getSingleJob()
+        .status.assert
+        .isEqualTo(BatchJobStatus.SUCCESS)
     }
 
     userAccount = testData.anotherUser

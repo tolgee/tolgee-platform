@@ -33,13 +33,13 @@ class GenericAutoTranslationChunkProcessor(
       val (keyId, languageId) = item
       val languageTag = languages[languageId]?.tag ?: return@iterateCatching
       val key = keys[keyId] ?: return@iterateCatching
-        autoTranslationService.autoTranslateSync(
-          key = key,
-          forcedLanguageTags = listOf(languageTag),
-          useTranslationMemory = useTranslationMemory,
-          useMachineTranslation = useMachineTranslation,
-          isBatch = true,
-        )
+      autoTranslationService.autoTranslateSync(
+        key = key,
+        forcedLanguageTags = listOf(languageTag),
+        useTranslationMemory = useTranslationMemory,
+        useMachineTranslation = useMachineTranslation,
+        isBatch = true,
+      )
     }
   }
 }

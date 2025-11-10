@@ -10,7 +10,7 @@ import jakarta.persistence.Transient
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.NotNull
-import java.util.*
+import java.util.Date
 
 @Entity
 @Table(

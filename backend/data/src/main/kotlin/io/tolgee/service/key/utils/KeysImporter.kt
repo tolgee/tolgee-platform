@@ -31,7 +31,8 @@ class KeysImporter(
 
   fun import() {
     val existing =
-      keyService.getAll(project.id)
+      keyService
+        .getAll(project.id)
         .associateBy { ((it.namespace?.name to it.name)) }
         .toMutableMap()
     val namespaces = mutableMapOf<String, Namespace>()

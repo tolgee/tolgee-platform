@@ -12,7 +12,10 @@ import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.io.InputStream
 
-class XliffFileWriter(private val xliffModel: XliffModel, private val enableXmlContent: Boolean) {
+class XliffFileWriter(
+  private val xliffModel: XliffModel,
+  private val enableXmlContent: Boolean,
+) {
   private lateinit var xliffElement: Element
 
   fun produceFiles(): InputStream {

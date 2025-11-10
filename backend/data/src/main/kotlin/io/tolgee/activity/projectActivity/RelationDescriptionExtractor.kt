@@ -14,7 +14,8 @@ class RelationDescriptionExtractor {
     val entity = describingEntities.find { it.entityClass == value.entityClass && it.entityId == value.entityId }
 
     val relations =
-      entity?.describingRelations
+      entity
+        ?.describingRelations
         ?.map { it.key to extract(it.value, describingEntities) }
         ?.toMap()
 

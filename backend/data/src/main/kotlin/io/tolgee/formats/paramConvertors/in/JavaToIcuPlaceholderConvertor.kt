@@ -2,7 +2,7 @@ package io.tolgee.formats.paramConvertors.`in`
 
 import io.tolgee.formats.ToIcuPlaceholderConvertor
 
-class JavaToIcuPlaceholderConvertor() : ToIcuPlaceholderConvertor {
+class JavaToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   override val pluralArgName: String = "0"
 
   override val regex: Regex

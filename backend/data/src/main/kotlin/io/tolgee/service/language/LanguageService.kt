@@ -34,7 +34,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.Optional
 
 @Service
 class LanguageService(
@@ -143,10 +143,11 @@ class LanguageService(
   ): Set<LanguageDto> {
     val all = self.getProjectLanguages(projectId)
     val viewLanguageIds =
-      permissionService.getProjectPermissionData(
-        projectId,
-        userId,
-      ).computedPermissions.viewLanguageIds
+      permissionService
+        .getProjectPermissionData(
+          projectId,
+          userId,
+        ).computedPermissions.viewLanguageIds
 
     val permitted =
       if (viewLanguageIds.isNullOrEmpty()) {
@@ -159,7 +160,8 @@ class LanguageService(
       .sortedBy { it.id }
       // base first
       .sortedBy { if (it.base) 0 else 1 }
-      .take(2).toSet()
+      .take(2)
+      .toSet()
   }
 
   @Transactional
@@ -181,7 +183,10 @@ class LanguageService(
     return self.getProjectLanguages(projectId).singleOrNull { it.id == languageId }
   }
 
-  fun findEntity(projectId: Long, tag: String): Language? {
+  fun findEntity(
+    projectId: Long,
+    tag: String,
+  ): Language? {
     return languageRepository.find(projectId, tag)
   }
 
@@ -290,10 +295,11 @@ class LanguageService(
     languages: Set<String>,
   ): Set<LanguageDto> {
     val viewLanguageIds =
-      permissionService.getProjectPermissionData(
-        projectId,
-        userId,
-      ).computedPermissions.viewLanguageIds
+      permissionService
+        .getProjectPermissionData(
+          projectId,
+          userId,
+        ).computedPermissions.viewLanguageIds
     return if (viewLanguageIds.isNullOrEmpty()) {
       findByTags(languages, projectId)
     } else {
@@ -312,13 +318,14 @@ class LanguageService(
     translationService.deleteAllByProject(projectId)
     autoTranslationService.deleteConfigsByProject(projectId)
     translationSuggestionService.deleteAllByProject(projectId)
-    entityManager.createNativeQuery(
-      "delete from language_stats " +
-        "where language_id in (select id from language where project_id = :projectId)",
-    )
-      .setParameter("projectId", projectId)
+    entityManager
+      .createNativeQuery(
+        "delete from language_stats " +
+          "where language_id in (select id from language where project_id = :projectId)",
+      ).setParameter("projectId", projectId)
       .executeUpdate()
-    entityManager.createNativeQuery("DELETE FROM language WHERE project_id = :projectId")
+    entityManager
+      .createNativeQuery("DELETE FROM language WHERE project_id = :projectId")
       .setParameter("projectId", projectId)
       .executeUpdate()
     evictCacheForProject(projectId)
@@ -367,7 +374,7 @@ class LanguageService(
       projectIds ?: emptyList(),
       projectIds == null,
       pageable,
-      search
+      search,
     )
   }
 
@@ -382,7 +389,7 @@ class LanguageService(
       projectIds ?: emptyList(),
       projectIds == null,
       pageable,
-      search
+      search,
     )
   }
 

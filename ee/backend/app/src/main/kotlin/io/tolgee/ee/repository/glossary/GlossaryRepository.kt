@@ -96,7 +96,5 @@ interface GlossaryRepository : JpaRepository<Glossary, Long> {
     nativeQuery = true,
   )
   @Modifying
-  fun unassignProjectFromAll(
-    projectId: Long,
-  ): Int
+  fun unassignProjectFromAll(projectId: Long): Int
 }

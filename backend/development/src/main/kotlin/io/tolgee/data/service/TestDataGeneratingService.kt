@@ -36,16 +36,23 @@ class TestDataGeneratingService(
             id = it.self.id,
             name = it.self.name,
             slug = it.self.slug,
-            glossaries = it.data.glossaries.map {
-              StandardTestDataResult.GlossaryModel(id = it.self.id, name = it.self.name)
-            },
+            glossaries =
+              it.data.glossaries.map {
+                StandardTestDataResult.GlossaryModel(id = it.self.id, name = it.self.name)
+              },
           )
         },
       invitations =
         data.data.invitations.map {
           StandardTestDataResult.InvitationModel(
-            projectId = it.self.permission?.project?.id,
-            organizationId = it.self.permission?.organization?.id,
+            projectId =
+              it.self.permission
+                ?.project
+                ?.id,
+            organizationId =
+              it.self.permission
+                ?.organization
+                ?.id,
             code = it.self.code,
           )
         },

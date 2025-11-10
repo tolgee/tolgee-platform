@@ -13,7 +13,9 @@ import org.springframework.web.context.request.RequestContextHolder
  * is completed, this enables us to be safe even when running activities in main thred.
  */
 @Component
-class ActivityHolderProvider(private val applicationContext: ApplicationContext) {
+class ActivityHolderProvider(
+  private val applicationContext: ApplicationContext,
+) {
   private val threadLocal = ThreadLocal<Pair<Scope, ActivityHolder?>>()
 
   fun getActivityHolder(): ActivityHolder {

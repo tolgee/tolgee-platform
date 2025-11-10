@@ -44,7 +44,8 @@ class GlossaryControllerTest : AuthorizedControllerTest() {
   @Test
   fun `returns all glossaries`() {
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaries").isArray.hasSize(2)
         node("_embedded.glossaries[0].id").isValidId
         inPath("_embedded.glossaries[*].name").isArray.containsExactlyInAnyOrder("Test Glossary", "Empty Glossary")
@@ -61,7 +62,8 @@ class GlossaryControllerTest : AuthorizedControllerTest() {
   @Test
   fun `returns single glossary`() {
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("Test Glossary")
         node("baseLanguageTag").isEqualTo("en")
@@ -77,16 +79,19 @@ class GlossaryControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `creates glossary`() {
-    val request = CreateGlossaryRequest().apply {
-      name = "New Glossary"
-      baseLanguageTag = "en"
-      assignedProjectIds = mutableSetOf(testData.project.id)
-    }
+    val request =
+      CreateGlossaryRequest().apply {
+        name = "New Glossary"
+        baseLanguageTag = "en"
+        assignedProjectIds = mutableSetOf(testData.project.id)
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId.satisfies({
           performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/$it")
-            .andIsOk.andAssertThatJson {
+            .andIsOk
+            .andAssertThatJson {
               node("id").isValidId.isEqualTo(it)
               node("name").isEqualTo("New Glossary")
               node("baseLanguageTag").isEqualTo("en")
@@ -100,30 +105,34 @@ class GlossaryControllerTest : AuthorizedControllerTest() {
   @Test
   fun `does not create glossary when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
-    val request = CreateGlossaryRequest().apply {
-      name = "New Glossary"
-      baseLanguageTag = "en"
-      assignedProjectIds = mutableSetOf(testData.project.id)
-    }
+    val request =
+      CreateGlossaryRequest().apply {
+        name = "New Glossary"
+        baseLanguageTag = "en"
+        assignedProjectIds = mutableSetOf(testData.project.id)
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
       .andIsBadRequest
   }
 
   @Test
   fun `updates glossary`() {
-    val request = UpdateGlossaryRequest().apply {
-      name = "Updated Glossary"
-      baseLanguageTag = "de"
-    }
+    val request =
+      UpdateGlossaryRequest().apply {
+        name = "Updated Glossary"
+        baseLanguageTag = "de"
+      }
     performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("Updated Glossary")
         node("baseLanguageTag").isEqualTo("de")
       }
 
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("Updated Glossary")
         node("baseLanguageTag").isEqualTo("de")
@@ -132,23 +141,26 @@ class GlossaryControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `updates glossary assigned projects`() {
-    val request = UpdateGlossaryRequest().apply {
-      name = testData.glossary.name
-      baseLanguageTag = testData.glossary.baseLanguageTag
-      assignedProjectIds = mutableSetOf(testData.anotherProject.id, testData.anotherProject2.id)
-    }
+    val request =
+      UpdateGlossaryRequest().apply {
+        name = testData.glossary.name
+        baseLanguageTag = testData.glossary.baseLanguageTag
+        assignedProjectIds = mutableSetOf(testData.anotherProject.id, testData.anotherProject2.id)
+      }
     performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo(testData.glossary.name)
         node("baseLanguageTag").isEqualTo(testData.glossary.baseLanguageTag)
       }
 
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/assigned-projects")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.projects").isArray.hasSize(2)
         inPath(
-          "_embedded.projects[*].id"
+          "_embedded.projects[*].id",
         ).isArray.containsExactlyInAnyOrder(testData.anotherProject.id, testData.anotherProject2.id)
       }
   }
@@ -156,10 +168,11 @@ class GlossaryControllerTest : AuthorizedControllerTest() {
   @Test
   fun `does not update glossary when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
-    val request = UpdateGlossaryRequest().apply {
-      name = "Updated Glossary"
-      baseLanguageTag = "de"
-    }
+    val request =
+      UpdateGlossaryRequest().apply {
+        name = "Updated Glossary"
+        baseLanguageTag = "de"
+      }
     performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
       .andIsBadRequest
   }

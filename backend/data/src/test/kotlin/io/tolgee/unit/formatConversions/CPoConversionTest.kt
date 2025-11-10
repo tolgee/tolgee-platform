@@ -23,7 +23,8 @@ class CPoConversionTest {
   @Test
   fun `doesn't limit precision`() {
     convertToIcu("Hello %.51f")
-      .assert.isEqualTo("Hello %.51f")
+      .assert
+      .isEqualTo("Hello %.51f")
   }
 
   private fun testString(string: String) {

@@ -5,8 +5,17 @@ import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.util.find
-import jakarta.persistence.*
-import java.util.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.FetchType
+import jakarta.persistence.Index
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.PrePersist
+import jakarta.persistence.PreUpdate
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
+import java.util.Locale
 
 @Entity
 @EntityListeners(GlossaryTermTranslation.Companion.GlossaryTermTranslationListener::class)
@@ -42,7 +51,11 @@ class GlossaryTermTranslation(
       @PreUpdate
       fun updateFirstWordLowercased(translation: GlossaryTermTranslation) {
         val locale = Locale.forLanguageTag(translation.languageTag) ?: Locale.ROOT
-        translation.firstWordLowercased = translation.text.lowercase(locale).find(WORD_REGEX)?.take(127)
+        translation.firstWordLowercased =
+          translation.text
+            .lowercase(locale)
+            .find(WORD_REGEX)
+            ?.take(127)
       }
     }
   }

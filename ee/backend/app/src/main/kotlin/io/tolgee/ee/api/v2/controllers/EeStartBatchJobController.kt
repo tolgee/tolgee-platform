@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
-import io.tolgee.batch.request.*
+import io.tolgee.batch.request.LabelTranslationsRequest
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.hateoas.batch.BatchJobModel
@@ -52,12 +52,13 @@ class EeStartBatchJobController(
     )
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLabelIdsExistAndIsFromProject(data.labelIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.ASSIGN_TRANSLATION_LABEL,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.ASSIGN_TRANSLATION_LABEL,
+      ).model
   }
 
   @PostMapping(value = ["/unassign-translation-label"])
@@ -76,12 +77,13 @@ class EeStartBatchJobController(
     )
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     securityService.checkLabelIdsExistAndIsFromProject(data.labelIds, projectHolder.project.id)
-    return batchJobService.startJob(
-      data,
-      projectHolder.projectEntity,
-      authenticationFacade.authenticatedUserEntity,
-      BatchJobType.UNASSIGN_TRANSLATION_LABEL,
-    ).model
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.UNASSIGN_TRANSLATION_LABEL,
+      ).model
   }
 
   val BatchJob.model

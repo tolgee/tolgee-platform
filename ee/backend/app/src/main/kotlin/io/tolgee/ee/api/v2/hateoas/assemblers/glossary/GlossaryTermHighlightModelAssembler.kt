@@ -11,9 +11,9 @@ class GlossaryTermHighlightModelAssembler(
   private val glossaryTermModelAssembler: GlossaryTermModelAssembler,
   private val positionModelAssembler: PositionModelAssembler,
 ) : RepresentationModelAssemblerSupport<GlossaryTermHighlight, GlossaryTermHighlightModel>(
-  GlossaryTermHighlightsController::class.java,
-  GlossaryTermHighlightModel::class.java,
-) {
+    GlossaryTermHighlightsController::class.java,
+    GlossaryTermHighlightModel::class.java,
+  ) {
   override fun toModel(entity: GlossaryTermHighlight): GlossaryTermHighlightModel {
     return GlossaryTermHighlightModel(
       position = positionModelAssembler.toModel(entity.position),

@@ -9,7 +9,6 @@ import java.io.InputStream
 class ScreenshotKeysHighlighter(
   imageStream: InputStream,
 ) : ImageProcessor(imageStream) {
-
   fun highlightKeys(
     screenshot: Screenshot,
     keyIds: List<Long>,

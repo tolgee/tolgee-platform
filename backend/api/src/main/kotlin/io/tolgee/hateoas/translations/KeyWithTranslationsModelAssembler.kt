@@ -32,9 +32,10 @@ class KeyWithTranslationsModelAssembler(
       keyTags = view.keyTags.map { tagModelAssembler.toModel(it) },
       contextPresent = view.contextPresent,
       translations =
-        view.translations.map {
-          it.key to translationViewModelAssembler.toModel(it.value)
-        }.toMap(),
+        view.translations
+          .map {
+            it.key to translationViewModelAssembler.toModel(it.value)
+          }.toMap(),
       screenshotCount = view.screenshotCount,
       screenshots =
         view.screenshots?.map {

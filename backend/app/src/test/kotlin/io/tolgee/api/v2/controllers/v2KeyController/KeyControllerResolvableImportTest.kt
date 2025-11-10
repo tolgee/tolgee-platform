@@ -4,7 +4,11 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ResolvableImportTestData
 import io.tolgee.dtos.request.ImageUploadInfoDto
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.generateImage

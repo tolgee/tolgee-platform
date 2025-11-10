@@ -10,23 +10,23 @@ val READ_ONLY_METHODS = arrayOf("GET", "HEAD", "OPTIONS")
  * [ReadOnlyOperation] or [WriteOperation] annotation.
  */
 fun HandlerMethod.isReadOnly(httpMethod: String): Boolean {
-    val forceReadOnly = AnnotationUtils.getAnnotation(method, ReadOnlyOperation::class.java) != null
-    val forceWrite = AnnotationUtils.getAnnotation(method, WriteOperation::class.java) != null
+  val forceReadOnly = AnnotationUtils.getAnnotation(method, ReadOnlyOperation::class.java) != null
+  val forceWrite = AnnotationUtils.getAnnotation(method, WriteOperation::class.java) != null
 
-    if (forceReadOnly && forceWrite) {
-        // This doesn't make sense
-        throw RuntimeException(
-            "Both `@ReadOnlyOperation` and `@WriteOperation` have been set for this endpoint!",
-        )
-    }
+  if (forceReadOnly && forceWrite) {
+    // This doesn't make sense
+    throw RuntimeException(
+      "Both `@ReadOnlyOperation` and `@WriteOperation` have been set for this endpoint!",
+    )
+  }
 
-    if (forceWrite) {
-        return false
-    }
+  if (forceWrite) {
+    return false
+  }
 
-    if (forceReadOnly) {
-        return true
-    }
+  if (forceReadOnly) {
+    return true
+  }
 
-    return httpMethod.uppercase() in READ_ONLY_METHODS
+  return httpMethod.uppercase() in READ_ONLY_METHODS
 }

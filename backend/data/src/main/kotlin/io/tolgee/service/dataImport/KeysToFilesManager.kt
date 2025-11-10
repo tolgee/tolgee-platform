@@ -3,12 +3,11 @@ package io.tolgee.service.dataImport
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.ImportFileMapping
+import io.tolgee.dtos.request.importKeysResolvable.ResolvableTranslationResolution
 import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableItemRequest
 import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableTranslationRequest
-import io.tolgee.dtos.request.importKeysResolvable.ResolvableTranslationResolution
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.util.nullIfEmpty
-import kotlin.collections.forEach
 
 class KeysToFilesManager {
   private val filesMap: MutableMap<Pair<String, String>, VirtualFile> = mutableMapOf()
@@ -21,9 +20,10 @@ class KeysToFilesManager {
       key.translations.entries.forEach { (language, data) ->
         if (data?.text != null) {
           val fileKey = language to (key.namespace ?: "")
-          val virtualFile = filesMap.getOrPut(fileKey) {
-            VirtualFile(language, key.namespace ?: "")
-          }
+          val virtualFile =
+            filesMap.getOrPut(fileKey) {
+              VirtualFile(language, key.namespace ?: "")
+            }
           virtualFile.records[key.name] = data
         }
       }
@@ -34,7 +34,7 @@ class KeysToFilesManager {
     return files.map { file ->
       ImportFileDto(
         getFileName(file.namespace, file.language),
-        file.contentsToByteArray()
+        file.contentsToByteArray(),
       )
     }
   }
@@ -52,7 +52,7 @@ class KeysToFilesManager {
 
   fun getConflictResolutionMap(): MutableMap<
     String,
-    MutableMap<String, MutableMap<String, ResolvableTranslationResolution?>>
+    MutableMap<String, MutableMap<String, ResolvableTranslationResolution?>>,
   > {
     val map = mutableMapOf<String, MutableMap<String, MutableMap<String, ResolvableTranslationResolution?>>>()
     files.forEach { file ->
@@ -65,12 +65,18 @@ class KeysToFilesManager {
     return map
   }
 
-  private fun getFileName(namespace: String, language: String): String {
+  private fun getFileName(
+    namespace: String,
+    language: String,
+  ): String {
     return "$namespace/$language.json"
   }
 
   companion object {
-    data class VirtualFile(val language: String, val namespace: String) {
+    data class VirtualFile(
+      val language: String,
+      val namespace: String,
+    ) {
       var records: MutableMap<String, SingleStepImportResolvableTranslationRequest> = mutableMapOf()
 
       fun contentsToByteArray(): ByteArray {

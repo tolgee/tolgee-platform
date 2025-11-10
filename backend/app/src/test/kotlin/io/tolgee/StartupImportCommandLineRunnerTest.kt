@@ -33,11 +33,12 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
 
   @BeforeAll
   fun setup() {
-    tolgeeProperties.import = ImportProperties().apply {
-      dir = importDir.file.absolutePath
-      createImplicitApiKey = true
-      baseLanguageTag = "de"
-    }
+    tolgeeProperties.import =
+      ImportProperties().apply {
+        dir = importDir.file.absolutePath
+        createImplicitApiKey = true
+        baseLanguageTag = "de"
+      }
     executeInNewTransaction {
       base = dbPopulator.createBase("admin")
       startupImportCommandLineRunner.run()
@@ -82,7 +83,9 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
       val projects = projectService.findAllByNameAndOrganizationOwner("examples", base.organization)
       assertThat(projects).isNotEmpty
       val project = projects.first()
-      project.baseLanguage!!.tag.assert.isEqualTo("de")
+      project.baseLanguage!!
+        .tag.assert
+        .isEqualTo("de")
       assertThat(project.useNamespaces).isFalse()
     }
   }

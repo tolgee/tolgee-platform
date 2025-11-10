@@ -75,7 +75,8 @@ class MtTranslatorContext(
       desired = desiredServices?.toSet(),
       enabled = enabledServices.map { it.serviceType },
     )
-    return enabledServices.filter { desiredServices?.contains(it.serviceType) ?: true }
+    return enabledServices
+      .filter { desiredServices?.contains(it.serviceType) ?: true }
       .toSet()
   }
 
@@ -117,8 +118,9 @@ class MtTranslatorContext(
 
   fun prepareKeysByIds(keyIds: List<Long>) {
     val result =
-      entityManger.createQuery(
-        """
+      entityManger
+        .createQuery(
+          """
         select new io.tolgee.service.machineTranslation.KeyForMt(k.id, k.name, ns.name, km.description, t.text, k.isPlural )
         from Key k
         left join k.project.baseLanguage bl
@@ -127,9 +129,8 @@ class MtTranslatorContext(
         left join k.namespace ns
         where k.id in :keyIds and k.project.id = :projectId
       """,
-        KeyForMt::class.java,
-      )
-        .setParameter("keyIds", keyIds)
+          KeyForMt::class.java,
+        ).setParameter("keyIds", keyIds)
         .setParameter("projectId", projectId)
         .resultList
 

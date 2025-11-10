@@ -20,14 +20,22 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.dataImport.*
+import io.tolgee.model.dataImport.Import
+import io.tolgee.model.dataImport.ImportFile
+import io.tolgee.model.dataImport.ImportKey
+import io.tolgee.model.dataImport.ImportLanguage
+import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
 import io.tolgee.model.enums.ConflictType
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
-import io.tolgee.repository.dataImport.*
+import io.tolgee.repository.dataImport.ImportFileRepository
+import io.tolgee.repository.dataImport.ImportKeyRepository
+import io.tolgee.repository.dataImport.ImportLanguageRepository
+import io.tolgee.repository.dataImport.ImportRepository
+import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
@@ -125,14 +133,15 @@ class ImportService(
   ): ImportResult {
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val providedSettingsOrFromDb = importSettingsService.get(import.author, import.project.id)
-    val result = StoredDataImporter(
-      applicationContext,
-      import,
-      forceMode,
-      reportStatus,
-      providedSettingsOrFromDb,
-      errorOnUnresolvedConflict = true,
-    ).doImport()
+    val result =
+      StoredDataImporter(
+        applicationContext,
+        import,
+        forceMode,
+        reportStatus,
+        providedSettingsOrFromDb,
+        errorOnUnresolvedConflict = true,
+      ).doImport()
     deleteImport(import)
     publishImportBusinessEvent(import.project.id, import.author.id)
     return result
@@ -240,30 +249,31 @@ class ImportService(
   @Suppress("UNCHECKED_CAST")
   fun findKeys(import: Import): List<ImportKey> {
     var result: List<ImportKey> =
-      entityManager.createQuery(
-        """
+      entityManager
+        .createQuery(
+          """
             select distinct ik from ImportKey ik 
             left join fetch ik.keyMeta ikm
             left join fetch ikm.comments ikc
             join ik.file if
             where if.import = :import
             """,
-      )
-        .setParameter("import", import)
+        ).setParameter("import", import)
         .resultList as List<ImportKey>
 
     // when we are import very lot of keys, we need to split it to multiple queries due to parameter limit
     result =
       result.chunked(30000).flatMap { subresult ->
-        entityManager.createQuery(
-          """
+        entityManager
+          .createQuery(
+            """
             select distinct ik from ImportKey ik 
             left join fetch ik.keyMeta ikm
             left join fetch ikm.codeReferences ikc
             join ik.file if
             where ik in :keys
         """,
-        ).setParameter("keys", subresult)
+          ).setParameter("keys", subresult)
           .resultList as List<ImportKey>
       }
 
@@ -496,8 +506,9 @@ class ImportService(
     importLanguageIds: List<Long>,
   ) {
     val languageIdStrings = importLanguageIds.map { it.toString() }
-    entityManager.createNativeQuery(
-      """
+    entityManager
+      .createNativeQuery(
+        """
       with deleted as (
         delete from import_file_issue_param
         where issue_id in (
@@ -512,8 +523,7 @@ class ImportService(
       delete from import_file_issue
       where id in (select issue_id from deleted)
     """,
-    )
-      .setParameter("ids", ids)
+      ).setParameter("ids", ids)
       .setParameter("importLanguageIds", languageIdStrings)
       .executeUpdate()
   }

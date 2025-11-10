@@ -49,7 +49,8 @@ class AdminAccessInterceptorTest {
   private val interceptor = AdminAccessInterceptor(authenticationFacade)
 
   private val mockMvc =
-    MockMvcBuilders.standaloneSetup(TestController::class.java)
+    MockMvcBuilders
+      .standaloneSetup(TestController::class.java)
       .addInterceptors(interceptor)
       .build()
 

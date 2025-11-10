@@ -27,7 +27,16 @@ import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -181,7 +190,7 @@ class PromptController(
       promptService.runPromptAndChargeCredits(
         organizationId,
         params,
-        data.provider
+        data.provider,
       )
     return PromptResponseDto(
       prompt,
@@ -200,8 +209,10 @@ class PromptController(
     @RequestParam targetLanguageId: Long?,
   ): VariablesResponseDto {
     return VariablesResponseDto(
-      promptVariablesHelper.getVariables(projectHolder.project.id, keyId, targetLanguageId)
-        .map { it.toPromptVariableDto() }.toMutableList(),
+      promptVariablesHelper
+        .getVariables(projectHolder.project.id, keyId, targetLanguageId)
+        .map { it.toPromptVariableDto() }
+        .toMutableList(),
     )
   }
 }

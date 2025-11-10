@@ -2,7 +2,11 @@ package io.tolgee.model.slackIntegration
 
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
-import jakarta.persistence.*
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 
 @Entity
 @Table(

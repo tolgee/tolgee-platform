@@ -163,28 +163,29 @@ class V2ImportControllerConflictsBetweenFilesTest : ProjectAuthControllerTest("/
     var file2Id: Long? = null
     var language1Id: Long? = null
     var language2Id: Long? = null
-    andIsOk.andAssertThatJson {
-      node("result._embedded.languages[0].importFileId").isNumber.satisfies(
-        Consumer {
-          file1Id = it.toLong()
-        },
-      )
-      node("result._embedded.languages[1].importFileId").isNumber.satisfies(
-        Consumer {
-          file2Id = it.toLong()
-        },
-      )
-      node("result._embedded.languages[0].id").isNumber.satisfies(
-        Consumer {
-          language1Id = it.toLong()
-        },
-      )
-      node("result._embedded.languages[1].id").isNumber.satisfies(
-        Consumer {
-          language2Id = it.toLong()
-        },
-      )
-    }.andIsOk
+    andIsOk
+      .andAssertThatJson {
+        node("result._embedded.languages[0].importFileId").isNumber.satisfies(
+          Consumer {
+            file1Id = it.toLong()
+          },
+        )
+        node("result._embedded.languages[1].importFileId").isNumber.satisfies(
+          Consumer {
+            file2Id = it.toLong()
+          },
+        )
+        node("result._embedded.languages[0].id").isNumber.satisfies(
+          Consumer {
+            language1Id = it.toLong()
+          },
+        )
+        node("result._embedded.languages[1].id").isNumber.satisfies(
+          Consumer {
+            language2Id = it.toLong()
+          },
+        )
+      }.andIsOk
     return ImportResult(
       file1Id!!,
       file2Id!!,

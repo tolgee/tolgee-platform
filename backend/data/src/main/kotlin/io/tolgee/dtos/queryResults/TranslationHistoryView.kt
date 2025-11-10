@@ -2,7 +2,7 @@ package io.tolgee.dtos.queryResults
 
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
-import java.util.*
+import java.util.Date
 
 interface TranslationHistoryView {
   var modifications: Map<String, PropertyModification>?

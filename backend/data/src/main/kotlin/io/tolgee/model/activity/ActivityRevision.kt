@@ -27,7 +27,7 @@ import org.hibernate.annotations.Type
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import java.util.*
+import java.util.Date
 
 @Entity
 @Table(
@@ -35,7 +35,7 @@ import java.util.*
     Index(columnList = "projectId"),
     Index(columnList = "authorId"),
     Index(columnList = "type"),
-    Index(columnList = "organizationId")
+    Index(columnList = "organizationId"),
   ],
 )
 @EntityListeners(ActivityRevision.Companion.ActivityRevisionListener::class)
@@ -73,9 +73,6 @@ class ActivityRevision : java.io.Serializable {
    * Project of the change
    */
   var projectId: Long? = null
-    set(value) {
-      field = value
-    }
 
   var organizationId: Long? = null
 

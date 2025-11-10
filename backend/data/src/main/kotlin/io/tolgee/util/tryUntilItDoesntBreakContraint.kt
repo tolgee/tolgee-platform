@@ -49,8 +49,12 @@ inline fun <T> tryUntil(
   throw exceptionToThrow(repeats, lastException!!)
 }
 
-class RepeatedlyThrowingConstraintViolationException(cause: Throwable, repeats: Int) :
-  RepeatedlyThrowingException(cause, repeats)
+class RepeatedlyThrowingConstraintViolationException(
+  cause: Throwable,
+  repeats: Int,
+) : RepeatedlyThrowingException(cause, repeats)
 
-open class RepeatedlyThrowingException(cause: Throwable, repeats: Int) :
-  RuntimeException("Retry failed $repeats times.", cause)
+open class RepeatedlyThrowingException(
+  cause: Throwable,
+  repeats: Int,
+) : RuntimeException("Retry failed $repeats times.", cause)

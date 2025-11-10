@@ -5,14 +5,21 @@ import io.tolgee.model.EntityWithId
 import io.tolgee.model.ModelWithAvatar
 import io.tolgee.model.Permission
 import io.tolgee.model.StandardAuditModel
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Type
-import java.util.*
+import java.util.Date
 
 @Entity
 @Table()
-class TranslationAgency : StandardAuditModel(), ModelWithAvatar, EntityWithId {
+class TranslationAgency :
+  StandardAuditModel(),
+  ModelWithAvatar,
+  EntityWithId {
   @field:Size(max = 255)
   @Column(length = 255)
   var name: String = ""

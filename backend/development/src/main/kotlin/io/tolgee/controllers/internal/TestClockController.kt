@@ -6,7 +6,7 @@ import io.tolgee.component.CurrentDateProvider
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
-import java.util.*
+import java.util.Date
 
 @InternalController(["internal/time"])
 class TestClockController(
