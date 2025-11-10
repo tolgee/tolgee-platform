@@ -11,6 +11,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.snapshot.TranslationSnapshot
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.util.TranslationStatsUtil
@@ -54,7 +55,7 @@ class Translation(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var text: String? = null,
-) : StandardAuditModel(), BranchVersionedEntity<Translation> {
+) : StandardAuditModel(), BranchVersionedEntity<Translation, TranslationSnapshot> {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @NotNull
   lateinit var key: Key
@@ -212,8 +213,8 @@ class Translation(
     return oldState["text"] != this.text || oldState["state"] != this.state || oldState["labels"] != this.labels
   }
 
-  override fun differsInBranchVersion(entity: Translation): Boolean {
-    return true
+  override fun hasChanged(snapshot: TranslationSnapshot): Boolean {
+    return this.text != snapshot.value || this.state != snapshot.state
   }
 
   override fun merge(source: Translation) {
@@ -221,5 +222,6 @@ class Translation(
     this.state = source.state
     this.labels.clear()
     this.labels.addAll(source.labels)
+    this.outdated = source.outdated
   }
 }

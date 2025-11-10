@@ -8,17 +8,19 @@ import org.springframework.stereotype.Component
 
 @Component
 class BranchModelAssembler(
-  private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler
+  private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
+  private val branchMergeRefModelAssembler: BranchMergeRefModelAssembler
 ) : RepresentationModelAssembler<Branch, BranchModel> {
   override fun toModel(entity: Branch): BranchModel {
     return BranchModel(
       id = entity.id,
       name = entity.name,
       author = entity.author?.let { simpleUserAccountModelAssembler.toModel(it) },
-      active = entity.archivedAt == null,
+      active = entity.isActive,
       isDefault = entity.isDefault,
       isProtected = entity.isProtected,
       createdAt = entity.createdAt?.time,
+      merge = entity.lastMerge?.let { branchMergeRefModelAssembler.toModel(it) }
     )
   }
 }

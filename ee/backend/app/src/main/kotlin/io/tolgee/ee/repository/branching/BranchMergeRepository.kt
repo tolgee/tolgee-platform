@@ -24,6 +24,7 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
       bm.id,
       sb,
       tb,
+      bm.mergedAt,
       case when sb.revision = bm.sourceRevision and tb.revision = bm.targetRevision then true else false end,
       coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.ADD then 1 else 0 end), 0),
       coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.DELETE then 1 else 0 end), 0),
@@ -48,6 +49,7 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
       bm.id,
       sb,
       tb,
+      bm.mergedAt,
       case when sb.revision = bm.sourceRevision and tb.revision = bm.targetRevision then true else false end,
       coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.ADD then 1 else 0 end), 0),
       coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.DELETE then 1 else 0 end), 0),
@@ -71,4 +73,9 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
     """
   )
   fun findBranchMerges(projectId: Long, pageable: Pageable): Page<BranchMergeView>
+
+  fun findAllBySourceBranchIdOrTargetBranchId(
+    sourceBranchId: Long,
+    targetBranchId: Long
+  ): List<BranchMerge>
 }

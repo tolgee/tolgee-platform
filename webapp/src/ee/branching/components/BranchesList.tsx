@@ -102,9 +102,22 @@ export const BranchesList = () => {
     });
   };
 
-  const handleOpenMergeIntoModal = (branch: BranchModel) => {
-    setMergeIntoOpen(true);
-    setMergeIntoSourceBranch(branch);
+  const handleMergeInto = (branch: BranchModel) => {
+    if (branch.merge) {
+      handleMergeDetail(branch);
+    } else {
+      setMergeIntoOpen(true);
+      setMergeIntoSourceBranch(branch);
+    }
+  };
+
+  const handleMergeDetail = (branch: BranchModel) => {
+    history.push(
+      LINKS.PROJECT_BRANCHES_MERGE.build({
+        projectId: project.id,
+        mergeId: branch.merge!.id,
+      })
+    );
   };
 
   const canEditBranches = true; // TODO satisfiesPermission('branches.edit')
@@ -160,8 +173,9 @@ export const BranchesList = () => {
           renderItem={(l: BranchModel) => (
             <BranchItem
               branch={l}
-              onRemove={!l.isDefault ? deleteBranch : undefined}
-              onMergeInto={!l.isDefault && (() => handleOpenMergeIntoModal(l))}
+              onRemove={deleteBranch}
+              onMergeInto={() => handleMergeInto(l)}
+              onMergeDetail={() => handleMergeDetail(l)}
             />
           )}
         />

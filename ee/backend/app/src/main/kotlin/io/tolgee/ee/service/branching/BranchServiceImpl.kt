@@ -10,11 +10,12 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.events.OnBranchDeleted
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
-import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchCopyService
 import io.tolgee.service.branching.BranchService
@@ -36,6 +37,7 @@ class BranchServiceImpl(
   private val currentDateProvider: CurrentDateProvider,
   private val entityManager: EntityManager,
   private val branchCopyService: BranchCopyService,
+  private val branchSnapshotService: BranchSnapshotService,
   private val applicationContext: ApplicationContext,
   private val defaultBranchCreator: DefaultBranchCreator,
   private val branchMergeService: BranchMergeService,
@@ -43,8 +45,8 @@ class BranchServiceImpl(
   private val languageService: LanguageService,
   private val authenticationFacade: AuthenticationFacade,
 ) : BranchService {
-  override fun getAllBranches(projectId: Long, page: Pageable, search: String?): Page<Branch> {
-    val branches = branchRepository.getAllProjectBranches(projectId, page, search)
+  override fun getBranches(projectId: Long, page: Pageable, search: String?, activeOnly: Boolean?): Page<Branch> {
+    val branches = branchRepository.getAllProjectBranches(projectId, page, search, activeOnly)
     if (branches.isEmpty) {
       val defaultBranch = defaultBranchCreator.create(projectId)
       return PageImpl(listOf(defaultBranch))
@@ -52,28 +54,40 @@ class BranchServiceImpl(
     return branches
   }
 
-  override fun getBranch(projectId: Long, branchId: Long): Branch {
+  override fun getActiveBranch(projectId: Long, branchId: Long): Branch {
+    return branchRepository.findActiveByProjectIdAndId(projectId, branchId)
+      ?: throw BadRequestException(Message.BRANCH_NOT_FOUND)
+  }
+
+  private fun getBranch(projectId: Long, branchId: Long): Branch {
     return branchRepository.findByProjectIdAndId(projectId, branchId)
       ?: throw BadRequestException(Message.BRANCH_NOT_FOUND)
   }
 
   @Transactional
-  override fun createBranch(projectId: Long, name: String, originBranchId: Long): Branch {
-    val originBranch = branchRepository.findByProjectIdAndId(projectId, originBranchId) ?: throw BadRequestException(
-      Message.ORIGIN_BRANCH_NOT_FOUND
-    )
+  override fun createBranch(
+    projectId: Long,
+    name: String,
+    originBranchId: Long,
+    author: UserAccount,
+  ): Branch {
+    val originBranch =
+      branchRepository.findActiveByProjectIdAndId(projectId, originBranchId) ?: throw BadRequestException(
+        Message.ORIGIN_BRANCH_NOT_FOUND
+      )
 
     if (originBranch.project.id != projectId) {
       throw BadRequestException(Message.ORIGIN_BRANCH_NOT_FOUND)
     }
 
-    val branch = createBranch(projectId, name).also {
+    val branch = createBranch(projectId, name, author).also {
       it.originBranch = originBranch
       it.pending = true
     }
     branchRepository.save(branch)
 
     branchCopyService.copy(projectId, originBranch, branch)
+    branchSnapshotService.createInitialSnapshot(projectId, originBranch, branch)
 
     branch.pending = false
     branchRepository.save(branch)
@@ -81,8 +95,8 @@ class BranchServiceImpl(
     return branch
   }
 
-  fun createBranch(projectId: Long, name: String): Branch {
-    branchRepository.findByProjectIdAndName(projectId, name)?.let {
+  private fun createBranch(projectId: Long, name: String, author: UserAccount): Branch {
+    branchRepository.findActiveByProjectIdAndName(projectId, name)?.let {
       throw BadRequestException(Message.BRANCH_ALREADY_EXISTS)
     }
     val project = entityManager.getReference(Project::class.java, projectId)
@@ -90,7 +104,7 @@ class BranchServiceImpl(
     return Branch().apply {
       this.project = project
       this.name = name
-      this.author = authenticationFacade.authenticatedUserEntity
+      this.author = author
     }
   }
 
@@ -98,15 +112,38 @@ class BranchServiceImpl(
   override fun deleteBranch(projectId: Long, branchId: Long) {
     val branch = getBranch(projectId, branchId)
     if (branch.isDefault) throw PermissionException(Message.CANNOT_DELETE_DEFAULT_BRANCH)
-    branch.archivedAt = currentDateProvider.date
+    softDeleteBranch(branch)
     applicationContext.publishEvent(OnBranchDeleted(branch))
   }
 
   @Transactional
-  override fun dryRunMergeBranch(projectId: Long, request: DryRunMergeBranchRequest): BranchMerge {
-    val sourceBranch = getBranch(projectId, request.sourceBranchId)
-    val targetBranch = getBranch(projectId, request.targetBranchId)
+  override fun dryRunMerge(projectId: Long, request: DryRunMergeBranchRequest): BranchMerge {
+    val sourceBranch = getActiveBranch(projectId, request.sourceBranchId)
+    val targetBranch = getActiveBranch(projectId, request.targetBranchId)
+    return dryRunMerge(sourceBranch, targetBranch)
+  }
+
+  @Transactional
+  fun dryRunMerge(sourceBranch: Branch, targetBranch: Branch): BranchMerge {
     return branchMergeService.dryRun(sourceBranch, targetBranch)
+  }
+
+  @Transactional
+  override fun applyMerge(projectId: Long, mergeId: Long) {
+    val merge = branchMergeService.findMerge(projectId, mergeId)
+      ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    if (!merge.isReadyToMerge) {
+      if (!merge.isRevisionValid) {
+        throw BadRequestException(Message.BRANCH_MERGE_REVISION_NOT_VALID)
+      }
+      if (!merge.isResolved) {
+        throw BadRequestException(Message.BRANCH_MERGE_CONFLICTS_NOT_RESOLVED)
+      }
+    }
+    branchMergeService.applyMerge(merge)
+    if (!merge.sourceBranch.isDefault) {
+      archiveBranch(merge.sourceBranch)
+    }
   }
 
   override fun getBranchMergeView(projectId: Long, mergeId: Long): BranchMergeView {
@@ -156,22 +193,13 @@ class BranchServiceImpl(
     conflict.resolution = request.resolve
   }
 
-  @Transactional
-  override fun applyMerge(projectId: Long, mergeId: Long) {
-    val merge = branchMergeService.getMerge(projectId, mergeId)
-    if (!merge.isReadyToMerge) {
-      if (!merge.isRevisionValid) {
-        throw BadRequestException(Message.BRANCH_MERGE_REVISION_NOT_VALID)
-      }
-      if (!merge.isResolved) {
-        throw BadRequestException(Message.BRANCH_MERGE_CONFLICTS_NOT_RESOLVED)
-      }
-    }
-    merge.changes.forEach { change ->
-      if (change.resolution == BranchKeyMergeResolutionType.SOURCE) {
-        change.targetKey.merge(change.sourceKey)
-      }
-    }
+  private fun archiveBranch(branch: Branch) {
+    branch.archivedAt = currentDateProvider.date
+  }
+
+  private fun softDeleteBranch(branch: Branch) {
+    archiveBranch(branch)
+    branch.deletedAt = currentDateProvider.date
   }
 
   @Transactional
