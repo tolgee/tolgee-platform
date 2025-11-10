@@ -9,4 +9,8 @@ import org.springframework.hateoas.server.core.Relation
 open class BranchMergeRefModel(
   @Schema(description = "Branch merge ID")
   val id: Long,
+  @Schema(description = "Target branch name")
+  val targetBranchName: String,
+  @Schema(description = "Date of merge. If null, merge was not applied yet")
+  val mergedAt: Long? = null,
 ) : RepresentationModel<BranchMergeRefModel>()

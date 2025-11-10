@@ -161,6 +161,15 @@ interface ProjectRepository : JpaRepository<Project, Long> {
 
   @Query(
     """
+    from Project p
+    left join fetch p.branches
+    where p.id = :id and p.deletedAt is null
+    """
+  )
+  fun findWithBranches(id: Long): Project?
+
+  @Query(
+    """
     from Project where id = :id and deletedAt is not null
   """,
   )

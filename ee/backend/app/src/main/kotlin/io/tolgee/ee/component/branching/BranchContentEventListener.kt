@@ -34,7 +34,7 @@ class BranchContentEventListener(
 
   fun onChange(entity: Any?, oldState: Map<String, Any>? = null) {
     if (entity == null) return
-    if (entity !is BranchVersionedEntity<*>) return
+    if (entity !is BranchVersionedEntity<*, *>) return
 
     val keyId = entity.resolveKeyId() ?: return
 

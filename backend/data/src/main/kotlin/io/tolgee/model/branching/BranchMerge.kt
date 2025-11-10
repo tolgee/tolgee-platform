@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
+import java.util.Date
 
 /**
  * Represents a merge operation between branches within a project. This entity stores details
@@ -37,6 +38,9 @@ class BranchMerge : StandardAuditModel(), EntityWithId {
   @Column(nullable = false)
   var targetRevision: Int = 0
 
+  @Column(nullable = true)
+  var mergedAt: Date? = null
+
   @OneToMany(
     targetEntity = BranchMergeChange::class,
     orphanRemoval = true,
@@ -53,4 +57,7 @@ class BranchMerge : StandardAuditModel(), EntityWithId {
 
   val isReadyToMerge: Boolean
     get() = isRevisionValid && isResolved
+
+  val isMerged: Boolean
+    get() = mergedAt != null
 }
