@@ -93,8 +93,7 @@ class GitHubAuthUtil(
         any(),
         eq(Array<GithubOAuthDelegate.GithubEmailResponse>::class.java),
       ),
-    )
-      .thenReturn(emailResponse)
+    ).thenReturn(emailResponse)
 
     val url = "/api/public/authorize_oauth/github?code=$receivedCode"
 
@@ -102,11 +101,12 @@ class GitHubAuthUtil(
       return authorizedRequestPerformer.performAuthGet(url).andReturn()
     }
 
-    return authMvc!!.perform(
-      MockMvcRequestBuilders.get(url)
-        .accept(MediaType.APPLICATION_JSON)
-        .contentType(MediaType.APPLICATION_JSON),
-    )
-      .andReturn()
+    return authMvc!!
+      .perform(
+        MockMvcRequestBuilders
+          .get(url)
+          .accept(MediaType.APPLICATION_JSON)
+          .contentType(MediaType.APPLICATION_JSON),
+      ).andReturn()
   }
 }

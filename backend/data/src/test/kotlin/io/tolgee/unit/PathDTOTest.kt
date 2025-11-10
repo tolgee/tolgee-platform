@@ -3,7 +3,7 @@ package io.tolgee.unit
 import io.tolgee.dtos.PathDTO
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.LinkedList
 
 class PathDTOTest {
   private val testList =

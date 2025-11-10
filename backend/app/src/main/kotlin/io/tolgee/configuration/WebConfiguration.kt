@@ -20,7 +20,11 @@ import org.springframework.http.CacheControl
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.util.unit.DataSize
-import org.springframework.web.servlet.config.annotation.*
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.security.SecureRandom
 import java.util.concurrent.TimeUnit
 
@@ -44,13 +48,15 @@ class WebConfiguration(
   }
 
   override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-    registry.addResourceHandler("/**/*.js", "/**/*.woff2", "/**/*.css", "/**/*.svg")
+    registry
+      .addResourceHandler("/**/*.js", "/**/*.woff2", "/**/*.css", "/**/*.svg")
       .addResourceLocations("classpath:/static/")
       .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
   }
 
   override fun addCorsMappings(registry: CorsRegistry) {
-    registry.addMapping("/**")
+    registry
+      .addMapping("/**")
       .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
       .exposedHeaders(VersionFilter.TOLGEE_VERSION_HEADER_NAME, TestClockHeaderFilter.TOLGEE_TEST_CLOCK_HEADER_NAME)
   }

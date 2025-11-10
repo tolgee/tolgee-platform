@@ -68,15 +68,17 @@ class MtServiceConfigService(
 
   private fun getEnabledServicesByDefaultServerConfig(language: LanguageDto): MutableList<MtServiceInfo> {
     val enabled =
-      services.asSequence()
+      services
+        .asSequence()
         .sortedBy { it.key.order }
         .sortedByDescending { it.value.first?.defaultPrimary ?: true }
         .filter {
-          it.value.first?.defaultEnabled ?: true && it.value.second.isEnabled && language.isSupportedBy(
-            it.key
-          )
-        }
-        .map { it.key }
+          it.value.first?.defaultEnabled ?: true &&
+            it.value.second.isEnabled &&
+            language.isSupportedBy(
+              it.key,
+            )
+        }.map { it.key }
         .map { MtServiceInfo(it, null) }
         .toMutableList()
 
@@ -88,14 +90,17 @@ class MtServiceConfigService(
   }
 
   private fun getPrimaryServiceByDefaultConfig(): MtServiceType? {
-    return services.filter {
-      (it.value.first?.defaultPrimary ?: true) && it.value.second.isEnabled
-    }.keys.minByOrNull { it.order }
+    return services
+      .filter {
+        (it.value.first?.defaultPrimary ?: true) && it.value.second.isEnabled
+      }.keys
+      .minByOrNull { it.order }
   }
 
   private fun getEnabledServiceInfosByStoredConfig(language: LanguageDto): List<MtServiceInfo>? {
     getStoredConfig(language.id)?.let { storedConfig ->
-      return storedConfig.enabledServicesInfo.toList()
+      return storedConfig.enabledServicesInfo
+        .toList()
         // return just enabled services
         .filter {
           isServiceEnabledByServerConfig(it) && language.isSupportedBy(it.serviceType)
@@ -139,12 +144,12 @@ class MtServiceConfigService(
         (
           languageSetting.primaryServiceInfo?.promptId
             ?: languageSetting.enabledServicesInfo?.find { it.promptId != null }?.promptId
-          )?.let {
-            promptService.findPrompt(
-              project.id,
-              it,
-            )
-          }
+        )?.let {
+          promptService.findPrompt(
+            project.id,
+            it,
+          )
+        }
 
       setPrimaryService(entity, languageSetting)
       entity.enabledServices = getEnabledServices(languageSetting)
@@ -331,8 +336,10 @@ class MtServiceConfigService(
   private fun getDefaultConfig(project: Project): MtServiceConfig {
     return MtServiceConfig().apply {
       enabledServices =
-        services.filter { it.value.first?.defaultEnabled ?: true && it.value.second.isEnabled }
-          .keys.toMutableSet()
+        services
+          .filter { it.value.first?.defaultEnabled ?: true && it.value.second.isEnabled }
+          .keys
+          .toMutableSet()
       this.project = project
       primaryService = getPrimaryServiceByDefaultConfig()
     }
@@ -363,9 +370,10 @@ class MtServiceConfigService(
     languageIds: List<Long>,
     projectId: Long,
   ): Map<Long, MtServiceConfig?> {
-    val entities = mtServiceConfigRepository.findAllByTargetLanguageIdIn(languageIds, projectId).map {
-      makeFormalityValid(it)
-    }
+    val entities =
+      mtServiceConfigRepository.findAllByTargetLanguageIdIn(languageIds, projectId).map {
+        makeFormalityValid(it)
+      }
     return languageIds.associateWith { languageId ->
       entities.find { it.targetLanguage?.id == languageId } ?: entities.find { it.targetLanguage == null }
     }
@@ -400,11 +408,12 @@ class MtServiceConfigService(
       MtLanguageInfo(
         language = null,
         supportedServices =
-          services.filter {
-            it.value.second.isEnabled
-          }.map {
-            MtSupportedService(it.key, it.value.second.formalitySupportingLanguages !== null)
-          },
+          services
+            .filter {
+              it.value.second.isEnabled
+            }.map {
+              MtSupportedService(it.key, it.value.second.formalitySupportingLanguages !== null)
+            },
       ),
     )
     languageService.findAll(project.id).forEach { language ->

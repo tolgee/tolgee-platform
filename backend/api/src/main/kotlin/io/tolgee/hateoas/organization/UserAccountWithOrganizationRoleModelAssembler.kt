@@ -13,14 +13,13 @@ import org.springframework.stereotype.Component
 class UserAccountWithOrganizationRoleModelAssembler(
   private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
   private val avatarService: AvatarService,
-) :
-  RepresentationModelAssemblerSupport<
-      Pair<UserAccountWithOrganizationRoleView, List<Project>>,
-      UserAccountWithOrganizationRoleModel,
-      >(
-      V2UserController::class.java,
-      UserAccountWithOrganizationRoleModel::class.java,
-    ) {
+) : RepresentationModelAssemblerSupport<
+    Pair<UserAccountWithOrganizationRoleView, List<Project>>,
+    UserAccountWithOrganizationRoleModel,
+  >(
+    V2UserController::class.java,
+    UserAccountWithOrganizationRoleModel::class.java,
+  ) {
   override fun toModel(
     data: Pair<UserAccountWithOrganizationRoleView, List<Project>>,
   ): UserAccountWithOrganizationRoleModel {

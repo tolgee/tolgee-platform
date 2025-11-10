@@ -9,7 +9,10 @@ import io.tolgee.dtos.sso.SsoTenantConfig
 import io.tolgee.ee.data.DomainRequest
 import io.tolgee.ee.data.SsoUrlResponse
 import io.tolgee.service.TenantService
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController

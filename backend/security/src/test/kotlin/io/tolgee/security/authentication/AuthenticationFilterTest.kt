@@ -46,7 +46,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.security.core.context.SecurityContextHolder
 import java.time.Duration
-import java.util.*
+import java.util.Date
 
 class AuthenticationFilterTest {
   companion object {
@@ -118,18 +118,21 @@ class AuthenticationFilterTest {
     Mockito.`when`(authProperties.enabled).thenReturn(true)
     Mockito.`when`(internalProperties.verifySsoAccountAvailableBypass).thenReturn(null)
 
-    Mockito.`when`(rateLimitService.getIpAuthRateLimitPolicy(any()))
+    Mockito
+      .`when`(rateLimitService.getIpAuthRateLimitPolicy(any()))
       .thenReturn(
         RateLimitPolicy("test policy", 5, Duration.ofSeconds(1), true),
       )
 
-    Mockito.`when`(rateLimitService.consumeBucketUnless(any(), any()))
+    Mockito
+      .`when`(rateLimitService.consumeBucketUnless(any(), any()))
       .then {
         val fn = it.getArgument<() -> Boolean>(1)
         fn()
       }
 
-    Mockito.`when`(jwtService.validateToken(TEST_VALID_TOKEN))
+    Mockito
+      .`when`(jwtService.validateToken(TEST_VALID_TOKEN))
       .thenReturn(
         TolgeeAuthentication(
           credentials = "uwu",
@@ -141,7 +144,8 @@ class AuthenticationFilterTest {
         ),
       )
 
-    Mockito.`when`(jwtService.validateToken(TEST_INVALID_TOKEN))
+    Mockito
+      .`when`(jwtService.validateToken(TEST_INVALID_TOKEN))
       .thenThrow(AuthenticationException(Message.INVALID_JWT_TOKEN))
 
     Mockito.`when`(pakService.parseApiKey(TEST_VALID_PAK)).thenReturn(TEST_VALID_PAK)
@@ -313,7 +317,8 @@ class AuthenticationFilterTest {
     val res = MockHttpServletResponse()
     val chain = MockFilterChain()
 
-    Mockito.`when`(rateLimitService.consumeBucketUnless(any(), any()))
+    Mockito
+      .`when`(rateLimitService.consumeBucketUnless(any(), any()))
       .thenThrow(RateLimitedException(1000L, true))
 
     req.addHeader("Authorization", "Bearer $TEST_VALID_TOKEN")

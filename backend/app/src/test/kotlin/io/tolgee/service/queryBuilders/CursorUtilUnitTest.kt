@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.Sort
 import java.sql.Timestamp
-import java.util.*
+import java.util.Base64
 
 class CursorUtilUnitTest {
   lateinit var cursor: String

@@ -5,10 +5,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class QuickStartModelAssembler : RepresentationModelAssemblerSupport<IQuickStart, QuickStartModel>(
-  IQuickStart::class.java,
-  QuickStartModel::class.java,
-) {
+class QuickStartModelAssembler :
+  RepresentationModelAssemblerSupport<IQuickStart, QuickStartModel>(
+    IQuickStart::class.java,
+    QuickStartModel::class.java,
+  ) {
   override fun toModel(entity: IQuickStart): QuickStartModel {
     return QuickStartModel(
       finished = entity.finished,

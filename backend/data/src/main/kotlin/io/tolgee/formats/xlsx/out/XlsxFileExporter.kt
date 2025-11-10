@@ -15,15 +15,19 @@ class XlsxFileExporter(
   isProjectIcuPlaceholdersEnabled: Boolean = true,
   pathProvider: ExportFilePathProvider,
 ) : TableExporter(
-  translations,
-  exportParams,
-  isProjectIcuPlaceholdersEnabled,
-  pathProvider
-) {
+    translations,
+    exportParams,
+    isProjectIcuPlaceholdersEnabled,
+    pathProvider,
+  ) {
   override fun List<TableEntry>.toFileContents(): InputStream {
     val languageTags =
       exportParams.languages?.sorted()?.toTypedArray()
-        ?: this.map { it.language }.distinct().sorted().toTypedArray()
+        ?: this
+          .map { it.language }
+          .distinct()
+          .sorted()
+          .toTypedArray()
     return XlsxFileWriter(
       createdDate = currentDate,
       languageTags = languageTags,

@@ -3,10 +3,10 @@ package io.tolgee.ee.api.v2.controllers
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.constants.Feature
+import io.tolgee.development.testDataBuilder.data.PromptTestData
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.development.testDataBuilder.data.PromptTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -32,7 +32,7 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           type = LlmProviderType.OPENAI,
           tokenPriceInCreditsInput = 2.0,
           tokenPriceInCreditsOutput = 2.0,
-          apiUrl = "http://test.com"
+          apiUrl = "http://test.com",
         ),
       )
     internalProperties.fakeLlmProviders = true
@@ -129,10 +129,13 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           key={{key.name}}
           translation={{source.translation}}
           """.trimIndent(),
-        keyId = testData.keys.first().self.id,
+        keyId =
+          testData.keys
+            .first()
+            .self.id,
         targetLanguageId = testData.czech.self.id,
         provider = "default",
-        basicPromptOptions = null
+        basicPromptOptions = null,
       ),
     ).andIsOk.andAssertThatJson {
       node("prompt").isString.contains("Hi LLM")

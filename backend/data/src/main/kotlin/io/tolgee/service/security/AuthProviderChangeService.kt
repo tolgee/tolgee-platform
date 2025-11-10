@@ -63,24 +63,29 @@ class AuthProviderChangeService(
       currentUser == null -> {
         // Nobody to initiate the change for
       }
+
       authenticatingUser?.id == currentUser.id -> {
         // Nothing to change
         // User used the same method for authentication as they already use - we can initiate
         // provider change but there is nothing to change
       }
+
       authenticatingUser != null -> {
         // Non-matching e-mail
         // Account with this e-mail already exists and would be authenticated otherwise
         throw AuthenticationException(Message.THIRD_PARTY_SWITCH_CONFLICT)
       }
+
       matchingUser == null -> {
         // Non-matching e-mail and no account with this email exists
         throw AuthenticationException(Message.THIRD_PARTY_SWITCH_CONFLICT)
       }
+
       matchingUser.id != currentUser.id -> {
         // Non-matching e-mail and account with this e-mail already exists
         throw AuthenticationException(Message.THIRD_PARTY_SWITCH_CONFLICT)
       }
+
       else -> {
         self.saveInNewTransaction(matchingUser, data)
         throw AuthenticationException(Message.THIRD_PARTY_SWITCH_INITIATED)

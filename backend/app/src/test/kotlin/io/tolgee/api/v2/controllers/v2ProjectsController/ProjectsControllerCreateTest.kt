@@ -4,7 +4,15 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.AuthorizedRequestFactory
+import io.tolgee.fixtures.andAssertError
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.satisfies
 import io.tolgee.model.Project
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
@@ -179,25 +187,33 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
     performAuthPost("/v2/projects", request)
       .andPrettyPrint
       .andIsBadRequest
-      .andAssertError.isStandardValidation.onField("languages[0].tag").isEqualTo("can not contain coma")
+      .andAssertError.isStandardValidation
+      .onField("languages[0].tag")
+      .isEqualTo("can not contain coma")
   }
 
   private fun testCreateCorrectRequest() {
     val organization = dbPopulator.createOrganizationIfNotExist("nice", userAccount = userAccount!!)
     val request = CreateProjectRequest("aaa", listOf(languageDTO), organizationId = organization.id)
-    mvc.perform(
-      AuthorizedRequestFactory.loggedPost("/v2/projects")
-        .contentType(MediaType.APPLICATION_JSON).content(
-          jacksonObjectMapper().writeValueAsString(request),
-        ),
-    )
-      .andExpect(MockMvcResultMatchers.status().isOk)
+    mvc
+      .perform(
+        AuthorizedRequestFactory
+          .loggedPost("/v2/projects")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(
+            jacksonObjectMapper().writeValueAsString(request),
+          ),
+      ).andExpect(MockMvcResultMatchers.status().isOk)
       .andReturn()
     val projectDto = projectService.findAllPermitted(userAccount!!).find { it.name == "aaa" }
     assertThat(projectDto).isNotNull
     val project = projectService.get(projectDto!!.id!!)
     assertThat(project.languages).isNotEmpty
-    val language = project.languages.stream().findFirst().orElse(null)
+    val language =
+      project.languages
+        .stream()
+        .findFirst()
+        .orElse(null)
     assertThat(language).isNotNull
     assertThat(language.tag).isEqualTo("en")
     assertThat(language.name).isEqualTo("English")
@@ -233,7 +249,8 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
   @Test
   fun `sets proper baseLanguage on create when not provided`() {
     performAuthPost("/v2/projects", createForLanguagesDto.copy(baseLanguageTag = null))
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").asNumber().satisfies {
           assertThat(projectService.get(it.toLong()).baseLanguage!!.tag)!!
             .isEqualTo("en")

@@ -31,103 +31,104 @@ class ImportNamespacesTestData {
   val root: TestDataBuilder =
     TestDataBuilder().apply {
       createProject()
-      projectBuilder.build {
-        addImport {
-          author = userAccount
-          import = this
-        }.build {
-          addImportFile {
-            name = "multilang.json"
-            defaultNsFile = this
+      projectBuilder
+        .build {
+          addImport {
+            author = userAccount
+            import = this
           }.build {
-            importEnglish =
-              addImportLanguage {
-                name = "en"
-                existingLanguage = english
-              }.self
-            importGerman =
-              addImportLanguage {
-                name = "de"
-                existingLanguage = german
-              }.self
-            addImportKey {
-              name = "what a key"
-            }.build key@{
-              addMeta {
-                comments =
-                  mutableListOf(
-                    KeyComment(this).apply {
-                      text = "hello1"
-                      author = userAccount
-                    },
-                  )
-              }
-              addImportTranslation {
-                text = "hello"
-                language = importGerman
-                key = this@key.self
-                conflict = existingTranslation
-                override = true
-                resolve()
+            addImportFile {
+              name = "multilang.json"
+              defaultNsFile = this
+            }.build {
+              importEnglish =
+                addImportLanguage {
+                  name = "en"
+                  existingLanguage = english
+                }.self
+              importGerman =
+                addImportLanguage {
+                  name = "de"
+                  existingLanguage = german
+                }.self
+              addImportKey {
+                name = "what a key"
+              }.build key@{
+                addMeta {
+                  comments =
+                    mutableListOf(
+                      KeyComment(this).apply {
+                        text = "hello1"
+                        author = userAccount
+                      },
+                    )
+                }
+                addImportTranslation {
+                  text = "hello"
+                  language = importGerman
+                  key = this@key.self
+                  conflict = existingTranslation
+                  override = true
+                  resolve()
+                }
               }
             }
-          }
 
-          addImportFile {
-            name = "multilang2.json"
-            defaultNsFile2 = this
-          }.build {
-            addImportKey {
-              name = "what a key"
-            }.build key@{
-              addMeta {
-                comments =
-                  mutableListOf(
-                    KeyComment(this).apply {
-                      text = "hello2"
-                      author = userAccount
-                    },
-                  )
+            addImportFile {
+              name = "multilang2.json"
+              defaultNsFile2 = this
+            }.build {
+              addImportKey {
+                name = "what a key"
+              }.build key@{
+                addMeta {
+                  comments =
+                    mutableListOf(
+                      KeyComment(this).apply {
+                        text = "hello2"
+                        author = userAccount
+                      },
+                    )
+                }
               }
             }
-          }
 
-          addImportFile {
-            name = "another.json"
-            namespace = "homepage"
-            homepageNsFile2 = this
-          }.build {
-            homepageImportEnglish =
-              addImportLanguage {
-                name = "en"
-                existingLanguage = english
-              }.self
-            homepageImportGerman =
-              addImportLanguage {
-                name = "de"
-                existingLanguage = german
-              }.self
-            addImportKey {
-              name = "what a key"
-            }.build key@{
-              addMeta {
-                comments =
-                  mutableListOf(
-                    KeyComment(this).apply {
-                      text = "hello2"
-                      author = userAccount
-                    },
-                  )
-              }
-              addImportTranslation {
-                text = "hello"
-                language = homepageImportGerman
-                key = this@key.self
+            addImportFile {
+              name = "another.json"
+              namespace = "homepage"
+              homepageNsFile2 = this
+            }.build {
+              homepageImportEnglish =
+                addImportLanguage {
+                  name = "en"
+                  existingLanguage = english
+                }.self
+              homepageImportGerman =
+                addImportLanguage {
+                  name = "de"
+                  existingLanguage = german
+                }.self
+              addImportKey {
+                name = "what a key"
+              }.build key@{
+                addMeta {
+                  comments =
+                    mutableListOf(
+                      KeyComment(this).apply {
+                        text = "hello2"
+                        author = userAccount
+                      },
+                    )
+                }
+                addImportTranslation {
+                  text = "hello"
+                  language = homepageImportGerman
+                  key = this@key.self
+                }
               }
             }
           }
-        }
-      }.self
+        }.self
     }
 
   private fun TestDataBuilder.createProject() {

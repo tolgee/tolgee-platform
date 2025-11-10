@@ -19,7 +19,14 @@ import io.tolgee.dtos.request.translation.ImportKeysDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.hateoas.key.*
+import io.tolgee.hateoas.key.KeyImportResolvableResultModel
+import io.tolgee.hateoas.key.KeyModel
+import io.tolgee.hateoas.key.KeyModelAssembler
+import io.tolgee.hateoas.key.KeySearchResultModelAssembler
+import io.tolgee.hateoas.key.KeySearchSearchResultModel
+import io.tolgee.hateoas.key.KeyWithDataModel
+import io.tolgee.hateoas.key.KeyWithDataModelAssembler
+import io.tolgee.hateoas.key.KeyWithScreenshotsModelAssembler
 import io.tolgee.hateoas.language.LanguageModel
 import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
@@ -50,7 +57,17 @@ import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
 
 @Suppress("MVCPathVariableInspection")
 @RestController
@@ -233,7 +250,7 @@ class KeyController(
       Import's new keys with translations. Translations can be updated, when specified.\n\n
       DEPRECATED: Use /v2/projects/{projectId}/single-step-import-resolvable instead.
     """,
-    deprecated = true
+    deprecated = true,
   )
   @RequestActivity(ActivityType.IMPORT)
   @UseDefaultPermissions // Security: permissions are handled in service

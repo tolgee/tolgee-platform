@@ -11,7 +11,7 @@ class I18nextToIcuPlaceholderConvertor : ToIcuPlaceholderConvertor {
   override val regex: Regex
     get() = I18NEXT_PLACEHOLDER_REGEX
 
-  override val pluralArgName: String? = I18NEXT_PLURAL_ARG_NAME
+  override val pluralArgName: String = I18NEXT_PLURAL_ARG_NAME
 
   override fun convert(
     matchResult: MatchResult,

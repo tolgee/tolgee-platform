@@ -10,10 +10,10 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationState
-import kotlin.collections.forEach
 
-class SuggestionsTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED) :
-  BaseTestData("suggestionsuggestionsTestUser", "Project with suggestions") {
+class SuggestionsTestData(
+  suggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED,
+) : BaseTestData("suggestionsuggestionsTestUser", "Project with suggestions") {
   var projectReviewer: UserAccountBuilder
   var orgAdmin: UserAccountBuilder
   var orgMember: UserAccountBuilder
@@ -136,7 +136,7 @@ class SuggestionsTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.DIS
             this.language = czechLanguage
             this.author = projectTranslator.self
             this.translation = "Navržený překlad 0-1"
-          }
+          },
         )
 
         czechSuggestions.add(
@@ -144,7 +144,7 @@ class SuggestionsTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.DIS
             this.language = czechLanguage
             this.author = projectReviewer.self
             this.translation = "Navržený překlad 0-2"
-          }
+          },
         )
 
         englishSuggestions.add(
@@ -152,7 +152,7 @@ class SuggestionsTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.DIS
             this.language = englishLanguage
             this.author = projectTranslator.self
             this.translation = "Suggested translation 0-1"
-          }
+          },
         )
 
         englishSuggestions.add(
@@ -160,23 +160,25 @@ class SuggestionsTestData(suggestionsMode: SuggestionsMode = SuggestionsMode.DIS
             this.language = englishLanguage
             this.author = projectReviewer.self
             this.translation = "Suggested translation 0-2"
-          }
+          },
         )
       }
 
-      pluralKey = addKey(null, "pluralKey").apply {
-        self.isPlural = true
-        addTranslation("en", "{value, plural, one {# key} other {# keys}}")
-        addTranslation("cs", "{value, plural, one {# klíč} few {# klíče} other {# klíčů}}")
-      }
+      pluralKey =
+        addKey(null, "pluralKey").apply {
+          self.isPlural = true
+          addTranslation("en", "{value, plural, one {# key} other {# keys}}")
+          addTranslation("cs", "{value, plural, one {# klíč} few {# klíče} other {# klíčů}}")
+        }
 
       pluralKey.apply {
-        pluralSuggestion = addSuggestion {
-          this.language = czechLanguage
-          this.author = projectTranslator.self
-          this.translation = "{value, plural, one {# překlad} few {# překlady} other {# překladů}}"
-          this.isPlural = true
-        }
+        pluralSuggestion =
+          addSuggestion {
+            this.language = czechLanguage
+            this.author = projectTranslator.self
+            this.translation = "{value, plural, one {# překlad} few {# překlady} other {# překladů}}"
+            this.isPlural = true
+          }
       }
     }
   }

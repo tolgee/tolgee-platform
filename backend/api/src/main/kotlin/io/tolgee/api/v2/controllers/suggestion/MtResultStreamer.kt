@@ -12,7 +12,10 @@ import io.tolgee.hateoas.machineTranslation.StreamedSuggestionInfo
 import io.tolgee.hateoas.machineTranslation.StreamedSuggestionItem
 import io.tolgee.hateoas.machineTranslation.TranslationItemModel
 import io.tolgee.security.ProjectHolder
-import io.tolgee.service.machineTranslation.*
+import io.tolgee.service.machineTranslation.MachineTranslationParams
+import io.tolgee.service.machineTranslation.MtService
+import io.tolgee.service.machineTranslation.MtServiceInfo
+import io.tolgee.service.machineTranslation.MtTranslatorResult
 import io.tolgee.util.Logging
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.debug
@@ -53,17 +56,19 @@ class MtResultStreamer(
     return StreamedSuggestionInfo(
       servicesToUse.map { it.serviceType },
       servicesToUse.find { it.serviceType == MtServiceType.PROMPT }?.promptId,
-      baseBlank
+      baseBlank,
     )
   }
 
   private fun writeServiceResultsAsync() {
     runBlocking(Dispatchers.IO) {
-      servicesToUse.map { it.serviceType }.map { service ->
-        async {
-          writeServiceResult(service)
-        }
-      }.awaitAll()
+      servicesToUse
+        .map { it.serviceType }
+        .map { service ->
+          async {
+            writeServiceResult(service)
+          }
+        }.awaitAll()
     }
   }
 
@@ -114,16 +119,17 @@ class MtResultStreamer(
     dto: SuggestRequestDto,
     service: MtServiceType,
   ): MtTranslatorResult? {
-    return mtTranslator.translate(
-      listOf(
-        MachineTranslationParams(
-          keyId = dto.keyId,
-          baseTranslationText = dto.baseText,
-          targetLanguageId = dto.targetLanguageId,
-          desiredServices = setOf(service),
+    return mtTranslator
+      .translate(
+        listOf(
+          MachineTranslationParams(
+            keyId = dto.keyId,
+            baseTranslationText = dto.baseText,
+            targetLanguageId = dto.targetLanguageId,
+            desiredServices = setOf(service),
+          ),
         ),
-      ),
-    ).singleOrNull()
+      ).singleOrNull()
   }
 
   private fun writeException(
@@ -151,17 +157,17 @@ class MtResultStreamer(
     logger.debug { "Sending to client: $string" }
     synchronized(this) {
       this.write(string + "\n")
-        try {
-          this.flush()
-        } catch (e: ConcurrentModificationException) {
-          // TODO(spring upgrade), check if the bug is fixed in spring and remove this ugly workaround
-          // Check io.tolgee.fixtures.springBug for more info.
-          // And yes, this happens not only in tests, but it is possible in production.
-          // You can't precisely predict when it happens, but here when stream is flushed and headers are
-          // added for the response, it happens most often. Just retrying works fine here.
-          logger.error("Error while streaming to client, bug in spring-security/issues/9175: ${e.message}", e)
-          this.flush()
-        }
+      try {
+        this.flush()
+      } catch (e: ConcurrentModificationException) {
+        // TODO(spring upgrade), check if the bug is fixed in spring and remove this ugly workaround
+        // Check io.tolgee.fixtures.springBug for more info.
+        // And yes, this happens not only in tests, but it is possible in production.
+        // You can't precisely predict when it happens, but here when stream is flushed and headers are
+        // added for the response, it happens most often. Just retrying works fine here.
+        logger.error("Error while streaming to client, bug in spring-security/issues/9175: ${e.message}", e)
+        this.flush()
+      }
     }
     logger.debug { "Sent to client using sync writer" }
   }

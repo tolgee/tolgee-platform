@@ -94,32 +94,33 @@ class TagService(
     val existingTags =
       this.getFromProject(projectId, map.values.flatten().toSet()).associateBy { it.name }.toMutableMap()
 
-    return map.map { (keyId, tagsToAdd) ->
-      keyId to
-        tagsToAdd.map { tagToAdd ->
-          val keyWithData = keysByIdMap[keyId] ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-          val keyMeta = keyMetaService.getOrCreateForKey(keyWithData)
-          val tag =
-            existingTags[tagToAdd]?.let {
-              if (!keyMeta.tags.contains(it)) {
-                it.keyMetas.add(keyMeta)
-                keyMeta.tags.add(it)
+    return map
+      .map { (keyId, tagsToAdd) ->
+        keyId to
+          tagsToAdd.map { tagToAdd ->
+            val keyWithData = keysByIdMap[keyId] ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+            val keyMeta = keyMetaService.getOrCreateForKey(keyWithData)
+            val tag =
+              existingTags[tagToAdd]?.let {
+                if (!keyMeta.tags.contains(it)) {
+                  it.keyMetas.add(keyMeta)
+                  keyMeta.tags.add(it)
+                }
+                it
+              } ?: let {
+                Tag().apply {
+                  project = keysByIdMap[keyId]?.project ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+                  keyMetas.add(keyMeta)
+                  name = tagToAdd
+                  keyMeta.tags.add(this)
+                  existingTags[tagToAdd] = this
+                }
               }
-              it
-            } ?: let {
-              Tag().apply {
-                project = keysByIdMap[keyId]?.project ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-                keyMetas.add(keyMeta)
-                name = tagToAdd
-                keyMeta.tags.add(this)
-                existingTags[tagToAdd] = this
-              }
-            }
-          tagRepository.save(tag)
-          keyMetaService.save(keyMeta)
-          tag
-        }
-    }.toMap()
+            tagRepository.save(tag)
+            keyMetaService.save(keyMeta)
+            tag
+          }
+      }.toMap()
   }
 
   fun untagKeys(
@@ -300,17 +301,21 @@ class TagService(
    * So we can go for native query.
    */
   fun deleteAllByProject(projectId: Long) {
-    entityManager.createNativeQuery(
-      """
+    entityManager
+      .createNativeQuery(
+        """
       delete from key_meta_tags kmt 
         where kmt.key_metas_id in 
         (select km.id from key_meta km join key k on km.key_id = k.id where k.project_id = :projectId)""",
-    ).setParameter("projectId", projectId).executeUpdate()
-    entityManager.createNativeQuery(
-      """
+      ).setParameter("projectId", projectId)
+      .executeUpdate()
+    entityManager
+      .createNativeQuery(
+        """
       delete from tag where project_id = :projectId
       """,
-    ).setParameter("projectId", projectId).executeUpdate()
+      ).setParameter("projectId", projectId)
+      .executeUpdate()
   }
 
   @Transactional

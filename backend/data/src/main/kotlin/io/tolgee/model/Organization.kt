@@ -19,7 +19,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Filter
-import java.util.*
+import java.util.Date
 
 @Entity
 @Table(
@@ -32,17 +32,18 @@ class Organization(
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0,
   @field:NotBlank
-  @field:Size(min = 1, max = 50)
-  open var name: String = "",
-  open var description: String? = null,
+  @field:Size(min = 1, max = 50) var name: String = "",
+  var description: String? = null,
   @Column(name = "address_part")
   @field:NotBlank
   @field:Size(min = 1, max = 60)
-  @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-_]*$", message = "invalid_pattern")
-  open var slug: String = "",
+  @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-_]*$", message = "invalid_pattern") var slug: String = "",
   @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
   var mtCreditBucket: MtCreditBucket? = null,
-) : ModelWithAvatar, AuditModel(), SoftDeletable, EntityWithId {
+) : AuditModel(),
+  ModelWithAvatar,
+  SoftDeletable,
+  EntityWithId {
   @OneToOne(mappedBy = "organization", optional = false, orphanRemoval = true, fetch = FetchType.LAZY)
   lateinit var basePermission: Permission
 

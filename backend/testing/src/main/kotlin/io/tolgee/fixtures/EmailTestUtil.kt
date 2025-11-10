@@ -7,7 +7,11 @@ import jakarta.mail.internet.MimeMessage
 import jakarta.mail.internet.MimeMultipart
 import org.assertj.core.api.AbstractStringAssert
 import org.mockito.Mockito
-import org.mockito.kotlin.*
+import org.mockito.kotlin.KArgumentCaptor
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mail.javamail.JavaMailSender
@@ -15,7 +19,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Component
 
 @Component
-class EmailTestUtil() {
+class EmailTestUtil {
   @Autowired
   @MockBean
   lateinit var javaMailSender: JavaMailSender
@@ -49,17 +53,19 @@ class EmailTestUtil() {
       messageArgumentCaptor.allValues.map {
         (
           (it.content as MimeMultipart)
-            .getBodyPart(0).content as MimeMultipart
-        )
-          .getBodyPart(0).content as String
+            .getBodyPart(0)
+            .content as MimeMultipart
+        ).getBodyPart(0)
+          .content as String
       }
 
   fun emailToString(email: MimeMessage): String {
     return (
       (email.content as MimeMultipart)
-        .getBodyPart(0).content as MimeMultipart
-    )
-      .getBodyPart(0).content as String
+        .getBodyPart(0)
+        .content as MimeMultipart
+    ).getBodyPart(0)
+      .content as String
   }
 
   fun verifyEmailSent() {

@@ -23,7 +23,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
-import java.util.*
+import java.util.Date
 
 @Entity
 @ActivityLoggedEntity
@@ -36,7 +36,8 @@ import java.util.*
 class ContentDeliveryConfig(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,
-) : StandardAuditModel(), IExportParams {
+) : StandardAuditModel(),
+  IExportParams {
   @ActivityLoggedProp
   @ActivityDescribingProp
   lateinit var name: String

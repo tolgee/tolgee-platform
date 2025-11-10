@@ -174,7 +174,8 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun createLanguageTestValidation(repoId: Long) {
     val mvcResult =
       performCreate(repoId, languageDTO)
-        .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
+        .andExpect(MockMvcResultMatchers.status().isBadRequest)
+        .andReturn()
     Assertions.assertThat(mvcResult.response.contentAsString).contains("language_tag_exists")
     Assertions.assertThat(mvcResult.response.contentAsString).contains("language_name_exists")
     performCreate(repoId, languageDTOBlank).andIsBadRequest.andAssertThatJson {
@@ -223,13 +224,13 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Suppress("UNCHECKED_CAST")
   private fun assertDeleteActivityCreated() {
     val result =
-      entityManager.createQuery(
-        """select ar.id, ame.modifications, ame.describingData from ActivityRevision ar 
+      entityManager
+        .createQuery(
+          """select ar.id, ame.modifications, ame.describingData from ActivityRevision ar 
             |join ar.modifiedEntities ame
             |where ar.type = :type
-        """.trimMargin(),
-      )
-        .setParameter("type", ActivityType.DELETE_LANGUAGE)
+          """.trimMargin(),
+        ).setParameter("type", ActivityType.DELETE_LANGUAGE)
         .resultList as List<Array<Any>>
     val modifications = result[0][1] as Map<String, PropertyModification>
     modifications["deletedAt"]!!.old.assert.isNull()

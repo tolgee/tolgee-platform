@@ -16,7 +16,9 @@ import org.springframework.web.client.exchange
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class OllamaApiService : AbstractLlmApiService(), Logging {
+class OllamaApiService :
+  AbstractLlmApiService(),
+  Logging {
   override fun translate(
     params: LlmParams,
     config: LlmProviderInterface,
@@ -68,7 +70,7 @@ class OllamaApiService : AbstractLlmApiService(), Logging {
 
     if (params.shouldOutputJson) {
       messages.add(
-        RequestMessage(role = "user", content = "Strictly return only valid json!")
+        RequestMessage(role = "user", content = "Strictly return only valid json!"),
       )
     }
     return messages

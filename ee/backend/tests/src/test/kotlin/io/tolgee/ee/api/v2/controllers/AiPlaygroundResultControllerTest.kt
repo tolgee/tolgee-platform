@@ -28,8 +28,8 @@ class AiPlaygroundResultControllerTest : ProjectAuthControllerTest("/v2/projects
       "ai-playground-result",
       AiPlaygroundResultRequest(
         keys = testData.keys.map { it.self.id },
-        languages = listOf(testData.czech.self.id)
-      )
+        languages = listOf(testData.czech.self.id),
+      ),
     ).andIsOk.andAssertThatJson {
       node("_embedded.results[0].translation").isString.contains("Llm test response")
     }

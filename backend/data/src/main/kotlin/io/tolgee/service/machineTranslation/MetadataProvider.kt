@@ -17,8 +17,9 @@ class MetadataProvider(
   ): List<ExampleItem> {
     val closeKeyIds = metadataKey.keyId?.let { bigMetaService.getCloseKeyIds(it) }
 
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select new 
          io.tolgee.component.machineTranslation.metadata.ExampleItem(source.text, target.text, key.name, ns.name) 
       from Translation source
@@ -31,9 +32,8 @@ class MetadataProvider(
           and source.text is not null 
           and source.text <> ''
     """,
-      ExampleItem::class.java,
-    )
-      .setParameter("excludeKeyId", metadataKey.keyId)
+        ExampleItem::class.java,
+      ).setParameter("excludeKeyId", metadataKey.keyId)
       .setParameter("targetLanguageId", targetLanguage.id)
       .setParameter("sourceLanguageId", sourceLanguage.id)
       .setParameter("closeKeyIds", closeKeyIds)
@@ -46,20 +46,22 @@ class MetadataProvider(
     text: String,
     keyId: Long?,
   ): List<ExampleItem> {
-    return translationMemoryService.getSuggestions(
-      baseTranslationText = text,
-      isPlural = isPlural,
-      keyId = keyId,
-      targetLanguage = targetLanguage,
-      pageable = Pageable.ofSize(5),
-    ).content.map {
-      ExampleItem(
-        key = it.keyName,
-        keyNamespace = it.keyNamespace,
-        source = it.baseTranslationText,
-        target = it.targetTranslationText,
-      )
-    }
+    return translationMemoryService
+      .getSuggestions(
+        baseTranslationText = text,
+        isPlural = isPlural,
+        keyId = keyId,
+        targetLanguage = targetLanguage,
+        pageable = Pageable.ofSize(5),
+      ).content
+      .map {
+        ExampleItem(
+          key = it.keyName,
+          keyNamespace = it.keyNamespace,
+          source = it.baseTranslationText,
+          target = it.targetTranslationText,
+        )
+      }
   }
 
   private val bigMetaService: BigMetaService by lazy {

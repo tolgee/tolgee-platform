@@ -3,7 +3,7 @@ package io.tolgee.dtos.cacheable
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ThirdPartyAuthType
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 
 data class UserAccountDto(
   val name: String,

@@ -87,9 +87,10 @@ class PlausibleBusinessEventReporter(
       url = url,
       domain = plausibleProperties.domain!!,
       props =
-        data.data?.mapNotNull {
-          it.key to it.value.toString()
-        }?.toMap(),
+        data.data
+          ?.mapNotNull {
+            it.key to it.value.toString()
+          }?.toMap(),
     )
   }
 

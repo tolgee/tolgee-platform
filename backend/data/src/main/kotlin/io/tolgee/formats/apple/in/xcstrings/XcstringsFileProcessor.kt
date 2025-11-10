@@ -91,7 +91,7 @@ class XcstringsFileProcessor(
     localization: JsonNode,
   ) {
     val stringUnit = localization.get("stringUnit")
-    val xcState = stringUnit?.get("state")?.asText()
+    stringUnit?.get("state")?.asText()
 
     val translationValue = stringUnit?.get("value")?.asText()
 

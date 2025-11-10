@@ -171,7 +171,7 @@ class PromptFragmentsHelper {
         """.trimIndent(),
         type = PromptVariableType.FRAGMENT,
         option = BasicPromptOption.KEY_DESCRIPTION,
-      )
+      ),
     )
 
     result.add(

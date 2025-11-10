@@ -13,11 +13,11 @@ import io.tolgee.model.enums.SuggestionsMode
 import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
-import java.util.*
+import java.util.UUID
 
 class LanguagePermissionsTestData(
   val projectSuggestionsMode: SuggestionsMode = SuggestionsMode.DISABLED,
-  val projectTranslationProtection: TranslationProtection = TranslationProtection.NONE
+  val projectTranslationProtection: TranslationProtection = TranslationProtection.NONE,
 ) {
   lateinit var project: Project
   lateinit var englishLanguage: Language

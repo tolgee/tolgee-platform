@@ -24,7 +24,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.Size
-import java.util.*
+import java.util.Date
 
 @Entity
 @Table(

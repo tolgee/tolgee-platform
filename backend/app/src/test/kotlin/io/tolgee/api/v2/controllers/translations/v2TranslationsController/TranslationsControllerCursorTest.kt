@@ -33,12 +33,14 @@ class TranslationsControllerCursorTest : ProjectAuthControllerTest("/v2/projects
     userAccount = testData.user
     var cursor = ""
     performProjectAuthGet("/translations?sort=translations.de.text&sort=keyName&size=4")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("nextCursor").isString.satisfies { cursor = it }
       }
 
     performProjectAuthGet("/translations?sort=translations.de.text&size=4&sort=keyName&cursor=$cursor")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("c")
         node("_embedded.keys[3].keyName").isEqualTo("A key")
       }
@@ -52,13 +54,15 @@ class TranslationsControllerCursorTest : ProjectAuthControllerTest("/v2/projects
     userAccount = testData.user
     var cursor = ""
     performProjectAuthGet("/translations?sort=translations.de.text&sort=keyName&size=2&search=hello")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("Hello")
         node("nextCursor").isString.satisfies { cursor = it }
       }
 
     performProjectAuthGet("/translations?sort=translations.de.text&size=2&sort=keyName&search=hello&cursor=$cursor")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys").isArray.hasSize(1)
         node("_embedded.keys[0].keyName").isEqualTo("Hello 3")
       }
@@ -157,7 +161,8 @@ class TranslationsControllerCursorTest : ProjectAuthControllerTest("/v2/projects
         url += "&cursor=$cursor"
       }
 
-      performProjectAuthGet(url).andPrettyPrint
+      performProjectAuthGet(url)
+        .andPrettyPrint
         .andAssertThatJson {
           try {
             node("nextCursor").isString.satisfies { cursor = it }

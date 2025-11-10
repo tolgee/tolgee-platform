@@ -28,7 +28,7 @@ interface MtServiceConfigRepository : JpaRepository<MtServiceConfig, Long> {
   @Query(
     """
     delete from MtServiceConfig c where c.project.id = :projectId
-  """
+  """,
   )
   fun deleteAllByProjectId(projectId: Long): Int
 

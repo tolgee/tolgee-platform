@@ -3,7 +3,13 @@ package io.tolgee.ee.service.glossary
 import io.tolgee.component.machineTranslation.metadata.TranslationGlossaryItem
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.ProjectDto
-import io.tolgee.ee.data.glossary.*
+import io.tolgee.ee.data.glossary.CreateGlossaryTermRequest
+import io.tolgee.ee.data.glossary.CreateGlossaryTermWithTranslationRequest
+import io.tolgee.ee.data.glossary.GlossaryTermHighlight
+import io.tolgee.ee.data.glossary.Position
+import io.tolgee.ee.data.glossary.UpdateGlossaryTermRequest
+import io.tolgee.ee.data.glossary.UpdateGlossaryTermTranslationRequest
+import io.tolgee.ee.data.glossary.UpdateGlossaryTermWithTranslationRequest
 import io.tolgee.ee.repository.glossary.GlossaryTermRepository
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.glossary.Glossary
@@ -17,7 +23,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Locale
 
 @Primary
 @Service
@@ -74,9 +80,7 @@ class GlossaryTermService(
     return findAllWithTranslations(glossary)
   }
 
-  fun findAllWithTranslations(
-    glossary: Glossary,
-  ): List<GlossaryTerm> {
+  fun findAllWithTranslations(glossary: Glossary): List<GlossaryTerm> {
     return glossaryTermRepository.findByGlossaryWithTranslations(glossary)
   }
 
@@ -226,9 +230,7 @@ class GlossaryTermService(
   }
 
   @Transactional
-  fun deleteAllByGlossary(
-    glossary: Glossary,
-  ) {
+  fun deleteAllByGlossary(glossary: Glossary) {
     glossaryTermRepository.deleteAllByGlossary(glossary)
   }
 
@@ -249,11 +251,12 @@ class GlossaryTermService(
     val locale = Locale.forLanguageTag(languageTag) ?: Locale.ROOT
     val textLowercased = text.lowercase(locale)
 
-    return translations.flatMap { translation ->
-      findTranslationPositions(text, textLowercased, translation, locale).map { position ->
-        GlossaryTermHighlight(position, translation)
-      }
-    }.toSet()
+    return translations
+      .flatMap { translation ->
+        findTranslationPositions(text, textLowercased, translation, locale).map { position ->
+          GlossaryTermHighlight(position, translation)
+        }
+      }.toSet()
   }
 
   private fun findTranslationPositions(

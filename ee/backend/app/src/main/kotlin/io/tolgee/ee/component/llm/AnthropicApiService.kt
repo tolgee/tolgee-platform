@@ -18,7 +18,9 @@ import org.springframework.web.client.exchange
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class AnthropicApiService : AbstractLlmApiService(), Logging {
+class AnthropicApiService :
+  AbstractLlmApiService(),
+  Logging {
   override fun translate(
     params: LlmParams,
     config: LlmProviderInterface,
@@ -44,7 +46,10 @@ class AnthropicApiService : AbstractLlmApiService(), Logging {
       )
 
     return PromptResult(
-      response.body?.content?.firstOrNull()?.text
+      response.body
+        ?.content
+        ?.firstOrNull()
+        ?.text
         ?: throw LlmEmptyResponseException(),
       usage =
         response.body?.usage?.let {
@@ -93,7 +98,10 @@ class AnthropicApiService : AbstractLlmApiService(), Logging {
 
     if (params.shouldOutputJson) {
       messages.add(
-        RequestMessage(role = "user", content = "Return valid JSON and only JSON! Output message is parsed by machine!")
+        RequestMessage(
+          role = "user",
+          content = "Return valid JSON and only JSON! Output message is parsed by machine!",
+        ),
       )
     }
     return messages

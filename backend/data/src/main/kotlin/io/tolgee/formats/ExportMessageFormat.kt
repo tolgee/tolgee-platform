@@ -9,7 +9,9 @@ import io.tolgee.formats.paramConvertors.out.IcuToPythonPlaceholderConvertor
 import io.tolgee.formats.paramConvertors.out.IcuToRubyPlaceholderConvertor
 
 @Suppress("unused") // it's exposed to the API
-enum class ExportMessageFormat(val paramConvertorFactory: () -> FromIcuPlaceholderConvertor) {
+enum class ExportMessageFormat(
+  val paramConvertorFactory: () -> FromIcuPlaceholderConvertor,
+) {
   C_SPRINTF(paramConvertorFactory = { IcuToCPlaceholderConvertor() }),
   PHP_SPRINTF(paramConvertorFactory = { IcuToPhpPlaceholderConvertor() }),
   JAVA_STRING_FORMAT(paramConvertorFactory = { IcuToJavaPlaceholderConvertor() }),

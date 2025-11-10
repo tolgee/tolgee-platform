@@ -125,7 +125,10 @@ class ComputedPermissionDto(
       }
     }
 
-    private fun getExtendedPermission(base: IPermission, extendedScopes: Array<Scope>): IPermission {
+    private fun getExtendedPermission(
+      base: IPermission,
+      extendedScopes: Array<Scope>,
+    ): IPermission {
       return object : IPermission by base {
         override val scopes: Array<Scope> by lazy {
           (base.scopes + extendedScopes).toSet().toTypedArray()

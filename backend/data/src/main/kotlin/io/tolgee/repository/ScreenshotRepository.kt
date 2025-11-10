@@ -74,7 +74,5 @@ interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
     where k = :key
   """,
   )
-  fun getAllKeyScreenshotReferences(
-    key: Key,
-  ): List<KeyScreenshotReference>
+  fun getAllKeyScreenshotReferences(key: Key): List<KeyScreenshotReference>
 }

@@ -56,8 +56,9 @@ class SlackIntegrationDataProvider(
 
   private fun getKeyInfoViaEntityManager(keyId: Long): SlackKeyInfoDto {
     val result =
-      entityManager.createQuery(
-        """
+      entityManager
+        .createQuery(
+          """
       |SELECT k.id, k.name, t.name, n.name, km.description
       |FROM Key k
       |left join k.keyMeta km
@@ -65,10 +66,9 @@ class SlackIntegrationDataProvider(
       |left join k.namespace n
       |    WHERE k.id = :keyId
       |
-        """.trimMargin(),
-        Array::class.java,
-      )
-        .setParameter("keyId", keyId)
+          """.trimMargin(),
+          Array::class.java,
+        ).setParameter("keyId", keyId)
         .resultList
 
     return result
@@ -77,12 +77,15 @@ class SlackIntegrationDataProvider(
         SlackKeyInfoDto(
           id = it.key as Long,
           name = it.value.firstOrNull()?.get(1) as String,
-          tags = it.value.mapNotNull { row -> row[2] as String? }.toSet().nullIfEmpty(),
+          tags =
+            it.value
+              .mapNotNull { row -> row[2] as String? }
+              .toSet()
+              .nullIfEmpty(),
           namespace = it.value.firstOrNull()?.get(3) as String?,
           description = it.value.firstOrNull()?.get(4) as String?,
         )
-      }
-      .single()
+      }.single()
   }
 
   fun getTranslation(

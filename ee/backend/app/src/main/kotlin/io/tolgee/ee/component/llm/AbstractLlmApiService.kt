@@ -14,7 +14,6 @@ import org.springframework.web.client.RestTemplate
 val DEFAULT_ATTEMPTS = listOf(30)
 
 abstract class AbstractLlmApiService {
-
   private val logger = LoggerFactory.getLogger(AbstractLlmApiService::class.java)
 
   abstract fun translate(

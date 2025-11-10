@@ -23,7 +23,8 @@ class ExportFilePathProvider(
   }
 
   fun replaceExtensionAndFinalize(path: String): String {
-    return path.replaceExtensionIfEnabled(true)
+    return path
+      .replaceExtensionIfEnabled(true)
       .finalizePath()
   }
 
@@ -49,22 +50,22 @@ class ExportFilePathProvider(
     if (replaceExtension) {
       val placeholder = ExportFilePathPlaceholder.EXTENSION
 
-      return this.replace(
-        "/+\\.${placeholder.placeholderForRegex}".toRegex(),
-        ".${placeholder.placeholder}",
-      )
-        .replacePlaceholder(placeholder, extension)
+      return this
+        .replace(
+          "/+\\.${placeholder.placeholderForRegex}".toRegex(),
+          ".${placeholder.placeholder}",
+        ).replacePlaceholder(placeholder, extension)
     }
     return this
   }
 
   private fun String.replaceLanguageTag(languageTag: String): String {
-    return this.replacePlaceholder(ExportFilePathPlaceholder.LANGUAGE_TAG, languageTag)
+    return this
+      .replacePlaceholder(ExportFilePathPlaceholder.LANGUAGE_TAG, languageTag)
       .replacePlaceholder(
         ExportFilePathPlaceholder.ANDROID_LANGUAGE_TAG,
         convertBCP47ToAndroidResourceFormat(languageTag),
-      )
-      .replacePlaceholder(
+      ).replacePlaceholder(
         ExportFilePathPlaceholder.SNAKE_LANGUAGE_TAG,
         getSnakeLanguageTag(languageTag),
       )

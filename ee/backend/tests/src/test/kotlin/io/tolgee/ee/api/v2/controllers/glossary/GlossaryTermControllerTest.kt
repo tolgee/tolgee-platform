@@ -46,16 +46,16 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
   @Test
   fun `returns all glossary terms`() {
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms"
-    )
-      .andIsOk.andAssertThatJson {
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms",
+    ).andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaryTerms").isArray.hasSize(4)
         node("_embedded.glossaryTerms[0].id").isValidId
         inPath("_embedded.glossaryTerms[*].description").isArray.containsExactlyInAnyOrder(
           "Forbidden term",
           "The description",
           "The multiword term",
-          "Trademark"
+          "Trademark",
         )
       }
   }
@@ -70,9 +70,9 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
   @Test
   fun `returns all glossary terms with translations`() {
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/termsWithTranslations?sort=description,asc"
-    )
-      .andIsOk.andAssertThatJson {
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/termsWithTranslations?sort=description,asc",
+    ).andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaryTerms") {
           isArray.hasSize(4)
           node("[0].id").isValidId
@@ -102,15 +102,15 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
   fun `does not return all glossary terms with translations when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/termsWithTranslations"
-    )
-      .andIsBadRequest
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/termsWithTranslations",
+    ).andIsBadRequest
   }
 
   @Test
   fun `returns all glossary term ids`() {
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/termsIds")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.longList") {
           isArray.hasSize(4)
         }
@@ -127,9 +127,9 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
   @Test
   fun `returns single glossary term`() {
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsOk.andAssertThatJson {
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("description").isEqualTo("The description")
         node("flagNonTranslatable").isEqualTo(false)
@@ -143,24 +143,26 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
   fun `does not return single glossary term when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsBadRequest
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsBadRequest
   }
 
   @Test
   fun `creates glossary term`() {
-    val request = CreateGlossaryTermWithTranslationRequest().apply {
-      description = "New Term Description"
-      flagNonTranslatable = true
-      flagCaseSensitive = true
-      text = "New Term"
-    }
+    val request =
+      CreateGlossaryTermWithTranslationRequest().apply {
+        description = "New Term Description"
+        flagNonTranslatable = true
+        flagCaseSensitive = true
+        text = "New Term"
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("term.id").isValidId.satisfies({
           performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/$it")
-            .andIsOk.andAssertThatJson {
+            .andIsOk
+            .andAssertThatJson {
               node("id").isValidId.isEqualTo(it)
               node("description").isEqualTo("New Term Description")
               node("flagNonTranslatable").isEqualTo(true)
@@ -177,27 +179,29 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
   @Test
   fun `does not create glossary term when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
-    val request = CreateGlossaryTermWithTranslationRequest().apply {
-      description = "New Term Description"
-      text = "New Term"
-    }
+    val request =
+      CreateGlossaryTermWithTranslationRequest().apply {
+        description = "New Term Description"
+        text = "New Term"
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
       .andIsBadRequest
   }
 
   @Test
   fun `updates glossary term`() {
-    val request = UpdateGlossaryTermWithTranslationRequest().apply {
-      description = "Updated Description"
-      flagNonTranslatable = true
-      flagCaseSensitive = true
-      text = "Updated Term"
-    }
+    val request =
+      UpdateGlossaryTermWithTranslationRequest().apply {
+        description = "Updated Description"
+        flagNonTranslatable = true
+        flagCaseSensitive = true
+        text = "Updated Term"
+      }
     performAuthPut(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
-      request
-    )
-      .andIsOk.andAssertThatJson {
+      request,
+    ).andIsOk
+      .andAssertThatJson {
         node("term.id").isValidId
         node("term.description").isEqualTo("Updated Description")
         node("term.flagNonTranslatable").isEqualTo(true)
@@ -206,9 +210,9 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
       }
 
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsOk.andAssertThatJson {
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("description").isEqualTo("Updated Description")
         node("flagNonTranslatable").isEqualTo(true)
@@ -219,70 +223,66 @@ class GlossaryTermControllerTest : AuthorizedControllerTest() {
   @Test
   fun `does not update glossary term when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
-    val request = UpdateGlossaryTermWithTranslationRequest().apply {
-      description = "Updated Description"
-      text = "Updated Term"
-    }
+    val request =
+      UpdateGlossaryTermWithTranslationRequest().apply {
+        description = "Updated Description"
+        text = "Updated Term"
+      }
     performAuthPut(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
-      request
-    )
-      .andIsBadRequest
+      request,
+    ).andIsBadRequest
   }
 
   @Test
   fun `deletes glossary term`() {
     performAuthDelete(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsOk
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsOk
 
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsNotFound
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsNotFound
   }
 
   @Test
   fun `does not delete glossary term when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     performAuthDelete(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsBadRequest
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsBadRequest
   }
 
   @Test
   fun `deletes multiple glossary terms`() {
-    val request = DeleteMultipleGlossaryTermsRequest().apply {
-      termIds = setOf(testData.term.id, testData.trademarkTerm.id)
-    }
+    val request =
+      DeleteMultipleGlossaryTermsRequest().apply {
+        termIds = setOf(testData.term.id, testData.trademarkTerm.id)
+      }
     performAuthDelete("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
       .andIsOk
 
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsNotFound
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsNotFound
 
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.trademarkTerm.id}"
-    )
-      .andIsNotFound
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.trademarkTerm.id}",
+    ).andIsNotFound
 
     // Verify the third term still exists
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.forbiddenTerm.id}"
-    )
-      .andIsOk
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.forbiddenTerm.id}",
+    ).andIsOk
   }
 
   @Test
   fun `does not delete multiple glossary terms when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
-    val request = DeleteMultipleGlossaryTermsRequest().apply {
-      termIds = setOf(testData.term.id, testData.trademarkTerm.id)
-    }
+    val request =
+      DeleteMultipleGlossaryTermsRequest().apply {
+        termIds = setOf(testData.term.id, testData.trademarkTerm.id)
+      }
     performAuthDelete("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
       .andIsBadRequest
   }

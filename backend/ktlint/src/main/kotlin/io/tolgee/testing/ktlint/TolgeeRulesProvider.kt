@@ -22,11 +22,12 @@ import com.pinterest.ktlint.rule.engine.core.api.RuleSetId
 import io.tolgee.testing.ktlint.rules.JakartaTransientInEntities
 
 class TolgeeRulesProvider : RuleSetProviderV3(RULE_SET_ID) {
-  override fun getRuleProviders(): Set<RuleProvider> = setOf(
-    RuleProvider {
-      JakartaTransientInEntities()
-    }
-  )
+  override fun getRuleProviders(): Set<RuleProvider> =
+    setOf(
+      RuleProvider {
+        JakartaTransientInEntities()
+      },
+    )
 
   companion object {
     val RULE_SET_ID = RuleSetId(RULE_SET_ID_STR)

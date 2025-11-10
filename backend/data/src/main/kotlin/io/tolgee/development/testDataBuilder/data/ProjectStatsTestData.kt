@@ -18,32 +18,35 @@ class ProjectStatsTestData : BaseTestData() {
       addKeys()
 
       val organizationOwner =
-        root.addUserAccount {
-          name = "franta"
-          username = "franta"
-        }.self
+        root
+          .addUserAccount {
+            name = "franta"
+            username = "franta"
+          }.self
 
       val organizationMember =
-        root.addUserAccount {
-          name = "jindra"
-          username = "jindra"
-        }.self
+        root
+          .addUserAccount {
+            name = "jindra"
+            username = "jindra"
+          }.self
 
-      root.addOrganization {
-        name = "org"
-        projectBuilder.self.organizationOwner = this
-      }.build buildOrganization@{
-        addRole {
-          user = organizationOwner
-          type = OrganizationRoleType.OWNER
-          organization = this@buildOrganization.self
+      root
+        .addOrganization {
+          name = "org"
+          projectBuilder.self.organizationOwner = this
+        }.build buildOrganization@{
+          addRole {
+            user = organizationOwner
+            type = OrganizationRoleType.OWNER
+            organization = this@buildOrganization.self
+          }
+          addRole {
+            user = organizationMember
+            type = OrganizationRoleType.MEMBER
+            organization = this@buildOrganization.self
+          }
         }
-        addRole {
-          user = organizationMember
-          type = OrganizationRoleType.MEMBER
-          organization = this@buildOrganization.self
-        }
-      }
 
       addPermission {
         type = ProjectPermissionType.MANAGE

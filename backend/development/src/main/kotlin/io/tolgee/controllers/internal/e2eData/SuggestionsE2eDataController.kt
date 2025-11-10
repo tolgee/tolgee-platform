@@ -26,7 +26,7 @@ class SuggestionsE2eDataController(
     @RequestParam
     translationProtection: TranslationProtection = TranslationProtection.NONE,
     @RequestParam
-    disableTranslation: Boolean = false
+    disableTranslation: Boolean = false,
   ): StandardTestDataResult {
     val data = SuggestionsTestData()
     data.projectBuilder.self.suggestionsMode = suggestionsMode

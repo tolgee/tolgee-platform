@@ -133,27 +133,33 @@ class OpenApiGroupBuilder(
 
     builder.addOpenApiCustomizer { openApi ->
       val declaringClasses =
-        operationHandlers.mapNotNull {
-          it.value.method.declaringClass
-        }.toSet()
+        operationHandlers
+          .mapNotNull {
+            it.value.method.declaringClass
+          }.toSet()
 
       val tagOrders =
-        declaringClasses.flatMap { clazz ->
-          val orderAnnotation = clazz.getAnnotation(OpenApiOrderExtension::class.java) ?: return@flatMap listOf()
-          classTags[clazz]?.map { it to orderAnnotation.order } ?: listOf()
-        }.groupBy { it.first }.map {
-          val orders = it.value.map { it.second }.toSet()
-          if (orders.size > 1) {
-            throw RuntimeException("Multiple orders for tag ${it.key}: $orders")
-          }
-          it.key to orders.first()
-        }.toMap()
+        declaringClasses
+          .flatMap { clazz ->
+            val orderAnnotation = clazz.getAnnotation(OpenApiOrderExtension::class.java) ?: return@flatMap listOf()
+            classTags[clazz]?.map { it to orderAnnotation.order } ?: listOf()
+          }.groupBy { it.first }
+          .map {
+            val orders = it.value.map { it.second }.toSet()
+            if (orders.size > 1) {
+              throw RuntimeException("Multiple orders for tag ${it.key}: $orders")
+            }
+            it.key to orders.first()
+          }.toMap()
 
       val tagsMap = openApi?.tags?.associateBy { it.name }?.toMutableMap() ?: mutableMapOf()
       tagOrders.forEach { (tagName, order) ->
         val tag =
           tagsMap.computeIfAbsent(tagName) {
-            val tag = io.swagger.v3.oas.models.tags.Tag().name(tagName)
+            val tag =
+              io.swagger.v3.oas.models.tags
+                .Tag()
+                .name(tagName)
             openApi.tags.add(tag)
             tag
           }

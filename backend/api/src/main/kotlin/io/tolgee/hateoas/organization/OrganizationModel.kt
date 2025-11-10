@@ -15,4 +15,5 @@ open class OrganizationModel(
   override val basePermissions: PermissionModel,
   override val currentUserRole: OrganizationRoleType?,
   override var avatar: Avatar?,
-) : RepresentationModel<OrganizationModel>(), IOrganizationModel
+) : RepresentationModel<OrganizationModel>(),
+  IOrganizationModel

@@ -3,7 +3,8 @@ package io.tolgee.api.v2.controllers.batch
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobService
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -78,8 +79,14 @@ class BatchMoveToNamespaceTest : ProjectAuthControllerTest("/v2/projects/") {
     batchJobTestBase.waitForJobCompleted(result)
 
     val jobId = result.jobId
-    keyService.get(key.id).namespace.assert.isNull()
-    batchJobService.findJobDto(jobId)?.status.assert.isEqualTo(BatchJobStatus.FAILED)
+    keyService
+      .get(key.id)
+      .namespace.assert
+      .isNull()
+    batchJobService
+      .findJobDto(jobId)
+      ?.status.assert
+      .isEqualTo(BatchJobStatus.FAILED)
   }
 
   val ResultActions.jobId: Long

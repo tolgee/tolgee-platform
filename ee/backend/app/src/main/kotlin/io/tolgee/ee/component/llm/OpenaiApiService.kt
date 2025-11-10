@@ -23,7 +23,10 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : AbstractLlmApiService(), Logging {
+class OpenaiApiService(
+  private val jacksonObjectMapper: ObjectMapper,
+) : AbstractLlmApiService(),
+  Logging {
   override fun defaultAttempts(): List<Int> = listOf(60, 120)
 
   override fun translate(
@@ -65,26 +68,32 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
         "${config.apiUrl}/openai/deployments/${config.deployment}/chat/completions?api-version=2025-01-01-preview"
       }
 
-    val response: ResponseEntity<ResponseBody> = try {
-      restTemplate.exchange(
-        url,
-        HttpMethod.POST,
-        request,
-        ResponseBody::class.java
-      )
-    } catch (e: HttpClientErrorException) {
-      if (e.statusCode == HttpStatus.BAD_REQUEST) {
-        val body = parseErrorBody(e)
-        if (body?.get("error")?.get("code")?.asText() == "content_filter") {
-          throw LlmContentFilterException()
+    val response: ResponseEntity<ResponseBody> =
+      try {
+        restTemplate.exchange(
+          url,
+          HttpMethod.POST,
+          request,
+          ResponseBody::class.java,
+        )
+      } catch (e: HttpClientErrorException) {
+        if (e.statusCode == HttpStatus.BAD_REQUEST) {
+          val body = parseErrorBody(e)
+          if (body?.get("error")?.get("code")?.asText() == "content_filter") {
+            throw LlmContentFilterException()
+          }
         }
+        throw e
       }
-      throw e
-    }
 
     return PromptResult(
-      response = response.body?.choices?.firstOrNull()?.message?.content
-        ?: throw LlmEmptyResponseException(),
+      response =
+        response.body
+          ?.choices
+          ?.firstOrNull()
+          ?.message
+          ?.content
+          ?: throw LlmEmptyResponseException(),
       usage =
         response.body?.usage?.let {
           PromptResponseUsageDto(
@@ -123,7 +132,7 @@ class OpenaiApiService(private val jacksonObjectMapper: ObjectMapper) : Abstract
 
     if (params.shouldOutputJson) {
       content.add(
-        RequestMessageContent(type = "text", text = "Strictly return only valid json!")
+        RequestMessageContent(type = "text", text = "Strictly return only valid json!"),
       )
     }
 

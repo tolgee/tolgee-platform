@@ -150,7 +150,8 @@ class FileProcessorContextMockUtil {
 
   fun getSavedTranslations(): List<ImportTranslation> {
     @Suppress("UNCHECKED_CAST")
-    return Mockito.mockingDetails(importServiceMock)
+    return Mockito
+      .mockingDetails(importServiceMock)
       .invocations
       .filter { it.method == ImportService::saveTranslations.javaMethod }
       .flatMap { it.arguments.first() as List<ImportTranslation> }

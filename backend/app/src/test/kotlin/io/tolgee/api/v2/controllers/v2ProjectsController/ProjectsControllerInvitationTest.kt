@@ -8,7 +8,13 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.project.LanguagePermissions
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.EmailTestUtil
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andGetContentAsString
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -70,14 +76,23 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `invites user to project with languages (translate)`() {
     val result =
-      invitationTestUtil.perform { getLang ->
-        type = ProjectPermissionType.TRANSLATE
-        languages = setOf(getLang("en"))
-      }.andIsOk
+      invitationTestUtil
+        .perform { getLang ->
+          type = ProjectPermissionType.TRANSLATE
+          languages = setOf(getLang("en"))
+        }.andIsOk
     executeInNewTransaction {
       val invitation = invitationTestUtil.getInvitation(result)
-      invitation.permission?.translateLanguages!!.map { it.tag }.assert.contains("en") // stores
-      invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
+      invitation.permission
+        ?.translateLanguages!!
+        .map { it.tag }
+        .assert
+        .contains("en") // stores
+      invitation.permission
+        ?.viewLanguages!!
+        .map { it.tag }
+        .assert
+        .contains() // ads also to view
     }
   }
 
@@ -85,49 +100,61 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `invites user to project with languages (review)`() {
     val result =
-      invitationTestUtil.perform { getLang ->
-        type = ProjectPermissionType.REVIEW
-        translateLanguages = setOf(getLang("en"))
-        stateChangeLanguages = setOf(getLang("en"))
-      }.andIsOk
+      invitationTestUtil
+        .perform { getLang ->
+          type = ProjectPermissionType.REVIEW
+          translateLanguages = setOf(getLang("en"))
+          stateChangeLanguages = setOf(getLang("en"))
+        }.andIsOk
     executeInNewTransaction {
       val invitation = invitationTestUtil.getInvitation(result)
-      invitation.permission?.stateChangeLanguages!!.map { it.tag }.assert.contains("en") // stores
-      invitation.permission?.viewLanguages!!.map { it.tag }.assert.contains() // ads also to view
+      invitation.permission
+        ?.stateChangeLanguages!!
+        .map { it.tag }
+        .assert
+        .contains("en") // stores
+      invitation.permission
+        ?.viewLanguages!!
+        .map { it.tag }
+        .assert
+        .contains() // ads also to view
     }
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `cannot set different languages (review)`() {
-    val result =
-      invitationTestUtil.perform { getLang ->
+    invitationTestUtil
+      .perform { getLang ->
         type = ProjectPermissionType.REVIEW
         translateLanguages = setOf(getLang("en"))
         stateChangeLanguages = setOf()
-      }
-        .andIsBadRequest
-        .andHasErrorMessage(
-          Message.CANNOT_SET_DIFFERENT_TRANSLATE_AND_STATE_CHANGE_LANGUAGES_FOR_LEVEL_BASED_PERMISSIONS,
-        )
+      }.andIsBadRequest
+      .andHasErrorMessage(
+        Message.CANNOT_SET_DIFFERENT_TRANSLATE_AND_STATE_CHANGE_LANGUAGES_FOR_LEVEL_BASED_PERMISSIONS,
+      )
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `validates languages and permission (lower)`() {
-    invitationTestUtil.perform { getLang ->
-      type = ProjectPermissionType.VIEW
-      translateLanguages = setOf(getLang("en"))
-    }.andIsBadRequest.andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
+    invitationTestUtil
+      .perform { getLang ->
+        type = ProjectPermissionType.VIEW
+        translateLanguages = setOf(getLang("en"))
+      }.andIsBadRequest
+      .andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `validates languages and permission (higher)`() {
-    invitationTestUtil.perform { getLang ->
-      type = ProjectPermissionType.EDIT
-      translateLanguages = setOf(getLang("en"))
-    }.andIsBadRequest.andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
+    invitationTestUtil
+      .perform { getLang ->
+        type = ProjectPermissionType.EDIT
+        translateLanguages = setOf(getLang("en"))
+      }.andIsBadRequest
+      .andHasErrorMessage(Message.ONLY_TRANSLATE_OR_REVIEW_PERMISSION_ACCEPTS_TRANSLATE_LANGUAGES)
   }
 
   @Test

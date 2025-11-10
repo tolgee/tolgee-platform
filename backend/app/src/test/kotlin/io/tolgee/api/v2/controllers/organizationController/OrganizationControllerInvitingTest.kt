@@ -6,7 +6,13 @@ import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.EmailTestUtil
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andGetContentAsString
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.satisfies
 import io.tolgee.model.Organization
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
@@ -57,7 +63,8 @@ class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
         )
       loginAsUser("hellouser")
       performAuthGet("/v2/organizations/${organization.id}/invitations")
-        .andIsOk.andAssertThatJson {
+        .andIsOk
+        .andAssertThatJson {
           node("_embedded.organizationInvitations").let { projectsNode ->
             projectsNode.isArray.hasSize(1)
             projectsNode.node("[0].id").isEqualTo(invitation.id)

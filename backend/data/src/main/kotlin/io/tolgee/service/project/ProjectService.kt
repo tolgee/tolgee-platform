@@ -75,7 +75,7 @@ class ProjectService(
   private val organizationService: OrganizationService,
   private val screenshotService: ScreenshotService,
   @Lazy
-  private val batchJobService: BatchJobService
+  private val batchJobService: BatchJobService,
 ) : Logging {
   @set:Autowired
   @set:Lazy
@@ -158,7 +158,8 @@ class ProjectService(
     dto: EditProjectRequest,
   ): Project {
     val project =
-      projectRepository.findById(id)
+      projectRepository
+        .findById(id)
         .orElseThrow { NotFoundException() }!!
 
     if (!dto.useNamespaces && project.namespaces.isNotEmpty()) {
@@ -209,19 +210,22 @@ class ProjectService(
   }
 
   fun findAllPermitted(userAccount: UserAccount): List<ProjectDTO> {
-    return projectRepository.findAllPermitted(userAccount.id).asSequence()
+    return projectRepository
+      .findAllPermitted(userAccount.id)
+      .asSequence()
       .map { result ->
         val project = result[0] as Project
         val permission = result[1] as Permission?
         val organization = result[2] as Organization
         val organizationRole = result[3] as OrganizationRole?
         val scopes =
-          permissionService.computeProjectPermission(
-            organizationRole?.type,
-            organization.basePermission,
-            permission,
-            userAccount.role ?: UserAccount.Role.USER,
-          ).scopes
+          permissionService
+            .computeProjectPermission(
+              organizationRole?.type,
+              organization.basePermission,
+              permission,
+              userAccount.role ?: UserAccount.Role.USER,
+            ).scopes
         fromEntityAndPermission(project, scopes)
       }.toList()
   }

@@ -4,10 +4,10 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ResolvableImportTestData
 import io.tolgee.dtos.request.ImageUploadInfoDto
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
+import io.tolgee.dtos.request.importKeysResolvable.ResolvableTranslationResolution
 import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableItemRequest
 import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableRequest
 import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableTranslationRequest
-import io.tolgee.dtos.request.importKeysResolvable.ResolvableTranslationResolution
 import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -38,89 +38,102 @@ class SingleStepImportControllerResolvableTest : ProjectAuthControllerTest("/v2/
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
     userAccount = testData.user
-    uploadedImageId = imageUploadService.store(
-      generateImage(),
-      userAccount!!,
-      ImageUploadInfoDto(location = "My cool frame"),
-    ).id
+    uploadedImageId =
+      imageUploadService
+        .store(
+          generateImage(),
+          userAccount!!,
+          ImageUploadInfoDto(location = "My cool frame"),
+        ).id
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `it imports screenshots`() {
-    val request = SingleStepImportResolvableRequest(
-      keys = listOf(
-        SingleStepImportResolvableItemRequest(
-          name = "key-1",
-          namespace = "namespace-1",
-          translations = mapOf(
-            "de" to SingleStepImportResolvableTranslationRequest(
-              text = "changed",
-              resolution = ResolvableTranslationResolution.OVERRIDE,
-            ),
-            "en" to SingleStepImportResolvableTranslationRequest(
-              text = "new",
-              resolution = ResolvableTranslationResolution.EXPECT_NO_CONFLICT,
-            )
-          ),
-          screenshots = listOf(
-            KeyScreenshotDto(
-              text = "Oh oh Oh",
-              uploadedImageId = uploadedImageId,
-              positions = listOf(
-                KeyInScreenshotPositionDto(
-                  x = 100,
-                  y = 150,
-                  width = 80,
-                  height = 100,
+    val request =
+      SingleStepImportResolvableRequest(
+        keys =
+          listOf(
+            SingleStepImportResolvableItemRequest(
+              name = "key-1",
+              namespace = "namespace-1",
+              translations =
+                mapOf(
+                  "de" to
+                    SingleStepImportResolvableTranslationRequest(
+                      text = "changed",
+                      resolution = ResolvableTranslationResolution.OVERRIDE,
+                    ),
+                  "en" to
+                    SingleStepImportResolvableTranslationRequest(
+                      text = "new",
+                      resolution = ResolvableTranslationResolution.EXPECT_NO_CONFLICT,
+                    ),
                 ),
-                KeyInScreenshotPositionDto(
-                  x = 500,
-                  y = 200,
-                  width = 30,
-                  height = 20,
-                )
-              )
-            )
-          )
-        ),
-        SingleStepImportResolvableItemRequest(
-          name = "key-2",
-          namespace = "namespace-1",
-          screenshots = listOf(
-            KeyScreenshotDto(
-              text = "Oh oh Oh",
-              uploadedImageId = uploadedImageId,
-              positions = listOf(
-                KeyInScreenshotPositionDto(
-                  x = 100,
-                  y = 150,
-                  width = 80,
-                  height = 100,
+              screenshots =
+                listOf(
+                  KeyScreenshotDto(
+                    text = "Oh oh Oh",
+                    uploadedImageId = uploadedImageId,
+                    positions =
+                      listOf(
+                        KeyInScreenshotPositionDto(
+                          x = 100,
+                          y = 150,
+                          width = 80,
+                          height = 100,
+                        ),
+                        KeyInScreenshotPositionDto(
+                          x = 500,
+                          y = 200,
+                          width = 30,
+                          height = 20,
+                        ),
+                      ),
+                  ),
                 ),
-              ),
+            ),
+            SingleStepImportResolvableItemRequest(
+              name = "key-2",
+              namespace = "namespace-1",
+              screenshots =
+                listOf(
+                  KeyScreenshotDto(
+                    text = "Oh oh Oh",
+                    uploadedImageId = uploadedImageId,
+                    positions =
+                      listOf(
+                        KeyInScreenshotPositionDto(
+                          x = 100,
+                          y = 150,
+                          width = 80,
+                          height = 100,
+                        ),
+                      ),
+                  ),
+                ),
+            ),
+            SingleStepImportResolvableItemRequest(
+              name = "nonexisting",
+              namespace = "namespace-1",
+              screenshots =
+                listOf(
+                  KeyScreenshotDto(
+                    uploadedImageId = uploadedImageId,
+                    positions =
+                      listOf(
+                        KeyInScreenshotPositionDto(
+                          x = 100,
+                          y = 150,
+                          width = 80,
+                          height = 100,
+                        ),
+                      ),
+                  ),
+                ),
             ),
           ),
-        ),
-        SingleStepImportResolvableItemRequest(
-          name = "nonexisting",
-          namespace = "namespace-1",
-          screenshots = listOf(
-            KeyScreenshotDto(
-              uploadedImageId = uploadedImageId,
-              positions = listOf(
-                KeyInScreenshotPositionDto(
-                  x = 100,
-                  y = 150,
-                  width = 80,
-                  height = 100,
-                ),
-              ),
-            ),
-          ),
-        ),
       )
-    )
 
     performProjectAuthPost(
       "single-step-import-resolvable",
@@ -144,27 +157,32 @@ class SingleStepImportControllerResolvableTest : ProjectAuthControllerTest("/v2/
   @Test
   @ProjectJWTAuthTestMethod
   fun `it imports unreviewed or new translations`() {
-    val request = SingleStepImportResolvableRequest(
-      keys = listOf(
-        SingleStepImportResolvableItemRequest(
-          name = "key-1",
-          namespace = "namespace-1",
-          translations = mapOf(
-            "de" to SingleStepImportResolvableTranslationRequest(
-              text = "changed",
-              resolution = ResolvableTranslationResolution.OVERRIDE,
+    val request =
+      SingleStepImportResolvableRequest(
+        keys =
+          listOf(
+            SingleStepImportResolvableItemRequest(
+              name = "key-1",
+              namespace = "namespace-1",
+              translations =
+                mapOf(
+                  "de" to
+                    SingleStepImportResolvableTranslationRequest(
+                      text = "changed",
+                      resolution = ResolvableTranslationResolution.OVERRIDE,
+                    ),
+                  "en" to
+                    SingleStepImportResolvableTranslationRequest(
+                      text = "new",
+                      resolution = ResolvableTranslationResolution.EXPECT_NO_CONFLICT,
+                    ),
+                ),
             ),
-            "en" to SingleStepImportResolvableTranslationRequest(
-              text = "new",
-              resolution = ResolvableTranslationResolution.EXPECT_NO_CONFLICT,
-            )
-          )
-        ),
+          ),
       )
-    )
     performProjectAuthPost(
       "single-step-import-resolvable",
-      request
+      request,
     ).andIsOk.andAssertThatJson {
       node("unresolvedConflicts").isNull()
     }
@@ -178,23 +196,27 @@ class SingleStepImportControllerResolvableTest : ProjectAuthControllerTest("/v2/
   @Test
   @ProjectJWTAuthTestMethod
   fun `fails on expect_no_conflict`() {
-    val request = SingleStepImportResolvableRequest(
-      keys = listOf(
-        SingleStepImportResolvableItemRequest(
-          name = "key-1",
-          namespace = "namespace-1",
-          translations = mapOf(
-            "de" to SingleStepImportResolvableTranslationRequest(
-              text = "new",
-              resolution = ResolvableTranslationResolution.EXPECT_NO_CONFLICT,
+    val request =
+      SingleStepImportResolvableRequest(
+        keys =
+          listOf(
+            SingleStepImportResolvableItemRequest(
+              name = "key-1",
+              namespace = "namespace-1",
+              translations =
+                mapOf(
+                  "de" to
+                    SingleStepImportResolvableTranslationRequest(
+                      text = "new",
+                      resolution = ResolvableTranslationResolution.EXPECT_NO_CONFLICT,
+                    ),
+                ),
             ),
-          )
-        ),
+          ),
       )
-    )
     performProjectAuthPost(
       "single-step-import-resolvable",
-      request
+      request,
     ).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("expect_no_conflict_failed")
       node("params[0].name").isEqualTo("key-1")

@@ -45,8 +45,8 @@ class IcuToPoMessageConvertorTest {
         "{0, plural, one {# dog} other {# dogs}}",
         IcuToPhpPlaceholderConvertor(),
         forceIsPlural = true,
-      )
-        .convert().formsResult
+      ).convert()
+        .formsResult
 
     forms!![0].assert.isEqualTo("%d dog")
     forms[1].assert.isEqualTo("%d dogs")

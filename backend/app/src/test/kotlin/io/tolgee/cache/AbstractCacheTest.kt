@@ -31,7 +31,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cache.CacheManager
 import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy
-import java.util.*
+import java.util.Optional
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractCacheTest : AbstractSpringTest() {
@@ -70,7 +70,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
         this.get(cacheManager) as CacheManager
       }
 
-  private final val paramsEnGoogle by lazy {
+  private val paramsEnGoogle by lazy {
     TranslationParams(
       text = "Hello",
       textRaw = "raw-text",
@@ -78,7 +78,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
       sourceLanguageTag = "en",
       targetLanguageTag = "de",
       serviceInfo = MtServiceInfo(MtServiceType.GOOGLE, null),
-      isBatch = false
+      isBatch = false,
     )
   }
 
@@ -123,10 +123,12 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
     whenever(permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(1, 1))
       .then { permission }
     permissionService.find(1, 1)
-    Mockito.verify(permissionRepository, times(1))
+    Mockito
+      .verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
     permissionService.find(1, 1)
-    Mockito.verify(permissionRepository, times(1))
+    Mockito
+      .verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(1, 1)
   }
 
@@ -139,14 +141,16 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
     ).then { permission }
 
     permissionService.find(organizationId = 1)
-    Mockito.verify(permissionRepository, times(1))
+    Mockito
+      .verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(
         null,
         null,
         organizationId = 1,
       )
     permissionService.find(organizationId = 1)
-    Mockito.verify(permissionRepository, times(1))
+    Mockito
+      .verify(permissionRepository, times(1))
       .findOneByProjectIdAndUserIdAndOrganizationId(
         null,
         null,

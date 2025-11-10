@@ -2,7 +2,7 @@ package io.tolgee.ee.service.eeSubscription
 
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
-import java.util.*
+import java.util.Date
 
 class SubscriptionFromModelAssigner(
   private val subscription: EeSubscription,

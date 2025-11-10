@@ -35,7 +35,7 @@ class RateLimitService(
 ) {
   private val cache: Cache by lazy {
     cacheManager.getCache(Caches.RATE_LIMITS)
-    ?: throw RuntimeException("Could not initialize cache!")
+      ?: throw RuntimeException("Could not initialize cache!")
   }
 
   /**

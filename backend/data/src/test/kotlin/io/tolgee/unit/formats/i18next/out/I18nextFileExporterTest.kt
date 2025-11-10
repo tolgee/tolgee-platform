@@ -50,7 +50,7 @@ class I18nextFileExporterTest {
     return getExporter(
       built.translations,
       false,
-      exportParams = ExportParams(format = ExportFormat.JSON_I18NEXT)
+      exportParams = ExportParams(format = ExportFormat.JSON_I18NEXT),
     )
   }
 
@@ -76,7 +76,7 @@ class I18nextFileExporterTest {
     val exporter =
       getExporter(
         getTranslationWithColon(),
-        exportParams = ExportParams(format = ExportFormat.JSON_I18NEXT)
+        exportParams = ExportParams(format = ExportFormat.JSON_I18NEXT),
       )
     val data = getExported(exporter)
     data.assertFile(
@@ -135,10 +135,11 @@ class I18nextFileExporterTest {
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       objectMapper = jacksonObjectMapper(),
       customPrettyPrinter = CustomPrettyPrinter(),
-      filePathProvider = ExportFilePathProvider(
-        template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
-        extension = exportParams.format.extension,
-      )
+      filePathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+          extension = exportParams.format.extension,
+        ),
     )
   }
 }

@@ -23,11 +23,11 @@ import org.springframework.core.Ordered
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
-import kotlin.jvm.java
 
 abstract class AbstractAuthorizationInterceptor(
   val allowGlobalRoutes: Boolean = true,
-) : HandlerInterceptor, Ordered {
+) : HandlerInterceptor,
+  Ordered {
   override fun preHandle(
     request: HttpServletRequest,
     response: HttpServletResponse,

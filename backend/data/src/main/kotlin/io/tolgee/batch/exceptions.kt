@@ -7,8 +7,7 @@ open class ChunkFailedException(
   message: Message,
   val successfulTargets: List<Any>,
   override val cause: Throwable,
-) :
-  ExceptionWithMessage(message)
+) : ExceptionWithMessage(message)
 
 open class FailedDontRequeueException(
   message: Message,
@@ -25,5 +24,6 @@ open class RequeueWithDelayException(
   val maxRetries: Int = 3,
 ) : ChunkFailedException(message, successfulTargets, cause)
 
-open class CannotFinalizeActivityException(cause: Throwable) :
-  ExceptionWithMessage(Message.CANNOT_FINALIZE_ACTIVITY, cause = cause)
+open class CannotFinalizeActivityException(
+  cause: Throwable,
+) : ExceptionWithMessage(Message.CANNOT_FINALIZE_ACTIVITY, cause = cause)

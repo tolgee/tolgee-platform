@@ -23,4 +23,6 @@ fun getPluralDataOrNull(locale: ULocale): PluralLanguage? {
   return PluralData.DATA[locale.language]
 }
 
-class NoPluralDataException(val languageTag: String) : RuntimeException("No plural data for language tag $languageTag")
+class NoPluralDataException(
+  val languageTag: String,
+) : RuntimeException("No plural data for language tag $languageTag")

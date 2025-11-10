@@ -22,7 +22,6 @@ import jakarta.validation.constraints.Size
 @ActivityLoggedEntity
 @ActivityReturnsExistence
 class Label : StandardAuditModel() {
-
   @field:NotEmpty
   @field:Size(max = 100)
   @Column(length = 100, nullable = false)

@@ -9,13 +9,11 @@ import java.util.Date
 
 @Component
 class TranslationSuggestionModelAssembler(
-  private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler
-) :
-  RepresentationModelAssemblerSupport<TranslationSuggestion, TranslationSuggestionModel>(
-  TranslationsController::class.java,
-  TranslationSuggestionModel::class.java,
-) {
-
+  private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
+) : RepresentationModelAssemblerSupport<TranslationSuggestion, TranslationSuggestionModel>(
+    TranslationsController::class.java,
+    TranslationSuggestionModel::class.java,
+  ) {
   override fun toModel(entity: TranslationSuggestion): TranslationSuggestionModel {
     return TranslationSuggestionModel(
       id = entity.id,

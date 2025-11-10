@@ -15,7 +15,6 @@ abstract class TableExporter(
   val isProjectIcuPlaceholdersEnabled: Boolean = true,
   val pathProvider: ExportFilePathProvider,
 ) : FileExporter {
-
   val messageFormat
     get() = exportParams.messageFormat ?: ExportMessageFormat.ICU
 
@@ -23,18 +22,19 @@ abstract class TableExporter(
     get() = messageFormat.paramConvertorFactory
 
   val entries =
-    translations.map {
-      val converted = convertMessage(it.text, it.key.isPlural)
-      val path =
-        pathProvider.getFilePath(it.key.namespace)
-      val entry =
-        TableEntry(
-          key = it.key.name,
-          language = it.languageTag,
-          value = converted,
-        )
-      path to entry
-    }.groupBy({ it.first }, { it.second })
+    translations
+      .map {
+        val converted = convertMessage(it.text, it.key.isPlural)
+        val path =
+          pathProvider.getFilePath(it.key.namespace)
+        val entry =
+          TableEntry(
+            key = it.key.name,
+            language = it.languageTag,
+            value = converted,
+          )
+        path to entry
+      }.groupBy({ it.first }, { it.second })
 
   fun convertMessage(
     text: String?,

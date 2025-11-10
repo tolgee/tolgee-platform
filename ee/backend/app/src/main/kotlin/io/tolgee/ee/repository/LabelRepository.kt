@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
 interface LabelRepository : JpaRepository<Label, Long> {
-
   @Query(
     """
     from Label l
@@ -15,13 +14,26 @@ interface LabelRepository : JpaRepository<Label, Long> {
     and (:search is null or lower(l.name) like lower(concat('%', cast(:search AS text), '%')))
   """,
   )
-  fun findByProjectId(projectId: Long, pageable: Pageable, search: String?): Page<Label>
+  fun findByProjectId(
+    projectId: Long,
+    pageable: Pageable,
+    search: String?,
+  ): Page<Label>
 
-  fun findAllByProjectIdAndIdIn(projectId: Long, ids: List<Long>): List<Label>
+  fun findAllByProjectIdAndIdIn(
+    projectId: Long,
+    ids: List<Long>,
+  ): List<Label>
 
-  fun findAllByProjectIdAndName(projectId: Long, name: String): List<Label>
+  fun findAllByProjectIdAndName(
+    projectId: Long,
+    name: String,
+  ): List<Label>
 
-  fun findByProjectIdAndId(projectId: Long, labelId: Long): Label?
+  fun findByProjectIdAndId(
+    projectId: Long,
+    labelId: Long,
+  ): Label?
 
   @Query(
     """
@@ -29,7 +41,7 @@ interface LabelRepository : JpaRepository<Label, Long> {
     join l.translations t
     where t.id in :translationIds
     order by l.name
-    """
+    """,
   )
   fun findByTranslationsIdIn(translationIds: List<Long>): List<Label>
 

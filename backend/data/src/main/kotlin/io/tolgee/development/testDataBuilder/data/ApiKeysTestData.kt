@@ -8,7 +8,7 @@ import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
-import java.util.*
+import java.util.Date
 
 class ApiKeysTestData : BaseTestData() {
   lateinit var frantisekDobrota: UserAccount

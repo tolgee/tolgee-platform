@@ -34,7 +34,8 @@ class AiPromptCustomizationControllerTest : ProjectAuthControllerTest("/v2/proje
   @ProjectJWTAuthTestMethod
   fun `get project prompt customization`() {
     performProjectAuthGet("ai-prompt-customization")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("description").isEqualTo(testData.project.aiTranslatorPromptDescription)
       }
   }
@@ -66,7 +67,8 @@ class AiPromptCustomizationControllerTest : ProjectAuthControllerTest("/v2/proje
   @ProjectJWTAuthTestMethod
   fun `get language prompt customizations`() {
     performProjectAuthGet("language-ai-prompt-customizations")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.promptCustomizations") {
           isArray.hasSize(2)
           node("[0].description").isEqualTo(testData.czech.aiTranslatorPromptDescription)

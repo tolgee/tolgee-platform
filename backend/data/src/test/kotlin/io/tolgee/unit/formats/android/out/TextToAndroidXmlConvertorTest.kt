@@ -55,7 +55,8 @@ class TextToAndroidXmlConvertorTest {
   fun `unsupported tags are converted to CDATA nodes`() {
     var nodes =
       "What a <unsupported attr=\"https://example.com\">link ' %% \" </unsupported>."
-        .convertedNodes().toList()
+        .convertedNodes()
+        .toList()
     nodes[0].assertTextContent("What a ")
     nodes[1].nodeAssertCdataNodeText(
       "<unsupported attr=\\\"https://example.com\\\">link \\' \\% \\\" " +
@@ -128,13 +129,15 @@ class TextToAndroidXmlConvertorTest {
 
   @Test
   fun `escapes special characters in malformed XML`() {
-    "<tag attr='value\">text with ' and \" characters</tag".assertSingleTextNode()
+    "<tag attr='value\">text with ' and \" characters</tag"
+      .assertSingleTextNode()
       .isEqualTo("<tag attr=\\'value\\\">text with \\' and \\\" characters</tag")
   }
 
   @Test
   fun `escapes special characters in malformed XML #2`() {
-    "text ' text <>".assertSingleTextNode()
+    "text ' text <>"
+      .assertSingleTextNode()
       .isEqualTo("text \\' text <>")
   }
 

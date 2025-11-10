@@ -8,7 +8,12 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.DeleteKeysRequest
-import io.tolgee.development.testDataBuilder.data.*
+import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
+import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
+import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
+import io.tolgee.development.testDataBuilder.data.SuggestionsTestData
+import io.tolgee.development.testDataBuilder.data.WebhooksTestData
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.fixtures.waitFor

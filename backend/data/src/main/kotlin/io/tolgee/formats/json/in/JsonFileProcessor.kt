@@ -1,4 +1,4 @@
- package io.tolgee.formats.json.`in`
+package io.tolgee.formats.json.`in`
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -33,7 +33,7 @@ class JsonFileProcessor(
     ).process()
   }
 
-    private fun getFormat(data: Any?): ImportFormat {
-      return context.mapping?.format ?: JsonImportFormatDetector().detectFormat(data)
-    }
+  private fun getFormat(data: Any?): ImportFormat {
+    return context.mapping?.format ?: JsonImportFormatDetector().detectFormat(data)
   }
+}

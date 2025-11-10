@@ -50,7 +50,17 @@ import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
@@ -168,7 +178,7 @@ class ProjectsController(
     summary = "Get users with project access",
     description = "Returns all project users, who have permission to access project",
   )
-  @RequiresProjectPermissions([ Scope.MEMBERS_VIEW ])
+  @RequiresProjectPermissions([Scope.MEMBERS_VIEW])
   @RequiresSuperAuthentication
   @AllowApiAccess
   fun getAllUsers(
@@ -177,21 +187,21 @@ class ProjectsController(
     @RequestParam("search", required = false) search: String?,
     @ParameterObject filters: UserAccountFilters = UserAccountFilters(),
   ): PagedModel<UserAccountInProjectModel> {
-    return userAccountService.getAllInProjectWithPermittedLanguages(
-      projectId,
-      pageable,
-      search,
-      filters = filters,
-    ).let {
-        users ->
-      userArrayResourcesAssembler.toModel(users, userAccountInProjectModelAssembler)
-    }
+    return userAccountService
+      .getAllInProjectWithPermittedLanguages(
+        projectId,
+        pageable,
+        search,
+        filters = filters,
+      ).let { users ->
+        userArrayResourcesAssembler.toModel(users, userAccountInProjectModelAssembler)
+      }
   }
 
   @PutMapping("/{projectId:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Upload project avatar")
   @ResponseStatus(HttpStatus.OK)
-  @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
+  @RequiresProjectPermissions([Scope.PROJECT_EDIT])
   @AllowApiAccess
   fun uploadAvatar(
     @RequestParam("avatar") avatar: MultipartFile,
@@ -205,7 +215,7 @@ class ProjectsController(
   @DeleteMapping("/{projectId:[0-9]+}/avatar")
   @Operation(summary = "Delete project avatar")
   @ResponseStatus(HttpStatus.OK)
-  @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
+  @RequiresProjectPermissions([Scope.PROJECT_EDIT])
   @AllowApiAccess
   fun removeAvatar(
     @PathVariable projectId: Long,
@@ -216,7 +226,7 @@ class ProjectsController(
 
   @PutMapping("/{projectId:[0-9]+}/users/{userId}/set-permissions/{permissionType}")
   @Operation(summary = "Set direct permission to user")
-  @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
+  @RequiresProjectPermissions([Scope.MEMBERS_EDIT])
   @RequiresSuperAuthentication
   fun setUsersPermissions(
     @PathVariable("userId") userId: Long,
@@ -239,7 +249,7 @@ class ProjectsController(
       "Removes user's direct project permission, explicitly set for the project. " +
         "User will have now base permissions from organization or no permission if they're not organization member.",
   )
-  @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
+  @RequiresProjectPermissions([Scope.MEMBERS_EDIT])
   @RequiresSuperAuthentication
   fun removeDirectProjectPermissions(
     @PathVariable("userId") userId: Long,
@@ -253,7 +263,7 @@ class ProjectsController(
 
   @PutMapping("/{projectId:[0-9]+}/users/{userId}/revoke-access")
   @Operation(summary = "Revoke project access")
-  @RequiresProjectPermissions([ Scope.MEMBERS_EDIT ])
+  @RequiresProjectPermissions([Scope.MEMBERS_EDIT])
   @RequiresSuperAuthentication
   fun revokePermission(
     @PathVariable("projectId") projectId: Long,

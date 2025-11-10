@@ -10,17 +10,17 @@ class SimpleGlossaryWithStatsModel(
   val name: String,
   @Schema(
     description = "The primary language code used for terms (e.g., 'en' for English)",
-    example = "en"
+    example = "en",
   )
   val baseLanguageTag: String,
   @Schema(
     description = "The name of one project using this glossary (can be shown as a preview)",
-    example = "My Project"
+    example = "My Project",
   )
   val firstAssignedProjectName: String?,
   @Schema(
     description = "Total number of projects currently using this glossary",
-    example = "69"
+    example = "69",
   )
   val assignedProjectsCount: Long,
 ) : RepresentationModel<SimpleGlossaryWithStatsModel>()

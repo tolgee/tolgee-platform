@@ -90,14 +90,15 @@ class AutoTranslateTestData : BaseTestData() {
   }
 
   fun createAnotherThisIsBeautifulKey(): Key {
-    return projectBuilder.addKey {
-      name = "another-this-is-b"
-    }.build {
-      addTranslation {
-        language = englishLanguage
-        text = "This is beautiful"
-      }
-    }.self
+    return projectBuilder
+      .addKey {
+        name = "another-this-is-b"
+      }.build {
+        addTranslation {
+          language = englishLanguage
+          text = "This is beautiful"
+        }
+      }.self
   }
 
   fun disableAutoTranslating() {

@@ -16,7 +16,9 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import kotlin.time.measureTime
 
-class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Logging {
+class BigMetaControllerTest :
+  ProjectAuthControllerTest("/v2/projects/"),
+  Logging {
   lateinit var testData: BigMetaTestData
 
   @Autowired
@@ -96,8 +98,7 @@ class BigMetaControllerTest : ProjectAuthControllerTest("/v2/projects/"), Loggin
     val distancesPerKey =
       stored.associate { storedKey ->
         val filtered =
-          distances.filter {
-              distance ->
+          distances.filter { distance ->
             distance.key1Id == storedKey.id || distance.key2Id == storedKey.id
           }
         storedKey.id to filtered

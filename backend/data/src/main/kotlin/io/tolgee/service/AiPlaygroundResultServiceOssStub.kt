@@ -10,12 +10,15 @@ class AiPlaygroundResultServiceOssStub : AiPlaygroundResultService {
     keyId: Long,
     languageId: Long,
     translation: String?,
-    contextDescription: String?
+    contextDescription: String?,
   ) {
     // No-op: OSS doesn't have AI Playground functionality, so there are no results to set
   }
 
-  override fun removeResults(projectId: Long, userId: Long) {
+  override fun removeResults(
+    projectId: Long,
+    userId: Long,
+  ) {
     // No-op: OSS doesn't have AI Playground functionality, so there are no results to remove
   }
 

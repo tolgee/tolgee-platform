@@ -10,7 +10,7 @@ class SimpleGlossaryModel(
   val name: String,
   @Schema(
     description = "Language tag for default translations for terms",
-    example = "en"
+    example = "en",
   )
   val baseLanguageTag: String,
 ) : RepresentationModel<SimpleGlossaryModel>()

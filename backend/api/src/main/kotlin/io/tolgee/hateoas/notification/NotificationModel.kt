@@ -7,7 +7,7 @@ import io.tolgee.model.notifications.NotificationType
 import io.tolgee.service.queryBuilders.Cursorable
 import org.springframework.hateoas.RepresentationModel
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 
 data class NotificationModel(
   val id: Long,
@@ -16,7 +16,9 @@ data class NotificationModel(
   var originatingUser: SimpleUserAccountModel? = null,
   var linkedTask: TaskModel? = null,
   var createdAt: Date?,
-) : RepresentationModel<NotificationModel>(), Serializable, Cursorable {
+) : RepresentationModel<NotificationModel>(),
+  Serializable,
+  Cursorable {
   override fun toCursorValue(property: String): String? =
     when (property) {
       "id" -> id.toString()

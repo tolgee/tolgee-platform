@@ -35,7 +35,8 @@ import org.springframework.web.servlet.HandlerInterceptor
 class AuthenticationInterceptor(
   private val authenticationFacade: AuthenticationFacade,
   private val authenticationProperties: AuthenticationProperties,
-) : HandlerInterceptor, Ordered {
+) : HandlerInterceptor,
+  Ordered {
   override fun preHandle(
     request: HttpServletRequest,
     response: HttpServletResponse,

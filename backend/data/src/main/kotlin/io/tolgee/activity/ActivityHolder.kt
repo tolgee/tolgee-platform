@@ -10,7 +10,9 @@ import jakarta.annotation.PreDestroy
 import org.springframework.context.ApplicationContext
 import kotlin.reflect.KClass
 
-open class ActivityHolder(val applicationContext: ApplicationContext) {
+open class ActivityHolder(
+  val applicationContext: ApplicationContext,
+) {
   open var activity: ActivityType? = null
     set(value) {
       field = value

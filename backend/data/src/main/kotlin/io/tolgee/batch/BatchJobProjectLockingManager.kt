@@ -137,9 +137,10 @@ class BatchJobProjectLockingManager(
 
     // First priority: Find actually RUNNING jobs from database
     // This prevents phantom locks from PENDING jobs that have chunks in queue but aren't executing
-    val runningJob = jobs.find { incompleteJob ->
-      incompleteJob.status == io.tolgee.model.batch.BatchJobStatus.RUNNING
-    }
+    val runningJob =
+      jobs.find { incompleteJob ->
+        incompleteJob.status == io.tolgee.model.batch.BatchJobStatus.RUNNING
+      }
     if (runningJob != null) {
       logger.debug("Found RUNNING job ${runningJob.jobId} for project $projectId")
       return runningJob.jobId
@@ -149,7 +150,9 @@ class BatchJobProjectLockingManager(
     val unlockedChunkCounts =
       batchJobService
         .getAllUnlockedChunksForJobs(jobs.map { it.jobId })
-        .groupBy { it.batchJobId }.map { it.key to it.value.count() }.toMap()
+        .groupBy { it.batchJobId }
+        .map { it.key to it.value.count() }
+        .toMap()
     // we are looking for a job that has already started and preferably for a locked one
     val startedJob = jobs.find { it.totalChunks != unlockedChunkCounts[it.jobId] }
     if (startedJob != null) {

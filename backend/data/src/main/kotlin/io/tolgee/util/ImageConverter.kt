@@ -11,7 +11,6 @@ import kotlin.math.sqrt
 class ImageConverter(
   imageStream: InputStream,
 ) : ImageProcessor(imageStream) {
-
   val originalDimension: Dimension by lazy {
     Dimension(sourceBufferedImage.width, sourceBufferedImage.height)
   }
@@ -54,8 +53,16 @@ class ImageConverter(
       RenderingHints.VALUE_INTERPOLATION_BILINEAR,
     )
     g.drawImage(
-      sourceBufferedImage, 0, 0, targetDimension.width, targetDimension.height, 0, 0, sourceBufferedImage.width,
-      sourceBufferedImage.height, null,
+      sourceBufferedImage,
+      0,
+      0,
+      targetDimension.width,
+      targetDimension.height,
+      0,
+      0,
+      sourceBufferedImage.width,
+      sourceBufferedImage.height,
+      null,
     )
     g.dispose()
     return resized

@@ -13,17 +13,15 @@ data class SingleStepImportResolvableRequest(
         "but will try to update protected REVIEWED translations (fails only if user has no permission)\n",
   )
   val overrideMode: OverrideMode? = OverrideMode.RECOMMENDED,
-
   @Schema(
     description =
       "If `false`, import will apply all `non-failed` overrides and reports `unresolvedConflict`\n." +
         "If `true`, import will fail completely on unresolved conflict and won't apply any changes. " +
-        "Unresolved conflicts are reported in the `params` of the error response"
+        "Unresolved conflicts are reported in the `params` of the error response",
   )
   val errorOnUnresolvedConflict: Boolean? = null,
-
   @get:Schema(
     description = "List of keys to import",
   )
-  var keys: List<SingleStepImportResolvableItemRequest> = listOf()
+  var keys: List<SingleStepImportResolvableItemRequest> = listOf(),
 )

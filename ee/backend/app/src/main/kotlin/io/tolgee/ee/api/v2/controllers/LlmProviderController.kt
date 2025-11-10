@@ -7,14 +7,23 @@ import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
 import io.tolgee.ee.api.v2.hateoas.assemblers.LlmProviderModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.LlmProviderSimpleModelAssembler
 import io.tolgee.ee.service.LlmProviderService
-import io.tolgee.hateoas.llmProvider.*
+import io.tolgee.hateoas.llmProvider.LlmProviderModel
+import io.tolgee.hateoas.llmProvider.LlmProviderSimpleModel
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -30,7 +39,7 @@ class LlmProviderController(
   @UseDefaultPermissions
   @Operation(
     summary = "Get all available llm providers",
-    description = "Combines llm providers from organization-specific and server-configured"
+    description = "Combines llm providers from organization-specific and server-configured",
   )
   fun getAvailableProviders(
     @PathVariable organizationId: Long,

@@ -21,4 +21,5 @@ class WebhookConfigModel(
     description = """Date of the last webhook request.""",
   )
   var lastExecuted: Long?,
-) : RepresentationModel<WebhookConfigModel>(), Serializable
+) : RepresentationModel<WebhookConfigModel>(),
+  Serializable

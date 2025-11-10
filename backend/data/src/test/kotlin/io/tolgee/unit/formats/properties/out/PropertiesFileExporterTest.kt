@@ -154,10 +154,11 @@ class PropertiesFileExporterTest {
       translations = translations,
       exportParams = params,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
-      filePathProvider = ExportFilePathProvider(
-        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-        extension = params.format?.extension ?: "properties",
-      )
+      filePathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+          extension = params.format?.extension ?: "properties",
+        ),
     )
   }
 

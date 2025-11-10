@@ -31,7 +31,6 @@ import io.tolgee.util.getSafeNamespace
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
-import kotlin.collections.forEach
 
 class StoredDataImporter(
   applicationContext: ApplicationContext,
@@ -170,7 +169,7 @@ class StoredDataImporter(
     return ImportResult(
       unresolvedConflicts.nullIfEmpty()?.let {
         getUnresolvedConflicts(unresolvedConflicts)
-      }
+      },
     )
   }
 
@@ -179,11 +178,10 @@ class StoredDataImporter(
       screenshots,
       existingKeys = importDataManager.existingKeys.values.toList(),
       newKeys = newKeys,
-      addKeyToSave = {
-        namespace: String?, key: String ->
+      addKeyToSave = { namespace: String?, key: String ->
         this.addKeyToSave(namespace, key)
       },
-      projectId = import.project.id
+      projectId = import.project.id,
     )
   }
 
@@ -193,10 +191,11 @@ class StoredDataImporter(
    */
   private fun throwOnUnresolvedConflicts(unresolvedConflicts: List<ImportTranslation>) {
     // when force mode is `NO_FORCE` default value is true, otherwise false
-    val shouldThrowError = errorOnUnresolvedConflict ?: when (forceMode) {
-      ForceMode.NO_FORCE -> true
-      else -> false
-    }
+    val shouldThrowError =
+      errorOnUnresolvedConflict ?: when (forceMode) {
+        ForceMode.NO_FORCE -> true
+        else -> false
+      }
 
     if (unresolvedConflicts.isNotEmpty() && shouldThrowError) {
       throw ImportConflictNotResolvedException(params = getUnresolvedConflicts(unresolvedConflicts))
@@ -212,10 +211,11 @@ class StoredDataImporter(
   private fun deleteOtherKeys() {
     if ((importSettings as? SingleStepImportRequest)?.removeOtherKeys == true) {
       val namespaces = import.files.map { getSafeNamespace(it.namespace) }.toSet()
-      val existingKeys = importDataManager.existingKeys.entries.filter {
-        // taking only keys from namespaces that are included in the import
-        namespaces.contains(getSafeNamespace(it.value.namespace?.name))
-      }
+      val existingKeys =
+        importDataManager.existingKeys.entries.filter {
+          // taking only keys from namespaces that are included in the import
+          namespaces.contains(getSafeNamespace(it.value.namespace?.name))
+        }
       val importedKeys = importDataManager.storedKeys.entries.map { (pair) -> Pair(pair.first.namespace, pair.second) }
       val otherKeys = existingKeys.filter { existing -> !importedKeys.contains(existing.key) }
       if (otherKeys.isNotEmpty()) {
@@ -268,7 +268,7 @@ class StoredDataImporter(
         keyName = it.key.name,
         keyNamespace = conflict.key.namespace?.name,
         language = conflict.language.tag,
-        isOverridable = ConflictType.isOverridable(it.conflictType)
+        isOverridable = ConflictType.isOverridable(it.conflictType),
       )
     }
   }
@@ -328,7 +328,7 @@ class StoredDataImporter(
   }
 
   private fun addAllKeys() {
-    importDataManager.storedKeys.map { (fileNamePair, importKey) ->
+    importDataManager.storedKeys.map { (_, importKey) ->
       if (!importKey.shouldBeImported) {
         return@map
       }

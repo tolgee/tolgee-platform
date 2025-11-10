@@ -117,18 +117,20 @@ class CsvFileExporterTest {
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
   ): CsvFileExporter {
-    val exportParams = ExportParams().apply {
-      format = ExportFormat.CSV
-    }
+    val exportParams =
+      ExportParams().apply {
+        format = ExportFormat.CSV
+      }
 
     return CsvFileExporter(
       translations = translations,
       exportParams = exportParams,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
-      filePathProvider = ExportFilePathProvider(
-        template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
-        extension = exportParams.format.extension,
-      )
+      filePathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+          extension = exportParams.format.extension,
+        ),
     )
   }
 }

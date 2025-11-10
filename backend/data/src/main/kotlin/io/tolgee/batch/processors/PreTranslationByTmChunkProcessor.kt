@@ -24,11 +24,12 @@ class PreTranslationByTmChunkProcessor(
     val languages = languageService.findByIdIn(parameters.targetLanguageIds)
 
     val preparedChunk =
-      chunk.map { keyId ->
-        languages.map { language ->
-          BatchTranslationTargetItem(keyId, language.id)
-        }
-      }.flatten()
+      chunk
+        .map { keyId ->
+          languages.map { language ->
+            BatchTranslationTargetItem(keyId, language.id)
+          }
+        }.flatten()
 
     genericAutoTranslationChunkProcessor.process(
       job,

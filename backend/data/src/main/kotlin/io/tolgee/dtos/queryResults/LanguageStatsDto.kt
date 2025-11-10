@@ -1,7 +1,7 @@
 package io.tolgee.dtos.queryResults
 
 import io.tolgee.api.ILanguageStats
-import java.util.*
+import java.util.Date
 
 data class LanguageStatsDto(
   override val languageId: Long,

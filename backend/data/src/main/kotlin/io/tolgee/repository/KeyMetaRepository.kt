@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional
 @Repository
 @Lazy
 interface KeyMetaRepository : JpaRepository<KeyMeta?, Long?> {
-
   @Modifying
   @Transactional
   @Query("delete from KeyMeta km where km.key in (select k from km.key k where k.project.id = :projectId)")

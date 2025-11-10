@@ -24,7 +24,9 @@ class AppleStringsStringsdictExporter(
     preparedFiles.forEach {
       if (it.value.hasSingle) {
         val path = stringsFilePathProvider.replaceExtensionAndFinalize(it.key)
-        result[path] = it.value.stringsWriter.result.byteInputStream()
+        result[path] =
+          it.value.stringsWriter.result
+            .byteInputStream()
       }
       if (it.value.hasPlural) {
         val path = stringsdictFilePathProvider.replaceExtensionAndFinalize(it.key)

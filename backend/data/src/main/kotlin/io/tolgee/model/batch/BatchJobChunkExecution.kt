@@ -15,7 +15,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
-import java.util.*
+import java.util.Date
 
 @Entity
 @Table(

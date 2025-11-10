@@ -131,10 +131,12 @@ class AuthenticationFilter(
         // Bypass user validity check
         return
       }
+
       false -> {
         // Always fail user validity check
         throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)
       }
+
       null -> {
         if (!ssoDelegate.verifyUserSsoAccountAvailable(userDto)) {
           throw AuthExpiredException(Message.SSO_CANT_VERIFY_USER)

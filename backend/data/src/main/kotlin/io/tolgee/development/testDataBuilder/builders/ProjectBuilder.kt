@@ -2,7 +2,15 @@ package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.development.testDataBuilder.builders.slack.SlackConfigBuilder
-import io.tolgee.model.*
+import io.tolgee.model.AiPlaygroundResult
+import io.tolgee.model.ApiKey
+import io.tolgee.model.AutoTranslationConfig
+import io.tolgee.model.Language
+import io.tolgee.model.Organization
+import io.tolgee.model.Permission
+import io.tolgee.model.Project
+import io.tolgee.model.Prompt
+import io.tolgee.model.Screenshot
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
@@ -31,7 +39,10 @@ class ProjectBuilder(
     Project().apply {
       if (organizationOwner == null) {
         if (testDataBuilder.data.organizations.size > 0) {
-          this.organizationOwner = testDataBuilder.data.organizations.first().self
+          this.organizationOwner =
+            testDataBuilder.data.organizations
+              .first()
+              .self
         }
         return@apply
       }
@@ -215,12 +226,18 @@ class ProjectBuilder(
 
   fun addAiPlaygroundResult(ft: FT<AiPlaygroundResult>) = addOperation(data.aiPlaygroundResults, ft)
 
-  val onlyUser get() = this.self.organizationOwner.memberRoles.singleOrNull()?.user
+  val onlyUser
+    get() =
+      this.self.organizationOwner.memberRoles
+        .singleOrNull()
+        ?.user
 
   fun getTranslation(
     key: Key,
     languageTag: String,
   ): Translation? {
-    return this.data.translations.find { it.self.key == key && it.self.language.tag == languageTag }?.self
+    return this.data.translations
+      .find { it.self.key == key && it.self.language.tag == languageTag }
+      ?.self
   }
 }

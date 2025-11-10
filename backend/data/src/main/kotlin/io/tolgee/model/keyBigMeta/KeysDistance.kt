@@ -28,7 +28,8 @@ class KeysDistance(
   var key1Id: Long = 0,
   @Id
   var key2Id: Long = 0,
-) : AuditModel(), Persistable<KeysDistanceId> {
+) : AuditModel(),
+  Persistable<KeysDistanceId> {
   @ManyToOne(fetch = FetchType.LAZY)
   lateinit var project: Project
 

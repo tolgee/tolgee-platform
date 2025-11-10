@@ -5,7 +5,7 @@ import io.tolgee.util.logger
 import jakarta.annotation.PreDestroy
 import org.springframework.stereotype.Component
 import java.time.Duration
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ScheduledFuture
 

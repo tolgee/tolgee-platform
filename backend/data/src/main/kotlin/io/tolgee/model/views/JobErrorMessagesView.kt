@@ -1,7 +1,7 @@
 package io.tolgee.model.views
 
 import io.tolgee.constants.Message
-import java.util.*
+import java.util.Date
 
 interface JobErrorMessagesView {
   val batchJobId: Long

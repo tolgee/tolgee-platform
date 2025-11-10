@@ -75,6 +75,7 @@ class PathParser(
               }
             }
           }
+
           else -> {
             state = State.NORMAL
             buffer.append(ch, index)

@@ -53,6 +53,7 @@ class CleanDbTestListener : TestExecutionListener {
                   throw e
                 }
               }
+
               else -> throw e
             }
             logger.info(

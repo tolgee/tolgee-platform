@@ -1,7 +1,7 @@
 package io.tolgee.hateoas.project.stats
 
 import org.springframework.hateoas.RepresentationModel
-import java.util.*
+import java.util.Date
 
 open class LanguageStatsModel(
   val languageId: Long?,

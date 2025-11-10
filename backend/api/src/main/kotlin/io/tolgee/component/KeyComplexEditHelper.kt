@@ -81,11 +81,13 @@ class KeyComplexEditHelper(
   }
 
   private val existingTranslations: MutableMap<String, Translation> by lazy {
-    translationService.getKeyTranslations(
-      languages,
-      projectHolder.projectEntity,
-      key,
-    ).associateBy { it.language.tag }.toMutableMap()
+    translationService
+      .getKeyTranslations(
+        languages,
+        projectHolder.projectEntity,
+        key,
+      ).associateBy { it.language.tag }
+      .toMutableMap()
   }
 
   fun doComplexUpdate(): KeyWithDataModel {
@@ -177,14 +179,15 @@ class KeyComplexEditHelper(
       )
       translationService.setStateBatch(
         states =
-          modifiedStates!!.map {
-            val translation =
-              existingTranslations[languageById(it.key).tag] ?: throw NotFoundException(
-                Message.TRANSLATION_NOT_FOUND,
-              )
+          modifiedStates!!
+            .map {
+              val translation =
+                existingTranslations[languageById(it.key).tag] ?: throw NotFoundException(
+                  Message.TRANSLATION_NOT_FOUND,
+                )
 
-            translation to it.value
-          }.toMap(),
+              translation to it.value
+            }.toMap(),
       )
     }
   }
@@ -202,9 +205,10 @@ class KeyComplexEditHelper(
 
       val existingTranslationsByTag = getExistingTranslationsByTag()
       val oldTranslations =
-        modifiedTranslations.map {
-          it.key to existingTranslationsByTag[it.key]
-        }.toMap()
+        modifiedTranslations
+          .map {
+            it.key to existingTranslationsByTag[it.key]
+          }.toMap()
 
       val translations =
         translationService.setForKey(
@@ -297,7 +301,8 @@ class KeyComplexEditHelper(
     isNamespaceChanged = key.namespace?.name != dto.namespace
     isDescriptionChanged = key.keyMeta?.description != dto.description
     isIsPluralChanged =
-      dto.isPlural != null && key.isPlural != dto.isPlural ||
+      dto.isPlural != null &&
+      key.isPlural != dto.isPlural ||
       (dto.isPlural == true && key.pluralArgName != dto.pluralArgName)
     isCustomDataChanged = dto.custom != null &&
       objectMapper.writeValueAsString(key.keyMeta?.custom) != objectMapper.writeValueAsString(dto.custom)
@@ -327,23 +332,25 @@ class KeyComplexEditHelper(
 
   private fun prepareModifiedTranslations() {
     modifiedTranslations =
-      dto.translations?.filter { it.value != existingTranslations[it.key]?.text }
+      dto.translations
+        ?.filter { it.value != existingTranslations[it.key]?.text }
         ?.mapKeys { languageByTag(it.key).id }
   }
 
   private fun prepareModifiedStates() {
     modifiedStates =
-      dto.states?.filter {
-        // When updating translation, we automatically set it to TRANSLATED state
-        // While executing complex edit, user can prevent this by setting the state to REVIEWED
-        // In that case, we have to add it to modified states too
-        val tryingToKeepReviewState =
-          modifiedTranslations?.get(languageByTag(it.key).id) != null &&
-            it.value.translationState == TranslationState.REVIEWED
+      dto.states
+        ?.filter {
+          // When updating translation, we automatically set it to TRANSLATED state
+          // While executing complex edit, user can prevent this by setting the state to REVIEWED
+          // In that case, we have to add it to modified states too
+          val tryingToKeepReviewState =
+            modifiedTranslations?.get(languageByTag(it.key).id) != null &&
+              it.value.translationState == TranslationState.REVIEWED
 
-        it.value.translationState != existingTranslations[it.key]?.state || tryingToKeepReviewState
-      }
-        ?.map { languageByTag(it.key).id to it.value.translationState }?.toMap()
+          it.value.translationState != existingTranslations[it.key]?.state || tryingToKeepReviewState
+        }?.map { languageByTag(it.key).id to it.value.translationState }
+        ?.toMap()
   }
 
   private fun languageByTag(tag: String): Language {

@@ -10,7 +10,11 @@ import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Label_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.Translation_
-import jakarta.persistence.criteria.*
+import jakarta.persistence.criteria.CriteriaBuilder
+import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.ListJoin
+import jakarta.persistence.criteria.Path
+import jakarta.persistence.criteria.Predicate
 
 class QueryTranslationFiltering(
   private val params: TranslationFilters,
@@ -62,7 +66,10 @@ class QueryTranslationFiltering(
     }
   }
 
-  fun apply(language: LanguageDto, commentsExpression: Expression<Long>) {
+  fun apply(
+    language: LanguageDto,
+    commentsExpression: Expression<Long>,
+  ) {
     if (params.filterHasSuggestionsInLang?.contains(language.tag) == true) {
       queryBase.translationConditions.add(cb.greaterThan(commentsExpression, cb.literal(0L)))
     }
@@ -75,16 +82,18 @@ class QueryTranslationFiltering(
   fun apply(languageSourceChangeMap: MutableMap<String, Expression<Boolean>>) {
     val conditions =
       (
-        params.filterOutdatedLanguage?.mapNotNull {
-          val field = languageSourceChangeMap[it] ?: return@mapNotNull null
-          cb.isTrue(field)
-        }?.toList() ?: listOf()
-        ) + (
-        params.filterNotOutdatedLanguage?.mapNotNull {
-          val field = languageSourceChangeMap[it] ?: return@mapNotNull null
-          cb.isFalse(field)
-        }?.toList() ?: listOf()
-        )
+        params.filterOutdatedLanguage
+          ?.mapNotNull {
+            val field = languageSourceChangeMap[it] ?: return@mapNotNull null
+            cb.isTrue(field)
+          }?.toList() ?: listOf()
+      ) + (
+        params.filterNotOutdatedLanguage
+          ?.mapNotNull {
+            val field = languageSourceChangeMap[it] ?: return@mapNotNull null
+            cb.isFalse(field)
+          }?.toList() ?: listOf()
+      )
 
     if (conditions.isNotEmpty()) {
       queryBase.translationConditions.add(cb.or(*conditions.toTypedArray()))
@@ -100,9 +109,10 @@ class QueryTranslationFiltering(
         val subquery = this.queryBase.query.subquery(Long::class.java)
         val subqueryRoot = subquery.from(Label::class.java)
         subquery.select(subqueryRoot.get(Label_.id))
-        val conditions = labelIds.map { label ->
-          cb.equal(subqueryRoot.get(Label_.id), label.labelId)
-        }
+        val conditions =
+          labelIds.map { label ->
+            cb.equal(subqueryRoot.get(Label_.id), label.labelId)
+          }
         subquery.where(
           cb.and(
             cb.or(*conditions.toTypedArray()),
@@ -135,7 +145,8 @@ class QueryTranslationFiltering(
 
   private val filterByLabelMap: Map<String, List<TranslationFilterByLabel>>? by lazy {
     params.filterLabel?.let { filterLabels ->
-      TranslationFilterByLabel.parseList(filterLabels)
+      TranslationFilterByLabel
+        .parseList(filterLabels)
         .let { filterLabelsParsed ->
           val filterByLabelMap = mutableMapOf<String, MutableList<TranslationFilterByLabel>>()
 

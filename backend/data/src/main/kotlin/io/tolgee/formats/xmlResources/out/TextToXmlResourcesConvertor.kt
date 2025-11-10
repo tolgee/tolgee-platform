@@ -13,7 +13,6 @@ import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
 import java.io.StringReader
 import java.io.StringWriter
-import java.lang.Exception
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
@@ -21,8 +20,6 @@ import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
-import kotlin.collections.forEach
-import kotlin.sequences.forEach
 
 class TextToXmlResourcesConvertor(
   private val document: Document,
@@ -40,7 +37,12 @@ class TextToXmlResourcesConvertor(
     escapeTextNodes()
 
     return ContentToAppend(
-      children = parsed.childNodes.item(0).childNodes.asSequence().toList(),
+      children =
+        parsed.childNodes
+          .item(0)
+          .childNodes
+          .asSequence()
+          .toList(),
     )
   }
 
@@ -227,7 +229,10 @@ class TextToXmlResourcesConvertor(
   val isAndroid
     get() = format == ExportFormat.ANDROID_XML
 
-  data class ContentToAppend(val text: String? = null, val children: Collection<Node>? = null)
+  data class ContentToAppend(
+    val text: String? = null,
+    val children: Collection<Node>? = null,
+  )
 
   private data class AnalysisResult(
     val containsXml: Boolean,

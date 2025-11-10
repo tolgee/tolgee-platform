@@ -23,7 +23,8 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
     loginAsUser(users[1].username)
     users[1].organizationRoles[0].organization.let { organization ->
       performAuthGet("/v2/organizations/${organization!!.slug}/projects")
-        .andIsOk.andAssertThatJson.let {
+        .andIsOk.andAssertThatJson
+        .let {
           it.node("_embedded.projects").let { projectsNode ->
             projectsNode.isArray.hasSize(3)
             projectsNode.node("[1].name").isEqualTo("user-2's organization 1 project 2")
@@ -40,7 +41,8 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
     loginAsUser(users[1].username)
     users[1].organizationRoles[0].organization.let { organization ->
       performAuthGet("/v2/organizations/${organization!!.id}/projects")
-        .andIsOk.andAssertThatJson.let {
+        .andIsOk.andAssertThatJson
+        .let {
           it.node("_embedded.projects").let { projectsNode ->
             projectsNode.isArray.hasSize(3)
             projectsNode.node("[1].name").isEqualTo("user-2's organization 1 project 2")
@@ -57,7 +59,8 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
     loginAsUser(users[1].username)
     users[1].organizationRoles[0].organization.let { organization ->
       performAuthGet("/v2/organizations/${organization!!.id}/projects-with-stats")
-        .andIsOk.andPrettyPrint.andAssertThatJson {
+        .andIsOk.andPrettyPrint
+        .andAssertThatJson {
           node("_embedded.projects") {
             node("[1].stats.languageCount").isEqualTo(2)
             node("[1].stats.keyCount").isEqualTo(0)
@@ -72,7 +75,8 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
     loginAsUser(users[1].username)
     users[1].organizationRoles[0].organization.let { organization ->
       performAuthGet("/v2/organizations/${organization!!.slug}/projects-with-stats")
-        .andIsOk.andPrettyPrint.andAssertThatJson {
+        .andIsOk.andPrettyPrint
+        .andAssertThatJson {
           node("_embedded.projects") {
             node("[1].stats.languageCount").isEqualTo(2)
             node("[1].stats.keyCount").isEqualTo(0)
@@ -97,9 +101,10 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
   fun `user with no direct permission cannot see the the project in organization with none base permissions`() {
     val testData = PermissionsTestData()
     val user =
-      testData.root.addUserAccount {
-        username = "pavek@stb.cz"
-      }.self
+      testData.root
+        .addUserAccount {
+          username = "pavek@stb.cz"
+        }.self
     testData.organizationBuilder.self.basePermission.type = ProjectPermissionType.NONE
     testData.organizationBuilder.build {
       addRole {
@@ -122,7 +127,8 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
     val user = testData.addUserWithPermissions(scopes = listOf(Scope.ADMIN))
     testDataService.saveTestData(testData.root)
     userAccount = user
-    performAuthGet("/v2/organizations/${testData.organizationBuilder.self.id}/projects-with-stats").andPrettyPrint
+    performAuthGet("/v2/organizations/${testData.organizationBuilder.self.id}/projects-with-stats")
+      .andPrettyPrint
       .andAssertThatJson {
         node("_embedded.projects").isArray.hasSize(1)
       }
@@ -135,7 +141,8 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
 
     testDataService.saveTestData(testData.root)
     userAccount = user
-    performAuthGet("/v2/organizations/${testData.organizationBuilder.self.id}/projects-with-stats").andPrettyPrint
+    performAuthGet("/v2/organizations/${testData.organizationBuilder.self.id}/projects-with-stats")
+      .andPrettyPrint
       .andAssertThatJson {
         node("_embedded.projects") {
           node("").isArray.hasSize(1)

@@ -24,7 +24,8 @@ class KeyCodeReference(
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   var author: UserAccount? = null,
-) : StandardAuditModel(), WithKeyMetaReference {
+) : StandardAuditModel(),
+  WithKeyMetaReference {
   @field:NotBlank
   @Column(length = 300)
   var path: String = ""

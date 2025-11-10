@@ -16,7 +16,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.test.web.servlet.ResultActions
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Date
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -85,7 +85,8 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
 
   private fun performAndGetLastModified(): String? =
     performProjectAuthGet("/translations/en,de")
-      .andIsOk.lastModified()
+      .andIsOk
+      .lastModified()
 
   private fun ResultActions.lastModified() = this.andReturn().response.getHeader("Last-Modified")
 

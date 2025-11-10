@@ -7,7 +7,9 @@ import io.tolgee.util.element
 import org.w3c.dom.Element
 import java.io.InputStream
 
-class ResxWriter(private val model: List<ResxEntry>) {
+class ResxWriter(
+  private val model: List<ResxEntry>,
+) {
   fun produceFiles(): InputStream {
     return buildDom {
       element("root") {

@@ -38,7 +38,12 @@ class KeyControllerDeleteManyKeysTest : ProjectAuthControllerTest("/v2/projects/
       measureTimeMillis {
         performProjectAuthDelete(
           "keys",
-          mapOf("ids" to testData.root.data.projects[0].data.keys.map { it.self.id }),
+          mapOf(
+            "ids" to
+              testData.root.data.projects[0]
+                .data.keys
+                .map { it.self.id },
+          ),
         ).andIsOk
       }
     assertThat(time).isLessThan(2000)

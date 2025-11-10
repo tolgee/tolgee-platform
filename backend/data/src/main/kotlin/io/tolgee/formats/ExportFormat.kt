@@ -59,5 +59,5 @@ enum class ExportFormat(
   APPLE_SDK(
     "json",
     "application/json",
-  )
+  ),
 }

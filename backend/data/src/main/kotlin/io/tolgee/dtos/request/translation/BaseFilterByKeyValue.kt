@@ -17,7 +17,7 @@ object BaseFilterByKeyValue {
   fun <T> parseList(
     strings: List<String>,
     valueConverter: (String) -> T,
-    exceptionSupplier: () -> BadRequestException
+    exceptionSupplier: () -> BadRequestException,
   ): List<Pair<String, T>> {
     if (strings.all { it.contains(",") }) {
       return strings.map { parseCommaSeparated(it, valueConverter, exceptionSupplier) }
@@ -28,30 +28,32 @@ object BaseFilterByKeyValue {
   private fun <T> parseSingleFilter(
     strings: List<String>,
     valueConverter: (String) -> T,
-    exceptionSupplier: () -> BadRequestException
+    exceptionSupplier: () -> BadRequestException,
   ): List<Pair<String, T>> {
     if (strings.size % 2 != 0) throw exceptionSupplier()
     return strings.chunked(2).map {
       if (it.size != 2) throw exceptionSupplier()
-      it[0] to try {
-        valueConverter(it[1])
-      } catch (e: Exception) {
-        throw exceptionSupplier()
-      }
+      it[0] to
+        try {
+          valueConverter(it[1])
+        } catch (e: Exception) {
+          throw exceptionSupplier()
+        }
     }
   }
 
   private fun <T> parseCommaSeparated(
     string: String,
     valueConverter: (String) -> T,
-    exceptionSupplier: () -> BadRequestException
+    exceptionSupplier: () -> BadRequestException,
   ): Pair<String, T> {
     val parts = string.split(",")
     if (parts.size != 2) throw exceptionSupplier()
-    return parts[0] to try {
-      valueConverter(parts[1])
-    } catch (e: Exception) {
-      throw exceptionSupplier()
-    }
+    return parts[0] to
+      try {
+        valueConverter(parts[1])
+      } catch (e: Exception) {
+        throw exceptionSupplier()
+      }
   }
 }

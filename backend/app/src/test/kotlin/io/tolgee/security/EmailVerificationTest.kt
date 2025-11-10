@@ -65,8 +65,10 @@ class EmailVerificationTest : AbstractControllerTest() {
   fun verifiesEmail() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser)
-    mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
-      .andExpect(status().isOk).andReturn()
+    mvc
+      .perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
+      .andExpect(status().isOk)
+      .andReturn()
 
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
   }
@@ -76,8 +78,10 @@ class EmailVerificationTest : AbstractControllerTest() {
   fun verifiesNewEmail() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser, newEmail = "this.is@new.email")
-    mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
-      .andExpect(status().isOk).andReturn()
+    mvc
+      .perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
+      .andExpect(status().isOk)
+      .andReturn()
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
     assertThat(userAccountService.findActive(createUser.username)!!.username).isEqualTo("this.is@new.email")
   }
@@ -86,8 +90,10 @@ class EmailVerificationTest : AbstractControllerTest() {
   fun doesNotVerifyWithWrongCode() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser)
-    mvc.perform(get("/api/public/verify_email/${createUser.id}/wrong_code"))
-      .andExpect(status().isBadRequest).andReturn()
+    mvc
+      .perform(get("/api/public/verify_email/${createUser.id}/wrong_code"))
+      .andExpect(status().isBadRequest)
+      .andReturn()
 
     assertThat(emailVerificationRepository.findById(emailVerification!!.id!!)).isPresent
   }
@@ -97,8 +103,10 @@ class EmailVerificationTest : AbstractControllerTest() {
   fun doesNotVerifyWithWrongUser() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser)
-    mvc.perform(get("/api/public/verify_email/${createUser.id + 1L}/${emailVerification!!.code}"))
-      .andExpect(status().isNotFound).andReturn()
+    mvc
+      .perform(get("/api/public/verify_email/${createUser.id + 1L}/${emailVerification!!.code}"))
+      .andExpect(status().isNotFound)
+      .andReturn()
 
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isPresent
   }
@@ -106,13 +114,13 @@ class EmailVerificationTest : AbstractControllerTest() {
   val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", null, "testtest")
 
   protected fun perform(): MvcResult {
-    return mvc.perform(
-      post("/api/public/sign_up")
-        .content(mapper.writeValueAsString(signUpDto))
-        .accept(MediaType.ALL)
-        .contentType(MediaType.APPLICATION_JSON),
-    )
-      .andReturn()
+    return mvc
+      .perform(
+        post("/api/public/sign_up")
+          .content(mapper.writeValueAsString(signUpDto))
+          .accept(MediaType.ALL)
+          .contentType(MediaType.APPLICATION_JSON),
+      ).andReturn()
   }
 
   @Test

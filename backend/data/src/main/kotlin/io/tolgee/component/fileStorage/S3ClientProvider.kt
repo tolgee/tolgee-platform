@@ -11,7 +11,9 @@ import software.amazon.awssdk.services.s3.S3ClientBuilder
 import software.amazon.awssdk.services.s3.S3Configuration
 import java.net.URI
 
-class S3ClientProvider(private val s3config: S3Config) {
+class S3ClientProvider(
+  private val s3config: S3Config,
+) {
   fun provide(): S3Client {
     val credentialsProvider = getCredentialsProvider()
 

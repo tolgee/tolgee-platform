@@ -2,7 +2,7 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import net.datafaker.Faker
-import java.util.*
+import java.util.UUID
 
 class KeySearchTestData : BaseTestData() {
   init {

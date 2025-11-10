@@ -10,7 +10,11 @@ import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
 import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
-import io.tolgee.ee.component.llm.*
+import io.tolgee.ee.component.llm.AbstractLlmApiService
+import io.tolgee.ee.component.llm.AnthropicApiService
+import io.tolgee.ee.component.llm.GoogleAiApiService
+import io.tolgee.ee.component.llm.OpenaiApiService
+import io.tolgee.ee.component.llm.TolgeeApiService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.FailedDependencyException
 import io.tolgee.exceptions.InvalidStateException
@@ -157,21 +161,20 @@ class LlmProviderService(
     params: LlmParams,
     attempts: List<Int>? = null,
   ): PromptResult {
-    val result = repeatWhileProvidersRateLimited(organizationId, provider, params.priority) { providerConfig ->
-      val providerService = getProviderService(providerConfig.type)
-      val resolvedAttempts = attempts ?: providerConfig.attempts ?: providerService.defaultAttempts()
-      repeatWithTimeouts(resolvedAttempts) { restTemplate ->
-        val result = getProviderResponse(providerService, params, providerConfig, restTemplate)
-        result.price = if (result.price != 0) result.price else calculatePrice(providerConfig, result.usage)
-        result
+    val result =
+      repeatWhileProvidersRateLimited(organizationId, provider, params.priority) { providerConfig ->
+        val providerService = getProviderService(providerConfig.type)
+        val resolvedAttempts = attempts ?: providerConfig.attempts ?: providerService.defaultAttempts()
+        repeatWithTimeouts(resolvedAttempts) { restTemplate ->
+          val result = getProviderResponse(providerService, params, providerConfig, restTemplate)
+          result.price = if (result.price != 0) result.price else calculatePrice(providerConfig, result.usage)
+          result
+        }
       }
-    }
     return result
   }
 
-  fun getFakedResponse(
-    config: LlmProviderInterface,
-  ): PromptResult {
+  fun getFakedResponse(config: LlmProviderInterface): PromptResult {
     val json =
       """
       {

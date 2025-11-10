@@ -33,14 +33,16 @@ class AWSCloudFrontContentDeliveryCachePurging(
   }
 
   private fun createClient(credentialsProvider: StaticCredentialsProvider): CloudFrontClient {
-    return CloudFrontClient.builder()
+    return CloudFrontClient
+      .builder()
       .region(Region.AWS_GLOBAL) // CloudFront is a global service
       .credentialsProvider(credentialsProvider)
       .build()
   }
 
   private fun buildPaths(pathsToInvalidate: Set<String>): Paths {
-    return Paths.builder()
+    return Paths
+      .builder()
       .quantity(pathsToInvalidate.size)
       .items(pathsToInvalidate)
       .build()
@@ -50,13 +52,14 @@ class AWSCloudFrontContentDeliveryCachePurging(
     distributionId: String?,
     paths: Paths,
   ): CreateInvalidationRequest {
-    return CreateInvalidationRequest.builder()
+    return CreateInvalidationRequest
+      .builder()
       .distributionId(distributionId)
       .invalidationBatch { batch ->
-        batch.paths(paths)
+        batch
+          .paths(paths)
           .callerReference(System.currentTimeMillis().toString()) // Unique identifier for request
-      }
-      .build()
+      }.build()
   }
 
   private fun createInvalidation(

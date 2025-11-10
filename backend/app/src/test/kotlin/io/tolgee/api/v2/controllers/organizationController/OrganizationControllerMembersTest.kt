@@ -31,7 +31,8 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
     val users = dbPopulator.createUsersAndOrganizations()
     loginAsUser(users[0].username)
     val organizationId = users[1].organizationRoles[0].organization!!.id
-    performAuthGet("/v2/organizations/$organizationId/users").andIsOk
+    performAuthGet("/v2/organizations/$organizationId/users")
+      .andIsOk
       .also { println(it.andReturn().response.contentAsString) }
       .andAssertThatJson {
         node("_embedded.usersInOrganization") {
@@ -50,7 +51,8 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.admin.self
 
-    performAuthGet("/v2/organizations/${testData.organizationBuilder.self.id}/users").andPrettyPrint.andIsOk
+    performAuthGet("/v2/organizations/${testData.organizationBuilder.self.id}/users")
+      .andPrettyPrint.andIsOk
       .andAssertThatJson {
         node("_embedded.usersInOrganization") {
           isArray.hasSize(4)
@@ -125,13 +127,17 @@ class OrganizationControllerMembersTest : BaseOrganizationControllerTest() {
     val me = testData.addUserWithPermissions(type = ProjectPermissionType.MANAGE)
     testDataService.saveTestData(testData.root)
     userAccount = testData.admin.self
-    permissionService.getProjectPermissionData(
-      testData.projectBuilder.self.id,
-      me.id,
-    ).directPermissions.assert.isNotNull
+    permissionService
+      .getProjectPermissionData(
+        testData.projectBuilder.self.id,
+        me.id,
+      ).directPermissions.assert.isNotNull
     performAuthDelete("/v2/organizations/${testData.organizationBuilder.self.id}/users/${me.id}", null)
       .andIsOk
-    permissionService.getProjectPermissionData(testData.projectBuilder.self.id, me.id).directPermissions.assert.isNull()
+    permissionService
+      .getProjectPermissionData(testData.projectBuilder.self.id, me.id)
+      .directPermissions.assert
+      .isNull()
   }
 
   @Test

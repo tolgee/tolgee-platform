@@ -45,7 +45,8 @@ class FeatureAuthorizationInterceptorTest {
     )
 
   private val mockMvc =
-    MockMvcBuilders.standaloneSetup(TestController::class.java)
+    MockMvcBuilders
+      .standaloneSetup(TestController::class.java)
       .addInterceptors(featureAuthorizationInterceptor)
       .build()
 

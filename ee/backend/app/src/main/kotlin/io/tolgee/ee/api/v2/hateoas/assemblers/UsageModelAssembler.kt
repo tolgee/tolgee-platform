@@ -50,7 +50,9 @@ class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> 
     if (sumMs == 0L) {
       return 0.toBigDecimal()
     }
-    return this.sumOf { property(it) * it.milliseconds }.toBigDecimal()
+    return this
+      .sumOf { property(it) * it.milliseconds }
+      .toBigDecimal()
       .divide(sumMs.toBigDecimal(), 2, RoundingMode.HALF_UP)
   }
 }

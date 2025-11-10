@@ -371,10 +371,11 @@ class PoFileExporterTest {
       exportParams = params,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       baseLanguage = baseLanguageMock,
-      filePathProvider = ExportFilePathProvider(
-        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-        extension = params.format.extension,
-      )
+      filePathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+          extension = params.format.extension,
+        ),
     )
   }
 

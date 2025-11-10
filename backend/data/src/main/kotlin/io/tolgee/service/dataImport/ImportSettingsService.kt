@@ -60,7 +60,8 @@ class ImportSettingsService(
 
   @Transactional
   fun deleteAllByProject(projectId: Long) {
-    entityManager.createQuery("delete from ImportSettings is where is.project.id = :projectId")
+    entityManager
+      .createQuery("delete from ImportSettings is where is.project.id = :projectId")
       .setParameter("projectId", projectId)
       .executeUpdate()
   }

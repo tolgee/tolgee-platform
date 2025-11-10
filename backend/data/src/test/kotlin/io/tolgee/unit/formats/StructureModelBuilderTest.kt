@@ -265,7 +265,7 @@ class StructureModelBuilderTest {
     listOf(
       PluralValue("key", mapOf("other" to "Collision!")),
       "key.other",
-      ).testResult(
+    ).testResult(
       '.',
       true,
       rootKeyIsLanguageTag = true,
@@ -277,7 +277,10 @@ class StructureModelBuilderTest {
     }
   }
 
-  class PluralValue(val key: String, val pluralForms: Map<String, String>)
+  class PluralValue(
+    val key: String,
+    val pluralForms: Map<String, String>,
+  )
 
   private inline fun List<Any>.testResult(
     delimiter: Char,

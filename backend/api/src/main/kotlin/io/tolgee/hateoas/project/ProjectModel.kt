@@ -34,5 +34,5 @@ open class ProjectModel(
   @Schema(description = "Suggestions for translations")
   var suggestionsMode: SuggestionsMode,
   @Schema(description = "Level of protection of translations")
-  var translationProtection: TranslationProtection
+  var translationProtection: TranslationProtection,
 ) : RepresentationModel<ProjectModel>()

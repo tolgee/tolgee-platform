@@ -61,7 +61,12 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     )
     executeInNewTransaction {
       assertJsonImported()
-      getTestTranslation().key.keyMeta!!.tags.map { it.name }.assert.contains("new-tag")
+      getTestTranslation()
+        .key.keyMeta!!
+        .tags
+        .map { it.name }
+        .assert
+        .contains("new-tag")
     }
   }
 
@@ -98,7 +103,12 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
     )
     executeInNewTransaction {
       assertPoImported()
-      getTestTranslation().key.keyMeta!!.codeReferences.map { it.path }.assert.contains("dir/file.py")
+      getTestTranslation()
+        .key.keyMeta!!
+        .codeReferences
+        .map { it.path }
+        .assert
+        .contains("dir/file.py")
     }
   }
 
@@ -129,7 +139,9 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
       ),
     )
     executeInNewTransaction {
-      getTestTranslation().language.tag.assert.isEqualTo("de")
+      getTestTranslation()
+        .language.tag.assert
+        .isEqualTo("de")
     }
   }
 
@@ -359,11 +371,13 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
 
     executeInNewTransaction {
       keyService.find(testData.project.id, "test", null).assert.isNotNull()
-      keyService.find(
-        testData.project.id,
-        "test_in_different_namespace",
-        "different_namespace"
-      ).assert.isNotNull()
+      keyService
+        .find(
+          testData.project.id,
+          "test_in_different_namespace",
+          "different_namespace",
+        ).assert
+        .isNotNull()
     }
 
     executeInNewTransaction {
@@ -415,8 +429,14 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   }
 
   private fun assertXliffDataImported() {
-    getTestKeyTranslations().find { it.language.tag == "de" }!!.text.assert.isEqualTo("Test cs")
-    getTestKeyTranslations().find { it.language.tag == "en" }!!.text.assert.isEqualTo("Test en")
+    getTestKeyTranslations()
+      .find { it.language.tag == "de" }!!
+      .text.assert
+      .isEqualTo("Test cs")
+    getTestKeyTranslations()
+      .find { it.language.tag == "en" }!!
+      .text.assert
+      .isEqualTo("Test en")
   }
 
   private fun getSimpleXliffMapping(languageMappings: Map<String?, String>): MutableMap<String, Any?> {
@@ -441,14 +461,15 @@ class SingleStepImportControllerTest : ProjectAuthControllerTest("/v2/projects/"
   ): MutableMap<String, Any?> {
     return mutableMapOf(
       "languageMappings" to requestLanguageMappings,
-      "fileMappings" to listOf(
-        mapOf(
-          "fileName" to fileName,
-          "namespace" to namespace,
-          "languageTag" to languageTag,
-          "format" to format,
+      "fileMappings" to
+        listOf(
+          mapOf(
+            "fileName" to fileName,
+            "namespace" to namespace,
+            "languageTag" to languageTag,
+            "format" to format,
+          ),
         ),
-      ),
     )
   }
 

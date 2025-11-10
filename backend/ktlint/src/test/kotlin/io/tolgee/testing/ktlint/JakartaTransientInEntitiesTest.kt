@@ -27,17 +27,17 @@ class JakartaTransientInEntitiesTest {
   fun `raises an error if using Kotlin transient in entity (property)`() {
     val code =
       """
-        @Entity
-        class MyEntity {
-          @Transient
-          var transientField: String? = null
-        }
+      @Entity
+      class MyEntity {
+        @Transient
+        var transientField: String? = null
+      }
       """.trimIndent()
     wrappingRuleAssertThat(code)
       .hasLintViolationWithoutAutoCorrect(
         3,
         3,
-        "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`."
+        "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`.",
       )
   }
 
@@ -45,17 +45,17 @@ class JakartaTransientInEntitiesTest {
   fun `raises an error if using Kotlin transient in entity (constructor parameter)`() {
     val code =
       """
-        @Entity
-        class MyEntity(
-          @Transient
-          var transientField: String? = null
-        )
+      @Entity
+      class MyEntity(
+        @Transient
+        var transientField: String? = null
+      )
       """.trimIndent()
     wrappingRuleAssertThat(code)
       .hasLintViolationWithoutAutoCorrect(
         3,
         3,
-        "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`."
+        "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`.",
       )
   }
 
@@ -63,17 +63,17 @@ class JakartaTransientInEntitiesTest {
   fun `raises an error if using Kotlin transient in entity (with specifier)`() {
     val code =
       """
-        @Entity
-        class MyEntity {
-          @field:Transient
-          var transientField: String? = null
-        }
+      @Entity
+      class MyEntity {
+        @field:Transient
+        var transientField: String? = null
+      }
       """.trimIndent()
     wrappingRuleAssertThat(code)
       .hasLintViolationWithoutAutoCorrect(
         3,
         3,
-        "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`."
+        "Unexpected Kotlin-native @Transient. Import `jakarta.persistence.Transient`.",
       )
   }
 
@@ -81,10 +81,10 @@ class JakartaTransientInEntitiesTest {
   fun `does not complain on Transient in non-entity classes`() {
     val code =
       """
-        class MyEntity {
-          @Transient
-          var transientField: String? = null
-        }
+      class MyEntity {
+        @Transient
+        var transientField: String? = null
+      }
       """.trimIndent()
     wrappingRuleAssertThat(code)
       .hasNoLintViolations()
@@ -94,13 +94,13 @@ class JakartaTransientInEntitiesTest {
   fun `does not complain on correct Transient usage`() {
     val code =
       """
-        import jakarta.persistence.Transient
+      import jakarta.persistence.Transient
 
-        @Entity
-        class MyEntity {
-          @Transient
-          var transientField: String? = null
-        }
+      @Entity
+      class MyEntity {
+        @Transient
+        var transientField: String? = null
+      }
       """.trimIndent()
     wrappingRuleAssertThat(code)
       .hasNoLintViolations()

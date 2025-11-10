@@ -13,7 +13,9 @@ import java.util.Date
  */
 @Entity
 @Table(schema = "ee")
-class UsageToReport : AuditModel(), IUsageToReport {
+class UsageToReport :
+  AuditModel(),
+  IUsageToReport {
   /**
    * Fixed ID as we only need a single instance of this entity per installation
    */

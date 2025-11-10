@@ -42,7 +42,7 @@ class CsvImportFormatDetectorTest {
     "src/test/resources/import/csv/unknown.csv".assertDetected(ImportFormat.CSV_ICU)
   }
 
-  private fun parseFile(path: String): Any? {
+  private fun parseFile(path: String): Any {
     val parser =
       CsvFileParser(
         inputStream = File(path).inputStream(),

@@ -6,10 +6,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class ImportLanguageModelAssembler : RepresentationModelAssemblerSupport<ImportLanguageView, ImportLanguageModel>(
-  V2ImportController::class.java,
-  ImportLanguageModel::class.java,
-) {
+class ImportLanguageModelAssembler :
+  RepresentationModelAssemblerSupport<ImportLanguageView, ImportLanguageModel>(
+    V2ImportController::class.java,
+    ImportLanguageModel::class.java,
+  ) {
   override fun toModel(view: ImportLanguageView): ImportLanguageModel {
     return ImportLanguageModel(
       id = view.id,

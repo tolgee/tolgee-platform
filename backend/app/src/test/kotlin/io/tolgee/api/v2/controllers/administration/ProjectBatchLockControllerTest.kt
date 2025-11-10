@@ -13,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 @AutoConfigureMockMvc
 class ProjectBatchLockControllerTest : AuthorizedControllerTest() {
-
   lateinit var testData: AdministrationTestData
 
   @BeforeEach
@@ -34,9 +33,11 @@ class ProjectBatchLockControllerTest : AuthorizedControllerTest() {
   @Test
   fun `GET project-batch-locks returns locks with super auth`() {
     // Test with admin user - should succeed and return valid CollectionModel response
-    val response = performAuthGet("/v2/administration/project-batch-locks")
-      .andIsOk
-      .andReturn().response.contentAsString
+    val response =
+      performAuthGet("/v2/administration/project-batch-locks")
+        .andIsOk
+        .andReturn()
+        .response.contentAsString
 
     // Verify the response structure
     performAuthGet("/v2/administration/project-batch-locks")
@@ -57,9 +58,11 @@ class ProjectBatchLockControllerTest : AuthorizedControllerTest() {
   @Test
   fun `GET batch-job-queue returns queue items with super auth`() {
     // Test with admin user - should succeed and return valid CollectionModel response
-    val response = performAuthGet("/v2/administration/batch-job-queue")
-      .andIsOk
-      .andReturn().response.contentAsString
+    val response =
+      performAuthGet("/v2/administration/batch-job-queue")
+        .andIsOk
+        .andReturn()
+        .response.contentAsString
 
     // Verify the response structure
     performAuthGet("/v2/administration/batch-job-queue")

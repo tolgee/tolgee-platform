@@ -35,7 +35,8 @@ class IcuUnescaperTest {
   fun `removes the escape char on end of string`() {
     val escaped = "Another ''''' more complex ' '''{ string }''' with many weird '} cases ''''}'"
     IcuUnescaper(escaped, false)
-      .unescaped.assert.isEqualTo("Another ''' more complex ' '{ string }' with many weird } cases ''}")
+      .unescaped.assert
+      .isEqualTo("Another ''' more complex ' '{ string }' with many weird } cases ''}")
   }
 
   @Test

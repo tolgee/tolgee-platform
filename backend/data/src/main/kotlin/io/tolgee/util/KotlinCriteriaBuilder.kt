@@ -4,7 +4,10 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.Expression
 import jakarta.persistence.criteria.Predicate
 
-abstract class KotlinCriteriaBuilder<T>(entityManager: EntityManager, result: Class<T>) {
+abstract class KotlinCriteriaBuilder<T>(
+  entityManager: EntityManager,
+  result: Class<T>,
+) {
   val cb = entityManager.criteriaBuilder
   val query = cb.createQuery(result)
 

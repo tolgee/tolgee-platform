@@ -128,12 +128,14 @@ class PluralTranslationUtil(
         }
 
       val exactCases =
-        forms.forms.asSequence().filter {
-          it.key.startsWith("=")
-        }.mapNotNull {
-          val number = it.key.substring(1).toDoubleOrNull() ?: return@mapNotNull null
-          it.key to it.value.replaceReplaceNumberPlaceholderWithExample(number)
-        }
+        forms.forms
+          .asSequence()
+          .filter {
+            it.key.startsWith("=")
+          }.mapNotNull {
+            val number = it.key.substring(1).toDoubleOrNull() ?: return@mapNotNull null
+            it.key to it.value.replaceReplaceNumberPlaceholderWithExample(number)
+          }
 
       return keywordCases + exactCases
     }

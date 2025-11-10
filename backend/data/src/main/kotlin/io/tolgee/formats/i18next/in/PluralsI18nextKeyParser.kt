@@ -4,7 +4,9 @@ import io.tolgee.formats.getGroupOrNull
 import io.tolgee.formats.importCommon.ParsedPluralsKey
 import io.tolgee.formats.importCommon.PluralsKeyParser
 
-class PluralsI18nextKeyParser(private val keyRegex: Regex) : PluralsKeyParser {
+class PluralsI18nextKeyParser(
+  private val keyRegex: Regex,
+) : PluralsKeyParser {
   override fun parse(key: String): ParsedPluralsKey {
     val match = keyRegex.find(key)
     return ParsedPluralsKey(

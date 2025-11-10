@@ -5,7 +5,7 @@ import io.tolgee.model.enums.LlmProviderPriority
 class LlmParams(
   val messages: List<LlmMessage>,
   val shouldOutputJson: Boolean,
-  val priority: LlmProviderPriority
+  val priority: LlmProviderPriority,
 ) {
   companion object {
     enum class LlmMessageType {

@@ -14,4 +14,5 @@ open class ApiKeyWithLanguagesModel(
     deprecated = true,
   )
   val permittedLanguageIds: Set<Long>?,
-) : RepresentationModel<ApiKeyWithLanguagesModel>(), IApiKeyModel by apiKeyModel
+) : RepresentationModel<ApiKeyWithLanguagesModel>(),
+  IApiKeyModel by apiKeyModel

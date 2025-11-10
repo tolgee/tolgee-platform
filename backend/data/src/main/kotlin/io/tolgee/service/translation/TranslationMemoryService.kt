@@ -67,8 +67,9 @@ class TranslationMemoryService(
   ): Pair<Long, List<TranslationMemoryItemView>> {
     entityManager.createNativeQuery("set pg_trgm.similarity_threshold to 0.5").executeUpdate()
     val queryResult =
-      entityManager.createNativeQuery(
-        """
+      entityManager
+        .createNativeQuery(
+          """
         with base as (
             select target.text as targetTranslationText, baseTranslation.text as baseTranslationText,
               key.name as keyName, ns.name as keyNamespace, key.id as keyId, 
@@ -85,10 +86,10 @@ class TranslationMemoryService(
             join key targetKey on target.key_id = targetKey.id    
             """ +
 
-          // we use the case when syntax to force postgres to evaluate all the other conditions first,
-          // the similarity condition is slow even it uses index, and it tends to be evaluated first since
-          // huge underestimation
-          """
+            // we use the case when syntax to force postgres to evaluate all the other conditions first,
+            // the similarity condition is slow even it uses index, and it tends to be evaluated first since
+            // huge underestimation
+            """
             where case when (baseTranslation.language_id = p.base_language_id and
               (cast(:key as bigint) is null or targetKey.id <> :key) and targetKey.is_plural = :isPlural)
               then baseTranslation.text % :baseTranslationText end
@@ -96,7 +97,7 @@ class TranslationMemoryService(
         from base
         order by base.similarity desc
     """,
-      ).setParameter("baseTranslationText", sourceTranslationText)
+        ).setParameter("baseTranslationText", sourceTranslationText)
         .setParameter("isPlural", isPlural)
         .setParameter("key", keyId)
         .setParameter("targetLanguageId", targetLanguage.id)

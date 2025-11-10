@@ -8,7 +8,6 @@ import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.export.exporters.FileExporter
 import java.io.InputStream
-import kotlin.collections.forEach
 
 class ResxExporter(
   val translations: List<ExportTranslationView>,
@@ -61,8 +60,9 @@ class ResxExporter(
   }
 
   override fun produceFiles(): Map<String, InputStream> {
-    return getModels().map { (path, model) ->
-      path to ResxWriter(model).produceFiles()
-    }.toMap()
+    return getModels()
+      .map { (path, model) ->
+        path to ResxWriter(model).produceFiles()
+      }.toMap()
   }
 }

@@ -42,12 +42,13 @@ class GlossaryTermHighlightsController(
     @RequestBody @Valid
     dto: GlossaryHighlightsRequest,
   ): CollectionModel<GlossaryTermHighlightModel> {
-    val highlights = glossaryTermService.getHighlights(
-      organizationHolder.organization.id,
-      projectHolder.project.id,
-      dto.text,
-      dto.languageTag,
-    )
+    val highlights =
+      glossaryTermService.getHighlights(
+        organizationHolder.organization.id,
+        projectHolder.project.id,
+        dto.text,
+        dto.languageTag,
+      )
     return modelAssembler.toCollectionModel(highlights)
   }
 }

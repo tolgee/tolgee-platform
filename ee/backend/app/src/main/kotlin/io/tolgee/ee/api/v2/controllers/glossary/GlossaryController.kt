@@ -24,8 +24,8 @@ import io.tolgee.model.glossary.Glossary
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
-import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
 import io.tolgee.security.authorization.UseDefaultPermissions
 import jakarta.validation.Valid

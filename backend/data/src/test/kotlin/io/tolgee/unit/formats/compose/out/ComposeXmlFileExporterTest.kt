@@ -320,10 +320,11 @@ class ComposeXmlFileExporterTest {
       translations = translations,
       exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
-      filePathProvider = ExportFilePathProvider(
-        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-        extension = params.format.extension,
-      ),
+      filePathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+          extension = params.format.extension,
+        ),
     )
   }
 

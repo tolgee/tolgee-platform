@@ -29,7 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import java.util.Date
 
 @Transactional
 class AuthTest : AbstractControllerTest() {
@@ -83,16 +83,18 @@ class AuthTest : AbstractControllerTest() {
   fun userWithTokenHasAccess() {
     val response =
       doAuthentication(initialUsername, initialPassword)
-        .andReturn().response.contentAsString
+        .andReturn()
+        .response.contentAsString
     val token = mapper.readValue(response, HashMap::class.java)["accessToken"] as String?
     val mvcResult =
-      mvc.perform(
-        MockMvcRequestBuilders.get("/api/projects")
-          .accept(MediaType.ALL)
-          .header("Authorization", String.format("Bearer %s", token))
-          .contentType(MediaType.APPLICATION_JSON),
-      )
-        .andReturn()
+      mvc
+        .perform(
+          MockMvcRequestBuilders
+            .get("/api/projects")
+            .accept(MediaType.ALL)
+            .header("Authorization", String.format("Bearer %s", token))
+            .contentType(MediaType.APPLICATION_JSON),
+        ).andReturn()
     assertThat(mvcResult.response.status).isEqualTo(200)
   }
 
@@ -108,12 +110,14 @@ class AuthTest : AbstractControllerTest() {
     currentDateProvider.forcedDate = baseline
 
     val mvcResult =
-      mvc.perform(
-        MockMvcRequestBuilders.get("/api/projects")
-          .accept(MediaType.ALL)
-          .header("Authorization", String.format("Bearer %s", token))
-          .contentType(MediaType.APPLICATION_JSON),
-      ).andReturn()
+      mvc
+        .perform(
+          MockMvcRequestBuilders
+            .get("/api/projects")
+            .accept(MediaType.ALL)
+            .header("Authorization", String.format("Bearer %s", token))
+            .contentType(MediaType.APPLICATION_JSON),
+        ).andReturn()
 
     assertThat(mvcResult.response.status).isEqualTo(401)
     assertThat(mvcResult.response.contentAsString).contains(Message.EXPIRED_JWT_TOKEN.code)
@@ -271,13 +275,16 @@ class AuthTest : AbstractControllerTest() {
   }
 
   private fun assertExpired(token: String) {
-    mvc.perform(
-      MockMvcRequestBuilders.put("/v2/projects/${project.id}/users/${project.id}/revoke-access")
-        .accept(MediaType.ALL)
-        .header("Authorization", String.format("Bearer %s", token))
-        .contentType(MediaType.APPLICATION_JSON),
-    ).andIsForbidden.andAssertThatJson {
-      node("code").isEqualTo(Message.EXPIRED_SUPER_JWT_TOKEN.code)
-    }
+    mvc
+      .perform(
+        MockMvcRequestBuilders
+          .put("/v2/projects/${project.id}/users/${project.id}/revoke-access")
+          .accept(MediaType.ALL)
+          .header("Authorization", String.format("Bearer %s", token))
+          .contentType(MediaType.APPLICATION_JSON),
+      ).andIsForbidden
+      .andAssertThatJson {
+        node("code").isEqualTo(Message.EXPIRED_SUPER_JWT_TOKEN.code)
+      }
   }
 }

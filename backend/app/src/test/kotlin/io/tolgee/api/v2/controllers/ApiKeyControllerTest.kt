@@ -21,7 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import java.math.BigDecimal
-import java.util.*
+import java.util.Date
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -145,7 +145,8 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   fun `returns correct keys by user and filters project`() {
     userAccount = testData.frantisekDobrota
     performAuthGet("/v2/api-keys?filterProjectId=${testData.projectBuilder.self.id}")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("page.totalElements").isNumber.isEqualTo("1")
         node("_embedded.apiKeys") {
           isArray.hasSize(1)
@@ -164,7 +165,8 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   @Test
   fun `returns correct keys by project`() {
     performAuthGet("/v2/projects/${testData.frantasProject.id}/api-keys")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.apiKeys") {
           isArray.hasSize(20)
         }
@@ -176,7 +178,8 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   fun `updates existing key`() {
     userAccount = testData.frantisekDobrota
     performAuthPut("/v2/api-keys/${testData.frantasKey.id}", V2EditApiKeyDto(setOf(Scope.TRANSLATIONS_EDIT)))
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("scopes").isEqualTo("""["translations.edit"]""")
       }
   }
@@ -239,7 +242,8 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
     val headers = HttpHeaders()
     headers["x-api-key"] = "tgpat_${testData.frantasPat.token!!}"
     performGet("/v2/api-keys/current-permissions?projectId=${testData.frantasProject.id}", headers)
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("projectId").isNotNull
         node("type").isEqualTo("MANAGE")
         node("scopes").isArray.isNotEmpty
@@ -285,7 +289,8 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.translateAllExplicitUser
     performGet("/v2/api-keys/current?ak=${testData.bothLangsExplicitUserApiKey.key}")
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("id").isValidId
         node("permittedLanguageIds")
           .isArray
@@ -318,7 +323,8 @@ class ApiKeyControllerTest : AuthorizedControllerTest() {
   @Test
   fun `regenerate works (never expiring key)`() {
     val oldKeyHash = testData.usersKey.keyHash
-    testData.usersKey.expiresAt.assert.isNull()
+    testData.usersKey.expiresAt.assert
+      .isNull()
 
     performAuthPut(
       "/v2/api-keys/${testData.usersKey.id}/regenerate",

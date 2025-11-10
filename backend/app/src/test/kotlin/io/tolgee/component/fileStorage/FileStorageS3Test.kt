@@ -45,7 +45,12 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
 
   @BeforeAll
   fun setup() {
-    s3Mock = S3Mock.Builder().withPort(29090).withInMemoryBackend().build()
+    s3Mock =
+      S3Mock
+        .Builder()
+        .withPort(29090)
+        .withInMemoryBackend()
+        .build()
     s3Mock.start()
     s3.createBucket { req -> req.bucket(BUCKET_NAME) }
   }

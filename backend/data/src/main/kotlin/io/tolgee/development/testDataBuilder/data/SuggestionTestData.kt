@@ -7,7 +7,8 @@ import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import io.tolgee.model.mtServiceConfig.Formality
 import net.datafaker.Faker
-import java.util.*
+import java.util.Locale
+import java.util.UUID
 
 class SuggestionTestData : BaseTestData() {
   var germanLanguage: Language
@@ -255,16 +256,17 @@ class SuggestionTestData : BaseTestData() {
     isPlural: Boolean,
   ): Key {
     val isNotPluralString = if (isPlural) "" else "not plural"
-    return projectBuilder.addKey(name) {
-      this.self.isPlural = isPlural
-      addTranslation {
-        language = englishLanguage
-        text = "{value, plural, one {# dog} other {# dogs}}$isNotPluralString"
-      }
-      addTranslation {
-        language = germanLanguage
-        text = "{value, plural, one {# Hund} other {# Hunde}}$isNotPluralString"
-      }
-    }.self
+    return projectBuilder
+      .addKey(name) {
+        this.self.isPlural = isPlural
+        addTranslation {
+          language = englishLanguage
+          text = "{value, plural, one {# dog} other {# dogs}}$isNotPluralString"
+        }
+        addTranslation {
+          language = germanLanguage
+          text = "{value, plural, one {# Hund} other {# Hunde}}$isNotPluralString"
+        }
+      }.self
   }
 }

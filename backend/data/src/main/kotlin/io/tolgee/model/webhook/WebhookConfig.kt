@@ -14,7 +14,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
-import java.util.*
+import java.util.Date
 
 @Entity
 @ActivityLoggedEntity

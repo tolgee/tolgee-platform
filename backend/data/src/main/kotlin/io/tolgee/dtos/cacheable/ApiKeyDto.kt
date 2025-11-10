@@ -19,7 +19,7 @@ package io.tolgee.dtos.cacheable
 import io.tolgee.model.ApiKey
 import io.tolgee.model.enums.Scope
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 
 data class ApiKeyDto(
   val id: Long,

@@ -87,23 +87,25 @@ object YamlExportTestData {
   fun getExporter(
     translations: List<ExportTranslationView>,
     isProjectIcuPlaceholdersEnabled: Boolean = true,
-    exportParams: ExportParams? = null
+    exportParams: ExportParams? = null,
   ): YamlFileExporter {
-    val params = exportParams ?: ExportParams().also {
-      it.supportArrays = true
-      it.structureDelimiter = '.'
-      it.format = ExportFormat.YAML_RUBY
-    }
+    val params =
+      exportParams ?: ExportParams().also {
+        it.supportArrays = true
+        it.structureDelimiter = '.'
+        it.format = ExportFormat.YAML_RUBY
+      }
     return YamlFileExporter(
       translations = translations,
       exportParams = params,
       projectIcuPlaceholdersSupport = isProjectIcuPlaceholdersEnabled,
       objectMapper = ObjectMapper(YAMLFactory()),
       customPrettyPrinter = CustomPrettyPrinter(),
-      filePathProvider = ExportFilePathProvider(
-        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-        extension = params.format?.extension ?: "yaml",
-      )
+      filePathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+          extension = params.format?.extension ?: "yaml",
+        ),
     )
   }
 }

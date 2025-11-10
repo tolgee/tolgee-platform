@@ -79,7 +79,8 @@ class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `tags key with no tag`() {
     performProjectAuthPut("keys/${testData.noTagKey.id}/tags", TagKeyDto(name = "brand new tag"))
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("brand new tag")
       }
@@ -95,7 +96,8 @@ class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `tags key with existing tag`() {
     performProjectAuthPut("keys/${testData.noTagKey.id}/tags", TagKeyDto(name = testData.existingTag.name))
-      .andPrettyPrint.andAssertThatJson {
+      .andPrettyPrint
+      .andAssertThatJson {
         node("id").isEqualTo(testData.existingTag.id)
         node("name").isEqualTo(testData.existingTag.name)
       }

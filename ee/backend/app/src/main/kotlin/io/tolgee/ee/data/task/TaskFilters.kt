@@ -3,7 +3,6 @@ package io.tolgee.ee.data.task
 import io.swagger.v3.oas.annotations.Parameter
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
-import java.util.*
 
 open class TaskFilters {
   @field:Parameter(

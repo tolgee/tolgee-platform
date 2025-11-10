@@ -25,7 +25,7 @@ import io.tolgee.util.addMonths
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.Optional
 
 @Service
 class InvitationService(

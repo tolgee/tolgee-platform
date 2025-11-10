@@ -4,7 +4,13 @@ import io.tolgee.api.EeSubscriptionDto
 import io.tolgee.component.HttpClient
 import io.tolgee.constants.Message
 import io.tolgee.ee.EeProperties
-import io.tolgee.ee.data.*
+import io.tolgee.ee.data.GetMySubscriptionDto
+import io.tolgee.ee.data.GetMySubscriptionUsageRequest
+import io.tolgee.ee.data.PrepareSetLicenseKeyDto
+import io.tolgee.ee.data.ReleaseKeyDto
+import io.tolgee.ee.data.ReportErrorDto
+import io.tolgee.ee.data.ReportUsageDto
+import io.tolgee.ee.data.SetLicenseKeyLicensingDto
 import io.tolgee.ee.model.EeSubscription
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel

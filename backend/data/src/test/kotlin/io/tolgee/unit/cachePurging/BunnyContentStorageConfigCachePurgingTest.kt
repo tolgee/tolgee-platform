@@ -18,7 +18,7 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
-class BunnyContentStorageConfigCachePurgingTest() {
+class BunnyContentStorageConfigCachePurgingTest {
   @Test
   fun `correctly purges`() {
     val config =

@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
-import java.util.*
+import java.util.LinkedList
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -43,7 +43,11 @@ class AzureCognitiveApiService(
         request,
       )
 
-    return response.body?.first?.translations?.first()?.text
+    return response.body
+      ?.first
+      ?.translations
+      ?.first()
+      ?.text
       ?: throw RuntimeException(response.toString())
   }
 
@@ -51,7 +55,9 @@ class AzureCognitiveApiService(
    * Data structure for mapping the AzureCognitive JSON response objects.
    */
   companion object {
-    class AzureCognitiveRequest(text: String) {
+    class AzureCognitiveRequest(
+      text: String,
+    ) {
       @JsonProperty("Text")
       var text: String? = text
     }

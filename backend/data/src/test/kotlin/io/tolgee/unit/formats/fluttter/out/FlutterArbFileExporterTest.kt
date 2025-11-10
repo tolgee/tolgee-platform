@@ -206,10 +206,11 @@ private fun getExporter(translations: List<ExportTranslationView>): FlutterArbFi
     exportParams = params,
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
-    filePathProvider = ExportFilePathProvider(
-      template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-      extension = params.format.extension,
-    )
+    filePathProvider =
+      ExportFilePathProvider(
+        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+        extension = params.format.extension,
+      ),
   )
 }
 
@@ -224,10 +225,11 @@ private fun getExporter(
     baseLanguageTag = "en",
     objectMapper = jacksonObjectMapper(),
     isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
-    filePathProvider = ExportFilePathProvider(
-      template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
-      extension = params.format.extension,
-    )
+    filePathProvider =
+      ExportFilePathProvider(
+        template = ExportFileStructureTemplateProvider(params, translations).validateAndGetTemplate(),
+        extension = params.format.extension,
+      ),
   )
 }
 

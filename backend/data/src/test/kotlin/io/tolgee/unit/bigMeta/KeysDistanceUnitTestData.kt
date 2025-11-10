@@ -13,9 +13,10 @@ class KeysDistanceUnitTestData {
   val existingDistances: Set<KeysDistanceDto>
     get() {
       val existingKeyIds = existingKeys.map { it.id }.toSet()
-      return _existingDistances.filter {
-        it.key1Id in existingKeyIds || it.key2Id in existingKeyIds
-      }.toSet()
+      return _existingDistances
+        .filter {
+          it.key1Id in existingKeyIds || it.key2Id in existingKeyIds
+        }.toSet()
     }
 
   fun createRequestData(

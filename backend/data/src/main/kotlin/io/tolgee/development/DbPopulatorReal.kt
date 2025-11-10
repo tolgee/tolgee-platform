@@ -28,7 +28,8 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.Locale
+import java.util.UUID
 
 @Service
 class DbPopulatorReal(
@@ -298,8 +299,10 @@ class DbPopulatorReal(
   ) {
     val key = Key()
     key.name = "sampleApp." +
-      english.replace(" ", "_")
-        .lowercase(Locale.getDefault()).replace("\\.+$".toRegex(), "")
+      english
+        .replace(" ", "_")
+        .lowercase(Locale.getDefault())
+        .replace("\\.+$".toRegex(), "")
     key.project = project
     val translation = Translation()
     translation.language = en

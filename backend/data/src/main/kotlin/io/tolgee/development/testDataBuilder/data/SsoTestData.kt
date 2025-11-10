@@ -4,7 +4,7 @@ import io.tolgee.model.SsoTenant
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 
-class SsoTestData() : BaseTestData() {
+class SsoTestData : BaseTestData() {
   val organization = this.projectBuilder.self.organizationOwner
 
   var userAdmin: UserAccount
@@ -13,14 +13,16 @@ class SsoTestData() : BaseTestData() {
 
   init {
     userAdmin =
-      root.addUserAccount {
-        username = "userAdmin@unrelated.com"
-        role = UserAccount.Role.ADMIN
-      }.self
+      root
+        .addUserAccount {
+          username = "userAdmin@unrelated.com"
+          role = UserAccount.Role.ADMIN
+        }.self
     userNotOwner =
-      root.addUserAccount {
-        username = "userNotOwner@domain.com"
-      }.self
+      root
+        .addUserAccount {
+          username = "userNotOwner@domain.com"
+        }.self
     userAccountBuilder.defaultOrganizationBuilder.apply {
       addRole {
         user = userNotOwner
@@ -31,12 +33,13 @@ class SsoTestData() : BaseTestData() {
 
   fun addTenant() {
     tenant =
-      userAccountBuilder.defaultOrganizationBuilder.setTenant {
-        domain = "domain.com"
-        clientId = "dummy_client_id"
-        clientSecret = "clientSecret"
-        authorizationUri = "https://dummy-url.com"
-        tokenUri = "http://tokenUri"
-      }.self
+      userAccountBuilder.defaultOrganizationBuilder
+        .setTenant {
+          domain = "domain.com"
+          clientId = "dummy_client_id"
+          clientSecret = "clientSecret"
+          authorizationUri = "https://dummy-url.com"
+          tokenUri = "http://tokenUri"
+        }.self
   }
 }

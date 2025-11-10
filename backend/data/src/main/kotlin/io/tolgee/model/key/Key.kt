@@ -54,7 +54,8 @@ class Key(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var name: String = "",
-) : StandardAuditModel(), WithKeyMeta {
+) : StandardAuditModel(),
+  WithKeyMeta {
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var project: Project

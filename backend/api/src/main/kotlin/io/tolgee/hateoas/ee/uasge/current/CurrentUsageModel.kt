@@ -17,4 +17,5 @@ open class CurrentUsageModel(
   val credits: CurrentUsageItemModel,
   val keys: CurrentUsageItemModel,
   val isPayAsYouGo: Boolean,
-) : RepresentationModel<CurrentUsageModel>(), Serializable
+) : RepresentationModel<CurrentUsageModel>(),
+  Serializable

@@ -28,6 +28,7 @@ import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.security.authentication.WriteOperation
 import io.tolgee.service.organization.OrganizationRoleService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -35,9 +36,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.kotlin.any
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import io.tolgee.security.authentication.WriteOperation
 import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
@@ -67,7 +67,8 @@ class OrganizationAuthorizationInterceptorTest {
     )
 
   private val mockMvc =
-    MockMvcBuilders.standaloneSetup(TestController::class.java)
+    MockMvcBuilders
+      .standaloneSetup(TestController::class.java)
       .addInterceptors(organizationAuthenticationInterceptor)
       .build()
 
@@ -118,13 +119,15 @@ class OrganizationAuthorizationInterceptorTest {
 
   @Test
   fun `it hides the organization if the user cannot see it`() {
-    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+    Mockito
+      .`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
       .thenReturn(false)
 
     mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsNotFound
     mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsNotFound
 
-    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+    Mockito
+      .`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
       .thenReturn(true)
 
     mockMvc.perform(get("/v2/organizations/1337/default-perms")).andIsOk
@@ -132,14 +135,17 @@ class OrganizationAuthorizationInterceptorTest {
 
   @Test
   fun `rejects access if the user does not have a sufficiently high role`() {
-    Mockito.`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
+    Mockito
+      .`when`(organizationRoleService.canUserViewStrict(1337L, 1337L))
       .thenReturn(true)
-    Mockito.`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
+    Mockito
+      .`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
       .thenReturn(false)
 
     mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsForbidden
 
-    Mockito.`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
+    Mockito
+      .`when`(organizationRoleService.isUserOfRole(1337L, 1337L, OrganizationRoleType.OWNER))
       .thenReturn(true)
 
     mockMvc.perform(get("/v2/organizations/1337/requires-owner")).andIsOk

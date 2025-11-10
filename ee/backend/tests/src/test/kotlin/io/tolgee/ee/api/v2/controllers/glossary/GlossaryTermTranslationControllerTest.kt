@@ -40,24 +40,25 @@ class GlossaryTermTranslationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `updates glossary term translation`() {
-    val request = UpdateGlossaryTermTranslationRequest().apply {
-      languageTag = "de"
-      text = "Neuer Begriff"
-    }
+    val request =
+      UpdateGlossaryTermTranslationRequest().apply {
+        languageTag = "de"
+        text = "Neuer Begriff"
+      }
     performAuthPost(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations",
-      request
-    )
-      .andIsOk.andAssertThatJson {
+      request,
+    ).andIsOk
+      .andAssertThatJson {
         node("languageTag").isEqualTo("de")
         node("text").isEqualTo("Neuer Begriff")
       }
 
     // Verify the translation was created by getting it
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations/de"
-    )
-      .andIsOk.andAssertThatJson {
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations/de",
+    ).andIsOk
+      .andAssertThatJson {
         node("languageTag").isEqualTo("de")
         node("text").isEqualTo("Neuer Begriff")
       }
@@ -66,34 +67,36 @@ class GlossaryTermTranslationControllerTest : AuthorizedControllerTest() {
   @Test
   fun `updates existing glossary term translation`() {
     // First create a translation
-    val createRequest = UpdateGlossaryTermTranslationRequest().apply {
-      languageTag = "cs"
-      text = "Pojem"
-    }
+    val createRequest =
+      UpdateGlossaryTermTranslationRequest().apply {
+        languageTag = "cs"
+        text = "Pojem"
+      }
     performAuthPost(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations",
-      createRequest
+      createRequest,
     ).andIsOk
 
     // Then update it
-    val updateRequest = UpdateGlossaryTermTranslationRequest().apply {
-      languageTag = "cs"
-      text = "Aktualizovaný pojem"
-    }
+    val updateRequest =
+      UpdateGlossaryTermTranslationRequest().apply {
+        languageTag = "cs"
+        text = "Aktualizovaný pojem"
+      }
     performAuthPost(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations",
-      updateRequest
-    )
-      .andIsOk.andAssertThatJson {
+      updateRequest,
+    ).andIsOk
+      .andAssertThatJson {
         node("languageTag").isEqualTo("cs")
         node("text").isEqualTo("Aktualizovaný pojem")
       }
 
     // Verify the translation was updated
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations/cs"
-    )
-      .andIsOk.andAssertThatJson {
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations/cs",
+    ).andIsOk
+      .andAssertThatJson {
         node("languageTag").isEqualTo("cs")
         node("text").isEqualTo("Aktualizovaný pojem")
       }
@@ -102,24 +105,24 @@ class GlossaryTermTranslationControllerTest : AuthorizedControllerTest() {
   @Test
   fun `does not update glossary term translation when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
-    val request = UpdateGlossaryTermTranslationRequest().apply {
-      languageTag = "de"
-      text = "Neuer Begriff"
-    }
+    val request =
+      UpdateGlossaryTermTranslationRequest().apply {
+        languageTag = "de"
+        text = "Neuer Begriff"
+      }
     performAuthPost(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations",
-      request
-    )
-      .andIsBadRequest
+      request,
+    ).andIsBadRequest
   }
 
   @Test
   fun `gets existing glossary term translation`() {
     // Get the existing English translation from test data
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations/en"
-    )
-      .andIsOk.andAssertThatJson {
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations/en",
+    ).andIsOk
+      .andAssertThatJson {
         node("languageTag").isEqualTo("en")
         node("text").isEqualTo("Term")
       }
@@ -128,9 +131,9 @@ class GlossaryTermTranslationControllerTest : AuthorizedControllerTest() {
   @Test
   fun `gets default value for non-existent glossary term translation`() {
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations/it"
-    )
-      .andIsOk.andAssertThatJson {
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations/it",
+    ).andIsOk
+      .andAssertThatJson {
         node("languageTag").isEqualTo("it")
         node("text").isEqualTo("")
       }
@@ -140,8 +143,7 @@ class GlossaryTermTranslationControllerTest : AuthorizedControllerTest() {
   fun `does not get glossary term translation when feature disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations/en"
-    )
-      .andIsBadRequest
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}/translations/en",
+    ).andIsBadRequest
   }
 }

@@ -14,7 +14,11 @@ import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.util.concurrent.atomic.AtomicInteger
@@ -23,10 +27,9 @@ import kotlin.coroutines.CoroutineContext
 @SpringBootTest
 class BatchJobManagementControllerCancellationTest :
   AbstractBatchJobManagementControllerTest(
-  "/v2/projects/"
-),
+    "/v2/projects/",
+  ),
   Logging {
-
   @Autowired
   lateinit var stuckBatchJobTestUtil: StuckBatchJobTestUtil
 
@@ -71,7 +74,9 @@ class BatchJobManagementControllerCancellationTest :
           "keyIds" to keyIds,
           "targetLanguageIds" to
             listOf(
-              testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
+              testData.projectBuilder
+                .getLanguageByTag("cs")!!
+                .self.id,
             ),
         ),
       ).andIsOk
@@ -86,13 +91,19 @@ class BatchJobManagementControllerCancellationTest :
 
       waitForNotThrowing(pollTime = 100) {
         executeInNewTransaction {
-          util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+          util
+            .getSingleJob()
+            .status.assert
+            .isEqualTo(BatchJobStatus.CANCELLED)
           verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
 
           // assert activity stored
-          entityManager.createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
-            .setParameter("id", job.id).resultList
-            .assert.hasSize(1)
+          entityManager
+            .createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
+            .setParameter("id", job.id)
+            .resultList
+            .assert
+            .hasSize(1)
         }
       }
     }
@@ -133,6 +144,9 @@ class BatchJobManagementControllerCancellationTest :
 
     performProjectAuthPut("batch-jobs/${job.id}/cancel").andIsOk
 
-    util.getSingleJob().status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+    util
+      .getSingleJob()
+      .status.assert
+      .isEqualTo(BatchJobStatus.CANCELLED)
   }
 }

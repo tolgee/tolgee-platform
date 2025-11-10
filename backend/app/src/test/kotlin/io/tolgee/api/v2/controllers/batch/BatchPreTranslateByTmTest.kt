@@ -14,7 +14,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class BatchPreTranslateByTmTest : Logging, ProjectAuthControllerTest("/v2/projects/") {
+class BatchPreTranslateByTmTest :
+  ProjectAuthControllerTest("/v2/projects/"),
+  Logging {
   @Autowired
   lateinit var batchJobTestBase: BatchJobTestBase
 
@@ -44,12 +46,15 @@ class BatchPreTranslateByTmTest : Logging, ProjectAuthControllerTest("/v2/projec
         "keyIds" to keyIds,
         "targetLanguageIds" to
           listOf(
-            testData.projectBuilder.getLanguageByTag("cs")!!.self.id,
-            testData.projectBuilder.getLanguageByTag("de")!!.self.id,
+            testData.projectBuilder
+              .getLanguageByTag("cs")!!
+              .self.id,
+            testData.projectBuilder
+              .getLanguageByTag("de")!!
+              .self.id,
           ),
       ),
-    )
-      .andIsOk
+    ).andIsOk
       .andAssertThatJson {
         node("id").isValidId
       }
@@ -57,13 +62,16 @@ class BatchPreTranslateByTmTest : Logging, ProjectAuthControllerTest("/v2/projec
     batchJobTestBase.waitForAllTranslated(keyIds, keyCount, "cs")
     executeInNewTransaction {
       val jobs =
-        entityManager.createQuery("""from BatchJob""", BatchJob::class.java)
+        entityManager
+          .createQuery("""from BatchJob""", BatchJob::class.java)
           .resultList
       jobs.assert.hasSize(1)
       val job = jobs[0]
       job.status.assert.isEqualTo(BatchJobStatus.SUCCESS)
       job.activityRevision.assert.isNotNull
-      job.activityRevision!!.modifiedEntities.assert.hasSize(2000)
+      job.activityRevision!!
+        .modifiedEntities.assert
+        .hasSize(2000)
     }
   }
 }

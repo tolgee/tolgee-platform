@@ -8,8 +8,12 @@ import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.slack.SlackCommandDto
 import io.tolgee.dtos.response.SlackMessageDto
 import io.tolgee.dtos.slackintegration.SlackConfigDto
-import io.tolgee.ee.component.slackIntegration.*
-import io.tolgee.ee.component.slackIntegration.slashcommand.*
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackBotInfoProvider
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackErrorProvider
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackExceptionHandler
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackRequestValidation
+import io.tolgee.ee.component.slackIntegration.slashcommand.SlackSlackCommandBlocksProvider
+import io.tolgee.ee.component.slackIntegration.slashcommand.asSlackResponseString
 import io.tolgee.ee.service.slackIntegration.OrganizationSlackWorkspaceService
 import io.tolgee.ee.service.slackIntegration.SlackConfigManageService
 import io.tolgee.ee.service.slackIntegration.SlackConfigReadService
@@ -25,7 +29,13 @@ import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.I18n
 import io.tolgee.util.Logging
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -108,9 +118,10 @@ class SlackSlashCommandController(
       return tolgeeProperties.slack.token!!
     }
 
-    return organizationSlackWorkspaceService.findBySlackTeamId(
-      teamId,
-    )?.accessToken ?: throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
+    return organizationSlackWorkspaceService
+      .findBySlackTeamId(
+        teamId,
+      )?.accessToken ?: throw SlackErrorException(slackErrorProvider.getWorkspaceNotFoundError())
   }
 
   private fun String?.toLongOrThrowInvalidCommand(): Long {
@@ -253,7 +264,8 @@ class SlackSlashCommandController(
   ) {
     try {
       if (
-        permissionService.getProjectPermissionScopesNoApiKey(projectId, userAccountId)
+        permissionService
+          .getProjectPermissionScopesNoApiKey(projectId, userAccountId)
           ?.contains(Scope.ACTIVITY_VIEW) != true
       ) {
         throw SlackErrorException(slackErrorProvider.getNoPermissionError())

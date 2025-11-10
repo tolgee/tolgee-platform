@@ -16,7 +16,11 @@ class CsvFileExporter(
   override fun List<TableEntry>.toFileContents(): InputStream {
     val languageTags =
       exportParams.languages?.sorted()?.toTypedArray()
-        ?: this.map { it.language }.distinct().sorted().toTypedArray()
+        ?: this
+          .map { it.language }
+          .distinct()
+          .sorted()
+          .toTypedArray()
     return CsvFileWriter(
       languageTags = languageTags,
       data = this,

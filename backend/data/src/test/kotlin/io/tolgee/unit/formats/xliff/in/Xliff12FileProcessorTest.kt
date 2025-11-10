@@ -50,10 +50,14 @@ class Xliff12FileProcessorTest {
     assertThat(mockUtil.fileProcessorContext.languages).hasSize(2)
     assertThat(mockUtil.fileProcessorContext.translations).hasSize(176)
     assertThat(mockUtil.fileProcessorContext.translations["vpn.devices.removeA11Y"]!![0].text).isEqualTo("Remove %1")
-    assertThat(mockUtil.fileProcessorContext.translations["vpn.devices.removeA11Y"]!![0].language.name).isEqualTo("en")
+    assertThat(
+      mockUtil.fileProcessorContext.translations["vpn.devices.removeA11Y"]!![0]
+        .language.name,
+    ).isEqualTo("en")
     assertThat(mockUtil.fileProcessorContext.translations["vpn.devices.removeA11Y"]!![1].text).isEqualTo("Eliminar %1")
     assertThat(
-      mockUtil.fileProcessorContext.translations["vpn.devices.removeA11Y"]!![1].language.name,
+      mockUtil.fileProcessorContext.translations["vpn.devices.removeA11Y"]!![1]
+        .language.name,
     ).isEqualTo("es-MX")
 
     val keyMeta = mockUtil.fileProcessorContext.keys["vpn.aboutUs.releaseVersion"]!!.keyMeta!!
@@ -90,15 +94,18 @@ class Xliff12FileProcessorTest {
     Xliff12FileProcessor(mockUtil.fileProcessorContext, parsed).process()
     mockUtil
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "1")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "1")
       .assertSingle {
         hasText("  Back")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "2")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "2")
       .assertSingle {
         hasText("Back")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "3")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "3")
       .assertSingle {
         hasText("  Back")
       }
@@ -109,11 +116,13 @@ class Xliff12FileProcessorTest {
     mockUtil.mockIt("example.xliff", "src/test/resources/import/xliff/escaping.xliff")
     xmlStreamReader = inputFactory.createXMLEventReader(mockUtil.importFileDto.data.inputStream())
     Xliff12FileProcessor(mockUtil.fileProcessorContext, parsed).process()
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("Hello & hello")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "key 2")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key 2")
       .assertSingle {
         hasText("<b>Hello</b> &amp; hello")
       }
@@ -139,11 +148,13 @@ class Xliff12FileProcessorTest {
   fun `import with placeholder conversion (disabled ICU)`() {
     mockPlaceholderConversionTestFile(convertPlaceholders = false, projectIcuPlaceholdersEnabled = false)
     processFile()
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("Hello {icuPara}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "plural")
       .assertSinglePlural {
         hasText(
           """
@@ -163,11 +174,13 @@ class Xliff12FileProcessorTest {
     processFile()
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
     mockUtil.fileProcessorContext.assertLanguagesCount(1)
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("Hello {icuPara}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "plural")
       .assertSinglePlural {
         hasText(
           """
@@ -185,11 +198,13 @@ class Xliff12FileProcessorTest {
   fun `import with placeholder conversion (with conversion)`() {
     mockPlaceholderConversionTestFile(convertPlaceholders = true, projectIcuPlaceholdersEnabled = true)
     processFile()
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("Hello {icuPara}")
       }
-    mockUtil.fileProcessorContext.assertTranslations("en", "plural")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "plural")
       .assertSinglePlural {
         hasText(
           """
@@ -238,7 +253,8 @@ class Xliff12FileProcessorTest {
       }
     processFile()
     // it's escaped because ICU doesn't php doesn't contain ICU
-    mockUtil.fileProcessorContext.assertTranslations("en", "key")
+    mockUtil.fileProcessorContext
+      .assertTranslations("en", "key")
       .assertSingle {
         hasText("Hello '{'icuPara'}'")
       }

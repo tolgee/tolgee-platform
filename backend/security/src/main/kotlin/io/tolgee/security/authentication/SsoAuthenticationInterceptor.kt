@@ -21,7 +21,8 @@ class SsoAuthenticationInterceptor(
   private val tolgeeProperties: TolgeeProperties,
   @Lazy
   private val tenantService: TenantService,
-) : HandlerInterceptor, Ordered {
+) : HandlerInterceptor,
+  Ordered {
   override fun preHandle(
     request: HttpServletRequest,
     response: HttpServletResponse,

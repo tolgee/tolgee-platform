@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonValue
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import kotlin.arrayOf
 
 enum class Scope(
   @get:JsonValue
@@ -51,7 +50,6 @@ enum class Scope(
   fun isReadOnly() = Scope.isReadOnly(this)
 
   companion object {
-
     val readOnlyScopes by lazy { ALL_VIEW.expand() }
 
     private val keysView = HierarchyItem(KEYS_VIEW)
@@ -105,8 +103,8 @@ enum class Scope(
               HierarchyItem(PROJECT_EDIT),
               HierarchyItem(LANGUAGES_EDIT),
               translationsView,
-              screenshotsView
-            )
+              screenshotsView,
+            ),
           ),
           activityView,
           HierarchyItem(LANGUAGES_EDIT, listOf(HierarchyItem(PROMPTS_VIEW))),
@@ -167,9 +165,10 @@ enum class Scope(
 
     private fun expand(item: HierarchyItem): MutableSet<Scope> {
       val descendants =
-        item.requires.flatMap {
-          expand(it)
-        }.toMutableSet()
+        item.requires
+          .flatMap {
+            expand(it)
+          }.toMutableSet()
 
       descendants.add(item.scope)
       return descendants
@@ -243,12 +242,13 @@ enum class Scope(
 
     fun parse(scopes: Collection<String>?): Set<Scope> {
       scopes ?: return setOf()
-      return scopes.map { stringScope ->
-        Scope.entries.find { it.value == stringScope } ?: throw BadRequestException(
-          Message.SCOPE_NOT_FOUND,
-          listOf(stringScope),
-        )
-      }.toSet()
+      return scopes
+        .map { stringScope ->
+          Scope.entries.find { it.value == stringScope } ?: throw BadRequestException(
+            Message.SCOPE_NOT_FOUND,
+            listOf(stringScope),
+          )
+        }.toSet()
     }
 
     fun isReadOnly(scope: Scope): Boolean {
@@ -260,5 +260,8 @@ enum class Scope(
     }
   }
 
-  data class HierarchyItem(val scope: Scope, val requires: List<HierarchyItem> = listOf())
+  data class HierarchyItem(
+    val scope: Scope,
+    val requires: List<HierarchyItem> = listOf(),
+  )
 }

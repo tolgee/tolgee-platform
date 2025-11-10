@@ -4,7 +4,7 @@ import io.tolgee.exceptions.SlackErrorException
 import org.springframework.stereotype.Component
 
 @Component
-class SlackExceptionHandler() {
+class SlackExceptionHandler {
   fun handle(fn: () -> String?): String? {
     return try {
       fn()

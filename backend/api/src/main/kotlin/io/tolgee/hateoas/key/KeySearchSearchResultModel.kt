@@ -6,5 +6,7 @@ import org.springframework.hateoas.server.core.Relation
 
 @Suppress("unused")
 @Relation(collectionRelation = "keys", itemRelation = "key")
-class KeySearchSearchResultModel(view: KeySearchResultView) :
-  KeySearchResultView by view, RepresentationModel<KeySearchSearchResultModel>()
+class KeySearchSearchResultModel(
+  view: KeySearchResultView,
+) : RepresentationModel<KeySearchSearchResultModel>(),
+  KeySearchResultView by view

@@ -1,7 +1,10 @@
 package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -54,9 +57,14 @@ class BatchTagKeysTest : ProjectAuthControllerTest("/v2/projects/") {
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
       val all = keyService.getKeysWithTagsById(testData.project.id, keyIds)
       all.assert.hasSize(keyIds.size)
-      all.count {
-        it.keyMeta?.tags?.map { it.name }?.containsAll(newTags) == true
-      }.assert.isEqualTo(keyIds.size)
+      all
+        .count {
+          it.keyMeta
+            ?.tags
+            ?.map { it.name }
+            ?.containsAll(newTags) == true
+        }.assert
+        .isEqualTo(keyIds.size)
     }
   }
 
@@ -82,13 +90,21 @@ class BatchTagKeysTest : ProjectAuthControllerTest("/v2/projects/") {
     waitForNotThrowing(pollTime = 1000, timeout = 10000) {
       val all = keyService.getKeysWithTagsById(testData.project.id, keyIds)
       all.assert.hasSize(keyIds.size)
-      all.count {
-        it.keyMeta?.tags?.map { it.name }?.any { tagsToRemove.contains(it) } == false &&
-          it.keyMeta?.tags?.map { it.name }?.contains("tag3") == true
-      }.assert.isEqualTo(keyIds.size)
+      all
+        .count {
+          it.keyMeta
+            ?.tags
+            ?.map { it.name }
+            ?.any { tagsToRemove.contains(it) } == false &&
+            it.keyMeta
+              ?.tags
+              ?.map { it.name }
+              ?.contains("tag3") == true
+        }.assert
+        .isEqualTo(keyIds.size)
     }
 
-    val aKeyId = keyService.get(testData.projectBuilder.self.id, "a-key", null)
+    keyService.get(testData.projectBuilder.self.id, "a-key", null)
     performProjectAuthPost(
       "start-batch-job/untag-keys",
       mapOf(
@@ -102,7 +118,7 @@ class BatchTagKeysTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it deletes tags when not used`() {
     val keyCount = 1000
-    val keys = testData.addTagKeysData(keyCount)
+    testData.addTagKeysData(keyCount)
     batchJobTestBase.saveAndPrepare(this)
 
     val aKeyId = keyService.get(testData.projectBuilder.self.id, "a-key", null).id

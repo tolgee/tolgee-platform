@@ -46,7 +46,8 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   fun `owner can get all glossary terms`() {
     userAccount = testData.userOwner
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaryTerms") {
           isArray.hasSize(1)
           node("[0].id").isValidId
@@ -59,7 +60,8 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   fun `maintainer can get all glossary terms`() {
     userAccount = testData.userMaintainer
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaryTerms") {
           isArray.hasSize(1)
           node("[0].id").isValidId
@@ -72,7 +74,8 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   fun `member can get all glossary terms`() {
     userAccount = testData.userMember
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaryTerms") {
           isArray.hasSize(1)
           node("[0].id").isValidId
@@ -92,9 +95,9 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   fun `owner can get single glossary term`() {
     userAccount = testData.userOwner
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsOk.andAssertThatJson {
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("description").isEqualTo("The description")
       }
@@ -104,9 +107,9 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   fun `maintainer can get single glossary term`() {
     userAccount = testData.userMaintainer
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsOk.andAssertThatJson {
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("description").isEqualTo("The description")
       }
@@ -116,9 +119,9 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   fun `member can get single glossary term`() {
     userAccount = testData.userMember
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsOk.andAssertThatJson {
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("description").isEqualTo("The description")
       }
@@ -128,20 +131,21 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   fun `unaffiliated cannot get single glossary term`() {
     userAccount = testData.userUnaffiliated
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsNotFound
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsNotFound
   }
 
   @Test
   fun `owner can create glossary term`() {
     userAccount = testData.userOwner
-    val request = CreateGlossaryTermWithTranslationRequest().apply {
-      description = "New Term"
-      text = "New Translation"
-    }
+    val request =
+      CreateGlossaryTermWithTranslationRequest().apply {
+        description = "New Term"
+        text = "New Translation"
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("term.id").isValidId
         node("term.description").isEqualTo("New Term")
         node("translation.text").isEqualTo("New Translation")
@@ -151,12 +155,14 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `maintainer can create glossary term`() {
     userAccount = testData.userMaintainer
-    val request = CreateGlossaryTermWithTranslationRequest().apply {
-      description = "New Term"
-      text = "New Translation"
-    }
+    val request =
+      CreateGlossaryTermWithTranslationRequest().apply {
+        description = "New Term"
+        text = "New Translation"
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("term.id").isValidId
         node("term.description").isEqualTo("New Term")
         node("translation.text").isEqualTo("New Translation")
@@ -166,10 +172,11 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `member cannot create glossary term`() {
     userAccount = testData.userMember
-    val request = CreateGlossaryTermWithTranslationRequest().apply {
-      description = "New Term"
-      text = "New Translation"
-    }
+    val request =
+      CreateGlossaryTermWithTranslationRequest().apply {
+        description = "New Term"
+        text = "New Translation"
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
       .andIsForbidden
   }
@@ -177,10 +184,11 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `unaffiliated cannot create glossary term`() {
     userAccount = testData.userUnaffiliated
-    val request = CreateGlossaryTermWithTranslationRequest().apply {
-      description = "New Term"
-      text = "New Translation"
-    }
+    val request =
+      CreateGlossaryTermWithTranslationRequest().apply {
+        description = "New Term"
+        text = "New Translation"
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
       .andIsNotFound
   }
@@ -188,15 +196,16 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `owner can update glossary term`() {
     userAccount = testData.userOwner
-    val request = UpdateGlossaryTermWithTranslationRequest().apply {
-      description = "Updated Term"
-      text = "Updated Translation"
-    }
+    val request =
+      UpdateGlossaryTermWithTranslationRequest().apply {
+        description = "Updated Term"
+        text = "Updated Translation"
+      }
     performAuthPut(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
-      request
-    )
-      .andIsOk.andAssertThatJson {
+      request,
+    ).andIsOk
+      .andAssertThatJson {
         node("term.id").isValidId
         node("term.description").isEqualTo("Updated Term")
         node("translation.text").isEqualTo("Updated Translation")
@@ -206,15 +215,16 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `maintainer can update glossary term`() {
     userAccount = testData.userMaintainer
-    val request = UpdateGlossaryTermWithTranslationRequest().apply {
-      description = "Updated Term"
-      text = "Updated Translation"
-    }
+    val request =
+      UpdateGlossaryTermWithTranslationRequest().apply {
+        description = "Updated Term"
+        text = "Updated Translation"
+      }
     performAuthPut(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
-      request
-    )
-      .andIsOk.andAssertThatJson {
+      request,
+    ).andIsOk
+      .andAssertThatJson {
         node("term.id").isValidId
         node("term.description").isEqualTo("Updated Term")
         node("translation.text").isEqualTo("Updated Translation")
@@ -224,113 +234,108 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `member cannot update glossary term`() {
     userAccount = testData.userMember
-    val request = UpdateGlossaryTermWithTranslationRequest().apply {
-      description = "Updated Term"
-      text = "Updated Translation"
-    }
+    val request =
+      UpdateGlossaryTermWithTranslationRequest().apply {
+        description = "Updated Term"
+        text = "Updated Translation"
+      }
     performAuthPut(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
-      request
-    )
-      .andIsForbidden
+      request,
+    ).andIsForbidden
   }
 
   @Test
   fun `unaffiliated cannot update glossary term`() {
     userAccount = testData.userUnaffiliated
-    val request = UpdateGlossaryTermWithTranslationRequest().apply {
-      description = "Updated Term"
-      text = "Updated Translation"
-    }
+    val request =
+      UpdateGlossaryTermWithTranslationRequest().apply {
+        description = "Updated Term"
+        text = "Updated Translation"
+      }
     performAuthPut(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
-      request
-    )
-      .andIsNotFound
+      request,
+    ).andIsNotFound
   }
 
   @Test
   fun `owner can delete glossary term`() {
     userAccount = testData.userOwner
     performAuthDelete(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsOk
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsOk
 
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsNotFound
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsNotFound
   }
 
   @Test
   fun `maintainer can delete glossary term`() {
     userAccount = testData.userMaintainer
     performAuthDelete(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsOk
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsOk
 
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsNotFound
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsNotFound
   }
 
   @Test
   fun `member cannot delete glossary term`() {
     userAccount = testData.userMember
     performAuthDelete(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsForbidden
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsForbidden
   }
 
   @Test
   fun `unaffiliated cannot delete glossary term`() {
     userAccount = testData.userUnaffiliated
     performAuthDelete(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsNotFound
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsNotFound
   }
 
   @Test
   fun `owner can delete multiple glossary terms`() {
     userAccount = testData.userOwner
-    val request = DeleteMultipleGlossaryTermsRequest().apply {
-      termIds = setOf(testData.term.id)
-    }
+    val request =
+      DeleteMultipleGlossaryTermsRequest().apply {
+        termIds = setOf(testData.term.id)
+      }
     performAuthDelete("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
       .andIsOk
 
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsNotFound
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsNotFound
   }
 
   @Test
   fun `maintainer can delete multiple glossary terms`() {
     userAccount = testData.userMaintainer
-    val request = DeleteMultipleGlossaryTermsRequest().apply {
-      termIds = setOf(testData.term.id)
-    }
+    val request =
+      DeleteMultipleGlossaryTermsRequest().apply {
+        termIds = setOf(testData.term.id)
+      }
     performAuthDelete("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
       .andIsOk
 
     performAuthGet(
-      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}"
-    )
-      .andIsNotFound
+      "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
+    ).andIsNotFound
   }
 
   @Test
   fun `member cannot delete multiple glossary terms`() {
     userAccount = testData.userMember
-    val request = DeleteMultipleGlossaryTermsRequest().apply {
-      termIds = setOf(testData.term.id)
-    }
+    val request =
+      DeleteMultipleGlossaryTermsRequest().apply {
+        termIds = setOf(testData.term.id)
+      }
     performAuthDelete("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
       .andIsForbidden
   }
@@ -338,9 +343,10 @@ class GlossaryTermPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `unaffiliated cannot delete multiple glossary terms`() {
     userAccount = testData.userUnaffiliated
-    val request = DeleteMultipleGlossaryTermsRequest().apply {
-      termIds = setOf(testData.term.id)
-    }
+    val request =
+      DeleteMultipleGlossaryTermsRequest().apply {
+        termIds = setOf(testData.term.id)
+      }
     performAuthDelete("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms", request)
       .andIsNotFound
   }

@@ -10,4 +10,5 @@ data class ProjectActivityAuthorModel(
   override var name: String?,
   override var avatar: Avatar?,
   override var deleted: Boolean,
-) : RepresentationModel<ProjectActivityAuthorModel>(), IProjectActivityAuthorModel
+) : RepresentationModel<ProjectActivityAuthorModel>(),
+  IProjectActivityAuthorModel

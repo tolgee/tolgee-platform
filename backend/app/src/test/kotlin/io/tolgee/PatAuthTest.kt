@@ -12,7 +12,7 @@ import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
-import java.util.*
+import java.util.Date
 
 class PatAuthTest : AbstractControllerTest() {
   @Test

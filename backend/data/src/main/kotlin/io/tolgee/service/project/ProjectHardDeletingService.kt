@@ -53,7 +53,7 @@ class ProjectHardDeletingService(
   @Qualifier("promptServiceEeImpl") private val promptService: PromptService,
   private val importSettingsService: ImportSettingsService,
   private val glossaryCleanupService: GlossaryCleanupService,
-  private val labelService: LabelService
+  private val labelService: LabelService,
 ) : Logging {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")

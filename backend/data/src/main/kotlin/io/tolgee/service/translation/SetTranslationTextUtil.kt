@@ -36,7 +36,8 @@ class SetTranslationTextUtil(
 
     return setForKey(
       key,
-      normalized.map { languageByTagFromLanguages(it.key, languages) to it.value }
+      normalized
+        .map { languageByTagFromLanguages(it.key, languages) to it.value }
         .toMap(),
       oldTranslations,
       options,
@@ -47,12 +48,13 @@ class SetTranslationTextUtil(
     key: Key,
     translations: Map<Language, String?>,
     oldTranslations: Map<Language, String?>,
-    options: Options? = null
+    options: Options? = null,
   ): Map<Language, Translation> {
     val result =
-      translations.entries.associate { (language, value) ->
-        language to setTranslationText(key, language, value, options)
-      }.mapValues { it.value }
+      translations.entries
+        .associate { (language, value) ->
+          language to setTranslationText(key, language, value, options)
+        }.mapValues { it.value }
 
     applicationContext.publishEvent(
       OnTranslationsSet(
@@ -70,7 +72,7 @@ class SetTranslationTextUtil(
     key: Key,
     language: Language,
     text: String?,
-    options: Options? = null
+    options: Options? = null,
   ): Translation {
     val translation = translationService.getOrCreate(key, language)
     setTranslationText(translation, text, options)
@@ -112,8 +114,9 @@ class SetTranslationTextUtil(
 
     val hasText = !text.isNullOrEmpty()
 
-    val keepState = options?.keepState
-      ?: (project?.translationProtection == TranslationProtection.PROTECT_REVIEWED)
+    val keepState =
+      options?.keepState
+        ?: (project?.translationProtection == TranslationProtection.PROTECT_REVIEWED)
 
     translation.state =
       when {
@@ -159,7 +162,7 @@ class SetTranslationTextUtil(
 
   companion object {
     data class Options(
-      val keepState: Boolean = false
+      val keepState: Boolean = false,
     )
   }
 }

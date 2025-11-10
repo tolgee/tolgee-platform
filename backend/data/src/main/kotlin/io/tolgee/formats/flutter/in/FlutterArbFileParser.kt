@@ -44,7 +44,8 @@ class FlutterArbFileParser(
 
   private fun getSafePlaceHoldersMap(placeholders: Any?) =
     (placeholders as? Map<*, *>)
-      ?.entries?.mapNotNull { (key, value) ->
+      ?.entries
+      ?.mapNotNull { (key, value) ->
         (key as? String ?: return@mapNotNull null) to value
       }?.toMap()
 }

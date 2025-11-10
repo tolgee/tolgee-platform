@@ -42,7 +42,7 @@ class XlsxImportFormatDetectorTest {
     "src/test/resources/import/xlsx/unknown.xlsx".assertDetected(ImportFormat.XLSX_ICU)
   }
 
-  private fun parseFile(path: String): Any? {
+  private fun parseFile(path: String): Any {
     val parser =
       XlsxFileParser(
         inputStream = File(path).inputStream(),

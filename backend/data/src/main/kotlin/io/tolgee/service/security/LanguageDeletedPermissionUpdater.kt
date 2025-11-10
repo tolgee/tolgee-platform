@@ -102,7 +102,8 @@ class LanguageDeletedPermissionUpdater(
   }
 
   private fun scopesWithout(scope: Scope) =
-    Scope.expand(permission.scopes)
+    Scope
+      .expand(permission.scopes)
       .toMutableList()
       .also { it.remove(scope) }
       .toTypedArray()

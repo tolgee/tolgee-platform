@@ -1,6 +1,6 @@
 package io.tolgee.api
 
-import java.util.*
+import java.util.Date
 
 interface ILanguageStats {
   val languageId: Long

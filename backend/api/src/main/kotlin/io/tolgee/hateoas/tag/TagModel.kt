@@ -15,9 +15,7 @@ open class TagModel(
 
     other as TagModel
 
-    if (id != other.id) return false
-
-    return true
+    return id == other.id
   }
 
   override fun hashCode(): Int {

@@ -47,23 +47,23 @@ import org.springframework.web.bind.annotation.RestController
 )
 @OpenApiSelfHostedExtension
 class AdministrationController(
-    private val organizationService: OrganizationService,
-    private val pagedOrganizationResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
-    private val organizationModelAssembler: OrganizationModelAssembler,
-    private val authenticationFacade: AuthenticationFacade,
-    private val userAccountService: UserAccountService,
-    private val pagedResourcesAssembler: PagedResourcesAssembler<UserAccount>,
-    private val userAccountModelAssembler: UserAccountModelAssembler,
-    private val jwtService: JwtService,
+  private val organizationService: OrganizationService,
+  private val pagedOrganizationResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
+  private val organizationModelAssembler: OrganizationModelAssembler,
+  private val authenticationFacade: AuthenticationFacade,
+  private val userAccountService: UserAccountService,
+  private val pagedResourcesAssembler: PagedResourcesAssembler<UserAccount>,
+  private val userAccountModelAssembler: UserAccountModelAssembler,
+  private val jwtService: JwtService,
 ) : IController {
   @GetMapping(value = ["/organizations"])
   @Operation(summary = "Get all server organizations")
   @RequiresSuperAuthentication
   fun getOrganizations(
-      @ParameterObject
+    @ParameterObject
     @SortDefault(sort = ["name"])
     pageable: Pageable,
-      search: String? = null,
+    search: String? = null,
   ): PagedModel<OrganizationModel> {
     val organizations =
       organizationService.findAllPaged(
@@ -78,10 +78,10 @@ class AdministrationController(
   @Operation(summary = "Get all server users")
   @RequiresSuperAuthentication
   fun getUsers(
-      @ParameterObject
+    @ParameterObject
     @SortDefault(sort = ["name"])
     pageable: Pageable,
-      search: String? = null,
+    search: String? = null,
   ): PagedModel<UserAccountModel> {
     val users = userAccountService.findAllWithDisabledPaged(pageable, search)
     return pagedResourcesAssembler.toModel(users, userAccountModelAssembler)
@@ -91,7 +91,7 @@ class AdministrationController(
   @Operation(summary = "Delete user")
   @RequiresSuperAuthentication
   fun deleteUser(
-      @PathVariable userId: Long,
+    @PathVariable userId: Long,
   ) {
     if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CANNOT_DELETE_YOUR_OWN_ACCOUNT)
@@ -109,7 +109,7 @@ class AdministrationController(
   )
   @RequiresSuperAuthentication
   fun disableUser(
-      @PathVariable userId: Long,
+    @PathVariable userId: Long,
   ) {
     if (userId == authenticationFacade.authenticatedUser.id) {
       throw BadRequestException(Message.CANNOT_DISABLE_YOUR_OWN_ACCOUNT)
@@ -121,7 +121,7 @@ class AdministrationController(
   @Operation(summary = "Enable user", description = "Enables previously disabled user.")
   @RequiresSuperAuthentication
   fun enableUser(
-      @PathVariable userId: Long,
+    @PathVariable userId: Long,
   ) {
     userAccountService.enable(userId)
   }
@@ -130,8 +130,8 @@ class AdministrationController(
   @Operation(summary = "Set Role", description = "Set's the global role on the Tolgee Platform server.")
   @RequiresSuperAuthentication
   fun setRole(
-      @PathVariable userId: Long,
-      @PathVariable role: UserAccount.Role,
+    @PathVariable userId: Long,
+    @PathVariable role: UserAccount.Role,
   ) {
     val user = userAccountService.get(userId)
     user.role = role
@@ -147,7 +147,7 @@ class AdministrationController(
   )
   @RequiresSuperAuthentication
   fun generateUserToken(
-      @PathVariable userId: Long,
+    @PathVariable userId: Long,
   ): String {
     val isAlreadyImpersonating = authenticationFacade.actingUser != null
     if (isAlreadyImpersonating) {

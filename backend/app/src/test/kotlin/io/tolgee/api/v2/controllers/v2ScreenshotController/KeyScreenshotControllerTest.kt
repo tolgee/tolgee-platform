@@ -5,7 +5,12 @@
 package io.tolgee.api.v2.controllers.v2ScreenshotController
 
 import io.tolgee.dtos.request.key.CreateKeyDto
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsCreated
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.satisfies
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -63,10 +68,18 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
         fileStorage.fileExists("screenshots/" + screenshots[0].filename).assert.isTrue()
         val reference = screenshots[0].keyScreenshotReferences[0]
         reference.originalText.assert.isEqualTo(text)
-        reference.positions!![0].x.assert.isEqualTo(200)
-        reference.positions!![0].y.assert.isEqualTo(100)
-        reference.positions!![0].width.assert.isEqualTo(40)
-        reference.positions!![0].height.assert.isEqualTo(40)
+        reference.positions!![0]
+          .x.assert
+          .isEqualTo(200)
+        reference.positions!![0]
+          .y.assert
+          .isEqualTo(100)
+        reference.positions!![0]
+          .width.assert
+          .isEqualTo(40)
+        reference.positions!![0]
+          .height.assert
+          .isEqualTo(40)
       }
     }
   }
@@ -148,11 +161,11 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
         screenshotService.store(screenshotFile, key, null)
       }
     val result =
-      performGet("/screenshots/${screenshot.filename}").andIsOk
+      performGet("/screenshots/${screenshot.filename}")
+        .andIsOk
         .andExpect(
           header().string("Cache-Control", "max-age=365, must-revalidate, no-transform"),
-        )
-        .andReturn()
+        ).andReturn()
     performGet("/screenshots/${screenshot.thumbnailFilename}").andIsOk
     assertThat(result.response.contentAsByteArray).isEqualTo(fileStorage.readFile("screenshots/" + screenshot.filename))
   }
@@ -165,9 +178,10 @@ class KeyScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
         val key = keyService.create(project, CreateKeyDto("test"))
 
         val list =
-          (1..20).map {
-            screenshotService.store(screenshotFile, key, null)
-          }.toCollection(mutableListOf())
+          (1..20)
+            .map {
+              screenshotService.store(screenshotFile, key, null)
+            }.toCollection(mutableListOf())
         key to list
       }
     val chunked = list.chunked(10)

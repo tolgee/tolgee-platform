@@ -15,7 +15,11 @@ class ProjectNotificationEnhancer(
     val projects = projectService.findAll(projectIds).associateBy { it.id }
 
     notifications.forEach { (source, target) ->
-      target.project = source.project?.id.let { projects[it] }?.let { simpleProjectModelAssembler.toModel(it) }
+      target.project =
+        source.project
+          ?.id
+          .let { projects[it] }
+          ?.let { simpleProjectModelAssembler.toModel(it) }
     }
   }
 }

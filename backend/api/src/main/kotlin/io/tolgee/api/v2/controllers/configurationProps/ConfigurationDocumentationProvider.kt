@@ -28,25 +28,32 @@ class ConfigurationDocumentationProvider {
     annotation: DocProperty?,
     isList: Boolean = false,
   ): Group {
-    val additionalProps = obj::class.findAnnotations(AdditionalDocsProperties::class)
-      .buildPropertiesTree().sortedByGroupAndName()
+    val additionalProps =
+      obj::class
+        .findAnnotations(AdditionalDocsProperties::class)
+        .buildPropertiesTree()
+        .sortedByGroupAndName()
 
     val objDef = obj::class.findAnnotations(DocProperty::class).singleOrNull()
     val confPropsDef = obj::class.findAnnotations(ConfigurationProperties::class).singleOrNull()
     val props =
-      obj::class.declaredMemberProperties.mapNotNull {
-        handleProperty(it, obj)
-      }.sortedByGroupAndName()
+      obj::class
+        .declaredMemberProperties
+        .mapNotNull {
+          handleProperty(it, obj)
+        }.sortedByGroupAndName()
 
     // Sort is stable - additional props will be added at the end, but props not part of a group will be moved before groups
     // Docs renderer expects groups to be always at the end of the list
     val allProps = (props + additionalProps).sortedByGroup()
 
     val name =
-      annotation?.name?.nullIfEmpty ?: objDef?.name?.nullIfEmpty ?: parent?.name ?: confPropsDef?.prefix?.replace(
-        "(.*)\\.(.+?)\$".toRegex(),
-        "$1",
-      )?.nullIfEmpty
+      annotation?.name?.nullIfEmpty ?: objDef?.name?.nullIfEmpty ?: parent?.name ?: confPropsDef
+        ?.prefix
+        ?.replace(
+          "(.*)\\.(.+?)\$".toRegex(),
+          "$1",
+        )?.nullIfEmpty
         ?: throw RuntimeException("No name for $obj with parent $parent")
     return Group(
       name = name,
@@ -68,19 +75,23 @@ class ConfigurationDocumentationProvider {
     if (annotation?.hidden == true) {
       return null
     }
-    val returnTypeFirstArgument = it.returnType.arguments.firstOrNull()?.type
+    val returnTypeFirstArgument =
+      it.returnType.arguments
+        .firstOrNull()
+        ?.type
 
     when {
       it.returnType.isSubtypeOf(typeOf<List<*>?>()) && returnTypeFirstArgument?.isPrimitive() == false -> {
         // we expect this is a list of some configuration property classes, so we need to dig deeper
         val items = it.getter.call(obj)
-        val child = (items as? List<*>)?.firstOrNull()
-          ?: try {
-            // if the list is empty, we try to instantiate an object ourselves
-            returnTypeFirstArgument.instantiate()
-          } catch (e: Exception) {
-            throw RuntimeException("Property ${it.name} failed to instantiate", e)
-          }
+        val child =
+          (items as? List<*>)?.firstOrNull()
+            ?: try {
+              // if the list is empty, we try to instantiate an object ourselves
+              returnTypeFirstArgument.instantiate()
+            } catch (e: Exception) {
+              throw RuntimeException("Property ${it.name} failed to instantiate", e)
+            }
 
         return handleObject(child, it, annotation, isList = true)
       }
@@ -129,7 +140,7 @@ class ConfigurationDocumentationProvider {
       typeOf<Double?>(),
       typeOf<List<*>?>(),
       typeOf<Boolean?>(),
-      typeOf<Map<*, *>?>()
+      typeOf<Map<*, *>?>(),
     )
   }
 
@@ -151,19 +162,20 @@ class ConfigurationDocumentationProvider {
     }
   }
 
-  private fun List<AdditionalDocsProperties>.buildPropertiesTree(): List<DocItem> = buildList {
-    this@buildPropertiesTree.forEach {
-      if (it.global) {
-        it.properties.forEach {
-          globalItems.add(getPropertyTree(it))
+  private fun List<AdditionalDocsProperties>.buildPropertiesTree(): List<DocItem> =
+    buildList {
+      this@buildPropertiesTree.forEach {
+        if (it.global) {
+          it.properties.forEach {
+            globalItems.add(getPropertyTree(it))
+          }
+          return@forEach
         }
-        return@forEach
-      }
-      it.properties.forEach {
-        add(getPropertyTree(it))
+        it.properties.forEach {
+          add(getPropertyTree(it))
+        }
       }
     }
-  }
 
   private fun List<DocItem>.sortedByGroup(): List<DocItem> {
     return this.sortedBy(

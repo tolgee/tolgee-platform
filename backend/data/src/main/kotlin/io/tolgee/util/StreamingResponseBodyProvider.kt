@@ -89,5 +89,7 @@ class StreamingResponseBodyProvider(
         )
     }
 
-  data class StreamedErrorMessage(val error: ErrorResponseBody)
+  data class StreamedErrorMessage(
+    val error: ErrorResponseBody,
+  )
 }

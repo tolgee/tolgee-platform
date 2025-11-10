@@ -5,7 +5,9 @@ interface StructuredModelItem {
   val key: Any?
 }
 
-interface ContainerNode<T : Any> : MutableMap<T, StructuredModelItem>, StructuredModelItem {
+interface ContainerNode<T : Any> :
+  MutableMap<T, StructuredModelItem>,
+  StructuredModelItem {
   val isPlural: Boolean
 }
 
@@ -13,13 +15,11 @@ class ValueStructuredModelItem(
   val value: String?,
   override val parent: ContainerNode<*>?,
   override val key: Any?,
-) :
-  StructuredModelItem
+) : StructuredModelItem
 
 class ObjectStructuredModelItem(
   override val parent: ContainerNode<*>?,
   override val key: Any?,
-
   /**
    * Whether this is a parent node of plural forms.
    *
@@ -30,8 +30,8 @@ class ObjectStructuredModelItem(
    * }
    */
   override val isPlural: Boolean = false,
-) :
-  LinkedHashMap<String, StructuredModelItem>(), ContainerNode<String>
+) : LinkedHashMap<String, StructuredModelItem>(),
+  ContainerNode<String>
 
 class ArrayStructuredModelItem(
   override val parent: ContainerNode<*>?,
@@ -39,7 +39,6 @@ class ArrayStructuredModelItem(
 ) : LinkedHashMap<Int, StructuredModelItem>(),
   StructuredModelItem,
   ContainerNode<Int> {
-
   /**
    * Whether this is a parent node of plural forms.
    *

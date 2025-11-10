@@ -6,10 +6,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class ApiKeyModelAssembler : RepresentationModelAssemblerSupport<ApiKey, ApiKeyModel>(
-  ApiKeyController::class.java,
-  ApiKeyModel::class.java,
-) {
+class ApiKeyModelAssembler :
+  RepresentationModelAssemblerSupport<ApiKey, ApiKeyModel>(
+    ApiKeyController::class.java,
+    ApiKeyModel::class.java,
+  ) {
   override fun toModel(entity: ApiKey) =
     ApiKeyModel(
       id = entity.id,

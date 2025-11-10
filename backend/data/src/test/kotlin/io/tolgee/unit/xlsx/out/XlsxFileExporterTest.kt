@@ -256,10 +256,11 @@ class XlsxFileExporterTest {
       translations = translations,
       exportParams = exportParams,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
-      pathProvider = ExportFilePathProvider(
-        template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
-        extension = exportParams.format.extension,
-      ),
+      pathProvider =
+        ExportFilePathProvider(
+          template = ExportFileStructureTemplateProvider(exportParams, translations).validateAndGetTemplate(),
+          extension = exportParams.format.extension,
+        ),
     )
   }
 }

@@ -21,9 +21,8 @@ import org.springframework.context.ApplicationContext
 class ActivityRevisionInitializer(
   private val applicationContext: ApplicationContext,
   private val revision: ActivityRevision,
-  private val activityHolder: ActivityHolder
+  private val activityHolder: ActivityHolder,
 ) : Logging {
-
   fun initialize() {
     revision.isInitializedByInterceptor = true
     revision.authorId = userAccount?.id ?: revision.authorId
@@ -58,7 +57,7 @@ class ActivityRevisionInitializer(
       project?.organizationOwnerId ?: let {
         logger.debug(
           "Organization is not set in OrganizationHolder. Activity will be stored without organizationId.",
-          e
+          e,
         )
         null
       }

@@ -10,7 +10,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
-import java.util.*
+import java.util.Date
 
 @Entity
 @Table(
@@ -23,7 +23,8 @@ class Import(
   @field:NotNull
   @ManyToOne(optional = false)
   val project: Project,
-) : StandardAuditModel(), SoftDeletable {
+) : StandardAuditModel(),
+  SoftDeletable {
   @field:NotNull
   @ManyToOne(optional = false)
   lateinit var author: UserAccount

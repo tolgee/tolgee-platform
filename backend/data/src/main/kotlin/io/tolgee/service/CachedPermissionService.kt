@@ -47,26 +47,27 @@ class CachedPermissionService(
     userId: Long? = null,
     organizationId: Long? = null,
   ): PermissionDto? {
-    return permissionRepository.findOneByProjectIdAndUserIdAndOrganizationId(
-      projectId = projectId,
-      userId = userId,
-      organizationId = organizationId,
-    )?.let { permission ->
-      PermissionDto(
-        id = permission.id,
-        userId = permission.user?.id,
-        invitationId = permission.invitation?.id,
-        scopes = permission.scopes,
-        projectId = permission.project?.id,
-        organizationId = permission.organization?.id,
-        translateLanguageIds = permission.translateLanguageIds,
-        viewLanguageIds = permission.viewLanguageIds,
-        stateChangeLanguageIds = permission.stateChangeLanguageIds,
-        suggestLanguageIds = permission.suggestLanguageIds,
-        type = permission.type,
-        granular = permission.granular,
-      )
-    }
+    return permissionRepository
+      .findOneByProjectIdAndUserIdAndOrganizationId(
+        projectId = projectId,
+        userId = userId,
+        organizationId = organizationId,
+      )?.let { permission ->
+        PermissionDto(
+          id = permission.id,
+          userId = permission.user?.id,
+          invitationId = permission.invitation?.id,
+          scopes = permission.scopes,
+          projectId = permission.project?.id,
+          organizationId = permission.organization?.id,
+          translateLanguageIds = permission.translateLanguageIds,
+          viewLanguageIds = permission.viewLanguageIds,
+          stateChangeLanguageIds = permission.stateChangeLanguageIds,
+          suggestLanguageIds = permission.suggestLanguageIds,
+          type = permission.type,
+          granular = permission.granular,
+        )
+      }
   }
 
   @CacheEvict(

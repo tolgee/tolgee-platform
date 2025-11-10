@@ -193,7 +193,8 @@ data class FileProcessorContext(
   val mapping: ImportFileMapping? by lazy {
     val mappings = singleStepImportParams?.fileMappings ?: return@lazy null
 
-    mappings.filter { it.fileName == this.file.name }
+    mappings
+      .filter { it.fileName == this.file.name }
       .getOrThrowIfMoreThanOne {
         BadRequestException(Message.TOO_MANY_MAPPINGS_FOR_FILE, listOf(this.file.name))
       }

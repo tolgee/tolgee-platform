@@ -30,7 +30,7 @@ class ScreenshotImporter(
     if (screenshots.isEmpty()) {
       return
     }
-    val uploadedImagesIds = screenshots.map { it -> it.screenshot.uploadedImageId }
+    val uploadedImagesIds = screenshots.map { it.screenshot.uploadedImageId }
     val images = imageUploadService.find(uploadedImagesIds)
     securityService.checkImageUploadPermissions(projectId, images)
     val createdScreenshots =
@@ -84,7 +84,7 @@ class ScreenshotImporter(
   companion object {
     data class ScreenshotToImport(
       val key: KeyDefinitionDto,
-      val screenshot: KeyScreenshotDto
+      val screenshot: KeyScreenshotDto,
     )
   }
 }

@@ -19,11 +19,11 @@ class OpenApiConfiguration {
   fun openAPI(): OpenAPI? {
     return OpenAPI()
       .info(
-        Info().title("Tolgee API")
+        Info()
+          .title("Tolgee API")
           .description("Tolgee Platform REST API reference")
           .version("v1.0"),
-      )
-      .externalDocs(
+      ).externalDocs(
         ExternalDocumentation()
           .description("Tolgee documentation")
           .url("https://tolgee.io"),
@@ -166,7 +166,8 @@ class OpenApiConfiguration {
     name: String,
   ): GroupedOpenApi? {
     return OpenApiGroupBuilder(name) {
-      builder.pathsToExclude(*excludedPaths)
+      builder
+        .pathsToExclude(*excludedPaths)
         .pathsToMatch(*paths)
       customizeOperations { operation, handler, path, _ ->
         if (isApiAccessAllowed(handler)) {
@@ -188,7 +189,8 @@ class OpenApiConfiguration {
     name: String,
   ): GroupedOpenApi? {
     return OpenApiGroupBuilder(name) {
-      builder.pathsToExclude(*excludedPaths)
+      builder
+        .pathsToExclude(*excludedPaths)
         .pathsToMatch(*paths)
       customizeOperations { operation, handler, path, _ ->
         val isProjectPath = isProjectPath(path)

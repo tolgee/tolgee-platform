@@ -11,7 +11,7 @@ import io.tolgee.model.glossary.GlossaryTermTranslation
 import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Locale
 
 @Service
 class GlossaryTermTranslationService(
@@ -26,9 +26,8 @@ class GlossaryTermTranslationService(
     val glossary = glossaryService.get(organizationId, glossaryId)
     return getDistinctLanguageTags(glossary)
   }
-  fun getDistinctLanguageTags(
-    glossary: Glossary,
-  ): Set<String> {
+
+  fun getDistinctLanguageTags(glossary: Glossary): Set<String> {
     return glossaryTermTranslationRepository.findDistinctLanguageTagsByGlossary(glossary)
   }
 

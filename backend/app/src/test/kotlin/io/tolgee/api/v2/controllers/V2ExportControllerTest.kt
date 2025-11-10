@@ -168,7 +168,8 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
               .andGetContentAsString
           val keyIds =
             jacksonObjectMapper()
-              .readValue<Map<String, List<Long>>>(selectAllResult)["ids"]?.take(500)
+              .readValue<Map<String, List<Long>>>(selectAllResult)["ids"]
+              ?.take(500)
           val parsed = performExportPost(mapOf("filterKeyId" to keyIds))
           assertThatJson(parsed["en.json"]!!) {
             isObject.hasSize(499)
@@ -212,7 +213,8 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val mvcResult =
       performProjectAuthGet("export?$query")
         .andIsOk
-        .andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
+        .andDo { obj: MvcResult -> obj.asyncResult }
+        .andReturn()
     return parseZip(mvcResult.response.contentAsByteArray)
   }
 
@@ -220,7 +222,8 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val mvcResult =
       performProjectAuthPost("export", body)
         .andIsOk
-        .andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
+        .andDo { obj: MvcResult -> obj.asyncResult }
+        .andReturn()
     return parseZip(mvcResult.response.contentAsByteArray)
   }
 
@@ -232,7 +235,8 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       generateSequence {
         it.nextEntry
       }.filterNot { it.isDirectory }
-        .map { it.name to zipInputStream.bufferedReader().readText() }.toMap()
+        .map { it.name to zipInputStream.bufferedReader().readText() }
+        .toMap()
     }
   }
 
@@ -262,10 +266,11 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it returns 400 error when namespaced and fileStructureTemplate is missing {namespace}`() {
     retryingOnCommonIssues {
-      val testData = TranslationsTestData().also {
-        // to avoid collision
-        it.user.username = "franta-2"
-      }
+      val testData =
+        TranslationsTestData().also {
+          // to avoid collision
+          it.user.username = "franta-2"
+        }
       testData.addTwoNamespacesTranslations()
       testDataService.saveTestData(testData.root)
       projectSupplier = { testData.project }

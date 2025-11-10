@@ -7,7 +7,8 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class SimpleGlossaryModelAssembler() : RepresentationModelAssemblerSupport<Glossary, SimpleGlossaryModel>(
+class SimpleGlossaryModelAssembler :
+  RepresentationModelAssemblerSupport<Glossary, SimpleGlossaryModel>(
     GlossaryController::class.java,
     SimpleGlossaryModel::class.java,
   ) {

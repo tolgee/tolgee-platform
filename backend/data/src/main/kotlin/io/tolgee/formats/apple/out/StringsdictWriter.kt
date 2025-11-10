@@ -117,7 +117,11 @@ class StringsdictWriter {
         matches[matchText] = matches.getOrDefault(matchText, 0) + 1
       }
     }
-    return matches.asSequence().sortedByDescending { it.value }.map { it.key }.toList()
+    return matches
+      .asSequence()
+      .sortedByDescending { it.value }
+      .map { it.key }
+      .toList()
   }
 
   private fun String.escaped(): String {

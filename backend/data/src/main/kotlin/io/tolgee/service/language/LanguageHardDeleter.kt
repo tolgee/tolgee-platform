@@ -36,44 +36,46 @@ class LanguageHardDeleter(
   }
 
   private fun getAllTranslations(languageWithData: Language) =
-    languageWithData.translations.chunked(30000).flatMap {
-      val withComments =
-        entityManager.createQuery(
-          """from Translation t
+    languageWithData.translations
+      .chunked(30000)
+      .flatMap {
+        val withComments =
+          entityManager
+            .createQuery(
+              """from Translation t
             join fetch t.key k
             left join fetch k.keyMeta km
             left join fetch k.namespace
             left join fetch t.comments
             left join fetch t.labels
             where t.id in :ids""",
-          Translation::class.java,
-        )
-          .setParameter("ids", it.map { it.id })
-          .resultList
+              Translation::class.java,
+            ).setParameter("ids", it.map { it.id })
+            .resultList
 
-      withComments
-    }.toMutableList()
+        withComments
+      }.toMutableList()
 
   fun getAllTasks(languageWithData: Language) =
-    entityManager.createQuery(
-      """from Task tk
+    entityManager
+      .createQuery(
+        """from Task tk
             join fetch tk.keys
             where tk.language = :languageWithData""",
-      Task::class.java,
-    )
-      .setParameter("languageWithData", languageWithData)
+        Task::class.java,
+      ).setParameter("languageWithData", languageWithData)
       .resultList
       .toMutableList()
 
   private fun getWithFetchedTranslations(language: Language): Language {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
           from Language l
           left join fetch l.translations t
           where l = :language""",
-      Language::class.java,
-    )
-      .setParameter("language", language)
+        Language::class.java,
+      ).setParameter("language", language)
       .singleResult
   }
 

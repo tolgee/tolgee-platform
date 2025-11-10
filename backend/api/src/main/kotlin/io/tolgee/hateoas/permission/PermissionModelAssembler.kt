@@ -7,10 +7,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class PermissionModelAssembler() : RepresentationModelAssemblerSupport<IPermission, PermissionModel>(
-  V2UserController::class.java,
-  PermissionModel::class.java,
-) {
+class PermissionModelAssembler :
+  RepresentationModelAssemblerSupport<IPermission, PermissionModel>(
+    V2UserController::class.java,
+    PermissionModel::class.java,
+  ) {
   override fun toModel(entity: IPermission): PermissionModel {
     return PermissionModel(
       scopes = Scope.expand(entity.scopes),

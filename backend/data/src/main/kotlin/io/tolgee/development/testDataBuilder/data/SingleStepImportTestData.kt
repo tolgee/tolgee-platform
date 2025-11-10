@@ -20,9 +20,10 @@ class SingleStepImportTestData : BaseTestData() {
   }
 
   fun addTranslationInDifferentNamespace() {
-    val namespace = projectBuilder.addNamespace {
-      this.name = "different_namespace"
-    }
+    val namespace =
+      projectBuilder.addNamespace {
+        this.name = "different_namespace"
+      }
     val key =
       projectBuilder.addKey {
         this.name = "test_in_different_namespace"
@@ -49,7 +50,11 @@ class SingleStepImportTestData : BaseTestData() {
   }
 
   fun setUserScopes(scopes: Array<Scope>) {
-    userAccountBuilder.defaultOrganizationBuilder.data.roles.first().self.type = OrganizationRoleType.MEMBER
-    projectBuilder.data.permissions.first().self.scopes = scopes
+    userAccountBuilder.defaultOrganizationBuilder.data.roles
+      .first()
+      .self.type = OrganizationRoleType.MEMBER
+    projectBuilder.data.permissions
+      .first()
+      .self.scopes = scopes
   }
 }

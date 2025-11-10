@@ -1,19 +1,23 @@
 package io.tolgee.ee.service.glossary.formats.csv.`in`
 
-import io.tolgee.ee.service.glossary.formats.*
+import io.tolgee.ee.service.glossary.formats.ImportGlossaryTerm
+import io.tolgee.ee.service.glossary.formats.assertSize
+import io.tolgee.ee.service.glossary.formats.assertTerm
+import io.tolgee.ee.service.glossary.formats.assertTermWithDescription
+import io.tolgee.ee.service.glossary.formats.assertTermWithTranslation
 import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream
 
 class GlossaryCSVParserTest {
-
   @Test
   fun `parses CSV with all fields`() {
-    val csvContent = """
+    val csvContent =
+      """
       term,description,translatable,casesensitive,abbreviation,forbidden,en,cs,de
       Apple,A fruit,true,false,false,false,Apple,Jablko,Apfel
       API,Application Programming Interface,false,true,true,false,API,API,API
       BadWord,Forbidden term,true,false,false,true,BadWord,SpatneSlovo,SchlechteWort
-    """.trimIndent()
+      """.trimIndent()
 
     val terms = parseCSV(csvContent)
 
@@ -55,10 +59,11 @@ class GlossaryCSVParserTest {
 
   @Test
   fun `parses CSV with minimal data`() {
-    val csvContent = """
+    val csvContent =
+      """
       term,en
       MinimalTerm,Minimal
-    """.trimIndent()
+      """.trimIndent()
 
     val terms = parseCSV(csvContent)
 
@@ -72,11 +77,12 @@ class GlossaryCSVParserTest {
 
   @Test
   fun `parses CSV with only translations`() {
-    val csvContent = """
+    val csvContent =
+      """
       en,cs,de
       Hello,Ahoj,Hallo
       World,Svět,Welt
-    """.trimIndent()
+      """.trimIndent()
 
     val terms = parseCSV(csvContent)
 
@@ -102,10 +108,11 @@ class GlossaryCSVParserTest {
 
   @Test
   fun `parses CSV with semicolon delimiter`() {
-    val csvContent = """
+    val csvContent =
+      """
       term;description;en;cs
       TestTerm;Test description;TestValue;TestHodnota
-    """.trimIndent()
+      """.trimIndent()
 
     val terms = parseCSV(csvContent, ';')
 
@@ -119,13 +126,14 @@ class GlossaryCSVParserTest {
 
   @Test
   fun `parses boolean flag variations`() {
-    val csvContent = """
+    val csvContent =
+      """
       term,translatable,casesensitive,abbreviation,forbidden,en
       Term1,true,1,yes,t,Value1
       Term2,false,0,no,f,Value2
       Term3,TRUE,Y,T,FALSE,Value3
       Term4,invalid,n,false,gibberish,Value4
-    """.trimIndent()
+      """.trimIndent()
 
     val terms = parseCSV(csvContent)
 
@@ -162,7 +170,8 @@ class GlossaryCSVParserTest {
 
   @Test
   fun `skips empty rows`() {
-    val csvContent = """
+    val csvContent =
+      """
       term,en
       ValidTerm,ValidValue
       ,,
@@ -184,7 +193,8 @@ class GlossaryCSVParserTest {
 
   @Test
   fun `handles case insensitive headers`() {
-    val csvContent = """
+    val csvContent =
+      """
       TERM,DESCRIPTION,TRANSLATABLE,CASESENSITIVE,ABBREVIATION,FORBIDDEN,EN
       TestTerm,Test Desc,true,false,false,false,TestValue
       """.trimIndent()
@@ -204,10 +214,11 @@ class GlossaryCSVParserTest {
 
   @Test
   fun `handles mixed header spacing`() {
-    val csvContent = """
+    val csvContent =
+      """
       term  , description,  en  ,cs
       TestTerm,Test description,TestValue,TestHodnota
-    """.trimIndent()
+      """.trimIndent()
 
     val terms = parseCSV(csvContent)
 
@@ -221,9 +232,10 @@ class GlossaryCSVParserTest {
 
   @Test
   fun `returns empty list for empty CSV`() {
-    val csvContent = """
+    val csvContent =
+      """
       term,en
-    """.trimIndent()
+      """.trimIndent()
 
     val terms = parseCSV(csvContent)
     terms.assertSize(0)
@@ -239,12 +251,13 @@ class GlossaryCSVParserTest {
 
   @Test
   fun `handles empty translation values`() {
-    val csvContent = """
+    val csvContent =
+      """
       term,en,cs,de
       TestTerm,TestValue,,
       AnotherTerm,,AnotherValue,
       EmptyTerm,,,
-    """.trimIndent()
+      """.trimIndent()
 
     val terms = parseCSV(csvContent)
 
@@ -271,11 +284,12 @@ class GlossaryCSVParserTest {
 
   @Test
   fun `handles term with description only`() {
-    val csvContent = """
+    val csvContent =
+      """
       description,en,cs
       Just a description,,
       Another description,Value,
-    """.trimIndent()
+      """.trimIndent()
 
     val terms = parseCSV(csvContent)
 
@@ -296,7 +310,10 @@ class GlossaryCSVParserTest {
     }
   }
 
-  private fun parseCSV(csvContent: String, delimiter: Char = ','): List<ImportGlossaryTerm> {
+  private fun parseCSV(
+    csvContent: String,
+    delimiter: Char = ',',
+  ): List<ImportGlossaryTerm> {
     return GlossaryCSVParser(ByteArrayInputStream(csvContent.toByteArray()), delimiter).parse()
   }
 }

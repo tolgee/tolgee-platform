@@ -9,15 +9,20 @@ import io.tolgee.ee.data.glossary.GlossaryImportResult
 import io.tolgee.ee.service.glossary.GlossaryImportService
 import io.tolgee.ee.service.glossary.GlossaryService
 import io.tolgee.ee.service.glossary.GlossaryTermService
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOrganizationRole
-import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.http.MediaType
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
@@ -49,9 +54,10 @@ class GlossaryImportController(
       glossaryTermService.deleteAllByGlossary(glossary)
     }
 
-    val imported = file.inputStream.use { input ->
-      glossaryImportService.importCsv(glossary, input)
-    }
+    val imported =
+      file.inputStream.use { input ->
+        glossaryImportService.importCsv(glossary, input)
+      }
     return GlossaryImportResult(imported)
   }
 }

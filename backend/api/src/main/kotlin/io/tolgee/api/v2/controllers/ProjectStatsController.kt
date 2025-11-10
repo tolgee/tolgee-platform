@@ -46,7 +46,8 @@ class ProjectStatsController(
     val baseLanguage = projectService.getOrAssignBaseLanguage(projectHolder.project.id)
     val languages = languageService.getProjectLanguages(projectHolder.project.id).associateBy { it.id }
     val languageStats =
-      languageStatsService.getLanguageStats(projectHolder.project.id)
+      languageStatsService
+        .getLanguageStats(projectHolder.project.id)
         .sortedBy { languages[it.languageId]?.name }
         .sortedBy { languages[it.languageId]?.base == false }
 
@@ -74,7 +75,7 @@ class ProjectStatsController(
 
   @Operation(summary = "Get project daily amount of events")
   @GetMapping("/daily-activity")
-  @RequiresProjectPermissions([ Scope.ACTIVITY_VIEW ])
+  @RequiresProjectPermissions([Scope.ACTIVITY_VIEW])
   @AllowApiAccess
   fun getProjectDailyActivity(): Map<LocalDate, Long> {
     return projectStatsService.getProjectDailyActivity(projectHolder.project.id)

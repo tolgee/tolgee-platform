@@ -1,6 +1,8 @@
 package io.tolgee.model.enums
 
-enum class ProjectPermissionType(val availableScopes: Array<Scope>) {
+enum class ProjectPermissionType(
+  val availableScopes: Array<Scope>,
+) {
   NONE(arrayOf()),
   VIEW(
     arrayOf(

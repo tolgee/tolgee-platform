@@ -37,8 +37,9 @@ class TwoWayEscapingTest {
   ) {
     val escaped = ForceIcuEscaper(string, plural).escaped
     val unescaped = IcuUnescaper(escaped, plural).unescaped
-    unescaped.assert.describedAs(
-      "\n\nInput:\n$string \n\nEscaped:\n$escaped \n\nUnescpaed: \n$unescaped",
-    ).isEqualTo(string)
+    unescaped.assert
+      .describedAs(
+        "\n\nInput:\n$string \n\nEscaped:\n$escaped \n\nUnescpaed: \n$unescaped",
+      ).isEqualTo(string)
   }
 }

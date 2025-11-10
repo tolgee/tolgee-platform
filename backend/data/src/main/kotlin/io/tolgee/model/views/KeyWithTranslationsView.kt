@@ -58,11 +58,11 @@ data class KeyWithTranslationsView(
             state =
               (
                 data[i + 2]
-                ?: if (id == null) {
-                  TranslationState.UNTRANSLATED
-                } else {
-                  TranslationState.TRANSLATED
-                }
+                  ?: if (id == null) {
+                    TranslationState.UNTRANSLATED
+                  } else {
+                    TranslationState.TRANSLATED
+                  }
               ) as TranslationState,
             outdated = (data[i + 3] ?: false) as Boolean,
             auto = (data[i + 4] ?: false) as Boolean,
@@ -95,6 +95,7 @@ data class KeyWithTranslationsView(
           else -> null
         }
       }
+
       else -> null
     }
   }

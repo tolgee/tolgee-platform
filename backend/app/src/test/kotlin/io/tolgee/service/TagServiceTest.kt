@@ -33,7 +33,9 @@ class TagServiceTest : AbstractSpringTest() {
     entityManager.flush()
     entityManager.clear()
     val start = System.currentTimeMillis()
-    val ids = tagsTestData.root.data.projects.flatMap { it.data.keys.map { it.self.id } }
+    val ids =
+      tagsTestData.root.data.projects
+        .flatMap { it.data.keys.map { it.self.id } }
     tagService.deleteAllByKeyIdIn(ids)
     entityManager.flush()
     val time = System.currentTimeMillis() - start

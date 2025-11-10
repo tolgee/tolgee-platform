@@ -4,7 +4,13 @@
 
 package io.tolgee.api.v2.controllers.v2ImageUploadController
 
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsCreated
+import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.satisfies
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -15,7 +21,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.Duration
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextRecreatingTest
@@ -67,7 +72,9 @@ class SecuredV2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest()
 
     val storedImage =
       performGet("/uploaded-images/${image.filename}.png?token=$token")
-        .andIsOk.andReturn().response.contentAsByteArray
+        .andIsOk
+        .andReturn()
+        .response.contentAsByteArray
 
     assertThat(storedImage).isEqualTo(fileStorage.readFile("uploadedImages/" + image.filename + ".png"))
   }

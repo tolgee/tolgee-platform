@@ -82,11 +82,12 @@ class DemoProjectCreator(
    * Map of Pair(languageTag, keyName) -> Translation
    */
   private val translations by lazy {
-    DemoProjectData.translations.flatMap { (languageTag, translations) ->
-      translations.map { (key, text) ->
-        setTranslation(key, languageTag, text)
-      }
-    }.associateBy { it.language.tag to it.key.name }
+    DemoProjectData.translations
+      .flatMap { (languageTag, translations) ->
+        translations.map { (key, text) ->
+          setTranslation(key, languageTag, text)
+        }
+      }.associateBy { it.language.tag to it.key.name }
   }
 
   private fun addBigMeta() {
@@ -120,10 +121,11 @@ class DemoProjectCreator(
 
   private fun tagKeys() {
     val tagsMap =
-      DemoProjectData.tags.mapNotNull {
-        val key = keys[it.key] ?: return@mapNotNull null
-        key to it.value
-      }.toMap()
+      DemoProjectData.tags
+        .mapNotNull {
+          val key = keys[it.key] ?: return@mapNotNull null
+          key to it.value
+        }.toMap()
     tagService.tagKeys(tagsMap)
   }
 
@@ -151,13 +153,19 @@ class DemoProjectCreator(
 
   private fun saveScreenshot(): Screenshot {
     val image =
-      applicationContext.getResource("classpath:demoProject/screenshot.png").inputStream
+      applicationContext
+        .getResource("classpath:demoProject/screenshot.png")
+        .inputStream
         .use { it.readAllBytes() }
     val middleSized =
-      applicationContext.getResource("classpath:demoProject/screenshot-middle-sized.png").inputStream
+      applicationContext
+        .getResource("classpath:demoProject/screenshot-middle-sized.png")
+        .inputStream
         .use { it.readAllBytes() }
     val thumbnail =
-      applicationContext.getResource("classpath:demoProject/screenshot-thumbnail.png").inputStream
+      applicationContext
+        .getResource("classpath:demoProject/screenshot-thumbnail.png")
+        .inputStream
         .use { screenshotThumbnail -> screenshotThumbnail.readAllBytes() }
 
     return screenshotService.saveScreenshot(

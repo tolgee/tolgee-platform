@@ -123,15 +123,18 @@ class PostHogBusinessEventReporter(
 
   private fun findOwnerUserByOrganizationId(organizationId: Long?): Long? {
     organizationId ?: return null
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
       select u.id from UserAccount u 
       join u.organizationRoles orl on orl.organization.id = :organizationId
       where orl.type = io.tolgee.model.enums.OrganizationRoleType.OWNER
       order by u.id
       limit 1
     """,
-      Long::class.java,
-    ).setParameter("organizationId", organizationId).resultList.firstOrNull()
+        Long::class.java,
+      ).setParameter("organizationId", organizationId)
+      .resultList
+      .firstOrNull()
   }
 }

@@ -84,27 +84,27 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
         anyString(),
         eq(POST),
         any(),
-        eq(PromptResult::class.java)
-      )
+        eq(PromptResult::class.java),
+      ),
     ).thenThrow(
-      mockBadRequest(errorCode)
+      mockBadRequest(errorCode),
     )
 
     val response =
       ignoreTestOnSpringBug {
-          performProjectAuthPost(
-            "suggest/machine-translations-streaming",
-            mapOf(
-              "targetLanguageId" to testData.czechLanguage.id,
-              "baseText" to "text",
-            ),
-          )
-            .andDo {
-              it.getAsyncResult(10000)
-            }
-            .andIsOk.andReturn().response.contentAsString
+        performProjectAuthPost(
+          "suggest/machine-translations-streaming",
+          mapOf(
+            "targetLanguageId" to testData.czechLanguage.id,
+            "baseText" to "text",
+          ),
+        ).andDo {
+          it.getAsyncResult(10000)
+        }.andIsOk
+          .andReturn()
+          .response.contentAsString
       }
-      val parsed = NdJsonParser(objectMapper).parse(response)
+    val parsed = NdJsonParser(objectMapper).parse(response)
     parsed.assert.hasSize(3)
     (parsed[1] as Map<*, *>)["errorMessage"].assert.isEqualTo(errorCode)
   }
@@ -143,7 +143,7 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
     projectSupplier = { testData.project }
   }
 
-  private class TestData() : BaseTestData() {
+  private class TestData : BaseTestData() {
     val czechLanguage = projectBuilder.addCzech().self
   }
 }

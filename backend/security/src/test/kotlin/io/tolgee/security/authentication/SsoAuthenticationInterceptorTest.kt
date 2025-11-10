@@ -35,7 +35,8 @@ class SsoAuthenticationInterceptorTest {
     SsoAuthenticationInterceptor(authenticationFacade, tolgeeProperties, tenantService)
 
   private val mockMvc =
-    MockMvcBuilders.standaloneSetup(TestController::class.java)
+    MockMvcBuilders
+      .standaloneSetup(TestController::class.java)
       .addInterceptors(ssoAuthenticationInterceptor)
       .build()
 

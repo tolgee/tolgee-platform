@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 
 @InternalController(["internal/e2e-data/websocket-translations"])
-class WebsocketTranslationsE2eDataController() : AbstractE2eDataController() {
+class WebsocketTranslationsE2eDataController : AbstractE2eDataController() {
   @GetMapping(value = ["/generate"])
   @Transactional
   fun generateKeys(): Map<String, Long> {

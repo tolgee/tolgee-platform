@@ -17,11 +17,13 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
 import java.time.Duration
-import java.util.*
+import java.util.Date
 import kotlin.math.ceil
 
 @WebsocketTest
-abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
+abstract class AbstractBatchJobsGeneralTest :
+  AbstractSpringTest(),
+  Logging {
   private lateinit var testData: BatchJobsTestData
 
   @Autowired
@@ -93,7 +95,10 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     val job = util.runChunkedJob(1000)
     job.totalItems.assert.isEqualTo(1000)
     util.assertPreTranslationProcessExecutedTimes(ceil(job.totalItems.toDouble() / 10).toInt())
-    util.waitForCompleted(job).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+    util
+      .waitForCompleted(job)
+      .status.assert
+      .isEqualTo(BatchJobStatus.SUCCESS)
     util.assertTotalWebsocketMessagesCount(101)
   }
 
@@ -164,7 +169,10 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     util.makeDeleteChunkProcessorReportProgressOnEachItem()
     val job = util.runSingleChunkJob(100)
 
-    util.waitForCompleted(job).status.assert.isEqualTo(BatchJobStatus.SUCCESS)
+    util
+      .waitForCompleted(job)
+      .status.assert
+      .isEqualTo(BatchJobStatus.SUCCESS)
     util.assertTotalExecutionsCount(job, 1)
     util.assertTotalWebsocketMessagesCount(101)
     util.assertStatusReported(BatchJobStatus.SUCCESS)
@@ -285,20 +293,26 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
   @Test
   fun `debounces job`() {
     currentDateProvider.forcedDate = currentDateProvider.date
-    val startTie = currentDateProvider.date
+    currentDateProvider.date
 
     util.makeAutomationChunkProcessorPass()
     val firstJobId = util.runDebouncedJob().id
 
     repeat(2) {
       Thread.sleep(500)
-      util.runDebouncedJob().id.assert.isEqualTo(firstJobId)
+      util
+        .runDebouncedJob()
+        .id.assert
+        .isEqualTo(firstJobId)
     }
     currentDateProvider.move(Duration.ofSeconds(5))
 
     Thread.sleep(500)
     repeat(2) {
-      util.runDebouncedJob().id.assert.isEqualTo(firstJobId)
+      util
+        .runDebouncedJob()
+        .id.assert
+        .isEqualTo(firstJobId)
     }
     currentDateProvider.move(Duration.ofSeconds(10))
     Thread.sleep(500)
@@ -310,14 +324,23 @@ abstract class AbstractBatchJobsGeneralTest : AbstractSpringTest(), Logging {
     repeat(7) {
       currentDateProvider.move(Duration.ofSeconds(2))
       Thread.sleep(20)
-      util.runDebouncedJob().id.assert.isEqualTo(anotherJobId)
+      util
+        .runDebouncedJob()
+        .id.assert
+        .isEqualTo(anotherJobId)
       currentDateProvider.move(Duration.ofSeconds(3))
       Thread.sleep(20)
-      util.runDebouncedJob().id.assert.isEqualTo(anotherJobId)
+      util
+        .runDebouncedJob()
+        .id.assert
+        .isEqualTo(anotherJobId)
     }
 
     currentDateProvider.move(Duration.ofSeconds(5))
     Thread.sleep(500)
-    util.runDebouncedJob().id.assert.isNotEqualTo(anotherJobId)
+    util
+      .runDebouncedJob()
+      .id.assert
+      .isNotEqualTo(anotherJobId)
   }
 }

@@ -29,7 +29,10 @@ class SelfHostedEePlanModelTest {
         """.trimIndent(),
       )
 
-    parsed.enabledFeatures.toList().assert.containsExactly(Feature.ASSISTED_UPDATES)
+    parsed.enabledFeatures
+      .toList()
+      .assert
+      .containsExactly(Feature.ASSISTED_UPDATES)
   }
 
   val pricesJson: String

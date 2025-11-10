@@ -20,9 +20,7 @@ interface GlossaryTermTranslationRepository : JpaRepository<GlossaryTermTranslat
     order by t.languageTag asc
     """,
   )
-  fun findDistinctLanguageTagsByGlossary(
-    glossary: Glossary,
-  ): Set<String>
+  fun findDistinctLanguageTagsByGlossary(glossary: Glossary): Set<String>
 
   @Query(
     """

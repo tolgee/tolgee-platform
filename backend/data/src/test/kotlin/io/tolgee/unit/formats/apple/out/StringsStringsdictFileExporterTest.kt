@@ -381,14 +381,16 @@ class StringsStringsdictFileExporterTest {
       translations = translations,
       exportParams = params,
       isProjectIcuPlaceholdersEnabled = isProjectIcuPlaceholdersEnabled,
-      stringsFilePathProvider = ExportFilePathProvider(
-        template = template,
-        extension = "strings",
-      ),
-      stringsdictFilePathProvider = ExportFilePathProvider(
-        template = template,
-        extension = "stringsdict",
-      ),
+      stringsFilePathProvider =
+        ExportFilePathProvider(
+          template = template,
+          extension = "strings",
+        ),
+      stringsdictFilePathProvider =
+        ExportFilePathProvider(
+          template = template,
+          extension = "stringsdict",
+        ),
     )
   }
 
@@ -398,14 +400,16 @@ class StringsStringsdictFileExporterTest {
     return AppleStringsStringsdictExporter(
       translations = translations,
       exportParams = params,
-      stringsFilePathProvider = ExportFilePathProvider(
-        template = template,
-        extension = "strings",
-      ),
-      stringsdictFilePathProvider = ExportFilePathProvider(
-        template = template,
-        extension = "stringsdict",
-      ),
+      stringsFilePathProvider =
+        ExportFilePathProvider(
+          template = template,
+          extension = "strings",
+        ),
+      stringsdictFilePathProvider =
+        ExportFilePathProvider(
+          template = template,
+          extension = "stringsdict",
+        ),
     )
   }
 

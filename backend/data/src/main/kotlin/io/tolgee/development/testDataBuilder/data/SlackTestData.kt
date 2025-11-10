@@ -1,10 +1,16 @@
 package io.tolgee.development.testDataBuilder.data
 
-import io.tolgee.development.testDataBuilder.builders.*
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
+import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
-import io.tolgee.model.automations.*
+import io.tolgee.model.automations.Automation
+import io.tolgee.model.automations.AutomationAction
+import io.tolgee.model.automations.AutomationActionType
+import io.tolgee.model.automations.AutomationTrigger
+import io.tolgee.model.automations.AutomationTriggerType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
@@ -55,10 +61,14 @@ class SlackTestData {
             usingPrimaryMtService = true
           }
         }
-      projectBuilder.addKey("testKey").also { key = it.self }
+      projectBuilder
+        .addKey("testKey")
+        .also { key = it.self }
         .addTranslation("en", "Hello")
 
-      projectBuilder.addKey("testKey2").also { key2 = it.self }
+      projectBuilder
+        .addKey("testKey2")
+        .also { key2 = it.self }
         .addTranslation("en", "Hello")
 
       projectBuilder.addKey {
@@ -100,58 +110,62 @@ class SlackTestData {
       projectBuilder.addCzech()
 
       slackConfig =
-        projectBuilder.addSlackConfig {
-          this.channelId = "testChannel"
-          this.project = projectBuilder.self
-          this.userAccount = userAccountBuilder.self
-          isGlobalSubscription = true
-          events = mutableSetOf(SlackEventType.ALL)
-        }.build config@{
-          addSlackMessage {
-            slackConfig = this@config.self
-            this.keyId = 0L
-            this.languageTags = mutableSetOf("en", "fr")
-          }
+        projectBuilder
+          .addSlackConfig {
+            this.channelId = "testChannel"
+            this.project = projectBuilder.self
+            this.userAccount = userAccountBuilder.self
+            isGlobalSubscription = true
+            events = mutableSetOf(SlackEventType.ALL)
+          }.build config@{
+            addSlackMessage {
+              slackConfig = this@config.self
+              this.keyId = 0L
+              this.languageTags = mutableSetOf("en", "fr")
+            }
 
-          addSlackMessage {
-            slackConfig = this@config.self
-            this.keyId = 0L
-            this.languageTags = mutableSetOf("fr", "cz")
-          }
+            addSlackMessage {
+              slackConfig = this@config.self
+              this.keyId = 0L
+              this.languageTags = mutableSetOf("fr", "cz")
+            }
 
-          addSlackMessage {
-            slackConfig = this@config.self
-            this.keyId = 1L
-            this.languageTags = mutableSetOf("cz", "ru")
-          }
+            addSlackMessage {
+              slackConfig = this@config.self
+              this.keyId = 1L
+              this.languageTags = mutableSetOf("cz", "ru")
+            }
 
-          addSlackMessage {
-            slackConfig = this@config.self
-            this.keyId = 52L
-            this.languageTags = mutableSetOf("fr", "cz")
-          }
-        }.self
+            addSlackMessage {
+              slackConfig = this@config.self
+              this.keyId = 52L
+              this.languageTags = mutableSetOf("fr", "cz")
+            }
+          }.self
 
       automation =
-        projectBuilder.addAutomation {
-          this.triggers.add(
-            AutomationTrigger(this)
-              .also { it.type = AutomationTriggerType.ACTIVITY },
-          )
-          this.actions.add(
-            AutomationAction(this).also {
-              it.type = AutomationActionType.SLACK_SUBSCRIPTION
-              it.slackConfig = slackConfig
-            },
-          )
-        }.self
+        projectBuilder
+          .addAutomation {
+            this.triggers.add(
+              AutomationTrigger(this)
+                .also { it.type = AutomationTriggerType.ACTIVITY },
+            )
+            this.actions.add(
+              AutomationAction(this).also {
+                it.type = AutomationActionType.SLACK_SUBSCRIPTION
+                it.slackConfig = slackConfig
+              },
+            )
+          }.self
     }
 
   fun add10Keys(): List<Key> {
     return (1..10).map {
-      projectBuilder.addKey("key$it").build {
-        addTranslation("en", "Hello")
-      }.self
+      projectBuilder
+        .addKey("key$it")
+        .build {
+          addTranslation("en", "Hello")
+        }.self
     }
   }
 }

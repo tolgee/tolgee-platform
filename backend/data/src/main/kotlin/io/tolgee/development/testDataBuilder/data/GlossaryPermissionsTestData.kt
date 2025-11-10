@@ -23,65 +23,74 @@ class GlossaryPermissionsTestData {
   lateinit var term: GlossaryTerm
   lateinit var translation: GlossaryTermTranslation
 
-  val root: TestDataBuilder = TestDataBuilder().apply {
-    addUserAccount {
-      username = "Owner"
-    }.build {
-      userOwner = self
-
-      userProjectTranslator = addUserAccount {
-        username = "ProjectTranslator"
-      }.self
-
-      project = addProject(defaultOrganizationBuilder.self) {
-        name = "TheProject"
+  val root: TestDataBuilder =
+    TestDataBuilder().apply {
+      addUserAccount {
+        username = "Owner"
       }.build {
-        addPermission {
-          user = userProjectTranslator
-          type = ProjectPermissionType.VIEW
-        }
-      }.self
+        userOwner = self
 
-      defaultOrganizationBuilder.build {
-        organization = self
-
-        addRole {
-          user = addUserAccount {
-            username = "Maintainer"
-          }.build {
-            userMaintainer = self
+        userProjectTranslator =
+          addUserAccount {
+            username = "ProjectTranslator"
           }.self
-          type = OrganizationRoleType.MAINTAINER
-        }
 
-        addRole {
-          user = addUserAccount {
-            username = "Member"
+        project =
+          addProject(defaultOrganizationBuilder.self) {
+            name = "TheProject"
           }.build {
-            userMember = self
+            addPermission {
+              user = userProjectTranslator
+              type = ProjectPermissionType.VIEW
+            }
           }.self
-          type = OrganizationRoleType.MEMBER
-        }
 
-        userUnaffiliated = addUserAccount {
-          username = "Unaffiliated"
-        }.self
+        defaultOrganizationBuilder.build {
+          organization = self
 
-        glossary = addGlossary {
-          name = "Test Glossary"
-          baseLanguageTag = "en"
-        }.build {
-          assignProject(project)
-          term = addTerm {
-            description = "The description"
-          }.build {
-            translation = addTranslation {
-              languageTag = "en"
-              text = "Term"
+          addRole {
+            user =
+              addUserAccount {
+                username = "Maintainer"
+              }.build {
+                userMaintainer = self
+              }.self
+            type = OrganizationRoleType.MAINTAINER
+          }
+
+          addRole {
+            user =
+              addUserAccount {
+                username = "Member"
+              }.build {
+                userMember = self
+              }.self
+            type = OrganizationRoleType.MEMBER
+          }
+
+          userUnaffiliated =
+            addUserAccount {
+              username = "Unaffiliated"
             }.self
-          }.self
-        }.self
+
+          glossary =
+            addGlossary {
+              name = "Test Glossary"
+              baseLanguageTag = "en"
+            }.build {
+              assignProject(project)
+              term =
+                addTerm {
+                  description = "The description"
+                }.build {
+                  translation =
+                    addTranslation {
+                      languageTag = "en"
+                      text = "Term"
+                    }.self
+                }.self
+            }.self
+        }
       }
     }
-  }
 }

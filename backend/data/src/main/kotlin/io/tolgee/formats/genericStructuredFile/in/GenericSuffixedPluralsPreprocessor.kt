@@ -44,13 +44,15 @@ class GenericSuffixedPluralsPreprocessor(
   }
 
   private fun Map<*, *>.groupByPlurals(keyParser: PluralsKeyParser): Map<String?, List<Pair<ParsedPluralsKey, Any?>>> {
-    return this.entries.mapIndexedNotNull { idx, (key, value) ->
-      key.parsePluralsKey(keyParser)?.let { it to value }.also {
-        if (it == null) {
-          context.fileEntity.addKeyIsNotStringIssue(key.toString(), idx)
+    return this.entries
+      .mapIndexedNotNull { idx, (key, value) ->
+        key.parsePluralsKey(keyParser)?.let { it to value }.also {
+          if (it == null) {
+            context.fileEntity.addKeyIsNotStringIssue(key.toString(), idx)
+          }
         }
-      }
-    }.groupBy { (parsedKey, _) -> parsedKey.key }.toMap()
+      }.groupBy { (parsedKey, _) -> parsedKey.key }
+      .toMap()
   }
 
   private fun List<Pair<ParsedPluralsKey, Any?>>.useOriginalKey(): List<Pair<String, Any?>> {
@@ -69,12 +71,14 @@ class GenericSuffixedPluralsPreprocessor(
   }
 
   private fun Map<*, *>.preprocessMap(): Map<*, *> {
-    return this.groupByPlurals(pluralsViaSuffixesParser).flatMap { (commonKey, values) ->
-      if (commonKey == null || (values.size < pluralKeywords.size && values.size < 2)) {
-        return@flatMap values.useOriginalKey()
-      }
-      return@flatMap values.usePluralsKey(commonKey)
-    }.toMap()
+    return this
+      .groupByPlurals(pluralsViaSuffixesParser)
+      .flatMap { (commonKey, values) ->
+        if (commonKey == null || (values.size < pluralKeywords.size && values.size < 2)) {
+          return@flatMap values.useOriginalKey()
+        }
+        return@flatMap values.usePluralsKey(commonKey)
+      }.toMap()
   }
 
   private val pluralKeywords by lazy {

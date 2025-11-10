@@ -42,7 +42,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
 import java.time.Duration
-import java.util.*
+import java.util.Date
 import kotlin.coroutines.CoroutineContext
 
 class BatchJobTestUtil(
@@ -66,7 +66,8 @@ class BatchJobTestUtil(
         executeInNewTransaction(transactionManager) {
           val finishedJob = batchJobService.getJobDto(batchJob.id)
           logger.debug("Job status: ${finishedJob.status.name}")
-          finishedJob.status.completed.assert.isTrue()
+          finishedJob.status.completed.assert
+            .isTrue()
         }
       }
     } catch (e: Exception) {
@@ -118,7 +119,10 @@ class BatchJobTestUtil(
   ) {
     waitForNotThrowing {
       executeInNewTransaction(transactionManager) {
-        batchJobService.getView(job.id).errorMessage.assert.isEqualTo(message)
+        batchJobService
+          .getView(job.id)
+          .errorMessage.assert
+          .isEqualTo(message)
       }
     }
   }
@@ -164,20 +168,24 @@ class BatchJobTestUtil(
       }
 
     doThrow(*exceptions.toTypedArray())
-      .whenever(deleteKeysChunkProcessor).process(any(), any(), any(), any())
+      .whenever(deleteKeysChunkProcessor)
+      .process(any(), any(), any(), any())
   }
 
   fun fastForwardToFailedJob(job: BatchJob) {
     waitForNotThrowing {
       currentDateProvider.forcedDate = currentDateProvider.date.addMinutes(1)
-      batchJobService.getJobEntity(job.id).status.assert.isEqualTo(BatchJobStatus.FAILED)
+      batchJobService
+        .getJobEntity(job.id)
+        .status.assert
+        .isEqualTo(BatchJobStatus.FAILED)
     }
   }
 
   fun makeProgressManagerFail() {
     doThrow(RuntimeException("test"))
       .whenever(progressManager)
-      .handleProgress(argThat { this.status != io.tolgee.model.batch.BatchJobChunkExecutionStatus.FAILED }, any())
+      .handleProgress(argThat { this.status != BatchJobChunkExecutionStatus.FAILED }, any())
   }
 
   fun waitForRetryExecutionCreated(afterMs: Int) {
@@ -191,8 +199,11 @@ class BatchJobTestUtil(
     count: Int,
   ) {
     waitForNotThrowing(pollTime = 100, timeout = 2000) {
-      entityManager.createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
-        .setParameter("id", job.id).resultList.assert.hasSize(count)
+      entityManager
+        .createQuery("""from BatchJobChunkExecution b where b.batchJob.id = :id""")
+        .setParameter("id", job.id)
+        .resultList.assert
+        .hasSize(count)
     }
   }
 
@@ -226,8 +237,7 @@ class BatchJobTestUtil(
           Thread.sleep(100)
         }
       }
-    }
-      .whenever(preTranslationByTmChunkProcessor)
+    }.whenever(preTranslationByTmChunkProcessor)
       .process(any(), any(), any(), any())
 
     return {
@@ -286,7 +296,8 @@ class BatchJobTestUtil(
         )
       }
 
-    doThrow(*exceptions.toTypedArray()).doAnswer { }
+    doThrow(*exceptions.toTypedArray())
+      .doAnswer { }
       .whenever(preTranslationByTmChunkProcessor)
       .process(any(), any(), any(), any())
   }
@@ -309,11 +320,13 @@ class BatchJobTestUtil(
   }
 
   fun getExecutions(jobIds: List<Long>): Map<Long, List<BatchJobChunkExecution>> =
-    entityManager.createQuery(
-      """from BatchJobChunkExecution b left join fetch b.batchJob where b.batchJob.id in :ids""",
-      BatchJobChunkExecution::class.java,
-    )
-      .setParameter("ids", jobIds).resultList.groupBy { it.batchJob.id }
+    entityManager
+      .createQuery(
+        """from BatchJobChunkExecution b left join fetch b.batchJob where b.batchJob.id in :ids""",
+        BatchJobChunkExecution::class.java,
+      ).setParameter("ids", jobIds)
+      .resultList
+      .groupBy { it.batchJob.id }
 
   fun runChunkedJob(keyCount: Int): BatchJob {
     return executeInNewTransaction(transactionManager) {
@@ -394,7 +407,10 @@ class BatchJobTestUtil(
   }
 
   fun verifyExecutionPending(execution: BatchJobChunkExecution) {
-    batchJobService.getExecution(execution.id).status.assert.isEqualTo(BatchJobChunkExecutionStatus.PENDING)
+    batchJobService
+      .getExecution(execution.id)
+      .status.assert
+      .isEqualTo(BatchJobChunkExecutionStatus.PENDING)
   }
 
   fun verifyJobUnlocked(job: BatchJob) {

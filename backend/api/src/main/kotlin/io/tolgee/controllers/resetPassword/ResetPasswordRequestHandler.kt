@@ -16,7 +16,7 @@ import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.context.ApplicationContext
-import java.util.*
+import java.util.Base64
 
 class ResetPasswordRequestHandler(
   private val applicationContext: ApplicationContext,

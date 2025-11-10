@@ -97,8 +97,10 @@ class ActivityViewByRevisionsProvider(
       .forEach { (providerClass, revisions) ->
         providerClass ?: return@forEach
         val revisionIds = revisions.map { it.id }
-        applicationContext.getBean(providerClass.java)
-          .provide(revisionIds).forEach(result::put)
+        applicationContext
+          .getBean(providerClass.java)
+          .provide(revisionIds)
+          .forEach(result::put)
       }
 
     return result
@@ -107,21 +109,23 @@ class ActivityViewByRevisionsProvider(
   private fun getCounts(): MutableMap<Long, MutableMap<String, Long>> {
     val allowedTypes = ActivityType.entries.filter { it.onlyCountsInList }
     val counts: MutableMap<Long, MutableMap<String, Long>> = mutableMapOf()
-    activityRevisionRepository.getModifiedEntityTypeCounts(
-      revisionIds = revisionIds,
-      allowedTypes,
-    ).forEach { (revisionId, entityClass, count) ->
-      counts
-        .computeIfAbsent(revisionId as Long) { mutableMapOf() }
-        .computeIfAbsent(entityClass as String) { count as Long }
-    }
+    activityRevisionRepository
+      .getModifiedEntityTypeCounts(
+        revisionIds = revisionIds,
+        allowedTypes,
+      ).forEach { (revisionId, entityClass, count) ->
+        counts
+          .computeIfAbsent(revisionId as Long) { mutableMapOf() }
+          .computeIfAbsent(entityClass as String) { count as Long }
+      }
     return counts
   }
 
   private fun getAuthors(revisions: Collection<ActivityRevision>) =
-    userAccountService.getAllByIdsIncludingDeleted(
-      revisions.mapNotNull { it.authorId }.toSet(),
-    ).associateBy { it.id }
+    userAccountService
+      .getAllByIdsIncludingDeleted(
+        revisions.mapNotNull { it.authorId }.toSet(),
+      ).associateBy { it.id }
 
   private fun getModifiedEntities(): Map<Long, List<ModifiedEntityView>> {
     val factory = ModifiedEntityViewFactory(entityExistences, allRelationData)
@@ -197,12 +201,17 @@ class ActivityViewByRevisionsProvider(
 
   private val classesToExpand: Map<Long, Set<String>>
     by lazy {
-      counts.mapNotNull { (revisionId, counts) ->
-        val allowedClasses = counts.entries.filter { it.value <= onlyCountInListAbove }.map { it.key }.toSet()
-        if (allowedClasses.isEmpty()) {
-          return@mapNotNull null
-        }
-        revisionId to allowedClasses
-      }.toMap()
+      counts
+        .mapNotNull { (revisionId, counts) ->
+          val allowedClasses =
+            counts.entries
+              .filter { it.value <= onlyCountInListAbove }
+              .map { it.key }
+              .toSet()
+          if (allowedClasses.isEmpty()) {
+            return@mapNotNull null
+          }
+          revisionId to allowedClasses
+        }.toMap()
     }
 }

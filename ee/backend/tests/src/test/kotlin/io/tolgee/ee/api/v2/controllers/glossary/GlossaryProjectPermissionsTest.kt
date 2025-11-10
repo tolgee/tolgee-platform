@@ -53,9 +53,9 @@ class GlossaryProjectPermissionsTest : AuthorizedControllerTest() {
       mapOf(
         "languageTag" to "en",
         "text" to text,
-      )
-    )
-      .andIsOk.andAssertThatJson {
+      ),
+    ).andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaryHighlights") {
           isArray.hasSize(1)
           node("[0].position.start").isNumber.isEqualTo(BigDecimal(10))
@@ -70,7 +70,8 @@ class GlossaryProjectPermissionsTest : AuthorizedControllerTest() {
   fun `user with project-specific permissions can get all glossaries`() {
     userAccount = testData.userProjectTranslator
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaries") {
           isArray.hasSize(1)
           node("[0].id").isValidId
@@ -83,7 +84,8 @@ class GlossaryProjectPermissionsTest : AuthorizedControllerTest() {
   fun `user with project-specific permissions can get single glossary`() {
     userAccount = testData.userProjectTranslator
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("Test Glossary")
         node("baseLanguageTag").isEqualTo("en")
@@ -93,11 +95,12 @@ class GlossaryProjectPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `user with project-specific permissions cannot create glossary`() {
     userAccount = testData.userProjectTranslator
-    val request = CreateGlossaryRequest().apply {
-      name = "New Glossary"
-      baseLanguageTag = "en"
-      assignedProjectIds = mutableSetOf(testData.project.id)
-    }
+    val request =
+      CreateGlossaryRequest().apply {
+        name = "New Glossary"
+        baseLanguageTag = "en"
+        assignedProjectIds = mutableSetOf(testData.project.id)
+      }
     performAuthPost("/v2/organizations/${testData.organization.id}/glossaries", request)
       .andIsForbidden
   }
@@ -105,10 +108,11 @@ class GlossaryProjectPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `user with project-specific permissions cannot update glossary`() {
     userAccount = testData.userProjectTranslator
-    val request = UpdateGlossaryRequest().apply {
-      name = "Updated Glossary"
-      baseLanguageTag = "de"
-    }
+    val request =
+      UpdateGlossaryRequest().apply {
+        name = "Updated Glossary"
+        baseLanguageTag = "de"
+      }
     performAuthPut("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}", request)
       .andIsForbidden
   }
@@ -124,7 +128,8 @@ class GlossaryProjectPermissionsTest : AuthorizedControllerTest() {
   fun `user with project-specific permissions can get all glossary terms`() {
     userAccount = testData.userProjectTranslator
     performAuthGet("/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.glossaryTerms") {
           isArray.hasSize(1)
           node("[0].id").isValidId
@@ -138,8 +143,8 @@ class GlossaryProjectPermissionsTest : AuthorizedControllerTest() {
     userAccount = testData.userProjectTranslator
     performAuthGet(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
-    )
-      .andIsOk.andAssertThatJson {
+    ).andIsOk
+      .andAssertThatJson {
         node("id").isValidId
         node("description").isEqualTo("The description")
       }
@@ -148,29 +153,29 @@ class GlossaryProjectPermissionsTest : AuthorizedControllerTest() {
   @Test
   fun `user with project-specific permissions cannot create glossary term`() {
     userAccount = testData.userProjectTranslator
-    val request = CreateGlossaryTermWithTranslationRequest().apply {
-      description = "New Term"
-      text = "New Translation"
-    }
+    val request =
+      CreateGlossaryTermWithTranslationRequest().apply {
+        description = "New Term"
+        text = "New Translation"
+      }
     performAuthPost(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms",
       request,
-    )
-      .andIsForbidden
+    ).andIsForbidden
   }
 
   @Test
   fun `user with project-specific permissions cannot update glossary term`() {
     userAccount = testData.userProjectTranslator
-    val request = UpdateGlossaryTermWithTranslationRequest().apply {
-      description = "Updated Term"
-      text = "Updated Translation"
-    }
+    val request =
+      UpdateGlossaryTermWithTranslationRequest().apply {
+        description = "Updated Term"
+        text = "Updated Translation"
+      }
     performAuthPut(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
       request,
-    )
-      .andIsForbidden
+    ).andIsForbidden
   }
 
   @Test
@@ -178,7 +183,6 @@ class GlossaryProjectPermissionsTest : AuthorizedControllerTest() {
     userAccount = testData.userProjectTranslator
     performAuthDelete(
       "/v2/organizations/${testData.organization.id}/glossaries/${testData.glossary.id}/terms/${testData.term.id}",
-    )
-      .andIsForbidden
+    ).andIsForbidden
   }
 }

@@ -14,12 +14,11 @@ import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
 import io.tolgee.exceptions.limits.PlanSpendingLimitExceededStringsException
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
-import kotlin.collections.forEach
 import kotlin.coroutines.CoroutineContext
 
 @Component
 class MtProviderCatching(
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
 ) {
   fun iterateCatching(
     chunk: List<BatchTranslationTargetItem>,

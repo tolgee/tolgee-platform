@@ -196,7 +196,8 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?sort=translations.en.text,asc&size=1000")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("A key")
       }
   }
@@ -208,8 +209,10 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?languages=en").andPrettyPrint.andIsOk.andAssertThatJson {
-      node("_embedded.keys[10].translations").isObject
-        .doesNotContainKey("de").containsKey("en")
+      node("_embedded.keys[10].translations")
+        .isObject
+        .doesNotContainKey("de")
+        .containsKey("en")
       node("selectedLanguages") {
         isArray.hasSize(1)
         node("[0].tag").isEqualTo("en")
@@ -242,9 +245,12 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?languages=en&languages=de")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
-        node("_embedded.keys[10].translations").isObject
-          .containsKey("de").containsKey("en")
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
+        node("_embedded.keys[10].translations")
+          .isObject
+          .containsKey("de")
+          .containsKey("en")
         node("selectedLanguages") {
           isArray.hasSize(2)
           node("[0].tag").isEqualTo("en")
@@ -260,7 +266,8 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations/en,de?filterTag=Another cool tag&filterTag=Unknown Tag")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("en")
           .isObject
           .containsOnlyKeys("Another key with tag")
@@ -275,7 +282,8 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   fun `works with API key`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations").andPrettyPrint.andIsOk
+    performProjectAuthGet("/translations")
+      .andPrettyPrint.andIsOk
       .andAssertThatJson {
         node("page.totalElements").isEqualTo(2)
       }
@@ -306,7 +314,8 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   fun `works with API key in query`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations").andPrettyPrint.andIsOk
+    performProjectAuthGet("/translations")
+      .andPrettyPrint.andIsOk
       .andAssertThatJson {
         node("page.totalElements").isEqualTo(2)
       }
@@ -364,7 +373,8 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   fun `returns all translations map`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations/en,de").andPrettyPrint.andIsOk
+    performProjectAuthGet("/translations/en,de")
+      .andPrettyPrint.andIsOk
       .andAssertThatJson { node("de").isObject }
   }
 
@@ -484,11 +494,12 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   }
 
   fun getLastRevision(): ActivityRevision? {
-    return entityManager.createQuery(
-      """
+    return entityManager
+      .createQuery(
+        """
         from ActivityRevision ar order by ar.id desc limit 1
-      """.trimMargin(),
-      ActivityRevision::class.java,
-    ).singleResult
+        """.trimMargin(),
+        ActivityRevision::class.java,
+      ).singleResult
   }
 }

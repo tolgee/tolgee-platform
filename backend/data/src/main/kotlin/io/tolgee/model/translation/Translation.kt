@@ -95,7 +95,7 @@ class Translation(
   @JoinTable(
     name = "translation_label",
     joinColumns = [JoinColumn(name = "translation_id")],
-    inverseJoinColumns = [JoinColumn(name = "label_id")]
+    inverseJoinColumns = [JoinColumn(name = "label_id")],
   )
   @OrderBy("name ASC")
   @ActivityLoggedProp(LabelPropChangesProvider::class)
@@ -192,7 +192,8 @@ class Translation(
           translation.state = TranslationState.TRANSLATED
         }
         if (translation.text.isNullOrEmpty() &&
-          translation.state != TranslationState.UNTRANSLATED && translation.state != TranslationState.DISABLED
+          translation.state != TranslationState.UNTRANSLATED &&
+          translation.state != TranslationState.DISABLED
         ) {
           translation.state = TranslationState.UNTRANSLATED
         }

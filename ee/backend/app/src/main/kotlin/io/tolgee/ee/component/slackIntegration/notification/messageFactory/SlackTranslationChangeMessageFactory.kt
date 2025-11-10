@@ -45,7 +45,9 @@ class SlackTranslationChangeMessageFactory(
 
         result.add(message)
 
-        val baseLanguageTag = context.slackConfig.project.baseLanguage?.tag ?: return@modifiedEntities
+        val baseLanguageTag =
+          context.slackConfig.project.baseLanguage
+            ?.tag ?: return@modifiedEntities
         if (baseLanguageTag == translation.languageTag) {
           return@modifiedEntities
         }
@@ -61,7 +63,9 @@ class SlackTranslationChangeMessageFactory(
     modificationAuthor: String?,
     event: String,
   ): SlackMessageDto? {
-    val baseLanguageTag = context.slackConfig.project.baseLanguage?.tag ?: return null
+    val baseLanguageTag =
+      context.slackConfig.project.baseLanguage
+        ?.tag ?: return null
     val modifiedLangTag = translation.languageTag
     val isBaseChanged = modifiedLangTag == baseLanguageTag
 
@@ -142,7 +146,8 @@ class SlackTranslationChangeMessageFactory(
           modifiedLangTag,
           baseLanguageTag,
           language.tag,
-        ) && language.tag != baseLanguageTag
+        ) &&
+        language.tag != baseLanguageTag
       ) {
         return@forEach
       }

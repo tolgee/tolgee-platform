@@ -25,7 +25,9 @@ fun buildDom(builder: Document.() -> Unit): DomBuilder {
   return domBuilder
 }
 
-class DomBuilder(val document: Document) {
+class DomBuilder(
+  val document: Document,
+) {
   companion object {
     private val xmlTransformer by lazy {
       val transformer: Transformer = TransformerFactory.newInstance().newTransformer()

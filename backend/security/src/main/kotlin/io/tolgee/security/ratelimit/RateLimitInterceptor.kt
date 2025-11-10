@@ -35,7 +35,8 @@ class RateLimitInterceptor(
   private val authenticationFacade: AuthenticationFacade,
   private val rateLimitProperties: RateLimitProperties,
   private val rateLimitService: RateLimitService,
-) : HandlerInterceptor, Ordered {
+) : HandlerInterceptor,
+  Ordered {
   override fun preHandle(
     request: HttpServletRequest,
     response: HttpServletResponse,

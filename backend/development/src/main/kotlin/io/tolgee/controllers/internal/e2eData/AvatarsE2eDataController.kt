@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 
 @InternalController(["internal/e2e-data/avatars"])
-class AvatarsE2eDataController() : AbstractE2eDataController() {
+class AvatarsE2eDataController : AbstractE2eDataController() {
   @GetMapping(value = ["/generate"])
   @Transactional
   fun generateBasicTestData(): Map<String, *> {

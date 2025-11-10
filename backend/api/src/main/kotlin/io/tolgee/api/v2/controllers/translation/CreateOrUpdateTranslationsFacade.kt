@@ -86,7 +86,8 @@ class CreateOrUpdateTranslationsFacade(
     val translations =
       dto.languagesToReturn
         ?.let { languagesToReturn ->
-          translationService.findForKeyByLanguages(keyNotNull, languagesToReturn)
+          translationService
+            .findForKeyByLanguages(keyNotNull, languagesToReturn)
             .associateBy { it.language.tag }
         }
         ?: modifiedTranslations

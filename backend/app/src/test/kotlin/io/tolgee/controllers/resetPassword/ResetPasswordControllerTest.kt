@@ -15,8 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean
 
 @AutoConfigureMockMvc
-class ResetPasswordControllerTest :
-  AbstractControllerTest() {
+class ResetPasswordControllerTest : AbstractControllerTest() {
   private var defaultFrontendUrl: String? = null
 
   @BeforeEach

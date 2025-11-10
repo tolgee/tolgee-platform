@@ -2,7 +2,9 @@ package io.tolgee.util
 
 import org.apache.commons.lang3.ObjectUtils.max
 import org.apache.commons.lang3.ObjectUtils.min
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.TimeZone
 
 fun Date.addMonths(months: Int): Date = addToCalendar(Calendar.MONTH, months)
 

@@ -27,11 +27,15 @@ class GenericStructuredFileExporter(
 
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
-    return result.asSequence().map { (fileName, modelBuilder) ->
-      fileName to
-        objectMapper.writer(customPrettyPrinter).writeValueAsBytes(modelBuilder.result)
-          .inputStream()
-    }.toMap()
+    return result
+      .asSequence()
+      .map { (fileName, modelBuilder) ->
+        fileName to
+          objectMapper
+            .writer(customPrettyPrinter)
+            .writeValueAsBytes(modelBuilder.result)
+            .inputStream()
+      }.toMap()
   }
 
   private fun prepare() {
@@ -82,7 +86,10 @@ class GenericStructuredFileExporter(
     return addSingularTranslation(translation)
   }
 
-  private fun addNestedPlural(translation: ExportTranslationView, appleStructure: Boolean = false) {
+  private fun addNestedPlural(
+    translation: ExportTranslationView,
+    appleStructure: Boolean = false,
+  ) {
     val pluralForms =
       convertMessageForNestedPlural(translation.text) ?: let {
         // this should never happen, but if it does, it's better to add a null key then crash or ignore it
@@ -90,18 +97,19 @@ class GenericStructuredFileExporter(
         return
       }
 
-    val nestedInside = if (appleStructure) {
-      listOf(ObjectPathItem("variations", "variations"), ObjectPathItem("plural", "plural"))
-    } else {
-      emptyList()
-    }
+    val nestedInside =
+      if (appleStructure) {
+        listOf(ObjectPathItem("variations", "variations"), ObjectPathItem("plural", "plural"))
+      } else {
+        emptyList()
+      }
 
     val builder = getFileContentResultBuilder(translation)
     builder.addValue(
       translation.languageTag,
       translation.key.name,
       pluralForms,
-      nestInside = nestedInside
+      nestInside = nestedInside,
     )
   }
 

@@ -34,7 +34,7 @@ fun <T> executeInNewTransaction(
     transactionManager = transactionManager,
     fn = fn,
     propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW,
-    readOnly = readOnly
+    readOnly = readOnly,
   )
 }
 
@@ -69,5 +69,7 @@ fun <T> executeInNewRepeatableTransaction(
   throw RepeatedlyCannotSerializeTransactionException(exception!!, repeats)
 }
 
-class RepeatedlyCannotSerializeTransactionException(cause: Throwable, repeats: Int) :
-  RuntimeException("Retry failed $repeats times.", cause)
+class RepeatedlyCannotSerializeTransactionException(
+  cause: Throwable,
+  repeats: Int,
+) : RuntimeException("Retry failed $repeats times.", cause)

@@ -35,17 +35,19 @@ class ComplexTagOperationKeyProvider(
 
     val conditions = getBaseConditions()
 
-    request.filterKeys?.map {
-      getKeyCondition(it)
-    }?.let {
-      conditions.add(cb.or(*it.toTypedArray()))
-    }
+    request.filterKeys
+      ?.map {
+        getKeyCondition(it)
+      }?.let {
+        conditions.add(cb.or(*it.toTypedArray()))
+      }
 
-    request.filterKeysNot?.map {
-      getKeyCondition(it)
-    }?.let {
-      conditions.add(cb.not(cb.or(*it.toTypedArray())))
-    }
+    request.filterKeysNot
+      ?.map {
+        getKeyCondition(it)
+      }?.let {
+        conditions.add(cb.not(cb.or(*it.toTypedArray())))
+      }
 
     conditions.add(root.get(Key_.id).`in`(filteredByTagFiltersKeyIds))
 
@@ -61,15 +63,17 @@ class ComplexTagOperationKeyProvider(
     val keyMeta = root.fetch(Key_.keyMeta, JoinType.LEFT)
     @Suppress("UNCHECKED_CAST")
     (keyMeta as Join<Key, KeyMeta>).fetch(KeyMeta_.tags, JoinType.LEFT) as Join<KeyMeta, Tag>
-    entityManager.createQuery(
-      query.select(root)
-        .where(
-          cb.and(
-            cb.equal(root.get(Key_.project).get(Project_.id), projectId),
-            cb.notIn(root.get(Key_.id), returnedIds),
+    entityManager
+      .createQuery(
+        query
+          .select(root)
+          .where(
+            cb.and(
+              cb.equal(root.get(Key_.project).get(Project_.id), projectId),
+              cb.notIn(root.get(Key_.id), returnedIds),
+            ),
           ),
-        ),
-    ).resultList
+      ).resultList
   }
 
   private fun CriteriaBuilder.notIn(

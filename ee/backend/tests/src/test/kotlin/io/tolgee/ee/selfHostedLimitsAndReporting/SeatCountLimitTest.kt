@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import java.util.*
+import java.util.Date
 
 @SpringBootTest()
 class SeatCountLimitTest : AbstractSpringTest() {
@@ -79,7 +79,10 @@ class SeatCountLimitTest : AbstractSpringTest() {
       includedSeats = 0
       seatsLimit = 0
     }
-    val userToDelete = testData.root.data.userAccounts.first().self.id
+    val userToDelete =
+      testData.root.data.userAccounts
+        .first()
+        .self.id
     userAccountService.delete(userToDelete)
   }
 

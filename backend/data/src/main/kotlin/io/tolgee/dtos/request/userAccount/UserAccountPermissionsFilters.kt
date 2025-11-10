@@ -30,15 +30,17 @@ open class UserAccountPermissionsFilters {
   )
   var filterStateLanguageId: Long? = null
 
-  val filterMinimalScopeExtended get(): String? {
-    return filterMinimalScope?.let {
-      "{${Scope.selfAndAncestors(Scope.valueOf(it)).joinToString(",")}}"
+  val filterMinimalScopeExtended
+    get(): String? {
+      return filterMinimalScope?.let {
+        "{${Scope.selfAndAncestors(Scope.valueOf(it)).joinToString(",")}}"
+      }
     }
-  }
 
-  val filterMinimalPermissionType get(): List<String> {
-    return filterMinimalScope?.let {
-      ProjectPermissionType.findByScope(Scope.valueOf(it)).map { it.toString() }
-    } ?: listOf()
-  }
+  val filterMinimalPermissionType
+    get(): List<String> {
+      return filterMinimalScope?.let {
+        ProjectPermissionType.findByScope(Scope.valueOf(it)).map { it.toString() }
+      } ?: listOf()
+    }
 }

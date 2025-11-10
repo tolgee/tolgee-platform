@@ -6,13 +6,15 @@ import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.service.dataImport.ForceMode
 import io.tolgee.service.dataImport.OverrideMode
 
-class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
+class SingleStepImportRequest :
+  ImportAddFilesParams(),
+  IImportSettings {
   @Schema(
     description =
       "Whether to override existing translation data.\n\n" +
         "When set to `KEEP`, existing translations will be kept.\n" +
         "When set to `NO_FORCE`, error will be thrown on conflict.\n" +
-        "When set to `OVERRIDE`, existing translations will be overwritten"
+        "When set to `OVERRIDE`, existing translations will be overwritten",
   )
   var forceMode: ForceMode = ForceMode.NO_FORCE
 
@@ -20,17 +22,17 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
     description =
       "Some translations are forbidden or protected:\n\n" +
         "When set to `RECOMMENDED` it will fail for DISABLED translations " +
-          "and protected REVIEWED translations.\n" +
+        "and protected REVIEWED translations.\n" +
         "When set to `ALL` it will fail for DISABLED translations, " +
-          "but will try to update protected REVIEWED translations (fails only if user has no permission)\n"
+        "but will try to update protected REVIEWED translations (fails only if user has no permission)\n",
   )
   var overrideMode: OverrideMode? = OverrideMode.RECOMMENDED
 
   @Schema(
     description =
       "If `false`, import will apply all `non-failed` overrides and reports `unresolvedConflict`\n." +
-      "If `true`, import will fail completely on unresolved conflict and won't apply any changes. " +
-        "Unresolved conflicts are reported in the `params` of the error response"
+        "If `true`, import will fail completely on unresolved conflict and won't apply any changes. " +
+        "Unresolved conflicts are reported in the `params` of the error response",
   )
   var errorOnUnresolvedConflict: Boolean? = null
 
@@ -65,8 +67,9 @@ class SingleStepImportRequest : ImportAddFilesParams(), IImportSettings {
   var tagNewKeys: List<String> = listOf()
 
   @get:Schema(
-    description = "If yes, keys from project that were not included in import will be deleted " +
-      "(only within namespaces which are included in the import).",
+    description =
+      "If yes, keys from project that were not included in import will be deleted " +
+        "(only within namespaces which are included in the import).",
   )
   var removeOtherKeys: Boolean? = false
 }

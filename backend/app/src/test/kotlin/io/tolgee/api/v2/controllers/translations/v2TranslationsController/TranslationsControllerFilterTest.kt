@@ -53,7 +53,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterKeyName=$keyName")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(1)
           node("[0].keyName").isEqualTo(keyName)
@@ -69,7 +70,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterKeyName=key 18&filterKeyName=key 20")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(2)
         }
@@ -84,19 +86,22 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
     performProjectAuthGet("/translations?filterNamespace=&filterNamespace=ns-2")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(3)
         }
       }
     performProjectAuthGet("/translations?filterNamespace=ns-2&filterNamespace=ns-1")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(3)
         }
       }
     performProjectAuthGet("/translations?filterNamespace=ns-2&filterNamespace=")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(3)
         }
@@ -125,13 +130,15 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
     performProjectAuthGet("/translations?filterNoNamespace=&filterNoNamespace=ns-2")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(2)
         }
       }
     performProjectAuthGet("/translations?filterNoNamespace=ns-2&filterNoNamespace=ns-1")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(2)
         }
@@ -188,7 +195,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterUntranslatedAny=true")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("page.totalElements").isEqualTo(2)
       }
   }
@@ -201,11 +209,13 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterTranslatedAny=true&search=dot")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("page.totalElements").isEqualTo(0)
       }
     performProjectAuthGet("/translations?filterTranslatedAny=true")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("page.totalElements").isNumber.isGreaterThan(BigDecimal(90))
       }
   }
@@ -217,7 +227,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterTranslatedInLang=en")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].translations.en").isNotNull
         node("page.totalElements").isEqualTo(1)
       }
@@ -230,7 +241,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterUntranslatedInLang=en")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].translations.de").isNotNull
         node("page.totalElements").isEqualTo(2)
       }
@@ -244,7 +256,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?languages=en&filterHasScreenshot=true")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].screenshotCount").isEqualTo(2)
         node("page.totalElements").isEqualTo(2)
       }
@@ -257,7 +270,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterHasNoScreenshot=true")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].screenshotCount").isEqualTo(0)
         node("page.totalElements").isEqualTo(2)
       }
@@ -269,7 +283,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterState=de,REVIEWED")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("A key")
         node("page.totalElements").isEqualTo(1)
       }
@@ -282,14 +297,16 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterState=de,TRANSLATED&filterState=en,REVIEWED")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("state test key")
         node("_embedded.keys[1].keyName").isEqualTo("state test key 2")
         node("_embedded.keys[2].keyName").isEqualTo("state test key 3")
         node("page.totalElements").isEqualTo(3)
       }
     performProjectAuthGet("/translations?filterState=de,REVIEWED&filterState=en,REVIEWED")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("A key")
         node("_embedded.keys[1].keyName").isEqualTo("state test key")
         node("_embedded.keys[2].keyName").isEqualTo("state test key 2")
@@ -304,7 +321,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterState=de,UNTRANSLATED")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("Z key")
         node("page.totalElements").isEqualTo(1)
       }
@@ -317,7 +335,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterTag=Cool tag")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("A key")
         node("_embedded.keys[0].keyTags[0].name").isEqualTo("Cool tag")
         node("_embedded.keys[1].keyTags[0].name").isEqualTo("Cool tag")
@@ -334,7 +353,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterTag=")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("page.totalElements").isEqualTo(2)
         node("_embedded.keys[0].keyName").isEqualTo("key with screenshot")
         node("_embedded.keys[1].keyName").isEqualTo("key with screenshot 2")
@@ -348,7 +368,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?sort=keyName&filterTag=Cool tag&filterTag=Another cool tag")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("A key")
         node("_embedded.keys[0].keyTags[0].name").isEqualTo("Cool tag")
         node("_embedded.keys[1].keyTags[0].name").isEqualTo("Another cool tag")
@@ -365,7 +386,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?sort=keyName&filterTag=&filterTag=Cool tag")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("page.totalElements").isEqualTo(5)
         node("_embedded.keys[0].keyName").isEqualTo("A key")
         node("_embedded.keys[1].keyName").isEqualTo("key with screenshot")
@@ -382,7 +404,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterNoTag=Cool tag")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("Z key")
         node("_embedded.keys[0].keyTags[0].name").isEqualTo("Lame tag")
         node("_embedded.keys[1].keyName").isEqualTo("Another key with tag")
@@ -398,7 +421,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterNoTag=")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("_embedded.keys[0].keyName").isEqualTo("A key")
         node("_embedded.keys[1].keyName").isEqualTo("Z key")
         node("page.totalElements").isEqualTo(2)
@@ -412,7 +436,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterNoTag=Cool tag&filterNoTag=Another cool tag&filterNoTag=Lame tag")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("page.totalElements").isEqualTo(0)
       }
   }
@@ -424,7 +449,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterNoTag=Cool tag&filterNoTag=")
-      .andPrettyPrint.andIsOk.andAssertThatJson {
+      .andPrettyPrint.andIsOk
+      .andAssertThatJson {
         node("page.totalElements").isEqualTo(1)
         node("_embedded.keys[0].keyName").isEqualTo("Z key")
       }
@@ -436,10 +462,12 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?filterState=de,REVIEWED,a")
-      .andIsBadRequest.andAssertError.hasCode("filter_by_value_state_not_valid")
+      .andIsBadRequest.andAssertError
+      .hasCode("filter_by_value_state_not_valid")
 
     performProjectAuthGet("/translations?filterState=de,REVIIIIIIEWED")
-      .andIsBadRequest.andAssertError.hasCode("filter_by_value_state_not_valid")
+      .andIsBadRequest.andAssertError
+      .hasCode("filter_by_value_state_not_valid")
   }
 
   @ProjectJWTAuthTestMethod
@@ -464,7 +492,8 @@ class TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projects
       }
     }
     performProjectAuthGet("/translations?filterNotOutdatedLanguage=de&filterOutdatedLanguage=de")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys").isArray.hasSize(2)
       }
   }

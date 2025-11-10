@@ -8,7 +8,6 @@ import io.tolgee.hateoas.language.LanguageModelAssembler
 import io.tolgee.hateoas.organization.SimpleOrganizationModelAssembler
 import io.tolgee.hateoas.permission.ComputedPermissionModelAssembler
 import io.tolgee.hateoas.permission.PermissionModelAssembler
-import io.tolgee.model.Project_.translationProtection
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AvatarService

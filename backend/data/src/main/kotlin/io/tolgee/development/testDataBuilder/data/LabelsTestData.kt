@@ -27,19 +27,21 @@ class LabelsTestData : BaseTestData() {
         }.build {
           unassignedTranslation = addTranslation("cs", "first key second translation").self
         }.build {
-          firstLabel = addLabel {
-            name = "First label"
-            color = "#FF0000"
-            description = "This is a description"
-            translations.add(labeledTranslation)
-            project = projectBuilder.self
-          }.self
-          unassignedLabel = addLabel {
-            name = "Unassigned label"
-            color = "#00FF00"
-            description = "This is a description for unassigned label"
-            project = projectBuilder.self
-          }.self
+          firstLabel =
+            addLabel {
+              name = "First label"
+              color = "#FF0000"
+              description = "This is a description"
+              translations.add(labeledTranslation)
+              project = projectBuilder.self
+            }.self
+          unassignedLabel =
+            addLabel {
+              name = "Unassigned label"
+              color = "#00FF00"
+              description = "This is a description for unassigned label"
+              project = projectBuilder.self
+            }.self
           labeledTranslation.labels.add(firstLabel)
           for (i in 1..3) {
             addLabel {
@@ -67,22 +69,25 @@ class LabelsTestData : BaseTestData() {
       addProject {
         name = "Second project"
       }.build secondProject@{
-        val key = addKey {
-          name = "Second project key"
-        }
+        val key =
+          addKey {
+            name = "Second project key"
+          }
         val en = addEnglish()
-        val translation = addTranslation {
-          language = en.self
-          text = "second project key translation"
-          this.key = key.self
-        }.self
-        secondLabel = addLabel {
-          name = "Second project label"
-          color = "#FF0000"
-          description = "This is a description"
-          translations = mutableSetOf(translation)
-          project = this@secondProject.self
-        }.self
+        val translation =
+          addTranslation {
+            language = en.self
+            text = "second project key translation"
+            this.key = key.self
+          }.self
+        secondLabel =
+          addLabel {
+            name = "Second project label"
+            color = "#FF0000"
+            description = "This is a description"
+            translations = mutableSetOf(translation)
+            project = this@secondProject.self
+          }.self
         for (i in 1..25) {
           addLabel {
             name = "Label $i"

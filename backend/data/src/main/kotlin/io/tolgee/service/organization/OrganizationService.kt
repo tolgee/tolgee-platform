@@ -135,11 +135,13 @@ class OrganizationService(
     userAccountId: Long,
     exceptOrganizationId: Long = 0,
   ): Organization? {
-    return organizationRepository.findPreferred(
-      userId = userAccountId,
-      exceptOrganizationId,
-      PageRequest.of(0, 1),
-    ).content.firstOrNull()
+    return organizationRepository
+      .findPreferred(
+        userId = userAccountId,
+        exceptOrganizationId,
+        PageRequest.of(0, 1),
+      ).content
+      .firstOrNull()
   }
 
   /**

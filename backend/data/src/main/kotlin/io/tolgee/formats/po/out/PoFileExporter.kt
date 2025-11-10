@@ -15,15 +15,17 @@ class PoFileExporter(
   val exportParams: IExportParams,
   val baseLanguage: ILanguage,
   private val projectIcuPlaceholdersSupport: Boolean = true,
-  private val filePathProvider: ExportFilePathProvider
+  private val filePathProvider: ExportFilePathProvider,
 ) : FileExporter {
   private val preparedResult: LinkedHashMap<String, StringBuilder> = LinkedHashMap()
 
   override fun produceFiles(): Map<String, InputStream> {
     prepareResult()
-    return preparedResult.asSequence().map { (fileName, content) ->
-      fileName to content.toString().byteInputStream()
-    }.toMap()
+    return preparedResult
+      .asSequence()
+      .map { (fileName, content) ->
+        fileName to content.toString().byteInputStream()
+      }.toMap()
   }
 
   private fun prepareResult() {

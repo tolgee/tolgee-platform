@@ -181,7 +181,8 @@ When null, resulting file will be a flat key-value object.
         filterTag = filterTag,
       )
 
-    return ResponseEntity.ok()
+    return ResponseEntity
+      .ok()
       .lastModified(lastModified)
       .cacheControl(CacheControl.maxAge(0, TimeUnit.SECONDS))
       .body(
@@ -312,14 +313,15 @@ When null, resulting file will be a flat key-value object.
   private fun addSuggestionsToResponse(
     projectId: Long,
     data: Page<KeyWithTranslationsView>,
-    languageIds: Collection<Long>
+    languageIds: Collection<Long>,
   ) {
     val keyIds = data.content.map { key -> key.keyId }
-    val keysWithSuggestions = translationSuggestionService.getKeysWithSuggestions(
-      projectId,
-      keyIds,
-      languageIds.toList()
-    )
+    val keysWithSuggestions =
+      translationSuggestionService.getKeysWithSuggestions(
+        projectId,
+        keyIds,
+        languageIds.toList(),
+      )
     data.content.forEach { key ->
       key.translations.forEach { (tag, translation) ->
         translation.suggestions = keysWithSuggestions[Pair(key.keyId, tag)]

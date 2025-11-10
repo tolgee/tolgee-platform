@@ -1,6 +1,8 @@
 package io.tolgee.formats.importCommon
 
-enum class ImportFileFormat(val extensions: Array<String>) {
+enum class ImportFileFormat(
+  val extensions: Array<String>,
+) {
   JSON(arrayOf("json")),
   PO(arrayOf("po")),
   STRINGS(arrayOf("strings")),
@@ -18,9 +20,10 @@ enum class ImportFileFormat(val extensions: Array<String>) {
 
   companion object {
     private val extensionFormatMap by lazy {
-      entries.flatMap { format ->
-        format.extensions.map { it to format }
-      }.toMap()
+      entries
+        .flatMap { format ->
+          format.extensions.map { it to format }
+        }.toMap()
     }
 
     fun findByExtension(extension: String?): ImportFileFormat? {

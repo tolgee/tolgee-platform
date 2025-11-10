@@ -85,11 +85,12 @@ class GenericStructuredRawDataToTextConvertor(
     }
 
     val safePluralMap =
-      map.entries.map {
-        val key = it.key as? String ?: return null
-        val value = it.value as? String ?: return null
-        key to value
-      }.toMap()
+      map.entries
+        .map {
+          val key = it.key as? String ?: return null
+          val value = it.value as? String ?: return null
+          key to value
+        }.toMap()
 
     val converted =
       format.messageConvertor.convert(

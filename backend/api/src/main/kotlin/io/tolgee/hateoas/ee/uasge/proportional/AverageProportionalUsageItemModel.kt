@@ -12,4 +12,5 @@ open class AverageProportionalUsageItemModel(
   val unusedQuantity: BigDecimal = 0.toBigDecimal(),
   val usedQuantity: BigDecimal = 0.toBigDecimal(),
   val usedQuantityOverPlan: BigDecimal = 0.toBigDecimal(),
-) : RepresentationModel<AverageProportionalUsageItemModel>(), Serializable
+) : RepresentationModel<AverageProportionalUsageItemModel>(),
+  Serializable

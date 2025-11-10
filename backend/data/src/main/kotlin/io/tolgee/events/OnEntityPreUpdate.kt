@@ -8,4 +8,5 @@ class OnEntityPreUpdate(
   override val entity: Any?,
   val previousState: Array<out Any>?,
   val propertyNames: Array<out String>?,
-) : ApplicationEvent(source), EntityPreCommitEvent
+) : ApplicationEvent(source),
+  EntityPreCommitEvent

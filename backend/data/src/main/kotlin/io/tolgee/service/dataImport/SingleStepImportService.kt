@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.Serializable
-import kotlin.collections.get
 
 @Service
 @Transactional
@@ -43,7 +42,7 @@ class SingleStepImportService(
     params: SingleStepImportRequest,
     reportStatus: ((ImportApplicationStatus) -> Unit) = {},
     screenshots: List<ScreenshotToImport> = emptyList(),
-    resolveConflict: ((translation: ImportTranslation) -> ForceMode?)? = null
+    resolveConflict: ((translation: ImportTranslation) -> ForceMode?)? = null,
   ): ImportResult {
     reportStatus?.invoke(ImportApplicationStatus.ANALYZING_FILES)
     val import = Import(project).also { it.author = userAccount }
@@ -78,19 +77,20 @@ class SingleStepImportService(
 
     entityManager.clear()
 
-    val result = StoredDataImporter(
-      applicationContext,
-      import,
-      params.forceMode,
-      reportStatus,
-      importSettings = params,
-      _importDataManager = fileProcessor.importDataManager,
-      isSingleStepImport = true,
-      overrideMode = params.overrideMode ?: OverrideMode.RECOMMENDED,
-      errorOnUnresolvedConflict = params.errorOnUnresolvedConflict,
-      resolveConflict = resolveConflict,
-      screenshots = screenshots
-    ).doImport()
+    val result =
+      StoredDataImporter(
+        applicationContext,
+        import,
+        params.forceMode,
+        reportStatus,
+        importSettings = params,
+        _importDataManager = fileProcessor.importDataManager,
+        isSingleStepImport = true,
+        overrideMode = params.overrideMode ?: OverrideMode.RECOMMENDED,
+        errorOnUnresolvedConflict = params.errorOnUnresolvedConflict,
+        resolveConflict = resolveConflict,
+        screenshots = screenshots,
+      ).doImport()
 
     return result
   }
@@ -125,7 +125,7 @@ class SingleStepImportService(
         key.screenshots?.map { sc ->
           ScreenshotToImport(
             key = KeyDefinitionDto(key.name, key.namespace),
-            screenshot = sc
+            screenshot = sc,
           )
         } ?: emptyList()
       }
@@ -138,10 +138,11 @@ class SingleStepImportService(
       reportStatus,
       screenshots = screenshots,
       resolveConflict = { translation ->
-        val resolution = conflictResolutionMap
-          .get(translation.key.file.namespace)
-          ?.get(translation.language.name)
-          ?.get(translation.key.name)
+        val resolution =
+          conflictResolutionMap
+            .get(translation.key.file.namespace)
+            ?.get(translation.language.name)
+            ?.get(translation.key.name)
 
         when (resolution) {
           null -> ForceMode.OVERRIDE
@@ -154,7 +155,7 @@ class SingleStepImportService(
             }
           }
         }
-      }
+      },
     )
   }
 

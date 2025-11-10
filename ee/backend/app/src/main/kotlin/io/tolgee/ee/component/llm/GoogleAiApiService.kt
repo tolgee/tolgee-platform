@@ -19,7 +19,9 @@ import org.springframework.web.client.exchange
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class GoogleAiApiService : AbstractLlmApiService(), Logging {
+class GoogleAiApiService :
+  AbstractLlmApiService(),
+  Logging {
   override fun translate(
     params: LlmParams,
     config: LlmProviderInterface,
@@ -48,7 +50,13 @@ class GoogleAiApiService : AbstractLlmApiService(), Logging {
 
     return PromptResult(
       response =
-        response.body?.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
+        response.body
+          ?.candidates
+          ?.firstOrNull()
+          ?.content
+          ?.parts
+          ?.firstOrNull()
+          ?.text
           ?: throw LlmEmptyResponseException(),
       usage =
         response.body?.usageMetadata?.let {
@@ -86,7 +94,7 @@ class GoogleAiApiService : AbstractLlmApiService(), Logging {
 
     if (params.shouldOutputJson) {
       contents.add(
-        RequestContent(parts = listOf(RequestPart(text = "Strictly return only valid json!")))
+        RequestContent(parts = listOf(RequestPart(text = "Strictly return only valid json!"))),
       )
     }
 

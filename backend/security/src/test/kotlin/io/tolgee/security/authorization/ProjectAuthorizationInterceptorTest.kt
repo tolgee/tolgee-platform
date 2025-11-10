@@ -34,6 +34,7 @@ import io.tolgee.security.RequestContextService
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authentication.TolgeeAuthentication
+import io.tolgee.security.authentication.WriteOperation
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
 import org.junit.jupiter.api.AfterEach
@@ -42,9 +43,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.kotlin.any
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import io.tolgee.security.authentication.WriteOperation
 import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -82,7 +82,8 @@ class ProjectAuthorizationInterceptorTest {
     )
 
   private val mockMvc =
-    MockMvcBuilders.standaloneSetup(TestController::class.java)
+    MockMvcBuilders
+      .standaloneSetup(TestController::class.java)
       .addInterceptors(projectAuthenticationInterceptor)
       .build()
 
@@ -145,13 +146,15 @@ class ProjectAuthorizationInterceptorTest {
 
   @Test
   fun `it hides the organization if the user cannot see it`() {
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+    Mockito
+      .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(emptySet())
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/default-perms")).andIsNotFound
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-admin")).andIsNotFound
 
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+    Mockito
+      .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(setOf(Scope.KEYS_VIEW))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/default-perms")).andIsOk
@@ -159,12 +162,14 @@ class ProjectAuthorizationInterceptorTest {
 
   @Test
   fun `rejects access if the user does not have the required scope (single scope)`() {
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+    Mockito
+      .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(setOf(Scope.KEYS_VIEW))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsForbidden
 
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+    Mockito
+      .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(setOf(Scope.KEYS_CREATE))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsOk
@@ -175,7 +180,8 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)
     Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.ADMIN)
 
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+    Mockito
+      .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(setOf(Scope.KEYS_VIEW))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andIsOk
@@ -188,17 +194,20 @@ class ProjectAuthorizationInterceptorTest {
 
   @Test
   fun `rejects access if the user does not have the required scope (multiple scopes)`() {
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+    Mockito
+      .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(setOf(Scope.KEYS_CREATE))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsForbidden
 
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+    Mockito
+      .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(setOf(Scope.MEMBERS_EDIT))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsForbidden
 
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+    Mockito
+      .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(setOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsOk
@@ -222,7 +231,8 @@ class ProjectAuthorizationInterceptorTest {
   fun `it restricts scopes (multiple scopes)`() {
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsForbidden
 
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+    Mockito
+      .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(setOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsOk
@@ -231,7 +241,8 @@ class ProjectAuthorizationInterceptorTest {
   @Test
   fun `it does not let scopes on the key work if the authenticated user does not have them`() {
     Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_CREATE, Scope.MEMBERS_EDIT))
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+    Mockito
+      .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(setOf(Scope.KEYS_CREATE))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-multiple-scopes")).andIsForbidden
@@ -246,7 +257,8 @@ class ProjectAuthorizationInterceptorTest {
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/implicit-access")).andIsOk
 
     Mockito.`when`(apiKey.scopes).thenReturn(mutableSetOf(Scope.KEYS_VIEW))
-    Mockito.`when`(securityService.getCurrentPermittedScopes(1337L))
+    Mockito
+      .`when`(securityService.getCurrentPermittedScopes(1337L))
       .thenReturn(setOf(Scope.KEYS_VIEW))
 
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/implicit-access")).andIsForbidden
@@ -287,25 +299,29 @@ class ProjectAuthorizationInterceptorTest {
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope")).andSatisfies(condition)
 
     // POST method, but with read-only annotation
-    mockMvc.perform(
-      MockMvcRequestBuilders.post("/v2/projects/1337/requires-single-scope-read-annotation")
-    ).andSatisfies(condition)
+    mockMvc
+      .perform(
+        MockMvcRequestBuilders.post("/v2/projects/1337/requires-single-scope-read-annotation"),
+      ).andSatisfies(condition)
   }
 
   private fun performWriteRequests(condition: (ResultActions) -> Unit) {
     // GET method, but with write annotation
-    mockMvc.perform(
-      MockMvcRequestBuilders.get("/v2/projects/1337/default-perms-write-annotation")
-    ).andSatisfies(condition)
-    mockMvc.perform(
-      MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope-write-annotation")
-    ).andSatisfies(condition)
+    mockMvc
+      .perform(
+        MockMvcRequestBuilders.get("/v2/projects/1337/default-perms-write-annotation"),
+      ).andSatisfies(condition)
+    mockMvc
+      .perform(
+        MockMvcRequestBuilders.get("/v2/projects/1337/requires-single-scope-write-annotation"),
+      ).andSatisfies(condition)
 
     // POST method
     mockMvc.perform(MockMvcRequestBuilders.post("/v2/projects/1337/default-perms-write-method")).andSatisfies(condition)
-    mockMvc.perform(
-      MockMvcRequestBuilders.post("/v2/projects/1337/requires-single-scope-write-method")
-    ).andSatisfies(condition)
+    mockMvc
+      .perform(
+        MockMvcRequestBuilders.post("/v2/projects/1337/requires-single-scope-write-method"),
+      ).andSatisfies(condition)
   }
 
   private fun ResultActions.andSatisfies(condition: (ResultActions) -> Unit): ResultActions {
@@ -344,46 +360,46 @@ class ProjectAuthorizationInterceptorTest {
     ) = "hello from project $id!"
 
     @GetMapping("/v2/projects/{id}/requires-single-scope")
-    @RequiresProjectPermissions([ Scope.KEYS_CREATE ])
+    @RequiresProjectPermissions([Scope.KEYS_CREATE])
     fun requiresSingleScope(
       @PathVariable id: Long,
     ) = "hello from project $id!"
 
     @GetMapping("/v2/projects/{id}/requires-single-scope-write-annotation")
     @WriteOperation
-    @RequiresProjectPermissions([ Scope.KEYS_CREATE ])
+    @RequiresProjectPermissions([Scope.KEYS_CREATE])
     fun requiresSingleScopeWriteAnnotation(
       @PathVariable id: Long,
     ) = "hello from project $id!"
 
     @PostMapping("/v2/projects/{id}/requires-single-scope-write-method")
-    @RequiresProjectPermissions([ Scope.KEYS_CREATE ])
+    @RequiresProjectPermissions([Scope.KEYS_CREATE])
     fun requiresSingleScopeWriteMethod(
       @PathVariable id: Long,
     ) = "hello from project $id!"
 
     @PostMapping("/v2/projects/{id}/requires-single-scope-read-annotation")
     @ReadOnlyOperation
-    @RequiresProjectPermissions([ Scope.KEYS_CREATE ])
+    @RequiresProjectPermissions([Scope.KEYS_CREATE])
     fun requiresSingleScopeReadAnnotation(
       @PathVariable id: Long,
     ) = "hello from project $id!"
 
     @GetMapping("/v2/projects/{id}/requires-multiple-scopes")
-    @RequiresProjectPermissions([ Scope.KEYS_CREATE, Scope.MEMBERS_EDIT ])
+    @RequiresProjectPermissions([Scope.KEYS_CREATE, Scope.MEMBERS_EDIT])
     fun requiresMultipleScopes(
       @PathVariable id: Long,
     ) = "hello from project $id!"
 
     @GetMapping("/v2/projects/{id}/nonsense-perms")
     @UseDefaultPermissions
-    @RequiresProjectPermissions([ Scope.PROJECT_EDIT ])
+    @RequiresProjectPermissions([Scope.PROJECT_EDIT])
     fun nonsensePerms(
       @PathVariable id: Long,
     ) = "hello from project $id!"
 
     @GetMapping("/v2/projects/implicit-access")
-    @RequiresProjectPermissions([ Scope.KEYS_CREATE ])
+    @RequiresProjectPermissions([Scope.KEYS_CREATE])
     fun implicitProject() = "hello from implicit project!"
   }
 }

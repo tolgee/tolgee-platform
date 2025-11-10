@@ -133,7 +133,9 @@ class OrganizationRoleCachingTest : AbstractSpringTest() {
     organizationId: Long,
     userId: Long,
   ): UserOrganizationRoleDto? =
-    cacheManager.getCache(Caches.ORGANIZATION_ROLES)!!.get(arrayListOf(organizationId, userId))
+    cacheManager
+      .getCache(Caches.ORGANIZATION_ROLES)!!
+      .get(arrayListOf(organizationId, userId))
       ?.get() as UserOrganizationRoleDto?
 
   private fun assertCacheEvicted(

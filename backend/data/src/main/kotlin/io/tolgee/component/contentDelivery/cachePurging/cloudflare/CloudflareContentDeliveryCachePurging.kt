@@ -46,10 +46,10 @@ class CloudflareContentDeliveryCachePurging(
     paths: Set<String>,
     contentDeliveryConfig: ContentDeliveryConfig,
   ): List<Map<String, List<Map<String, Any>>>> {
-    return paths.flatMap {
-      getFileItems(contentDeliveryConfig, it)
-    }
-      .chunked(config.maxFilesPerRequest)
+    return paths
+      .flatMap {
+        getFileItems(contentDeliveryConfig, it)
+      }.chunked(config.maxFilesPerRequest)
       .map { fileItems ->
         mapOf("files" to fileItems)
       }

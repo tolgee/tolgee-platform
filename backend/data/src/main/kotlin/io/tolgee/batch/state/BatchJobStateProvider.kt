@@ -96,26 +96,28 @@ class BatchJobStateProvider(
         isolationLevel = TransactionDefinition.ISOLATION_READ_COMMITTED,
         readOnly = true,
       ) {
-        entityManager.createQuery(
-          """
+        entityManager
+          .createQuery(
+            """
       from BatchJobChunkExecution bjce
       where bjce.batchJob.id = :jobId
       """,
-          BatchJobChunkExecution::class.java,
-        )
-          .setParameter("jobId", jobId).resultList
+            BatchJobChunkExecution::class.java,
+          ).setParameter("jobId", jobId)
+          .resultList
       }
 
-    return executions.associate {
-      it.id to
-        ExecutionState(
-          it.successTargets,
-          it.status,
-          it.chunkNumber,
-          it.retry,
-          true,
-        )
-    }.toMutableMap()
+    return executions
+      .associate {
+        it.id to
+          ExecutionState(
+            it.successTargets,
+            it.status,
+            it.chunkNumber,
+            it.retry,
+            true,
+          )
+      }.toMutableMap()
   }
 
   /**
@@ -124,9 +126,10 @@ class BatchJobStateProvider(
   @Scheduled(fixedRate = 10000)
   fun clearUnusedStates() {
     val toRemove =
-      getStatesMap().filter {
-        it.value.all { (_, state) -> state.status.completed && state.status.completed }
-      }.keys
+      getStatesMap()
+        .filter {
+          it.value.all { (_, state) -> state.status.completed && state.status.completed }
+        }.keys
     getStatesMap().keys.removeAll(toRemove)
   }
 

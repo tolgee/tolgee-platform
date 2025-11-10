@@ -1,9 +1,13 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
-import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
 import io.tolgee.development.testDataBuilder.data.PromptTestData
-import io.tolgee.fixtures.*
+import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.testing.AuthorizedControllerTest
 import org.junit.jupiter.api.BeforeEach
@@ -21,7 +25,7 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
       mutableListOf(
         LlmProperties.LlmProvider(
           type = LlmProviderType.OPENAI,
-          apiUrl = "http://test.com"
+          apiUrl = "http://test.com",
         ),
       )
     this.userAccount = testData.organizationOwner.self

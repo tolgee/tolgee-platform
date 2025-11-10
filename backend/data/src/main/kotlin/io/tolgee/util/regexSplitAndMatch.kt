@@ -9,7 +9,10 @@ package io.tolgee.util
  * @param input The input string to be split and matched.
  * @return A list of substrings, including the text between matches and the matches themselves.
  */
-fun regexSplitAndMatch(regex: Regex, input: String): List<String> {
+fun regexSplitAndMatch(
+  regex: Regex,
+  input: String,
+): List<String> {
   val result = mutableListOf<String>()
   var lastIndex = 0
 

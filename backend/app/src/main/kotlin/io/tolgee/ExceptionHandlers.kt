@@ -7,11 +7,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.ValidationErrorType
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
-import io.tolgee.exceptions.*
+import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.ErrorException
+import io.tolgee.exceptions.ErrorResponseBody
+import io.tolgee.exceptions.ErrorResponseTyped
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
 import io.tolgee.util.Logging
-import io.tolgee.util.debug
 import io.tolgee.util.logger
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpServletRequest
@@ -52,7 +55,7 @@ class ExceptionHandlers : Logging {
     ex.bindingResult.allErrors.forEach(
       Consumer { error: ObjectError ->
         val fieldName = (error as FieldError).field
-        val errorMessage = error.getDefaultMessage()
+        val errorMessage = error.defaultMessage
         errors[fieldName] = errorMessage ?: ""
       },
     )
@@ -90,7 +93,7 @@ class ExceptionHandlers : Logging {
 
     ex.bindingResult.allErrors.forEach { error: ObjectError ->
       val fieldName = (error as FieldError).field
-      val errorMessage = error.getDefaultMessage()
+      val errorMessage = error.defaultMessage
       errors[fieldName] = errorMessage ?: ""
     }
 

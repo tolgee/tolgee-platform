@@ -105,7 +105,8 @@ class SlackNotificationBlocksProvider(
   }
 
   fun getRedirectButtonAttachment(url: String): Attachment =
-    Attachment.builder()
+    Attachment
+      .builder()
       .blocks(
         withBlocks {
           actions {
@@ -113,8 +114,7 @@ class SlackNotificationBlocksProvider(
             redirectOnPlatformButton(url)
           }
         },
-      )
-      .color("#00000000")
+      ).color("#00000000")
       .build()
 
   private fun ActionsBlockBuilder.redirectOnPlatformButton(tolgeeUrl: String) {
@@ -211,7 +211,8 @@ class SlackNotificationBlocksProvider(
       } else {
         getBlocksEmptyTranslation(context, translation)
       }
-    return Attachment.builder()
+    return Attachment
+      .builder()
       .color(color)
       .blocks(blocksBody)
       .fallback(translation.text ?: "")

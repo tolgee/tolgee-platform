@@ -5,7 +5,12 @@ import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.TaskTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.ee.data.task.*
+import io.tolgee.ee.data.task.CalculateScopeRequest
+import io.tolgee.ee.data.task.CreateMultipleTasksRequest
+import io.tolgee.ee.data.task.CreateTaskRequest
+import io.tolgee.ee.data.task.UpdateTaskKeyRequest
+import io.tolgee.ee.data.task.UpdateTaskKeysRequest
+import io.tolgee.ee.data.task.UpdateTaskRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk

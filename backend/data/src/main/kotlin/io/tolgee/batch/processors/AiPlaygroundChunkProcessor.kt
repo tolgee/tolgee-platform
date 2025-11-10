@@ -8,7 +8,7 @@ import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
-import io.tolgee.exceptions.*
+import io.tolgee.exceptions.InvalidStateException
 import io.tolgee.model.batch.params.AiPlaygroundJobParams
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.key.Key
@@ -23,7 +23,7 @@ class AiPlaygroundChunkProcessor(
   private val keyService: KeyService,
   private val promptService: PromptService,
   private val aiPlaygroundResultService: AiPlaygroundResultService,
-  private val mtProviderCatching: MtProviderCatching
+  private val mtProviderCatching: MtProviderCatching,
 ) : ChunkProcessor<MachineTranslationRequest, AiPlaygroundJobParams, BatchTranslationTargetItem> {
   override fun process(
     job: BatchJobDto,
@@ -41,7 +41,12 @@ class AiPlaygroundChunkProcessor(
     }
   }
 
-  fun translateAndSetResult(job: BatchJobDto, llmPrompt: PromptDto, key: Key, languageId: Long) {
+  fun translateAndSetResult(
+    job: BatchJobDto,
+    llmPrompt: PromptDto,
+    key: Key,
+    languageId: Long,
+  ) {
     val result =
       promptService.translate(
         job.projectId!!,

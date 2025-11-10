@@ -46,7 +46,7 @@ You need to set at least one of useMachineTranslation or useTranslationMemory to
 This will replace the the existing translation with the result obtained from specified source!
     """,
   )
-  @RequiresProjectPermissions([ Scope.TRANSLATIONS_EDIT ])
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   fun autoTranslate(
     @PathVariable keyId: Long,
@@ -101,9 +101,11 @@ When no languages provided, it translates only untranslated languages.""",
 
   private fun getAllLanguagesToTranslate(): Set<String> {
     val baseLanguageTag = getBaseLanguageTag()
-    return projectHolder.projectEntity.languages.map { it.tag }.filter {
-      it != baseLanguageTag
-    }.toSet()
+    return projectHolder.projectEntity.languages
+      .map { it.tag }
+      .filter {
+        it != baseLanguageTag
+      }.toSet()
   }
 
   private fun getBaseLanguageTag(): String {
