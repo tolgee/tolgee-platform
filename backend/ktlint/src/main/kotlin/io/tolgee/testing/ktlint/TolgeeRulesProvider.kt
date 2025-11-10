@@ -19,6 +19,7 @@ package io.tolgee.testing.ktlint
 import com.pinterest.ktlint.cli.ruleset.core.api.RuleSetProviderV3
 import com.pinterest.ktlint.rule.engine.core.api.RuleProvider
 import com.pinterest.ktlint.rule.engine.core.api.RuleSetId
+import io.tolgee.testing.ktlint.rules.DirtiesContextTagRule
 import io.tolgee.testing.ktlint.rules.JakartaTransientInEntities
 
 class TolgeeRulesProvider : RuleSetProviderV3(RULE_SET_ID) {
@@ -26,6 +27,9 @@ class TolgeeRulesProvider : RuleSetProviderV3(RULE_SET_ID) {
     setOf(
       RuleProvider {
         JakartaTransientInEntities()
+      },
+      RuleProvider {
+        DirtiesContextTagRule()
       },
     )
 
