@@ -11,6 +11,8 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
 import org.springframework.boot.context.properties.bind.DefaultValue
 import java.util.Date
@@ -58,7 +60,13 @@ class Branch(
 
   @Column(name = "revision")
   @DefaultValue("0")
-  var revision: Int = 0
+  var revision: Int = 0,
+
+  @OneToMany(targetEntity = BranchMerge::class, mappedBy = "sourceBranch", fetch = FetchType.LAZY)
+  @OrderBy("createdAt DESC")
+  var merges: List<BranchMerge> = listOf(),
+
+  var deletedAt: Date? = null,
 
   ) : StandardAuditModel() {
   companion object {
@@ -87,4 +95,10 @@ class Branch(
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "origin_branch_id")
   var originBranch: Branch? = null
+
+  val lastMerge: BranchMerge?
+    get() = merges.firstOrNull()
+
+  val isActive: Boolean
+    get() = archivedAt == null
 }
