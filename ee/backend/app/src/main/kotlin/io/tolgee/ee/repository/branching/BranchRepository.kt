@@ -13,17 +13,32 @@ interface BranchRepository : JpaRepository<Branch, Long> {
     """
     select b
     from Branch b
-    where b.project.id = :projectId and b.archivedAt IS NULL
+    where b.project.id = :projectId and b.deletedAt IS NULL and (:activeOnly is null or b.archivedAt IS NULL)
+    and (:search is null or lower(b.name) like lower(concat('%', cast(:search AS text), '%')))
     order by b.isDefault desc, b.createdAt desc, b.id desc
   """
   )
-  fun getAllProjectBranches(projectId: Long, page: Pageable?, search: String?): Page<Branch>
+  fun getAllProjectBranches(
+    projectId: Long,
+    page: Pageable?,
+    search: String?,
+    activeOnly: Boolean? = false
+  ): Page<Branch>
 
   @Query(
     """
     select b
     from Branch b
-    where b.project.id = :projectId and b.id = :branchId and b.archivedAt IS NULL
+    where b.project.id = :projectId and b.id = :branchId and b.archivedAt IS NULL and b.deletedAt IS NULL
+    """
+  )
+  fun findActiveByProjectIdAndId(projectId: Long, branchId: Long): Branch?
+
+  @Query(
+    """
+    select b
+    from Branch b
+    where b.project.id = :projectId and b.id = :branchId and b.deletedAt IS NULL
     """
   )
   fun findByProjectIdAndId(projectId: Long, branchId: Long): Branch?
@@ -32,8 +47,8 @@ interface BranchRepository : JpaRepository<Branch, Long> {
     """
     select b
     from Branch b
-    where b.project.id = :projectId and b.archivedAt IS NULL and lower(b.name) = lower(:name)
+    where b.project.id = :projectId and b.deletedAt IS NULL and b.archivedAt IS NULL and lower(b.name) = lower(:name)
     """
   )
-  fun findByProjectIdAndName(projectId: Long, name: String): Branch?
+  fun findActiveByProjectIdAndName(projectId: Long, name: String): Branch?
 }
