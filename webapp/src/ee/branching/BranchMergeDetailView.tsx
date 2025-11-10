@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import {
   Alert,
   Box,
@@ -8,10 +8,14 @@ import {
   styled,
   useTheme,
   Chip,
+  Menu,
+  IconButton,
+  MenuItem,
 } from '@mui/material';
 import {
   AlertTriangle,
   CheckCircle,
+  DotsVertical,
   Minus,
   Plus,
   RefreshCcw02,
@@ -31,6 +35,8 @@ import { CellTranslation } from 'tg.views/projects/translations/TranslationsList
 import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
 import clsx from 'clsx';
 import { Branch } from 'tg.component/CustomIcons';
+import { useDateFormatter } from 'tg.hooks/useLocale';
+import { SuccessChip } from 'tg.component/common/chips/SuccessChip';
 
 const BranchesRow = styled(Box)`
   display: flex;
@@ -87,6 +93,7 @@ const KeyPanel = styled(Box)`
   border: 1px solid ${({ theme }) => theme.palette.divider1};
   border-radius: ${({ theme }) => theme.spacing(1)};
   display: grid;
+
   &.accepted {
     border-color: ${({ theme }) => theme.palette.tokens.success.main};
   }
@@ -232,7 +239,7 @@ const KeyTranslations: React.FC<{
 
 const ConflictKeyPanel: React.FC<{
   keyData: components['schemas']['KeyWithTranslationsModel'];
-  conflictHandler: () => void;
+  conflictHandler?: () => void;
   accepted?: boolean;
 }> = ({ keyData, accepted, conflictHandler }) => {
   const theme = useTheme();
@@ -274,6 +281,9 @@ export const BranchMergeDetailView: React.FC = () => {
   const project = useProject();
   const { mergeId } = useParams<RouteParams>();
   const history = useHistory();
+  const formatDate = useDateFormatter();
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>();
+
   const numericMergeId = Number(mergeId);
 
   const previewLoadable = useApiQuery({
@@ -299,6 +309,11 @@ export const BranchMergeDetailView: React.FC = () => {
     method: 'post',
   });
 
+  const deleteMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/merge/{mergeId}',
+    method: 'delete',
+  });
+
   const merge = previewLoadable.data;
   const conflicts =
     conflictsLoadable.data?._embedded?.branchMergeConflicts ?? [];
@@ -320,6 +335,28 @@ export const BranchMergeDetailView: React.FC = () => {
     await previewLoadable.refetch?.();
   };
 
+  const closeWith = (action?: () => void) => (e) => {
+    e?.stopPropagation();
+    setAnchorEl(undefined);
+    action?.();
+  };
+
+  const handleOpen = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    setAnchorEl(e.target as HTMLElement);
+  };
+
+  const handleCancel = async () => {
+    await deleteMutation.mutateAsync({
+      path: { projectId: project.id, mergeId: numericMergeId },
+    });
+    history.push(
+      LINKS.PROJECT_BRANCHES.build({
+        [PARAMS.PROJECT_ID]: project.id,
+      })
+    );
+  };
+
   const handleApply = async () => {
     await applyMutation.mutateAsync({
       path: { projectId: project.id, mergeId: numericMergeId },
@@ -336,24 +373,60 @@ export const BranchMergeDetailView: React.FC = () => {
   const readyToMerge =
     merge?.keyUnresolvedConflictsCount === 0 && merge.outdated === false;
 
-  const backLink = LINKS.PROJECT_BRANCHES_MERGES.build({
+  const backLink = LINKS.PROJECT_BRANCHES.build({
     [PARAMS.PROJECT_ID]: project.id,
   });
 
-  const totalConflicts = !previewLoadable.isLoading
-    ? merge!.keyResolvedConflictsCount + merge!.keyUnresolvedConflictsCount
-    : 0;
+  const goBackToBranches = () => {
+    history.push(backLink);
+  };
+
+  const totalConflicts =
+    merge && merge.mergedAt == null && !previewLoadable.isLoading
+      ? merge!.keyResolvedConflictsCount + merge!.keyUnresolvedConflictsCount
+      : 0;
 
   return (
     <BaseProjectView
       maxWidth={1200}
       windowTitle={t('branch_merges_title')}
-      navigation={[[t('branch_merges_title'), backLink]]}
+      navigation={[[t('branches_title'), backLink]]}
     >
-      <Box mb={2}>
+      <Box display="flex" justifyContent="space-between" mb={2}>
         <Typography variant="h4">
-          <T keyName="branches_merge_title" />
+          {merge?.mergedAt ? (
+            <T keyName="branches_merge_merged_detail" />
+          ) : (
+            <T keyName="branches_merge_title" />
+          )}
         </Typography>
+        <Box display="flex" alignItems="center">
+          <SuccessChip
+            icon={<CheckCircle width={18} height={18} />}
+            label={<T keyName={'branch_merges_merged_button'} />}
+          />
+          {merge && merge?.mergedAt == null && (
+            <>
+              <IconButton
+                onClick={handleOpen}
+                data-cy="project-dashboard-language-menu"
+              >
+                <DotsVertical />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={closeWith()}
+              >
+                <MenuItem onClick={closeWith(handleCancel)}>
+                  <Typography color={(theme) => theme.palette.error.main}>
+                    <T keyName="branch_merge_delete_button" />
+                  </Typography>
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+        </Box>
       </Box>
 
       {previewLoadable.isLoading ? (
@@ -361,17 +434,32 @@ export const BranchMergeDetailView: React.FC = () => {
       ) : merge ? (
         <Box data-cy="project-branch-merge-detail">
           <BranchesRow mb={3}>
-            <T
-              keyName="branch_merging_into_title"
-              params={{
-                branch: <BranchNameChipNode />,
-                sourceName: merge.sourceBranch.name,
-                targetName: merge.targetBranch.name,
-              }}
-            />
+            {merge.mergedAt == null ? (
+              <T
+                keyName="branch_merging_into_title"
+                params={{
+                  branch: <BranchNameChipNode />,
+                  sourceName: merge.sourceBranch.name,
+                  targetName: merge.targetBranch.name,
+                }}
+              />
+            ) : (
+              <T
+                keyName="branch_merging_from_title_merged"
+                params={{
+                  branch: <BranchNameChipNode />,
+                  sourceName: merge.sourceBranch.name,
+                  targetName: merge.targetBranch.name,
+                  date: formatDate(merge.mergedAt, {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                  }),
+                }}
+              />
+            )}
           </BranchesRow>
 
-          {merge.outdated && (
+          {merge.mergedAt == null && merge.outdated && (
             <Box mb={2}>
               <Alert severity="warning">
                 <T keyName="branch_merges_status_outdated" />
@@ -425,15 +513,19 @@ export const BranchMergeDetailView: React.FC = () => {
                         <ConflictKeyPanel
                           keyData={conflict.sourceKey}
                           accepted={conflict.resolution == 'SOURCE'}
-                          conflictHandler={() =>
-                            handleResolve(conflict, 'SOURCE')
+                          conflictHandler={
+                            merge!.mergedAt == null
+                              ? () => handleResolve(conflict, 'SOURCE')
+                              : undefined
                           }
                         />
                         <ConflictKeyPanel
                           keyData={conflict.targetKey}
                           accepted={conflict.resolution == 'TARGET'}
-                          conflictHandler={() =>
-                            handleResolve(conflict, 'TARGET')
+                          conflictHandler={
+                            merge!.mergedAt == null
+                              ? () => handleResolve(conflict, 'TARGET')
+                              : undefined
                           }
                         />
                       </ConflictColumns>
@@ -445,15 +537,24 @@ export const BranchMergeDetailView: React.FC = () => {
           </Box>
         )}
         {merge && (
-          <Box display="flex" justifyContent="end" columnGap={1}>
+          <Box display="flex" justifyContent="end" columnGap={2}>
             <Button
-              variant="contained"
+              variant="outlined"
               color="primary"
-              onClick={handleApply}
-              disabled={!readyToMerge || applyMutation.isLoading}
+              onClick={goBackToBranches}
             >
-              <T keyName="branch_merges_apply_button" />
+              <T keyName="branch_merge_cancel_button" />
             </Button>
+            {merge.mergedAt == null && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleApply}
+                disabled={!readyToMerge || applyMutation.isLoading}
+              >
+                <T keyName="branch_merges_apply_button" />
+              </Button>
+            )}
           </Box>
         )}
       </Box>

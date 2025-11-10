@@ -11,6 +11,7 @@ import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeConflictModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeRefModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeConflictModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeRefModel
@@ -19,6 +20,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.branching.BranchService
 import org.springdoc.core.annotations.ParameterObject
@@ -44,7 +46,7 @@ import org.springframework.web.bind.annotation.RestController
     "/v2/projects/{projectId:[0-9]+}/branches",
   ],
 )
-@OpenApiOrderExtension(8)
+@OpenApiOrderExtension(9)
 @Tag(name = "Branches", description = "Branching operations")
 class BranchController(
   private val branchService: BranchService,
@@ -55,7 +57,8 @@ class BranchController(
   private val pagedBranchMergeResourceAssembler: PagedResourcesAssembler<BranchMergeView>,
   private val branchMergeConflictModelAssembler: BranchMergeConflictModelAssembler,
   private val pagedBranchMergeConflictResourceAssembler: PagedResourcesAssembler<BranchMergeConflictView>,
-
+  private val branchMergeRefModelAssembler: BranchMergeRefModelAssembler,
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   @GetMapping(value = [""])
   @Operation(summary = "Get all branches")
@@ -67,8 +70,10 @@ class BranchController(
     pageable: Pageable,
     @RequestParam("search", required = false)
     search: String?,
+    @RequestParam("activeOnly", required = false)
+    activeOnly: Boolean?,
   ): PagedModel<BranchModel> {
-    val branches = branchService.getAllBranches(projectHolder.project.id, pageable, search)
+    val branches = branchService.getBranches(projectHolder.project.id, pageable, search, activeOnly)
     return pagedBranchResourceAssembler.toModel(branches, branchModelAssembler)
   }
 
@@ -81,7 +86,8 @@ class BranchController(
     val branch = branchService.createBranch(
       projectHolder.project.id,
       branch.name,
-      branch.originBranchId
+      branch.originBranchId,
+      authenticationFacade.authenticatedUserEntity
     )
     return branchModelAssembler.toModel(branch)
   }
@@ -116,8 +122,8 @@ class BranchController(
   fun dryRunMerge(
     @RequestBody request: DryRunMergeBranchRequest,
   ): BranchMergeRefModel {
-    val merge = branchService.dryRunMergeBranch(projectHolder.project.id, request)
-    return BranchMergeRefModel(merge.id)
+    val merge = branchService.dryRunMerge(projectHolder.project.id, request)
+    return branchMergeRefModelAssembler.toModel(merge)
   }
 
   @GetMapping(value = ["/merge/{mergeId}/preview"])

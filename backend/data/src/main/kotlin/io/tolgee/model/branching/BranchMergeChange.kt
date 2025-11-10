@@ -39,11 +39,11 @@ class BranchMergeChange : StandardAuditModel(), EntityWithId {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "source_key_id", nullable = true)
-  lateinit var sourceKey: Key
+  var sourceKey: Key? = null
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "target_key_id", nullable = true)
-  lateinit var targetKey: Key
+  var targetKey: Key? = null
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
@@ -54,5 +54,5 @@ class BranchMergeChange : StandardAuditModel(), EntityWithId {
   var resolution: BranchKeyMergeResolutionType? = null
 
   val isResolved: Boolean
-    get() = resolution != null
+    get() = resolution != null || change == BranchKeyMergeChangeType.SKIP
 }
