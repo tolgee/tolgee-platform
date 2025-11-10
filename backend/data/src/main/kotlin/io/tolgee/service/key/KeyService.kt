@@ -217,7 +217,10 @@ class KeyService(
       key.namespace = namespaceService.findOrCreate(namespace, project.id)
     }
     if (!branch.isNullOrEmpty()) {
-      key.branch = project.branches.find { it.name == branch } ?: throw BadRequestException(Message.BRANCH_NOT_FOUND)
+      key.branch = project.branches.find { it.name == branch } ?: throw BadRequestException(
+        Message.BRANCH_NOT_FOUND,
+        listOf(branch)
+      )
     } else if (project.hasDefaultBranch()) {
       key.branch = project.getDefaultBranch()
     }
