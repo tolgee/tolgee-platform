@@ -23,7 +23,6 @@ import { Sort } from 'tg.component/CustomIcons';
 import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
 import { useState } from 'react';
 import { useProject } from 'tg.hooks/useProject';
-import { BranchSelector } from 'tg.component/branching/BranchSelector';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -114,7 +113,6 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
           onChange={setOrder}
           value={order}
         />
-        <BranchSelector />
       </StyledSpaced>
 
       <StyledSpaced>

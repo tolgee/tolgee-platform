@@ -11,14 +11,17 @@ import { useProject } from 'tg.hooks/useProject';
 import { BatchOperationsSummary } from './translations/BatchOperations/OperationsSummary/OperationsSummary';
 import { CriticalUsageCircle } from 'tg.ee';
 import { ProjectPage } from './ProjectPage';
+import { GlobalBranchSelector } from 'tg.component/branching/GlobalBranchSelector';
 
 type Props = BaseViewProps & {
   rightPanelContent?: (width: number) => React.ReactNode;
+  branching?: boolean;
 };
 
 export const BaseProjectView: React.FC<Props> = ({
   navigation,
   rightPanelContent,
+  branching,
   ...otherProps
 }) => {
   const project = useProject() as ReturnType<typeof useProject> | undefined;
@@ -39,7 +42,8 @@ export const BaseProjectView: React.FC<Props> = ({
       LINKS.PROJECT_DASHBOARD.build({
         [PARAMS.PROJECT_ID]: project.id,
       }),
-      <SmallProjectAvatar key={0} project={project} />,
+      <SmallProjectAvatar key="avatar" project={project} />,
+      branching ? <GlobalBranchSelector key="branch" /> : undefined,
     ]);
   }
 

@@ -10,7 +10,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { LoadableType } from 'tg.component/common/form/StandardForm';
 import { BranchSelectField } from 'tg.component/branching/BranchSelectField';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { BranchNameChipNode } from 'tg.ee.module/branching/components/BranchNameChip';
+import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
 
 type BranchModel = components['schemas']['BranchModel'];
 type DryRunMergeBranchRequest =
@@ -114,7 +114,10 @@ export const BranchMergeCreateModal: React.FC<Props> = ({
                   <T keyName="branch_merges_target_branch" />
                 </FieldLabel>
                 <Box data-cy="branch-merge-target-select">
-                  <BranchSelectField name="targetBranchId" />
+                  <BranchSelectField
+                    name="targetBranchId"
+                    hiddenIds={sourceBranch ? [sourceBranch?.id] : undefined}
+                  />
                 </Box>
               </SelectorColumn>
             </FormLayout>
