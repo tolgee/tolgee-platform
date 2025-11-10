@@ -23,6 +23,12 @@ const StyledWrapper = styled('div')`
   }
 `;
 
+const LinkWrapper = styled('div')`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
 const StyledLink = styled(Link)`
   display: grid;
   grid-auto-flow: column;
@@ -33,7 +39,8 @@ const StyledLink = styled(Link)`
 export type NavigationItem = [
   name: string | ReactNode,
   url?: string,
-  icon?: ReactNode
+  icon?: ReactNode,
+  suffix?: ReactNode
 ];
 
 type Props = {
@@ -55,7 +62,7 @@ export const Navigation: React.FC<Props> = ({ path }) => {
         itemsBeforeCollapse={0}
         maxItems={smallScreen ? 1 : undefined}
       >
-        {path.map(([name, url, icon], index) => {
+        {path.map(([name, url, icon, suffix], index) => {
           const color =
             index === path.length - 1 ? theme.palette.primaryText : undefined;
           if (React.isValidElement(name)) {
@@ -66,17 +73,19 @@ export const Navigation: React.FC<Props> = ({ path }) => {
             );
           } else if (url) {
             return (
-              <StyledLink
-                data-cy="navigation-item"
-                key={index}
-                sx={{ color }}
-                // @ts-ignore
-                to={url}
-                component={RouterLink}
-              >
-                {icon}
-                {name}
-              </StyledLink>
+              <LinkWrapper key={index}>
+                <StyledLink
+                  data-cy="navigation-item"
+                  sx={{ color }}
+                  // @ts-ignore
+                  to={url}
+                  component={RouterLink}
+                >
+                  {icon}
+                  {name}
+                </StyledLink>
+                {suffix}
+              </LinkWrapper>
             );
           } else {
             return (
