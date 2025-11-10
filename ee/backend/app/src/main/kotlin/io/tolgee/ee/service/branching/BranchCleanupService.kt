@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.branching
 
+import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.events.OnBranchDeleted
 import io.tolgee.service.key.KeyService
@@ -17,6 +18,7 @@ class BranchCleanupService(
   private val keyRepository: KeyRepository,
   private val keyService: KeyService,
   private val branchRepository: BranchRepository,
+  private val branchMergeRepository: BranchMergeRepository,
 ) {
   companion object {
     private const val BATCH_SIZE = 1000
@@ -40,10 +42,10 @@ class BranchCleanupService(
    * Synchronous cleanup
    */
   fun cleanupBranch(branchId: Long) {
-    val branch = branchRepository.findById(branchId).get()
-    if (branch.archivedAt == null) return
+    val branch = branchRepository.findById(branchId).orElse(null) ?: return
+    if (branch.deletedAt == null) return
 
-    logger.warn("Cleaning up branch ${branch.id}")
+    logger.debug("Cleaning up branch ${branch.id}")
     var page = 0
     while (true) {
       val idsPage = keyRepository.findIdsByProjectAndBranch(
@@ -62,6 +64,13 @@ class BranchCleanupService(
       }
       page++
     }
+    val merges = branchMergeRepository
+      .findAllBySourceBranchIdOrTargetBranchId(branch.id, branch.id)
+    if (merges.isNotEmpty()) {
+      branchMergeRepository.deleteAll(merges)
+      logger.debug("Deleted ${merges.size} merges for branch ${branch.id}")
+    }
     branchRepository.delete(branch)
+    logger.debug("Deleted branch ${branch.name} (${branch.id})")
   }
 }

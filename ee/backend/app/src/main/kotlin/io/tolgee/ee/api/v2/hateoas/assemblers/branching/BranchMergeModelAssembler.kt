@@ -20,6 +20,7 @@ class BranchMergeModelAssembler(
       keyModificationsCount = entity.keyModificationsCount.toInt(),
       keyUnresolvedConflictsCount = entity.keyUnresolvedConflictsCount.toInt(),
       keyResolvedConflictsCount = entity.keyResolvedConflictsCount.toInt(),
+      mergedAt = entity.mergedAt?.time,
     )
   }
 }
