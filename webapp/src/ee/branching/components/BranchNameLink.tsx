@@ -1,15 +1,16 @@
-import { Link } from '@mui/material';
+import { Link, Typography } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 
 type Props = {
   name: string;
+  deleted?: boolean;
 };
 
-export const BranchNameLink = ({ name }: Props) => {
+export const BranchNameLink = ({ name, deleted }: Props) => {
   const project = useProject();
-  return (
+  return !deleted ? (
     <Link
       component={RouterLink}
       to={LINKS.PROJECT_TRANSLATIONS_BRANCHED.build({
@@ -19,5 +20,9 @@ export const BranchNameLink = ({ name }: Props) => {
     >
       {name}
     </Link>
+  ) : (
+    <Typography variant="body2" color={(theme) => theme.palette.text.disabled}>
+      {name}
+    </Typography>
   );
 };

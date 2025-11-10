@@ -13,6 +13,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.task.TaskKey
@@ -59,7 +60,7 @@ class Key(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var name: String = "",
-) : StandardAuditModel(), WithKeyMeta, BranchVersionedEntity<Key> {
+) : StandardAuditModel(), WithKeyMeta, BranchVersionedEntity<Key, KeySnapshot> {
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -143,8 +144,28 @@ class Key(
     return oldState["isPlural"] != this.isPlural || oldState["pluralArgName"] != this.pluralArgName
   }
 
-  override fun differsInBranchVersion(entity: Key): Boolean {
-    return true
+  override fun hasChanged(snapshot: KeySnapshot): Boolean {
+    val changed =
+      this.name != snapshot.name || this.isPlural != snapshot.isPlural || this.pluralArgName != snapshot.pluralArgName
+    if (changed) {
+      return true
+    }
+    this.keyMeta?.let { meta ->
+      snapshot.keyMetaSnapshot?.let { keyMetaSnapshot ->
+        if (meta.hasChanged(keyMetaSnapshot)) {
+          return true
+        }
+      }
+    }
+    if (this.translations.size != snapshot.translations.size) {
+      return true
+    }
+    this.translations.forEach { translation ->
+      if (translation.hasChanged(snapshot.translations.find { it.language == translation.language.tag }!!)) {
+        return true
+      }
+    }
+    return false
   }
 
   override fun merge(source: Key) {

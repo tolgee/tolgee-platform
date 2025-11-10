@@ -1461,6 +1461,11 @@ export interface components {
        * @description Key unresoled conflicts count
        */
       keyUnresolvedConflictsCount: number;
+      /**
+       * Format: int64
+       * @description Date of merge. If null, merge was not applied yet
+       */
+      mergedAt?: number;
       /** @description Is merge outdated. If true, it means, that either source or target branch data were changed */
       outdated: boolean;
       /** @description Source branch */
@@ -1474,11 +1479,18 @@ export interface components {
        * @description Branch merge ID
        */
       id: number;
+      /**
+       * Format: int64
+       * @description Date of merge. If null, merge was not applied yet
+       */
+      mergedAt?: number;
+      /** @description Target branch name */
+      targetBranchName: string;
     };
     BranchModel: {
-      /** @description Is branch active */
+      /** @description Indicates whether this branch is currently active (visible and usable for editing translations and keys). Inactive branches are hidden but still stored in the project. */
       active: boolean;
-      /** @description Author of the branch */
+      /** @description User who created or owns this branch. Can be null for system-generated branches. */
       author?: components["schemas"]["SimpleUserAccountModel"];
       /**
        * Format: int64
@@ -1487,14 +1499,16 @@ export interface components {
       createdAt?: number;
       /**
        * Format: int64
-       * @description Branch id
+       * @description Unique identifier of the branch
        */
       id: number;
       /** @description Is branch default */
       isDefault: boolean;
       /** @description Is branch protected */
       isProtected: boolean;
-      /** @description Branch name */
+      /** @description Ongoing (or applied) merge operation related to this branch. Null when the branch is not being merged yet */
+      merge?: components["schemas"]["BranchMergeRefModel"];
+      /** @description Human-readable name of the branch. Similar to Git branch names, it identifies the feature or purpose of this branch (e.g. 'feature-login-page') */
       name: string;
     };
     BusinessEventReportRequest: {
@@ -2701,7 +2715,8 @@ export interface components {
         | "branch_merge_not_found"
         | "branch_merge_change_not_found"
         | "branch_merge_revision_not_valid"
-        | "branch_merge_conflicts_not_resolved";
+        | "branch_merge_conflicts_not_resolved"
+        | "branch_merge_already_merged";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -6033,7 +6048,8 @@ export interface components {
         | "branch_merge_not_found"
         | "branch_merge_change_not_found"
         | "branch_merge_revision_not_valid"
-        | "branch_merge_conflicts_not_resolved";
+        | "branch_merge_conflicts_not_resolved"
+        | "branch_merge_already_merged";
       params?: unknown[];
       success: boolean;
     };
@@ -12147,6 +12163,7 @@ export interface operations {
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
+        activeOnly?: boolean;
       };
       path: {
         projectId: number;
