@@ -9,7 +9,7 @@ import { useBranchesService } from 'tg.views/projects/translations/context/servi
 
 type BranchModel = components['schemas']['BranchModel'];
 
-export const BranchSelector = () => {
+export const GlobalBranchSelector = () => {
   const project = useProject();
   const history = useHistory();
   const { selected, loadable } = useBranchesService({ projectId: project.id });
