@@ -59,7 +59,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
       node("active").isEqualTo(true)
     }
 
-    val newBranchId = branchRepository.findByProjectIdAndName(projectId, "feature-x")!!.id
+    val newBranchId = branchRepository.findActiveByProjectIdAndName(projectId, "feature-x")!!.id
     val newBranchKeyCount = keyRepository.countByProjectAndBranch(projectId, newBranchId)
 
     newBranchKeyCount.assert.isEqualTo(50)

@@ -320,4 +320,24 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
   )
   fun findAllByBranchId(branchId: Long): List<Key>
+
+  @Query(
+    """
+    select distinct k from Key k
+    left join fetch k.keyMeta km
+    left join fetch k.translations t
+    left join fetch t.language lang
+    left join fetch k.namespace ns
+    left join fetch k.branch b
+    where k.project.id = :projectId and (
+      (:includeOrphanDefault = true and (b.id = :branchId or b is null))
+      or (:includeOrphanDefault = false and b.id = :branchId)
+    )
+    """
+  )
+  fun findAllDetailedByBranch(
+    projectId: Long,
+    branchId: Long,
+    includeOrphanDefault: Boolean,
+  ): List<Key>
 }
