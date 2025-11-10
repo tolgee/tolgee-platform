@@ -17,7 +17,7 @@ import {
   RefreshCcw02,
 } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -28,8 +28,9 @@ import { messageService } from 'tg.service/MessageService';
 import { SimpleCellKey } from 'tg.views/projects/translations/SimpleCellKey';
 import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 import { CellTranslation } from 'tg.views/projects/translations/TranslationsList/CellTranslation';
-import { BranchNameChipNode } from 'tg.ee.module/branching/components/BranchNameChip';
+import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
 import clsx from 'clsx';
+import { Branch } from 'tg.component/CustomIcons';
 
 const BranchesRow = styled(Box)`
   display: flex;
@@ -64,6 +65,16 @@ const ConflictsWrapper = styled(Box)`
 const ConflictCard = styled(Box)`
   display: grid;
   gap: ${({ theme }) => theme.spacing(2)};
+`;
+
+const ConflictsHeader = styled(Box)`
+  display: flex;
+`;
+
+const ConflictsHeaderColumn = styled(Box)`
+  display: flex;
+  flex: 1;
+  gap: 5px;
 `;
 
 const ConflictColumns = styled(Box)`
@@ -195,8 +206,11 @@ const KeyTranslations: React.FC<{
   const languages = useTranslationsSelector((c) => c.languages);
   return (
     <TranslationList>
-      {Object.entries(keyData.translations ?? {}).map(([lang, translation]) => {
+      {Object.entries(keyData.translations ?? {}).map(([lang]) => {
         const language = languages?.find((l) => l.tag === lang);
+        if (!language) {
+          return;
+        }
         return (
           <StyledLanguageField
             key={lang}
@@ -204,7 +218,7 @@ const KeyTranslations: React.FC<{
           >
             <CellTranslation
               data={keyData!}
-              language={language!}
+              language={language}
               active={false}
               lastFocusable={false}
               readonly={true}
@@ -259,6 +273,7 @@ export const BranchMergeDetailView: React.FC = () => {
   const { t } = useTranslate();
   const project = useProject();
   const { mergeId } = useParams<RouteParams>();
+  const history = useHistory();
   const numericMergeId = Number(mergeId);
 
   const previewLoadable = useApiQuery({
@@ -310,6 +325,12 @@ export const BranchMergeDetailView: React.FC = () => {
       path: { projectId: project.id, mergeId: numericMergeId },
     });
     messageService.success(<T keyName="branch_merges_apply_success" />);
+    history.push(
+      LINKS.PROJECT_TRANSLATIONS_BRANCHED.build({
+        [PARAMS.PROJECT_ID]: project.id,
+        [PARAMS.TRANSLATIONS_BRANCH]: merge!.targetBranch.name,
+      })
+    );
   };
 
   const readyToMerge =
@@ -318,6 +339,10 @@ export const BranchMergeDetailView: React.FC = () => {
   const backLink = LINKS.PROJECT_BRANCHES_MERGES.build({
     [PARAMS.PROJECT_ID]: project.id,
   });
+
+  const totalConflicts = !previewLoadable.isLoading
+    ? merge!.keyResolvedConflictsCount + merge!.keyUnresolvedConflictsCount
+    : 0;
 
   return (
     <BaseProjectView
@@ -359,20 +384,38 @@ export const BranchMergeDetailView: React.FC = () => {
       ) : null}
 
       <Box display="grid" mt={4} rowGap={2}>
-        <Box>
-          <Typography variant="h6" gutterBottom>
-            <T keyName="branch_merges_conflicts_title" />
-          </Typography>
-          {conflictsLoadable.isLoading ? (
-            <CircularProgress />
-          ) : (
-            <ConflictsWrapper>
-              {conflicts.length === 0 ? (
-                <Typography color="textSecondary">
-                  <T keyName="branch_merges_conflicts_resolved_all" />
-                </Typography>
-              ) : (
-                conflicts.map((conflict) => {
+        {totalConflicts > 0 && (
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              <T keyName="branch_merges_conflicts_title" />
+            </Typography>
+            {conflictsLoadable.isLoading ? (
+              <CircularProgress />
+            ) : (
+              <ConflictsWrapper>
+                {merge!.keyUnresolvedConflictsCount > 0 && (
+                  <Alert severity="warning">
+                    <T
+                      keyName="branch_merges_unresolved_conflicts_alert"
+                      params={{ value: merge!.keyUnresolvedConflictsCount }}
+                    />
+                  </Alert>
+                )}
+                <ConflictsHeader>
+                  <ConflictsHeaderColumn>
+                    <Branch height={18} width={18} />
+                    <Typography variant="body2" fontWeight="medium">
+                      {merge!.sourceBranch.name}
+                    </Typography>
+                  </ConflictsHeaderColumn>
+                  <ConflictsHeaderColumn>
+                    <Branch height={18} width={18} />
+                    <Typography variant="body2" fontWeight="medium">
+                      {merge!.targetBranch.name}
+                    </Typography>
+                  </ConflictsHeaderColumn>
+                </ConflictsHeader>
+                {conflicts.map((conflict) => {
                   return (
                     <ConflictCard
                       key={conflict.id}
@@ -396,11 +439,11 @@ export const BranchMergeDetailView: React.FC = () => {
                       </ConflictColumns>
                     </ConflictCard>
                   );
-                })
-              )}
-            </ConflictsWrapper>
-          )}
-        </Box>
+                })}
+              </ConflictsWrapper>
+            )}
+          </Box>
+        )}
         {merge && (
           <Box display="flex" justifyContent="end" columnGap={1}>
             <Button
