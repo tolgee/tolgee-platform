@@ -213,6 +213,7 @@ tasks.register('runContextRecreatingTests', Test) {
     useJUnitPlatform {
         includeTags "contextRecreating"
     }
+    systemProperties['spring.test.context.cache.maxSize'] = 1
     maxHeapSize = "4096m"
     rootProject.setTestRetry(it)
 }
