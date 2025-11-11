@@ -9,6 +9,7 @@
 
 ```shell
 git clone --depth 1 git@github.com:tolgee/tolgee-platform.git
+git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```
 
 ## Run the stack
@@ -107,6 +108,8 @@ On the backend, there is Gradle task `ktlintFormat`, which helps you to format K
 ```shell
 ./gradlew ktlintFormat
 ```
+
+On IntelliJ, you can install the Ktlint plugin to get the editor to format the code correctly.
 
 ## Using current translations from the Tolgee app
 
