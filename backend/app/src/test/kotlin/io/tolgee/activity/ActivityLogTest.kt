@@ -20,15 +20,10 @@ import net.javacrumbs.jsonunit.assertj.JsonAssert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.ResultActions
 import java.math.BigDecimal
 
@@ -36,7 +31,7 @@ import java.math.BigDecimal
 class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: BaseTestData
 
-  @MockBean
+  @MockitoBean
   @Autowired
   lateinit var postHog: PostHog
 
@@ -144,17 +139,7 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
       },
     ).andIsOk
 
-    var params: Map<String, Any> = emptyMap()
-    waitForNotThrowing(timeout = 10000) {
-      verify(postHog, times(1)).capture(
-        any<String>(),
-        eq("SET_TRANSLATIONS"),
-        argThat<Map<String, Any>> {
-          params = this
-          true
-        },
-      )
-    }
+    val params = assertPostHogEventReported("SET_TRANSLATIONS")
     params["utm_hello"].assert.isEqualTo("hello")
     params["sdkType"].assert.isEqualTo("Unreal")
     params["sdkVersion"].assert.isEqualTo("1.0.0")
@@ -247,4 +232,18 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
         }
       })
     }
+
+  private fun assertPostHogEventReported(eventName: String): Map<String, Any> {
+    var params: Map<String, Any> = emptyMap()
+    waitForNotThrowing(timeout = 10000) {
+      val mockingDetails = Mockito.mockingDetails(postHog)
+      val invocations = mockingDetails.invocations
+      val captureInvocation = invocations.find {
+        it.method.name == "capture" && it.arguments.size >= 2 && it.arguments[1] == eventName
+      }
+      captureInvocation.assert.isNotNull()
+      params = captureInvocation!!.arguments[2] as Map<String, Any>
+    }
+    return params
+  }
 }

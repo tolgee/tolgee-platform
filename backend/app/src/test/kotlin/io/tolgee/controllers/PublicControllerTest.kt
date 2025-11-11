@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import com.posthog.PostHogInterface
+import com.posthog.server.PostHog
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andAssertResponse
@@ -16,15 +16,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import kotlin.properties.Delegates
 
 @AutoConfigureMockMvc
@@ -45,9 +40,9 @@ class PublicControllerTest : AbstractControllerTest() {
     tolgeeProperties.authentication.registrationsAllowed = registrationsAllowed
   }
 
-  @MockBean
+  @MockitoBean
   @Autowired
-  lateinit var postHog: PostHogInterface
+  lateinit var postHog: PostHog
 
   @Test
   fun `creates organization`() {
@@ -83,20 +78,10 @@ class PublicControllerTest : AbstractControllerTest() {
       },
     ).andIsOk
 
-    var params: Map<String, Any?>? = null
-    waitForNotThrowing(timeout = 10000) {
-      verify(postHog, times(1)).capture(
-        any(),
-        eq("SIGN_UP"),
-        argThat {
-          params = this
-          true
-        },
-      )
-    }
-    params!!["utm_hello"].assert.isEqualTo("hello")
-    params!!["sdkType"].assert.isEqualTo("Unreal")
-    params!!["sdkVersion"].assert.isEqualTo("1.0.0")
+    val params = assertPostHogEventReported("SIGN_UP")
+    params["utm_hello"].assert.isEqualTo("hello")
+    params["sdkType"].assert.isEqualTo("Unreal")
+    params["sdkVersion"].assert.isEqualTo("1.0.0")
   }
 
   @Test
@@ -176,5 +161,19 @@ class PublicControllerTest : AbstractControllerTest() {
       .error()
       .isStandardValidation
       .onField("email")
+  }
+
+  private fun assertPostHogEventReported(eventName: String): Map<String, Any> {
+    var params: Map<String, Any> = emptyMap()
+    waitForNotThrowing(timeout = 10000) {
+      val mockingDetails = Mockito.mockingDetails(postHog)
+      val invocations = mockingDetails.invocations
+      val captureInvocation = invocations.find {
+        it.method.name == "capture" && it.arguments[1] == eventName
+      }
+      captureInvocation.assert.isNotNull()
+      params = captureInvocation!!.arguments[2] as Map<String, Any>
+    }
+    return params
   }
 }
