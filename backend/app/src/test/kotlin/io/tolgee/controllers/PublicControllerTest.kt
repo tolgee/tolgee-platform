@@ -7,7 +7,7 @@ import io.tolgee.fixtures.andAssertResponse
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
-import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
@@ -78,7 +78,7 @@ class PublicControllerTest : AbstractControllerTest() {
       },
     ).andIsOk
 
-    val params = assertPostHogEventReported("SIGN_UP")
+    val params = assertPostHogEventReported(postHog, "SIGN_UP")
     params["utm_hello"].assert.isEqualTo("hello")
     params["sdkType"].assert.isEqualTo("Unreal")
     params["sdkVersion"].assert.isEqualTo("1.0.0")
@@ -161,20 +161,5 @@ class PublicControllerTest : AbstractControllerTest() {
       .error()
       .isStandardValidation
       .onField("email")
-  }
-
-  private fun assertPostHogEventReported(eventName: String): Map<String, Any> {
-    var params: Map<String, Any> = emptyMap()
-    waitForNotThrowing(timeout = 10000) {
-      val mockingDetails = Mockito.mockingDetails(postHog)
-      val invocations = mockingDetails.invocations
-      val captureInvocation =
-        invocations.find {
-          it.method.name == "capture" && it.arguments[1] == eventName
-        }
-      captureInvocation.assert.isNotNull()
-      params = captureInvocation!!.arguments[2] as Map<String, Any>
-    }
-    return params
   }
 }

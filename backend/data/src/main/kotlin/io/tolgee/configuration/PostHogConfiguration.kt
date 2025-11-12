@@ -16,9 +16,19 @@ class PostHogConfiguration(
       val configBuilder = PostHogConfig.builder(postHogApiKey)
       properties.host?.let { configBuilder.host(it) }
       val config = configBuilder.build()
-      val instance = PostHog()
-      instance.setup(config)
-      return instance
+
+      return getPostHogInstance(config)
     }
+  }
+
+  /**
+   * This is not official way how to create the PostHog instance.
+   *
+   * But when I used the official way, it was returning PostHogInterface, and it was impossible for us to mock it.
+   */
+  private fun getPostHogInstance(config: PostHogConfig): PostHog {
+    val instance = PostHog()
+    instance.setup(config)
+    return instance
   }
 }
