@@ -1,3 +1,10 @@
+# [3.139.0](https://github.com/tolgee/tolgee-platform/compare/v3.138.2...v3.139.0) (2025-11-12)
+
+
+### Features
+
+* add subscription and org details to Chatwoot support widget ([#3277](https://github.com/tolgee/tolgee-platform/issues/3277)) ([ea8b018](https://github.com/tolgee/tolgee-platform/commit/ea8b018bcb68b6a63d345c33c9baffaac47d459e))
+
 ## [3.138.2](https://github.com/tolgee/tolgee-platform/compare/v3.138.1...v3.138.2) (2025-11-07)
 
 
