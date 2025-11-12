@@ -385,6 +385,10 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun assertPostHogCaptureCalledTimes(i: Int): AbstractIntegerAssert<*>? =
-    Mockito.mockingDetails(postHog).invocations
-      .filter { it.method.name == "capture" }.size.assert.isEqualTo(i)
+    Mockito
+      .mockingDetails(postHog)
+      .invocations
+      .filter { it.method.name == "capture" }
+      .size.assert
+      .isEqualTo(i)
 }

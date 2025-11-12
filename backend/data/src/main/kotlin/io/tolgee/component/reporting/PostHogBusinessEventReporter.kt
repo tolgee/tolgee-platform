@@ -21,7 +21,7 @@ class PostHogBusinessEventReporter(
   private val organizationService: OrganizationService,
   private val userAccountService: UserAccountService,
   private val entityManager: EntityManager,
-  private var postHogGroupIdentifier: PostHogGroupIdentifier?
+  private var postHogGroupIdentifier: PostHogGroupIdentifier?,
 ) {
   @Lazy
   @Autowired
@@ -55,19 +55,21 @@ class PostHogBusinessEventReporter(
     val id = data.userAccountDto?.id ?: data.instanceId ?: data.anonymousUserId
     val setEntry = getIdentificationMapForPostHog(data)
 
-    val map = mapOf(
-      "${'$'}groups" to mapOf(
-        "project" to data.projectDto?.id,
-        GROUP_TYPE to data.organizationId,
-      ),
-      "organizationId" to data.organizationId,
-      "organizationName" to data.organizationName,
-    ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap()) + setEntry
+    val map =
+      mapOf(
+        "${'$'}groups" to
+          mapOf(
+            "project" to data.projectDto?.id,
+            GROUP_TYPE to data.organizationId,
+          ),
+        "organizationId" to data.organizationId,
+        "organizationName" to data.organizationName,
+      ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap()) + setEntry
 
     postHog?.capture(
       id.toString(),
       data.eventName,
-      map.filterValueNotNull()
+      map.filterValueNotNull(),
     )
 
     postHogGroupIdentifier?.identifyOrganization(organizationId = data.organizationId ?: return)

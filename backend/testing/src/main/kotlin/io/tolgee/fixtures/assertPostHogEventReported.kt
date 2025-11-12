@@ -12,14 +12,17 @@ import org.mockito.Mockito
  * @return the data of the matched PostHog event as a map
  */
 fun assertPostHogEventReported(
-  postHogMock: Any, eventName: String, checkFn: ((Map<*, *>) -> Unit)? = null
+  postHogMock: Any,
+  eventName: String,
+  checkFn: ((Map<*, *>) -> Unit)? = null,
 ): Map<*, *> {
   return waitForNotThrowing(timeout = 10000) {
     val mockingDetails = Mockito.mockingDetails(postHogMock)
     val invocations = mockingDetails.invocations
-    val captureInvocation = invocations.last {
-      it.method.name == "capture" && it.arguments[1] == eventName
-    }
+    val captureInvocation =
+      invocations.last {
+        it.method.name == "capture" && it.arguments[1] == eventName
+      }
     captureInvocation.assert.isNotNull()
     checkFn?.invoke(captureInvocation!!.arguments[2] as Map<*, *>)
     captureInvocation!!.arguments[2] as Map<*, *>

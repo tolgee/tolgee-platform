@@ -168,9 +168,10 @@ class PublicControllerTest : AbstractControllerTest() {
     waitForNotThrowing(timeout = 10000) {
       val mockingDetails = Mockito.mockingDetails(postHog)
       val invocations = mockingDetails.invocations
-      val captureInvocation = invocations.find {
-        it.method.name == "capture" && it.arguments[1] == eventName
-      }
+      val captureInvocation =
+        invocations.find {
+          it.method.name == "capture" && it.arguments[1] == eventName
+        }
       captureInvocation.assert.isNotNull()
       params = captureInvocation!!.arguments[2] as Map<String, Any>
     }
