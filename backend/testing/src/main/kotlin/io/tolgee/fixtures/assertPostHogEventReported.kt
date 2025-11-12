@@ -17,7 +17,7 @@ fun assertPostHogEventReported(
   return waitForNotThrowing(timeout = 10000) {
     val mockingDetails = Mockito.mockingDetails(postHogMock)
     val invocations = mockingDetails.invocations
-    val captureInvocation = invocations.find {
+    val captureInvocation = invocations.last {
       it.method.name == "capture" && it.arguments[1] == eventName
     }
     captureInvocation.assert.isNotNull()
