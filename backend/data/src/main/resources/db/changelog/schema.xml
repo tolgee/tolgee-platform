@@ -4637,4 +4637,10 @@
             <column name="key_id"/>
         </createIndex>
     </changeSet>
+    <changeSet author="anty (generated)" id="1762964560931-1">
+        <modifyDataType columnName="api_key" newDataType="varchar(511)" tableName="llm_provider"/>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1762964560931-2">
+        <modifyDataType columnName="api_url" newDataType="varchar(2047)" tableName="llm_provider"/>
+    </changeSet>
 </databaseChangeLog>

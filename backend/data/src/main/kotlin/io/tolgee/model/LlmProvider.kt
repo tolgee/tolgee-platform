@@ -3,6 +3,7 @@ package io.tolgee.model
 import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -31,7 +32,9 @@ class LlmProvider(
   var type: LlmProviderType = LlmProviderType.OPENAI,
   @field:Enumerated(EnumType.STRING)
   var priority: LlmProviderPriority? = null,
+  @Column(length = 511)
   var apiKey: String? = null,
+  @Column(length = 2047)
   var apiUrl: String = "",
   var model: String? = null,
   var deployment: String? = null,
