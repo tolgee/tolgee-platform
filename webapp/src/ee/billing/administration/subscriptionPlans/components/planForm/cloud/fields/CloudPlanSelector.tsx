@@ -7,7 +7,7 @@ import { SearchSelect } from 'tg.component/searchSelect/SearchSelect';
 export const CloudPlanSelector: FC<
   Omit<
     GenericPlanSelector<components['schemas']['AdministrationCloudPlanModel']>,
-    'plans'
+    'plans' | 'loading'
   > & {
     organizationId?: number;
     selectProps?: React.ComponentProps<typeof SearchSelect>[`SelectProps`];
@@ -26,6 +26,7 @@ export const CloudPlanSelector: FC<
     <GenericPlanSelector
       plans={plansLoadable?.data?._embedded?.plans}
       {...props}
+      loading={plansLoadable.isLoading}
     />
   );
 };
