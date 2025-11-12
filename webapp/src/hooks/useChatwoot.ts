@@ -32,16 +32,14 @@ function loadScript(doc: Document, url: string) {
 }
 
 async function loadChatwoot(websiteToken: string, darkMode: boolean) {
-  // @ts-ignore
-  window.chatwootSettings = {
+  window['chatwootSettings'] = {
     darkMode: darkMode ? 'auto' : 'light',
     hideMessageBubble: true,
   };
 
   await loadScript(document, BASE_URL + '/packs/js/sdk.js');
 
-  // @ts-ignore
-  window.chatwootSDK?.run({
+  window['chatwootSDK']?.run({
     websiteToken,
     baseUrl: BASE_URL,
   });
@@ -56,8 +54,7 @@ async function loadChatwootOnce(websiteToken: string, darkMode: boolean) {
 }
 
 function setChatwootUser(user: User) {
-  // @ts-ignore
-  window.$chatwoot?.setUser(user.id, {
+  window['$chatwoot']?.setUser(user.id, {
     email: user!.username,
     name: user!.name,
     url: window.location,
@@ -66,8 +63,7 @@ function setChatwootUser(user: User) {
 
 function setChatwootAttributes(organization: Organization) {
   const subscription = organization.activeCloudSubscription;
-  // @ts-ignore
-  window.$chatwoot?.setCustomAttributes({
+  window['$chatwoot']?.setCustomAttributes({
     plan: subscription?.plan?.name || 'free',
     subscriptionStatus: subscription?.status || 'inactive',
     organizationId: organization.id,
@@ -78,8 +74,7 @@ function setChatwootAttributes(organization: Organization) {
 }
 
 function toggleChatwoot() {
-  // @ts-ignore
-  window.$chatwoot?.toggle();
+  window['$chatwoot']?.toggle();
 }
 
 export function useChatwoot() {
