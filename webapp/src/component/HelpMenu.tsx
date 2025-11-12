@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   styled,
-  useTheme,
   Tooltip,
   Fab,
   Menu,
@@ -26,16 +25,10 @@ import {
 } from '@untitled-ui/icons-react';
 import { T, useTranslate } from '@tolgee/react';
 
-import {
-  useConfig,
-  usePreferredOrganization,
-  useUser,
-} from 'tg.globalContext/helpers';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { GitHub, Slack } from './CustomIcons';
 import { TranslationsShortcuts } from './shortcuts/TranslationsShortcuts';
-
-const BASE_URL = 'https://app.chatwoot.com';
-let scriptPromise: Promise<void> | null = null;
+import { useChatwoot } from 'tg.hooks/useChatwoot';
 
 const StyledHelpButton = styled('div')`
   position: fixed;
@@ -45,44 +38,10 @@ const StyledHelpButton = styled('div')`
   border-radius: 50%;
 `;
 
-export const loadScript = (websiteToken: string, darkMode: boolean) => {
-  return (function (doc, tag) {
-    if (!scriptPromise) {
-      const g = doc.createElement(tag) as HTMLScriptElement,
-        s = doc.getElementsByTagName(tag)[0] as HTMLScriptElement;
-      g.src = BASE_URL + '/packs/js/sdk.js';
-      g.defer = true;
-      g.async = true;
-      s!.parentNode!.insertBefore(g, s);
-      // @ts-ignore
-      window.chatwootSettings = {
-        darkMode: darkMode ? 'auto' : 'light',
-        hideMessageBubble: true,
-      };
-      scriptPromise = new Promise<void>((resolve) => {
-        g.onload = function () {
-          // @ts-ignore
-          window.chatwootSDK.run({
-            websiteToken,
-            baseUrl: BASE_URL,
-          });
-          resolve();
-        };
-      });
-    }
-    return scriptPromise;
-  })(document, 'script');
-};
-
 export const HelpMenu = () => {
   const { t } = useTranslate();
-  const user = useUser();
-  const config = useConfig();
   const { preferredOrganization } = usePreferredOrganization();
-  const token = config?.chatwootToken;
-  const {
-    palette: { mode },
-  } = useTheme();
+  const { chatwootAvailable, openChatwoot } = useChatwoot();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -107,28 +66,6 @@ export const HelpMenu = () => {
     handleClose();
   }
 
-  const darkMode = mode === 'dark';
-
-  useEffect(() => {
-    if (token) {
-      loadScript(token!, darkMode);
-    }
-  }, [token]);
-
-  const openChatwoot = () => {
-    handleClose();
-    loadScript(token!, darkMode).then(() => {
-      // @ts-ignore
-      window.$chatwoot.setUser(user.id, {
-        email: user!.username,
-        name: user!.name,
-        url: window.location,
-      });
-      // @ts-ignore
-      window.$chatwoot.toggle();
-    });
-  };
-
   function buttonLink(url: string) {
     return { href: url, target: 'blank', rel: 'noreferrer noopener' };
   }
@@ -136,14 +73,6 @@ export const HelpMenu = () => {
   if (!preferredOrganization) {
     return null;
   }
-
-  const enabledFeatures = preferredOrganization.enabledFeatures;
-
-  const hasStandardSupport =
-    enabledFeatures.includes('STANDARD_SUPPORT') ||
-    enabledFeatures.includes('PREMIUM_SUPPORT');
-
-  const displayChat = token && user && hasStandardSupport;
 
   return (
     <>
@@ -212,8 +141,13 @@ export const HelpMenu = () => {
             secondary={t('help_menu_slack_community_description')}
           />
         </MenuItem>
-        {displayChat && (
-          <MenuItem onClick={openChatwoot}>
+        {chatwootAvailable && (
+          <MenuItem
+            onClick={() => {
+              handleClose();
+              openChatwoot();
+            }}
+          >
             <ListItemIcon>
               <MessageSquare01 />
             </ListItemIcon>
