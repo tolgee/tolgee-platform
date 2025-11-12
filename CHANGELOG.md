@@ -1,3 +1,10 @@
+# [3.140.0](https://github.com/tolgee/tolgee-platform/compare/v3.139.0...v3.140.0) (2025-11-12)
+
+
+### Features
+
+* Event grouping in PostHog ([#3302](https://github.com/tolgee/tolgee-platform/issues/3302)) ([4a1987c](https://github.com/tolgee/tolgee-platform/commit/4a1987cd24879b9200d7ea26437307cd8d99fe36))
+
 # [3.139.0](https://github.com/tolgee/tolgee-platform/compare/v3.138.2...v3.139.0) (2025-11-12)
 
 
