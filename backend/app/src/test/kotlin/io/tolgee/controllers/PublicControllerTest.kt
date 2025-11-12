@@ -1,13 +1,13 @@
 package io.tolgee.controllers
 
-import com.posthog.java.PostHog
+import com.posthog.server.PostHog
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andAssertResponse
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsUnauthorized
-import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assert
@@ -16,15 +16,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import kotlin.properties.Delegates
 
 @AutoConfigureMockMvc
@@ -45,7 +40,7 @@ class PublicControllerTest : AbstractControllerTest() {
     tolgeeProperties.authentication.registrationsAllowed = registrationsAllowed
   }
 
-  @MockBean
+  @MockitoBean
   @Autowired
   lateinit var postHog: PostHog
 
@@ -83,20 +78,10 @@ class PublicControllerTest : AbstractControllerTest() {
       },
     ).andIsOk
 
-    var params: Map<String, Any?>? = null
-    waitForNotThrowing(timeout = 10000) {
-      verify(postHog, times(1)).capture(
-        any(),
-        eq("SIGN_UP"),
-        argThat {
-          params = this
-          true
-        },
-      )
-    }
-    params!!["utm_hello"].assert.isEqualTo("hello")
-    params!!["sdkType"].assert.isEqualTo("Unreal")
-    params!!["sdkVersion"].assert.isEqualTo("1.0.0")
+    val params = assertPostHogEventReported(postHog, "SIGN_UP")
+    params["utm_hello"].assert.isEqualTo("hello")
+    params["sdkType"].assert.isEqualTo("Unreal")
+    params["sdkVersion"].assert.isEqualTo("1.0.0")
   }
 
   @Test

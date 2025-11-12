@@ -1,28 +1,23 @@
 package io.tolgee.api.v2.controllers
 
-import com.posthog.java.PostHog
+import com.posthog.server.PostHog
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: BaseTestData
 
-  @MockBean
+  @MockitoBean
   @Autowired
   lateinit var postHog: PostHog
 
@@ -50,19 +45,9 @@ class BusinessEventControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       },
     ).andIsOk
 
-    var params: Map<String, Any?>? = null
-    waitForNotThrowing(timeout = 10000) {
-      verify(postHog, times(1)).capture(
-        any(),
-        eq("TEST_EVENT"),
-        argThat {
-          params = this
-          true
-        },
-      )
-    }
-    params!!["organizationId"].assert.isNotNull
-    params!!["organizationName"].assert.isEqualTo("test_username")
-    params!!["test"].assert.isEqualTo("test")
+    val params = assertPostHogEventReported(postHog, "TEST_EVENT")
+    params["organizationId"].assert.isNotNull
+    params["organizationName"].assert.isEqualTo("test_username")
+    params["test"].assert.isEqualTo("test")
   }
 }
