@@ -29,14 +29,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
@@ -54,7 +50,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   var namespacesTestData: NamespacesTestData? = null
   var languagePermissionsTestData: LanguagePermissionsTestData? = null
 
-  @MockBean
+  @MockitoBean
   @Autowired
   lateinit var postHog: PostHog
 
@@ -389,5 +385,6 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun assertPostHogCaptureCalledTimes(i: Int): AbstractIntegerAssert<*>? =
-    Mockito.mockingDetails(postHog).invocations.filter { it.method.name == "capture" }.size.assert.isEqualTo(i)
+    Mockito.mockingDetails(postHog).invocations
+      .filter { it.method.name == "capture" }.size.assert.isEqualTo(i)
 }

@@ -9,10 +9,10 @@ import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.waitFor
-import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -139,7 +139,7 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
       },
     ).andIsOk
 
-    val params = assertPostHogEventReported("SET_TRANSLATIONS")
+    val params = assertPostHogEventReported(postHog, "SET_TRANSLATIONS")
     params["utm_hello"].assert.isEqualTo("hello")
     params["sdkType"].assert.isEqualTo("Unreal")
     params["sdkVersion"].assert.isEqualTo("1.0.0")
@@ -232,18 +232,4 @@ class ActivityLogTest : ProjectAuthControllerTest("/v2/projects/") {
         }
       })
     }
-
-  private fun assertPostHogEventReported(eventName: String): Map<String, Any> {
-    var params: Map<String, Any> = emptyMap()
-    waitForNotThrowing(timeout = 10000) {
-      val mockingDetails = Mockito.mockingDetails(postHog)
-      val invocations = mockingDetails.invocations
-      val captureInvocation = invocations.find {
-        it.method.name == "capture" && it.arguments.size >= 2 && it.arguments[1] == eventName
-      }
-      captureInvocation.assert.isNotNull()
-      params = captureInvocation!!.arguments[2] as Map<String, Any>
-    }
-    return params
-  }
 }

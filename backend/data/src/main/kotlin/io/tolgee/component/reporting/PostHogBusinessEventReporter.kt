@@ -1,7 +1,6 @@
 package io.tolgee.component.reporting
 
 import com.posthog.server.PostHog
-import com.posthog.server.PostHogInterface
 import io.tolgee.component.reporting.PostHogGroupIdentifier.Companion.GROUP_TYPE
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.service.organization.OrganizationService
