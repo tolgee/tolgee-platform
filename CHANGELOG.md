@@ -1,3 +1,10 @@
+## [3.140.1](https://github.com/tolgee/tolgee-platform/compare/v3.140.0...v3.140.1) (2025-11-13)
+
+
+### Bug Fixes
+
+* send temperature as 0 for OpenaiApi LLM providers ([#3308](https://github.com/tolgee/tolgee-platform/issues/3308)) ([762621d](https://github.com/tolgee/tolgee-platform/commit/762621d4321f16bafdd088f765eb180d0bf0880f)), closes [#3297](https://github.com/tolgee/tolgee-platform/issues/3297)
+
 # [3.140.0](https://github.com/tolgee/tolgee-platform/compare/v3.139.0...v3.140.0) (2025-11-12)
 
 
