@@ -1,3 +1,10 @@
+## [3.140.2](https://github.com/tolgee/tolgee-platform/compare/v3.140.1...v3.140.2) (2025-11-13)
+
+
+### Bug Fixes
+
+* limit length of activity changes for diffing ([#3309](https://github.com/tolgee/tolgee-platform/issues/3309)) ([659d8c8](https://github.com/tolgee/tolgee-platform/commit/659d8c8d5efbacc14a80949b5814d479489a5de7)), closes [#3298](https://github.com/tolgee/tolgee-platform/issues/3298)
+
 ## [3.140.1](https://github.com/tolgee/tolgee-platform/compare/v3.140.0...v3.140.1) (2025-11-13)
 
 
