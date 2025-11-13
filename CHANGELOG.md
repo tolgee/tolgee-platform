@@ -1,3 +1,10 @@
+## [3.140.3](https://github.com/tolgee/tolgee-platform/compare/v3.140.2...v3.140.3) (2025-11-13)
+
+
+### Bug Fixes
+
+* increase length limit for llm provider url and api key ([#3310](https://github.com/tolgee/tolgee-platform/issues/3310)) ([1a475a9](https://github.com/tolgee/tolgee-platform/commit/1a475a97ec6ed53bac90b9a9c815ae2ede53b5f1)), closes [#3295](https://github.com/tolgee/tolgee-platform/issues/3295)
+
 ## [3.140.2](https://github.com/tolgee/tolgee-platform/compare/v3.140.1...v3.140.2) (2025-11-13)
 
 
