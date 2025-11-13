@@ -154,7 +154,7 @@ class OpenaiApiService(
       @JsonInclude(JsonInclude.Include.NON_NULL)
       val reasoning_effort: String? = null,
       @JsonInclude(JsonInclude.Include.NON_NULL)
-      val temperature: Long? = null,
+      val temperature: Long? = 0,
     )
 
     class RequestMessage(
