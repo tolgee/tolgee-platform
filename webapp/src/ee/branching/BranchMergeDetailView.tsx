@@ -401,29 +401,35 @@ export const BranchMergeDetailView: React.FC = () => {
           )}
         </Typography>
         <Box display="flex" alignItems="center">
-          <SuccessChip
-            icon={<CheckCircle width={18} height={18} />}
-            label={<T keyName={'branch_merges_merged_button'} />}
-          />
-          {merge && merge?.mergedAt == null && (
+          {merge && (
             <>
-              <IconButton
-                onClick={handleOpen}
-                data-cy="project-dashboard-language-menu"
-              >
-                <DotsVertical />
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={closeWith()}
-              >
-                <MenuItem onClick={closeWith(handleCancel)}>
-                  <Typography color={(theme) => theme.palette.error.main}>
-                    <T keyName="branch_merge_delete_button" />
-                  </Typography>
-                </MenuItem>
-              </Menu>
+              <>
+                {merge.mergedAt && (
+                  <SuccessChip
+                    icon={<CheckCircle width={18} height={18} />}
+                    label={<T keyName={'branch_merges_merged_button'} />}
+                  />
+                )}
+              </>
+              <>
+                <IconButton
+                  onClick={handleOpen}
+                  data-cy="project-dashboard-language-menu"
+                >
+                  <DotsVertical />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={closeWith()}
+                >
+                  <MenuItem onClick={closeWith(handleCancel)}>
+                    <Typography color={(theme) => theme.palette.error.main}>
+                      <T keyName="branch_merge_delete_button" />
+                    </Typography>
+                  </MenuItem>
+                </Menu>
+              </>
             </>
           )}
         </Box>
