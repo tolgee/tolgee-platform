@@ -350,6 +350,11 @@ export class LINKS {
   static PROJECT_ADD = Link.ofParent(LINKS.PROJECTS, 'add');
 
   static PROJECT_TRANSLATIONS = Link.ofParent(LINKS.PROJECT, 'translations');
+  static PROJECT_TRANSLATIONS_BRANCHED_VIEW = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS,
+    'tree/' + p(PARAMS.TRANSLATIONS_BRANCH) + '*'
+  );
+
   static PROJECT_TRANSLATIONS_BRANCHED = Link.ofParent(
     LINKS.PROJECT_TRANSLATIONS,
     'tree/' + p(PARAMS.TRANSLATIONS_BRANCH)
