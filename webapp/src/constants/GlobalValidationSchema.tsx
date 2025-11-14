@@ -526,10 +526,10 @@ export class Validation {
     Yup.object().shape({
       name: Yup.string()
         .required()
-        .min(3)
+        .min(2)
         .max(100)
         .matches(
-          /^[a-z0-9]([a-z0-9-_]*[a-z0-9])?$/i,
+          /^[a-z0-9]([a-z0-9-_/]*[a-z0-9])?$/i,
           t('validation_invalid_branch_name')
         ),
     });
