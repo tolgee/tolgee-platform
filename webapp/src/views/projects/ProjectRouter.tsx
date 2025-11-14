@@ -43,7 +43,7 @@ export const ProjectRouter = () => {
           <TranslationsView />
         </Route>
 
-        <Route exact path={LINKS.PROJECT_TRANSLATIONS_BRANCHED.template}>
+        <Route exact path={LINKS.PROJECT_TRANSLATIONS_BRANCHED_VIEW.template}>
           <TranslationsView />
         </Route>
 
