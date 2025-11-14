@@ -52,7 +52,7 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
         with:
-          node: 'false'
+          node: "false"
 
       - name: Download backend build result
         uses: ./.github/actions/download-backend-build
@@ -227,7 +227,7 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
         with:
-          java: 'false'
+          java: "false"
 
       - name: Install dependencies
         run: npm ci
@@ -276,7 +276,7 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
         with:
-          java: 'false'
+          java: "false"
 
       - name: Install dependencies
         run: npm ci
@@ -299,7 +299,7 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
         with:
-          java: 'false'
+          java: "false"
 
       - name: Install dependencies
         run: npm ci
@@ -330,7 +330,7 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
         with:
-          node: 'false'
+          node: "false"
 
       - name: Run ktlint
         run: ./gradlew ktlintCheck
