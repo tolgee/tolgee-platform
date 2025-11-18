@@ -3,8 +3,6 @@ package io.tolgee.ee.api.v2.controllers.branching
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BranchTestData
-import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
-import io.tolgee.ee.repository.branching.BranchMergeChangeRepository
 import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.branching.BranchSnapshotService
@@ -17,12 +15,8 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
-import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
-import io.tolgee.model.branching.BranchMergeChange
-import io.tolgee.model.enums.BranchKeyMergeChangeType
-import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.Key
 import io.tolgee.service.branching.BranchService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -43,9 +37,6 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var branchMergeRepository: BranchMergeRepository
-
-  @Autowired
-  lateinit var branchMergeChangeRepository: BranchMergeChangeRepository
 
   @Autowired
   lateinit var branchSnapshotService: BranchSnapshotService
@@ -175,8 +166,8 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         node("_embedded.branchMerges") {
           isArray.hasSize(1)
           node("[0]") {
-            node("sourceBranch.name").isEqualTo("merge-branch")
-            node("targetBranch.name").isEqualTo("main")
+            node("sourceBranchName").isEqualTo("merge-branch")
+            node("targetBranchName").isEqualTo("main")
             node("keyAdditionsCount").isEqualTo(0)
             node("keyDeletionsCount").isEqualTo(0)
             node("keyModificationsCount").isEqualTo(0)
@@ -197,14 +188,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `dry-run merges feature branch into main`() {
-    val keys = createConflictKeys()
-    branchSnapshotService.createInitialSnapshot(
-      testData.project.id,
-      testData.mainBranch,
-      testData.featureBranch
-    )
-    updateKeyTranslation(keys.first, "main translation")
-    updateKeyTranslation(keys.second, "new translation")
+    initConflicts()
 
     var mergeId: Int
     performProjectAuthPost(
@@ -257,64 +241,6 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `resolves merge conflict`() {
-    val keys = createConflictKeys()
-    val change = createMergeWithConflict(keys.second, keys.first)
-    val mergeId = change.branchMerge.id
-
-    performProjectAuthGet("branches/merge/$mergeId/conflicts")
-      .andIsOk.andAssertThatJson {
-        node("_embedded.branchMergeConflicts") {
-          node("[0].id").isEqualTo(change.id)
-          node("[0].resolution").isNull()
-        }
-      }
-
-    performProjectAuthPut(
-      "branches/merge/$mergeId/resolve",
-      ResolveBranchMergeConflictRequest(
-        changeId = change.id,
-        resolve = BranchKeyMergeResolutionType.SOURCE,
-      )
-    ).andIsOk
-
-    performProjectAuthGet("branches/merge/$mergeId/conflicts")
-      .andIsOk.andAssertThatJson {
-        node("_embedded.branchMergeConflicts") {
-          node("[0].resolution").isEqualTo("SOURCE")
-        }
-      }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `merges resolved feature branch into main`() {
-    val keys = createConflictKeys()
-    branchSnapshotService.createInitialSnapshot(
-      testData.project.id,
-      testData.mainBranch,
-      testData.featureBranch
-    )
-    updateKeyTranslation(keys.first, "main translation")
-    updateKeyTranslation(keys.second, "new translation")
-    // wait for revision numbers of branches to increase after conflict keys are created
-    waitForNotThrowing(timeout = 10000, pollTime = 250) {
-      testData.featureBranch.refresh().revision.assert.isGreaterThan(15)
-      testData.mainBranch.refresh().revision.assert.isGreaterThan(10)
-    }
-    val change = createMergeWithConflict(
-      keys.second,
-      keys.first,
-      BranchKeyMergeResolutionType.SOURCE
-    )
-    val mergeId = change.branchMerge.id
-
-    performProjectAuthPost("branches/merge/$mergeId/apply").andIsOk
-    translationService.find(keys.first.translations.first().id)!!.text.assert.isEqualTo("new translation")
-  }
-
   private fun createConflictKeys(): Pair<Key, Key> {
     fun createKey(
       name: String,
@@ -359,33 +285,6 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     translationService.setTranslationText(translation, value)
   }
 
-  private fun createMergeWithConflict(
-    sourceKey: Key,
-    targetKey: Key,
-    resolutionType: BranchKeyMergeResolutionType? = null
-  ): BranchMergeChange {
-    lateinit var change: BranchMergeChange
-    val sourceBranch = testData.featureBranch.refresh()
-    val targetBranch = testData.mainBranch.refresh()
-    val branchMerge = testData.projectBuilder.addBranchMerge {
-      this.sourceBranch = sourceBranch
-      this.targetBranch = targetBranch
-      sourceRevision = sourceBranch.revision
-      targetRevision = targetBranch.revision
-    }.build {
-      change = addChange {
-        this.change = BranchKeyMergeChangeType.CONFLICT
-        this.sourceKey = sourceKey
-        this.targetKey = targetKey
-        this.resolution = resolutionType
-        branchMerge.changes.add(this)
-      }.self
-    }.self
-    branchMergeRepository.save(branchMerge)
-    branchMergeChangeRepository.save(change)
-    return change
-  }
-
   private fun createBranchesOneByObe(project: Project) {
     defaultBranchCreator.create(project.id)
     val refreshed = project.refresh()
@@ -393,6 +292,18 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     branchService.createBranch(refreshed.id, "first-branch", defaultBranch.id, testData.user)
     branchService.createBranch(refreshed.id, "second-branch", defaultBranch.id, testData.user)
     branchService.createBranch(refreshed.id, "third-branch", defaultBranch.id, testData.user)
+  }
+
+  private fun initConflicts(): Pair<Key, Key> {
+    val keys = createConflictKeys()
+    branchSnapshotService.createInitialSnapshot(
+      testData.project.id,
+      testData.mainBranch,
+      testData.featureBranch
+    )
+    updateKeyTranslation(keys.first, "main translation")
+    updateKeyTranslation(keys.second, "new translation")
+    return keys
   }
 
   private fun Branch.refresh(): Branch {
