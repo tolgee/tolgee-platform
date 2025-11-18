@@ -13,6 +13,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
+import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.util.Logging
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -28,7 +29,10 @@ class BranchMergeService(
 
   fun dryRun(branchMerge: BranchMerge) {
     val changes = branchMergeAnalyzer.compute(branchMerge)
-    branchMerge.changes = changes
+    branchMerge.sourceRevision = branchMerge.sourceBranch.revision
+    branchMerge.targetRevision = branchMerge.targetBranch.revision
+    branchMerge.changes.clear()
+    branchMerge.changes.addAll(changes)
   }
 
   fun dryRun(sourceBranch: Branch, targetBranch: Branch): BranchMerge {
@@ -42,6 +46,24 @@ class BranchMergeService(
     branchMergeRepository.save(branchMerge)
     return branchMerge
   }
+
+  fun refresh(branchMerge: BranchMerge) {
+    val resolvedConflicts = branchMerge.changes
+      .filter { it.change == BranchKeyMergeChangeType.CONFLICT && it.resolution != null }
+      .associateBy { ConflictKey(it.sourceKey?.id, it.targetKey?.id) }
+
+    dryRun(branchMerge)
+
+    branchMerge.changes
+      .filter { it.change == BranchKeyMergeChangeType.CONFLICT }
+      .forEach { change ->
+        resolvedConflicts[ConflictKey(change.sourceKey?.id, change.targetKey?.id)]?.resolution?.let { resolution ->
+          change.resolution = resolution
+        }
+      }
+  }
+
+  private data class ConflictKey(val sourceKeyId: Long?, val targetKeyId: Long?)
 
   fun applyMerge(merge: BranchMerge) {
     try {

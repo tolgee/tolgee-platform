@@ -138,6 +138,18 @@ class BranchController(
     return branchMergeModelAssembler.toModel(merge)
   }
 
+  @PostMapping(value = ["/merge/{mergeId}/refresh"])
+  @Operation(summary = "Refresh branch merge session preview")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @OpenApiOrderExtension(11)
+  fun refreshBranchMerge(
+    @PathVariable mergeId: Long,
+  ): BranchMergeModel {
+    val merge = branchService.refreshMerge(projectHolder.project.id, mergeId)
+    return branchMergeModelAssembler.toModel(merge)
+  }
+
   @GetMapping(value = ["/merge/{mergeId}/conflicts"])
   @Operation(summary = "Get branch merge session conflicts")
   @AllowApiAccess

@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Box,
@@ -283,6 +283,7 @@ export const BranchMergeDetailView: React.FC = () => {
   const history = useHistory();
   const formatDate = useDateFormatter();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>();
+  const [refreshed, setRefreshed] = useState(false);
 
   const numericMergeId = Number(mergeId);
 
@@ -312,6 +313,11 @@ export const BranchMergeDetailView: React.FC = () => {
   const deleteMutation = useApiMutation({
     url: '/v2/projects/{projectId}/branches/merge/{mergeId}',
     method: 'delete',
+  });
+
+  const refreshPreviewMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/merge/{mergeId}/refresh',
+    method: 'post',
   });
 
   const merge = previewLoadable.data;
@@ -365,7 +371,7 @@ export const BranchMergeDetailView: React.FC = () => {
     history.push(
       LINKS.PROJECT_TRANSLATIONS_BRANCHED.build({
         [PARAMS.PROJECT_ID]: project.id,
-        [PARAMS.TRANSLATIONS_BRANCH]: merge!.targetBranch.name,
+        [PARAMS.TRANSLATIONS_BRANCH]: merge!.targetBranchName,
       })
     );
   };
@@ -385,6 +391,22 @@ export const BranchMergeDetailView: React.FC = () => {
     merge && merge.mergedAt == null && !previewLoadable.isLoading
       ? merge!.keyResolvedConflictsCount + merge!.keyUnresolvedConflictsCount
       : 0;
+
+  useEffect(() => {
+    if (previewLoadable.isFetched && merge && merge.outdated && !refreshed) {
+      setRefreshed(true);
+      refreshPreviewMutation.mutate(
+        {
+          path: { projectId: project.id, mergeId: numericMergeId },
+        },
+        {
+          onSuccess: () => {
+            previewLoadable.refetch?.();
+          },
+        }
+      );
+    }
+  });
 
   return (
     <BaseProjectView
@@ -445,8 +467,8 @@ export const BranchMergeDetailView: React.FC = () => {
                 keyName="branch_merging_into_title"
                 params={{
                   branch: <BranchNameChipNode />,
-                  sourceName: merge.sourceBranch.name,
-                  targetName: merge.targetBranch.name,
+                  sourceName: merge.sourceBranchName,
+                  targetName: merge.targetBranchName,
                 }}
               />
             ) : (
@@ -454,8 +476,8 @@ export const BranchMergeDetailView: React.FC = () => {
                 keyName="branch_merging_from_title_merged"
                 params={{
                   branch: <BranchNameChipNode />,
-                  sourceName: merge.sourceBranch.name,
-                  targetName: merge.targetBranch.name,
+                  sourceName: merge.sourceBranchName,
+                  targetName: merge.targetBranchName,
                   date: formatDate(merge.mergedAt, {
                     dateStyle: 'short',
                     timeStyle: 'short',
@@ -499,13 +521,13 @@ export const BranchMergeDetailView: React.FC = () => {
                   <ConflictsHeaderColumn>
                     <Branch height={18} width={18} />
                     <Typography variant="body2" fontWeight="medium">
-                      {merge!.sourceBranch.name}
+                      {merge!.sourceBranchName}
                     </Typography>
                   </ConflictsHeaderColumn>
                   <ConflictsHeaderColumn>
                     <Branch height={18} width={18} />
                     <Typography variant="body2" fontWeight="medium">
-                      {merge!.targetBranch.name}
+                      {merge!.targetBranchName}
                     </Typography>
                   </ConflictsHeaderColumn>
                 </ConflictsHeader>
