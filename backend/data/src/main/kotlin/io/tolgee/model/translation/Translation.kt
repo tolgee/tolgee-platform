@@ -207,7 +207,7 @@ class Translation(
     }
   }
 
-  override fun resolveKeyId(): Long? = key.id
+  override fun resolveKey(): Key? = key
 
   override fun isModified(oldState: Map<String, Any>): Boolean {
     return oldState["text"] != this.text || oldState["state"] != this.state || oldState["labels"] != this.labels
