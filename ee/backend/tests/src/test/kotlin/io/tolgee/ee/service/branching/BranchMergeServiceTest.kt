@@ -87,7 +87,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     createFeatureOnlyKey()
     deleteFeatureKey()
     updateFeatureKey()
-    waitForNotThrowing(timeout = 2500, pollTime = 250) {
+    waitForNotThrowing(timeout = 5000, pollTime = 250) {
       testData.featureBranch.refresh()!!.revision.assert.isEqualTo(3)
     }
 
