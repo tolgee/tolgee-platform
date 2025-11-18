@@ -140,7 +140,7 @@ class Key(
     return SimpleKeyResult(id, name, namespace?.name)
   }
 
-  override fun resolveKeyId(): Long? = id
+  override fun resolveKey(): Key? = this
 
   override fun isModified(oldState: Map<String, Any>): Boolean {
     return oldState["isPlural"] != this.isPlural || oldState["pluralArgName"] != this.pluralArgName

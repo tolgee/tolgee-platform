@@ -70,7 +70,7 @@ class BranchTestData(
         }
       }
       addBranch {
-        name = "merged-and-deleted-branch"
+        name = "merged-and-archived-branch"
         project = projectBuilder.self
         isProtected = false
         isDefault = false

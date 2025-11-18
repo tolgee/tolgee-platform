@@ -1,5 +1,7 @@
 package io.tolgee.model.branching
 
+import io.tolgee.model.key.Key
+
 /**
  * Interface for entities that are versioned across branches.
  *
@@ -10,11 +12,11 @@ package io.tolgee.model.branching
 interface BranchVersionedEntity<T, U> {
 
   /**
-   * Resolves the unique identifier of the branch associated with the entity in the branching model.
+   * Resolves the Key of the branch associated with the entity in the branching model.
    *
-   * @return The ID of the branch
+   * @return The Key entity
    */
-  fun resolveKeyId(): Long?
+  fun resolveKey(): Key?
 
   /**
    * Determines whether the entity has been modified based on the provided state.
