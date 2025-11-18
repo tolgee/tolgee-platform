@@ -442,6 +442,9 @@ export interface paths {
   "/v2/projects/{projectId}/branches/merge/{mergeId}/preview": {
     get: operations["getBranchMergeSessionPreview"];
   };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}/refresh": {
+    post: operations["refreshBranchMerge"];
+  };
   "/v2/projects/{projectId}/branches/merge/{mergeId}/resolve": {
     put: operations["resolveConflict"];
   };
@@ -1468,10 +1471,20 @@ export interface components {
       mergedAt?: number;
       /** @description Is merge outdated. If true, it means, that either source or target branch data were changed */
       outdated: boolean;
-      /** @description Source branch */
-      sourceBranch: components["schemas"]["BranchModel"];
-      /** @description Target branch */
-      targetBranch: components["schemas"]["BranchModel"];
+      /**
+       * Format: int64
+       * @description Source branch id
+       */
+      sourceBranchId: number;
+      /** @description Source branch name */
+      sourceBranchName: string;
+      /**
+       * Format: int64
+       * @description Target branch id
+       */
+      targetBranchId: number;
+      /** @description Target branch name */
+      targetBranchName: string;
     };
     BranchMergeRefModel: {
       /**
@@ -12458,6 +12471,46 @@ export interface operations {
     };
   };
   getBranchMergeSessionPreview: {
+    parameters: {
+      path: {
+        mergeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BranchMergeModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  refreshBranchMerge: {
     parameters: {
       path: {
         mergeId: number;

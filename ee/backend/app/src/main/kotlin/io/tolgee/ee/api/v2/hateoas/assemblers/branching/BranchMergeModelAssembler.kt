@@ -6,14 +6,14 @@ import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.stereotype.Component
 
 @Component
-class BranchMergeModelAssembler(
-  private val branchModelAssembler: BranchModelAssembler,
-) : RepresentationModelAssembler<BranchMergeView, BranchMergeModel> {
+class BranchMergeModelAssembler : RepresentationModelAssembler<BranchMergeView, BranchMergeModel> {
   override fun toModel(entity: BranchMergeView): BranchMergeModel {
     return BranchMergeModel(
       id = entity.id,
-      sourceBranch = branchModelAssembler.toModel(entity.sourceBranch),
-      targetBranch = branchModelAssembler.toModel(entity.targetBranch),
+      sourceBranchId = entity.sourceBranch.id,
+      sourceBranchName = entity.sourceBranch.name,
+      targetBranchId = entity.targetBranch.id,
+      targetBranchName = entity.targetBranch.name,
       outdated = !entity.revisionsMatch,
       keyAdditionsCount = entity.keyAdditionsCount.toInt(),
       keyDeletionsCount = entity.keyDeletionsCount.toInt(),

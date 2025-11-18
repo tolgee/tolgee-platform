@@ -86,12 +86,9 @@ class BranchServiceImpl(
     }
     branchRepository.save(branch)
 
+    branchRepository.save(branch)
     branchCopyService.copy(projectId, originBranch, branch)
     branchSnapshotService.createInitialSnapshot(projectId, originBranch, branch)
-
-    branch.pending = false
-    branchRepository.save(branch)
-
     return branch
   }
 
@@ -147,6 +144,14 @@ class BranchServiceImpl(
   }
 
   override fun getBranchMergeView(projectId: Long, mergeId: Long): BranchMergeView {
+    return branchMergeService.getMergeView(projectId, mergeId)
+  }
+
+  @Transactional
+  override fun refreshMerge(projectId: Long, mergeId: Long): BranchMergeView {
+    val merge = branchMergeService.findMerge(projectId, mergeId)
+      ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    branchMergeService.refresh(merge)
     return branchMergeService.getMergeView(projectId, mergeId)
   }
 
