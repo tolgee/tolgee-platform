@@ -101,7 +101,7 @@ class KeyMeta(
     }
   }
 
-  override fun resolveKeyId(): Long? = key?.id
+  override fun resolveKey(): Key? = key
 
   override fun isModified(oldState: Map<String, Any>): Boolean {
     return oldState["description"] != this.description || oldState["custom"] != this.custom

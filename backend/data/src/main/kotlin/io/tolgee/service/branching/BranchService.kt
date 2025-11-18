@@ -18,6 +18,7 @@ interface BranchService {
   fun dryRunMerge(projectId: Long, request: DryRunMergeBranchRequest): BranchMerge
   fun getBranchMergeView(projectId: Long, mergeId: Long): BranchMergeView
   fun getBranchMerges(projectId: Long, pageable: Pageable): Page<BranchMergeView>
+  fun refreshMerge(projectId: Long, mergeId: Long): BranchMergeView
   fun getBranchMergeConflicts(
     projectId: Long,
     branchMergeId: Long,
