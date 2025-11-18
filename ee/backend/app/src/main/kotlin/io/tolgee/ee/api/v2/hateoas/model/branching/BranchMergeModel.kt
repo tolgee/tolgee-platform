@@ -9,10 +9,14 @@ import org.springframework.hateoas.server.core.Relation
 open class BranchMergeModel(
   @Schema(description = "Branch merge id")
   val id: Long,
-  @Schema(description = "Source branch")
-  val sourceBranch: BranchModel,
-  @Schema(description = "Target branch")
-  val targetBranch: BranchModel,
+  @Schema(description = "Source branch id")
+  val sourceBranchId: Long,
+  @Schema(description = "Source branch name")
+  val sourceBranchName: String,
+  @Schema(description = "Target branch id")
+  val targetBranchId: Long,
+  @Schema(description = "Target branch name")
+  val targetBranchName: String,
   @Schema(description = "Is merge outdated. If true, it means, that either source or target branch data were changed")
   val outdated: Boolean,
   @Schema(description = "Key additions count")

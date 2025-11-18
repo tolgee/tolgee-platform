@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.branching
 
+import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.snapshot.KeyMetaSnapshot
@@ -15,6 +16,7 @@ import java.util.LinkedHashMap
 class BranchSnapshotService(
   private val keyRepository: KeyRepository,
   private val keySnapshotRepository: KeySnapshotRepository,
+  private val branchRepository: BranchRepository,
 ) {
 
   @Transactional
@@ -40,6 +42,8 @@ class BranchSnapshotService(
     }
 
     keySnapshotRepository.saveAll(snapshots)
+    targetBranch.pending = false
+    branchRepository.save(targetBranch)
   }
 
   private fun buildSnapshot(

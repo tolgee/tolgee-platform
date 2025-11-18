@@ -37,6 +37,10 @@ class BranchServiceOssStub : BranchService {
     throw UnsupportedOperationException()
   }
 
+  override fun refreshMerge(projectId: Long, mergeId: Long): BranchMergeView {
+    throw UnsupportedOperationException()
+  }
+
   override fun getBranchMerges(projectId: Long, pageable: Pageable): Page<BranchMergeView> {
     return Page.empty()
   }

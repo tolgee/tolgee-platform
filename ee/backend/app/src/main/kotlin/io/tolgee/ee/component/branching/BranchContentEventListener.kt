@@ -36,10 +36,10 @@ class BranchContentEventListener(
     if (entity == null) return
     if (entity !is BranchVersionedEntity<*, *>) return
 
-    val keyId = entity.resolveKeyId() ?: return
+    val key = entity.resolveKey() ?: return
 
     if (oldState == null || entity.isModified(oldState)) {
-      branchRevisionUpdater.snapshot(keyId)
+      branchRevisionUpdater.snapshot(key)
     }
   }
 }

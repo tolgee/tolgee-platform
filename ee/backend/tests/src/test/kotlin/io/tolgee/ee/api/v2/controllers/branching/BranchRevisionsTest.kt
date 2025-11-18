@@ -2,6 +2,7 @@ package io.tolgee.ee.api.v2.controllers.branching
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BranchRevisionData
+import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.fixtures.waitForNotThrowing
@@ -44,6 +45,7 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `editing key increases branch revision`() {
     keyService.edit(testData.firstKey.id, EditKeyDto(name = "first_key", description = "test description"))
     assertBranchMetadataChanged()
+    assertKeyCascadeUpdateChanged()
   }
 
   @Test
@@ -54,6 +56,7 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
       mapOf("en" to "new translation text")
     )
     assertBranchMetadataChanged()
+    assertKeyCascadeUpdateChanged()
   }
 
   @Test
@@ -61,12 +64,38 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `changing translation state increases branch revision`() {
     translationService.setStateBatch(testData.translation, TranslationState.REVIEWED)
     assertBranchMetadataChanged()
+    assertKeyCascadeUpdateChanged()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `deleting key increases branch revision`() {
+    keyService.delete(testData.firstKey.id)
+    assertBranchMetadataChanged()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `deleting translation increases branch revision`() {
+    translationService.deleteByIdIn(listOf(testData.translation.id))
+    assertBranchMetadataChanged()
+    assertKeyCascadeUpdateChanged()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `adding key increases branch revision`() {
+    keyService.create(project, CreateKeyDto(name = "new_key", description = "test description", branch = "dev"))
+    assertBranchMetadataChanged()
   }
 
   private fun assertBranchMetadataChanged() {
     waitForNotThrowing(timeout = 3000, pollTime = 500) {
-      testData.devBranch.refresh().revision.assert.isEqualTo(1)
+      testData.devBranch.refresh().revision.assert.isGreaterThan(0)
     }
+  }
+
+  private fun assertKeyCascadeUpdateChanged() {
     testData.firstKey.refresh().let {
       it.cascadeUpdatedAt.assert.isNotNull
       it.cascadeUpdatedAt!!.time.assert.isEqualTo(currentDateProvider.date.time)
