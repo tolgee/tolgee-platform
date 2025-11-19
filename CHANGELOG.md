@@ -1,3 +1,15 @@
+# [3.141.0](https://github.com/tolgee/tolgee-platform/compare/v3.140.4...v3.141.0) (2025-11-19)
+
+
+### Bug Fixes
+
+* handle numbered placeholders when exporting Apple Stringsdict plurals ([#3314](https://github.com/tolgee/tolgee-platform/issues/3314)) ([881486b](https://github.com/tolgee/tolgee-platform/commit/881486b0550f4f820668e62fa1542b355088d5fc))
+
+
+### Features
+
+* Add intercom support ([#3315](https://github.com/tolgee/tolgee-platform/issues/3315)) ([5a4d668](https://github.com/tolgee/tolgee-platform/commit/5a4d668dcfeb7f79086a3ee3ac3c0f570774e1f3))
+
 ## [3.140.4](https://github.com/tolgee/tolgee-platform/compare/v3.140.3...v3.140.4) (2025-11-14)
 
 
