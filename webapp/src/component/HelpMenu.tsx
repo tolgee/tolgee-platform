@@ -29,6 +29,7 @@ import { usePreferredOrganization } from 'tg.globalContext/helpers';
 import { GitHub, Slack } from './CustomIcons';
 import { TranslationsShortcuts } from './shortcuts/TranslationsShortcuts';
 import { useChatwoot } from 'tg.hooks/useChatwoot';
+import { useIntercom } from 'tg.hooks/useIntercom';
 
 const StyledHelpButton = styled('div')`
   position: fixed;
@@ -42,6 +43,7 @@ export const HelpMenu = () => {
   const { t } = useTranslate();
   const { preferredOrganization } = usePreferredOrganization();
   const { chatwootAvailable, openChatwoot } = useChatwoot();
+  const { intercomAvailable, openIntercom } = useIntercom();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -157,6 +159,22 @@ export const HelpMenu = () => {
             />
           </MenuItem>
         )}
+        {intercomAvailable && (
+          <MenuItem
+            onClick={() => {
+              handleClose();
+              openIntercom();
+            }}
+          >
+            <ListItemIcon>
+              <MessageSquare01 />
+            </ListItemIcon>
+            <ListItemText
+              primary={t('help_menu_chat_with_us')}
+              secondary={t('help_menu_chat_with_us_description')}
+            />
+          </MenuItem>
+        )}
         <MenuItem onClick={handleOpenDialog}>
           <ListItemIcon>
             <Mail01 />
@@ -164,7 +182,6 @@ export const HelpMenu = () => {
           <ListItemText primary={t('help_menu_email')} />
         </MenuItem>
         <Divider />
-
         <MenuItem onClick={handleOpenShortcuts}>
           <ListItemIcon>
             <Keyboard02 />

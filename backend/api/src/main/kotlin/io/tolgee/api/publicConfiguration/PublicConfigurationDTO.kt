@@ -27,6 +27,7 @@ class PublicConfigurationDTO(
   val maxTranslationTextLength: Long,
   val recaptchaSiteKey: String?,
   val chatwootToken: String?,
+  val intercomAppId: String?,
   val capterraTracker: String?,
   val ga4Tag: String?,
   val postHogApiKey: String?,

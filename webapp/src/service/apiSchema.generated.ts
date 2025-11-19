@@ -4844,6 +4844,7 @@ export interface components {
       clientSentryDsn?: string;
       contentDeliveryConfigured: boolean;
       ga4Tag?: string;
+      intercomAppId?: string;
       internalControllerEnabled: boolean;
       llm: components["schemas"]["PublicLlmConfigurationDTO"];
       machineTranslationServices: components["schemas"]["MtServicesDTO"];
