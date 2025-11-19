@@ -73,6 +73,8 @@ class TolgeeProperties(
   @DocProperty(hidden = true)
   var chatwootToken: String? = null,
   @DocProperty(hidden = true)
+  var intercomAppId: String? = null,
+  @DocProperty(hidden = true)
   var capterraTracker: String? = null,
   @DocProperty(hidden = true)
   var ga4Tag: String? = null,

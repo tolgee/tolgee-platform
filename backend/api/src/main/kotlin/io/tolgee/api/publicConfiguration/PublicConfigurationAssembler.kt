@@ -47,6 +47,7 @@ class PublicConfigurationAssembler(
       maxTranslationTextLength = properties.maxTranslationTextLength,
       recaptchaSiteKey = properties.recaptcha.siteKey,
       chatwootToken = properties.chatwootToken,
+      intercomAppId = properties.intercomAppId,
       capterraTracker = properties.capterraTracker,
       ga4Tag = properties.ga4Tag,
       postHogApiKey = properties.postHog.apiKey,
