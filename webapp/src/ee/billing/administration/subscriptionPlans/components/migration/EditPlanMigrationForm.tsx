@@ -22,6 +22,7 @@ export const EditPlanMigrationForm: React.FC<Props> = (props) => {
     targetPlanId: migration.targetPlan.id,
     monthlyOffsetDays: migration.monthlyOffsetDays,
     yearlyOffsetDays: migration.yearlyOffsetDays,
+    customEmailBody: migration.customEmailBody ?? undefined,
   };
   return (
     <PlanMigrationForm<PlanMigrationFormData>
