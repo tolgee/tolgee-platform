@@ -1,0 +1,7 @@
+reviews:
+  path_instructions:
+    - path: "**/*.{ts,tsx,js,jsx,kt,kts}"
+      instructions: "As part of review, please check if the file follows 'The Stepdown Rule':
+        The most important, high-level concepts should be at the top (like a newspaper headline and opening paragraph).
+        Details should increase as you read downward. Functions should be ordered so that a caller appears before the functions it calls.
+        When working with JavaScript components, we allow the main component to live at the bottom of the file as an exception to the rule."
