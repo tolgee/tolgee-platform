@@ -10,7 +10,6 @@ import kotlin.reflect.KClass
 class EmailTemplateRenderer(
   private val placeholderExtractor: EmailPlaceholdersExtractor,
 ) {
-
   fun render(
     template: String,
     variables: EmailTemplateVariables,
@@ -22,11 +21,11 @@ class EmailTemplateRenderer(
       )
 
     val parameters =
-      entries.map { entry ->
-        entry.accessor(variables) ?: ""
-      }.toTypedArray()
+      entries
+        .map { entry ->
+          entry.accessor(variables) ?: ""
+        }.toTypedArray()
 
     return MessageFormat(template, Locale.ENGLISH).format(parameters)
   }
 }
-
