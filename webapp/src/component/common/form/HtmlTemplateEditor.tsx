@@ -11,7 +11,6 @@ import {
   ToggleButtonGroup,
   Tooltip,
   Typography,
-  useTheme,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import {
@@ -29,7 +28,6 @@ export type TemplatePlaceholder =
 type Props = {
   value: string;
   onChange: (value: string) => void;
-  label?: string;
   disabled?: boolean;
   readOnly?: boolean;
   placeholders?: TemplatePlaceholder[];
@@ -40,18 +38,14 @@ type Mode = 'html' | 'preview';
 export const HtmlTemplateEditor: React.FC<Props> = ({
   value,
   onChange,
-  label,
   disabled,
   readOnly,
   placeholders = [],
 }) => {
   const { t } = useTranslate();
-  const theme = useTheme();
   const [mode, setMode] = useState<Mode>('html');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
-
-  const isDark = theme.palette.mode === 'dark';
 
   useEffect(() => {
     if (
@@ -169,11 +163,29 @@ export const HtmlTemplateEditor: React.FC<Props> = ({
     <Card variant="outlined">
       <Box display="grid" gap={1.5} px={2} pb={2}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          {label && (
-            <Typography variant="subtitle1" fontWeight={600}>
-              {label}
-            </Typography>
-          )}
+          <ToggleButtonGroup size="small" exclusive>
+            <ToggleButton
+              value="bold"
+              onClick={() => wrapOrUnwrapSelection('b')}
+              disabled={disabled || readOnly}
+            >
+              <Bold01 width={16} height={16} />
+            </ToggleButton>
+            <ToggleButton
+              value="italic"
+              onClick={() => wrapOrUnwrapSelection('i')}
+              disabled={disabled || readOnly}
+            >
+              <Italic01 width={16} height={16} />
+            </ToggleButton>
+            <ToggleButton
+              value="underline"
+              onClick={() => wrapOrUnwrapSelection('u')}
+              disabled={disabled || readOnly}
+            >
+              <Underline01 width={16} height={16} />
+            </ToggleButton>
+          </ToggleButtonGroup>
           <Tabs
             value={mode}
             onChange={handleTabChange}
@@ -202,30 +214,6 @@ export const HtmlTemplateEditor: React.FC<Props> = ({
           </Tabs>
         </Box>
 
-        <ToggleButtonGroup size="small" exclusive>
-          <ToggleButton
-            value="bold"
-            onClick={() => wrapOrUnwrapSelection('b')}
-            disabled={disabled || readOnly}
-          >
-            <Bold01 width={16} height={16} />
-          </ToggleButton>
-          <ToggleButton
-            value="italic"
-            onClick={() => wrapOrUnwrapSelection('i')}
-            disabled={disabled || readOnly}
-          >
-            <Italic01 width={16} height={16} />
-          </ToggleButton>
-          <ToggleButton
-            value="underline"
-            onClick={() => wrapOrUnwrapSelection('u')}
-            disabled={disabled || readOnly}
-          >
-            <Underline01 width={16} height={16} />
-          </ToggleButton>
-        </ToggleButtonGroup>
-
         {mode === 'html' ? (
           <TextField
             inputRef={textareaRef}
@@ -237,13 +225,6 @@ export const HtmlTemplateEditor: React.FC<Props> = ({
             disabled={disabled}
             InputProps={{
               readOnly,
-              sx: {
-                fontFamily: 'Source Code Pro, monospace',
-                backgroundColor: isDark
-                  ? 'rgba(255,255,255,0.05)'
-                  : 'background.paper',
-                color: isDark ? '#fff' : 'inherit',
-              },
             }}
           />
         ) : (
@@ -251,17 +232,12 @@ export const HtmlTemplateEditor: React.FC<Props> = ({
             ref={previewRef}
             contentEditable={!readOnly && !disabled}
             suppressContentEditableWarning
+            p={1}
             sx={{
               minHeight: 150,
               border: 1,
               borderColor: 'divider',
               borderRadius: 1,
-              padding: 1,
-              fontFamily: 'inherit',
-              backgroundColor: isDark
-                ? 'rgba(255,255,255,0.05)'
-                : 'background.paper',
-              color: isDark ? '#fff' : 'inherit',
               '&:focus': { outline: 'none' },
             }}
             onInput={() => {

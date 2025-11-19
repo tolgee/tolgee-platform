@@ -1,6 +1,5 @@
 import {
   CreatePlanMigrationFormData,
-  EmailTemplateData,
   PlanMigrationForm,
 } from './PlanMigrationForm';
 import { PlanType } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/types';
@@ -18,7 +17,6 @@ type Props = {
   onSubmit: (values: CreatePlanMigrationFormData) => void;
   loading?: boolean;
   planType?: PlanType;
-  emailTemplate?: EmailTemplateData;
 };
 
 export const CreatePlanMigrationForm: React.FC<Props> = (props) => {

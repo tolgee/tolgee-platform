@@ -7,7 +7,6 @@ import {
 } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/PlanMigrationForm';
 import { Box, Typography } from '@mui/material';
 import { HtmlTemplateEditor } from 'tg.component/common/form/HtmlTemplateEditor';
-import { useEffect } from 'react';
 
 type EmailSectionProps = {
   template?: EmailTemplateData;
@@ -19,12 +18,6 @@ export const PlanMigrationEmailSection = ({ template }: EmailSectionProps) => {
     CreatePlanMigrationFormData | PlanMigrationFormData
   >();
 
-  useEffect(() => {
-    if (values.customEmailBody == null && template?.body) {
-      setFieldValue('customEmailBody', null);
-    }
-  }, [setFieldValue, template?.body, values.customEmailBody]);
-
   return (
     <Box mt={1} display="grid" gap={1}>
       <Typography>
@@ -33,8 +26,6 @@ export const PlanMigrationEmailSection = ({ template }: EmailSectionProps) => {
       <HtmlTemplateEditor
         value={values.customEmailBody ?? template?.body ?? ''}
         onChange={(val) => setFieldValue('customEmailBody', val)}
-        label={t('administration_plan_migration_custom_email_label')}
-        readOnly={false}
         disabled={!template}
         placeholders={template?.placeholders ?? []}
       />
