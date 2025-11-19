@@ -534,6 +534,7 @@ export class Validation {
     Yup.object().shape({
       monthlyOffsetDays: Yup.number().required().min(0),
       yearlyOffsetDays: Yup.number().required().min(0),
+      customEmailBody: Yup.string().nullable(),
     });
 }
 

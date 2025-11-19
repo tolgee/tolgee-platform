@@ -22,6 +22,9 @@ export interface paths {
   "/v2/administration/billing/cloud-plans/migration": {
     post: operations["createPlanMigration_1"];
   };
+  "/v2/administration/billing/cloud-plans/migration/email-preview": {
+    post: operations["sendPlanMigrationPreview_1"];
+  };
   "/v2/administration/billing/cloud-plans/migration/{migrationId}": {
     get: operations["getPlanMigration_1"];
     put: operations["updatePlanMigration_1"];
@@ -51,12 +54,18 @@ export interface paths {
   "/v2/administration/billing/organizations": {
     get: operations["getOrganizations"];
   };
+  "/v2/administration/billing/plan-migration/email-template": {
+    get: operations["getPlanMigrationEmailTemplate"];
+  };
   "/v2/administration/billing/self-hosted-ee-plans": {
     get: operations["getPlans"];
     post: operations["create_1"];
   };
   "/v2/administration/billing/self-hosted-ee-plans/migration": {
     post: operations["createPlanMigration"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/migration/email-preview": {
+    post: operations["sendPlanMigrationPreview"];
   };
   "/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}": {
     get: operations["getPlanMigration"];
@@ -229,6 +238,9 @@ export interface paths {
   "/v2/public/licensing/subscription": {
     post: operations["getMySubscription"];
   };
+  "/v2/public/llm/prompt": {
+    post: operations["prompt"];
+  };
   "/v2/public/telemetry/report": {
     post: operations["report"];
   };
@@ -320,6 +332,7 @@ export interface components {
       trialEnd?: number;
     };
     AdministrationSelfHostedEePlanMigrationModel: {
+      customEmailBody?: string;
       enabled: boolean;
       /** Format: int64 */
       id: number;
@@ -381,6 +394,7 @@ export interface components {
       ids: components["schemas"]["SubscriptionId"][];
     };
     CloudPlanMigrationModel: {
+      customEmailBody?: string;
       enabled: boolean;
       /** Format: int64 */
       id: number;
@@ -555,6 +569,7 @@ export interface components {
       };
     };
     CreatePlanMigrationRequest: {
+      customEmailBody?: string;
       enabled: boolean;
       /** Format: int32 */
       monthlyOffsetDays: number;
@@ -614,6 +629,15 @@ export interface components {
       keys: components["schemas"]["CurrentUsageItemModel"];
       seats: components["schemas"]["CurrentUsageItemModel"];
       strings: components["schemas"]["CurrentUsageItemModel"];
+    };
+    EmailPlaceholderModel: {
+      description: string;
+      exampleValue: string;
+      placeholder: string;
+    };
+    EmailTemplateModel: {
+      body: string;
+      placeholders: components["schemas"]["EmailPlaceholderModel"][];
     };
     ErrorResponseBody: {
       code: string;
@@ -926,6 +950,7 @@ export interface components {
         | "impersonation_of_admin_by_supporter_not_allowed"
         | "already_impersonating_user"
         | "operation_not_permitted_in_read_only_mode"
+        | "file_processing_failed"
         | "plan_migration_not_found"
         | "plan_has_migrations";
       params?: unknown[];
@@ -978,6 +1003,7 @@ export interface components {
       /** @description The Total amount with tax */
       total: number;
     };
+    JsonNode: unknown;
     LegacyTolgeeTranslateRequest: {
       /** @enum {string} */
       formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
@@ -1005,6 +1031,18 @@ export interface components {
        * -1 if unlimited
        */
       limit: number;
+    };
+    LlmMessage: {
+      image?: string;
+      text?: string;
+      /** @enum {string} */
+      type: "TEXT" | "IMAGE";
+    };
+    LlmParams: {
+      messages: components["schemas"]["LlmMessage"][];
+      /** @enum {string} */
+      priority: "LOW" | "HIGH";
+      shouldOutputJson: boolean;
     };
     Metadata: {
       closeItems: components["schemas"]["ExampleItem"][];
@@ -1191,6 +1229,13 @@ export interface components {
       /** Format: int64 */
       translations: number;
     };
+    PlanMigrationEmailPreviewRequest: {
+      customEmailBody?: string;
+      /** Format: int64 */
+      sourcePlanId: number;
+      /** Format: int64 */
+      targetPlanId: number;
+    };
     PlanMigrationRecordModel: {
       /** Format: int64 */
       finalizedAt?: number;
@@ -1204,6 +1249,7 @@ export interface components {
       status: "COMPLETED" | "SCHEDULED";
     };
     PlanMigrationRequest: {
+      customEmailBody?: string;
       enabled: boolean;
       /** Format: int32 */
       monthlyOffsetDays: number;
@@ -1250,6 +1296,13 @@ export interface components {
       inputTokens?: number;
       /** Format: int64 */
       outputTokens?: number;
+    };
+    PromptResult: {
+      parsedJson?: components["schemas"]["JsonNode"];
+      /** Format: int32 */
+      price: number;
+      response: string;
+      usage?: components["schemas"]["PromptResponseUsageDto"];
     };
     ReleaseKeyDto: {
       licenseKey: string;
@@ -1840,6 +1893,41 @@ export interface operations {
       };
     };
   };
+  sendPlanMigrationPreview_1: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationEmailPreviewRequest"];
+      };
+    };
+  };
   getPlanMigration_1: {
     parameters: {
       path: {
@@ -2347,6 +2435,40 @@ export interface operations {
       };
     };
   };
+  getPlanMigrationEmailTemplate: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["EmailTemplateModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   getPlans: {
     parameters: {
       query: {
@@ -2471,6 +2593,41 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["CreatePlanMigrationRequest"];
+      };
+    };
+  };
+  sendPlanMigrationPreview: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationEmailPreviewRequest"];
       };
     };
   };
@@ -4862,6 +5019,45 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["GetMySubscriptionDto"];
+      };
+    };
+  };
+  prompt: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PromptResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LlmParams"];
       };
     };
   };
