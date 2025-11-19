@@ -30,11 +30,10 @@ const normalizeCustomBody = (
   body: string | null | undefined,
   template?: EmailTemplateData
 ): string | null | undefined => {
-  const trimmed = body?.trim();
-  if (!trimmed) {
+  if (!body || !body.trim()) {
     return null;
   }
-  if (template && trimmed === template.body) {
+  if (template && body === template.body) {
     return null;
   }
   return body;
