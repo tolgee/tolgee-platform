@@ -772,6 +772,7 @@ declare namespace DataCy {
         "self-hosted-ee-subscription-metrics" |
         "self-hosted-plans-placeholder" |
         "self-hosted-plans-placeholder-contact-us" |
+        "send-preview-email" |
         "sensitive-dialog-otp-input" |
         "sensitive-dialog-password-input" |
         "sensitive-protection-dialog" |
