@@ -10,7 +10,6 @@ import kotlin.reflect.full.memberProperties
 
 @Component
 class EmailPlaceholdersExtractor {
-
   private val cache =
     ConcurrentHashMap<KClass<*>, List<EmailPlaceholderEntry<*>>>()
 
@@ -31,20 +30,22 @@ class EmailPlaceholdersExtractor {
   }
 
   private fun <T : EmailTemplateVariables> extract(kClass: KClass<T>): List<EmailPlaceholderEntry<T>> {
-    return kClass.memberProperties.mapNotNull { property ->
-      val annotation = property.findAnnotation<EmailPlaceholder>() ?: return@mapNotNull null
+    return kClass.memberProperties
+      .mapNotNull { property ->
+        val annotation = property.findAnnotation<EmailPlaceholder>() ?: return@mapNotNull null
 
-      EmailPlaceholderEntry(
-        definition = EmailPlaceholderDefinition(
-          position = annotation.position,
-          placeholder = annotation.placeholder,
-          description = annotation.description,
-          exampleValue = annotation.exampleValue,
-        ),
-        accessor = { instance: T ->
-          property.get(instance)?.toString()
-        }
-      )
-    }.sortedBy { it.definition.position }
+        EmailPlaceholderEntry(
+          definition =
+            EmailPlaceholderDefinition(
+              position = annotation.position,
+              placeholder = annotation.placeholder,
+              description = annotation.description,
+              exampleValue = annotation.exampleValue,
+            ),
+          accessor = { instance: T ->
+            property.get(instance)?.toString()
+          },
+        )
+      }.sortedBy { it.definition.position }
   }
 }
