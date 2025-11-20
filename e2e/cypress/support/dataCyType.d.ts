@@ -200,6 +200,7 @@ declare namespace DataCy {
         "billing-plan-included-keys" |
         "billing-plan-included-seats" |
         "billing-plan-included-strings" |
+        "billing-plan-migration-alert" |
         "billing-plan-monthly-price" |
         "billing-plan-price-extra-seat" |
         "billing-plan-price-extra-thousand-keys" |
