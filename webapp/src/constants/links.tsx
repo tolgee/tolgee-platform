@@ -63,6 +63,7 @@ export enum PARAMS {
   TRANSLATION_ID = 'translationId',
   PLAN_ID = 'planId',
   TA_ID = 'taId',
+  PLAN_MIGRATION_ID = 'migrationId',
 }
 
 export class LINKS {
@@ -244,6 +245,26 @@ export class LINKS {
   static ADMINISTRATION_BILLING_EE_PLAN_CREATE = Link.ofParent(
     LINKS.ADMINISTRATION_BILLING_EE_PLANS,
     'create'
+  );
+
+  static ADMINISTRATION_BILLING_CLOUD_PLAN_MIGRATION_CREATE = Link.ofParent(
+    LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS,
+    'create-migration'
+  );
+
+  static ADMINISTRATION_BILLING_CLOUD_PLAN_MIGRATION_EDIT = Link.ofParent(
+    LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS,
+    'migration/' + p(PARAMS.PLAN_MIGRATION_ID)
+  );
+
+  static ADMINISTRATION_BILLING_EE_PLAN_MIGRATION_CREATE = Link.ofParent(
+    LINKS.ADMINISTRATION_BILLING_EE_PLANS,
+    'create-migration'
+  );
+
+  static ADMINISTRATION_BILLING_EE_PLAN_MIGRATION_EDIT = Link.ofParent(
+    LINKS.ADMINISTRATION_BILLING_EE_PLANS,
+    'migration/' + p(PARAMS.PLAN_MIGRATION_ID)
   );
 
   /**

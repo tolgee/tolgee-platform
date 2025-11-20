@@ -6,15 +6,22 @@ import React from 'react';
 import { T } from '@tolgee/react';
 import { Box } from '@mui/material';
 
-type GenericPlanType = { id: number; name: string };
+export type GenericPlanType = { id: number; name: string; free: boolean };
+
+type PlansProps = {
+  hiddenIds?: number[];
+  free?: boolean;
+};
 
 export interface GenericPlanSelector<T extends GenericPlanType> {
   organizationId?: number;
-  onPlanChange?: (planId: T) => void;
+  onPlanChange?: (plan: T) => void;
   value?: number;
   onChange?: (value: number) => void;
   selectProps?: React.ComponentProps<typeof SearchSelect>[`SelectProps`];
   plans?: T[];
+  planProps?: PlansProps;
+  dataCy?: string;
 }
 
 export const GenericPlanSelector = <T extends GenericPlanType>({
@@ -23,6 +30,8 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   selectProps,
   onPlanChange,
   plans,
+  planProps,
+  dataCy = 'administration-plan-selector',
 }: GenericPlanSelector<T>) => {
   if (!plans) {
     return (
@@ -32,13 +41,23 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
     );
   }
 
-  const selectItems = plans.map(
-    (plan) =>
-      ({
-        value: plan.id,
-        name: plan.name,
-      } satisfies SelectItem<number>)
-  );
+  const selectItems = plans
+    .filter((plan) => {
+      if (planProps?.hiddenIds?.includes(plan.id)) {
+        return false;
+      }
+      if (planProps?.free !== undefined) {
+        return planProps.free === plan.free;
+      }
+      return true;
+    })
+    .map(
+      (plan) =>
+        ({
+          value: plan.id,
+          name: plan.name,
+        } satisfies SelectItem<number>)
+    );
 
   function handleChange(planId: number) {
     if (plans) {
@@ -56,7 +75,7 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
 
   return (
     <SearchSelect
-      dataCy="administration-plan-selector"
+      dataCy={dataCy}
       SelectProps={selectProps}
       items={selectItems}
       value={value}
