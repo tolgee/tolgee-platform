@@ -317,6 +317,7 @@ export interface components {
       /** Format: int64 */
       organizationId: number;
       plan: components["schemas"]["AdministrationCloudPlanModel"];
+      planMigration?: components["schemas"]["CloudSubscriptionPlanMigrationRecordModel"];
       /** @enum {string} */
       status:
         | "ACTIVE"
@@ -515,6 +516,7 @@ export interface components {
       /** Format: int64 */
       organizationId: number;
       plan: components["schemas"]["CloudPlanModel"];
+      planMigration?: components["schemas"]["CloudSubscriptionPlanMigrationRecordModel"];
       /** @enum {string} */
       status:
         | "ACTIVE"
@@ -527,6 +529,16 @@ export interface components {
         | "UNKNOWN";
       /** Format: int64 */
       trialEnd?: number;
+    };
+    CloudSubscriptionPlanMigrationRecordModel: {
+      /** Format: int64 */
+      finalizedAt?: number;
+      originPlanName: string;
+      /** Format: int64 */
+      scheduledAt: number;
+      /** @enum {string} */
+      status: "COMPLETED" | "SCHEDULED";
+      targetPlanName: string;
     };
     CollectionModelAdministrationCloudPlanModel: {
       _embedded?: {
