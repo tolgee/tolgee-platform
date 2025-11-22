@@ -1,3 +1,10 @@
+## [3.141.1](https://github.com/tolgee/tolgee-platform/compare/v3.141.0...v3.141.1) (2025-11-22)
+
+
+### Bug Fixes
+
+* show a welcome message in the web console ([#3319](https://github.com/tolgee/tolgee-platform/issues/3319)) ([eae8737](https://github.com/tolgee/tolgee-platform/commit/eae873709c5d290efaf3f2c9de6f452648fb642f))
+
 # [3.141.0](https://github.com/tolgee/tolgee-platform/compare/v3.140.4...v3.141.0) (2025-11-19)
 
 
