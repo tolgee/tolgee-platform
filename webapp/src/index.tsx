@@ -28,6 +28,9 @@ import { MuiLocalizationProvider } from 'tg.component/MuiLocalizationProvider';
 import { languageStorage, queryClient } from './initialSetup';
 import { GlobalStyles } from './GlobalStyles';
 import { branchName } from './branch.json';
+import { showConsoleHello } from './showConsoleHello';
+
+showConsoleHello();
 
 function getFeatureName(branch: string) {
   const parts = branch.split('/');
