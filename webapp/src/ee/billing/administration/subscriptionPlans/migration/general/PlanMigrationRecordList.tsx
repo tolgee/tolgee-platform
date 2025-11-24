@@ -10,6 +10,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 import { HateoasListData } from 'tg.service/response.types';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import { Link as RouterLink } from 'react-router-dom';
+import { FormatedDateTooltip } from 'tg.component/common/tooltip/FormatedDateTooltip';
 
 type PlanMigrationRecord = components['schemas']['PlanMigrationRecordModel'];
 
@@ -32,6 +33,7 @@ export const PlanMigrationRecordList = ({ subscriptions, setPage }: Props) => {
           <TableCell>{t('global_organization')}</TableCell>
           <TableCell>{t('administration_plan_migration_from')}</TableCell>
           <TableCell>{t('administration_plan_migration_to')}</TableCell>
+          <TableCell>{t('administration_plan_scheduled_at')}</TableCell>
           <TableCell>{t('administration_plan_migrated_at')}</TableCell>
           <TableCell>
             {t('administration_plan_migrated_subscription_status')}
@@ -53,11 +55,10 @@ export const PlanMigrationRecordList = ({ subscriptions, setPage }: Props) => {
           <TableCell>{item.originPlan}</TableCell>
           <TableCell>{item.plan}</TableCell>
           <TableCell>
-            {formatDate(item.scheduledAt, {
-              timeZone: 'UTC',
-              dateStyle: 'short',
-              timeStyle: 'short',
-            })}
+            <FormatedDateTooltip date={item.scheduledAt} />
+          </TableCell>
+          <TableCell>
+            <FormatedDateTooltip date={item.transferAt} />
           </TableCell>
           <TableCell>
             <PlanMigrationStatus status={item.status} date={item.finalizedAt} />
