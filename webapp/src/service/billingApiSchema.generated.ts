@@ -33,6 +33,12 @@ export interface paths {
   "/v2/administration/billing/cloud-plans/migration/{migrationId}/subscriptions": {
     get: operations["getPlanMigrationSubscriptions_1"];
   };
+  "/v2/administration/billing/cloud-plans/migration/{migrationId}/upcoming-subscriptions": {
+    get: operations["getPlanMigrationUpcomingSubscriptions_1"];
+  };
+  "/v2/administration/billing/cloud-plans/migration/{migrationId}/upcoming-subscriptions/{subscriptionId}/skip": {
+    put: operations["setUpcomingSubscriptionSkipped_1"];
+  };
   "/v2/administration/billing/cloud-plans/{planId}": {
     get: operations["getPlan_1"];
     put: operations["updatePlan_1"];
@@ -74,6 +80,12 @@ export interface paths {
   };
   "/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}/subscriptions": {
     get: operations["getPlanMigrationSubscriptions"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}/upcoming-subscriptions": {
+    get: operations["getPlanMigrationUpcomingSubscriptions"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}/upcoming-subscriptions/{subscriptionId}/skip": {
+    put: operations["setUpcomingSubscriptionSkipped"];
   };
   "/v2/administration/billing/self-hosted-ee-plans/{planId}": {
     get: operations["getPlan"];
@@ -535,9 +547,9 @@ export interface components {
       finalizedAt?: number;
       originPlanName: string;
       /** Format: int64 */
-      scheduledAt: number;
+      scheduledAt?: number;
       /** @enum {string} */
-      status: "COMPLETED" | "SCHEDULED";
+      status: "COMPLETED" | "SCHEDULED" | "SKIPPED";
       targetPlanName: string;
     };
     CollectionModelAdministrationCloudPlanModel: {
@@ -1110,6 +1122,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelPlanMigrationUpcomingSubscriptionModel: {
+      _embedded?: {
+        planMigrationUpcomingSubscriptionModelList?: components["schemas"]["PlanMigrationUpcomingSubscriptionModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelSimpleOrganizationModel: {
       _embedded?: {
         organizations?: components["schemas"]["SimpleOrganizationModel"][];
@@ -1258,7 +1276,9 @@ export interface components {
       /** Format: int64 */
       scheduledAt: number;
       /** @enum {string} */
-      status: "COMPLETED" | "SCHEDULED";
+      status: "COMPLETED" | "SCHEDULED" | "SKIPPED";
+      /** Format: int64 */
+      transferAt: number;
     };
     PlanMigrationRequest: {
       customEmailBody?: string;
@@ -1269,6 +1289,22 @@ export interface components {
       targetPlanId: number;
       /** Format: int32 */
       yearlyOffsetDays: number;
+    };
+    PlanMigrationSkipRequest: {
+      skipped: boolean;
+    };
+    PlanMigrationUpcomingSubscriptionModel: {
+      /** Format: int64 */
+      currentPeriodEnd: number;
+      organizationName: string;
+      organizationSlug: string;
+      originPlan: string;
+      /** Format: int64 */
+      scheduleAt: number;
+      skipped: boolean;
+      /** Format: int64 */
+      subscriptionId: number;
+      targetPlan: string;
     };
     PlanPricesModel: {
       perSeat: number;
@@ -2105,6 +2141,94 @@ export interface operations {
       };
     };
   };
+  getPlanMigrationUpcomingSubscriptions_1: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelPlanMigrationUpcomingSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  setUpcomingSubscriptionSkipped_1: {
+    parameters: {
+      path: {
+        migrationId: number;
+        subscriptionId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationSkipRequest"];
+      };
+    };
+  };
   getPlan_1: {
     parameters: {
       path: {
@@ -2805,6 +2929,94 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  getPlanMigrationUpcomingSubscriptions: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelPlanMigrationUpcomingSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  setUpcomingSubscriptionSkipped: {
+    parameters: {
+      path: {
+        migrationId: number;
+        subscriptionId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationSkipRequest"];
       };
     };
   };

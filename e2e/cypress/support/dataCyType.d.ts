@@ -573,6 +573,8 @@ declare namespace DataCy {
         "permissions-menu-save" |
         "plan-limit-dialog-close" |
         "plan-limit-exceeded-popover" |
+        "plan-migration-tab-migrated" |
+        "plan-migration-tab-upcoming" |
         "plan-migration-tooltip-detail" |
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |

@@ -3,7 +3,9 @@ import { Chip, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 
-type Status = components['schemas']['PlanMigrationRecordModel']['status'];
+type Status =
+  | components['schemas']['PlanMigrationRecordModel']['status']
+  | 'TO_BE_SCHEDULED';
 
 type Props = {
   status: Status;
@@ -12,6 +14,8 @@ type Props = {
 
 const colors = {
   COMPLETED: 'success',
+  SKIPPED: 'default',
+  TO_BE_SCHEDULED: 'info',
 };
 
 export const PlanMigrationStatus = ({ status, date }: Props) => {
@@ -24,6 +28,10 @@ export const PlanMigrationStatus = ({ status, date }: Props) => {
         return t('administration_plan_migration_status_completed');
       case 'SCHEDULED':
         return t('administration_plan_migration_status_scheduled');
+      case 'SKIPPED':
+        return t('administration_plan_migration_status_skipped');
+      case 'TO_BE_SCHEDULED':
+        return t('administration_plan_migration_status_to_be_scheduled');
       default:
         return String(s);
     }
