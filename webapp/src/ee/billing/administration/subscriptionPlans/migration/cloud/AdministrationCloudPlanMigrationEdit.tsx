@@ -2,9 +2,15 @@ import React, { useState } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { AdministrationPlanMigrationEditBase } from 'tg.ee.module/billing/administration/subscriptionPlans/migration/general/AdministrationPlanMigrationEditBase';
-import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
+import {
+  useBillingApiMutation,
+  useBillingApiQuery,
+} from 'tg.service/http/useQueryApi';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { CloudPlanEditPlanMigrationForm } from 'tg.ee.module/billing/administration/subscriptionPlans/components/migration/CloudPlanEditPlanMigrationForm';
+import { components } from 'tg.service/billingApiSchema.generated';
+
+type CloudPlanMigration = components['schemas']['CloudPlanMigrationModel'];
 
 export const AdministrationCloudPlanMigrationEdit = () => {
   const { t } = useTranslate();
@@ -17,6 +23,7 @@ export const AdministrationCloudPlanMigrationEdit = () => {
   }
 
   const [subscriptionsPage, setSubscriptionsPage] = useState(0);
+  const [upcomingPage, setUpcomingPage] = useState(0);
 
   const migrations = useBillingApiQuery({
     url: '/v2/administration/billing/cloud-plans/migration/{migrationId}',
@@ -37,10 +44,38 @@ export const AdministrationCloudPlanMigrationEdit = () => {
     },
   });
 
+  const upcomingSubscriptions = useBillingApiQuery({
+    url: '/v2/administration/billing/cloud-plans/migration/{migrationId}/upcoming-subscriptions',
+    method: 'get',
+    path: { migrationId },
+    query: {
+      page: upcomingPage,
+      size: 10,
+    },
+    options: {
+      keepPreviousData: true,
+    },
+  });
+
+  const toggleUpcomingSkip = useBillingApiMutation({
+    url: '/v2/administration/billing/cloud-plans/migration/{migrationId}/upcoming-subscriptions/{subscriptionId}/skip',
+    method: 'put',
+    invalidatePrefix:
+      '/v2/administration/billing/cloud-plans/migration/{migrationId}/upcoming-subscriptions',
+  });
+
+  const onToggleUpcomingSkip = (subscriptionId: number, skipped: boolean) => {
+    toggleUpcomingSkip.mutate({
+      path: { migrationId, subscriptionId },
+      content: { 'application/json': { skipped } },
+    });
+  };
+
   return (
-    <AdministrationPlanMigrationEditBase
+    <AdministrationPlanMigrationEditBase<CloudPlanMigration>
       migrations={migrations}
       subscriptions={subscriptions}
+      upcomingSubscriptions={upcomingSubscriptions}
       navigation={[
         [
           t('administration_cloud_plans'),
@@ -56,6 +91,9 @@ export const AdministrationCloudPlanMigrationEdit = () => {
       listLink={LINKS.ADMINISTRATION_BILLING_CLOUD_PLANS.build()}
       form={CloudPlanEditPlanMigrationForm}
       onPage={setSubscriptionsPage}
+      onUpcomingPage={setUpcomingPage}
+      onToggleUpcomingSkip={onToggleUpcomingSkip}
+      upcomingToggleLoading={toggleUpcomingSkip.isLoading}
     />
   );
 };
