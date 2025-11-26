@@ -30,6 +30,9 @@ export interface paths {
   "/v2/administration/billing/cloud-plans/{planId}/organizations": {
     get: operations["getPlanOrganizations_1"];
   };
+  "/v2/administration/billing/cloud-plans/{planId}/subscriptions": {
+    get: operations["planSubscriptions"];
+  };
   "/v2/administration/billing/features": {
     get: operations["getAllFeatures"];
   };
@@ -236,6 +239,24 @@ export interface paths {
 
 export interface components {
   schemas: {
+    AdministrationBasicSubscriptionModel: {
+      cancelAtPeriodEnd?: boolean;
+      /** @enum {string} */
+      currentBillingPeriod?: "MONTHLY" | "YEARLY";
+      organization: string;
+      organizationSlug: string;
+      planName: string;
+      /** @enum {string} */
+      status:
+        | "ACTIVE"
+        | "CANCELED"
+        | "PAST_DUE"
+        | "UNPAID"
+        | "ERROR"
+        | "TRIALING"
+        | "KEY_USED_BY_ANOTHER_INSTANCE"
+        | "UNKNOWN";
+    };
     AdministrationCloudPlanModel: {
       /** Format: date-time */
       archivedAt?: string;
@@ -1040,6 +1061,12 @@ export interface components {
       totalElements?: number;
       /** Format: int64 */
       totalPages?: number;
+    };
+    PagedModelAdministrationBasicSubscriptionModel: {
+      _embedded?: {
+        plans?: components["schemas"]["AdministrationBasicSubscriptionModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     PagedModelInvoiceModel: {
       _embedded?: {
@@ -2059,6 +2086,53 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelSimpleOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  planSubscriptions: {
+    parameters: {
+      path: {
+        planId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelAdministrationBasicSubscriptionModel"];
         };
       };
       /** Bad Request */
