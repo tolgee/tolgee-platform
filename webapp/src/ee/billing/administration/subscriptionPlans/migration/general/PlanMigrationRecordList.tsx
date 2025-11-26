@@ -8,7 +8,6 @@ import React from 'react';
 import { UseQueryResult } from 'react-query';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { HateoasListData } from 'tg.service/response.types';
-import { useDateFormatter } from 'tg.hooks/useLocale';
 import { Link as RouterLink } from 'react-router-dom';
 import { FormatedDateTooltip } from 'tg.component/common/tooltip/FormatedDateTooltip';
 
@@ -21,7 +20,6 @@ type Props = {
 
 export const PlanMigrationRecordList = ({ subscriptions, setPage }: Props) => {
   const { t } = useTranslate();
-  const formatDate = useDateFormatter();
 
   return (
     <PaginatedHateoasTable

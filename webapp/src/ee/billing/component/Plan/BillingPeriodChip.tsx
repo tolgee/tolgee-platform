@@ -5,11 +5,7 @@ import { components } from 'tg.service/billingApiSchema.generated';
 type BillingPeriod =
   components['schemas']['AdministrationBasicSubscriptionModel']['currentBillingPeriod'];
 
-export const BillingPeriodChip = ({
-  period,
-}: {
-  period?: BillingPeriod;
-}) => {
+export const BillingPeriodChip = ({ period }: { period?: BillingPeriod }) => {
   const { t } = useTranslate();
   const config: Record<NonNullable<BillingPeriod>, { label: string }> = {
     MONTHLY: { label: t('subscription_period_monthly') },

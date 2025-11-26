@@ -26,7 +26,6 @@ import { PlanListPriceInfo } from 'tg.ee.module/billing/component/Plan/PlanListP
 import { PlanArchivedChip } from 'tg.ee.module/billing/component/Plan/PlanArchivedChip';
 import clsx from 'clsx';
 import { CloudPlanMigratingChip } from 'tg.ee.module/billing/component/Plan/migration/CloudPlanMigratingChip';
-import { PlanSubscriptionsTooltip } from 'tg.ee.module/billing/component/Plan/PlanSubscriptionsTooltip';
 import { CloudPlanSubscriptionsTooltip } from 'tg.ee.module/billing/component/Plan/cloud/CloudPlanSubscriptionsTooltip';
 
 type CloudPlanModel = components['schemas']['CloudPlanModel'];
