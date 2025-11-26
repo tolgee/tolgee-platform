@@ -721,6 +721,8 @@ declare namespace DataCy {
         "storage-subtitle" |
         "submenu-item" |
         "subscribe-cancels-trial-plan-tooltip" |
+        "subscription-period-" |
+        "subscription-status-" |
         "subscriptions-cloud-popover-active-plan-name" |
         "subscriptions-trial-alert" |
         "subscriptions-trial-alert-reaching-the-limit" |

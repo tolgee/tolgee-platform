@@ -22,11 +22,12 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { PlanPublicChip } from '../../../component/Plan/PlanPublicChip';
-import { PlanSubscriptionCount } from 'tg.ee.module/billing/component/Plan/PlanSubscriptionCount';
 import { PlanListPriceInfo } from 'tg.ee.module/billing/component/Plan/PlanListPriceInfo';
 import { PlanArchivedChip } from 'tg.ee.module/billing/component/Plan/PlanArchivedChip';
 import clsx from 'clsx';
 import { CloudPlanMigratingChip } from 'tg.ee.module/billing/component/Plan/migration/CloudPlanMigratingChip';
+import { PlanSubscriptionsTooltip } from 'tg.ee.module/billing/component/Plan/PlanSubscriptionsTooltip';
+import { CloudPlanSubscriptionsTooltip } from 'tg.ee.module/billing/component/Plan/cloud/CloudPlanSubscriptionsTooltip';
 
 type CloudPlanModel = components['schemas']['CloudPlanModel'];
 
@@ -153,7 +154,7 @@ export const AdministrationCloudPlansView = () => {
                 <Box display="flex" gap={2}>
                   <Box display="flex" gap={2} alignItems="center">
                     <ListItemText>
-                      <PlanSubscriptionCount count={plan.subscriptionCount} />
+                      <CloudPlanSubscriptionsTooltip plan={plan} />
                     </ListItemText>
                     <PlanListPriceInfo prices={plan.prices} bold />
                   </Box>
