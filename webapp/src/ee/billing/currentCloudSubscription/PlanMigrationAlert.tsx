@@ -45,6 +45,7 @@ const getPlanMigrationAlertData = (
 
   if (
     migration.status === 'SCHEDULED' &&
+    migration.scheduledAt &&
     migration.scheduledAt >= now &&
     !subscription.cancelAtPeriodEnd
   ) {
