@@ -51,7 +51,7 @@ export interface paths {
     get: operations["getPlanOrganizations_1"];
   };
   "/v2/administration/billing/cloud-plans/{planId}/subscriptions": {
-    get: operations["planSubscriptions"];
+    get: operations["planSubscriptions_1"];
   };
   "/v2/administration/billing/features": {
     get: operations["getAllFeatures"];
@@ -100,6 +100,9 @@ export interface paths {
   };
   "/v2/administration/billing/self-hosted-ee-plans/{planId}/organizations": {
     get: operations["getPlanOrganizations"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/{planId}/subscriptions": {
+    get: operations["planSubscriptions"];
   };
   "/v2/administration/billing/stripe-products": {
     get: operations["getStripeProducts"];
@@ -2461,7 +2464,7 @@ export interface operations {
       };
     };
   };
-  planSubscriptions: {
+  planSubscriptions_1: {
     parameters: {
       path: {
         planId: number;
@@ -3271,6 +3274,53 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelSimpleOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  planSubscriptions: {
+    parameters: {
+      path: {
+        planId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelAdministrationBasicSubscriptionModel"];
         };
       };
       /** Bad Request */

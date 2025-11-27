@@ -20,6 +20,9 @@ import { BillingPeriodChip } from './BillingPeriodChip';
 import { useTranslate } from '@tolgee/react';
 
 type CloudPlanModel = components['schemas']['AdministrationCloudPlanModel'];
+type SelfHostedPlanModel =
+  components['schemas']['SelfHostedEePlanAdministrationModel'];
+
 type SubscriptionModel =
   components['schemas']['AdministrationBasicSubscriptionModel'];
 
@@ -28,7 +31,7 @@ export const PlanSubscriptionsTooltip = ({
   subscriptions,
   onOpen,
 }: {
-  plan: CloudPlanModel;
+  plan: CloudPlanModel | SelfHostedPlanModel;
   subscriptions: UseInfiniteQueryResult<HateoasListData<SubscriptionModel>>;
   onOpen?: () => void;
 }) => {

@@ -22,11 +22,11 @@ import { BaseAdministrationView } from 'tg.views/administration/components/BaseA
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/billingApiSchema.generated';
-import { PlanSubscriptionCount } from 'tg.ee.module/billing/component/Plan/PlanSubscriptionCount';
 import { PlanListPriceInfo } from 'tg.ee.module/billing/component/Plan/PlanListPriceInfo';
 import { PlanArchivedChip } from 'tg.ee.module/billing/component/Plan/PlanArchivedChip';
 import clsx from 'clsx';
 import { SelfHostedEePlanMigratingChip } from 'tg.ee.module/billing/component/Plan/migration/SelfHostedEePlanMigratingChip';
+import { SelfHostedPlanSubscriptionsTooltip } from 'tg.ee.module/billing/component/Plan/selfHosted/SelfHostedPlanSubscriptionsTooltip';
 
 type SelfHostedEePlanAdministrationModel =
   components['schemas']['SelfHostedEePlanAdministrationModel'];
@@ -159,7 +159,7 @@ export const AdministrationEePlansView = () => {
                 </Box>
                 <Box display="flex" gap={2}>
                   <Box display="flex" gap={2} alignItems="center">
-                    <PlanSubscriptionCount count={plan.subscriptionCount} />
+                    <SelfHostedPlanSubscriptionsTooltip plan={plan} />
                     <PlanListPriceInfo prices={plan.prices} bold />
                   </Box>
                   <Box display="flex">
