@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "lib.components/*": ["./src/components/*"],
+      "lib.constants/*": ["./src/constants/*"],
+      "lib.hooks/*": ["./src/hooks/*"],
+      "tg.component/*": ["../webapp/src/component/*"],
+      "tg.fixtures/*": ["../webapp/src/fixtures/*"]
+    },
+    "lib": ["dom", "esnext"],
+    "target": "ESNext",
+    "types": ["vite/client"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react"
+  },
+  "include": [
+    "src/**/*",
+    ".storybook/**/*",
+    "custom.d.ts",
+    "../webapp/src/custom.d.ts"
+  ],
+  "exclude": ["dist", "node_modules"]
+}

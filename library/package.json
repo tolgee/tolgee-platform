@@ -1,0 +1,87 @@
+{
+  "name": "@tginternal/library",
+  "version": "1.0.0",
+  "description": "Component & co. library for Tolgee localization tool",
+  "type": "module",
+  "engines": {
+    "node": ">=22.10.0"
+  },
+  "scripts": {
+    "build": "vite build && npm run build:types",
+    "build:types": "tsc --project tsconfig.build.json",
+    "format": "prettier --write .",
+    "lint": "npm run lint:code && npm run lint:types && npm run lint:spelling && npm run lint:format",
+    "lint:code": "eslint '**/*'",
+    "lint:types": "tsc --noEmit --project tsconfig.lint.json",
+    "lint:spelling": "cspell --no-progress '**/*'",
+    "lint:format": "prettier --check .",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^5.18.0",
+    "@mui/x-date-pickers": "^7.29.4",
+    "@tolgee/format-icu": "^6.2.7",
+    "@tolgee/react": "^6.2.7",
+    "@untitled-ui/icons-react": "^0.1.4",
+    "date-fns": "^2.29.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@eslint/json": "^0.14.0",
+    "@eslint/markdown": "^7.5.1",
+    "@storybook/addon-a11y": "^10.0.7",
+    "@storybook/addon-docs": "^10.0.7",
+    "@storybook/addon-themes": "^10.0.7",
+    "@storybook/react-vite": "^10.0.7",
+    "@tginternal/language-util": "^1.1.1",
+    "@types/react": "17.0.75",
+    "@types/react-dom": "17.0.25",
+    "@vitejs/plugin-react": "^5.1.1",
+    "cspell": "^9.3.2",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-compat": "^6.0.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "fg": "^0.0.3",
+    "globals": "^16.5.0",
+    "prettier": "^3.6.2",
+    "storybook": "^10.0.7",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.2",
+    "vite-tsconfig-paths": "^5.1.4"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    "./components/*": {
+      "types": "./dist/components/*/index.d.ts",
+      "import": "./dist/components/*/index.js"
+    },
+    "./components/languages/*": {
+      "types": "./dist/components/languages/*/index.d.ts",
+      "import": "./dist/components/languages/*/index.js"
+    },
+    "./hooks/*": {
+      "types": "./dist/hooks/*.d.ts",
+      "import": "./dist/hooks/*.js"
+    },
+    "./constants/*": {
+      "types": "./dist/constants/*.d.ts",
+      "import": "./dist/constants/*.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "browserslist": [
+    "defaults",
+    "not op_mini all"
+  ]
+}
