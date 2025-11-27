@@ -28,11 +28,23 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   plans,
   loading,
 }: GenericPlanSelector<T>) => {
+  const selectItems =
+    plans?.map(
+      (plan) =>
+        ({
+          value: plan.id,
+          name: plan.name,
+        } satisfies SelectItem<number>)
+    ) || [];
+
+  const { incrementPlanWithId } = usePreferredPlans();
+  const sortedPlans = useSortPlans(plans);
+
   if (loading) {
     return <BoxLoading />;
   }
 
-  if (!plans) {
+  if (!sortedPlans) {
     return (
       <Box>
         <T keyName="administration-assign-plan-no-plans-to-assign" />
@@ -40,19 +52,8 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
     );
   }
 
-  const selectItems = plans.map(
-    (plan) =>
-      ({
-        value: plan.id,
-        name: plan.name,
-      } satisfies SelectItem<number>)
-  );
-
-  const { incrementPlanWithId } = usePreferredPlans();
-  const sortedPlans = useSortPlans(plans);
-
   function handleChange(planId: number) {
-    if (plans) {
+    if (sortedPlans) {
       const plan = sortedPlans.find((plan) => plan.id === planId);
       if (plan) {
         onChange?.(planId);
@@ -82,7 +83,11 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
  * Sorts plans by user's preferred plans.
  * The purpose of this is to put the user's popular plans to the top.
  */
-function useSortPlans(plans: GenericPlanType[]) {
+function useSortPlans(plans?: GenericPlanType[]) {
+  if (!plans) {
+    return undefined;
+  }
+
   const { preferredPlansLoadable } = usePreferredPlans();
 
   return React.useMemo(() => {
