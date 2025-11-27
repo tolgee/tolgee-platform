@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assert
 import io.tolgee.util.StuckBatchJobTestUtil
 import org.junit.jupiter.api.AfterEach
@@ -18,6 +19,7 @@ import org.springframework.test.annotation.DirtiesContext
   properties = ["tolgee.batch.scheduled-handle-stuck-job-delay=200"],
 )
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ContextRecreatingTest
 class BatchJobsCleanerTest : AbstractSpringTest() {
   @Autowired
   lateinit var jobConcurrentLauncher: BatchJobConcurrentLauncher
