@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "lib.components/*": ["./src/components/*"],
+      "lib.constants/*": ["./src/constants/*"],
+      "lib.hooks/*": ["./src/hooks/*"]
+    }
+  },
+  "include": ["src/**/*", "custom.d.ts"]
+}

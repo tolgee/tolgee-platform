@@ -1,7 +1,7 @@
 import { components } from 'tg.service/apiSchema.generated';
 import { Chip, styled, useTheme } from '@mui/material';
 import React from 'react';
-import { PropsOf } from '@emotion/react/dist/emotion-react.cjs';
+import { PropsOf } from '@emotion/react';
 import { useTranslate } from '@tolgee/react';
 
 type SimpleGlossaryTermModel = components['schemas']['SimpleGlossaryTermModel'];
