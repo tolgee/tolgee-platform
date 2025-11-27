@@ -13,7 +13,7 @@ import { CompactMenuItem } from 'tg.component/ListComponents';
 
 const StyledMenuItem = styled(CompactMenuItem)`
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
   padding-left: 4px !important;
   & .hidden {
@@ -50,10 +50,19 @@ type Props = MenuItemProps & {
   excluded?: boolean;
   onExclude?: () => void;
   exclusive?: boolean;
+  indicator?: React.ReactNode;
 };
 
 export const FilterItem = React.forwardRef(function FilterItem(
-  { label, excluded, selected, onExclude, exclusive, ...other }: Props,
+  {
+    label,
+    excluded,
+    selected,
+    onExclude,
+    exclusive,
+    indicator,
+    ...other
+  }: Props,
   ref
 ) {
   const { t } = useTranslate();
@@ -96,6 +105,7 @@ export const FilterItem = React.forwardRef(function FilterItem(
             : t('translation_filter_item_exclude')}
         </ButtonToggle>
       )}
+      {indicator}
     </StyledMenuItem>
   );
 });
