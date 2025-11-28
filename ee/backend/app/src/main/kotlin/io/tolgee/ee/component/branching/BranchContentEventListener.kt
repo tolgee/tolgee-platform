@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service
 class BranchContentEventListener(
   private val branchRevisionUpdater: BranchMetaUpdater,
 ) {
-
   @EventListener
   fun onPersist(event: OnEntityPrePersist) {
     onChange(event.entity)
@@ -26,13 +25,17 @@ class BranchContentEventListener(
   fun onUpdate(event: OnEntityPreUpdate) {
     onChange(
       event.entity,
-      event.previousState?.let {
-        event.propertyNames?.zip(it)
-      }?.toMap()
+      event.previousState
+        ?.let {
+          event.propertyNames?.zip(it)
+        }?.toMap(),
     )
   }
 
-  fun onChange(entity: Any?, oldState: Map<String, Any>? = null) {
+  fun onChange(
+    entity: Any?,
+    oldState: Map<String, Any>? = null,
+  ) {
     if (entity == null) return
     if (entity !is BranchVersionedEntity<*, *>) return
 
