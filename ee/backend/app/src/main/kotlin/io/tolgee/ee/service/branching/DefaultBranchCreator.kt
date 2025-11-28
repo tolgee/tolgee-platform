@@ -12,7 +12,6 @@ class DefaultBranchCreator(
   private val keyService: KeyService,
   private val projectService: ProjectService,
 ) {
-
   @Transactional
   fun create(projectId: Long): Branch {
     val project = projectService.get(projectId)

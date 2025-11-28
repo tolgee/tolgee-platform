@@ -125,19 +125,21 @@ class KeysTestData {
           }
 
           // deleted branch with the same name
-          devBranch = addBranch {
-            name = "dev"
-            archivedAt = Date(1759833439)
-          }.build {
-            firstDevKey = addKey {
-              name = "first_key"
-              branch = self
+          devBranch =
+            addBranch {
+              name = "dev"
+              archivedAt = Date(1759833439)
             }.build {
-              addMeta {
-                description = "default"
-              }
+              firstDevKey =
+                addKey {
+                  name = "first_key"
+                  branch = self
+                }.build {
+                  addMeta {
+                    description = "default"
+                  }
+                }.self
             }.self
-          }.self
         }
 
       addUserAccountWithoutOrganization {
@@ -161,7 +163,10 @@ class KeysTestData {
     }
   }
 
-  fun addNBranchedKeys(n: Int, branchName: String = "feature") {
+  fun addNBranchedKeys(
+    n: Int,
+    branchName: String = "feature",
+  ) {
     projectBuilder.apply {
       addBranch {
         name = branchName
