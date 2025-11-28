@@ -40,36 +40,44 @@ class BranchTranslationsTestData {
         }
         en = addEnglish().self
         de = addGerman().self
-        firstTag = Tag().apply {
-          name = "draft"
-          project = this@project.self
-        }
-        secondTag = Tag().apply {
-          name = "feature"
-          project = this@project.self
-        }
-        firstLabel = addLabel {
-          name = "first"
-          color = "#FF5555"
-        }.self
-        secondLabel = addLabel {
-          name = "wohoo"
-          color = "#FF0000"
-        }.self
-        mainBranch = addBranch {
-          name = "main"
-          project = this@project.self
-          isDefault = true
-          isProtected = true
-        }.build {
-          (1..50).forEach {
-            this@project.addBranchKey(it, "branched key", this@build.self)
+        firstTag =
+          Tag().apply {
+            name = "draft"
+            project = this@project.self
           }
-        }.self
+        secondTag =
+          Tag().apply {
+            name = "feature"
+            project = this@project.self
+          }
+        firstLabel =
+          addLabel {
+            name = "first"
+            color = "#FF5555"
+          }.self
+        secondLabel =
+          addLabel {
+            name = "wohoo"
+            color = "#FF0000"
+          }.self
+        mainBranch =
+          addBranch {
+            name = "main"
+            project = this@project.self
+            isDefault = true
+            isProtected = true
+          }.build {
+            (1..50).forEach {
+              this@project.addBranchKey(it, "branched key", this@build.self)
+            }
+          }.self
       }.self
     }
 
-  fun generateBunchData(n: Int, branch: Branch = mainBranch): ProjectBuilder {
+  fun generateBunchData(
+    n: Int,
+    branch: Branch = mainBranch,
+  ): ProjectBuilder {
     return root.data.projects[0].apply {
       (1..n).forEach {
         addBranchKey(it, "branched additional key", branch)
@@ -91,7 +99,11 @@ class BranchTranslationsTestData {
     }
   }
 
-  private fun ProjectBuilder.addBranchKey(num: Int, prefix: String, branch: Branch) {
+  private fun ProjectBuilder.addBranchKey(
+    num: Int,
+    prefix: String,
+    branch: Branch,
+  ) {
     addKey {
       name = "$prefix $num"
       this.branch = branch

@@ -31,7 +31,8 @@ class KeyMeta(
   var key: Key? = null,
   @OneToOne
   var importKey: ImportKey? = null,
-) : StandardAuditModel(), BranchVersionedEntity<KeyMeta, KeyMetaSnapshot> {
+) : StandardAuditModel(),
+  BranchVersionedEntity<KeyMeta, KeyMetaSnapshot> {
   @OneToMany(mappedBy = "keyMeta")
   @OrderBy("id")
   var comments = mutableListOf<KeyComment>()

@@ -20,22 +20,19 @@ import org.hibernate.annotations.ColumnDefault
   indexes = [
     Index(columnList = "key_snapshot_id"),
     Index(columnList = "language"),
-  ]
+  ],
 )
 class TranslationSnapshot(
   @field:NotBlank
   var language: String,
-
   @field:NotBlank
   @Column(columnDefinition = "text")
   var value: String,
-
   @Enumerated
   @ColumnDefault(value = "2")
   @ActivityLoggedProp
-  var state: TranslationState = TranslationState.TRANSLATED
+  var state: TranslationState = TranslationState.TRANSLATED,
 ) : StandardAuditModel() {
-
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "key_snapshot_id")
   lateinit var keySnapshot: KeySnapshot
