@@ -1,16 +1,20 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
+  Badge,
+  BadgeProps,
   Box,
   Button,
-  CircularProgress,
-  Typography,
-  styled,
-  useTheme,
   Chip,
-  Menu,
+  CircularProgress,
   IconButton,
+  Menu,
   MenuItem,
+  styled,
+  Tab,
+  Tabs,
+  Typography,
+  useTheme,
 } from '@mui/material';
 import {
   AlertTriangle,
@@ -26,7 +30,11 @@ import { useHistory, useParams } from 'react-router-dom';
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import {
+  useApiInfiniteQuery,
+  useApiMutation,
+  useApiQuery,
+} from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { messageService } from 'tg.service/MessageService';
 import { SimpleCellKey } from 'tg.views/projects/translations/SimpleCellKey';
@@ -34,7 +42,7 @@ import { useTranslationsSelector } from 'tg.views/projects/translations/context/
 import { CellTranslation } from 'tg.views/projects/translations/TranslationsList/CellTranslation';
 import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
 import clsx from 'clsx';
-import { Branch } from 'tg.component/CustomIcons';
+import { Branch, CheckDone } from 'tg.component/CustomIcons';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import { SuccessChip } from 'tg.component/common/chips/SuccessChip';
 
@@ -68,7 +76,12 @@ const ConflictsWrapper = styled(Box)`
   gap: ${({ theme }) => theme.spacing(2)};
 `;
 
-const ConflictCard = styled(Box)`
+const TabsWrapper = styled(Box)`
+  margin-top: ${({ theme }) => theme.spacing(3)};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
+`;
+
+const ChangeCard = styled(Box)`
   display: grid;
   gap: ${({ theme }) => theme.spacing(2)};
 `;
@@ -80,7 +93,8 @@ const ConflictsHeader = styled(Box)`
 const ConflictsHeaderColumn = styled(Box)`
   display: flex;
   flex: 1;
-  gap: 5px;
+  gap: 15px;
+  align-items: center;
 `;
 
 const ConflictColumns = styled(Box)`
@@ -132,6 +146,8 @@ const StyledLanguageField = styled('div')`
 type BranchMergeModel = components['schemas']['BranchMergeModel'];
 type BranchMergeConflictModel =
   components['schemas']['BranchMergeConflictModel'];
+type BranchMergeChangeType =
+  components['schemas']['BranchMergeChangeModel']['type'];
 
 type RouteParams = {
   mergeId: string;
@@ -276,6 +292,12 @@ const ConflictKeyPanel: React.FC<{
   );
 };
 
+const StyledBadge = styled(Badge)<BadgeProps>(() => ({
+  '& .MuiBadge-badge': {
+    right: -6,
+  },
+}));
+
 export const BranchMergeDetailView: React.FC = () => {
   const { t } = useTranslate();
   const project = useProject();
@@ -284,6 +306,8 @@ export const BranchMergeDetailView: React.FC = () => {
   const formatDate = useDateFormatter();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>();
   const [refreshed, setRefreshed] = useState(false);
+  const [selectedTab, setSelectedTab] =
+    useState<BranchMergeChangeType>('CONFLICT');
 
   const numericMergeId = Number(mergeId);
 
@@ -292,16 +316,42 @@ export const BranchMergeDetailView: React.FC = () => {
     method: 'get',
     path: { projectId: project.id, mergeId: numericMergeId },
   });
+  const merge = previewLoadable.data;
 
-  const conflictsLoadable = useApiQuery({
-    url: '/v2/projects/{projectId}/branches/merge/{mergeId}/conflicts',
+  const changesLoadable = useApiInfiniteQuery({
+    url: '/v2/projects/{projectId}/branches/merge/{mergeId}/changes',
     method: 'get',
     path: { projectId: project.id, mergeId: numericMergeId },
-    query: { size: 1000, page: 0 },
+    query: { size: 100, type: selectedTab },
+    options: {
+      enabled: Boolean(merge),
+      keepPreviousData: true,
+      getNextPageParam: (lastPage) => {
+        if (
+          lastPage.page &&
+          lastPage.page.number! < lastPage.page.totalPages! - 1
+        ) {
+          return {
+            path: { projectId: project.id, mergeId: numericMergeId },
+            query: {
+              size: 100,
+              page: lastPage.page.number! + 1,
+              type: selectedTab,
+            },
+          } as const;
+        }
+        return undefined;
+      },
+    },
   });
 
   const resolveMutation = useApiMutation({
     url: '/v2/projects/{projectId}/branches/merge/{mergeId}/resolve',
+    method: 'put',
+  });
+
+  const resolveAllMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/merge/{mergeId}/resolve-all',
     method: 'put',
   });
 
@@ -320,9 +370,10 @@ export const BranchMergeDetailView: React.FC = () => {
     method: 'post',
   });
 
-  const merge = previewLoadable.data;
-  const conflicts =
-    conflictsLoadable.data?._embedded?.branchMergeConflicts ?? [];
+  const changes =
+    changesLoadable.data?.pages.flatMap(
+      (p) => p._embedded?.branchMergeChanges ?? []
+    ) ?? [];
 
   const handleResolve = async (
     conflict: BranchMergeConflictModel,
@@ -337,8 +388,23 @@ export const BranchMergeDetailView: React.FC = () => {
         },
       },
     });
-    await conflictsLoadable.refetch?.();
+    await changesLoadable.refetch?.();
     await previewLoadable.refetch?.();
+  };
+
+  const handleResolveAll = async (resolution: 'SOURCE' | 'TARGET') => {
+    await resolveAllMutation.mutateAsync({
+      path: { projectId: project.id, mergeId: numericMergeId },
+      content: {
+        'application/json': {
+          resolve: resolution,
+        },
+      },
+    });
+    await Promise.all([
+      changesLoadable.refetch?.(),
+      previewLoadable.refetch?.(),
+    ]);
   };
 
   const closeWith = (action?: () => void) => (e) => {
@@ -387,10 +453,47 @@ export const BranchMergeDetailView: React.FC = () => {
     history.push(backLink);
   };
 
-  const totalConflicts =
-    merge && merge.mergedAt == null && !previewLoadable.isLoading
-      ? merge!.keyResolvedConflictsCount + merge!.keyUnresolvedConflictsCount
-      : 0;
+  const totalConflicts = merge
+    ? merge.keyResolvedConflictsCount + merge.keyUnresolvedConflictsCount
+    : 0;
+
+  const tabsConfig = merge
+    ? [
+        {
+          key: 'ADD' as BranchMergeChangeType,
+          label: t('branch_merges_additions'),
+          count: merge.keyAdditionsCount,
+        },
+        {
+          key: 'UPDATE' as BranchMergeChangeType,
+          label: t('branch_merges_modifications'),
+          count: merge.keyModificationsCount,
+        },
+        {
+          key: 'DELETE' as BranchMergeChangeType,
+          label: t('branch_merges_deletions'),
+          count: merge.keyDeletionsCount,
+        },
+        {
+          key: 'CONFLICT' as BranchMergeChangeType,
+          label: t('branch_merges_conflicts_title'),
+          count: totalConflicts,
+        },
+      ]
+    : [];
+
+  useEffect(() => {
+    if (!merge) return;
+    if (selectedTab && tabsConfig.find((t) => t.key === selectedTab)) return;
+
+    const conflictTab = tabsConfig.find((t) => t.key === 'CONFLICT');
+    const firstWithData =
+      conflictTab && conflictTab.count > 0
+        ? conflictTab
+        : tabsConfig.find((t) => t.count > 0);
+
+    setSelectedTab((firstWithData?.key ?? tabsConfig[0]?.key) || 'CONFLICT');
+  }, [merge, totalConflicts, tabsConfig.map((t) => t.count).join('|')]);
 
   useEffect(() => {
     if (previewLoadable.isFetched && merge && merge.outdated && !refreshed) {
@@ -499,68 +602,170 @@ export const BranchMergeDetailView: React.FC = () => {
         </Box>
       ) : null}
 
+      {merge && merge.keyUnresolvedConflictsCount > 0 && (
+        <Alert severity="warning" sx={{ mt: 2 }}>
+          <T
+            keyName="branch_merges_unresolved_conflicts_alert"
+            params={{ value: merge.keyUnresolvedConflictsCount }}
+          />
+        </Alert>
+      )}
+
+      {merge && (
+        <TabsWrapper>
+          <Tabs
+            value={selectedTab ?? 'CONFLICT'}
+            onChange={(_, value) =>
+              setSelectedTab(value as BranchMergeChangeType)
+            }
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            {tabsConfig.map((tab) => (
+              <Tab
+                key={tab.key}
+                value={tab.key}
+                disabled={tab.count === 0}
+                label={
+                  <StyledBadge
+                    color="primary"
+                    badgeContent={tab.count}
+                    max={999}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  >
+                    {tab.label}
+                  </StyledBadge>
+                }
+              />
+            ))}
+          </Tabs>
+        </TabsWrapper>
+      )}
+
       <Box display="grid" mt={4} rowGap={2}>
-        {totalConflicts > 0 && (
+        {merge && (
           <Box>
-            <Typography variant="h6" gutterBottom>
-              <T keyName="branch_merges_conflicts_title" />
-            </Typography>
-            {conflictsLoadable.isLoading ? (
+            {changesLoadable.isLoading ? (
               <CircularProgress />
-            ) : (
+            ) : changes.length ? (
               <ConflictsWrapper>
-                {merge!.keyUnresolvedConflictsCount > 0 && (
-                  <Alert severity="warning">
-                    <T
-                      keyName="branch_merges_unresolved_conflicts_alert"
-                      params={{ value: merge!.keyUnresolvedConflictsCount }}
-                    />
-                  </Alert>
-                )}
                 <ConflictsHeader>
+                  {selectedTab !== 'DELETE' && selectedTab !== 'ADD' && (
+                    <ConflictsHeaderColumn>
+                      <Box display="flex" gap={1}>
+                        <Branch height={18} width={18} />
+                        <Typography variant="body2" fontWeight="medium">
+                          {merge.sourceBranchName}
+                        </Typography>
+                      </Box>
+                      {merge.mergedAt == null && selectedTab === 'CONFLICT' && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => handleResolveAll('SOURCE')}
+                          disabled={resolveAllMutation.isLoading}
+                          endIcon={<CheckDone />}
+                        >
+                          <T keyName="branch_merges_accept_all" />
+                        </Button>
+                      )}
+                    </ConflictsHeaderColumn>
+                  )}
                   <ConflictsHeaderColumn>
-                    <Branch height={18} width={18} />
-                    <Typography variant="body2" fontWeight="medium">
-                      {merge!.sourceBranchName}
-                    </Typography>
-                  </ConflictsHeaderColumn>
-                  <ConflictsHeaderColumn>
-                    <Branch height={18} width={18} />
-                    <Typography variant="body2" fontWeight="medium">
-                      {merge!.targetBranchName}
-                    </Typography>
+                    <Box display="flex" gap={1}>
+                      <Branch height={18} width={18} />
+                      <Typography variant="body2" fontWeight="medium">
+                        {merge.targetBranchName}
+                      </Typography>
+                    </Box>
+                    {merge.mergedAt == null && selectedTab === 'CONFLICT' && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => handleResolveAll('TARGET')}
+                        disabled={resolveAllMutation.isLoading}
+                        endIcon={<CheckDone />}
+                      >
+                        <T keyName="branch_merges_accept_all" />
+                      </Button>
+                    )}
                   </ConflictsHeaderColumn>
                 </ConflictsHeader>
-                {conflicts.map((conflict) => {
+                {changes.map((change) => {
+                  const sourceKey = change.sourceKey;
+                  const targetKey = change.targetKey;
+                  const isConflict = change.type === 'CONFLICT';
+                  const isModification = change.type === 'UPDATE';
+                  const showTwoColumns = isConflict || isModification;
+                  const acceptedSource = change.resolution === 'SOURCE';
+                  const acceptedTarget = change.resolution === 'TARGET';
+
                   return (
-                    <ConflictCard
-                      key={conflict.id}
-                      data-cy="project-branch-merge-conflict"
+                    <ChangeCard
+                      key={change.id}
+                      data-cy="project-branch-merge-change"
                     >
-                      <ConflictColumns>
-                        <ConflictKeyPanel
-                          keyData={conflict.sourceKey}
-                          accepted={conflict.resolution == 'SOURCE'}
-                          conflictHandler={
-                            merge!.mergedAt == null
-                              ? () => handleResolve(conflict, 'SOURCE')
-                              : undefined
-                          }
-                        />
-                        <ConflictKeyPanel
-                          keyData={conflict.targetKey}
-                          accepted={conflict.resolution == 'TARGET'}
-                          conflictHandler={
-                            merge!.mergedAt == null
-                              ? () => handleResolve(conflict, 'TARGET')
-                              : undefined
-                          }
-                        />
-                      </ConflictColumns>
-                    </ConflictCard>
+                      {showTwoColumns ? (
+                        <ConflictColumns>
+                          {sourceKey && (
+                            <ConflictKeyPanel
+                              keyData={sourceKey}
+                              accepted={isConflict ? acceptedSource : undefined}
+                              conflictHandler={
+                                isConflict && merge.mergedAt == null
+                                  ? () =>
+                                      handleResolve(
+                                        change as BranchMergeConflictModel,
+                                        'SOURCE'
+                                      )
+                                  : undefined
+                              }
+                            />
+                          )}
+                          {targetKey && (
+                            <ConflictKeyPanel
+                              keyData={targetKey}
+                              accepted={isConflict ? acceptedTarget : undefined}
+                              conflictHandler={
+                                isConflict && merge.mergedAt == null
+                                  ? () =>
+                                      handleResolve(
+                                        change as BranchMergeConflictModel,
+                                        'TARGET'
+                                      )
+                                  : undefined
+                              }
+                            />
+                          )}
+                        </ConflictColumns>
+                      ) : (
+                        <KeyPanel>
+                          <KeyHeader>
+                            <SimpleCellKey data={(sourceKey || targetKey)!} />
+                          </KeyHeader>
+                          <KeyTranslations
+                            keyData={(sourceKey || targetKey)!}
+                          />
+                        </KeyPanel>
+                      )}
+                    </ChangeCard>
                   );
                 })}
               </ConflictsWrapper>
+            ) : (
+              <Typography variant="body2" color="textSecondary">
+                <T
+                  keyName={
+                    selectedTab === 'CONFLICT'
+                      ? 'branch_merges_no_conflicts'
+                      : selectedTab === 'ADD'
+                      ? 'branch_merges_no_additions'
+                      : selectedTab === 'UPDATE'
+                      ? 'branch_merges_no_modifications'
+                      : 'branch_merges_no_deletions'
+                  }
+                />
+              </Typography>
             )}
           </Box>
         )}
