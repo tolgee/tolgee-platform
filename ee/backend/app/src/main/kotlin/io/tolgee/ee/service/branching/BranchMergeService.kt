@@ -1,6 +1,7 @@
 package io.tolgee.ee.service.branching
 
 import io.tolgee.constants.Message
+import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
 import io.tolgee.ee.exceptions.BranchMergeConflictNotResolvedException
@@ -14,6 +15,7 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
 import io.tolgee.model.enums.BranchKeyMergeChangeType
+import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.util.Logging
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -103,6 +105,15 @@ class BranchMergeService(
     return branchMergeChangeRepository.findBranchMergeConflicts(projectId, mergeId, pageable)
   }
 
+  fun getChanges(
+    projectId: Long,
+    mergeId: Long,
+    type: BranchKeyMergeChangeType?,
+    pageable: Pageable,
+  ): Page<BranchMergeChangeView> {
+    return branchMergeChangeRepository.findBranchMergeChanges(projectId, mergeId, type, pageable)
+  }
+
   fun getConflict(
     projectId: Long,
     mergeId: Long,
@@ -110,6 +121,17 @@ class BranchMergeService(
   ): BranchMergeChange {
     return branchMergeChangeRepository.findConflict(projectId, mergeId, changeId)
       ?: throw NotFoundException(Message.BRANCH_MERGE_CHANGE_NOT_FOUND)
+  }
+
+  fun resolveAllConflicts(
+    projectId: Long,
+    mergeId: Long,
+    resolution: BranchKeyMergeResolutionType,
+  ) {
+    val merge = findMerge(projectId, mergeId) ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    merge.changes
+      .filter { it.change == BranchKeyMergeChangeType.CONFLICT }
+      .forEach { it.resolution = resolution }
   }
 
   fun findMerge(
