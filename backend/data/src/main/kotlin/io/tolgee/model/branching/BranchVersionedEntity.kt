@@ -10,7 +10,6 @@ import io.tolgee.model.key.Key
  * that support branching.
  */
 interface BranchVersionedEntity<T, U> {
-
   /**
    * Resolves the Key of the branch associated with the entity in the branching model.
    *

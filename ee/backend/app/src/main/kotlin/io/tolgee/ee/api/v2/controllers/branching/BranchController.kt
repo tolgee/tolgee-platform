@@ -4,17 +4,17 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
-import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchModelAssembler
-import io.tolgee.ee.api.v2.hateoas.model.branching.BranchModel
-import io.tolgee.ee.api.v2.hateoas.model.branching.CreateBranchModel
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeConflictModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeRefModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeConflictModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeRefModel
+import io.tolgee.ee.api.v2.hateoas.model.branching.BranchModel
+import io.tolgee.ee.api.v2.hateoas.model.branching.CreateBranchModel
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
@@ -82,13 +82,16 @@ class BranchController(
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @OpenApiOrderExtension(2)
-  fun create(@RequestBody branch: CreateBranchModel): BranchModel {
-    val branch = branchService.createBranch(
-      projectHolder.project.id,
-      branch.name,
-      branch.originBranchId,
-      authenticationFacade.authenticatedUserEntity
-    )
+  fun create(
+    @RequestBody branch: CreateBranchModel,
+  ): BranchModel {
+    val branch =
+      branchService.createBranch(
+        projectHolder.project.id,
+        branch.name,
+        branch.originBranchId,
+        authenticationFacade.authenticatedUserEntity,
+      )
     return branchModelAssembler.toModel(branch)
   }
 
@@ -97,7 +100,9 @@ class BranchController(
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @OpenApiOrderExtension(3)
-  fun delete(@PathVariable branchId: Long) {
+  fun delete(
+    @PathVariable branchId: Long,
+  ) {
     branchService.deleteBranch(projectHolder.project.id, branchId)
   }
 
@@ -171,7 +176,7 @@ class BranchController(
   @OpenApiOrderExtension(8)
   fun resolveConflict(
     @PathVariable mergeId: Long,
-    @RequestBody request: ResolveBranchMergeConflictRequest
+    @RequestBody request: ResolveBranchMergeConflictRequest,
   ) {
     branchService.resolveConflict(projectHolder.project.id, mergeId, request)
   }
@@ -181,7 +186,9 @@ class BranchController(
   @AllowApiAccess
   @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @OpenApiOrderExtension(9)
-  fun deleteBranchMerge(@PathVariable mergeId: Long) {
+  fun deleteBranchMerge(
+    @PathVariable mergeId: Long,
+  ) {
     branchService.deleteMerge(projectHolder.project.id, mergeId)
   }
 

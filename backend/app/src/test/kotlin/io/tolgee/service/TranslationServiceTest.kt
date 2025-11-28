@@ -86,13 +86,14 @@ class TranslationServiceTest : AbstractSpringTest() {
     val testData = TranslationsTestData()
     testData.generateBranchedData(10)
     testDataService.saveTestData(testData.root)
-    val translations = translationService.getTranslations(
-      languageTags = HashSet(listOf("en", "de")),
-      namespace = null,
-      branch = null,
-      projectId = testData.project.id,
-      structureDelimiter = '.',
-    )
+    val translations =
+      translationService.getTranslations(
+        languageTags = HashSet(listOf("en", "de")),
+        namespace = null,
+        branch = null,
+        projectId = testData.project.id,
+        structureDelimiter = '.',
+      )
     assertThat(translations).hasSize(2)
     assertThat(translations["en"] as LinkedHashMap<*, *>).hasSize(1)
   }
@@ -103,13 +104,14 @@ class TranslationServiceTest : AbstractSpringTest() {
     val testData = TranslationsTestData()
     testData.generateBranchedData(10)
     testDataService.saveTestData(testData.root)
-    val translations = translationService.getTranslations(
-      languageTags = HashSet(listOf("en", "de")),
-      namespace = null,
-      branch = "feature-branch",
-      projectId = testData.project.id,
-      structureDelimiter = '.',
-    )
+    val translations =
+      translationService.getTranslations(
+        languageTags = HashSet(listOf("en", "de")),
+        namespace = null,
+        branch = "feature-branch",
+        projectId = testData.project.id,
+        structureDelimiter = '.',
+      )
     assertThat(translations).hasSize(2)
     assertThat(translations["en"] as LinkedHashMap<*, *>).hasSize(10)
   }
@@ -120,13 +122,14 @@ class TranslationServiceTest : AbstractSpringTest() {
     val testData = TranslationsTestData()
     testData.generateBranchedData(5)
     testDataService.saveTestData(testData.root)
-    val translations = translationService.getTranslations(
-      languageTags = HashSet(listOf("en", "de")),
-      namespace = null,
-      branch = "invalid-branch",
-      projectId = testData.project.id,
-      structureDelimiter = '.',
-    )
+    val translations =
+      translationService.getTranslations(
+        languageTags = HashSet(listOf("en", "de")),
+        namespace = null,
+        branch = "invalid-branch",
+        projectId = testData.project.id,
+        structureDelimiter = '.',
+      )
     assertThat(translations).hasSize(0)
   }
 }
