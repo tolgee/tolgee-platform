@@ -369,9 +369,9 @@ export const BranchMergeDetailView: React.FC = () => {
     });
     messageService.success(<T keyName="branch_merges_apply_success" />);
     history.push(
-      LINKS.PROJECT_TRANSLATIONS_BRANCHED.build({
+      LINKS.PROJECT_TRANSLATIONS_WITH_BRANCH.build({
         [PARAMS.PROJECT_ID]: project.id,
-        [PARAMS.TRANSLATIONS_BRANCH]: merge!.targetBranchName,
+        [PARAMS.BRANCH]: merge!.targetBranchName,
       })
     );
   };

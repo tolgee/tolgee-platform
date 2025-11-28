@@ -13,9 +13,9 @@ export const BranchNameLink = ({ name, deleted }: Props) => {
   return !deleted ? (
     <Link
       component={RouterLink}
-      to={LINKS.PROJECT_TRANSLATIONS_BRANCHED.build({
+      to={LINKS.PROJECT_TRANSLATIONS_WITH_BRANCH.build({
         [PARAMS.PROJECT_ID]: project.id,
-        [PARAMS.TRANSLATIONS_BRANCH]: name,
+        [PARAMS.BRANCH]: name,
       })}
     >
       {name}
