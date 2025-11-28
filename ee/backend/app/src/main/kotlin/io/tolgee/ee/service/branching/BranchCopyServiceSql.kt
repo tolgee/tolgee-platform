@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service
 @Service
 class BranchCopyServiceSql(
   private val entityManager: EntityManager,
-) : BranchCopyService, Logging {
-
+) : BranchCopyService,
+  Logging {
   /**
    * Copies keys and its related entities from a source branch to target branch
    * - translations
@@ -23,7 +23,11 @@ class BranchCopyServiceSql(
    * If sourceBranch is a default, keys with NULL branch_id are also treated as part of the source
    */
   @Transactional
-  override fun copy(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
+  override fun copy(
+    projectId: Long,
+    sourceBranch: Branch,
+    targetBranch: Branch,
+  ) {
     require(sourceBranch.id != targetBranch.id) { "Source and target branch must differ" }
 
     traceLogMeasureTime("branchCopyService: copyKeys") {
@@ -63,7 +67,11 @@ class BranchCopyServiceSql(
     }
   }
 
-  private fun copyKeyMetas(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
+  private fun copyKeyMetas(
+    projectId: Long,
+    sourceBranch: Branch,
+    targetBranch: Branch,
+  ) {
     val sql = """
       insert into key_meta (id, key_id, description, custom, created_at, updated_at)
       select nextval('hibernate_sequence'), tk.id, km.description, km.custom, :targetBranchCreatedAt, :targetBranchCreatedAt
@@ -76,7 +84,8 @@ class BranchCopyServiceSql(
       where ((:sourceIsDefault and (sk.branch_id = :sourceBranchId or sk.branch_id is null))
              or (not :sourceIsDefault and sk.branch_id = :sourceBranchId))
     """
-    entityManager.createNativeQuery(sql)
+    entityManager
+      .createNativeQuery(sql)
       .setParameter("projectId", projectId)
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
@@ -85,7 +94,11 @@ class BranchCopyServiceSql(
       .executeUpdate()
   }
 
-  private fun copyKeyMetaTags(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
+  private fun copyKeyMetaTags(
+    projectId: Long,
+    sourceBranch: Branch,
+    targetBranch: Branch,
+  ) {
     val sql = """
       insert into key_meta_tags (key_metas_id, tags_id)
       select tkm.id, kmt.tags_id
@@ -100,7 +113,8 @@ class BranchCopyServiceSql(
       where ((:sourceIsDefault and (sk.branch_id = :sourceBranchId or sk.branch_id is null))
              or (not :sourceIsDefault and sk.branch_id = :sourceBranchId))
     """
-    entityManager.createNativeQuery(sql)
+    entityManager
+      .createNativeQuery(sql)
       .setParameter("projectId", projectId)
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
@@ -108,7 +122,11 @@ class BranchCopyServiceSql(
       .executeUpdate()
   }
 
-  private fun copyKeyMetaComments(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
+  private fun copyKeyMetaComments(
+    projectId: Long,
+    sourceBranch: Branch,
+    targetBranch: Branch,
+  ) {
     val sql = """
       insert into key_comment (id, key_meta_id, author_id, text, from_import, created_at, updated_at)
       select nextval('hibernate_sequence'), tkm.id, kc.author_id, kc.text, kc.from_import, :targetBranchCreatedAt, :targetBranchCreatedAt
@@ -123,7 +141,8 @@ class BranchCopyServiceSql(
       where ((:sourceIsDefault and (sk.branch_id = :sourceBranchId or sk.branch_id is null))
              or (not :sourceIsDefault and sk.branch_id = :sourceBranchId))
     """
-    entityManager.createNativeQuery(sql)
+    entityManager
+      .createNativeQuery(sql)
       .setParameter("projectId", projectId)
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
@@ -132,7 +151,11 @@ class BranchCopyServiceSql(
       .executeUpdate()
   }
 
-  private fun copyKeyMetaCodeReferences(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
+  private fun copyKeyMetaCodeReferences(
+    projectId: Long,
+    sourceBranch: Branch,
+    targetBranch: Branch,
+  ) {
     val sql = """
       insert into key_code_reference (id, key_meta_id, author_id, path, line, from_import, created_at, updated_at)
       select nextval('hibernate_sequence'), tkm.id, kcr.author_id, kcr.path, kcr.line, kcr.from_import, :targetBranchCreatedAt, :targetBranchCreatedAt
@@ -147,7 +170,8 @@ class BranchCopyServiceSql(
       where ((:sourceIsDefault and (sk.branch_id = :sourceBranchId or sk.branch_id is null))
              or (not :sourceIsDefault and sk.branch_id = :sourceBranchId))
     """
-    entityManager.createNativeQuery(sql)
+    entityManager
+      .createNativeQuery(sql)
       .setParameter("projectId", projectId)
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
@@ -156,7 +180,11 @@ class BranchCopyServiceSql(
       .executeUpdate()
   }
 
-  private fun copyKeyScreenshotReferences(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
+  private fun copyKeyScreenshotReferences(
+    projectId: Long,
+    sourceBranch: Branch,
+    targetBranch: Branch,
+  ) {
     val sql = """
       insert into key_screenshot_reference (key_id, screenshot_id, positions, original_text)
       select tk.id, ksr.screenshot_id, ksr.positions, ksr.original_text
@@ -169,7 +197,8 @@ class BranchCopyServiceSql(
       where ((:sourceIsDefault and (sk.branch_id = :sourceBranchId or sk.branch_id is null))
              or (not :sourceIsDefault and sk.branch_id = :sourceBranchId))
     """
-    entityManager.createNativeQuery(sql)
+    entityManager
+      .createNativeQuery(sql)
       .setParameter("projectId", projectId)
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
@@ -177,7 +206,11 @@ class BranchCopyServiceSql(
       .executeUpdate()
   }
 
-  private fun copyTranslationComments(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
+  private fun copyTranslationComments(
+    projectId: Long,
+    sourceBranch: Branch,
+    targetBranch: Branch,
+  ) {
     val sql = """
       insert into translation_comment (id, text, state, translation_id, author_id, created_at, updated_at)
       select nextval('hibernate_sequence'), tc.text, tc.state, tgt_t.id, tc.author_id, :targetBranchCreatedAt, :targetBranchCreatedAt
@@ -194,7 +227,8 @@ class BranchCopyServiceSql(
         or (not :sourceIsDefault and sk.branch_id = :sourceBranchId)
       )
     """
-    entityManager.createNativeQuery(sql)
+    entityManager
+      .createNativeQuery(sql)
       .setParameter("projectId", projectId)
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
@@ -203,7 +237,11 @@ class BranchCopyServiceSql(
       .executeUpdate()
   }
 
-  private fun copyKeys(projectId: Long, sourceBranch: Branch, targetBranch: Branch) {
+  private fun copyKeys(
+    projectId: Long,
+    sourceBranch: Branch,
+    targetBranch: Branch,
+  ) {
     val sql = """
       with source_keys as (
         select k.id as old_id, k.name, k.namespace_id, k.is_plural, k.plural_arg_name
@@ -227,7 +265,8 @@ class BranchCopyServiceSql(
              ti.name, :projectId, ti.namespace_id, :targetBranchId, ti.is_plural, ti.plural_arg_name, :targetBranchCreatedAt, :targetBranchCreatedAt
       from to_insert ti
     """
-    entityManager.createNativeQuery(sql)
+    entityManager
+      .createNativeQuery(sql)
       .setParameter("projectId", projectId)
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
@@ -259,7 +298,8 @@ class BranchCopyServiceSql(
         or (not :sourceIsDefault and sk.branch_id = :sourceBranchId)
       )
     """
-    entityManager.createNativeQuery(sql)
+    entityManager
+      .createNativeQuery(sql)
       .setParameter("projectId", projectId)
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)
@@ -289,7 +329,8 @@ class BranchCopyServiceSql(
         or (not :sourceIsDefault and sk.branch_id = :sourceBranchId)
       )
     """
-    entityManager.createNativeQuery(sql)
+    entityManager
+      .createNativeQuery(sql)
       .setParameter("projectId", projectId)
       .setParameter("sourceBranchId", sourceBranch.id)
       .setParameter("sourceIsDefault", sourceBranch.isDefault)

@@ -14,9 +14,12 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
       join fetch bm.sourceBranch sb
       join fetch bm.targetBranch tb
       where sb.project.id = :projectId and bm.id = :mergeId
-    """
+    """,
   )
-  fun findMerge(projectId: Long, mergeId: Long): BranchMerge?
+  fun findMerge(
+    projectId: Long,
+    mergeId: Long,
+  ): BranchMerge?
 
   @Query(
     """
@@ -39,9 +42,12 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
     where sb.project.id = :projectId
       and bm.id = :branchMergeId
     group by bm.id, sb, tb
-    """
+    """,
   )
-  fun findBranchMergeView(projectId: Long, branchMergeId: Long): BranchMergeView?
+  fun findBranchMergeView(
+    projectId: Long,
+    branchMergeId: Long,
+  ): BranchMergeView?
 
   @Query(
     value = """
@@ -70,12 +76,15 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
     from BranchMerge bm
       join bm.sourceBranch sb
     where sb.project.id = :projectId
-    """
+    """,
   )
-  fun findBranchMerges(projectId: Long, pageable: Pageable): Page<BranchMergeView>
+  fun findBranchMerges(
+    projectId: Long,
+    pageable: Pageable,
+  ): Page<BranchMergeView>
 
   fun findAllBySourceBranchIdOrTargetBranchId(
     sourceBranchId: Long,
-    targetBranchId: Long
+    targetBranchId: Long,
   ): List<BranchMerge>
 }

@@ -88,7 +88,7 @@ class KeyService(
     projectId: Long,
     name: String,
     namespace: String?,
-    branch: String?
+    branch: String?,
   ): Optional<Key> {
     return keyRepository.getByNameAndNamespace(projectId, name, namespace, branch)
   }
@@ -219,7 +219,7 @@ class KeyService(
     if (!branch.isNullOrEmpty()) {
       key.branch = project.branches.find { it.name == branch } ?: throw BadRequestException(
         Message.BRANCH_NOT_FOUND,
-        listOf(branch)
+        listOf(branch),
       )
     } else if (project.hasDefaultBranch()) {
       key.branch = project.getDefaultBranch()
@@ -298,7 +298,7 @@ class KeyService(
     projectId: Long,
     name: String,
     namespace: String?,
-    branch: String?
+    branch: String?,
   ) {
     if (findOptional(projectId, name, namespace, branch).isPresent) {
       throw ValidationException(Message.KEY_EXISTS)

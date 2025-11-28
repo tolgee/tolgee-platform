@@ -8,5 +8,5 @@ open class ResolveBranchMergeConflictRequest(
   @Schema(description = "Merge change id")
   val changeId: Long,
   @Schema(description = "Type of resolution")
-  val resolve: BranchKeyMergeResolutionType
+  val resolve: BranchKeyMergeResolutionType,
 )

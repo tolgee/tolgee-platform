@@ -14,26 +14,25 @@ class BranchMergeAnalyzer(
   private val keyRepository: KeyRepository,
   private val keySnapshotRepository: KeySnapshotRepository,
 ) {
-
-  fun compute(
-    merge: BranchMerge,
-  ): MutableList<BranchMergeChange> {
+  fun compute(merge: BranchMerge): MutableList<BranchMergeChange> {
     val snapshots = keySnapshotRepository.findAllByBranchId(merge.sourceBranch.id)
     val sourceBranch = merge.sourceBranch
     val targetBranch = merge.targetBranch
 
     val changes = mutableListOf<BranchMergeChange>()
 
-    val sourceKeys = keyRepository.findAllDetailedByBranch(
-      projectId = sourceBranch.project.id,
-      branchId = sourceBranch.id,
-      includeOrphanDefault = sourceBranch.isDefault,
-    )
-    val targetKeys = keyRepository.findAllDetailedByBranch(
-      projectId = targetBranch.project.id,
-      branchId = targetBranch.id,
-      includeOrphanDefault = targetBranch.isDefault,
-    )
+    val sourceKeys =
+      keyRepository.findAllDetailedByBranch(
+        projectId = sourceBranch.project.id,
+        branchId = sourceBranch.id,
+        includeOrphanDefault = sourceBranch.isDefault,
+      )
+    val targetKeys =
+      keyRepository.findAllDetailedByBranch(
+        projectId = targetBranch.project.id,
+        branchId = targetBranch.id,
+        includeOrphanDefault = targetBranch.isDefault,
+      )
 
     val sourceById = sourceKeys.associateBy { it.id }
     val targetById = targetKeys.associateBy { it.id }
@@ -48,7 +47,7 @@ class BranchMergeAnalyzer(
             sourceKey = key
             change = BranchKeyMergeChangeType.ADD
             resolution = BranchKeyMergeResolutionType.SOURCE
-          }
+          },
         )
       }
     }
@@ -70,7 +69,7 @@ class BranchMergeAnalyzer(
               this.targetKey = targetKey
               change = BranchKeyMergeChangeType.DELETE
               resolution = BranchKeyMergeResolutionType.SOURCE
-            }
+            },
           )
         }
 
@@ -82,7 +81,7 @@ class BranchMergeAnalyzer(
               this.sourceKey = sourceKey
               change = BranchKeyMergeChangeType.ADD
               resolution = BranchKeyMergeResolutionType.SOURCE
-            }
+            },
           )
         }
 
@@ -98,7 +97,7 @@ class BranchMergeAnalyzer(
                   this.sourceKey = sourceKey
                   this.targetKey = targetKey
                   change = BranchKeyMergeChangeType.CONFLICT
-                }
+                },
               )
             }
 
@@ -110,7 +109,7 @@ class BranchMergeAnalyzer(
                   this.targetKey = targetKey
                   change = BranchKeyMergeChangeType.UPDATE
                   resolution = BranchKeyMergeResolutionType.SOURCE
-                }
+                },
               )
             }
 
