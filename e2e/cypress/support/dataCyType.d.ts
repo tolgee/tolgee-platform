@@ -574,7 +574,7 @@ declare namespace DataCy {
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |
         "project-branch-merge-accept" |
-        "project-branch-merge-conflict" |
+        "project-branch-merge-change" |
         "project-branch-merge-detail" |
         "project-dashboard-activity-chart" |
         "project-dashboard-activity-list" |
