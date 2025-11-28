@@ -23,9 +23,11 @@ import { FC } from 'react';
 import { createAdder } from 'tg.fixtures/pluginAdder';
 import { useAddProjectMenuItems } from 'tg.ee';
 import { useProject } from 'tg.hooks/useProject';
+import { useBranchLinks } from 'tg.component/branching/useBranchLinks';
 
 export const ProjectMenu = () => {
   const project = useProject();
+  const { withBranchLink } = useBranchLinks();
   const { satisfiesPermission } = useProjectPermissions();
   const config = useConfig();
   const canPublishCd = satisfiesPermission('content-delivery.publish');
@@ -165,7 +167,7 @@ export const ProjectMenu = () => {
         return (
           <SideMenuItem
             key={item.id}
-            linkTo={link.build({
+            linkTo={withBranchLink(link, {
               [PARAMS.PROJECT_ID]: project.id,
               [PARAMS.ORGANIZATION_SLUG]: project.organizationOwner?.slug || '',
             })}
