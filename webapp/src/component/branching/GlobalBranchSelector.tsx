@@ -1,34 +1,47 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import { components } from 'tg.service/apiSchema.generated';
-import { useHistory } from 'react-router-dom';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { useProject } from 'tg.hooks/useProject';
+import { useHistory, useLocation } from 'react-router-dom';
 import { BranchSelect } from 'tg.component/branching/BranchSelect';
+import { useProject } from 'tg.hooks/useProject';
 import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
+import {
+  applyBranchToLocation,
+  extractBranchFromPathname,
+} from 'tg.component/branching/branchingPath';
+import { setCachedBranch } from 'tg.component/branching/branchCache';
 
 type BranchModel = components['schemas']['BranchModel'];
 
 export const GlobalBranchSelector = () => {
-  const project = useProject();
   const history = useHistory();
-  const { selected, loadable } = useBranchesService({ projectId: project.id });
+  const location = useLocation();
+  const project = useProject();
+  const {
+    selected,
+    loadable,
+    default: defaultBranch,
+  } = useBranchesService({
+    projectId: project.id,
+  });
+  const branchInUrl = extractBranchFromPathname(location.pathname);
 
   if (!loadable.isLoading && !selected) {
     history.replace(
-      LINKS.PROJECT_TRANSLATIONS.build({
-        [PARAMS.PROJECT_ID]: project.id,
-      })
+      applyBranchToLocation(location, defaultBranch?.name || null)
     );
+    setCachedBranch(
+      project.id,
+      defaultBranch?.isDefault ? null : defaultBranch?.name || null
+    );
+  } else if (!loadable.isLoading && !branchInUrl) {
+    // no branch in URL means user wants default/unbranched state
+    setCachedBranch(project.id, null);
   }
 
   function changeBranch(item: BranchModel) {
-    history.replace(
-      LINKS.PROJECT_TRANSLATIONS_BRANCHED.build({
-        [PARAMS.PROJECT_ID]: project.id,
-        [PARAMS.TRANSLATIONS_BRANCH]: item.name,
-      })
-    );
+    history.replace(applyBranchToLocation(location, item.name));
+    setCachedBranch(project.id, item.isDefault ? null : item.name);
   }
 
   return (

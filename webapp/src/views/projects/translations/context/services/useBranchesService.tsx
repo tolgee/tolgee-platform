@@ -1,9 +1,9 @@
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useTranslationsService } from 'tg.views/projects/translations/context/services/useTranslationsService';
-import { useRouteMatch } from 'react-router-dom';
-import { PARAMS } from 'tg.constants/links';
+import { useLocation } from 'react-router-dom';
 import { components } from 'tg.service/apiSchema.generated';
+import { extractBranchFromPathname } from 'tg.component/branching/branchingPath';
 
 type Props = {
   projectId?: number;
@@ -24,8 +24,8 @@ const defaultBranchObject: BranchModel = {
 };
 
 export const useBranchesService = ({ projectId, enabled = true }: Props) => {
-  const match = useRouteMatch();
-  const routeBranch = match.params[PARAMS.TRANSLATIONS_BRANCH];
+  const location = useLocation();
+  const routeBranch = extractBranchFromPathname(location.pathname);
 
   projectId = projectId || useProject().id;
 
