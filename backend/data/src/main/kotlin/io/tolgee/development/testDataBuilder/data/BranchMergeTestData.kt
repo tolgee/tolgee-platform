@@ -37,24 +37,27 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
   }
 
   private fun ProjectBuilder.addBranches() {
-    mainBranch = addBranch {
-      name = "main"
-      isProtected = true
-      isDefault = true
-    }.build mainBranch@{
-      featureBranch = addBranch {
-        name = "feature"
-        originBranch = this@mainBranch.self
-        isDefault = false
-        isProtected = false
+    mainBranch =
+      addBranch {
+        name = "main"
+        isProtected = true
+        isDefault = true
+      }.build mainBranch@{
+        featureBranch =
+          addBranch {
+            name = "feature"
+            originBranch = this@mainBranch.self
+            isDefault = false
+            isProtected = false
+          }.self
+        conflictsBranch =
+          addBranch {
+            name = "conflicts"
+            originBranch = this@mainBranch.self
+            isDefault = false
+            isProtected = false
+          }.self
       }.self
-      conflictsBranch = addBranch {
-        name = "conflicts"
-        originBranch = this@mainBranch.self
-        isDefault = false
-        isProtected = false
-      }.self
-    }.self
   }
 
   private fun ProjectBuilder.addSharedKeys() {
@@ -92,53 +95,57 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
     name: String,
     mainText: String,
     featureText: String = mainText,
-    callback: (main: Key, feature: Key) -> Unit = { _, _ -> }
+    callback: (main: Key, feature: Key) -> Unit = { _, _ -> },
   ) {
-    val mainKey = addKey {
-      this.name = name
-      this.branch = mainBranch
-    }.build {
-      addTranslation {
-        language = englishLanguage
-        text = mainText
-      }
-    }.self
+    val mainKey =
+      addKey {
+        this.name = name
+        this.branch = mainBranch
+      }.build {
+        addTranslation {
+          language = englishLanguage
+          text = mainText
+        }
+      }.self
 
-    val featureKey = addKey {
-      this.name = name
-      this.branch = featureBranch
-    }.build {
-      addTranslation {
-        language = englishLanguage
-        text = featureText
-      }
-    }.self
+    val featureKey =
+      addKey {
+        this.name = name
+        this.branch = featureBranch
+      }.build {
+        addTranslation {
+          language = englishLanguage
+          text = featureText
+        }
+      }.self
 
     callback(mainKey, featureKey)
   }
 
   private fun ProjectBuilder.createMergeWithConflicts() {
-    conflictsBranchKey = addKey {
-      name = CONFLICT_KEY_NAME
-      branch = conflictsBranch
-    }.build {
-      addTranslation {
-        language = englishLanguage
-        text = "Conflict feature text"
-      }
-    }.self
-    conflictBranchMerge = addBranchMerge {
-      sourceBranch = conflictsBranch
-      targetBranch = mainBranch
-      sourceRevision = conflictsBranch.revision + 6
-      targetRevision = mainBranch.revision + 4
-    }.build {
-      addChange {
-        change = BranchKeyMergeChangeType.CONFLICT
-        sourceKey = conflictsBranchKey
-        targetKey = mainConflictKey
-        resolution = BranchKeyMergeResolutionType.SOURCE
-      }
-    }.self
+    conflictsBranchKey =
+      addKey {
+        name = CONFLICT_KEY_NAME
+        branch = conflictsBranch
+      }.build {
+        addTranslation {
+          language = englishLanguage
+          text = "Conflict feature text"
+        }
+      }.self
+    conflictBranchMerge =
+      addBranchMerge {
+        sourceBranch = conflictsBranch
+        targetBranch = mainBranch
+        sourceRevision = conflictsBranch.revision + 6
+        targetRevision = mainBranch.revision + 4
+      }.build {
+        addChange {
+          change = BranchKeyMergeChangeType.CONFLICT
+          sourceKey = conflictsBranchKey
+          targetKey = mainConflictKey
+          resolution = BranchKeyMergeResolutionType.SOURCE
+        }
+      }.self
   }
 }

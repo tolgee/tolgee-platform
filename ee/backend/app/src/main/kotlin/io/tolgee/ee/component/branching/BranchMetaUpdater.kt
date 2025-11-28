@@ -12,7 +12,6 @@ class BranchMetaUpdater(
   private val branchRepository: BranchRepository,
   private val currentDateProvider: CurrentDateProvider,
 ) {
-
   @Async
   @Transactional
   fun snapshot(key: Key) {

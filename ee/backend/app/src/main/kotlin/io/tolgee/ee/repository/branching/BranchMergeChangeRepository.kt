@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
 interface BranchMergeChangeRepository : JpaRepository<BranchMergeChange, Long> {
-
   @Query(
     """
     select new io.tolgee.dtos.queryResults.branching.BranchMergeConflictView(
@@ -22,12 +21,12 @@ interface BranchMergeChangeRepository : JpaRepository<BranchMergeChange, Long> {
     WHERE
       bm.id = :mergeId
       and bmc.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT
-  """
+  """,
   )
   fun findBranchMergeConflicts(
     projectId: Long,
     mergeId: Long,
-    pageable: Pageable
+    pageable: Pageable,
   ): Page<BranchMergeConflictView>
 
   @Query(
@@ -38,7 +37,11 @@ interface BranchMergeChangeRepository : JpaRepository<BranchMergeChange, Long> {
       where sb.project.id = :projectId 
         and bm.id = :mergeId 
         and bmc.id = :changeId 
-    """
+    """,
   )
-  fun findConflict(projectId: Long, mergeId: Long, changeId: Long): BranchMergeChange?
+  fun findConflict(
+    projectId: Long,
+    mergeId: Long,
+    changeId: Long,
+  ): BranchMergeChange?
 }

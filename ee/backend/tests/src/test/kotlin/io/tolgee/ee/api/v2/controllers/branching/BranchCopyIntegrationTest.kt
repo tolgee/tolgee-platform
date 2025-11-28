@@ -27,7 +27,6 @@ import kotlin.system.measureTimeMillis
   ],
 )
 class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: BranchTranslationsTestData
 
   @Autowired
@@ -68,7 +67,10 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     val firstMainKey = keyRepository.findPrefetchedByNameAndBranch(projectId, "branched key 1", "main")
     val firstBranchKey = keyRepository.findPrefetchedByNameAndBranch(projectId, "branched key 1", "feature-x")
 
-    firstBranchKey!!.branch!!.id.assert.isEqualTo(newBranchId)
+    firstBranchKey!!
+      .branch!!
+      .id.assert
+      .isEqualTo(newBranchId)
     firstBranchKey.assertIsCopyOf(firstMainKey!!)
 
     // branch should be ready
@@ -84,9 +86,10 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.user
 
     var response: ResultActions
-    val time = measureTimeMillis {
-      response = performBranchCreation()
-    }
+    val time =
+      measureTimeMillis {
+        response = performBranchCreation()
+      }
     response.andIsOk
     time.assert.isLessThan(3200)
   }
@@ -101,10 +104,12 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     performBranchDeletion(testData.toBeDeletedBranch.id).andIsOk
 
     waitForNotThrowing(timeout = 10000, pollTime = 250) {
-      keyRepository.countByProjectAndBranch(
-        testData.project.id,
-        testData.toBeDeletedBranch.id
-      ).assert.isEqualTo(0)
+      keyRepository
+        .countByProjectAndBranch(
+          testData.project.id,
+          testData.toBeDeletedBranch.id,
+        ).assert
+        .isEqualTo(0)
     }
     branchRepository.findByIdOrNull(testData.toBeDeletedBranch.id).assert.isNull()
   }
@@ -115,7 +120,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
       mapOf(
         "name" to "feature-x",
         "originBranchId" to testData.mainBranch.id,
-      )
+      ),
     )
   }
 
@@ -157,9 +162,15 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     mainTranslationLabels.assert.containsAll(branchTranslationLabels)
 
     // tags are the same
-    this.keyMeta!!.tags.assert.hasSize(other.keyMeta!!.tags.size)
-    this.keyMeta!!.tags.assert.containsAll(other.keyMeta!!.tags)
-    this.keyMeta!!.createdAt.assert.isEqualTo(this.branch!!.createdAt)
+    this.keyMeta!!
+      .tags.assert
+      .hasSize(other.keyMeta!!.tags.size)
+    this.keyMeta!!
+      .tags.assert
+      .containsAll(other.keyMeta!!.tags)
+    this.keyMeta!!
+      .createdAt.assert
+      .isEqualTo(this.branch!!.createdAt)
 
     // translation comments are the same
     mainTranslation.comments.assert.hasSize(branchTranslation.comments.size)

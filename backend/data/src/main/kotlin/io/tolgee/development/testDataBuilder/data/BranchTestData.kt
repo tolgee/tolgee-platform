@@ -9,13 +9,14 @@ import io.tolgee.model.branching.BranchMerge
 import io.tolgee.util.addDays
 
 class BranchTestData(
-  private var currentDateProvider: CurrentDateProvider
+  private var currentDateProvider: CurrentDateProvider,
 ) : BaseTestData("branch", "Project with branches") {
   lateinit var mainBranch: Branch
   lateinit var featureBranch: Branch
   lateinit var mergeBranch: Branch
   lateinit var secondProject: Project
   lateinit var mergedBranchMerge: BranchMerge
+
   init {
     this.root.apply {
       projectBuilder.apply {
@@ -30,13 +31,14 @@ class BranchTestData(
   }
 
   private fun TestDataBuilder.addProjectWithoutBranch() {
-    secondProject = addProject {
-      name = "empty-project"
-    }.build {
-      addKey {
-        name = "test"
-      }
-    }.self
+    secondProject =
+      addProject {
+        name = "empty-project"
+      }.build {
+        addKey {
+          name = "test"
+        }
+      }.self
   }
 
   private fun ProjectBuilder.addBranches() {
@@ -81,11 +83,12 @@ class BranchTestData(
   }
 
   private fun ProjectBuilder.addMergeData() {
-    mergedBranchMerge = addBranchMerge {
-      sourceBranch = mergeBranch
-      targetBranch = mainBranch
-      sourceRevision = 15
-      targetRevision = 10
-    }.self
+    mergedBranchMerge =
+      addBranchMerge {
+        sourceBranch = mergeBranch
+        targetBranch = mainBranch
+        sourceRevision = 15
+        targetRevision = 10
+      }.self
   }
 }

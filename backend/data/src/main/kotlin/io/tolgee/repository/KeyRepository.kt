@@ -16,20 +16,26 @@ import java.util.Optional
 @Repository
 @Lazy
 interface KeyRepository : JpaRepository<Key, Long> {
-
   @Query(
     value = "select count(k.id) from key k where k.project_id = :projectId and k.branch_id = :branchId",
-    nativeQuery = true
+    nativeQuery = true,
   )
-  fun countByProjectAndBranch(projectId: Long, branchId: Long): Long
+  fun countByProjectAndBranch(
+    projectId: Long,
+    branchId: Long,
+  ): Long
 
   @Query(
     """
     select k.id from Key k
     where k.project.id = :projectId and k.branch.id = :branchId
-    """
+    """,
   )
-  fun findIdsByProjectAndBranch(projectId: Long, branchId: Long, pageable: Pageable): Page<Long>
+  fun findIdsByProjectAndBranch(
+    projectId: Long,
+    branchId: Long,
+    pageable: Pageable,
+  ): Page<Long>
 
   @Query(
     """
@@ -299,16 +305,20 @@ interface KeyRepository : JpaRepository<Key, Long> {
       where k.project.id = :projectId 
         and k.name = :keyName
         and ((b.name = :branchName and b.archivedAt is null) or (:branchName is null and (b is null or b.isDefault)))
-    """
+    """,
   )
-  fun findPrefetchedByNameAndBranch(projectId: Long, keyName: String, branchName: String?): Key?
+  fun findPrefetchedByNameAndBranch(
+    projectId: Long,
+    keyName: String,
+    branchName: String?,
+  ): Key?
 
   @Query(
     """
       from Key k
       left join fetch k.branch
       where k.id = :keyId
-    """
+    """,
   )
   fun findByIdWithBranch(keyId: Long): Key?
 
@@ -317,7 +327,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
       from Key k
       join fetch k.branch b
       where b.id = :branchId
-    """
+    """,
   )
   fun findAllByBranchId(branchId: Long): List<Key>
 
@@ -333,7 +343,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
       (:includeOrphanDefault = true and (b.id = :branchId or b is null))
       or (:includeOrphanDefault = false and b.id = :branchId)
     )
-    """
+    """,
   )
   fun findAllDetailedByBranch(
     projectId: Long,

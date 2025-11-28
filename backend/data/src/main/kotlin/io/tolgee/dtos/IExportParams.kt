@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.dtos.ExportParamsDocs.FILE_STRUCTURE_TEMPLATE_DESCRIPTION
+import io.tolgee.dtos.ExportParamsDocs.FILTER_BRANCH_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_ID_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_ID_NOT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.FILTER_KEY_PREFIX_DESCRIPTION
@@ -19,7 +20,6 @@ import io.tolgee.dtos.ExportParamsDocs.LANGUAGES_EXAMPLE
 import io.tolgee.dtos.ExportParamsDocs.MESSAGE_FORMAT_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.STRUCTURE_DELIMITER_DESCRIPTION
 import io.tolgee.dtos.ExportParamsDocs.SUPPORT_ARRAYS_DESCRIPTION
-import io.tolgee.dtos.ExportParamsDocs.FILTER_BRANCH_DESCRIPTION
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.model.enums.TranslationState

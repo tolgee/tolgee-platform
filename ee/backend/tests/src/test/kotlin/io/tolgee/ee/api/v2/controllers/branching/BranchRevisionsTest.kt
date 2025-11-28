@@ -22,7 +22,6 @@ import org.springframework.data.repository.findByIdOrNull
 @SpringBootTest
 @AutoConfigureMockMvc
 class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
-
   private lateinit var testData: BranchRevisionData
 
   @Autowired
@@ -53,7 +52,7 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `editing translation text increases branch revision`() {
     translationService.setForKey(
       testData.firstKey,
-      mapOf("en" to "new translation text")
+      mapOf("en" to "new translation text"),
     )
     assertBranchMetadataChanged()
     assertKeyCascadeUpdateChanged()
@@ -91,17 +90,23 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private fun assertBranchMetadataChanged() {
     waitForNotThrowing(timeout = 3000, pollTime = 500) {
-      testData.devBranch.refresh().revision.assert.isGreaterThan(0)
+      testData.devBranch
+        .refresh()
+        .revision.assert
+        .isGreaterThan(0)
     }
   }
 
   private fun assertKeyCascadeUpdateChanged() {
     testData.firstKey.refresh().let {
       it.cascadeUpdatedAt.assert.isNotNull
-      it.cascadeUpdatedAt!!.time.assert.isEqualTo(currentDateProvider.date.time)
+      it.cascadeUpdatedAt!!
+        .time.assert
+        .isEqualTo(currentDateProvider.date.time)
     }
   }
 
   private fun Branch.refresh(): Branch = branchRepository.findByIdOrNull(this.id)!!
+
   private fun Key.refresh(): Key = keyRepository.findByIdOrNull(this.id)!!
 }

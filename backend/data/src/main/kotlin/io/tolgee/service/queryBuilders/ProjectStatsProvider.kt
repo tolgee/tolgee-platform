@@ -59,9 +59,9 @@ open class ProjectStatsProvider(
         key.get(Key_.project) equal project,
         cb.or(
           cb.isNull(key.get(Key_.branch)),
-          cb.isTrue(branch.get(Branch_.isDefault))
-        )
-      )
+          cb.isTrue(branch.get(Branch_.isDefault)),
+        ),
+      ),
     )
     return sub.select(cb.countDistinct(key.get(Key_.id)))
   }

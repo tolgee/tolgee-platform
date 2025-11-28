@@ -20,8 +20,9 @@ import java.util.Date
 @Entity
 @Table()
 @ActivityLoggedEntity
-class BranchMerge : StandardAuditModel(), EntityWithId {
-
+class BranchMerge :
+  StandardAuditModel(),
+  EntityWithId {
   @ManyToOne(targetEntity = Branch::class)
   @JoinColumn(name = "source_branch_id", nullable = false)
   @NotNull
@@ -45,7 +46,7 @@ class BranchMerge : StandardAuditModel(), EntityWithId {
     targetEntity = BranchMergeChange::class,
     orphanRemoval = true,
     mappedBy = "branchMerge",
-    cascade = [CascadeType.ALL]
+    cascade = [CascadeType.ALL],
   )
   var changes: MutableList<BranchMergeChange> = mutableListOf()
 

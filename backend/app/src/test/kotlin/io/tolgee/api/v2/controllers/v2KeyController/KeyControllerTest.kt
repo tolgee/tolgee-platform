@@ -77,7 +77,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     testData.addNBranchedKeys(110)
     saveTestDataAndPrepare()
     performProjectAuthGet("keys?branch=feature")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(20)
           node("[0].id").isValidId
@@ -88,7 +89,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         node("page.totalElements").isNumber.isEqualTo(BigDecimal(110))
       }
     performProjectAuthGet("keys?page=1&branch=feature")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.keys") {
           isArray.hasSize(20)
           node("[0].id").isValidId

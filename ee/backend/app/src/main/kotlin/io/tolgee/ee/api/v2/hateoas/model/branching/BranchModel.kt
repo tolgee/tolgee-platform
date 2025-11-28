@@ -13,7 +13,7 @@ data class BranchModel(
   @Schema(
     description =
       "Human-readable name of the branch. " +
-      "Similar to Git branch names, it identifies the feature or purpose of this branch (e.g. 'feature-login-page')"
+        "Similar to Git branch names, it identifies the feature or purpose of this branch (e.g. 'feature-login-page')",
   )
   val name: String,
   @Schema(description = "User who created or owns this branch. Can be null for system-generated branches.")
@@ -21,7 +21,7 @@ data class BranchModel(
   @Schema(
     description =
       "Indicates whether this branch is currently active (visible and usable for editing translations and keys). " +
-        "Inactive branches are hidden but still stored in the project."
+        "Inactive branches are hidden but still stored in the project.",
   )
   val active: Boolean,
   @Schema(description = "Is branch default")
@@ -33,7 +33,7 @@ data class BranchModel(
   @Schema(
     description =
       "Ongoing (or applied) merge operation related to this branch. " +
-        "Null when the branch is not being merged yet"
+        "Null when the branch is not being merged yet",
   )
-  val merge: BranchMergeRefModel? = null
+  val merge: BranchMergeRefModel? = null,
 ) : RepresentationModel<BranchModel>()

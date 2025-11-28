@@ -40,10 +40,11 @@ class BranchRevisionData {
           organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
           project = this
         }.build {
-          english = addLanguage {
-            name = "English"
-            tag = "en"
-          }.self
+          english =
+            addLanguage {
+              name = "English"
+              tag = "en"
+            }.self
 
           addLanguage {
             name = "German"
@@ -62,55 +63,58 @@ class BranchRevisionData {
             type = ProjectPermissionType.MANAGE
           }
 
-          devBranch = addBranch {
-            name = "dev"
-          }.build {
-            firstKey = addKey {
-              name = "first_key"
-              branch = self
+          devBranch =
+            addBranch {
+              name = "dev"
             }.build {
-              translation = addTranslation {
-                language = english
-                text = "first key translation"
-              }.self
-              addMeta {
-                description = "default"
-              }
-              screenshot = addScreenshot { }.self
-            }.self
+              firstKey =
+                addKey {
+                  name = "first_key"
+                  branch = self
+                }.build {
+                  translation =
+                    addTranslation {
+                      language = english
+                      text = "first key translation"
+                    }.self
+                  addMeta {
+                    description = "default"
+                  }
+                  screenshot = addScreenshot { }.self
+                }.self
 
-            addKey {
-              name = "key_with_references"
-              branch = self
-              keyWithReferences = this
-            }.build {
-              addTranslation {
-                language = english
-                text = "Term"
-              }.self
-              addScreenshotReference {
-                screenshot = this@BranchRevisionData.screenshot
-                key = self
-              }
-              addMeta {
-                tags.add(
-                  Tag().apply {
-                    project = projectBuilder.self
-                    name = "test"
-                  },
-                )
-                addComment {
-                  text = "What a text comment"
+              addKey {
+                name = "key_with_references"
+                branch = self
+                keyWithReferences = this
+              }.build {
+                addTranslation {
+                  language = english
+                  text = "Term"
+                }.self
+                addScreenshotReference {
+                  screenshot = this@BranchRevisionData.screenshot
+                  key = self
                 }
-                addCodeReference {
-                  line = 20
-                  path = "./code/exist.extension"
-                  author = user
+                addMeta {
+                  tags.add(
+                    Tag().apply {
+                      project = projectBuilder.self
+                      name = "test"
+                    },
+                  )
+                  addComment {
+                    text = "What a text comment"
+                  }
+                  addCodeReference {
+                    line = 20
+                    path = "./code/exist.extension"
+                    author = user
+                  }
+                  custom = mutableMapOf("custom" to "value")
                 }
-                custom = mutableMapOf("custom" to "value")
               }
-            }
-          }.self
+            }.self
         }
     }
 }

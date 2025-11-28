@@ -15,12 +15,10 @@ import org.hibernate.annotations.Type
 class KeyMetaSnapshot(
   @Column(columnDefinition = "text")
   var description: String? = null,
-
   @Column(columnDefinition = "jsonb")
   @Type(JsonBinaryType::class)
-  var custom: MutableMap<String, Any?>? = null
+  var custom: MutableMap<String, Any?>? = null,
 ) : StandardAuditModel() {
-
   @OneToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "key_snapshot_id")
   lateinit var keySnapshot: KeySnapshot
