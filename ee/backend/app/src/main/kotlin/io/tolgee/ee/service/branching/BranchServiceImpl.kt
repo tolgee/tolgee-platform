@@ -2,8 +2,10 @@ package io.tolgee.ee.service.branching
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
+import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
+import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.dtos.request.translation.TranslationFilters
@@ -16,6 +18,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
+import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchCopyService
 import io.tolgee.service.branching.BranchService
@@ -234,6 +237,47 @@ class BranchServiceImpl(
   }
 
   @Transactional
+  override fun getBranchMergeChanges(
+    projectId: Long,
+    branchMergeId: Long,
+    type: BranchKeyMergeChangeType?,
+    pageable: Pageable,
+  ): Page<BranchMergeChangeView> {
+    val project = entityManager.getReference(Project::class.java, projectId)
+    val changes = branchMergeService.getChanges(projectId, branchMergeId, type, pageable)
+
+    val languages =
+      languageService.getLanguagesForTranslationsView(
+        project.languages.map { it.tag }.toSet(),
+        project.id,
+        authenticationFacade.authenticatedUser.id,
+      )
+
+    val sourceIds = changes.mapNotNull { it.sourceBranchKeyId }
+    val targetIds = changes.mapNotNull { it.targetBranchKeyId }
+
+    val sourceFilter = TranslationFilters().apply { filterKeyId = sourceIds }
+    val targetFilter = TranslationFilters().apply { filterKeyId = targetIds }
+
+    val sourceKeys =
+      translationViewDataProvider
+        .getData(projectId, languages, pageable, sourceFilter)
+        .associateBy { it.keyId }
+
+    val targetKeys =
+      translationViewDataProvider
+        .getData(projectId, languages, pageable, targetFilter)
+        .associateBy { it.keyId }
+
+    changes.forEach { change ->
+      change.sourceBranchKeyId?.let { id -> change.sourceBranchKey = sourceKeys[id] }
+      change.targetBranchKeyId?.let { id -> change.targetBranchKey = targetKeys[id] }
+    }
+
+    return changes
+  }
+
+  @Transactional
   override fun resolveConflict(
     projectId: Long,
     mergeId: Long,
@@ -241,6 +285,15 @@ class BranchServiceImpl(
   ) {
     val conflict = branchMergeService.getConflict(projectId, mergeId, request.changeId)
     conflict.resolution = request.resolve
+  }
+
+  @Transactional
+  override fun resolveAllConflicts(
+    projectId: Long,
+    mergeId: Long,
+    request: ResolveAllBranchMergeConflictsRequest,
+  ) {
+    branchMergeService.resolveAllConflicts(projectId, mergeId, request.resolve)
   }
 
   private fun archiveBranch(branch: Branch) {

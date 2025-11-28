@@ -1,7 +1,9 @@
 package io.tolgee.ee.repository.branching
 
+import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.model.branching.BranchMergeChange
+import io.tolgee.model.enums.BranchKeyMergeChangeType
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -20,6 +22,7 @@ interface BranchMergeChangeRepository : JpaRepository<BranchMergeChange, Long> {
     join bmc.branchMerge bm
     WHERE
       bm.id = :mergeId
+      and bm.sourceBranch.project.id = :projectId
       and bmc.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT
   """,
   )
@@ -28,6 +31,29 @@ interface BranchMergeChangeRepository : JpaRepository<BranchMergeChange, Long> {
     mergeId: Long,
     pageable: Pageable,
   ): Page<BranchMergeConflictView>
+
+  @Query(
+    """
+    select new io.tolgee.dtos.queryResults.branching.BranchMergeChangeView(
+        bmc.id,
+        bmc.change,
+        bmc.resolution,
+        bmc.sourceKey.id,
+        bmc.targetKey.id
+      )
+    from BranchMergeChange bmc
+    join bmc.branchMerge bm
+    where bm.id = :mergeId
+      and bm.sourceBranch.project.id = :projectId
+      and (:type is null or bmc.change = :type)
+    """,
+  )
+  fun findBranchMergeChanges(
+    projectId: Long,
+    mergeId: Long,
+    type: BranchKeyMergeChangeType?,
+    pageable: Pageable,
+  ): Page<BranchMergeChangeView>
 
   @Query(
     """
