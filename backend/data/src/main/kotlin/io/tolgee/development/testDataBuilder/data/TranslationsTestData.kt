@@ -282,7 +282,11 @@ class TranslationsTestData {
     }
   }
 
-  fun generateBranchedData(count: Long, branchName: String = "feature-branch", isBranchDefault: Boolean = false) {
+  fun generateBranchedData(
+    count: Long,
+    branchName: String = "feature-branch",
+    isBranchDefault: Boolean = false,
+  ) {
     root.data.projects[0].apply {
       addBranch {
         name = branchName

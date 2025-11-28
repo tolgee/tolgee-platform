@@ -94,7 +94,6 @@ data class ExportParams(
     description = HTML_ESCAPE_DESCRIPTION,
   )
   override var escapeHtml: Boolean? = false,
-
   @field:Parameter(
     description = ExportParamsDocs.FILTER_BRANCH_DESCRIPTION,
   )

@@ -45,39 +45,32 @@ class Branch(
   @ActivityLoggedProp
   @Column(length = 200)
   var name: String = "",
-
   @ActivityLoggedProp
   var isDefault: Boolean = false,
-
   @ActivityLoggedProp
   var isProtected: Boolean = false,
-
   @ActivityLoggedProp
   var archivedAt: Date? = null,
-
   @Column(name = "pending")
   var pending: Boolean = false,
-
   @Column(name = "revision")
   @DefaultValue("0")
   var revision: Int = 0,
-
   @OneToMany(targetEntity = BranchMerge::class, mappedBy = "sourceBranch", fetch = FetchType.LAZY)
   @OrderBy("createdAt DESC")
   var merges: List<BranchMerge> = listOf(),
-
   var deletedAt: Date? = null,
-
-  ) : StandardAuditModel() {
+) : StandardAuditModel() {
   companion object {
     const val DEFAULT_BRANCH_NAME = "main"
 
     fun createMainBranch(project: Project): Branch {
-      val branch = Branch(
-        name = DEFAULT_BRANCH_NAME,
-        isDefault = true,
-        isProtected = true,
-      )
+      val branch =
+        Branch(
+          name = DEFAULT_BRANCH_NAME,
+          isDefault = true,
+          isProtected = true,
+        )
       branch.project = project
       project.branches.add(branch)
       return branch

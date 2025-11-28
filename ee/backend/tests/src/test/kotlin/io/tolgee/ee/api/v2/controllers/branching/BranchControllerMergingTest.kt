@@ -25,7 +25,6 @@ import org.springframework.data.repository.findByIdOrNull
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: BranchMergeTestData
 
   @Autowired
@@ -56,7 +55,8 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     val mergeId = change.branchMerge.id
 
     performProjectAuthGet("branches/merge/$mergeId/conflicts")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.branchMergeConflicts") {
           node("[0].id").isEqualTo(change.id)
           node("[0].resolution").isNull()
@@ -68,11 +68,12 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
       ResolveBranchMergeConflictRequest(
         changeId = change.id,
         resolve = BranchKeyMergeResolutionType.SOURCE,
-      )
+      ),
     ).andIsOk
 
     performProjectAuthGet("branches/merge/$mergeId/conflicts")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.branchMergeConflicts") {
           node("[0].resolution").isEqualTo("SOURCE")
         }
@@ -85,18 +86,32 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     val keys = initConflicts()
     // wait for revision numbers of branches to increase after conflict keys are created
     waitForNotThrowing(timeout = 10000, pollTime = 250) {
-      testData.featureBranch.refresh().revision.assert.isGreaterThan(0)
-      testData.mainBranch.refresh().revision.assert.isGreaterThan(0)
+      testData.featureBranch
+        .refresh()
+        .revision.assert
+        .isGreaterThan(0)
+      testData.mainBranch
+        .refresh()
+        .revision.assert
+        .isGreaterThan(0)
     }
-    val change = createMergeWithConflict(
-      keys.second,
-      keys.first,
-      BranchKeyMergeResolutionType.SOURCE
-    )
+    val change =
+      createMergeWithConflict(
+        keys.second,
+        keys.first,
+        BranchKeyMergeResolutionType.SOURCE,
+      )
     val mergeId = change.branchMerge.id
 
     performProjectAuthPost("branches/merge/$mergeId/apply").andIsOk
-    translationService.find(keys.first.translations.first().id)!!.text.assert.isEqualTo("new translation")
+    translationService
+      .find(
+        keys.first.translations
+          .first()
+          .id,
+      )!!
+      .text.assert
+      .isEqualTo("new translation")
   }
 
   @Test
@@ -105,27 +120,30 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     branchSnapshotService.createInitialSnapshot(
       testData.project.id,
       testData.mainBranch,
-      testData.conflictsBranch
+      testData.conflictsBranch,
     )
     // we have to modify the same keys to
     updateKeyTranslation(testData.mainConflictKey, "main translation")
     updateKeyTranslation(testData.conflictsBranchKey, "new translation")
 
     performProjectAuthGet("branches/merge/${testData.conflictBranchMerge.id}/preview")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("outdated").isEqualTo(true)
         node("keyResolvedConflictsCount").isEqualTo(1)
       }
 
     performProjectAuthPost("branches/merge/${testData.conflictBranchMerge.id}/refresh")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("outdated").isEqualTo(false)
         node("keyResolvedConflictsCount").isEqualTo(1)
         node("keyUnresolvedConflictsCount").isEqualTo(0)
       }
 
     performProjectAuthGet("branches/merge/${testData.conflictBranchMerge.id}/conflicts")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("_embedded.branchMergeConflicts") {
           node("[0].resolution").isEqualTo("SOURCE")
         }
@@ -135,25 +153,28 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
   private fun createMergeWithConflict(
     sourceKey: Key,
     targetKey: Key,
-    resolutionType: BranchKeyMergeResolutionType? = null
+    resolutionType: BranchKeyMergeResolutionType? = null,
   ): BranchMergeChange {
     lateinit var change: BranchMergeChange
     val sourceBranch = testData.featureBranch.refresh()
     val targetBranch = testData.mainBranch.refresh()
-    val branchMerge = testData.projectBuilder.addBranchMerge {
-      this.sourceBranch = sourceBranch
-      this.targetBranch = targetBranch
-      sourceRevision = sourceBranch.revision
-      targetRevision = targetBranch.revision
-    }.build {
-      change = addChange {
-        this.change = BranchKeyMergeChangeType.CONFLICT
-        this.sourceKey = sourceKey
-        this.targetKey = targetKey
-        this.resolution = resolutionType
-        branchMerge.changes.add(this)
-      }.self
-    }.self
+    val branchMerge =
+      testData.projectBuilder
+        .addBranchMerge {
+          this.sourceBranch = sourceBranch
+          this.targetBranch = targetBranch
+          sourceRevision = sourceBranch.revision
+          targetRevision = targetBranch.revision
+        }.build {
+          change =
+            addChange {
+              this.change = BranchKeyMergeChangeType.CONFLICT
+              this.sourceKey = sourceKey
+              this.targetKey = targetKey
+              this.resolution = resolutionType
+              branchMerge.changes.add(this)
+            }.self
+        }.self
     branchMergeRepository.save(branchMerge)
     branchMergeChangeRepository.save(change)
     return change
@@ -164,30 +185,33 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
       name: String,
       branch: Branch,
       translation: String,
-      description: String
-    ) = testData.projectBuilder.addKey {
-      this.name = name
-      this.branch = branch
-    }.build keyBuilder@{
-      addTranslation("en", translation).build {
-        this@keyBuilder.self.translations.add(self)
-      }
-      addMeta { this.description = description }
-    }.self
+      description: String,
+    ) = testData.projectBuilder
+      .addKey {
+        this.name = name
+        this.branch = branch
+      }.build keyBuilder@{
+        addTranslation("en", translation).build {
+          this@keyBuilder.self.translations.add(self)
+        }
+        addMeta { this.description = description }
+      }.self
 
-    val conflictKeyMain = createKey(
-      name = "conflict-key",
-      branch = testData.mainBranch,
-      translation = "old translation",
-      description = "conflict key description"
-    )
+    val conflictKeyMain =
+      createKey(
+        name = "conflict-key",
+        branch = testData.mainBranch,
+        translation = "old translation",
+        description = "conflict key description",
+      )
 
-    val conflictKeyFeature = createKey(
-      name = "conflict-key",
-      branch = testData.featureBranch,
-      translation = "old translation",
-      description = "conflict feature key description"
-    )
+    val conflictKeyFeature =
+      createKey(
+        name = "conflict-key",
+        branch = testData.featureBranch,
+        translation = "old translation",
+        description = "conflict feature key description",
+      )
 
     keyService.save(conflictKeyMain)
     translationService.save(conflictKeyMain.translations.first { it.language.tag == "en" })
@@ -197,7 +221,10 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     return Pair(conflictKeyMain, conflictKeyFeature)
   }
 
-  private fun updateKeyTranslation(key: Key, value: String) {
+  private fun updateKeyTranslation(
+    key: Key,
+    value: String,
+  ) {
     val managedKey = keyService.get(key.id)
     val translation = translationService.getOrCreate(managedKey, testData.englishLanguage)
     translationService.setTranslationText(translation, value)
@@ -208,10 +235,12 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     branchSnapshotService.createInitialSnapshot(
       testData.project.id,
       testData.mainBranch,
-      testData.featureBranch
+      testData.featureBranch,
     )
     waitForNotThrowing(timeout = 10000, pollTime = 250) {
-      testData.featureBranch.refresh().pending.assert.isFalse
+      testData.featureBranch
+        .refresh()
+        .pending.assert.isFalse
     }
     updateKeyTranslation(keys.first, "main translation")
     updateKeyTranslation(keys.second, "new translation")

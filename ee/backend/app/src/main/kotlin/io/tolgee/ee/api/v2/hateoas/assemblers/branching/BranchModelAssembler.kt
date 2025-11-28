@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 class BranchModelAssembler(
   private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
-  private val branchMergeRefModelAssembler: BranchMergeRefModelAssembler
+  private val branchMergeRefModelAssembler: BranchMergeRefModelAssembler,
 ) : RepresentationModelAssembler<Branch, BranchModel> {
   override fun toModel(entity: Branch): BranchModel {
     return BranchModel(
@@ -20,7 +20,7 @@ class BranchModelAssembler(
       isDefault = entity.isDefault,
       isProtected = entity.isProtected,
       createdAt = entity.createdAt?.time,
-      merge = entity.lastMerge?.let { branchMergeRefModelAssembler.toModel(it) }
+      merge = entity.lastMerge?.let { branchMergeRefModelAssembler.toModel(it) },
     )
   }
 }

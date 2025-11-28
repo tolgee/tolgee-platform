@@ -276,15 +276,15 @@ class QueryGlobalFiltering(
       queryBase.whereConditions.add(
         cb.or(
           branchJoin.get(Branch_.id).isNull,
-          cb.isTrue(branchJoin.get(Branch_.isDefault))
-        )
+          cb.isTrue(branchJoin.get(Branch_.isDefault)),
+        ),
       )
     } else {
       queryBase.whereConditions.add(
         cb.and(
           cb.equal(branchJoin.get(Branch_.name), cb.literal(params.branch)),
           cb.isNull(branchJoin.get(Branch_.archivedAt)),
-        )
+        ),
       )
     }
   }

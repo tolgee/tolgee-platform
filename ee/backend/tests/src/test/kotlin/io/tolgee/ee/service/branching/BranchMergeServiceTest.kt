@@ -19,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 class BranchMergeServiceTest : AbstractSpringTest() {
-
   @Autowired
   lateinit var branchService: BranchServiceImpl
 
@@ -45,7 +44,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     branchSnapshotService.createInitialSnapshot(
       testData.project.id,
       testData.mainBranch,
-      testData.featureBranch
+      testData.featureBranch,
     )
   }
 
@@ -58,15 +57,33 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     val updates = merge.changes.filter { it.change == BranchKeyMergeChangeType.UPDATE }
 
     additions.assert.hasSize(1)
-    additions.first().sourceKey!!.name.assert.isEqualTo(additionKeyName)
-    additions.first().resolution.assert.isEqualTo(BranchKeyMergeResolutionType.SOURCE)
+    additions
+      .first()
+      .sourceKey!!
+      .name.assert
+      .isEqualTo(additionKeyName)
+    additions
+      .first()
+      .resolution.assert
+      .isEqualTo(BranchKeyMergeResolutionType.SOURCE)
 
     deletions.assert.hasSize(1)
-    deletions.first().targetKey!!.name.assert.isEqualTo(BranchMergeTestData.DELETE_KEY_NAME)
+    deletions
+      .first()
+      .targetKey!!
+      .name.assert
+      .isEqualTo(BranchMergeTestData.DELETE_KEY_NAME)
 
     updates.assert.hasSize(1)
-    updates.first().sourceKey!!.name.assert.isEqualTo(BranchMergeTestData.UPDATE_KEY_NAME)
-    updates.first().resolution.assert.isEqualTo(BranchKeyMergeResolutionType.SOURCE)
+    updates
+      .first()
+      .sourceKey!!
+      .name.assert
+      .isEqualTo(BranchMergeTestData.UPDATE_KEY_NAME)
+    updates
+      .first()
+      .resolution.assert
+      .isEqualTo(BranchKeyMergeResolutionType.SOURCE)
   }
 
   @Test
@@ -79,7 +96,10 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     additionInMain.assert.isNotNull()
     additionInMain!!.enTranslation().assert.isEqualTo(additionValue)
 
-    testData.mainKeyToUpdate.enTranslation().assert.isEqualTo(updatedValue)
+    testData.mainKeyToUpdate
+      .enTranslation()
+      .assert
+      .isEqualTo(updatedValue)
     keyService.find(testData.mainKeyToDelete.id).assert.isNull()
   }
 
@@ -88,7 +108,10 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     deleteFeatureKey()
     updateFeatureKey()
     waitForNotThrowing(timeout = 5000, pollTime = 250) {
-      testData.featureBranch.refresh()!!.revision.assert.isEqualTo(3)
+      testData.featureBranch
+        .refresh()!!
+        .revision.assert
+        .isEqualTo(3)
     }
 
     return branchService.dryRunMerge(
@@ -105,24 +128,37 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     updateKeyTranslation(testData.mainConflictKey, mainConflictValue)
     updateKeyTranslation(testData.featureConflictKey, featureConflictValue)
 
-    val merge = branchService.dryRunMerge(
-      testData.featureBranch.refresh()!!,
-      testData.mainBranch.refresh()!!,
-    )
+    val merge =
+      branchService.dryRunMerge(
+        testData.featureBranch.refresh()!!,
+        testData.mainBranch.refresh()!!,
+      )
 
     val conflicts = merge.changes.filter { it.change == BranchKeyMergeChangeType.CONFLICT }
     conflicts.assert.hasSize(1)
-    conflicts.first().sourceKey!!.name.assert.isEqualTo(BranchMergeTestData.CONFLICT_KEY_NAME)
-    conflicts.first().targetKey!!.name.assert.isEqualTo(BranchMergeTestData.CONFLICT_KEY_NAME)
-    conflicts.first().resolution.assert.isNull()
+    conflicts
+      .first()
+      .sourceKey!!
+      .name.assert
+      .isEqualTo(BranchMergeTestData.CONFLICT_KEY_NAME)
+    conflicts
+      .first()
+      .targetKey!!
+      .name.assert
+      .isEqualTo(BranchMergeTestData.CONFLICT_KEY_NAME)
+    conflicts
+      .first()
+      .resolution.assert
+      .isNull()
   }
 
   private fun createFeatureOnlyKey() {
-    val dto = CreateKeyDto(
-      name = additionKeyName,
-      translations = mapOf("en" to additionValue),
-      branch = testData.featureBranch.name
-    )
+    val dto =
+      CreateKeyDto(
+        name = additionKeyName,
+        translations = mapOf("en" to additionValue),
+        branch = testData.featureBranch.name,
+      )
     keyService.create(testData.project, dto)
   }
 
@@ -134,7 +170,10 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     updateKeyTranslation(testData.featureKeyToUpdate, updatedValue)
   }
 
-  private fun updateKeyTranslation(key: Key, value: String) {
+  private fun updateKeyTranslation(
+    key: Key,
+    value: String,
+  ) {
     val managedKey = keyService.get(key.id)
     val translation = translationService.getOrCreate(managedKey, testData.englishLanguage)
     translationService.setTranslationText(translation, value)

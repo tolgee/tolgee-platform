@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface KeySnapshotRepository : JpaRepository<KeySnapshot, Long> {
-
   @EntityGraph(attributePaths = ["translations", "keyMetaSnapshot"])
   fun findAllByBranchId(branchId: Long): List<KeySnapshot>
 

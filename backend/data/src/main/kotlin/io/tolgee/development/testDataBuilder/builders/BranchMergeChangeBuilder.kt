@@ -5,7 +5,8 @@ import io.tolgee.model.branching.BranchMergeChange
 class BranchMergeChangeBuilder(
   val branchMergeBuilder: BranchMergeBuilder,
 ) : BaseEntityDataBuilder<BranchMergeChange, BranchMergeChangeBuilder>() {
-  override val self: BranchMergeChange = BranchMergeChange().apply {
-    branchMergeBuilder.let { branchMerge = it.self }
-  }
+  override val self: BranchMergeChange =
+    BranchMergeChange().apply {
+      branchMergeBuilder.let { branchMerge = it.self }
+    }
 }

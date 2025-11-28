@@ -97,7 +97,8 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
       node("icuPlaceholders").isBoolean.isTrue
       node("id").asNumber().satisfies {
         projectService.get(it.toLong()).let { it ->
-          it.branches.size.assert.isEqualTo(1)
+          it.branches.size.assert
+            .isEqualTo(1)
           it.branches.first().let { branch ->
             branch.isDefault.assert.isTrue
             branch.isProtected.assert.isTrue

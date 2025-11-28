@@ -55,7 +55,8 @@ class Translation(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var text: String? = null,
-) : StandardAuditModel(), BranchVersionedEntity<Translation, TranslationSnapshot> {
+) : StandardAuditModel(),
+  BranchVersionedEntity<Translation, TranslationSnapshot> {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @NotNull
   lateinit var key: Key

@@ -253,7 +253,7 @@ class BigMetaService(
               cb.isNull(root.get(Key_.branch)),
               cb.isTrue(branch.get(Branch_.isDefault)),
             ),
-          )
+          ),
         )
       }
     val keyPredicates = cb.or(*predicates.toTypedArray())
