@@ -90,7 +90,7 @@ export interface paths {
   "/v2/api-keys": {
     get: operations["allByUser"];
     /** Creates new API key with provided scopes */
-    post: operations["create_15"];
+    post: operations["create_16"];
   };
   "/v2/api-keys/availableScopes": {
     get: operations["getScopes"];
@@ -148,7 +148,7 @@ export interface paths {
     post: operations["upload"];
   };
   "/v2/image-upload/{ids}": {
-    delete: operations["delete_15"];
+    delete: operations["delete_16"];
   };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
@@ -172,7 +172,7 @@ export interface paths {
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
     get: operations["getAll_10"];
-    post: operations["create_12"];
+    post: operations["create_13"];
   };
   "/v2/organizations/{id}": {
     get: operations["get_15"];
@@ -206,7 +206,7 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/glossaries": {
     get: operations["getAll_12"];
-    post: operations["create_13"];
+    post: operations["create_14"];
   };
   "/v2/organizations/{organizationId}/glossaries-with-stats": {
     get: operations["getAllWithStats"];
@@ -230,7 +230,7 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms": {
     get: operations["getAll_13"];
-    post: operations["create_14"];
+    post: operations["create_15"];
     delete: operations["deleteMultiple"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}": {
@@ -335,7 +335,7 @@ export interface paths {
   };
   "/v2/pats": {
     get: operations["getAll_9"];
-    post: operations["create_11"];
+    post: operations["create_12"];
   };
   "/v2/pats/current": {
     /** Returns current Personal Access Token. If the request is not authenticated with a Personal Access Token, it will return 400 response status. */
@@ -425,6 +425,37 @@ export interface paths {
   "/v2/projects/{projectId}/big-meta": {
     /** Stores a bigMeta for a project */
     post: operations["store_2"];
+  };
+  "/v2/projects/{projectId}/branches": {
+    get: operations["all"];
+    post: operations["create_11"];
+  };
+  "/v2/projects/{projectId}/branches/merge": {
+    get: operations["getBranchMerges"];
+  };
+  "/v2/projects/{projectId}/branches/merge/preview": {
+    post: operations["dryRunMerge"];
+  };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}": {
+    delete: operations["deleteBranchMerge"];
+  };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}/apply": {
+    post: operations["merge"];
+  };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}/conflicts": {
+    get: operations["getBranchMergeSessionConflicts"];
+  };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}/preview": {
+    get: operations["getBranchMergeSessionPreview"];
+  };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}/refresh": {
+    post: operations["refreshBranchMerge"];
+  };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}/resolve": {
+    put: operations["resolveConflict"];
+  };
+  "/v2/projects/{projectId}/branches/{branchId}": {
+    delete: operations["delete_15"];
   };
   "/v2/projects/{projectId}/content-delivery-configs": {
     get: operations["list_2"];
@@ -1393,6 +1424,113 @@ export interface components {
       /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
       relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
     };
+    BranchMergeConflictModel: {
+      /**
+       * Format: int64
+       * @description Branch merge session id
+       */
+      id: number;
+      /**
+       * @description Type of key conflict resolution
+       * @enum {string}
+       */
+      resolution?: "SOURCE" | "TARGET";
+      /** @description Source branch key */
+      sourceKey: components["schemas"]["KeyWithTranslationsModel"];
+      /** @description Target branch key */
+      targetKey: components["schemas"]["KeyWithTranslationsModel"];
+    };
+    BranchMergeModel: {
+      /**
+       * Format: int64
+       * @description Branch merge id
+       */
+      id: number;
+      /**
+       * Format: int32
+       * @description Key additions count
+       */
+      keyAdditionsCount: number;
+      /**
+       * Format: int32
+       * @description Key deletions count
+       */
+      keyDeletionsCount: number;
+      /**
+       * Format: int32
+       * @description Key updates count
+       */
+      keyModificationsCount: number;
+      /**
+       * Format: int32
+       * @description Key resolved conflicts count
+       */
+      keyResolvedConflictsCount: number;
+      /**
+       * Format: int32
+       * @description Key unresoled conflicts count
+       */
+      keyUnresolvedConflictsCount: number;
+      /**
+       * Format: int64
+       * @description Date of merge. If null, merge was not applied yet
+       */
+      mergedAt?: number;
+      /** @description Is merge outdated. If true, it means, that either source or target branch data were changed */
+      outdated: boolean;
+      /**
+       * Format: int64
+       * @description Source branch id
+       */
+      sourceBranchId: number;
+      /** @description Source branch name */
+      sourceBranchName: string;
+      /**
+       * Format: int64
+       * @description Target branch id
+       */
+      targetBranchId: number;
+      /** @description Target branch name */
+      targetBranchName: string;
+    };
+    BranchMergeRefModel: {
+      /**
+       * Format: int64
+       * @description Branch merge ID
+       */
+      id: number;
+      /**
+       * Format: int64
+       * @description Date of merge. If null, merge was not applied yet
+       */
+      mergedAt?: number;
+      /** @description Target branch name */
+      targetBranchName: string;
+    };
+    BranchModel: {
+      /** @description Indicates whether this branch is currently active (visible and usable for editing translations and keys). Inactive branches are hidden but still stored in the project. */
+      active: boolean;
+      /** @description User who created or owns this branch. Can be null for system-generated branches. */
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      /**
+       * Format: int64
+       * @description Date of branch creation
+       */
+      createdAt?: number;
+      /**
+       * Format: int64
+       * @description Unique identifier of the branch
+       */
+      id: number;
+      /** @description Is branch default */
+      isDefault: boolean;
+      /** @description Is branch protected */
+      isProtected: boolean;
+      /** @description Ongoing (or applied) merge operation related to this branch. Null when the branch is not being merged yet */
+      merge?: components["schemas"]["BranchMergeRefModel"];
+      /** @description Human-readable name of the branch. Similar to Git branch names, it identifies the feature or purpose of this branch (e.g. 'feature-login-page') */
+      name: string;
+    };
     BusinessEventReportRequest: {
       anonymousUserId?: string;
       data?: { [key: string]: unknown };
@@ -1554,6 +1692,8 @@ export interface components {
       };
     };
     ComplexEditKeyDto: {
+      /** @description Branch of the key. If not provided, default branch will be used */
+      branch?: string;
       /** @description Custom values of the key. If not provided, custom values won't be modified */
       custom?: { [key: string]: unknown };
       /** @description Description of the key. It's also used as a context for Tolgee AI translator */
@@ -1733,6 +1873,12 @@ export interface components {
        * but in Android format. (e.g., en-rUS)
        */
       fileStructureTemplate?: string;
+      /**
+       * @description Filter translations with branch.
+       *
+       * By default, default branch is exported.
+       */
+      filterBranch?: string;
       /** @description Filter key IDs to be contained in export */
       filterKeyId?: number[];
       /** @description Filter key IDs not to be contained in export */
@@ -1857,6 +2003,12 @@ export interface components {
        * but in Android format. (e.g., en-rUS)
        */
       fileStructureTemplate?: string;
+      /**
+       * @description Filter translations with branch.
+       *
+       * By default, default branch is exported.
+       */
+      filterBranch?: string;
       /** @description Filter key IDs to be contained in export */
       filterKeyId?: number[];
       /** @description Filter key IDs not to be contained in export */
@@ -1990,6 +2142,15 @@ export interface components {
       projectId: number;
       scopes: string[];
     };
+    CreateBranchModel: {
+      /** @description Branch name, example = feature/new-feature */
+      name: string;
+      /**
+       * Format: int64
+       * @description Origin branch id
+       */
+      originBranchId: number;
+    };
     CreateGlossaryRequest: {
       /** @description IDs of projects to be assigned to glossary */
       assignedProjectIds: number[];
@@ -2021,6 +2182,7 @@ export interface components {
       text: string;
     };
     CreateKeyDto: {
+      branch?: string;
       /**
        * @description Description of the key
        * @example This key is used on homepage. It's a label of sign up button.
@@ -2159,7 +2321,21 @@ export interface components {
       domain: string;
       state: string;
     };
+    DryRunMergeBranchRequest: {
+      /**
+       * Format: int64
+       * @description Source branch id
+       */
+      sourceBranchId: number;
+      /**
+       * Format: int64
+       * @description Target branch id
+       */
+      targetBranchId: number;
+    };
     EditKeyDto: {
+      /** @description The branch of the key. (When empty or null default branch will be used) */
+      branch?: string;
       /**
        * @description Description of the key
        * @example This key is used on homepage. It's a label of sign up button.
@@ -2552,7 +2728,16 @@ export interface components {
         | "impersonation_of_admin_by_supporter_not_allowed"
         | "already_impersonating_user"
         | "operation_not_permitted_in_read_only_mode"
-        | "file_processing_failed";
+        | "file_processing_failed"
+        | "branch_not_found"
+        | "cannot_delete_default_branch"
+        | "branch_already_exists"
+        | "origin_branch_not_found"
+        | "branch_merge_not_found"
+        | "branch_merge_change_not_found"
+        | "branch_merge_revision_not_valid"
+        | "branch_merge_conflicts_not_resolved"
+        | "branch_merge_already_merged";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -2613,6 +2798,12 @@ export interface components {
        * but in Android format. (e.g., en-rUS)
        */
       fileStructureTemplate?: string;
+      /**
+       * @description Filter translations with branch.
+       *
+       * By default, default branch is exported.
+       */
+      filterBranch?: string;
       /** @description Filter key IDs to be contained in export */
       filterKeyId?: number[];
       /** @description Filter key IDs not to be contained in export */
@@ -2955,6 +3146,7 @@ export interface components {
       keys: components["schemas"]["ImportKeysResolvableItemDto"][];
     };
     ImportKeysResolvableItemDto: {
+      branch?: string;
       /**
        * @description Key name to set translations for
        * @example what_a_key_to_translate
@@ -3193,6 +3385,11 @@ export interface components {
       y: number;
     };
     KeyModel: {
+      /**
+       * @description Branch of key
+       * @example dev
+       */
+      branch?: string;
       /** @description Custom values of the key */
       custom?: { [key: string]: unknown };
       /**
@@ -3278,6 +3475,8 @@ export interface components {
       namespace?: string;
     };
     KeyWithDataModel: {
+      /** @description Branch of the key */
+      branch?: string;
       /** @description Custom values of the key */
       custom: { [key: string]: unknown };
       /**
@@ -3883,6 +4082,24 @@ export interface components {
     PagedModelBatchJobModel: {
       _embedded?: {
         batchJobs?: components["schemas"]["BatchJobModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelBranchMergeConflictModel: {
+      _embedded?: {
+        branchMergeConflicts?: components["schemas"]["BranchMergeConflictModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelBranchMergeModel: {
+      _embedded?: {
+        branchMerges?: components["schemas"]["BranchMergeModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelBranchModel: {
+      _embedded?: {
+        branches?: components["schemas"]["BranchModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -5020,6 +5237,7 @@ export interface components {
       expiresAt?: number;
     };
     RelatedKeyDto: {
+      branch?: string;
       keyName: string;
       namespace?: string;
     };
@@ -5031,6 +5249,18 @@ export interface components {
     ResetPasswordRequest: {
       callbackUrl: string;
       email: string;
+    };
+    ResolveBranchMergeConflictRequest: {
+      /**
+       * Format: int64
+       * @description Merge change id
+       */
+      changeId: number;
+      /**
+       * @description Type of resolution
+       * @enum {string}
+       */
+      resolve: "SOURCE" | "TARGET";
     };
     RevealedApiKeyModel: {
       description: string;
@@ -5226,6 +5456,8 @@ export interface components {
       state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
     };
     SetTranslationsWithKeyDto: {
+      /** @description Branch name to set translations for */
+      branch?: string;
       /**
        * @description Key name to set translations for
        * @example what_a_key_to_translate
@@ -5821,7 +6053,16 @@ export interface components {
         | "impersonation_of_admin_by_supporter_not_allowed"
         | "already_impersonating_user"
         | "operation_not_permitted_in_read_only_mode"
-        | "file_processing_failed";
+        | "file_processing_failed"
+        | "branch_not_found"
+        | "cannot_delete_default_branch"
+        | "branch_already_exists"
+        | "origin_branch_not_found"
+        | "branch_merge_not_found"
+        | "branch_merge_change_not_found"
+        | "branch_merge_revision_not_valid"
+        | "branch_merge_conflicts_not_resolved"
+        | "branch_merge_already_merged";
       params?: unknown[];
       success: boolean;
     };
@@ -7289,7 +7530,7 @@ export interface operations {
     };
   };
   /** Creates new API key with provided scopes */
-  create_15: {
+  create_16: {
     responses: {
       /** OK */
       200: {
@@ -8024,7 +8265,7 @@ export interface operations {
       };
     };
   };
-  delete_15: {
+  delete_16: {
     parameters: {
       path: {
         ids: number[];
@@ -8372,7 +8613,7 @@ export interface operations {
       };
     };
   };
-  create_12: {
+  create_13: {
     responses: {
       /** OK */
       200: {
@@ -8893,7 +9134,7 @@ export interface operations {
       };
     };
   };
-  create_13: {
+  create_14: {
     parameters: {
       path: {
         organizationId: number;
@@ -9327,7 +9568,7 @@ export interface operations {
       };
     };
   };
-  create_14: {
+  create_15: {
     parameters: {
       path: {
         organizationId: number;
@@ -10766,7 +11007,7 @@ export interface operations {
       };
     };
   };
-  create_11: {
+  create_12: {
     responses: {
       /** Created */
       201: {
@@ -12020,6 +12261,467 @@ export interface operations {
       };
     };
   };
+  all: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+        activeOnly?: boolean;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelBranchModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  create_11: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BranchModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateBranchModel"];
+      };
+    };
+  };
+  getBranchMerges: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelBranchMergeModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  dryRunMerge: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BranchMergeRefModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DryRunMergeBranchRequest"];
+      };
+    };
+  };
+  deleteBranchMerge: {
+    parameters: {
+      path: {
+        mergeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  merge: {
+    parameters: {
+      path: {
+        mergeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getBranchMergeSessionConflicts: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        mergeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelBranchMergeConflictModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getBranchMergeSessionPreview: {
+    parameters: {
+      path: {
+        mergeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BranchMergeModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  refreshBranchMerge: {
+    parameters: {
+      path: {
+        mergeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BranchMergeModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  resolveConflict: {
+    parameters: {
+      path: {
+        mergeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResolveBranchMergeConflictRequest"];
+      };
+    };
+  };
+  delete_15: {
+    parameters: {
+      path: {
+        branchId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   list_2: {
     parameters: {
       query: {
@@ -12725,6 +13427,12 @@ export interface operations {
          * e.g. Key <b>hello</b> will be exported as &lt;b&gt;hello&lt;/b&gt;
          */
         escapeHtml?: boolean;
+        /**
+         * Filter translations with branch.
+         *
+         * By default, default branch is exported.
+         */
+        filterBranch?: string;
       };
       path: {
         projectId: number;
@@ -13743,6 +14451,7 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        branch?: string;
       };
       path: {
         projectId: number;
@@ -14178,6 +14887,8 @@ export interface operations {
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
         filterHasNoSuggestionsInLang?: string[];
+        /** Selects only keys from specified branch */
+        branch?: string;
       };
       path: {
         projectId: number;
@@ -18264,6 +18975,8 @@ export interface operations {
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
         filterHasNoSuggestionsInLang?: string[];
+        /** Selects only keys from specified branch */
+        branch?: string;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -18565,6 +19278,8 @@ export interface operations {
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
         filterHasNoSuggestionsInLang?: string[];
+        /** Selects only keys from specified branch */
+        branch?: string;
       };
       path: {
         projectId: number;
@@ -18628,6 +19343,8 @@ export interface operations {
          * Optional, filtering is not applied if not specified.
          */
         filterTag?: string[];
+        /** Branch name to return translations from */
+        branch?: string;
       };
     };
     responses: {
