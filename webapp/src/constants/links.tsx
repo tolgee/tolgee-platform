@@ -63,7 +63,7 @@ export enum PARAMS {
   TRANSLATION_ID = 'translationId',
   PLAN_ID = 'planId',
   TA_ID = 'taId',
-  TRANSLATIONS_BRANCH = 'branch',
+  BRANCH = 'branch',
   MERGE_ID = 'mergeId',
 }
 
@@ -350,14 +350,10 @@ export class LINKS {
   static PROJECT_ADD = Link.ofParent(LINKS.PROJECTS, 'add');
 
   static PROJECT_TRANSLATIONS = Link.ofParent(LINKS.PROJECT, 'translations');
-  static PROJECT_TRANSLATIONS_BRANCHED_VIEW = Link.ofParent(
-    LINKS.PROJECT_TRANSLATIONS,
-    'tree/' + p(PARAMS.TRANSLATIONS_BRANCH) + '*'
-  );
 
-  static PROJECT_TRANSLATIONS_BRANCHED = Link.ofParent(
+  static PROJECT_TRANSLATIONS_WITH_BRANCH = Link.ofParent(
     LINKS.PROJECT_TRANSLATIONS,
-    'tree/' + p(PARAMS.TRANSLATIONS_BRANCH)
+    'tree/' + p(PARAMS.BRANCH)
   );
 
   static PROJECT_TRANSLATIONS_SINGLE = Link.ofParent(
@@ -454,6 +450,18 @@ export class LINKS {
   static SLACK = Link.ofRoot('slack');
   static SLACK_CONNECT = Link.ofParent(LINKS.SLACK, 'connect');
   static SLACK_CONNECTED = Link.ofParent(LINKS.SLACK, 'connected');
+
+  /**
+   * Represents a generated link for branched project views
+   */
+  static PROJECT_TRANSLATIONS_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+  static PROJECT_DASHBOARD_BRANCHED = Link.ofParent(
+    LINKS.PROJECT,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
 }
 
 export enum QUERY {
