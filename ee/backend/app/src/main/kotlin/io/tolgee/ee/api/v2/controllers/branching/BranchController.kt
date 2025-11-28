@@ -2,20 +2,25 @@ package io.tolgee.ee.api.v2.controllers.branching
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
+import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
+import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeChangeModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeConflictModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchMergeRefModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.branching.BranchModelAssembler
+import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeChangeModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeConflictModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeRefModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.CreateBranchModel
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiOrderExtension
 import io.tolgee.security.ProjectHolder
@@ -57,6 +62,8 @@ class BranchController(
   private val pagedBranchMergeResourceAssembler: PagedResourcesAssembler<BranchMergeView>,
   private val branchMergeConflictModelAssembler: BranchMergeConflictModelAssembler,
   private val pagedBranchMergeConflictResourceAssembler: PagedResourcesAssembler<BranchMergeConflictView>,
+  private val branchMergeChangeModelAssembler: BranchMergeChangeModelAssembler,
+  private val pagedBranchMergeChangeResourceAssembler: PagedResourcesAssembler<BranchMergeChangeView>,
   private val branchMergeRefModelAssembler: BranchMergeRefModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
 ) {
@@ -169,6 +176,20 @@ class BranchController(
     return pagedBranchMergeConflictResourceAssembler.toModel(conflicts, branchMergeConflictModelAssembler)
   }
 
+  @GetMapping(value = ["/merge/{mergeId}/changes"])
+  @Operation(summary = "Get branch merge session changes")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @OpenApiOrderExtension(7)
+  fun getBranchMergeSessionChanges(
+    @ParameterObject pageable: Pageable,
+    @PathVariable mergeId: Long,
+    @RequestParam(required = false) type: BranchKeyMergeChangeType?,
+  ): PagedModel<BranchMergeChangeModel> {
+    val changes = branchService.getBranchMergeChanges(projectHolder.project.id, mergeId, type, pageable)
+    return pagedBranchMergeChangeResourceAssembler.toModel(changes, branchMergeChangeModelAssembler)
+  }
+
   @PutMapping(value = ["/merge/{mergeId}/resolve"])
   @Operation(summary = "Resolve branch merge session conflicts")
   @AllowApiAccess
@@ -179,6 +200,18 @@ class BranchController(
     @RequestBody request: ResolveBranchMergeConflictRequest,
   ) {
     branchService.resolveConflict(projectHolder.project.id, mergeId, request)
+  }
+
+  @PutMapping(value = ["/merge/{mergeId}/resolve-all"])
+  @Operation(summary = "Resolve all branch merge session conflicts")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @OpenApiOrderExtension(8)
+  fun resolveAllConflicts(
+    @PathVariable mergeId: Long,
+    @RequestBody request: ResolveAllBranchMergeConflictsRequest,
+  ) {
+    branchService.resolveAllConflicts(projectHolder.project.id, mergeId, request)
   }
 
   @DeleteMapping(value = ["/merge/{mergeId}"])

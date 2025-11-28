@@ -442,6 +442,9 @@ export interface paths {
   "/v2/projects/{projectId}/branches/merge/{mergeId}/apply": {
     post: operations["merge"];
   };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}/changes": {
+    get: operations["getBranchMergeSessionChanges"];
+  };
   "/v2/projects/{projectId}/branches/merge/{mergeId}/conflicts": {
     get: operations["getBranchMergeSessionConflicts"];
   };
@@ -453,6 +456,9 @@ export interface paths {
   };
   "/v2/projects/{projectId}/branches/merge/{mergeId}/resolve": {
     put: operations["resolveConflict"];
+  };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}/resolve-all": {
+    put: operations["resolveAllConflicts"];
   };
   "/v2/projects/{projectId}/branches/{branchId}": {
     delete: operations["delete_15"];
@@ -1419,6 +1425,27 @@ export interface components {
     BigMetaDto: {
       /** @description Keys in the document used as a context for machine translation. Keys in the same order as they appear in the document. The order is important! We are using it for graph distance calculation. */
       relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
+    };
+    BranchMergeChangeModel: {
+      /**
+       * Format: int64
+       * @description Branch merge change id
+       */
+      id: number;
+      /**
+       * @description Type of key conflict resolution
+       * @enum {string}
+       */
+      resolution?: "SOURCE" | "TARGET";
+      /** @description Source branch key */
+      sourceKey?: components["schemas"]["KeyWithTranslationsModel"];
+      /** @description Target branch key */
+      targetKey?: components["schemas"]["KeyWithTranslationsModel"];
+      /**
+       * @description Change type
+       * @enum {string}
+       */
+      type: "ADD" | "UPDATE" | "DELETE" | "CONFLICT" | "SKIP";
     };
     BranchMergeConflictModel: {
       /**
@@ -4081,6 +4108,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelBranchMergeChangeModel: {
+      _embedded?: {
+        branchMergeChanges?: components["schemas"]["BranchMergeChangeModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelBranchMergeConflictModel: {
       _embedded?: {
         branchMergeConflicts?: components["schemas"]["BranchMergeConflictModel"][];
@@ -5245,6 +5278,10 @@ export interface components {
     ResetPasswordRequest: {
       callbackUrl: string;
       email: string;
+    };
+    ResolveAllBranchMergeConflictsRequest: {
+      /** @enum {string} */
+      resolve: "SOURCE" | "TARGET";
     };
     ResolveBranchMergeConflictRequest: {
       /**
@@ -12509,6 +12546,55 @@ export interface operations {
       };
     };
   };
+  getBranchMergeSessionChanges: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        type?: "ADD" | "UPDATE" | "DELETE" | "CONFLICT" | "SKIP";
+      };
+      path: {
+        mergeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelBranchMergeChangeModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   getBranchMergeSessionConflicts: {
     parameters: {
       query: {
@@ -12675,6 +12761,47 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["ResolveBranchMergeConflictRequest"];
+      };
+    };
+  };
+  resolveAllConflicts: {
+    parameters: {
+      path: {
+        mergeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResolveAllBranchMergeConflictsRequest"];
       };
     };
   };
