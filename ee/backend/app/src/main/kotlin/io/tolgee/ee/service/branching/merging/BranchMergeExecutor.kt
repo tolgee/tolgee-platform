@@ -24,7 +24,6 @@ class BranchMergeExecutor(
   private val translationService: TranslationService,
   private val currentDateProvider: CurrentDateProvider,
 ) {
-
   fun execute(merge: BranchMerge) {
     merge.changes.forEach { change ->
       when (change.change) {
@@ -51,26 +50,31 @@ class BranchMergeExecutor(
       return
     }
     val sourceKey = change.sourceKey ?: return
-    val targetKey = change.targetKey ?: run {
-      applyAddition(change, change.branchMerge.targetBranch)
-      return
-    }
+    val targetKey =
+      change.targetKey ?: run {
+        applyAddition(change, change.branchMerge.targetBranch)
+        return
+      }
     targetKey.merge(sourceKey)
   }
 
-  private fun applyAddition(change: BranchMergeChange, targetBranch: Branch) {
+  private fun applyAddition(
+    change: BranchMergeChange,
+    targetBranch: Branch,
+  ) {
     if (change.resolution != BranchKeyMergeResolutionType.SOURCE) {
       return
     }
     val sourceKey = change.sourceKey ?: return
-    val newKey = Key().apply {
-      name = sourceKey.name
-      namespace = sourceKey.namespace
-      isPlural = sourceKey.isPlural
-      pluralArgName = sourceKey.pluralArgName
-      project = targetBranch.project
-      branch = targetBranch
-    }
+    val newKey =
+      Key().apply {
+        name = sourceKey.name
+        namespace = sourceKey.namespace
+        isPlural = sourceKey.isPlural
+        pluralArgName = sourceKey.pluralArgName
+        project = targetBranch.project
+        branch = targetBranch
+      }
     keyRepository.save(newKey)
 
     sourceKey.keyMeta?.let { sourceMeta ->
@@ -80,16 +84,17 @@ class BranchMergeExecutor(
     }
 
     sourceKey.translations.forEach { sourceTranslation ->
-      val translation = Translation(
-        text = sourceTranslation.text
-      ).apply {
-        key = newKey
-        language = sourceTranslation.language
-        state = sourceTranslation.state
-        auto = sourceTranslation.auto
-        mtProvider = sourceTranslation.mtProvider
-        outdated = sourceTranslation.outdated
-      }
+      val translation =
+        Translation(
+          text = sourceTranslation.text,
+        ).apply {
+          key = newKey
+          language = sourceTranslation.language
+          state = sourceTranslation.state
+          auto = sourceTranslation.auto
+          mtProvider = sourceTranslation.mtProvider
+          outdated = sourceTranslation.outdated
+        }
       sourceTranslation.labels.forEach { label ->
         translation.addLabel(label)
       }

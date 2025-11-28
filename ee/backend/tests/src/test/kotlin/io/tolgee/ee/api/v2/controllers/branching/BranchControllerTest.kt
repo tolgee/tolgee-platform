@@ -29,7 +29,6 @@ import java.math.BigDecimal
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
-
   lateinit var testData: BranchTestData
 
   @Autowired
@@ -118,7 +117,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       mapOf(
         "name" to "new-branch",
         "originBranchId" to testData.mainBranch.id,
-      )
+      ),
     ).andAssertThatJson {
       node("name").isEqualTo("new-branch")
       node("active").isEqualTo(true)
@@ -134,7 +133,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       mapOf(
         "name" to "feature-branch",
         "originBranchId" to testData.mainBranch.id,
-      )
+      ),
     ).andIsBadRequest.andHasErrorMessage(Message.BRANCH_ALREADY_EXISTS)
   }
 
@@ -152,7 +151,10 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `cannot delete default branch`() {
     performProjectAuthDelete("branches/${testData.mainBranch.id}").andIsForbidden
-    testData.mainBranch.refresh().archivedAt.assert.isNull()
+    testData.mainBranch
+      .refresh()
+      .archivedAt.assert
+      .isNull()
   }
 
   @Test
@@ -161,7 +163,8 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     createConflictKeys()
 
     performProjectAuthGet("branches/merge")
-      .andIsOk.andAssertThatJson {
+      .andIsOk
+      .andAssertThatJson {
         node("page.totalElements").isNumber.isEqualTo(BigDecimal(1))
         node("_embedded.branchMerges") {
           isArray.hasSize(1)
@@ -196,8 +199,8 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       mapOf(
         "name" to "new-merge",
         "targetBranchId" to testData.mainBranch.id,
-        "sourceBranchId" to testData.featureBranch.id
-      )
+        "sourceBranchId" to testData.featureBranch.id,
+      ),
     ).let {
       it.andIsOk.andAssertThatJson {
         node("id").isValidId
@@ -246,30 +249,33 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       name: String,
       branch: Branch,
       translation: String,
-      description: String
-    ) = testData.projectBuilder.addKey {
-      this.name = name
-      this.branch = branch
-    }.build keyBuilder@{
-      addTranslation("en", translation).build {
-        this@keyBuilder.self.translations.add(self)
-      }
-      addMeta { this.description = description }
-    }.self
+      description: String,
+    ) = testData.projectBuilder
+      .addKey {
+        this.name = name
+        this.branch = branch
+      }.build keyBuilder@{
+        addTranslation("en", translation).build {
+          this@keyBuilder.self.translations.add(self)
+        }
+        addMeta { this.description = description }
+      }.self
 
-    val conflictKeyMain = createKey(
-      name = "conflict-key",
-      branch = testData.mainBranch,
-      translation = "old translation",
-      description = "conflict key description"
-    )
+    val conflictKeyMain =
+      createKey(
+        name = "conflict-key",
+        branch = testData.mainBranch,
+        translation = "old translation",
+        description = "conflict key description",
+      )
 
-    val conflictKeyFeature = createKey(
-      name = "conflict-key",
-      branch = testData.featureBranch,
-      translation = "old translation",
-      description = "conflict feature key description"
-    )
+    val conflictKeyFeature =
+      createKey(
+        name = "conflict-key",
+        branch = testData.featureBranch,
+        translation = "old translation",
+        description = "conflict feature key description",
+      )
 
     keyService.save(conflictKeyMain)
     translationService.save(conflictKeyMain.translations.first { it.language.tag == "en" })
@@ -279,7 +285,10 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     return Pair(conflictKeyMain, conflictKeyFeature)
   }
 
-  private fun updateKeyTranslation(key: Key, value: String) {
+  private fun updateKeyTranslation(
+    key: Key,
+    value: String,
+  ) {
     val managedKey = keyService.get(key.id)
     val translation = translationService.getOrCreate(managedKey, testData.englishLanguage)
     translationService.setTranslationText(translation, value)
@@ -299,7 +308,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     branchSnapshotService.createInitialSnapshot(
       testData.project.id,
       testData.mainBranch,
-      testData.featureBranch
+      testData.featureBranch,
     )
     updateKeyTranslation(keys.first, "main translation")
     updateKeyTranslation(keys.second, "new translation")

@@ -77,24 +77,25 @@ class KeysDistanceUtil(
         !currentUpdated.containsKey(it.key)
       }
 
-    distinctKeys.map { getKeyId(it.namespace, it.keyName, it.branch ?: project.getDefaultBranch()?.name) }
+    distinctKeys
+      .map { getKeyId(it.namespace, it.keyName, it.branch ?: project.getDefaultBranch()?.name) }
       .forEachIndexed { index, keyId ->
         // by this, we are pushing unprovided keys out of the "focus zone", so they should "converge" to become deleted
         val maxDistance = MAX_STORED
         otherThanCurrent
-        .asSequence()
-        .filter {
-          it.key.first == keyId || it.key.second == keyId
-        }.sortedBy { it.value.distance }
-        .forEachIndexed { index, (key, value) ->
-          value.distance =
-            computeDistance(
-              oldDistance = value.distance,
-              hits = value.hits,
-              newDistance = maxDistance,
-            )
-          value.hits++
-        }
+          .asSequence()
+          .filter {
+            it.key.first == keyId || it.key.second == keyId
+          }.sortedBy { it.value.distance }
+          .forEachIndexed { index, (key, value) ->
+            value.distance =
+              computeDistance(
+                oldDistance = value.distance,
+                hits = value.hits,
+                newDistance = maxDistance,
+              )
+            value.hits++
+          }
       }
 
     otherThanCurrent
