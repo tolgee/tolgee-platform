@@ -26,7 +26,6 @@ class BranchMergeService(
   private val branchMergeAnalyzer: BranchMergeAnalyzer,
   private val branchMergeExecutor: BranchMergeExecutor,
 ) : Logging {
-
   fun dryRun(branchMerge: BranchMerge) {
     val changes = branchMergeAnalyzer.compute(branchMerge)
     branchMerge.sourceRevision = branchMerge.sourceBranch.revision
@@ -35,22 +34,27 @@ class BranchMergeService(
     branchMerge.changes.addAll(changes)
   }
 
-  fun dryRun(sourceBranch: Branch, targetBranch: Branch): BranchMerge {
-    val branchMerge = BranchMerge().apply {
-      this.sourceBranch = sourceBranch
-      this.targetBranch = targetBranch
-      this.sourceRevision = sourceBranch.revision
-      this.targetRevision = targetBranch.revision
-    }
+  fun dryRun(
+    sourceBranch: Branch,
+    targetBranch: Branch,
+  ): BranchMerge {
+    val branchMerge =
+      BranchMerge().apply {
+        this.sourceBranch = sourceBranch
+        this.targetBranch = targetBranch
+        this.sourceRevision = sourceBranch.revision
+        this.targetRevision = targetBranch.revision
+      }
     dryRun(branchMerge)
     branchMergeRepository.save(branchMerge)
     return branchMerge
   }
 
   fun refresh(branchMerge: BranchMerge) {
-    val resolvedConflicts = branchMerge.changes
-      .filter { it.change == BranchKeyMergeChangeType.CONFLICT && it.resolution != null }
-      .associateBy { ConflictKey(it.sourceKey?.id, it.targetKey?.id) }
+    val resolvedConflicts =
+      branchMerge.changes
+        .filter { it.change == BranchKeyMergeChangeType.CONFLICT && it.resolution != null }
+        .associateBy { ConflictKey(it.sourceKey?.id, it.targetKey?.id) }
 
     dryRun(branchMerge)
 
@@ -63,7 +67,10 @@ class BranchMergeService(
       }
   }
 
-  private data class ConflictKey(val sourceKeyId: Long?, val targetKeyId: Long?)
+  private data class ConflictKey(
+    val sourceKeyId: Long?,
+    val targetKeyId: Long?,
+  )
 
   fun applyMerge(merge: BranchMerge) {
     try {
@@ -105,13 +112,20 @@ class BranchMergeService(
       ?: throw NotFoundException(Message.BRANCH_MERGE_CHANGE_NOT_FOUND)
   }
 
-  fun findMerge(projectId: Long, mergeId: Long): BranchMerge? {
+  fun findMerge(
+    projectId: Long,
+    mergeId: Long,
+  ): BranchMerge? {
     return branchMergeRepository.findMerge(projectId, mergeId)
   }
 
-  fun deleteMerge(projectId: Long, mergeId: Long) {
-    val merge = branchMergeRepository.findMerge(projectId, mergeId)
-      ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+  fun deleteMerge(
+    projectId: Long,
+    mergeId: Long,
+  ) {
+    val merge =
+      branchMergeRepository.findMerge(projectId, mergeId)
+        ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     branchMergeRepository.delete(merge)
   }
 }

@@ -31,8 +31,9 @@ import jakarta.persistence.Table
 @Entity
 @Table()
 @ActivityLoggedEntity
-class BranchMergeChange : StandardAuditModel(), EntityWithId {
-
+class BranchMergeChange :
+  StandardAuditModel(),
+  EntityWithId {
   @ManyToOne(targetEntity = BranchMerge::class)
   @JoinColumn(name = "branch_merge_id", nullable = false)
   lateinit var branchMerge: BranchMerge

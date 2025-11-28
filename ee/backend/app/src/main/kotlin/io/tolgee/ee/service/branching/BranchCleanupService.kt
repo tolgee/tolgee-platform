@@ -3,8 +3,8 @@ package io.tolgee.ee.service.branching
 import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.events.OnBranchDeleted
-import io.tolgee.service.key.KeyService
 import io.tolgee.repository.KeyRepository
+import io.tolgee.service.key.KeyService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
@@ -48,11 +48,12 @@ class BranchCleanupService(
     logger.debug("Cleaning up branch ${branch.id}")
     var page = 0
     while (true) {
-      val idsPage = keyRepository.findIdsByProjectAndBranch(
-        branch.project.id,
-        branch.id,
-        PageRequest.of(page, BATCH_SIZE)
-      )
+      val idsPage =
+        keyRepository.findIdsByProjectAndBranch(
+          branch.project.id,
+          branch.id,
+          PageRequest.of(page, BATCH_SIZE),
+        )
       if (idsPage.isEmpty) break
       val ids = idsPage.content
       if (ids.isNotEmpty()) {
@@ -64,8 +65,9 @@ class BranchCleanupService(
       }
       page++
     }
-    val merges = branchMergeRepository
-      .findAllBySourceBranchIdOrTargetBranchId(branch.id, branch.id)
+    val merges =
+      branchMergeRepository
+        .findAllBySourceBranchIdOrTargetBranchId(branch.id, branch.id)
     if (merges.isNotEmpty()) {
       branchMergeRepository.deleteAll(merges)
       logger.debug("Deleted ${merges.size} merges for branch ${branch.id}")
