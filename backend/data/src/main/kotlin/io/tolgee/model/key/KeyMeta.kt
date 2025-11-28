@@ -7,6 +7,8 @@ import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.propChangesProvider.TagsPropChangesProvider
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.snapshot.KeyMetaSnapshot
 import io.tolgee.model.dataImport.ImportKey
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -29,7 +31,8 @@ class KeyMeta(
   var key: Key? = null,
   @OneToOne
   var importKey: ImportKey? = null,
-) : StandardAuditModel() {
+) : StandardAuditModel(),
+  BranchVersionedEntity<KeyMeta, KeyMetaSnapshot> {
   @OneToMany(mappedBy = "keyMeta")
   @OrderBy("id")
   var comments = mutableListOf<KeyComment>()
@@ -97,5 +100,20 @@ class KeyMeta(
         }
       }
     }
+  }
+
+  override fun resolveKey(): Key? = key
+
+  override fun isModified(oldState: Map<String, Any>): Boolean {
+    return oldState["description"] != this.description || oldState["custom"] != this.custom
+  }
+
+  override fun hasChanged(snapshot: KeyMetaSnapshot): Boolean {
+    return this.description != snapshot.description || this.custom != snapshot.custom
+  }
+
+  override fun merge(source: KeyMeta) {
+    this.description = source.description
+    this.custom = source.custom
   }
 }

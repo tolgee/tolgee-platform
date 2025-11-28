@@ -18,6 +18,7 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.screenshotReference.KeyInScreenshotPosition
 import io.tolgee.model.translation.Translation
+import java.util.Date
 
 class TranslationsTestData {
   lateinit var project: Project
@@ -59,27 +60,34 @@ class TranslationsTestData {
             originalName = "Deutsch"
           }.self
 
-        addKey {
-          name = "A key"
-          aKey = this
+        aKey = addBasicKey()
+        aKeyGermanTranslation = aKey.translations.first()
+        addBranch {
+          name = "test-branch"
+          project = this@project.self
         }.build {
-          setDescription("A key description")
-          addTranslation {
-            language = germanLanguage
-            text = "Z translation"
-            state = TranslationState.REVIEWED
-            auto = true
-            outdated = true
-            mtProvider = MtServiceType.GOOGLE
-            aKeyGermanTranslation = this
+          addKey {
+            name = "branch key"
+            branch = this@build.self
           }.build {
-            addComment {
-              author = user
-              text = "Comment"
-              state = TranslationCommentState.RESOLVED
+            addTranslation {
+              language = germanLanguage
+              text = "Branched german key."
+            }
+            addTranslation {
+              language = englishLanguage
+              text = "Branched english key."
             }
           }
-          addTag("Cool tag")
+        }
+        // create same key as in different branch
+        addBranch {
+          name = "from-default"
+          project = this@project.self
+        }.build {
+          addBasicKey().apply {
+            branch = self
+          }
         }
 
         val zKeyBuilder =
@@ -100,6 +108,30 @@ class TranslationsTestData {
         projectBuilder = this
       }.self
     }
+
+  private fun ProjectBuilder.addBasicKey(): Key {
+    return addKey {
+      name = "A key"
+    }.build key@{
+      setDescription("A key description")
+      addTranslation {
+        language = germanLanguage
+        text = "Z translation"
+        state = TranslationState.REVIEWED
+        auto = true
+        outdated = true
+        mtProvider = MtServiceType.GOOGLE
+        self.translations.add(this)
+      }.build {
+        addComment {
+          author = user
+          text = "Comment"
+          state = TranslationCommentState.RESOLVED
+        }
+      }
+      addTag("Cool tag")
+    }.self
+  }
 
   fun addKeysViewOnlyUser() {
     root.apply {
@@ -245,6 +277,50 @@ class TranslationsTestData {
             language = englishLanguage
             text = "I am key $padNum's english translation."
           }
+        }
+      }
+    }
+  }
+
+  fun generateBranchedData(
+    count: Long,
+    branchName: String = "feature-branch",
+    isBranchDefault: Boolean = false,
+  ) {
+    root.data.projects[0].apply {
+      addBranch {
+        name = branchName
+        project = this@apply.self
+        isDefault = isBranchDefault
+      }.build {
+        (1..count).forEach {
+          addKey {
+            name = "key from branch $branchName $it"
+            branch = this@build.self
+          }.build {
+            addTranslation {
+              language = germanLanguage
+              text = "I am key $it's german translation from branch $branchName."
+            }
+            addTranslation {
+              language = englishLanguage
+              text = "I am key $it's english translation from branch $branchName."
+            }
+          }
+        }
+      }
+    }
+  }
+
+  fun addDeletedBranch(name: String = "feature-branch") {
+    root.data.projects[0].apply {
+      addBranch {
+        this.name = name
+        project = this@apply.self
+        archivedAt = Date(1759834567)
+      }.build {
+        addBasicKey().apply {
+          branch = self
         }
       }
     }

@@ -521,6 +521,30 @@ export class Validation {
         .required()
         .matches(/^#[0-9A-F]{6}$/i, t('validation_invalid_hex_color')),
     });
+
+  static readonly BRANCH = (t: TranslateFunction) =>
+    Yup.object().shape({
+      name: Yup.string()
+        .required()
+        .min(2)
+        .max(100)
+        .matches(
+          /^[a-z0-9]([a-z0-9-_/]*[a-z0-9])?$/i,
+          t('validation_invalid_branch_name')
+        ),
+    });
+
+  static readonly BRANCH_MERGE = (t: TranslateFunction) =>
+    Yup.object({
+      targetBranchId: Yup.number()
+        .nullable()
+        .typeError(t('branch_merges_select_branch_error'))
+        .required(t('branch_merges_select_branch_error'))
+        .notOneOf(
+          [Yup.ref('sourceBranchId')],
+          t('branch_merges_same_branch_error')
+        ),
+    });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

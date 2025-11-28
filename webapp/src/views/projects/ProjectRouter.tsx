@@ -93,6 +93,15 @@ export const ProjectRouter = () => {
         <Route exact path={LINKS.PROJECT_WEBSOCKETS_PREVIEW.template}>
           <WebsocketPreview />
         </Route>
+
+        {/*Branched views*/}
+        <Route exact path={LINKS.PROJECT_TRANSLATIONS_BRANCHED.template}>
+          <TranslationsView />
+        </Route>
+
+        <Route exact path={LINKS.PROJECT_DASHBOARD_BRANCHED.template}>
+          <DashboardView />
+        </Route>
       </Switch>
       <routes.Project />
     </ProjectContext>

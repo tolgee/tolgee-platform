@@ -149,4 +149,13 @@ class KeyControllerKeySearchTest :
       time.assert.isLessThan(4000)
     }
   }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it search in default branch only`() {
+    saveAndPrepare()
+    performProjectAuthGet("keys/search?search=this-is-branched-key&languageTag=de").andAssertThatJson {
+      node("_embedded").isAbsent()
+    }
+  }
 }
