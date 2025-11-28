@@ -1,12 +1,15 @@
 package io.tolgee.service.branching
 
+import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
+import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
+import io.tolgee.model.enums.BranchKeyMergeChangeType
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 
@@ -61,10 +64,23 @@ interface BranchService {
     pageable: Pageable,
   ): Page<BranchMergeConflictView>
 
+  fun getBranchMergeChanges(
+    projectId: Long,
+    branchMergeId: Long,
+    type: BranchKeyMergeChangeType?,
+    pageable: Pageable,
+  ): Page<BranchMergeChangeView>
+
   fun resolveConflict(
     projectId: Long,
     mergeId: Long,
     request: ResolveBranchMergeConflictRequest,
+  )
+
+  fun resolveAllConflicts(
+    projectId: Long,
+    mergeId: Long,
+    request: ResolveAllBranchMergeConflictsRequest,
   )
 
   fun applyMerge(
