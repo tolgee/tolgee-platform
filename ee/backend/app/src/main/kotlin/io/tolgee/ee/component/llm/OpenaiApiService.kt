@@ -1,6 +1,7 @@
 package io.tolgee.ee.component.llm
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
@@ -85,6 +86,8 @@ class OpenaiApiService :
         throw e
       }
 
+    setSentryContext(request, response)
+
     return PromptResult(
       response =
         response.body
@@ -101,11 +104,6 @@ class OpenaiApiService :
             cachedTokens = it.prompt_tokens_details?.cached_tokens,
           )
         },
-      diagnosticInfo =
-        PromptResult.DiagnosticInfo(
-          request,
-          response,
-        ),
     )
   }
 

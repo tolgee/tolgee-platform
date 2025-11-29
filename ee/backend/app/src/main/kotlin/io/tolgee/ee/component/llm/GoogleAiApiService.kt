@@ -1,6 +1,7 @@
 package io.tolgee.ee.component.llm
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
@@ -48,6 +49,8 @@ class GoogleAiApiService :
         request,
       )
 
+    setSentryContext(request, response)
+
     return PromptResult(
       response =
         response.body
@@ -65,11 +68,6 @@ class GoogleAiApiService :
             outputTokens = it.candidatesTokenCount,
           )
         },
-      diagnosticInfo =
-        PromptResult.DiagnosticInfo(
-          request,
-          response,
-        ),
     )
   }
 

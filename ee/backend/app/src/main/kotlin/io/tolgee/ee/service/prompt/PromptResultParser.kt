@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.sentry.Sentry
 import io.tolgee.dtos.PromptResult
 import io.tolgee.exceptions.LlmProviderNotReturnedJsonException
 import io.tolgee.util.updateStringsInJson
@@ -13,8 +12,6 @@ class PromptResultParser(
   private val promptResult: PromptResult,
 ) {
   fun parse(): ParsedResult {
-    Sentry.configureScope { scope -> scope.setContexts("llmDiagnostics", promptResult.diagnosticInfo) }
-
     val json = extractJsonFromResponse(promptResult.response)
     val output = json?.get("output")?.asText() ?: throw LlmProviderNotReturnedJsonException()
     val contextDescription = json.get("contextDescription")?.asText()

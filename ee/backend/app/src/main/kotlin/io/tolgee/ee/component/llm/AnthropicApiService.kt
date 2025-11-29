@@ -1,5 +1,6 @@
 package io.tolgee.ee.component.llm
 
+import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
@@ -46,6 +47,8 @@ class AnthropicApiService :
         request,
       )
 
+    setSentryContext(request, response)
+
     return PromptResult(
       response.body
         ?.content
@@ -59,11 +62,6 @@ class AnthropicApiService :
             outputTokens = it.output_tokens,
           )
         },
-      diagnosticInfo =
-        PromptResult.DiagnosticInfo(
-          request,
-          response,
-        ),
     )
   }
 
