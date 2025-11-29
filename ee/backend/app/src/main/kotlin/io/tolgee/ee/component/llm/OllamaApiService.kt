@@ -49,6 +49,11 @@ class OllamaApiService :
       response.body?.message?.content
         ?: throw LlmEmptyResponseException(),
       usage = null,
+      diagnosticInfo =
+        PromptResult.DiagnosticInfo(
+          request,
+          response,
+        ),
     )
   }
 

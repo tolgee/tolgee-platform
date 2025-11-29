@@ -17,4 +17,9 @@ interface LlmProviderRepository : JpaRepository<LlmProvider, Long> {
     """,
   )
   fun getAll(organizationId: Long): List<LlmProvider>
+
+  fun deleteByIdAndOrganizationId(
+    id: Long,
+    organizationId: Long,
+  )
 }

@@ -2,14 +2,17 @@ package io.tolgee.ee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
-import io.tolgee.dtos.response.prompt.PromptResponseDto
 import io.tolgee.ee.api.v2.hateoas.assemblers.PromptModelAssembler
+import io.tolgee.ee.api.v2.hateoas.model.prompt.PromptResponseModel
+import io.tolgee.ee.api.v2.hateoas.model.prompt.PromptResponseUsageModelAssembler
 import io.tolgee.ee.data.prompt.VariablesResponseDto
 import io.tolgee.ee.service.prompt.DefaultPromptHelper
 import io.tolgee.ee.service.prompt.PromptServiceEeImpl
@@ -59,6 +62,7 @@ class PromptController(
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val businessEventPublisher: BusinessEventPublisher,
   private val authenticationFacade: AuthenticationFacade,
+  private val promptResponseUsageModelAssembler: PromptResponseUsageModelAssembler,
 ) {
   @GetMapping("")
   @RequiresProjectPermissions([Scope.PROMPTS_VIEW])
@@ -81,6 +85,7 @@ class PromptController(
   @PostMapping("")
   @RequiresProjectPermissions([Scope.PROMPTS_EDIT])
   @Operation(summary = "Create prompt")
+  @RequestActivity(ActivityType.AI_PROMPT_CREATE)
   fun createPrompt(
     @RequestBody @Valid dto: PromptDto,
   ): PromptModel {
@@ -116,6 +121,7 @@ class PromptController(
   @PutMapping("/{promptId}")
   @RequiresProjectPermissions([Scope.PROMPTS_EDIT])
   @Operation(summary = "Update prompt")
+  @RequestActivity(ActivityType.AI_PROMPT_UPDATE)
   fun updatePrompt(
     @PathVariable promptId: Long,
     @RequestBody @Valid dto: PromptDto,
@@ -141,6 +147,7 @@ class PromptController(
   @DeleteMapping("/{promptId}")
   @RequiresProjectPermissions([Scope.PROMPTS_EDIT])
   @Operation(summary = "Delete prompt")
+  @RequestActivity(ActivityType.AI_PROMPT_DELETE)
   fun deletePrompt(
     @PathVariable promptId: Long,
   ) {
@@ -159,7 +166,7 @@ class PromptController(
   @Operation(summary = "Run prompt")
   fun run(
     @Valid @RequestBody data: PromptRunDto,
-  ): PromptResponseDto {
+  ): PromptResponseModel {
     businessEventPublisher.publish(
       OnBusinessEventToCaptureEvent(
         eventName = "AI_PROMPT_RUN",
@@ -192,12 +199,12 @@ class PromptController(
         params,
         data.provider,
       )
-    return PromptResponseDto(
+    return PromptResponseModel(
       prompt,
-      response.response,
+      response.promptResult.response,
       response.parsedJson,
-      price = response.price,
-      usage = response.usage,
+      price = response.promptResult.price,
+      usage = response.promptResult.usage?.let { promptResponseUsageModelAssembler.toModel(it) },
     )
   }
 

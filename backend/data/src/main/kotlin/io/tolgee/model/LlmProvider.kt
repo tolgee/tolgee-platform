@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties.LlmProvider.Companion.MAX_TOKENS_DEFAULT
 import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
@@ -59,6 +60,7 @@ class LlmProvider(
       attempts = null,
       tokenPriceInCreditsInput = null,
       tokenPriceInCreditsOutput = null,
+      maxTokens = MAX_TOKENS_DEFAULT,
     )
   }
 }

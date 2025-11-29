@@ -1,6 +1,8 @@
 package io.tolgee.model
 
 import io.hypersistence.utils.hibernate.type.array.EnumArrayType
+import io.tolgee.activity.annotation.ActivityLoggedEntity
+import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.enums.BasicPromptOption
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -21,14 +23,18 @@ import org.hibernate.annotations.Type
     Index(columnList = "project_id"),
   ],
 )
+@ActivityLoggedEntity
 class Prompt(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long = 0L,
   @field:NotBlank
+  @ActivityLoggedProp
   var name: String = "",
+  @ActivityLoggedProp
   @Column(columnDefinition = "text")
   var template: String? = null,
+  @ActivityLoggedProp
   @Column
   var providerName: String = "",
   @Type(
@@ -40,6 +46,7 @@ class Prompt(
       ),
     ],
   )
+  @ActivityLoggedProp
   @Column(columnDefinition = "varchar[]")
   var basicPromptOptions: Array<BasicPromptOption>? = null,
   @ManyToOne

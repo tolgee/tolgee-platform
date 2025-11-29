@@ -2,7 +2,7 @@ package io.tolgee.component.machineTranslation
 
 import io.tolgee.component.machineTranslation.metadata.MtMetadata
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
-import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
+import io.tolgee.dtos.PromptResult
 
 interface MtValueProvider {
   val isEnabled: Boolean
@@ -28,7 +28,7 @@ interface MtValueProvider {
     var translated: String?,
     val price: Int,
     val contextDescription: String? = null,
-    val usage: PromptResponseUsageDto? = null,
+    val usage: PromptResult.Usage? = null,
   )
 
   val formalitySupportingLanguages: Array<String>?
