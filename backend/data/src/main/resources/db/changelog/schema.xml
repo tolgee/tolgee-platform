@@ -4643,4 +4643,9 @@
     <changeSet author="anty (generated)" id="1762964560931-2">
         <modifyDataType columnName="api_url" newDataType="varchar(2047)" tableName="llm_provider"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1764343564010-1">
+        <addColumn tableName="translation">
+            <column name="prompt_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

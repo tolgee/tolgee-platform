@@ -113,16 +113,16 @@ class AutoTranslationService(
       return
     }
 
-    val (text, usedService) = getAutoTranslatedValue(config, translation) ?: return
+    val (text, usedService, promptId) = getAutoTranslatedValue(config, translation) ?: return
     text ?: return
 
-    translation.setValueAndState(project, text, usedService)
+    translation.setValueAndState(project, text, usedService, promptId)
   }
 
   private fun getAutoTranslatedValue(
     config: AutoTranslationConfig,
     translation: Translation,
-  ): Pair<String?, MtServiceType?>? {
+  ): Triple<String?, MtServiceType?, Long?>? {
     if (config.usingTm) {
       val value =
         translationMemoryService
@@ -132,7 +132,7 @@ class AutoTranslationService(
           )?.targetTranslationText
 
       if (!value.isNullOrBlank()) {
-        return value to null
+        return Triple(value, null, null)
       }
     }
 
@@ -147,7 +147,7 @@ class AutoTranslationService(
             usePrimaryService = true
           }.singleOrNull()
 
-      return result?.let { it.translatedText to it.service }
+      return result?.let { Triple(it.translatedText, it.service, it.promptId) }
     }
 
     return null
@@ -273,7 +273,7 @@ class AutoTranslationService(
     translations.forEach { translation ->
       result[translation.language.id]?.let {
         it.translatedText?.let { text ->
-          translation.setValueAndState(project, text, it.service)
+          translation.setValueAndState(project, text, it.service, it.promptId)
         }
       }
     }
@@ -303,6 +303,7 @@ class AutoTranslationService(
     project: ProjectDto,
     text: String,
     usedService: MtServiceType?,
+    promptId: Long? = null,
   ) {
     this.resetFlags()
     if (project.translationProtection != TranslationProtection.PROTECT_REVIEWED) {
@@ -311,6 +312,7 @@ class AutoTranslationService(
     this.auto = true
     this.text = text
     this.mtProvider = usedService
+    this.promptId = promptId
     translationService.save(this)
   }
 

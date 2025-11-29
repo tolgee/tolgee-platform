@@ -1,11 +1,19 @@
 package io.tolgee.dtos
 
-import com.fasterxml.jackson.databind.JsonNode
-import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
-
 class PromptResult(
   val response: String,
-  val usage: PromptResponseUsageDto?,
-  var parsedJson: JsonNode? = null,
+  val usage: Usage?,
   var price: Int = 0,
-)
+  var diagnosticInfo: DiagnosticInfo? = null,
+) {
+  data class DiagnosticInfo(
+    val request: Any,
+    var response: Any,
+  )
+
+  data class Usage(
+    val inputTokens: Long? = null,
+    val outputTokens: Long? = null,
+    val cachedTokens: Long? = null,
+  )
+}
