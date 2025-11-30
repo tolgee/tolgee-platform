@@ -32,6 +32,7 @@ import org.springframework.cache.CacheManager
 import org.springframework.cache.set
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestTemplate
@@ -242,6 +243,7 @@ class LlmProviderService(
     return provider.toDto()
   }
 
+  @Transactional
   fun updateProvider(
     organizationId: Long,
     providerId: Long,
@@ -263,6 +265,7 @@ class LlmProviderService(
     return provider.toDto()
   }
 
+  @Transactional
   fun deleteProvider(
     organizationId: Long,
     providerId: Long,
