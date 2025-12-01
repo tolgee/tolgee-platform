@@ -5,18 +5,21 @@ import { Mt } from 'tg.component/CustomIcons';
 import { TranslationStateType } from './tools';
 
 const StyledDot = styled('div')`
+  margin-left: 12px;
+  margin-right: 4px;
   width: 8px;
   height: 8px;
   border-radius: 4px;
-  margin-right: 4px;
 `;
 
 const StyledIcon = styled('div')`
+  margin-left: 8px;
   display: flex;
   align-items: center;
   font-size: 16px;
   width: 16px;
   height: 16px;
+  color: ${({ theme }) => theme.palette.tokens.icon.secondary};
 `;
 
 type Props = {
@@ -25,9 +28,8 @@ type Props = {
 
 export const StateIndicator = ({ state }: Props) => {
   if (state === 'AUTO_TRANSLATED' || state === 'OUTDATED') {
-    const color = TRANSLATION_STATES['TRANSLATED']?.color;
     return (
-      <StyledIcon style={{ color }}>
+      <StyledIcon>
         {state === 'AUTO_TRANSLATED' && <Mt />}
         {state === 'OUTDATED' && <Flag02 />}
       </StyledIcon>
