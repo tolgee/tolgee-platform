@@ -55,5 +55,5 @@ class BranchMergeChange :
   var resolution: BranchKeyMergeResolutionType? = null
 
   val isResolved: Boolean
-    get() = resolution != null || change == BranchKeyMergeChangeType.SKIP
+    get() = resolution != null
 }
