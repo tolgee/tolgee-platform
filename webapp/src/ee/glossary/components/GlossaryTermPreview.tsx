@@ -17,7 +17,7 @@ import {
 } from '@untitled-ui/icons-react';
 import { GlossaryTermTags } from 'tg.ee.module/glossary/components/GlossaryTermTags';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import { getGlossaryTermSearchUrl } from 'tg.constants/links';
