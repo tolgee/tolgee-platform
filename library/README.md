@@ -7,19 +7,36 @@ you try the components individually or in preset combinations.
 
 ## Storybook
 
+Install Storybook and library dependencies:
+
+```shell
+cd library
+npm run install
+```
+
+Duplicate [.env](./.env) as [.env.local](./.env.local) and configure your Tolgee API KEY.
+
+Addon for Tolgee is preset, but its dependencies have to be also installed:
+
+```shell
+cd ../storybook-tolgee-addon
+npm run install
+```
+
 Run Storybook:
 
 ```shell
+cd ../library
 npm run storybook
 ```
 
-Storybook should open in your browser, otherwise open http://localhost:6006/.
+Storybook should open in your browser, otherwise open <http://localhost:6006/>.
 
 ## Component Migration
 
 - Apply the boy scout rule – improve names, aliases, subpaths, dependencies...
 - Move the component/hook/... from `webapp/src/component/` directory under `library/src/components/` (note the plural – we are unifying it to plurals everywhere). If the component/hook/... is placed under a subpath, persist it.
-- Keep one component per file. Constants reused elsewhere can be placed under `constants.ts`. Helper functions under `utils.tx`.
+- Keep one component per file. Constants reused elsewhere can be placed under `constants.ts`. Helper functions under `utils.ts`.
 - Up until now, each component was a single file (e.g. `MfaBadge.tsx`), this is changing (not for hooks/...). Please create a directory named like the component (i.e. `MfaBadge`), move the component inside and name it `index.tsx`. This way the component can still be referenced the same path (omit `index.tsx` in the path).
 - Remove the original component/hook/...
 - Update dependencies. Within `webapp` use `@tginternal/library/` prefix (e.g. `@tginternal/library/hooks/useCurrentLanguage`). Within `library` use `lib.` prefix (e.g. `lib.hooks/useCurrentLanguage`). Referencing `webapp` from `library` might not be safe. At the moment, only a few prefixes are predefined in `library`'s [tsconfig.json](./tsconfig.json), [package.json](./package.json) and [vite.config.ts](./vite.config.ts), add more as you need them.

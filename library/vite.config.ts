@@ -46,9 +46,22 @@ export default defineConfig({
       },
     },
   },
+  resolve: {
+    preserveSymlinks: true,
+    alias: {
+      '@tolgee/storybook-addon': resolve(
+        __dirname,
+        '../storybook-tolgee-addon/src',
+      ),
+    },
+  },
+  optimizeDeps: {
+    exclude: ['@tolgee/storybook-addon'],
+  },
   server: {
     fs: {
       allow: [
+        resolve(__dirname, '../storybook-tolgee-addon/src'),
         resolve(__dirname, '../webapp/src'), // TODO remove once https://github.com/tolgee/tolgee-platform/issues/3326
       ],
     },
