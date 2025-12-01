@@ -214,6 +214,7 @@ declare namespace DataCy {
         "billing-usage-table-translations" |
         "billing_period_annual" |
         "branch-merge-create-modal" |
+        "branch-merge-detail-menu" |
         "branch-merge-target-select" |
         "cell-key-screenshot-dropzone" |
         "cell-key-screenshot-file-input" |

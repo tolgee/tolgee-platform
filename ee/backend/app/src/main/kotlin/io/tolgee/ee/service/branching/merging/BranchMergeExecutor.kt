@@ -31,7 +31,6 @@ class BranchMergeExecutor(
         BranchKeyMergeChangeType.UPDATE -> applyUpdate(change)
         BranchKeyMergeChangeType.DELETE -> applyDeletion(change)
         BranchKeyMergeChangeType.CONFLICT -> applyConflict(change)
-        BranchKeyMergeChangeType.SKIP -> Unit
       }
     }
     merge.mergedAt = currentDateProvider.date

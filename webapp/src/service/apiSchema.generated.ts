@@ -1445,7 +1445,7 @@ export interface components {
        * @description Change type
        * @enum {string}
        */
-      type: "ADD" | "UPDATE" | "DELETE" | "CONFLICT" | "SKIP";
+      type: "ADD" | "UPDATE" | "DELETE" | "CONFLICT";
     };
     BranchMergeConflictModel: {
       /**
@@ -12555,7 +12555,7 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
-        type?: "ADD" | "UPDATE" | "DELETE" | "CONFLICT" | "SKIP";
+        type?: "ADD" | "UPDATE" | "DELETE" | "CONFLICT";
       };
       path: {
         mergeId: number;
