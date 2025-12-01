@@ -7,5 +7,4 @@ enum class BranchKeyMergeChangeType(
   UPDATE("UPDATE"),
   DELETE("DELETE"),
   CONFLICT("CONFLICT"),
-  SKIP("SKIP"),
 }
