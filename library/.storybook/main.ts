@@ -6,6 +6,7 @@ export default {
     '@storybook/addon-docs',
     '@storybook/addon-a11y',
     '@storybook/addon-themes',
+    '@tolgee/storybook-addon',
   ],
   framework: {
     name: '@storybook/react-vite',

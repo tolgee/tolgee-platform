@@ -39,6 +39,7 @@
     "@storybook/addon-themes": "^10.0.7",
     "@storybook/react-vite": "^10.0.7",
     "@tginternal/language-util": "^1.1.1",
+    "@tolgee/storybook-addon": "file:../storybook-tolgee-addon",
     "@types/react": "17.0.75",
     "@types/react-dom": "17.0.25",
     "@vitejs/plugin-react": "^5.1.1",
