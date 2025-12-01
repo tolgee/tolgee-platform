@@ -1,4 +1,5 @@
 import { defineConfig, UserConfig } from 'vite';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import react from '@vitejs/plugin-react';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import { extname, resolve, relative } from 'path';
@@ -36,6 +37,7 @@ export default defineConfig({
         resolve(__dirname, '../webapp/tsconfig.json'), // TODO remove once https://github.com/tolgee/tolgee-platform/issues/3326
       ],
     }),
+    nodePolyfills(),
   ],
   build: {
     lib: { entry: entryPoints, formats: ['es'] },
