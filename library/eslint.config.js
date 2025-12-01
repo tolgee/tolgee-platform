@@ -52,15 +52,12 @@ export default defineConfig([
       reactHooksPlugin.configs.flat.recommended,
       reactRefreshPlugin.configs.vite,
     ],
-    rules: {
-      'react-refresh/only-export-components': 'warn',
-    },
   },
   {
     files: ['src/**/stories.jsx', 'src/**/stories.tsx'],
     rules: {
       'react-refresh/only-export-components': [
-        'warn',
+        'error',
         { allowExportNames: ['meta'] },
       ],
     },
