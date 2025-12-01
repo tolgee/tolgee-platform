@@ -3,7 +3,7 @@ import { Button, Popover, styled } from '@mui/material';
 import { supportedFlags } from '@tginternal/language-util';
 import { useField } from 'formik';
 import countryFlagEmoji from 'country-flag-emoji';
-import { FlagImage } from '../FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { FlagInfo } from './types';
 import { FlagSelectorContent } from './FlagSelectorContent';
 import { ArrowDropDown } from 'tg.component/CustomIcons';

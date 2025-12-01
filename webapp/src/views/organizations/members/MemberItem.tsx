@@ -20,7 +20,7 @@ import { UpdateRoleButton } from './UpdateRoleButton';
 import { useLeaveOrganization } from '../useLeaveOrganization';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import { MfaBadge } from 'tg.component/MfaBadge';
+import { MfaBadge } from '@tginternal/library/components/MfaBadge';
 
 type UserAccountWithOrganizationRoleModel =
   components['schemas']['UserAccountWithOrganizationRoleModel'];

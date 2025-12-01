@@ -20,7 +20,7 @@ import { useImportLanguageHelper } from '../hooks/useImportLanguageHelper';
 import { components } from 'tg.service/apiSchema.generated';
 import { LanguagesAddDialog } from 'tg.component/languages/LanguagesAddDialog';
 import { useState } from 'react';
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 
 const StyledItem = styled(MenuItem)`
   padding: ${({ theme }) => theme.spacing(1, 2)};
