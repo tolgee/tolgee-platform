@@ -27,6 +27,7 @@ export default defineConfig([
         ...globals.browser,
       },
       parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
         ecmaFeatures: {
           jsx: true,
         },
