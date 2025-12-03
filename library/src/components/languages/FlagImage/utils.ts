@@ -1,14 +1,14 @@
 import { getSvgNameByEmoji } from '@tginternal/language-util';
 
-const removePaths = (filesByPaths: object) => {
-  console.log(filesByPaths);
-  return Object.fromEntries(
+const removePaths = (
+  filesByPaths: Record<string, string>,
+): Record<string, string> =>
+  Object.fromEntries(
     Object.entries(filesByPaths).map(([key, value]) => [
       key.replace(/^.*\/flags\/(.*)\.svg$/, '$1'),
       value,
     ]),
   );
-};
 
 const flagFiles = removePaths({
   // if package-local install (npm)
