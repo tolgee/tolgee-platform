@@ -1,11 +1,11 @@
 package io.tolgee.ee.component.llm
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.ObjectMapper
+import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
-import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
+import io.tolgee.ee.api.v2.hateoas.model.prompt.PromptResponseUsageModel
 import io.tolgee.exceptions.LlmContentFilterException
 import io.tolgee.exceptions.LlmEmptyResponseException
 import io.tolgee.model.enums.LlmProviderType
@@ -23,9 +23,8 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-class OpenaiApiService(
-  private val jacksonObjectMapper: ObjectMapper,
-) : AbstractLlmApiService(),
+class OpenaiApiService :
+  AbstractLlmApiService(),
   Logging {
   override fun defaultAttempts(): List<Int> = listOf(60, 120)
 
@@ -45,6 +44,7 @@ class OpenaiApiService(
 
     val requestBody =
       RequestBody(
+        max_completion_tokens = config.maxTokens,
         messages = messages,
         response_format =
           if (params.shouldOutputJson) {
@@ -86,6 +86,8 @@ class OpenaiApiService(
         throw e
       }
 
+    setSentryContext(request, response)
+
     return PromptResult(
       response =
         response.body
@@ -96,7 +98,7 @@ class OpenaiApiService(
           ?: throw LlmEmptyResponseException(),
       usage =
         response.body?.usage?.let {
-          PromptResponseUsageDto(
+          PromptResult.Usage(
             inputTokens = it.prompt_tokens,
             outputTokens = it.completion_tokens,
             cachedTokens = it.prompt_tokens_details?.cached_tokens,

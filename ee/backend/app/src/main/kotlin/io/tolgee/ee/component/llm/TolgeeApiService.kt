@@ -62,7 +62,7 @@ class TolgeeApiService(
         e.responseBodyAsString
           .runCatching {
             jacksonObjectMapper().readValue(e.responseBodyAsString, JsonNode::class.java)
-          }?.getOrNull()
+          }.getOrNull()
       val eCode = json?.get("code")?.runCatching { this.asText() }?.getOrNull()
       val eParams = json?.get("params")?.runCatching { this.asIterable().map { it.asText() } }?.getOrNull()
       val message = eCode?.runCatching { Message.valueOf(this.uppercase()) }?.getOrNull()

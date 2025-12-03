@@ -9,7 +9,7 @@ import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
-import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
+import io.tolgee.ee.api.v2.hateoas.model.prompt.PromptResponseUsageModel
 import io.tolgee.ee.component.llm.AbstractLlmApiService
 import io.tolgee.ee.component.llm.AnthropicApiService
 import io.tolgee.ee.component.llm.GoogleAiApiService
@@ -32,6 +32,7 @@ import org.springframework.cache.CacheManager
 import org.springframework.cache.set
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestTemplate
@@ -145,7 +146,7 @@ class LlmProviderService(
   ): T {
     var lastError: Exception? = null
     for (timeout in attempts) {
-      val restTemplate = restTemplateBuilder.setReadTimeout(Duration.ofSeconds(timeout.toLong())).build()
+      val restTemplate = restTemplateBuilder.readTimeout(Duration.ofSeconds(timeout.toLong())).build()
       try {
         return callback(restTemplate)
       } catch (e: ResourceAccessException) {
@@ -184,7 +185,7 @@ class LlmProviderService(
       """.trimIndent()
     return PromptResult(
       response = json,
-      usage = PromptResponseUsageDto(inputTokens = 42, outputTokens = 21, cachedTokens = 1),
+      usage = PromptResult.Usage(inputTokens = 42, outputTokens = 21, cachedTokens = 1),
     )
   }
 
@@ -242,6 +243,7 @@ class LlmProviderService(
     return provider.toDto()
   }
 
+  @Transactional
   fun updateProvider(
     organizationId: Long,
     providerId: Long,
@@ -263,11 +265,12 @@ class LlmProviderService(
     return provider.toDto()
   }
 
+  @Transactional
   fun deleteProvider(
     organizationId: Long,
     providerId: Long,
   ) {
-    llmProviderRepository.deleteById(providerId)
+    llmProviderRepository.deleteByIdAndOrganizationId(providerId, organizationId)
   }
 
   fun getAllServerProviders(): List<LlmProviderDto> {
@@ -279,7 +282,7 @@ class LlmProviderService(
 
   fun calculatePrice(
     providerConfig: LlmProviderDto,
-    usage: PromptResponseUsageDto?,
+    usage: PromptResult.Usage?,
   ): Int {
     val tokenPriceInCreditsInput: Double = (providerConfig.tokenPriceInCreditsInput ?: 0.0)
     val tokenPriceInCreditsOutput: Double = (providerConfig.tokenPriceInCreditsOutput ?: 0.0)

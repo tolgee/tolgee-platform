@@ -14,6 +14,7 @@ import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.component.PromptLazyMap
 import io.tolgee.ee.service.LlmProviderService
+import io.tolgee.ee.service.prompt.PromptResultParser.ParsedResult
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.exceptions.BadRequestException
@@ -198,7 +199,7 @@ class PromptServiceEeImpl(
     params: LlmParams,
     provider: String,
     attempts: List<Int>? = null,
-  ): PromptResult {
+  ): ParsedResult {
     val result =
       try {
         providerService.callProvider(organizationId, provider, params, attempts)
@@ -206,42 +207,7 @@ class PromptServiceEeImpl(
         throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(e.message), e)
       }
 
-    result.parsedJson = extractJsonFromResponse(result.response)
-    return result
-  }
-
-  fun getJsonLike(content: String): String {
-    return "{${content.substringAfter("{").substringBeforeLast("}")}}"
-  }
-
-  fun extractJsonFromResponse(content: String): JsonNode? {
-    // attempting different strategies to find a json in the response
-    val attempts =
-      listOf<(String) -> String>(
-        { it },
-        { getJsonLike(it) },
-        { getJsonLike(it.substringAfter("```").substringBefore("```")) },
-      )
-    for (attempt in attempts) {
-      val result = parseJsonSafely(attempt.invoke(content))
-      if (result != null) {
-        return result
-      }
-    }
-    return null
-  }
-
-  fun parseJsonSafely(content: String): JsonNode? {
-    return try {
-      val result = jacksonObjectMapper().readValue<JsonNode>(content)
-      updateStringsInJson(result) {
-        // gpt-4.1 sometimes includes NIL,
-        // which is invalid utf-8 character breaking DB saving
-        it.replace("\u0000", "")
-      }
-    } catch (_: JsonProcessingException) {
-      null
-    }
+    return PromptResultParser(result).parse()
   }
 
   fun runPromptAndChargeCredits(
@@ -249,10 +215,10 @@ class PromptServiceEeImpl(
     params: LlmParams,
     provider: String,
     attempts: List<Int>? = null,
-  ): PromptResult {
+  ): ParsedResult {
     publishBeforeEvent(organizationId)
     val result = runPromptWithoutChargingCredits(organizationId, params, provider, attempts)
-    publishAfterEvent(organizationId, result.price)
+    publishAfterEvent(organizationId, result.promptResult.price)
     return result
   }
 
@@ -264,15 +230,12 @@ class PromptServiceEeImpl(
     }
   }
 
-  fun getTranslationFromPromptResult(result: PromptResult): MtValueProvider.MtResult {
-    val json = result.parsedJson ?: throw LlmProviderNotReturnedJsonException()
-    val translation = json.get("output")?.asText() ?: throw LlmProviderNotReturnedJsonException()
-
+  fun getTranslationFromPromptResult(result: ParsedResult): MtValueProvider.MtResult {
     return MtValueProvider.MtResult(
-      translation,
-      contextDescription = json.get("contextDescription")?.asText(),
-      price = result.price,
-      usage = result.usage,
+      result.output,
+      contextDescription = result.contextDescription,
+      price = result.promptResult.price,
+      usage = result.promptResult.usage,
     )
   }
 

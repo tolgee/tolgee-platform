@@ -101,6 +101,9 @@ class Translation(
   @ActivityLoggedProp(LabelPropChangesProvider::class)
   var labels: MutableSet<Label> = mutableSetOf()
 
+  @ActivityLoggedProp
+  var promptId: Long? = null
+
   val isUntranslated: Boolean
     get() = state == TranslationState.UNTRANSLATED
 
@@ -113,6 +116,7 @@ class Translation(
     this.outdated = false
     this.mtProvider = null
     this.auto = false
+    this.promptId = null
   }
 
   fun clear() {
