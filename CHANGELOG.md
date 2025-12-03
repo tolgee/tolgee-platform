@@ -1,3 +1,10 @@
+## [3.141.2](https://github.com/tolgee/tolgee-platform/compare/v3.141.1...v3.141.2) (2025-12-03)
+
+
+### Bug Fixes
+
+* add back color dots next to the translation state filters ([#3324](https://github.com/tolgee/tolgee-platform/issues/3324)) ([6555495](https://github.com/tolgee/tolgee-platform/commit/6555495f39789ff474f561bf1bfc4a885c57ccbd))
+
 ## [3.141.1](https://github.com/tolgee/tolgee-platform/compare/v3.141.0...v3.141.1) (2025-11-22)
 
 
