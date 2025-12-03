@@ -1,29 +1,30 @@
 import { getSvgNameByEmoji } from '@tginternal/language-util';
 
-// TODO Remove `removeBase` once `base` option gets available in webapp's Vite (works in library)
-const removeBase = (basedFlagPaths: object, base: string) =>
+const removePaths = (
+  filesByPaths: Record<string, string>,
+): Record<string, string> =>
   Object.fromEntries(
-    Object.entries(basedFlagPaths).map(([key, value]) => [
-      `./${key.slice(base.length)}`,
+    Object.entries(filesByPaths).map(([key, value]) => [
+      key.replace(/^.*\/flags\/(.*)\.svg$/, '$1'),
       value,
     ]),
   );
 
-const flagPaths = removeBase(
-  import.meta.glob<true, string, string>(
+const flagFiles = removePaths({
+  // if package-local install (npm)
+  ...import.meta.glob<true, string, string>(
     '/node_modules/@tginternal/language-util/flags/*.svg',
-    {
-      query: '?url',
-      import: 'default',
-      // base: '/node_modules/@tginternal/language-util/',
-      eager: true,
-    },
+    { query: '?url', import: 'default', eager: true },
   ),
-  '/node_modules/@tginternal/language-util/',
-);
-export const flagNames = Object.keys(flagPaths).map((path) =>
-  path.replace(/^\.\/flags\/(.*)\.svg$/, '$1'),
-);
+  // if hoisted one level up (pnpm)
+  ...import.meta.glob<true, string, string>(
+    '../../../../../node_modules/@tginternal/language-util/flags/*.svg',
+    { query: '?url', import: 'default', eager: true },
+  ),
+});
+
+export const flagNames = Object.keys(flagFiles);
+
 export const getFlagPath = (hex: string): string => {
   let flagName: string;
   try {
@@ -31,5 +32,5 @@ export const getFlagPath = (hex: string): string => {
   } catch {
     flagName = getSvgNameByEmoji('🏳️');
   }
-  return flagPaths[`./flags/${flagName}.svg`];
+  return flagFiles[flagName];
 };

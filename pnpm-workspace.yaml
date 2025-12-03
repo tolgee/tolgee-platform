@@ -1,0 +1,5 @@
+nodeLinker: hoisted
+packages:
+  - "storybook-tolgee-addon"
+  - "library"
+  - "webapp"
