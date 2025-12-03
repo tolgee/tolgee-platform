@@ -10,6 +10,7 @@ import { CompactListSubheader } from 'tg.component/ListComponents';
 import { FiltersInternal, FilterActions, TranslationStateType } from './tools';
 import { FilterItem } from './FilterItem';
 import { LanguageModel } from './tools';
+import { StateIndicator } from './StateIndicator';
 
 type Props = {
   projectId: number;
@@ -94,6 +95,7 @@ export const SubfilterTranslations = ({
                     value.filterTranslationState?.includes(state)
                   )}
                   onClick={() => toggleFilterState(state)}
+                  indicator={<StateIndicator state={state} />}
                 />
               );
             })}
