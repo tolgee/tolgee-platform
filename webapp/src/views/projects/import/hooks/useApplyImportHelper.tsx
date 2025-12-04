@@ -9,6 +9,7 @@ import { T } from '@tolgee/react';
 import { OperationStatusType } from '../component/ImportFileInput';
 import { ApiError } from 'tg.service/http/ApiError';
 import { errorAction } from 'tg.service/http/errorAction';
+import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
 
 export const useApplyImportHelper = (
   dataHelper: ReturnType<typeof useImportDataHelper>
@@ -38,6 +39,7 @@ export const useApplyImportHelper = (
   });
 
   const project = useProject();
+  const { selected } = useBranchesService({ projectId: project.id });
   const error = importApplyMutation.error;
 
   const message = useMessage();
@@ -53,7 +55,9 @@ export const useApplyImportHelper = (
           path: {
             projectId: project.id,
           },
-          query: {},
+          query: {
+            branch: selected?.name,
+          },
         },
         {
           onSuccess(data) {

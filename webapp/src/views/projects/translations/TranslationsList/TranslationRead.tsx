@@ -59,6 +59,7 @@ type Props = {
   lastFocusable: boolean;
   className?: string;
   tools: ReturnType<typeof useTranslationCell>;
+  readonly?: boolean;
 };
 
 export const TranslationRead: React.FC<Props> = ({
@@ -67,6 +68,7 @@ export const TranslationRead: React.FC<Props> = ({
   lastFocusable,
   className,
   tools,
+  readonly,
 }) => {
   const {
     isEditing,
@@ -116,11 +118,11 @@ export const TranslationRead: React.FC<Props> = ({
       <TranslationLabels
         labels={translation?.labels}
         className="labels"
-        onSelect={(label) => addLabel(label.id)}
-        onDelete={(labelId) => removeLabel(labelId)}
+        onSelect={!readonly ? (label) => addLabel(label.id) : undefined}
+        onDelete={!readonly ? (labelId) => removeLabel(labelId) : undefined}
       />
 
-      {!aiPlaygroundEnabled && (
+      {!readonly && !aiPlaygroundEnabled && (
         <ControlsTranslation
           onEdit={() => handleOpen()}
           onComments={() => handleOpen('comments')}

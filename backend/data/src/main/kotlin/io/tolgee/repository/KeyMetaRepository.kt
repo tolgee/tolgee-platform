@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.model.key.KeyCodeReference
 import io.tolgee.model.key.KeyMeta
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
@@ -24,4 +25,7 @@ interface KeyMetaRepository : JpaRepository<KeyMeta?, Long?> {
   @Modifying
   @Query("delete from KeyMeta km where km.key.id in (select k.id from Key k where k.project.id = :projectId)")
   fun deleteAllByProject(projectId: Long)
+
+  @Query("from KeyCodeReference c left join fetch c.author a where c.keyMeta.id = :keyMetaId")
+  fun getCodeReferencesByKeyMetaId(keyMetaId: Long): List<KeyCodeReference>
 }
