@@ -26,6 +26,11 @@ interface BranchService {
     branchId: Long,
   ): Branch
 
+  fun getActiveBranch(
+    projectId: Long,
+    branchName: String,
+  ): Branch
+
   fun createBranch(
     projectId: Long,
     name: String,
