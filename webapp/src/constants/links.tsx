@@ -462,6 +462,10 @@ export class LINKS {
     LINKS.PROJECT,
     'tree/' + p(PARAMS.BRANCH) + '*'
   );
+  static PROJECT_IMPORT_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_IMPORT,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
 }
 
 export enum QUERY {
