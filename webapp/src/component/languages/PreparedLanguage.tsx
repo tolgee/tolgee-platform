@@ -3,7 +3,7 @@ import { XClose, Edit02 } from '@untitled-ui/icons-react';
 
 import { components } from 'tg.service/apiSchema.generated';
 
-import { FlagImage } from './FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 
 const StyledContainer = styled('div')`
   background: ${({ theme }) => theme.palette.languageChips.background};

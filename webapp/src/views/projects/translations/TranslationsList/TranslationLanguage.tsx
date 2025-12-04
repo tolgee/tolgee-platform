@@ -1,5 +1,5 @@
 import { styled, useTheme } from '@mui/material';
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationFlags } from '../cell/TranslationFlags';
 

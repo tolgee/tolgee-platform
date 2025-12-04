@@ -5,7 +5,7 @@ import {
   NotificationItemProps,
 } from 'tg.component/layout/Notifications/NotificationItem';
 import { getTaskUrl } from 'tg.constants/links';
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { useTranslate } from '@tolgee/react';
 
 const StyledLinkedDetailItem = styled(Box)`

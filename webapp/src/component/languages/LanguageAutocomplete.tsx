@@ -12,7 +12,7 @@ import { suggest } from '@tginternal/language-util';
 import { SuggestResult } from '@tginternal/language-util/lib/suggesting';
 import { T, useTranslate } from '@tolgee/react';
 import { MenuItem } from '@mui/material';
-import { FlagImage } from './FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 
 const StyledMenuItem = styled(MenuItem)`
   display: flex;
