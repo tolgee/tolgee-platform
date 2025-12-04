@@ -2,64 +2,36 @@ import { Location } from 'history';
 
 const BRANCH_SEGMENT = '/tree/';
 
-const findBranchIndex = (pathname: string) => pathname.indexOf(BRANCH_SEGMENT);
-
-const sliceBranchPart = (pathname: string) => {
-  const idx = findBranchIndex(pathname);
-  if (idx === -1) return undefined;
-  return pathname.slice(idx + BRANCH_SEGMENT.length);
+export const extractBranchFromPathname = (pathname: string): string | null => {
+  const idx = pathname.indexOf(BRANCH_SEGMENT);
+  if (idx === -1) return null;
+  const after = pathname.substring(idx + BRANCH_SEGMENT.length);
+  if (!after) return null;
+  return after;
 };
 
-export const extractBranchFromPathname = (pathname: string) => {
-  const branchPart = sliceBranchPart(pathname);
-  if (!branchPart) return undefined;
-
-  const cleaned = branchPart.replace(/\/+$/, '');
-
-  try {
-    return decodeURIComponent(cleaned);
-  } catch (e) {
-    return cleaned;
-  }
-};
-
-export const stripBranchFromPathname = (pathname: string) => {
-  const idx = findBranchIndex(pathname);
-  if (idx === -1) return pathname;
-  const stripped = pathname.slice(0, idx);
-  return stripped === '' ? '/' : stripped.replace(/\/$/, '');
-};
-
-export const applyBranchToPathname = (
-  pathname: string,
-  branch?: string | null
-) => {
-  const basePath = stripBranchFromPathname(pathname);
-
-  if (!branch) {
-    return basePath;
-  }
-
-  // Encode branch but keep path separators so we can support names like "feat/demo"
-  const encodedBranch = encodeURIComponent(branch).replace(/%2F/gi, '/');
-  const trimmedBase = basePath.replace(/\/$/, '');
-  return `${trimmedBase}${BRANCH_SEGMENT}${encodedBranch}`;
+export const applyBranchToUrl = (url: string, branch: string) => {
+  const [path, query] = url.split('?');
+  const idx = path.indexOf(BRANCH_SEGMENT);
+  const base = idx === -1 ? path : path.substring(0, idx);
+  const newPath = `${base}${BRANCH_SEGMENT}${branch}`;
+  return query ? `${newPath}?${query}` : newPath;
 };
 
 export const applyBranchToLocation = (
-  location: Location | { pathname: string; search?: string; hash?: string },
-  branch?: string | null
+  location: Location,
+  branch: string | null
 ) => {
-  return (
-    applyBranchToPathname(location.pathname, branch) +
-    (location.search || '') +
-    (location.hash || '')
-  );
-};
+  const idx = location.pathname.indexOf(BRANCH_SEGMENT);
+  const basePath =
+    idx === -1 ? location.pathname : location.pathname.substring(0, idx);
 
-export const applyBranchToUrl = (url: string, branch?: string | null) => {
-  const parsed = new URL(url, window.location.origin);
-  return (
-    applyBranchToPathname(parsed.pathname, branch) + parsed.search + parsed.hash
-  );
+  if (!branch) {
+    return { ...location, pathname: basePath };
+  }
+
+  return {
+    ...location,
+    pathname: `${basePath}${BRANCH_SEGMENT}${branch}`,
+  };
 };
