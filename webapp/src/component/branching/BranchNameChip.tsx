@@ -6,16 +6,19 @@ import { Box } from '@mui/material';
 type Props = {
   name: string;
   as?: typeof DefaultChip;
+  disabled?: boolean;
   arrow?: boolean;
 };
 
 export const BranchNameChip = ({
   name,
   as: ChipComponent = DefaultChip,
+  disabled,
   arrow,
 }: Props) => {
   return (
     <ChipComponent
+      disabled={disabled}
       label={
         <Box display="flex" alignItems="center" flexWrap="nowrap">
           <span>{name}</span>
@@ -24,7 +27,7 @@ export const BranchNameChip = ({
           )}
         </Box>
       }
-      icon={<Branch width={20} height={20} />}
+      icon={<Branch width={18} height={18} />}
     />
   );
 };

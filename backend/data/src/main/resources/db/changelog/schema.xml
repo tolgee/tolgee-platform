@@ -4941,4 +4941,23 @@
             <column name="deleted_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
         </addColumn>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1764843997114-1">
+        <addColumn tableName="import">
+            <column name="branch_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1764843997114-2">
+        <addForeignKeyConstraint baseColumnNames="branch_id" baseTableName="import" constraintName="FKopvqh82o6l414c1s303md2pov" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1764848705878-1">
+        <createIndex indexName="IDX6x1mvj1s52qxnrd1naym069v1" tableName="import">
+            <column name="branch_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1764848705878-2" >
+        <dropIndex indexName="import_author_project_unique" tableName="import" />
+        <sql>
+            create unique index import_author_project_unique on import(author_id, project_id, coalesce(branch_id, -1)) where deleted_at is null
+        </sql>
+    </changeSet>
 </databaseChangeLog>
