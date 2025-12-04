@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
@@ -26,6 +27,7 @@ class ImportTestData {
   lateinit var importEnglish: ImportLanguage
   lateinit var translationWithConflict: ImportTranslation
   lateinit var newLongKey: ImportKey
+  lateinit var featureBranch: Branch
   var project: Project
   var userAccount: UserAccount
   val projectBuilder get() = root.data.projects[0]
@@ -468,6 +470,19 @@ class ImportTestData {
 
   fun useCzechBaseLanguage() {
     project.baseLanguage = czech
+  }
+
+  fun addBranch() {
+    this.projectBuilder.apply {
+      featureBranch =
+        addBranch {
+          name = "feature"
+          project = projectBuilder.self
+          isProtected = false
+          isDefault = false
+          originBranch = this
+        }.self
+    }
   }
 
   data class AddFilesWithNamespacesResult(

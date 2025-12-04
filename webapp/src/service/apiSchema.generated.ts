@@ -5630,6 +5630,11 @@ export interface components {
       username: string;
     };
     SingleStepImportRequest: {
+      /**
+       * @description Branch to which files will be imported
+       * @example main
+       */
+      branch?: string;
       /** @description If true, placeholders from other formats will be converted to ICU when possible */
       convertPlaceholdersToIcu: boolean;
       /** @description If false, only updates keys, skipping the creation of new keys */
@@ -13691,6 +13696,8 @@ export interface operations {
       query: {
         /** When importing files in structured formats (e.g., JSON, YAML), this field defines the delimiter which will be used in names of imported keys. */
         structureDelimiter?: string;
+        /** Branch to which files will be imported */
+        branch?: string;
       };
       path: {
         projectId: number;
@@ -13739,6 +13746,9 @@ export interface operations {
   /** Deletes prepared import data. */
   cancelImport: {
     parameters: {
+      query: {
+        branch?: string;
+      };
       path: {
         projectId: number;
       };
@@ -13903,6 +13913,7 @@ export interface operations {
       query: {
         /** Whether override or keep all translations with unresolved conflicts */
         forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+        branch?: string;
       };
       path: {
         projectId: number;
@@ -13943,6 +13954,7 @@ export interface operations {
       query: {
         /** Whether override or keep all translations with unresolved conflicts */
         forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+        branch?: string;
       };
       path: {
         projectId: number;
@@ -13991,6 +14003,7 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        branch?: string;
       };
       path: {
         projectId: number;

@@ -21,6 +21,7 @@ import { TaskRedirect } from './TaskRedirect';
 import { routes } from 'tg.ee';
 import { IntegrateView } from './integrate/IntegrateView';
 import { AiView } from './ai/AiView';
+import { BRANCH_ROUTES } from '../../branching/branchRoutes';
 
 export const ProjectRouter = () => {
   const match = useRouteMatch();
@@ -95,12 +96,16 @@ export const ProjectRouter = () => {
         </Route>
 
         {/*Branched views*/}
-        <Route exact path={LINKS.PROJECT_TRANSLATIONS_BRANCHED.template}>
+        <Route exact path={BRANCH_ROUTES.translations.branched}>
           <TranslationsView />
         </Route>
 
-        <Route exact path={LINKS.PROJECT_DASHBOARD_BRANCHED.template}>
+        <Route exact path={BRANCH_ROUTES.dashboard.branched}>
           <DashboardView />
+        </Route>
+
+        <Route exact path={BRANCH_ROUTES.import.branched}>
+          <ImportView />
         </Route>
       </Switch>
       <routes.Project />

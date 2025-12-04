@@ -5,8 +5,8 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
-import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
+import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.ee.repository.branching.BranchRepository
@@ -67,6 +67,14 @@ class BranchServiceImpl(
     branchId: Long,
   ): Branch {
     return branchRepository.findActiveByProjectIdAndId(projectId, branchId)
+      ?: throw BadRequestException(Message.BRANCH_NOT_FOUND)
+  }
+
+  override fun getActiveBranch(
+    projectId: Long,
+    branchName: String,
+  ): Branch {
+    return branchRepository.findActiveByProjectIdAndName(projectId, branchName)
       ?: throw BadRequestException(Message.BRANCH_NOT_FOUND)
   }
 

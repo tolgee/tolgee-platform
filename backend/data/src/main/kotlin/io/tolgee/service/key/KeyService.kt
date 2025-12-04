@@ -17,6 +17,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -58,6 +59,13 @@ class KeyService(
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
+  }
+
+  fun getAllByBranch(
+    projectId: Long,
+    branch: String?,
+  ): Set<Key> {
+    return keyRepository.getAllByProjectIdAndBranch(projectId, branch)
   }
 
   fun getAllSortedById(projectId: Long): List<KeyView> {

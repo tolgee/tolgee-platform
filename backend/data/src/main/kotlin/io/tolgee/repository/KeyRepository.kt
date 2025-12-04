@@ -65,6 +65,21 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
+      from Key k 
+        left join k.branch b
+        left join fetch k.namespace 
+        left join fetch k.keyMeta 
+    where k.project.id = :projectId
+    and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault))) 
+    """,
+  )
+  fun getAllByProjectIdAndBranch(
+    projectId: Long,
+    branch: String?,
+  ): Set<Key>
+
+  @Query(
+    """
      select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom, k.branch.name)
      from Key k
      left join k.keyMeta km

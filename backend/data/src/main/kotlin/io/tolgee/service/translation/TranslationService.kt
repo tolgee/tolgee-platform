@@ -97,8 +97,11 @@ class TranslationService(
     return langTranslations
   }
 
-  fun getAllByLanguageId(languageId: Long): List<Translation> {
-    return translationRepository.getAllByLanguageId(languageId)
+  fun getAllByLanguageId(
+    languageId: Long,
+    branch: String? = null,
+  ): List<Translation> {
+    return translationRepository.getAllByLanguageId(languageId, branch)
   }
 
   fun getKeyTranslations(

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DefaultBranchChip } from 'tg.component/branching/DefaultBranchChip';
 import { components } from 'tg.service/apiSchema.generated';
 import { Box, Menu, MenuItem, styled } from '@mui/material';
@@ -27,7 +27,7 @@ const Label = styled('div')`
 `;
 
 type Props = {
-  branch?: BranchModel | number | null;
+  branch?: BranchModel | number | string | null;
   onSelect?: (branch: BranchModel) => void;
   onDefaultValue?: (branch: BranchModel) => void;
   hideDefault?: boolean;
@@ -52,24 +52,34 @@ export const BranchSelect = ({
     (b) => (!b.isDefault || !hideDefault) && !hiddenIds?.includes(b.id)
   );
 
-  const defaultValue = !hideDefault
-    ? branch
-      ? items.find((b) =>
-          typeof branch === 'number' ? b.id === branch : b.id === branch.id
-        )!
-      : defaultBranch!
-    : items[0]!;
+  const derivedSelected = useMemo(() => {
+    if (!items.length) {
+      return undefined;
+    }
+    if (branch) {
+      return items.find((b) =>
+        typeof branch === 'number'
+          ? b.id === branch
+          : typeof branch === 'string'
+          ? b.name === branch
+          : b.id === branch.id
+      );
+    }
+    return (!hideDefault ? defaultBranch : items[0]) ?? undefined;
+  }, [branch, items, defaultBranch, hideDefault]);
 
-  const [selected, setSelected] = useState<BranchModel>(defaultValue);
+  const [selected, setSelected] = useState<BranchModel | undefined>(
+    derivedSelected
+  );
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    if (defaultValue) {
-      setSelected(defaultValue);
-      onDefaultValue?.(defaultValue);
+    if (derivedSelected && derivedSelected.id !== selected?.id) {
+      setSelected(derivedSelected);
+      onDefaultValue?.(derivedSelected);
     }
-  }, [defaultBranch]);
+  }, [derivedSelected, selected?.id, onDefaultValue]);
 
   function renderItem(props: any, item: BranchModel) {
     return (
@@ -113,7 +123,12 @@ export const BranchSelect = ({
         className={clsx(disabled && 'disabled')}
       >
         {selected && (
-          <BranchNameChip name={selected.name} as={TransparentChip} arrow />
+          <BranchNameChip
+            name={selected.name}
+            as={TransparentChip}
+            disabled={disabled}
+            arrow
+          />
         )}
       </Label>
       <Menu
