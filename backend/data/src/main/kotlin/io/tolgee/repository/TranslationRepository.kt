@@ -76,10 +76,18 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query(
     """
-        from Translation t join fetch t.key k left join fetch k.keyMeta where t.language.id = :languageId
+        from Translation t 
+        join fetch t.key k 
+        left join k.branch b
+        left join fetch k.keyMeta 
+        where t.language.id = :languageId
+        and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault))) 
     """,
   )
-  fun getAllByLanguageId(languageId: Long): List<Translation>
+  fun getAllByLanguageId(
+    languageId: Long,
+    branch: String?,
+  ): List<Translation>
 
   @Query(
     """from Translation t 

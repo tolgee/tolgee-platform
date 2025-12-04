@@ -90,6 +90,7 @@ export const ImportView: FunctionComponent = () => {
       ]}
       maxWidth="wide"
       overflow="auto"
+      branching
     >
       <ImportConflictResolutionDialog
         row={resolveRow}
