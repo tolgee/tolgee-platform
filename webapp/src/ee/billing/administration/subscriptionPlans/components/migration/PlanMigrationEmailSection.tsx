@@ -29,7 +29,11 @@ export const PlanMigrationEmailSection: FC<EmailSectionProps> = ({
   >();
 
   return (
-    <Accordion sx={{ mt: 1 }} defaultExpanded={false}>
+    <Accordion
+      sx={{ mt: 1 }}
+      defaultExpanded={false}
+      data-cy="plan-migration-email-section"
+    >
       <AccordionSummary expandIcon={<ArrowDropDown />}>
         <Typography>
           {t('administration_plan_migration_email_section_title')}
@@ -38,6 +42,7 @@ export const PlanMigrationEmailSection: FC<EmailSectionProps> = ({
       <AccordionDetails>
         <Box mt={1}>
           <HtmlTemplateEditor
+            name="emailTemplate"
             value={values.customEmailBody ?? template?.body ?? ''}
             onChange={(val) => setFieldValue('customEmailBody', val)}
             disabled={!template}

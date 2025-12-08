@@ -30,6 +30,10 @@ export const getInput = (name, nth = 1) =>
   `//input[translate(@name,` +
   `'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') = '${name.toLowerCase()}'][${nth}]`;
 
+export const getTextArea = (name, nth = 1) =>
+  `//textarea[translate(@name,` +
+  `'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') = '${name.toLowerCase()}'][${nth}]`;
+
 export const getClosestContainingText = (text, tag = '*', nth = 1) =>
   `./ancestor::*[.//*[${containsIgnoreCase(
     'text()',

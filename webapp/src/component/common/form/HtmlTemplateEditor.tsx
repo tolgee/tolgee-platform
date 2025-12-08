@@ -26,6 +26,7 @@ export type TemplatePlaceholder =
   components['schemas']['EmailPlaceholderModel'];
 
 type Props = {
+  name?: string;
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
@@ -36,6 +37,7 @@ type Props = {
 type Mode = 'html' | 'preview';
 
 export const HtmlTemplateEditor: React.FC<Props> = ({
+  name,
   value,
   onChange,
   disabled,
@@ -216,6 +218,7 @@ export const HtmlTemplateEditor: React.FC<Props> = ({
 
         {mode === 'html' ? (
           <TextField
+            name={name}
             inputRef={textareaRef}
             label={t('html_editor_source_label')}
             multiline
@@ -226,6 +229,7 @@ export const HtmlTemplateEditor: React.FC<Props> = ({
             InputProps={{
               readOnly,
             }}
+            data-cy="html-template-editor"
           />
         ) : (
           <Box
@@ -263,6 +267,7 @@ export const HtmlTemplateEditor: React.FC<Props> = ({
                     onClick={() => insertPlaceholder(ph.placeholder)}
                     clickable={!disabled && !readOnly}
                     disabled={disabled || readOnly}
+                    data-cy="html-template-editor-placeholder"
                   />
                 );
                 if (!ph.exampleValue) {

@@ -1,5 +1,9 @@
 /// <reference types="cypress" />
-import { getAnyContainingAriaLabelAttribute, getInput } from './xPath';
+import {
+  getAnyContainingAriaLabelAttribute,
+  getInput,
+  getTextArea,
+} from './xPath';
 import { Scope } from './types';
 import { waitForGlobalLoading } from './loading';
 import { HOST } from './constants';
@@ -156,6 +160,10 @@ export const assertMultiselect = (chainable: Chainable, values: string[]) => {
 
 export const getInputByName = (name: string): Chainable => {
   return cy.xpath(getInput(name));
+};
+
+export const getTextAreaByName = (name: string): Chainable => {
+  return cy.xpath(getTextArea(name));
 };
 
 export const switchToOrganizationWithSearch = (name: string): Chainable => {
