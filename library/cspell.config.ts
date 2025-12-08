@@ -23,5 +23,5 @@ export default defineConfig({
     'tginternal',
     'tolgee',
   ],
-  ignorePaths: ['/dist/', '/src/i18n/*.json', '/storybook-static/'],
+  ignorePaths: ['/dist/', '/storybook-static/'],
 });
