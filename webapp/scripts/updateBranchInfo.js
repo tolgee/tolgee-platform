@@ -1,7 +1,7 @@
-import { execSync } from 'child_process';
-import { writeFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { execSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // Get current branch name
 const branchName = execSync('git rev-parse --abbrev-ref HEAD')
