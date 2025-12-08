@@ -1,6 +1,7 @@
 package io.tolgee.component.email.customTemplate.placeholder
 
 import io.tolgee.component.email.customTemplate.EmailTemplateVariables
+import io.tolgee.util.I18n
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.set
@@ -9,7 +10,9 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 
 @Component
-class EmailPlaceholdersExtractor {
+class EmailPlaceholdersExtractor(
+  private val i18n: I18n,
+) {
   private val cache =
     ConcurrentHashMap<KClass<*>, List<EmailPlaceholderEntry<*>>>()
 
@@ -39,7 +42,7 @@ class EmailPlaceholdersExtractor {
             EmailPlaceholderDefinition(
               position = annotation.position,
               placeholder = annotation.placeholder,
-              description = annotation.description,
+              description = i18n.translate(annotation.description),
               exampleValue = annotation.exampleValue,
             ),
           accessor = { instance: T ->
