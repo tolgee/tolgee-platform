@@ -70,6 +70,10 @@ export default defineConfig([
     extends: [jsonPlugin.configs.recommended],
   },
   {
+    files: ['**/tsconfig*.json'],
+    language: 'json/jsonc',
+  },
+  {
     files: ['**/*.md'], // MDX support awaits implementation https://github.com/eslint/markdown/issues/316
     language: 'markdown/gfm',
     plugins: { markdownPlugin },

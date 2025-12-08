@@ -5,8 +5,8 @@
       "lib.components/*": ["./src/components/*"],
       "lib.constants/*": ["./src/constants/*"],
       "lib.hooks/*": ["./src/hooks/*"],
-      "tg.component/*": ["../webapp/src/component/*"],
-      "tg.fixtures/*": ["../webapp/src/fixtures/*"]
+      "tg.component/*": ["../webapp/src/component/*"], // TODO remove under https://github.com/tolgee/tolgee-platform/issues/3326
+      "tg.fixtures/*": ["../webapp/src/fixtures/*"] // TODO remove under https://github.com/tolgee/tolgee-platform/issues/3326
     },
     "lib": ["dom", "esnext"],
     "target": "ESNext",
@@ -29,7 +29,7 @@
     "src/**/*",
     ".storybook/**/*",
     "custom.d.ts",
-    "../webapp/src/custom.d.ts"
+    "../webapp/src/custom.d.ts" // TODO remove under https://github.com/tolgee/tolgee-platform/issues/3326
   ],
   "exclude": ["dist", "node_modules"]
 }

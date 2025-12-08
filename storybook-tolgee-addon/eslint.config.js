@@ -57,6 +57,10 @@ export default defineConfig([
     extends: [jsonPlugin.configs.recommended],
   },
   {
+    files: ['tsconfig.json'],
+    language: 'json/jsonc',
+  },
+  {
     files: ['**/*.md'],
     language: 'markdown/gfm',
     plugins: { markdownPlugin },
