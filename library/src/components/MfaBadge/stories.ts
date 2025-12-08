@@ -7,7 +7,7 @@ const meta = {
     layout: 'centered',
   },
   play: async ({ canvas, userEvent }) => {
-    setTimeout(() => userEvent.hover(canvas.getAllByText(() => true)[1]), 500);
+    setTimeout(() => userEvent.hover(canvas.getAllByText(() => true)[1]), 1000);
   },
   tags: ['autodocs'],
 } satisfies Meta<typeof MfaBadge>;
