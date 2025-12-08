@@ -363,6 +363,8 @@ declare namespace DataCy {
         "glossary-view-button" |
         "glossary-view-language-select" |
         "handlebars-editor" |
+        "html-template-editor" |
+        "html-template-editor-placeholder" |
         "import-conflict-resolution-dialog" |
         "import-conflicts-not-resolved-dialog" |
         "import-conflicts-not-resolved-dialog-cancel-button" |
@@ -573,6 +575,7 @@ declare namespace DataCy {
         "permissions-menu-save" |
         "plan-limit-dialog-close" |
         "plan-limit-exceeded-popover" |
+        "plan-migration-email-section" |
         "plan-migration-tab-migrated" |
         "plan-migration-tab-upcoming" |
         "plan-migration-tooltip-detail" |
