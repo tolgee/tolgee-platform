@@ -6,6 +6,7 @@ import { T } from '@tolgee/react';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useEffect } from 'react';
 import { FilesType } from 'tg.fixtures/FileUploadFixtures';
+import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
 
 type ResultType = components['schemas']['PagedModelImportLanguageModel'];
 
@@ -32,6 +33,7 @@ export const useImportDataHelper = () => {
   const setResult = useImportDataStore((s) => s.setResult);
   const setApplyTouched = useImportDataStore((s) => s.setApplyTouched);
   const applyTouched = useImportDataStore((s) => s.applyTouched);
+  const { selected } = useBranchesService({ projectId: project.id });
 
   const message = useMessage();
 
@@ -41,7 +43,10 @@ export const useImportDataHelper = () => {
     path: {
       projectId: project.id,
     },
-    query: { size: 1000 },
+    query: {
+      size: 1000,
+      branch: selected?.name,
+    },
     options: {
       onSuccess(data) {
         setResult(data, project.id);
@@ -101,7 +106,9 @@ export const useImportDataHelper = () => {
       path: {
         projectId: project.id,
       },
-      query: {},
+      query: {
+        branch: selected?.name,
+      },
       content: {
         'multipart/form-data': {
           files: files.map((f) => {
@@ -116,6 +123,9 @@ export const useImportDataHelper = () => {
     cancelMutation.mutate({
       path: {
         projectId: project.id,
+      },
+      query: {
+        branch: selected?.name,
       },
     });
 

@@ -11,6 +11,9 @@ import io.tolgee.events.OnKeyPrePersist
 import io.tolgee.events.OnKeyPreRemove
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.task.TaskKey
@@ -21,6 +24,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
@@ -35,6 +39,7 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.context.ApplicationEventPublisher
+import java.util.Date
 
 @Entity
 @ActivityLoggedEntity
@@ -45,6 +50,7 @@ import org.springframework.context.ApplicationEventPublisher
   indexes = [
     Index(columnList = "project_id"),
     Index(columnList = "namespace_id"),
+    Index(columnList = "branch_id"),
   ],
 )
 class Key(
@@ -55,7 +61,8 @@ class Key(
   @ActivityDescribingProp
   var name: String = "",
 ) : StandardAuditModel(),
-  WithKeyMeta {
+  WithKeyMeta,
+  BranchVersionedEntity<Key, KeySnapshot> {
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -63,6 +70,12 @@ class Key(
   @ManyToOne
   @ActivityLoggedProp
   var namespace: Namespace? = null
+
+  // Nullable for backward compatibility: NULL represents default branch for legacy data
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "branch_id")
+  @ActivityLoggedProp
+  var branch: Branch? = null
 
   @OneToMany(mappedBy = "key")
   var translations: MutableList<Translation> = mutableListOf()
@@ -83,6 +96,9 @@ class Key(
   @ActivityLoggedProp
   var pluralArgName: String? = null
 
+  @Column(nullable = true)
+  var cascadeUpdatedAt: Date? = null
+
   constructor(
     name: String,
     project: Project,
@@ -94,6 +110,9 @@ class Key(
 
   val path: PathDTO
     get() = PathDTO.fromFullPath(name)
+
+  val modifiedAt: Date
+    get() = cascadeUpdatedAt ?: updatedAt!!
 
   companion object {
     @Configurable
@@ -119,5 +138,48 @@ class Key(
 
   fun toSimpleKey(): SimpleKeyResult {
     return SimpleKeyResult(id, name, namespace?.name)
+  }
+
+  override fun resolveKey(): Key? = this
+
+  override fun isModified(oldState: Map<String, Any>): Boolean {
+    return oldState["isPlural"] != this.isPlural || oldState["pluralArgName"] != this.pluralArgName
+  }
+
+  override fun hasChanged(snapshot: KeySnapshot): Boolean {
+    val changed =
+      this.name != snapshot.name || this.isPlural != snapshot.isPlural || this.pluralArgName != snapshot.pluralArgName
+    if (changed) {
+      return true
+    }
+    this.keyMeta?.let { meta ->
+      snapshot.keyMetaSnapshot?.let { keyMetaSnapshot ->
+        if (meta.hasChanged(keyMetaSnapshot)) {
+          return true
+        }
+      }
+    }
+    if (this.translations.size != snapshot.translations.size) {
+      return true
+    }
+    this.translations.forEach { translation ->
+      if (translation.hasChanged(snapshot.translations.find { it.language == translation.language.tag }!!)) {
+        return true
+      }
+    }
+    return false
+  }
+
+  override fun merge(source: Key) {
+    this.isPlural = source.isPlural
+    this.pluralArgName = source.pluralArgName
+    this.translations.forEach { translation ->
+      translation.merge(source.translations.find { it.language == translation.language }!!)
+    }
+    this.keyMeta?.let { meta ->
+      source.keyMeta?.let { sourceMeta ->
+        meta.merge(sourceMeta)
+      }
+    }
   }
 }

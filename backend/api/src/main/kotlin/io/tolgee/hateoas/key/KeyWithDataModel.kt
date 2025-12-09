@@ -37,5 +37,7 @@ open class KeyWithDataModel(
   val pluralArgName: String?,
   @Schema(description = "Custom values of the key")
   val custom: Map<String, Any?>,
+  @Schema(description = "Branch of the key")
+  val branch: String?,
 ) : RepresentationModel<KeyWithDataModel>(),
   Serializable

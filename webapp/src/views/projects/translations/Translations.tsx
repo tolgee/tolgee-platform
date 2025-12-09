@@ -161,6 +161,7 @@ export const Translations = () => {
       ]}
       wrapperProps={{ style: { paddingBottom: 0, paddingTop: '3px' } }}
       rightPanelContent={(width) => <AiPlayground width={width} />}
+      branching
     >
       <BatchOperationsChangeIndicator />
       <TranslationsHeader />
