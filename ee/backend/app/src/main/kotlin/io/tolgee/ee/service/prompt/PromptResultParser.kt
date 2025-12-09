@@ -2,7 +2,7 @@ package io.tolgee.ee.service.prompt
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.PromptResult
 import io.tolgee.exceptions.LlmProviderNotReturnedJsonException
@@ -10,6 +10,7 @@ import io.tolgee.util.updateStringsInJson
 
 class PromptResultParser(
   private val promptResult: PromptResult,
+  private val objectMapper: ObjectMapper,
 ) {
   fun parse(): ParsedResult {
     val json = extractJsonFromResponse(promptResult.response)
@@ -26,14 +27,14 @@ class PromptResultParser(
 
   private fun extractJsonFromResponse(content: String): JsonNode? {
     // attempting different strategies to find a json in the response
-    val attempts =
+    val attemptFns =
       listOf<(String) -> String>(
         { it },
         { getJsonLike(it) },
         { getJsonLike(it.substringAfter("```").substringBefore("```")) },
       )
-    for (attempt in attempts) {
-      val result = parseJsonSafely(attempt.invoke(content))
+    for (attemptFn in attemptFns) {
+      val result = parseJsonSafely(attemptFn(content))
       if (result != null) {
         return result
       }
@@ -47,14 +48,14 @@ class PromptResultParser(
 
   private fun parseJsonSafely(content: String): JsonNode? {
     return try {
-      val result = jacksonObjectMapper().readValue<JsonNode>(content)
+      val result = objectMapper.readValue<JsonNode>(content)
       updateStringsInJson(result) {
         // gpt-4.1 sometimes includes NIL,
         // which is invalid utf-8 character breaking DB saving
         it.replace("\u0000", "")
       }
-    } catch (e: JsonProcessingException) {
-      throw LlmProviderNotReturnedJsonException(e)
+    } catch (_: JsonProcessingException) {
+      null
     }
   }
 

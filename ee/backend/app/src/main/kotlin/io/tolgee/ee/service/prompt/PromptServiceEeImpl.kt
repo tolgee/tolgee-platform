@@ -1,15 +1,11 @@
 package io.tolgee.ee.service.prompt
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.HandlebarsException
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
-import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.component.PromptLazyMap
@@ -19,7 +15,6 @@ import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.FailedDependencyException
-import io.tolgee.exceptions.LlmProviderNotReturnedJsonException
 import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.TooManyRequestsException
@@ -31,7 +26,6 @@ import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.util.updateStringsInJson
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
@@ -54,6 +48,7 @@ class PromptServiceEeImpl(
   private val mtServiceConfigService: MtServiceConfigService,
   private val applicationContext: ApplicationContext,
   private val promptParamsHelper: PromptParamsHelper,
+  private val objectMapper: ObjectMapper,
 ) : PromptService {
   fun getAllPaged(
     projectId: Long,
@@ -207,7 +202,7 @@ class PromptServiceEeImpl(
         throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(e.message), e)
       }
 
-    return PromptResultParser(result).parse()
+    return PromptResultParser(result, objectMapper).parse()
   }
 
   fun runPromptAndChargeCredits(
