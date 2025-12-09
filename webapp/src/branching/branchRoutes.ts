@@ -40,6 +40,17 @@ export const BRANCH_ROUTES: Record<string, BranchRoute> = {
           })
         : LINKS.PROJECT_IMPORT.build({ [PARAMS.PROJECT_ID]: projectId }),
   },
+  export: {
+    base: LINKS.PROJECT_EXPORT.template,
+    branched: LINKS.PROJECT_EXPORT_BRANCHED.template,
+    build: (projectId, branch) =>
+      branch
+        ? LINKS.PROJECT_EXPORT_BRANCHED.build({
+            [PARAMS.PROJECT_ID]: projectId,
+            [PARAMS.BRANCH]: branch,
+          })
+        : LINKS.PROJECT_EXPORT.build({ [PARAMS.PROJECT_ID]: projectId }),
+  },
 };
 
 export type BranchRouteKey = keyof typeof BRANCH_ROUTES;
