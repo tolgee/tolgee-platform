@@ -107,6 +107,10 @@ export const ProjectRouter = () => {
         <Route exact path={BRANCH_ROUTES.import.branched}>
           <ImportView />
         </Route>
+
+        <Route exact path={BRANCH_ROUTES.export.branched}>
+          <ExportView />
+        </Route>
       </Switch>
       <routes.Project />
     </ProjectContext>
