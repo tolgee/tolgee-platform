@@ -10,6 +10,7 @@ const BRANCHING_LINKS = new Set<Link>([
   LINKS.PROJECT_DASHBOARD,
   LINKS.PROJECT_TRANSLATIONS,
   LINKS.PROJECT_IMPORT,
+  LINKS.PROJECT_EXPORT,
 ]);
 
 export const useBranchLinks = (selectedBranch?: string) => {
