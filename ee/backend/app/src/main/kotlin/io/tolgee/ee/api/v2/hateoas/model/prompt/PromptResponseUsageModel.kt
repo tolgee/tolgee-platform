@@ -6,4 +6,4 @@ data class PromptResponseUsageModel(
   val inputTokens: Long? = null,
   val outputTokens: Long? = null,
   val cachedTokens: Long? = null,
-) : RepresentationModel<PromptResponseModel>()
+) : RepresentationModel<PromptResponseUsageModel>()
