@@ -1,4 +1,4 @@
-import { defineConfig } from 'eslint/config';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import jsPlugin from '@eslint/js';
 import jsonPlugin from '@eslint/json';
@@ -6,6 +6,7 @@ import markdownPlugin from '@eslint/markdown';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import reactRefreshPlugin from 'eslint-plugin-react-refresh';
+import storybookPlugin from 'eslint-plugin-storybook';
 import tsPlugin from 'typescript-eslint';
 import compatPlugin from 'eslint-plugin-compat';
 import prettierConfig from 'eslint-config-prettier/flat';
@@ -34,9 +35,7 @@ export default defineConfig([
       sourceType: 'module',
     },
   },
-  {
-    ignores: ['dist/*', 'storybook-static/*'],
-  },
+  globalIgnores(['!.storybook', 'dist/*', 'storybook-static/*']),
   {
     files: ['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx'],
     extends: [
@@ -79,6 +78,7 @@ export default defineConfig([
     plugins: { markdownPlugin },
     extends: [markdownPlugin.configs.recommended],
   },
+  storybookPlugin.configs['flat/recommended'],
   compatPlugin.configs['flat/recommended'],
   prettierConfig,
 ]);
