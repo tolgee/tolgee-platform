@@ -30,6 +30,8 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.HttpStatus
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
@@ -43,15 +45,15 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var httpClientMocker: HttpClientMocker
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   override lateinit var internalProperties: InternalProperties
 
-  @MockBean
+  @MockitoBean
   @Autowired
   lateinit var restTemplateBuilder: RestTemplateBuilder
 
   @Autowired
-  @MockBean
+  @MockitoBean
   private lateinit var restTemplate: RestTemplate
 
   @BeforeEach
@@ -62,7 +64,7 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
       freeCreditsAmount = -1,
     )
     whenever(internalProperties.fakeMtProviders).thenReturn(false)
-    whenever(restTemplateBuilder.setReadTimeout(any())).thenReturn(restTemplateBuilder)
+    whenever(restTemplateBuilder.readTimeout(any())).thenReturn(restTemplateBuilder)
     whenever(restTemplateBuilder.build()).thenReturn(restTemplate)
   }
 

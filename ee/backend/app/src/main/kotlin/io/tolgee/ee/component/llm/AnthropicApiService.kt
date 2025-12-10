@@ -3,7 +3,6 @@ package io.tolgee.ee.component.llm
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
-import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.exceptions.LlmEmptyResponseException
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -34,6 +33,7 @@ class AnthropicApiService :
       RequestBody(
         messages = messages,
         model = config.model,
+        max_tokens = config.maxTokens,
       )
 
     val request = HttpEntity(requestBody, headers)
@@ -45,6 +45,8 @@ class AnthropicApiService :
         request,
       )
 
+    setSentryContext(request, response)
+
     return PromptResult(
       response.body
         ?.content
@@ -53,7 +55,7 @@ class AnthropicApiService :
         ?: throw LlmEmptyResponseException(),
       usage =
         response.body?.usage?.let {
-          PromptResponseUsageDto(
+          PromptResult.Usage(
             inputTokens = it.input_tokens,
             outputTokens = it.output_tokens,
           )

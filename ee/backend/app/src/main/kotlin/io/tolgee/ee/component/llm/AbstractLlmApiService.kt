@@ -4,10 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpEntity
+import org.springframework.http.ResponseEntity
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
@@ -42,6 +45,17 @@ abstract class AbstractLlmApiService {
       // No error body available
       logger.debug("Bad request with no error body")
       return null
+    }
+  }
+
+  protected fun setSentryContext(
+    request: HttpEntity<*>,
+    response: ResponseEntity<*>,
+  ) {
+    Sentry.configureScope { scope ->
+      scope.setContexts("llmDiagnosticsRequestBody", request.body)
+      scope.setContexts("llmDiagnosticsResponseBody", response.body)
+      scope.setContexts("llmDiagnosticsResponseHeaders", response.headers)
     }
   }
 }

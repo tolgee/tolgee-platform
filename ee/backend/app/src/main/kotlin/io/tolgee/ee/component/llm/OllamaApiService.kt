@@ -1,5 +1,6 @@
 package io.tolgee.ee.component.llm
 
+import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.exchange
@@ -44,6 +46,8 @@ class OllamaApiService :
         HttpMethod.POST,
         request,
       )
+
+    setSentryContext(request, response)
 
     return PromptResult(
       response.body?.message?.content

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
-import io.tolgee.dtos.response.prompt.PromptResponseUsageDto
 import io.tolgee.exceptions.LlmEmptyResponseException
 import io.tolgee.util.Logging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -48,6 +47,8 @@ class GoogleAiApiService :
         request,
       )
 
+    setSentryContext(request, response)
+
     return PromptResult(
       response =
         response.body
@@ -60,7 +61,7 @@ class GoogleAiApiService :
           ?: throw LlmEmptyResponseException(),
       usage =
         response.body?.usageMetadata?.let {
-          PromptResponseUsageDto(
+          PromptResult.Usage(
             inputTokens = it.promptTokenCount,
             outputTokens = it.candidatesTokenCount,
           )

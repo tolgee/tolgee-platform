@@ -1,24 +1,20 @@
 package io.tolgee.ee.service.prompt
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.HandlebarsException
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.LlmParams
-import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.component.PromptLazyMap
 import io.tolgee.ee.service.LlmProviderService
+import io.tolgee.ee.service.prompt.PromptResultParser.ParsedResult
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.FailedDependencyException
-import io.tolgee.exceptions.LlmProviderNotReturnedJsonException
 import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.TooManyRequestsException
@@ -30,7 +26,6 @@ import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.util.updateStringsInJson
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
@@ -53,6 +48,7 @@ class PromptServiceEeImpl(
   private val mtServiceConfigService: MtServiceConfigService,
   private val applicationContext: ApplicationContext,
   private val promptParamsHelper: PromptParamsHelper,
+  private val objectMapper: ObjectMapper,
 ) : PromptService {
   fun getAllPaged(
     projectId: Long,
@@ -198,7 +194,7 @@ class PromptServiceEeImpl(
     params: LlmParams,
     provider: String,
     attempts: List<Int>? = null,
-  ): PromptResult {
+  ): ParsedResult {
     val result =
       try {
         providerService.callProvider(organizationId, provider, params, attempts)
@@ -206,42 +202,7 @@ class PromptServiceEeImpl(
         throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(e.message), e)
       }
 
-    result.parsedJson = extractJsonFromResponse(result.response)
-    return result
-  }
-
-  fun getJsonLike(content: String): String {
-    return "{${content.substringAfter("{").substringBeforeLast("}")}}"
-  }
-
-  fun extractJsonFromResponse(content: String): JsonNode? {
-    // attempting different strategies to find a json in the response
-    val attempts =
-      listOf<(String) -> String>(
-        { it },
-        { getJsonLike(it) },
-        { getJsonLike(it.substringAfter("```").substringBefore("```")) },
-      )
-    for (attempt in attempts) {
-      val result = parseJsonSafely(attempt.invoke(content))
-      if (result != null) {
-        return result
-      }
-    }
-    return null
-  }
-
-  fun parseJsonSafely(content: String): JsonNode? {
-    return try {
-      val result = jacksonObjectMapper().readValue<JsonNode>(content)
-      updateStringsInJson(result) {
-        // gpt-4.1 sometimes includes NIL,
-        // which is invalid utf-8 character breaking DB saving
-        it.replace("\u0000", "")
-      }
-    } catch (_: JsonProcessingException) {
-      null
-    }
+    return PromptResultParser(result, objectMapper).parse()
   }
 
   fun runPromptAndChargeCredits(
@@ -249,10 +210,10 @@ class PromptServiceEeImpl(
     params: LlmParams,
     provider: String,
     attempts: List<Int>? = null,
-  ): PromptResult {
+  ): ParsedResult {
     publishBeforeEvent(organizationId)
     val result = runPromptWithoutChargingCredits(organizationId, params, provider, attempts)
-    publishAfterEvent(organizationId, result.price)
+    publishAfterEvent(organizationId, result.promptResult.price)
     return result
   }
 
@@ -264,15 +225,12 @@ class PromptServiceEeImpl(
     }
   }
 
-  fun getTranslationFromPromptResult(result: PromptResult): MtValueProvider.MtResult {
-    val json = result.parsedJson ?: throw LlmProviderNotReturnedJsonException()
-    val translation = json.get("output")?.asText() ?: throw LlmProviderNotReturnedJsonException()
-
+  fun getTranslationFromPromptResult(result: ParsedResult): MtValueProvider.MtResult {
     return MtValueProvider.MtResult(
-      translation,
-      contextDescription = json.get("contextDescription")?.asText(),
-      price = result.price,
-      usage = result.usage,
+      result.output,
+      contextDescription = result.contextDescription,
+      price = result.promptResult.price,
+      usage = result.promptResult.usage,
     )
   }
 
