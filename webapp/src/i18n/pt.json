@@ -277,7 +277,7 @@
   "administration_plan_migration_deleted_success": "Migração do plano excluída",
   "administration_plan_migration_details": "Detalhes da transferência do plano",
   "administration_plan_migration_email_placeholders": "Marcadores de posição",
-  "administration_plan_migration_email_section_title": "Conteúdo do e-mail de migração de plano",
+  "administration_plan_migration_email_section_title": "Conteúdo do e-mail de transferência do plano",
   "administration_plan_migration_from": "Plano de origem",
   "administration_plan_migration_migrated_subscriptions": "Assinaturas migradas",
   "administration_plan_migration_migrated_tab": "Assinaturas transferidas",

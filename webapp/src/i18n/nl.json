@@ -278,7 +278,7 @@
   "administration_plan_migration_deleted_success": "Planmigratie verwijderd",
   "administration_plan_migration_details": "Details van planoverdracht",
   "administration_plan_migration_email_placeholders": "Placeholders",
-  "administration_plan_migration_email_section_title": "Inhoud e-mail voor abonnementsmigratie",
+  "administration_plan_migration_email_section_title": "E-mailinhoud voor planoverdracht",
   "administration_plan_migration_from": "Bronplan",
   "administration_plan_migration_migrated_subscriptions": "Gemigreerde abonnementen",
   "administration_plan_migration_migrated_tab": "Overgezette abonnementen",

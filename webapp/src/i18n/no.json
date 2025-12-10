@@ -277,7 +277,7 @@
   "administration_plan_migration_deleted_success": "Planmigrering slettet",
   "administration_plan_migration_details": "Detaljer for planoverføring",
   "administration_plan_migration_email_placeholders": "Plassholdere",
-  "administration_plan_migration_email_section_title": "Planlagt migrering e-postinnhold",
+  "administration_plan_migration_email_section_title": "Planoverføring e-postinnhold",
   "administration_plan_migration_from": "Opprinnelsesplan",
   "administration_plan_migration_migrated_subscriptions": "Migrerte abonnementer",
   "administration_plan_migration_migrated_tab": "Overførte abonnementer",

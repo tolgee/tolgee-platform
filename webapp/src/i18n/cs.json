@@ -278,7 +278,7 @@
   "administration_plan_migration_deleted_success": "Migrace plánu odstraněna",
   "administration_plan_migration_details": "Podrobnosti převodu plánu",
   "administration_plan_migration_email_placeholders": "Placeholdery",
-  "administration_plan_migration_email_section_title": "Obsah e-mailu pro migraci tarifu",
+  "administration_plan_migration_email_section_title": "Obsah e-mailu k převodu plánu",
   "administration_plan_migration_from": "Výchozí plán",
   "administration_plan_migration_migrated_subscriptions": "Migrovaná předplatná",
   "administration_plan_migration_migrated_tab": "Převedená předplatná",

@@ -1,3 +1,10 @@
+# [3.142.0](https://github.com/tolgee/tolgee-platform/compare/v3.141.2...v3.142.0) (2025-12-10)
+
+
+### Features
+
+* Store data for LLM Analytics, Diagnostics, Fixed LLM errors ([#3328](https://github.com/tolgee/tolgee-platform/issues/3328)) ([88ecdb1](https://github.com/tolgee/tolgee-platform/commit/88ecdb19bd5c018ed6137be8b4680d5ff6d604db))
+
 ## [3.141.2](https://github.com/tolgee/tolgee-platform/compare/v3.141.1...v3.141.2) (2025-12-03)
 
 

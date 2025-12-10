@@ -277,7 +277,7 @@
   "administration_plan_migration_deleted_success": "Migration du plan supprimée",
   "administration_plan_migration_details": "Détails du transfert du plan",
   "administration_plan_migration_email_placeholders": "Placeholders",
-  "administration_plan_migration_email_section_title": "Contenu de l’e-mail de migration de plan",
+  "administration_plan_migration_email_section_title": "Contenu de l’e-mail de transfert de plan",
   "administration_plan_migration_from": "Plan d'origine",
   "administration_plan_migration_migrated_subscriptions": "Abonnements migrés",
   "administration_plan_migration_migrated_tab": "Abonnements transférés",

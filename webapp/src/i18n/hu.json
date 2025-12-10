@@ -277,7 +277,7 @@
   "administration_plan_migration_deleted_success": "Csomag migráció törölve",
   "administration_plan_migration_details": "Csomagátvitel részletei",
   "administration_plan_migration_email_placeholders": "Helyőrzők",
-  "administration_plan_migration_email_section_title": "Csomagváltási e-mail tartalma",
+  "administration_plan_migration_email_section_title": "Csomagátvitel e-mail tartalma",
   "administration_plan_migration_from": "Forráscsomag",
   "administration_plan_migration_migrated_subscriptions": "Áttelepített előfizetések",
   "administration_plan_migration_migrated_tab": "Átvezetett előfizetések",

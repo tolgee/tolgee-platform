@@ -277,7 +277,7 @@
   "administration_plan_migration_deleted_success": "计划迁移已删除",
   "administration_plan_migration_details": "计划转移详情",
   "administration_plan_migration_email_placeholders": "占位符",
-  "administration_plan_migration_email_section_title": "计划迁移邮件内容",
+  "administration_plan_migration_email_section_title": "计划转移邮件内容",
   "administration_plan_migration_from": "原计划",
   "administration_plan_migration_migrated_subscriptions": "已迁移订阅",
   "administration_plan_migration_migrated_tab": "已迁移的订阅",

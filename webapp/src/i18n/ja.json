@@ -278,7 +278,7 @@
   "administration_plan_migration_deleted_success": "プラン移行を削除しました",
   "administration_plan_migration_details": "プラン移行の詳細",
   "administration_plan_migration_email_placeholders": "プレースホルダー",
-  "administration_plan_migration_email_section_title": "プラン移行のメール内容",
+  "administration_plan_migration_email_section_title": "プラン移行 メール内容",
   "administration_plan_migration_from": "オリジン プラン",
   "administration_plan_migration_migrated_subscriptions": "移行済みサブスクリプション",
   "administration_plan_migration_migrated_tab": "移行済みサブスクリプション",
