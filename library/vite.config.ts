@@ -62,7 +62,7 @@ export default defineConfig({
     fs: {
       allow: [
         resolve(__dirname, '../storybook-tolgee-addon/src'),
-        resolve(__dirname, '../webapp/src'), // TODO remove once https://github.com/tolgee/tolgee-platform/issues/3326
+        resolve(__dirname, '../webapp/src'), // TODO remove under https://github.com/tolgee/tolgee-platform/issues/3326
       ],
     },
   },

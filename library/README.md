@@ -2,31 +2,43 @@
 
 This project is a library of components/hooks/... which are reused across other
 Tolgee applications. This is not an application by itself, but there is a
-[Storybook](https://storybook.js.org/) instance integrated to display and let
-you try the components individually or in preset combinations.
+Storybook instance integrated to display and let you try the components
+individually or in preset combinations.
 
 ## Storybook
 
-Install Storybook and library dependencies:
+[Storybook](https://storybook.js.org/) is a catalog of components. This
+particular instance hosts those of the Tolgee library.
+
+### Setup Storybook
+
+One time Storybook setup.
+
+Install dependencies of Storybook and the library itself:
 
 ```shell
 cd library
-npm run install
+npm ci
 ```
 
-Duplicate [.env](./.env) as [.env.local](./.env.local) and configure your Tolgee API KEY.
+Duplicate [.env](./.env) as [.env.local](./.env.local) and configure your
+Tolgee API KEY.
 
-Addon for Tolgee is preset, but its dependencies have to be also installed:
+Addon for Tolgee is preset, but its dependencies have to be also installed and
+the addon built to work properly:
 
 ```shell
-cd ../storybook-tolgee-addon
-npm run install
+cd storybook-tolgee-addon
+npm ci
+npm run build
 ```
 
-Run Storybook:
+### Open Storybook
+
+Every time you want to open Storybook run:
 
 ```shell
-cd ../library
+cd library
 npm run storybook
 ```
 

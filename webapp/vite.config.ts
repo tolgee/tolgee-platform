@@ -49,7 +49,7 @@ export default defineConfig(({ mode }) => {
       port: Number(process.env.VITE_PORT) || 3000,
       // this enables direct access to library sources
       fs: {
-        allow: [resolve(__dirname, '../library/src')],
+        allow: [resolve(__dirname, '../library/src'), __dirname],
       },
     },
     build: {
