@@ -1,6 +1,5 @@
 import API from '@openreplay/tracker';
-import { PaletteColor } from '@mui/material/styles';
-import { PaletteColorOptions } from '@mui/material';
+import type { PaletteColor, PaletteColorOptions } from '@mui/material';
 import {
   Activity,
   Cell,
@@ -21,7 +20,7 @@ import {
   Tooltip,
   TopBanner,
 } from './colors';
-import { tolgeeColors, tolgeePalette } from 'figmaTheme';
+import { tolgeeColors, tolgeePalette } from './figmaTheme';
 
 declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;

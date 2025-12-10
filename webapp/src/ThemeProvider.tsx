@@ -2,7 +2,6 @@ import React, { useContext, useState } from 'react';
 import { createTheme, PaletteMode, useMediaQuery } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 
-import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
 // @ts-ignore
 import RighteousLatinExtWoff2 from './fonts/Righteous/righteous-latin-ext.woff2';
 // @ts-ignore
@@ -170,7 +169,7 @@ export const getTheme = (mode: PaletteMode) => {
     },
     mixins: {
       toolbar: {
-        minHeight: TOP_BAR_HEIGHT,
+        minHeight: 52,
       },
     },
     components: {
