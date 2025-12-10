@@ -1,7 +1,7 @@
 // if src/ee exists copy the webapp/src/eeModule.ee.tsx to webapp/src/eeModule.local.tsx
 // else copy the webapp/src/eeModule.oss.tsx to webapp/src/eeModule.local.tsx
 
-import { existsSync, symlinkSync, unlinkSync } from 'fs';
+import { existsSync, lstatSync, symlinkSync, unlinkSync } from 'fs';
 
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -17,7 +17,8 @@ const eeModuleLocal = path.join(
   '../src/eeSetup/eeModule.current.tsx'
 );
 
-if (existsSync(eeModuleLocal)) {
+// remove the symlink if it exists
+if (!!lstatSync(eeModuleLocal, { throwIfNoEntry: false })) {
   unlinkSync(eeModuleLocal);
 }
 
