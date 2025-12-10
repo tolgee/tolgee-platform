@@ -17,10 +17,10 @@ const eeModuleLocal = path.join(
   '../src/eeSetup/eeModule.current.tsx'
 );
 
-try {
-  lstatSync(eeModuleLocal);
+// remove the symlink if it exists
+if (!!lstatSync(eeModuleLocal, { throwIfNoEntry: false })) {
   unlinkSync(eeModuleLocal);
-} catch {}
+}
 
 if (existsSync(srcDir)) {
   symlinkSync(eeModuleEe, eeModuleLocal);
