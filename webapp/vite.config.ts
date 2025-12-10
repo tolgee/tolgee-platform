@@ -2,6 +2,7 @@ import { defineConfig, loadEnv, UserConfigFnObject } from 'vite';
 import react from '@vitejs/plugin-react';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import mdx from '@mdx-js/rollup';
 import { resolve } from 'node:path';
 
@@ -25,6 +26,7 @@ export default defineConfig(({ mode }) => {
       }),
       svgr(),
       mdx({ rehypePlugins: [rehypeHighlight] }),
+      nodePolyfills(),
       extractDataCy(),
       sentryVitePlugin({
         authToken: process.env.SENTRY_AUTH_TOKEN,
