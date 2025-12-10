@@ -46,19 +46,22 @@
     "@storybook/icons": "^2.0.1",
     "@tolgee/core": "^6.2.7",
     "@types/node": "^22.19.1",
-    "@types/react": "^19.2.6",
-    "cspell": "^9.3.2",
+    "@types/react": "^17.0.2",
+    "cspell": "^9.4.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-compat": "^6.0.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^16.5.0",
-    "prettier": "^3.6.2",
+    "prettier": "^3.7.4",
     "react": "^17.0.2",
-    "storybook": "^10.0.7",
+    "storybook": "^10.1.5",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.47.0"
+    "typescript-eslint": "^8.49.0"
+  },
+  "peerDependencies": {
+    "storybook": "^10.0.0"
   },
   "exports": {
     "./package.json": "./package.json",
