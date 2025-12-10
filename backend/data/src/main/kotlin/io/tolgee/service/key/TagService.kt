@@ -35,7 +35,8 @@ class TagService(
     val tag =
       find(key.project, tagName)?.let {
         if (!keyMeta.tags.contains(it)) {
-          it.keyMetas.add(keyMeta)
+          // Don't access it.keyMetas - triggers lazy load of all KeyMeta for this tag
+          // Only update owning side (keyMeta.tags) - JPA will sync the join table
           keyMeta.tags.add(it)
         }
         it
@@ -103,7 +104,8 @@ class TagService(
             val tag =
               existingTags[tagToAdd]?.let {
                 if (!keyMeta.tags.contains(it)) {
-                  it.keyMetas.add(keyMeta)
+                  // Don't access it.keyMetas directly - it triggers massive query for all KeyMeta on this tag
+                  // Instead, just update the owning side (keyMeta.tags)
                   keyMeta.tags.add(it)
                 }
                 it
