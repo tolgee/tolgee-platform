@@ -13,7 +13,7 @@
     "lint": "npm run lint:code && npm run lint:types && npm run lint:spelling && npm run lint:format",
     "lint:code": "eslint '**/*'",
     "lint:types": "tsc --project tsconfig.lint.json",
-    "lint:spelling": "cspell --no-progress '**/*'",
+    "lint:spelling": "cspell --no-progress --dot .",
     "lint:format": "prettier --check .",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"

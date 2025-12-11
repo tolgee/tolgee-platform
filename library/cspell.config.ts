@@ -24,4 +24,11 @@ export default defineConfig({
     'tolgee',
   ],
   ignorePaths: ['/dist/', '/storybook-static/'],
+  ignoreRegExpList: ['tolgee-pat'],
+  patterns: [
+    {
+      name: 'tolgee-pat',
+      pattern: '/tgpak_[a-z0-9]*/g',
+    },
+  ],
 });

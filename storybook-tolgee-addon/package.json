@@ -32,7 +32,7 @@
     "lint": "npm run lint:code && npm run lint:types && npm run lint:spelling && npm run lint:format",
     "lint:code": "eslint '**/*'",
     "lint:types": "tsc --noEmit",
-    "lint:spelling": "cspell --no-progress '**/*'",
+    "lint:spelling": "cspell --no-progress --dot .",
     "lint:format": "prettier --check ."
   },
   "dependencies": {
