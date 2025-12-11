@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv, UserConfigFnObject } from 'vite';
+import { defineConfig, loadEnv, UserConfigFn } from 'vite';
 import react from '@vitejs/plugin-react';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
@@ -36,6 +36,14 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       preserveSymlinks: true,
+      dedupe: [
+        '@emotion/react',
+        '@emotion/styled',
+        '@mui/material',
+        '@tolgee/react',
+        'react',
+        'react-dom',
+      ],
       alias: {
         '@tginternal/library': resolve(__dirname, '../library/src'),
       },
@@ -60,4 +68,4 @@ export default defineConfig(({ mode }) => {
       },
     },
   };
-}) satisfies UserConfigFnObject;
+}) satisfies UserConfigFn;

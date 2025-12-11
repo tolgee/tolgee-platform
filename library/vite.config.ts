@@ -50,6 +50,7 @@ export default defineConfig({
   },
   resolve: {
     preserveSymlinks: true,
+    dedupe: ['react', 'react-dom', '@tolgee/react'],
     alias: {
       '@tolgee/storybook-addon': resolve(
         __dirname,

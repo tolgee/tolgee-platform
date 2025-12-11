@@ -270,6 +270,7 @@ jobs:
       - name: Check it builds without ee directory
         run: |
           rm -rf ./src/ee
+          npm --prefix ../library install
           npm install
           npm run tsc
           npm run build
