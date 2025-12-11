@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.comtolgee/storybook-addon"
+    "url": "https://github.com/tolgee/storybook-addon"
   },
   "scripts": {
     "build": "npm run clean && tsc --project .",
