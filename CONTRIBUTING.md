@@ -4,7 +4,7 @@ We're excited you're interested in contributing to Tolgee! We'd love your help, 
 contribute:
 
 * Give the repo a star
-* Join our [slack](https://join.slack.com/t/tolgeecommunity/shared_invite/zt-195isb5u8-_RcSRgVJfvgsPpOBIok~IQ) channel
+* Join our [slack](https://tolg.ee/slack) channel
   and leave us feedback or help with answering questions from the community
 * Fix or [report](https://github.com/tolgee/tolgee-platform/issues/new) a bug
 * Fix or improve [documentation](https://github.com/tolgee/documentation)
