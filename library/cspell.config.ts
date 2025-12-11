@@ -12,6 +12,7 @@ export default defineConfig({
     'autodocs',
     'Čeština',
     'Dansk',
+    'data-testid',
     'Deutsch',
     'env',
     'esnext',

@@ -43,6 +43,7 @@ export const MfaBadge = ({ enabled }: Props) => {
       title={
         enabled ? t('tooltip_user_mfa_enabled') : t('tooltip_user_mfa_disabled')
       }
+      data-cy="mfa-badge"
     >
       <StyledTextWrapper>
         {enabled ? (
