@@ -19,6 +19,7 @@ class BranchRevisionData {
   lateinit var user: UserAccount
   lateinit var english: Language
   lateinit var screenshot: Screenshot
+  lateinit var tag: Tag
   lateinit var firstKey: Key
   lateinit var devBranch: Branch
   lateinit var translation: Translation
@@ -79,6 +80,8 @@ class BranchRevisionData {
                     }.self
                   addMeta {
                     description = "default"
+                  }.build {
+                    tag = addTag("main")
                   }
                   screenshot = addScreenshot { }.self
                 }.self
