@@ -65,17 +65,19 @@ export default defineConfig([
     files: ['**/*.json'],
     ignores: ['package-lock.json'],
     language: 'json/json',
-    plugins: { jsonPlugin },
+    plugins: { json: jsonPlugin },
     extends: [jsonPlugin.configs.recommended],
   },
   {
     files: ['**/tsconfig*.json'],
     language: 'json/jsonc',
+    plugins: { json: jsonPlugin },
+    extends: [jsonPlugin.configs.recommended],
   },
   {
     files: ['**/*.md'], // MDX support awaits implementation https://github.com/eslint/markdown/issues/316
     language: 'markdown/gfm',
-    plugins: { markdownPlugin },
+    plugins: { markdown: markdownPlugin },
     extends: [markdownPlugin.configs.recommended],
   },
   storybookPlugin.configs['flat/recommended'],

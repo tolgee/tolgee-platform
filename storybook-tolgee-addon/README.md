@@ -1,5 +1,10 @@
 # Storybook Tolgee Addon
 
+> [!NOTE]
+> The addon is pending internal testing and publication. This documentation is
+> reflecting the expected state, not the current one. Though the addon should
+> already work and setting it up is not difficult. Your feedback is welcome.
+
 `@tolgee/storybook-addon` package provides Tolgee localization tool for Storybook stories.
 
 Only React SDK is supported at the moment. Ask for more SDKs on [tolgee.io](https://tolgee.io/).

@@ -53,18 +53,28 @@ export default defineConfig([
     files: ['**/*.json'],
     ignores: ['package-lock.json'],
     language: 'json/json',
-    plugins: { jsonPlugin },
+    plugins: { json: jsonPlugin },
     extends: [jsonPlugin.configs.recommended],
   },
   {
     files: ['tsconfig.json'],
     language: 'json/jsonc',
+    plugins: { json: jsonPlugin },
+    extends: [jsonPlugin.configs.recommended],
   },
   {
     files: ['**/*.md'],
     language: 'markdown/gfm',
-    plugins: { markdownPlugin },
+    plugins: { markdown: markdownPlugin },
     extends: [markdownPlugin.configs.recommended],
+    rules: {
+      'markdown/no-missing-label-refs': [
+        'error',
+        {
+          allowLabels: ['!NOTE', '!TIP', '!IMPORTANT', '!WARNING', '!CAUTION'],
+        },
+      ],
+    },
   },
   compatPlugin.configs['flat/recommended'],
   prettierConfig,
