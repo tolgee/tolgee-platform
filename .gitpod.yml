@@ -11,6 +11,7 @@ tasks:
         # Frontend cache
         rm -f /workspace/.f
         pushd webapp
+        npm --prefix ../library ci
         npm ci
         popd
         touch /workspace/.f
@@ -21,7 +22,6 @@ tasks:
       ./gradlew server-app:unpack
       touch /workspace/.b
 
-  
   - name: Backend
     openMode: split-left
     command: |
@@ -54,7 +54,7 @@ ports:
     port: 8080
     visibility: public
     onOpen: ignore
-  
+
   - name: Frontend
     port: 3000
     visibility: public

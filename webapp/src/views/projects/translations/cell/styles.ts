@@ -1,7 +1,5 @@
 import { keyframes, styled } from '@mui/material';
 
-import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
-
 export type PositionType = 'left' | 'right';
 
 export const NAMESPACE_BANNER_SPACING = 8;
@@ -55,7 +53,7 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
   }
 
   ${combine('&', CELL_PLAIN)} {
-    scroll-margin-top: ${TOP_BAR_HEIGHT}px;
+    scroll-margin-top: ${({ theme }) => theme.mixins.toolbar.minHeight}px;
     scroll-margin-left: 10px;
     scroll-margin-right: 10px;
     position: relative;

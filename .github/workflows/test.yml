@@ -52,7 +52,7 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
         with:
-          node: 'false'
+          node: "false"
 
       - name: Download backend build result
         uses: ./.github/actions/download-backend-build
@@ -100,7 +100,7 @@ jobs:
         if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Convert JUnit to CTRF
         if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
@@ -227,17 +227,25 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
         with:
-          java: 'false'
+          java: "false"
 
-      - name: Install dependencies
+      - name: Install library dependencies
+        run: npm ci
+        working-directory: ./library
+
+      - name: Lint library
+        run: npm run lint
+        working-directory: ./library
+
+      - name: Install webapp dependencies
         run: npm ci
         working-directory: ./webapp
 
-      - name: Typescript
+      - name: Typescript on webapp
         run: npm run tsc
         working-directory: ./webapp
 
-      - name: Eslint
+      - name: Eslint on webapp
         run: npm run eslint
         working-directory: ./webapp
 
@@ -262,6 +270,7 @@ jobs:
       - name: Check it builds without ee directory
         run: |
           rm -rf ./src/ee
+          npm --prefix ../library install
           npm install
           npm run tsc
           npm run build
@@ -276,7 +285,7 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
         with:
-          java: 'false'
+          java: "false"
 
       - name: Install dependencies
         run: npm ci
@@ -299,7 +308,7 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
         with:
-          java: 'false'
+          java: "false"
 
       - name: Install dependencies
         run: npm ci
@@ -330,7 +339,7 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup-env
         with:
-          node: 'false'
+          node: "false"
 
       - name: Run ktlint
         run: ./gradlew ktlintCheck

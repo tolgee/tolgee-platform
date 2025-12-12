@@ -1,1 +1,1 @@
-node webapp/scripts/updateBranchInfo.mjs
+node webapp/scripts/updateBranchInfo.js

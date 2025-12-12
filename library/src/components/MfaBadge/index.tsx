@@ -1,5 +1,6 @@
 import { ShieldTick, ShieldOff } from '@untitled-ui/icons-react';
-import { styled, Tooltip } from '@mui/material';
+import { Tooltip } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { useTranslate } from '@tolgee/react';
 
 const StyledTextWrapper = styled('span')`
@@ -31,6 +32,9 @@ type Props = {
   enabled: boolean;
 };
 
+/**
+ * MfaBadge is a static element that is used to display user's Multi Factor Authentication (MFA) state. It communicates whether MFA is enabled or disabled. The state is reflected by the component's icon and by its tooltip.
+ */
 export const MfaBadge = ({ enabled }: Props) => {
   const { t } = useTranslate();
 
@@ -39,6 +43,7 @@ export const MfaBadge = ({ enabled }: Props) => {
       title={
         enabled ? t('tooltip_user_mfa_enabled') : t('tooltip_user_mfa_disabled')
       }
+      data-cy="mfa-badge"
     >
       <StyledTextWrapper>
         {enabled ? (

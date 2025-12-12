@@ -1,5 +1,6 @@
 apply from: './gradle/utils.gradle'
 
+def libraryPath = "${project.projectDir}/library"
 def webappPath = "${project.projectDir}/webapp"
 
 task copyDist(type: Copy) {
@@ -13,22 +14,31 @@ task copyDist(type: Copy) {
     dependsOn "buildWebapp"
 }
 
+task installLibraryDeps(type: Exec) {
+    onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
+    commandLine npmCommandName, "ci"
+    workingDir = libraryPath
+    inputs.file("${libraryPath}/package.json")
+    inputs.file("${libraryPath}/package-lock.json")
+    outputs.dir("${libraryPath}/node_modules")
+}
+
 task installWebappDeps(type: Exec) {
     onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
     commandLine npmCommandName, "ci"
     workingDir = webappPath
-    inputs.file("${project.projectDir}/webapp/package.json")
-    inputs.file("${project.projectDir}/webapp/package-lock.json")
-    outputs.dir("${project.projectDir}/webapp/node_modules")
+    inputs.file("${webappPath}/package.json")
+    inputs.file("${webappPath}/package-lock.json")
+    outputs.dir("${webappPath}/node_modules")
 }
 
 task buildWebapp(type: Exec) {
     onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
     commandLine npmCommandName, "run", "build"
     workingDir = webappPath
-    inputs.dir("${project.projectDir}/webapp/")
-    outputs.dir("${project.projectDir}/webapp/dist/")
-    dependsOn "installWebappDeps", "updateStaticTranslations"
+    inputs.dir(webappPath)
+    outputs.dir("${webappPath}/dist/")
+    dependsOn "installLibraryDeps", "installWebappDeps", "updateStaticTranslations"
 }
 
 task createBuildDir() {

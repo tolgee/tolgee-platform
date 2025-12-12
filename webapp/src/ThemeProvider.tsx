@@ -2,7 +2,6 @@ import React, { useContext, useState } from 'react';
 import { createTheme, PaletteMode, useMediaQuery } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 
-import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
 // @ts-ignore
 import RighteousLatinExtWoff2 from './fonts/Righteous/righteous-latin-ext.woff2';
 // @ts-ignore
@@ -10,14 +9,15 @@ import RighteousLatinWoff2 from './fonts/Righteous/righteous-latin.woff2';
 // @ts-ignore
 import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
 import { colors } from './colors';
-import { tolgeeColors, tolgeePalette } from 'figmaTheme';
+import { tolgeeColors, tolgeePalette } from './figmaTheme';
 import { fromFigmaColor } from 'tg.fixtures/figma';
 
 const LOCALSTORAGE_THEME_MODE = 'themeMode';
 
 const { palette } = createTheme();
 const { augmentColor } = palette;
-const createColor = (mainColor) => augmentColor({ color: { main: mainColor } });
+const createColor = (mainColor: string) =>
+  augmentColor({ color: { main: mainColor } });
 
 const rubik = {
   fontFamily: 'Rubik',
@@ -61,7 +61,7 @@ const righteousLatinExt = {
     'U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF',
 };
 
-const getTheme = (mode: PaletteMode) => {
+export const getTheme = (mode: PaletteMode) => {
   const c = mode === 'light' ? colors.light : colors.dark;
   const tPalette = mode === 'light' ? tolgeePalette.Light : tolgeePalette.Dark;
 
@@ -169,7 +169,7 @@ const getTheme = (mode: PaletteMode) => {
     },
     mixins: {
       toolbar: {
-        minHeight: TOP_BAR_HEIGHT,
+        minHeight: 52,
       },
     },
     components: {

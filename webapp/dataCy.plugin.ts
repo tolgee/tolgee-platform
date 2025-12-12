@@ -1,7 +1,7 @@
 import { Plugin } from 'vite';
 import { readdir, readFile, writeFile } from 'fs/promises';
-import { resolve } from 'path';
-import { existsSync } from 'fs';
+import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 
 const SRC_PATH = resolve('./src');
 

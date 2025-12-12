@@ -10,7 +10,7 @@ import { DebugCustomerAccountButton } from './components/DebugCustomerAccountBut
 import { RoleSelector } from './components/RoleSelector';
 import { BaseAdministrationView } from './components/BaseAdministrationView';
 import { OptionsButton } from './components/OptionsButton';
-import { MfaBadge } from 'tg.component/MfaBadge';
+import { MfaBadge } from '@tginternal/library/components/MfaBadge';
 
 const StyledWrapper = styled('div')`
   display: flex;

@@ -24,6 +24,7 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
    * With the prepared Idea run configuration `Frontend localhost`
    * With command line:
      ```shell
+     npm --prefix library ci
      cd webapp && npm ci && npm run start
      ```
 3. Open your browser and go to http://localhost:3000.

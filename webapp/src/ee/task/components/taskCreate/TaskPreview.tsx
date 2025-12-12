@@ -3,7 +3,7 @@ import { Box, Skeleton, styled, Tooltip, useTheme } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { useNumberFormatter } from 'tg.hooks/useLocale';
 import { User } from 'tg.component/UserAccount';
 import { AssigneeSearchSelect } from '../assigneeSelect/AssigneeSearchSelect';
