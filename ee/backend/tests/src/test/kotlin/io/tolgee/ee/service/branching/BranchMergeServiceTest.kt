@@ -4,19 +4,24 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.ee.repository.branching.BranchRepository
+import io.tolgee.ee.service.LabelServiceImpl
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.model.Language
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import io.tolgee.model.translation.Label
+import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 class BranchMergeServiceTest : AbstractSpringTest() {
@@ -31,6 +36,9 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   @Autowired
   lateinit var keyRepository: KeyRepository
+
+  @Autowired
+  lateinit var labelService: LabelServiceImpl
 
   private lateinit var testData: BranchMergeTestData
 
@@ -159,6 +167,34 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       }
   }
 
+  @Test
+  @Transactional
+  fun `apply merge - labels merge correctly`() {
+    val mainTranslation = getTranslation(testData.mainKeyToUpdate, testData.englishLanguage)
+    val featureTranslation = getTranslation(testData.featureKeyToUpdate, testData.englishLanguage)
+
+    setLabels(mainTranslation, testData.label2, testData.label3)
+    setLabels(featureTranslation, testData.label1, testData.label3, testData.label4)
+
+    dryRunAndMergeFeatureBranch()
+
+    val mergedTranslation =
+      getTranslation(testData.mainKeyToUpdate.refresh(), testData.englishLanguage)!!
+    mergedTranslation.labels
+      .map { it.name }
+      .assert
+      .containsExactlyInAnyOrder("dev", "test")
+  }
+
+  private fun setLabels(
+    translation: Translation,
+    vararg labels: Label,
+  ) {
+    translation.labels.clear()
+    labels.forEach { translation.addLabel(it) }
+    translationService.save(translation)
+  }
+
   private fun prepareMergeScenario(): BranchMerge {
     createFeatureOnlyKey()
     deleteFeatureKey()
@@ -226,6 +262,11 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     val translation = translationService.getOrCreate(managedKey, testData.englishLanguage)
     translationService.setTranslationText(translation, value)
   }
+
+  private fun getTranslation(
+    key: Key,
+    language: Language,
+  ): Translation = translationService.find(key, language).orElse(null)!!
 
   private fun Branch.findKey(name: String): Key? {
     return keyRepository.findAllByBranchId(this.id).firstOrNull { it.name == name }
