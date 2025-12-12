@@ -4,6 +4,7 @@ import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.snapshot.KeyMetaSnapshot
+import io.tolgee.model.branching.snapshot.KeyScreenshotReferenceView
 import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.branching.snapshot.TranslationSnapshot
 import io.tolgee.model.key.Key
@@ -76,6 +77,7 @@ class BranchSnapshotService(
         KeyMetaSnapshot(
           description = meta.description,
           custom = meta.custom?.let { LinkedHashMap(it) },
+          tags = meta.tags.mapTo(mutableSetOf()) { it },
         ).apply { disableActivityLogging = true }
       snapshotMeta.keySnapshot = snapshot
       snapshot.keyMetaSnapshot = snapshotMeta
@@ -88,12 +90,25 @@ class BranchSnapshotService(
           value = translation.text.orEmpty(),
           state = translation.state,
         ).apply { disableActivityLogging = true }
+      translationSnapshot.labels = translation.labels.mapTo(mutableSetOf()) { it.name }
       translationSnapshot.keySnapshot = snapshot
       snapshot.translations.add(translationSnapshot)
     }
 
+    snapshot.screenshotReferences.addAll(
+      sourceKey.keyScreenshotReferences.map {
+        KeyScreenshotReferenceView(
+          screenshotId = it.screenshot.id,
+          positions = it.positions?.toList(),
+          originalText = it.originalText,
+        )
+      },
+    )
+
     return snapshot
   }
+
+  fun getSnapshotKeys(branchId: Long): List<KeySnapshot> = keySnapshotRepository.findAllByBranchId(branchId)
 
   private fun Key.snapshotSignature(): Pair<Long?, String> {
     return this.namespace?.id to this.name

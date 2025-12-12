@@ -1,5 +1,6 @@
 package io.tolgee.model.branching
 
+import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.Key
 
 /**
@@ -37,9 +38,26 @@ interface BranchVersionedEntity<T, U> {
   fun hasChanged(snapshot: U): Boolean
 
   /**
+   * Determines if there is a conflict between a source entity and its snapshot version.
+   *
+   * @param source The source entity to be checked for conflicts.
+   * @param snapshot The snapshot of the entity to compare against.
+   * @return True if a conflict exists between the source and the snapshot; false otherwise.
+   */
+  fun isConflicting(
+    source: T,
+    snapshot: U,
+  ): Boolean = false
+
+  /**
    * Merges the properties from the specified source entity into the current entity.
    *
    * @param source The object whose values will be merged into the current object.
+   * @param snapshot The object snapshot to improve a merge process
    */
-  fun merge(source: T)
+  fun merge(
+    source: T,
+    snapshot: U?,
+    resolution: BranchKeyMergeResolutionType,
+  )
 }
