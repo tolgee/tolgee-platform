@@ -54,7 +54,12 @@ const file2Base64 = (file: File): Promise<string> => {
   });
 };
 
-const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
+const ALLOWED_UPLOAD_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+];
 
 export const ProfileAvatar: FC<{
   disabled?: boolean;
