@@ -88,6 +88,20 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
     assertBranchMetadataChanged()
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `adding key tag increases branch revision`() {
+    tagService.tagKey(testData.project.id, testData.firstKey.id, "test")
+    assertBranchMetadataChanged()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `removing key tag increases branch revision`() {
+    tagService.removeTag(testData.project.id, testData.firstKey.id, testData.tag.id)
+    assertBranchMetadataChanged()
+  }
+
   private fun assertBranchMetadataChanged() {
     waitForNotThrowing(timeout = 3000, pollTime = 500) {
       testData.devBranch

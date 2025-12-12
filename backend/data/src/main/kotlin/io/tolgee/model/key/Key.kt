@@ -13,11 +13,15 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.snapshot.KeyScreenshotReferenceView
 import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.dataImport.WithKeyMeta
+import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.task.TaskKey
 import io.tolgee.model.translation.Translation
+import io.tolgee.service.branching.chooseThreeWay
+import io.tolgee.service.branching.mergeByKey
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -167,19 +171,114 @@ class Key(
         return true
       }
     }
+    if (this.toScreenshotViews().toSet() != snapshot.screenshotReferences.toSet()) {
+      return true
+    }
     return false
   }
 
-  override fun merge(source: Key) {
-    this.isPlural = source.isPlural
-    this.pluralArgName = source.pluralArgName
-    this.translations.forEach { translation ->
-      translation.merge(source.translations.find { it.language == translation.language }!!)
+  override fun isConflicting(
+    source: Key,
+    snapshot: KeySnapshot,
+  ): Boolean {
+    if (source.isPlural != this.isPlural && source.isPlural != snapshot.isPlural) {
+      return true
     }
+    if (source.pluralArgName != this.pluralArgName && source.pluralArgName != snapshot.pluralArgName) {
+      return true
+    }
+
+    source.keyMeta?.let { sourceKeyMeta ->
+      snapshot.keyMetaSnapshot?.let { snapshotKeyMeta ->
+        if (this.keyMeta?.isConflicting(sourceKeyMeta, snapshotKeyMeta) == true) {
+          return true
+        }
+      }
+    }
+
+    val snapshotTranslations = snapshot.translations.associateBy { it.language }
+    val targetTranslations = this.translations.associateBy { it.language.tag }
+
+    source.translations.forEach { sourceTranslation ->
+      val languageTag = sourceTranslation.language.tag
+      val targetTranslation = targetTranslations[languageTag] ?: return@forEach
+      val snapshotTranslation = snapshotTranslations[languageTag] ?: return@forEach
+      if (targetTranslation.isConflicting(sourceTranslation, snapshotTranslation)) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  override fun merge(
+    source: Key,
+    snapshot: KeySnapshot?,
+    resolution: BranchKeyMergeResolutionType,
+  ) {
+    this.isPlural = chooseThreeWay(source.isPlural, this.isPlural, snapshot?.isPlural, resolution) ?: false
+    this.pluralArgName = chooseThreeWay(source.pluralArgName, this.pluralArgName, snapshot?.pluralArgName, resolution)
+
+    val snapshotTranslations = snapshot?.translations?.associateBy { it.language } ?: emptyMap()
+    val targetTranslations = this.translations.associateBy { it.language.tag }
+    source.translations.forEach { sourceTranslation ->
+      val languageTag = sourceTranslation.language.tag
+      val targetTranslation = targetTranslations[languageTag] ?: return@forEach
+      val translationSnapshot = snapshotTranslations[languageTag]
+      targetTranslation.merge(sourceTranslation, translationSnapshot, resolution)
+    }
+
     this.keyMeta?.let { meta ->
       source.keyMeta?.let { sourceMeta ->
-        meta.merge(sourceMeta)
+        meta.merge(sourceMeta, snapshot?.keyMetaSnapshot, resolution)
+      }
+    }
+
+    mergeScreenshots(source, snapshot, resolution)
+  }
+
+  private fun mergeScreenshots(
+    source: Key,
+    snapshot: KeySnapshot?,
+    resolution: BranchKeyMergeResolutionType,
+  ) {
+    val snapshotMap = snapshot?.screenshotReferences?.associateBy { it.screenshotId } ?: emptyMap()
+    val sourceMap = source.toScreenshotViews().associateBy { it.screenshotId }
+    val targetMap = this.toScreenshotViews().associateBy { it.screenshotId }
+
+    val finalViews = mergeByKey(snapshotMap, sourceMap, targetMap, resolution)
+
+    val targetById = this.keyScreenshotReferences.associateBy { it.screenshot.id }.toMutableMap()
+    val sourceById = source.keyScreenshotReferences.associateBy { it.screenshot.id }
+
+    // remove references not present anymore
+    this.keyScreenshotReferences.removeIf { it.screenshot.id !in finalViews.keys }
+
+    finalViews.forEach { (id, view) ->
+      val existing = targetById[id]
+      if (existing != null) {
+        existing.positions = view.positions?.toMutableList()
+        existing.originalText = view.originalText
+      } else {
+        val sourceReference = sourceById[id] ?: return@forEach
+        val newReference =
+          KeyScreenshotReference().apply {
+            key = this@Key
+            screenshot = sourceReference.screenshot
+            positions = view.positions?.toMutableList()
+            originalText = view.originalText
+          }
+        this.keyScreenshotReferences.add(newReference)
       }
     }
   }
+
+  private fun toScreenshotViews(): List<KeyScreenshotReferenceView> =
+    this.keyScreenshotReferences.map {
+      KeyScreenshotReferenceView(
+        screenshotId = it.screenshot.id,
+        positions = it.positions?.toList(),
+        originalText = it.originalText,
+      )
+    }
 }
