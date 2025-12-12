@@ -6,7 +6,6 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.security.authentication.TolgeeAuthentication
-import io.tolgee.security.authentication.TolgeeAuthenticationDetails
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
@@ -77,8 +76,10 @@ class WebsocketAuthenticationResolver(
 
     return TolgeeAuthentication(
       pak,
-      userAccount,
-      TolgeeAuthenticationDetails(false),
+      deviceId = null,
+      userAccount = userAccount,
+      actingAsUserAccount = null,
+      isReadOnly = false,
     )
   }
 
@@ -96,9 +97,11 @@ class WebsocketAuthenticationResolver(
     patService.updateLastUsedAsync(pat.id)
 
     return TolgeeAuthentication(
-      pat,
-      userAccount,
-      TolgeeAuthenticationDetails(false),
+      credentials = pat,
+      deviceId = null,
+      userAccount = userAccount,
+      actingAsUserAccount = null,
+      isReadOnly = false,
     )
   }
 }
