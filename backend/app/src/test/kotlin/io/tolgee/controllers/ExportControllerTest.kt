@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Date
 import java.util.function.Consumer
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -130,7 +130,8 @@ class ExportControllerTest : ProjectAuthControllerTest() {
 
   private fun performAndGetLastModified(): String? =
     performProjectAuthGet("export/jsonZip")
-      .andIsOk.lastModified()
+      .andIsOk
+      .lastModified()
 
   private fun ResultActions.lastModified() = this.andReturn().response.getHeader("Last-Modified")
 

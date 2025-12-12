@@ -69,14 +69,14 @@ class V2ExportController(
       project hasn't changed.
       
       Cache-Control header is set to max-age=0 to ensure validation on each request.
-    """
+    """,
   )
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @ExportApiResponse
   fun exportData(
     @ParameterObject params: ExportParams,
-    request: WebRequest
+    request: WebRequest,
   ): ResponseEntity<StreamingResponseBody>? {
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
       params.languages =
@@ -125,7 +125,7 @@ class V2ExportController(
   @ExportApiResponse
   fun exportPost(
     @RequestBody params: ExportParams,
-    request: WebRequest
+    request: WebRequest,
   ): ResponseEntity<StreamingResponseBody>? {
     return exportData(params, request)
   }

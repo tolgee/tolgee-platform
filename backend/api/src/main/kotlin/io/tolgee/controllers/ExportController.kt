@@ -15,12 +15,12 @@ import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.StreamingResponseBodyProvider
 import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springframework.http.ResponseEntity
-import org.springframework.web.context.request.WebRequest
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.ByteArrayInputStream
 import java.io.OutputStream
@@ -51,7 +51,7 @@ class ExportController(
   @Deprecated("Use v2 export controller")
   fun doExportJsonZip(
     @PathVariable("projectId") projectId: Long?,
-    request: WebRequest
+    request: WebRequest,
   ): ResponseEntity<StreamingResponseBody>? {
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
       val allLanguages =

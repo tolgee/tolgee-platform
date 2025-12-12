@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 @Component
 class ProjectLastModifiedManager(
   private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager,
-  private val projectHolder: ProjectHolder
+  private val projectHolder: ProjectHolder,
 ) {
   /**
    * Executes a function only when the project data has been modified since the client's last request.
@@ -44,8 +44,8 @@ class ProjectLastModifiedManager(
       /**
        * Enables setting of additional headers on the response.
        */
-      headersBuilder: ResponseEntity.HeadersBuilder<*>
-    ) -> T?
+      headersBuilder: ResponseEntity.HeadersBuilder<*>,
+    ) -> T?,
   ): ResponseEntity<T>? {
     val lastModified: Long = projectTranslationLastModifiedManager.getLastModified(projectHolder.project.id)
 
@@ -53,10 +53,11 @@ class ProjectLastModifiedManager(
       return null
     }
 
-    val headersBuilder = ResponseEntity
-      .ok()
-      .lastModified(lastModified)
-      .cacheControl(DEFAULT_CACHE_CONTROL_HEADER)
+    val headersBuilder =
+      ResponseEntity
+        .ok()
+        .lastModified(lastModified)
+        .cacheControl(DEFAULT_CACHE_CONTROL_HEADER)
 
     val response = fn(headersBuilder)
 

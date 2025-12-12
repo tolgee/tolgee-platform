@@ -94,7 +94,7 @@ class WebsocketTestHelper(
 
     enum class AuthenticationStatus {
       UNAUTHENTICATED,
-      FORBIDDEN
+      FORBIDDEN,
     }
 
     override fun afterConnected(
@@ -187,8 +187,7 @@ class WebsocketTestHelper(
   }
 
   fun waitForUnauthenticated() {
-      waitForAuthenticationStatus(MySessionHandler.AuthenticationStatus.UNAUTHENTICATED)
-
+    waitForAuthenticationStatus(MySessionHandler.AuthenticationStatus.UNAUTHENTICATED)
   }
 
   fun waitForAuthenticationStatus(status: MySessionHandler.AuthenticationStatus) {
@@ -202,7 +201,10 @@ class WebsocketTestHelper(
     }
   }
 
-  data class Auth(val jwtToken: String? = null, val apiKey: String? = null) {
+  data class Auth(
+    val jwtToken: String? = null,
+    val apiKey: String? = null,
+  ) {
     init {
       if ((jwtToken == null && apiKey == null) || (jwtToken != null && apiKey != null)) {
         throw IllegalArgumentException("Either jwtToken or apiKey must be provided")

@@ -41,7 +41,7 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     saveTestData()
     testItWorksWithAuth(
       auth =
-        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id))
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)),
     )
   }
 
@@ -51,18 +51,18 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
     saveTestData()
     testItIsUnauthenticatedWithAuth(
       auth =
-        WebsocketTestHelper.Auth(jwtToken = "invalid")
+        WebsocketTestHelper.Auth(jwtToken = "invalid"),
     )
   }
 
   // we need at least keys.view permission when using JWT
   @Test
   @ProjectJWTAuthTestMethod
-fun `forbidden with insufficient scopes on user with JWT`() {
+  fun `forbidden with insufficient scopes on user with JWT`() {
     val user2 = testData.root.addUserAccount { username = "user2" }
     saveTestData()
-      testItIsForbiddenWithAuth(
-      auth = WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(user2.self.id))
+    testItIsForbiddenWithAuth(
+      auth = WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(user2.self.id)),
     )
   }
 
@@ -71,7 +71,7 @@ fun `forbidden with insufficient scopes on user with JWT`() {
   fun `works with PAK`() {
     saveTestData()
     testItWorksWithAuth(
-      auth = WebsocketTestHelper.Auth(apiKey = apiKey.key)
+      auth = WebsocketTestHelper.Auth(apiKey = apiKey.key),
     )
   }
 
@@ -80,7 +80,7 @@ fun `forbidden with insufficient scopes on user with JWT`() {
   fun `unauthenticated with invalid PAK`() {
     saveTestData()
     testItIsUnauthenticatedWithAuth(
-      auth = WebsocketTestHelper.Auth(apiKey = "invalid-api-key")
+      auth = WebsocketTestHelper.Auth(apiKey = "invalid-api-key"),
     )
   }
 
@@ -89,37 +89,39 @@ fun `forbidden with insufficient scopes on user with JWT`() {
   fun `unauthenticated with expired PAK`() {
     saveTestData()
     // Create an expired API key by manipulating date
-    val expiredApiKey = apiKeyService.create(
-      userAccount = testData.user,
-      scopes = setOf(Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW),
-      project = testData.projectBuilder.self,
-      expiresAt = currentDateProvider.date.addMinutes(-60).time
-    )
+    val expiredApiKey =
+      apiKeyService.create(
+        userAccount = testData.user,
+        scopes = setOf(Scope.TRANSLATIONS_VIEW, Scope.KEYS_VIEW),
+        project = testData.projectBuilder.self,
+        expiresAt = currentDateProvider.date.addMinutes(-60).time,
+      )
 
     testItIsUnauthenticatedWithAuth(
-      auth = WebsocketTestHelper.Auth(apiKey = expiredApiKey.key)
+      auth = WebsocketTestHelper.Auth(apiKey = expiredApiKey.key),
     )
   }
 
   /** for api key we need at least translations.view scope */
   @Test
   @ProjectApiKeyAuthTestMethod(scopes = []) // No scopes
-fun `forbidden with insufficient scopes on PAT`() {
+  fun `forbidden with insufficient scopes on PAT`() {
     saveTestData()
     testItIsForbiddenWithAuth(
-      auth = WebsocketTestHelper.Auth(apiKey = apiKey.key)
+      auth = WebsocketTestHelper.Auth(apiKey = apiKey.key),
     )
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `works with PAT token`() {
-    val pat = addPatToTestData(
-      expiresAt = currentDateProvider.date.addMinutes(60)
-    )
+    val pat =
+      addPatToTestData(
+        expiresAt = currentDateProvider.date.addMinutes(60),
+      )
     saveTestData()
     testItWorksWithAuth(
-      auth = WebsocketTestHelper.Auth(apiKey = pat.tokenWithPrefix)
+      auth = WebsocketTestHelper.Auth(apiKey = pat.tokenWithPrefix),
     )
   }
 
@@ -128,31 +130,32 @@ fun `forbidden with insufficient scopes on PAT`() {
   fun `unauthenticated with invalid PAT`() {
     saveTestData()
     testItIsUnauthenticatedWithAuth(
-      auth = WebsocketTestHelper.Auth(apiKey = "tgpat_invalid")
+      auth = WebsocketTestHelper.Auth(apiKey = "tgpat_invalid"),
     )
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `unauthenticated with expired PAT`() {
-    val expiredPat = addPatToTestData(
-      expiresAt = currentDateProvider.date.addMinutes(-60)
-    )
+    val expiredPat =
+      addPatToTestData(
+        expiresAt = currentDateProvider.date.addMinutes(-60),
+      )
     saveTestData()
     testItIsUnauthenticatedWithAuth(
-      auth = WebsocketTestHelper.Auth(apiKey = expiredPat.tokenWithPrefix)
+      auth = WebsocketTestHelper.Auth(apiKey = expiredPat.tokenWithPrefix),
     )
   }
 
   // we need at least keys.view permission when using PAT
   @Test
   @ProjectJWTAuthTestMethod
-fun `forbidden with insufficient scopes on user with PAT`() {
+  fun `forbidden with insufficient scopes on user with PAT`() {
     val pat = addInsufficientPatToTestData()
     saveTestData()
     // This test should fail with insufficient permissions - intentionally designed to fail
     testItIsForbiddenWithAuth(
-      auth = WebsocketTestHelper.Auth(apiKey = pat.tokenWithPrefix)
+      auth = WebsocketTestHelper.Auth(apiKey = pat.tokenWithPrefix),
     )
   }
 
@@ -168,7 +171,7 @@ fun `forbidden with insufficient scopes on user with PAT`() {
       { createKey() },
       {
         assertThatJson(it.poll()).node("data").isObject
-      }
+      },
     )
   }
 
@@ -183,12 +186,13 @@ fun `forbidden with insufficient scopes on user with PAT`() {
   }
 
   private fun prepareSocket(auth: WebsocketTestHelper.Auth): WebsocketTestHelper {
-    val socket = WebsocketTestHelper(
-      port,
-      auth,
-      testData.projectBuilder.self.id,
-      testData.user.id,
-    )
+    val socket =
+      WebsocketTestHelper(
+        port,
+        auth,
+        testData.projectBuilder.self.id,
+        testData.user.id,
+      )
 
     socket.listenForTranslationDataModified()
     return socket
@@ -200,19 +204,22 @@ fun `forbidden with insufficient scopes on user with PAT`() {
   }
 
   private fun addPatToTestData(expiresAt: Date): Pat {
-    return testData.userAccountBuilder.addPat {
-      description = "Test"
-      this.expiresAt = expiresAt
-    }.self
+    return testData.userAccountBuilder
+      .addPat {
+        description = "Test"
+        this.expiresAt = expiresAt
+      }.self
   }
 
   private fun addInsufficientPatToTestData(): Pat {
-    val user = testData.root.addUserAccount {
-      username = "user2"
-    }
-    return user.addPat {
-      description = "Test"
-      this.expiresAt = currentDateProvider.date.addMinutes(60)
-    }.self
+    val user =
+      testData.root.addUserAccount {
+        username = "user2"
+      }
+    return user
+      .addPat {
+        description = "Test"
+        this.expiresAt = currentDateProvider.date.addMinutes(60)
+      }.self
   }
 }

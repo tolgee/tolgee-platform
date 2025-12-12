@@ -120,9 +120,11 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       response.andPrettyPrint.andAssertThatJson {
         node("Z key").isEqualTo("A translation")
       }
-      Assertions.assertThat(response.andReturn().response.getHeaderValue("content-type"))
+      Assertions
+        .assertThat(response.andReturn().response.getHeaderValue("content-type"))
         .isEqualTo("application/json")
-      Assertions.assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
+      Assertions
+        .assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
         .isEqualTo("""attachment; filename="en.json"""")
     }
   }
@@ -139,9 +141,11 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
           .andDo { obj: MvcResult -> obj.getAsyncResult(30000) }
 
-      Assertions.assertThat(response.andReturn().response.getHeaderValue("content-type"))
+      Assertions
+        .assertThat(response.andReturn().response.getHeaderValue("content-type"))
         .isEqualTo("application/x-xliff+xml")
-      Assertions.assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
+      Assertions
+        .assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
         .isEqualTo("""attachment; filename="en.xliff"""")
     }
   }

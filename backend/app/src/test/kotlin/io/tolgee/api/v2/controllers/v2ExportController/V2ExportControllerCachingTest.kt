@@ -50,12 +50,13 @@ class V2ExportControllerCachingTest : ProjectAuthControllerTest("/v2/projects/")
   @ProjectJWTAuthTestMethod
   fun `returns 304 for POST export when data not modified`() {
     retryingOnCommonIssues {
-        initBaseData()
+      initBaseData()
 
       // First request - should return data
-      val firstResponse = performProjectAuthGet("export?languages=en&zip=false")
-        .andIsOk
-        .andReturn()
+      val firstResponse =
+        performProjectAuthGet("export?languages=en&zip=false")
+          .andIsOk
+          .andReturn()
 
       val lastModifiedHeader = firstResponse.response.getHeaderValue("Last-Modified") as String
       Assertions.assertThat(lastModifiedHeader).isNotNull()
@@ -77,12 +78,13 @@ class V2ExportControllerCachingTest : ProjectAuthControllerTest("/v2/projects/")
   @ProjectJWTAuthTestMethod
   fun `returns 412 for POST export when data not modified`() {
     retryingOnCommonIssues {
-        initBaseData()
+      initBaseData()
 
       // First request - should return data
-      val firstResponse = performProjectAuthPost("export", mapOf("languages" to setOf("en"), "zip" to false))
-        .andIsOk
-        .andReturn()
+      val firstResponse =
+        performProjectAuthPost("export", mapOf("languages" to setOf("en"), "zip" to false))
+          .andIsOk
+          .andReturn()
 
       val lastModifiedHeader = firstResponse.response.getHeaderValue("Last-Modified") as String
       Assertions.assertThat(lastModifiedHeader).isNotNull()
@@ -91,14 +93,15 @@ class V2ExportControllerCachingTest : ProjectAuthControllerTest("/v2/projects/")
       val headers = org.springframework.http.HttpHeaders()
       headers["If-Modified-Since"] = lastModifiedHeader
       headers["x-api-key"] = apiKeyService.create(userAccount!!, scopes = setOf(Scope.TRANSLATIONS_VIEW), project).key
-      val secondResponse = performPost(
-        "/v2/projects/${project.id}/export",
-        mapOf(
-          "languages" to setOf("en"),
-        "zip" to false
-        ),
-          headers
-      ).andReturn()
+      val secondResponse =
+        performPost(
+          "/v2/projects/${project.id}/export",
+          mapOf(
+            "languages" to setOf("en"),
+            "zip" to false,
+          ),
+          headers,
+        ).andReturn()
 
       // Since this is POST request Spring returns 412 as it is according to the spec for modifying methods.
       // In our case, we are using POST only since we cannot provide all the params in the query.
