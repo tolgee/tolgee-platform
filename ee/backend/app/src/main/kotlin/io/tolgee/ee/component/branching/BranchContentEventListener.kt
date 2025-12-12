@@ -1,5 +1,6 @@
 package io.tolgee.ee.component.branching
 
+import io.tolgee.events.OnEntityCollectionPreUpdate
 import io.tolgee.events.OnEntityPreDelete
 import io.tolgee.events.OnEntityPrePersist
 import io.tolgee.events.OnEntityPreUpdate
@@ -30,6 +31,11 @@ class BranchContentEventListener(
           event.propertyNames?.zip(it)
         }?.toMap(),
     )
+  }
+
+  @EventListener
+  fun onCollectionUpdate(event: OnEntityCollectionPreUpdate) {
+    onChange(event.entity)
   }
 
   fun onChange(
