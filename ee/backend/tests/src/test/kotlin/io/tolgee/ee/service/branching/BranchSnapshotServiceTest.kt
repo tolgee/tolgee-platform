@@ -46,6 +46,14 @@ class BranchSnapshotServiceTest : AbstractSpringTest() {
     snapshotTranslation.labels.assert.containsExactlyInAnyOrder("prod")
   }
 
+  @Test
+  @Transactional
+  fun `snapshot stores key screenshot references`() {
+    val snapshot = getSnapshotKey()
+
+    snapshot.screenshotReferences.assert.hasSize(1)
+  }
+
   private fun getSnapshotKey() =
     branchSnapshotService
       .getSnapshotKeys(testData.featureBranch.id)
