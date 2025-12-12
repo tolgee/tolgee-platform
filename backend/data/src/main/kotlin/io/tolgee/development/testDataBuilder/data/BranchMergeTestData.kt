@@ -7,6 +7,7 @@ import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import io.tolgee.model.translation.Label
 
 class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for branch merge tests") {
   lateinit var mainBranch: Branch
@@ -23,6 +24,10 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
   lateinit var tag1: Tag
   lateinit var tag2: Tag
   lateinit var tag3: Tag
+  lateinit var label1: Label
+  lateinit var label2: Label
+  lateinit var label3: Label
+  lateinit var label4: Label
 
   companion object {
     const val UPDATE_KEY_NAME = "shared-update-key"
@@ -34,6 +39,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
     root.apply {
       projectBuilder.apply {
         addBranches()
+        addLabels()
         addSharedKeys()
         createMergeWithConflicts()
       }
@@ -111,6 +117,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
         addTranslation {
           language = englishLanguage
           text = mainText
+          labels = mutableSetOf(label1, label2, label3)
         }
         if (extended) {
           tag1 = addTag("abc")
@@ -127,6 +134,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
         addTranslation {
           language = englishLanguage
           text = featureText
+          labels = mutableSetOf(label1, label2, label3)
         }
         if (extended) {
           addTag("abc")
@@ -162,6 +170,33 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
           targetKey = mainConflictKey
           resolution = BranchKeyMergeResolutionType.SOURCE
         }
+      }.self
+  }
+
+  private fun ProjectBuilder.addLabels() {
+    label1 =
+      addLabel {
+        name = "prod"
+        color = "#FF0000"
+        description = "Production label"
+      }.self
+    label2 =
+      addLabel {
+        name = "staging"
+        color = "#00FF00"
+        description = "Staging label"
+      }.self
+    label3 =
+      addLabel {
+        name = "dev"
+        color = "#0000FF"
+        description = "Development label"
+      }.self
+    label4 =
+      addLabel {
+        name = "test"
+        color = "#FFFF00"
+        description = "Test label"
       }.self
   }
 }
