@@ -43,5 +43,6 @@ class Pat(
   @NotNull
   lateinit var userAccount: UserAccount
 
-  val tokenWithPrefix get() = "$PAT_PREFIX$token"
+  val tokenWithPrefix: String?
+    get() = token?.let { "$PAT_PREFIX$token" }
 }

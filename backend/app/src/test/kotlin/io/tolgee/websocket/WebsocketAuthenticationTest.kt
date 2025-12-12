@@ -105,7 +105,7 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
   /** for api key we need at least translations.view scope */
   @Test
   @ProjectApiKeyAuthTestMethod(scopes = []) // No scopes
-  fun `forbidden with insufficient scopes on PAT`() {
+  fun `forbidden with insufficient scopes on PAK`() {
     saveTestData()
     testItIsForbiddenWithAuth(
       auth = WebsocketTestHelper.Auth(apiKey = apiKey.key),
@@ -153,7 +153,6 @@ class WebsocketAuthenticationTest : ProjectAuthControllerTest() {
   fun `forbidden with insufficient scopes on user with PAT`() {
     val pat = addInsufficientPatToTestData()
     saveTestData()
-    // This test should fail with insufficient permissions - intentionally designed to fail
     testItIsForbiddenWithAuth(
       auth = WebsocketTestHelper.Auth(apiKey = pat.tokenWithPrefix),
     )

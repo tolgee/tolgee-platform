@@ -96,13 +96,10 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
       options.onError?.();
     };
 
-    const headers: Record<string, string> | null = options.authentication
-      .jwtToken
-      ? {
-          jwtToken: options.authentication.jwtToken,
-          Authorization: `Bearer ${options.authentication.jwtToken}`,
-        }
-      : null;
+    const headers: Record<string, string> | null = {
+      jwtToken: options.authentication.jwtToken,
+      Authorization: `Bearer ${options.authentication.jwtToken}`,
+    };
 
     client.connect(headers, onConnected, onError, onDisconnect);
   }

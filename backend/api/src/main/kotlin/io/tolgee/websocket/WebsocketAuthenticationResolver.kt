@@ -9,6 +9,8 @@ import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PatService
 import io.tolgee.service.security.UserAccountService
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 
@@ -18,7 +20,7 @@ class WebsocketAuthenticationResolver(
   @Lazy private val apiKeyService: ApiKeyService,
   @Lazy private val patService: PatService,
   @Lazy private val userAccountService: UserAccountService,
-) {
+) : Logging {
   /**
    * Resolves STOMP CONNECT headers into TolgeeAuthentication.
    * Supports:
@@ -34,21 +36,44 @@ class WebsocketAuthenticationResolver(
     // Authorization: Bearer <jwt>
     val bearer = extractBearer(authorizationHeader)
     if (bearer != null) {
-      return runCatching { jwtService.validateToken(bearer) }.getOrNull()
+      return runCatching { jwtService.validateToken(bearer) }
+        .onFailure {
+          logger.debug(
+            "Bearer token validation failed",
+            it,
+          )
+        }.getOrNull()
     }
 
     // X-API-Key: PAT / PAK
     val xApiKey = xApiKeyHeader
     if (!xApiKey.isNullOrBlank()) {
       return when {
-        xApiKey.startsWith(PAT_PREFIX) -> runCatching { patAuth(xApiKey) }.getOrNull()
-        else -> runCatching { pakAuth(xApiKey) }.getOrNull()
+        xApiKey.startsWith(PAT_PREFIX) ->
+          runCatching { patAuth(xApiKey) }
+            .onFailure {
+              logger.debug(
+                "PAT authentication failed",
+                it,
+              )
+            }.getOrNull()
+
+        else ->
+          runCatching { pakAuth(xApiKey) }
+            .onFailure { logger.debug("PAT authentication failed", it) }
+            .getOrNull()
       }
     }
 
     // Legacy jwtToken header
     if (!legacyJwtHeader.isNullOrBlank()) {
-      return runCatching { jwtService.validateToken(legacyJwtHeader) }.getOrNull()
+      return runCatching { jwtService.validateToken(legacyJwtHeader) }
+        .onFailure {
+          logger.debug(
+            "Legacy JWT validation failed",
+            it,
+          )
+        }.getOrNull()
     }
 
     return null
