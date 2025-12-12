@@ -1,5 +1,6 @@
 package io.tolgee.activity.iterceptor
 
+import io.tolgee.events.OnEntityCollectionPreUpdate
 import io.tolgee.events.OnEntityPreDelete
 import io.tolgee.events.OnEntityPrePersist
 import io.tolgee.events.OnEntityPreUpdate
@@ -24,5 +25,12 @@ class PreCommitEventPublisher(
 
   fun onDelete(entity: Any?) {
     applicationContext.publishEvent(OnEntityPreDelete(this, entity))
+  }
+
+  fun onCollectionUpdate(
+    entity: Any?,
+    previousState: MutableCollection<out Any?>?,
+  ) {
+    applicationContext.publishEvent(OnEntityCollectionPreUpdate(this, entity, previousState))
   }
 }

@@ -2,12 +2,15 @@ package io.tolgee.ee.service.branching.merging
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.ee.exceptions.BranchMergeConflictNotResolvedException
+import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
+import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.service.key.KeyMetaService
@@ -23,38 +26,59 @@ class BranchMergeExecutor(
   private val keyService: KeyService,
   private val translationService: TranslationService,
   private val currentDateProvider: CurrentDateProvider,
+  private val branchSnapshotService: BranchSnapshotService,
 ) {
   fun execute(merge: BranchMerge) {
+    val snapshotKeys = branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id).associateBy { it.originalKeyId }
     merge.changes.forEach { change ->
       when (change.change) {
-        BranchKeyMergeChangeType.ADD -> applyAddition(change, merge.targetBranch)
-        BranchKeyMergeChangeType.UPDATE -> applyUpdate(change)
-        BranchKeyMergeChangeType.DELETE -> applyDeletion(change)
-        BranchKeyMergeChangeType.CONFLICT -> applyConflict(change)
+        BranchKeyMergeChangeType.ADD -> {
+          applyAddition(change, merge.targetBranch)
+        }
+
+        BranchKeyMergeChangeType.UPDATE -> {
+          change.withSnapshotKey(snapshotKeys) { snapshotKey ->
+            applyUpdate(change, snapshotKey)
+          }
+        }
+
+        BranchKeyMergeChangeType.DELETE -> {
+          applyDeletion(change)
+        }
+
+        BranchKeyMergeChangeType.CONFLICT -> {
+          change.withSnapshotKey(snapshotKeys) { snapshotKey ->
+            applyConflict(change, snapshotKey)
+          }
+        }
       }
     }
     merge.mergedAt = currentDateProvider.date
   }
 
-  private fun applyConflict(change: BranchMergeChange) {
+  private fun applyConflict(
+    change: BranchMergeChange,
+    keySnapshot: KeySnapshot,
+  ) {
     when (change.resolution) {
-      BranchKeyMergeResolutionType.SOURCE -> applyUpdate(change)
-      BranchKeyMergeResolutionType.TARGET -> Unit
+      BranchKeyMergeResolutionType.SOURCE -> applyUpdate(change, keySnapshot)
+      BranchKeyMergeResolutionType.TARGET -> applyUpdate(change, keySnapshot)
       null -> throw BranchMergeConflictNotResolvedException()
     }
   }
 
-  private fun applyUpdate(change: BranchMergeChange) {
-    if (change.resolution != BranchKeyMergeResolutionType.SOURCE) {
-      return
-    }
+  private fun applyUpdate(
+    change: BranchMergeChange,
+    snapshotKey: KeySnapshot,
+  ) {
+    val resolution = change.resolution ?: BranchKeyMergeResolutionType.SOURCE
     val sourceKey = change.sourceKey ?: return
     val targetKey =
       change.targetKey ?: run {
         applyAddition(change, change.branchMerge.targetBranch)
         return
       }
-    targetKey.merge(sourceKey)
+    targetKey.merge(sourceKey, snapshotKey, resolution)
   }
 
   private fun applyAddition(
@@ -80,6 +104,8 @@ class BranchMergeExecutor(
       val newMeta = keyMetaService.getOrCreateForKey(newKey)
       newMeta.description = sourceMeta.description
       newMeta.custom = sourceMeta.custom?.let { LinkedHashMap(it) }
+      newMeta.tags.clear()
+      newMeta.tags.addAll(sourceMeta.tags)
     }
 
     sourceKey.translations.forEach { sourceTranslation ->
@@ -99,6 +125,17 @@ class BranchMergeExecutor(
       }
       translationService.save(translation)
     }
+
+    sourceKey.keyScreenshotReferences.forEach { reference ->
+      val newReference =
+        KeyScreenshotReference().apply {
+          key = newKey
+          screenshot = reference.screenshot
+          positions = reference.positions?.toMutableList()
+          originalText = reference.originalText
+        }
+      newKey.keyScreenshotReferences.add(newReference)
+    }
   }
 
   private fun applyDeletion(change: BranchMergeChange) {
@@ -108,5 +145,14 @@ class BranchMergeExecutor(
     val targetKey = change.targetKey ?: return
     change.targetKey = null
     keyService.delete(targetKey.id)
+  }
+
+  private inline fun BranchMergeChange.withSnapshotKey(
+    snapshotKeys: Map<Long, KeySnapshot>,
+    block: (KeySnapshot) -> Unit,
+  ) {
+    val id = targetKey?.id ?: return
+    val snapshotKey = snapshotKeys[id] ?: return
+    block(snapshotKey)
   }
 }
