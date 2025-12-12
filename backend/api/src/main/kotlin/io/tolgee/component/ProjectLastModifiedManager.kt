@@ -26,7 +26,8 @@ class ProjectLastModifiedManager(
    * This method implements HTTP conditional request handling by:
    * 1. Retrieving the last modification timestamp of the current project
    * 2. Checking if the client's If-Modified-Since header indicates the data is still current
-   * 3. If data hasn't changed, returning null (which translates to HTTP 304 Not Modified)
+   * 3. If data hasn't changed, returning null
+   *    (which translates to HTTP 304 Not Modified / or HTTP 412 when the method is POST)
    * 4. If data has changed, executing the provided function and wrapping the result in a ResponseEntity
    *    with appropriate cache control headers
    *
@@ -34,7 +35,7 @@ class ProjectLastModifiedManager(
    * - Last-Modified header set to the project's modification timestamp
    * - Cache-Control header set to max-age=0 to ensure validation on each request
    *
-   * This mechanism helps optimize performance by preventing export data computation and loading from database when
+   * This mechanism helps optimize performance by preventing export data computation and loading from the database when
    * not modified.
    *
    */
