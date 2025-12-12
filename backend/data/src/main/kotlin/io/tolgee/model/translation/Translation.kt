@@ -12,8 +12,11 @@ import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.branching.BranchVersionedEntity
 import io.tolgee.model.branching.snapshot.TranslationSnapshot
+import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.service.branching.chooseThreeWay
+import io.tolgee.service.branching.mergeSetsWithBase
 import io.tolgee.util.TranslationStatsUtil
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -215,14 +218,45 @@ class Translation(
   }
 
   override fun hasChanged(snapshot: TranslationSnapshot): Boolean {
-    return this.text != snapshot.value || this.state != snapshot.state
+    if (this.text != snapshot.value || this.state != snapshot.state) {
+      return true
+    }
+    val labelNames = this.labels.map { it.name }.toSet()
+    if (labelNames != snapshot.labels.toSet()) {
+      return true
+    }
+    return false
   }
 
-  override fun merge(source: Translation) {
-    this.text = source.text
-    this.state = source.state
+  override fun isConflicting(
+    source: Translation,
+    snapshot: TranslationSnapshot,
+  ): Boolean {
+    if (source.text != this.text && source.text != snapshot.value) return true
+    if (source.state != this.state && source.state != snapshot.state) return true
+    return false
+  }
+
+  override fun merge(
+    source: Translation,
+    snapshot: TranslationSnapshot?,
+    resolution: BranchKeyMergeResolutionType,
+  ) {
+    this.text = chooseThreeWay(source.text, this.text, snapshot?.value, resolution)
+    this.state = chooseThreeWay(source.state, this.state, snapshot?.state, resolution) ?: this.state
+    this.outdated = chooseThreeWay(source.outdated, this.outdated, null, resolution) ?: false
+    this.auto = chooseThreeWay(source.auto, this.auto, null, resolution) ?: false
+    this.mtProvider = chooseThreeWay(source.mtProvider, this.mtProvider, null, resolution)
+
+    val snapshotLabels = snapshot?.labels?.toSet() ?: emptySet()
+    val sourceByName = source.labels.associateBy { it.name }
+    val targetByName = this.labels.associateBy { it.name }
+    val finalLabels =
+      mergeSetsWithBase(snapshotLabels, sourceByName.keys, targetByName.keys)
+        .mapNotNull { name -> sourceByName[name] ?: targetByName[name] }
+        .toMutableSet()
+
     this.labels.clear()
-    this.labels.addAll(source.labels)
-    this.outdated = source.outdated
+    this.labels.addAll(finalLabels)
   }
 }

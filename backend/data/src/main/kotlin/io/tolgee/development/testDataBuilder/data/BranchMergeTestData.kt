@@ -6,6 +6,7 @@ import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.Tag
 
 class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for branch merge tests") {
   lateinit var mainBranch: Branch
@@ -19,6 +20,9 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
   lateinit var featureConflictKey: Key
   lateinit var conflictsBranchKey: Key
   lateinit var conflictBranchMerge: BranchMerge
+  lateinit var tag1: Tag
+  lateinit var tag2: Tag
+  lateinit var tag3: Tag
 
   companion object {
     const val UPDATE_KEY_NAME = "shared-update-key"
@@ -64,6 +68,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
     addMatchingKey(
       UPDATE_KEY_NAME,
       mainText = "Original base text",
+      extended = true,
     ) { mainKey, featureKey ->
       mainKeyToUpdate = mainKey
       featureKeyToUpdate = featureKey
@@ -95,6 +100,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
     name: String,
     mainText: String,
     featureText: String = mainText,
+    extended: Boolean = false,
     callback: (main: Key, feature: Key) -> Unit = { _, _ -> },
   ) {
     val mainKey =
@@ -106,6 +112,11 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
           language = englishLanguage
           text = mainText
         }
+        if (extended) {
+          tag1 = addTag("abc")
+          tag2 = addTag("def")
+          tag3 = addTag("ghi")
+        }
       }.self
 
     val featureKey =
@@ -116,6 +127,11 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
         addTranslation {
           language = englishLanguage
           text = featureText
+        }
+        if (extended) {
+          addTag("abc")
+          addTag("def")
+          addTag("ghi")
         }
       }.self
 

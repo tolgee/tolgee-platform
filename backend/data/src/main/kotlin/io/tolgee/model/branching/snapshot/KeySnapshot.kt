@@ -1,8 +1,10 @@
 package io.tolgee.model.branching.snapshot
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.key.screenshotReference.KeyInScreenshotPosition
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -15,6 +17,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import org.hibernate.annotations.Type
 
 @Entity
 @Table(
@@ -59,4 +62,14 @@ class KeySnapshot(
 
   @OneToOne(mappedBy = "keySnapshot", cascade = [CascadeType.ALL], orphanRemoval = true)
   var keyMetaSnapshot: KeyMetaSnapshot? = null
+
+  @Column(columnDefinition = "jsonb")
+  @Type(JsonBinaryType::class)
+  var screenshotReferences: MutableSet<KeyScreenshotReferenceView> = mutableSetOf()
 }
+
+data class KeyScreenshotReferenceView(
+  val screenshotId: Long,
+  val positions: List<KeyInScreenshotPosition>? = null,
+  val originalText: String? = null,
+)
