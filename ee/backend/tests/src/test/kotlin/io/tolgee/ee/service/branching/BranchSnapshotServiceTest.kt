@@ -54,6 +54,18 @@ class BranchSnapshotServiceTest : AbstractSpringTest() {
     snapshot.screenshotReferences.assert.hasSize(1)
   }
 
+  @Test
+  @Transactional
+  fun `snapshot stores translations`() {
+    val snapshotTranslation =
+      getSnapshotKey()
+        .translations
+        .first { it.language == "en" }
+
+    snapshotTranslation.value.assert.isEqualTo("Snapshot text")
+    snapshotTranslation.state.assert.isEqualTo(testData.translationEn.state)
+  }
+
   private fun getSnapshotKey() =
     branchSnapshotService
       .getSnapshotKeys(testData.featureBranch.id)
