@@ -4960,4 +4960,30 @@
             create unique index import_author_project_unique on import(author_id, project_id, coalesce(branch_id, -1)) where deleted_at is null
         </sql>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1765539301819-1">
+        <createTable tableName="branch_key_meta_snapshot_tags">
+            <column name="key_meta_snapshot_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="branch_key_meta_snapshot_tagsPK"/>
+            </column>
+            <column name="tags_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="branch_key_meta_snapshot_tagsPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1765539301819-2">
+        <addColumn tableName="branch_translation_snapshot">
+            <column name="labels" type="JSONB"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1765539301819-3">
+        <addColumn tableName="branch_key_snapshot">
+            <column name="screenshot_references" type="JSONB"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1765539301819-4">
+        <addForeignKeyConstraint baseColumnNames="key_meta_snapshot_id" baseTableName="branch_key_meta_snapshot_tags" constraintName="FK3tslgyhdddfky2tdiaqng2s6f" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch_key_meta_snapshot" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1765539301819-5">
+        <addForeignKeyConstraint baseColumnNames="tags_id" baseTableName="branch_key_meta_snapshot_tags" constraintName="FK6grk5x5ho9jp85gktc2munh5m" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tag" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

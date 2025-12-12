@@ -37,6 +37,7 @@ import kotlin.reflect.jvm.javaField
 @Scope(SCOPE_SINGLETON)
 class InterceptedEventsManager(
   private val applicationContext: ApplicationContext,
+  private val preCommitEventPublisher: PreCommitEventPublisher,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -66,7 +67,8 @@ class InterceptedEventsManager(
 
     val provider = getChangesProvider(collectionOwner, ownerField.name) ?: return
 
-    val stored = (collection.storedSnapshot as? HashMap<*, *>)?.values?.toList()
+    val storedSnapshotCollection = (collection.storedSnapshot as? HashMap<*, *>)?.values
+    val stored = storedSnapshotCollection?.toList()
 
     val old =
       activityHolder.modifiedCollections.computeIfAbsent(collectionOwner to ownerField.name) {
@@ -80,6 +82,10 @@ class InterceptedEventsManager(
     activityModifiedEntity.modifications = (newChanges).toMutableMap()
 
     activityModifiedEntity.setEntityDescription(collectionOwner)
+    preCommitEventPublisher.onCollectionUpdate(
+      collectionOwner,
+      storedSnapshotCollection,
+    )
   }
 
   private fun KCallable<*>.callIfInitialized(instance: Any?): Any? {
