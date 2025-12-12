@@ -53,6 +53,7 @@ class BranchSnapshotTestData : BaseTestData("branch_snapshot_user", "branch_snap
             text = "Snapshot text"
           }.self
         translationEn.addLabel(label)
+        addScreenshot { }.self
         addTag("abc")
         addTag("def")
         addTag("ghi")
