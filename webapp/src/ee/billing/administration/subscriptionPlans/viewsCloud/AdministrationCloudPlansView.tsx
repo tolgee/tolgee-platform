@@ -9,7 +9,7 @@ import {
   Paper,
   styled,
 } from '@mui/material';
-import { X } from '@untitled-ui/icons-react';
+import { Settings01, X } from '@untitled-ui/icons-react';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -22,10 +22,11 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { PlanPublicChip } from '../../../component/Plan/PlanPublicChip';
-import { PlanSubscriptionCount } from 'tg.ee.module/billing/component/Plan/PlanSubscriptionCount';
 import { PlanListPriceInfo } from 'tg.ee.module/billing/component/Plan/PlanListPriceInfo';
 import { PlanArchivedChip } from 'tg.ee.module/billing/component/Plan/PlanArchivedChip';
 import clsx from 'clsx';
+import { CloudPlanMigratingChip } from 'tg.ee.module/billing/component/Plan/migration/CloudPlanMigratingChip';
+import { CloudPlanSubscriptionsTooltip } from 'tg.ee.module/billing/component/Plan/cloud/CloudPlanSubscriptionsTooltip';
 
 type CloudPlanModel = components['schemas']['CloudPlanModel'];
 
@@ -112,6 +113,20 @@ export const AdministrationCloudPlansView = () => {
         hideChildrenOnLoading={false}
         addLinkTo={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_CREATE.build()}
         onAdd={() => {}}
+        customButtons={[
+          <Button
+            key="create-migration"
+            variant="contained"
+            size="medium"
+            startIcon={<Settings01 width={19} height={19} />}
+            component={Link}
+            color="warning"
+            to={LINKS.ADMINISTRATION_BILLING_CLOUD_PLAN_MIGRATION_CREATE.build()}
+            data-cy="administration-plans-create-migration"
+          >
+            {t('administration_plan_create_migration')}
+          </Button>,
+        ]}
       >
         <Paper variant="outlined">
           {plansLoadable.data?._embedded?.plans?.map((plan, i) => (
@@ -130,11 +145,15 @@ export const AdministrationCloudPlansView = () => {
                   </StyledListItemText>
                   <PlanArchivedChip isArchived={plan.archivedAt != null} />
                   <PlanPublicChip isPublic={plan.public} />
+                  <CloudPlanMigratingChip
+                    migrationId={plan.migrationId}
+                    isEnabled={plan.activeMigration}
+                  />
                 </Box>
                 <Box display="flex" gap={2}>
                   <Box display="flex" gap={2} alignItems="center">
                     <ListItemText>
-                      <PlanSubscriptionCount count={plan.subscriptionCount} />
+                      <CloudPlanSubscriptionsTooltip plan={plan} />
                     </ListItemText>
                     <PlanListPriceInfo prices={plan.prices} bold />
                   </Box>
