@@ -1,21 +1,20 @@
 package io.tolgee.ee.service.branching.merging
 
-import io.tolgee.ee.repository.branching.KeySnapshotRepository
+import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.repository.KeyRepository
 import org.springframework.stereotype.Service
-import kotlin.collections.forEach
 
 @Service
 class BranchMergeAnalyzer(
   private val keyRepository: KeyRepository,
-  private val keySnapshotRepository: KeySnapshotRepository,
+  private val branchSnapshotService: BranchSnapshotService,
 ) {
   fun compute(merge: BranchMerge): MutableList<BranchMergeChange> {
-    val snapshots = keySnapshotRepository.findAllByBranchId(merge.sourceBranch.id)
+    val snapshots = branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id)
     val sourceBranch = merge.sourceBranch
     val targetBranch = merge.targetBranch
 
@@ -91,14 +90,26 @@ class BranchMergeAnalyzer(
 
           when {
             sourceChanged && targetChanged -> {
-              changes.add(
-                BranchMergeChange().apply {
-                  branchMerge = merge
-                  this.sourceKey = sourceKey
-                  this.targetKey = targetKey
-                  change = BranchKeyMergeChangeType.CONFLICT
-                },
-              )
+              if (sourceKey.isConflicting(targetKey, snapshot)) {
+                changes.add(
+                  BranchMergeChange().apply {
+                    branchMerge = merge
+                    this.sourceKey = sourceKey
+                    this.targetKey = targetKey
+                    change = BranchKeyMergeChangeType.CONFLICT
+                  },
+                )
+              } else {
+                changes.add(
+                  BranchMergeChange().apply {
+                    branchMerge = merge
+                    this.sourceKey = sourceKey
+                    this.targetKey = targetKey
+                    change = BranchKeyMergeChangeType.UPDATE
+                    resolution = BranchKeyMergeResolutionType.SOURCE
+                  },
+                )
+              }
             }
 
             sourceChanged -> {
@@ -113,7 +124,9 @@ class BranchMergeAnalyzer(
               )
             }
 
-            targetChanged -> Unit // target changed, source not -> keep target state
+            targetChanged -> {
+              Unit
+            } // target changed, source not -> keep target state
           }
         }
       }

@@ -10,6 +10,7 @@ import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.Tag
 import io.tolgee.repository.KeyRepository
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -49,7 +50,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `dry-run detects additions updates and deletions`() {
+  fun `dry-run detects additions, updates and deletions`() {
     val merge = prepareMergeScenario()
 
     val additions = merge.changes.filter { it.change == BranchKeyMergeChangeType.ADD }
@@ -87,41 +88,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `apply merge propagates additions updates and deletions`() {
-    val merge = prepareMergeScenario()
-
-    branchService.applyMerge(testData.project.id, merge.id)
-
-    val additionInMain = testData.mainBranch.findKey(additionKeyName)
-    additionInMain.assert.isNotNull()
-    additionInMain!!.enTranslation().assert.isEqualTo(additionValue)
-
-    testData.mainKeyToUpdate
-      .enTranslation()
-      .assert
-      .isEqualTo(updatedValue)
-    keyService.find(testData.mainKeyToDelete.id).assert.isNull()
-  }
-
-  private fun prepareMergeScenario(): BranchMerge {
-    createFeatureOnlyKey()
-    deleteFeatureKey()
-    updateFeatureKey()
-    waitForNotThrowing(timeout = 5000, pollTime = 250) {
-      testData.featureBranch
-        .refresh()!!
-        .revision.assert
-        .isEqualTo(3)
-    }
-
-    return branchService.dryRunMerge(
-      testData.featureBranch.refresh()!!,
-      testData.mainBranch.refresh()!!,
-    )
-  }
-
-  @Test
-  fun `dry-run marks key as conflict when both branches change it`() {
+  fun `dry-run marks key as conflict when translations are changed on both branches`() {
     val mainConflictValue = "Main side conflict change"
     val featureConflictValue = "Feature side conflict change"
 
@@ -152,6 +119,73 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       .isNull()
   }
 
+  @Test
+  fun `apply merge - propagates additions, updates and deletions`() {
+    val merge = prepareMergeScenario()
+    applyMerge(merge)
+
+    val additionInMain = testData.mainBranch.findKey(additionKeyName)
+    additionInMain.assert.isNotNull()
+    additionInMain!!.enTranslation().assert.isEqualTo(additionValue)
+
+    testData.mainKeyToUpdate
+      .enTranslation()
+      .assert
+      .isEqualTo(updatedValue)
+    keyService.find(testData.mainKeyToDelete.id).assert.isNull()
+  }
+
+  @Test
+  fun `apply merge - tags merge correctly`() {
+    // remove one tag from each key
+    removeTagFromKey(testData.mainKeyToUpdate, testData.tag1)
+    removeTagFromKey(testData.featureKeyToUpdate, testData.tag2)
+    // add one to the feature key
+    addTagToKey(testData.featureKeyToUpdate, "xyz")
+
+    dryRunAndMergeFeatureBranch()
+
+    // the main key should have one tag
+    val key =
+      testData.mainKeyToUpdate
+        .refresh()
+    // only tag3 and xyz remains after merge
+    key
+      .keyMeta!!
+      .tags
+      .let { tags ->
+        tags.assert.hasSize(2)
+        tags.map { it.name }.assert.containsExactlyInAnyOrder("ghi", "xyz")
+      }
+  }
+
+  private fun prepareMergeScenario(): BranchMerge {
+    createFeatureOnlyKey()
+    deleteFeatureKey()
+    updateFeatureKey()
+    waitForNotThrowing(timeout = 5000, pollTime = 250) {
+      testData.featureBranch
+        .refresh()!!
+        .revision.assert
+        .isEqualTo(6)
+    }
+    return dryRunFeatureBranchMerge()
+  }
+
+  private fun dryRunFeatureBranchMerge(): BranchMerge {
+    return branchService.dryRunMerge(
+      testData.featureBranch.refresh()!!,
+      testData.mainBranch.refresh()!!,
+    )
+  }
+
+  private fun applyMerge(merge: BranchMerge) = branchService.applyMerge(testData.project.id, merge.id)
+
+  private fun dryRunAndMergeFeatureBranch() {
+    val merge = dryRunFeatureBranchMerge()
+    applyMerge(merge)
+  }
+
   private fun createFeatureOnlyKey() {
     val dto =
       CreateKeyDto(
@@ -170,6 +204,20 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     updateKeyTranslation(testData.featureKeyToUpdate, updatedValue)
   }
 
+  private fun removeTagFromKey(
+    key: Key,
+    tag: Tag,
+  ) {
+    tagService.removeTag(testData.project.id, key.id, tag.id)
+  }
+
+  private fun addTagToKey(
+    key: Key,
+    tagName: String,
+  ) {
+    tagService.tagKey(testData.project.id, key.id, tagName)
+  }
+
   private fun updateKeyTranslation(
     key: Key,
     value: String,
@@ -185,6 +233,10 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   private fun Branch.refresh(): Branch? {
     return branchRepository.findById(this.id).orElse(null)
+  }
+
+  private fun Key.refresh(): Key {
+    return keyRepository.findOneWithTags(this.id)
   }
 
   private fun Key.enTranslation(): String? {
