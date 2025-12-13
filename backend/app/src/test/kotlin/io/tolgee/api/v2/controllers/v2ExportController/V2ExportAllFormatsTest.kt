@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.v2ExportController
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
@@ -7,7 +7,7 @@ import io.tolgee.fixtures.ignoreTestOnSpringBug
 import io.tolgee.formats.ExportFormat
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
-import io.tolgee.testing.assertions.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest

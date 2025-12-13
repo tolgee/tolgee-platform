@@ -271,7 +271,7 @@ class BatchJobTestUtil(
     websocketHelper =
       WebsocketTestHelper(
         port,
-        jwtService.emitToken(testData.user.id),
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)),
         testData.projectBuilder.self.id,
         testData.user.id,
       )
