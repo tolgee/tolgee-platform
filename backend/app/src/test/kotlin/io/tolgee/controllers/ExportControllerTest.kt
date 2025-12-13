@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andIsNotModified
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Language
 import io.tolgee.model.enums.Scope
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -15,6 +16,8 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.ResultActions
@@ -28,6 +31,13 @@ import java.util.function.Consumer
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
+@AutoConfigureMockMvc
+@ContextRecreatingTest
+@SpringBootTest(
+  properties = [
+    "tolgee.cache.enabled=true",
+  ],
+)
 class ExportControllerTest : ProjectAuthControllerTest() {
   private lateinit var testData: TranslationsTestData
 
@@ -115,6 +125,24 @@ class ExportControllerTest : ProjectAuthControllerTest() {
     performWithIfModifiedSince(lastModified).andIsNotModified
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns export with eTag header`() {
+    val now = Date()
+    setForcedDate(now)
+    val eTag = performAndGetETag()
+    Assertions.assertThat(eTag).isNotNull()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns 304 when export eTag matches`() {
+    val now = Date()
+    setForcedDate(now)
+    val eTag = performAndGetETag()
+    performWithIfNoneMatch(eTag).andIsNotModified
+  }
+
   @AfterEach
   fun clearDate() {
     clearForcedDate()
@@ -128,12 +156,26 @@ class ExportControllerTest : ProjectAuthControllerTest() {
     return performGet("/api/project/export/jsonZip", headers)
   }
 
+  private fun performWithIfNoneMatch(eTag: String?): ResultActions {
+    val headers = HttpHeaders()
+    headers["x-api-key"] = apiKeyService.create(userAccount!!, scopes = setOf(Scope.TRANSLATIONS_VIEW), project).key
+    headers["If-None-Match"] = eTag
+    return performGet("/api/project/export/jsonZip", headers)
+  }
+
   private fun performAndGetLastModified(): String? =
     performProjectAuthGet("export/jsonZip")
       .andIsOk
       .lastModified()
 
+  private fun performAndGetETag(): String? =
+    performProjectAuthGet("export/jsonZip")
+      .andIsOk
+      .eTag()
+
   private fun ResultActions.lastModified() = this.andReturn().response.getHeader("Last-Modified")
+
+  private fun ResultActions.eTag() = this.andReturn().response.getHeader("ETag")
 
   private fun assertEqualsDate(
     lastModified: String?,

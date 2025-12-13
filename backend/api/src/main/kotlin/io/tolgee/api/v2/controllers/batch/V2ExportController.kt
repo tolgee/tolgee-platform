@@ -58,15 +58,16 @@ class V2ExportController(
       
       ## HTTP Conditional Requests Support
       
-      This endpoint supports HTTP conditional requests using the If-Modified-Since header:
+      This endpoint supports HTTP conditional requests using both If-Modified-Since and If-None-Match headers:
       
       - **If-Modified-Since header provided**: The server checks if the project data has been modified since the specified date
+      - **If-None-Match header provided**: The server checks if the project data has changed by comparing the eTag value
       - **Data not modified**: Returns HTTP 304 Not Modified with empty body
-      - **Data modified or no header**: Returns HTTP 200 OK with the exported data and Last-Modified header
+      - **Data modified or no header**: Returns HTTP 200 OK with the exported data, Last-Modified header, and ETag header
       
-      The Last-Modified header in the response contains the timestamp of the last project modification, 
-      which can be used for subsequent conditional requests to avoid unnecessary data transfer when the 
-      project hasn't changed.
+      The Last-Modified header in the response contains the timestamp of the last project modification,
+      and the ETag header contains a unique identifier for the current project state. Both can be used 
+      for subsequent conditional requests to avoid unnecessary data transfer when the project hasn't changed.
       
       Cache-Control header is set to max-age=0 to ensure validation on each request.
     """,
@@ -102,19 +103,21 @@ class V2ExportController(
       
       ## HTTP Conditional Requests Support
       
-      This endpoint supports HTTP conditional requests using the If-Modified-Since header:
+      This endpoint supports HTTP conditional requests using both If-Modified-Since and If-None-Match headers:
       
       - **If-Modified-Since header provided**: The server checks if the project data has been modified since the specified date
-      - **Data not modified**: Returns HTTP 412 Precondition Failed with empty body (as per HTTP specification for POST requests)
-      - **Data modified or no header**: Returns HTTP 200 OK with the exported data and Last-Modified header
+      - **If-None-Match header provided**: The server checks if the project data has changed by comparing the eTag value
+      - **Data not modified**: Returns HTTP 304 Not Modified with empty body
+      - **Data modified or no header**: Returns HTTP 200 OK with the exported data, Last-Modified header, and ETag header
       
-      Note: Unlike GET requests which return 304 Not Modified, POST requests return 412 Precondition Failed 
-      when the If-Modified-Since condition is not met, as POST is considered a modifying method according 
-      to HTTP specifications.
+      Note: This endpoint uses a custom implementation that returns 304 Not Modified for all HTTP methods
+      (including POST) when conditional headers indicate the data hasn't changed. This differs from Spring's
+      default behavior which returns 412 for POST requests, but is appropriate here since POST is used only
+      to accommodate large request parameters, not to modify data.
       
-      The Last-Modified header in the response contains the timestamp of the last project modification, 
-      which can be used for subsequent conditional requests to avoid unnecessary data transfer when the 
-      project hasn't changed.
+      The Last-Modified header in the response contains the timestamp of the last project modification,
+      and the ETag header contains a unique identifier for the current project state. Both can be used 
+      for subsequent conditional requests to avoid unnecessary data transfer when the project hasn't changed.
       
       Cache-Control header is set to max-age=0 to ensure validation on each request.
     """,

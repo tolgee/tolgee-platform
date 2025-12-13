@@ -16,7 +16,6 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.ProjectLastModifiedManager
-import io.tolgee.component.ProjectTranslationLastModifiedManager
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
@@ -101,7 +100,6 @@ class TranslationsController(
   private val authenticationFacade: AuthenticationFacade,
   private val screenshotService: ScreenshotService,
   private val activityService: ActivityService,
-  private val projectTranslationLastModifiedManager: ProjectTranslationLastModifiedManager,
   private val createOrUpdateTranslationsFacade: CreateOrUpdateTranslationsFacade,
   private val taskService: ITaskService,
   private val translationSuggestionService: TranslationSuggestionService,

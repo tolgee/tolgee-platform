@@ -48,7 +48,7 @@ class V2ExportControllerCachingTest : ProjectAuthControllerTest("/v2/projects/")
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  fun `returns 304 for POST export when data not modified`() {
+  fun `returns 304 for GET export when data not modified`() {
     retryingOnCommonIssues {
       initBaseData()
 
@@ -76,7 +76,74 @@ class V2ExportControllerCachingTest : ProjectAuthControllerTest("/v2/projects/")
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  fun `returns 412 for POST export when data not modified`() {
+  fun `returns 304 for GET export when eTag matches`() {
+    retryingOnCommonIssues {
+      initBaseData()
+
+      // First request - should return data
+      val firstResponse =
+        performProjectAuthGet("export?languages=en&zip=false")
+          .andIsOk
+          .andReturn()
+
+      val eTagHeader = firstResponse.response.getHeaderValue("ETag") as String
+      Assertions.assertThat(eTagHeader).isNotNull()
+
+      // Second request with If-None-Match header - should return 304
+      val headers = org.springframework.http.HttpHeaders()
+      headers["If-None-Match"] = eTagHeader
+      headers["x-api-key"] = apiKeyService.create(userAccount!!, scopes = setOf(Scope.TRANSLATIONS_VIEW), project).key
+      val secondResponse = performGet("/v2/projects/${project.id}/export?languages=en&zip=false", headers).andReturn()
+
+      Assertions.assertThat(secondResponse.response.status).isEqualTo(304)
+      Assertions.assertThat(secondResponse.response.contentAsByteArray).isEmpty()
+      Assertions.assertThat(secondResponse.response.contentAsString).isEmpty()
+    }
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `returns 304 for POST export when eTag matches`() {
+    retryingOnCommonIssues {
+      initBaseData()
+
+      // First request - should return data
+      val firstResponse =
+        performProjectAuthPost("export", mapOf("languages" to setOf("en"), "zip" to false))
+          .andIsOk
+          .andReturn()
+
+      val eTagHeader = firstResponse.response.getHeaderValue("ETag") as String
+      Assertions.assertThat(eTagHeader).isNotNull()
+
+      // Second request with If-None-Match header - should return 304
+      val headers = org.springframework.http.HttpHeaders()
+      headers["If-None-Match"] = eTagHeader
+      headers["x-api-key"] = apiKeyService.create(userAccount!!, scopes = setOf(Scope.TRANSLATIONS_VIEW), project).key
+      val secondResponse =
+        performPost(
+          "/v2/projects/${project.id}/export",
+          mapOf(
+            "languages" to setOf("en"),
+            "zip" to false,
+          ),
+          headers,
+        ).andReturn()
+
+      // With custom implementation, POST requests now return 304 (Not Modified) instead of 412
+      // when conditional headers indicate the data hasn't changed, since we're using POST only
+      // because we cannot provide all the params in the query - no actual modification occurs.
+      Assertions.assertThat(secondResponse.response.status).isEqualTo(304)
+      Assertions.assertThat(secondResponse.response.contentAsByteArray).isEmpty()
+      Assertions.assertThat(secondResponse.response.contentAsString).isEmpty()
+    }
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `returns 304 for POST export when data not modified`() {
     retryingOnCommonIssues {
       initBaseData()
 
@@ -103,9 +170,10 @@ class V2ExportControllerCachingTest : ProjectAuthControllerTest("/v2/projects/")
           headers,
         ).andReturn()
 
-      // Since this is POST request Spring returns 412 as it is according to the spec for modifying methods.
-      // In our case, we are using POST only since we cannot provide all the params in the query.
-      Assertions.assertThat(secondResponse.response.status).isEqualTo(412)
+      // With custom implementation, POST requests now return 304 (Not Modified) instead of 412
+      // when conditional headers indicate the data hasn't changed, since we're using POST only
+      // because we cannot provide all the params in the query - no actual modification occurs.
+      Assertions.assertThat(secondResponse.response.status).isEqualTo(304)
       Assertions.assertThat(secondResponse.response.contentAsByteArray).isEmpty()
       Assertions.assertThat(secondResponse.response.contentAsString).isEmpty()
     }
