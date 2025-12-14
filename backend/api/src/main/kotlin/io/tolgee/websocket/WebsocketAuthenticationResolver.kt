@@ -1,5 +1,6 @@
 package io.tolgee.websocket
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
@@ -12,6 +13,7 @@ import io.tolgee.service.security.UserAccountService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.context.annotation.Lazy
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.stereotype.Component
 
 @Component
@@ -20,6 +22,7 @@ class WebsocketAuthenticationResolver(
   @Lazy private val apiKeyService: ApiKeyService,
   @Lazy private val patService: PatService,
   @Lazy private val userAccountService: UserAccountService,
+  private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
   /**
    * Resolves STOMP CONNECT headers into TolgeeAuthentication.
@@ -27,12 +30,14 @@ class WebsocketAuthenticationResolver(
    * - Authorization: Bearer <jwt>
    * - X-API-Key: tgpat_<token> (PAT) or tgpak_<...> (PAK, incl. legacy/raw)
    * - jwtToken: <jwt> (legacy header)
+   *
+   * It retrieves the headers from the accessor and validates them.
    */
-  fun resolve(
-    authorizationHeader: String?,
-    xApiKeyHeader: String?,
-    legacyJwtHeader: String?,
-  ): TolgeeAuthentication? {
+  fun resolve(accessor: StompHeaderAccessor): TolgeeAuthentication? {
+    val authorizationHeader = accessor.getNativeHeader("authorization")?.firstOrNull()
+    val xApiKeyHeader = accessor.getNativeHeader("x-api-key")?.firstOrNull()
+    val legacyJwtHeader = accessor.getNativeHeader("jwtToken")?.firstOrNull()
+
     // Authorization: Bearer <jwt>
     val bearer = extractBearer(authorizationHeader)
     if (bearer != null) {
@@ -60,7 +65,7 @@ class WebsocketAuthenticationResolver(
 
         else ->
           runCatching { pakAuth(xApiKey) }
-            .onFailure { logger.debug("PAT authentication failed", it) }
+            .onFailure { logger.debug("PAK authentication failed", it) }
             .getOrNull()
       }
     }
@@ -90,7 +95,7 @@ class WebsocketAuthenticationResolver(
     val hash = apiKeyService.hashKey(parsed)
     val pak = apiKeyService.findDto(hash) ?: throw AuthenticationException(Message.INVALID_PROJECT_API_KEY)
 
-    if (pak.expiresAt?.before(java.util.Date()) == true) {
+    if (pak.expiresAt?.before(currentDateProvider.date) == true) {
       throw AuthenticationException(Message.PROJECT_API_KEY_EXPIRED)
     }
 
@@ -112,7 +117,7 @@ class WebsocketAuthenticationResolver(
     val hash = patService.hashToken(key.substring(PAT_PREFIX.length))
     val pat = patService.findDto(hash) ?: throw AuthenticationException(Message.INVALID_PAT)
 
-    if (pat.expiresAt?.before(java.util.Date()) == true) {
+    if (pat.expiresAt?.before(currentDateProvider.date) == true) {
       throw AuthenticationException(Message.PAT_EXPIRED)
     }
 

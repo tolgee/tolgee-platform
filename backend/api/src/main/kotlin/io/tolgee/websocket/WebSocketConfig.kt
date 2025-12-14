@@ -1,9 +1,11 @@
 package io.tolgee.websocket
 
 import io.tolgee.dtos.cacheable.ApiKeyDto
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.service.security.SecurityService
+import io.tolgee.util.logger
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
 import org.springframework.messaging.Message
@@ -45,10 +47,7 @@ class WebSocketConfig(
           val accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor::class.java)
 
           if (accessor?.command == StompCommand.CONNECT) {
-            val authorization = accessor.getNativeHeader("authorization")?.firstOrNull()
-            val xApiKey = accessor.getNativeHeader("x-api-key")?.firstOrNull()
-            val legacyJwt = accessor.getNativeHeader("jwtToken")?.firstOrNull()
-            accessor.user = websocketAuthenticationResolver.resolve(authorization, xApiKey, legacyJwt)
+            accessor.user = websocketAuthenticationResolver.resolve(accessor)
           }
 
           val authentication = accessor?.user as? TolgeeAuthentication
@@ -82,22 +81,22 @@ class WebSocketConfig(
       throw MessagingException("Unauthenticated")
     }
 
-    val creds = authentication.credentials
-    if (creds is ApiKeyDto) {
-      val matchesProject = creds.projectId == projectId
-      val hasScope = creds.scopes.contains(Scope.KEYS_VIEW)
-      if (!matchesProject || !hasScope) {
-        throw MessagingException("Forbidden")
-      }
-      return
+    val apiKey = authentication.credentials as? ApiKeyDto
+    val user = authentication.principal
+
+    try {
+      securityService.checkProjectPermission(
+        projectId = projectId,
+        requiredPermission = Scope.KEYS_VIEW,
+        user = user,
+        apiKey = apiKey,
+      )
+    } catch (e: PermissionException) {
+      logger().debug("API key does not have required scopes", e)
+      throwForbidden()
     }
 
-    val user = authentication.principal
-    try {
-      securityService.checkProjectPermissionNoApiKey(projectId = projectId, Scope.KEYS_VIEW, user)
-    } catch (e: Exception) {
-      throw MessagingException("Forbidden")
-    }
+    return
   }
 
   fun checkUserPathPermissionsAuth(
@@ -128,5 +127,9 @@ class WebSocketConfig(
     if (user?.id != userId) {
       throw MessagingException("Forbidden")
     }
+  }
+
+  private fun throwForbidden() {
+    throw MessagingException("Forbidden")
   }
 }

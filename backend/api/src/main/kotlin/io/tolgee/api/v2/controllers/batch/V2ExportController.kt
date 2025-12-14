@@ -88,9 +88,9 @@ class V2ExportController(
           .toSet()
       val exported = exportService.export(projectHolder.project.id, params)
       checkExportNotEmpty(exported)
-      val responseEntity = getExportResponse(params, exported)
-      headersBuilder.headers(responseEntity.headers)
-      responseEntity.body
+      val preparedResponse = getExportResponse(params, exported)
+      headersBuilder.headers(preparedResponse.headers)
+      preparedResponse.body
     }
   }
 
@@ -156,7 +156,7 @@ class V2ExportController(
   private fun getExportResponse(
     params: ExportParams,
     exported: Map<String, InputStream>,
-  ): ResponseEntity<StreamingResponseBody> {
+  ): PreparedResponse {
     if (exported.entries.size == 1 && !params.zip) {
       return exportSingleFile(exported, params)
     }
@@ -172,29 +172,38 @@ class V2ExportController(
   private fun exportSingleFile(
     exported: Map<String, InputStream>,
     params: ExportParams,
-  ): ResponseEntity<StreamingResponseBody> {
+  ): PreparedResponse {
     val (fileName, stream) = exported.entries.first()
     val fileNameWithoutSlash = fileName.replace("^/(.*)".toRegex(), "$1")
     val headers = getHeaders(fileNameWithoutSlash, params.format.mediaType)
 
-    return ResponseEntity.ok().headers(headers).body(
-      streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
-        IOUtils.copy(stream, out)
-        stream.close()
-        out.close()
-      },
+    return PreparedResponse(
+      headers = headers,
+      body =
+        streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
+          IOUtils.copy(stream, out)
+          stream.close()
+          out.close()
+        },
     )
   }
 
-  private fun getZipResponseEntity(exported: Map<String, InputStream>): ResponseEntity<StreamingResponseBody> {
+  private fun getZipResponseEntity(exported: Map<String, InputStream>): PreparedResponse {
     val httpHeaders = getZipHeaders(projectHolder.project.name)
 
-    return ResponseEntity.ok().headers(httpHeaders).body(
-      streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
-        streamZipResponse(out, exported)
-      },
+    return PreparedResponse(
+      headers = httpHeaders,
+      body =
+        streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
+          streamZipResponse(out, exported)
+        },
     )
   }
+
+  data class PreparedResponse(
+    val headers: HttpHeaders,
+    val body: StreamingResponseBody?,
+  )
 
   private fun streamZipResponse(
     out: OutputStream,

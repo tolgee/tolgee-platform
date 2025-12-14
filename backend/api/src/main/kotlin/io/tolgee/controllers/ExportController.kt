@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
@@ -17,7 +17,6 @@ import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.WebRequest
@@ -43,16 +42,15 @@ class ExportController(
   private val authenticationFacade: AuthenticationFacade,
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
   private val projectLastModifiedManager: ProjectLastModifiedManager,
+  private val objectMapper: ObjectMapper,
 ) : IController {
+  @Suppress("MVCPathVariableInspection")
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
   @Operation(summary = "Export to ZIP of jsons", description = "Exports data as ZIP of jsons", deprecated = true)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @Deprecated("Use v2 export controller")
-  fun doExportJsonZip(
-    @PathVariable("projectId") projectId: Long?,
-    request: WebRequest,
-  ): ResponseEntity<StreamingResponseBody>? {
+  fun doExportJsonZip(request: WebRequest): ResponseEntity<StreamingResponseBody>? {
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
       val allLanguages =
         permissionService.getPermittedViewLanguages(
@@ -62,7 +60,7 @@ class ExportController(
 
       headersBuilder.header(
         "Content-Disposition",
-        String.format("attachment; filename=\"%s.zip\"", projectHolder.project.name),
+        "attachment; filename=\"${projectHolder.project.name}.zip\"",
       )
 
       streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
@@ -76,7 +74,7 @@ class ExportController(
           )
         for ((key, value) in translations) {
           zipOutputStream.putNextEntry(ZipEntry(String.format("%s.json", key)))
-          val data = jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(value)
+          val data = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(value)
           val byteArrayInputStream = ByteArrayInputStream(data)
           IOUtils.copy(byteArrayInputStream, zipOutputStream)
           byteArrayInputStream.close()

@@ -35,9 +35,6 @@ class ProjectLastModifiedManager(
    * - ETag header set to the project's unique identifier
    * - Cache-Control header set to max-age=0 to ensure validation on each request
    *
-   * This mechanism helps optimize performance by preventing export data computation and loading from the database when
-   * not modified.
-   *
    */
   fun <T> onlyWhenProjectDataChanged(
     request: WebRequest,

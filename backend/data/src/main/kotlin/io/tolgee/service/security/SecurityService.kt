@@ -81,16 +81,31 @@ class SecurityService(
     return Scope.expand(apiKey.scopes).toSet().intersect(projectScopes.toSet())
   }
 
+  /**
+   * Checks if the user has required permission for the project. If no user or API key is provided,
+   * uses the currently authenticated user and active API key.
+   * Always checks permissions for the current user even when using the API key for security reasons.
+   *
+   */
   fun checkProjectPermission(
     projectId: Long,
     requiredPermission: Scope,
+    user: UserAccountDto? = null,
+    apiKey: ApiKeyDto? = null,
   ) {
+    val user = user ?: activeUser
     // Always check for the current user even if we're using an API key for security reasons.
     // This prevents improper preservation of permissions.
-    checkProjectPermissionNoApiKey(projectId, requiredPermission, activeUser)
+    checkProjectPermissionNoApiKey(projectId, requiredPermission, user)
 
-    val apiKey = activeApiKey ?: return
-    checkProjectPermission(projectId, requiredPermission, apiKey)
+    val apiKey = apiKey ?: activeApiKey
+    apiKey ?: return
+
+    if (apiKey.projectId != projectId) {
+      throw PermissionException(Message.PAK_CREATED_FOR_DIFFERENT_PROJECT)
+    }
+
+    this.checkApiKeyScopes(listOf(requiredPermission), apiKey)
   }
 
   fun hasTaskEditScopeOrIsAssigned(
@@ -134,21 +149,6 @@ class SecurityService(
         taskType,
       )
     return assignees.isNotEmpty() && assignees[0].id == activeUser.id
-  }
-
-  fun checkProjectPermission(
-    projectId: Long,
-    requiredScopes: Scope,
-    apiKey: ApiKeyDto,
-  ) {
-    checkProjectPermission(listOf(requiredScopes), apiKey)
-  }
-
-  private fun checkProjectPermission(
-    requiredScopes: List<Scope>,
-    apiKey: ApiKeyDto,
-  ) {
-    this.checkApiKeyScopes(requiredScopes, apiKey)
   }
 
   fun checkProjectPermissionNoApiKey(
@@ -436,18 +436,13 @@ class SecurityService(
     checkProjectPermission(projectId, Scope.TRANSLATIONS_EDIT)
   }
 
-  fun checkApiKeyScopes(
-    scopes: Set<Scope>,
-    apiKey: ApiKeyDto,
-  ) {
-    checkApiKeyScopes(apiKey) { expandedScopes ->
-      if (!expandedScopes.toList().containsAll(scopes)) {
-        val missingScopes = scopes.filter { !expandedScopes.contains(it) }
-        throw PermissionException(missingScopes = missingScopes)
-      }
-    }
-  }
-
+  /**
+   * Checks if API key has required scopes.
+   *
+   * It does not check whether the user has the permission to use all the scope. This needs to be done separately.
+   *
+   * If you need to check both, use [checkProjectPermission] function.
+   */
   fun checkApiKeyScopes(
     scopes: Collection<Scope>,
     apiKey: ApiKeyDto,
