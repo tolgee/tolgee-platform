@@ -13,7 +13,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { FormatedDateTooltip } from 'tg.component/common/tooltip/FormatedDateTooltip';
 import React from 'react';
-import { useDateFormatter } from 'tg.hooks/useLocale';
+import { useDateFormatter, useMoneyFormatter } from 'tg.hooks/useLocale';
 import { T } from '@tolgee/react';
 
 type UpcomingItem =
@@ -38,6 +38,7 @@ export const PlanMigrationUpcomingItem = ({
   toggleLoading,
 }: Props) => {
   const formatDate = useDateFormatter();
+  const formatMoney = useMoneyFormatter();
 
   return (
     <StyledTableRow skipped={subscription.skipped}>
@@ -65,6 +66,7 @@ export const PlanMigrationUpcomingItem = ({
       </TableCell>
       <TableCell>{subscription.originPlan}</TableCell>
       <TableCell>{subscription.targetPlan}</TableCell>
+      <TableCell>{formatMoney(subscription.expectedUsage.total)}</TableCell>
       <TableCell>
         <FormatedDateTooltip date={subscription.scheduleAt} />
       </TableCell>
