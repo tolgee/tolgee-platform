@@ -1326,6 +1326,8 @@ export interface components {
     PlanMigrationUpcomingSubscriptionModel: {
       /** Format: int64 */
       currentPeriodEnd: number;
+      /** Format: int64 */
+      firstPaymentDate?: number;
       organizationName: string;
       organizationSlug: string;
       originPlan: string;

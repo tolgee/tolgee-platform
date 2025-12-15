@@ -7,6 +7,7 @@ import { PaginatedHateoasTable } from 'tg.component/common/table/PaginatedHateoa
 import { HateoasListData } from 'tg.service/response.types';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { PlanMigrationUpcomingItem } from 'tg.ee.module/billing/administration/subscriptionPlans/migration/general/PlanMigrationUpcomingItem';
+import React from 'react';
 
 type UpcomingItem =
   components['schemas']['PlanMigrationUpcomingSubscriptionModel'];
