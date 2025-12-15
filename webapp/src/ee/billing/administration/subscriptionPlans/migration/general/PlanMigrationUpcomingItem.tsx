@@ -1,10 +1,20 @@
-import { Checkbox, Link, styled, TableCell, TableRow } from '@mui/material';
+import {
+  Checkbox,
+  Link,
+  styled,
+  TableCell,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { PlanMigrationStatus } from './PlanMigrationStatus';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { FormatedDateTooltip } from 'tg.component/common/tooltip/FormatedDateTooltip';
+import React from 'react';
+import { useDateFormatter } from 'tg.hooks/useLocale';
+import { T } from '@tolgee/react';
 
 type UpcomingItem =
   components['schemas']['PlanMigrationUpcomingSubscriptionModel'];
@@ -27,6 +37,8 @@ export const PlanMigrationUpcomingItem = ({
   onToggleSkip,
   toggleLoading,
 }: Props) => {
+  const formatDate = useDateFormatter();
+
   return (
     <StyledTableRow skipped={subscription.skipped}>
       <TableCell>
@@ -36,8 +48,20 @@ export const PlanMigrationUpcomingItem = ({
             [PARAMS.ORGANIZATION_SLUG]: subscription.organizationSlug,
           })}
         >
-          {subscription.organizationName}
+          <Typography>{subscription.organizationName}</Typography>
         </Link>
+        <Typography variant="caption">
+          {subscription.firstPaymentDate && (
+            <T
+              keyName="administration_plan_migration_first_payment_date"
+              params={{
+                date: formatDate(subscription.firstPaymentDate, {
+                  dateStyle: 'long',
+                }),
+              }}
+            />
+          )}
+        </Typography>
       </TableCell>
       <TableCell>{subscription.originPlan}</TableCell>
       <TableCell>{subscription.targetPlan}</TableCell>
