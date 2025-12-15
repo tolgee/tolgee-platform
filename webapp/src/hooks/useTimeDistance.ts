@@ -1,13 +1,15 @@
 import { useTranslate } from '@tolgee/react';
 import { useDateFormatter } from 'tg.hooks/useLocale';
+import { useCurrentDate } from 'tg.hooks/useCurrentDate';
 
 export function useTimeDistance() {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
+  const currentDate = useCurrentDate();
 
   return (timeInPast: number | string | Date) => {
     const diffSeconds =
-      (Date.now().valueOf() - new Date(timeInPast).valueOf()) / 1000;
+      (currentDate.valueOf() - new Date(timeInPast).valueOf()) / 1000;
     const isFuture = diffSeconds < 0;
     const differenceInSeconds = Math.abs(diffSeconds);
 
