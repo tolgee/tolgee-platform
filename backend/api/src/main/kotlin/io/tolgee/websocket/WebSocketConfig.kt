@@ -92,7 +92,7 @@ class WebSocketConfig(
         apiKey = apiKey,
       )
     } catch (e: PermissionException) {
-      logger().debug("API key does not have required scopes", e)
+      logger().debug("User / API key does not have required scopes", e)
       throwForbidden()
     }
 
@@ -114,7 +114,7 @@ class WebSocketConfig(
       } ?: return
 
     if (authentication == null) {
-      throw MessagingException("Forbidden")
+      throw MessagingException("Unauthenticated")
     }
 
     val creds = authentication.credentials

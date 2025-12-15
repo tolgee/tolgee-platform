@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsNotModified
 import io.tolgee.fixtures.andIsOk
@@ -12,6 +13,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
@@ -40,6 +42,9 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
   fun clear() {
     clearForcedDate()
   }
+
+  @Autowired
+  private lateinit var activityHolder: ActivityHolder
 
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_VIEW])
   @Test
@@ -97,8 +102,11 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
 
     val newNow = Date(Date().time + 50000)
     setForcedDate(newNow)
-    translationService.setTranslationText(testData.aKey, testData.englishLanguage, "This was changed!")
 
+    executeInNewTransaction {
+      activityHolder.activityRevision.projectId = testData.project.id
+      translationService.setTranslationText(testData.aKey, testData.englishLanguage, "This was changed!")
+    }
     val newETag = performWithIfNoneMatch(eTag).andIsOk.eTag()
     Assertions.assertThat(newETag).isNotNull()
     Assertions.assertThat(newETag).isNotEqualTo(eTag)
@@ -118,8 +126,11 @@ class TranslationsControllerCachingTest : ProjectAuthControllerTest("/v2/project
 
     val newNow = Date(Date().time + 50000)
     setForcedDate(newNow)
-    translationService.setTranslationText(testData.aKey, testData.englishLanguage, "This was changed!")
 
+    executeInNewTransaction {
+      activityHolder.activityRevision.projectId = testData.project.id
+      translationService.setTranslationText(testData.aKey, testData.englishLanguage, "This was changed!")
+    }
     val newLastModified = performWithIsModifiedSince(lastModified).andIsOk.lastModified()
     assertEqualsDate(newLastModified, newNow)
 

@@ -34,9 +34,9 @@ class WebsocketAuthenticationResolver(
    * It retrieves the headers from the accessor and validates them.
    */
   fun resolve(accessor: StompHeaderAccessor): TolgeeAuthentication? {
-    val authorizationHeader = accessor.getNativeHeader("authorization")?.firstOrNull()
-    val xApiKeyHeader = accessor.getNativeHeader("x-api-key")?.firstOrNull()
-    val legacyJwtHeader = accessor.getNativeHeader("jwtToken")?.firstOrNull()
+    val authorizationHeader = getCaseInsensitiveHeader(accessor, "authorization")
+    val xApiKeyHeader = getCaseInsensitiveHeader(accessor, "x-api-key")
+    val legacyJwtHeader = getCaseInsensitiveHeader(accessor, "jwtToken")
 
     // Authorization: Bearer <jwt>
     val bearer = extractBearer(authorizationHeader)
@@ -133,5 +133,28 @@ class WebsocketAuthenticationResolver(
       actingAsUserAccount = null,
       isReadOnly = false,
     )
+  }
+
+  /**
+   * Case-insensitive header lookup for STOMP headers.
+   * Searches through message headers using case-insensitive comparison.
+   */
+  private fun getCaseInsensitiveHeader(
+    accessor: StompHeaderAccessor,
+    headerName: String,
+  ): String? {
+    val messageHeaders = accessor.messageHeaders
+    return messageHeaders.entries
+      .firstOrNull { (key, value) ->
+        key.equals("nativeHeaders", ignoreCase = true) && value is Map<*, *>
+      }?.let { (_, nativeHeadersMap) ->
+        @Suppress("UNCHECKED_CAST")
+        val nativeHeaders = nativeHeadersMap as Map<String, List<String>>
+        nativeHeaders.entries
+          .firstOrNull { (key, _) ->
+            key.equals(headerName, ignoreCase = true)
+          }?.value
+          ?.firstOrNull()
+      }
   }
 }
