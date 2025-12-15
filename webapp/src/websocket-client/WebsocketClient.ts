@@ -4,7 +4,7 @@ import { components } from 'tg.service/apiSchema.generated';
 
 type BatchJobModelStatus = components['schemas']['BatchJobModel']['status'];
 
-type TranslationsClientOptions = {
+type WebsocketClientOptions = {
   serverUrl?: string;
   authentication: {
     jwtToken: string;
@@ -27,7 +27,7 @@ type Subscription<T extends string> = {
   unsubscribe?: () => void;
 };
 
-export const WebsocketClient = (options: TranslationsClientOptions) => {
+export const WebsocketClient = (options: WebsocketClientOptions) => {
   options.serverUrl = options.serverUrl || window.origin;
 
   let _client: CompatClient | undefined;
@@ -96,12 +96,12 @@ export const WebsocketClient = (options: TranslationsClientOptions) => {
       options.onError?.();
     };
 
-    client.connect(
-      options.authentication.jwtToken ? { ...options.authentication } : null,
-      onConnected,
-      onError,
-      onDisconnect
-    );
+    const headers: Record<string, string> | null = {
+      jwtToken: options.authentication.jwtToken,
+      Authorization: `Bearer ${options.authentication.jwtToken}`,
+    };
+
+    client.connect(headers, onConnected, onError, onDisconnect);
   }
 
   const getClient = () => {

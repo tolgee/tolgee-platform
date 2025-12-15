@@ -45,14 +45,14 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
     currentUserWebsocket =
       WebsocketTestHelper(
         port,
-        jwtService.emitToken(testData.user.id),
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(testData.user.id)),
         testData.projectBuilder.self.id,
         testData.user.id,
       )
     anotherUserWebsocket =
       WebsocketTestHelper(
         port,
-        jwtService.emitToken(anotherUser.id),
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(anotherUser.id)),
         testData.projectBuilder.self.id,
         anotherUser.id,
       )
@@ -239,12 +239,13 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
     val spyingUserWebsocket =
       WebsocketTestHelper(
         port,
-        jwtService.emitToken(anotherUser.id),
+        WebsocketTestHelper.Auth(jwtToken = jwtService.emitToken(anotherUser.id)),
         testData.projectBuilder.self.id,
         // anotherUser trying to spy on other user's websocket
         testData.user.id,
       )
     spyingUserWebsocket.listenForNotificationsChanged()
+    spyingUserWebsocket.waitForForbidden()
     saveNotificationForCurrentUser()
 
     assertCurrentUserReceivedMessage()

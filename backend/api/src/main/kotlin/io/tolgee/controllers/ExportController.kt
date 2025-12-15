@@ -1,9 +1,10 @@
 package io.tolgee.controllers
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
+import io.tolgee.component.ProjectLastModifiedManager
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
@@ -16,9 +17,9 @@ import org.apache.tomcat.util.http.fileupload.IOUtils
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.ByteArrayInputStream
 import java.io.OutputStream
@@ -40,46 +41,47 @@ class ExportController(
   private val projectHolder: ProjectHolder,
   private val authenticationFacade: AuthenticationFacade,
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
+  private val projectLastModifiedManager: ProjectLastModifiedManager,
+  private val objectMapper: ObjectMapper,
 ) : IController {
+  @Suppress("MVCPathVariableInspection")
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
   @Operation(summary = "Export to ZIP of jsons", description = "Exports data as ZIP of jsons", deprecated = true)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @Deprecated("Use v2 export controller")
-  fun doExportJsonZip(
-    @PathVariable("projectId") projectId: Long?,
-  ): ResponseEntity<StreamingResponseBody> {
-    val allLanguages =
-      permissionService.getPermittedViewLanguages(
-        projectHolder.project.id,
-        authenticationFacade.authenticatedUser.id,
+  fun doExportJsonZip(request: WebRequest): ResponseEntity<StreamingResponseBody>? {
+    return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
+      val allLanguages =
+        permissionService.getPermittedViewLanguages(
+          projectHolder.project.id,
+          authenticationFacade.authenticatedUser.id,
+        )
+
+      headersBuilder.header(
+        "Content-Disposition",
+        "attachment; filename=\"${projectHolder.project.name}.zip\"",
       )
 
-    return ResponseEntity
-      .ok()
-      .header(
-        "Content-Disposition",
-        String.format("attachment; filename=\"%s.zip\"", projectHolder.project.name),
-      ).body(
-        streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
-          val zipOutputStream = ZipOutputStream(out)
-          val translations =
-            translationService.getTranslations(
-              allLanguages.map { it.tag }.toSet(),
-              null,
-              projectHolder.project.id,
-              '.',
-            )
-          for ((key, value) in translations) {
-            zipOutputStream.putNextEntry(ZipEntry(String.format("%s.json", key)))
-            val data = jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(value)
-            val byteArrayInputStream = ByteArrayInputStream(data)
-            IOUtils.copy(byteArrayInputStream, zipOutputStream)
-            byteArrayInputStream.close()
-            zipOutputStream.closeEntry()
-          }
-          zipOutputStream.close()
-        },
-      )
+      streamingResponseBodyProvider.createStreamingResponseBody { out: OutputStream ->
+        val zipOutputStream = ZipOutputStream(out)
+        val translations =
+          translationService.getTranslations(
+            allLanguages.map { it.tag }.toSet(),
+            null,
+            projectHolder.project.id,
+            '.',
+          )
+        for ((key, value) in translations) {
+          zipOutputStream.putNextEntry(ZipEntry(String.format("%s.json", key)))
+          val data = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(value)
+          val byteArrayInputStream = ByteArrayInputStream(data)
+          IOUtils.copy(byteArrayInputStream, zipOutputStream)
+          byteArrayInputStream.close()
+          zipOutputStream.closeEntry()
+        }
+        zipOutputStream.close()
+      }
+    }
   }
 }
