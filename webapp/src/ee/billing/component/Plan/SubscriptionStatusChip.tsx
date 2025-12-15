@@ -23,7 +23,7 @@ export const SubscriptionStatusChip = ({ status }: { status: Status }) => {
     ERROR: { color: 'error', label: t('subscription_status_error') },
     KEY_USED_BY_ANOTHER_INSTANCE: {
       color: 'default',
-      label: t('subscription_status_key_used_by_another_instance'),
+      label: t('subscription_status_error'),
     },
     UNKNOWN: { color: 'default', label: t('subscription_status_unknown') },
   };
