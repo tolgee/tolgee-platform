@@ -1326,6 +1326,7 @@ export interface components {
     PlanMigrationUpcomingSubscriptionModel: {
       /** Format: int64 */
       currentPeriodEnd: number;
+      expectedUsage: components["schemas"]["UsageModel"];
       /** Format: int64 */
       firstPaymentDate?: number;
       organizationName: string;

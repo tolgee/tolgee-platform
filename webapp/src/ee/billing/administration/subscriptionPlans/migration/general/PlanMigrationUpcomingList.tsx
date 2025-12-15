@@ -36,42 +36,47 @@ export const PlanMigrationUpcomingList = ({
           <T keyName="administration_plan_migration_upcoming_hint" />
         </Alert>
       </Box>
-      <PaginatedHateoasTable
-        wrapperComponentProps={{ className: 'listWrapper' }}
-        loadable={subscriptions}
-        onPageChange={setPage}
-        tableHead={
-          <TableRow>
-            <TableCell>{t('global_organization')}</TableCell>
-            <TableCell>{t('administration_plan_migration_from')}</TableCell>
-            <TableCell>{t('administration_plan_migration_to')}</TableCell>
-            <TableCell>
-              {t('administration_plan_migration_scheduled_at')}
-            </TableCell>
-            <TableCell>
-              {t('administration_plan_migration_skip_label')}
-            </TableCell>
-            <TableCell>
-              {t('administration_plan_migrated_subscription_status')}
-            </TableCell>
-          </TableRow>
-        }
-        renderItem={(item) => (
-          <PlanMigrationUpcomingItem
-            subscription={item}
-            onToggleSkip={onToggleSkip}
-            toggleLoading={toggleLoading}
-          />
-        )}
-        emptyPlaceholder={
-          <EmptyState
-            loading={subscriptions.isLoading}
-            wrapperProps={{ py: 1 }}
-          >
-            <T keyName="administration_plan_migration_no_upcoming_subscriptions" />
-          </EmptyState>
-        }
-      />
+      <Box data-cy="plan-migration-upcoming-list">
+        <PaginatedHateoasTable
+          wrapperComponentProps={{ className: 'listWrapper' }}
+          loadable={subscriptions}
+          onPageChange={setPage}
+          tableHead={
+            <TableRow>
+              <TableCell>{t('global_organization')}</TableCell>
+              <TableCell>{t('administration_plan_migration_from')}</TableCell>
+              <TableCell>{t('administration_plan_migration_to')}</TableCell>
+              <TableCell>
+                {t('administration_plan_migration_expected_price')}
+              </TableCell>
+              <TableCell>
+                {t('administration_plan_migration_scheduled_at')}
+              </TableCell>
+              <TableCell>
+                {t('administration_plan_migration_skip_label')}
+              </TableCell>
+              <TableCell>
+                {t('administration_plan_migrated_subscription_status')}
+              </TableCell>
+            </TableRow>
+          }
+          renderItem={(item) => (
+            <PlanMigrationUpcomingItem
+              subscription={item}
+              onToggleSkip={onToggleSkip}
+              toggleLoading={toggleLoading}
+            />
+          )}
+          emptyPlaceholder={
+            <EmptyState
+              loading={subscriptions.isLoading}
+              wrapperProps={{ py: 1 }}
+            >
+              <T keyName="administration_plan_migration_no_upcoming_subscriptions" />
+            </EmptyState>
+          }
+        />
+      </Box>
     </>
   );
 };
