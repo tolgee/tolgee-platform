@@ -1,3 +1,10 @@
+# [3.143.0](https://github.com/tolgee/tolgee-platform/compare/v3.142.0...v3.143.0) (2025-12-15)
+
+
+### Features
+
+* Allow websocket PAK/PAT auth, caching, eTag for export ([#3203](https://github.com/tolgee/tolgee-platform/issues/3203)) ([56523df](https://github.com/tolgee/tolgee-platform/commit/56523df9b6df652bdcc1541ffbde68f87abeb0fb))
+
 # [3.142.0](https://github.com/tolgee/tolgee-platform/compare/v3.141.2...v3.142.0) (2025-12-10)
 
 
