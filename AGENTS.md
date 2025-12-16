@@ -23,6 +23,15 @@ Tests are split into multiple categories that run in parallel in CI:
 ./gradlew security:test
 ```
 
+Don't use the bare test task (it doesn't work) – always run a specific test suite even when running a single test, e.g:
+```bash
+# Don't do this
+./gradlew test --tests "io.tolgee.unit.formats.android.out.AndroidSdkFileExporterTest"
+
+# Do this
+./gradlew :data:test --tests "io.tolgee.unit.formats.android.out.AndroidSdkFileExporterTest"
+```
+
 **TestData Pattern**: Use TestData classes for test setup:
 ```kotlin
 class YourControllerTest {

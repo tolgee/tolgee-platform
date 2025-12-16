@@ -12,6 +12,7 @@ import io.tolgee.formats.csv.out.CsvFileExporter
 import io.tolgee.formats.flutter.out.FlutterArbFileExporter
 import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.formats.json.out.JsonFileExporter
+import io.tolgee.formats.json.out.JsonFileExporterWithManifest
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.formats.properties.out.PropertiesFileExporter
 import io.tolgee.formats.resx.out.ResxExporter
@@ -40,17 +41,18 @@ class FileExporterFactory(
     projectIcuPlaceholdersSupport: Boolean,
   ): FileExporter {
     return when (exportParams.format) {
-      ExportFormat.CSV ->
+      ExportFormat.CSV -> {
         CsvFileExporter(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
           getFilePathProvider(exportParams, data),
         )
+      }
 
       ExportFormat.JSON, ExportFormat.JSON_TOLGEE, ExportFormat.JSON_I18NEXT,
-      ExportFormat.ANDROID_SDK, ExportFormat.APPLE_SDK,
-      ->
+      ExportFormat.APPLE_SDK,
+      -> {
         JsonFileExporter(
           data,
           exportParams,
@@ -59,8 +61,20 @@ class FileExporterFactory(
           customPrettyPrinter = customPrettyPrinter,
           filePathProvider = getFilePathProvider(exportParams, data),
         )
+      }
 
-      ExportFormat.YAML_RUBY, ExportFormat.YAML ->
+      ExportFormat.ANDROID_SDK -> {
+        JsonFileExporterWithManifest(
+          translations = data,
+          exportParams = exportParams,
+          projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
+          objectMapper = objectMapper,
+          customPrettyPrinter = customPrettyPrinter,
+          filePathProvider = getFilePathProvider(exportParams, data),
+        )
+      }
+
+      ExportFormat.YAML_RUBY, ExportFormat.YAML -> {
         YamlFileExporter(
           data,
           exportParams,
@@ -69,8 +83,9 @@ class FileExporterFactory(
           customPrettyPrinter,
           filePathProvider = getFilePathProvider(exportParams, data),
         )
+      }
 
-      ExportFormat.XLIFF ->
+      ExportFormat.XLIFF -> {
         XliffFileExporter(
           data,
           exportParams,
@@ -79,8 +94,9 @@ class FileExporterFactory(
           projectIcuPlaceholdersSupport,
           filePathProvider = getFilePathProvider(exportParams, data),
         )
+      }
 
-      ExportFormat.APPLE_XLIFF ->
+      ExportFormat.APPLE_XLIFF -> {
         AppleXliffExporter(
           data,
           baseTranslationsProvider,
@@ -88,24 +104,27 @@ class FileExporterFactory(
           projectIcuPlaceholdersSupport,
           filePathProvider = getFilePathProvider(exportParams, data),
         )
+      }
 
-      ExportFormat.ANDROID_XML ->
+      ExportFormat.ANDROID_XML -> {
         XmlResourcesExporter(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
           filePathProvider = getFilePathProvider(exportParams, data),
         )
+      }
 
-      ExportFormat.COMPOSE_XML ->
+      ExportFormat.COMPOSE_XML -> {
         XmlResourcesExporter(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
           filePathProvider = getFilePathProvider(exportParams, data),
         )
+      }
 
-      ExportFormat.PO ->
+      ExportFormat.PO -> {
         PoFileExporter(
           data,
           exportParams,
@@ -113,8 +132,9 @@ class FileExporterFactory(
           projectIcuPlaceholdersSupport,
           getFilePathProvider(exportParams, data),
         )
+      }
 
-      ExportFormat.APPLE_STRINGS_STRINGSDICT ->
+      ExportFormat.APPLE_STRINGS_STRINGSDICT -> {
         AppleStringsStringsdictExporter(
           data,
           exportParams,
@@ -122,8 +142,9 @@ class FileExporterFactory(
           stringsFilePathProvider = getFilePathProvider(exportParams, data, "strings"),
           stringsdictFilePathProvider = getFilePathProvider(exportParams, data, "stringsdict"),
         )
+      }
 
-      ExportFormat.APPLE_XCSTRINGS ->
+      ExportFormat.APPLE_XCSTRINGS -> {
         AppleXcstringsExporter(
           translations = data,
           exportParams = exportParams,
@@ -131,8 +152,9 @@ class FileExporterFactory(
           isProjectIcuPlaceholdersEnabled = projectIcuPlaceholdersSupport,
           filePathProvider = getFilePathProvider(exportParams, data),
         )
+      }
 
-      ExportFormat.FLUTTER_ARB ->
+      ExportFormat.FLUTTER_ARB -> {
         FlutterArbFileExporter(
           data,
           exportParams,
@@ -141,24 +163,27 @@ class FileExporterFactory(
           projectIcuPlaceholdersSupport,
           filePathProvider = getFilePathProvider(exportParams, data),
         )
+      }
 
-      ExportFormat.PROPERTIES ->
+      ExportFormat.PROPERTIES -> {
         PropertiesFileExporter(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
           filePathProvider = getFilePathProvider(exportParams, data),
         )
+      }
 
-      ExportFormat.RESX_ICU ->
+      ExportFormat.RESX_ICU -> {
         ResxExporter(
           data,
           exportParams,
           projectIcuPlaceholdersSupport,
           pathProvider = getFilePathProvider(exportParams, data),
         )
+      }
 
-      ExportFormat.XLSX ->
+      ExportFormat.XLSX -> {
         XlsxFileExporter(
           currentDateProvider.date,
           data,
@@ -166,6 +191,7 @@ class FileExporterFactory(
           projectIcuPlaceholdersSupport,
           pathProvider = getFilePathProvider(exportParams, data),
         )
+      }
     }
   }
 
