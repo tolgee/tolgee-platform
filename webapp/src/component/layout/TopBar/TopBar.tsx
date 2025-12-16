@@ -17,8 +17,6 @@ import React, { FC } from 'react';
 import { TrialChip } from 'tg.ee';
 import { NotificationsTopBarButton } from 'tg.component/layout/Notifications/NotificationsTopBarButton';
 
-export const TOP_BAR_HEIGHT = 52;
-
 export const StyledAppBar = styled(AppBar)(
   ({ theme }) =>
     ({

@@ -1,0 +1,71 @@
+import {
+  Story,
+  ArgTypes,
+  Canvas,
+  Unstyled,
+  Meta,
+} from '@storybook/addon-docs/blocks';
+import { FlagImage } from '.';
+import { flagNames } from './utils';
+import * as FlagImageStories from './stories';
+import preview from '../../../../.storybook/preview';
+
+<Meta of={FlagImageStories} />
+
+# languages / FlagImage
+
+FlagImage is a static element that is used to display country flag image based
+on a country flag emoji. This way the flag image is consistent with our design
+on all platforms.
+
+## Table of Contents
+
+- [Flag](#flag)
+- [Unsupported Flag](#unsupported-flag)
+- [Component API](#component-api)
+- [Flag List](#flag-list)
+- [References](#references)
+
+## Flag
+
+<Canvas of={FlagImageStories.Supported} />
+
+## Unsupported Flag
+
+Unsupported flag goes to a fallback image.
+
+<Canvas of={FlagImageStories.Unsupported} />
+
+## Component API
+
+<ArgTypes />
+
+Additional props passed into `FlagImage` will be forwarded along to the
+underlying elements. Especially `width` prop is very useful.
+
+## Flag List
+
+<Unstyled
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+    gap: '10px',
+  }}
+>
+  {flagNames.map((flagName) => {
+    const flagEmoji = String.fromCodePoint(
+      ...flagName.split('-').map((hex) => parseInt(hex, 16)),
+    );
+    return (
+      <div key={flagName}>
+        <FlagImage flagEmoji={flagEmoji} width="64" />
+        <div>{flagEmoji}</div>
+        <div>{flagName}</div>
+      </div>
+    );
+  })}
+</Unstyled>
+
+## References
+
+- [Source code](https://github.com/tolgee/tolgee-platform/blob/main/library/src/components/languages/FlagImage)

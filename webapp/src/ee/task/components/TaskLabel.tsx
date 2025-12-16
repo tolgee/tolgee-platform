@@ -1,5 +1,5 @@
 import { Box, styled, SxProps, Tooltip } from '@mui/material';
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { components } from 'tg.service/apiSchema.generated';
 import { TaskNumber, TaskNumberWithLink } from './TaskId';
 import { TaskTypeChip } from 'tg.component/task/TaskTypeChip';

@@ -1,7 +1,7 @@
 import React, { ComponentProps } from 'react';
 import { Box, styled } from '@mui/material';
 
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 
 const DEFAULT_SIZE = 18;
 
