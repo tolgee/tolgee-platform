@@ -207,6 +207,9 @@ export interface paths {
   "/v2/public/licensing/subscription": {
     post: operations["getMySubscription"];
   };
+  "/v2/public/llm/prompt": {
+    post: operations["prompt"];
+  };
   "/v2/public/telemetry/report": {
     post: operations["report"];
   };
@@ -860,7 +863,20 @@ export interface components {
         | "suggestion_cant_be_plural"
         | "suggestion_must_be_plural"
         | "duplicate_suggestion"
-        | "unsupported_media_type";
+        | "unsupported_media_type"
+        | "impersonation_of_admin_by_supporter_not_allowed"
+        | "already_impersonating_user"
+        | "operation_not_permitted_in_read_only_mode"
+        | "file_processing_failed"
+        | "branch_not_found"
+        | "cannot_delete_default_branch"
+        | "branch_already_exists"
+        | "origin_branch_not_found"
+        | "branch_merge_not_found"
+        | "branch_merge_change_not_found"
+        | "branch_merge_revision_not_valid"
+        | "branch_merge_conflicts_not_resolved"
+        | "branch_merge_already_merged";
       params?: unknown[];
     };
     ExampleItem: {
@@ -911,6 +927,7 @@ export interface components {
       /** @description The Total amount with tax */
       total: number;
     };
+    JsonNode: unknown;
     LegacyTolgeeTranslateRequest: {
       /** @enum {string} */
       formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
@@ -938,6 +955,18 @@ export interface components {
        * -1 if unlimited
        */
       limit: number;
+    };
+    LlmMessage: {
+      image?: string;
+      text?: string;
+      /** @enum {string} */
+      type: "TEXT" | "IMAGE";
+    };
+    LlmParams: {
+      messages: components["schemas"]["LlmMessage"][];
+      /** @enum {string} */
+      priority: "LOW" | "HIGH";
+      shouldOutputJson: boolean;
     };
     Metadata: {
       closeItems: components["schemas"]["ExampleItem"][];
@@ -1058,6 +1087,7 @@ export interface components {
         | "prompts.edit"
         | "translation-labels.manage"
         | "translation-labels.assign"
+        | "all.view"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1155,6 +1185,13 @@ export interface components {
       inputTokens?: number;
       /** Format: int64 */
       outputTokens?: number;
+    };
+    PromptResult: {
+      parsedJson?: components["schemas"]["JsonNode"];
+      /** Format: int32 */
+      price: number;
+      response: string;
+      usage?: components["schemas"]["PromptResponseUsageDto"];
     };
     ReleaseKeyDto: {
       licenseKey: string;
@@ -4354,6 +4391,45 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["GetMySubscriptionDto"];
+      };
+    };
+  };
+  prompt: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PromptResult"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LlmParams"];
       };
     };
   };

@@ -1,0 +1,78 @@
+package io.tolgee.ee.service.branching
+
+import io.tolgee.ee.repository.branching.BranchMergeRepository
+import io.tolgee.ee.repository.branching.BranchRepository
+import io.tolgee.events.OnBranchDeleted
+import io.tolgee.repository.KeyRepository
+import io.tolgee.service.key.KeyService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.data.domain.PageRequest
+import org.springframework.scheduling.annotation.Async
+import org.springframework.stereotype.Service
+import org.springframework.transaction.event.TransactionPhase
+import org.springframework.transaction.event.TransactionalEventListener
+
+@Service
+class BranchCleanupService(
+  private val keyRepository: KeyRepository,
+  private val keyService: KeyService,
+  private val branchRepository: BranchRepository,
+  private val branchMergeRepository: BranchMergeRepository,
+) {
+  companion object {
+    private const val BATCH_SIZE = 1000
+  }
+
+  val logger: Logger by lazy {
+    LoggerFactory.getLogger(javaClass)
+  }
+
+  /**
+   * Async cleanup entry point. Deletes all keys and related data for the archived branch.
+   * Uses KeyService to cascade-delete related entities in batches.
+   */
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)
+  @Async
+  fun cleanupBranchAsync(event: OnBranchDeleted) {
+    cleanupBranch(event.branch.id)
+  }
+
+  /**
+   * Synchronous cleanup
+   */
+  fun cleanupBranch(branchId: Long) {
+    val branch = branchRepository.findById(branchId).orElse(null) ?: return
+    if (branch.deletedAt == null) return
+
+    logger.debug("Cleaning up branch ${branch.id}")
+    var page = 0
+    while (true) {
+      val idsPage =
+        keyRepository.findIdsByProjectAndBranch(
+          branch.project.id,
+          branch.id,
+          PageRequest.of(page, BATCH_SIZE),
+        )
+      if (idsPage.isEmpty) break
+      val ids = idsPage.content
+      if (ids.isNotEmpty()) {
+        keyService.deleteMultiple(ids)
+        logger.debug("Deleted ${ids.size} keys for branch ${branch.id}")
+      }
+      if (idsPage.numberOfElements < BATCH_SIZE) {
+        break
+      }
+      page++
+    }
+    val merges =
+      branchMergeRepository
+        .findAllBySourceBranchIdOrTargetBranchId(branch.id, branch.id)
+    if (merges.isNotEmpty()) {
+      branchMergeRepository.deleteAll(merges)
+      logger.debug("Deleted ${merges.size} merges for branch ${branch.id}")
+    }
+    branchRepository.delete(branch)
+    logger.debug("Deleted branch ${branch.name} (${branch.id})")
+  }
+}

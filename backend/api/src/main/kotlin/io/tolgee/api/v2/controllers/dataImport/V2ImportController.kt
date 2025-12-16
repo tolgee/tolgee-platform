@@ -89,16 +89,17 @@ class V2ImportController(
         userAccount = authenticationFacade.authenticatedUserEntity,
         params = params,
       )
-    return getImportAddFilesResultModel(errors, warnings)
+    return getImportAddFilesResultModel(errors, warnings, params)
   }
 
   private fun getImportAddFilesResultModel(
     errors: List<ErrorResponseBody>,
     warnings: List<ErrorResponseBody>,
+    params: ImportAddFilesParams,
   ): ImportAddFilesResultModel {
     val result: PagedModel<ImportLanguageModel>? =
       try {
-        this.getImportResult(PageRequest.of(0, 100))
+        this.getImportResult(PageRequest.of(0, 100), params.branch)
       } catch (e: NotFoundException) {
         null
       }
@@ -115,9 +116,10 @@ class V2ImportController(
     @Parameter(description = "Whether override or keep all translations with unresolved conflicts")
     @RequestParam(defaultValue = "NO_FORCE")
     forceMode: ForceMode,
+    @RequestParam branch: String? = null,
   ) {
     val projectId = projectHolder.project.id
-    this.importService.import(projectId, authenticationFacade.authenticatedUser.id, forceMode)
+    this.importService.import(projectId, authenticationFacade.authenticatedUser.id, branch, forceMode)
   }
 
   @PutMapping("/apply-streaming", produces = [MediaType.APPLICATION_NDJSON_VALUE])
@@ -134,11 +136,12 @@ class V2ImportController(
     @Parameter(description = "Whether override or keep all translations with unresolved conflicts")
     @RequestParam(defaultValue = "NO_FORCE")
     forceMode: ForceMode,
+    @RequestParam branch: String? = null,
   ): ResponseEntity<StreamingResponseBody> {
     val projectId = projectHolder.project.id
 
     return streamingImportProgressUtil.stream { writeStatus ->
-      this.importService.import(projectId, authenticationFacade.authenticatedUser.id, forceMode, writeStatus)
+      this.importService.import(projectId, authenticationFacade.authenticatedUser.id, branch, forceMode, writeStatus)
     }
   }
 
@@ -148,10 +151,11 @@ class V2ImportController(
   @AllowApiAccess
   fun getImportResult(
     @ParameterObject pageable: Pageable,
+    @RequestParam branch: String? = null,
   ): PagedModel<ImportLanguageModel> {
     val projectId = projectHolder.project.id
     val userId = authenticationFacade.authenticatedUser.id
-    val languages = importService.getResult(projectId, userId, pageable)
+    val languages = importService.getResult(projectId, userId, branch, pageable)
     return pagedLanguagesResourcesAssembler.toModel(languages, importLanguageModelAssembler)
   }
 
@@ -160,8 +164,10 @@ class V2ImportController(
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @OpenApiOrderExtension(3)
-  fun cancelImport() {
-    this.importService.deleteImport(projectHolder.project.id, authenticationFacade.authenticatedUser.id)
+  fun cancelImport(
+    @RequestParam branch: String? = null,
+  ) {
+    this.importService.deleteImport(projectHolder.project.id, authenticationFacade.authenticatedUser.id, branch)
   }
 
   @GetMapping("/all-namespaces")

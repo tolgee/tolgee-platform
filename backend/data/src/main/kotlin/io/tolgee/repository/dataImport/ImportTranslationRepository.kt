@@ -53,10 +53,13 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
         left join Namespace en on ik.file.namespace = en.name and en.project = ik.file.import.project 
         left join Key ek on it.key.name = ek.name and ek.project = it.key.file.import.project 
             and (ek.namespace = en or (ek.namespace is null and en is null))
+        left join ek.branch ekb
         left join ik.keyMeta ikm
         left join ek.keyMeta ekm
         left join ImportSettings is on is.project = ik.file.import.project 
+        left join ik.file.import.branch b
         where (itc.id is not null or :onlyConflicts = false)
+        and ((b is null and (ekb is null or ekb.isDefault)) or (b.id = ekb.id))
         and ((itc.id is not null and it.resolvedHash is null) or :onlyUnresolved = false)
         and it.language.id = :languageId
         and (ik.shouldBeImported)

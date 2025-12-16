@@ -17,19 +17,43 @@ import java.util.Optional
 @Lazy
 interface KeyRepository : JpaRepository<Key, Long> {
   @Query(
+    value = "select count(k.id) from key k where k.project_id = :projectId and k.branch_id = :branchId",
+    nativeQuery = true,
+  )
+  fun countByProjectAndBranch(
+    projectId: Long,
+    branchId: Long,
+  ): Long
+
+  @Query(
+    """
+    select k.id from Key k
+    where k.project.id = :projectId and k.branch.id = :branchId
+    """,
+  )
+  fun findIdsByProjectAndBranch(
+    projectId: Long,
+    branchId: Long,
+    pageable: Pageable,
+  ): Page<Long>
+
+  @Query(
     """
     from Key k
     left join k.namespace ns
+    left join k.branch br
     where 
       k.name = :name 
       and k.project.id = :projectId 
       and (ns.name = :namespace or (ns is null and :namespace is null))
+      and ((br.name = :branch and br.archivedAt is null) or (:branch is null and (br is null or br.isDefault)))
   """,
   )
   fun getByNameAndNamespace(
     projectId: Long,
     name: String,
     namespace: String?,
+    branch: String?,
   ): Optional<Key>
 
   @Query(
@@ -41,11 +65,28 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom)
+      from Key k 
+        left join k.branch b
+        left join fetch k.namespace 
+        left join fetch k.keyMeta 
+    where k.project.id = :projectId
+    and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault))) 
+    """,
+  )
+  fun getAllByProjectIdAndBranch(
+    projectId: Long,
+    branch: String?,
+  ): Set<Key>
+
+  @Query(
+    """
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom, k.branch.name)
      from Key k
      left join k.keyMeta km
      left join k.namespace ns
-     where k.project.id = :projectId order by k.id
+     left join k.branch br
+     where k.project.id = :projectId and (br is null or br.archivedAt is null) 
+     order by k.id
     """,
   )
   fun getAllByProjectIdSortedById(projectId: Long): List<KeyView>
@@ -82,6 +123,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
         k.name as name, bt.text as baseTranslation, t.text as translation 
         from key k
        join project p on p.id = k.project_id and p.id = :projectId
+       left join branch br on k.branch_id = br.id
        left join namespace ns on k.namespace_id = ns.id
        left join key_meta km on k.id = km.key_id
        left join language l on p.id = l.project_id and l.tag = :languageTag
@@ -93,7 +135,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
           or lower(f_unaccent(k.name)) %> searchUnaccent
           or lower(f_unaccent(t.text)) %> searchUnaccent
           or lower(f_unaccent(bt.text)) %> searchUnaccent
-          )
+          ) and (br.id is null or br.is_default)
        order by 
        (
        3 * (ns.name <-> searchUnaccent) + 
@@ -109,6 +151,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
       select count(k.id) 
       from key k
        join project p on p.id = k.project_id and p.id = :projectId
+       left join branch br on k.branch_id = br.id
        left join namespace ns on k.namespace_id = ns.id
        left join language l on p.id = l.project_id and l.tag = :languageTag
        left join translation bt on bt.key_id = k.id and (bt.language_id = p.base_language_id)
@@ -119,7 +162,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
           or lower(f_unaccent(k.name)) %> searchUnaccent
           or lower(f_unaccent(t.text)) %> searchUnaccent
           or lower(f_unaccent(bt.text)) %> searchUnaccent
-          )
+          ) and (br.id is null or br.is_default)
       """,
   )
   fun searchKeys(
@@ -131,28 +174,34 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom)
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom, b.name)
      from Key k
      left join k.keyMeta km
      left join k.namespace ns
+     left join k.branch b
      where k.project.id = :projectId
+        and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault)))
     """,
     countQuery = """
       select count(k) from Key k 
-      where k.project.id = :projectId
+      left join k.branch b
+      where k.project.id = :projectId 
+        and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault)))
     """,
   )
   fun getAllByProjectId(
     projectId: Long,
+    branch: String?,
     pageable: Pageable,
   ): Page<KeyView>
 
   @Query(
     """
-     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom)
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom, br.name)
      from Key k
      left join k.keyMeta km
      left join k.namespace ns
+     left join k.branch br
      where k.project.id = :projectId
      and k.id = :id
     """,
@@ -171,6 +220,16 @@ interface KeyRepository : JpaRepository<Key, Long> {
   """,
   )
   fun getWithTags(keys: Set<Key>): List<Key>
+
+  @Query(
+    """
+    select k from Key k
+    left join fetch k.keyMeta km
+    left join fetch km.tags
+    where k.id = :keyId
+  """,
+  )
+  fun findOneWithTags(keyId: Long): Key
 
   @Query(
     """
@@ -238,10 +297,11 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom)
+     select new io.tolgee.dtos.queryResults.KeyView(k.id, k.name, ns.name, km.description, km.custom, br.name)
      from Key k
      left join k.keyMeta km
      left join k.namespace ns
+     left join k.branch br
       where k.id in :ids
   """,
   )
@@ -255,4 +315,64 @@ interface KeyRepository : JpaRepository<Key, Long> {
   """,
   )
   fun countAllOnInstance(): Long
+
+  @Query(
+    """
+      from Key k
+      left join fetch k.translations t
+      left join fetch k.keyMeta km
+      left join fetch k.namespace ns
+      left join fetch k.branch b
+      left join fetch t.labels l
+      left join fetch km.tags tg
+      left join fetch t.comments c
+      left join fetch c.author ca
+      where k.project.id = :projectId 
+        and k.name = :keyName
+        and ((b.name = :branchName and b.archivedAt is null) or (:branchName is null and (b is null or b.isDefault)))
+    """,
+  )
+  fun findPrefetchedByNameAndBranch(
+    projectId: Long,
+    keyName: String,
+    branchName: String?,
+  ): Key?
+
+  @Query(
+    """
+      from Key k
+      left join fetch k.branch
+      where k.id = :keyId
+    """,
+  )
+  fun findByIdWithBranch(keyId: Long): Key?
+
+  @Query(
+    """
+      from Key k
+      join fetch k.branch b
+      where b.id = :branchId
+    """,
+  )
+  fun findAllByBranchId(branchId: Long): List<Key>
+
+  @Query(
+    """
+    select distinct k from Key k
+    left join fetch k.keyMeta km
+    left join fetch k.translations t
+    left join fetch t.language lang
+    left join fetch k.namespace ns
+    left join fetch k.branch b
+    where k.project.id = :projectId and (
+      (:includeOrphanDefault = true and (b.id = :branchId or b is null))
+      or (:includeOrphanDefault = false and b.id = :branchId)
+    )
+    """,
+  )
+  fun findAllDetailedByBranch(
+    projectId: Long,
+    branchId: Long,
+    includeOrphanDefault: Boolean,
+  ): List<Key>
 }

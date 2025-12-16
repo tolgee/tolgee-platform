@@ -69,12 +69,13 @@ class ExportController(
           translationService.getTranslations(
             allLanguages.map { it.tag }.toSet(),
             null,
-            projectHolder.project.id,
-            '.',
-          )
-        for ((key, value) in translations) {
-          zipOutputStream.putNextEntry(ZipEntry(String.format("%s.json", key)))
-          val data = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(value)
+            null,
+              projectHolder.project.id,
+              '.',
+            )
+          for ((key, value) in translations) {
+            zipOutputStream.putNextEntry(ZipEntry(String.format("%s.json", key)))
+            val data = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(value)
           val byteArrayInputStream = ByteArrayInputStream(data)
           IOUtils.copy(byteArrayInputStream, zipOutputStream)
           byteArrayInputStream.close()

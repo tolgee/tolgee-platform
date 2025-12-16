@@ -10,8 +10,13 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.snapshot.TranslationSnapshot
+import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.service.branching.chooseThreeWay
+import io.tolgee.service.branching.mergeSetsWithBase
 import io.tolgee.util.TranslationStatsUtil
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -53,7 +58,8 @@ class Translation(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var text: String? = null,
-) : StandardAuditModel() {
+) : StandardAuditModel(),
+  BranchVersionedEntity<Translation, TranslationSnapshot> {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @NotNull
   lateinit var key: Key
@@ -81,7 +87,7 @@ class Translation(
   var mtProvider: MtServiceType? = null
 
   @OneToMany(mappedBy = "translation", orphanRemoval = true)
-  var comments: MutableList<TranslationComment> = mutableListOf()
+  var comments: MutableSet<TranslationComment> = mutableSetOf()
 
   var wordCount: Int? = null
 
@@ -203,5 +209,54 @@ class Translation(
         }
       }
     }
+  }
+
+  override fun resolveKey(): Key? = key
+
+  override fun isModified(oldState: Map<String, Any>): Boolean {
+    return oldState["text"] != this.text || oldState["state"] != this.state || oldState["labels"] != this.labels
+  }
+
+  override fun hasChanged(snapshot: TranslationSnapshot): Boolean {
+    if (this.text != snapshot.value || this.state != snapshot.state) {
+      return true
+    }
+    val labelNames = this.labels.map { it.name }.toSet()
+    if (labelNames != snapshot.labels.toSet()) {
+      return true
+    }
+    return false
+  }
+
+  override fun isConflicting(
+    source: Translation,
+    snapshot: TranslationSnapshot,
+  ): Boolean {
+    if (source.text != this.text && source.text != snapshot.value) return true
+    if (source.state != this.state && source.state != snapshot.state) return true
+    return false
+  }
+
+  override fun merge(
+    source: Translation,
+    snapshot: TranslationSnapshot?,
+    resolution: BranchKeyMergeResolutionType,
+  ) {
+    this.text = chooseThreeWay(source.text, this.text, snapshot?.value, resolution)
+    this.state = chooseThreeWay(source.state, this.state, snapshot?.state, resolution) ?: this.state
+    this.outdated = chooseThreeWay(source.outdated, this.outdated, null, resolution) ?: false
+    this.auto = chooseThreeWay(source.auto, this.auto, null, resolution) ?: false
+    this.mtProvider = chooseThreeWay(source.mtProvider, this.mtProvider, null, resolution)
+
+    val snapshotLabels = snapshot?.labels?.toSet() ?: emptySet()
+    val sourceByName = source.labels.associateBy { it.name }
+    val targetByName = this.labels.associateBy { it.name }
+    val finalLabels =
+      mergeSetsWithBase(snapshotLabels, sourceByName.keys, targetByName.keys)
+        .mapNotNull { name -> sourceByName[name] ?: targetByName[name] }
+        .toMutableSet()
+
+    this.labels.clear()
+    this.labels.addAll(finalLabels)
   }
 }
