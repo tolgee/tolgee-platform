@@ -1,4 +1,4 @@
-# Component/Hook/... Library
+# Tolgee UI Library
 
 This project is a library of components/hooks/... which are reused across other
 Tolgee applications. This is not an application by itself, but there is a
