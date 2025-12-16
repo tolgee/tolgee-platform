@@ -42,7 +42,7 @@ export const PlanMigrationUpcomingItem = ({
 
   return (
     <StyledTableRow skipped={subscription.skipped}>
-      <TableCell>
+      <TableCell data-cy="plan-migration-upcoming-list-item">
         <Link
           component={RouterLink}
           to={LINKS.ORGANIZATION_PROFILE.build({
@@ -78,6 +78,7 @@ export const PlanMigrationUpcomingItem = ({
             onToggleSkip(subscription.subscriptionId, e.target.checked)
           }
           disabled={toggleLoading}
+          data-cy="plan-migration-subscription-skip"
         />
       </TableCell>
       <TableCell>
