@@ -72,7 +72,7 @@ export const MenuSwitcher = React.memo(function MenuSwitcher() {
   if (isLocked) {
     label = 'Story override';
   } else if (locales[language]) {
-    label = `${locales[language]?.name || language} ${locales[language].flag || ''}`;
+    label = `${locales[language].name || language} ${locales[language].flag || ''}`;
   }
 
   if (disable) {
@@ -110,7 +110,7 @@ export const MenuSwitcher = React.memo(function MenuSwitcher() {
             <TooltipLinkList
               links={Object.keys(locales).map((lang) => ({
                 id: lang,
-                title: locales[lang]?.name || lang,
+                title: locales[lang].name || lang,
                 right: locales[lang].flag,
                 active: languageFromGlobals === lang,
                 onClick: () => {

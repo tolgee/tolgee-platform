@@ -48,7 +48,7 @@ export const LanguageMenu: FunctionComponent<{ className?: string }> = () => {
           size="large"
         >
           <CircledLanguageIcon
-            flag={locales[language]?.flag}
+            flag={language ? locales[language].flag : undefined}
             size={24}
             draggable="false"
           />
