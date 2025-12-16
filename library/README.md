@@ -51,7 +51,7 @@ Storybook should open in your browser, otherwise open <http://localhost:6006/>.
 - Keep one component per file. Constants reused elsewhere can be placed under `constants.ts`. Helper functions under `utils.ts`.
 - Up until now, each component was a single file (e.g. `MfaBadge.tsx`), this is changing (not for hooks/...). Please create a directory named like the component (i.e. `MfaBadge`), move the component inside and name it `index.tsx`. This way the component can still be referenced the same path (omit `index.tsx` in the path).
 - Remove the original component/hook/...
-- Update dependencies. Within `webapp` use `@tginternal/library/` prefix (e.g. `@tginternal/library/hooks/useCurrentLanguage`). Within `library` use `lib.` prefix (e.g. `lib.hooks/useCurrentLanguage`). Referencing `webapp` from `library` might not be safe. At the moment, only a few prefixes are predefined in `library`'s [tsconfig.json](./tsconfig.json), [package.json](./package.json) and [vite.config.ts](./vite.config.ts), add more as you need them.
+- Update dependencies. Within `webapp` and `library` use `@tginternal/library/` prefix (e.g. `@tginternal/library/hooks/useCurrentLanguage`). Referencing `webapp` from `library` might not be safe. At the moment, only a few prefixes are predefined in `library`'s [tsconfig.json](./tsconfig.json), [package.json](./package.json) and [vite.config.ts](./vite.config.ts), add more as you need them.
 - Remember the boy scout rule.
 
 ## Component Documentation

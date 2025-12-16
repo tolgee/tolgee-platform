@@ -8,7 +8,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { UserName } from 'tg.component/common/UserName';
 
-import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { PrefilterContainer } from './ContainerPrefilter';
 
 const StyledDescription = styled('div')`

@@ -1,8 +1,8 @@
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { FC } from 'react';
-import { useCurrentLanguage } from 'lib.hooks/useCurrentLanguage';
-import { locales } from 'lib.constants/locales';
+import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
+import { locales } from '@tginternal/library/constants/locales';
 
 export const MuiLocalizationProvider: FC = (props) => {
   const language =

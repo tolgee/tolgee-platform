@@ -1,4 +1,4 @@
-import { useCurrentLanguage } from './useCurrentLanguage';
+import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 
 export const useMoneyFormatter = () => {
   const language = useCurrentLanguage();

@@ -1,5 +1,5 @@
 import { useTolgee } from '@tolgee/react';
-import type { locales } from 'lib.constants/locales';
+import type { locales } from '@tginternal/library/constants/locales';
 
 export const useCurrentLanguage = () => {
   const tolgee = useTolgee(['language']);

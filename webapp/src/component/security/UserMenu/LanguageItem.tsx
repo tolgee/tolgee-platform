@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { useTolgee, useTranslate } from '@tolgee/react';
 import { locales } from '@tginternal/library/constants/locales';
-import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 
 const StyledSelect = styled(Select)`

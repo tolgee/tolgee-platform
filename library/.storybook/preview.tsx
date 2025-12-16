@@ -3,8 +3,8 @@ import type { Preview } from '@storybook/react-vite';
 import { withThemeFromJSXProvider } from '@storybook/addon-themes';
 import { configure } from 'storybook/test';
 import { withTolgeeProvider } from '@tolgee/storybook-addon';
-import { MuiLocalizationProvider } from 'lib.components/MuiLocalizationProvider';
-import { locales } from 'lib.constants/locales';
+import { MuiLocalizationProvider } from '@tginternal/library/components/MuiLocalizationProvider';
+import { locales } from '@tginternal/library/constants/locales';
 
 import { getTheme } from '../../webapp/src/ThemeProvider'; // TODO migrate https://github.com/tolgee/tolgee-platform/issues/3326
 import { branchName } from '../../webapp/src/branch.json';

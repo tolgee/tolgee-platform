@@ -6,9 +6,7 @@
   "compilerOptions": {
     "paths": {
       // redeclare without paths to ../webapp
-      "lib.components/*": ["./src/components/*"],
-      "lib.constants/*": ["./src/constants/*"],
-      "lib.hooks/*": ["./src/hooks/*"]
+      "@tginternal/library/*": ["./src/*"]
     }
   },
   "include": ["src/**/*", "custom.d.ts"] // redeclare without paths to ../webapp
