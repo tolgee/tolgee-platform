@@ -148,7 +148,7 @@ export const actionsConfiguration: Partial<
     label(params) {
       return <T keyName="activity_edit_project" params={params} />;
     },
-    entities: { Project: ['name'] },
+    entities: { Project: ['name', 'description'] },
   },
   NAMESPACE_EDIT: {
     label(params) {
