@@ -21,7 +21,7 @@
     "@mui/material": "^5.5.3",
     "@mui/x-date-pickers": "^7.9.0",
     "@openreplay/tracker": "^3.5.4",
-    "@sentry/react": "^10.29.0",
+    "@sentry/react": "^10.31.0",
     "@sentry/vite-plugin": "^4.6.1",
     "@stomp/stompjs": "^6.1.2",
     "@tginternal/editor": "1.15.2",
@@ -106,7 +106,7 @@
     ]
   },
   "devDependencies": {
-    "@sentry/types": "^10.11.0",
+    "@sentry/types": "^10.31.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.0.0",
     "@testing-library/user-event": "^13.2.1",
