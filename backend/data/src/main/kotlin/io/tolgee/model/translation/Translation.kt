@@ -222,10 +222,7 @@ class Translation(
       return true
     }
     val labelNames = this.labels.map { it.name }.toSet()
-    if (labelNames != snapshot.labels.toSet()) {
-      return true
-    }
-    return false
+    return labelNames != snapshot.labels
   }
 
   override fun isConflicting(
