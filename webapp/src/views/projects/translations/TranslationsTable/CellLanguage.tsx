@@ -3,7 +3,7 @@ import { Box, styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CellStateBar } from '../cell/CellStateBar';
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 export type CellLanguageModel = Pick<

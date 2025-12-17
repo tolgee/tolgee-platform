@@ -8,7 +8,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { confirmation } from 'tg.hooks/confirmation';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { UserName } from 'tg.component/common/UserName';
-import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { SmallActionButton } from '../../common/SmallActionButton';
 
 type TranslationCommentModel = components['schemas']['TranslationCommentModel'];

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { useQuickStartGuideService } from './useQuickStartGuideService';
 import { useWidthObserver } from 'tg.hooks/useWidthObserver';
 
-export const TOP_BAR_HEIGHT = 52;
+export const TOP_BAR_HEIGHT = 52; // the same value as theme.mixins.toolbar.minHeight
 
 type Props = {
   quickStart: ReturnType<typeof useQuickStartGuideService>;

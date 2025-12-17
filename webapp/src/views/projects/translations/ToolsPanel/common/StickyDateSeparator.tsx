@@ -1,6 +1,6 @@
 import { styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 
 const StyledStickyContainer = styled('div')`
   display: flex;

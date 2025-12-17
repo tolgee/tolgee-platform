@@ -1,0 +1,13 @@
+// Up until ../webapp use is removed from ../library, this config is used by linters
+// https://github.com/tolgee/tolgee-platform/issues/3326
+
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      // redeclare without paths to ../webapp
+      "@tginternal/library/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*", "custom.d.ts"] // redeclare without paths to ../webapp
+}

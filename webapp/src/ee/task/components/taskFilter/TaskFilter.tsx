@@ -8,7 +8,7 @@ import { TaskFilterPopover, TaskFilterType } from './TaskFilterPopover';
 import { components } from 'tg.service/apiSchema.generated';
 import { useTranslate } from '@tolgee/react';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { TaskTypeChip } from 'tg.component/task/TaskTypeChip';
 import { filterEmpty } from './taskFilterUtils';
 import { stopBubble } from 'tg.fixtures/eventHandler';

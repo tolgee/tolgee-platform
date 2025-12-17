@@ -3,8 +3,8 @@ import { Box, IconButton, styled } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { CircledLanguageIcon } from '../../languages/CircledLanguageIcon';
-import { locales } from '../../../locales';
-import { useCurrentLanguage } from 'tg.hooks/useCurrentLanguage';
+import { locales } from '@tginternal/library/constants/locales';
+import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
 import { useTolgee } from '@tolgee/react';
 
 const StyledMenu = styled(Menu)`
@@ -48,7 +48,7 @@ export const LanguageMenu: FunctionComponent<{ className?: string }> = () => {
           size="large"
         >
           <CircledLanguageIcon
-            flag={locales[language]?.flag}
+            flag={language ? locales[language].flag : undefined}
             size={24}
             draggable="false"
           />

@@ -24,7 +24,7 @@ import ErrorBoundary from './component/ErrorBoundary';
 import { FullPageLoading } from './component/common/FullPageLoading';
 import { ThemeProvider } from './ThemeProvider';
 
-import { MuiLocalizationProvider } from 'tg.component/MuiLocalizationProvider';
+import { MuiLocalizationProvider } from '@tginternal/library/components/MuiLocalizationProvider';
 import { languageStorage, queryClient } from './initialSetup';
 import { GlobalStyles } from './GlobalStyles';
 import { branchName } from './branch.json';

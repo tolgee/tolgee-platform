@@ -1,5 +1,6 @@
 import { ComponentProps } from 'react';
 import { DatePicker } from '@mui/x-date-pickers';
+import type {} from '@mui/x-date-pickers/AdapterDateFns';
 
 import { TextField as NonFormTextField } from 'tg.component/common/TextField';
 import { Calendar } from '@untitled-ui/icons-react';

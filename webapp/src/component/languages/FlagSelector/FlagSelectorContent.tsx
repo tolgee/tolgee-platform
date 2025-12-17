@@ -1,7 +1,10 @@
 import { Button, Tooltip, styled } from '@mui/material';
 import { FlagSearchField } from './FlagSearchField';
 import { useMemo, useState } from 'react';
-import { FlagImage, FlagInfo } from '../FlagImage';
+import {
+  FlagImage,
+  FlagInfo,
+} from '@tginternal/library/components/languages/FlagImage';
 
 const StyledSelector = styled('div')`
   width: 300px;
