@@ -7,6 +7,7 @@ import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.request.AutomationBjRequest
 import io.tolgee.batch.request.DeleteKeysRequest
+import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.batch.request.PreTranslationByTmRequest
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.component.CurrentDateProvider
@@ -43,6 +44,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
 import java.time.Duration
 import java.util.Date
+import kotlin.apply
 import kotlin.coroutines.CoroutineContext
 
 class BatchJobTestUtil(
@@ -444,6 +446,49 @@ class BatchJobTestUtil(
         type = BatchJobType.PRE_TRANSLATE_BT_TM,
         isHidden = false,
       )
+    }
+  }
+
+  fun runMtJob(
+    keyCount: Int,
+    author: UserAccount = testData.user,
+  ): BatchJob {
+    return executeInNewTransaction(transactionManager) {
+      batchJobService.startJob(
+        request =
+          MachineTranslationRequest().apply {
+            keyIds = (1L..keyCount).map { it }
+            targetLanguageIds =
+              listOf(
+                testData.projectBuilder
+                  .getLanguageByTag("cs")!!
+                  .self.id,
+              )
+          },
+        project = testData.projectBuilder.self,
+        author = author,
+        type = BatchJobType.MACHINE_TRANSLATE,
+        isHidden = false,
+      )
+    }
+  }
+
+  fun assertAllowedMaxPerJobConcurrency(
+    job: BatchJob,
+    maxConcurrency: Int,
+  ) {
+    batchJobService
+      .getJobDto(job.id)
+      .maxPerJobConcurrency.assert
+      .isEqualTo(maxConcurrency)
+  }
+
+  fun assertMaxPerJobConcurrencyIsLessThanOrEqualTo(maxConcurrency: Int) {
+    waitFor(pollTime = 100) {
+      batchJobConcurrentLauncher.runningJobs.assert
+        .size()
+        .isLessThanOrEqualTo(maxConcurrency)
+      batchJobChunkExecutionQueue.size == 0
     }
   }
 
