@@ -75,11 +75,18 @@ export const BranchSelect = ({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    if (derivedSelected && derivedSelected.id !== selected?.id) {
+    if (!derivedSelected) {
+      return;
+    }
+
+    if (derivedSelected.id !== selected?.id) {
       setSelected(derivedSelected);
+    }
+
+    if (!branch) {
       onDefaultValue?.(derivedSelected);
     }
-  }, [derivedSelected, selected?.id, onDefaultValue]);
+  }, [branch, derivedSelected, onDefaultValue, selected?.id]);
 
   function renderItem(props: any, item: BranchModel) {
     return (

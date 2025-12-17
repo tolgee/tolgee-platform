@@ -1,5 +1,5 @@
-import { Tabs, Tab, Badge, styled, BadgeProps } from '@mui/material';
-import { BranchMergeChangeType } from '../types';
+import { Box, Chip, styled, Tab, Tabs, Typography } from '@mui/material';
+import { BranchMergeChangeType } from '../../types';
 
 type TabConfig = {
   key: BranchMergeChangeType;
@@ -13,11 +13,7 @@ type Props = {
   onSelect: (tab: BranchMergeChangeType) => void;
 };
 
-const StyledBadge = styled(Badge)<BadgeProps>(() => ({
-  '& .MuiBadge-badge': {
-    right: -6,
-  },
-}));
+const StyledBadge = styled(Chip)(() => ({}));
 
 export const ChangesTabs = ({ tabs, selectedTab, onSelect }: Props) => (
   <Tabs
@@ -25,6 +21,7 @@ export const ChangesTabs = ({ tabs, selectedTab, onSelect }: Props) => (
     onChange={(_, value) => onSelect(value as BranchMergeChangeType)}
     variant="scrollable"
     scrollButtons="auto"
+    sx={{ borderBottom: 1, borderColor: 'divider' }}
   >
     {tabs.map((tab) => (
       <Tab
@@ -32,14 +29,13 @@ export const ChangesTabs = ({ tabs, selectedTab, onSelect }: Props) => (
         value={tab.key}
         disabled={tab.count === 0}
         label={
-          <StyledBadge
-            color="primary"
-            badgeContent={tab.count}
-            max={999}
-            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          >
-            {tab.label}
-          </StyledBadge>
+          <Box display="flex" gap={1} alignItems="center">
+            <Typography variant="button">{tab.label}</Typography>
+            <StyledBadge
+              size="small"
+              label={<Typography variant="body2">{tab.count}</Typography>}
+            ></StyledBadge>
+          </Box>
         }
       />
     ))}
