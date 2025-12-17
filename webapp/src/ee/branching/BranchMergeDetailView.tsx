@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { Box, Button, CircularProgress, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -8,8 +8,8 @@ import { useProject } from 'tg.hooks/useProject';
 import { useMergeTabs } from './merge/hooks/useMergeTabs';
 import { useMergeData } from './merge/hooks/useMergeData';
 import { MergeHeader } from './merge/components/MergeHeader';
-import { ChangesTabs } from './merge/components/ChangesTabs';
-import { ChangeList } from './merge/components/ChangeList';
+import { ChangesTabs } from './merge/components/changes/ChangesTabs';
+import { ChangeList } from './merge/components/changes/ChangeList';
 import { BranchMergeChangeType, BranchMergeConflictModel } from './merge/types';
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
@@ -31,6 +31,7 @@ export const BranchMergeDetailView: FC = () => {
   const history = useHistory();
   const { mergeId } = useParams<RouteParams>();
   const numericMergeId = Number(mergeId);
+  const userSelectedTab = useRef(false);
 
   const [selectedTab, setSelectedTab] =
     useState<BranchMergeChangeType>('CONFLICT');
@@ -55,6 +56,31 @@ export const BranchMergeDetailView: FC = () => {
   } = useMergeData(project.id, numericMergeId, selectedTab);
 
   const { tabs } = useMergeTabs(merge, labels, selectedTab, setSelectedTab);
+
+  useEffect(() => {
+    userSelectedTab.current = false;
+    setSelectedTab('CONFLICT');
+  }, [numericMergeId]);
+
+  useEffect(() => {
+    if (!merge || userSelectedTab.current) {
+      return;
+    }
+
+    const totalConflicts =
+      merge.keyResolvedConflictsCount + merge.keyUnresolvedConflictsCount;
+
+    const firstTabWithData: BranchMergeChangeType | undefined = [
+      ['CONFLICT', totalConflicts],
+      ['ADD', merge.keyAdditionsCount],
+      ['UPDATE', merge.keyModificationsCount],
+      ['DELETE', merge.keyDeletionsCount],
+    ].find(([, count]) => (count as number) > 0)?.[0] as BranchMergeChangeType;
+
+    if (firstTabWithData && firstTabWithData !== selectedTab) {
+      setSelectedTab(firstTabWithData);
+    }
+  }, [merge, selectedTab]);
 
   useEffect(() => {
     if (!merge) return;
@@ -123,8 +149,23 @@ export const BranchMergeDetailView: FC = () => {
     );
   };
 
+  const handleTabSelect = (tab: BranchMergeChangeType) => {
+    userSelectedTab.current = true;
+    setSelectedTab(tab);
+  };
+
+  const totalChanges = merge
+    ? merge.keyAdditionsCount +
+      merge.keyModificationsCount +
+      merge.keyDeletionsCount +
+      merge.keyUnresolvedConflictsCount +
+      merge.keyResolvedConflictsCount
+    : 0;
+
   const readyToMerge =
-    merge?.keyUnresolvedConflictsCount === 0 && merge?.outdated === false;
+    totalChanges > 0 &&
+    merge?.keyUnresolvedConflictsCount === 0 &&
+    merge?.outdated === false;
 
   return (
     <BaseProjectView
@@ -144,11 +185,13 @@ export const BranchMergeDetailView: FC = () => {
           <StyledDetail>
             <MergeHeader merge={merge} onDelete={handleCancel} />
 
-            <ChangesTabs
-              tabs={tabs}
-              selectedTab={selectedTab ?? 'CONFLICT'}
-              onSelect={setSelectedTab}
-            />
+            {totalChanges > 0 && (
+              <ChangesTabs
+                tabs={tabs}
+                selectedTab={selectedTab ?? 'CONFLICT'}
+                onSelect={handleTabSelect}
+              />
+            )}
 
             <Box display="grid" rowGap={2}>
               <ChangeList

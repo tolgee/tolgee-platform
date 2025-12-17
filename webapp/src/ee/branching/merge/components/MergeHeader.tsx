@@ -3,7 +3,7 @@ import { Alert, Box, MenuItem, styled, Typography } from '@mui/material';
 import { DotsVertical } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { BranchMergeModel } from '../types';
-import { StatsBlock } from './StatsBlock';
+import { StatsBlock } from './header/StatsBlock';
 import { MergeTitle } from 'tg.ee.module/branching/merge/components/header/MergeTitle';
 import { IconMenu } from 'tg.component/common/menu/IconMenu';
 
