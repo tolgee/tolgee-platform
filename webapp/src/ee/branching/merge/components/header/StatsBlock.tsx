@@ -8,7 +8,7 @@ import {
 } from '@untitled-ui/icons-react';
 import { ElementType, FC, useMemo } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { BranchMergeModel } from '../types';
+import { BranchMergeModel } from '../../types';
 
 const StatsRow = styled(Box)`
   display: flex;
