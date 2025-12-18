@@ -18,11 +18,11 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
+import io.tolgee.repository.KeyRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchCopyService
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.language.LanguageService
-import io.tolgee.repository.KeyRepository
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Primary
@@ -320,5 +320,4 @@ class BranchServiceImpl(
   ) {
     branchMergeService.deleteMerge(projectId, mergeId)
   }
-
 }
