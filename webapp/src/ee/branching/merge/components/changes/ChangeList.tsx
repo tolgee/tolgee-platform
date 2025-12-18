@@ -233,6 +233,7 @@ export const ChangeList = ({
                     onToggleShowAll={() => toggleShowAll(`${change.id}-source`)}
                     hideAllWhenFalse
                     toggleLabels={toggleLabels}
+                    variant="added"
                   />
                 ) : (
                   additionPlaceholder
@@ -247,6 +248,7 @@ export const ChangeList = ({
                     onToggleShowAll={() => toggleShowAll(`${change.id}-target`)}
                     hideAllWhenFalse
                     toggleLabels={toggleLabels}
+                    variant="deleted"
                   />
                 ) : (
                   deletionPlaceholder

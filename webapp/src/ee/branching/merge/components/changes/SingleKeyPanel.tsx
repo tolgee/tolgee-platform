@@ -1,6 +1,7 @@
 import { Button } from '@mui/material';
 import { FC } from 'react';
 import { T } from '@tolgee/react';
+import clsx from 'clsx';
 import { KeyFooter, KeyHeader, KeyPanel } from './KeyPanelBase';
 import { KeyTranslations } from './KeyTranslations';
 import { MergeKeyHeader } from './MergeKeyHeader';
@@ -12,6 +13,7 @@ type Props = {
   showAll?: boolean;
   onToggleShowAll?: () => void;
   hideAllWhenFalse?: boolean;
+  variant?: 'added' | 'deleted';
   toggleLabels?: {
     showAll: string;
     showLess: string;
@@ -24,11 +26,12 @@ export const SingleKeyPanel: FC<Props> = ({
   showAll,
   onToggleShowAll,
   hideAllWhenFalse,
+  variant,
   toggleLabels,
 }) => (
-  <KeyPanel>
+  <KeyPanel className={clsx(variant)}>
     <KeyHeader>
-      <MergeKeyHeader data={keyData} />
+      <MergeKeyHeader data={keyData} variant={variant} />
     </KeyHeader>
     <KeyTranslations
       keyData={keyData}
