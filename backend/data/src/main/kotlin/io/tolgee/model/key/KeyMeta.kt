@@ -12,6 +12,7 @@ import io.tolgee.model.branching.snapshot.KeyMetaSnapshot
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.service.branching.chooseThreeWay
+import io.tolgee.service.branching.isConflictingThreeWay
 import io.tolgee.service.branching.mergeSetsWithBase
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -119,8 +120,12 @@ class KeyMeta(
     source: KeyMeta,
     snapshot: KeyMetaSnapshot,
   ): Boolean {
-    if (source.description != this.description && source.description != snapshot.description) return true
-    if (source.custom != this.custom && source.custom != snapshot.custom) return true
+    if (isConflictingThreeWay(source.description, this.description, snapshot.description)) {
+      return true
+    }
+    if (isConflictingThreeWay(source.custom, this.custom, snapshot.custom)) {
+      return true
+    }
     return false
   }
 
