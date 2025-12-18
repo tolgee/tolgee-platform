@@ -495,8 +495,49 @@ export interface paths {
     get: operations["currentJobs"];
   };
   "/v2/projects/{projectId}/export": {
+    /**
+     * Exports project data in various formats (JSON, properties, YAML, etc.).
+     *
+     *       ## HTTP Conditional Requests Support
+     *
+     *       This endpoint supports HTTP conditional requests using both If-Modified-Since and If-None-Match headers:
+     *
+     *       - **If-Modified-Since header provided**: The server checks if the project data has been modified since the specified date
+     *       - **If-None-Match header provided**: The server checks if the project data has changed by comparing the eTag value
+     *       - **Data not modified**: Returns HTTP 304 Not Modified with empty body
+     *       - **Data modified or no header**: Returns HTTP 200 OK with the exported data, Last-Modified header, and ETag header
+     *
+     *       The Last-Modified header in the response contains the timestamp of the last project modification,
+     *       and the ETag header contains a unique identifier for the current project state. Both can be used
+     *       for subsequent conditional requests to avoid unnecessary data transfer when the project hasn't changed.
+     *
+     *       Cache-Control header is set to max-age=0 to ensure validation on each request.
+     */
     get: operations["exportData"];
-    /** Exports data (post). Useful when exceeding allowed URL size. */
+    /**
+     * Exports project data in various formats (JSON, properties, YAML, etc.).
+     *       Useful when exceeding allowed URL size with GET requests.
+     *
+     *       ## HTTP Conditional Requests Support
+     *
+     *       This endpoint supports HTTP conditional requests using both If-Modified-Since and If-None-Match headers:
+     *
+     *       - **If-Modified-Since header provided**: The server checks if the project data has been modified since the specified date
+     *       - **If-None-Match header provided**: The server checks if the project data has changed by comparing the eTag value
+     *       - **Data not modified**: Returns HTTP 304 Not Modified with empty body
+     *       - **Data modified or no header**: Returns HTTP 200 OK with the exported data, Last-Modified header, and ETag header
+     *
+     *       Note: This endpoint uses a custom implementation that returns 304 Not Modified for all HTTP methods
+     *       (including POST) when conditional headers indicate the data hasn't changed. This differs from Spring's
+     *       default behavior which returns 412 for POST requests, but is appropriate here since POST is used only
+     *       to accommodate large request parameters, not to modify data.
+     *
+     *       The Last-Modified header in the response contains the timestamp of the last project modification,
+     *       and the ETag header contains a unique identifier for the current project state. Both can be used
+     *       for subsequent conditional requests to avoid unnecessary data transfer when the project hasn't changed.
+     *
+     *       Cache-Control header is set to max-age=0 to ensure validation on each request.
+     */
     post: operations["exportPost"];
   };
   "/v2/projects/{projectId}/glossary-highlights": {
@@ -1427,20 +1468,29 @@ export interface components {
       relatedKeysInOrder?: components["schemas"]["RelatedKeyDto"][];
     };
     BranchMergeChangeModel: {
+      /** @description Languages changed by the merge */
+      changedTranslations?: string[];
+      /**
+       * @description Effective resolution used to compute the merged key
+       * @enum {string}
+       */
+      effectiveResolution?: "SOURCE" | "TARGET";
       /**
        * Format: int64
        * @description Branch merge change id
        */
       id: number;
+      /** @description Merged branch key (post-merge result) */
+      mergedKey?: components["schemas"]["BranchMergeKeyModel"];
       /**
        * @description Type of key conflict resolution
        * @enum {string}
        */
       resolution?: "SOURCE" | "TARGET";
       /** @description Source branch key */
-      sourceKey?: components["schemas"]["KeyWithTranslationsModel"];
+      sourceKey?: components["schemas"]["BranchMergeKeyModel"];
       /** @description Target branch key */
-      targetKey?: components["schemas"]["KeyWithTranslationsModel"];
+      targetKey?: components["schemas"]["BranchMergeKeyModel"];
       /**
        * @description Change type
        * @enum {string}
@@ -1448,20 +1498,46 @@ export interface components {
       type: "ADD" | "UPDATE" | "DELETE" | "CONFLICT";
     };
     BranchMergeConflictModel: {
+      /** @description Languages changed by the merge */
+      changedTranslations?: string[];
+      /**
+       * @description Effective resolution used to compute the merged key
+       * @enum {string}
+       */
+      effectiveResolution?: "SOURCE" | "TARGET";
       /**
        * Format: int64
        * @description Branch merge session id
        */
       id: number;
+      /** @description Merged branch key (post-merge result) */
+      mergedKey?: components["schemas"]["BranchMergeKeyModel"];
       /**
        * @description Type of key conflict resolution
        * @enum {string}
        */
       resolution?: "SOURCE" | "TARGET";
       /** @description Source branch key */
-      sourceKey: components["schemas"]["KeyWithTranslationsModel"];
+      sourceKey: components["schemas"]["BranchMergeKeyModel"];
       /** @description Target branch key */
-      targetKey: components["schemas"]["KeyWithTranslationsModel"];
+      targetKey: components["schemas"]["BranchMergeKeyModel"];
+    };
+    BranchMergeKeyModel: {
+      /** @description Key description */
+      keyDescription?: string;
+      /**
+       * Format: int64
+       * @description Key id
+       */
+      keyId: number;
+      /** @description Whether key uses plural forms */
+      keyIsPlural: boolean;
+      /** @description Key name */
+      keyName: string;
+      /** @description Translations indexed by language tag */
+      translations: {
+        [key: string]: components["schemas"]["BranchMergeTranslationModel"];
+      };
     };
     BranchMergeModel: {
       /**
@@ -1529,6 +1605,24 @@ export interface components {
       mergedAt?: number;
       /** @description Target branch name */
       targetBranchName: string;
+    };
+    BranchMergeTranslationModel: {
+      /**
+       * Format: int64
+       * @description Translation id
+       */
+      id?: number;
+      /** @description Language tag */
+      language: string;
+      /** @description Whether translation is outdated */
+      outdated: boolean;
+      /**
+       * @description Translation state
+       * @enum {string}
+       */
+      state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "DISABLED";
+      /** @description Translation text */
+      text?: string;
     };
     BranchModel: {
       /** @description Indicates whether this branch is currently active (visible and usable for editing translations and keys). Inactive branches are hidden but still stored in the project. */
@@ -4777,7 +4871,10 @@ export interface components {
         | "ACCEPT_SUGGESTION"
         | "REVERSE_SUGGESTION"
         | "DELETE_SUGGESTION"
-        | "SUGGESTION_SET_ACTIVE";
+        | "SUGGESTION_SET_ACTIVE"
+        | "AI_PROMPT_CREATE"
+        | "AI_PROMPT_UPDATE"
+        | "AI_PROMPT_DELETE";
     };
     ProjectAiPromptCustomizationModel: {
       /**
@@ -4979,15 +5076,15 @@ export interface components {
       providerName: string;
       template?: string;
     };
-    PromptResponseDto: {
+    PromptResponseModel: {
       parsedJson?: components["schemas"]["JsonNode"];
       /** Format: int32 */
       price?: number;
       prompt: string;
       result: string;
-      usage?: components["schemas"]["PromptResponseUsageDto"];
+      usage?: components["schemas"]["PromptResponseUsageModel"];
     };
-    PromptResponseUsageDto: {
+    PromptResponseUsageModel: {
       /** Format: int64 */
       cachedTokens?: number;
       /** Format: int64 */
@@ -13437,6 +13534,24 @@ export interface operations {
       };
     };
   };
+  /**
+   * Exports project data in various formats (JSON, properties, YAML, etc.).
+   *
+   *       ## HTTP Conditional Requests Support
+   *
+   *       This endpoint supports HTTP conditional requests using both If-Modified-Since and If-None-Match headers:
+   *
+   *       - **If-Modified-Since header provided**: The server checks if the project data has been modified since the specified date
+   *       - **If-None-Match header provided**: The server checks if the project data has changed by comparing the eTag value
+   *       - **Data not modified**: Returns HTTP 304 Not Modified with empty body
+   *       - **Data modified or no header**: Returns HTTP 200 OK with the exported data, Last-Modified header, and ETag header
+   *
+   *       The Last-Modified header in the response contains the timestamp of the last project modification,
+   *       and the ETag header contains a unique identifier for the current project state. Both can be used
+   *       for subsequent conditional requests to avoid unnecessary data transfer when the project hasn't changed.
+   *
+   *       Cache-Control header is set to max-age=0 to ensure validation on each request.
+   */
   exportData: {
     parameters: {
       query: {
@@ -13598,7 +13713,30 @@ export interface operations {
       };
     };
   };
-  /** Exports data (post). Useful when exceeding allowed URL size. */
+  /**
+   * Exports project data in various formats (JSON, properties, YAML, etc.).
+   *       Useful when exceeding allowed URL size with GET requests.
+   *
+   *       ## HTTP Conditional Requests Support
+   *
+   *       This endpoint supports HTTP conditional requests using both If-Modified-Since and If-None-Match headers:
+   *
+   *       - **If-Modified-Since header provided**: The server checks if the project data has been modified since the specified date
+   *       - **If-None-Match header provided**: The server checks if the project data has changed by comparing the eTag value
+   *       - **Data not modified**: Returns HTTP 304 Not Modified with empty body
+   *       - **Data modified or no header**: Returns HTTP 200 OK with the exported data, Last-Modified header, and ETag header
+   *
+   *       Note: This endpoint uses a custom implementation that returns 304 Not Modified for all HTTP methods
+   *       (including POST) when conditional headers indicate the data hasn't changed. This differs from Spring's
+   *       default behavior which returns 412 for POST requests, but is appropriate here since POST is used only
+   *       to accommodate large request parameters, not to modify data.
+   *
+   *       The Last-Modified header in the response contains the timestamp of the last project modification,
+   *       and the ETag header contains a unique identifier for the current project state. Both can be used
+   *       for subsequent conditional requests to avoid unnecessary data transfer when the project hasn't changed.
+   *
+   *       Cache-Control header is set to max-age=0 to ensure validation on each request.
+   */
   exportPost: {
     parameters: {
       path: {
@@ -17079,7 +17217,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PromptResponseDto"];
+          "application/json": components["schemas"]["PromptResponseModel"];
         };
       };
       /** Bad Request */
