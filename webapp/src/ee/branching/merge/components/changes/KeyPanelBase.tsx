@@ -10,6 +10,16 @@ export const KeyPanel = styled(Box)`
   &.accepted {
     border-color: ${({ theme }) => theme.palette.tokens.success.main};
   }
+
+  &.added {
+    border-width: 2px;
+    border-color: ${({ theme }) => theme.palette.tokens.success.main};
+  }
+
+  &.deleted {
+    border-width: 2px;
+    border-color: ${({ theme }) => theme.palette.tokens.error.main};
+  }
 `;
 
 export const KeyHeader = styled(Box)`
