@@ -14,8 +14,11 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
+import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
+import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
 import io.tolgee.util.Logging
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -27,6 +30,8 @@ class BranchMergeService(
   private val branchMergeChangeRepository: BranchMergeChangeRepository,
   private val branchMergeAnalyzer: BranchMergeAnalyzer,
   private val branchMergeExecutor: BranchMergeExecutor,
+  private val branchSnapshotService: BranchSnapshotService,
+  private val branchMergeKeyCloneFactory: BranchMergeKeyCloneFactory,
 ) : Logging {
   fun dryRun(branchMerge: BranchMerge) {
     val changes = branchMergeAnalyzer.compute(branchMerge)
@@ -149,5 +154,83 @@ class BranchMergeService(
       branchMergeRepository.findMerge(projectId, mergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     branchMergeRepository.delete(merge)
+  }
+
+  fun enrichConflicts(
+    conflicts: Page<BranchMergeConflictView>,
+    merge: BranchMerge,
+    allowedLanguageTags: Set<String>,
+  ) {
+    val snapshotByTargetKeyId =
+      branchSnapshotService
+        .getSnapshotKeys(merge.sourceBranch.id)
+        .associateBy { it.originalKeyId }
+    conflicts.forEach { conflict ->
+      conflict.effectiveResolutionType = conflict.resolutionType
+      conflict.changedTranslations =
+        computeChangedTranslations(conflict.sourceBranchKey, conflict.targetBranchKey, allowedLanguageTags)
+      val resolution = conflict.resolutionType ?: return@forEach
+      val snapshot = snapshotByTargetKeyId[conflict.targetBranchKeyId]
+      conflict.mergedBranchKey =
+        mergeKeyView(conflict.sourceBranchKey, conflict.targetBranchKey, snapshot, resolution)
+    }
+  }
+
+  fun enrichChanges(
+    changes: Page<BranchMergeChangeView>,
+    merge: BranchMerge,
+    allowedLanguageTags: Set<String>,
+  ) {
+    val snapshotByTargetKeyId =
+      branchSnapshotService
+        .getSnapshotKeys(merge.sourceBranch.id)
+        .associateBy { it.originalKeyId }
+    changes.forEach { change ->
+      change.effectiveResolutionType = change.resolutionType
+      if (change.changeType == BranchKeyMergeChangeType.UPDATE ||
+        change.changeType == BranchKeyMergeChangeType.CONFLICT
+      ) {
+        val sourceKey = change.sourceBranchKey
+        val targetKey = change.targetBranchKey
+        change.changedTranslations = computeChangedTranslations(sourceKey, targetKey, allowedLanguageTags)
+        val resolution =
+          when (change.changeType) {
+            BranchKeyMergeChangeType.CONFLICT -> change.resolutionType
+            else -> change.resolutionType ?: BranchKeyMergeResolutionType.SOURCE
+          }
+        if (sourceKey != null && targetKey != null && resolution != null) {
+          val snapshot = change.targetBranchKeyId?.let { snapshotByTargetKeyId[it] }
+          change.mergedBranchKey = mergeKeyView(sourceKey, targetKey, snapshot, resolution)
+        }
+      }
+    }
+  }
+
+  private fun mergeKeyView(
+    source: Key,
+    target: Key,
+    snapshot: KeySnapshot?,
+    resolution: BranchKeyMergeResolutionType,
+  ): Key {
+    val merged = branchMergeKeyCloneFactory.cloneForMerge(target)
+    merged.merge(source, snapshot, resolution)
+    return merged
+  }
+
+  private fun computeChangedTranslations(
+    source: Key?,
+    target: Key?,
+    allowedLanguageTags: Set<String>,
+  ): List<String>? {
+    if (source == null || target == null) {
+      return null
+    }
+    val sourceByLang = source.translations.associateBy { it.language.tag }
+    val targetByLang = target.translations.associateBy { it.language.tag }
+    val languages = (sourceByLang.keys + targetByLang.keys).filter { it in allowedLanguageTags }
+    return languages
+      .filter { language ->
+        Translation.differ(sourceByLang[language], targetByLang[language])
+      }.sorted()
   }
 }

@@ -1,7 +1,7 @@
 package io.tolgee.dtos.queryResults.branching
 
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
-import io.tolgee.model.views.KeyWithTranslationsView
+import io.tolgee.model.key.Key
 
 data class BranchMergeConflictView(
   val id: Long,
@@ -9,6 +9,10 @@ data class BranchMergeConflictView(
   val targetBranchKeyId: Long,
   val resolutionType: BranchKeyMergeResolutionType?,
 ) {
-  lateinit var sourceBranchKey: KeyWithTranslationsView
-  lateinit var targetBranchKey: KeyWithTranslationsView
+  lateinit var sourceBranchKey: Key
+  lateinit var targetBranchKey: Key
+  var mergedBranchKey: Key? = null
+  var changedTranslations: List<String>? = null
+  var effectiveResolutionType: BranchKeyMergeResolutionType? = null
+  var allowedLanguageTags: Set<String>? = null
 }
