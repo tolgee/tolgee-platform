@@ -1,13 +1,53 @@
+import { Button } from '@mui/material';
 import { FC } from 'react';
-import { KeyHeader, KeyPanel } from './KeyPanelBase';
+import { T } from '@tolgee/react';
+import { KeyFooter, KeyHeader, KeyPanel } from './KeyPanelBase';
 import { KeyTranslations } from './KeyTranslations';
-import { SimpleCellKey } from 'tg.views/projects/translations/SimpleCellKey';
+import { MergeKeyHeader } from './MergeKeyHeader';
+import { BranchMergeKeyModel } from '../../types';
 
-export const SingleKeyPanel: FC<{ keyData: any }> = ({ keyData }) => (
+type Props = {
+  keyData: BranchMergeKeyModel;
+  changedTranslations?: string[];
+  showAll?: boolean;
+  onToggleShowAll?: () => void;
+  hideAllWhenFalse?: boolean;
+  toggleLabels?: {
+    showAll: string;
+    showLess: string;
+  };
+};
+
+export const SingleKeyPanel: FC<Props> = ({
+  keyData,
+  changedTranslations,
+  showAll,
+  onToggleShowAll,
+  hideAllWhenFalse,
+  toggleLabels,
+}) => (
   <KeyPanel>
     <KeyHeader>
-      <SimpleCellKey data={keyData} />
+      <MergeKeyHeader data={keyData} />
     </KeyHeader>
-    <KeyTranslations keyData={keyData} />
+    <KeyTranslations
+      keyData={keyData}
+      changedTranslations={changedTranslations}
+      showAll={showAll}
+      hideAllWhenFalse={hideAllWhenFalse}
+    />
+    {onToggleShowAll && (
+      <KeyFooter>
+        <Button size="small" variant="text" onClick={onToggleShowAll}>
+          {showAll
+            ? toggleLabels?.showLess ?? (
+                <T keyName="branch_merge_show_changed_translations" />
+              )
+            : toggleLabels?.showAll ?? (
+                <T keyName="branch_merge_show_all_translations" />
+              )}
+        </Button>
+      </KeyFooter>
+    )}
   </KeyPanel>
 );

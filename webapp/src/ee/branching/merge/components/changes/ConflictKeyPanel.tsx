@@ -2,26 +2,38 @@ import { Button, Chip } from '@mui/material';
 import clsx from 'clsx';
 import { FC } from 'react';
 import { T } from '@tolgee/react';
-import { BranchMergeConflictModel, BranchMergeChangeModel } from '../../types';
-import { AcceptButton, KeyHeader, KeyPanel } from './KeyPanelBase';
+import { BranchMergeKeyModel } from '../../types';
+import { AcceptButton, KeyFooter, KeyHeader, KeyPanel } from './KeyPanelBase';
 import { KeyTranslations } from './KeyTranslations';
-import { SimpleCellKey } from 'tg.views/projects/translations/SimpleCellKey';
+import { MergeKeyHeader } from './MergeKeyHeader';
 
 type ConflictPanelProps = {
-  keyData: any;
-  conflict?: BranchMergeConflictModel | BranchMergeChangeModel;
+  keyData: BranchMergeKeyModel;
   accepted?: boolean;
   onAccept?: () => void;
+  changedTranslations?: string[];
+  showAll?: boolean;
+  onToggleShowAll?: () => void;
+  hideAllWhenFalse?: boolean;
+  toggleLabels?: {
+    showAll: string;
+    showLess: string;
+  };
 };
 
 export const ConflictKeyPanel: FC<ConflictPanelProps> = ({
   keyData,
   accepted,
   onAccept,
+  changedTranslations,
+  showAll,
+  onToggleShowAll,
+  hideAllWhenFalse,
+  toggleLabels,
 }) => (
   <KeyPanel className={clsx({ accepted })}>
     <KeyHeader className={clsx({ accepted })}>
-      <SimpleCellKey data={keyData} />
+      <MergeKeyHeader data={keyData} />
       <AcceptButton>
         {accepted ? (
           <Chip
@@ -41,6 +53,24 @@ export const ConflictKeyPanel: FC<ConflictPanelProps> = ({
         ) : null}
       </AcceptButton>
     </KeyHeader>
-    <KeyTranslations keyData={keyData} />
+    <KeyTranslations
+      keyData={keyData}
+      changedTranslations={changedTranslations}
+      showAll={showAll}
+      hideAllWhenFalse={hideAllWhenFalse}
+    />
+    {onToggleShowAll && (
+      <KeyFooter>
+        <Button size="small" variant="text" onClick={onToggleShowAll}>
+          {showAll
+            ? toggleLabels?.showLess ?? (
+                <T keyName="branch_merge_show_changed_translations" />
+              )
+            : toggleLabels?.showAll ?? (
+                <T keyName="branch_merge_show_all_translations" />
+              )}
+        </Button>
+      </KeyFooter>
+    )}
   </KeyPanel>
 );

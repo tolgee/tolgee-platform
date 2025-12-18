@@ -11,6 +11,7 @@ const PlaceholderContent = styled(Box)`
   color: ${({ theme }) => theme.palette.text.secondary};
   background: ${({ theme }) => theme.palette.action.hover};
   text-align: center;
+  flex: 1;
 `;
 
 export const PlaceholderKeyPanel: FC<{ text: string }> = ({ text }) => (
