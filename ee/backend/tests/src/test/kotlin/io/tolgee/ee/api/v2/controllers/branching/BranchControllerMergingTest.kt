@@ -9,6 +9,7 @@ import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.branching.Branch
@@ -150,6 +151,84 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
       }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `merge changes include merged key and changed translations`() {
+    branchSnapshotService.createInitialSnapshot(
+      testData.project.id,
+      testData.mainBranch,
+      testData.featureBranch,
+    )
+    updateKeyTranslation(testData.featureKeyToUpdate, "Updated text")
+
+    val mergeId = createMergePreview(testData.featureBranch.id, testData.mainBranch.id)
+
+    performProjectAuthGet("branches/merge/$mergeId/changes?type=UPDATE")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.branchMergeChanges") {
+          isArray.hasSize(1)
+          node("[0].sourceKey.keyName").isEqualTo(BranchMergeTestData.UPDATE_KEY_NAME)
+          node("[0].mergedKey.translations.en.text").isEqualTo("Updated text")
+          node("[0].changedTranslations").isArray.hasSize(1)
+          node("[0].changedTranslations[0]").isEqualTo("en")
+          node("[0].effectiveResolution").isEqualTo("SOURCE")
+        }
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `conflicts expose merged key after resolve`() {
+    initConflicts()
+    val mergeId = createMergePreview(testData.featureBranch.id, testData.mainBranch.id)
+    val conflictId = getFirstConflictId(mergeId)
+
+    performProjectAuthPut(
+      "branches/merge/$mergeId/resolve",
+      ResolveBranchMergeConflictRequest(
+        changeId = conflictId,
+        resolve = BranchKeyMergeResolutionType.SOURCE,
+      ),
+    ).andIsOk
+
+    performProjectAuthGet("branches/merge/$mergeId/conflicts")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.branchMergeConflicts") {
+          node("[0].resolution").isEqualTo("SOURCE")
+          node("[0].effectiveResolution").isEqualTo("SOURCE")
+          node("[0].mergedKey.translations.en.text").isEqualTo("new translation")
+          node("[0].changedTranslations").isArray.hasSize(1)
+          node("[0].changedTranslations[0]").isEqualTo("en")
+        }
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `identical values are not marked as changed`() {
+    branchSnapshotService.createInitialSnapshot(
+      testData.project.id,
+      testData.mainBranch,
+      testData.featureBranch,
+    )
+    updateKeyTranslation(testData.mainKeyToUpdate, "Same text")
+    updateKeyTranslation(testData.featureKeyToUpdate, "Same text")
+
+    val mergeId = createMergePreview(testData.featureBranch.id, testData.mainBranch.id)
+
+    performProjectAuthGet("branches/merge/$mergeId/changes?type=UPDATE")
+      .andIsOk
+      .andAssertThatJson {
+        node("_embedded.branchMergeChanges") {
+          isArray.hasSize(1)
+          node("[0].sourceKey.keyName").isEqualTo(BranchMergeTestData.UPDATE_KEY_NAME)
+          node("[0].changedTranslations").isArray.hasSize(0)
+        }
+      }
+  }
+
   private fun createMergeWithConflict(
     sourceKey: Key,
     targetKey: Key,
@@ -249,5 +328,33 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
 
   private fun Branch.refresh(): Branch {
     return branchRepository.findByIdOrNull(this.id)!!
+  }
+
+  private fun createMergePreview(
+    sourceBranchId: Long,
+    targetBranchId: Long,
+  ): Long {
+    val response =
+      performProjectAuthPost(
+        "branches/merge/preview",
+        mapOf(
+          "sourceBranchId" to sourceBranchId,
+          "targetBranchId" to targetBranchId,
+        ),
+      ).andIsOk
+        .andReturn()
+        .mapResponseTo<Map<String, Any>>()
+    return (response["id"] as Number).toLong()
+  }
+
+  private fun getFirstConflictId(mergeId: Long): Long {
+    val response =
+      performProjectAuthGet("branches/merge/$mergeId/conflicts")
+        .andIsOk
+        .andReturn()
+        .mapResponseTo<Map<String, Any>>()
+    val embedded = response["_embedded"] as Map<*, *>
+    val conflicts = embedded["branchMergeConflicts"] as List<Map<String, Any>>
+    return (conflicts.first()["id"] as Number).toLong()
   }
 }
