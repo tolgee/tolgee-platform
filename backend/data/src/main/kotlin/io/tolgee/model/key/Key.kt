@@ -21,6 +21,7 @@ import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.task.TaskKey
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.branching.chooseThreeWay
+import io.tolgee.service.branching.isConflictingThreeWay
 import io.tolgee.service.branching.mergeByKey
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -181,10 +182,10 @@ class Key(
     source: Key,
     snapshot: KeySnapshot,
   ): Boolean {
-    if (source.isPlural != this.isPlural && source.isPlural != snapshot.isPlural) {
+    if (isConflictingThreeWay(source.isPlural, this.isPlural, snapshot.isPlural)) {
       return true
     }
-    if (source.pluralArgName != this.pluralArgName && source.pluralArgName != snapshot.pluralArgName) {
+    if (isConflictingThreeWay(source.pluralArgName, this.pluralArgName, snapshot.pluralArgName)) {
       return true
     }
 

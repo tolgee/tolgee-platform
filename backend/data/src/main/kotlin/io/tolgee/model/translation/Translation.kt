@@ -16,6 +16,7 @@ import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.service.branching.chooseThreeWay
+import io.tolgee.service.branching.isConflictingThreeWay
 import io.tolgee.service.branching.mergeSetsWithBase
 import io.tolgee.util.TranslationStatsUtil
 import jakarta.persistence.Column
@@ -249,8 +250,8 @@ class Translation(
     source: Translation,
     snapshot: TranslationSnapshot,
   ): Boolean {
-    if (source.text != this.text && source.text != snapshot.value) return true
-    if (source.state != this.state && source.state != snapshot.state) return true
+    if (isConflictingThreeWay(source.text, this.text, snapshot.value)) return true
+    if (isConflictingThreeWay(source.state, this.state, snapshot.state)) return true
     return false
   }
 

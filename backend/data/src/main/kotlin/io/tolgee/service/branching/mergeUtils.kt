@@ -18,6 +18,12 @@ fun <T> chooseThreeWay(
     else -> if (resolution == BranchKeyMergeResolutionType.SOURCE) source else target
   }
 
+fun <T> isConflictingThreeWay(
+  source: T?,
+  target: T?,
+  base: T?,
+): Boolean = source != target && source != base && target != base
+
 fun <T> mergeSetsWithBase(
   snapshot: Set<T>,
   source: Set<T>,
