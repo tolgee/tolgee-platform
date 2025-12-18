@@ -1,3 +1,10 @@
+# [3.144.0](https://github.com/tolgee/tolgee-platform/compare/v3.143.0...v3.144.0) (2025-12-18)
+
+
+### Features
+
+* allow webp upload for project/profile avatars ([#3340](https://github.com/tolgee/tolgee-platform/issues/3340)) ([abc8431](https://github.com/tolgee/tolgee-platform/commit/abc8431b5721d900f746443505cb275b33827b44))
+
 # [3.143.0](https://github.com/tolgee/tolgee-platform/compare/v3.142.0...v3.143.0) (2025-12-15)
 
 
