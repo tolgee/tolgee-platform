@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, styled } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import clsx from 'clsx';
+import { MinusCircle, PlusCircle } from '@untitled-ui/icons-react';
 
 import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import { MarkdownLink } from 'tg.component/common/MarkdownLink';
@@ -29,9 +30,32 @@ const Markdown = styled('div')`
 
 type Props = {
   data: BranchMergeKeyModel;
+  variant?: 'added' | 'deleted';
 };
 
-export const MergeKeyHeader: React.FC<Props> = ({ data }) => {
+const HeaderRow = styled('div')`
+  display: flex;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.spacing(1.5)};
+`;
+
+const IconWrapper = styled('div')<{ variant: 'added' | 'deleted' }>`
+  display: flex;
+  align-items: center;
+  color: ${({ theme, variant }) =>
+    variant === 'added'
+      ? theme.palette.tokens.success.main
+      : theme.palette.tokens.error.main};
+`;
+
+const TextColumn = styled('div')<{ strike?: boolean }>`
+  display: flex;
+  flex-direction: column;
+  ${({ strike }) => (strike ? 'text-decoration: line-through;' : '')}
+`;
+
+export const MergeKeyHeader: React.FC<Props> = ({ data, variant }) => {
+  const strike = variant === 'deleted';
   return (
     <Box
       display="flex"
@@ -43,26 +67,39 @@ export const MergeKeyHeader: React.FC<Props> = ({ data }) => {
         [CELL_PLAIN]: true,
       })}
     >
-      <StyledKey data-cy="translations-key-name">
-        <LimitedHeightText maxLines={3} wrap="break-all">
-          {data.keyName}
-        </LimitedHeightText>
-      </StyledKey>
-      {data.keyDescription && (
-        <StyledDescription data-cy="translations-key-cell-description">
-          <LimitedHeightText maxLines={5} lineHeight="auto">
-            <Markdown>
-              <ReactMarkdown
-                components={{
-                  a: MarkdownLink,
-                }}
-              >
-                {data.keyDescription}
-              </ReactMarkdown>
-            </Markdown>
-          </LimitedHeightText>
-        </StyledDescription>
-      )}
+      <HeaderRow>
+        {variant && (
+          <IconWrapper variant={variant}>
+            {variant === 'added' ? (
+              <PlusCircle width={22} height={22} />
+            ) : (
+              <MinusCircle width={22} height={22} />
+            )}
+          </IconWrapper>
+        )}
+        <TextColumn strike={strike}>
+          <StyledKey data-cy="translations-key-name">
+            <LimitedHeightText maxLines={3} wrap="break-all">
+              {data.keyName}
+            </LimitedHeightText>
+          </StyledKey>
+          {data.keyDescription && (
+            <StyledDescription data-cy="translations-key-cell-description">
+              <LimitedHeightText maxLines={5} lineHeight="auto">
+                <Markdown>
+                  <ReactMarkdown
+                    components={{
+                      a: MarkdownLink,
+                    }}
+                  >
+                    {data.keyDescription}
+                  </ReactMarkdown>
+                </Markdown>
+              </LimitedHeightText>
+            </StyledDescription>
+          )}
+        </TextColumn>
+      </HeaderRow>
     </Box>
   );
 };
