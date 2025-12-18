@@ -8,7 +8,6 @@ import io.tolgee.dtos.queryResults.branching.BranchMergeView
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
-import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.events.OnBranchDeleted
 import io.tolgee.exceptions.BadRequestException
@@ -23,7 +22,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchCopyService
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.language.LanguageService
-import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
+import io.tolgee.repository.KeyRepository
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Primary
@@ -44,8 +43,8 @@ class BranchServiceImpl(
   private val applicationContext: ApplicationContext,
   private val defaultBranchCreator: DefaultBranchCreator,
   private val branchMergeService: BranchMergeService,
-  private val translationViewDataProvider: TranslationViewDataProvider,
   private val languageService: LanguageService,
+  private val keyRepository: KeyRepository,
   private val authenticationFacade: AuthenticationFacade,
 ) : BranchService {
   override fun getBranches(
@@ -216,6 +215,9 @@ class BranchServiceImpl(
     pageable: Pageable,
   ): Page<BranchMergeConflictView> {
     val project = entityManager.getReference(Project::class.java, projectId)
+    val merge =
+      branchMergeService.findMerge(projectId, branchMergeId)
+        ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     val conflicts = branchMergeService.getConflicts(projectId, branchMergeId, pageable)
     val languages =
       languageService.getLanguagesForTranslationsView(
@@ -223,24 +225,22 @@ class BranchServiceImpl(
         project.id,
         authenticationFacade.authenticatedUser.id,
       )
+    val allowedLanguageTags = languages.map { it.tag }.toSet()
 
-    val sourceFilter = TranslationFilters().apply { filterKeyId = conflicts.map { it.sourceBranchKeyId }.toList() }
-    val targetFilter = TranslationFilters().apply { filterKeyId = conflicts.map { it.targetBranchKeyId }.toList() }
-
-    val sourceKeys =
-      translationViewDataProvider
-        .getData(projectId, languages, pageable, sourceFilter)
-        .associateBy { it.keyId }
-
-    val targetKeys =
-      translationViewDataProvider
-        .getData(projectId, languages, pageable, targetFilter)
-        .associateBy { it.keyId }
+    val keyIds = (conflicts.map { it.sourceBranchKeyId } + conflicts.map { it.targetBranchKeyId }).toSet()
+    val keysById =
+      if (keyIds.isEmpty()) {
+        emptyMap()
+      } else {
+        keyRepository.findAllDetailedByIdIn(keyIds).associateBy { it.id }
+      }
 
     conflicts.forEach { conflict ->
-      conflict.sourceBranchKey = sourceKeys[conflict.sourceBranchKeyId]!!
-      conflict.targetBranchKey = targetKeys[conflict.targetBranchKeyId]!!
+      conflict.sourceBranchKey = keysById[conflict.sourceBranchKeyId]!!
+      conflict.targetBranchKey = keysById[conflict.targetBranchKeyId]!!
+      conflict.allowedLanguageTags = allowedLanguageTags
     }
+    branchMergeService.enrichConflicts(conflicts, merge, allowedLanguageTags)
     return conflicts
   }
 
@@ -252,6 +252,9 @@ class BranchServiceImpl(
     pageable: Pageable,
   ): Page<BranchMergeChangeView> {
     val project = entityManager.getReference(Project::class.java, projectId)
+    val merge =
+      branchMergeService.findMerge(projectId, branchMergeId)
+        ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     val changes = branchMergeService.getChanges(projectId, branchMergeId, type, pageable)
 
     val languages =
@@ -260,27 +263,24 @@ class BranchServiceImpl(
         project.id,
         authenticationFacade.authenticatedUser.id,
       )
+    val allowedLanguageTags = languages.map { it.tag }.toSet()
 
     val sourceIds = changes.mapNotNull { it.sourceBranchKeyId }
     val targetIds = changes.mapNotNull { it.targetBranchKeyId }
-
-    val sourceFilter = TranslationFilters().apply { filterKeyId = sourceIds }
-    val targetFilter = TranslationFilters().apply { filterKeyId = targetIds }
-
-    val sourceKeys =
-      translationViewDataProvider
-        .getData(projectId, languages, pageable, sourceFilter)
-        .associateBy { it.keyId }
-
-    val targetKeys =
-      translationViewDataProvider
-        .getData(projectId, languages, pageable, targetFilter)
-        .associateBy { it.keyId }
+    val keyIds = (sourceIds + targetIds).toSet()
+    val keysById =
+      if (keyIds.isEmpty()) {
+        emptyMap()
+      } else {
+        keyRepository.findAllDetailedByIdIn(keyIds).associateBy { it.id }
+      }
 
     changes.forEach { change ->
-      change.sourceBranchKeyId?.let { id -> change.sourceBranchKey = sourceKeys[id] }
-      change.targetBranchKeyId?.let { id -> change.targetBranchKey = targetKeys[id] }
+      change.sourceBranchKeyId?.let { id -> change.sourceBranchKey = keysById[id] }
+      change.targetBranchKeyId?.let { id -> change.targetBranchKey = keysById[id] }
+      change.allowedLanguageTags = allowedLanguageTags
     }
+    branchMergeService.enrichChanges(changes, merge, allowedLanguageTags)
 
     return changes
   }
@@ -320,4 +320,5 @@ class BranchServiceImpl(
   ) {
     branchMergeService.deleteMerge(projectId, mergeId)
   }
+
 }
