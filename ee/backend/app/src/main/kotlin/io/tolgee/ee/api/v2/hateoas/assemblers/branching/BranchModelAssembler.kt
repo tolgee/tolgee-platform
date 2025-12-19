@@ -21,6 +21,7 @@ class BranchModelAssembler(
       isProtected = entity.isProtected,
       createdAt = entity.createdAt?.time,
       merge = entity.lastMerge?.let { branchMergeRefModelAssembler.toModel(it) },
+      originBranchName = entity.originBranch?.name,
     )
   }
 }
