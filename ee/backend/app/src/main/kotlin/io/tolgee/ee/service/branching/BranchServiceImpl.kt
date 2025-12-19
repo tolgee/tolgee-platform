@@ -77,6 +77,29 @@ class BranchServiceImpl(
       ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
   }
 
+  private fun getActiveBranchWithMerge(
+    projectId: Long,
+    branchId: Long,
+  ) = branchRepository.findActiveWithLatestMerge(projectId, branchId)
+    ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
+
+  @Transactional
+  override fun renameBranch(
+    projectId: Long,
+    branchId: Long,
+    name: String,
+  ): Branch {
+    val branch = getActiveBranchWithMerge(projectId, branchId)
+    branchRepository.findActiveByProjectIdAndName(projectId, name)?.let {
+      if (it.id != branchId) {
+        throw BadRequestException(Message.BRANCH_ALREADY_EXISTS)
+      }
+    }
+    branch.name = name
+    branchRepository.save(branch)
+    return branch
+  }
+
   private fun getBranch(
     projectId: Long,
     branchId: Long,
