@@ -81,7 +81,6 @@ export const BranchesList = () => {
       content: {
         'application/json': {
           sourceBranchId: values.sourceBranchId,
-          targetBranchId: values.targetBranchId,
         },
       },
     });
@@ -207,9 +206,7 @@ export const BranchesList = () => {
           />
           <BranchMergeCreateModal
             open={mergeIntoOpen}
-            close={() => setMergeIntoOpen(false)}
             submit={mergeIntoSubmit}
-            saveActionLoadable={createMergeMutation}
             sourceBranch={mergeIntoSourceBranch}
           />
           {renameBranch && (

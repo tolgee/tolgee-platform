@@ -6,6 +6,4 @@ import io.swagger.v3.oas.annotations.media.Schema
 open class DryRunMergeBranchRequest(
   @Schema(description = "Source branch id")
   val sourceBranchId: Long,
-  @Schema(description = "Target branch id")
-  val targetBranchId: Long,
 )

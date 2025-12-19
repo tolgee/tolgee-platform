@@ -56,7 +56,7 @@ class BranchTestData(
         project = projectBuilder.self
         isProtected = false
         isDefault = false
-        originBranch = this
+        originBranch = self
         revision = 15
       }.build {
         featureBranch = self
@@ -65,7 +65,7 @@ class BranchTestData(
           project = projectBuilder.self
           isProtected = false
           isDefault = false
-          originBranch = this
+          originBranch = self
           revision = 20
         }.build {
           mergeBranch = self

@@ -227,8 +227,6 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost(
       "branches/merge/preview",
       mapOf(
-        "name" to "new-merge",
-        "targetBranchId" to testData.mainBranch.id,
         "sourceBranchId" to testData.featureBranch.id,
       ),
     ).let {
