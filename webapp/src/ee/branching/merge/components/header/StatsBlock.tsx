@@ -1,10 +1,10 @@
-import { Box, Typography, styled, useTheme } from '@mui/material';
+import { Box, styled, Typography, useTheme } from '@mui/material';
 import {
-  RefreshCcw02,
-  Plus,
-  Minus,
-  CheckCircle,
   AlertTriangle,
+  CheckCircle,
+  MinusCircle,
+  PlusCircle,
+  RefreshCcw02,
 } from '@untitled-ui/icons-react';
 import { ElementType, FC, useMemo } from 'react';
 import { useTranslate } from '@tolgee/react';
@@ -36,7 +36,7 @@ export const StatsBlock: FC<{ merge: BranchMergeModel }> = ({ merge }) => {
       {
         label: t('branch_merges_additions'),
         value: merge.keyAdditionsCount,
-        icon: Plus,
+        icon: PlusCircle,
       },
       {
         label: t('branch_merges_modifications'),
@@ -46,7 +46,7 @@ export const StatsBlock: FC<{ merge: BranchMergeModel }> = ({ merge }) => {
       {
         label: t('branch_merges_deletions'),
         value: merge.keyDeletionsCount,
-        icon: Minus,
+        icon: MinusCircle,
       },
     ],
     [merge, t]
@@ -87,11 +87,17 @@ export const StatsBlock: FC<{ merge: BranchMergeModel }> = ({ merge }) => {
               ))}
           </Box>
           <Typography variant="h3">
-            <div>{resolvedConflicts + '/' + conflictsTotal}</div>
+            <div>
+              {conflictsTotal > 0
+                ? resolvedConflicts + '/' + conflictsTotal
+                : 0}
+            </div>
           </Typography>
         </Box>
         <Typography variant="body1" fontSize={18}>
-          {t('branch_merges_conflicts_resolved_unresolved')}
+          {conflictsTotal > 0
+            ? t('branch_merges_conflicts_resolved_unresolved')
+            : t('branch_merges_conflicts')}
         </Typography>
       </StatCard>
     </StatsRow>
