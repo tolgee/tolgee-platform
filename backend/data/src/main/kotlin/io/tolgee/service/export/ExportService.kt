@@ -4,9 +4,11 @@ import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.export.dataProvider.ExportDataProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.project.ProjectService
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import java.io.InputStream
@@ -18,11 +20,13 @@ class ExportService(
   private val projectService: ProjectService,
   private val applicationContext: ApplicationContext,
   private val businessEventPublisher: BusinessEventPublisher,
+  @Qualifier("branchServiceImpl") private val branchService: BranchService,
 ) {
   fun export(
     projectId: Long,
     exportParams: IExportParams,
   ): Map<String, InputStream> {
+    validateParams(projectId, exportParams)
     val data = getDataForExport(projectId, exportParams)
     val baseLanguage = getProjectBaseLanguage(projectId)
     val project = projectService.get(projectId)
@@ -83,5 +87,14 @@ class ExportService(
 
   private fun getProjectBaseLanguage(projectId: Long): LanguageDto {
     return projectService.getOrAssignBaseLanguage(projectId)
+  }
+
+  private fun validateParams(
+    projectId: Long,
+    params: IExportParams,
+  ) {
+    if (params.filterBranch?.isNotEmpty() == true) {
+      branchService.getActiveBranch(projectId, params.filterBranch!!)
+    }
   }
 }
