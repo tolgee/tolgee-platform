@@ -161,7 +161,7 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     )
     updateKeyTranslation(testData.featureKeyToUpdate, "Updated text")
 
-    val mergeId = createMergePreview(testData.featureBranch.id, testData.mainBranch.id)
+    val mergeId = createMergePreview(testData.featureBranch.id)
 
     performProjectAuthGet("branches/merge/$mergeId/changes?type=UPDATE")
       .andIsOk
@@ -181,7 +181,7 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `conflicts expose merged key after resolve`() {
     initConflicts()
-    val mergeId = createMergePreview(testData.featureBranch.id, testData.mainBranch.id)
+    val mergeId = createMergePreview(testData.featureBranch.id)
     val conflictId = getFirstConflictId(mergeId)
 
     performProjectAuthPut(
@@ -216,7 +216,7 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     updateKeyTranslation(testData.mainKeyToUpdate, "Same text")
     updateKeyTranslation(testData.featureKeyToUpdate, "Same text")
 
-    val mergeId = createMergePreview(testData.featureBranch.id, testData.mainBranch.id)
+    val mergeId = createMergePreview(testData.featureBranch.id)
 
     performProjectAuthGet("branches/merge/$mergeId/changes?type=UPDATE")
       .andIsOk
@@ -330,16 +330,12 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     return branchRepository.findByIdOrNull(this.id)!!
   }
 
-  private fun createMergePreview(
-    sourceBranchId: Long,
-    targetBranchId: Long,
-  ): Long {
+  private fun createMergePreview(sourceBranchId: Long): Long {
     val response =
       performProjectAuthPost(
         "branches/merge/preview",
         mapOf(
           "sourceBranchId" to sourceBranchId,
-          "targetBranchId" to targetBranchId,
         ),
       ).andIsOk
         .andReturn()

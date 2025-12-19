@@ -535,16 +535,7 @@ export class Validation {
     });
 
   static readonly BRANCH_MERGE = (t: TranslateFunction) =>
-    Yup.object({
-      targetBranchId: Yup.number()
-        .nullable()
-        .typeError(t('branch_merges_select_branch_error'))
-        .required(t('branch_merges_select_branch_error'))
-        .notOneOf(
-          [Yup.ref('sourceBranchId')],
-          t('branch_merges_same_branch_error')
-        ),
-    });
+    Yup.object({});
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;
