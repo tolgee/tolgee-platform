@@ -1648,6 +1648,8 @@ export interface components {
       merge?: components["schemas"]["BranchMergeRefModel"];
       /** @description Human-readable name of the branch. Similar to Git branch names, it identifies the feature or purpose of this branch (e.g. 'feature-login-page') */
       name: string;
+      /** @description Name of the branch this branch was created from */
+      originBranchName?: string;
     };
     BusinessEventReportRequest: {
       anonymousUserId?: string;
@@ -2448,11 +2450,6 @@ export interface components {
        * @description Source branch id
        */
       sourceBranchId: number;
-      /**
-       * Format: int64
-       * @description Target branch id
-       */
-      targetBranchId: number;
     };
     EditKeyDto: {
       /** @description The branch of the key. (When empty or null default branch will be used) */
