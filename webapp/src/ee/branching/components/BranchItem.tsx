@@ -166,38 +166,44 @@ export const BranchItem: React.FC<Props> = ({
             </Tooltip>
           ) : (
             !branch.merge && (
-              <IconButton
-                data-cy="project-settings-branches-merge-into-button"
-                size="medium"
-                onClick={onMergeInto}
+              <Tooltip
+                title={
+                  <T
+                    keyName="branch_merge_into_tooltip"
+                    params={{ target: branch.originBranchName!, b: <b /> }}
+                  />
+                }
               >
-                <GitMerge width={20} height={20} />
-              </IconButton>
+                <IconButton
+                  data-cy="project-settings-branches-merge-into-button"
+                  size="medium"
+                  onClick={onMergeInto}
+                >
+                  <GitMerge width={20} height={20} />
+                </IconButton>
+              </Tooltip>
             )
           ))}
-        {!branch.isDefault && (
-          <>
-            <IconButton
-              data-cy="project-settings-branches-actions-menu"
-              size="small"
-              onClick={handleMenuOpen}
+
+        <>
+          <IconButton
+            data-cy="project-settings-branches-actions-menu"
+            size="small"
+            onClick={handleMenuOpen}
+          >
+            <DotsVertical width={20} height={20} />
+          </IconButton>
+          <Menu anchorEl={menuAnchor} open={openMenu} onClose={handleMenuClose}>
+            <MenuItem
+              data-cy="project-settings-branches-rename-button"
+              onClick={() => {
+                handleMenuClose();
+                onRename(branch);
+              }}
             >
-              <DotsVertical width={20} height={20} />
-            </IconButton>
-            <Menu
-              anchorEl={menuAnchor}
-              open={openMenu}
-              onClose={handleMenuClose}
-            >
-              <MenuItem
-                data-cy="project-settings-branches-rename-button"
-                onClick={() => {
-                  handleMenuClose();
-                  onRename(branch);
-                }}
-              >
-                <T keyName="project_branch_rename" />
-              </MenuItem>
+              <T keyName="project_branch_rename" />
+            </MenuItem>
+            {!branch.isDefault && (
               <MenuItem
                 data-cy="project-settings-branches-remove-button"
                 onClick={() => {
@@ -209,9 +215,9 @@ export const BranchItem: React.FC<Props> = ({
                   <T keyName="branch_merges_delete" />
                 </Typography>
               </MenuItem>
-            </Menu>
-          </>
-        )}
+            )}
+          </Menu>
+        </>
       </StyledItemActions>
     </StyledListItem>
   );
