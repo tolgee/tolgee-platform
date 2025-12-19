@@ -1,3 +1,10 @@
+## [3.144.1](https://github.com/tolgee/tolgee-platform/compare/v3.144.0...v3.144.1) (2025-12-19)
+
+
+### Bug Fixes
+
+* Fix plural form syntax to confirm to gettext ([#3346](https://github.com/tolgee/tolgee-platform/issues/3346)) ([c84dab6](https://github.com/tolgee/tolgee-platform/commit/c84dab60a54e83a07189d4f6f21f71e5d8302675)), closes [/github.com/autotools-mirror/gettext/blob/abb256e01e99223e98f172aaf0bb963ccdb17bee/gettext-runtime/intl/plural.y#L271](https://github.com//github.com/autotools-mirror/gettext/blob/abb256e01e99223e98f172aaf0bb963ccdb17bee/gettext-runtime/intl/plural.y/issues/L271)
+
 # [3.144.0](https://github.com/tolgee/tolgee-platform/compare/v3.143.0...v3.144.0) (2025-12-18)
 
 
