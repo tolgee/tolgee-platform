@@ -31,6 +31,12 @@ interface BranchService {
     branchName: String,
   ): Branch
 
+  fun renameBranch(
+    projectId: Long,
+    branchId: Long,
+    name: String,
+  ): Branch
+
   fun createBranch(
     projectId: Long,
     name: String,

@@ -11,10 +11,12 @@ import org.springframework.stereotype.Repository
 interface BranchRepository : JpaRepository<Branch, Long> {
   @Query(
     """
-    select b
+    select distinct b
     from Branch b
+      left join fetch b.merges m
     where b.project.id = :projectId and b.deletedAt IS NULL and (:activeOnly is null or b.archivedAt IS NULL)
-    and (:search is null or lower(b.name) like lower(concat('%', cast(:search AS text), '%')))
+      and (:search is null or lower(b.name) like lower(concat('%', cast(:search AS text), '%')))
+      and (m.id is null or m.id = (select max(m2.id) from BranchMerge m2 where m2.sourceBranch.id = b.id))
     order by b.isDefault desc, b.createdAt desc, b.id desc
   """,
   )
@@ -33,6 +35,20 @@ interface BranchRepository : JpaRepository<Branch, Long> {
     """,
   )
   fun findActiveByProjectIdAndId(
+    projectId: Long,
+    branchId: Long,
+  ): Branch?
+
+  @Query(
+    """
+    select b
+    from Branch b
+      left join fetch b.merges m
+    where b.project.id = :projectId and b.id = :branchId and b.archivedAt IS NULL and b.deletedAt IS NULL
+      and (m.id is null or m.id = (select max(m2.id) from BranchMerge m2 where m2.sourceBranch.id = b.id))
+  """,
+  )
+  fun findActiveWithLatestMerge(
     projectId: Long,
     branchId: Long,
   ): Branch?

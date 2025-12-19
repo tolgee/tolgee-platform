@@ -11,6 +11,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.mapResponseTo
@@ -135,6 +136,35 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         "originBranchId" to testData.mainBranch.id,
       ),
     ).andIsBadRequest.andHasErrorMessage(Message.BRANCH_ALREADY_EXISTS)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `renames branch`() {
+    performProjectAuthPost(
+      "branches/${testData.featureBranch.id}",
+      mapOf("name" to "renamed-branch"),
+    ).andIsOk.andAssertThatJson {
+      node("name").isEqualTo("renamed-branch")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `rename fails when name exists`() {
+    performProjectAuthPost(
+      "branches/${testData.featureBranch.id}",
+      mapOf("name" to "main"),
+    ).andIsBadRequest.andHasErrorMessage(Message.BRANCH_ALREADY_EXISTS)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `rename fails when branch not found`() {
+    performProjectAuthPost(
+      "branches/0",
+      mapOf("name" to "renamed-branch"),
+    ).andIsNotFound.andHasErrorMessage(Message.BRANCH_NOT_FOUND)
   }
 
   @Test

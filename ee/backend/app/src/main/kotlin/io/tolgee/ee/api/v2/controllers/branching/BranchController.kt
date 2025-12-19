@@ -19,6 +19,7 @@ import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeRefModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.CreateBranchModel
+import io.tolgee.ee.api.v2.hateoas.model.branching.RenameBranchModel
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.Scope
@@ -111,6 +112,19 @@ class BranchController(
     @PathVariable branchId: Long,
   ) {
     branchService.deleteBranch(projectHolder.project.id, branchId)
+  }
+
+  @PostMapping(value = ["/{branchId}"])
+  @Operation(summary = "Rename branch")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @OpenApiOrderExtension(3)
+  fun rename(
+    @PathVariable branchId: Long,
+    @RequestBody rename: RenameBranchModel,
+  ): BranchModel {
+    val branch = branchService.renameBranch(projectHolder.project.id, branchId, rename.name)
+    return branchModelAssembler.toModel(branch)
   }
 
   @GetMapping(value = ["/merge"])

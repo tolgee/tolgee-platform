@@ -1,13 +1,13 @@
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { components } from 'tg.service/apiSchema.generated';
 import React, { FC } from 'react';
-import { Box, styled } from '@mui/material';
+import { Box } from '@mui/material';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { FieldLabel } from 'tg.component/FormField';
 import { T, useTranslate } from '@tolgee/react';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { BranchSelectField } from 'tg.component/branching/BranchSelectField';
-import { LabelHint } from 'tg.component/common/LabelHint';
+import { BranchNameLabel } from 'tg.ee.module/branching/components/form/BranchNameLabel';
 
 type BranchModel = components['schemas']['BranchModel'];
 
@@ -15,13 +15,6 @@ export type BranchFormValues = {
   name: string;
   originBranchId: number;
 };
-
-const StyledHint = styled(Box)`
-  ul {
-    margin: 0;
-    padding-left: 16px;
-  }
-`;
 
 export const BranchForm: FC<{
   branch?: BranchModel;
@@ -53,18 +46,7 @@ export const BranchForm: FC<{
           <Box display="grid" flexGrow={1}>
             <FieldLabel>
               <Box display="flex" alignItems="center" gap={1}>
-                <LabelHint
-                  title={
-                    <StyledHint>
-                      <T
-                        keyName="branch_name_rules"
-                        params={{ ul: <ul />, li: <li /> }}
-                      />
-                    </StyledHint>
-                  }
-                >
-                  <T keyName="project_branch_name" />
-                </LabelHint>
+                <BranchNameLabel />
               </Box>
             </FieldLabel>
             <TextField size="small" name="name" required={true} />

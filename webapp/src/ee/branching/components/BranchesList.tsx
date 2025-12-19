@@ -13,6 +13,7 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { BranchMergeCreateModal } from 'tg.ee.module/branching/components/merge/BranchMergeCreateModal';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
+import { BranchRenameModal } from './BranchRenameModal';
 
 const TableGrid = styled('div')`
   display: grid;
@@ -33,6 +34,7 @@ export const BranchesList = () => {
   const [mergeIntoSourceBranch, setMergeIntoSourceBranch] =
     useState<BranchModel | null>(null);
   const [page, setPage] = useState(0);
+  const [renameBranch, setRenameBranch] = useState<BranchModel | null>(null);
 
   function handleCloseMergeIntoModal() {
     setAddBranchOpen(false);
@@ -52,6 +54,12 @@ export const BranchesList = () => {
   const deleteMutation = useApiMutation({
     url: '/v2/projects/{projectId}/branches/{branchId}',
     method: 'delete',
+    invalidatePrefix: '/v2/projects/{projectId}/branches',
+  });
+
+  const renameMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/{branchId}',
+    method: 'post',
     invalidatePrefix: '/v2/projects/{projectId}/branches',
   });
 
@@ -109,6 +117,15 @@ export const BranchesList = () => {
       setMergeIntoOpen(true);
       setMergeIntoSourceBranch(branch);
     }
+  };
+
+  const handleRenameSubmit = async (name: string) => {
+    if (!renameBranch) return;
+    await renameMutation.mutateAsync({
+      path: { projectId: project.id, branchId: renameBranch.id },
+      content: { 'application/json': { name } },
+    });
+    setRenameBranch(null);
   };
 
   const handleMergeDetail = (branch: BranchModel) => {
@@ -174,6 +191,7 @@ export const BranchesList = () => {
             <BranchItem
               branch={l}
               onRemove={deleteBranch}
+              onRename={(branch) => setRenameBranch(branch)}
               onMergeInto={() => handleMergeInto(l)}
               onMergeDetail={() => handleMergeDetail(l)}
             />
@@ -194,6 +212,14 @@ export const BranchesList = () => {
             saveActionLoadable={createMergeMutation}
             sourceBranch={mergeIntoSourceBranch}
           />
+          {renameBranch && (
+            <BranchRenameModal
+              open={Boolean(renameBranch)}
+              initialName={renameBranch.name}
+              onSubmit={handleRenameSubmit}
+              onClose={() => setRenameBranch(null)}
+            />
+          )}
         </>
       )}
     </Box>
