@@ -163,6 +163,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               maxWidth: 'unset',
               width: '100%',
             }}
+            setSearchOpen={setSearchOpen}
           />
           <StyledIconButton size="small" onClick={() => setSearchOpen(false)}>
             <XClose />

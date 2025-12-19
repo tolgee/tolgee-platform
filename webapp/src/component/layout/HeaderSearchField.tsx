@@ -10,11 +10,12 @@ export const HeaderSearchField = (
     value: string;
     onSearchChange: (value: string) => void;
     style?: React.CSSProperties;
+    setSearchOpen?: (open: boolean) => void;
   }
 ) => {
   const theme = useTheme();
 
-  const { value, onSearchChange, ...otherProps } = props;
+  const { value, onSearchChange, setSearchOpen, ...otherProps } = props;
 
   return (
     <TextField
@@ -53,6 +54,12 @@ export const HeaderSearchField = (
       value={value}
       style={{ flexBasis: 200 }}
       onChange={(e) => onSearchChange(e.target.value)}
+      onKeyUp={(e) => {
+        if (e.key === 'Escape') {
+          onSearchChange('');
+          setSearchOpen?.(false);
+        }
+      }}
       {...otherProps}
     />
   );
