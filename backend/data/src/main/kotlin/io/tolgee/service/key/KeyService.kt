@@ -17,7 +17,6 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
-import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -25,6 +24,7 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
 import io.tolgee.service.translation.TranslationService
@@ -56,6 +56,8 @@ class KeyService(
   private val activityHolder: ActivityHolder,
   @Lazy
   private val aiPlaygroundResultService: AiPlaygroundResultService,
+  @Lazy
+  private val branchService: BranchService,
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -68,8 +70,12 @@ class KeyService(
     return keyRepository.getAllByProjectIdAndBranch(projectId, branch)
   }
 
-  fun getAllSortedById(projectId: Long): List<KeyView> {
-    return keyRepository.getAllByProjectIdSortedById(projectId)
+  fun getAllSortedById(
+    projectId: Long,
+    branch: String?,
+  ): List<KeyView> {
+    branch?.let { branchService.getActiveBranch(projectId, it) }
+    return keyRepository.getAllByProjectIdSortedById(projectId, branch)
   }
 
   fun get(
