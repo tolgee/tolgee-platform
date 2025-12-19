@@ -122,6 +122,7 @@ interface IExportParams {
     this.supportArrays = other.supportArrays
     this.fileStructureTemplate = other.fileStructureTemplate
     this.escapeHtml = other.escapeHtml
+    this.filterBranch = other.filterBranch
   }
 
   @get:Hidden

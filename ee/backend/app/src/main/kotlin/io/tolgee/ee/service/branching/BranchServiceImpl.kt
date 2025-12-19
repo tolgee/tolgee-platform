@@ -66,7 +66,7 @@ class BranchServiceImpl(
     branchId: Long,
   ): Branch {
     return branchRepository.findActiveByProjectIdAndId(projectId, branchId)
-      ?: throw BadRequestException(Message.BRANCH_NOT_FOUND)
+      ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
   }
 
   override fun getActiveBranch(
@@ -74,7 +74,7 @@ class BranchServiceImpl(
     branchName: String,
   ): Branch {
     return branchRepository.findActiveByProjectIdAndName(projectId, branchName)
-      ?: throw BadRequestException(Message.BRANCH_NOT_FOUND)
+      ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
   }
 
   private fun getBranch(
@@ -82,7 +82,7 @@ class BranchServiceImpl(
     branchId: Long,
   ): Branch {
     return branchRepository.findByProjectIdAndId(projectId, branchId)
-      ?: throw BadRequestException(Message.BRANCH_NOT_FOUND)
+      ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
   }
 
   @Transactional
@@ -93,13 +93,9 @@ class BranchServiceImpl(
     author: UserAccount,
   ): Branch {
     val originBranch =
-      branchRepository.findActiveByProjectIdAndId(projectId, originBranchId) ?: throw BadRequestException(
+      branchRepository.findActiveByProjectIdAndId(projectId, originBranchId) ?: throw NotFoundException(
         Message.ORIGIN_BRANCH_NOT_FOUND,
       )
-
-    if (originBranch.project.id != projectId) {
-      throw BadRequestException(Message.ORIGIN_BRANCH_NOT_FOUND)
-    }
 
     val branch =
       createBranch(projectId, name, author).also {

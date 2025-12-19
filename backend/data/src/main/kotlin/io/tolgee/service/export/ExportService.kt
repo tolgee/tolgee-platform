@@ -6,6 +6,7 @@ import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.export.dataProvider.ExportDataProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.project.ProjectService
@@ -24,11 +25,13 @@ class ExportService(
   private val applicationContext: ApplicationContext,
   private val businessEventPublisher: BusinessEventPublisher,
   private val objectMapper: ObjectMapper,
-) : Logging {
+  private val branchService: BranchService,
+  ) : Logging {
   fun export(
     projectId: Long,
     exportParams: IExportParams,
   ): Map<String, InputStream> {
+    validateParams(projectId, exportParams)
     traceLogExportInfo(exportParams, projectId)
     return traceLogMeasureTime("Export project $projectId data") {
       val data = getDataForExport(projectId, exportParams)
@@ -113,6 +116,15 @@ class ExportService(
           "[cannot serialize params]"
         }
       "Exporting project $projectId with params $json"
+    }
+  }
+
+  private fun validateParams(
+    projectId: Long,
+    params: IExportParams,
+  ) {
+    if (params.filterBranch?.isNotEmpty() == true) {
+      branchService.getActiveBranch(projectId, params.filterBranch!!)
     }
   }
 }
