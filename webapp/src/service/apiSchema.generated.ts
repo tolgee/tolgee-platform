@@ -461,7 +461,8 @@ export interface paths {
     put: operations["resolveAllConflicts"];
   };
   "/v2/projects/{projectId}/branches/{branchId}": {
-    delete: operations["delete_15"];
+    post: operations["rename"];
+    delete: operations["delete_13"];
   };
   "/v2/projects/{projectId}/content-delivery-configs": {
     get: operations["list_2"];
@@ -656,7 +657,7 @@ export interface paths {
     get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/{ids}": {
-    delete: operations["delete_13"];
+    delete: operations["delete_14"];
   };
   "/v2/projects/{projectId}/keys/{id}": {
     get: operations["get_8"];
@@ -2260,7 +2261,10 @@ export interface components {
       scopes: string[];
     };
     CreateBranchModel: {
-      /** @description Branch name, example = feature/new-feature */
+      /**
+       * @description Branch name
+       * @example feature/new-branch
+       */
       name: string;
       /**
        * Format: int64
@@ -5366,6 +5370,13 @@ export interface components {
       branch?: string;
       keyName: string;
       namespace?: string;
+    };
+    RenameBranchModel: {
+      /**
+       * @description New branch name
+       * @example feature/rename-branch
+       */
+      name: string;
     };
     ResetPassword: {
       code: string;
@@ -11932,6 +11943,9 @@ export interface operations {
   };
   getAllKeys: {
     parameters: {
+      query: {
+        branch?: string;
+      };
       path: {
         projectId: number;
       };
@@ -12907,7 +12921,52 @@ export interface operations {
       };
     };
   };
-  delete_15: {
+  rename: {
+    parameters: {
+      path: {
+        branchId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BranchModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RenameBranchModel"];
+      };
+    };
+  };
+  delete_13: {
     parameters: {
       path: {
         branchId: number;
@@ -15197,7 +15256,7 @@ export interface operations {
       };
     };
   };
-  delete_13: {
+  delete_14: {
     parameters: {
       path: {
         ids: number[];
