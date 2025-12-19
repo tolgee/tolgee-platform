@@ -638,9 +638,11 @@ declare namespace DataCy {
         "project-settings-branch-item" |
         "project-settings-branch-item-name" |
         "project-settings-branch-item-properties" |
+        "project-settings-branches-actions-menu" |
         "project-settings-branches-add" |
         "project-settings-branches-merge-into-button" |
         "project-settings-branches-remove-button" |
+        "project-settings-branches-rename-button" |
         "project-settings-button" |
         "project-settings-delete-button" |
         "project-settings-description" |
