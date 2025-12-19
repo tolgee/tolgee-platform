@@ -9,13 +9,14 @@ export const SelfHostedEePlanSelector: FC<
       components['schemas']['SelfHostedEePlanAdministrationModel']
     >,
     'plans'
-  > & { organizationId?: number }
-> = ({ organizationId, ...props }) => {
+  > & { organizationId?: number; filterHasMigration?: boolean }
+> = ({ organizationId, filterHasMigration, ...props }) => {
   const plansLoadable = useBillingApiQuery({
     url: '/v2/administration/billing/self-hosted-ee-plans',
     method: 'get',
     query: {
       filterAssignableToOrganization: organizationId,
+      filterHasMigration,
     },
   });
 

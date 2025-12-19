@@ -10,6 +10,7 @@ import org.mockito.Mockito
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -70,6 +71,10 @@ class EmailTestUtil {
 
   fun verifyEmailSent() {
     verify(javaMailSender).send(any<MimeMessage>())
+  }
+
+  fun verifyTimesEmailSent(num: Int) {
+    verify(javaMailSender, times(num)).send(any<MimeMessage>())
   }
 
   val assertEmailTo: AbstractStringAssert<*>

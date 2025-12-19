@@ -2548,7 +2548,9 @@ export interface components {
         | "impersonation_of_admin_by_supporter_not_allowed"
         | "already_impersonating_user"
         | "operation_not_permitted_in_read_only_mode"
-        | "file_processing_failed";
+        | "file_processing_failed"
+        | "plan_migration_not_found"
+        | "plan_has_migrations";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -5817,7 +5819,9 @@ export interface components {
         | "impersonation_of_admin_by_supporter_not_allowed"
         | "already_impersonating_user"
         | "operation_not_permitted_in_read_only_mode"
-        | "file_processing_failed";
+        | "file_processing_failed"
+        | "plan_migration_not_found"
+        | "plan_has_migrations";
       params?: unknown[];
       success: boolean;
     };

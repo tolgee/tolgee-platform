@@ -32,6 +32,7 @@ export type HeaderBarProps = {
   switcher?: ReactNode;
   maxWidth?: BaseViewWidth;
   initialSearch?: string;
+  customButtons?: ReactNode[];
 };
 
 export const HeaderBar: React.VFC<HeaderBarProps> = (props) => {
@@ -81,6 +82,12 @@ export const HeaderBar: React.VFC<HeaderBarProps> = (props) => {
                   {props.switcher}
                 </Box>
               )}
+              {props.customButtons &&
+                props.customButtons.map((button, index) => (
+                  <Box key={index} display="flex" alignItems="center">
+                    {button}
+                  </Box>
+                ))}
               {props.addComponent
                 ? props.addComponent
                 : (props.onAdd || props.addLinkTo) && (

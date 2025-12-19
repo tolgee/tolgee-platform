@@ -39,6 +39,14 @@ Yup.setLocale({
       />
     ),
   },
+  number: {
+    min: ({ min }) => (
+      <T
+        keyName="validation_schema_number_min_message"
+        params={{ min: min.toString() }}
+      />
+    ),
+  },
 });
 
 export class Validation {
@@ -520,6 +528,13 @@ export class Validation {
       color: Yup.string()
         .required()
         .matches(/^#[0-9A-F]{6}$/i, t('validation_invalid_hex_color')),
+    });
+
+  static readonly PLAN_MIGRATION_FORM = () =>
+    Yup.object().shape({
+      monthlyOffsetDays: Yup.number().required().min(0),
+      yearlyOffsetDays: Yup.number().required().min(0),
+      customEmailBody: Yup.string().nullable(),
     });
 }
 
