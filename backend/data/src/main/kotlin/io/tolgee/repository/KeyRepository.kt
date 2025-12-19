@@ -85,11 +85,15 @@ interface KeyRepository : JpaRepository<Key, Long> {
      left join k.keyMeta km
      left join k.namespace ns
      left join k.branch br
-     where k.project.id = :projectId and (br is null or br.archivedAt is null) 
+     where k.project.id = :projectId
+        and ((br.name = :branch and br.archivedAt is null) or (:branch is null and (br is null or br.isDefault))) 
      order by k.id
     """,
   )
-  fun getAllByProjectIdSortedById(projectId: Long): List<KeyView>
+  fun getAllByProjectIdSortedById(
+    projectId: Long,
+    branch: String?,
+  ): List<KeyView>
 
   @Query("select k from Key k left join fetch k.keyMeta km where k.project.id = :projectId")
   fun getByProjectIdWithFetchedMetas(projectId: Long?): List<Key>
