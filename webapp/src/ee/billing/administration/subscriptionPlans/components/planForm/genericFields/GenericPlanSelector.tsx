@@ -28,8 +28,10 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   plans,
   loading,
 }: GenericPlanSelector<T>) => {
+  const sortedPlans = useSortPlans(plans);
+
   const selectItems =
-    plans?.map(
+    sortedPlans?.map(
       (plan) =>
         ({
           value: plan.id,
@@ -38,7 +40,6 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
     ) || [];
 
   const { incrementPlanWithId } = usePreferredPlans();
-  const sortedPlans = useSortPlans(plans);
 
   if (loading) {
     return <BoxLoading />;

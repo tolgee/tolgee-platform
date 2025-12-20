@@ -64,7 +64,9 @@ class UserPreferencesController(
 
   @GetMapping("/storage/{fieldName}")
   @Operation(summary = "Get specific field from user's storage")
-  fun getStorageField(@PathVariable fieldName: String): UserStorageResponse {
+  fun getStorageField(
+    @PathVariable fieldName: String,
+  ): UserStorageResponse {
     val preferences = userPreferencesService.findOrCreate(authenticationFacade.authenticatedUser.id)
     val storage = preferences.storageJson ?: emptyMap()
     return UserStorageResponse(storage[fieldName])
@@ -74,12 +76,12 @@ class UserPreferencesController(
   @Operation(summary = "Set specific field in user storage")
   fun setStorageField(
     @PathVariable fieldName: String,
-    @RequestBody data: Any?
+    @RequestBody data: Any?,
   ) {
     userPreferencesService.setStorageJsonField(
       fieldName,
       data,
-      authenticationFacade.authenticatedUserEntity
+      authenticationFacade.authenticatedUserEntity,
     )
   }
 }
