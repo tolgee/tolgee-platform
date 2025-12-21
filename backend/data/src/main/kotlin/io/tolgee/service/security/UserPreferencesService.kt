@@ -36,6 +36,28 @@ class UserPreferencesService(
     userPreferencesRepository.save(preferences)
   }
 
+  /**
+   * Updates a specific field within the user's stored JSON preferences.
+   *
+   * If the user's storage JSON does not exist, it creates one, updates the specified field,
+   * and saves the changes to the repository.
+   */
+  fun setStorageJsonField(
+    fieldName: String,
+    value: Any?,
+    userAccount: UserAccount,
+  ) {
+    val preferences = findOrCreate(userAccount.id)
+    val currentStorage = preferences.storageJson?.toMutableMap() ?: mutableMapOf()
+    if (value != null) {
+      currentStorage[fieldName] = value
+    } else {
+      currentStorage.remove(fieldName)
+    }
+    preferences.storageJson = currentStorage
+    userPreferencesRepository.save(preferences)
+  }
+
   fun findOrCreate(userAccountId: Long): UserPreferences {
     return tryUntilItDoesntBreakConstraint {
       val userAccount = userAccountService.get(userAccountId)

@@ -6,6 +6,7 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.dtos.request.UserStorageResponse
 import io.tolgee.hateoas.userPreferences.UserPreferencesModel
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.BypassEmailVerification
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -58,5 +60,28 @@ class UserPreferencesController(
     val organization = organizationService.get(organizationId)
     organizationRoleService.checkUserCanView(organization.id)
     userPreferencesService.setPreferredOrganization(organization, authenticationFacade.authenticatedUserEntity)
+  }
+
+  @GetMapping("/storage/{fieldName}")
+  @Operation(summary = "Get specific field from user's storage")
+  fun getStorageField(
+    @PathVariable fieldName: String,
+  ): UserStorageResponse {
+    val preferences = userPreferencesService.findOrCreate(authenticationFacade.authenticatedUser.id)
+    val storage = preferences.storageJson ?: emptyMap()
+    return UserStorageResponse(storage[fieldName])
+  }
+
+  @PutMapping("/storage/{fieldName}")
+  @Operation(summary = "Set specific field in user storage")
+  fun setStorageField(
+    @PathVariable fieldName: String,
+    @RequestBody data: Any?,
+  ) {
+    userPreferencesService.setStorageJsonField(
+      fieldName,
+      data,
+      authenticationFacade.authenticatedUserEntity,
+    )
   }
 }

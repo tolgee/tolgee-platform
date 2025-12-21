@@ -22,6 +22,7 @@ import com.pinterest.ktlint.rule.engine.core.api.Rule
 import com.pinterest.ktlint.rule.engine.core.api.RuleAutocorrectApproveHandler
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import com.pinterest.ktlint.rule.engine.core.api.children
+import com.pinterest.ktlint.rule.engine.core.api.children20
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
 class JakartaTransientInEntities :
@@ -36,7 +37,7 @@ class JakartaTransientInEntities :
   ) {
     when (node.elementType) {
       ElementType.IMPORT_DIRECTIVE -> {
-        val qual = node.children().last().text
+        val qual = node.children20.last().text
         if (qual == "jakarta.persistence.Transient" || qual == "jakarta.persistence.*") {
           // Imported, nothing to do
           return stopTraversalOfAST()
