@@ -1,3 +1,15 @@
+# [3.145.0](https://github.com/tolgee/tolgee-platform/compare/v3.144.1...v3.145.0) (2025-12-21)
+
+
+### Bug Fixes
+
+* User preferences storage & admin: sorted billing plans by popularity ([#3266](https://github.com/tolgee/tolgee-platform/issues/3266)) ([9203d59](https://github.com/tolgee/tolgee-platform/commit/9203d592c2700db582e943b435f8e87fd8776223))
+
+
+### Features
+
+* close search field on escape key ([#3354](https://github.com/tolgee/tolgee-platform/issues/3354)) ([fa675aa](https://github.com/tolgee/tolgee-platform/commit/fa675aadca14d710853d94f8ffc2354d5af2e032))
+
 ## [3.144.1](https://github.com/tolgee/tolgee-platform/compare/v3.144.0...v3.144.1) (2025-12-19)
 
 
