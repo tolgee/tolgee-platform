@@ -1,3 +1,10 @@
+## [3.145.2](https://github.com/tolgee/tolgee-platform/compare/v3.145.1...v3.145.2) (2025-12-22)
+
+
+### Bug Fixes
+
+* billing admin > plan popularity storing bugs ([#3360](https://github.com/tolgee/tolgee-platform/issues/3360)) ([2eef402](https://github.com/tolgee/tolgee-platform/commit/2eef4028a1a61c198cab2f3eea60c833edbfab05))
+
 ## [3.145.1](https://github.com/tolgee/tolgee-platform/compare/v3.145.0...v3.145.1) (2025-12-22)
 
 
