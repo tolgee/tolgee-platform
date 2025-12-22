@@ -28,6 +28,8 @@ class StringsStringsdictFileExporterTest {
       """
     |"key" = "Hello! I am great today! There you have some params %lld, %@, %e, %f";
     |
+    |"key" = "String\nwith\nnewlines";
+    |
     |
       """.trimMargin(),
     )
@@ -66,9 +68,9 @@ class StringsStringsdictFileExporterTest {
     |        <key>NSStringFormatValueTypeKey</key>
     |        <string>lld</string>
     |        <key>one</key>
-    |        <string>Today we had a very nice workout at %2$@, where we did one push up.</string>
+    |        <string>Today we had a very nice workout at %2${'$'}@, where we did one push up.</string>
     |        <key>other</key>
-    |        <string>Today we had a very nice workout at %2$@, where we did %3$@ push ups.</string>
+    |        <string>Today we had a very nice workout at %2${'$'}@, where we did %3${'$'}@ push ups.</string>
     |      </dict>
     |    </dict>
     |  </dict>
@@ -346,6 +348,13 @@ class StringsStringsdictFileExporterTest {
           "{count, plural, one {# day} other {# days}}",
           TranslationState.TRANSLATED,
           ExportKeyView(1, "key", namespace = "homepage", isPlural = true),
+          "en",
+        ),
+        ExportTranslationView(
+          1,
+          "String\nwith\nnewlines",
+          TranslationState.TRANSLATED,
+          ExportKeyView(1, "key"),
           "en",
         ),
         ExportTranslationView(

@@ -27,7 +27,7 @@ class StringsWriter {
       escapeApos = false,
       keepPercentSignEscaped = true,
       quoteMoreWhitespaces = false,
-      escapeNewLines = false,
+      escapeNewLines = true,
       escapeQuotes = true,
       utfSymbolCharacter = 'U',
     ).escape()
