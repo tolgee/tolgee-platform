@@ -65,8 +65,12 @@ class CoreImportFilesProcessor(
   val errors = mutableListOf<ErrorResponseBody>()
   val warnings = mutableListOf<ErrorResponseBody>()
 
+  private val importedTranslations =
+    mutableMapOf<ImportLanguage, MutableMap<ImportKey, MutableList<ImportTranslation>>>()
+
   fun processFiles(files: Collection<ImportFileDto>?) {
     errors.addAll(processFilesRecursive(files))
+    importDataManager.populateStoredTranslationsFrom(importedTranslations)
     renderPossibleNamespacesWarning()
   }
 
@@ -231,18 +235,22 @@ class CoreImportFilesProcessor(
   private fun FileProcessorContext.processLanguages() {
     this.languages.forEach { entry ->
       val languageEntity = entry.value
-      importDataManager.storedLanguages.add(languageEntity)
-
       if (!shouldBeImported(languageEntity)) {
         languageEntity.ignored = true
-        return@forEach
       }
+    }
 
-      preselectExistingLanguage(languageEntity)
-      if (saveData) {
-        importService.saveLanguages(this.languages.values)
+    if (saveData) {
+      importService.saveLanguages(this.languages.values.filterNot { it.ignored })
+    }
+
+    this.languages.forEach { entry ->
+      val languageEntity = entry.value
+      importDataManager.storedLanguages.add(languageEntity)
+
+      if (!languageEntity.ignored) {
+        preselectExistingLanguage(languageEntity)
       }
-      importDataManager.populateStoredTranslations(entry.value)
     }
   }
 
@@ -325,13 +333,27 @@ class CoreImportFilesProcessor(
   }
 
   private fun FileProcessorContext.processTranslations() {
-    this.translations.forEach { entry ->
-      val keyEntity = getOrCreateKey(entry.key)
-      entry.value.forEach translationForeach@{ newTranslation ->
-        processTranslation(newTranslation, keyEntity)
+    val translationsByKeys = translations.mapKeys { (keyName, _) ->
+      getOrCreateKey(keyName).apply {
+        shouldBeImported = shouldImportKey(name)
       }
-      keyEntity.shouldBeImported = shouldImportKey(keyEntity.name)
     }
+
+    translationsByKeys.forEach { (key, translations) ->
+      translations.forEach { translation ->
+        importedTranslations.putIfAbsent(translation.language, mutableMapOf())
+        importedTranslations.getValue(translation.language).putIfAbsent(key, mutableListOf())
+        importedTranslations.getValue(translation.language).getValue(key).add(translation)
+      }
+    }
+
+    translationsByKeys.forEach { (key, translations) ->
+      translations.forEach { translation ->
+        translation.key = key
+        processTranslation(translation)
+      }
+    }
+
     if (saveData) {
       importDataManager.saveAllStoredTranslations()
     }
@@ -346,9 +368,7 @@ class CoreImportFilesProcessor(
 
   private fun FileProcessorContext.processTranslation(
     newTranslation: ImportTranslation,
-    keyEntity: ImportKey,
   ) {
-    newTranslation.key = keyEntity
     val (isCollision, fileCollisions) = checkForInFileCollisions(newTranslation)
     if (isCollision) {
       fileEntity.addIssues(fileCollisions)
@@ -369,9 +389,8 @@ class CoreImportFilesProcessor(
     var isCollision = false
     val issues =
       mutableListOf<Pair<FileIssueType, Map<FileIssueParamType, String>>>()
-    val storedTranslations =
-      importDataManager
-        .getStoredTranslations(newTranslation.key, newTranslation.language)
+    val storedTranslations = importedTranslations[newTranslation.language]?.get(newTranslation.key) ?: emptyList()
+
     if (storedTranslations.isNotEmpty()) {
       isCollision = true
       storedTranslations.forEach { collision ->
