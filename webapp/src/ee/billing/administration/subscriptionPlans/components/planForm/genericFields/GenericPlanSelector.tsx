@@ -85,13 +85,13 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
  * The purpose of this is to put the user's popular plans to the top.
  */
 function useSortPlans(plans?: GenericPlanType[]) {
-  if (!plans) {
-    return undefined;
-  }
-
   const { preferredPlansLoadable } = usePreferredPlans();
 
   return React.useMemo(() => {
+    if (!plans) {
+      return undefined;
+    }
+
     return [...plans].sort(
       (a, b) =>
         (preferredPlansLoadable.data?.data?.[b.id] || 0) -
@@ -114,7 +114,7 @@ function usePreferredPlans() {
     preferredPlansLoadable: loadable,
     incrementPlanWithId: async (planId: number) => {
       const refetched = await loadable.refetch();
-      const current = refetched.data?.data[planId] ?? 0;
+      const current = refetched.data?.data?.[planId] ?? 0;
       const newValue = {
         ...refetched.data,
         [planId]: current + 1,
