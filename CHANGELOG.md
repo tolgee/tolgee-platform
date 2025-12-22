@@ -1,3 +1,10 @@
+## [3.145.1](https://github.com/tolgee/tolgee-platform/compare/v3.145.0...v3.145.1) (2025-12-22)
+
+
+### Bug Fixes
+
+* Export -> escape newlines in Apple .strings files ([#3358](https://github.com/tolgee/tolgee-platform/issues/3358)) ([38f8c12](https://github.com/tolgee/tolgee-platform/commit/38f8c12a22c0971d3e0c1aa092a1205e69e78a89)), closes [#3322](https://github.com/tolgee/tolgee-platform/issues/3322)
+
 # [3.145.0](https://github.com/tolgee/tolgee-platform/compare/v3.144.1...v3.145.0) (2025-12-21)
 
 
