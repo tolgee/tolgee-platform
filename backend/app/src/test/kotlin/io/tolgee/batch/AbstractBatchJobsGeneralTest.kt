@@ -4,6 +4,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
+import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.model.batch.BatchJobStatus
@@ -28,6 +29,9 @@ abstract class AbstractBatchJobsGeneralTest :
 
   @Autowired
   lateinit var batchJobService: BatchJobService
+
+  @Autowired
+  lateinit var batchProperties: BatchProperties
 
   @SpyBean
   @Autowired
@@ -342,5 +346,22 @@ abstract class AbstractBatchJobsGeneralTest :
       .runDebouncedJob()
       .id.assert
       .isNotEqualTo(anotherJobId)
+  }
+
+  @Test
+  fun `mt job respects maxPerJobConcurrency`() {
+    val mtDefault = batchProperties.maxPerMtJobConcurrency
+    val maxConcurrency = 1
+    batchProperties.maxPerMtJobConcurrency = maxConcurrency
+
+    try {
+      val mtJob = util.runMtJob(100)
+      util.assertAllowedMaxPerJobConcurrency(mtJob, maxConcurrency)
+      util.assertMaxPerJobConcurrencyIsLessThanOrEqualTo(maxConcurrency)
+      util.waitForJobSuccess(mtJob)
+      util.assertJobUnlocked()
+    } finally {
+      batchProperties.maxPerMtJobConcurrency = mtDefault
+    }
   }
 }

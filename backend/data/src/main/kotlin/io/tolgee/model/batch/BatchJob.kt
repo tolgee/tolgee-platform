@@ -63,6 +63,11 @@ class BatchJob :
 
   val chunkedTarget get() = chunkTarget(chunkSize, target)
 
+  /**
+   * The maximum number of coroutines among all tolgee instances (e.g. k8s pods). The default value is -1,
+   * which means that the concurrency is not limited.
+   * (check `BatchJobConcurrentLauncher#ExecutionQueueItem.trySetRunningState()` for more info).
+   */
   var maxPerJobConcurrency: Int = -1
 
   @Enumerated(STRING)
