@@ -64,7 +64,8 @@ export const getLanguagesContent = ({
   );
 
   // Показываем кнопки "All" и "None" только для batch операций
-  const isBatchOperation = context === 'batch-operations';
+  const isBatchOperation =
+    context === 'batch-operations' || context === 'translations';
 
   const languageItems = languages.map((lang) => (
     <MenuItem

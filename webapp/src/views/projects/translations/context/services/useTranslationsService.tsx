@@ -177,12 +177,15 @@ export const useTranslationsService = (props: Props) => {
       onSuccess(data) {
         const flatKeys = flattenKeys(data);
 
-        const selectedLanguages = languages?.length
-          ? shaveBy(
-              data.pages[0].selectedLanguages.map((l) => l.tag),
-              languages
-            )
-          : data.pages[0].selectedLanguages.map((l) => l.tag);
+        const selectedLanguages =
+          languages !== undefined
+            ? languages.length === 0
+              ? []
+              : shaveBy(
+                  data.pages[0].selectedLanguages.map((l) => l.tag),
+                  languages
+                )
+            : data.pages[0].selectedLanguages.map((l) => l.tag);
         if (query.languages?.toString() !== selectedLanguages?.toString()) {
           // update language selection to the fetched one
           // if there are some languages which are not permitted or were deleted
@@ -301,7 +304,7 @@ export const useTranslationsService = (props: Props) => {
     }
     // override url languages
     setUrlLanguages(undefined);
-    _setLanguages(value?.length ? value : undefined);
+    _setLanguages(value);
   };
 
   const updateQuery = (q: Partial<typeof query>) => {
