@@ -197,7 +197,6 @@ class BatchJobService(
   @TransactionalEventListener
   fun onCreated(event: OnBatchJobCreated) {
     val (job, executions) = event
-    applicationContext.publishEvent(OnBatchJobCreated(job, executions))
 
     executions.let { batchJobChunkExecutionQueue.addToQueue(it) }
     logger.debug(
