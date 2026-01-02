@@ -96,16 +96,7 @@ class BatchJobChunkExecutionQueue(
   }
 
   fun addExecutionsToLocalQueue(data: List<BatchJobChunkExecutionDto>) {
-    val ids = queue.map { it.chunkExecutionId }.toSet()
-    var count = 0
-    data.forEach {
-      if (!ids.contains(it.id)) {
-        queue.add(it.toItem())
-        count++
-      }
-    }
-
-    logger.debug("Added $count new items to queue ${System.identityHashCode(this)}")
+    addItemsToLocalQueue(data.map { it.toItem() })
   }
 
   fun addItemsToLocalQueue(data: List<ExecutionQueueItem>) {
