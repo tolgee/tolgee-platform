@@ -185,7 +185,7 @@ class BatchJobConcurrentLauncher(
       )
 
       // we haven't publish consuming, so we can add it only to the local queue
-      batchJobChunkExecutionQueue.addItemsToLocalQueue(
+      batchJobChunkExecutionQueue.addItemsToQueue(
         listOf(
           executionItem.also {
             it.executeAfter = currentDateProvider.date.time + 1000
@@ -212,7 +212,7 @@ class BatchJobConcurrentLauncher(
 
   private fun addBackToQueue(executionItem: ExecutionQueueItem) {
     logger.trace { "Adding execution $executionItem back to queue" }
-    batchJobChunkExecutionQueue.addItemsToLocalQueue(listOf(executionItem))
+    batchJobChunkExecutionQueue.addItemsToQueue(listOf(executionItem))
   }
 
   private fun onJobCompleted(executionItem: ExecutionQueueItem) {

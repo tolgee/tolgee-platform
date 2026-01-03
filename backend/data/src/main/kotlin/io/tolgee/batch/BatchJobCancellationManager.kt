@@ -85,7 +85,7 @@ class BatchJobCancellationManager(
   private fun cancelExecutions(jobId: Long): MutableList<BatchJobChunkExecution> =
     executeInNewTransaction(transactionManager) {
       entityManager.createNativeQuery("""SET enable_seqscan=off""")
-      val executions = getUnlockedPendingExecutions(jobId)
+      val executions = getUnlockedNewOrPendingExecutions(jobId)
 
       logger.debug(
         "Cancelling job $jobId, cancelling unlocked execution ids: ${
@@ -100,13 +100,13 @@ class BatchJobCancellationManager(
       executions
     }
 
-  private fun getUnlockedPendingExecutions(jobId: Long): MutableList<BatchJobChunkExecution> =
+  private fun getUnlockedNewOrPendingExecutions(jobId: Long): MutableList<BatchJobChunkExecution> =
     entityManager
       .createQuery(
         """
             from BatchJobChunkExecution bjce  
             where bjce.batchJob.id = :id
-            and status = :status
+            and status in (:status)
           """,
         BatchJobChunkExecution::class.java,
       ).setLockMode(LockModeType.PESSIMISTIC_WRITE)
@@ -114,7 +114,7 @@ class BatchJobCancellationManager(
         "jakarta.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED,
       ).setParameter("id", jobId)
-      .setParameter("status", BatchJobChunkExecutionStatus.PENDING)
+      .setParameter("status", listOf(BatchJobChunkExecutionStatus.PENDING, BatchJobChunkExecutionStatus.NEW))
       .resultList
 
   private fun handleJobStatusAfterCancellation(jobId: Long) {

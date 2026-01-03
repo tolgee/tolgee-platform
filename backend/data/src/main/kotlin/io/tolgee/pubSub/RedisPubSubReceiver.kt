@@ -3,6 +3,7 @@ package io.tolgee.pubSub
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.batch.events.JobCancelEvent
 import io.tolgee.batch.events.JobQueueItemsEvent
+import io.tolgee.batch.events.NewJobEvent
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import io.tolgee.websocket.RedisWebsocketEventWrapper
@@ -19,6 +20,11 @@ class RedisPubSubReceiver(
       template.convertAndSend(data.destination, it)
       logger.debug("Sending message to ${data.destination}")
     }
+  }
+
+  fun receiveNewJobQueueMessage(message: String) {
+    val data = jacksonObjectMapper().readValue(message, NewJobEvent::class.java)
+    applicationEventPublisher.publishEvent(data)
   }
 
   fun receiveJobQueueMessage(message: String) {

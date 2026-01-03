@@ -31,7 +31,7 @@ class BatchJobChunkExecution : StandardAuditModel() {
   lateinit var batchJob: BatchJob
 
   @Enumerated(EnumType.STRING)
-  var status: BatchJobChunkExecutionStatus = BatchJobChunkExecutionStatus.PENDING
+  var status: BatchJobChunkExecutionStatus = BatchJobChunkExecutionStatus.NEW
 
   var chunkNumber: Int = 0
 

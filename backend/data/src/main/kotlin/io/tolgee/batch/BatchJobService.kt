@@ -118,9 +118,9 @@ class BatchJobService(
 
     entityManager.flushAndClear()
 
-    val executions = storeExecutions(chunked = chunked, job = job, executeAfter = processor.getExecuteAfter(request))
+    storeExecutions(chunked = chunked, job = job, executeAfter = processor.getExecuteAfter(request))
 
-    applicationContext.publishEvent(OnBatchJobCreated(job, executions))
+    applicationContext.publishEvent(OnBatchJobCreated(job))
 
     return job
   }
@@ -192,20 +192,6 @@ class BatchJobService(
     val debouncingKeyJson =
       objectMapper.writeValueAsString(key)
     return sha256Hex(debouncingKeyJson)
-  }
-
-  @TransactionalEventListener
-  fun onCreated(event: OnBatchJobCreated) {
-    val (job, executions) = event
-
-    executions.let { batchJobChunkExecutionQueue.addToQueue(it) }
-    logger.debug(
-      "Starting job ${job.id}, aadded ${executions.size} executions to queue ${
-        System.identityHashCode(
-          batchJobChunkExecutionQueue,
-        )
-      }",
-    )
   }
 
   fun findJobEntity(id: Long): BatchJob? {
