@@ -14,6 +14,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.key.TagService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
@@ -46,6 +47,7 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 class TagsController(
   private val projectHolder: ProjectHolder,
   private val tagService: TagService,
+  private val branchService: BranchService,
   private val tagModelAssembler: TagModelAssembler,
   private val pagedResourcesAssembler: PagedResourcesAssembler<Tag>,
 ) : IController {
@@ -97,8 +99,10 @@ class TagsController(
   @RequestActivity(ActivityType.COMPLEX_TAG_OPERATION)
   fun executeComplexTagOperation(
     @RequestBody req: ComplexTagKeysRequest,
+    @RequestParam(required = false) branch: String? = null,
   ) {
-    tagService.complexTagOperation(projectHolder.project.id, req)
+    branch?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
+    tagService.complexTagOperation(projectHolder.project.id, req, branch)
   }
 
   private val Tag.model: TagModel
