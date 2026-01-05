@@ -237,13 +237,9 @@ class KeyController(
   fun importKeys(
     @RequestBody @Valid
     dto: ImportKeysDto,
+    @RequestParam branch: String?,
   ) {
-    securityService.checkLanguageTranslatePermissionByTag(
-      projectHolder.project.id,
-      dto.keys.flatMap { it.translations.keys }.toSet(),
-    )
-
-    keyService.importKeys(dto.keys, projectHolder.projectEntity)
+    keyService.importKeys(dto.keys, projectHolder.projectEntity, branch)
   }
 
   @PostMapping("/import-resolvable")
