@@ -20,6 +20,7 @@ class KeysImporter(
   applicationContext: ApplicationContext,
   val keys: List<ImportKeysItemDto>,
   val project: Project,
+  val branch: String?,
 ) {
   private val translationService: TranslationService = applicationContext.getBean(TranslationService::class.java)
   private val keyService: KeyService = applicationContext.getBean(KeyService::class.java)
@@ -30,17 +31,18 @@ class KeysImporter(
   private val keyMetaService: KeyMetaService = applicationContext.getBean(KeyMetaService::class.java)
 
   fun import() {
+    val languageTags = keys.flatMap { it.translations.keys }.toSet()
+    securityService.checkLanguageTranslatePermissionByTag(project.id, languageTags)
+    val branchEntity = securityService.checkAndGetProjectBranch(project.id, branch)
+
     val existing =
       keyService
-        .getAll(project.id)
+        .getAllByBranch(project.id, branch)
         .associateBy { ((it.namespace?.name to it.name)) }
         .toMutableMap()
     val namespaces = mutableMapOf<String, Namespace>()
     namespaceService.getAllInProject(project.id).associateByTo(namespaces) { it.name }
-    val languageTags = keys.flatMap { it.translations.keys }.toSet()
     val languages = languageService.findEntitiesByTags(languageTags, project.id).associateBy { it.tag }
-
-    securityService.checkLanguageTranslatePermissionByTag(project.id, languageTags)
 
     val toTag = mutableMapOf<Key, List<String>>()
     val keyMetasToSave = mutableListOf<KeyMeta>()
@@ -60,6 +62,7 @@ class KeysImporter(
               }
             }
             this.namespace = namespaces[safeNamespace]
+            this.branch = branchEntity ?: project.getDefaultBranch()
           }
 
         val convertedToPlurals = keyDto.translations.convertToPluralIfAnyIsPlural()?.convertedStrings
