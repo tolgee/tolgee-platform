@@ -387,8 +387,9 @@ class KeyService(
   fun importKeys(
     keys: List<ImportKeysItemDto>,
     project: Project,
+    branch: String?,
   ) {
-    KeysImporter(applicationContext, keys, project).import()
+    KeysImporter(applicationContext, keys, project, branch).import()
   }
 
   @Transactional

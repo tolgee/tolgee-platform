@@ -12,6 +12,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
 import io.tolgee.model.UploadedImage
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.enums.TranslationProtection
@@ -19,6 +20,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.task.ITaskService
@@ -32,6 +34,7 @@ class SecurityService(
   private val languageService: LanguageService,
   private val keyRepository: KeyRepository,
   private val projectHolder: ProjectHolder,
+  private val branchService: BranchService,
 ) {
   @set:Autowired
   lateinit var apiKeyService: ApiKeyService
@@ -524,6 +527,13 @@ class SecurityService(
         throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
       }
     }
+  }
+
+  fun checkAndGetProjectBranch(
+    projectId: Long,
+    branch: String?,
+  ): Branch? {
+    return branch?.let { branchService.getActiveBranch(projectId, it) }
   }
 
   /**
