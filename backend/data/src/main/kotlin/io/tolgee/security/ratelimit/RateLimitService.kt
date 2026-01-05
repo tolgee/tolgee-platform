@@ -163,6 +163,14 @@ class RateLimitService(
     )
   }
 
+  /**
+   * Determines whether rate limiting should be applied based on the configuration and the
+   * type of operation (authentication or regular endpoint access).
+   *
+   * @param isAuthentication Indicates if the request is an authentication operation.
+   *                          If true, checks the rate limiting configuration for authentication operations.
+   *                          If false, checks the rate limiting configuration for regular endpoint operations.
+   */
   fun shouldRateLimit(isAuthentication: Boolean): Boolean {
     @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
     if (!rateLimitProperties.enabled) return false
@@ -176,7 +184,7 @@ class RateLimitService(
     limit: Int,
     refillDuration: Duration = Duration.ofMinutes(1),
   ) {
-    if (!shouldRateLimit(true)) {
+    if (!shouldRateLimit(false)) {
       return
     }
 
