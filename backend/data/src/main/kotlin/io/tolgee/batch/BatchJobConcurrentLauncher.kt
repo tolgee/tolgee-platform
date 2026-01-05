@@ -171,7 +171,10 @@ class BatchJobConcurrentLauncher(
           |(there are already max concurrent executions running of this specific job)
         """.trimMargin(),
       )
-      addBackToQueue(executionItem)
+      if (!batchJobService.getJobDto(executionItem.jobId).status.completed) {
+        // e.g. job isn't canceled (check ProgressManager.trySetExecutionRunning returning false on competed job)
+        addBackToQueue(executionItem)
+      }
       return false
     }
 
@@ -263,12 +266,16 @@ class BatchJobConcurrentLauncher(
 
   private fun ExecutionQueueItem.trySetRunningState(): Boolean {
     return progressManager.trySetExecutionRunning(this.chunkExecutionId, this.jobId) {
+      val maxPerJobConcurrency = batchJobService.getJobDto(this.jobId).maxPerJobConcurrency
+      if (maxPerJobConcurrency == -1) {
+        return@trySetExecutionRunning true
+      }
       val count =
         it.values.count { executionState -> executionState.status == BatchJobChunkExecutionStatus.RUNNING }
       if (count == 0) {
         return@trySetExecutionRunning true
       }
-      batchJobService.getJobDto(this.jobId).maxPerJobConcurrency > count
+      maxPerJobConcurrency > count
     }
   }
 }
