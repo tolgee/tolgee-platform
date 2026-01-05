@@ -1,3 +1,10 @@
+## [3.145.3](https://github.com/tolgee/tolgee-platform/compare/v3.145.2...v3.145.3) (2026-01-05)
+
+
+### Bug Fixes
+
+* update status of pending chunks in redis/local queue ([#3355](https://github.com/tolgee/tolgee-platform/issues/3355)) ([959fda0](https://github.com/tolgee/tolgee-platform/commit/959fda07300a471fc54726d52b8485fa85884d22))
+
 ## [3.145.2](https://github.com/tolgee/tolgee-platform/compare/v3.145.1...v3.145.2) (2025-12-22)
 
 
