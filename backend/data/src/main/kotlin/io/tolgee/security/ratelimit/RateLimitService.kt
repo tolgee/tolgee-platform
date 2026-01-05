@@ -20,9 +20,11 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.constants.Caches
+import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.time.Duration
 
@@ -32,6 +34,8 @@ class RateLimitService(
   private val lockingProvider: LockingProvider,
   private val currentDateProvider: CurrentDateProvider,
   private val rateLimitProperties: RateLimitProperties,
+  @Lazy
+  private val authenticationFacade: AuthenticationFacade,
 ) {
   private val cache: Cache by lazy {
     cacheManager.getCache(Caches.RATE_LIMITS)
@@ -157,6 +161,36 @@ class RateLimitService(
       Duration.ofMillis(rateLimitProperties.emailVerificationRequestWindow),
       false,
     )
+  }
+
+  fun shouldRateLimit(isAuthentication: Boolean): Boolean {
+    @Suppress("DEPRECATION") // TODO: remove for Tolgee 4 release
+    if (!rateLimitProperties.enabled) return false
+
+    return (isAuthentication && rateLimitProperties.authenticationLimits) ||
+      (!isAuthentication && rateLimitProperties.endpointLimits)
+  }
+
+  fun checkPerUserRateLimit(
+    bucketName: String,
+    limit: Int,
+    refillDuration: Duration = Duration.ofMinutes(1),
+  ) {
+    if (!shouldRateLimit(true)) {
+      return
+    }
+
+    val userAccount = authenticationFacade.authenticatedUserOrNull ?: return
+
+    val policy =
+      RateLimitPolicy(
+        "$bucketName::user.${userAccount.id}",
+        limit,
+        refillDuration,
+        false,
+      )
+
+    consumeBucket(policy)
   }
 
   /**

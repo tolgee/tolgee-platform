@@ -58,13 +58,13 @@ class RateLimitInterceptorTest {
         TestLockingProvider(),
         currentDateProvider,
         rateLimitProperties,
+        authenticationFacade,
       ),
     )
 
   private val rateLimitInterceptor =
     RateLimitInterceptor(
       authenticationFacade,
-      rateLimitProperties,
       rateLimitService,
     )
 

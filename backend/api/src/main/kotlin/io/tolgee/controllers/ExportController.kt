@@ -5,11 +5,13 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.ProjectLastModifiedManager
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.translation.TranslationService
@@ -24,6 +26,7 @@ import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.ByteArrayInputStream
 import java.io.OutputStream
+import java.time.Duration
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -44,6 +47,8 @@ class ExportController(
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
   private val projectLastModifiedManager: ProjectLastModifiedManager,
   private val objectMapper: ObjectMapper,
+  private val rateLimitService: RateLimitService,
+  private val tolgeeProperties: TolgeeProperties,
 ) : IController {
   @Suppress("MVCPathVariableInspection")
   @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
@@ -53,6 +58,12 @@ class ExportController(
   @RateLimited(limit = 10, refillDurationInMs = 60_000)
   @Deprecated("Use v2 export controller")
   fun doExportJsonZip(request: WebRequest): ResponseEntity<StreamingResponseBody>? {
+    rateLimitService.checkPerUserRateLimit(
+      "export",
+      limit = tolgeeProperties.rateLimit.exportRequestLimit,
+      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimit.exportRequestWindow),
+    )
+
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
       val allLanguages =
         permissionService.getPermittedViewLanguages(

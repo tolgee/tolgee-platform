@@ -20,6 +20,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.model.UserAccount
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -57,6 +58,8 @@ class RateLimitServiceTest {
 
   private val rateLimitProperties = Mockito.spy(RateLimitProperties::class.java)
 
+  private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
+
   private val rateLimitService =
     Mockito.spy(
       RateLimitService(
@@ -64,6 +67,7 @@ class RateLimitServiceTest {
         lockingProvider,
         currentDateProvider,
         rateLimitProperties,
+        authenticationFacade,
       ),
     )
 

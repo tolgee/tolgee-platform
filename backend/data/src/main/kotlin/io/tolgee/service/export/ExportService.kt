@@ -3,8 +3,10 @@ package io.tolgee.service.export
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.export.dataProvider.ExportDataProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.project.ProjectService
@@ -23,11 +25,19 @@ class ExportService(
   private val applicationContext: ApplicationContext,
   private val businessEventPublisher: BusinessEventPublisher,
   private val objectMapper: ObjectMapper,
+  private val rateLimitService: RateLimitService,
+  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
   fun export(
     projectId: Long,
     exportParams: IExportParams,
   ): Map<String, InputStream> {
+    rateLimitService.checkPerUserRateLimit(
+      "export",
+      limit = tolgeeProperties.rateLimit.exportRequestLimit,
+      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimit.exportRequestWindow),
+    )
+
     logger.trace { "Exporting project $projectId with params ${objectMapper.writeValueAsString(exportParams)}" }
     return traceLogMeasureTime("Export project $projectId data") {
       val data = getDataForExport(projectId, exportParams)
