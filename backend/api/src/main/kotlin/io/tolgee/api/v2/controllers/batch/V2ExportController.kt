@@ -76,7 +76,7 @@ class V2ExportController(
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @ExportApiResponse
-  @RateLimited(limit = 4, refillDurationInMs = 60_000)
+  @RateLimited(limit = 10, refillDurationInMs = 60_000)
   fun exportData(
     @ParameterObject params: ExportParams,
     request: WebRequest,
@@ -96,6 +96,7 @@ class V2ExportController(
     }
   }
 
+  @RateLimited(limit = 10, refillDurationInMs = 60_000)
   @PostMapping(value = [""])
   @Operation(
     summary = "Export data (post)",

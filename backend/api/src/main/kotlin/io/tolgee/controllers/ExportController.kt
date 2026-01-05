@@ -10,6 +10,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.security.PermissionService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.StreamingResponseBodyProvider
@@ -49,6 +50,7 @@ class ExportController(
   @Operation(summary = "Export to ZIP of jsons", description = "Exports data as ZIP of jsons", deprecated = true)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
+  @RateLimited(limit = 10, refillDurationInMs = 60_000)
   @Deprecated("Use v2 export controller")
   fun doExportJsonZip(request: WebRequest): ResponseEntity<StreamingResponseBody>? {
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
