@@ -42,6 +42,8 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
         (null to "test key") to listOf("test", "existing tag", "existing tag 2", "new tag"),
         (null to "no tag key") to listOf("other tag"),
         (null to "existing tag key 2") to listOf("existing tag 2", "other tag"),
+        // branched key keeps untouched
+        (null to "branch key") to listOf("existing tag"),
       ),
     )
   }
@@ -64,6 +66,7 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
         (null to "test key") to listOf("test", "existing tag", "existing tag 2", "new tag"),
         (null to "no tag key") to listOf("other tag"),
         (null to "existing tag key 2") to listOf("existing tag 2", "new tag"),
+        (null to "branch key") to listOf("existing tag"),
       ),
     )
   }
@@ -130,6 +133,7 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
         (null to "test key") to listOf("test", "existing tag 2"),
         (null to "no tag key") to listOf(),
         (null to "existing tag key 2") to listOf(),
+        (null to "branch key") to listOf("existing tag"),
       ),
     )
   }
@@ -152,6 +156,7 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
         (null to "test key") to listOf("test"),
         (null to "no tag key") to listOf(),
         (null to "existing tag key 2") to listOf(),
+        (null to "branch key") to listOf("existing tag"),
       ),
     )
   }
@@ -269,6 +274,55 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
         (null to "no tag key") to listOf("other tag"),
         (null to "existing tag key 2") to listOf("existing tag 2", "other tag"),
         ("namespace" to "namespaced key") to listOf("existing tag", "other tag"),
+      ),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `works with branch - tag filtered within branch`() {
+    saveAndPrepare()
+
+    performProjectAuthPut(
+      "tag-complex?branch=feature",
+      mapOf(
+        "filterTag" to listOf("existing tag"),
+        "tagFiltered" to listOf("branch only"),
+      ),
+    ).andIsOk
+
+    assertKeyTags(
+      mapOf(
+        (null to "branch key") to listOf("existing tag", "branch only"),
+        // others keep untouched
+        (null to "test key") to listOf("test", "existing tag", "existing tag 2"),
+        ("namespace" to "namespaced key") to listOf("existing tag"),
+        (null to "existing tag key 2") to listOf("existing tag 2"),
+      ),
+    )
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `works with branch - tag other within branch`() {
+    saveAndPrepare()
+
+    performProjectAuthPut(
+      "tag-complex?branch=feature",
+      mapOf(
+        "filterTag" to listOf("oh no it doesnt exist"),
+        "tagOther" to listOf("branch only"),
+      ),
+    ).andIsOk
+
+    assertKeyTags(
+      mapOf(
+        (null to "branch key") to listOf("existing tag", "branch only"),
+        // others keep untouched
+        (null to "test key") to listOf("test", "existing tag", "existing tag 2"),
+        ("namespace" to "namespaced key") to listOf("existing tag"),
+        (null to "existing tag key 2") to listOf("existing tag 2"),
+        (null to "no tag key") to listOf(),
       ),
     )
   }

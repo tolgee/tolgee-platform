@@ -324,9 +324,10 @@ class TagService(
   fun complexTagOperation(
     projectId: Long,
     req: ComplexTagKeysRequest,
+    branch: String?,
   ) {
     val provider =
-      ComplexTagOperationKeyProvider(projectId, req, applicationContext)
+      ComplexTagOperationKeyProvider(projectId, req, branch, applicationContext)
 
     if (req.tagFiltered != null || req.untagFiltered != null) {
       val untagFilteredWithAppliedWildcards = req.untagFiltered?.applyWildcards(projectId)?.toList()
