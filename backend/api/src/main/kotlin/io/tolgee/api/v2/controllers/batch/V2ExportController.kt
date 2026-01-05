@@ -13,6 +13,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.export.ExportService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.util.StreamingResponseBodyProvider
@@ -75,6 +76,7 @@ class V2ExportController(
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @ExportApiResponse
+  @RateLimited(limit = 10, refillDurationInMs = 60_000)
   fun exportData(
     @ParameterObject params: ExportParams,
     request: WebRequest,
@@ -94,6 +96,7 @@ class V2ExportController(
     }
   }
 
+  @RateLimited(limit = 10, refillDurationInMs = 60_000)
   @PostMapping(value = [""])
   @Operation(
     summary = "Export data (post)",

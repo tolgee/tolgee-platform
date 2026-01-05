@@ -1,6 +1,7 @@
 package io.tolgee.security.rateLimits
 
 import io.tolgee.constants.Caches
+import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsRateLimited
 import io.tolgee.fixtures.andIsUnauthorized
@@ -71,5 +72,16 @@ class RateLimitsTest : AuthorizedControllerTest() {
       performPost("/api/public/generatetoken?bla", mapOf("username" to "a", "password" to "p")).andIsUnauthorized
     }
     performPost("/api/public/generatetoken?bla", mapOf("username" to "a", "password" to "p")).andIsRateLimited
+  }
+
+  @Test
+  fun `limits the export`() {
+    val projectTestData = TranslationsTestData()
+    testDataService.saveTestData(projectTestData.root)
+    loginAsUser(projectTestData.user.username)
+    (1..10).forEach { _ ->
+      performAuthGet("/v2/projects/${projectTestData.project.id}/export").andIsOk
+    }
+    performAuthGet("/v2/projects/${projectTestData.project.id}/export").andIsRateLimited
   }
 }

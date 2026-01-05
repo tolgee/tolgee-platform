@@ -1,12 +1,18 @@
 package io.tolgee.service.export
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.export.dataProvider.ExportDataProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.project.ProjectService
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
+import io.tolgee.util.trace
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import java.io.InputStream
@@ -18,40 +24,52 @@ class ExportService(
   private val projectService: ProjectService,
   private val applicationContext: ApplicationContext,
   private val businessEventPublisher: BusinessEventPublisher,
-) {
+  private val objectMapper: ObjectMapper,
+  private val rateLimitService: RateLimitService,
+  private val tolgeeProperties: TolgeeProperties,
+) : Logging {
   fun export(
     projectId: Long,
     exportParams: IExportParams,
   ): Map<String, InputStream> {
-    val data = getDataForExport(projectId, exportParams)
-    val baseLanguage = getProjectBaseLanguage(projectId)
-    val project = projectService.get(projectId)
-    val baseTranslationsProvider =
-      getBaseTranslationsProvider(
-        exportParams = exportParams,
-        projectId = projectId,
-        baseLanguage = baseLanguage,
-      )
+    rateLimitService.checkPerUserRateLimit(
+      "export",
+      limit = tolgeeProperties.rateLimit.exportRequestLimit,
+      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimit.exportRequestWindow),
+    )
 
-    return fileExporterFactory
-      .create(
-        data = data,
-        exportParams = exportParams,
-        baseTranslationsProvider = baseTranslationsProvider,
-        baseLanguage,
-        projectIcuPlaceholdersSupport = project.icuPlaceholders,
-      ).produceFiles()
-      .also {
-        businessEventPublisher.publishOnceInTime(
-          OnBusinessEventToCaptureEvent(
-            eventName = "EXPORT",
-            projectId = projectId,
-          ),
-          Duration.ofDays(1),
-        ) {
-          "EXPORT_$projectId"
+    logger.trace { "Exporting project $projectId with params ${objectMapper.writeValueAsString(exportParams)}" }
+    return traceLogMeasureTime("Export project $projectId data") {
+      val data = getDataForExport(projectId, exportParams)
+      val baseLanguage = getProjectBaseLanguage(projectId)
+      val project = projectService.get(projectId)
+      val baseTranslationsProvider =
+        getBaseTranslationsProvider(
+          exportParams = exportParams,
+          projectId = projectId,
+          baseLanguage = baseLanguage,
+        )
+
+      fileExporterFactory
+        .create(
+          data = data,
+          exportParams = exportParams,
+          baseTranslationsProvider = baseTranslationsProvider,
+          baseLanguage,
+          projectIcuPlaceholdersSupport = project.icuPlaceholders,
+        ).produceFiles()
+        .also {
+          businessEventPublisher.publishOnceInTime(
+            OnBusinessEventToCaptureEvent(
+              eventName = "EXPORT",
+              projectId = projectId,
+            ),
+            Duration.ofDays(1),
+          ) {
+            "EXPORT_$projectId"
+          }
         }
-      }
+    }
   }
 
   /**
