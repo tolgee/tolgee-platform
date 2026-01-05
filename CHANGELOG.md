@@ -1,3 +1,11 @@
+## [3.145.4](https://github.com/tolgee/tolgee-platform/compare/v3.145.3...v3.145.4) (2026-01-05)
+
+
+### Bug Fixes
+
+* Rate limit export & trace log time ([#3364](https://github.com/tolgee/tolgee-platform/issues/3364)) ([90830dd](https://github.com/tolgee/tolgee-platform/commit/90830ddf71804d9d1c2f8e65a26f4041a5447d1e))
+* Trace logging content delivery serialization ([#3365](https://github.com/tolgee/tolgee-platform/issues/3365)) ([5c6400b](https://github.com/tolgee/tolgee-platform/commit/5c6400bae95d1299927c1cea28837f0f0b9c135e))
+
 ## [3.145.3](https://github.com/tolgee/tolgee-platform/compare/v3.145.2...v3.145.3) (2026-01-05)
 
 
