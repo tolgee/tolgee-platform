@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.batch
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.ProjectLastModifiedManager
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.exceptions.BadRequestException
@@ -13,6 +14,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.ratelimit.RateLimited
 import io.tolgee.service.export.ExportService
 import io.tolgee.service.language.LanguageService
@@ -34,6 +36,7 @@ import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.InputStream
 import java.io.OutputStream
+import java.time.Duration
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -50,6 +53,8 @@ class V2ExportController(
   private val authenticationFacade: AuthenticationFacade,
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
   private val projectLastModifiedManager: ProjectLastModifiedManager,
+  private val rateLimitService: RateLimitService,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   @GetMapping(value = [""])
   @Operation(
@@ -81,6 +86,11 @@ class V2ExportController(
     @ParameterObject params: ExportParams,
     request: WebRequest,
   ): ResponseEntity<StreamingResponseBody>? {
+    rateLimitService.checkPerUserRateLimit(
+      "export",
+      limit = tolgeeProperties.rateLimit.exportRequestLimit,
+      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimit.exportRequestWindow),
+    )
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
       params.languages =
         languageService

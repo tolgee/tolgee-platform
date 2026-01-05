@@ -3,10 +3,9 @@ package io.tolgee.service.export
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.reporting.BusinessEventPublisher
 import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
-import io.tolgee.security.ratelimit.RateLimitService
+import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.service.export.dataProvider.ExportDataProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.project.ProjectService
@@ -25,20 +24,12 @@ class ExportService(
   private val applicationContext: ApplicationContext,
   private val businessEventPublisher: BusinessEventPublisher,
   private val objectMapper: ObjectMapper,
-  private val rateLimitService: RateLimitService,
-  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
   fun export(
     projectId: Long,
     exportParams: IExportParams,
   ): Map<String, InputStream> {
-    rateLimitService.checkPerUserRateLimit(
-      "export",
-      limit = tolgeeProperties.rateLimit.exportRequestLimit,
-      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimit.exportRequestWindow),
-    )
-
-    logger.trace { "Exporting project $projectId with params ${objectMapper.writeValueAsString(exportParams)}" }
+    traceLogExportInfo(exportParams, projectId)
     return traceLogMeasureTime("Export project $projectId data") {
       val data = getDataForExport(projectId, exportParams)
       val baseLanguage = getProjectBaseLanguage(projectId)
@@ -59,15 +50,7 @@ class ExportService(
           projectIcuPlaceholdersSupport = project.icuPlaceholders,
         ).produceFiles()
         .also {
-          businessEventPublisher.publishOnceInTime(
-            OnBusinessEventToCaptureEvent(
-              eventName = "EXPORT",
-              projectId = projectId,
-            ),
-            Duration.ofDays(1),
-          ) {
-            "EXPORT_$projectId"
-          }
+          publishBusinessEvent(projectId)
         }
     }
   }
@@ -101,5 +84,35 @@ class ExportService(
 
   private fun getProjectBaseLanguage(projectId: Long): LanguageDto {
     return projectService.getOrAssignBaseLanguage(projectId)
+  }
+
+  private fun publishBusinessEvent(projectId: Long) {
+    businessEventPublisher.publishOnceInTime(
+      OnBusinessEventToCaptureEvent(
+        eventName = "EXPORT",
+        projectId = projectId,
+      ),
+      Duration.ofDays(1),
+    ) {
+      "EXPORT_$projectId"
+    }
+  }
+
+  private fun traceLogExportInfo(
+    exportParams: IExportParams,
+    projectId: Long,
+  ) {
+    logger.trace {
+      // we don't want to log params which are other then ExportParams, since it can fail on serialization
+      val params = exportParams as? ExportParams
+
+      val json =
+        try {
+          objectMapper.writeValueAsString(params)
+        } catch (_: Exception) {
+          "[cannot serialize params]"
+        }
+      "Exporting project $projectId with params $json"
+    }
   }
 }
