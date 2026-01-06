@@ -5,8 +5,9 @@ import {
   styled,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
+import { useInView } from 'react-intersection-observer';
 import { Branch, CheckDone } from 'tg.component/CustomIcons';
 
 import {
@@ -52,6 +53,9 @@ type Props = {
   changes: BranchMergeChangeModel[];
   selectedTab: BranchMergeChangeType;
   isLoading: boolean;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  onLoadMore?: () => void;
   onResolve?: (
     conflict: BranchMergeConflictModel,
     resolution: 'SOURCE' | 'TARGET'
@@ -65,12 +69,22 @@ export const ChangeList = ({
   changes,
   selectedTab,
   isLoading,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
   onResolve,
   onResolveAll,
   resolveAllLoading,
 }: Props) => {
   const { t } = useTranslate();
   const [showAllMap, setShowAllMap] = useState<Record<string, boolean>>({});
+  const { ref, inView } = useInView({ rootMargin: '200px' });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      onLoadMore?.();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, onLoadMore]);
 
   const toggleShowAll = (key: string) => {
     setShowAllMap((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -279,6 +293,11 @@ export const ChangeList = ({
             })}
           </ConflictsWrapper>
         )
+      )}
+      {hasNextPage && (
+        <Box ref={ref} display="flex" justifyContent="center" py={2}>
+          {isFetchingNextPage && <CircularProgress size={24} />}
+        </Box>
       )}
     </Box>
   );
