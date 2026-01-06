@@ -1342,6 +1342,9 @@ export interface components {
       userFullName?: string;
       username?: string;
     };
+    ApplyBranchMergeRequest: {
+      deleteBranch: boolean;
+    };
     AuthInfoModel: {
       isReadOnly: boolean;
     };
@@ -12666,6 +12669,11 @@ export interface operations {
         };
       };
     };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ApplyBranchMergeRequest"];
+      };
+    };
   };
   getBranchMergeSessionChanges: {
     parameters: {
@@ -14956,6 +14964,9 @@ export interface operations {
   /** Imports new keys with translations. If key already exists, its translations and tags are not updated. */
   importKeys_2: {
     parameters: {
+      query: {
+        branch?: string;
+      };
       path: {
         projectId: number;
       };
@@ -18283,6 +18294,9 @@ export interface operations {
   };
   executeComplexTagOperation: {
     parameters: {
+      query: {
+        branch?: string;
+      };
       path: {
         projectId: number;
       };
