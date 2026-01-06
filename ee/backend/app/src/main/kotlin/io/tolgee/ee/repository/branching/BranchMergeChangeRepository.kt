@@ -62,10 +62,11 @@ interface BranchMergeChangeRepository : JpaRepository<BranchMergeChange, Long> {
       join bm.sourceBranch sb 
       where sb.project.id = :projectId 
         and bm.id = :mergeId 
-        and bmc.id = :changeId 
+        and bmc.id = :changeId
+        and bm.mergedAt IS NULL
     """,
   )
-  fun findConflict(
+  fun findActiveMergeConflict(
     projectId: Long,
     mergeId: Long,
     changeId: Long,

@@ -187,7 +187,7 @@ class BranchServiceImpl(
     deleteBranch: Boolean?,
   ) {
     val merge =
-      branchMergeService.findMerge(projectId, mergeId)
+      branchMergeService.findActiveMerge(projectId, mergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     if (!merge.isReadyToMerge) {
       if (!merge.isRevisionValid) {
@@ -224,7 +224,7 @@ class BranchServiceImpl(
     mergeId: Long,
   ): BranchMergeView {
     val merge =
-      branchMergeService.findMerge(projectId, mergeId)
+      branchMergeService.findActiveMerge(projectId, mergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     branchMergeService.refresh(merge)
     return branchMergeService.getMergeView(projectId, mergeId)
@@ -245,7 +245,7 @@ class BranchServiceImpl(
   ): Page<BranchMergeConflictView> {
     val project = entityManager.getReference(Project::class.java, projectId)
     val merge =
-      branchMergeService.findMerge(projectId, branchMergeId)
+      branchMergeService.findActiveMerge(projectId, branchMergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     val conflicts = branchMergeService.getConflicts(projectId, branchMergeId, pageable)
     val languages =
@@ -282,7 +282,7 @@ class BranchServiceImpl(
   ): Page<BranchMergeChangeView> {
     val project = entityManager.getReference(Project::class.java, projectId)
     val merge =
-      branchMergeService.findMerge(projectId, branchMergeId)
+      branchMergeService.findActiveMerge(projectId, branchMergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     val changes = branchMergeService.getChanges(projectId, branchMergeId, type, pageable)
 
@@ -320,8 +320,7 @@ class BranchServiceImpl(
     mergeId: Long,
     request: ResolveBranchMergeConflictRequest,
   ) {
-    val conflict = branchMergeService.getConflict(projectId, mergeId, request.changeId)
-    conflict.resolution = request.resolve
+    branchMergeService.resolveConflict(projectId, mergeId, request.changeId, request.resolve)
   }
 
   @Transactional

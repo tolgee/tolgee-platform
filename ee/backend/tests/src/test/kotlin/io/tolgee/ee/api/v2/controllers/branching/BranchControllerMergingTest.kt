@@ -1,13 +1,17 @@
 package io.tolgee.ee.api.v2.controllers.branching
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
+import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.ee.repository.branching.BranchMergeChangeRepository
 import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
@@ -229,6 +233,56 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
       }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `merged merge conflicts are not accessible`() {
+    val mergeId = testData.mergedConflictBranchMerge.id
+
+    performProjectAuthGet("branches/merge/$mergeId/conflicts")
+      .andIsNotFound
+      .andHasErrorMessage(Message.BRANCH_MERGE_NOT_FOUND)
+    performProjectAuthGet("branches/merge/$mergeId/changes")
+      .andIsNotFound
+      .andHasErrorMessage(Message.BRANCH_MERGE_NOT_FOUND)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `merged merge conflict resolution is not allowed`() {
+    val mergeId = testData.mergedConflictBranchMerge.id
+    val changeId = getConflictChangeId(mergeId)
+
+    performProjectAuthPut(
+      "branches/merge/$mergeId/resolve",
+      ResolveBranchMergeConflictRequest(
+        changeId = changeId,
+        resolve = BranchKeyMergeResolutionType.SOURCE,
+      ),
+    ).andIsNotFound
+      .andHasErrorMessage(Message.BRANCH_MERGE_CHANGE_NOT_FOUND)
+
+    performProjectAuthPut(
+      "branches/merge/$mergeId/resolve-all",
+      ResolveAllBranchMergeConflictsRequest(
+        resolve = BranchKeyMergeResolutionType.SOURCE,
+      ),
+    ).andIsNotFound
+      .andHasErrorMessage(Message.BRANCH_MERGE_NOT_FOUND)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `merged merge preview and apply are not allowed`() {
+    val mergeId = testData.mergedConflictBranchMerge.id
+
+    performProjectAuthPost("branches/merge/$mergeId/refresh")
+      .andIsNotFound
+      .andHasErrorMessage(Message.BRANCH_MERGE_NOT_FOUND)
+    performProjectAuthPost("branches/merge/$mergeId/apply")
+      .andIsNotFound
+      .andHasErrorMessage(Message.BRANCH_MERGE_NOT_FOUND)
+  }
+
   private fun createMergeWithConflict(
     sourceKey: Key,
     targetKey: Key,
@@ -352,5 +406,12 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
     val embedded = response["_embedded"] as Map<*, *>
     val conflicts = embedded["branchMergeConflicts"] as List<Map<String, Any>>
     return (conflicts.first()["id"] as Number).toLong()
+  }
+
+  private fun getConflictChangeId(mergeId: Long): Long {
+    return branchMergeChangeRepository
+      .findAll()
+      .first { it.branchMerge.id == mergeId && it.change == BranchKeyMergeChangeType.CONFLICT }
+      .id
   }
 }

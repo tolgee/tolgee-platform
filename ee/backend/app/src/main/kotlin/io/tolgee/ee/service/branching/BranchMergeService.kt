@@ -124,8 +124,18 @@ class BranchMergeService(
     mergeId: Long,
     changeId: Long,
   ): BranchMergeChange {
-    return branchMergeChangeRepository.findConflict(projectId, mergeId, changeId)
+    return branchMergeChangeRepository.findActiveMergeConflict(projectId, mergeId, changeId)
       ?: throw NotFoundException(Message.BRANCH_MERGE_CHANGE_NOT_FOUND)
+  }
+
+  fun resolveConflict(
+    projectId: Long,
+    mergeId: Long,
+    changeId: Long,
+    resolution: BranchKeyMergeResolutionType,
+  ) {
+    val change = getConflict(projectId, mergeId, changeId)
+    change.resolution = resolution
   }
 
   fun resolveAllConflicts(
@@ -133,17 +143,17 @@ class BranchMergeService(
     mergeId: Long,
     resolution: BranchKeyMergeResolutionType,
   ) {
-    val merge = findMerge(projectId, mergeId) ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    val merge = findActiveMerge(projectId, mergeId) ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     merge.changes
       .filter { it.change == BranchKeyMergeChangeType.CONFLICT }
       .forEach { it.resolution = resolution }
   }
 
-  fun findMerge(
+  fun findActiveMerge(
     projectId: Long,
     mergeId: Long,
   ): BranchMerge? {
-    return branchMergeRepository.findMerge(projectId, mergeId)
+    return branchMergeRepository.findActiveMerge(projectId, mergeId)
   }
 
   fun deleteMerge(
