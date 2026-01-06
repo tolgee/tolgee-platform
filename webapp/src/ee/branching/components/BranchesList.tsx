@@ -110,7 +110,7 @@ export const BranchesList = () => {
   };
 
   const handleMergeInto = (branch: BranchModel) => {
-    if (branch.merge) {
+    if (branch.merge && !branch.merge.mergedAt) {
       handleMergeDetail(branch);
     } else {
       setMergeIntoOpen(true);
