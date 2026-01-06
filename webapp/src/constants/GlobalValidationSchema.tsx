@@ -534,8 +534,7 @@ export class Validation {
         ),
     });
 
-  static readonly BRANCH_MERGE = (t: TranslateFunction) =>
-    Yup.object({});
+  static readonly BRANCH_MERGE = (t: TranslateFunction) => Yup.object({});
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;
