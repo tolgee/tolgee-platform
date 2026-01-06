@@ -5,13 +5,16 @@ import {
   Checkbox,
   CircularProgress,
   FormControlLabel,
+  Portal,
   styled,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory, useParams } from 'react-router-dom';
+import { useInView } from 'react-intersection-observer';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { useMergeTabs } from './merge/hooks/useMergeTabs';
 import { useMergeData } from './merge/hooks/useMergeData';
 import { MergeHeader } from './merge/components/MergeHeader';
@@ -20,6 +23,7 @@ import { ChangeList } from './merge/components/changes/ChangeList';
 import { BranchMergeChangeType, BranchMergeConflictModel } from './merge/types';
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
+import { MENU_WIDTH } from 'tg.views/projects/projectMenu/SideMenu';
 
 type RouteParams = {
   mergeId: string;
@@ -31,14 +35,37 @@ const StyledDetail = styled(Box)`
   gap: ${({ theme }) => theme.spacing(2)};
 `;
 
+const StyledFloatingActions = styled(Box)`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: ${({ theme }) => theme.zIndex.drawer};
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+`;
+
+const StyledFloatingActionsInner = styled(Box)`
+  pointer-events: all;
+  background: ${({ theme }) => theme.palette.background.paper};
+  box-shadow: 0px -6px 12px rgba(0, 0, 0, 0.15);
+  border-radius: ${({ theme }) => theme.shape.borderRadius}px;
+`;
+
 export const BranchMergeDetailView: FC = () => {
   const { t } = useTranslate();
   const project = useProject();
+  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const messaging = useMessage();
   const history = useHistory();
   const { mergeId } = useParams<RouteParams>();
   const numericMergeId = Number(mergeId);
   const userSelectedTab = useRef(false);
+  const { ref: actionsRef, inView: actionsInView } = useInView({
+    rootMargin: '0px',
+    threshold: 0.1,
+  });
 
   const [selectedTab, setSelectedTab] =
     useState<BranchMergeChangeType>('CONFLICT');
@@ -178,6 +205,51 @@ export const BranchMergeDetailView: FC = () => {
     merge?.keyUnresolvedConflictsCount === 0 &&
     merge?.outdated === false;
 
+  const actionControls = (
+    <>
+      <FormControlLabel
+        control={
+          <Checkbox
+            size="small"
+            checked={deleteBranchAfterMerge}
+            onChange={(event) =>
+              setDeleteBranchAfterMerge(event.target.checked)
+            }
+          />
+        }
+        label={
+          <T
+            keyName="branch_merge_delete_branch_after_merge"
+            params={{ b: <b />, branch: merge?.sourceBranchName }}
+          />
+        }
+      />
+      <Box display="flex" columnGap={2}>
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={() =>
+            history.push(
+              LINKS.PROJECT_BRANCHES.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              })
+            )
+          }
+        >
+          <T keyName="branch_merge_cancel_button" />
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleApply}
+          disabled={!readyToMerge || applyMutation.isLoading}
+        >
+          <T keyName="branch_merges_apply_button" />
+        </Button>
+      </Box>
+    </>
+  );
+
   return (
     <BaseProjectView
       maxWidth={1200}
@@ -210,59 +282,47 @@ export const BranchMergeDetailView: FC = () => {
                 changes={changes}
                 selectedTab={selectedTab ?? 'CONFLICT'}
                 isLoading={changesLoadable.isLoading}
+                hasNextPage={changesLoadable.hasNextPage}
+                isFetchingNextPage={changesLoadable.isFetchingNextPage}
+                onLoadMore={changesLoadable.fetchNextPage}
                 onResolve={handleResolve}
                 onResolveAll={handleResolveAll}
                 resolveAllLoading={resolveAllMutation.isLoading}
               />
               <Box
+                ref={actionsRef}
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={deleteBranchAfterMerge}
-                      onChange={(event) =>
-                        setDeleteBranchAfterMerge(event.target.checked)
-                      }
-                    />
-                  }
-                  label={
-                    <T
-                      keyName="branch_merge_delete_branch_after_merge"
-                      params={{ b: <b />, branch: merge.sourceBranchName }}
-                    />
-                  }
-                />
-                <Box display="flex" columnGap={2}>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={() =>
-                      history.push(
-                        LINKS.PROJECT_BRANCHES.build({
-                          [PARAMS.PROJECT_ID]: project.id,
-                        })
-                      )
-                    }
-                  >
-                    <T keyName="branch_merge_cancel_button" />
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleApply}
-                    disabled={!readyToMerge || applyMutation.isLoading}
-                  >
-                    <T keyName="branch_merges_apply_button" />
-                  </Button>
-                </Box>
+                {actionControls}
               </Box>
             </Box>
           </StyledDetail>
         )
+      )}
+      {!actionsInView && merge && (
+        <Portal>
+          <StyledFloatingActions
+            style={{
+              left: MENU_WIDTH,
+              width: `calc(100vw - ${rightPanelWidth}px - ${MENU_WIDTH}px)`,
+            }}
+          >
+            <StyledFloatingActionsInner
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              maxWidth={1200}
+              mx="auto"
+              width="100%"
+              px={2}
+              py={1.5}
+            >
+              {actionControls}
+            </StyledFloatingActionsInner>
+          </StyledFloatingActions>
+        </Portal>
       )}
     </BaseProjectView>
   );

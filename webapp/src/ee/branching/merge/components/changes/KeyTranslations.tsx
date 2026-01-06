@@ -48,9 +48,10 @@ export const KeyTranslations: FC<Props> = ({
       ? languageOrder.filter((tag) => keyData.translations?.[tag])
       : translationEntries.map(([tag]) => tag);
 
-  const visibleTags = hideAllWhenFalse && !showAll
-    ? []
-    : showAll || !changedTranslations
+  const visibleTags =
+    hideAllWhenFalse && !showAll
+      ? []
+      : showAll || !changedTranslations
       ? orderedTags
       : orderedTags.filter((tag) => changedTranslations.includes(tag));
 

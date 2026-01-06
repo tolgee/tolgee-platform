@@ -79,19 +79,20 @@ export const StatsBlock: FC<{ merge: BranchMergeModel }> = ({ merge }) => {
       <StatCard>
         <Box display="flex" alignItems="center" gap={1} flexGrow={0}>
           <Box display="flex" alignItems="center">
-            {conflictsTotal > 0 &&
-              (resolvedConflicts === conflictsTotal ? (
-                <CheckCircle color={theme.palette.tokens.success.main} />
-              ) : (
-                <AlertTriangle color={theme.palette.tokens.warning.main} />
-              ))}
+            {conflictsTotal > 0 && resolvedConflicts === conflictsTotal ? (
+              <CheckCircle color={theme.palette.tokens.success.main} />
+            ) : (
+              <AlertTriangle
+                color={
+                  conflictsTotal > 0
+                    ? theme.palette.tokens.warning.main
+                    : 'default'
+                }
+              />
+            )}
           </Box>
           <Typography variant="h3">
-            <div>
-              {conflictsTotal > 0
-                ? resolvedConflicts + '/' + conflictsTotal
-                : 0}
-            </div>
+            <div>{resolvedConflicts + '/' + conflictsTotal}</div>
           </Typography>
         </Box>
         <Typography variant="body1" fontSize={18}>
