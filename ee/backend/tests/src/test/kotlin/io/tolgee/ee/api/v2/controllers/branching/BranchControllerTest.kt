@@ -215,7 +215,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `deletes branch merge`() {
     performProjectAuthDelete("branches/merge/${testData.mergedBranchMerge.id}").andIsOk
 
-    branchMergeRepository.findMerge(testData.project.id, testData.mergedBranchMerge.id).assert.isNull()
+    branchMergeRepository.findActiveMerge(testData.project.id, testData.mergedBranchMerge.id).assert.isNull()
   }
 
   @Test

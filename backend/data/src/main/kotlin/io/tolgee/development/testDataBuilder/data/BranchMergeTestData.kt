@@ -8,6 +8,7 @@ import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 import io.tolgee.model.translation.Label
+import java.util.Date
 
 class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for branch merge tests") {
   lateinit var mainBranch: Branch
@@ -21,6 +22,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
   lateinit var featureConflictKey: Key
   lateinit var conflictsBranchKey: Key
   lateinit var conflictBranchMerge: BranchMerge
+  lateinit var mergedConflictBranchMerge: BranchMerge
   lateinit var tag1: Tag
   lateinit var tag2: Tag
   lateinit var tag3: Tag
@@ -163,6 +165,21 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
         targetBranch = mainBranch
         sourceRevision = conflictsBranch.revision + 6
         targetRevision = mainBranch.revision + 4
+      }.build {
+        addChange {
+          change = BranchKeyMergeChangeType.CONFLICT
+          sourceKey = conflictsBranchKey
+          targetKey = mainConflictKey
+          resolution = BranchKeyMergeResolutionType.SOURCE
+        }
+      }.self
+    mergedConflictBranchMerge =
+      addBranchMerge {
+        sourceBranch = conflictsBranch
+        targetBranch = mainBranch
+        sourceRevision = conflictsBranch.revision + 6
+        targetRevision = mainBranch.revision + 4
+        mergedAt = Date()
       }.build {
         addChange {
           change = BranchKeyMergeChangeType.CONFLICT
