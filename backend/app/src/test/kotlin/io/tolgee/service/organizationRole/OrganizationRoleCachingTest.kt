@@ -25,7 +25,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 @SpringBootTest(
   properties = [
@@ -34,13 +34,13 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 )
 class OrganizationRoleCachingTest : AbstractSpringTest() {
   @Suppress("LateinitVarOverridesLateinitVar")
-  @SpyBean
+  @MockitoSpyBean
   @Autowired
   override lateinit var organizationRoleRepository: OrganizationRoleRepository
 
   private lateinit var testData: OrganizationTestData
 
-  @SpyBean
+  @MockitoSpyBean
   @Autowired
   private lateinit var authenticationFacade: AuthenticationFacade
 

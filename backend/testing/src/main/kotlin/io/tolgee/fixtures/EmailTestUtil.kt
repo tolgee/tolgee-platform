@@ -13,15 +13,15 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Component
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @Component
 class EmailTestUtil {
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var javaMailSender: JavaMailSender
 
   @Autowired

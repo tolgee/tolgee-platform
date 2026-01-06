@@ -11,7 +11,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.ResultActions
 import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
@@ -19,11 +19,11 @@ import software.amazon.awssdk.services.translate.model.TranslateTextResponse
 
 open class MachineTranslationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var googleTranslate: Translate
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var amazonTranslate: TranslateClient
 
   fun initMachineTranslationMocks(translateDelay: Long = 0) {

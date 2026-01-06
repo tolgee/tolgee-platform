@@ -20,7 +20,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 @SpringBootTest(
   properties = [
@@ -28,7 +28,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean
   ],
 )
 class LanguageCachingTest : AbstractSpringTest() {
-  @SpyBean
+  @MockitoSpyBean
   @Autowired
   private lateinit var languageRepository: LanguageRepository
 

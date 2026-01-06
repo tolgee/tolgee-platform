@@ -27,8 +27,8 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.data.domain.Pageable
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.servlet.ResultActions
 import java.math.BigDecimal
 import java.util.function.Consumer
@@ -39,7 +39,7 @@ class ContentStorageControllerTest : ProjectAuthControllerTest("/v2/projects/") 
   @Autowired
   private lateinit var contentStorageService: ContentStorageService
 
-  @SpyBean
+  @MockitoSpyBean
   @Autowired
   private lateinit var contentDeliveryFileStorageProvider: ContentDeliveryFileStorageProvider
 

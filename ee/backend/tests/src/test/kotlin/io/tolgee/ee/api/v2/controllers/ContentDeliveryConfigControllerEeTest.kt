@@ -30,7 +30,7 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.servlet.ResultActions
 import java.util.function.Consumer
 
@@ -44,11 +44,11 @@ class ContentDeliveryConfigControllerEeTest : ProjectAuthControllerTest("/v2/pro
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   private lateinit var s3FileStorageFactory: S3FileStorageFactory
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   private lateinit var azureFileStorageFactory: AzureFileStorageFactory
 
   @Autowired

@@ -20,8 +20,8 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.cache.CacheManager
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.ResultActions
 import java.util.Date
 
@@ -36,11 +36,11 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
   lateinit var testData: SuggestionTestData
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var llmTranslationProvider: LlmTranslationProvider
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var eeSubscriptionInfoProvider: EeSubscriptionInfoProvider
 
   @Suppress("LateinitVarOverridesLateinitVar")

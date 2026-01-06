@@ -42,9 +42,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.ResultActions
 import software.amazon.awssdk.services.translate.TranslateClient
 import software.amazon.awssdk.services.translate.model.TranslateTextRequest
@@ -56,40 +56,40 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   lateinit var testData: SuggestionTestData
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var googleTranslate: Translate
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var amazonTranslate: TranslateClient
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var deeplApiService: DeeplApiService
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var azureCognitiveApiService: AzureCognitiveApiService
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var baiduApiService: BaiduApiService
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var llmTranslationProvider: LlmTranslationProvider
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var eeSubscriptionInfoProvider: EeSubscriptionInfoProvider
 
   @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
-  @MockBean
+  @MockitoBean
   override lateinit var cacheManager: CacheManager
 
   @Suppress("LateinitVarOverridesLateinitVar")
-  @MockBean
+  @MockitoBean
   @Autowired
   override lateinit var machineTranslationProperties: MachineTranslationProperties
 

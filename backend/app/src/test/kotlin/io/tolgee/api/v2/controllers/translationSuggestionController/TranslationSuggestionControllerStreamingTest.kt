@@ -20,12 +20,12 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("/v2/projects/") {
   @Suppress("LateinitVarOverridesLateinitVar")
-  @SpyBean
+  @MockitoSpyBean
   @Autowired
   override lateinit var mtService: MtService
 
@@ -34,7 +34,7 @@ class TranslationSuggestionControllerStreamingTest : ProjectAuthControllerTest("
   lateinit var czechLanguage: Language
   lateinit var hindiLanguage: Language
 
-  @MockBean
+  @MockitoBean
   @Autowired
   private lateinit var eeSubscriptionInfoProvider: EeSubscriptionInfoProvider
 
