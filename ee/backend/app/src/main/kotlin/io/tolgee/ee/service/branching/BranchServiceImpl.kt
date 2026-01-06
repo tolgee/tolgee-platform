@@ -184,6 +184,7 @@ class BranchServiceImpl(
   override fun applyMerge(
     projectId: Long,
     mergeId: Long,
+    deleteBranch: Boolean?,
   ) {
     val merge =
       branchMergeService.findMerge(projectId, mergeId)
@@ -198,7 +199,15 @@ class BranchServiceImpl(
     }
     branchMergeService.applyMerge(merge)
     if (!merge.sourceBranch.isDefault) {
-      archiveBranch(merge.sourceBranch)
+      if (deleteBranch == true) {
+        archiveBranch(merge.sourceBranch)
+      } else {
+        branchSnapshotService.rebuildSnapshotFromSource(
+          projectId = projectId,
+          sourceBranch = merge.sourceBranch,
+          targetBranch = merge.targetBranch,
+        )
+      }
     }
   }
 
