@@ -165,7 +165,7 @@ export const BranchItem: React.FC<Props> = ({
               </Badge>
             </Tooltip>
           ) : (
-            !branch.merge && (
+            branch.active && (
               <Tooltip
                 title={
                   <T
