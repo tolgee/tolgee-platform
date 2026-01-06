@@ -9,6 +9,7 @@ import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.branching.snapshot.TranslationSnapshot
 import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyRepository
+import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.util.LinkedHashMap
@@ -18,6 +19,7 @@ class BranchSnapshotService(
   private val keyRepository: KeyRepository,
   private val keySnapshotRepository: KeySnapshotRepository,
   private val branchRepository: BranchRepository,
+  private val entityManager: EntityManager,
 ) {
   @Transactional
   fun createInitialSnapshot(
@@ -25,7 +27,7 @@ class BranchSnapshotService(
     sourceBranch: Branch,
     targetBranch: Branch,
   ) {
-    keySnapshotRepository.deleteAllByBranchId(targetBranch.id)
+    deleteSnapshots(targetBranch.id)
 
     val sourceKeys =
       keyRepository.findAllDetailedByBranch(
@@ -45,7 +47,12 @@ class BranchSnapshotService(
     val snapshots =
       targetKeys.mapNotNull { branchKey ->
         val sourceKey = sourceBySignature[branchKey.snapshotSignature()] ?: return@mapNotNull null
-        buildSnapshot(sourceKey, branchKey, targetBranch)
+        buildSnapshot(
+          snapshotKey = sourceKey,
+          originalKeyId = sourceKey.id,
+          branchKeyId = branchKey.id,
+          branch = targetBranch,
+        )
       }
 
     keySnapshotRepository.saveAll(snapshots)
@@ -53,26 +60,64 @@ class BranchSnapshotService(
     branchRepository.save(targetBranch)
   }
 
+  @Transactional
+  fun rebuildSnapshotFromSource(
+    projectId: Long,
+    sourceBranch: Branch,
+    targetBranch: Branch,
+  ) {
+    deleteSnapshots(sourceBranch.id)
+
+    val sourceKeys =
+      keyRepository.findAllDetailedByBranch(
+        projectId = projectId,
+        branchId = sourceBranch.id,
+        includeOrphanDefault = sourceBranch.isDefault,
+      )
+    val targetKeys =
+      keyRepository.findAllDetailedByBranch(
+        projectId = projectId,
+        branchId = targetBranch.id,
+        includeOrphanDefault = targetBranch.isDefault,
+      )
+
+    val targetBySignature = targetKeys.associateBy { it.snapshotSignature() }
+
+    val snapshots =
+      sourceKeys.mapNotNull { sourceKey ->
+        val targetKey = targetBySignature[sourceKey.snapshotSignature()] ?: return@mapNotNull null
+        buildSnapshot(
+          snapshotKey = sourceKey,
+          originalKeyId = targetKey.id,
+          branchKeyId = sourceKey.id,
+          branch = sourceBranch,
+        )
+      }
+
+    keySnapshotRepository.saveAll(snapshots)
+  }
+
   private fun buildSnapshot(
-    sourceKey: Key,
-    branchKey: Key,
+    snapshotKey: Key,
+    originalKeyId: Long,
+    branchKeyId: Long,
     branch: Branch,
   ): KeySnapshot {
     val snapshot =
       KeySnapshot(
-        name = sourceKey.name,
-        namespace = sourceKey.namespace?.name,
-        isPlural = sourceKey.isPlural,
-        pluralArgName = sourceKey.pluralArgName,
-        originalKeyId = sourceKey.id,
-        branchKeyId = branchKey.id,
+        name = snapshotKey.name,
+        namespace = snapshotKey.namespace?.name,
+        isPlural = snapshotKey.isPlural,
+        pluralArgName = snapshotKey.pluralArgName,
+        originalKeyId = originalKeyId,
+        branchKeyId = branchKeyId,
       ).apply {
         this.project = branch.project
         this.branch = branch
         this.disableActivityLogging = true
       }
 
-    sourceKey.keyMeta?.let { meta ->
+    snapshotKey.keyMeta?.let { meta ->
       val snapshotMeta =
         KeyMetaSnapshot(
           description = meta.description,
@@ -83,7 +128,7 @@ class BranchSnapshotService(
       snapshot.keyMetaSnapshot = snapshotMeta
     }
 
-    sourceKey.translations.forEach { translation ->
+    snapshotKey.translations.forEach { translation ->
       val translationSnapshot =
         TranslationSnapshot(
           language = translation.language.tag,
@@ -96,7 +141,7 @@ class BranchSnapshotService(
     }
 
     snapshot.screenshotReferences.addAll(
-      sourceKey.keyScreenshotReferences.map {
+      snapshotKey.keyScreenshotReferences.map {
         KeyScreenshotReferenceView(
           screenshotId = it.screenshot.id,
           positions = it.positions?.toList(),
@@ -109,6 +154,46 @@ class BranchSnapshotService(
   }
 
   fun getSnapshotKeys(branchId: Long): List<KeySnapshot> = keySnapshotRepository.findAllByBranchId(branchId)
+
+  private fun deleteSnapshots(branchId: Long) {
+    entityManager
+      .createNativeQuery(
+        """
+        delete from branch_key_meta_snapshot_tags
+        where key_meta_snapshot_id in (
+          select id from branch_key_meta_snapshot
+          where key_snapshot_id in (
+            select id from branch_key_snapshot where branch_id = :branchId
+          )
+        )
+        """.trimIndent(),
+      ).setParameter("branchId", branchId)
+      .executeUpdate()
+    entityManager
+      .createNativeQuery(
+        """
+        delete from branch_key_meta_snapshot
+        where key_snapshot_id in (
+          select id from branch_key_snapshot where branch_id = :branchId
+        )
+        """.trimIndent(),
+      ).setParameter("branchId", branchId)
+      .executeUpdate()
+    entityManager
+      .createNativeQuery(
+        """
+        delete from branch_translation_snapshot
+        where key_snapshot_id in (
+          select id from branch_key_snapshot where branch_id = :branchId
+        )
+        """.trimIndent(),
+      ).setParameter("branchId", branchId)
+      .executeUpdate()
+    entityManager
+      .createNativeQuery("delete from branch_key_snapshot where branch_id = :branchId")
+      .setParameter("branchId", branchId)
+      .executeUpdate()
+  }
 
   private fun Key.snapshotSignature(): Pair<Long?, String> {
     return this.namespace?.id to this.name

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
+import io.tolgee.dtos.request.branching.ApplyBranchMergeRequest
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
@@ -246,7 +247,8 @@ class BranchController(
   @OpenApiOrderExtension(10)
   fun merge(
     @PathVariable mergeId: Long,
+    @RequestBody(required = false) request: ApplyBranchMergeRequest?,
   ) {
-    branchService.applyMerge(projectHolder.project.id, mergeId)
+    branchService.applyMerge(projectHolder.project.id, mergeId, request?.deleteBranch ?: true)
   }
 }

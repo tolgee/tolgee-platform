@@ -127,6 +127,7 @@ class BranchServiceOssStub : BranchService {
   override fun applyMerge(
     projectId: Long,
     mergeId: Long,
+    deleteBranch: Boolean?,
   ) {
     throw UnsupportedOperationException()
   }

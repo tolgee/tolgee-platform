@@ -144,6 +144,21 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `apply merge - keeps branch and resets snapshot`() {
+    val merge = prepareMergeScenario()
+    branchService.applyMerge(testData.project.id, merge.id, false)
+
+    val refreshedBranch = testData.featureBranch.refresh()!!
+    refreshedBranch.archivedAt.assert.isNull()
+    refreshedBranch.deletedAt.assert.isNull()
+
+    // dry-run again and validate no changes are present
+    val newMerge = dryRunFeatureBranchMerge()
+    newMerge.changes.size.assert
+      .isEqualTo(0)
+  }
+
+  @Test
   fun `apply merge - tags merge correctly`() {
     // remove one tag from each key
     removeTagFromKey(testData.mainKeyToUpdate, testData.tag1)

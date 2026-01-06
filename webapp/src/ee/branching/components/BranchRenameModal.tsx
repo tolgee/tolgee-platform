@@ -32,7 +32,7 @@ export const BranchRenameModal: React.FC<Props> = ({
           validationSchema={Validation.BRANCH(t)}
           onSubmit={(values) => onSubmit(values.name)}
           onCancel={onClose}
-          submitButtonInner={<T keyName="global_rename_button" />}
+          submitButtonInner={<T keyName="global_form_save" />}
         >
           <Box mb={2}>
             <TextField

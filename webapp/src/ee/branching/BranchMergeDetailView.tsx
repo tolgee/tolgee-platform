@@ -1,5 +1,12 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
-import { Box, Button, CircularProgress, styled } from '@mui/material';
+import {
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+  styled,
+} from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory, useParams } from 'react-router-dom';
 
@@ -35,6 +42,7 @@ export const BranchMergeDetailView: FC = () => {
 
   const [selectedTab, setSelectedTab] =
     useState<BranchMergeChangeType>('CONFLICT');
+  const [deleteBranchAfterMerge, setDeleteBranchAfterMerge] = useState(true);
 
   const labels = {
     ADD: t('branch_merges_additions'),
@@ -128,6 +136,9 @@ export const BranchMergeDetailView: FC = () => {
   const handleApply = async () => {
     await applyMutation.mutateAsync({
       path: { projectId: project.id, mergeId: numericMergeId },
+      content: {
+        'application/json': { deleteBranch: deleteBranchAfterMerge },
+      },
     });
     messaging.success(<T keyName="branch_merges_apply_success" />);
     history.push(
@@ -203,28 +214,51 @@ export const BranchMergeDetailView: FC = () => {
                 onResolveAll={handleResolveAll}
                 resolveAllLoading={resolveAllMutation.isLoading}
               />
-              <Box display="flex" justifyContent="end" columnGap={2}>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={() =>
-                    history.push(
-                      LINKS.PROJECT_BRANCHES.build({
-                        [PARAMS.PROJECT_ID]: project.id,
-                      })
-                    )
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      size="small"
+                      checked={deleteBranchAfterMerge}
+                      onChange={(event) =>
+                        setDeleteBranchAfterMerge(event.target.checked)
+                      }
+                    />
                   }
-                >
-                  <T keyName="branch_merge_cancel_button" />
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleApply}
-                  disabled={!readyToMerge || applyMutation.isLoading}
-                >
-                  <T keyName="branch_merges_apply_button" />
-                </Button>
+                  label={
+                    <T
+                      keyName="branch_merge_delete_branch_after_merge"
+                      params={{ b: <b />, branch: merge.sourceBranchName }}
+                    />
+                  }
+                />
+                <Box display="flex" columnGap={2}>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() =>
+                      history.push(
+                        LINKS.PROJECT_BRANCHES.build({
+                          [PARAMS.PROJECT_ID]: project.id,
+                        })
+                      )
+                    }
+                  >
+                    <T keyName="branch_merge_cancel_button" />
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleApply}
+                    disabled={!readyToMerge || applyMutation.isLoading}
+                  >
+                    <T keyName="branch_merges_apply_button" />
+                  </Button>
+                </Box>
               </Box>
             </Box>
           </StyledDetail>
