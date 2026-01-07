@@ -155,6 +155,16 @@ class BranchSnapshotService(
 
   fun getSnapshotKeys(branchId: Long): List<KeySnapshot> = keySnapshotRepository.findAllByBranchId(branchId)
 
+  fun getSnapshotKeysByOriginalKeyIdIn(
+    branchId: Long,
+    originalKeyIds: Collection<Long>,
+  ): List<KeySnapshot> {
+    if (originalKeyIds.isEmpty()) {
+      return emptyList()
+    }
+    return keySnapshotRepository.findAllByBranchIdAndOriginalKeyIdIn(branchId, originalKeyIds)
+  }
+
   private fun deleteSnapshots(branchId: Long) {
     entityManager
       .createNativeQuery(

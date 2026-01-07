@@ -24,7 +24,6 @@ class BranchMergeKeyCloneFactory {
         KeyMeta(key = clone).apply {
           description = meta.description
           custom = meta.custom?.let { LinkedHashMap(it) }
-          tags.addAll(meta.tags)
         }
       clone.keyMeta = clonedMeta
     }
@@ -39,7 +38,6 @@ class BranchMergeKeyCloneFactory {
           auto = translation.auto
           outdated = translation.outdated
           mtProvider = translation.mtProvider
-          labels.addAll(translation.labels)
         }
       clone.translations.add(clonedTranslation)
     }
