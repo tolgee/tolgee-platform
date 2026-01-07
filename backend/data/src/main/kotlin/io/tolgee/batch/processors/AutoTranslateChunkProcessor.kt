@@ -6,6 +6,7 @@ import io.tolgee.batch.MtProviderCatching
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.AutoTranslationRequest
+import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.constants.MtServiceType
 import io.tolgee.model.batch.params.AutoTranslationJobParams
 import io.tolgee.service.machineTranslation.MtServiceConfigService
@@ -20,6 +21,7 @@ class AutoTranslateChunkProcessor(
   private val mtProviderCatching: MtProviderCatching,
   private val projectService: ProjectService,
   private val mtServiceConfigService: MtServiceConfigService,
+  private val batchProperties: BatchProperties,
 ) : ChunkProcessor<AutoTranslationRequest, AutoTranslationJobParams, BatchTranslationTargetItem> {
   override fun process(
     job: BatchJobDto,
@@ -43,7 +45,7 @@ class AutoTranslateChunkProcessor(
   }
 
   override fun getMaxPerJobConcurrency(): Int {
-    return 1
+    return batchProperties.maxPerMtJobConcurrency
   }
 
   override fun getJobCharacter(): JobCharacter {
