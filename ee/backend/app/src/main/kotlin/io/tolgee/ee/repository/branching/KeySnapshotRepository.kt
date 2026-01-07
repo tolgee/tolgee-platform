@@ -10,5 +10,11 @@ interface KeySnapshotRepository : JpaRepository<KeySnapshot, Long> {
   @EntityGraph(attributePaths = ["translations", "keyMetaSnapshot"])
   fun findAllByBranchId(branchId: Long): List<KeySnapshot>
 
+  @EntityGraph(attributePaths = ["translations", "keyMetaSnapshot"])
+  fun findAllByBranchIdAndOriginalKeyIdIn(
+    branchId: Long,
+    originalKeyIds: Collection<Long>,
+  ): List<KeySnapshot>
+
   fun deleteAllByBranchId(branchId: Long)
 }

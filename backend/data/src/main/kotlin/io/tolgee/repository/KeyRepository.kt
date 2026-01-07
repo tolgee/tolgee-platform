@@ -111,12 +111,8 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
     select distinct k from Key k
     left join fetch k.keyMeta km
-    left join fetch km.tags
     left join fetch k.translations t
     left join fetch t.language lang
-    left join fetch t.labels
-    left join fetch k.namespace ns
-    left join fetch k.branch b
     where k.id in :ids
     """,
   )
