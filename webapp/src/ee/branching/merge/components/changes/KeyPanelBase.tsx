@@ -1,11 +1,12 @@
 import { Box, styled } from '@mui/material';
 
-export const KeyPanel = styled(Box)`
+export const KeyWrapper = styled(Box)`
   flex: 1;
   border: 1px solid ${({ theme }) => theme.palette.tokens.border.primary};
   border-radius: ${({ theme }) => theme.spacing(1)};
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 
   &.accepted {
     border-color: ${({ theme }) => theme.palette.tokens.success.main};
@@ -31,6 +32,11 @@ export const KeyHeader = styled(Box)`
   &.accepted {
     background: ${({ theme }) => theme.palette.tokens.success._states.selected};
   }
+`;
+
+export const KeyPanel = styled(Box)`
+  display: flex;
+  flex-direction: column;
 `;
 
 export const AcceptButton = styled(Box)`
