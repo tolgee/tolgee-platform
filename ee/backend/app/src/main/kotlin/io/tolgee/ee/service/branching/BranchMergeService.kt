@@ -171,9 +171,10 @@ class BranchMergeService(
     merge: BranchMerge,
     allowedLanguageTags: Set<String>,
   ) {
+    val snapshotOriginalKeyIds = conflicts.map { it.targetBranchKeyId }.toSet()
     val snapshotByTargetKeyId =
       branchSnapshotService
-        .getSnapshotKeys(merge.sourceBranch.id)
+        .getSnapshotKeysByOriginalKeyIdIn(merge.sourceBranch.id, snapshotOriginalKeyIds)
         .associateBy { it.originalKeyId }
     conflicts.forEach { conflict ->
       conflict.effectiveResolutionType = conflict.resolutionType
@@ -191,9 +192,10 @@ class BranchMergeService(
     merge: BranchMerge,
     allowedLanguageTags: Set<String>,
   ) {
+    val snapshotOriginalKeyIds = changes.mapNotNull { it.targetBranchKeyId }.toSet()
     val snapshotByTargetKeyId =
       branchSnapshotService
-        .getSnapshotKeys(merge.sourceBranch.id)
+        .getSnapshotKeysByOriginalKeyIdIn(merge.sourceBranch.id, snapshotOriginalKeyIds)
         .associateBy { it.originalKeyId }
     changes.forEach { change ->
       change.effectiveResolutionType = change.resolutionType

@@ -188,14 +188,7 @@ class Translation(
       if (source == null || target == null) {
         return true
       }
-      if (source.text != target.text) return true
-      if (source.state != target.state) return true
-      if (source.outdated != target.outdated) return true
-      if (source.auto != target.auto) return true
-      if (source.mtProvider != target.mtProvider) return true
-      val sourceLabels = source.labels.map { it.name }.toSet()
-      val targetLabels = target.labels.map { it.name }.toSet()
-      return sourceLabels != targetLabels
+      return (source.text != target.text)
     }
 
     class UpdateStatsListener {
