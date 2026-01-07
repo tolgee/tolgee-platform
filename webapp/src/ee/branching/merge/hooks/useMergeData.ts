@@ -20,7 +20,7 @@ export const useMergeData = (
     url: '/v2/projects/{projectId}/branches/merge/{mergeId}/changes',
     method: 'get',
     path: { projectId, mergeId },
-    query: { size: 25, type: selectedTab },
+    query: { size: 10, type: selectedTab },
     options: {
       enabled: Boolean(previewLoadable.data),
       keepPreviousData: true,
@@ -32,7 +32,7 @@ export const useMergeData = (
           return {
             path: { projectId, mergeId },
             query: {
-              size: 25,
+              size: 10,
               page: lastPage.page.number! + 1,
               type: selectedTab,
             },
