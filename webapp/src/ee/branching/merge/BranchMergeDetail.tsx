@@ -14,13 +14,12 @@ import { useInView } from 'react-intersection-observer';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
-import { useGlobalContext } from 'tg.globalContext/GlobalContext';
-import { useMergeTabs } from './merge/hooks/useMergeTabs';
-import { useMergeData } from './merge/hooks/useMergeData';
-import { MergeHeader } from './merge/components/MergeHeader';
-import { ChangesTabs } from './merge/components/changes/ChangesTabs';
-import { ChangeList } from './merge/components/changes/ChangeList';
-import { BranchMergeChangeType, BranchMergeConflictModel } from './merge/types';
+import { useMergeTabs } from './hooks/useMergeTabs';
+import { useMergeData } from './hooks/useMergeData';
+import { MergeHeader } from './components/MergeHeader';
+import { ChangesTabs } from './components/changes/ChangesTabs';
+import { ChangeList } from './components/changes/ChangeList';
+import { BranchMergeChangeType, BranchMergeConflictModel } from './types';
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { MENU_WIDTH } from 'tg.views/projects/projectMenu/SideMenu';
@@ -49,14 +48,13 @@ const StyledFloatingActions = styled(Box)`
 const StyledFloatingActionsInner = styled(Box)`
   pointer-events: all;
   background: ${({ theme }) => theme.palette.background.paper};
-  box-shadow: 0px -6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 -6px 12px rgba(0, 0, 0, 0.15);
   border-radius: ${({ theme }) => theme.shape.borderRadius}px;
 `;
 
-export const BranchMergeDetailView: FC = () => {
+export const BranchMergeDetail: FC = () => {
   const { t } = useTranslate();
   const project = useProject();
-  const rightPanelWidth = useGlobalContext((c) => c.layout.rightPanelWidth);
   const messaging = useMessage();
   const history = useHistory();
   const { mergeId } = useParams<RouteParams>();
@@ -305,8 +303,7 @@ export const BranchMergeDetailView: FC = () => {
         <Portal>
           <StyledFloatingActions
             style={{
-              left: MENU_WIDTH,
-              width: `calc(100vw - ${rightPanelWidth}px - ${MENU_WIDTH}px)`,
+              left: MENU_WIDTH / 2,
             }}
           >
             <StyledFloatingActionsInner

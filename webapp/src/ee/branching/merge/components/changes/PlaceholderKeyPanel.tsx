@@ -1,6 +1,6 @@
 import { Box, styled, Typography } from '@mui/material';
 import { FC } from 'react';
-import { KeyPanel } from './KeyPanelBase';
+import { KeyWrapper } from './KeyPanelBase';
 
 const PlaceholderContent = styled(Box)`
   min-height: 80px;
@@ -15,11 +15,11 @@ const PlaceholderContent = styled(Box)`
 `;
 
 export const PlaceholderKeyPanel: FC<{ text: string }> = ({ text }) => (
-  <KeyPanel>
+  <KeyWrapper>
     <PlaceholderContent>
       <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
         {text}
       </Typography>
     </PlaceholderContent>
-  </KeyPanel>
+  </KeyWrapper>
 );

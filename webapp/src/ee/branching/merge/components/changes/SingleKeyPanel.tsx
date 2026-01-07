@@ -2,7 +2,7 @@ import { Button } from '@mui/material';
 import { FC } from 'react';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
-import { KeyFooter, KeyHeader, KeyPanel } from './KeyPanelBase';
+import { KeyFooter, KeyHeader, KeyPanel, KeyWrapper } from './KeyPanelBase';
 import { KeyTranslations } from './KeyTranslations';
 import { MergeKeyHeader } from './MergeKeyHeader';
 import { BranchMergeKeyModel } from '../../types';
@@ -29,16 +29,18 @@ export const SingleKeyPanel: FC<Props> = ({
   variant,
   toggleLabels,
 }) => (
-  <KeyPanel className={clsx(variant)}>
-    <KeyHeader>
-      <MergeKeyHeader data={keyData} variant={variant} />
-    </KeyHeader>
-    <KeyTranslations
-      keyData={keyData}
-      changedTranslations={changedTranslations}
-      showAll={showAll}
-      hideAllWhenFalse={hideAllWhenFalse}
-    />
+  <KeyWrapper className={clsx(variant)}>
+    <KeyPanel>
+      <KeyHeader>
+        <MergeKeyHeader data={keyData} variant={variant} />
+      </KeyHeader>
+      <KeyTranslations
+        keyData={keyData}
+        changedTranslations={changedTranslations}
+        showAll={showAll}
+        hideAllWhenFalse={hideAllWhenFalse}
+      />
+    </KeyPanel>
     {onToggleShowAll && (
       <KeyFooter>
         <Button size="small" variant="text" onClick={onToggleShowAll}>
@@ -52,5 +54,5 @@ export const SingleKeyPanel: FC<Props> = ({
         </Button>
       </KeyFooter>
     )}
-  </KeyPanel>
+  </KeyWrapper>
 );
