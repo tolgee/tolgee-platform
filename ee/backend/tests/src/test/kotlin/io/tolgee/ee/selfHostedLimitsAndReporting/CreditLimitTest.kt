@@ -34,6 +34,7 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest()
+@MockitoSpyBean(types = [InternalProperties::class])
 class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   private lateinit var eeSubscriptionRepository: EeSubscriptionRepository

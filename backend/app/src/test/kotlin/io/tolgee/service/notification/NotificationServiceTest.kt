@@ -1,6 +1,7 @@
 package io.tolgee.service.notification
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.development.Base
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationChannel
@@ -11,7 +12,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 
+@Import(TestEmailConfiguration::class)
 class NotificationServiceTest : AbstractSpringTest() {
   @Autowired
   private lateinit var notificationTestUtil: NotificationTestUtil

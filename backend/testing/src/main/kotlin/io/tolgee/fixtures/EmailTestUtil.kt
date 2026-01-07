@@ -16,12 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Component
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @Component
 class EmailTestUtil {
   @Autowired
-  @MockitoBean
   lateinit var javaMailSender: JavaMailSender
 
   @Autowired

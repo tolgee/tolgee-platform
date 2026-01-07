@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.batch
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobService
+import io.tolgee.config.BatchJobBaseConfiguration
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.batch.BatchJobStatus
@@ -13,11 +14,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.context.annotation.Import
 import org.springframework.test.web.servlet.ResultActions
 import java.util.function.Consumer
 
 @AutoConfigureMockMvc
 @ContextRecreatingTest
+@Import(BatchJobBaseConfiguration::class)
 class BatchMoveToNamespaceTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var batchJobOperationQueue: BatchJobChunkExecutionQueue

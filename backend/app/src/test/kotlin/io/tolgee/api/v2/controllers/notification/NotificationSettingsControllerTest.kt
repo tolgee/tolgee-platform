@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers.notification
 
+import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.development.testDataBuilder.data.TaskTestData
 import io.tolgee.dtos.request.notification.NotificationSettingsRequest
 import io.tolgee.fixtures.andAssertThatJson
@@ -16,7 +17,9 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 
+@Import(TestEmailConfiguration::class)
 class NotificationSettingsControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var notificationService: NotificationService

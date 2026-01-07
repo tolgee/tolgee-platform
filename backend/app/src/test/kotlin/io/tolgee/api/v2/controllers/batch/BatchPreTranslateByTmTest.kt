@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.batch
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.ApplicationBatchJobRunner
+import io.tolgee.config.BatchJobBaseConfiguration
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
@@ -13,7 +14,9 @@ import io.tolgee.util.Logging
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 
+@Import(BatchJobBaseConfiguration::class)
 class BatchPreTranslateByTmTest :
   ProjectAuthControllerTest("/v2/projects/"),
   Logging {

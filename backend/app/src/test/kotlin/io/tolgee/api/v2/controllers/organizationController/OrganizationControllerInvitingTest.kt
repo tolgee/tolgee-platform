@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.organizationController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
@@ -23,9 +24,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(TestEmailConfiguration::class)
 class OrganizationControllerInvitingTest : AuthorizedControllerTest() {
   companion object {
     private const val INVITED_EMAIL = "jon@doe.com"

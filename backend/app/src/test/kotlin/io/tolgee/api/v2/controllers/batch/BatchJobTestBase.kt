@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.batch
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobService
+import io.tolgee.config.BatchJobBaseConfiguration
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
@@ -18,8 +19,8 @@ import jakarta.persistence.EntityManager
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Component
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.servlet.ResultActions
 import java.util.function.Consumer
 
@@ -34,7 +35,6 @@ class BatchJobTestBase {
   lateinit var batchJobService: BatchJobService
 
   @Autowired
-  @MockitoSpyBean
   lateinit var machineTranslationProperties: MachineTranslationProperties
 
   @Autowired
@@ -43,7 +43,6 @@ class BatchJobTestBase {
   var fakeBefore: Boolean = false
 
   @Autowired
-  @MockitoSpyBean
   private lateinit var internalProperties: InternalProperties
 
   @Autowired
