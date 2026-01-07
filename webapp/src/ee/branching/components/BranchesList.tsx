@@ -10,10 +10,10 @@ import { components } from 'tg.service/apiSchema.generated';
 import { BranchModal } from 'tg.ee.module/branching/components/BranchModal';
 import { BranchFormValues } from 'tg.ee.module/branching/components/BranchForm';
 import { confirmation } from 'tg.hooks/confirmation';
-import { BranchMergeCreateModal } from 'tg.ee.module/branching/components/merge/BranchMergeCreateModal';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { BranchRenameModal } from './BranchRenameModal';
+import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
 
 const TableGrid = styled('div')`
   display: grid;
@@ -30,9 +30,6 @@ export const BranchesList = () => {
   const history = useHistory();
 
   const [addBranchOpen, setAddBranchOpen] = useState(false);
-  const [mergeIntoOpen, setMergeIntoOpen] = useState(false);
-  const [mergeIntoSourceBranch, setMergeIntoSourceBranch] =
-    useState<BranchModel | null>(null);
   const [page, setPage] = useState(0);
   const [renameBranch, setRenameBranch] = useState<BranchModel | null>(null);
 
@@ -113,8 +110,24 @@ export const BranchesList = () => {
     if (branch.merge && !branch.merge.mergedAt) {
       handleMergeDetail(branch);
     } else {
-      setMergeIntoOpen(true);
-      setMergeIntoSourceBranch(branch);
+      confirmation({
+        message: (
+          <T
+            keyName="branch_merges_create_title"
+            params={{
+              name: branch?.name,
+              branch: <BranchNameChipNode />,
+              targetName: branch?.originBranchName,
+            }}
+          />
+        ),
+        confirmButtonText: <T keyName="branch_merges_create_button" />,
+        async onConfirm() {
+          await mergeIntoSubmit({
+            sourceBranchId: branch.id,
+          });
+        },
+      });
     }
   };
 
@@ -203,11 +216,6 @@ export const BranchesList = () => {
             open={addBranchOpen}
             close={handleCloseMergeIntoModal}
             submit={createBranchSubmit}
-          />
-          <BranchMergeCreateModal
-            open={mergeIntoOpen}
-            submit={mergeIntoSubmit}
-            sourceBranch={mergeIntoSourceBranch}
           />
           {renameBranch && (
             <BranchRenameModal
