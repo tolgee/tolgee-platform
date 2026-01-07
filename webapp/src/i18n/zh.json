@@ -645,6 +645,7 @@
   "branches_title": "分支",
   "branching_title": "分支",
   "branch_merge_cancel_button": "取消",
+  "branch_merge_delete_branch_after_merge": "在合并后删除 <b>{branch}</b>",
   "branch_merge_delete_button": "删除合并",
   "branch_merge_hide_translations": "隐藏翻译",
   "branch_merge_into_tooltip": "合并分支到 <b>{target}</b>",

@@ -646,6 +646,7 @@
   "branches_title": "Branches",
   "branching_title": "Branching",
   "branch_merge_cancel_button": "Annuleren",
+  "branch_merge_delete_branch_after_merge": "<b>{branch}</b> verwijderen na samenvoegen",
   "branch_merge_delete_button": "Samenvoeging verwijderen",
   "branch_merge_hide_translations": "Vertalingen verbergen",
   "branch_merge_into_tooltip": "Branch samenvoegen in <b>{target}</b>",

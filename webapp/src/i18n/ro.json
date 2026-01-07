@@ -646,6 +646,7 @@
   "branches_title": "Ramuri",
   "branching_title": "Ramificare",
   "branch_merge_cancel_button": "Anulare",
+  "branch_merge_delete_branch_after_merge": "Șterge <b>{branch}</b> după îmbinare",
   "branch_merge_delete_button": "Ștergeți îmbinarea",
   "branch_merge_hide_translations": "Ascunde traducerile",
   "branch_merge_into_tooltip": "Îmbină ramura în <b>{target}</b>",

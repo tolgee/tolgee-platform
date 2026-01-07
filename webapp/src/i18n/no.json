@@ -645,6 +645,7 @@
   "branches_title": "Grener",
   "branching_title": "Forgrening",
   "branch_merge_cancel_button": "Avbryt",
+  "branch_merge_delete_branch_after_merge": "Slett <b>{branch}</b> etter fletting",
   "branch_merge_delete_button": "Slett sammenslåing",
   "branch_merge_hide_translations": "Skjul oversettelser",
   "branch_merge_into_tooltip": "Slå sammen gren inn i <b>{target}</b>",

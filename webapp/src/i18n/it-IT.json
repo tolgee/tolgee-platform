@@ -641,6 +641,7 @@
   "branches_title": "Rami",
   "branching_title": "Diramazioni",
   "branch_merge_cancel_button": "Annulla",
+  "branch_merge_delete_branch_after_merge": "Elimina <b>{branch}</b> dopo l’unione",
   "branch_merge_delete_button": "Elimina unione",
   "branch_merge_hide_translations": "Nascondi traduzioni",
   "branch_merge_into_tooltip": "Unisci branch in <b>{target}</b>",

@@ -645,6 +645,7 @@
   "branches_title": "Ágak",
   "branching_title": "Elágazás",
   "branch_merge_cancel_button": "Mégse",
+  "branch_merge_delete_branch_after_merge": "<b>{branch}</b> törlése egyesítés után",
   "branch_merge_delete_button": "Összefésülés törlése",
   "branch_merge_hide_translations": "Fordítások elrejtése",
   "branch_merge_into_tooltip": "Ág egyesítése ebbe: <b>{target}</b>",

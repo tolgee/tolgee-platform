@@ -645,6 +645,7 @@
   "branches_title": "Zweige",
   "branching_title": "Verzweigungen",
   "branch_merge_cancel_button": "Abbrechen",
+  "branch_merge_delete_branch_after_merge": "<b>{branch}</b> nach dem Zusammenführen löschen",
   "branch_merge_delete_button": "Merge löschen",
   "branch_merge_hide_translations": "Übersetzungen ausblenden",
   "branch_merge_into_tooltip": "Zweig zusammenführen in <b>{target}</b>",

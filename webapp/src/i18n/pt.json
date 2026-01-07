@@ -645,6 +645,7 @@
   "branches_title": "Branches",
   "branching_title": "Ramificação",
   "branch_merge_cancel_button": "Cancelar",
+  "branch_merge_delete_branch_after_merge": "Excluir <b>{branch}</b> após a mesclagem",
   "branch_merge_delete_button": "Excluir mesclagem",
   "branch_merge_hide_translations": "Ocultar traduções",
   "branch_merge_into_tooltip": "Mesclar branch em <b>{target}</b>",

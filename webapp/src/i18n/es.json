@@ -645,6 +645,7 @@
   "branches_title": "Ramas",
   "branching_title": "Bifurcación",
   "branch_merge_cancel_button": "Cancelar",
+  "branch_merge_delete_branch_after_merge": "Eliminar <b>{branch}</b> después de la fusión",
   "branch_merge_delete_button": "Eliminar fusión",
   "branch_merge_hide_translations": "Ocultar traducciones",
   "branch_merge_into_tooltip": "Combinar rama en <b>{target}</b>",

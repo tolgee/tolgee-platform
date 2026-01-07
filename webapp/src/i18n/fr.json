@@ -645,6 +645,7 @@
   "branches_title": "Branches",
   "branching_title": "Création de branches",
   "branch_merge_cancel_button": "Annuler",
+  "branch_merge_delete_branch_after_merge": "Supprimer <b>{branch}</b> après la fusion",
   "branch_merge_delete_button": "Supprimer la fusion",
   "branch_merge_hide_translations": "Masquer les traductions",
   "branch_merge_into_tooltip": "Fusionner la branche dans <b>{target}</b>",

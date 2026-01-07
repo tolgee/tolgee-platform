@@ -1,3 +1,10 @@
+## [3.145.5](https://github.com/tolgee/tolgee-platform/compare/v3.145.4...v3.145.5) (2026-01-07)
+
+
+### Bug Fixes
+
+* Respect configurable concurrency for auto-translation jobs ([#3367](https://github.com/tolgee/tolgee-platform/issues/3367)) ([66ac1fd](https://github.com/tolgee/tolgee-platform/commit/66ac1fdf0b18b61ef5e9b62f4407baa87b14ca89))
+
 ## [3.145.4](https://github.com/tolgee/tolgee-platform/compare/v3.145.3...v3.145.4) (2026-01-05)
 
 

@@ -646,6 +646,7 @@
   "branches_title": "Větve",
   "branching_title": "Větvení",
   "branch_merge_cancel_button": "Zrušit",
+  "branch_merge_delete_branch_after_merge": "Odstranit <b>{branch}</b> po sloučení",
   "branch_merge_delete_button": "Smazat sloučení",
   "branch_merge_hide_translations": "Skrýt překlady",
   "branch_merge_into_tooltip": "Sloučit větev do <b>{target}</b>",

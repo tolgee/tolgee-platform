@@ -646,6 +646,7 @@
   "branches_title": "Branches",
   "branching_title": "Branching",
   "branch_merge_cancel_button": "Cancel",
+  "branch_merge_delete_branch_after_merge": "Delete <b>{branch}</b> after merge",
   "branch_merge_delete_button": "Delete merge",
   "branch_merge_hide_translations": "Hide translations",
   "branch_merge_into_tooltip": "Merge branch into <b>{target}</b>",

@@ -646,6 +646,7 @@
   "branches_title": "ブランチ",
   "branching_title": "ブランチング",
   "branch_merge_cancel_button": "キャンセル",
+  "branch_merge_delete_branch_after_merge": "マージ後に <b>{branch}</b> を削除",
   "branch_merge_delete_button": "マージを削除",
   "branch_merge_hide_translations": "翻訳を非表示",
   "branch_merge_into_tooltip": "ブランチを <b>{target}</b> にマージ",
