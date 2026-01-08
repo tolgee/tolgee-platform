@@ -9,6 +9,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.translationAgency.TranslationAgency
@@ -38,6 +39,7 @@ import java.util.Date
     Index(columnList = "author_id"),
     Index(columnList = "language_id"),
     Index(columnList = "agency_id"),
+    Index(columnList = "branch_id"),
   ],
 )
 @ActivityLoggedEntity
@@ -82,6 +84,9 @@ class Task : StandardAuditModel() {
   @ManyToOne(fetch = FetchType.LAZY, optional = true)
   @ActivityLoggedProp
   var author: UserAccount? = null
+
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  var branch: Branch? = null
 
   @ActivityLoggedProp
   @Enumerated(EnumType.STRING)

@@ -64,4 +64,7 @@ open class TaskFilters {
     description = """Exclude tasks which were closed before specified timestamp""",
   )
   var filterNotClosedBefore: Long? = null
+
+  @field:Parameter(description = "Filter tasks by branch name. Defaults to project's default branch.")
+  var branch: String? = null
 }
