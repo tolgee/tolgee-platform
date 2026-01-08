@@ -1599,6 +1599,11 @@ export interface components {
       targetBranchId: number;
       /** @description Target branch name */
       targetBranchName: string;
+      /**
+       * Format: int32
+       * @description Uncompleted tasks count on source branch
+       */
+      uncompletedTasksCount: number;
     };
     BranchMergeRefModel: {
       /**
@@ -1668,6 +1673,7 @@ export interface components {
       projectId?: number;
     };
     CalculateScopeRequest: {
+      branch?: string;
       keys: number[];
       /** Format: int64 */
       languageId: number;
@@ -2377,6 +2383,8 @@ export interface components {
     };
     CreateTaskRequest: {
       assignees: number[];
+      /** @description Branch name. If empty or null, default branch is used. */
+      branch?: string;
       description: string;
       /**
        * Format: int64
@@ -6300,6 +6308,9 @@ export interface components {
       /** Format: int64 */
       baseWordCount: number;
       /** Format: int64 */
+      branchId?: number;
+      branchName?: string;
+      /** Format: int64 */
       closedAt?: number;
       /** Format: int64 */
       createdAt?: number;
@@ -6336,6 +6347,9 @@ export interface components {
       baseCharacterCount: number;
       /** Format: int64 */
       baseWordCount: number;
+      /** Format: int64 */
+      branchId?: number;
+      branchName?: string;
       /** Format: int64 */
       closedAt?: number;
       /** Format: int64 */
@@ -18410,6 +18424,8 @@ export interface operations {
         filterAgency?: number[];
         /** Exclude tasks which were closed before specified timestamp */
         filterNotClosedBefore?: number;
+        /** Filter tasks by branch name. Defaults to project's default branch. */
+        branch?: string;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -21933,6 +21949,8 @@ export interface operations {
         filterAgency?: number[];
         /** Exclude tasks which were closed before specified timestamp */
         filterNotClosedBefore?: number;
+        /** Filter tasks by branch name. Defaults to project's default branch. */
+        branch?: string;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */

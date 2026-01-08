@@ -67,7 +67,7 @@ export const useBranchesService = ({ projectId, enabled = true }: Props) => {
     branches: data,
     selected: selected,
     default: defaultBranch,
-    selectedName: routeBranch,
+    selectedName: routeBranch || undefined,
     loadable: loadableBranches,
   };
 };
