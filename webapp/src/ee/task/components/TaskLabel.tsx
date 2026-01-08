@@ -1,11 +1,12 @@
-import { Box, styled, SxProps, Tooltip } from '@mui/material';
+import { Box, styled, SxProps, Tooltip, Typography } from '@mui/material';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { components } from 'tg.service/apiSchema.generated';
 import { TaskNumber, TaskNumberWithLink } from './TaskId';
 import { TaskTypeChip } from 'tg.component/task/TaskTypeChip';
 import { AgencyLabel } from 'tg.ee';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import clsx from 'clsx';
+import { BranchNameChip } from 'tg.component/branching/BranchNameChip';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -22,6 +23,7 @@ const StyledContainer = styled(Box)`
     opacity: 0.6;
     filter: grayscale(1);
   }
+
   &.finished {
     opacity: 0.6;
   }
@@ -41,6 +43,7 @@ type Props = {
   sx?: SxProps;
   className?: string;
   hideType?: boolean;
+  currentBranchName?: string;
 };
 
 export const TaskLabel = ({
@@ -49,8 +52,13 @@ export const TaskLabel = ({
   className,
   project,
   hideType,
+  currentBranchName,
 }: Props) => {
   const { t } = useTranslate();
+  const shouldShowBranch =
+    !!currentBranchName &&
+    !!task.branchName &&
+    task.branchName !== currentBranchName;
   return (
     <StyledContainer
       {...{
@@ -78,6 +86,22 @@ export const TaskLabel = ({
         <TaskNumber taskNumber={task.number} />
       )}
       {!hideType && <TaskTypeChip type={task.type} />}
+      {shouldShowBranch && (
+        <Typography
+          color="text.secondary"
+          fontSize={14}
+          display="flex"
+          alignItems="center"
+          gap={1}
+        >
+          <T
+            keyName="task_label_from_branch"
+            params={{
+              branch: <BranchNameChip name={task.branchName!} size="small" />,
+            }}
+          />
+        </Typography>
+      )}
       {task.agency && (
         <Tooltip title={t('task_label_agency_tooltip')}>
           <span>
