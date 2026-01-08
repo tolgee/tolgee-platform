@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.branching
 
+import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.events.OnBranchDeleted
@@ -19,6 +20,7 @@ class BranchCleanupService(
   private val keyService: KeyService,
   private val branchRepository: BranchRepository,
   private val branchMergeRepository: BranchMergeRepository,
+  private val taskRepository: TaskRepository,
 ) {
   companion object {
     private const val BATCH_SIZE = 1000
@@ -71,6 +73,11 @@ class BranchCleanupService(
     if (merges.isNotEmpty()) {
       branchMergeRepository.deleteAll(merges)
       logger.debug("Deleted ${merges.size} merges for branch ${branch.id}")
+    }
+    val taskCount = taskRepository.countByBranchId(branch.id)
+    if (taskCount > 0) {
+      logger.debug("Skipping deleting branch entity ${branch.id} because $taskCount tasks still exist")
+      return
     }
     branchRepository.delete(branch)
     logger.debug("Deleted branch ${branch.name} (${branch.id})")

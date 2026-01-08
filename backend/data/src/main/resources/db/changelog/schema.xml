@@ -4986,4 +4986,17 @@
     <changeSet author="danielkrizan (generated)" id="1765539301819-5">
         <addForeignKeyConstraint baseColumnNames="tags_id" baseTableName="branch_key_meta_snapshot_tags" constraintName="FK6grk5x5ho9jp85gktc2munh5m" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tag" validate="true"/>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1767813368518-1">
+        <addColumn tableName="task">
+            <column name="branch_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1767813368518-2">
+        <createIndex indexName="IDX8ym0mywgtoacu67e7xejvef38" tableName="task">
+            <column name="branch_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1767813368518-3">
+        <addForeignKeyConstraint baseColumnNames="branch_id" baseTableName="task" constraintName="FKnomxhqrycqxv0cyqtn9f0h39j" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
 </databaseChangeLog>
