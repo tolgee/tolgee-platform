@@ -111,7 +111,7 @@ class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       assertThat(notificationUtil.newestInAppNotification().linkedTask?.name).isEqualTo("Another task")
       waitForNotThrowing(timeout = 2000, pollTime = 25) {
         assertThat(
-          notificationUtil.newestEmailNotification()
+          notificationUtil.newestEmailNotification(),
         ).contains("/projects/${testData.project.id}/task?number=3")
       }
     }

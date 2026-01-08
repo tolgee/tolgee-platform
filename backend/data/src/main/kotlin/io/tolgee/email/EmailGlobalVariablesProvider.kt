@@ -37,7 +37,7 @@ class EmailGlobalVariablesProvider(
     return mapOf(
       "isCloud" to isCloud,
       "instanceQualifier" to if (isCloud) tolgeeProperties.appName else backendUrl.intoQualifier(),
-      "backendUrl" to backendUrl
+      "backendUrl" to backendUrl,
     )
   }
 

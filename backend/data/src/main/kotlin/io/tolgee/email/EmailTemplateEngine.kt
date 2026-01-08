@@ -19,7 +19,7 @@ package io.tolgee.email
 import org.thymeleaf.messageresolver.IMessageResolver
 import org.thymeleaf.spring6.SpringTemplateEngine
 
-class EmailTemplateEngine() : SpringTemplateEngine() {
+class EmailTemplateEngine : SpringTemplateEngine() {
   lateinit var emailMessageResolver: IMessageResolver
 
   override fun initializeSpringSpecific() {

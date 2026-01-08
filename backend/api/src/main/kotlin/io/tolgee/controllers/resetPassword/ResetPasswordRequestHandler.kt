@@ -48,7 +48,7 @@ class ResetPasswordRequestHandler(
         to = request.email,
         subject = if (isInitial) "Initial password configuration" else "Password reset",
         header = "Password reset",
-          text =
+        text =
           """
           ${if (isInitial) "To set a password for your account, <b>follow this link</b>:<br/>" else "To reset your password, <b>follow this link</b>:<br/>"}
           <a href="$url">$url</a><br/><br/>
