@@ -7,6 +7,7 @@ import {
   FormControlLabel,
   Portal,
   styled,
+  Alert,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -23,6 +24,7 @@ import { BranchMergeChangeType, BranchMergeConflictModel } from './types';
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { MENU_WIDTH } from 'tg.views/projects/projectMenu/SideMenu';
+import { confirmation } from 'tg.hooks/confirmation';
 
 type RouteParams = {
   mergeId: string;
@@ -158,7 +160,7 @@ export const BranchMergeDetail: FC = () => {
     ]);
   };
 
-  const handleApply = async () => {
+  const applyMerge = async () => {
     await applyMutation.mutateAsync({
       path: { projectId: project.id, mergeId: numericMergeId },
       content: {
@@ -172,6 +174,23 @@ export const BranchMergeDetail: FC = () => {
         [PARAMS.BRANCH]: merge!.targetBranchName,
       })
     );
+  };
+
+  const handleApply = async () => {
+    if ((merge?.uncompletedTasksCount ?? 0) > 0) {
+      confirmation({
+        message: (
+          <T
+            keyName="branch_merges_uncompleted_tasks_confirmation"
+            params={{ value: merge?.uncompletedTasksCount }}
+          />
+        ),
+        confirmButtonText: <T keyName="branch_merges_apply_button" />,
+        onConfirm: applyMerge,
+      });
+      return;
+    }
+    await applyMerge();
   };
 
   const handleCancel = async () => {
@@ -265,6 +284,15 @@ export const BranchMergeDetail: FC = () => {
         merge && (
           <StyledDetail>
             <MergeHeader merge={merge} onDelete={handleCancel} />
+
+            {merge.uncompletedTasksCount > 0 && (
+              <Alert severity="warning">
+                <T
+                  keyName="branch_merges_uncompleted_tasks_alert"
+                  params={{ value: merge.uncompletedTasksCount }}
+                />
+              </Alert>
+            )}
 
             {totalChanges > 0 && (
               <ChangesTabs
