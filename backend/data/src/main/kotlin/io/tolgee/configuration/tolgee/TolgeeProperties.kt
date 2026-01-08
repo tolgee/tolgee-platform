@@ -132,9 +132,10 @@ class TolgeeProperties(
   )
   var llmProperties: LlmProperties = LlmProperties(),
   @DocProperty(
-    description = "Public URL of the Tolgee API endpoint. While this typically matches the 'frontEndUrl', " +
-      "it should be set separately when running the backend on a different URL." +
-      "\n\n"
+    description =
+      "Public URL of the Tolgee API endpoint. While this typically matches the 'frontEndUrl', " +
+        "it should be set separately when running the backend on a different URL." +
+        "\n\n",
   )
   var backEndUrl: String? = null,
 )

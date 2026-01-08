@@ -26,7 +26,7 @@ import org.thymeleaf.spring6.messageresolver.SpringMessageResolver
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.thymeleaf.templateresolver.ITemplateResolver
 import org.thymeleaf.templateresolver.StringTemplateResolver
-import java.util.*
+import java.util.Locale
 
 @Configuration
 class EmailTemplateConfig {
@@ -51,7 +51,7 @@ class EmailTemplateConfig {
   @Bean("emailMessageResolver")
   fun messageResolver(
     @Qualifier("emailIcuMessageSource") messageSource: MessageSource,
-    @Qualifier("emailTemplateEngine") templateEngine: EmailTemplateEngine
+    @Qualifier("emailTemplateEngine") templateEngine: EmailTemplateEngine,
   ): IMessageResolver {
     val messageResolver = SpringMessageResolver()
     messageResolver.messageSource = messageSource

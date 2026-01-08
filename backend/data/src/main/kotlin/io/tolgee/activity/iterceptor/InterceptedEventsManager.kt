@@ -239,19 +239,24 @@ class InterceptedEventsManager(
 
   private fun getEntityAnnotatedMembers(entity: Any): Map<String, ActivityLoggedProp> {
     return annotatedMembersCache.computeIfAbsent(entity::class.java) {
-      entity::class.members.mapNotNull {
-        if (it !is KProperty<*>) return@mapNotNull null
-        val annotation = it.javaField?.getAnnotation(ActivityLoggedProp::class.java) ?: return@mapNotNull null
-        it.name to annotation
-      }.toMap()
+      entity::class
+        .members
+        .mapNotNull {
+          if (it !is KProperty<*>) return@mapNotNull null
+          val annotation = it.javaField?.getAnnotation(ActivityLoggedProp::class.java) ?: return@mapNotNull null
+          it.name to annotation
+        }.toMap()
     }
   }
 
   private fun getEntityIgnoredMembers(entity: Any): Set<String> {
     return ignoredMembersCache.computeIfAbsent(entity::class.java) {
-      entity::class.members.filter {
-        it is KProperty<*> && (it.javaField?.isAnnotationPresent(ActivityIgnoredProp::class.java) ?: false)
-      }.map { it.name }.toSet()
+      entity::class
+        .members
+        .filter {
+          it is KProperty<*> && (it.javaField?.isAnnotationPresent(ActivityIgnoredProp::class.java) ?: false)
+        }.map { it.name }
+        .toSet()
     }
   }
 
