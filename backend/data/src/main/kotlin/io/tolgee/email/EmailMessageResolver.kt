@@ -33,7 +33,7 @@ class EmailMessageResolver(
     context: ITemplateContext?,
     origin: Class<*>?,
     key: String,
-    messageParameters: Array<out Any?>?
+    messageParameters: Array<out Any?>?,
   ): String? {
     val message = provider.resolveMessage(context, origin, key, messageParameters)
     if (message == null || context == null) return null
@@ -41,7 +41,11 @@ class EmailMessageResolver(
     return postProcessMessage(message, context, key)
   }
 
-  private fun postProcessMessage(message: String, context: ITemplateContext, code: String): String {
+  private fun postProcessMessage(
+    message: String,
+    context: ITemplateContext,
+    code: String,
+  ): String {
     // Dumb heuristic to skip XML parsing for trivial cases, to (hopefully) improve performance.
     if (message.contains('<') && message.contains('>')) {
       var counter = 0L
@@ -52,23 +56,24 @@ class EmailMessageResolver(
       // Does not contain lightweight XML references. Skip.
       if (!m.find()) return message.replace("\n", "<br/>")
 
-      val template = m.replaceAll {
-        if (it.group(1) == null) {
-          // Opening tag
-          stack.add(it.group(2))
+      val template =
+        m.replaceAll {
+          if (it.group(1) == null) {
+            // Opening tag
+            stack.add(it.group(2))
 
-          val ref = "intl-ref-${++counter}"
-          val fragName = "intl-${stack.joinToString("--")}"
-          val fragExpr = "~{ :: $fragName (~{ :: $ref }) }"
+            val ref = "intl-ref-${++counter}"
+            val fragName = "intl-${stack.joinToString("--")}"
+            val fragExpr = "~{ :: $fragName (~{ :: $ref }) }"
 
-          "<th:block th:replace=\"$fragExpr\"><th:block th:ref=\"$ref\">"
-        } else {
-          // Closing tag
-          stack.removeLast()
+            "<th:block th:replace=\"$fragExpr\"><th:block th:ref=\"$ref\">"
+          } else {
+            // Closing tag
+            stack.removeLast()
 
-          "</th:block></th:block>"
+            "</th:block></th:block>"
+          }
         }
-      }
 
       return templateEngine.process("<!--@frag--> $template", context).replace("\n", "<br/>")
     }

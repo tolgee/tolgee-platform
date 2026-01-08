@@ -35,7 +35,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
-import java.util.*
+import java.util.Locale
 
 @ExtendWith(MockitoExtension::class)
 @SpringJUnitConfig(EmailService::class, EmailTemplateConfig::class, EmailTemplateTestConfig::class)
@@ -71,7 +71,7 @@ class EmailServiceTest {
         "isCloud" to true,
         "instanceQualifier" to "Tolgee",
         "backendUrl" to "https://tolgee.test",
-      )
+      ),
     )
   }
 
@@ -82,9 +82,15 @@ class EmailServiceTest {
 
     val email = emailCaptor.value
     email.subject.assert.isEqualTo("Test email (written with React Email)")
-    email.allRecipients.asList().assert.singleElement().asString().isEqualTo("test@tolgee.text")
+    email.allRecipients
+      .asList()
+      .assert
+      .singleElement()
+      .asString()
+      .isEqualTo("test@tolgee.text")
 
-    email.assertContents()
+    email
+      .assertContents()
       .contains("Testing ICU strings -- test!!")
       .contains("Value of `testVar`: <span>test!!</span>")
       .contains("<span>Was `testVar` equal to &quot;meow&quot; : </span><span>no</span>")
@@ -111,7 +117,8 @@ class EmailServiceTest {
     verify(mailSender).send(emailCaptor.capture())
 
     val email = emailCaptor.value
-    email.assertContents()
+    email
+      .assertContents()
       .contains("Testing ICU strings -- meow")
       .contains("Value of `testVar`: <span>meow</span>")
       .contains("<span>Was `testVar` equal to &quot;meow&quot; : </span><span>yes</span>")
@@ -124,7 +131,8 @@ class EmailServiceTest {
     verify(mailSender).send(emailCaptor.capture())
 
     val email = emailCaptor.value
-    email.assertContents()
+    email
+      .assertContents()
       .contains("Plain test: <span>Name #1</span>")
       .contains("<span>ICU test: Name #1</span>")
       .contains("Plain test: <span>Name #2</span>")
@@ -139,7 +147,8 @@ class EmailServiceTest {
     verify(mailSender).send(emailCaptor.capture())
 
     val email = emailCaptor.value
-    email.assertContents()
+    email
+      .assertContents()
       .doesNotContain("<a href=\"https://pwned.example.com\">")
       .contains("&lt;a href=&quot;https://pwned.example.com&quot;")
       .doesNotContain("pwn49")

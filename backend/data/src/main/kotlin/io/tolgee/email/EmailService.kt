@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring6.expression.ThymeleafEvaluationContext
-import java.util.*
+import java.util.Locale
 
 @Service
 class EmailService(

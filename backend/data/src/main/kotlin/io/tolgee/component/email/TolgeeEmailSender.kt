@@ -9,10 +9,11 @@ class TolgeeEmailSender(
   private val emailService: EmailService,
 ) {
   fun sendEmail(params: EmailParams) {
-    val properties = mapOf<String, Any>()
-      .let { if (params.text != null) it.plus("content" to params.text!!) else it }
-      .let { if (params.header != null) it.plus("header" to params.header!!) else it }
-      .let { if (params.recipientName != null) it.plus("recipientName" to params.recipientName!!) else it }
+    val properties =
+      mapOf<String, Any>()
+        .let { if (params.text != null) it.plus("content" to params.text!!) else it }
+        .let { if (params.header != null) it.plus("header" to params.header!!) else it }
+        .let { if (params.recipientName != null) it.plus("recipientName" to params.recipientName!!) else it }
     emailService.sendEmailTemplate(
       recipient = params.to,
       subject = params.subject,
