@@ -69,6 +69,7 @@ type Props = {
   projectScopes?: Scope[];
   onDetailOpen: (task: TaskModel) => void;
   newTaskActions: boolean;
+  currentBranchName?: string;
 };
 
 export const BoardItem = ({
@@ -77,6 +78,7 @@ export const BoardItem = ({
   projectScopes,
   onDetailOpen,
   newTaskActions,
+  currentBranchName,
 }: Props) => {
   const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -89,7 +91,7 @@ export const BoardItem = ({
       to={getTaskUrl(project.id, task.number)}
     >
       <StyledRow>
-        <TaskLabel task={task} hideType />
+        <TaskLabel task={task} hideType currentBranchName={currentBranchName} />
         <Box
           display="flex"
           gap={0.1}

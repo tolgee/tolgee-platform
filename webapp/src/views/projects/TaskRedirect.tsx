@@ -9,6 +9,7 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { ProjectPage } from './ProjectPage';
+import { useBranchLinks } from 'tg.component/branching/useBranchLinks';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -20,13 +21,18 @@ export const TaskRedirect = () => {
     defaultVal: undefined,
   });
   const [detail] = useUrlSearchState('detail');
+  const { withBranchLink } = useBranchLinks();
 
   const getLinkToTask = (task: TaskModel) => {
     const languages = new Set([project.baseLanguage!.tag, task.language.tag]);
 
-    let url = `${LINKS.PROJECT_TRANSLATIONS.build({
-      [PARAMS.PROJECT_ID]: project.id,
-    })}?${QUERY.TRANSLATIONS_PREFILTERS_TASK}=${task.number}`;
+    let url = `${withBranchLink(
+      LINKS.PROJECT_TRANSLATIONS,
+      {
+        [PARAMS.PROJECT_ID]: project.id,
+      },
+      task.branchName
+    )}?${QUERY.TRANSLATIONS_PREFILTERS_TASK}=${task.number}`;
 
     if (detail === 'true') {
       url += `&${QUERY.TRANSLATIONS_TASK_DETAIL}=${task.number}`;

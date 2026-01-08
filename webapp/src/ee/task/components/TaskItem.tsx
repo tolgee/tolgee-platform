@@ -58,6 +58,7 @@ type Props = {
   projectScopes?: Scope[];
   showProject?: boolean;
   newTaskActions: boolean;
+  currentBranchName?: string;
 };
 
 export const TaskItem = ({
@@ -67,6 +68,7 @@ export const TaskItem = ({
   showProject,
   projectScopes,
   newTaskActions,
+  currentBranchName,
 }: Props) => {
   const { t } = useTranslate();
   const theme = useTheme();
@@ -86,7 +88,11 @@ export const TaskItem = ({
   return (
     <StyledContainer data-cy="task-item">
       <StyledItem {...linkProps}>
-        <TaskLabel sx={{ padding: '12px 0px 12px 16px' }} task={task} />
+        <TaskLabel
+          sx={{ padding: '12px 0px 12px 16px' }}
+          task={task}
+          currentBranchName={currentBranchName}
+        />
       </StyledItem>
       <StyledItem
         {...linkProps}

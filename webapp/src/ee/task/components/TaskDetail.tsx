@@ -92,9 +92,16 @@ type Props = {
   task?: TaskModel;
   onClose: () => void;
   projectId: number;
+  currentBranchName?: string;
 };
 
-export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
+export const TaskDetail = ({
+  onClose,
+  projectId,
+  taskNumber,
+  task,
+  currentBranchName,
+}: Props) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
 
@@ -150,7 +157,7 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
         {data && projectLoadable.data && (
           <>
             <StyledSubtitle>
-              <TaskLabel task={data} />
+              <TaskLabel task={data} currentBranchName={currentBranchName} />
             </StyledSubtitle>
             <StyledMenu>
               <IconButton

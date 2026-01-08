@@ -8,6 +8,7 @@ type Props = {
   as?: typeof DefaultChip;
   disabled?: boolean;
   arrow?: boolean;
+  size?: 'small' | 'default';
 };
 
 export const BranchNameChip = ({
@@ -15,19 +16,27 @@ export const BranchNameChip = ({
   as: ChipComponent = DefaultChip,
   disabled,
   arrow,
+  size = 'default',
 }: Props) => {
+  const iconSize = size === 'small' ? 14 : 18;
+  const dropdownIconSize = size === 'small' ? 18 : 24;
   return (
     <ChipComponent
       disabled={disabled}
+      size={size === 'small' ? 'small' : undefined}
       label={
         <Box display="flex" alignItems="center" flexWrap="nowrap">
           <span>{name}</span>
           {arrow && (
-            <ArrowDropDown width={24} height={24} style={{ marginRight: -4 }} />
+            <ArrowDropDown
+              width={dropdownIconSize}
+              height={dropdownIconSize}
+              style={{ marginRight: -4 }}
+            />
           )}
         </Box>
       }
-      icon={<Branch width={18} height={18} />}
+      icon={<Branch width={iconSize} height={iconSize} />}
     />
   );
 };
