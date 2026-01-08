@@ -5,8 +5,11 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
+import io.tolgee.model.enums.TaskState
+import io.tolgee.model.enums.TaskType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Label
 import java.util.Date
 
@@ -30,6 +33,9 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
   lateinit var label2: Label
   lateinit var label3: Label
   lateinit var label4: Label
+  lateinit var featureOpenTask: Task
+  lateinit var featureFinishedTask: Task
+  lateinit var conflictsBranchTask: Task
 
   companion object {
     const val UPDATE_KEY_NAME = "shared-update-key"
@@ -44,6 +50,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
         addLabels()
         addSharedKeys()
         createMergeWithConflicts()
+        addTasks()
       }
     }
   }
@@ -101,6 +108,62 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
     ) { mainKey, featureKey ->
       mainConflictKey = mainKey
       featureConflictKey = featureKey
+    }
+  }
+
+  private fun ProjectBuilder.addTasks() {
+    featureOpenTask =
+      addTask {
+        number = 1
+        name = "Feature branch open task"
+        type = TaskType.TRANSLATE
+        state = TaskState.NEW
+        project = projectBuilder.self
+        language = englishLanguage
+        author = user
+        branch = featureBranch
+      }.self
+
+    addTaskKey {
+      task = featureOpenTask
+      key = featureKeyToUpdate
+      done = false
+    }
+
+    featureFinishedTask =
+      addTask {
+        number = 2
+        name = "Feature branch finished task"
+        type = TaskType.TRANSLATE
+        state = TaskState.FINISHED
+        project = projectBuilder.self
+        language = englishLanguage
+        author = user
+        branch = featureBranch
+      }.self
+
+    addTaskKey {
+      task = featureFinishedTask
+      key = featureKeyToDelete
+      done = true
+    }
+
+    conflictsBranchTask =
+      addTask {
+        number = 3
+        name = "Conflicts branch finished task"
+        type = TaskType.REVIEW
+        state = TaskState.FINISHED
+        project = projectBuilder.self
+        language = englishLanguage
+        author = user
+        branch = conflictsBranch
+      }.self
+
+    addTaskKey {
+      task = conflictsBranchTask
+      key = conflictsBranchKey
+      done = true
     }
   }
 
