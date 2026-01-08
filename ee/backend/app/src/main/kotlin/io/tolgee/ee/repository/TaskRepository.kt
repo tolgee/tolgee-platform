@@ -4,6 +4,7 @@ import io.tolgee.ee.data.task.TaskFilters
 import io.tolgee.ee.data.task.TranslationScopeFilters
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.Task
 import io.tolgee.model.views.KeysScopeSimpleView
@@ -92,11 +93,26 @@ interface TaskRepository : JpaRepository<Task, Long> {
      select tk
      from Task tk
         left join tk.language l
+        left join tk.branch b
      where
         l.deletedAt is null
         and tk.project.id = :projectId
         and $TASK_SEARCH
         and $TASK_FILTERS
+        and (
+          (b.name = :#{#filters.branch} and b.archivedAt is null) 
+          or (:#{#filters.branch} is null and (b is null or b.isDefault))
+          or (
+            b.archivedAt is not null
+            and exists (
+              select 1
+              from BranchMerge bm
+              where bm.sourceBranch.id = b.id
+                and bm.targetBranch.name = :#{#filters.branch}
+                and bm.mergedAt is not null
+            )
+          )
+        )
     """,
   )
   fun getAllByProjectId(
@@ -160,6 +176,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
         left join fetch t.author
         left join fetch t.project
         left join fetch t.language
+        left join fetch t.branch
       where t in :tasks
     """,
   )
@@ -177,13 +194,39 @@ interface TaskRepository : JpaRepository<Task, Long> {
   fun findByProjectOrderByNumberDesc(project: Project): List<Task>
 
   @Query(
+    """
+      select count(t)
+      from Task t
+      where t.branch.id = :branchId
+    """,
+  )
+  fun countByBranchId(branchId: Long): Long
+
+  @Query(
+    """
+      select t
+      from Task t
+      where t.project.id = :projectId
+        and t.branch.id = :branchId
+        and t.state in :states
+    """,
+  )
+  fun findAllByProjectIdAndBranchIdAndStateIn(
+    projectId: Long,
+    branchId: Long,
+    states: Collection<TaskState>,
+  ): List<Task>
+
+  @Query(
     nativeQuery = true,
     value = """
       select key.id
       from key
           left join translation t on t.key_id = key.id and t.language_id = :languageId
+          left join branch b on b.id = key.branch_id
       where key.project_id = :projectId
           and key.id in :keyIds
+          and ((b.name = :branch and b.archived_at is null) or (:branch is null and (b is null or b.is_default))) 
           and (
             COALESCE(t.state, 0) in :#{#filters.filterStateOrdinal} -- item fits the filter
             or (
@@ -203,6 +246,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
     languageId: Long,
     keyIds: Collection<Long>,
     filters: TranslationScopeFilters = TranslationScopeFilters(),
+    branch: String?,
   ): List<Long>
 
   @Query(
@@ -221,8 +265,10 @@ interface TaskRepository : JpaRepository<Task, Long> {
                 and l.deleted_at is null
           ) as task on task.key_id = key.id
           left join translation t on t.key_id = key.id and t.language_id = :languageId
+          left join branch b on b.id = key.branch_id
       where key.project_id = :projectId
           and key.id in :keyIds
+          and ((b.name = :branch and b.archived_at is null) or (:branch is null and (b is null or b.is_default))) 
           and task IS NULL
           and (
             COALESCE(t.state, 0) in :#{#filters.filterStateOrdinal} -- item fits the filter
@@ -244,6 +290,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
     taskType: String,
     keyIds: Collection<Long>,
     filters: TranslationScopeFilters = TranslationScopeFilters(),
+    branch: String?,
   ): List<Long>
 
   @Query(
@@ -377,6 +424,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
         left join fetch t.assignees
         left join fetch t.project
         left join fetch t.language
+        left join fetch t.branch
       where t.number = :taskNumber
         and t.project.id = :projectId
     """,

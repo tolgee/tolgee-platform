@@ -9,6 +9,7 @@ import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.ee.repository.branching.BranchRepository
+import io.tolgee.ee.service.TaskService
 import io.tolgee.events.OnBranchDeleted
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -43,6 +44,7 @@ class BranchServiceImpl(
   private val applicationContext: ApplicationContext,
   private val defaultBranchCreator: DefaultBranchCreator,
   private val branchMergeService: BranchMergeService,
+  private val taskService: TaskService,
   private val languageService: LanguageService,
   private val keyRepository: KeyRepository,
   private val authenticationFacade: AuthenticationFacade,
@@ -334,6 +336,9 @@ class BranchServiceImpl(
 
   private fun archiveBranch(branch: Branch) {
     branch.archivedAt = currentDateProvider.date
+    branch.lastMerge?.sourceBranch?.let {
+      taskService.cancelUnfinishedTasksForBranch(branch.project.id, it.id)
+    }
   }
 
   private fun softDeleteBranch(branch: Branch) {
