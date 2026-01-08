@@ -48,7 +48,8 @@ class EmailGlobalVariablesProviderTest {
     whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
     whenever(tolgeeProperties.backEndUrl).thenReturn("https://tolgee.test")
 
-    emailGlobalVariablesProvider().assert
+    emailGlobalVariablesProvider()
+      .assert
       .containsEntry("isCloud", true)
       .containsEntry("instanceQualifier", "Tolgee Test Edition")
       .containsEntry("backendUrl", "https://tolgee.test")
@@ -61,7 +62,8 @@ class EmailGlobalVariablesProviderTest {
     whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
     whenever(tolgeeProperties.backEndUrl).thenReturn("https://tolgee.test")
 
-    emailGlobalVariablesProvider().assert
+    emailGlobalVariablesProvider()
+      .assert
       .containsEntry("isCloud", false)
       .containsEntry("instanceQualifier", "tolgee.test")
       .containsEntry("backendUrl", "https://tolgee.test")
@@ -74,7 +76,8 @@ class EmailGlobalVariablesProviderTest {
     whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
     whenever(tolgeeProperties.backEndUrl).thenReturn("https:/tolgee.test")
 
-    emailGlobalVariablesProvider().assert
+    emailGlobalVariablesProvider()
+      .assert
       .containsEntry("isCloud", false)
       .containsEntry("instanceQualifier", SELF_HOSTED_DEFAULT_QUALIFIER)
       .containsEntry("backendUrl", "https:/tolgee.test")
@@ -88,7 +91,8 @@ class EmailGlobalVariablesProviderTest {
     whenever(tolgeeProperties.appName).thenReturn("Tolgee Test Edition")
     whenever(tolgeeProperties.frontEndUrl).thenReturn(null)
 
-    emailGlobalVariablesProvider().assert
+    emailGlobalVariablesProvider()
+      .assert
       .containsEntry("isCloud", false)
       .containsEntry("instanceQualifier", SELF_HOSTED_DEFAULT_QUALIFIER)
       .containsEntry("backendUrl", null)

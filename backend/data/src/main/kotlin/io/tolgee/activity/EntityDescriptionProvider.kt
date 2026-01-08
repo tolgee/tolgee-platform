@@ -53,9 +53,10 @@ class EntityDescriptionProvider(
     val entityClass = entityUtil.getRealEntityClass(entity::class.java) ?: return null
 
     val fieldValues =
-      entityClass.kotlin.members.filter { member ->
-        member is KProperty<*> && member.javaField?.isAnnotationPresent(ActivityDescribingProp::class.java) ?: false
-      }.associateTo(HashMap()) { it.name to it.call(entity) }
+      entityClass.kotlin.members
+        .filter { member ->
+          member is KProperty<*> && member.javaField?.isAnnotationPresent(ActivityDescribingProp::class.java) ?: false
+        }.associateTo(HashMap()) { it.name to it.call(entity) }
 
     return EntityDescription(
       entityClass.simpleName,

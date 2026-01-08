@@ -21,7 +21,8 @@ class EmailVerificationSender(
         to = email,
         subject = "Tolgee e-mail verification",
         header = "Verify your e-mail",
-        text = """
+        text =
+          """
           ${if (isSignUp) "Welcome to Tolgee. Thanks for signing up. \uD83C\uDF89<br/><br/>" else ""}
           
           To verify your e-mail, <b>follow this link</b>:<br/>
