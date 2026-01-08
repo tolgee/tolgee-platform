@@ -45,7 +45,22 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
       coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.DELETE then 1 else 0 end), 0),
       coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.UPDATE then 1 else 0 end), 0),
       coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NULL then 1 else 0 end), 0),
-      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NOT NULL then 1 else 0 end), 0)
+      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NOT NULL then 1 else 0 end), 0),
+      coalesce(
+        (
+          select count(t)
+          from Task t
+          where (
+            t.branch.id = sb.id
+            or (t.branch is null and sb.isDefault = true)
+          )
+            and t.state in (
+              io.tolgee.model.enums.TaskState.NEW,
+              io.tolgee.model.enums.TaskState.IN_PROGRESS
+            )
+        ),
+        0
+      )
     )
     from BranchMerge bm
       join bm.sourceBranch sb
@@ -73,7 +88,22 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
       coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.DELETE then 1 else 0 end), 0),
       coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.UPDATE then 1 else 0 end), 0),
       coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NULL then 1 else 0 end), 0),
-      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NOT NULL then 1 else 0 end), 0)
+      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NOT NULL then 1 else 0 end), 0),
+      coalesce(
+        (
+          select count(t)
+          from Task t
+          where (
+            t.branch.id = sb.id
+            or (t.branch is null and sb.isDefault = true)
+          )
+            and t.state in (
+              io.tolgee.model.enums.TaskState.NEW,
+              io.tolgee.model.enums.TaskState.IN_PROGRESS
+            )
+        ),
+        0
+      )
     )
     from BranchMerge bm
       join bm.sourceBranch sb

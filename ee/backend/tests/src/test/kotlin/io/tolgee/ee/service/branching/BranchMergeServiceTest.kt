@@ -3,6 +3,7 @@ package io.tolgee.ee.service.branching
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.LabelServiceImpl
 import io.tolgee.fixtures.waitForNotThrowing
@@ -11,8 +12,10 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
+import io.tolgee.model.enums.TaskState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
@@ -21,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
@@ -39,6 +43,9 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   @Autowired
   lateinit var labelService: LabelServiceImpl
+
+  @Autowired
+  lateinit var taskRepository: TaskRepository
 
   private lateinit var testData: BranchMergeTestData
 
@@ -151,11 +158,45 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     val refreshedBranch = testData.featureBranch.refresh()!!
     refreshedBranch.archivedAt.assert.isNull()
     refreshedBranch.deletedAt.assert.isNull()
+    testData.featureOpenTask
+      .refresh()
+      .state.assert
+      .isEqualTo(TaskState.NEW)
+    testData.featureFinishedTask
+      .refresh()
+      .state.assert
+      .isEqualTo(TaskState.FINISHED)
 
     // dry-run again and validate no changes are present
     val newMerge = dryRunFeatureBranchMerge()
     newMerge.changes.size.assert
       .isEqualTo(0)
+  }
+
+  @Test
+  fun `apply merge - cancels unfinished tasks when deleting branch`() {
+    val merge = prepareMergeScenario()
+    branchService.applyMerge(testData.project.id, merge.id, true)
+
+    testData.featureOpenTask
+      .refresh()
+      .state.assert
+      .isEqualTo(TaskState.CANCELED)
+    testData.featureFinishedTask
+      .refresh()
+      .state.assert
+      .isEqualTo(TaskState.FINISHED)
+  }
+
+  @Test
+  fun `merge view reports uncompleted task count`() {
+    val merge = prepareMergeScenario()
+
+    branchService
+      .getBranchMergeView(testData.project.id, merge.id)
+      .uncompletedTasksCount
+      .assert
+      .isEqualTo(1)
   }
 
   @Test
@@ -293,6 +334,10 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   private fun Key.refresh(): Key {
     return keyRepository.findOneWithTags(this.id)
+  }
+
+  private fun Task.refresh(): Task {
+    return taskRepository.findByIdOrNull(this.id) ?: throw IllegalStateException("Task not found")
   }
 
   private fun Key.enTranslation(): String? {

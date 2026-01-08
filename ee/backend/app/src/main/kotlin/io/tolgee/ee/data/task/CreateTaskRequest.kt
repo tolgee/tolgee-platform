@@ -29,4 +29,6 @@ data class CreateTaskRequest(
   var assignees: MutableSet<Long>? = null,
   @field:NotNull
   var keys: MutableSet<Long>? = null,
+  @Schema(description = "Branch name. If empty or null, default branch is used.")
+  var branch: String? = null,
 )
