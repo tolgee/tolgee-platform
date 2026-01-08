@@ -11,6 +11,7 @@ const BRANCHING_LINKS = new Set<Link>([
   LINKS.PROJECT_TRANSLATIONS,
   LINKS.PROJECT_IMPORT,
   LINKS.PROJECT_EXPORT,
+  LINKS.PROJECT_TASKS,
 ]);
 
 export const useBranchLinks = (selectedBranch?: string) => {
@@ -23,15 +24,17 @@ export const useBranchLinks = (selectedBranch?: string) => {
 
   const withBranchLink = (
     link: Link,
-    params?: { [key: string]: string | number }
+    params?: { [key: string]: string | number },
+    branchName?: string
   ) => {
     const url = link.build(params);
+    const branchParam = branchName || branch;
 
-    if (!branch || !BRANCHING_LINKS.has(link)) {
+    if (!branchParam || !BRANCHING_LINKS.has(link)) {
       return url;
     }
 
-    return applyBranchToUrl(url, branch);
+    return applyBranchToUrl(url, branchParam);
   };
 
   const withBranchUrl = (url?: string) => {
