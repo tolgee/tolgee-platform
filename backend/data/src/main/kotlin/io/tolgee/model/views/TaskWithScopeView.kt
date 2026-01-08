@@ -3,6 +3,7 @@ package io.tolgee.model.views
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.task.TaskKey
@@ -20,6 +21,7 @@ data class TaskWithScopeView(
   val assignees: MutableSet<UserAccount>,
   val keys: MutableSet<TaskKey>,
   val author: UserAccount,
+  val branch: Branch?,
   val createdAt: Date?,
   val state: TaskState,
   val closedAt: Date?,
