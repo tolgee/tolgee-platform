@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.dtos.request.UserMfaRecoveryRequestDto
 import io.tolgee.dtos.request.UserTotpDisableRequestDto
 import io.tolgee.dtos.request.UserTotpEnableRequestDto
@@ -17,8 +18,10 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
+@Import(TestEmailConfiguration::class)
 class UserMfaControllerTest : AuthorizedControllerTest() {
   companion object {
     private const val TOTP_KEY = "meowmeowmeowmeow"

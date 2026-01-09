@@ -16,9 +16,9 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.KArgumentCaptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
 import java.util.Date
@@ -37,7 +37,7 @@ class KeyUsageReportingTest : AbstractSpringTest() {
   @Autowired
   private lateinit var tolgeeCloudLicencingClientStub: TolgeeCloudLicencingClientStub
 
-  @MockBean
+  @MockitoBean
   @Autowired
   lateinit var restTemplate: RestTemplate
 

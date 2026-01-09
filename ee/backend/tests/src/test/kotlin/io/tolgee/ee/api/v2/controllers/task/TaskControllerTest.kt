@@ -1,6 +1,7 @@
 package io.tolgee.ee.api.v2.controllers.task
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.TaskTestData
@@ -26,8 +27,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 import java.math.BigDecimal
 
+@Import(TestEmailConfiguration::class)
 class TaskControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TaskTestData
 

@@ -17,12 +17,12 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 @SpringBootTest(
   properties = [
@@ -56,7 +56,7 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
   @Autowired
   lateinit var jobConcurrentLauncher: BatchJobConcurrentLauncher
 
-  @SpyBean
+  @MockitoSpyBean
   @Autowired
   lateinit var redisTemplate: StringRedisTemplate
 

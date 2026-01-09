@@ -17,7 +17,7 @@ import io.tolgee.util.Logging
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 abstract class AbstractBatchJobManagementControllerTest(
   basePath: String,
@@ -39,22 +39,22 @@ abstract class AbstractBatchJobManagementControllerTest(
 
   @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   override lateinit var mtCreditBucketService: MtCreditBucketService
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   lateinit var preTranslationByTmChunkProcessor: PreTranslationByTmChunkProcessor
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   lateinit var machineTranslationChunkProcessor: MachineTranslationChunkProcessor
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   lateinit var autoTranslationService: AutoTranslationService
 
-  @SpyBean
+  @MockitoSpyBean
   @Autowired
   lateinit var batchJobActivityFinalizer: BatchJobActivityFinalizer
 

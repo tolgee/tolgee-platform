@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.dtos.request.project.LanguagePermissions
@@ -25,7 +26,9 @@ import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 
+@Import(TestEmailConfiguration::class)
 class V2InvitationControllerTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import java.time.Duration
 import java.util.Date
 import kotlin.math.ceil
@@ -33,12 +33,12 @@ abstract class AbstractBatchJobsGeneralTest :
   @Autowired
   lateinit var batchProperties: BatchProperties
 
-  @SpyBean
+  @MockitoSpyBean
   @Autowired
   lateinit var preTranslationByTmChunkProcessor: PreTranslationByTmChunkProcessor
 
-  @Suppress("unused") // Used to instrument it in other places via @SpyBean
-  @SpyBean
+  @Suppress("unused") // Used to instrument it in other places via @MockitoSpyBean
+  @MockitoSpyBean
   @Autowired
   lateinit var deleteKeysChunkProcessor: DeleteKeysChunkProcessor
 
@@ -55,15 +55,15 @@ abstract class AbstractBatchJobsGeneralTest :
   lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   lateinit var batchJobProjectLockingManager: BatchJobProjectLockingManager
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   lateinit var automationChunkProcessor: AutomationChunkProcessor
 
   @Autowired
-  @SpyBean
+  @MockitoSpyBean
   lateinit var progressManager: ProgressManager
 
   lateinit var util: BatchJobTestUtil

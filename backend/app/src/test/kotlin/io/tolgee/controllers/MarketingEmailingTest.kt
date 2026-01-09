@@ -2,6 +2,7 @@ package io.tolgee.controllers
 
 import io.tolgee.component.emailContacts.EmailServiceManager
 import io.tolgee.component.emailContacts.MailJetEmailServiceManager
+import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.EmailTestUtil
@@ -24,7 +25,8 @@ import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -32,12 +34,13 @@ import org.springframework.web.client.RestTemplate
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(TestEmailConfiguration::class)
 class MarketingEmailingTest : AuthorizedControllerTest() {
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var mailjetEmailServiceManager: MailJetEmailServiceManager
 
-  @MockBean
+  @MockitoBean
   @Autowired
   private val restTemplate: RestTemplate? = null
 

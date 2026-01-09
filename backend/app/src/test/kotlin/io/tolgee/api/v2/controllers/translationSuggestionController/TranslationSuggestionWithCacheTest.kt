@@ -20,8 +20,8 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.cache.CacheManager
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.ResultActions
 import java.util.Date
 
@@ -33,14 +33,15 @@ import java.util.Date
   ],
 )
 class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projects/") {
+  private var previousFreeCreditsAmount: Long? = null
   lateinit var testData: SuggestionTestData
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var llmTranslationProvider: LlmTranslationProvider
 
   @Autowired
-  @MockBean
+  @MockitoBean
   lateinit var eeSubscriptionInfoProvider: EeSubscriptionInfoProvider
 
   @Suppress("LateinitVarOverridesLateinitVar")
@@ -51,6 +52,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
 
   @BeforeEach
   fun setup() {
+    previousFreeCreditsAmount = machineTranslationProperties.freeCreditsAmount
     Mockito.clearInvocations(llmTranslationProvider)
     setForcedDate(Date())
     initTestData()
@@ -63,12 +65,11 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
   @AfterEach
   fun clear() {
     clearForcedDate()
+    previousFreeCreditsAmount?.let { machineTranslationProperties.freeCreditsAmount = it }
   }
 
   private fun mockDefaultMtBucketSize(size: Long) {
-    whenever(machineTranslationProperties.freeCreditsAmount).thenAnswer {
-      size
-    }
+    machineTranslationProperties.freeCreditsAmount = size
   }
 
   private fun initMachineTranslationMocks() {
