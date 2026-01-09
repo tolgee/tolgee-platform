@@ -1,3 +1,11 @@
+## [3.146.1](https://github.com/tolgee/tolgee-platform/compare/v3.146.0...v3.146.1) (2026-01-09)
+
+
+### Bug Fixes
+
+* don't rate limit export endpoint twice ([#3371](https://github.com/tolgee/tolgee-platform/issues/3371)) ([5cf2454](https://github.com/tolgee/tolgee-platform/commit/5cf24546f4d2e724b9c34a64c473145ca4bd13b9))
+* use correct languageInfo when validating Mt settings ([#3357](https://github.com/tolgee/tolgee-platform/issues/3357)) ([599ad9c](https://github.com/tolgee/tolgee-platform/commit/599ad9cd96d8ca88e68a23859fd0c30bf2d583ec)), closes [#3353](https://github.com/tolgee/tolgee-platform/issues/3353)
+
 # [3.146.0](https://github.com/tolgee/tolgee-platform/compare/v3.145.5...v3.146.0) (2026-01-09)
 
 
