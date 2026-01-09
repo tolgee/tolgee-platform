@@ -107,6 +107,7 @@ dependencies {
     implementation('com.github.transferwise:spring-icu:0.3.0') {
         exclude group: 'org.springframework', module: 'spring-context'
         exclude group: 'com.ibm.icu', module: 'icu4j'
+        exclude group: 'org.springframework', module: 'spring-beans'
     }
 
     /**
