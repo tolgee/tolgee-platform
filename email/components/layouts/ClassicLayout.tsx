@@ -49,14 +49,8 @@ type SocialLinkProps = {
 function SocialLink({ social, link, resourceName }: SocialLinkProps) {
   return (
     <Text className="text-xs m-0">
-      <Link href={link}>
-        <span className="hidden">{social}</span>
-        <ImgResource
-          className="mx-auto"
-          resourceName={resourceName}
-          alt={social}
-          aria-hidden={true}
-        />
+      <Link href={link} aria-label={social}>
+        <ImgResource className="mx-auto" resourceName={resourceName} alt="" />
       </Link>
     </Text>
   );
