@@ -238,30 +238,30 @@ export const deleteUser = () => {
 
 export const deleteUserSql = (username: string) => {
   const sql = `
-      delete
-      from permission
-      where user_id in (select id from user_account where username = '${username}');
-      delete
-      from email_verification
-      where user_account_id in (select id from user_account where username = '${username}');
-      delete
-      from organization_role
-      where user_id in (select id from user_account where username = '${username}');
-      delete
-      from user_preferences
-      where user_account_id in (select id from user_account where username = '${username}');
-      delete
-      from quick_start
-      where user_account_id in (select id from user_account where username = '${username}');
-      delete
-      from notification
-      where user_id in (select id from user_account where username = '${username}');
-      delete
-      from notification_setting
-      where user_id in (select id from user_account where username = '${username}');
-      delete
-      from user_account
-      where username = '${username}';
+    delete
+    from permission
+    where user_id in (select id from user_account where username = '${username}');
+    delete
+    from email_verification
+    where user_account_id in (select id from user_account where username = '${username}');
+    delete
+    from organization_role
+    where user_id in (select id from user_account where username = '${username}');
+    delete
+    from user_preferences
+    where user_account_id in (select id from user_account where username = '${username}');
+    delete
+    from quick_start
+    where user_account_id in (select id from user_account where username = '${username}');
+    delete
+    from notification
+    where user_id in (select id from user_account where username = '${username}');
+    delete
+    from notification_setting
+    where user_id in (select id from user_account where username = '${username}');
+    delete
+    from user_account
+    where username = '${username}';
   `;
 
   return internalFetch(`sql/execute`, { method: 'POST', body: sql });
@@ -270,7 +270,7 @@ export const deleteUserSql = (username: string) => {
 export const getUser = (username: string) => {
   const sql = `select user_account.username, email_verification.id
                from user_account
-                        join email_verification on email_verification.user_account_id = user_account.id
+                      join email_verification on email_verification.user_account_id = user_account.id
                where username = '${username}'`;
   return internalFetch(`sql/list`, { method: 'POST', body: sql }).then((r) => {
     return r.body[0];
@@ -419,7 +419,7 @@ export const getParsedEmailVerificationByIndex = (index: number) => {
       }
       return getEmail(emails[index].ID).then((email) => {
         return {
-          verifyEmailLink: (email.HTML.match(/href="([^"]+)"/i) || [, ''])[1],
+          verifyEmailLink: (email.HTML.match(/href="([^"]+)"/i) || ['', ''])[1],
           fromAddress: email.From.Address,
           toAddress: email.To[0].Address,
           content: email.HTML,
@@ -443,6 +443,9 @@ export const getAgencyInvitationLinks = () =>
     const email = emails.find((e) =>
       e.Subject.includes('New translation request')
     );
+    if (!email) {
+      throw new Error('Agency invitation email not found');
+    }
     return getEmail(email.ID).then((e) => {
       const links = Array.from(
         e.HTML.matchAll(/(http:\/\/[\w:/]*)/g),
