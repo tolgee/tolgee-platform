@@ -110,14 +110,20 @@ tasks.register('printE2eGroups') {
 tasks.register('saveServerLogs', Exec) {
     group = 'e2e'
     workingDir = file(E2E_DIR)
-
     def outFile = file("$E2E_DIR/server.log")
+    def outStream = null
     doFirst {
         outFile.parentFile.mkdirs()
-        standardOutput = new FileOutputStream(outFile)
-        errorOutput = standardOutput
+        outStream = new FileOutputStream(outFile)
+        standardOutput = outStream
+        errorOutput = outStream
     }
     commandLine dockerCommandName(), "compose", "logs"
+    ignoreExitValue = true
+    doLast {
+        try { outStream?.close() } catch (ignored) {}
+    }
+    finalizedBy "stopDockerE2e"
 }
 
 tasks.register('openE2e', Exec) {
@@ -159,6 +165,7 @@ tasks.register('stopDockerE2e', Exec) {
     commandLine dockerCommandName(), "compose", "stop"
     workingDir E2E_DIR
     ignoreExitValue = true
+    finalizedBy "cleanupDockerE2e"
 }
 
 tasks.register('cleanupDockerE2e', Exec) {
