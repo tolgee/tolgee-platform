@@ -104,7 +104,7 @@ export const useMachineTranslationSettings = () => {
       ({ targetLanguageId, primaryServiceInfo, enabledServicesInfo }) => {
         const targetLangInfo =
           languageInfos.data?._embedded?.languageInfos?.find(
-            (l) => l.languageId === targetLanguageId
+            (l) => l.languageId === (targetLanguageId ?? null)
           );
 
         return {
