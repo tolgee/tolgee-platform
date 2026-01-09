@@ -1,0 +1,61 @@
+name: Deploy preview
+
+on:
+  push:
+    tags:
+      - preview/stepan/1
+      - preview/stepan/2
+      - preview/honza/1
+      - preview/honza/2
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-java@v3
+        with:
+          java-version: 21
+          distribution: adopt
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22.x"
+
+      - name: Set git globals
+        run: |
+          git config --local user.email "machine@tolgee.io"
+          git config --local user.name "Tolgee Machine"
+
+      - name: Download translations
+        run: ./gradlew updateStaticTranslations
+        env:
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+
+      - name: Login to docker
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
+
+      - name: Set version
+        id: version
+        run: echo "VERSION=$(echo $GITHUB_REF | sed -e 's/refs\/tags\///g' -e 's/\//-/g')" >> $GITHUB_OUTPUT
+
+      - name: Prepare for docker build
+        run: ./gradlew dockerPrepare
+        env:
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+
+      - name: Create docker image
+        run: |
+          docker buildx create --use 
+          docker buildx build . -t tgint/tgpreview:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --push
+        working-directory: build/docker
+
+      - name: Deploy
+        uses: nickgronow/kubectl@master
+        with:
+          args: '"rollout restart deployment/tolgee-deployment-${{ steps.version.outputs.VERSION }}"'
+          config_data: ${{ secrets.KUBERNETES_DO_SERVICE_CONFIG }}
