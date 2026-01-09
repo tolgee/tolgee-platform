@@ -1,3 +1,10 @@
+# [3.146.0](https://github.com/tolgee/tolgee-platform/compare/v3.145.5...v3.146.0) (2026-01-09)
+
+
+### Features
+
+* add manifest in generated files by exporter for Android SDK ([#3352](https://github.com/tolgee/tolgee-platform/issues/3352)) ([e2d9699](https://github.com/tolgee/tolgee-platform/commit/e2d969922c81d3fc40b713fc65aefaaa22e2ff6d))
+
 ## [3.145.5](https://github.com/tolgee/tolgee-platform/compare/v3.145.4...v3.145.5) (2026-01-07)
 
 
