@@ -123,6 +123,7 @@ class BatchJobActionService(
     val lockedExecution = getExecutionIfCanAcquireLockInDb(executionItem.chunkExecutionId)
 
     if (lockedExecution == null) {
+      metrics.batchJobManagementItemAlreadyLockedCounter.increment()
       logger.debug("⚠️ Chunk ${executionItem.chunkExecutionId} (job: ${executionItem.jobId}) is locked, skipping")
       progressManager.finalizeIfCompleted(executionItem.jobId)
       return null
