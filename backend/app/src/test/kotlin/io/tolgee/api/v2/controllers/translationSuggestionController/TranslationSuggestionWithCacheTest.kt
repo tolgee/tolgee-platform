@@ -33,6 +33,7 @@ import java.util.Date
   ],
 )
 class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projects/") {
+  private var previousFreeCreditsAmount: Long? = null
   lateinit var testData: SuggestionTestData
 
   @Autowired
@@ -51,6 +52,7 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
 
   @BeforeEach
   fun setup() {
+    previousFreeCreditsAmount = machineTranslationProperties.freeCreditsAmount
     Mockito.clearInvocations(llmTranslationProvider)
     setForcedDate(Date())
     initTestData()
@@ -63,12 +65,11 @@ class TranslationSuggestionWithCacheTest : ProjectAuthControllerTest("/v2/projec
   @AfterEach
   fun clear() {
     clearForcedDate()
+    previousFreeCreditsAmount?.let { machineTranslationProperties.freeCreditsAmount = it }
   }
 
   private fun mockDefaultMtBucketSize(size: Long) {
-    whenever(machineTranslationProperties.freeCreditsAmount).thenAnswer {
-      size
-    }
+    machineTranslationProperties.freeCreditsAmount = size
   }
 
   private fun initMachineTranslationMocks() {
