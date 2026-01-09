@@ -73,6 +73,10 @@ To learn more about externalized configuration in Spring boot, read [the docs](h
 
 Since we set the active profile to `dev`, Spring uses the `application-dev.yaml` configuration file.
 
+## Writing emails
+
+Please refer to [email/HACKING.md](email/HACKING.md).
+
 ## Updating the database changelog
 
 Tolgee uses Liquibase to handle the database migration. The migrations are run on every app startup. To update the changelog, run:
