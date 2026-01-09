@@ -9,7 +9,6 @@ import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.dtos.PromptResult
 import io.tolgee.dtos.request.llmProvider.LlmProviderRequest
-import io.tolgee.ee.api.v2.hateoas.model.prompt.PromptResponseUsageModel
 import io.tolgee.ee.component.llm.AbstractLlmApiService
 import io.tolgee.ee.component.llm.AnthropicApiService
 import io.tolgee.ee.component.llm.GoogleAiApiService
@@ -122,22 +121,30 @@ class LlmProviderService(
     callback: (provider: LlmProviderDto) -> T,
   ): T {
     var lastError: Exception? = null
+    var retryAt: Long? = null
 
     // attempt 3 times to find non-rate-limited provider
     repeat(3) {
       val providerConfig = getProviderByName(organizationId, provider, priority)
       try {
         return callback(providerConfig)
+      } catch (e: LlmRateLimitedException) {
+        retryAt = e.retryAt
+        lastError = e
       } catch (e: HttpClientErrorException) {
         if (e.statusCode == HttpStatus.TOO_MANY_REQUESTS) {
-          suspendProvider(provider, providerConfig.id, 60 * 1000)
+          suspendProvider(provider, providerConfig.id)
           lastError = e
         } else {
           throw e
         }
       }
     }
-    throw LlmRateLimitedException(params = lastError?.message?.let { listOf(it) }, cause = lastError)
+    throw LlmRateLimitedException(
+      retryAt = retryAt ?: (currentDateProvider.date.time + RATE_LIMIT_SUSPEND_PERIOD_MS),
+      params = lastError?.message?.let { listOf(it) },
+      cause = lastError,
+    )
   }
 
   fun <T> repeatWithTimeouts(
@@ -214,10 +221,9 @@ class LlmProviderService(
   fun suspendProvider(
     name: String,
     providerId: Long,
-    period: Long,
   ) {
     val providerInfo = cache.get(name, ProviderInfo::class.java) ?: ProviderInfo()
-    providerInfo.suspendMap.set(providerId, currentDateProvider.date.time + period)
+    providerInfo.suspendMap.set(providerId, currentDateProvider.date.time + RATE_LIMIT_SUSPEND_PERIOD_MS)
     cache.set(name, providerInfo)
   }
 
@@ -299,6 +305,8 @@ class LlmProviderService(
   }
 
   companion object {
+    private const val RATE_LIMIT_SUSPEND_PERIOD_MS = 60000L // 1 minute
+
     data class ProviderInfo(
       var suspendMap: MutableMap<Long, Long> = mutableMapOf(),
     )
