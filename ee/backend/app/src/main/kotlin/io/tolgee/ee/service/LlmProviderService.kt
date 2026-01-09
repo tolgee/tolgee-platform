@@ -56,113 +56,6 @@ class LlmProviderService(
   private val cache: Cache by lazy { cacheManager.getCache(Caches.LLM_PROVIDERS) ?: throw InvalidStateException() }
   private var lastUsedMap: MutableMap<String, Long> = mutableMapOf()
 
-  fun getProviderByName(
-    organizationId: Long,
-    name: String,
-    priority: LlmProviderPriority?,
-  ): LlmProviderDto {
-    val customProviders = getAll(organizationId)
-    val serverProviders = getAllServerProviders()
-
-    // if there is a provider of that name in custom providers, it overrides server provider(s)
-    val providersOfTheName =
-      if (customProviders.find { it.name == name } != null) {
-        customProviders
-      } else {
-        serverProviders
-      }.filter {
-        it.name == name
-      }
-
-    // try to find the provider(s) with matching priority
-    // if none found, get all of them
-    val providersWithPriority =
-      if (providersOfTheName.find { it.priority == priority } != null) {
-        providersOfTheName.filter { it.priority == priority }
-      } else {
-        providersOfTheName
-      }
-
-    if (providersWithPriority.isEmpty()) {
-      throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(name))
-    }
-
-    val providerInfo = cache.get(name, ProviderInfo::class.java)
-    val providers =
-      providersWithPriority.filter {
-        if (providerInfo != null) {
-          providerInfo.suspendMap.getOrDefault(it.id, 0L) < currentDateProvider.date.time
-        } else {
-          true
-        }
-      }
-
-    if (providers.isEmpty() && providerInfo?.suspendMap?.isNotEmpty() == true) {
-      val closestUnsuspend = providerInfo.suspendMap.map { (_, time) -> time }.min()
-      throw LlmRateLimitedException(closestUnsuspend)
-    }
-
-    var lastUsed = lastUsedMap.get(name)
-    val lastUsedIndex = providers.indexOfFirst { it.id == lastUsed }
-    val newIndex = (lastUsedIndex + 1) % providers.size
-    val provider = providers.get(newIndex)
-    lastUsedMap.set(name, provider.id)
-    return provider
-  }
-
-  fun getAll(organizationId: Long): List<LlmProviderDto> {
-    return llmProviderRepository.getAll(organizationId).map { it.toDto() }
-  }
-
-  fun <T> repeatWhileProvidersRateLimited(
-    organizationId: Long,
-    provider: String,
-    priority: LlmProviderPriority?,
-    callback: (provider: LlmProviderDto) -> T,
-  ): T {
-    var lastError: Exception? = null
-    var retryAt: Long? = null
-
-    // attempt 3 times to find non-rate-limited provider
-    repeat(3) {
-      val providerConfig = getProviderByName(organizationId, provider, priority)
-      try {
-        return callback(providerConfig)
-      } catch (e: LlmRateLimitedException) {
-        retryAt = e.retryAt
-        lastError = e
-      } catch (e: HttpClientErrorException) {
-        if (e.statusCode == HttpStatus.TOO_MANY_REQUESTS) {
-          suspendProvider(provider, providerConfig.id)
-          lastError = e
-        } else {
-          throw e
-        }
-      }
-    }
-    throw LlmRateLimitedException(
-      retryAt = retryAt ?: (currentDateProvider.date.time + RATE_LIMIT_SUSPEND_PERIOD_MS),
-      params = lastError?.message?.let { listOf(it) },
-      cause = lastError,
-    )
-  }
-
-  fun <T> repeatWithTimeouts(
-    attempts: List<Int>,
-    callback: (restTemplate: RestTemplate) -> T,
-  ): T {
-    var lastError: Exception? = null
-    for (timeout in attempts) {
-      val restTemplate = restTemplateBuilder.readTimeout(Duration.ofSeconds(timeout.toLong())).build()
-      try {
-        return callback(restTemplate)
-      } catch (e: ResourceAccessException) {
-        lastError = e
-      }
-    }
-    throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(lastError!!.message), lastError)
-  }
-
   fun callProvider(
     organizationId: Long,
     provider: String,
@@ -180,51 +73,6 @@ class LlmProviderService(
         }
       }
     return result
-  }
-
-  fun getFakedResponse(config: LlmProviderInterface): PromptResult {
-    val json =
-      """
-      {
-        "output": "response from: ${config.name}",
-        "contextDescription": "context description from: ${config.name}"
-      }
-      """.trimIndent()
-    return PromptResult(
-      response = json,
-      usage = PromptResult.Usage(inputTokens = 42, outputTokens = 21, cachedTokens = 1),
-    )
-  }
-
-  fun getProviderResponse(
-    providerService: AbstractLlmApiService,
-    params: LlmParams,
-    config: LlmProviderInterface,
-    restTemplate: RestTemplate,
-  ): PromptResult {
-    if (internalProperties.fakeLlmProviders) {
-      return getFakedResponse(config)
-    }
-    return providerService.translate(params, config, restTemplate)
-  }
-
-  fun getProviderService(providerType: LlmProviderType): AbstractLlmApiService {
-    return when (providerType) {
-      LlmProviderType.OPENAI -> openaiApiService
-      LlmProviderType.OPENAI_AZURE -> openaiApiService
-      LlmProviderType.TOLGEE -> tolgeeApiService
-      LlmProviderType.ANTHROPIC -> anthropicApiService
-      LlmProviderType.GOOGLE_AI -> googleAiApiService
-    }
-  }
-
-  fun suspendProvider(
-    name: String,
-    providerId: Long,
-  ) {
-    val providerInfo = cache.get(name, ProviderInfo::class.java) ?: ProviderInfo()
-    providerInfo.suspendMap.set(providerId, currentDateProvider.date.time + RATE_LIMIT_SUSPEND_PERIOD_MS)
-    cache.set(name, providerInfo)
   }
 
   fun createProvider(
@@ -279,10 +127,135 @@ class LlmProviderService(
     llmProviderRepository.deleteByIdAndOrganizationId(providerId, organizationId)
   }
 
+  fun getAll(organizationId: Long): List<LlmProviderDto> {
+    return llmProviderRepository.getAll(organizationId).map { it.toDto() }
+  }
+
   fun getAllServerProviders(): List<LlmProviderDto> {
     return llmPropertiesService.getProviders().mapIndexed { index, llmProvider ->
       // server configured providers are indexed like -1, -2, -3, to identify them
       llmProvider.toDto(-(index.toLong()) - 1)
+    }
+  }
+
+  fun <T> repeatWhileProvidersRateLimited(
+    organizationId: Long,
+    provider: String,
+    priority: LlmProviderPriority?,
+    callback: (provider: LlmProviderDto) -> T,
+  ): T {
+    var lastError: Exception? = null
+    var retryAt: Long? = null
+
+    repeat(3) {
+      val providerConfig = getProviderByName(organizationId, provider, priority)
+      try {
+        return callback(providerConfig)
+      } catch (e: LlmRateLimitedException) {
+        retryAt = e.retryAt
+        lastError = e
+      } catch (e: HttpClientErrorException) {
+        if (e.statusCode == HttpStatus.TOO_MANY_REQUESTS) {
+          suspendProvider(provider, providerConfig.id)
+          lastError = e
+        } else {
+          throw e
+        }
+      }
+    }
+    throw LlmRateLimitedException(
+      retryAt = retryAt ?: (currentDateProvider.date.time + RATE_LIMIT_SUSPEND_PERIOD_MS),
+      params = lastError?.message?.let { listOf(it) },
+      cause = lastError,
+    )
+  }
+
+  fun <T> repeatWithTimeouts(
+    attempts: List<Int>,
+    callback: (restTemplate: RestTemplate) -> T,
+  ): T {
+    var lastError: Exception? = null
+    for (timeout in attempts) {
+      val restTemplate = restTemplateBuilder.readTimeout(Duration.ofSeconds(timeout.toLong())).build()
+      try {
+        return callback(restTemplate)
+      } catch (e: ResourceAccessException) {
+        lastError = e
+      }
+    }
+    throw FailedDependencyException(Message.LLM_PROVIDER_ERROR, listOf(lastError!!.message), lastError)
+  }
+
+  fun getProviderByName(
+    organizationId: Long,
+    name: String,
+    priority: LlmProviderPriority?,
+  ): LlmProviderDto {
+    val customProviders = getAll(organizationId)
+    val serverProviders = getAllServerProviders()
+
+    val providersOfTheName =
+      if (customProviders.find { it.name == name } != null) {
+        customProviders
+      } else {
+        serverProviders
+      }.filter {
+        it.name == name
+      }
+
+    val providersWithPriority =
+      if (providersOfTheName.find { it.priority == priority } != null) {
+        providersOfTheName.filter { it.priority == priority }
+      } else {
+        providersOfTheName
+      }
+
+    if (providersWithPriority.isEmpty()) {
+      throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(name))
+    }
+
+    val providerInfo = cache.get(name, ProviderInfo::class.java)
+    val providers =
+      providersWithPriority.filter {
+        if (providerInfo != null) {
+          providerInfo.suspendMap.getOrDefault(it.id, 0L) < currentDateProvider.date.time
+        } else {
+          true
+        }
+      }
+
+    if (providers.isEmpty() && providerInfo?.suspendMap?.isNotEmpty() == true) {
+      val closestUnsuspend = providerInfo.suspendMap.map { (_, time) -> time }.min()
+      throw LlmRateLimitedException(closestUnsuspend)
+    }
+
+    var lastUsed = lastUsedMap.get(name)
+    val lastUsedIndex = providers.indexOfFirst { it.id == lastUsed }
+    val newIndex = (lastUsedIndex + 1) % providers.size
+    val provider = providers.get(newIndex)
+    lastUsedMap.set(name, provider.id)
+    return provider
+  }
+
+  fun getProviderResponse(
+    providerService: AbstractLlmApiService,
+    params: LlmParams,
+    config: LlmProviderInterface,
+    restTemplate: RestTemplate,
+  ): PromptResult {
+    if (internalProperties.fakeLlmProviders) {
+      return getFakedResponse(config)
+    }
+    return providerService.translate(params, config, restTemplate)
+  }
+
+  fun getProviderService(providerType: LlmProviderType): AbstractLlmApiService {
+    return when (providerType) {
+      LlmProviderType.OPENAI -> openaiApiService
+      LlmProviderType.OPENAI_AZURE -> openaiApiService
+      LlmProviderType.TOLGEE -> tolgeeApiService
+      LlmProviderType.ANTHROPIC -> anthropicApiService
+      LlmProviderType.GOOGLE_AI -> googleAiApiService
     }
   }
 
@@ -304,8 +277,31 @@ class LlmProviderService(
     return (price * 100).roundToInt()
   }
 
+  fun suspendProvider(
+    name: String,
+    providerId: Long,
+  ) {
+    val providerInfo = cache.get(name, ProviderInfo::class.java) ?: ProviderInfo()
+    providerInfo.suspendMap.set(providerId, currentDateProvider.date.time + RATE_LIMIT_SUSPEND_PERIOD_MS)
+    cache.set(name, providerInfo)
+  }
+
+  fun getFakedResponse(config: LlmProviderInterface): PromptResult {
+    val json =
+      """
+      {
+        "output": "response from: ${config.name}",
+        "contextDescription": "context description from: ${config.name}"
+      }
+      """.trimIndent()
+    return PromptResult(
+      response = json,
+      usage = PromptResult.Usage(inputTokens = 42, outputTokens = 21, cachedTokens = 1),
+    )
+  }
+
   companion object {
-    private const val RATE_LIMIT_SUSPEND_PERIOD_MS = 60000L // 1 minute
+    private const val RATE_LIMIT_SUSPEND_PERIOD_MS = 60000L
 
     data class ProviderInfo(
       var suspendMap: MutableMap<Long, Long> = mutableMapOf(),
