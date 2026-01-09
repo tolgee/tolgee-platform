@@ -100,7 +100,7 @@ class EmailServiceTest {
           "target=\"_blank\">Tolgee</a>",
       )
       // Makes sure resources have been added as expected
-      .contains("<img aria-hidden=\"true\" src=\"https://tolgee.test/static/emails/")
+      .contains("<img src=\"https://tolgee.test/static/emails/")
       // Header is taken from variable
       .contains("Test header from var")
       // Might be a bit brittle but does the trick for now.
