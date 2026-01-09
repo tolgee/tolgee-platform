@@ -99,6 +99,58 @@ describe('Machine translation settings', () => {
     cy.contains('from en to cs').should('not.exist');
   });
 
+  it(
+    'preserves settings across language configurations',
+    { retries: 5 },
+    () => {
+      // This checks for the case where modifying one language
+      // doesn't affect the other languages.
+      // To be exact, the Spanish language supports formality, while
+      // the Czech language doesn't. This used to reset the Spanish
+      // settings when changing the Czech settings, because of a bug.
+
+      gcyAdvanced({
+        value: 'machine-translations-settings-language-options',
+        language: 'es',
+      }).click();
+
+      getPrimaryRadio('AWS').click();
+      getFormalitySelect('AWS').click();
+      cy.gcy('mt-language-dialog-formality-select-item')
+        .contains('Formal')
+        .click();
+      cy.gcy('mt-language-dialog-save').click();
+
+      waitForGlobalLoading();
+
+      getAvatarPrimary('AWS', 'es').should('be.visible');
+
+      gcyAdvanced({
+        value: 'machine-translations-settings-language-options',
+        language: 'cs',
+      }).click();
+
+      getPrimaryRadio('AWS').click();
+      cy.gcy('mt-language-dialog-save').click();
+
+      waitForGlobalLoading();
+
+      getAvatarPrimary('AWS', 'cs').should('be.visible');
+
+      // Re-open Spanish settings
+      gcyAdvanced({
+        value: 'machine-translations-settings-language-options',
+        language: 'es',
+      }).click();
+
+      // Verify AWS is still primary
+      getPrimaryRadio('AWS').find('input').should('be.checked');
+
+      // Verify formality is still set to Formal
+      getFormalitySelect('AWS').should('contain', 'Formal');
+    }
+  );
+
   const visit = () => {
     cy.visit(`${HOST}/projects/${project.id}/languages/mt`);
   };

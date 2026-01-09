@@ -48,16 +48,13 @@ export const useMachineTranslationSettings = () => {
 
   function isSupported(
     service: MtServiceInfo | undefined,
-    languageId: number | undefined
+    langInfo: LanguageInfoModel | undefined
   ) {
-    const settings = languageInfos.data!._embedded?.languageInfos?.find(
-      (l) => l.languageId === languageId
-    );
     return (
       service &&
-      (!settings ||
+      (!langInfo ||
         Boolean(
-          settings.supportedServices.find(
+          langInfo.supportedServices.find(
             (i) => i.serviceType === service.serviceType
           )
         ))
@@ -65,12 +62,13 @@ export const useMachineTranslationSettings = () => {
   }
 
   function validateService(
-    langInfo: LanguageInfoModel,
+    langInfo: LanguageInfoModel | undefined,
     service: MtServiceInfo | undefined
   ): MtServiceInfo | undefined {
     if (
       service === undefined ||
-      !isSupported(service, langInfo.languageId ?? undefined)
+      langInfo === undefined ||
+      !isSupported(service, langInfo)
     ) {
       return undefined;
     }
@@ -104,11 +102,19 @@ export const useMachineTranslationSettings = () => {
 
     const mtSettingsValidated = updatedMtSettings.map(
       ({ targetLanguageId, primaryServiceInfo, enabledServicesInfo }) => {
+        const targetLangInfo =
+          languageInfos.data?._embedded?.languageInfos?.find(
+            (l) => l.languageId === (targetLanguageId ?? null)
+          );
+
         return {
           targetLanguageId,
-          primaryServiceInfo: validateService(langInfo, primaryServiceInfo),
+          primaryServiceInfo: validateService(
+            targetLangInfo,
+            primaryServiceInfo
+          ),
           enabledServicesInfo: enabledServicesInfo
-            ?.map((service) => validateService(langInfo, service))
+            ?.map((service) => validateService(targetLangInfo, service))
             .filter((service) => Boolean(service)) as MtServiceInfo[],
         };
       }
