@@ -4,7 +4,7 @@ import io.tolgee.constants.Message
 import java.io.Serializable
 
 class LlmRateLimitedException(
-  val retryAt: Long? = null,
+  val retryAt: Long,
   params: List<Serializable?>? = null,
   cause: Exception? = null,
 ) : FailedDependencyException(
