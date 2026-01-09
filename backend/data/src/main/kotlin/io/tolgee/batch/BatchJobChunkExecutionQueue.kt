@@ -104,7 +104,7 @@ class BatchJobChunkExecutionQueue(
         count++
       }
     }
-
+    metrics.batchJobManagementItemAlreadyQueuedCounter.increment(data.size - count.toDouble())
     logger.debug("Added $count new items to queue ${System.identityHashCode(this)}")
   }
 
@@ -119,7 +119,7 @@ class BatchJobChunkExecutionQueue(
         filteredOut.add(it)
       }
     }
-
+    metrics.batchJobManagementItemAlreadyQueuedCounter.increment(filteredOut.size.toDouble())
     logger.trace {
       val itemsString = toAdd.joinToString(", ") { it.chunkExecutionId.toString() }
       val filteredOutString = filteredOut.joinToString(", ") { it.chunkExecutionId.toString() }

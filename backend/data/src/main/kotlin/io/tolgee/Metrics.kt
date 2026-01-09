@@ -18,6 +18,21 @@ class Metrics(
       .register(meterRegistry)
   }
 
+  val batchJobManagementItemAlreadyQueuedCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.batch.job.execution.queue.already_queued")
+      .description("Number of executions that were already queued, but retrieved again from db")
+      .register(meterRegistry)
+  }
+
+  val batchJobManagementItemAlreadyLockedCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.batch.job.execution.queue.already_locked")
+      .description(
+        "Number of executions that were already locked (by scheduled db retrieved or other pod) and are preprocessed redundantly",
+      ).register(meterRegistry)
+  }
+
   val batchJobManagementFailureWithRetryCounter: Counter by lazy {
     Counter
       .builder("tolgee.batch.job.execution.management.failure.retried")
