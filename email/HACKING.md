@@ -132,7 +132,7 @@ Injects a variable as plaintext. Easy, simple. Only useful when a variable is us
 It takes the following arguments:
 - `variable` (required): name of the variable
 - `demoValue` (required): value used for the preview
-- `dangerouslyInjectValueAsHtmlWithoutSanitization` (optional): whether to inject this variable as raw HTML. **VERY DANGEROUS. WILL LEAD TO <abbr title="Remote Code Execution">RCE</abbr> IF MISUSED.** Defaults to `false`
+- `dangerouslyInjectValueAsHtmlWithoutSanitization` (optional): whether to inject this variable as raw HTML. **VERY DANGEROUS. WILL LEAD TO <abbr title="Cross-Site Scripting">XSS</abbr> ATTACKS IF MISUSED.** Defaults to `false`
 
 ### `<ImgResource />`
 If you want to use images, images should be placed in the `resources` folder and then this component should be used.

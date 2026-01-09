@@ -59,10 +59,7 @@ const interleave = (arr: any[], thing: any): any[] =>
 
 function addBrToTranslations(arg: ValidNode): ValidNode {
   // noinspection SuspiciousTypeOfGuard -- React.Fragment gate
-  if (
-    arg == null ||
-    ['string', 'number', 'boolean', 'bigint'].includes(typeof arg)
-  )
+  if (arg == null || ['number', 'boolean', 'bigint'].includes(typeof arg))
     return arg;
 
   if (typeof arg === 'string') {

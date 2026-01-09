@@ -412,9 +412,14 @@ export const getParsedEmailVerificationByIndex = (index: number) => {
     });
   } else {
     return getAllEmails().then((emails) => {
+      if (!emails || index < 0 || index >= emails.length) {
+        throw new Error(
+          `Email at index ${index} not found. Total: ${emails?.length ?? 0}`
+        );
+      }
       return getEmail(emails[index].ID).then((email) => {
         return {
-          verifyEmailLink: email.HTML.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
+          verifyEmailLink: (email.HTML.match(/href="([^"]+)"/i) || [, ''])[1],
           fromAddress: email.From.Address,
           toAddress: email.To[0].Address,
           content: email.HTML,

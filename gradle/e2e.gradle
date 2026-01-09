@@ -9,7 +9,6 @@ ext {
     BILLING_E2E_DIR = "${project.projectDir}/../billing/e2e"
     WEBAPP_DIR = "${project.projectDir}/webapp"
 }
-def dockerPath = ["which", "docker"].execute().text.trim()
 
 def getE2eChunks() {
     def totalJobs = System.getenv("E2E_TOTAL_JOBS")
@@ -55,7 +54,7 @@ tasks.register('waitForRunningContainer', Task) {
     group = 'e2e'
     doLast {
         while (true) {
-            def pb = new ProcessBuilder("docker", "compose", "logs", "-f")
+            def pb = new ProcessBuilder(dockerCommandName(), "compose", "logs", "-f")
             pb.directory(new File(E2E_DIR))
             def proc = pb.start()
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()))
@@ -99,6 +98,7 @@ tasks.register('runE2e', Exec) {
 }
 
 tasks.register('printE2eGroups') {
+    group = 'e2e'
     doLast {
         getE2eChunks().indexed().forEach { index, chunk ->
             println("Chunk: $index")
@@ -109,7 +109,8 @@ tasks.register('printE2eGroups') {
 
 tasks.register('saveServerLogs', Exec) {
     group = 'e2e'
-    commandLine "bash", "-c", "docker compose logs > server.log"
+    commandLine dockerCommandName(), "compose", "logs"
+    redirectOutput file("$E2E_DIR/server.log")
     workingDir E2E_DIR
 }
 
@@ -136,31 +137,31 @@ tasks.register('openE2eDev', Exec) {
 tasks.register('runDockerE2e', Exec) {
     group = 'e2e'
     dependsOn "tagDockerLocal"
-    commandLine dockerPath, "compose", "up", "-d"
+    commandLine dockerCommandName(), "compose", "up", "-d"
     workingDir E2E_DIR
     finalizedBy "waitForRunningContainer"
 }
 
 tasks.register('runDockerE2eDev', Exec) {
     group = 'e2e'
-    commandLine dockerPath, "compose", "up", "-d", "fakesmtp"
+    commandLine dockerCommandName(), "compose", "up", "-d", "fakesmtp"
     workingDir E2E_DIR
 }
 
 tasks.register('stopDockerE2e', Exec) {
     group = 'e2e'
-    commandLine dockerPath, "compose", "stop"
+    commandLine dockerCommandName(), "compose", "stop"
     workingDir E2E_DIR
 }
 
 tasks.register('cleanupDockerE2e', Exec) {
     group = 'e2e'
-    commandLine dockerPath, "compose", "rm", "-f"
+    commandLine dockerCommandName(), "compose", "rm", "-f"
     workingDir E2E_DIR
 }
 
 tasks.register('tagDockerLocal', Exec) {
     group = 'e2e'
     dependsOn "docker"
-    commandLine dockerPath, "tag", "tolgee/tolgee", "tolgee/tolgee:local"
+    commandLine dockerCommandName(), "tag", "tolgee/tolgee", "tolgee/tolgee:local"
 }
