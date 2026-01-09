@@ -1,18 +1,12 @@
 name: Release
 
 on:
-  workflow_run:
-    workflows: ["Test"]
-    branches: ["main", "next"]
-    types:
-      - completed
+  push:
+    branches: ["tolgee-3"]
 
 jobs:
   main:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v3
         with:
@@ -49,8 +43,8 @@ jobs:
         run: ./gradlew bootJar
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
-          TOLGEE_API_KEY: ${{ secrets.TOLGEE_API_KEY }}
-          TOLGEE_API_URL: ${{ secrets.TOLGEE_API_URL }}
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
       - name: Login to docker
         if: ${{ steps.version.outputs.VERSION != '' }}
@@ -68,8 +62,7 @@ jobs:
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: |
           docker buildx create --use
-          docker buildx build . -t tolgee/tolgee:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --cache-from type=registry,ref=tolgee/tolgee:latest --cache-to type=inline --push
-          docker buildx build . -t tolgee/tolgee:latest --platform linux/arm64,linux/amd64 --cache-from type=registry,ref=tolgee/tolgee:latest --cache-to type=inline --push
+          docker buildx build . -t tolgee/tolgee:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --push
         working-directory: build/docker
 
       - name: Pack with webapp
@@ -77,26 +70,28 @@ jobs:
         run: ./gradlew packResources
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
-          TOLGEE_API_KEY: ${{ secrets.TOLGEE_API_KEY }}
-          TOLGEE_API_URL: ${{ secrets.TOLGEE_API_URL }}
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
       - name: Run npm release
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: npm run release
         env:
-          GITHUB_TOKEN: ${{ secrets.TOLGEE_MACHINE_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.VERSION }}
           GIT_AUTHOR_NAME: Tolgee Machine
           GIT_COMMITTER_NAME: Tolgee Machine
           GIT_AUTHOR_EMAIL: machine@tolgee.io
           GIT_COMMITTER_EMAIL: machine@tolgee.io
 
-      - name: Tag production and deprecated keys in platform
+      - name: Deploy testing
         if: ${{ steps.version.outputs.VERSION != '' }}
-        run: "npm run tag-keys"
+        run: |
+          mkdir -p ~/.kube
+          echo $KUBERNETES_DO_SERVICE_CONFIG | base64 -d > ~/.kube/config
+          kubectl exec $(kubectl get pods -l app=testing-migrator -o jsonpath={.items\[0\].metadata.name}) -- /bin/bash -c "MIGRATE_TARGET_IMAGE=tolgee/tolgee:${{ steps.version.outputs.VERSION }} /migrate.sh"
         env:
-          TOLGEE_API_KEY: ${{ secrets.TOLGEE_API_KEY }}
-        working-directory: ./webapp
+          KUBERNETES_DO_SERVICE_CONFIG: ${{secrets.KUBERNETES_DO_SERVICE_CONFIG}}
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -106,13 +101,3 @@ jobs:
             ./e2e/cypress/videos/**/*
             ./e2e/cypress/screenshots/**/*
             ./build/reports/**/*
-
-      - name: Trigger Billing repo tests & testing deploy
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        run: |
-          curl \
-            -X POST \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${{ secrets.TOLGEE_MACHINE_PAT }}" \
-            https://api.github.com/repos/tolgee/billing/actions/workflows/test.yml/dispatches \
-            -d '{"ref":"main","inputs":{"releaseVersion":"${{ steps.version.outputs.VERSION }}"}}'
