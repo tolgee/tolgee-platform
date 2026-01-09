@@ -62,6 +62,10 @@ spring:
 tolgee:
   front-end-url: http://localhost:3000
   file-storage-url: http://localhost:8080
+  authentication: # to see "Server administration", "Organization settings" etc.
+    enabled: true
+    initial-username: admin
+    initial-password: 123123
 ```
 
 You can check `application-e2e.yaml` for further inspiration.
