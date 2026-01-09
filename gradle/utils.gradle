@@ -1,7 +1,29 @@
 ext {
-    if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows")) {
-        npmCommandName = "npm.cmd"
-    } else {
-        npmCommandName = "npm"
+    def resolveExecutable = { String executableName ->
+        def osName = System.getProperty("os.name").toLowerCase(Locale.ROOT)
+        def locator = osName.contains("windows") ? "where" : "which"
+        def executable = (osName.contains("windows") && executableName == "npm") ? "npm.cmd" : executableName
+        try {
+            def proc = [locator, executable].execute()
+            proc.waitFor()
+            def output = proc.in.text.trim()
+            if (proc.exitValue() != 0 || output.isEmpty()) {
+                throw new GradleException(
+                    "${executableName} executable not found. Install it and ensure it is on PATH (lookup used '${locator} ${executable}')."
+                )
+            }
+            return output.readLines().first().trim()
+        } catch (Exception e) {
+            if (e instanceof GradleException) {
+                throw e
+            }
+            throw new GradleException(
+                "${executableName} executable not found. Install it and ensure it is on PATH (lookup used '${locator} ${executable}').",
+                e
+            )
+        }
     }
+
+    npmCommandName = resolveExecutable("npm")
+    dockerCommandName = { resolveExecutable("docker") }
 }
