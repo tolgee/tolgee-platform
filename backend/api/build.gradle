@@ -53,7 +53,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation "org.springframework.boot:spring-boot-starter-websocket"
 
-    implementation(project(':data'))
+    implementation(project(':core'))
     implementation(project(':misc'))
     implementation(project(':security'))
 

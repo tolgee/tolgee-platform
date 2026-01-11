@@ -108,9 +108,9 @@ dependencies {
     implementation libs.kotlinCoroutines
 
     /**
-     * DATA MODULE
+     * CORE MODULE
      */
-    implementation project(':data')
+    implementation project(':core')
 
 
     /**

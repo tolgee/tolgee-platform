@@ -54,7 +54,7 @@ dependencies {
     testImplementation(project(":ee-app"))
     testImplementation(project(":server-app"))
     testImplementation(project(":api"))
-    testImplementation(project(":data"))
+    testImplementation(project(":core"))
     testImplementation(project(":misc"))
     testImplementation libs.jsonUnitAssert
     testImplementation libs.mockito

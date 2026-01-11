@@ -171,9 +171,9 @@ dependencies {
     }
 
     /**
-     * DATA MODULE
+     * CORE MODULE
      */
-    implementation(project(':data'))
+    implementation(project(':core'))
 
     /**
      * TESTING MODULE
