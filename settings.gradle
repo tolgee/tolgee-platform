@@ -88,8 +88,8 @@ rootProject.name = "tolgee-platform"
 include ':server-app'
 project(':server-app').projectDir = new File('backend/app')
 
-include ':data'
-project(':data').projectDir = new File('backend/data')
+include ':core'
+project(':core').projectDir = new File('backend/core')
 
 gradle.ext.billingAppDirectory = new File('../billing/app')
 gradle.ext.billingTestDirectory = new File('../billing/tests')
