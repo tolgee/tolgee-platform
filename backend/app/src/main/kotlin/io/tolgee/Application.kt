@@ -16,7 +16,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 @EnableJpaAuditing
 @EntityScan("io.tolgee.model")
 @ConfigurationPropertiesScan
-@EnableJpaRepositories("io.tolgee.repository")
+@EnableJpaRepositories("io.tolgee.repository", "io.tolgee.core")
 class Application {
   companion object {
     @JvmStatic
