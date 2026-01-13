@@ -67,6 +67,8 @@ export const Translations = () => {
 
   const { onKey } = useTranslationsShortcuts();
 
+  const branchingDisabled = prefilter?.task !== undefined;
+
   useEffect(() => {
     document.body?.addEventListener('keydown', onKey);
     return () => document.body?.removeEventListener('keydown', onKey);
@@ -161,7 +163,7 @@ export const Translations = () => {
       ]}
       wrapperProps={{ style: { paddingBottom: 0, paddingTop: '3px' } }}
       rightPanelContent={(width) => <AiPlayground width={width} />}
-      branching
+      branching={!branchingDisabled}
     >
       <BatchOperationsChangeIndicator />
       <TranslationsHeader />
