@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Dialog, IconButton, Tooltip } from '@mui/material';
 import { InfoCircle, Translate01 } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
@@ -8,7 +7,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { TaskTooltipContent } from './TaskTooltipContent';
 import { TaskDetail } from './TaskDetail';
-import { getTaskUrl } from 'tg.constants/links';
+import { TaskTranslationsLink } from 'tg.component/task/TaskTranslationsLink';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -42,14 +41,15 @@ export const TaskTooltip = ({
               disableInteractive
               title={t('task_link_translations_tooltip')}
             >
-              <IconButton
+              <TaskTranslationsLink
+                component={IconButton}
+                task={task}
+                projectId={project.id}
                 data-cy="task-tooltip-action-translations"
-                component={Link}
-                to={getTaskUrl(project.id, task.number)}
                 size="small"
               >
                 <Translate01 width={20} height={20} />
-              </IconButton>
+              </TaskTranslationsLink>
             </Tooltip>
           )}
           {actions.includes('detail') && (

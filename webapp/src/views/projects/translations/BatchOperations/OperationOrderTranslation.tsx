@@ -17,7 +17,8 @@ export const OperationOrderTranslation = ({ disabled, onFinished }: Props) => {
   const { selected, selectedName } = useBranchesService({
     projectId: project.id,
   });
-  const branch = selectedName ?? (selected?.isDefault ? undefined : selected?.name);
+  const branch =
+    selectedName ?? (selected?.isDefault ? undefined : selected?.name);
   const [dialogOpen, setDialogOpen] = useState(true);
 
   const allLanguages = useTranslationsSelector((c) => c.languages) ?? [];

@@ -21,6 +21,7 @@ import { PrefilterTaskProps } from '../../../eeSetup/EeModuleType';
 import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
 import { QUERY } from 'tg.constants/links';
 import { PrefilterTaskHideDoneSwitch } from './PrefilterTaskHideDoneSwitch';
+import { BranchNameChip } from 'tg.component/branching/BranchNameChip';
 
 const StyledWarning = styled('div')`
   display: flex;
@@ -114,6 +115,9 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
             pr={2}
           >
             <TaskLabel task={data} />
+            {data.branchName && (
+              <BranchNameChip name={data.branchName!} size={'small'} />
+            )}
             <Tooltip title={t('task_detail_tooltip')} disableInteractive>
               <IconButton size="small" onClick={handleShowDetails}>
                 <InfoCircle width={20} height={20} />
