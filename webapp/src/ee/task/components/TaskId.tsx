@@ -1,14 +1,22 @@
 import { Box, styled, SxProps } from '@mui/material';
-import { Link } from 'react-router-dom';
 import { components } from 'tg.service/apiSchema.generated';
-import { getTaskUrl } from 'tg.constants/links';
+import { TaskTranslationsLink } from 'tg.component/task/TaskTranslationsLink';
 
-export const Container = styled(Box)`
+const containerStyles = `
   color: ${({ theme }) => theme.palette.tokens.icon.secondary};
   font-size: 15px;
 `;
 
+export const Container = styled(Box)`
+  ${containerStyles}
+`;
+
+export const LinkContainer = styled(Box)`
+  ${containerStyles}
+`;
+
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
+type TaskModel = components['schemas']['TaskModel'];
 
 type TaskNumberProps = {
   sx?: SxProps;
@@ -27,24 +35,24 @@ export const TaskNumber = ({ sx, className, taskNumber }: TaskNumberProps) => {
 type TaskNumberWithLinkProps = {
   sx?: SxProps;
   className?: string;
-  taskNumber: number;
+  task: TaskModel;
   project: SimpleProjectModel;
 };
 
 export const TaskNumberWithLink = ({
   sx,
   className,
-  taskNumber,
+  task,
   project,
 }: TaskNumberWithLinkProps) => {
   return (
-    <Container
-      component={Link}
-      // @ts-ignore
-      to={getTaskUrl(project.id, taskNumber)}
+    <TaskTranslationsLink
+      component={LinkContainer}
+      task={task}
+      projectId={project.id}
       {...{ sx, className }}
     >
-      #{taskNumber}
-    </Container>
+      #{task}
+    </TaskTranslationsLink>
   );
 };
