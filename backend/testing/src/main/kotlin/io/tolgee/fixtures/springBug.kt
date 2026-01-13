@@ -34,10 +34,24 @@ fun <T> ignoreTestOnSpringBug(fn: () -> T): T {
   }
 }
 
+fun <T> ignoreSpringBugAndContinue(fn: () -> T) {
+  try {
+    fn.invoke()
+  } catch (e: Exception) {
+    if (isSpringBug(e)) {
+      org.slf4j.LoggerFactory
+        .getLogger("springBug")
+        .error(e.message, e)
+    } else {
+      throw e
+    }
+  }
+}
+
 private fun isSpringBug(e: Exception): Boolean {
   return when (e) {
     is ConcurrentModificationException -> {
-      return e.stackTrace
+      e.stackTrace
         .first()
         .className
         .contains("HashMap") &&
@@ -51,7 +65,7 @@ private fun isSpringBug(e: Exception): Boolean {
     is IllegalStateException -> {
       // this one is thrown by mockMvc. Somewhere inside backend code, if you wrap it in try/catch,
       // you will find the ConcurrentModificationException (e.g. MtResultStreamer when writer is flushed)
-      return e.stackTrace.any {
+      e.stackTrace.any {
         it.className.contains("HeaderValueHolder") &&
           it.methodName == "getStringValues"
       }

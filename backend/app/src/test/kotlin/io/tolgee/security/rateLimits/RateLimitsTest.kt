@@ -5,6 +5,8 @@ import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsRateLimited
 import io.tolgee.fixtures.andIsUnauthorized
+import io.tolgee.fixtures.ignoreSpringBugAndContinue
+import io.tolgee.fixtures.ignoreTestOnSpringBug
 import io.tolgee.security.ratelimit.RateLimitedException
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.ContextRecreatingTest
@@ -80,8 +82,13 @@ class RateLimitsTest : AuthorizedControllerTest() {
     testDataService.saveTestData(projectTestData.root)
     loginAsUser(projectTestData.user.username)
     (1..10).forEach { _ ->
-      performAuthGet("/v2/projects/${projectTestData.project.id}/export").andIsOk
+      // ignore spring bug here, because we're not interested in result, and rateLimit will still be updated
+      ignoreSpringBugAndContinue {
+        performAuthGet("/v2/projects/${projectTestData.project.id}/export").andIsOk
+      }
     }
-    performAuthGet("/v2/projects/${projectTestData.project.id}/export").andIsRateLimited
+    ignoreTestOnSpringBug {
+      performAuthGet("/v2/projects/${projectTestData.project.id}/export").andIsRateLimited
+    }
   }
 }
