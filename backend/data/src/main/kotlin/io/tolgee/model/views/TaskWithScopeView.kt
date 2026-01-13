@@ -22,6 +22,7 @@ data class TaskWithScopeView(
   val keys: MutableSet<TaskKey>,
   val author: UserAccount,
   val branch: Branch?,
+  val originBranch: Branch?,
   val createdAt: Date?,
   val state: TaskState,
   val closedAt: Date?,

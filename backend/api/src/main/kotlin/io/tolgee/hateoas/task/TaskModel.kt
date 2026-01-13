@@ -26,5 +26,6 @@ class TaskModel(
   var closedAt: Long? = null,
   var state: TaskState = TaskState.IN_PROGRESS,
   var branchName: String? = "",
+  var originBranchName: String? = null,
   var agency: TranslationAgencySimpleModel? = null,
 ) : RepresentationModel<TaskModel>()
