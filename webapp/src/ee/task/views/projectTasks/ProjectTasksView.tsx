@@ -92,10 +92,9 @@ export const ProjectTasksView = () => {
   const [detail, setDetail] = useState<TaskModel>();
   const [addDialog, setAddDialog] = useState(false);
   const [orderTranslation, setOrderTranslation] = useState(false);
-  const { selectedName: branch, selected } = useBranchesService({
+  const { selectedName: branch } = useBranchesService({
     projectId: project.id,
   });
-  const currentBranchName = branch ?? selected?.name;
 
   const allLanguages = languagesLoadable.data?._embedded?.languages ?? [];
 
@@ -147,7 +146,6 @@ export const ProjectTasksView = () => {
             filter={filter}
             showAll={showAll === 'true'}
             branch={branch}
-            currentBranchName={currentBranchName}
             onOpenDetail={setDetail}
             newTaskActions={true}
           />
@@ -157,7 +155,6 @@ export const ProjectTasksView = () => {
             filter={filter}
             showAll={showAll === 'true'}
             branch={branch}
-            currentBranchName={currentBranchName}
             onOpenDetail={setDetail}
           />
         )}
@@ -168,7 +165,6 @@ export const ProjectTasksView = () => {
               onClose={handleDetailClose}
               projectId={project.id}
               task={detail}
-              currentBranchName={currentBranchName}
             />
           </Dialog>
         )}
