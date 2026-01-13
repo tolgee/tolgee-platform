@@ -202,6 +202,7 @@ class BranchServiceImpl(
     branchMergeService.applyMerge(merge)
     if (!merge.sourceBranch.isDefault) {
       if (deleteBranch == true) {
+        taskService.moveTasksAfterMerge(projectId, merge.sourceBranch, merge.targetBranch)
         archiveBranch(merge.sourceBranch)
       } else {
         branchSnapshotService.rebuildSnapshotFromSource(

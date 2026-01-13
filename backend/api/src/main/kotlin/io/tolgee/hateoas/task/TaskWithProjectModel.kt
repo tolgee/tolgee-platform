@@ -27,6 +27,7 @@ data class TaskWithProjectModel(
   var closedAt: Long? = null,
   var state: TaskState = TaskState.IN_PROGRESS,
   var branchName: String? = "",
+  var originBranchName: String? = null,
   var project: SimpleProjectModel,
   var agency: TranslationAgencySimpleModel? = null,
 ) : RepresentationModel<TaskWithProjectModel>()

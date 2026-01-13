@@ -285,6 +285,24 @@ class TaskService(
   }
 
   @Transactional
+  fun moveTasksAfterMerge(
+    projectId: Long,
+    sourceBranch: Branch,
+    targetBranch: Branch,
+  ) {
+    val tasks = taskRepository.findAllByProjectIdAndBranchId(projectId, sourceBranch.id)
+    tasks.forEach { task ->
+      if (task.originBranch == null) {
+        task.originBranch = sourceBranch
+      }
+      task.branch = targetBranch
+      if (task.state == TaskState.NEW || task.state == TaskState.IN_PROGRESS) {
+        setTaskState(task, TaskState.CANCELED)
+      }
+    }
+  }
+
+  @Transactional
   fun getTask(
     projectId: Long,
     taskNumber: Long,
@@ -545,6 +563,7 @@ class TaskService(
         keys = task.keys,
         author = task.author!!,
         branch = task.branch,
+        originBranch = task.originBranch,
         createdAt = task.createdAt,
         state = task.state,
         closedAt = task.closedAt,

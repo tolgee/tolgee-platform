@@ -102,16 +102,6 @@ interface TaskRepository : JpaRepository<Task, Long> {
         and (
           (b.name = :#{#filters.branch} and b.archivedAt is null) 
           or (:#{#filters.branch} is null and (b is null or b.isDefault))
-          or (
-            b.archivedAt is not null
-            and exists (
-              select 1
-              from BranchMerge bm
-              where bm.sourceBranch.id = b.id
-                and bm.targetBranch.name = :#{#filters.branch}
-                and bm.mergedAt is not null
-            )
-          )
         )
     """,
   )
@@ -215,6 +205,19 @@ interface TaskRepository : JpaRepository<Task, Long> {
     projectId: Long,
     branchId: Long,
     states: Collection<TaskState>,
+  ): List<Task>
+
+  @Query(
+    """
+      select t
+      from Task t
+      where t.project.id = :projectId
+        and t.branch.id = :branchId
+    """,
+  )
+  fun findAllByProjectIdAndBranchId(
+    projectId: Long,
+    branchId: Long,
   ): List<Task>
 
   @Query(

@@ -174,18 +174,32 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  fun `apply merge - cancels unfinished tasks when deleting branch`() {
+  fun `apply merge - moves finished and cancels unfinished tasks when deleting branch`() {
     val merge = prepareMergeScenario()
     branchService.applyMerge(testData.project.id, merge.id, true)
 
     testData.featureOpenTask
       .refresh()
-      .state.assert
-      .isEqualTo(TaskState.CANCELED)
+      .let { task ->
+        task.state.assert.isEqualTo(TaskState.CANCELED)
+        task.branch!!
+          .id.assert
+          .isEqualTo(testData.mainBranch.id)
+        task.originBranch!!
+          .id.assert
+          .isEqualTo(testData.featureBranch.id)
+      }
     testData.featureFinishedTask
       .refresh()
-      .state.assert
-      .isEqualTo(TaskState.FINISHED)
+      .let { task ->
+        task.state.assert.isEqualTo(TaskState.FINISHED)
+        task.branch!!
+          .id.assert
+          .isEqualTo(testData.mainBranch.id)
+        task.originBranch!!
+          .id.assert
+          .isEqualTo(testData.featureBranch.id)
+      }
   }
 
   @Test

@@ -40,6 +40,7 @@ import java.util.Date
     Index(columnList = "language_id"),
     Index(columnList = "agency_id"),
     Index(columnList = "branch_id"),
+    Index(columnList = "origin_branch_id"),
   ],
 )
 @ActivityLoggedEntity
@@ -87,6 +88,9 @@ class Task : StandardAuditModel() {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = true)
   var branch: Branch? = null
+
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  var originBranch: Branch? = null
 
   @ActivityLoggedProp
   @Enumerated(EnumType.STRING)

@@ -4,23 +4,18 @@ import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
-import java.util.Date
 
 class TaskControllerBranchingTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: BranchMergeTestData
 
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
-
-  @Autowired
-  private lateinit var branchRepository: BranchRepository
 
   @BeforeEach
   fun setup() {
@@ -33,15 +28,16 @@ class TaskControllerBranchingTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `lists tasks from archived merged branches only`() {
-    testData.conflictsBranch.archivedAt = Date()
-    branchRepository.save(testData.conflictsBranch)
-
+  fun `lists only tasks from selected branch and moved tasks`() {
     performProjectAuthGet("tasks?branch=${testData.mainBranch.name}")
       .andAssertThatJson {
-        node("page.totalElements").isNumber.isEqualTo(BigDecimal(1))
-        node("_embedded.tasks[0].number").isEqualTo(testData.conflictsBranchTask.number)
-        node("_embedded.tasks[0].branchName").isEqualTo(testData.conflictsBranch.name)
+        node("page.totalElements").isNumber.isEqualTo(BigDecimal(2))
+        node("_embedded.tasks[0].number").isEqualTo(testData.mainTask.number)
+        node("_embedded.tasks[0].branchName").isEqualTo(testData.mainBranch.name)
+        node("_embedded.tasks[0].originBranchName").isNull()
+        node("_embedded.tasks[1].number").isEqualTo(testData.mergedFeatureTask.number)
+        node("_embedded.tasks[1].branchName").isEqualTo(testData.mainBranch.name)
+        node("_embedded.tasks[1].originBranchName").isEqualTo(testData.featureBranch.name)
       }
   }
 }
