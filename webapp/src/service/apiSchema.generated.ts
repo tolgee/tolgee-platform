@@ -6307,8 +6307,6 @@ export interface components {
       baseCharacterCount: number;
       /** Format: int64 */
       baseWordCount: number;
-      /** Format: int64 */
-      branchId?: number;
       branchName?: string;
       /** Format: int64 */
       closedAt?: number;
@@ -6347,8 +6345,6 @@ export interface components {
       baseCharacterCount: number;
       /** Format: int64 */
       baseWordCount: number;
-      /** Format: int64 */
-      branchId?: number;
       branchName?: string;
       /** Format: int64 */
       closedAt?: number;
