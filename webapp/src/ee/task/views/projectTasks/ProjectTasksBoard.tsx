@@ -14,7 +14,6 @@ type Props = {
   onOpenDetail: (task: TaskModel) => void;
   search: string;
   branch?: string;
-  currentBranchName?: string;
 };
 
 export const ProjectTasksBoard = ({
@@ -23,7 +22,6 @@ export const ProjectTasksBoard = ({
   onOpenDetail,
   search,
   branch,
-  currentBranchName,
 }: Props) => {
   const project = useProject();
 
@@ -66,7 +64,6 @@ export const ProjectTasksBoard = ({
       newTasks={newTasks}
       project={project}
       newTaskActions={true}
-      currentBranchName={currentBranchName}
     />
   );
 };

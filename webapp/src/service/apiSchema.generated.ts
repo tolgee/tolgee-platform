@@ -6321,6 +6321,7 @@ export interface components {
       name?: string;
       /** Format: int64 */
       number: number;
+      originBranchName?: string;
       /** @enum {string} */
       state: "NEW" | "IN_PROGRESS" | "FINISHED" | "CANCELED";
       /** Format: int64 */
@@ -6359,6 +6360,7 @@ export interface components {
       name?: string;
       /** Format: int64 */
       number: number;
+      originBranchName?: string;
       project: components["schemas"]["SimpleProjectModel"];
       /** @enum {string} */
       state: "NEW" | "IN_PROGRESS" | "FINISHED" | "CANCELED";
