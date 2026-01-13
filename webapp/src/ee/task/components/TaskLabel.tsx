@@ -10,6 +10,7 @@ import { BranchNameChip } from 'tg.component/branching/BranchNameChip';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
+type TaskModelWithOrigin = TaskModel & { originBranchName?: string };
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -43,7 +44,6 @@ type Props = {
   sx?: SxProps;
   className?: string;
   hideType?: boolean;
-  currentBranchName?: string;
 };
 
 export const TaskLabel = ({
@@ -52,13 +52,9 @@ export const TaskLabel = ({
   className,
   project,
   hideType,
-  currentBranchName,
 }: Props) => {
   const { t } = useTranslate();
-  const shouldShowBranch =
-    !!currentBranchName &&
-    !!task.branchName &&
-    task.branchName !== currentBranchName;
+  const originBranchName = (task as TaskModelWithOrigin).originBranchName;
   return (
     <StyledContainer
       {...{
@@ -86,7 +82,7 @@ export const TaskLabel = ({
         <TaskNumber taskNumber={task.number} />
       )}
       {!hideType && <TaskTypeChip type={task.type} />}
-      {shouldShowBranch && (
+      {originBranchName && (
         <Typography
           color="text.secondary"
           fontSize={14}
@@ -97,7 +93,7 @@ export const TaskLabel = ({
           <T
             keyName="task_label_from_branch"
             params={{
-              branch: <BranchNameChip name={task.branchName!} size="small" />,
+              branch: <BranchNameChip name={originBranchName} size="small" />,
             }}
           />
         </Typography>

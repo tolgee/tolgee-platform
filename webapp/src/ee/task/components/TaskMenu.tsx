@@ -288,7 +288,6 @@ export const TaskMenu = ({
             projectId={project.id}
             onClose={() => setTaskDetail(undefined)}
             task={taskDetail}
-            currentBranchName={branch?.name}
           />
         </Dialog>
       )}
