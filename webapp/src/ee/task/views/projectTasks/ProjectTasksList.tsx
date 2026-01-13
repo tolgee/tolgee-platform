@@ -24,7 +24,6 @@ type Props = {
   search: string;
   newTaskActions: boolean;
   branch?: string;
-  currentBranchName?: string;
 };
 
 export const ProjectTasksList = ({
@@ -33,7 +32,6 @@ export const ProjectTasksList = ({
   onOpenDetail,
   newTaskActions,
   branch,
-  currentBranchName,
 }: Props) => {
   const project = useProject();
   const { t } = useTranslate();
@@ -102,7 +100,6 @@ export const ProjectTasksList = ({
           onDetailOpen={(task) => onOpenDetail(task)}
           project={project}
           projectScopes={project.computedPermission.scopes}
-          currentBranchName={currentBranchName}
         />
       )}
       itemSeparator={() => <StyledSeparator />}

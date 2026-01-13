@@ -56,7 +56,6 @@ type Props = {
   title?: React.ReactNode;
   emptyMessage: React.ReactNode;
   newTaskActions: boolean;
-  currentBranchName?: string;
 };
 
 export const BoardColumn = ({
@@ -69,7 +68,6 @@ export const BoardColumn = ({
   title,
   emptyMessage,
   newTaskActions,
-  currentBranchName,
 }: Props) => {
   const translateState = useTaskStateTranslation();
   const stateColor = useStateColor();
@@ -95,7 +93,6 @@ export const BoardColumn = ({
             projectScopes={projectScopes}
             onDetailOpen={onDetailOpen}
             newTaskActions={newTaskActions}
-            currentBranchName={currentBranchName}
           />
         ))
       ) : (

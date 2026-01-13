@@ -177,12 +177,12 @@ export const BranchMergeDetail: FC = () => {
   };
 
   const handleApply = async () => {
-    if ((merge?.uncompletedTasksCount ?? 0) > 0) {
+    if (deleteBranchAfterMerge && (merge?.uncompletedTasksCount ?? 0) > 0) {
       confirmation({
         message: (
           <T
             keyName="branch_merges_uncompleted_tasks_confirmation"
-            params={{ value: merge?.uncompletedTasksCount }}
+            params={{ value: merge?.uncompletedTasksCount, b: <b /> }}
           />
         ),
         confirmButtonText: <T keyName="branch_merges_apply_button" />,
@@ -217,10 +217,10 @@ export const BranchMergeDetail: FC = () => {
       merge.keyResolvedConflictsCount
     : 0;
 
+  const isOutdated = merge?.outdated;
+
   const readyToMerge =
-    totalChanges > 0 &&
-    merge?.keyUnresolvedConflictsCount === 0 &&
-    merge?.outdated === false;
+    totalChanges > 0 && merge?.keyUnresolvedConflictsCount === 0 && !isOutdated;
 
   const actionControls = (
     <>
@@ -289,9 +289,17 @@ export const BranchMergeDetail: FC = () => {
               <Alert severity="warning">
                 <T
                   keyName="branch_merges_uncompleted_tasks_alert"
-                  params={{ value: merge.uncompletedTasksCount }}
+                  params={{ value: merge.uncompletedTasksCount, b: <b /> }}
                 />
               </Alert>
+            )}
+
+            {isOutdated && (
+              <Box mt={1}>
+                <Alert severity="warning">
+                  <T keyName="branch_merges_status_outdated" />
+                </Alert>
+              </Box>
             )}
 
             {totalChanges > 0 && (
