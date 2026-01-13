@@ -5004,4 +5004,17 @@
     <changeSet author="danielkrizan (generated)" id="1767813368518-3">
         <addForeignKeyConstraint baseColumnNames="branch_id" baseTableName="task" constraintName="FKnomxhqrycqxv0cyqtn9f0h39j" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768315146361-1">
+        <addColumn tableName="task">
+            <column name="origin_branch_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768315146361-2">
+        <createIndex indexName="IDXrwoj95fp1dwjkbeu14n8ljq29" tableName="task">
+            <column name="origin_branch_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768315146361-3">
+        <addForeignKeyConstraint baseColumnNames="origin_branch_id" baseTableName="task" constraintName="FKcanmnd49erqwfkfctp2doeqpm" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

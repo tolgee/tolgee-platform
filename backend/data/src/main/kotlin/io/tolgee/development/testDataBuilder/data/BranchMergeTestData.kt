@@ -33,8 +33,10 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
   lateinit var label2: Label
   lateinit var label3: Label
   lateinit var label4: Label
+  lateinit var mainTask: Task
   lateinit var featureOpenTask: Task
   lateinit var featureFinishedTask: Task
+  lateinit var mergedFeatureTask: Task
   lateinit var conflictsBranchTask: Task
 
   companion object {
@@ -112,9 +114,21 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
   }
 
   private fun ProjectBuilder.addTasks() {
-    featureOpenTask =
+    mainTask =
       addTask {
         number = 1
+        name = "Main branch task"
+        type = TaskType.TRANSLATE
+        state = TaskState.NEW
+        project = projectBuilder.self
+        language = englishLanguage
+        author = user
+        branch = mainBranch
+      }.self
+
+    featureOpenTask =
+      addTask {
+        number = 2
         name = "Feature branch open task"
         type = TaskType.TRANSLATE
         state = TaskState.NEW
@@ -132,7 +146,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
 
     featureFinishedTask =
       addTask {
-        number = 2
+        number = 3
         name = "Feature branch finished task"
         type = TaskType.TRANSLATE
         state = TaskState.FINISHED
@@ -148,9 +162,28 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
       done = true
     }
 
+    mergedFeatureTask =
+      addTask {
+        number = 4
+        name = "Merged feature task"
+        type = TaskType.REVIEW
+        state = TaskState.FINISHED
+        project = projectBuilder.self
+        language = englishLanguage
+        author = user
+        branch = mainBranch
+        originBranch = featureBranch
+      }.self
+
+    addTaskKey {
+      task = mergedFeatureTask
+      key = mainKeyToUpdate
+      done = true
+    }
+
     conflictsBranchTask =
       addTask {
-        number = 3
+        number = 5
         name = "Conflicts branch finished task"
         type = TaskType.REVIEW
         state = TaskState.FINISHED
