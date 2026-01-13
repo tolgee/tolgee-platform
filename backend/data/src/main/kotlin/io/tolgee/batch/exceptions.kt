@@ -3,11 +3,16 @@ package io.tolgee.batch
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.ExceptionWithMessage
 
+interface HasSuccessfulTargets {
+  val successfulTargets: List<Any>
+}
+
 open class ChunkFailedException(
   message: Message,
-  val successfulTargets: List<Any>,
+  override val successfulTargets: List<Any>,
   override val cause: Throwable,
-) : ExceptionWithMessage(message)
+) : ExceptionWithMessage(message),
+  HasSuccessfulTargets
 
 open class FailedDontRequeueException(
   message: Message,
@@ -23,6 +28,12 @@ open class RequeueWithDelayException(
   val increaseFactor: Int = 10,
   val maxRetries: Int = 3,
 ) : ChunkFailedException(message, successfulTargets, cause)
+
+open class MultipleItemsFailedException(
+  val exceptions: List<RequeueWithDelayException>,
+  override val successfulTargets: List<Any>,
+) : ExceptionWithMessage(Message.MULTIPLE_ITEMS_IN_CHUNK_FAILED),
+  HasSuccessfulTargets
 
 open class CannotFinalizeActivityException(
   cause: Throwable,

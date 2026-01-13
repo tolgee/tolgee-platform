@@ -7,10 +7,7 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.AutoTranslationRequest
 import io.tolgee.configuration.tolgee.BatchProperties
-import io.tolgee.constants.MtServiceType
 import io.tolgee.model.batch.params.AutoTranslationJobParams
-import io.tolgee.service.machineTranslation.MtServiceConfigService
-import io.tolgee.service.project.ProjectService
 import io.tolgee.service.translation.AutoTranslationService
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
@@ -19,8 +16,6 @@ import kotlin.coroutines.CoroutineContext
 class AutoTranslateChunkProcessor(
   private val autoTranslationService: AutoTranslationService,
   private val mtProviderCatching: MtProviderCatching,
-  private val projectService: ProjectService,
-  private val mtServiceConfigService: MtServiceConfigService,
   private val batchProperties: BatchProperties,
 ) : ChunkProcessor<AutoTranslationRequest, AutoTranslationJobParams, BatchTranslationTargetItem> {
   override fun process(
@@ -56,14 +51,7 @@ class AutoTranslateChunkProcessor(
     request: AutoTranslationRequest,
     projectId: Long?,
   ): Int {
-    projectId ?: throw IllegalArgumentException("Project id is required")
-    val languageIds = request.target.map { it.languageId }.distinct()
-    val project = projectService.getDto(projectId)
-    val services = mtServiceConfigService.getPrimaryServices(languageIds, project.id).values.toSet()
-    if (services.mapNotNull { it?.serviceType }.contains(MtServiceType.PROMPT)) {
-      return 1
-    }
-    return 5
+    return 3
   }
 
   override fun getTargetItemType(): Class<BatchTranslationTargetItem> {

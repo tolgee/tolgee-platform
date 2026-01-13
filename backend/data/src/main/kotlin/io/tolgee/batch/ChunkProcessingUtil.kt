@@ -17,7 +17,9 @@ import jakarta.persistence.EntityManager
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.hibernate.LockOptions
 import org.springframework.context.ApplicationContext
+import java.lang.RuntimeException
 import java.util.Date
+import kotlin.collections.sorted
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.pow
 import kotlin.system.measureTimeMillis
@@ -72,11 +74,21 @@ open class ChunkProcessingUtil(
     execution.stackTrace = exception.stackTraceToString()
     execution.status = BatchJobChunkExecutionStatus.FAILED
     execution.errorMessage = (exception as? ExceptionWithMessage)?.tolgeeMessage
-    execution.errorKey = ExceptionUtils.getRootCause(exception)?.javaClass?.simpleName
+    if (exception !is MultipleItemsFailedException) {
+      execution.errorKey = ExceptionUtils.getRootCause(exception)?.javaClass?.simpleName
+    } else {
+      execution.errorKey =
+        exception.exceptions
+          .map { ExceptionUtils.getRootCause(it)?.javaClass?.simpleName }
+          .filterNotNull()
+          .distinct()
+          .sorted()
+          .joinToString(",")
+    }
 
     logException(exception)
 
-    if (exception is ChunkFailedException) {
+    if (exception is HasSuccessfulTargets) {
       successfulTargets = exception.successfulTargets
       successfulTargets?.let { execution.successTargets = it }
     }
@@ -89,12 +101,14 @@ open class ChunkProcessingUtil(
   }
 
   private fun logException(exception: Throwable) {
-    val knownCauses =
-      listOf(
-        OutOfCreditsException::class.java,
-        LlmRateLimitedException::class.java,
-      )
+    if (exception is MultipleItemsFailedException) {
+      exception.exceptions.forEach { logKnownException(it) }
+      return
+    }
+    logKnownException(exception)
+  }
 
+  private fun logKnownException(exception: Throwable) {
     val isKnownCause = knownCauses.any { ExceptionUtils.indexOfType(exception, it) > -1 }
     if (!isKnownCause) {
       Sentry.captureException(exception)
@@ -109,6 +123,11 @@ open class ChunkProcessingUtil(
     if (exception is RequeueWithDelayException) {
       maxRetries = exception.maxRetries
       waitTime = getWaitTime(exception)
+    } else if (exception is MultipleItemsFailedException) {
+      // do not retry more than a minimum number required among all exceptions
+      maxRetries = exception.exceptions.minOfOrNull { it.maxRetries } ?: maxRetries
+      // do wait for the maximum amount of time among all exceptions
+      waitTime = exception.exceptions.maxOfOrNull { getWaitTime(it) } ?: waitTime
     }
 
     logger.debug(
@@ -124,6 +143,13 @@ open class ChunkProcessingUtil(
     logger.debug("Retrying job execution ${execution.id} in ${waitTime}ms")
     retryExecution.executeAfter = Date(waitTime + currentDateProvider.date.time)
     execution.retry = true
+  }
+
+  private val knownCauses: List<Class<out RuntimeException>> by lazy {
+    listOf(
+      OutOfCreditsException::class.java,
+      LlmRateLimitedException::class.java,
+    )
   }
 
   private fun getWaitTime(exception: RequeueWithDelayException) =
