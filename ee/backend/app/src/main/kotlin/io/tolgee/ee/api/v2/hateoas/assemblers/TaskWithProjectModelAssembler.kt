@@ -46,7 +46,6 @@ class TaskWithProjectModelAssembler(
       baseWordCount = entity.baseWordCount,
       baseCharacterCount = entity.baseCharacterCount,
       state = entity.state,
-      branchId = entity.branch?.id,
       branchName = entity.branch?.name,
       project = entity.project.let { simpleProjectModelAssembler.toModel(it) },
       agency = entity.agency?.let { translationAgencySimpleModelAssembler.toModel(it) },
