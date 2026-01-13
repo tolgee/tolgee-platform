@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { Box, IconButton, styled, Tooltip } from '@mui/material';
+import { Box, IconButton, Link, styled, Tooltip } from '@mui/material';
 import { AlarmClock, DotsVertical, InfoCircle } from '@untitled-ui/icons-react';
 
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
@@ -15,7 +14,7 @@ import { TaskMenu } from './TaskMenu';
 import { TaskTypeChip } from 'tg.component/task/TaskTypeChip';
 import { TaskState } from 'tg.component/task/TaskState';
 import { TaskAssignees } from './TaskAssignees';
-import { getTaskUrl } from 'tg.constants/links';
+import { TaskTranslationsLink } from 'tg.component/task/TaskTranslationsLink';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -28,10 +27,12 @@ const StyledContainer = styled(Box)`
   padding: 20px;
   text-decoration: none;
   color: ${({ theme }) => theme.palette.text.primary};
+
   .showOnHover {
     opacity: 0;
     transition: opacity ease-in-out 0.3s;
   }
+
   &:hover .showOnHover,
   &:focus-within .showOnHover {
     opacity: 1;
@@ -85,71 +86,73 @@ export const BoardItem = ({
   const formatDate = useDateFormatter();
 
   return (
-    <StyledContainer
-      component={Link}
-      // @ts-ignore
-      to={getTaskUrl(project.id, task.number)}
-    >
-      <StyledRow>
-        <TaskLabel task={task} hideType currentBranchName={currentBranchName} />
-        <Box
-          display="flex"
-          gap={0.1}
-          marginRight={-1.8}
-          className="showOnHover"
-          style={{ opacity: anchorEl ? 1 : undefined }}
-          onClick={stopAndPrevent()}
-        >
-          <Tooltip title={t('task_detail_tooltip')} disableInteractive>
+    <StyledContainer>
+      <TaskTranslationsLink component={Link} task={task} projectId={project.id}>
+        <StyledRow>
+          <TaskLabel
+            task={task}
+            hideType
+            currentBranchName={currentBranchName}
+          />
+          <Box
+            display="flex"
+            gap={0.1}
+            marginRight={-1.8}
+            className="showOnHover"
+            style={{ opacity: anchorEl ? 1 : undefined }}
+            onClick={stopAndPrevent()}
+          >
+            <Tooltip title={t('task_detail_tooltip')} disableInteractive>
+              <IconButton
+                size="small"
+                onClick={stopAndPrevent(() => onDetailOpen(task))}
+              >
+                <InfoCircle />
+              </IconButton>
+            </Tooltip>
             <IconButton
               size="small"
-              onClick={stopAndPrevent(() => onDetailOpen(task))}
+              onClick={stopAndPrevent((e) => setAnchorEl(e.currentTarget))}
             >
-              <InfoCircle />
+              <DotsVertical />
             </IconButton>
-          </Tooltip>
-          <IconButton
-            size="small"
-            onClick={stopAndPrevent((e) => setAnchorEl(e.currentTarget))}
-          >
-            <DotsVertical />
-          </IconButton>
-          <TaskMenu
-            task={task}
-            project={project}
-            projectScopes={projectScopes}
-            anchorEl={anchorEl}
-            onClose={() => setAnchorEl(null)}
-            newTaskActions={newTaskActions}
-          />
-        </Box>
-      </StyledRow>
-      <StyledRow>
-        <TaskTypeChip type={task.type} />
-        <StyledProgress>
-          {['IN_PROGRESS', 'NEW'].includes(task.state) ? (
-            <BatchProgress progress={task.doneItems} max={task.totalItems} />
-          ) : (
-            <TaskState state={task.state} />
-          )}
-        </StyledProgress>
-      </StyledRow>
-      <StyledRow>
-        <StyledSecondaryItem>
-          {t('task_word_count', { value: task.baseWordCount })}
-        </StyledSecondaryItem>
-        <StyledSecondaryItem>
-          {task.dueDate ? (
-            <Box display="flex" alignItems="center" gap={0.5}>
-              <AlarmClock style={{ width: 20, height: 20 }} />
-              {formatDate(task.dueDate, { timeZone: 'UTC' })}
-            </Box>
-          ) : null}
-        </StyledSecondaryItem>
-        <Box>
-          <TaskAssignees task={task} />
-        </Box>
-      </StyledRow>
+            <TaskMenu
+              task={task}
+              project={project}
+              projectScopes={projectScopes}
+              anchorEl={anchorEl}
+              onClose={() => setAnchorEl(null)}
+              newTaskActions={newTaskActions}
+            />
+          </Box>
+        </StyledRow>
+        <StyledRow>
+          <TaskTypeChip type={task.type} />
+          <StyledProgress>
+            {['IN_PROGRESS', 'NEW'].includes(task.state) ? (
+              <BatchProgress progress={task.doneItems} max={task.totalItems} />
+            ) : (
+              <TaskState state={task.state} />
+            )}
+          </StyledProgress>
+        </StyledRow>
+        <StyledRow>
+          <StyledSecondaryItem>
+            {t('task_word_count', { value: task.baseWordCount })}
+          </StyledSecondaryItem>
+          <StyledSecondaryItem>
+            {task.dueDate ? (
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <AlarmClock style={{ width: 20, height: 20 }} />
+                {formatDate(task.dueDate, { timeZone: 'UTC' })}
+              </Box>
+            ) : null}
+          </StyledSecondaryItem>
+          <Box>
+            <TaskAssignees task={task} />
+          </Box>
+        </StyledRow>
+      </TaskTranslationsLink>
     </StyledContainer>
   );
 };

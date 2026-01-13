@@ -81,7 +81,7 @@ export const TaskLabel = ({
         {task.name || t('task_default_name')}
       </StyledTaskName>
       {project ? (
-        <TaskNumberWithLink project={project} taskNumber={task.number} />
+        <TaskNumberWithLink project={project} task={task} />
       ) : (
         <TaskNumber taskNumber={task.number} />
       )}

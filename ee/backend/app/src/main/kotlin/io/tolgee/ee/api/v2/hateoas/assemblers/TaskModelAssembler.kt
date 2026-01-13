@@ -44,7 +44,6 @@ class TaskModelAssembler(
       baseWordCount = entity.baseWordCount,
       baseCharacterCount = entity.baseCharacterCount,
       state = entity.state,
-      branchId = entity.branch?.id,
       branchName = entity.branch?.name,
       agency = entity.agency?.let { translationAgencySimpleModelAssembler.toModel(it) },
     )
