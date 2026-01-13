@@ -1,6 +1,6 @@
 import { ScrollArrows } from 'tg.ee.module/glossary/components/ScrollArrows';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
-import { Button, styled } from '@mui/material';
+import { Button, styled, useTheme } from '@mui/material';
 import { T } from '@tolgee/react';
 import { GlossaryEmptyListMessage } from 'tg.ee.module/glossary/components/GlossaryEmptyListMessage';
 import { GlossaryViewListHeader } from 'tg.ee.module/glossary/components/GlossaryViewListHeader';
@@ -9,9 +9,10 @@ import {
   estimateGlossaryViewListRowHeight,
   GlossaryViewListRow,
 } from 'tg.ee.module/glossary/components/GlossaryViewListRow';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SelectionService } from 'tg.service/useSelectionService';
 import { components } from 'tg.service/apiSchema.generated';
+import { useResizeObserver } from 'usehooks-ts';
 
 type SimpleGlossaryTermWithTranslationsModel =
   components['schemas']['SimpleGlossaryTermWithTranslationsModel'];
@@ -56,15 +57,17 @@ const StyledContainer = styled('div')`
 
 const StyleTermsCount = styled('div')`
   color: ${({ theme }) => theme.palette.text.secondary};
-  margin-top: ${({ theme }) => theme.spacing(1)};
+  margin-top: ${({ theme }) => theme.spacing(0.5)};
   margin-bottom: ${({ theme }) => theme.spacing(1)};
 `;
 
 const StyledVerticalScroll = styled('div')`
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: ${({ theme }) => theme.palette.text.secondary} transparent;
   scroll-behavior: smooth;
+  margin-top: ${({ theme }) => theme.spacing(0.5)};
+  min-height: 350px;
 `;
 
 const StyledContent = styled('div')`
@@ -104,6 +107,22 @@ export const GlossaryTermsList = ({
   const [editingTranslation, setEditingTranslation] = useState<
     [number | undefined, string | undefined]
   >([undefined, undefined]);
+
+  const [tableHeight, setTableHeight] = useState(600);
+  const theme = useTheme();
+
+  const onResize = () => {
+    const position = verticalScrollRef.current?.getBoundingClientRect();
+    if (position) {
+      const bottomSpacing = parseInt(theme.spacing(2), 10);
+      setTableHeight(
+        window.innerHeight - position.top + window.scrollY - bottomSpacing
+      );
+    }
+  };
+
+  useResizeObserver({ ref: verticalScrollRef, onResize });
+  useEffect(onResize, [verticalScrollRef.current]);
 
   const renderItem = (index: number) => {
     const row = terms[index];
@@ -165,7 +184,10 @@ export const GlossaryTermsList = ({
         verticalScrollRef={verticalScrollRef}
         deps={[selectedLanguages]}
       />
-      <StyledVerticalScroll ref={verticalScrollRef}>
+      <StyledVerticalScroll
+        ref={verticalScrollRef}
+        style={{ height: tableHeight }}
+      >
         <StyledContent>
           <StyleTermsCount>
             <T
