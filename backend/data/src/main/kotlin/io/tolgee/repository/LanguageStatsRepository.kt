@@ -38,18 +38,30 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
       ls.translationsUpdatedAt
     )
     from LanguageStats ls
-    where ls.language.project.id in :projectIds and ls.language.deletedAt is null
+    left join ls.branch b
+    where ls.language.project.id = :projectId
+      and ls.language.deletedAt is null
+      and ((b.id = :branchId and b.archivedAt is null) or (:branchId is null and (b is null or b.isDefault)))
   """,
   )
-  fun getDtosByProjectIds(projectIds: List<Long>): List<LanguageStatsDto>
+  fun getDtosByProjectIdAndBranchId(
+    projectId: Long,
+    branchId: Long?,
+  ): List<LanguageStatsDto>
 
   @Query(
     """
     from LanguageStats ls
     join fetch ls.language l
     join fetch l.project
-    where l.project.id in :projectIds and l.deletedAt is null
+    left join ls.branch b
+    where l.project.id = :projectId
+      and l.deletedAt is null
+      and ((b.id = :branchId and b.archivedAt is null) or (:branchId is null and (b is null or b.isDefault)))
   """,
   )
-  fun getAllByProjectIds(projectIds: List<Long>): List<LanguageStats>
+  fun getAllByProjectIdAndBranchId(
+    projectId: Long,
+    branchId: Long?,
+  ): List<LanguageStats>
 }
