@@ -17159,6 +17159,9 @@ export interface operations {
   };
   getProjectStats: {
     parameters: {
+      query: {
+        branch?: string;
+      };
       path: {
         projectId: number;
       };

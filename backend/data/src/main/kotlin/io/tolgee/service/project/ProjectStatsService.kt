@@ -19,8 +19,11 @@ class ProjectStatsService(
   private val entityManager: EntityManager,
   private val activityRevisionRepository: ActivityRevisionRepository,
 ) {
-  fun getProjectStats(projectId: Long): ProjectStatsView {
-    return ProjectStatsProvider(entityManager, projectId).getResult()
+  fun getProjectStats(
+    projectId: Long,
+    branchId: Long? = null,
+  ): ProjectStatsView {
+    return ProjectStatsProvider(entityManager, projectId, branchId).getResult()
   }
 
   fun getProjectDailyActivity(projectId: Long): Map<LocalDate, Long> {
