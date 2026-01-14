@@ -3,6 +3,7 @@ package io.tolgee.service.queryBuilders
 import io.tolgee.model.Language_
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.Branch_
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -21,7 +22,8 @@ import jakarta.persistence.criteria.Subquery
 
 open class LanguageStatsProvider(
   val entityManager: EntityManager,
-  private val projectIds: List<Long>,
+  private val projectId: Long,
+  private val branchId: Long?,
 ) {
   private val cb: CriteriaBuilder = entityManager.criteriaBuilder
   val query: CriteriaQuery<ProjectLanguageStatsResultView> = cb.createQuery(ProjectLanguageStatsResultView::class.java)
@@ -40,11 +42,11 @@ open class LanguageStatsProvider(
         selectWordCount(state) to selectKeyCount(state)
       }
 
-    val projectId = project.get(Project_.id)
+    val projectIdPath = project.get(Project_.id)
     val languageId = languageJoin.get(Language_.id)
     val selection =
       mutableListOf<Selection<*>>(
-        projectId,
+        projectIdPath,
         languageId,
         languageJoin.get(Language_.tag),
         languageJoin.get(Language_.name),
@@ -59,15 +61,15 @@ open class LanguageStatsProvider(
 
     query.multiselect(selection)
 
-    query.groupBy(languageId, projectId)
-    query.where(projectId.`in`(projectIds))
+    query.groupBy(languageId, projectIdPath)
+    query.where(projectIdPath.`in`(listOf(projectId)))
   }
 
   private fun selectKeyCount(state: TranslationState): Selection<Long> {
     val sub = query.subquery(Long::class.java)
     val subProject = sub.from(Project::class.java)
     val keyJoin = subProject.join(Project_.keys)
-    joinDefaultBranch(sub, keyJoin)
+    joinBranch(sub, keyJoin)
 
     joinTargetTranslations(keyJoin, state)
 
@@ -81,7 +83,7 @@ open class LanguageStatsProvider(
     val sub = query.subquery(Int::class.java)
     val project = sub.from(Project::class.java)
     val keyJoin = project.join(Project_.keys)
-    joinDefaultBranch(sub, keyJoin)
+    joinBranch(sub, keyJoin)
 
     joinTargetTranslations(keyJoin, state)
 
@@ -100,17 +102,30 @@ open class LanguageStatsProvider(
     return sub.select(coalesceCount)
   }
 
-  private fun joinDefaultBranch(
+  private fun joinBranch(
     subquery: Subquery<*>,
     join: ListJoin<Project, Key>,
   ) {
     val branchJoin = join.join(Key_.branch, JoinType.LEFT)
     subquery.where(
-      cb.or(
-        cb.isNull(join.get(Key_.branch)),
-        cb.isTrue(branchJoin.get(Branch_.isDefault)),
-      ),
+      branchPredicate(branchJoin, join.get(Key_.branch)),
     )
+  }
+
+  private fun branchPredicate(
+    branchJoin: jakarta.persistence.criteria.Join<*, Branch>,
+    branchPath: jakarta.persistence.criteria.Path<Branch?>,
+  ) = when {
+    branchId == null -> {
+      cb.or(
+        cb.isNull(branchPath),
+        cb.isTrue(branchJoin.get(Branch_.isDefault)),
+      )
+    }
+
+    else -> {
+      cb.equal(branchJoin.get(Branch_.id), branchId)
+    }
   }
 
   private fun joinTargetTranslations(
