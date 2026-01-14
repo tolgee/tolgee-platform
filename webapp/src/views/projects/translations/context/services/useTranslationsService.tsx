@@ -22,7 +22,6 @@ import {
 import { PrefilterType } from '../../prefilters/usePrefilter';
 import { useConfig } from 'tg.globalContext/helpers';
 import { useTranslationFiltersService } from './useTranslationFilterService';
-import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
 
 const PAGE_SIZE = 60;
 
@@ -36,6 +35,7 @@ type TranslationModel = components['schemas']['TranslationViewModel'];
 
 type Props = {
   projectId: number;
+  branchName?: string;
   keyName?: string;
   keyNamespace?: string;
   keyId?: number;
@@ -82,10 +82,6 @@ export const useTranslationsService = (props: Props) => {
 
   const [urlSearch, _setUrlSearch] = useUrlSearchState('search', {
     defaultVal: '',
-  });
-
-  const { selectedName: branch } = useBranchesService({
-    projectId: props.projectId,
   });
 
   const messaging = useMessage();
@@ -154,7 +150,7 @@ export const useTranslationsService = (props: Props) => {
     filterTaskNumber:
       props.prefilter?.task !== undefined ? [props.prefilter.task] : undefined,
     filterTaskKeysNotDone: props.prefilter?.taskFilterNotDone || undefined,
-    branch: branch || undefined,
+    branch: props.branchName,
     sort: ['keyNamespace', order, 'keyId'],
   };
 

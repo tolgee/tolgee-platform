@@ -17,6 +17,7 @@ import { TaskView } from 'tg.ee.module/task/components/tasksHeader/TasksHeaderBi
 import { TaskCreateDialog } from 'tg.ee.module/task/components/taskCreate/TaskCreateDialog';
 import { TaskDetail } from 'tg.ee.module/task/components/TaskDetail';
 import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
+import { useBranchFromUrl } from 'tg.component/branching/useBranchFromUrl';
 
 import { ProjectTasksBoard } from './ProjectTasksBoard';
 import { ProjectTasksList } from './ProjectTasksList';
@@ -92,8 +93,10 @@ export const ProjectTasksView = () => {
   const [detail, setDetail] = useState<TaskModel>();
   const [addDialog, setAddDialog] = useState(false);
   const [orderTranslation, setOrderTranslation] = useState(false);
+  const branchName = useBranchFromUrl();
   const { selectedName: branch, selected } = useBranchesService({
     projectId: project.id,
+    branchName,
   });
   const currentBranchName = branch ?? selected?.name;
 

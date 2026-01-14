@@ -9,13 +9,16 @@ import { useTranslationsSelector } from 'tg.views/projects/translations/context/
 import { getPreselectedLanguagesIds } from 'tg.views/projects/translations/BatchOperations/getPreselectedLanguages';
 import { TaskCreateDialog } from '../task/components/taskCreate/TaskCreateDialog';
 import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
+import { useBranchFromUrl } from 'tg.component/branching/useBranchFromUrl';
 
 type Props = OperationProps;
 
 export const OperationTaskCreate = ({ disabled, onFinished }: Props) => {
   const project = useProject();
+  const branchName = useBranchFromUrl();
   const { selectedName: branch } = useBranchesService({
     projectId: project.id,
+    branchName,
   });
   const [dialogOpen, setDialogOpen] = useState(true);
 

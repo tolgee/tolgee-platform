@@ -14,6 +14,7 @@ import { useUser } from 'tg.globalContext/helpers';
 import { TaskDetail } from './TaskDetail';
 import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
 import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
+import { useBranchFromUrl } from 'tg.component/branching/useBranchFromUrl';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -39,8 +40,10 @@ export const TaskMenu = ({
 }: Props) => {
   const user = useUser();
   const isOpen = Boolean(anchorEl);
+  const branchName = useBranchFromUrl();
   const { selected: branch } = useBranchesService({
     projectId: project.id,
+    branchName,
   });
   const [taskCreate, setTaskCreate] = useState<Partial<InitialValues>>();
   const [taskDetail, setTaskDetail] = useState<TaskModel>();

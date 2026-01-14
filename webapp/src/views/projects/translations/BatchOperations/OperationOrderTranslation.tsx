@@ -9,15 +9,19 @@ import { OperationContainer } from './components/OperationContainer';
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { getPreselectedLanguagesIds } from './getPreselectedLanguages';
 import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
+import { useBranchFromUrl } from 'tg.component/branching/useBranchFromUrl';
 
 type Props = OperationProps;
 
 export const OperationOrderTranslation = ({ disabled, onFinished }: Props) => {
   const project = useProject();
+  const branchName = useBranchFromUrl();
   const { selected, selectedName } = useBranchesService({
     projectId: project.id,
+    branchName,
   });
-  const branch = selectedName ?? (selected?.isDefault ? undefined : selected?.name);
+  const branch =
+    selectedName ?? (selected?.isDefault ? undefined : selected?.name);
   const [dialogOpen, setDialogOpen] = useState(true);
 
   const allLanguages = useTranslationsSelector((c) => c.languages) ?? [];

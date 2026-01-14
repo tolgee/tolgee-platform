@@ -7,6 +7,7 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useEffect } from 'react';
 import { FilesType } from 'tg.fixtures/FileUploadFixtures';
 import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
+import { useBranchFromUrl } from 'tg.component/branching/useBranchFromUrl';
 
 type ResultType = components['schemas']['PagedModelImportLanguageModel'];
 
@@ -28,12 +29,16 @@ const useImportDataStore = create<{
 
 export const useImportDataHelper = () => {
   const project = useProject();
+  const branchName = useBranchFromUrl();
   const result = useImportDataStore((s) => s.result);
   const resultProjectId = useImportDataStore((s) => s.projectId);
   const setResult = useImportDataStore((s) => s.setResult);
   const setApplyTouched = useImportDataStore((s) => s.setApplyTouched);
   const applyTouched = useImportDataStore((s) => s.applyTouched);
-  const { selected } = useBranchesService({ projectId: project.id });
+  const { selected } = useBranchesService({
+    projectId: project.id,
+    branchName,
+  });
 
   const message = useMessage();
 

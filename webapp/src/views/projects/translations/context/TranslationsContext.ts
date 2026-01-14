@@ -49,6 +49,7 @@ import { useBranchesService } from 'tg.views/projects/translations/context/servi
 
 type Props = {
   projectId: number;
+  branchName?: string;
   baseLang: string | undefined;
   keyId?: number;
   keyName?: string;
@@ -115,6 +116,7 @@ export const [
 
   const translationService = useTranslationsService({
     projectId: props.projectId,
+    branchName: props.branchName,
     keyId: props.keyId,
     keyName: props.keyName,
     keyNamespace: props.keyNamespace,
@@ -157,6 +159,7 @@ export const [
 
   const branchesService = useBranchesService({
     projectId: props.projectId,
+    branchName: props.branchName,
   });
 
   const editService = useEditService({

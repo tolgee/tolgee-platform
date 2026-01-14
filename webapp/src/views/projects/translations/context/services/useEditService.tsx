@@ -13,15 +13,14 @@ import {
 } from 'tg.service/TranslationHooks';
 import { components } from 'tg.service/apiSchema.generated';
 
-import { useTranslationsService } from './useTranslationsService';
-import { useRefsService } from './useRefsService';
+import type { useTranslationsService } from './useTranslationsService';
+import type { useRefsService } from './useRefsService';
 import { AfterCommand, ChangeValue, SetEdit } from '../types';
-import { useTaskService } from './useTaskService';
+import type { useTaskService } from './useTaskService';
 import { composeValue, taskEditControlsShouldBeVisible } from './utils';
-import { usePositionService } from './usePositionService';
+import type { usePositionService } from './usePositionService';
 import { TranslationViewModel } from '../../ToolsPanel/common/types';
-import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
-
+import type { useBranchesService } from './useBranchesService';
 type LanguageModel = components['schemas']['LanguageModel'];
 
 type Props = {
