@@ -355,6 +355,17 @@ class LanguageService(
     cacheManager.getCache(Caches.LANGUAGES)?.evict(language.project.id)
   }
 
+  fun getTagsByOrganization(
+    organizationId: Long,
+    projectIds: List<Long>?,
+  ): Set<String> {
+    return this.languageRepository.findAllTagsByOrganizationId(
+      organizationId,
+      projectIds ?: emptyList(),
+      projectIds == null,
+    )
+  }
+
   fun getPaged(
     projectId: Long,
     pageable: Pageable,

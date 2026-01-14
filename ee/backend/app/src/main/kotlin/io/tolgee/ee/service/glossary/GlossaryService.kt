@@ -124,6 +124,10 @@ class GlossaryService(
     glossaryRepository.delete(glossary)
   }
 
+  fun getAssignedProjectsIds(glossary: Glossary): Set<Long> {
+    return glossaryRepository.findAssignedProjectsIdsByGlossaryId(glossary.id)
+  }
+
   @Transactional
   fun assignProject(
     organizationId: Long,

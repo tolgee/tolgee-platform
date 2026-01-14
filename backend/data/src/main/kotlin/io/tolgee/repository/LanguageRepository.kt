@@ -73,6 +73,29 @@ interface LanguageRepository : JpaRepository<Language, Long> {
   fun deleteAllByProjectId(projectId: Long?)
 
   @Query(
+    value = """
+      select distinct l.tag as result
+      from language l
+      join project p on p.id = l.project_id
+      join organization o on o.id = p.organization_owner_id
+      where $ORGANIZATION_FILTER
+    """,
+    countQuery = """
+      select count(distinct l.tag) as result
+      from language l
+      join project p on p.id = l.project_id
+      join organization o on o.id = p.organization_owner_id
+      where $ORGANIZATION_FILTER
+    """,
+    nativeQuery = true,
+  )
+  fun findAllTagsByOrganizationId(
+    organizationId: Long?,
+    projectIds: List<Long>,
+    anyProject: Boolean,
+  ): Set<String>
+
+  @Query(
     """
     select l
     from Language l
