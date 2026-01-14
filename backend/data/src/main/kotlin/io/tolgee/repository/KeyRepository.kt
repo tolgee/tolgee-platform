@@ -105,6 +105,16 @@ interface KeyRepository : JpaRepository<Key, Long> {
     ids: Collection<Long>,
   ): List<Key>
 
+  @Query(
+    """
+    select b.id
+    from Key k
+    left join k.branch b
+    where k.id in :ids
+  """,
+  )
+  fun getBranchIdsByIds(ids: Collection<Long>): List<Long?>
+
   fun findAllByIdIn(ids: Collection<Long>): List<Key>
 
   @Query(
