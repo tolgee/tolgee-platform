@@ -11,6 +11,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TranslationCommentState
@@ -29,6 +30,7 @@ class TranslationsTestData {
   lateinit var projectBuilder: ProjectBuilder
   lateinit var aKeyGermanTranslation: Translation
   lateinit var keysOnlyUser: UserAccount
+  lateinit var testBranch: Branch
 
   val root: TestDataBuilder =
     TestDataBuilder().apply {
@@ -62,24 +64,25 @@ class TranslationsTestData {
 
         aKey = addBasicKey()
         aKeyGermanTranslation = aKey.translations.first()
-        addBranch {
-          name = "test-branch"
-          project = this@project.self
-        }.build {
-          addKey {
-            name = "branch key"
-            branch = this@build.self
+        testBranch =
+          addBranch {
+            name = "test-branch"
+            project = this@project.self
           }.build {
-            addTranslation {
-              language = germanLanguage
-              text = "Branched german key."
+            addKey {
+              name = "branch key"
+              branch = this@build.self
+            }.build {
+              addTranslation {
+                language = germanLanguage
+                text = "Branched german key."
+              }
+              addTranslation {
+                language = englishLanguage
+                text = "Branched english key."
+              }
             }
-            addTranslation {
-              language = englishLanguage
-              text = "Branched english key."
-            }
-          }
-        }
+          }.self
         // create same key as in different branch
         addBranch {
           name = "from-default"

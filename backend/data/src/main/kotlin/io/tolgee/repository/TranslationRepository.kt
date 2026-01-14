@@ -76,6 +76,17 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query(
     """
+    select b.id
+    from Translation t
+    join t.key k
+    left join k.branch b
+    where t.id in :ids
+  """,
+  )
+  fun getBranchIdsByIds(ids: Collection<Long>): List<Long?>
+
+  @Query(
+    """
         from Translation t 
         join fetch t.key k 
         left join k.branch b

@@ -84,8 +84,8 @@ class Language :
   @OneToOne(mappedBy = "targetLanguage", orphanRemoval = true, fetch = FetchType.LAZY)
   var autoTranslationConfig: AutoTranslationConfig? = null
 
-  @OneToOne(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
-  var stats: LanguageStats? = null
+  @OneToMany(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
+  var stats: MutableList<LanguageStats> = mutableListOf()
 
   @OneToMany(mappedBy = "language", orphanRemoval = true, fetch = FetchType.LAZY)
   var tasks: MutableList<Task> = mutableListOf()
