@@ -11,6 +11,7 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.Branch_
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Tag
 import io.tolgee.model.key.Tag_
@@ -68,7 +69,15 @@ open class ProjectStatsProvider(
   private fun getTagSelection(): Selection<Long> {
     val sub = query.subquery(Long::class.java)
     val tag = sub.from(Tag::class.java)
-    sub.where(tag.get(Tag_.project) equal project)
+    val keyMeta = tag.join(Tag_.keyMetas, JoinType.INNER)
+    val key = keyMeta.join(KeyMeta_.key, JoinType.INNER)
+    val branch = key.join(Key_.branch, JoinType.LEFT)
+    sub.where(
+      cb.and(
+        tag.get(Tag_.project) equal project,
+        branchPredicate(branch, key.get(Key_.branch)),
+      ),
+    )
     return sub.select(cb.coalesce(cb.countDistinct(tag.get(Tag_.id)), 0))
   }
 
