@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.model.Language
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.enums.TranslationState
@@ -10,12 +11,15 @@ import io.tolgee.model.key.Tag
 class ProjectStatsTestData : BaseTestData() {
   lateinit var germanLanguage: Language
   lateinit var czechLanguage: Language
+  lateinit var tag: Tag
+  lateinit var featureBranch: Branch
 
   init {
     projectBuilder.apply {
 
       addLanguages()
       addKeys()
+      addBranch()
 
       val organizationOwner =
         root
@@ -61,7 +65,7 @@ class ProjectStatsTestData : BaseTestData() {
   }
 
   private fun ProjectBuilder.addKeys() {
-    val tag1 =
+    tag =
       Tag().apply {
         name = "Tag1"
         project = this@addKeys.self
@@ -78,6 +82,10 @@ class ProjectStatsTestData : BaseTestData() {
         name = "Tag3"
         project = this@addKeys.self
       }
+
+    addTag {
+      name = "Tag4"
+    }
 
     addKey {
       name = "Super key"
@@ -98,7 +106,7 @@ class ProjectStatsTestData : BaseTestData() {
         state = TranslationState.TRANSLATED
       }
       addMeta {
-        tags.add(tag1)
+        tags.add(tag)
         tags.add(tag3)
       }
     }
@@ -111,7 +119,7 @@ class ProjectStatsTestData : BaseTestData() {
         text = "This text has 5 words"
       }
       addMeta {
-        tags.add(tag1)
+        tags.add(tag)
         tags.add(tag2)
       }
     }
@@ -176,5 +184,21 @@ class ProjectStatsTestData : BaseTestData() {
         state = TranslationState.REVIEWED
       }
     }
+  }
+
+  private fun ProjectBuilder.addBranch() {
+    featureBranch =
+      addBranch {
+        name = "feature"
+      }.build {
+        addKey {
+          name = "feature key"
+          branch = self
+        }.build {
+          addMeta {
+            tags.add(tag)
+          }
+        }
+      }.self
   }
 }
