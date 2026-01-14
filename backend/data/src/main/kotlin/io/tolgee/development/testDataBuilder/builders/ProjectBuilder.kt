@@ -23,6 +23,7 @@ import io.tolgee.model.dataImport.ImportSettings
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Namespace
+import io.tolgee.model.key.Tag
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.mtServiceConfig.MtServiceConfig
@@ -82,6 +83,7 @@ class ProjectBuilder(
     val branches = mutableListOf<BranchBuilder>()
     val branchMerges = mutableListOf<BranchMergeBuilder>()
     val branchMergeChanges = mutableListOf<BranchMergeChangeBuilder>()
+    val tags = mutableListOf<TagBuilder>()
   }
 
   var data = DATA()
@@ -99,6 +101,8 @@ class ProjectBuilder(
   fun addTask(ft: FT<Task>) = addOperation(data.tasks, ft)
 
   fun addTaskKey(ft: FT<TaskKey>) = addOperation(data.taskKeys, ft)
+
+  fun addTag(ft: FT<Tag>) = addOperation(data.tags, ft)
 
   fun addLabel(ft: FT<Label>) = addOperation(data.labels, ft)
 

@@ -329,6 +329,7 @@ class TestDataService(
     savePrompts(builder)
     saveAiPlaygroundResults(builder)
     saveLabels(builder)
+    saveTags(builder)
     saveSuggestions(builder)
   }
 
@@ -617,6 +618,12 @@ class TestDataService(
 
   private fun saveLabels(builder: ProjectBuilder) {
     builder.data.labels.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveTags(builder: ProjectBuilder) {
+    builder.data.tags.forEach {
       entityManager.persist(it.self)
     }
   }
