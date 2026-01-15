@@ -5,7 +5,7 @@ import { useTranslationsSelector } from 'tg.views/projects/translations/context/
 import { BranchMergeKeyModel } from '../../types';
 import { CellStateBar } from 'tg.views/projects/translations/cell/CellStateBar';
 import { TranslationVisual } from 'tg.views/projects/translations/translationVisual/TranslationVisual';
-import { FlagImage } from 'tg.component/languages/FlagImage';
+import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 
 const TranslationRow = styled(Box)`
   display: grid;
