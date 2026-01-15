@@ -5076,4 +5076,14 @@
     <changeSet author="danielkrizan (generated)" id="1768340754107-3">
         <addForeignKeyConstraint baseColumnNames="branch_id" baseTableName="language_stats" constraintName="FKanv7yhl65oxk2tsiek8fx54kw" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768473852506-1">
+        <addColumn tableName="activity_modified_entity">
+            <column name="branch_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768473852506-2">
+        <createIndex indexName="IDX7ofy2tesqs3c5b8j1us8ajtjd" tableName="activity_modified_entity">
+            <column name="branch_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

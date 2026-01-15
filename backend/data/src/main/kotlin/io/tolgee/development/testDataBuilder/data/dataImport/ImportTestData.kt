@@ -28,6 +28,7 @@ class ImportTestData {
   lateinit var translationWithConflict: ImportTranslation
   lateinit var newLongKey: ImportKey
   lateinit var featureBranch: Branch
+  lateinit var defaultBranch: Branch
   var project: Project
   var userAccount: UserAccount
   val projectBuilder get() = root.data.projects[0]
@@ -221,6 +222,17 @@ class ImportTestData {
       }.build {
         addTag(keyTag)
       }.self
+  }
+
+  fun addDefaultBranch(): Branch {
+    defaultBranch =
+      projectBuilder
+        .addBranch {
+          name = "main"
+          isDefault = true
+          isProtected = true
+        }.self
+    return defaultBranch
   }
 
   fun useViewEnOnlyUser(): UserAccount {

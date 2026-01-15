@@ -17,6 +17,7 @@ class ModificationsByRevisionsProvider(
   private val revisionIds: List<Long>,
   private val pageable: Pageable,
   private val filterEntityClass: List<String>?,
+  private val branchId: Long?,
 ) {
   val userAccountService: UserAccountService =
     applicationContext.getBean(UserAccountService::class.java)
@@ -57,6 +58,12 @@ class ModificationsByRevisionsProvider(
   }
 
   private fun getModifiedEntitiesRaw(): Page<ActivityModifiedEntity> {
-    return activityModifiedEntityRepository.getModifiedEntities(projectId, revisionIds, filterEntityClass, pageable)
+    return activityModifiedEntityRepository.getModifiedEntities(
+      projectId,
+      revisionIds,
+      filterEntityClass,
+      pageable,
+      branchId,
+    )
   }
 }

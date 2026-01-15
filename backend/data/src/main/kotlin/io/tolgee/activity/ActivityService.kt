@@ -59,8 +59,8 @@ class ActivityService(
     jdbcTemplate.batchUpdate(
       "INSERT INTO activity_modified_entity " +
         "(entity_class, entity_id, describing_data, " +
-        "describing_relations, modifications, revision_type, activity_revision_id) " +
-        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        "describing_relations, modifications, revision_type, activity_revision_id, branch_id) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       list,
       100,
     ) { ps, entity ->
@@ -71,6 +71,7 @@ class ActivityService(
       ps.setObject(5, getJsonbObject(entity.modifications))
       ps.setInt(6, RevisionType.values().indexOf(entity.revisionType))
       ps.setLong(7, entity.activityRevision.id)
+      ps.setObject(8, entity.branchId)
     }
 
     return list
@@ -113,11 +114,13 @@ class ActivityService(
   fun findProjectActivity(
     projectId: Long,
     pageable: Pageable,
+    branchId: Long? = null,
   ): Page<ProjectActivityView> {
     return ProjectActivityViewByPageableProvider(
       applicationContext = applicationContext,
       projectId = projectId,
       pageable = pageable,
+      branchId = branchId,
     ).get()
   }
 
@@ -126,6 +129,7 @@ class ActivityService(
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
       revisionId = revisionId,
+      branchId = null,
     ).get()
   }
 
@@ -133,11 +137,13 @@ class ActivityService(
   fun findProjectActivity(
     projectId: Long,
     revisionId: Long,
+    branchId: Long? = null,
   ): ProjectActivityView? {
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
       revisionId = revisionId,
       projectId = projectId,
+      branchId = branchId,
     ).get()
   }
 
@@ -158,9 +164,17 @@ class ActivityService(
     revisionId: Long,
     pageable: Pageable,
     filterEntityClass: List<String>?,
+    branchId: Long? = null,
   ): Page<ModifiedEntityView> {
     val provider =
-      ModificationsByRevisionsProvider(applicationContext, projectId, listOf(revisionId), pageable, filterEntityClass)
+      ModificationsByRevisionsProvider(
+        applicationContext,
+        projectId,
+        listOf(revisionId),
+        pageable,
+        filterEntityClass,
+        branchId,
+      )
     return provider.get()
   }
 

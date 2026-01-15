@@ -35,10 +35,12 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
   @Query(
     """
       from ActivityModifiedEntity ame
+        left join Branch b on ame.branchId = b.id
         where ame.activityRevision.projectId = :projectId 
         and ame.activityRevision.id in :revisionIds
         and cast(empty_json(ame.modifications) as boolean) = false 
         and (:filterEntityClass is null or ame.entityClass in :filterEntityClass)
+        and ((b.id = :branchId and b.archivedAt is null) or (:branchId is null and (b is null or b.isDefault)))
         order by ame.activityRevision.id, ame.entityClass, ame.entityId
     """,
   )
@@ -47,5 +49,6 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
     revisionIds: List<Long>,
     filterEntityClass: List<String>?,
     pageable: Pageable,
+    branchId: Long? = null,
   ): Page<ActivityModifiedEntity>
 }
