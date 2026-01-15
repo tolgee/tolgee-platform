@@ -1,12 +1,15 @@
 package io.tolgee.activity.projectActivity
 
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.model.Project_
 import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityModifiedEntity_
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.activity.ActivityRevision_
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.Branch_
 import io.tolgee.model.views.activity.ModifiedEntityView
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityRevisionRepository
@@ -21,6 +24,7 @@ import org.springframework.context.ApplicationContext
 class ActivityViewByRevisionsProvider(
   private val applicationContext: ApplicationContext,
   private val revisions: Collection<ActivityRevision>,
+  private val branchId: Long? = null,
   /**
    * For Activities, which have onlyCountInList = true in io.tolgee.activity.data.ActivityType,
    * this parameter specifies what's the maximum per-entity modification to be included in the list.
@@ -112,7 +116,8 @@ class ActivityViewByRevisionsProvider(
     activityRevisionRepository
       .getModifiedEntityTypeCounts(
         revisionIds = revisionIds,
-        allowedTypes,
+        allowedTypes = allowedTypes,
+        branchId = branchId,
       ).forEach { (revisionId, entityClass, count) ->
         counts
           .computeIfAbsent(revisionId as Long) { mutableMapOf() }
@@ -153,6 +158,7 @@ class ActivityViewByRevisionsProvider(
     val whereConditions = mutableListOf<Predicate>()
     whereConditions.add(filter)
     whereConditions.add(revision.get(ActivityRevision_.id).`in`(revisionIds))
+    whereConditions.add(getBranchPredicate(cb, query, root, revision))
     ActivityType.entries.forEach {
       it.restrictEntitiesInList?.let { restrictEntitiesInList ->
         val restrictedEntityNames = restrictEntitiesInList.map { it.simpleName }
@@ -167,6 +173,32 @@ class ActivityViewByRevisionsProvider(
 
     query.where(cb.and(*whereConditions.toTypedArray()))
     return entityManager.createQuery(query).resultList
+  }
+
+  private fun getBranchPredicate(
+    cb: CriteriaBuilder,
+    query: jakarta.persistence.criteria.CriteriaQuery<*>,
+    root: Root<ActivityModifiedEntity>,
+    revision: Join<ActivityModifiedEntity, ActivityRevision>,
+  ): Predicate {
+    val branchPath = root.get(ActivityModifiedEntity_.branchId)
+    if (branchId != null) {
+      return cb.equal(branchPath, branchId)
+    }
+
+    val subquery = query.subquery(Long::class.java)
+    val branch = subquery.from(Branch::class.java)
+    subquery.select(branch.get(Branch_.id))
+    subquery.where(
+      cb.equal(branch.get(Branch_.project).get(Project_.id), revision.get(ActivityRevision_.projectId)),
+      cb.isTrue(branch.get(Branch_.isDefault)),
+      cb.isNull(branch.get(Branch_.archivedAt)),
+    )
+
+    return cb.or(
+      cb.isNull(branchPath),
+      branchPath.`in`(subquery),
+    )
   }
 
   private fun getClassesToExpandFilter(
