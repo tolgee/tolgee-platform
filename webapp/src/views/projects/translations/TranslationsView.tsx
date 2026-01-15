@@ -5,11 +5,11 @@ import { HeaderNsContext } from './context/HeaderNsContext';
 import { usePrefilter } from './prefilters/usePrefilter';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { QUERY } from 'tg.constants/links';
-import { useBranchFromUrl } from 'tg.component/branching/useBranchFromUrl';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 
 export const TranslationsView = () => {
   const project = useProject();
-  const branchName = useBranchFromUrl();
+  const branchName = useBranchFromUrlPath();
 
   const prefilter = usePrefilter();
   const [aiPlayground] = useUrlSearchState(QUERY.TRANSLATIONS_AI_PLAYGROUND, {

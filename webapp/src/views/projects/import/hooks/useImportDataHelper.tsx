@@ -6,8 +6,7 @@ import { T } from '@tolgee/react';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useEffect } from 'react';
 import { FilesType } from 'tg.fixtures/FileUploadFixtures';
-import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
-import { useBranchFromUrl } from 'tg.component/branching/useBranchFromUrl';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 
 type ResultType = components['schemas']['PagedModelImportLanguageModel'];
 
@@ -29,16 +28,12 @@ const useImportDataStore = create<{
 
 export const useImportDataHelper = () => {
   const project = useProject();
-  const branchName = useBranchFromUrl();
+  const branchName = useBranchFromUrlPath();
   const result = useImportDataStore((s) => s.result);
   const resultProjectId = useImportDataStore((s) => s.projectId);
   const setResult = useImportDataStore((s) => s.setResult);
   const setApplyTouched = useImportDataStore((s) => s.setApplyTouched);
   const applyTouched = useImportDataStore((s) => s.applyTouched);
-  const { selected } = useBranchesService({
-    projectId: project.id,
-    branchName,
-  });
 
   const message = useMessage();
 
@@ -50,7 +45,7 @@ export const useImportDataHelper = () => {
     },
     query: {
       size: 1000,
-      branch: selected?.name,
+      branch: branchName,
     },
     options: {
       onSuccess(data) {
@@ -112,7 +107,7 @@ export const useImportDataHelper = () => {
         projectId: project.id,
       },
       query: {
-        branch: selected?.name,
+        branch: branchName,
       },
       content: {
         'multipart/form-data': {
@@ -130,7 +125,7 @@ export const useImportDataHelper = () => {
         projectId: project.id,
       },
       query: {
-        branch: selected?.name,
+        branch: branchName,
       },
     });
 

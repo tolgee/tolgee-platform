@@ -23,8 +23,7 @@ type Props = {
   onOpenDetail: (task: TaskModel) => void;
   search: string;
   newTaskActions: boolean;
-  branch?: string;
-  currentBranchName?: string;
+  branchName?: string;
 };
 
 export const ProjectTasksList = ({
@@ -32,8 +31,7 @@ export const ProjectTasksList = ({
   search,
   onOpenDetail,
   newTaskActions,
-  branch,
-  currentBranchName,
+  branchName,
 }: Props) => {
   const project = useProject();
   const { t } = useTranslate();
@@ -55,7 +53,7 @@ export const ProjectTasksList = ({
       filterType: filter.types,
       filterNotClosedBefore: filter.filterNotClosedBefore,
       filterAgency: filter.agencies,
-      branch,
+      branch: branchName,
     },
     options: {
       keepPreviousData: true,
@@ -102,7 +100,7 @@ export const ProjectTasksList = ({
           onDetailOpen={(task) => onOpenDetail(task)}
           project={project}
           projectScopes={project.computedPermission.scopes}
-          currentBranchName={currentBranchName}
+          branchName={branchName}
         />
       )}
       itemSeparator={() => <StyledSeparator />}

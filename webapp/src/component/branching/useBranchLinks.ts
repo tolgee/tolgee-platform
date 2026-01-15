@@ -1,5 +1,5 @@
 import { applyBranchToUrl } from './branchingPath';
-import { useBranchFromUrl } from './useBranchFromUrl';
+import { useBranchFromUrlPath } from './useBranchFromUrlPath';
 import { Link, LINKS } from 'tg.constants/links';
 import { getCachedBranch } from './branchCache';
 import { useProject } from 'tg.hooks/useProject';
@@ -16,7 +16,7 @@ const BRANCHING_LINKS = new Set<Link>([
 export const useBranchLinks = (selectedBranch?: string) => {
   const project = useProject();
   const branch =
-    selectedBranch || useBranchFromUrl() || getCachedBranch(project.id);
+    selectedBranch || useBranchFromUrlPath() || getCachedBranch(project.id);
 
   const withBranchLink = (
     link: Link,

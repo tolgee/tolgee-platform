@@ -70,7 +70,7 @@ type Props = {
   projectId: number;
   allLanguages: LanguageModel[];
   initialValues?: Partial<InitialValues>;
-  branch?: string;
+  branchName?: string;
 };
 
 export const TaskCreateDialog = ({
@@ -80,7 +80,7 @@ export const TaskCreateDialog = ({
   projectId,
   allLanguages,
   initialValues,
-  branch,
+  branchName,
 }: Props) => {
   const { t } = useTranslate();
 
@@ -108,7 +108,7 @@ export const TaskCreateDialog = ({
     query: {
       ...filtersQuery,
       languages: allLanguages.map((l) => l.tag),
-      branch,
+      branch: branchName,
     },
     options: {
       enabled: !initialValues?.selection,
@@ -174,7 +174,7 @@ export const TaskCreateDialog = ({
             dueDate: values.dueDate,
             assignees: values.assignees[languageId]?.map((u) => u.id) ?? [],
             keys: selectedKeys,
-            branch,
+            branch: branchName,
           }));
 
           const stateFilters = getStateFilters(values.type);
@@ -220,7 +220,7 @@ export const TaskCreateDialog = ({
                 stateFilters={getStateFilters(values.type)}
                 setStateFilters={setStateFilters}
                 projectId={projectId}
-                branch={branch}
+                branchName={branchName}
                 onScopeChange={setScope}
               />
               <StyledActions>

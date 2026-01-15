@@ -16,8 +16,7 @@ import { TasksHeader } from 'tg.ee.module/task/components/tasksHeader/TasksHeade
 import { TaskView } from 'tg.ee.module/task/components/tasksHeader/TasksHeaderBig';
 import { TaskCreateDialog } from 'tg.ee.module/task/components/taskCreate/TaskCreateDialog';
 import { TaskDetail } from 'tg.ee.module/task/components/TaskDetail';
-import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
-import { useBranchFromUrl } from 'tg.component/branching/useBranchFromUrl';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 
 import { ProjectTasksBoard } from './ProjectTasksBoard';
 import { ProjectTasksList } from './ProjectTasksList';
@@ -93,12 +92,7 @@ export const ProjectTasksView = () => {
   const [detail, setDetail] = useState<TaskModel>();
   const [addDialog, setAddDialog] = useState(false);
   const [orderTranslation, setOrderTranslation] = useState(false);
-  const branchName = useBranchFromUrl();
-  const { selectedName: branch, selected } = useBranchesService({
-    projectId: project.id,
-    branchName,
-  });
-  const currentBranchName = branch ?? selected?.name;
+  const branchName = useBranchFromUrlPath();
 
   const allLanguages = languagesLoadable.data?._embedded?.languages ?? [];
 
@@ -149,8 +143,7 @@ export const ProjectTasksView = () => {
             search={search}
             filter={filter}
             showAll={showAll === 'true'}
-            branch={branch}
-            currentBranchName={currentBranchName}
+            branchName={branchName}
             onOpenDetail={setDetail}
             newTaskActions={true}
           />
@@ -159,8 +152,7 @@ export const ProjectTasksView = () => {
             search={search}
             filter={filter}
             showAll={showAll === 'true'}
-            branch={branch}
-            currentBranchName={currentBranchName}
+            branchName={branchName}
             onOpenDetail={setDetail}
           />
         )}
@@ -171,7 +163,7 @@ export const ProjectTasksView = () => {
               onClose={handleDetailClose}
               projectId={project.id}
               task={detail}
-              currentBranchName={currentBranchName}
+              branchName={branchName}
             />
           </Dialog>
         )}
@@ -188,7 +180,7 @@ export const ProjectTasksView = () => {
             }}
             projectId={project.id}
             allLanguages={allLanguages}
-            branch={branch}
+            branchName={branchName}
           />
         )}
         {orderTranslation && (
@@ -204,7 +196,7 @@ export const ProjectTasksView = () => {
             }}
             projectId={project.id}
             allLanguages={allLanguages}
-            branch={branch}
+            branchName={branchName}
           />
         )}
       </Box>

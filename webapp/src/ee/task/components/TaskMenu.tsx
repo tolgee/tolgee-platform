@@ -13,8 +13,7 @@ import { InitialValues, TaskCreateDialog } from './taskCreate/TaskCreateDialog';
 import { useUser } from 'tg.globalContext/helpers';
 import { TaskDetail } from './TaskDetail';
 import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
-import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
-import { useBranchFromUrl } from 'tg.component/branching/useBranchFromUrl';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -40,11 +39,7 @@ export const TaskMenu = ({
 }: Props) => {
   const user = useUser();
   const isOpen = Boolean(anchorEl);
-  const branchName = useBranchFromUrl();
-  const { selected: branch } = useBranchesService({
-    projectId: project.id,
-    branchName,
-  });
+  const branchName = useBranchFromUrlPath();
   const [taskCreate, setTaskCreate] = useState<Partial<InitialValues>>();
   const [taskDetail, setTaskDetail] = useState<TaskModel>();
   const closeMutation = useApiMutation({
@@ -277,7 +272,7 @@ export const TaskMenu = ({
           allLanguages={languagesLoadable.data._embedded?.languages ?? []}
           projectId={project.id}
           initialValues={taskCreate}
-          branch={branch?.name}
+          branchName={branchName}
         />
       )}
       {taskDetail && (
@@ -291,7 +286,7 @@ export const TaskMenu = ({
             projectId={project.id}
             onClose={() => setTaskDetail(undefined)}
             task={taskDetail}
-            currentBranchName={branch?.name}
+            branchName={branchName}
           />
         </Dialog>
       )}

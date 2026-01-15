@@ -36,7 +36,7 @@ type Props = {
   doneTasks: TasksLoadable;
   project?: SimpleProjectModel;
   newTaskActions: boolean;
-  currentBranchName?: string;
+  branchName?: string;
   showBranchLabel?: boolean;
 };
 
@@ -48,7 +48,7 @@ export const TasksBoard = ({
   doneTasks,
   project,
   newTaskActions,
-  currentBranchName,
+  branchName,
   showBranchLabel,
 }: Props) => {
   const theme = useTheme();
@@ -104,7 +104,7 @@ export const TasksBoard = ({
           onDetailOpen={onOpenDetail}
           emptyMessage={t('task_board_empty_new')}
           newTaskActions={newTaskActions}
-          currentBranchName={currentBranchName}
+          branchName={branchName}
         />
         <BoardColumn
           state="IN_PROGRESS"
@@ -114,7 +114,7 @@ export const TasksBoard = ({
           onDetailOpen={onOpenDetail}
           emptyMessage={t('task_board_empty_pending')}
           newTaskActions={newTaskActions}
-          currentBranchName={currentBranchName}
+          branchName={branchName}
         />
         <BoardColumn
           title={
@@ -143,7 +143,7 @@ export const TasksBoard = ({
           onDetailOpen={onOpenDetail}
           emptyMessage={t('task_board_empty_closed')}
           newTaskActions={newTaskActions}
-          currentBranchName={currentBranchName}
+          branchName={branchName}
         />
       </StyledColumns>
       <Box

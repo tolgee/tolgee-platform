@@ -1,11 +1,11 @@
 import { useProject } from 'tg.hooks/useProject';
 import { TranslationsContextProvider } from 'tg.views/projects/translations/context/TranslationsContext';
-import { BranchMergeDetail } from 'tg.ee.module/branching/merge/BranchMergeDetail';
-import { useBranchFromUrl } from 'tg.component/branching/useBranchFromUrl';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
+import { BranchMergeDetail } from './merge/BranchMergeDetail';
 
 export const BranchMergePage = () => {
   const project = useProject();
-  const branchName = useBranchFromUrl();
+  const branchName = useBranchFromUrlPath();
 
   return (
     <TranslationsContextProvider

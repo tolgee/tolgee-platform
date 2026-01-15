@@ -103,7 +103,7 @@ type Props = {
   projectId: number;
   allLanguages: LanguageModel[];
   initialValues?: Partial<InitialValues>;
-  branch?: string;
+  branchName?: string;
 };
 
 export const OrderTranslationsDialog: React.FC<Props> = ({
@@ -113,7 +113,7 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
   projectId,
   allLanguages,
   initialValues,
-  branch,
+  branchName,
 }) => {
   const theme = useTheme();
   const { isEnabled } = useEnabledFeatures();
@@ -172,7 +172,7 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
     query: {
       ...filtersQuery,
       languages: allLanguages.map((l) => l.tag),
-      branch,
+      branch: branchName,
     },
     options: {
       enabled: !initialValues?.selection,
@@ -287,7 +287,7 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
                   assignees:
                     values.assignees[languageId]?.map((u) => u.id) ?? [],
                   keys: selectedKeys,
-                  branch,
+                  branch: branchName,
                 } satisfies CreateTaskRequest)
             );
             const stateFilters = getStateFilters(values.type);
@@ -399,7 +399,7 @@ export const OrderTranslationsDialog: React.FC<Props> = ({
                           stateFilters={getStateFilters(values.type)}
                           setStateFilters={setStateFilters}
                           projectId={projectId}
-                          branch={branch}
+                          branchName={branchName}
                           hideDueDate
                           hideAssignees
                           disabled={disabled}

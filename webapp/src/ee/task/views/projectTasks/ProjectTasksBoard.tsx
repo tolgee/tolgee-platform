@@ -13,8 +13,7 @@ type Props = {
   filter: TaskFilterType;
   onOpenDetail: (task: TaskModel) => void;
   search: string;
-  branch?: string;
-  currentBranchName?: string;
+  branchName?: string;
 };
 
 export const ProjectTasksBoard = ({
@@ -22,8 +21,7 @@ export const ProjectTasksBoard = ({
   filter,
   onOpenDetail,
   search,
-  branch,
-  currentBranchName,
+  branchName,
 }: Props) => {
   const project = useProject();
 
@@ -35,7 +33,7 @@ export const ProjectTasksBoard = ({
     filterLanguage: filter.languages,
     filterType: filter.types,
     filterAgency: filter.agencies,
-    branch: branch,
+    branch: branchName,
   } satisfies QueryParameters;
 
   const newTasks = useProjectBoardTasks({
@@ -66,7 +64,7 @@ export const ProjectTasksBoard = ({
       newTasks={newTasks}
       project={project}
       newTaskActions={true}
-      currentBranchName={currentBranchName}
+      branchName={branchName}
     />
   );
 };

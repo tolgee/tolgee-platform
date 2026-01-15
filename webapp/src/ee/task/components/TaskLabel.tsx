@@ -43,7 +43,7 @@ type Props = {
   sx?: SxProps;
   className?: string;
   hideType?: boolean;
-  currentBranchName?: string;
+  branchName?: string;
 };
 
 export const TaskLabel = ({
@@ -52,13 +52,11 @@ export const TaskLabel = ({
   className,
   project,
   hideType,
-  currentBranchName,
+  branchName,
 }: Props) => {
   const { t } = useTranslate();
   const shouldShowBranch =
-    !!currentBranchName &&
-    !!task.branchName &&
-    task.branchName !== currentBranchName;
+    !!branchName && !!task.branchName && task.branchName !== branchName;
   return (
     <StyledContainer
       {...{

@@ -58,7 +58,7 @@ type Props = {
   projectScopes?: Scope[];
   showProject?: boolean;
   newTaskActions: boolean;
-  currentBranchName?: string;
+  branchName?: string;
 };
 
 export const TaskItem = ({
@@ -68,7 +68,7 @@ export const TaskItem = ({
   showProject,
   projectScopes,
   newTaskActions,
-  currentBranchName,
+  branchName,
 }: Props) => {
   const { t } = useTranslate();
   const theme = useTheme();
@@ -91,7 +91,7 @@ export const TaskItem = ({
         <TaskLabel
           sx={{ padding: '12px 0px 12px 16px' }}
           task={task}
-          currentBranchName={currentBranchName}
+          branchName={branchName}
         />
       </StyledItem>
       <StyledItem
