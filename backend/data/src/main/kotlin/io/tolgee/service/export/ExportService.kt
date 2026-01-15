@@ -26,7 +26,7 @@ class ExportService(
   private val businessEventPublisher: BusinessEventPublisher,
   private val objectMapper: ObjectMapper,
   private val branchService: BranchService,
-  ) : Logging {
+) : Logging {
   fun export(
     projectId: Long,
     exportParams: IExportParams,
