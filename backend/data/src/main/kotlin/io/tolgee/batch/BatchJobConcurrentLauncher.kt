@@ -6,7 +6,6 @@ import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.fixtures.waitFor
-import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import io.tolgee.util.trace
@@ -270,12 +269,13 @@ class BatchJobConcurrentLauncher(
       if (maxPerJobConcurrency == -1) {
         return@trySetExecutionRunning true
       }
-      val count =
-        it.values.count { executionState -> executionState.status == BatchJobChunkExecutionStatus.RUNNING }
-      if (count == 0) {
-        return@trySetExecutionRunning true
-      }
-      maxPerJobConcurrency > count
+      // before (look back to the git log) number of running executions was counted based on
+      // executions in Map<Long, ExecutionState> in status RUNNING
+      // it.values.count { executionState -> executionState.status == BatchJobChunkExecutionStatus.RUNNING },
+      // which led to more couroutines actually launched, because there can be executions in the SUCCESS
+      // state that are not finalized yet and are not removed from that map
+      // see io.tolgee.batch.AbstractBatchJobsGeneralTest.`mt job respects maxPerJobConcurrency`
+      runningJobs.size < maxPerJobConcurrency
     }
   }
 }
