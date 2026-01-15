@@ -70,7 +70,7 @@ export const DashboardView = () => {
   const canViewActivity = satisfiesPermission('activity.view');
 
   const path = { projectId: project.id };
-  const query = { size: 15, sort: ['timestamp,desc'] };
+  const query = { size: 15, sort: ['timestamp,desc'], branch: selectedName };
   const activityLoadable = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/activity',
     method: 'get',
