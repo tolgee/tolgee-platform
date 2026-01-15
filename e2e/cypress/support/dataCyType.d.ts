@@ -343,6 +343,8 @@ declare namespace DataCy {
         "glossary-list-languages" |
         "glossary-panel-container" |
         "glossary-panel-container-empty" |
+        "glossary-projects-info" |
+        "glossary-switch" |
         "glossary-term-highlight" |
         "glossary-term-list-item" |
         "glossary-term-preview-container" |
@@ -541,9 +543,6 @@ declare namespace DataCy {
         "organization-role-select-item" |
         "organization-side-menu" |
         "organization-switch" |
-        "organization-switch-item" |
-        "organization-switch-new" |
-        "organization-switch-search" |
         "palette-color" |
         "pat-expiry-info" |
         "pat-list-item" |

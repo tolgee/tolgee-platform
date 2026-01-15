@@ -6,6 +6,8 @@ import { GlossaryViewBody } from 'tg.ee.module/glossary/components/GlossaryViewB
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { GlossarySwitch } from 'tg.ee.module/glossary/components/glossarySwitch';
+import { GlossaryProjectsInfo } from 'tg.ee.module/glossary/components/GlossaryProjectsInfo';
 
 export const GlossaryView = () => {
   const [search, setSearch] = useUrlSearchState('search', {
@@ -20,6 +22,10 @@ export const GlossaryView = () => {
   return (
     <BaseOrganizationSettingsView
       windowTitle={glossary.name || t('organization_glossary_title')}
+      title={glossary.name || t('organization_glossary_title')}
+      titleAdornment={
+        <GlossaryProjectsInfo projects={glossary.assignedProjects} />
+      }
       link={LINKS.ORGANIZATION_GLOSSARY}
       navigation={[
         [
@@ -28,13 +34,7 @@ export const GlossaryView = () => {
             [PARAMS.ORGANIZATION_SLUG]: preferredOrganization?.slug || '',
           }),
         ],
-        [
-          glossary.name || t('organization_glossary_view_title'),
-          LINKS.ORGANIZATION_GLOSSARY.build({
-            [PARAMS.GLOSSARY_ID]: glossary.id,
-            [PARAMS.ORGANIZATION_SLUG]: preferredOrganization?.slug || '',
-          }),
-        ],
+        [<GlossarySwitch key="glossary-switch" />],
       ]}
       maxWidth="max"
       allCentered={false}
