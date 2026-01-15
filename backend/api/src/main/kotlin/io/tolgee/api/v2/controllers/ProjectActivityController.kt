@@ -20,6 +20,7 @@ import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.branching.BranchService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -43,6 +44,7 @@ class ProjectActivityController(
   private val modificationResourcesAssembler: PagedResourcesAssembler<ModifiedEntityView>,
   private val projectActivityModelAssembler: ProjectActivityModelAssembler,
   private val modifiedEntityModelAssembler: ModifiedEntityModelAssembler,
+  private val branchService: BranchService,
 ) {
   @Operation(summary = "Get project activity")
   @GetMapping("")
@@ -50,8 +52,16 @@ class ProjectActivityController(
   @AllowApiAccess
   fun getActivity(
     @ParameterObject pageable: Pageable,
+    @RequestParam(required = false) branch: String? = null,
   ): PagedModel<ProjectActivityModel> {
-    val views = activityService.findProjectActivity(projectId = projectHolder.project.id, pageable)
+    val branchEntity =
+      branch?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
+    val views =
+      activityService.findProjectActivity(
+        projectId = projectHolder.project.id,
+        pageable = pageable,
+        branchId = branchEntity?.id,
+      )
     return activityPagedResourcesAssembler.toModel(views, projectActivityModelAssembler)
   }
 
@@ -61,9 +71,16 @@ class ProjectActivityController(
   @AllowApiAccess
   fun getSingleRevision(
     @PathVariable revisionId: Long,
+    @RequestParam(required = false) branch: String? = null,
   ): ProjectActivityModel {
+    val branchEntity =
+      branch?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
     val views =
-      activityService.findProjectActivity(projectId = projectHolder.project.id, revisionId)
+      activityService.findProjectActivity(
+        projectId = projectHolder.project.id,
+        revisionId = revisionId,
+        branchId = branchEntity?.id,
+      )
         ?: throw NotFoundException()
     return projectActivityModelAssembler.toModel(views)
   }
@@ -80,13 +97,18 @@ class ProjectActivityController(
     )
     @RequestParam(required = false)
     filterEntityClass: List<String>?,
+    @RequestParam(required = false)
+    branch: String? = null,
   ): PagedModel<ModifiedEntityModel> {
+    val branchEntity =
+      branch?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
     val page =
       activityService.getRevisionModifications(
         projectId = projectHolder.project.id,
         revisionId,
         pageable,
         filterEntityClass,
+        branchEntity?.id,
       )
     return modificationResourcesAssembler.toModel(page, modifiedEntityModelAssembler)
   }

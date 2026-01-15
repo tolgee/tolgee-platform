@@ -13,10 +13,17 @@ import io.tolgee.activity.propChangesProvider.PropChangesProvider
 import io.tolgee.component.ActivityHolderProvider
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.EntityWithId
+import io.tolgee.model.Language
+import io.tolgee.model.Project
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.key.KeyComment
+import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
+import io.tolgee.model.task.Task
 import jakarta.persistence.EntityManager
+import jakarta.persistence.FlushModeType
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCause
 import org.hibernate.Transaction
 import org.hibernate.action.spi.BeforeTransactionCompletionProcess
@@ -165,7 +172,69 @@ class InterceptedEventsManager(
           ).also { it.revisionType = revisionType }
         }
 
+    activityModifiedEntity.branchId = resolveBranchId(entity)
+
     return activityModifiedEntity
+  }
+
+  private fun resolveBranchId(entity: EntityWithId): Long? {
+    val branchableKey =
+      (entity as? BranchVersionedEntity<*, *>)?.resolveKey()
+    if (branchableKey != null) {
+      return branchableKey.branch?.id ?: defaultBranchId(branchableKey.project.id)
+    }
+
+    return when (entity) {
+      is KeyComment -> {
+        entity.keyMeta.key
+          ?.branch
+          ?.id ?: entity.keyMeta.key
+          ?.project
+          ?.id
+          ?.let(::defaultBranchId)
+      }
+
+      is KeyScreenshotReference -> {
+        entity.key.branch?.id ?: defaultBranchId(entity.key.project.id)
+      }
+
+      is Task -> {
+        entity.branch?.id ?: defaultBranchId(entity.project.id)
+      }
+
+      is Project -> {
+        defaultBranchId(entity.id)
+      }
+
+      is Language -> {
+        defaultBranchId(entity.project.id)
+      }
+
+      else -> {
+        null
+      }
+    }
+  }
+
+  private fun defaultBranchId(projectId: Long?): Long? {
+    if (projectId == null) {
+      return null
+    }
+    return entityManager
+      .createQuery(
+        """
+        select b.id
+        from Branch b
+        where b.project.id = :projectId
+          and b.isDefault = true
+          and b.archivedAt is null
+          and b.deletedAt is null
+        """,
+        Long::class.java,
+      ).setParameter("projectId", projectId)
+      .setFlushMode(FlushModeType.COMMIT)
+      .resultList
+      .firstOrNull()
   }
 
   private fun getChangeEntityDescription(
