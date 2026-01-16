@@ -1245,6 +1245,8 @@ export interface components {
         | "translation-labels.manage"
         | "translation-labels.assign"
         | "all.view"
+        | "branch.management"
+        | "branch.protected-modify"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1701,6 +1703,8 @@ export interface components {
         | "translation-labels.manage"
         | "translation-labels.assign"
         | "all.view"
+        | "branch.management"
+        | "branch.protected-modify"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -2844,7 +2848,9 @@ export interface components {
         | "prompts.edit"
         | "translation-labels.manage"
         | "translation-labels.assign"
-        | "all.view";
+        | "all.view"
+        | "branch.management"
+        | "branch.protected-modify";
     };
     IdentifyRequest: {
       anonymousUserId: string;
@@ -4227,6 +4233,8 @@ export interface components {
         | "translation-labels.manage"
         | "translation-labels.assign"
         | "all.view"
+        | "branch.management"
+        | "branch.protected-modify"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -4321,6 +4329,8 @@ export interface components {
         | "translation-labels.manage"
         | "translation-labels.assign"
         | "all.view"
+        | "branch.management"
+        | "branch.protected-modify"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -11346,6 +11356,7 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        branch?: string;
       };
       path: {
         projectId: number;
@@ -11389,6 +11400,9 @@ export interface operations {
       path: {
         revisionId: number;
         projectId: number;
+      };
+      query: {
+        branch?: string;
       };
     };
     responses: {
@@ -11435,6 +11449,7 @@ export interface operations {
         sort?: string[];
         /** Filters results by specific entity class */
         filterEntityClass?: string[];
+        branch?: string;
       };
       path: {
         revisionId: number;
@@ -20079,6 +20094,8 @@ export interface operations {
               | "translation-labels.manage"
               | "translation-labels.assign"
               | "all.view"
+              | "branch.management"
+              | "branch.protected-modify"
             )[];
           };
         };

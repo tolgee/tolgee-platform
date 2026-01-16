@@ -43,6 +43,8 @@ enum class Scope(
   TRANSLATION_LABEL_MANAGE("translation-labels.manage"),
   TRANSLATION_LABEL_ASSIGN("translation-labels.assign"),
   ALL_VIEW("all.view"),
+  BRANCH_MANAGEMENT("branch.management"),
+  BRANCH_PROTECTED_MODIFY("branch.protected-modify"),
   ;
 
   fun expand() = Scope.expand(this)
@@ -160,6 +162,8 @@ enum class Scope(
               promptsView,
             ),
           ),
+          HierarchyItem(BRANCH_MANAGEMENT),
+          HierarchyItem(BRANCH_PROTECTED_MODIFY, listOf(translationsEdit)),
         ),
       )
 
