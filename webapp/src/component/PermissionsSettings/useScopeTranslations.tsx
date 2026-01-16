@@ -51,6 +51,8 @@ export const useScopeTranslations = () => {
       'permissions_item_translation_labels_assign'
     ),
     'all.view': t('permissions_item_all_view'),
+    'branch.management': t('permissions_item_branch_management'),
+    'branch.protected-modify': t('permissions_item_branch_protected_modify'),
   };
 
   return {
