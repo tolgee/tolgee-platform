@@ -11706,6 +11706,7 @@ export interface operations {
         size?: number;
         /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
+        branch?: string;
       };
       path: {
         projectId: number;
@@ -11749,6 +11750,9 @@ export interface operations {
       path: {
         revisionId: number;
         projectId: number;
+      };
+      query: {
+        branch?: string;
       };
     };
     responses: {
@@ -11795,6 +11799,7 @@ export interface operations {
         sort?: string[];
         /** Filters results by specific entity class */
         filterEntityClass?: string[];
+        branch?: string;
       };
       path: {
         revisionId: number;

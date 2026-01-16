@@ -30,6 +30,7 @@ export const ActivityDetailDialog: React.FC<Props> = ({
     url: '/v2/projects/{projectId}/activity/revisions/{revisionId}',
     method: 'get',
     path: { projectId: project.id, revisionId: detailId },
+    query: {},
     options: { enabled: !data },
   });
 
