@@ -35,6 +35,12 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    /**
+     * OpenTelemetry Java Agent configuration.
+     * The agent is downloaded as a dependency and attached to the JVM via -javaagent flag.
+     * See: docs/observability/
+     */
+    otelAgent
 }
 
 apply plugin: 'java'
@@ -134,6 +140,11 @@ dependencies {
 
     implementation libs.springDocOpenApiCommon
     testApi libs.redissonSpringBootStarter
+
+    /**
+     * OPENTELEMETRY
+     */
+    otelAgent libs.opentelemetryJavaagent
 
     /**
      * KOTLIN
@@ -276,6 +287,14 @@ bootJar {
 normalization {
     runtimeClasspath {
         ignore '**/build-info.properties'
+    }
+}
+
+bootRun {
+    // OpenTelemetry Java Agent - disabled by default, enable via OTEL_JAVAAGENT_ENABLED=true
+    // See: docs/observability/
+    if (System.getenv("OTEL_JAVAAGENT_ENABLED") == "true") {
+        jvmArgs "-javaagent:${configurations.otelAgent.singleFile.absolutePath}"
     }
 }
 
