@@ -55,8 +55,8 @@ type BranchModel = components['schemas']['BranchModel'];
 
 type Props = {
   branch: BranchModel;
-  onRemove: (branch: BranchModel) => void;
-  onRename: (branch: BranchModel) => void;
+  onRemove?: (branch: BranchModel) => void;
+  onRename?: (branch: BranchModel) => void;
   onMergeInto: () => void;
   onMergeDetail: () => void;
 };
@@ -78,6 +78,8 @@ export const BranchItem: React.FC<Props> = ({
   };
 
   const handleMenuClose = () => setMenuAnchor(null);
+  const hasMenuItems =
+    Boolean(onRename) || (!branch.isDefault && Boolean(onRemove));
 
   return (
     <StyledListItem data-cy="project-settings-branch-item">
@@ -185,39 +187,47 @@ export const BranchItem: React.FC<Props> = ({
             )
           ))}
 
-        <>
-          <IconButton
-            data-cy="project-settings-branches-actions-menu"
-            size="small"
-            onClick={handleMenuOpen}
-          >
-            <DotsVertical width={20} height={20} />
-          </IconButton>
-          <Menu anchorEl={menuAnchor} open={openMenu} onClose={handleMenuClose}>
-            <MenuItem
-              data-cy="project-settings-branches-rename-button"
-              onClick={() => {
-                handleMenuClose();
-                onRename(branch);
-              }}
+        {hasMenuItems && (
+          <>
+            <IconButton
+              data-cy="project-settings-branches-actions-menu"
+              size="small"
+              onClick={handleMenuOpen}
             >
-              <T keyName="project_branch_rename" />
-            </MenuItem>
-            {!branch.isDefault && (
-              <MenuItem
-                data-cy="project-settings-branches-remove-button"
-                onClick={() => {
-                  handleMenuClose();
-                  onRemove(branch);
-                }}
-              >
-                <Typography color={(theme) => theme.palette.error.main}>
-                  <T keyName="branch_merges_delete" />
-                </Typography>
-              </MenuItem>
-            )}
-          </Menu>
-        </>
+              <DotsVertical width={20} height={20} />
+            </IconButton>
+            <Menu
+              anchorEl={menuAnchor}
+              open={openMenu}
+              onClose={handleMenuClose}
+            >
+              {onRename && (
+                <MenuItem
+                  data-cy="project-settings-branches-rename-button"
+                  onClick={() => {
+                    handleMenuClose();
+                    onRename(branch);
+                  }}
+                >
+                  <T keyName="project_branch_rename" />
+                </MenuItem>
+              )}
+              {!branch.isDefault && onRemove && (
+                <MenuItem
+                  data-cy="project-settings-branches-remove-button"
+                  onClick={() => {
+                    handleMenuClose();
+                    onRemove(branch);
+                  }}
+                >
+                  <Typography color={(theme) => theme.palette.error.main}>
+                    <T keyName="branch_merges_delete" />
+                  </Typography>
+                </MenuItem>
+              )}
+            </Menu>
+          </>
+        )}
       </StyledItemActions>
     </StyledListItem>
   );

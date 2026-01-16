@@ -29,6 +29,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.branching.BranchService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -51,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/projects/{projectId:[0-9]+}/branches",
+    "/v2/projects/branches",
   ],
 )
 @OpenApiOrderExtension(9)
@@ -69,27 +71,10 @@ class BranchController(
   private val branchMergeRefModelAssembler: BranchMergeRefModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
 ) {
-  @GetMapping(value = [""])
-  @Operation(summary = "Get all branches")
-  @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
-  @OpenApiOrderExtension(1)
-  fun all(
-    @ParameterObject
-    pageable: Pageable,
-    @RequestParam("search", required = false)
-    search: String?,
-    @RequestParam("activeOnly", required = false)
-    activeOnly: Boolean?,
-  ): PagedModel<BranchModel> {
-    val branches = branchService.getBranches(projectHolder.project.id, pageable, search, activeOnly)
-    return pagedBranchResourceAssembler.toModel(branches, branchModelAssembler)
-  }
-
   @PostMapping(value = [""])
   @Operation(summary = "Create branch")
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
   @OpenApiOrderExtension(2)
   fun create(
     @RequestBody branch: CreateBranchModel,
@@ -104,10 +89,27 @@ class BranchController(
     return branchModelAssembler.toModel(branch)
   }
 
+  @GetMapping(value = [""])
+  @Operation(summary = "Get all branches")
+  @AllowApiAccess
+  @UseDefaultPermissions
+  @OpenApiOrderExtension(1)
+  fun all(
+    @ParameterObject
+    pageable: Pageable,
+    @RequestParam("search", required = false)
+    search: String?,
+    @RequestParam("activeOnly", required = false)
+    activeOnly: Boolean?,
+  ): PagedModel<BranchModel> {
+    val branches = branchService.getBranches(projectHolder.project.id, pageable, search, activeOnly)
+    return pagedBranchResourceAssembler.toModel(branches, branchModelAssembler)
+  }
+
   @DeleteMapping(value = ["/{branchId}"])
   @Operation(summary = "Delete branch")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(3)
   fun delete(
     @PathVariable branchId: Long,
@@ -118,7 +120,7 @@ class BranchController(
   @PostMapping(value = ["/{branchId}"])
   @Operation(summary = "Rename branch")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(3)
   fun rename(
     @PathVariable branchId: Long,
@@ -131,7 +133,7 @@ class BranchController(
   @GetMapping(value = ["/merge"])
   @Operation(summary = "Get branch merges")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @UseDefaultPermissions
   @OpenApiOrderExtension(4)
   fun getBranchMerges(
     @ParameterObject
@@ -144,7 +146,7 @@ class BranchController(
   @PostMapping(value = ["/merge/preview"])
   @Operation(summary = "Creates a merge, dry-runs source branch to target branch and return preview")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @UseDefaultPermissions
   @OpenApiOrderExtension(5)
   fun dryRunMerge(
     @RequestBody request: DryRunMergeBranchRequest,
@@ -156,7 +158,7 @@ class BranchController(
   @GetMapping(value = ["/merge/{mergeId}/preview"])
   @Operation(summary = "Get branch merge session preview")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @UseDefaultPermissions
   @OpenApiOrderExtension(6)
   fun getBranchMergeSessionPreview(
     @PathVariable mergeId: Long,
@@ -168,7 +170,7 @@ class BranchController(
   @PostMapping(value = ["/merge/{mergeId}/refresh"])
   @Operation(summary = "Refresh branch merge session preview")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @UseDefaultPermissions
   @OpenApiOrderExtension(11)
   fun refreshBranchMerge(
     @PathVariable mergeId: Long,
@@ -180,7 +182,7 @@ class BranchController(
   @GetMapping(value = ["/merge/{mergeId}/conflicts"])
   @Operation(summary = "Get branch merge session conflicts")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @UseDefaultPermissions
   @OpenApiOrderExtension(7)
   fun getBranchMergeSessionConflicts(
     @ParameterObject
@@ -194,7 +196,7 @@ class BranchController(
   @GetMapping(value = ["/merge/{mergeId}/changes"])
   @Operation(summary = "Get branch merge session changes")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @UseDefaultPermissions
   @OpenApiOrderExtension(7)
   fun getBranchMergeSessionChanges(
     @ParameterObject pageable: Pageable,
@@ -208,7 +210,7 @@ class BranchController(
   @PutMapping(value = ["/merge/{mergeId}/resolve"])
   @Operation(summary = "Resolve branch merge session conflicts")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @UseDefaultPermissions
   @OpenApiOrderExtension(8)
   fun resolveConflict(
     @PathVariable mergeId: Long,
@@ -220,7 +222,7 @@ class BranchController(
   @PutMapping(value = ["/merge/{mergeId}/resolve-all"])
   @Operation(summary = "Resolve all branch merge session conflicts")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @UseDefaultPermissions
   @OpenApiOrderExtension(8)
   fun resolveAllConflicts(
     @PathVariable mergeId: Long,
@@ -232,7 +234,7 @@ class BranchController(
   @DeleteMapping(value = ["/merge/{mergeId}"])
   @Operation(summary = "Delete branch merge session")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @UseDefaultPermissions
   @OpenApiOrderExtension(9)
   fun deleteBranchMerge(
     @PathVariable mergeId: Long,
@@ -243,7 +245,7 @@ class BranchController(
   @PostMapping(value = ["/merge/{mergeId}/apply"])
   @Operation(summary = "Merge source branch to target branch")
   @AllowApiAccess
-  @RequiresProjectPermissions([Scope.KEYS_EDIT])
+  @UseDefaultPermissions
   @OpenApiOrderExtension(10)
   fun merge(
     @PathVariable mergeId: Long,

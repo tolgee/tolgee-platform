@@ -18,8 +18,10 @@ import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
 import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.service.branching.BranchService
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -111,7 +113,9 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test()
-  @ProjectJWTAuthTestMethod
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.BRANCH_MANAGEMENT],
+  )
   fun `creates branch`() {
     performProjectAuthPost(
       "branches",
@@ -119,15 +123,29 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         "name" to "new-branch",
         "originBranchId" to testData.mainBranch.id,
       ),
-    ).andAssertThatJson {
+    ).andIsOk.andAssertThatJson {
       node("name").isEqualTo("new-branch")
       node("active").isEqualTo(true)
     }
     branchRepository.findActiveByProjectIdAndName(testData.project.id, "new-branch").assert.isNotNull()
   }
 
+  @Test()
+  @ProjectApiKeyAuthTestMethod
+  fun `unable to create branch without proper permission`() {
+    performProjectAuthPost(
+      "branches",
+      mapOf(
+        "name" to "new-branch",
+        "originBranchId" to testData.mainBranch.id,
+      ),
+    ).andIsForbidden
+  }
+
   @Test
-  @ProjectJWTAuthTestMethod
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.BRANCH_MANAGEMENT],
+  )
   fun `unable to create branch with name of existing branch`() {
     performProjectAuthPost(
       "branches",
@@ -139,7 +157,9 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
-  @ProjectJWTAuthTestMethod
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.BRANCH_MANAGEMENT],
+  )
   fun `renames branch`() {
     performProjectAuthPost(
       "branches/${testData.featureBranch.id}",
@@ -147,6 +167,15 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsOk.andAssertThatJson {
       node("name").isEqualTo("renamed-branch")
     }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod
+  fun `unable to rename branch without proper permission`() {
+    performProjectAuthPost(
+      "branches/${testData.featureBranch.id}",
+      mapOf("name" to "renamed-branch"),
+    ).andIsForbidden
   }
 
   @Test
@@ -168,13 +197,21 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
-  @ProjectJWTAuthTestMethod
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.BRANCH_MANAGEMENT],
+  )
   fun `deletes branch`() {
     performProjectAuthDelete("branches/${testData.mergeBranch.id}").andIsOk
     testData.mergeBranch.refresh().let {
       it.archivedAt.assert.isNotNull()
       it.deletedAt.assert.isNotNull()
     }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod
+  fun `unable to delete branch without proper permission`() {
+    performProjectAuthDelete("branches/${testData.mergeBranch.id}").andIsForbidden
   }
 
   @Test
