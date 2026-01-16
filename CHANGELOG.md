@@ -1,3 +1,10 @@
+## [3.146.2](https://github.com/tolgee/tolgee-platform/compare/v3.146.1...v3.146.2) (2026-01-16)
+
+
+### Bug Fixes
+
+* optimize tagging memory ([#3380](https://github.com/tolgee/tolgee-platform/issues/3380)) ([fa86c57](https://github.com/tolgee/tolgee-platform/commit/fa86c574537325b752cdbd61e65ff5798a2ee98a))
+
 ## [3.146.1](https://github.com/tolgee/tolgee-platform/compare/v3.146.0...v3.146.1) (2026-01-09)
 
 
