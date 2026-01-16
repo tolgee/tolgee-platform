@@ -14,6 +14,7 @@ import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { BranchRenameModal } from './BranchRenameModal';
 import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 const TableGrid = styled('div')`
   display: grid;
@@ -28,10 +29,13 @@ export const BranchesList = () => {
   const project = useProject();
   const { t } = useTranslate();
   const history = useHistory();
+  const { satisfiesPermission } = useProjectPermissions();
 
   const [addBranchOpen, setAddBranchOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [renameBranch, setRenameBranch] = useState<BranchModel | null>(null);
+
+  const canManageBranches = satisfiesPermission('branch.management');
 
   function handleCloseMergeIntoModal() {
     setAddBranchOpen(false);
@@ -149,8 +153,6 @@ export const BranchesList = () => {
     );
   };
 
-  const canEditBranches = true; // TODO satisfiesPermission('branches.edit')
-
   const branchesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/branches',
     method: 'get',
@@ -174,7 +176,7 @@ export const BranchesList = () => {
           <Typography variant="h4">
             <T keyName="branches_title" />
           </Typography>
-          {canEditBranches && (
+          {canManageBranches && (
             <Button
               color="primary"
               variant="contained"
@@ -202,8 +204,12 @@ export const BranchesList = () => {
           renderItem={(l: BranchModel) => (
             <BranchItem
               branch={l}
-              onRemove={deleteBranch}
-              onRename={(branch) => setRenameBranch(branch)}
+              onRemove={canManageBranches ? deleteBranch : undefined}
+              onRename={
+                canManageBranches
+                  ? (branch) => setRenameBranch(branch)
+                  : undefined
+              }
               onMergeInto={() => handleMergeInto(l)}
               onMergeDetail={() => handleMergeDetail(l)}
             />
