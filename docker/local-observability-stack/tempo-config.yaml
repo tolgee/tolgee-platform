@@ -1,0 +1,82 @@
+# =============================================================================
+# LOCAL DEVELOPMENT ONLY - Do not use in production.
+# =============================================================================
+#
+# Tempo - Trace Storage & Metrics Generation
+#
+# Purpose:
+#   Stores distributed traces and generates RED metrics (Rate, Errors, Duration)
+#   from ingested spans. Metrics are pushed to Prometheus via remote_write.
+#
+# Part of: Tolgee Local Observability Stack
+#   See: docs/observability/
+#
+# =============================================================================
+
+stream_over_http_enabled: true
+server:
+  http_listen_port: 3200
+  log_level: info
+
+query_frontend:
+  search:
+    duration_slo: 5s
+    throughput_bytes_slo: 1.073741824e+09
+  trace_by_id:
+    duration_slo: 5s
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+ingester:
+  max_block_duration: 5m
+
+compactor:
+  compaction:
+    block_retention: 48h
+
+# Metrics Generator - derives metrics from ingested traces
+# See: https://grafana.com/docs/tempo/latest/metrics-from-traces/span-metrics/
+metrics_generator:
+  processor:
+    span_metrics:
+      dimensions:
+        # HTTP attributes (stable semantic conventions)
+        - http.request.method
+        - http.route
+        - http.response.status_code
+        # Database attributes
+        - db.system
+        - db.operation
+      enable_target_info: true
+    local_blocks:
+      flush_to_storage: true  # enables queries against historical data
+  traces_storage:
+    path: /var/tempo/generator/traces
+  storage:
+    path: /var/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
+  registry:
+    external_labels:
+      source: tempo
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+
+overrides:
+  defaults:
+    metrics_generator:
+      processors: [service-graphs, span-metrics, local-blocks]

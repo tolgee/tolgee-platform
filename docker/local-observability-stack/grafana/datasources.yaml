@@ -1,0 +1,85 @@
+# =============================================================================
+# LOCAL DEVELOPMENT ONLY - Do not use in production.
+# =============================================================================
+#
+# Grafana Datasources - Pre-configured Connections
+#
+# Purpose:
+#   Connects Grafana to Tempo, Loki, and Prometheus with trace-log correlation
+#   configured (Tempo→Loki "Logs for this span", Loki→Tempo "View Trace" links).
+#
+# Part of: Tolgee Local Observability Stack
+#   See: docs/observability/
+#
+# =============================================================================
+
+apiVersion: 1
+
+datasources:
+  - name: Tempo
+    type: tempo
+    access: proxy
+    orgId: 1
+    url: http://tempo:3200
+    basicAuth: false
+    isDefault: true
+    version: 1
+    editable: false
+    apiVersion: 1
+    uid: tempo
+    jsonData:
+      httpMethod: GET
+      tracesToLogsV2:
+        datasourceUid: loki
+        spanStartTimeShift: '-1h'
+        spanEndTimeShift: '1h'
+        tags:
+          - key: service.name
+            value: service_name
+        filterByTraceID: false
+        filterBySpanID: false
+        # Use custom query to filter logs by trace ID using line filter
+        customQuery: true
+        query: '{service_name="tolgee-platform"} |= "$${__span.traceId}"'
+      nodeGraph:
+        enabled: true
+      search:
+        hide: false
+      lokiSearch:
+        datasourceUid: loki
+
+  - name: Loki
+    type: loki
+    access: proxy
+    orgId: 1
+    url: http://loki:3100
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: false
+    apiVersion: 1
+    uid: loki
+    jsonData:
+      derivedFields:
+        - datasourceUid: tempo
+          matcherRegex: '(?:trace_id|traceId|traceid)["\s:=]+([a-fA-F0-9]{32})'
+          name: TraceID
+          url: '$${__value.raw}'
+          urlDisplayLabel: 'View Trace'
+
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    orgId: 1
+    url: http://prometheus:9090
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: false
+    apiVersion: 1
+    uid: prometheus
+    jsonData:
+      httpMethod: POST
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: tempo

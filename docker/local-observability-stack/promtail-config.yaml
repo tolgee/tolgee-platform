@@ -1,0 +1,70 @@
+# =============================================================================
+# LOCAL DEVELOPMENT ONLY - Do not use in production.
+# =============================================================================
+#
+# Promtail - Log Shipping
+#
+# Purpose:
+#   Scrapes container logs, extracts trace_id from log lines, and ships
+#   them to Loki with appropriate labels for trace correlation.
+#
+# Part of: Tolgee Local Observability Stack
+#   See: docs/observability/
+#
+# =============================================================================
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: containers
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: containerlogs
+          __path__: /var/lib/docker/containers/*/*log
+
+    pipeline_stages:
+      - json:
+          expressions:
+            output: log
+            stream: stream
+            attrs:
+            time:
+      - json:
+          expressions:
+            tag:
+          source: attrs
+      - regex:
+          expression: ^(?P<container_name>[^|]+)\|(?P<image_name>[^$]+)$
+          source: tag
+      - timestamp:
+          source: time
+          format: RFC3339Nano
+      - labels:
+          stream:
+          container_name:
+          image_name:
+      # Add service_name label for Grafana Tempo→Loki correlation
+      # The container_name is extracted from Docker log tag (configured in docker-compose)
+      # For Tolgee app, the tag is "tolgee-platform|tolgee/tolgee" so container_name=tolgee-platform
+      - template:
+          source: service_name
+          template: '{{ .container_name }}'
+      - labels:
+          service_name:
+      - output:
+          source: output
+      - regex:
+          expression: '(?:trace_id|traceId|traceid)["\s:=]+(?P<trace_id>[a-fA-F0-9]{32})'
+          source: output
+      - labels:
+          trace_id:

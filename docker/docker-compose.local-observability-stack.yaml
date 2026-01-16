@@ -1,0 +1,190 @@
+# Local Observability Stack for development. See: docs/observability/
+name: tolgee-local-observability-stack
+
+services:
+  # Local Observability Stack (for development only)
+  tempo:
+    image: grafana/tempo:2.6.1
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./local-observability-stack/tempo-config.yaml:/etc/tempo.yaml:ro
+      - tempo-data:/var/tempo
+    ports:
+      - "3200:3200"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3200/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./local-observability-stack/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "13133:13133"
+    depends_on:
+      tempo:
+        condition: service_healthy
+    # Note: otel-collector image is scratch-based without shell utilities.
+    # Health check is disabled, but service exposes health_check extension on :13133
+
+  loki:
+    image: grafana/loki:2.9.1
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+    volumes:
+      - ./local-observability-stack/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  promtail:
+    image: grafana/promtail:2.9.1
+    command: ["-config.file=/etc/promtail/config.yaml"]
+    volumes:
+      - ./local-observability-stack/promtail-config.yaml:/etc/promtail/config.yaml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      loki:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-remote-write-receiver'
+    volumes:
+      - ./local-observability-stack/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
+    volumes:
+      - ./local-observability-stack/grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      tempo:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Tolgee Dependencies
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: tolgee
+      POSTGRES_PASSWORD: tolgee
+      POSTGRES_DB: tolgee
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tolgee"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--requirepass", "tolgee"]
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "tolgee", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Tolgee Application with OpenTelemetry tracing enabled
+  # Requires: ./gradlew docker (builds the image)
+  # See: docs/observability/
+  app:
+    image: tolgee/tolgee
+    # Logging config for promtail to extract container/service name
+    logging:
+      driver: json-file
+      options:
+        tag: "tolgee-platform|tolgee/tolgee"
+    ports:
+      - "8080:8080"
+    environment:
+      # Spring/Tolgee configuration
+      - spring.profiles.active=docker
+      - spring.datasource.url=jdbc:postgresql://postgres:5432/tolgee
+      - spring.datasource.username=tolgee
+      - spring.datasource.password=tolgee
+      - spring.redis.host=redis
+      - spring.redis.port=6379
+      - spring.redis.password=tolgee
+      - tolgee.postgres-autostart.enabled=false
+      - tolgee.internal.mock-free-plan=true
+      - tolgee.billing.enabled=false
+      # OpenTelemetry configuration
+      - OTEL_JAVAAGENT_ENABLED=true
+      - OTEL_SERVICE_NAME=tolgee-platform
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=local
+      - OTEL_LOGS_EXPORTER=none
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_INSTRUMENTATION_LOGBACK_MDC_ENABLED=true
+      # Use stable HTTP semantic conventions (http.request.method, http.response.status_code)
+      - OTEL_SEMCONV_STABILITY_OPT_IN=http
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    volumes:
+      - app-data:/data
+
+volumes:
+  tempo-data:
+  loki-data:
+  grafana-data:
+  prometheus-data:
+  postgres-data:
+  redis-data:
+  app-data:
