@@ -31,37 +31,42 @@ class ProgressManager(
   private val queue: BatchJobChunkExecutionQueue,
 ) : Logging {
   /**
-   * This method tries to set execution running in the state
-   * @param canRunFn function that returns true if execution can be run
+   * This method tries to set execution running in the state.
+   * Lock-free implementation: reads state without locking, then uses atomic single-execution update.
+   * @param canRunFn function that returns true if execution can be run (called with current state)
    */
   fun trySetExecutionRunning(
     executionId: Long,
     batchJobId: Long,
     canRunFn: (Map<Long, ExecutionState>) -> Boolean,
   ): Boolean {
-    return batchJobStateProvider.updateState(batchJobId) {
-      if (canRunFn(it)) {
-        if (it[executionId] != null) {
-          val currentState = it[executionId]
-          // Don't overwrite terminal states
-          if (currentState?.status?.completed == true) {
-            return@updateState false
-          }
-          currentState?.status = BatchJobChunkExecutionStatus.RUNNING
-          return@updateState true
-        }
-        it[executionId] =
-          ExecutionState(
-            successTargets = listOf(),
-            status = BatchJobChunkExecutionStatus.RUNNING,
-            chunkNumber = null,
-            retry = null,
-            transactionCommitted = false,
-          )
-        return@updateState true
-      }
-      return@updateState false
+    // Lock-free read to check concurrency limit and current state
+    val state = batchJobStateProvider.get(batchJobId)
+
+    // Check if caller allows running
+    if (!canRunFn(state)) {
+      return false
     }
+
+    // Check if execution already exists with terminal state
+    val currentState = state[executionId]
+    if (currentState?.status?.completed == true) {
+      return false
+    }
+
+    // Lock-free set to RUNNING using atomic single-execution update
+    batchJobStateProvider.updateSingleExecution(
+      batchJobId,
+      executionId,
+      ExecutionState(
+        successTargets = currentState?.successTargets ?: listOf(),
+        status = BatchJobChunkExecutionStatus.RUNNING,
+        chunkNumber = currentState?.chunkNumber,
+        retry = currentState?.retry,
+        transactionCommitted = currentState?.transactionCommitted ?: false,
+      ),
+    )
+    return true
   }
 
   /**
@@ -72,10 +77,10 @@ class ProgressManager(
     executionId: Long,
     batchJobId: Long,
   ) {
-    return batchJobStateProvider.updateState(batchJobId) {
-      if (it[executionId]?.status == BatchJobChunkExecutionStatus.RUNNING) {
-        it.remove(executionId)
-      }
+    // Lock-free: check and remove single execution
+    val currentState = batchJobStateProvider.getSingleExecution(batchJobId, executionId)
+    if (currentState?.status == BatchJobChunkExecutionStatus.RUNNING) {
+      batchJobStateProvider.removeSingleExecution(batchJobId, executionId)
     }
   }
 
@@ -85,34 +90,40 @@ class ProgressManager(
   ) {
     val job = batchJobService.getJobDto(execution.batchJob.id)
 
-    // the update state function locks it, so we can sure nothing run concurrently there,
-    // this might be a source of bugs
-    batchJobStateProvider.updateState(job.id) {
-      it[execution.id] = batchJobStateProvider.getStateForExecution(execution)
+    // Lock-free: update single execution using atomic Redis HSET
+    batchJobStateProvider.updateSingleExecution(
+      job.id,
+      execution.id,
+      batchJobStateProvider.getStateForExecution(execution),
+    )
 
-      val info = it.getInfoForJobResult()
+    // Lock-free: read state for aggregation (eventual consistency is fine for read-only)
+    val state = batchJobStateProvider.get(job.id)
+    val info = state.getInfoForJobResult()
 
-      if (execution.successTargets.isNotEmpty()) {
-        eventPublisher.publishEvent(OnBatchJobProgress(job, info.progress, job.totalItems.toLong()))
-      }
-      handleJobStatus(job, info)
+    if (execution.successTargets.isNotEmpty()) {
+      eventPublisher.publishEvent(OnBatchJobProgress(job, info.progress, job.totalItems.toLong()))
     }
+    handleJobStatus(job, info)
   }
 
   fun handleChunkCompletedCommitted(
     execution: BatchJobChunkExecution,
     triggerJobCompleted: Boolean = true,
   ) {
-    val state =
-      batchJobStateProvider.updateState(execution.batchJob.id) {
-        logger.debug("Setting transaction committed for chunk execution ${execution.id} to true")
-        it.compute(execution.id) { _, v ->
-          val state = batchJobStateProvider.getStateForExecution(execution)
-          state.transactionCommitted = true
-          state
-        }
-        it
-      }
+    logger.debug("Setting transaction committed for chunk execution ${execution.id} to true")
+
+    // Lock-free: update single execution using atomic Redis HSET
+    val executionState = batchJobStateProvider.getStateForExecution(execution)
+    executionState.transactionCommitted = true
+    batchJobStateProvider.updateSingleExecution(
+      execution.batchJob.id,
+      execution.id,
+      executionState,
+    )
+
+    // Lock-free: read state for completion check (eventual consistency is fine)
+    val state = batchJobStateProvider.get(execution.batchJob.id)
 
     val isJobCompleted = state.all { it.value.transactionCommitted && it.value.status.completed }
     logger.debug {
