@@ -29,8 +29,17 @@ class BatchJobStateProvider(
     private val localJobStatesMap by lazy {
       ConcurrentHashMap<Long, MutableMap<Long, ExecutionState>>()
     }
+    private val localRunningCountMap by lazy {
+      ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>()
+    }
 
     private const val REDIS_STATE_KEY_PREFIX = "batch_job_state:"
+    private const val REDIS_RUNNING_COUNT_KEY_PREFIX = "batch_job_running_count:"
+    private const val REDIS_STATE_INITIALIZED_KEY_PREFIX = "batch_job_state_initialized:"
+
+    private val localInitializedJobs by lazy {
+      ConcurrentHashMap.newKeySet<Long>()
+    }
   }
 
   /**
@@ -73,26 +82,44 @@ class BatchJobStateProvider(
   }
 
   /**
-   * Ensures Redis hash is initialized from DB. Uses a short-lived lock to prevent
-   * multiple threads from initializing simultaneously.
+   * Ensures the job state is initialized from DB. O(1) check using initialization marker.
+   * Call this before using lock-free single-execution operations.
+   */
+  fun ensureInitialized(jobId: Long) {
+    if (usingRedisProvider.areWeUsingRedis) {
+      val redisHash = getRedisHashForJob(jobId)
+      ensureRedisHashInitialized(jobId, redisHash)
+    } else {
+      // For local, getLocal already handles initialization via getOrPut
+      getLocal(jobId)
+    }
+  }
+
+  /**
+   * Ensures Redis hash is initialized from DB. Uses a separate marker key for O(1) check.
+   * Uses a short-lived lock to prevent multiple threads from initializing simultaneously.
    * Uses putIfAbsent to not overwrite entries that were already updated by other threads.
    */
   private fun ensureRedisHashInitialized(
     jobId: Long,
     redisHash: RMap<Long, ExecutionState>,
   ) {
-    if (!redisHash.isEmpty()) {
+    // O(1) check using initialization marker
+    val initKey = "$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId"
+    if (redissonClient.getBucket<Boolean>(initKey).get() == true) {
       return
     }
     // Use a lock only for initialization to prevent race conditions
     lockingProvider.withLocking("batch_job_state_init_$jobId") {
       // Double-check after acquiring lock
-      if (redisHash.isEmpty()) {
+      if (redissonClient.getBucket<Boolean>(initKey).get() != true) {
         val initialState = getInitialState(jobId)
         // Use putIfAbsent to not overwrite entries updated by other threads
         initialState.forEach { (executionId, state) ->
           redisHash.putIfAbsent(executionId, state)
         }
+        // Mark as initialized
+        redissonClient.getBucket<Boolean>(initKey).set(true)
       }
     }
   }
@@ -131,6 +158,53 @@ class BatchJobStateProvider(
       return redisHash[executionId]
     }
     return localJobStatesMap[jobId]?.get(executionId)
+  }
+
+  /**
+   * Gets the running count for a job. O(1) operation using atomic counter.
+   */
+  fun getRunningCount(jobId: Long): Int {
+    if (usingRedisProvider.areWeUsingRedis) {
+      return redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").get().toInt()
+    }
+    return localRunningCountMap[jobId]?.get() ?: 0
+  }
+
+  /**
+   * Increments the running count for a job. O(1) atomic operation.
+   */
+  fun incrementRunningCount(jobId: Long) {
+    if (usingRedisProvider.areWeUsingRedis) {
+      redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").incrementAndGet()
+    } else {
+      localRunningCountMap
+        .computeIfAbsent(jobId) {
+          java.util.concurrent.atomic
+            .AtomicInteger(0)
+        }.incrementAndGet()
+    }
+  }
+
+  /**
+   * Decrements the running count for a job. O(1) atomic operation.
+   */
+  fun decrementRunningCount(jobId: Long) {
+    if (usingRedisProvider.areWeUsingRedis) {
+      redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").decrementAndGet()
+    } else {
+      localRunningCountMap[jobId]?.decrementAndGet()
+    }
+  }
+
+  /**
+   * Removes the running count for a job (cleanup).
+   */
+  private fun removeRunningCount(jobId: Long) {
+    if (usingRedisProvider.areWeUsingRedis) {
+      redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").delete()
+    } else {
+      localRunningCountMap.remove(jobId)
+    }
   }
 
   /**
@@ -220,12 +294,16 @@ class BatchJobStateProvider(
 
   fun removeJobState(jobId: Long): MutableMap<Long, ExecutionState>? {
     logger.debug("Removing job state for job $jobId")
+    removeRunningCount(jobId)
     if (usingRedisProvider.areWeUsingRedis) {
       val redisHash = getRedisHashForJob(jobId)
       val state = if (redisHash.isEmpty()) null else redisHash.readAllMap().toMutableMap()
       redisHash.delete()
+      // Also remove initialization marker
+      redissonClient.getBucket<Boolean>("$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId").delete()
       return state
     }
+    localInitializedJobs.remove(jobId)
     return localJobStatesMap.remove(jobId)
   }
 
@@ -298,6 +376,9 @@ class BatchJobStateProvider(
         val allCompleted = redisHash.readAllValues().all { state -> state.status.completed }
         if (allCompleted) {
           redisHash.delete()
+          // Also clean up related keys
+          redissonClient.getBucket<Boolean>("$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId").delete()
+          redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").delete()
         }
       }
     } else {
@@ -306,7 +387,11 @@ class BatchJobStateProvider(
           .filter {
             it.value.all { (_, state) -> state.status.completed }
           }.keys
-      localJobStatesMap.keys.removeAll(toRemove)
+      toRemove.forEach { jobId ->
+        localJobStatesMap.remove(jobId)
+        localInitializedJobs.remove(jobId)
+        localRunningCountMap.remove(jobId)
+      }
     }
   }
 

@@ -32,7 +32,7 @@ class ProgressManager(
 ) : Logging {
   /**
    * This method tries to set execution running in the state.
-   * Lock-free implementation: reads state without locking, then uses atomic single-execution update.
+   * Lock-free O(1) implementation using atomic counter and single-execution operations.
    * @param canRunFn function that returns true if execution can be run (called with current state)
    */
   fun trySetExecutionRunning(
@@ -40,21 +40,22 @@ class ProgressManager(
     batchJobId: Long,
     canRunFn: (Map<Long, ExecutionState>) -> Boolean,
   ): Boolean {
-    // Lock-free read to check concurrency limit and current state
-    val state = batchJobStateProvider.get(batchJobId)
+    // Ensure state is initialized (O(1) check after first call)
+    batchJobStateProvider.ensureInitialized(batchJobId)
 
-    // Check if caller allows running
+    // Check if caller allows running (provides state for backward compatibility)
+    val state = batchJobStateProvider.get(batchJobId)
     if (!canRunFn(state)) {
       return false
     }
 
-    // Check if execution already exists with terminal state
-    val currentState = state[executionId]
+    // O(1) check if execution already exists with terminal state
+    val currentState = batchJobStateProvider.getSingleExecution(batchJobId, executionId)
     if (currentState?.status?.completed == true) {
       return false
     }
 
-    // Lock-free set to RUNNING using atomic single-execution update
+    // O(1) set to RUNNING using atomic single-execution update
     batchJobStateProvider.updateSingleExecution(
       batchJobId,
       executionId,
@@ -66,6 +67,8 @@ class ProgressManager(
         transactionCommitted = currentState?.transactionCommitted ?: false,
       ),
     )
+    // O(1) increment running counter
+    batchJobStateProvider.incrementRunningCount(batchJobId)
     return true
   }
 
@@ -81,6 +84,7 @@ class ProgressManager(
     val currentState = batchJobStateProvider.getSingleExecution(batchJobId, executionId)
     if (currentState?.status == BatchJobChunkExecutionStatus.RUNNING) {
       batchJobStateProvider.removeSingleExecution(batchJobId, executionId)
+      batchJobStateProvider.decrementRunningCount(batchJobId)
     }
   }
 
@@ -96,6 +100,11 @@ class ProgressManager(
       execution.id,
       batchJobStateProvider.getStateForExecution(execution),
     )
+
+    // Decrement running count when execution completes
+    if (execution.status.completed) {
+      batchJobStateProvider.decrementRunningCount(job.id)
+    }
 
     // Lock-free: read state for aggregation (eventual consistency is fine for read-only)
     val state = batchJobStateProvider.get(job.id)
