@@ -26,11 +26,39 @@ if [ "$(docker ps -aq -f name=^tolgee_postgres$)" ]; then
     docker rm -f tolgee_postgres
 fi
 
-# Set number of keys (default to 10000 if not provided)
-NUM_KEYS=${1:-10000}
+# Parse command line arguments
+NUM_KEYS=10000
+NUM_INSTANCES=2
+START_PORT=""
+
+usage() {
+    echo "Usage: $0 [-k NUM_KEYS] [-n NUM_INSTANCES] [-p START_PORT]"
+    echo "  -k NUM_KEYS       Number of keys to process (default: 10000)"
+    echo "  -n NUM_INSTANCES  Number of Tolgee instances to start (default: 2)"
+    echo "  -p START_PORT     Starting port number (default: random port > 10000)"
+    exit 1
+}
+
+while getopts "k:n:p:h" opt; do
+    case $opt in
+        k) NUM_KEYS="$OPTARG" ;;
+        n) NUM_INSTANCES="$OPTARG" ;;
+        p) START_PORT="$OPTARG" ;;
+        h) usage ;;
+        *) usage ;;
+    esac
+done
+
+# Generate random start port if not specified
+if [ -z "$START_PORT" ]; then
+    START_PORT=$((RANDOM % 50000 + 10001))
+fi
+
 KEYS_FILE="$SCRIPT_DIR/${NUM_KEYS}-keys.json"
 echo "Project root detected at: $PROJECT_ROOT"
 echo "Number of keys to process: $NUM_KEYS"
+echo "Number of instances: $NUM_INSTANCES"
+echo "Starting port: $START_PORT"
 
 # 1. Build the JAR
 echo "Building the JAR..."
@@ -98,9 +126,16 @@ start_instance() {
     echo " Instance on port $port started!"
 }
 
-# 3. Start the JAR twice
-start_instance 8080
-start_instance 8081
+# 3. Start the JAR instances
+PORTS=()
+for i in $(seq 0 $((NUM_INSTANCES - 1))); do
+    PORT=$((START_PORT + i))
+    PORTS+=("$PORT")
+    start_instance "$PORT"
+done
+
+# Use the first port for API calls
+PRIMARY_PORT="${PORTS[0]}"
 
 # 4. Import the keys
 import_file() {
@@ -145,7 +180,7 @@ import_file() {
     echo "Apply response: $apply_response"
 }
 
-import_file 8080
+import_file "$PRIMARY_PORT"
 
 echo "Querying the database for key IDs starting with 'key'..."
 KEY_IDS_JSON=$(PGPASSWORD=postgres psql -h localhost -p 25432 -U postgres -d postgres -t -A -c "SELECT json_agg(id) FROM public.key WHERE name LIKE 'key%';" | tr -d '[:space:]')
@@ -154,13 +189,13 @@ if [ -z "$KEY_IDS_JSON" ] || [ "$KEY_IDS_JSON" == "null" ]; then
     echo "No keys starting with 'key' found in the database."
 else
     # Get project ID
-    PROJECT_ID=$(curl -s -X GET "http://localhost:8080/v2/projects" | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
+    PROJECT_ID=$(curl -s -X GET "http://localhost:$PRIMARY_PORT/v2/projects" | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
     
     if [ -n "$PROJECT_ID" ] && [ "$PROJECT_ID" != "null" ]; then
         KEY_COUNT=$(echo "$KEY_IDS_JSON" | jq '. | length')
         echo "Found $KEY_COUNT keys starting with 'key'."
         echo "Starting batch machine translation job for project $PROJECT_ID..."
-        BATCH_JOB_RESPONSE=$(curl -s -X POST "http://localhost:8080/v2/projects/$PROJECT_ID/start-batch-job/machine-translate" \
+        BATCH_JOB_RESPONSE=$(curl -s -X POST "http://localhost:$PRIMARY_PORT/v2/projects/$PROJECT_ID/start-batch-job/machine-translate" \
             -H "Content-Type: application/json" \
             -d "{
                 \"keyIds\": $KEY_IDS_JSON,
@@ -232,5 +267,5 @@ else
     fi
 fi
 
-echo "Both instances started, file imported and batch job initiated. Press Ctrl+C to stop."
+echo "All $NUM_INSTANCES instances started (ports: ${PORTS[*]}), file imported and batch job initiated. Press Ctrl+C to stop."
 wait
