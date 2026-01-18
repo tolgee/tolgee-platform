@@ -3,6 +3,7 @@ package io.tolgee.batch
 import io.tolgee.AbstractSpringTest
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.NoOpRequest
+import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.fixtures.RedisRunner
 import io.tolgee.model.batch.BatchJob
@@ -94,6 +95,9 @@ class BatchJobNoOpPerformanceWithRedisTest :
   @Autowired
   lateinit var operationTimer: BatchJobOperationTimer
 
+  @Autowired
+  lateinit var batchJobStateProvider: BatchJobStateProvider
+
   @BeforeEach
   fun setup() {
     batchJobChunkExecutionQueue.clear()
@@ -111,8 +115,8 @@ class BatchJobNoOpPerformanceWithRedisTest :
   }
 
   @Test
-  fun `NO_OP job with 1000 chunks - measure throughput WITH REDIS`() {
-    val chunkCount = 1000
+  fun `NO_OP job with lot of chunks - measure throughput WITH REDIS`() {
+    val chunkCount = 20000
 
     logger.info("Starting NO_OP job with $chunkCount chunks (WITH REDIS)...")
 
@@ -165,6 +169,7 @@ class BatchJobNoOpPerformanceWithRedisTest :
   ) {
     val startTime = System.currentTimeMillis()
     var lastLogTime = startTime
+    var allCompletedCount = 0
 
     while (true) {
       val currentTime = System.currentTimeMillis()
@@ -193,6 +198,18 @@ class BatchJobNoOpPerformanceWithRedisTest :
 
         logger.info("Progress: completed=$completed, running=$running, pending=$pending, queueSize=$queueSize")
         lastLogTime = currentTime
+
+        // Fail fast if all chunks completed but job didn't transition
+        if (completed == jobDto.totalChunks && running == 0 && pending == 0) {
+          allCompletedCount++
+          if (allCompletedCount >= 2) {
+            throw AssertionError(
+              "All ${jobDto.totalChunks} chunks completed but job status is still ${jobDto.status}. " +
+                "Counter values - completedChunks: ${batchJobStateProvider.getCompletedChunksCount(job.id)}, " +
+                "committedCount: ${batchJobStateProvider.getCommittedCount(job.id)}",
+            )
+          }
+        }
       }
 
       Thread.sleep(100)

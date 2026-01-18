@@ -29,14 +29,6 @@ class BatchJobTimingAspect(
     }
   }
 
-  // Measure BatchJobStateProvider.updateState (distributed lock + state update)
-  @Around("execution(* io.tolgee.batch.state.BatchJobStateProvider.updateState(..))")
-  fun measureStateUpdate(joinPoint: ProceedingJoinPoint): Any? {
-    return timer.measure("STATE_UPDATE") {
-      joinPoint.proceed()
-    }
-  }
-
   // Measure BatchJobStateProvider.get (state retrieval)
   @Around("execution(* io.tolgee.batch.state.BatchJobStateProvider.get(..))")
   fun measureStateGet(joinPoint: ProceedingJoinPoint): Any? {

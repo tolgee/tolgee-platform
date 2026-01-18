@@ -32,29 +32,34 @@ class BatchJobStateProvider(
     private val localRunningCountMap by lazy {
       ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>()
     }
+    private val localCompletedChunksCountMap by lazy {
+      ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>()
+    }
+    private val localProgressCountMap by lazy {
+      ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicLong>()
+    }
+    private val localFailedCountMap by lazy {
+      ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>()
+    }
+    private val localCancelledCountMap by lazy {
+      ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>()
+    }
+    private val localCommittedCountMap by lazy {
+      ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>()
+    }
 
     private const val REDIS_STATE_KEY_PREFIX = "batch_job_state:"
     private const val REDIS_RUNNING_COUNT_KEY_PREFIX = "batch_job_running_count:"
     private const val REDIS_STATE_INITIALIZED_KEY_PREFIX = "batch_job_state_initialized:"
+    private const val REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX = "batch_job_completed_chunks:"
+    private const val REDIS_PROGRESS_COUNT_KEY_PREFIX = "batch_job_progress:"
+    private const val REDIS_FAILED_COUNT_KEY_PREFIX = "batch_job_failed:"
+    private const val REDIS_CANCELLED_COUNT_KEY_PREFIX = "batch_job_cancelled:"
+    private const val REDIS_COMMITTED_COUNT_KEY_PREFIX = "batch_job_committed:"
 
     private val localInitializedJobs by lazy {
       ConcurrentHashMap.newKeySet<Long>()
     }
-  }
-
-  /**
-   * Updates the state for a job with distributed locking.
-   * Use this when you need atomic read-check-write across multiple entries
-   * (e.g., checking running count before starting a new execution).
-   */
-  fun <T> updateState(
-    jobId: Long,
-    block: (MutableMap<Long, ExecutionState>) -> T,
-  ): T {
-    if (usingRedisProvider.areWeUsingRedis) {
-      return updateStateRedis(jobId, block)
-    }
-    return updateStateLocal(jobId, block)
   }
 
   /**
@@ -96,17 +101,24 @@ class BatchJobStateProvider(
   }
 
   /**
-   * Ensures Redis hash is initialized from DB. Uses a separate marker key for O(1) check.
+   * Ensures Redis hash is initialized from DB. Uses local in-memory cache first for O(1) check,
+   * then falls back to Redis marker for cross-instance coordination.
    * Uses a short-lived lock to prevent multiple threads from initializing simultaneously.
    * Uses putIfAbsent to not overwrite entries that were already updated by other threads.
+   * Also initializes all counters from the initial state.
    */
   private fun ensureRedisHashInitialized(
     jobId: Long,
     redisHash: RMap<Long, ExecutionState>,
   ) {
-    // O(1) check using initialization marker
+    // Fast path: check local in-memory cache first (no Redis call)
+    if (localInitializedJobs.contains(jobId)) {
+      return
+    }
+    // Check Redis marker for cross-instance coordination
     val initKey = "$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId"
     if (redissonClient.getBucket<Boolean>(initKey).get() == true) {
+      localInitializedJobs.add(jobId)
       return
     }
     // Use a lock only for initialization to prevent race conditions
@@ -118,9 +130,66 @@ class BatchJobStateProvider(
         initialState.forEach { (executionId, state) ->
           redisHash.putIfAbsent(executionId, state)
         }
-        // Mark as initialized
+        // Initialize counters from the initial state
+        initializeCountersFromState(jobId, initialState)
+        // Mark as initialized in Redis
         redissonClient.getBucket<Boolean>(initKey).set(true)
       }
+      // Mark as initialized in local cache
+      localInitializedJobs.add(jobId)
+    }
+  }
+
+  /**
+   * Initializes all counters from the given state map.
+   * Called during initialization to ensure counters match the DB state.
+   */
+  private fun initializeCountersFromState(
+    jobId: Long,
+    state: Map<Long, ExecutionState>,
+  ) {
+    var runningCount = 0
+    var completedChunksCount = 0
+    var progressCount = 0L
+    var failedCount = 0
+    var cancelledCount = 0
+    var committedCount = 0
+
+    state.values.forEach { executionState ->
+      if (executionState.status == io.tolgee.model.batch.BatchJobChunkExecutionStatus.RUNNING) {
+        runningCount++
+      }
+      if (executionState.status.completed && executionState.retry != true) {
+        completedChunksCount++
+      }
+      progressCount += executionState.successTargets.size
+      if (executionState.status == io.tolgee.model.batch.BatchJobChunkExecutionStatus.FAILED &&
+        executionState.retry != true
+      ) {
+        failedCount++
+      }
+      if (executionState.status == io.tolgee.model.batch.BatchJobChunkExecutionStatus.CANCELLED) {
+        cancelledCount++
+      }
+      if (executionState.transactionCommitted) {
+        committedCount++
+      }
+    }
+
+    if (usingRedisProvider.areWeUsingRedis) {
+      redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").set(runningCount.toLong())
+      redissonClient.getAtomicLong("$REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX$jobId").set(completedChunksCount.toLong())
+      redissonClient.getAtomicLong("$REDIS_PROGRESS_COUNT_KEY_PREFIX$jobId").set(progressCount)
+      redissonClient.getAtomicLong("$REDIS_FAILED_COUNT_KEY_PREFIX$jobId").set(failedCount.toLong())
+      redissonClient.getAtomicLong("$REDIS_CANCELLED_COUNT_KEY_PREFIX$jobId").set(cancelledCount.toLong())
+      redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId").set(committedCount.toLong())
+    } else {
+      localRunningCountMap[jobId] = java.util.concurrent.atomic.AtomicInteger(runningCount)
+      localCompletedChunksCountMap[jobId] = java.util.concurrent.atomic.AtomicInteger(completedChunksCount)
+      localProgressCountMap[jobId] = java.util.concurrent.atomic.AtomicLong(progressCount)
+      localFailedCountMap[jobId] = java.util.concurrent.atomic.AtomicInteger(failedCount)
+      localCancelledCountMap[jobId] = java.util.concurrent.atomic.AtomicInteger(cancelledCount)
+      localCommittedCountMap[jobId] = java.util.concurrent.atomic.AtomicInteger(committedCount)
     }
   }
 
@@ -196,14 +265,131 @@ class BatchJobStateProvider(
     }
   }
 
-  /**
-   * Removes the running count for a job (cleanup).
-   */
-  private fun removeRunningCount(jobId: Long) {
+  // ===== Completed Chunks Counter =====
+
+  fun getCompletedChunksCount(jobId: Long): Int {
+    if (usingRedisProvider.areWeUsingRedis) {
+      return redissonClient.getAtomicLong("$REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX$jobId").get().toInt()
+    }
+    return localCompletedChunksCountMap[jobId]?.get() ?: 0
+  }
+
+  fun incrementCompletedChunksCount(jobId: Long) {
+    if (usingRedisProvider.areWeUsingRedis) {
+      redissonClient.getAtomicLong("$REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX$jobId").incrementAndGet()
+    } else {
+      localCompletedChunksCountMap
+        .computeIfAbsent(jobId) {
+          java.util.concurrent.atomic
+            .AtomicInteger(0)
+        }.incrementAndGet()
+    }
+  }
+
+  // ===== Progress Counter =====
+
+  fun getProgressCount(jobId: Long): Long {
+    if (usingRedisProvider.areWeUsingRedis) {
+      return redissonClient.getAtomicLong("$REDIS_PROGRESS_COUNT_KEY_PREFIX$jobId").get()
+    }
+    return localProgressCountMap[jobId]?.get() ?: 0L
+  }
+
+  fun addProgressCount(
+    jobId: Long,
+    delta: Long,
+  ) {
+    if (usingRedisProvider.areWeUsingRedis) {
+      redissonClient.getAtomicLong("$REDIS_PROGRESS_COUNT_KEY_PREFIX$jobId").addAndGet(delta)
+    } else {
+      localProgressCountMap
+        .computeIfAbsent(jobId) {
+          java.util.concurrent.atomic
+            .AtomicLong(0)
+        }.addAndGet(delta)
+    }
+  }
+
+  // ===== Failed Counter =====
+
+  fun getFailedCount(jobId: Long): Int {
+    if (usingRedisProvider.areWeUsingRedis) {
+      return redissonClient.getAtomicLong("$REDIS_FAILED_COUNT_KEY_PREFIX$jobId").get().toInt()
+    }
+    return localFailedCountMap[jobId]?.get() ?: 0
+  }
+
+  fun incrementFailedCount(jobId: Long) {
+    if (usingRedisProvider.areWeUsingRedis) {
+      redissonClient.getAtomicLong("$REDIS_FAILED_COUNT_KEY_PREFIX$jobId").incrementAndGet()
+    } else {
+      localFailedCountMap
+        .computeIfAbsent(jobId) {
+          java.util.concurrent.atomic
+            .AtomicInteger(0)
+        }.incrementAndGet()
+    }
+  }
+
+  // ===== Cancelled Counter =====
+
+  fun getCancelledCount(jobId: Long): Int {
+    if (usingRedisProvider.areWeUsingRedis) {
+      return redissonClient.getAtomicLong("$REDIS_CANCELLED_COUNT_KEY_PREFIX$jobId").get().toInt()
+    }
+    return localCancelledCountMap[jobId]?.get() ?: 0
+  }
+
+  fun incrementCancelledCount(jobId: Long) {
+    if (usingRedisProvider.areWeUsingRedis) {
+      redissonClient.getAtomicLong("$REDIS_CANCELLED_COUNT_KEY_PREFIX$jobId").incrementAndGet()
+    } else {
+      localCancelledCountMap
+        .computeIfAbsent(jobId) {
+          java.util.concurrent.atomic
+            .AtomicInteger(0)
+        }.incrementAndGet()
+    }
+  }
+
+  // ===== Committed Counter =====
+
+  fun getCommittedCount(jobId: Long): Int {
+    if (usingRedisProvider.areWeUsingRedis) {
+      return redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId").get().toInt()
+    }
+    return localCommittedCountMap[jobId]?.get() ?: 0
+  }
+
+  fun incrementCommittedCount(jobId: Long) {
+    if (usingRedisProvider.areWeUsingRedis) {
+      redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId").incrementAndGet()
+    } else {
+      localCommittedCountMap
+        .computeIfAbsent(jobId) {
+          java.util.concurrent.atomic
+            .AtomicInteger(0)
+        }.incrementAndGet()
+    }
+  }
+
+  // ===== Cleanup all counters =====
+
+  private fun removeAllCounters(jobId: Long) {
     if (usingRedisProvider.areWeUsingRedis) {
       redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").delete()
+      redissonClient.getAtomicLong("$REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX$jobId").delete()
+      redissonClient.getAtomicLong("$REDIS_PROGRESS_COUNT_KEY_PREFIX$jobId").delete()
+      redissonClient.getAtomicLong("$REDIS_FAILED_COUNT_KEY_PREFIX$jobId").delete()
+      redissonClient.getAtomicLong("$REDIS_CANCELLED_COUNT_KEY_PREFIX$jobId").delete()
+      redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId").delete()
     } else {
       localRunningCountMap.remove(jobId)
+      localCompletedChunksCountMap.remove(jobId)
+      localProgressCountMap.remove(jobId)
+      localFailedCountMap.remove(jobId)
+      localCancelledCountMap.remove(jobId)
+      localCommittedCountMap.remove(jobId)
     }
   }
 
@@ -294,7 +480,7 @@ class BatchJobStateProvider(
 
   fun removeJobState(jobId: Long): MutableMap<Long, ExecutionState>? {
     logger.debug("Removing job state for job $jobId")
-    removeRunningCount(jobId)
+    removeAllCounters(jobId)
     if (usingRedisProvider.areWeUsingRedis) {
       val redisHash = getRedisHashForJob(jobId)
       val state = if (redisHash.isEmpty()) null else redisHash.readAllMap().toMutableMap()
@@ -315,8 +501,19 @@ class BatchJobStateProvider(
   }
 
   private fun getLocal(jobId: Long): MutableMap<Long, ExecutionState> {
-    return localJobStatesMap.getOrPut(jobId) {
-      getInitialState(jobId)
+    val existing = localJobStatesMap[jobId]
+    if (existing != null) {
+      return existing
+    }
+    // Need to initialize - use synchronized to prevent double initialization
+    synchronized(localInitializedJobs) {
+      // Double-check after acquiring lock
+      localJobStatesMap[jobId]?.let { return it }
+      val initialState = getInitialState(jobId)
+      localJobStatesMap[jobId] = initialState
+      initializeCountersFromState(jobId, initialState)
+      localInitializedJobs.add(jobId)
+      return initialState
     }
   }
 
@@ -357,13 +554,18 @@ class BatchJobStateProvider(
             it.status,
             it.chunkNumber,
             it.retry,
-            true,
+            // Only mark as transactionCommitted if the execution is actually completed
+            // PENDING/RUNNING executions haven't committed yet
+            it.status.completed,
           )
       }.toMutableMap()
   }
 
   /**
    * If the state of all execution completed, it's highly probable it is not needed anymore, so we can clean it up.
+   * NOTE: This method does NOT remove counters - counters are only removed in removeJobState when the job
+   * is properly finalized. This prevents race conditions where counters are removed before the job status
+   * is updated based on those counters.
    */
   @Scheduled(fixedRate = 10000)
   fun clearUnusedStates() {
@@ -376,9 +578,9 @@ class BatchJobStateProvider(
         val allCompleted = redisHash.readAllValues().all { state -> state.status.completed }
         if (allCompleted) {
           redisHash.delete()
-          // Also clean up related keys
           redissonClient.getBucket<Boolean>("$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId").delete()
-          redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").delete()
+          // Do NOT remove counters here - they're needed until job status is properly updated
+          // Counters will be removed in removeJobState when job is finalized
         }
       }
     } else {
@@ -390,7 +592,8 @@ class BatchJobStateProvider(
       toRemove.forEach { jobId ->
         localJobStatesMap.remove(jobId)
         localInitializedJobs.remove(jobId)
-        localRunningCountMap.remove(jobId)
+        // Do NOT remove counters here - they're needed until job status is properly updated
+        // Counters will be removed in removeJobState when job is finalized
       }
     }
   }

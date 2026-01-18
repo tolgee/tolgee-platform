@@ -185,7 +185,7 @@ class BatchJobActionService(
         execution
       }
     executeInNewTransaction(transactionManager) {
-      progressManager.handleProgress(execution, failOnly = true)
+      progressManager.handleProgress(execution)
     }
     progressManager.handleChunkCompletedCommitted(execution)
   }

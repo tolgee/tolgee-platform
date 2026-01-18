@@ -191,7 +191,7 @@ class BatchJobTestUtil(
   fun makeProgressManagerFail() {
     doThrow(RuntimeException("test"))
       .whenever(progressManager)
-      .handleProgress(argThat { this.status != BatchJobChunkExecutionStatus.FAILED }, any())
+      .handleProgress(argThat { this.status != BatchJobChunkExecutionStatus.FAILED })
   }
 
   fun waitForRetryExecutionCreated(afterMs: Int) {
