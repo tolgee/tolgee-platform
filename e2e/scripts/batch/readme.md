@@ -23,22 +23,23 @@ This test is run **without any translation provider configured**. As a result, n
 #### Usage:
 Run from the project root:
 ```bash
-./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh [-k NUM_KEYS] [-n NUM_INSTANCES] [-p START_PORT]
+./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh [-k NUM_KEYS] [-n NUM_INSTANCES] [-p START_PORT] [-c POSTGRES_CONTAINER]
 ```
 
 Options:
 - `-k NUM_KEYS` - Number of keys to process (default: 10000)
 - `-n NUM_INSTANCES` - Number of Tolgee instances to start (default: 2)
-- `-p START_PORT` - Starting port number (default: random port > 10000)
+- `-p START_PORT` - Starting port number (default: 10020)
+- `-c POSTGRES_CONTAINER` - PostgreSQL container name (default: tolgee-batch-jobs-perf-test-postgres)
 
 Examples:
 ```bash
-# Default: 2 instances on random ports, 10000 keys
+# Default: 2 instances on ports 10020-10021, 10000 keys
 ./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh
 
 # 3 instances starting at port 9000 with 1000 keys
 ./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh -n 3 -p 9000 -k 1000
 
-# 5 instances with random starting port
+# 5 instances on ports 10020-10024
 ./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh -n 5
 ```

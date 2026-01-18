@@ -18,40 +18,43 @@ if ! command -v jq &> /dev/null; then
     exit 1
 fi
 
-# Check for existing tolgee_postgres container
-if [ "$(docker ps -aq -f name=^tolgee_postgres$)" ]; then
-    echo "Existing docker container 'tolgee_postgres' found."
-    read -p "It will be deleted. Press Enter to continue or Ctrl+C to cancel..."
-    echo "Removing 'tolgee_postgres' container..."
-    docker rm -f tolgee_postgres
-fi
-
 # Parse command line arguments
 NUM_KEYS=10000
 NUM_INSTANCES=2
 START_PORT=""
+POSTGRES_CONTAINER="tolgee-batch-jobs-perf-test-postgres"
 
 usage() {
-    echo "Usage: $0 [-k NUM_KEYS] [-n NUM_INSTANCES] [-p START_PORT]"
-    echo "  -k NUM_KEYS       Number of keys to process (default: 10000)"
-    echo "  -n NUM_INSTANCES  Number of Tolgee instances to start (default: 2)"
-    echo "  -p START_PORT     Starting port number (default: random port > 10000)"
+    echo "Usage: $0 [-k NUM_KEYS] [-n NUM_INSTANCES] [-p START_PORT] [-c POSTGRES_CONTAINER]"
+    echo "  -k NUM_KEYS            Number of keys to process (default: 10000)"
+    echo "  -n NUM_INSTANCES       Number of Tolgee instances to start (default: 2)"
+    echo "  -p START_PORT          Starting port number (default: 10020)"
+    echo "  -c POSTGRES_CONTAINER  PostgreSQL container name (default: tolgee-batch-jobs-perf-test-postgres)"
     exit 1
 }
 
-while getopts "k:n:p:h" opt; do
+while getopts "k:n:p:c:h" opt; do
     case $opt in
         k) NUM_KEYS="$OPTARG" ;;
         n) NUM_INSTANCES="$OPTARG" ;;
         p) START_PORT="$OPTARG" ;;
+        c) POSTGRES_CONTAINER="$OPTARG" ;;
         h) usage ;;
         *) usage ;;
     esac
 done
 
-# Generate random start port if not specified
+# Use default start port if not specified
 if [ -z "$START_PORT" ]; then
-    START_PORT=$((RANDOM % 50000 + 10001))
+    START_PORT=10020
+fi
+
+# Check for existing postgres container
+if [ "$(docker ps -aq -f name=^${POSTGRES_CONTAINER}$)" ]; then
+    echo "Existing docker container '$POSTGRES_CONTAINER' found."
+    read -p "It will be deleted. Press Enter to continue or Ctrl+C to cancel..."
+    echo "Removing '$POSTGRES_CONTAINER' container..."
+    docker rm -f "$POSTGRES_CONTAINER"
 fi
 
 KEYS_FILE="$SCRIPT_DIR/${NUM_KEYS}-keys.json"
@@ -106,7 +109,11 @@ start_instance() {
       --server.port=$port \
       --spring.data.redis.host=localhost \
       --spring.data.redis.port=6379 \
-      --tolgee.cache.use-redis=true > "$log_file" 2>&1 &
+      --tolgee.cache.use-redis=true \
+      --tolgee.billing.enabled=false \
+      --tolgee.postgres-autostart.container-name="$POSTGRES_CONTAINER" \
+      > "$log_file" 2>&1 &
+
     
     local pid=$!
     PIDS+=("$pid")
@@ -137,10 +144,11 @@ done
 # Use the first port for API calls
 PRIMARY_PORT="${PORTS[0]}"
 
-# 4. Import the keys
+# 4. Import the keys using single-step import
 import_file() {
     local port=$1
     local file_path="$KEYS_FILE"
+    local file_name=$(basename "$file_path")
 
     if [ ! -f "$file_path" ]; then
         echo "File $file_path not found! Generating it using jq..."
@@ -159,25 +167,13 @@ import_file() {
 
     echo "Using Project ID: $project_id"
 
-    # Perform import
-    echo "Adding files to import..."
-    local add_files_response=$(curl -s -X POST "http://localhost:$port/v2/projects/$project_id/import" \
-        -F "files=@$file_path")
-    
-    echo "Add files response: $add_files_response"
+    # Perform single-step import
+    echo "Performing single-step import..."
+    local import_response=$(curl -s -X POST "http://localhost:$port/v2/projects/$project_id/single-step-import" \
+        -F "files=@$file_path" \
+        -F "params={\"forceMode\":\"OVERRIDE\",\"fileMappings\":[{\"fileName\":\"$file_name\",\"languageTag\":\"en\"}]};type=application/json")
 
-    # Extract importLanguageId
-    local import_language_id=$(echo "$add_files_response" | jq -r '.result._embedded.languages[0].id')
-    echo "Extracted Import Language ID: $import_language_id"
-
-    echo "Selecting existing language..."
-    local select_response=$(curl -s -X PUT "http://localhost:$port/v2/projects/$project_id/import/result/languages/$import_language_id/select-existing/1000000001")
-    echo "Select existing response: $select_response"
-
-    echo "Applying import..."
-    local apply_response=$(curl -s -X PUT "http://localhost:$port/v2/projects/$project_id/import/apply?forceMode=OVERRIDE")
-
-    echo "Apply response: $apply_response"
+    echo "Import response: $import_response"
 }
 
 import_file "$PRIMARY_PORT"
@@ -186,86 +182,89 @@ echo "Querying the database for key IDs starting with 'key'..."
 KEY_IDS_JSON=$(PGPASSWORD=postgres psql -h localhost -p 25432 -U postgres -d postgres -t -A -c "SELECT json_agg(id) FROM public.key WHERE name LIKE 'key%';" | tr -d '[:space:]')
 
 if [ -z "$KEY_IDS_JSON" ] || [ "$KEY_IDS_JSON" == "null" ]; then
-    echo "No keys starting with 'key' found in the database."
-else
-    # Get project ID
-    PROJECT_ID=$(curl -s -X GET "http://localhost:$PRIMARY_PORT/v2/projects" | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
-    
-    if [ -n "$PROJECT_ID" ] && [ "$PROJECT_ID" != "null" ]; then
-        KEY_COUNT=$(echo "$KEY_IDS_JSON" | jq '. | length')
-        echo "Found $KEY_COUNT keys starting with 'key'."
-        echo "Starting batch machine translation job for project $PROJECT_ID..."
-        BATCH_JOB_RESPONSE=$(curl -s -X POST "http://localhost:$PRIMARY_PORT/v2/projects/$PROJECT_ID/start-batch-job/machine-translate" \
-            -H "Content-Type: application/json" \
-            -d "{
-                \"keyIds\": $KEY_IDS_JSON,
-                \"targetLanguageIds\": [1000000002]
-            }")
-        echo "Batch job response: $BATCH_JOB_RESPONSE"
-
-        BATCH_JOB_ID=$(echo "$BATCH_JOB_RESPONSE" | jq -r '.id')
-
-        if [ -n "$BATCH_JOB_ID" ] && [ "$BATCH_JOB_ID" != "null" ]; then
-            echo "Monitoring batch job $BATCH_JOB_ID..."
-            while true; do
-                JOB_STATUS_DATA=$(PGPASSWORD=postgres psql -h localhost -p 25432 -U postgres -d postgres -t -A -F '|' -c "SELECT status, created_at, updated_at FROM public.tolgee_batch_job WHERE id = $BATCH_JOB_ID;")
-                
-                # Format: STATUS|CREATED_AT|UPDATED_AT
-                STATUS=$(echo "$JOB_STATUS_DATA" | cut -d'|' -f1)
-                CREATED_AT=$(echo "$JOB_STATUS_DATA" | cut -d'|' -f2)
-                UPDATED_AT=$(echo "$JOB_STATUS_DATA" | cut -d'|' -f3)
-
-                # Get chunk execution stats
-                CHUNK_STATS=$(PGPASSWORD=postgres psql -h localhost -p 25432 -U postgres -d postgres -t -A -F ':' -c "SELECT status, count(*) FROM public.tolgee_batch_job_chunk_execution WHERE batch_job_id = $BATCH_JOB_ID GROUP BY status order by status;")
-                
-                # Format chunk stats for output
-                STATS_STRING=""
-                if [ -n "$CHUNK_STATS" ]; then
-                    while IFS=: read -r c_status count; do
-                        STATS_STRING+="$c_status: $count, "
-                    done <<< "$CHUNK_STATS"
-                    STATS_STRING=" (${STATS_STRING%, })"
-                fi
-
-                echo "Current status: $STATUS$STATS_STRING"
-
-                if [ "$STATUS" == "SUCCESS" ]; then
-                    echo "Batch job finished successfully!"
-                    
-                    # Calculate duration
-                    # PostgreSQL timestamps are like 2026-01-16 21:33:53.123
-                    # We use date command to convert them to seconds since epoch
-                    # Note: MacOS 'date' command is different from Linux 'date'
-                    if [[ "$OSTYPE" == "darwin"* ]]; then
-                        # MacOS version
-                        START_SEC=$(date -j -f "%Y-%m-%d %H:%M:%S" "$(echo $CREATED_AT | cut -d. -f1)" "+%s")
-                        END_SEC=$(date -j -f "%Y-%m-%d %H:%M:%S" "$(echo $UPDATED_AT | cut -d. -f1)" "+%s")
-                    else
-                        # Linux version
-                        START_SEC=$(date -d "$CREATED_AT" "+%s")
-                        END_SEC=$(date -d "$UPDATED_AT" "+%s")
-                    fi
-                    
-                    DURATION=$((END_SEC - START_SEC))
-                    MIN=$((DURATION / 60))
-                    SEC=$((DURATION % 60))
-                    
-                    echo "Execution time: ${MIN}m ${SEC}s"
-                    break
-                elif [ "$STATUS" == "FAILED" ] || [ "$STATUS" == "CANCELLED" ]; then
-                    echo "Batch job failed or was cancelled with status: $STATUS"
-                    exit 1
-                fi
-                
-                sleep 5
-            done
-        else
-            echo "Failed to get batch job ID from response."
-        fi
-    else
-        echo "Could not find project ID for batch job."
-    fi
+    echo "Error: No keys starting with 'key' found in the database. Import may have failed."
+    exit 1
 fi
+
+# Get project ID
+PROJECT_ID=$(curl -s -X GET "http://localhost:$PRIMARY_PORT/v2/projects" | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
+
+if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" == "null" ]; then
+    echo "Error: Could not find project ID for batch job."
+    exit 1
+fi
+
+KEY_COUNT=$(echo "$KEY_IDS_JSON" | jq '. | length')
+echo "Found $KEY_COUNT keys starting with 'key'."
+echo "Starting batch machine translation job for project $PROJECT_ID..."
+BATCH_JOB_RESPONSE=$(curl -s -X POST "http://localhost:$PRIMARY_PORT/v2/projects/$PROJECT_ID/start-batch-job/machine-translate" \
+    -H "Content-Type: application/json" \
+    -d "{
+        \"keyIds\": $KEY_IDS_JSON,
+        \"targetLanguageIds\": [1000000002]
+    }")
+echo "Batch job response: $BATCH_JOB_RESPONSE"
+
+BATCH_JOB_ID=$(echo "$BATCH_JOB_RESPONSE" | jq -r '.id')
+
+if [ -z "$BATCH_JOB_ID" ] || [ "$BATCH_JOB_ID" == "null" ]; then
+    echo "Error: Failed to get batch job ID from response."
+    exit 1
+fi
+
+echo "Monitoring batch job $BATCH_JOB_ID..."
+while true; do
+    JOB_STATUS_DATA=$(PGPASSWORD=postgres psql -h localhost -p 25432 -U postgres -d postgres -t -A -F '|' -c "SELECT status, created_at, updated_at FROM public.tolgee_batch_job WHERE id = $BATCH_JOB_ID;")
+
+    # Format: STATUS|CREATED_AT|UPDATED_AT
+    STATUS=$(echo "$JOB_STATUS_DATA" | cut -d'|' -f1)
+    CREATED_AT=$(echo "$JOB_STATUS_DATA" | cut -d'|' -f2)
+    UPDATED_AT=$(echo "$JOB_STATUS_DATA" | cut -d'|' -f3)
+
+    # Get chunk execution stats
+    CHUNK_STATS=$(PGPASSWORD=postgres psql -h localhost -p 25432 -U postgres -d postgres -t -A -F ':' -c "SELECT status, count(*) FROM public.tolgee_batch_job_chunk_execution WHERE batch_job_id = $BATCH_JOB_ID GROUP BY status order by status;")
+
+    # Format chunk stats for output
+    STATS_STRING=""
+    if [ -n "$CHUNK_STATS" ]; then
+        while IFS=: read -r c_status count; do
+            STATS_STRING+="$c_status: $count, "
+        done <<< "$CHUNK_STATS"
+        STATS_STRING=" (${STATS_STRING%, })"
+    fi
+
+    echo "Current status: $STATUS$STATS_STRING"
+
+    if [ "$STATUS" == "SUCCESS" ]; then
+        echo "Batch job finished successfully!"
+
+        # Calculate duration
+        # PostgreSQL timestamps are like 2026-01-16 21:33:53.123
+        # We use date command to convert them to seconds since epoch
+        # Note: MacOS 'date' command is different from Linux 'date'
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # MacOS version
+            START_SEC=$(date -j -f "%Y-%m-%d %H:%M:%S" "$(echo $CREATED_AT | cut -d. -f1)" "+%s")
+            END_SEC=$(date -j -f "%Y-%m-%d %H:%M:%S" "$(echo $UPDATED_AT | cut -d. -f1)" "+%s")
+        else
+            # Linux version
+            START_SEC=$(date -d "$CREATED_AT" "+%s")
+            END_SEC=$(date -d "$UPDATED_AT" "+%s")
+        fi
+
+        DURATION=$((END_SEC - START_SEC))
+        MIN=$((DURATION / 60))
+        SEC=$((DURATION % 60))
+
+        echo "Execution time: ${MIN}m ${SEC}s"
+        break
+    elif [ "$STATUS" == "FAILED" ] || [ "$STATUS" == "CANCELLED" ]; then
+        echo "Batch job failed or was cancelled with status: $STATUS"
+        exit 1
+    fi
+
+    sleep 5
+done
 
 echo "All $NUM_INSTANCES instances started (ports: ${PORTS[*]}), file imported and batch job initiated. Press Ctrl+C to stop."
 wait
