@@ -16,8 +16,6 @@ import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import io.tolgee.util.trace
 import jakarta.persistence.EntityManager
-import org.hibernate.LockMode
-import org.hibernate.LockOptions
 import org.hibernate.Session
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Lazy
@@ -77,16 +75,6 @@ class BatchJobChunkExecutionQueue(
           BatchJobChunkExecutionDto::class.java,
         ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
         .setParameter("runningStatus", BatchJobStatus.RUNNING)
-        // setLockMode here is per alias of the tables from the queryString.
-        // will generate: "select ... for no key update of bjce skip locked"
-        .setLockMode("bjce", LockMode.PESSIMISTIC_WRITE) // block selected rows from the chunk table
-        .setLockMode("bk", LockMode.NONE) // don't block job table, so that other pods could select smth too
-        .setHint(
-          "jakarta.persistence.lock.timeout",
-          LockOptions.SKIP_LOCKED,
-        )
-        // Limit to get pending batches faster
-        .setMaxResults(batchProperties.chunkQueuePopulationSize)
         .resultList
 
     if (data.size > 0) {
