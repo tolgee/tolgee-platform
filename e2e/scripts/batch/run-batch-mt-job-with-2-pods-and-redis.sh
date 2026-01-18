@@ -23,22 +23,31 @@ NUM_KEYS=10000
 NUM_INSTANCES=2
 START_PORT=""
 POSTGRES_CONTAINER="tolgee-batch-jobs-perf-test-postgres"
+REDIS_CONTAINER="tolgee-batch-jobs-perf-test-redis"
+POSTGRES_PORT=25433
+REDIS_PORT=6380
 
 usage() {
-    echo "Usage: $0 [-k NUM_KEYS] [-n NUM_INSTANCES] [-p START_PORT] [-c POSTGRES_CONTAINER]"
-    echo "  -k NUM_KEYS            Number of keys to process (default: 10000)"
+    echo "Usage: $0 [-k NUM_ITEMS] [-n NUM_INSTANCES] [-p START_PORT] [-c POSTGRES_CONTAINER] [-r REDIS_CONTAINER] [-P POSTGRES_PORT] [-R REDIS_PORT]"
+    echo "  -k NUM_ITEMS           Number of items to process (default: 10000)"
     echo "  -n NUM_INSTANCES       Number of Tolgee instances to start (default: 2)"
     echo "  -p START_PORT          Starting port number (default: 10020)"
     echo "  -c POSTGRES_CONTAINER  PostgreSQL container name (default: tolgee-batch-jobs-perf-test-postgres)"
+    echo "  -r REDIS_CONTAINER     Redis container name (default: tolgee-batch-jobs-perf-test-redis)"
+    echo "  -P POSTGRES_PORT       PostgreSQL port (default: 25433)"
+    echo "  -R REDIS_PORT          Redis port (default: 6380)"
     exit 1
 }
 
-while getopts "k:n:p:c:h" opt; do
+while getopts "k:n:p:c:r:P:R:h" opt; do
     case $opt in
         k) NUM_KEYS="$OPTARG" ;;
         n) NUM_INSTANCES="$OPTARG" ;;
         p) START_PORT="$OPTARG" ;;
         c) POSTGRES_CONTAINER="$OPTARG" ;;
+        r) REDIS_CONTAINER="$OPTARG" ;;
+        P) POSTGRES_PORT="$OPTARG" ;;
+        R) REDIS_PORT="$OPTARG" ;;
         h) usage ;;
         *) usage ;;
     esac
@@ -49,19 +58,24 @@ if [ -z "$START_PORT" ]; then
     START_PORT=10020
 fi
 
-# Check for existing postgres container
+# Remove existing containers if they exist
+if [ "$(docker ps -aq -f name=^${REDIS_CONTAINER}$)" ]; then
+    echo "Removing existing Redis container '$REDIS_CONTAINER'..."
+    docker rm -f "$REDIS_CONTAINER"
+fi
+
 if [ "$(docker ps -aq -f name=^${POSTGRES_CONTAINER}$)" ]; then
     echo "Existing docker container '$POSTGRES_CONTAINER' found."
-    read -p "It will be deleted. Press Enter to continue or Ctrl+C to cancel..."
     echo "Removing '$POSTGRES_CONTAINER' container..."
     docker rm -f "$POSTGRES_CONTAINER"
 fi
 
-KEYS_FILE="$SCRIPT_DIR/${NUM_KEYS}-keys.json"
 echo "Project root detected at: $PROJECT_ROOT"
-echo "Number of keys to process: $NUM_KEYS"
+echo "Number of items to process: $NUM_KEYS"
 echo "Number of instances: $NUM_INSTANCES"
 echo "Starting port: $START_PORT"
+echo "PostgreSQL port: $POSTGRES_PORT"
+echo "Redis port: $REDIS_PORT"
 
 # 1. Build the JAR
 echo "Building the JAR..."
@@ -84,125 +98,130 @@ fi
 
 echo "Found JAR: $JAR_FILE"
 
-# 2. Start Redis via Docker
-echo "Starting Redis..."
-docker run --name tolgee-test-redis -p 6379:6379 -d --rm redis:alpine
+# 2. Start PostgreSQL via Docker
+echo "Starting PostgreSQL on port $POSTGRES_PORT..."
+docker run --name "$POSTGRES_CONTAINER" \
+    -e POSTGRES_PASSWORD=postgres \
+    -e POSTGRES_USER=postgres \
+    -e POSTGRES_DB=postgres \
+    -p "$POSTGRES_PORT:5432" \
+    -d --rm postgres:17-alpine
 
-# Function to stop Redis and background processes on exit
+# Wait for PostgreSQL to be ready
+echo "Waiting for PostgreSQL to be ready..."
+MAX_PG_RETRIES=30
+PG_COUNT=0
+while ! PGPASSWORD=postgres psql -h localhost -p "$POSTGRES_PORT" -U postgres -c "SELECT 1" &>/dev/null; do
+    if [ $PG_COUNT -ge $MAX_PG_RETRIES ]; then
+        echo "Timeout waiting for PostgreSQL to start."
+        exit 1
+    fi
+    sleep 1
+    PG_COUNT=$((PG_COUNT + 1))
+    echo -n "."
+done
+echo " PostgreSQL is ready!"
+
+# 3. Start Redis via Docker
+echo "Starting Redis on port $REDIS_PORT..."
+docker run --name "$REDIS_CONTAINER" -p "$REDIS_PORT:6379" -d --rm redis:alpine
+
+# Function to stop containers and background processes on exit
 PIDS=()
 cleanup() {
     echo "Cleaning up..."
-    docker stop tolgee-test-redis || true
+    docker stop "$POSTGRES_CONTAINER" || true
+    docker stop "$REDIS_CONTAINER" || true
     for pid in "${PIDS[@]}"; do
         kill "$pid" || true
     done
 }
 trap cleanup EXIT
 
-# Function to start Tolgee on a specific port
-start_instance() {
+# Function to launch Tolgee on a specific port (non-blocking)
+launch_instance() {
     local port=$1
     local log_file="$SCRIPT_DIR/tolgee-$port.log"
-    
-    echo "Starting instance on port $port (logs: tolgee-$port.log)..."
+
+    echo "Launching instance on port $port (logs: tolgee-$port.log)..."
     java -jar "$JAR_FILE" \
       --server.port=$port \
+      --spring.datasource.url="jdbc:postgresql://localhost:$POSTGRES_PORT/postgres" \
+      --spring.datasource.username=postgres \
+      --spring.datasource.password=postgres \
       --spring.data.redis.host=localhost \
-      --spring.data.redis.port=6379 \
+      --spring.data.redis.port="$REDIS_PORT" \
       --tolgee.cache.use-redis=true \
       --tolgee.billing.enabled=false \
-      --tolgee.postgres-autostart.container-name="$POSTGRES_CONTAINER" \
+      --tolgee.internal.controller-enabled=true \
+      --tolgee.postgres-autostart.enabled=false \
       > "$log_file" 2>&1 &
 
-    
     local pid=$!
     PIDS+=("$pid")
-
-    echo "Waiting for instance on port $port to start..."
-    local MAX_RETRIES=60
-    local COUNT=0
-    while ! grep -q "Tomcat started on port" "$log_file"; do
-        if [ $COUNT -ge $MAX_RETRIES ]; then
-            echo "Timeout waiting for instance on port $port to start. Check $log_file"
-            exit 1
-        fi
-        sleep 2
-        COUNT=$((COUNT + 1))
-        echo -n "."
-    done
-    echo " Instance on port $port started!"
 }
 
-# 3. Start the JAR instances
+# Function to wait for all instances to be ready
+wait_for_instances() {
+    local ports=("$@")
+    local MAX_RETRIES=120
+    local COUNT=0
+
+    echo "Waiting for ${#ports[@]} instances to start..."
+
+    while true; do
+        local all_ready=true
+        local ready_count=0
+
+        for port in "${ports[@]}"; do
+            local log_file="$SCRIPT_DIR/tolgee-$port.log"
+            if grep -q "Tomcat started on port" "$log_file" 2>/dev/null; then
+                ready_count=$((ready_count + 1))
+            else
+                all_ready=false
+            fi
+        done
+
+        if [ "$all_ready" = true ]; then
+            echo ""
+            echo "All ${#ports[@]} instances started!"
+            return 0
+        fi
+
+        if [ $COUNT -ge $MAX_RETRIES ]; then
+            echo ""
+            echo "Timeout waiting for instances to start. Check log files."
+            exit 1
+        fi
+
+        sleep 2
+        COUNT=$((COUNT + 1))
+        echo -ne "\r  Ready: $ready_count/${#ports[@]} (attempt $COUNT/$MAX_RETRIES)"
+    done
+}
+
+# 4. Start the JAR instances in parallel
 PORTS=()
 for i in $(seq 0 $((NUM_INSTANCES - 1))); do
     PORT=$((START_PORT + i))
     PORTS+=("$PORT")
-    start_instance "$PORT"
+    launch_instance "$PORT"
 done
+
+# Wait for all instances to be ready
+wait_for_instances "${PORTS[@]}"
 
 # Use the first port for API calls
 PRIMARY_PORT="${PORTS[0]}"
 
-# 4. Import the keys using single-step import
-import_file() {
-    local port=$1
-    local file_path="$KEYS_FILE"
-    local file_name=$(basename "$file_path")
+# 5. Generate fake item IDs and start NO_OP batch job
+echo "Generating $NUM_KEYS fake item IDs..."
+ITEM_IDS_JSON=$(jq -n --arg num "$NUM_KEYS" '[range(1; ($num|tonumber) + 1)]')
 
-    if [ ! -f "$file_path" ]; then
-        echo "File $file_path not found! Generating it using jq..."
-        jq -n --arg num "$NUM_KEYS" 'reduce range(1; ($num|tonumber) + 1) as $i ({}; . + {("key" + ($i|tostring)): ("value-" + ($i|tostring))})' > "$file_path"
-    fi
-
-    echo "Importing $file_path to instance on port $port..."
-
-    # Get project ID (assuming the demo project is created)
-    local project_id=$(curl -s -X GET "http://localhost:$port/v2/projects" | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
-
-    if [ -z "$project_id" ]; then
-        echo "No project found on instance on port $port"
-        return
-    fi
-
-    echo "Using Project ID: $project_id"
-
-    # Perform single-step import
-    echo "Performing single-step import..."
-    local import_response=$(curl -s -X POST "http://localhost:$port/v2/projects/$project_id/single-step-import" \
-        -F "files=@$file_path" \
-        -F "params={\"forceMode\":\"OVERRIDE\",\"fileMappings\":[{\"fileName\":\"$file_name\",\"languageTag\":\"en\"}]};type=application/json")
-
-    echo "Import response: $import_response"
-}
-
-import_file "$PRIMARY_PORT"
-
-echo "Querying the database for key IDs starting with 'key'..."
-KEY_IDS_JSON=$(PGPASSWORD=postgres psql -h localhost -p 25432 -U postgres -d postgres -t -A -c "SELECT json_agg(id) FROM public.key WHERE name LIKE 'key%';" | tr -d '[:space:]')
-
-if [ -z "$KEY_IDS_JSON" ] || [ "$KEY_IDS_JSON" == "null" ]; then
-    echo "Error: No keys starting with 'key' found in the database. Import may have failed."
-    exit 1
-fi
-
-# Get project ID
-PROJECT_ID=$(curl -s -X GET "http://localhost:$PRIMARY_PORT/v2/projects" | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
-
-if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" == "null" ]; then
-    echo "Error: Could not find project ID for batch job."
-    exit 1
-fi
-
-KEY_COUNT=$(echo "$KEY_IDS_JSON" | jq '. | length')
-echo "Found $KEY_COUNT keys starting with 'key'."
-echo "Starting batch machine translation job for project $PROJECT_ID..."
-BATCH_JOB_RESPONSE=$(curl -s -X POST "http://localhost:$PRIMARY_PORT/v2/projects/$PROJECT_ID/start-batch-job/machine-translate" \
+echo "Starting NO_OP batch job with $NUM_KEYS items..."
+BATCH_JOB_RESPONSE=$(curl -s -X POST "http://localhost:$PRIMARY_PORT/internal/batch-jobs/start-no-op" \
     -H "Content-Type: application/json" \
-    -d "{
-        \"keyIds\": $KEY_IDS_JSON,
-        \"targetLanguageIds\": [1000000002]
-    }")
+    -d "{\"itemIds\": $ITEM_IDS_JSON}")
 echo "Batch job response: $BATCH_JOB_RESPONSE"
 
 BATCH_JOB_ID=$(echo "$BATCH_JOB_RESPONSE" | jq -r '.id')
@@ -214,7 +233,7 @@ fi
 
 echo "Monitoring batch job $BATCH_JOB_ID..."
 while true; do
-    JOB_STATUS_DATA=$(PGPASSWORD=postgres psql -h localhost -p 25432 -U postgres -d postgres -t -A -F '|' -c "SELECT status, created_at, updated_at FROM public.tolgee_batch_job WHERE id = $BATCH_JOB_ID;")
+    JOB_STATUS_DATA=$(PGPASSWORD=postgres psql -h localhost -p $POSTGRES_PORT -U postgres -d postgres -t -A -F '|' -c "SELECT status, created_at, updated_at FROM public.tolgee_batch_job WHERE id = $BATCH_JOB_ID;")
 
     # Format: STATUS|CREATED_AT|UPDATED_AT
     STATUS=$(echo "$JOB_STATUS_DATA" | cut -d'|' -f1)
@@ -222,7 +241,7 @@ while true; do
     UPDATED_AT=$(echo "$JOB_STATUS_DATA" | cut -d'|' -f3)
 
     # Get chunk execution stats
-    CHUNK_STATS=$(PGPASSWORD=postgres psql -h localhost -p 25432 -U postgres -d postgres -t -A -F ':' -c "SELECT status, count(*) FROM public.tolgee_batch_job_chunk_execution WHERE batch_job_id = $BATCH_JOB_ID GROUP BY status order by status;")
+    CHUNK_STATS=$(PGPASSWORD=postgres psql -h localhost -p $POSTGRES_PORT -U postgres -d postgres -t -A -F ':' -c "SELECT status, count(*) FROM public.tolgee_batch_job_chunk_execution WHERE batch_job_id = $BATCH_JOB_ID GROUP BY status order by status;")
 
     # Format chunk stats for output
     STATS_STRING=""
@@ -266,5 +285,5 @@ while true; do
     sleep 5
 done
 
-echo "All $NUM_INSTANCES instances started (ports: ${PORTS[*]}), file imported and batch job initiated. Press Ctrl+C to stop."
+echo "All $NUM_INSTANCES instances started (ports: ${PORTS[*]}), NO_OP batch job completed. Press Ctrl+C to stop."
 wait
