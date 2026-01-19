@@ -27,6 +27,7 @@ import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import io.tolgee.util.setSimilarityLimit
@@ -58,6 +59,8 @@ class KeyService(
   private val aiPlaygroundResultService: AiPlaygroundResultService,
   @Lazy
   private val branchService: BranchService,
+  @Lazy
+  private val securityService: SecurityService,
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -140,6 +143,7 @@ class KeyService(
     project: Project,
     dto: CreateKeyDto,
   ): Key {
+    securityService.checkProtectedBranchModify(project.id, dto.branch)
     val key = create(project, dto.name, dto.namespace, dto.branch)
     key.isPlural = dto.isPlural
     if (key.isPlural) {
@@ -247,6 +251,7 @@ class KeyService(
     dto: EditKeyDto,
   ): Key {
     val key = findOptional(keyId).orElseThrow { NotFoundException() }
+    securityService.checkProtectedBranchModify(key)
     keyMetaService.getOrCreateForKey(key).apply {
       description = dto.description
     }
@@ -490,6 +495,7 @@ class KeyService(
     languageIds: List<Long>,
   ): List<Language> {
     val key = keyRepository.findByProjectIdAndId(projectId, keyId) ?: throw NotFoundException()
+    securityService.checkProtectedBranchModify(key)
     enableRestOfLanguages(projectId, languageIds, key)
     return disableLanguages(projectId, languageIds, key)
   }

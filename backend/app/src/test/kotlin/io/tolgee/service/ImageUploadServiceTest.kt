@@ -7,9 +7,9 @@ package io.tolgee.service
 import io.tolgee.AbstractSpringTest
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.exceptions.FileStoreException
+import io.tolgee.fixtures.generateImage
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.testing.assertions.Assertions.assertThat
-import io.tolgee.util.generateImage
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

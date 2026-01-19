@@ -79,6 +79,10 @@ class BranchServiceImpl(
       ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
   }
 
+  override fun getDefaultBranch(projectId: Long): Branch? {
+    return branchRepository.findDefaultByProjectId(projectId)
+  }
+
   private fun getActiveBranchWithMerge(
     projectId: Long,
     branchId: Long,

@@ -60,14 +60,13 @@ class ProjectApiKeyAuthRequestPerformer(
     files: List<MockMultipartFile>,
     params: Map<String, Array<String>>,
   ): ResultActions {
-    val builder = MockMvcRequestBuilders.multipart(url)
+    val builder = MockMvcRequestBuilders.multipart(projectUrlPrefix + url.withApiKey)
     files.forEach { builder.file(it) }
     params.forEach { (name, values) -> builder.param(name, *values) }
-    return mvc.perform(
-      AuthorizedRequestFactory.addToken(
-        MockMvcRequestBuilders.multipart(projectUrlPrefix + url.withApiKey),
-      ),
-    )
+    if (apiKeyPresentMode == ApiKeyPresentMode.HEADER) {
+      builder.header(API_KEY_HEADER_NAME, apiKey.key)
+    }
+    return mvc.perform(builder)
   }
 
   private val String.withApiKey: String

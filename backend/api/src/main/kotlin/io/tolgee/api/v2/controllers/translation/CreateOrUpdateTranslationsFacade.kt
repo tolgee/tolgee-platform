@@ -38,6 +38,7 @@ class CreateOrUpdateTranslationsFacade(
 
   private fun create(dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     securityService.checkProjectPermission(projectHolder.project.id, Scope.KEYS_EDIT)
+    securityService.checkProtectedBranchModify(projectHolder.project.id, dto.branch)
     activityHolder.activity = ActivityType.CREATE_KEY
     val key = keyService.create(projectHolder.projectEntity, dto.key, dto.namespace)
     val convertedToPlurals = dto.translations.convertToPluralIfAnyIsPlural()
@@ -75,6 +76,7 @@ class CreateOrUpdateTranslationsFacade(
     key: Key? = null,
   ): SetTranslationsResponseModel {
     val keyNotNull = key ?: keyService.get(projectHolder.project.id, dto.key, dto.namespace, dto.branch)
+    securityService.checkProtectedBranchModify(keyNotNull)
     securityService.checkLanguageTranslatePermissionsByTag(
       dto.translations.keys,
       projectHolder.project.id,

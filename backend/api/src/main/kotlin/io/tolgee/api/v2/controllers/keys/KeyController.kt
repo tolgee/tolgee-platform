@@ -185,7 +185,12 @@ class KeyController(
   fun delete(
     @PathVariable ids: Set<Long>,
   ) {
-    keyService.findAllWithProjectsAndMetas(ids).forEach { it.checkInProject() }
+    keyService.findAllWithProjectsAndMetas(ids).forEach {
+      it.run {
+        checkInProject()
+        checkBranchPermission()
+      }
+    }
     keyService.deleteMultiple(ids)
   }
 
@@ -359,6 +364,10 @@ class KeyController(
 
   private fun Key.checkInProject() {
     keyService.checkInProject(this, projectHolder.project.id)
+  }
+
+  private fun Key.checkBranchPermission() {
+    securityService.checkProtectedBranchModify(this)
   }
 
   private fun Project.checkScreenshotsUploadPermission() {
