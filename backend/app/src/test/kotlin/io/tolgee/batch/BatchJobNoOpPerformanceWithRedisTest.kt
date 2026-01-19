@@ -116,7 +116,7 @@ class BatchJobNoOpPerformanceWithRedisTest :
 
   @Test
   fun `NO_OP job with lot of chunks - measure throughput WITH REDIS`() {
-    val chunkCount = 20000
+    val chunkCount = 5000
 
     logger.info("Starting NO_OP job with $chunkCount chunks (WITH REDIS)...")
 

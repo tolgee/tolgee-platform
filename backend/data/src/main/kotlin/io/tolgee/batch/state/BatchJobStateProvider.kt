@@ -532,21 +532,6 @@ class BatchJobStateProvider(
   }
 
   /**
-   * Updates the job state within a lock to ensure atomicity.
-   * Use this when you need to read state, make decisions, and update state atomically.
-   */
-  fun <T> updateState(
-    jobId: Long,
-    block: (MutableMap<Long, ExecutionState>) -> T,
-  ): T {
-    return if (usingRedisProvider.areWeUsingRedis) {
-      updateStateRedis(jobId, block)
-    } else {
-      updateStateLocal(jobId, block)
-    }
-  }
-
-  /**
    * Optimized Redis implementation using Redis Hash.
    * Each job has its own hash: batch_job_state:{jobId}
    * Fields are execution IDs, values are ExecutionState objects.
