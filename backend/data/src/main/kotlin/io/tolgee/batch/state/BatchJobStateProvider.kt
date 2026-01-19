@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 
 @Component
 class BatchJobStateProvider(
@@ -30,22 +32,22 @@ class BatchJobStateProvider(
       ConcurrentHashMap<Long, MutableMap<Long, ExecutionState>>()
     }
     private val localRunningCountMap by lazy {
-      ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>()
+      ConcurrentHashMap<Long, AtomicInteger>()
     }
     private val localCompletedChunksCountMap by lazy {
-      ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>()
+      ConcurrentHashMap<Long, AtomicInteger>()
     }
     private val localProgressCountMap by lazy {
-      ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicLong>()
+      ConcurrentHashMap<Long, AtomicLong>()
     }
     private val localFailedCountMap by lazy {
-      ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>()
+      ConcurrentHashMap<Long, AtomicInteger>()
     }
     private val localCancelledCountMap by lazy {
-      ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>()
+      ConcurrentHashMap<Long, AtomicInteger>()
     }
     private val localCommittedCountMap by lazy {
-      ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>()
+      ConcurrentHashMap<Long, AtomicInteger>()
     }
 
     private const val REDIS_STATE_KEY_PREFIX = "batch_job_state:"
@@ -179,12 +181,30 @@ class BatchJobStateProvider(
     if (usingRedisProvider.areWeUsingRedis) {
       // Use setIfLower to avoid overwriting concurrent increments.
       // If the counter is already > initial value, some execution has already updated it.
-      setIfLower(redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId"), runningCount.toLong())
-      setIfLower(redissonClient.getAtomicLong("$REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX$jobId"), completedChunksCount.toLong())
-      setIfLower(redissonClient.getAtomicLong("$REDIS_PROGRESS_COUNT_KEY_PREFIX$jobId"), progressCount)
-      setIfLower(redissonClient.getAtomicLong("$REDIS_FAILED_COUNT_KEY_PREFIX$jobId"), failedCount.toLong())
-      setIfLower(redissonClient.getAtomicLong("$REDIS_CANCELLED_COUNT_KEY_PREFIX$jobId"), cancelledCount.toLong())
-      setIfLower(redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId"), committedCount.toLong())
+      setIfLower(
+        redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId"),
+        runningCount.toLong(),
+      )
+      setIfLower(
+        redissonClient.getAtomicLong("$REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX$jobId"),
+        completedChunksCount.toLong(),
+      )
+      setIfLower(
+        redissonClient.getAtomicLong("$REDIS_PROGRESS_COUNT_KEY_PREFIX$jobId"),
+        progressCount,
+      )
+      setIfLower(
+        redissonClient.getAtomicLong("$REDIS_FAILED_COUNT_KEY_PREFIX$jobId"),
+        failedCount.toLong(),
+      )
+      setIfLower(
+        redissonClient.getAtomicLong("$REDIS_CANCELLED_COUNT_KEY_PREFIX$jobId"),
+        cancelledCount.toLong(),
+      )
+      setIfLower(
+        redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId"),
+        committedCount.toLong(),
+      )
     } else {
       // Use computeIfAbsent and setIfLower logic to avoid overwriting concurrent increments.
       // Only set the counter if it doesn't exist, or if the current value is lower than initial.
@@ -222,13 +242,13 @@ class BatchJobStateProvider(
    * Sets a local AtomicInteger counter only if it doesn't exist or current value is lower.
    */
   private fun setLocalCounterIfLower(
-    map: ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>,
+    map: ConcurrentHashMap<Long, AtomicInteger>,
     jobId: Long,
     value: Int,
   ) {
     map.compute(jobId) { _, existing ->
       if (existing == null) {
-        java.util.concurrent.atomic.AtomicInteger(value)
+        AtomicInteger(value)
       } else {
         // Only update if existing value is lower than the initial value
         while (true) {
@@ -249,13 +269,13 @@ class BatchJobStateProvider(
    * Sets a local AtomicLong counter only if it doesn't exist or current value is lower.
    */
   private fun setLocalLongCounterIfLower(
-    map: ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicLong>,
+    map: ConcurrentHashMap<Long, AtomicLong>,
     jobId: Long,
     value: Long,
   ) {
     map.compute(jobId) { _, existing ->
       if (existing == null) {
-        java.util.concurrent.atomic.AtomicLong(value)
+        AtomicLong(value)
       } else {
         // Only update if existing value is lower than the initial value
         while (true) {

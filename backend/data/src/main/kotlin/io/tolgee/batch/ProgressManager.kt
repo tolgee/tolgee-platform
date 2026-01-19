@@ -134,12 +134,13 @@ class ProgressManager(
 
     // Use counters for job result info (O(1) operations)
     val completedChunks = batchJobStateProvider.getCompletedChunksCount(job.id)
-    val info = JobResultInfo(
-      completedChunks = completedChunks,
-      progress = batchJobStateProvider.getProgressCount(job.id),
-      isAnyCancelled = batchJobStateProvider.getCancelledCount(job.id) > 0,
-      isAnyFailed = batchJobStateProvider.getFailedCount(job.id) > 0,
-    )
+    val info =
+      JobResultInfo(
+        completedChunks = completedChunks,
+        progress = batchJobStateProvider.getProgressCount(job.id),
+        isAnyCancelled = batchJobStateProvider.getCancelledCount(job.id) > 0,
+        isAnyFailed = batchJobStateProvider.getFailedCount(job.id) > 0,
+      )
 
     if (execution.successTargets.isNotEmpty()) {
       eventPublisher.publishEvent(OnBatchJobProgress(job, info.progress, job.totalItems.toLong()))

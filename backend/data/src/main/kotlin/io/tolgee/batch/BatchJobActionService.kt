@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
@@ -27,7 +28,6 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.UnexpectedRollbackException
-import io.tolgee.batch.data.BatchJobDto
 import java.util.concurrent.CancellationException
 import kotlin.coroutines.coroutineContext
 
@@ -129,17 +129,18 @@ class BatchJobActionService(
 
   private fun handleCancelledExecution(executionItem: ExecutionQueueItem) {
     try {
-      val execution = executeInNewTransaction(transactionManager) {
-        val exec = entityManager.find(BatchJobChunkExecution::class.java, executionItem.chunkExecutionId)
-        if (exec != null && !exec.status.completed) {
-          exec.status = BatchJobChunkExecutionStatus.CANCELLED
-          entityManager.persist(exec)
-          progressManager.handleProgress(exec)
-          exec
-        } else {
-          null
+      val execution =
+        executeInNewTransaction(transactionManager) {
+          val exec = entityManager.find(BatchJobChunkExecution::class.java, executionItem.chunkExecutionId)
+          if (exec != null && !exec.status.completed) {
+            exec.status = BatchJobChunkExecutionStatus.CANCELLED
+            entityManager.persist(exec)
+            progressManager.handleProgress(exec)
+            exec
+          } else {
+            null
+          }
         }
-      }
       execution?.let {
         progressManager.handleChunkCompletedCommitted(it)
       }
