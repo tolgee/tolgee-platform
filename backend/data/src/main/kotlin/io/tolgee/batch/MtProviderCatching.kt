@@ -25,6 +25,7 @@ class MtProviderCatching(
     coroutineContext: CoroutineContext,
     fn: (item: BatchTranslationTargetItem) -> Unit,
   ) {
+    val exceptions = mutableListOf<RequeueWithDelayException>()
     val successfulTargets = mutableListOf<BatchTranslationTargetItem>()
     chunk.forEach { item ->
       coroutineContext.ensureActive()
@@ -40,13 +41,15 @@ class MtProviderCatching(
       } catch (e: LlmProviderNotReturnedJsonException) {
         throw FailedDontRequeueException(Message.LLM_PROVIDER_NOT_RETURNED_JSON, successfulTargets, e)
       } catch (e: LlmRateLimitedException) {
-        throw RequeueWithDelayException(
-          Message.LLM_RATE_LIMITED,
-          successfulTargets,
-          e,
-          e.retryAt?.let { (e.retryAt - currentDateProvider.date.time).toInt() } ?: 100,
-          increaseFactor = 1,
-          maxRetries = -1,
+        exceptions.add(
+          RequeueWithDelayException(
+            Message.LLM_RATE_LIMITED,
+            successfulTargets,
+            e,
+            e.retryAt?.let { (e.retryAt - currentDateProvider.date.time).toInt() } ?: 100,
+            increaseFactor = 1,
+            maxRetries = -1,
+          ),
         )
       } catch (e: PlanLimitExceededStringsException) {
         throw FailedDontRequeueException(Message.PLAN_TRANSLATION_LIMIT_EXCEEDED, successfulTargets, e)
@@ -57,8 +60,26 @@ class MtProviderCatching(
       } catch (e: LanguageNotSupportedException) {
         throw FailedDontRequeueException(e.tolgeeMessage!!, successfulTargets, e)
       } catch (e: Throwable) {
-        throw RequeueWithDelayException(Message.TRANSLATION_FAILED, successfulTargets, e)
+        exceptions.add(RequeueWithDelayException(Message.TRANSLATION_FAILED, successfulTargets, e))
       }
+    }
+    if (exceptions.isNotEmpty()) {
+      if (exceptions.size == 1) {
+        // remap with using successfulTargets declared above
+        val exception = exceptions.first()
+        throw RequeueWithDelayException(
+          message = exception.tolgeeMessage ?: Message.TRANSLATION_FAILED,
+          successfulTargets = successfulTargets,
+          cause = exception.cause,
+          delayInMs = exception.delayInMs,
+          increaseFactor = exception.increaseFactor,
+          maxRetries = exception.maxRetries,
+        )
+      }
+      throw MultipleItemsFailedException(
+        exceptions = exceptions.toList(),
+        successfulTargets = successfulTargets,
+      )
     }
   }
 }

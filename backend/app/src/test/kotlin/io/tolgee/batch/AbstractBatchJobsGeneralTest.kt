@@ -7,6 +7,7 @@ import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
+import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.testing.WebsocketTest
 import io.tolgee.testing.assert
@@ -66,18 +67,24 @@ abstract class AbstractBatchJobsGeneralTest :
   @MockitoSpyBean
   lateinit var progressManager: ProgressManager
 
+  @MockitoSpyBean
+  @Autowired
+  lateinit var autoTranslationService: io.tolgee.service.translation.AutoTranslationService
+
   lateinit var util: BatchJobTestUtil
 
   @BeforeEach
   fun setup() {
     Mockito.reset(batchJobProjectLockingManager)
     Mockito.reset(progressManager)
+    Mockito.reset(autoTranslationService)
     batchJobChunkExecutionQueue.clear()
     Mockito.reset(preTranslationByTmChunkProcessor)
     Mockito.clearInvocations(preTranslationByTmChunkProcessor)
     batchJobChunkExecutionQueue.populateQueue()
 
     testData = BatchJobsTestData()
+    testData.addTranslationOperationData(1000)
     testDataService.saveTestData(testData.root)
     util = BatchJobTestUtil(applicationContext, testData)
 
@@ -363,5 +370,31 @@ abstract class AbstractBatchJobsGeneralTest :
     } finally {
       batchProperties.maxPerMtJobConcurrency = mtDefault
     }
+  }
+
+  @Test
+  fun `MultipleItemsFailedException retries the job`() {
+    util.makeAutoTranslationFailOnTwoFirstItemsInChunk()
+    val job = util.runMtJob(5) // one chunk
+
+    util.waitForRetryExecutionCreated(100)
+    moveCurrentDate(Duration.ofMillis(100))
+
+    util.waitForJobSuccess(job)
+
+    // Verify it's retried
+    val executions = batchJobService.getExecutions(job.id)
+    executions.assert.size().isEqualTo(2) // 1 initial + 1 retry
+    executions
+      .last()
+      .status.assert
+      .isEqualTo(BatchJobChunkExecutionStatus.SUCCESS)
+
+    executions
+      .last()
+      .successTargets!!
+      .assert
+      .size()
+      .isEqualTo(2) // 2 failed items in a chunk are retried successfully
   }
 }
