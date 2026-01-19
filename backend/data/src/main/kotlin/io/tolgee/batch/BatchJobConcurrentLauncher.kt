@@ -269,13 +269,8 @@ class BatchJobConcurrentLauncher(
       if (maxPerJobConcurrency == -1) {
         return@trySetExecutionRunning true
       }
-      // before (look back to the git log) number of running executions was counted based on
-      // executions in Map<Long, ExecutionState> in status RUNNING
-      // it.values.count { executionState -> executionState.status == BatchJobChunkExecutionStatus.RUNNING },
-      // which led to more couroutines actually launched, because there can be executions in the SUCCESS
-      // state that are not finalized yet and are not removed from that map
-      // see io.tolgee.batch.AbstractBatchJobsGeneralTest.`mt job respects maxPerJobConcurrency`
-      runningJobs.size < maxPerJobConcurrency
+      // Count only executions for THIS specific job, not all running executions globally
+      runningJobs.values.count { it.first.id == this.jobId } < maxPerJobConcurrency
     }
   }
 }
