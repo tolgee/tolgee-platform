@@ -276,6 +276,52 @@ jobs:
           npm run build
         working-directory: ./webapp
 
+  schema-check:
+    name: Schema Check 📋
+    needs: [backend-build]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Download backend build result
+        uses: ./.github/actions/download-backend-build
+
+      - name: Install webapp dependencies
+        run: npm ci
+        working-directory: ./webapp
+
+      - name: Start backend
+        run: |
+          ./gradlew server-app:bootRun --args='--spring.profiles.active=dev' &
+          echo "Waiting for backend to start..."
+          timeout 120 bash -c 'until curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; do sleep 2; done'
+          echo "Backend is ready"
+        env:
+          SKIP_SERVER_BUILD: true
+
+      - name: Generate schema
+        run: npm run schema
+        working-directory: ./webapp
+        env:
+          VITE_APP_API_URL: http://localhost:8080
+
+      - name: Check for uncommitted schema changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ Schema files have changed! Please run 'npm run schema' locally and commit the changes."
+            echo ""
+            echo "Changed files:"
+            git status --porcelain
+            echo ""
+            echo "Diff:"
+            git diff
+            exit 1
+          fi
+          echo "✅ Schema files are up to date"
+
   e2e-code-checks:
     name: E2E Static Check 🪲
     runs-on: ubuntu-24.04
@@ -352,6 +398,7 @@ jobs:
       - backend-code-checks
       - frontend-build
       - frontend-code-check
+      - schema-check
       - e2e
       - e2e-code-checks
       - e2e-install-deps
@@ -380,6 +427,10 @@ jobs:
 
           if [[ "${{ needs.frontend-code-check.result }}" != "success" ]]; then
             failed_jobs+=("frontend-code-check")
+          fi
+
+          if [[ "${{ needs.schema-check.result }}" != "success" ]]; then
+            failed_jobs+=("schema-check")
           fi
 
           if [[ "${{ needs.e2e.result }}" != "success" ]]; then
