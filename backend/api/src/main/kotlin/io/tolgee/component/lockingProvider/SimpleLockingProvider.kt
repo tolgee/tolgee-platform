@@ -30,6 +30,15 @@ open class SimpleLockingProvider : LockingProvider {
 
   @Scheduled(fixedRate = 60000)
   fun cleanupUnusedLocks() {
-    map.entries.removeIf { !it.value.isLocked }
+    // Use compute() for atomic removal that doesn't race with computeIfAbsent()
+    map.keys.toList().forEach { key ->
+      map.compute(key) { _, lock ->
+        if (lock != null && !lock.isLocked && !lock.hasQueuedThreads()) {
+          null // Remove the lock
+        } else {
+          lock // Keep the lock
+        }
+      }
+    }
   }
 }
