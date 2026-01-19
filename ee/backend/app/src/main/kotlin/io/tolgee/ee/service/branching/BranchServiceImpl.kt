@@ -129,7 +129,6 @@ class BranchServiceImpl(
       }
     branchRepository.save(branch)
 
-    branchRepository.save(branch)
     branchCopyService.copy(projectId, originBranch, branch)
     branchSnapshotService.createInitialSnapshot(projectId, originBranch, branch)
     return branch
