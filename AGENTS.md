@@ -2,6 +2,28 @@
 
 This file provides Tolgee-specific guidance for AI coding agents working on the Tolgee localization platform.
 
+## Repository Structure
+
+This project uses a multi-repository setup managed by a wrapper repository:
+
+```
+tolgee-platform/                    # platform-dev-start (wrapper repo)
+├── .git/                           # git@github.com:tolgee/platform-dev-start.git
+├── start.sh                        # Development startup script
+├── public/                         # tolgee-platform (main repo)
+│   ├── .git/                       # git@github.com:tolgee/tolgee-platform.git
+│   ├── backend/                    # Kotlin/Spring Boot backend
+│   ├── webapp/                     # React frontend
+│   └── e2e/                        # Cypress E2E tests
+└── billing/                        # billing (private repo)
+    └── .git/                       # git@github.com:tolgee/billing.git
+```
+
+**Important**: When working with git commands, ensure you're in the correct repository:
+- For platform code changes: `cd public/` then run git commands
+- For billing changes: `cd billing/` then run git commands
+- The wrapper repo (`platform-dev-start`) ignores `public/` and `billing/` in its `.gitignore`
+
 ## Backend Development
 
 ### Database Migrations
