@@ -26,6 +26,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
+import io.tolgee.service.security.SecurityService
 import org.springframework.hateoas.CollectionModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -56,6 +57,7 @@ class KeyScreenshotController(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
   private val screenshotModelAssembler: ScreenshotModelAssembler,
+  private val securityService: SecurityService,
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(summary = "Upload screenshot")
@@ -74,6 +76,7 @@ class KeyScreenshotController(
       throw ValidationException(Message.FILE_NOT_IMAGE)
     }
     val keyEntity = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
+    securityService.checkProtectedBranchModify(keyEntity)
     keyEntity.checkInProject()
     val screenShotEntity = screenshotService.store(screenshot, keyEntity, info)
     return ResponseEntity(screenShotEntity.model, HttpStatus.CREATED)
@@ -105,6 +108,7 @@ class KeyScreenshotController(
       it.checkInProject()
     }
     val key = keyService.get(keyId)
+    securityService.checkProtectedBranchModify(key)
     key.checkInProject()
     screenshotService.removeScreenshotReferences(key, screenshots)
   }

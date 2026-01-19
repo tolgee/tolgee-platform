@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
@@ -7,7 +8,9 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.ProjectPermissionType
+import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.translation.Label
 
 class BranchTranslationsTestData {
@@ -19,8 +22,14 @@ class BranchTranslationsTestData {
   lateinit var toBeDeletedBranch: Branch
   lateinit var firstLabel: Label
   lateinit var secondLabel: Label
+  lateinit var thirdLabel: Label
   lateinit var firstTag: Tag
   lateinit var secondTag: Tag
+  lateinit var protectedBranch: Branch
+  lateinit var protectedKey: Key
+  lateinit var branchedKey: Key
+  lateinit var branchedScreenshotReference: KeyScreenshotReference
+  lateinit var protectedScreenshotReference: KeyScreenshotReference
 
   val root: TestDataBuilder =
     TestDataBuilder().apply {
@@ -60,16 +69,65 @@ class BranchTranslationsTestData {
             name = "wohoo"
             color = "#FF0000"
           }.self
+        thirdLabel =
+          addLabel {
+            name = "unassigned"
+            color = "#00FF00"
+          }.self
         mainBranch =
           addBranch {
             name = "main"
             project = this@project.self
             isDefault = true
-            isProtected = true
+            isProtected = false
           }.build {
+            branchedKey =
+              this@project
+                .addBranchKey(0, "branched key example", this@build.self)
+                .build {
+                  val screenshot = addScreenshot { _ -> }.self
+                  branchedScreenshotReference =
+                    addScreenshotReference {
+                      key = self
+                      this.screenshot = screenshot
+                    }.self
+                }.self
             (1..50).forEach {
               this@project.addBranchKey(it, "branched key", this@build.self)
             }
+          }.self
+        protectedBranch =
+          addBranch {
+            name = "protected"
+            project = this@project.self
+            isProtected = true
+          }.build {
+            protectedKey =
+              addKey {
+                name = "protected-key"
+                branch = this@build.self
+              }.build {
+                addMeta {
+                  description = "description of protected key"
+                  tags.add(firstTag)
+                  tags.add(secondTag)
+                }
+                val screenshot = addScreenshot { _ -> }.self
+                protectedScreenshotReference =
+                  addScreenshotReference {
+                    key = self
+                    this.screenshot = screenshot
+                  }.self
+                addTranslation {
+                  language = de
+                  text = "Branched german key."
+                }
+                addTranslation {
+                  language = en
+                  text = "Branched english key."
+                  labels = mutableSetOf(firstLabel)
+                }
+              }.self
           }.self
       }.self
     }
@@ -103,8 +161,8 @@ class BranchTranslationsTestData {
     num: Int,
     prefix: String,
     branch: Branch,
-  ) {
-    addKey {
+  ): KeyBuilder {
+    return addKey {
       name = "$prefix $num"
       this.branch = branch
     }.build {
