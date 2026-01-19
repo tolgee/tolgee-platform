@@ -63,9 +63,13 @@ class BatchJobChunkExecutionQueue(
     when (event.type) {
       QueueEventType.ADD -> this.addItemsToLocalQueue(event.items)
       QueueEventType.REMOVE -> {
-        val itemsSet = event.items.toSet()
-        queue.removeAll(itemsSet)
-        itemsSet.forEach { decrementCharacterCount(it.jobCharacter) }
+        // Remove and decrement atomically per item to prevent double-decrement
+        // if poll() removes an item between removeAll and forEach
+        event.items.forEach { item ->
+          if (queue.remove(item)) {
+            decrementCharacterCount(item.jobCharacter)
+          }
+        }
       }
     }
   }
