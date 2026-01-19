@@ -200,12 +200,19 @@ wait_for_instances() {
     done
 }
 
-# 4. Start the JAR instances in parallel
+# 4. Start the JAR instances (first one starts earlier to initialize database schema)
 PORTS=()
 for i in $(seq 0 $((NUM_INSTANCES - 1))); do
     PORT=$((START_PORT + i))
     PORTS+=("$PORT")
     launch_instance "$PORT"
+
+    # After starting the first instance, wait 3 seconds before starting others
+    # This prevents race conditions with database schema initialization (Liquibase)
+    if [ $i -eq 0 ] && [ $NUM_INSTANCES -gt 1 ]; then
+        echo "Waiting 3 seconds for first instance to initialize database schema..."
+        sleep 3
+    fi
 done
 
 # Wait for all instances to be ready
