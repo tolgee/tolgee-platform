@@ -9,6 +9,7 @@ import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 import io.tolgee.repository.TagRepository
+import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
@@ -26,12 +27,15 @@ class TagService(
   private val keyService: KeyService,
   private val entityManager: EntityManager,
   private val applicationContext: ApplicationContext,
+  @Lazy
+  private val securityService: SecurityService,
 ) : Logging {
   fun tagKey(
     key: Key,
     tagName: String,
   ): Tag {
     val keyMeta = keyMetaService.getOrCreateForKey(key)
+    securityService.checkProtectedBranchModify(keyMeta)
     val tag =
       find(key.project, tagName)?.let {
         if (!keyMeta.tags.contains(it)) {
@@ -381,7 +385,9 @@ class TagService(
     keyId: Long,
     tagName: String,
   ): Tag {
-    return tagKeysById(projectId, mapOf(keyId to listOf(tagName))).values.singleOrNull()?.singleOrNull()
+    val key = keyService.getKeysWithTagsById(projectId, listOf(keyId)).singleOrNull() ?: throw NotFoundException()
+    securityService.checkProtectedBranchModify(key)
+    return tagKeys(listOf(key), mapOf(key.id to listOf(tagName))).values.singleOrNull()?.singleOrNull()
       ?: throw IllegalStateException("No single tag found in result.")
   }
 
@@ -392,6 +398,7 @@ class TagService(
     tagId: Long,
   ) {
     val key = keyService.getKeysWithTagsById(projectId, listOf(keyId)).singleOrNull() ?: throw NotFoundException()
+    securityService.checkProtectedBranchModify(key)
     val tag = getWithKeyMetasFetched(projectId, tagId)
     remove(key, tag)
   }
