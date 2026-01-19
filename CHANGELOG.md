@@ -1,3 +1,11 @@
+## [3.147.1](https://github.com/tolgee/tolgee-platform/compare/v3.147.0...v3.147.1) (2026-01-19)
+
+
+### Bug Fixes
+
+* count per-job executions for maxPerJobConcurrency check ([#3394](https://github.com/tolgee/tolgee-platform/issues/3394)) ([ea4064a](https://github.com/tolgee/tolgee-platform/commit/ea4064ad2b072830c91b5b6491d92e09047dc581))
+* prevent lock loss in SimpleLockingProvider ([#3393](https://github.com/tolgee/tolgee-platform/issues/3393)) ([bcd5629](https://github.com/tolgee/tolgee-platform/commit/bcd562983fe7d9c2379d2d6925c2d98712bef4d6))
+
 # [3.147.0](https://github.com/tolgee/tolgee-platform/compare/v3.146.2...v3.147.0) (2026-01-19)
 
 
