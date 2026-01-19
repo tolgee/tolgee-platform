@@ -2,7 +2,7 @@ import { Box, styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 
-type PromptResponseUsageDto = components['schemas']['PromptResponseUsageDto'];
+type PromptResponseUsageDto = components['schemas']['PromptResponseUsageModel'];
 
 const StyledContainer = styled(Box)`
   display: flex;
