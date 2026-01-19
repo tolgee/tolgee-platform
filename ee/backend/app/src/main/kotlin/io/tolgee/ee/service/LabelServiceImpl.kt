@@ -11,6 +11,7 @@ import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.label.LabelService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
@@ -29,6 +30,8 @@ class LabelServiceImpl(
   private val translationRepository: TranslationRepository,
   @Lazy private val translationService: TranslationService,
   private val activityHolder: ActivityHolder,
+  @Lazy
+  private val securityService: SecurityService,
 ) : LabelService {
   override fun getProjectLabels(
     projectId: Long,
@@ -133,12 +136,13 @@ class LabelServiceImpl(
     translationId: Long,
     labelId: Long,
   ): Label {
-    val label = getByProjectIdAndId(projectId, labelId)
     val translation =
       translationRepository.find(
         projectId,
         translationId,
       ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+    securityService.checkProtectedBranchModify(translation)
+    val label = getByProjectIdAndId(projectId, labelId)
     translation.addLabel(label)
     translationRepository.save(translation)
     labelRepository.save(label)
@@ -151,6 +155,7 @@ class LabelServiceImpl(
     translation: Translation,
     labelId: Long,
   ): Label {
+    securityService.checkProtectedBranchModify(translation)
     val label = getByProjectIdAndId(projectId, labelId)
     translation.addLabel(label)
     translationRepository.save(translation)
@@ -164,12 +169,13 @@ class LabelServiceImpl(
     translationId: Long,
     labelId: Long,
   ) {
-    val label = getByProjectIdAndId(projectId, labelId)
     val translation =
       translationRepository.find(
         projectId,
         translationId,
       ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+    securityService.checkProtectedBranchModify(translation)
+    val label = getByProjectIdAndId(projectId, labelId)
     translation.removeLabel(label)
     labelRepository.save(label)
   }

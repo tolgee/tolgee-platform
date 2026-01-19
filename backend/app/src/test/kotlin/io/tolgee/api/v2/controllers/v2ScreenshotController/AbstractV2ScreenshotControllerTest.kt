@@ -7,9 +7,9 @@ package io.tolgee.api.v2.controllers.v2ScreenshotController
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.fixtures.generateImage
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
-import io.tolgee.util.generateImage
 import org.junit.jupiter.api.AfterAll
 import org.springframework.core.io.InputStreamSource
 import org.springframework.http.MediaType
