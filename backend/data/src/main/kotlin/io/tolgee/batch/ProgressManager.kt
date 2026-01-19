@@ -115,9 +115,12 @@ class ProgressManager(
     // Update single execution state (lock-free)
     batchJobStateProvider.updateSingleExecution(job.id, execution.id, newState)
 
-    // Update progress counter
-    if (execution.successTargets.isNotEmpty()) {
-      batchJobStateProvider.addProgressCount(job.id, execution.successTargets.size.toLong())
+    // Update progress counter using delta to prevent double-counting on repeated calls
+    val previousSuccessCount = existingState?.successTargets?.size ?: 0
+    val newSuccessCount = execution.successTargets.size
+    val progressDelta = newSuccessCount - previousSuccessCount
+    if (progressDelta > 0) {
+      batchJobStateProvider.addProgressCount(job.id, progressDelta.toLong())
     }
 
     // Only update completion-related counters if status changed to countable
@@ -142,7 +145,8 @@ class ProgressManager(
         isAnyFailed = batchJobStateProvider.getFailedCount(job.id) > 0,
       )
 
-    if (execution.successTargets.isNotEmpty()) {
+    // Only publish progress event when there's actual progress
+    if (progressDelta > 0) {
       eventPublisher.publishEvent(OnBatchJobProgress(job, info.progress, job.totalItems.toLong()))
     }
     handleJobStatus(job, info)
