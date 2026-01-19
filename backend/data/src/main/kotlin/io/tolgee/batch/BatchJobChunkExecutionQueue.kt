@@ -24,7 +24,9 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicInteger
 
 @Component
 class BatchJobChunkExecutionQueue(
@@ -41,13 +43,30 @@ class BatchJobChunkExecutionQueue(
      * It's static
      */
     private val queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
+
+    /**
+     * O(1) counter for job characters in queue - avoids O(n) iteration on every chunk
+     */
+    private val jobCharacterCounts = ConcurrentHashMap<JobCharacter, AtomicInteger>()
+  }
+
+  private fun incrementCharacterCount(character: JobCharacter) {
+    jobCharacterCounts.computeIfAbsent(character) { AtomicInteger(0) }.incrementAndGet()
+  }
+
+  private fun decrementCharacterCount(character: JobCharacter) {
+    jobCharacterCounts[character]?.decrementAndGet()
   }
 
   @EventListener
   fun onJobItemEvent(event: JobQueueItemsEvent) {
     when (event.type) {
       QueueEventType.ADD -> this.addItemsToLocalQueue(event.items)
-      QueueEventType.REMOVE -> queue.removeAll(event.items.toSet())
+      QueueEventType.REMOVE -> {
+        val itemsSet = event.items.toSet()
+        queue.removeAll(itemsSet)
+        itemsSet.forEach { decrementCharacterCount(it.jobCharacter) }
+      }
     }
   }
 
@@ -88,7 +107,9 @@ class BatchJobChunkExecutionQueue(
     var count = 0
     data.forEach {
       if (!ids.contains(it.id)) {
-        queue.add(it.toItem())
+        val item = it.toItem()
+        queue.add(item)
+        incrementCharacterCount(item.jobCharacter)
         count++
       }
     }
@@ -115,6 +136,7 @@ class BatchJobChunkExecutionQueue(
     }
 
     queue.addAll(toAdd)
+    toAdd.forEach { incrementCharacterCount(it.jobCharacter) }
   }
 
   fun addToQueue(
@@ -145,7 +167,14 @@ class BatchJobChunkExecutionQueue(
 
   fun removeJobExecutions(jobId: Long) {
     logger.debug("Removing job $jobId from queue, queue size: ${queue.size}")
-    queue.removeIf { it.jobId == jobId }
+    val iterator = queue.iterator()
+    while (iterator.hasNext()) {
+      val item = iterator.next()
+      if (item.jobId == jobId) {
+        iterator.remove()
+        decrementCharacterCount(item.jobCharacter)
+      }
+    }
     logger.debug("Removed job $jobId from queue, queue size: ${queue.size}")
   }
 
@@ -168,12 +197,15 @@ class BatchJobChunkExecutionQueue(
   ) = queue.joinToString(separator, transform = transform)
 
   fun poll(): ExecutionQueueItem? {
-    return queue.poll()
+    val item = queue.poll()
+    item?.let { decrementCharacterCount(it.jobCharacter) }
+    return item
   }
 
   fun clear() {
     logger.debug("Clearing queue")
     queue.clear()
+    jobCharacterCounts.clear()
   }
 
   fun find(function: (ExecutionQueueItem) -> Boolean): ExecutionQueueItem? {
@@ -187,7 +219,7 @@ class BatchJobChunkExecutionQueue(
   fun isEmpty(): Boolean = queue.isEmpty()
 
   fun getJobCharacterCounts(): Map<JobCharacter, Int> {
-    return queue.groupBy { it.jobCharacter }.map { it.key to it.value.size }.toMap()
+    return jobCharacterCounts.mapValues { it.value.get() }
   }
 
   override fun afterPropertiesSet() {

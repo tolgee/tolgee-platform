@@ -37,6 +37,7 @@ import jakarta.persistence.EntityManager
 import kotlinx.coroutines.ensureActive
 import org.mockito.ArgumentMatchers
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.doAnswer
@@ -191,7 +192,7 @@ class BatchJobTestUtil(
   fun makeProgressManagerFail() {
     doThrow(RuntimeException("test"))
       .whenever(progressManager)
-      .handleProgress(argThat { this.status != BatchJobChunkExecutionStatus.FAILED })
+      .handleProgress(argThat { this.status != BatchJobChunkExecutionStatus.FAILED }, anyOrNull())
   }
 
   fun waitForRetryExecutionCreated(afterMs: Int) {

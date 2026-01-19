@@ -91,8 +91,11 @@ class ProgressManager(
     batchJobStateProvider.decrementRunningCount(batchJobId)
   }
 
-  fun handleProgress(execution: BatchJobChunkExecution) {
-    val job = batchJobService.getJobDto(execution.batchJob.id)
+  fun handleProgress(
+    execution: BatchJobChunkExecution,
+    batchJobDto: BatchJobDto? = null,
+  ) {
+    val job = batchJobDto ?: batchJobService.getJobDto(execution.batchJob.id)
 
     // Get existing state to preserve transactionCommitted and detect status changes
     val existingState = batchJobStateProvider.getSingleExecution(job.id, execution.id)
@@ -144,6 +147,7 @@ class ProgressManager(
   fun handleChunkCompletedCommitted(
     execution: BatchJobChunkExecution,
     triggerJobCompleted: Boolean = true,
+    batchJobDto: BatchJobDto? = null,
   ) {
     logger.debug("Setting transaction committed for chunk execution ${execution.id} to true")
 
@@ -168,7 +172,7 @@ class ProgressManager(
     // Atomically increment committed counter and get the new value
     // This ensures only the thread that reaches totalChunks will trigger job completion
     val committedCount = batchJobStateProvider.incrementCommittedCountAndGet(execution.batchJob.id)
-    val job = batchJobService.getJobDto(execution.batchJob.id)
+    val job = batchJobDto ?: batchJobService.getJobDto(execution.batchJob.id)
     val isJobCompleted = committedCount == job.totalChunks
 
     logger.debug {
@@ -240,13 +244,11 @@ class ProgressManager(
     eventPublisher.publishEvent(OnBatchJobProgress(job, progress.toLong(), job.totalItems.toLong()))
   }
 
-  fun handleJobRunning(id: Long) {
-    executeInNewTransaction(transactionManager) {
-      logger.trace { """Fetching job $id""" }
-      val job = batchJobService.getJobDto(id)
-      if (job.status == BatchJobStatus.PENDING) {
-        logger.debug { """Updating job state to running ${job.id}""" }
-        cachingBatchJobService.setRunningState(job.id)
+  fun handleJobRunning(batchJobDto: BatchJobDto) {
+    if (batchJobDto.status == BatchJobStatus.PENDING) {
+      executeInNewTransaction(transactionManager) {
+        logger.debug { """Updating job state to running ${batchJobDto.id}""" }
+        cachingBatchJobService.setRunningState(batchJobDto.id)
       }
     }
   }

@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 
 @Component
@@ -39,6 +40,19 @@ class BatchJobConcurrentLauncher(
    * Job is the result of launch method executing the execution in separate coroutine
    */
   val runningJobs: ConcurrentHashMap<Long, Pair<BatchJobDto, Job>> = ConcurrentHashMap()
+
+  /**
+   * O(1) counter for running jobs by character - avoids O(n) iteration on every chunk
+   */
+  private val runningJobCharacterCounts = ConcurrentHashMap<JobCharacter, AtomicInteger>()
+
+  private fun incrementRunningCharacterCount(character: JobCharacter) {
+    runningJobCharacterCounts.computeIfAbsent(character) { AtomicInteger(0) }.incrementAndGet()
+  }
+
+  private fun decrementRunningCharacterCount(character: JobCharacter) {
+    runningJobCharacterCounts[character]?.decrementAndGet()
+  }
 
   var pause = false
     set(value) {
@@ -150,7 +164,11 @@ class BatchJobConcurrentLauncher(
       addBackToQueue(executionItem)
       return false
     }
-    if (!executionItem.shouldNotBeDebounced()) {
+
+    // Fetch BatchJobDto once and reuse throughout the method
+    val batchJobDto = batchJobService.getJobDto(executionItem.jobId)
+
+    if (!executionItem.shouldNotBeDebounced(batchJobDto)) {
       logger.trace(
         """Execution ${executionItem.chunkExecutionId} not ready to execute (debouncing), adding back to queue""",
       )
@@ -159,7 +177,7 @@ class BatchJobConcurrentLauncher(
     }
     if (!canRunJobWithCharacter(executionItem.jobCharacter)) {
       logger.trace(
-        """Execution ${executionItem.chunkExecutionId} cannot run concurrent job 
+        """Execution ${executionItem.chunkExecutionId} cannot run concurrent job
           |(there are already max coroutines working on this specific job)
         """.trimMargin(),
       )
@@ -167,13 +185,13 @@ class BatchJobConcurrentLauncher(
       return false
     }
 
-    if (!executionItem.trySetRunningState()) {
+    if (!executionItem.trySetRunningState(batchJobDto)) {
       logger.trace(
-        """Execution ${executionItem.chunkExecutionId} cannot run concurrent job 
+        """Execution ${executionItem.chunkExecutionId} cannot run concurrent job
           |(there are already max concurrent executions running of this specific job)
         """.trimMargin(),
       )
-      if (!batchJobService.getJobDto(executionItem.jobId).status.completed) {
+      if (!batchJobDto.status.completed) {
         // e.g. job isn't canceled (check ProgressManager.trySetExecutionRunning returning false on competed job)
         addBackToQueue(executionItem)
       }
@@ -205,14 +223,14 @@ class BatchJobConcurrentLauncher(
 
     val job =
       launch {
-        batchJobActionService.handleItem(executionItem)
+        batchJobActionService.handleItem(executionItem, batchJobDto)
       }
 
-    val batchJobDto = batchJobService.getJobDto(executionItem.jobId)
     runningJobs[executionItem.chunkExecutionId] = batchJobDto to job
+    incrementRunningCharacterCount(batchJobDto.jobCharacter)
 
     job.invokeOnCompletion {
-      onJobCompleted(executionItem)
+      onJobCompleted(executionItem, batchJobDto.jobCharacter)
     }
     logger.debug("Execution ${executionItem.chunkExecutionId} launched. Running jobs: ${runningJobs.size}")
     return true
@@ -223,8 +241,12 @@ class BatchJobConcurrentLauncher(
     batchJobChunkExecutionQueue.addItemsToLocalQueue(listOf(executionItem))
   }
 
-  private fun onJobCompleted(executionItem: ExecutionQueueItem) {
+  private fun onJobCompleted(
+    executionItem: ExecutionQueueItem,
+    jobCharacter: JobCharacter,
+  ) {
     runningJobs.remove(executionItem.chunkExecutionId)
+    decrementRunningCharacterCount(jobCharacter)
     // Decrement running count when coroutine actually finishes to align with runningJobs
     progressManager.onExecutionCoroutineComplete(executionItem.jobId)
     logger.debug("Chunk ${executionItem.chunkExecutionId}: Completed")
@@ -238,8 +260,7 @@ class BatchJobConcurrentLauncher(
     return executeAfter <= currentDateProvider.date.time
   }
 
-  fun ExecutionQueueItem.shouldNotBeDebounced(): Boolean {
-    val dto = batchJobService.getJobDto(this.jobId)
+  fun ExecutionQueueItem.shouldNotBeDebounced(dto: BatchJobDto): Boolean {
     val lastEventTime = dto.lastDebouncingEvent ?: dto.createdAt ?: return true
     val debounceDuration = dto.debounceDurationInMs ?: return true
     val executeAfter = lastEventTime + debounceDuration
@@ -266,14 +287,14 @@ class BatchJobConcurrentLauncher(
     if (otherCharactersInQueueCount == 0) {
       return true
     }
-    val runningJobCharacterCounts = runningJobs.values.filter { it.first.jobCharacter == character }.size
+    val runningCount = runningJobCharacterCounts[character]?.get() ?: 0
     val allowedCharacterCounts = ceil(character.maxConcurrencyRatio * batchProperties.concurrency)
-    return runningJobCharacterCounts < allowedCharacterCounts
+    return runningCount < allowedCharacterCounts
   }
 
-  private fun ExecutionQueueItem.trySetRunningState(): Boolean {
+  private fun ExecutionQueueItem.trySetRunningState(batchJobDto: BatchJobDto): Boolean {
     // Check maxPerJobConcurrency before trying to set running state
-    val maxPerJobConcurrency = batchJobService.getJobDto(this.jobId).maxPerJobConcurrency
+    val maxPerJobConcurrency = batchJobDto.maxPerJobConcurrency
     if (maxPerJobConcurrency != -1) {
       // Count only executions for THIS specific job, not all running executions globally
       val runningForThisJob = runningJobs.values.count { it.first.id == this.jobId }

@@ -27,6 +27,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.UnexpectedRollbackException
+import io.tolgee.batch.data.BatchJobDto
 import java.util.concurrent.CancellationException
 import kotlin.coroutines.coroutineContext
 
@@ -48,7 +49,10 @@ class BatchJobActionService(
   private val activityHolder: ActivityHolder,
   private val metrics: Metrics,
 ) : Logging {
-  suspend fun handleItem(executionItem: ExecutionQueueItem) {
+  suspend fun handleItem(
+    executionItem: ExecutionQueueItem,
+    batchJobDto: BatchJobDto,
+  ) {
     val coroutineContext = coroutineContext
     var retryExecution: BatchJobChunkExecution? = null
     try {
@@ -62,8 +66,7 @@ class BatchJobActionService(
 
             publishRemoveConsuming(executionItem)
 
-            progressManager.handleJobRunning(lockedExecution.batchJob.id)
-            val batchJobDto = batchJobService.getJobDto(lockedExecution.batchJob.id)
+            progressManager.handleJobRunning(batchJobDto)
 
             logger.debug("Job ${batchJobDto.id}: 🟡 Processing chunk ${lockedExecution.id}")
             val savepoint = savePointManager.setSavepoint()
@@ -79,7 +82,7 @@ class BatchJobActionService(
               rollbackActivity()
             }
 
-            progressManager.handleProgress(lockedExecution)
+            progressManager.handleProgress(lockedExecution, batchJobDto)
             entityManager.persist(entityManager.merge(lockedExecution))
 
             if (lockedExecution.retry) {
@@ -94,7 +97,7 @@ class BatchJobActionService(
         }
       execution?.let {
         logger.debug("Job: ${it.batchJob.id} - Handling execution committed ${it.id} (standard flow)")
-        progressManager.handleChunkCompletedCommitted(it)
+        progressManager.handleChunkCompletedCommitted(it, batchJobDto = batchJobDto)
       }
       addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter)
     } catch (e: Throwable) {
