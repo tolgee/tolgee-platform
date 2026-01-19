@@ -21,6 +21,7 @@ fi
 # Parse command line arguments
 NUM_KEYS=10000
 NUM_INSTANCES=2
+CONCURRENCY=20
 START_PORT=""
 POSTGRES_CONTAINER="tolgee-batch-jobs-perf-test-postgres"
 REDIS_CONTAINER="tolgee-batch-jobs-perf-test-redis"
@@ -28,9 +29,10 @@ POSTGRES_PORT=25433
 REDIS_PORT=6380
 
 usage() {
-    echo "Usage: $0 [-k NUM_ITEMS] [-n NUM_INSTANCES] [-p START_PORT] [-c POSTGRES_CONTAINER] [-r REDIS_CONTAINER] [-P POSTGRES_PORT] [-R REDIS_PORT]"
+    echo "Usage: $0 [-k NUM_ITEMS] [-n NUM_INSTANCES] [-C CONCURRENCY] [-p START_PORT] [-c POSTGRES_CONTAINER] [-r REDIS_CONTAINER] [-P POSTGRES_PORT] [-R REDIS_PORT]"
     echo "  -k NUM_ITEMS           Number of items to process (default: 10000)"
     echo "  -n NUM_INSTANCES       Number of Tolgee instances to start (default: 2)"
+    echo "  -C CONCURRENCY         Batch job concurrency per instance (default: 20)"
     echo "  -p START_PORT          Starting port number (default: 10020)"
     echo "  -c POSTGRES_CONTAINER  PostgreSQL container name (default: tolgee-batch-jobs-perf-test-postgres)"
     echo "  -r REDIS_CONTAINER     Redis container name (default: tolgee-batch-jobs-perf-test-redis)"
@@ -39,10 +41,11 @@ usage() {
     exit 1
 }
 
-while getopts "k:n:p:c:r:P:R:h" opt; do
+while getopts "k:n:C:p:c:r:P:R:h" opt; do
     case $opt in
         k) NUM_KEYS="$OPTARG" ;;
         n) NUM_INSTANCES="$OPTARG" ;;
+        C) CONCURRENCY="$OPTARG" ;;
         p) START_PORT="$OPTARG" ;;
         c) POSTGRES_CONTAINER="$OPTARG" ;;
         r) REDIS_CONTAINER="$OPTARG" ;;
@@ -73,6 +76,7 @@ fi
 echo "Project root detected at: $PROJECT_ROOT"
 echo "Number of items to process: $NUM_KEYS"
 echo "Number of instances: $NUM_INSTANCES"
+echo "Batch concurrency per instance: $CONCURRENCY"
 echo "Starting port: $START_PORT"
 echo "PostgreSQL port: $POSTGRES_PORT"
 echo "Redis port: $REDIS_PORT"
@@ -155,6 +159,7 @@ launch_instance() {
       --tolgee.billing.enabled=false \
       --tolgee.internal.controller-enabled=true \
       --tolgee.postgres-autostart.enabled=false \
+      --tolgee.batch.concurrency=$CONCURRENCY \
       > "$log_file" 2>&1 &
 
     local pid=$!

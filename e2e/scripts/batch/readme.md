@@ -22,25 +22,35 @@ This test uses a **NO_OP batch job type** that does nothing except report progre
 #### Usage:
 Run from the project root:
 ```bash
-./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh [-k NUM_ITEMS] [-n NUM_INSTANCES] [-p START_PORT] [-c POSTGRES_CONTAINER] [-r REDIS_CONTAINER] [-P POSTGRES_PORT] [-R REDIS_PORT]
+./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh [-k NUM_ITEMS] [-n NUM_INSTANCES] [-C CONCURRENCY] [-p START_PORT] [-c POSTGRES_CONTAINER] [-r REDIS_CONTAINER] [-P POSTGRES_PORT] [-R REDIS_PORT]
 ```
 
 Options:
 - `-k NUM_ITEMS` - Number of items to process (default: 10000)
 - `-n NUM_INSTANCES` - Number of Tolgee instances to start (default: 2)
+- `-C CONCURRENCY` - Batch job concurrency per instance (default: 20)
 - `-p START_PORT` - Starting port number (default: 10020)
 - `-c POSTGRES_CONTAINER` - PostgreSQL container name (default: tolgee-batch-jobs-perf-test-postgres)
 - `-r REDIS_CONTAINER` - Redis container name (default: tolgee-batch-jobs-perf-test-redis)
 - `-P POSTGRES_PORT` - PostgreSQL port (default: 25433)
 - `-R REDIS_PORT` - Redis port (default: 6380)
 
+#### Production-like Test Configuration
+For testing closest to production settings, use **10000 items, 3 instances, and concurrency 20**:
+```bash
+./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh -k 10000 -n 3 -C 20
+```
+
 Examples:
 ```bash
-# Default: 2 instances on ports 10020-10021, 10000 items
+# Default: 2 instances, 10000 items, concurrency 20
 ./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh
 
-# 3 instances starting at port 9000 with 1000 items
-./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh -n 3 -p 9000 -k 1000
+# Production-like: 3 instances, 10000 items, concurrency 20
+./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh -n 3
+
+# Quick test with fewer items
+./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh -n 3 -k 1000
 
 # 5 instances on ports 10020-10024
 ./e2e/scripts/batch/run-batch-mt-job-with-2-pods-and-redis.sh -n 5
