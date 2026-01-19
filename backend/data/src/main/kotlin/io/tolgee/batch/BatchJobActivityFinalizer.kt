@@ -67,21 +67,18 @@ class BatchJobActivityFinalizer(
   }
 
   private fun waitForOtherChunksToComplete(job: BatchJobDto) {
-    // how many executions are being committed in this transaction
-    val committedInThisTransactions = activityHolder.activityRevision.cancelledBatchJobExecutionCount ?: 1
-    logger.debug("Committed chunks executions in this transaction: $committedInThisTransactions")
-
     retryWaitingWithBatchJobResetting(job.id) {
-      val committedChunks =
-        batchJobStateProvider
-          .get(job.id)
-          .values
-          .count { it.retry == false && it.transactionCommitted && it.status.completed }
+      // Use O(1) completedChunksCount counter instead of iterating the entire state map.
+      // We use completedChunksCount (not committedCount) because it's incremented INSIDE the transaction
+      // (in handleProgress), so it's already updated when this beforeTransactionCompletion callback runs.
+      // committedCount is incremented AFTER commit (in handleChunkCompletedCommitted), which would cause
+      // a race condition where chunks wait for each other to commit.
+      // Note: The current chunk has already incremented this counter, so we check for ALL chunks completed.
+      val completedChunks = batchJobStateProvider.getCompletedChunksCount(job.id)
       logger.debug(
-        "Waiting for completed chunks and committed ($committedChunks) to be equal to all other chunks" +
-          " count (${job.totalChunks - committedInThisTransactions})",
+        "Waiting for all chunks to complete ($completedChunks/${job.totalChunks})",
       )
-      committedChunks == job.totalChunks - committedInThisTransactions
+      completedChunks == job.totalChunks
     }
   }
 
