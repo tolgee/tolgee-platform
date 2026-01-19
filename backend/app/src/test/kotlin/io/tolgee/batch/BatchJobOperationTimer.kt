@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicLong
  * Used for profiling and identifying bottlenecks.
  */
 class BatchJobOperationTimer : Logging {
-
   private val operationTimes = ConcurrentHashMap<String, OperationStats>()
 
   data class OperationStats(
@@ -20,7 +19,10 @@ class BatchJobOperationTimer : Logging {
     val minTimeNanos: AtomicLong = AtomicLong(Long.MAX_VALUE),
   )
 
-  fun <T> measure(operationName: String, block: () -> T): T {
+  fun <T> measure(
+    operationName: String,
+    block: () -> T,
+  ): T {
     val startTime = System.nanoTime()
     try {
       return block()
@@ -30,7 +32,10 @@ class BatchJobOperationTimer : Logging {
     }
   }
 
-  suspend fun <T> measureSuspend(operationName: String, block: suspend () -> T): T {
+  suspend fun <T> measureSuspend(
+    operationName: String,
+    block: suspend () -> T,
+  ): T {
     val startTime = System.nanoTime()
     try {
       return block()
@@ -40,7 +45,10 @@ class BatchJobOperationTimer : Logging {
     }
   }
 
-  private fun record(operationName: String, elapsedNanos: Long) {
+  private fun record(
+    operationName: String,
+    elapsedNanos: Long,
+  ) {
     val stats = operationTimes.computeIfAbsent(operationName) { OperationStats() }
     stats.totalTimeNanos.addAndGet(elapsedNanos)
     stats.count.incrementAndGet()

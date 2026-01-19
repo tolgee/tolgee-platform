@@ -51,7 +51,6 @@ import org.springframework.transaction.PlatformTransactionManager
 class BatchJobNoOpPerformanceWithRedisTest :
   AbstractSpringTest(),
   Logging {
-
   @TestConfiguration
   @EnableAspectJAutoProxy
   class TimingConfiguration {
