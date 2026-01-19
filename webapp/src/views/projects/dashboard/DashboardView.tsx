@@ -2,6 +2,7 @@ import { Box, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProject } from 'tg.hooks/useProject';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
@@ -17,7 +18,6 @@ import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { useEffect } from 'react';
 import { ProjectNameAndId } from './ProjectNameAndId';
 import { ProjectSettingsRight } from './ProjectSettingsRight';
-import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -55,7 +55,7 @@ const StyledTopInfo = styled(Box)`
 
 export const DashboardView = () => {
   const project = useProject();
-  const { selectedName } = useBranchesService({ projectId: project.id });
+  const branch = useBranchFromUrlPath();
 
   const reportEvent = useReportEvent();
   useEffect(() => {
@@ -70,7 +70,7 @@ export const DashboardView = () => {
   const canViewActivity = satisfiesPermission('activity.view');
 
   const path = { projectId: project.id };
-  const query = { size: 15, sort: ['timestamp,desc'], branch: selectedName };
+  const query = { size: 15, sort: ['timestamp,desc'], branch };
   const activityLoadable = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/activity',
     method: 'get',
@@ -104,7 +104,7 @@ export const DashboardView = () => {
       projectId: project.id,
     },
     query: {
-      branch: selectedName,
+      branch,
     },
   });
 
