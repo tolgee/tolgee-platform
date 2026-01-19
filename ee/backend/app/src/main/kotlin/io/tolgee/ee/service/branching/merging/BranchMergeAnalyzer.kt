@@ -7,12 +7,14 @@ import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.repository.KeyRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class BranchMergeAnalyzer(
   private val keyRepository: KeyRepository,
   private val branchSnapshotService: BranchSnapshotService,
 ) {
+  @Transactional
   fun compute(merge: BranchMerge): MutableList<BranchMergeChange> {
     val snapshots = branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id)
     val sourceBranch = merge.sourceBranch
