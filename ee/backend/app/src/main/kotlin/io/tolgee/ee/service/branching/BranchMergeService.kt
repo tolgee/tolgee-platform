@@ -23,6 +23,7 @@ import io.tolgee.util.Logging
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class BranchMergeService(
@@ -33,6 +34,7 @@ class BranchMergeService(
   private val branchSnapshotService: BranchSnapshotService,
   private val branchMergeKeyCloneFactory: BranchMergeKeyCloneFactory,
 ) : Logging {
+  @Transactional
   fun dryRun(branchMerge: BranchMerge) {
     val changes = branchMergeAnalyzer.compute(branchMerge)
     branchMerge.sourceRevision = branchMerge.sourceBranch.revision
@@ -41,6 +43,7 @@ class BranchMergeService(
     branchMerge.changes.addAll(changes)
   }
 
+  @Transactional
   fun dryRun(
     sourceBranch: Branch,
     targetBranch: Branch,
@@ -57,6 +60,7 @@ class BranchMergeService(
     return branchMerge
   }
 
+  @Transactional
   fun refresh(branchMerge: BranchMerge) {
     val resolvedConflicts =
       branchMerge.changes
