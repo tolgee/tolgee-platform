@@ -1,18 +1,18 @@
 package io.tolgee.component.lockingProvider
 
 import io.tolgee.component.LockingProvider
-import java.util.WeakHashMap
+import org.springframework.scheduling.annotation.Scheduled
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
-class SimpleLockingProvider : LockingProvider {
+open class SimpleLockingProvider : LockingProvider {
   companion object {
-    val map = WeakHashMap<String, Lock>()
+    val map = ConcurrentHashMap<String, ReentrantLock>()
   }
 
-  @Synchronized
   override fun getLock(name: String): Lock {
-    return map.getOrPut(name) { ReentrantLock() }
+    return map.computeIfAbsent(name) { ReentrantLock() }
   }
 
   override fun <T> withLocking(
@@ -26,5 +26,10 @@ class SimpleLockingProvider : LockingProvider {
     } finally {
       lock.unlock()
     }
+  }
+
+  @Scheduled(fixedRate = 60000)
+  fun cleanupUnusedLocks() {
+    map.entries.removeIf { !it.value.isLocked }
   }
 }
