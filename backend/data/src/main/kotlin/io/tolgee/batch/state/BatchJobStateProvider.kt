@@ -177,19 +177,98 @@ class BatchJobStateProvider(
     }
 
     if (usingRedisProvider.areWeUsingRedis) {
-      redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").set(runningCount.toLong())
-      redissonClient.getAtomicLong("$REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX$jobId").set(completedChunksCount.toLong())
-      redissonClient.getAtomicLong("$REDIS_PROGRESS_COUNT_KEY_PREFIX$jobId").set(progressCount)
-      redissonClient.getAtomicLong("$REDIS_FAILED_COUNT_KEY_PREFIX$jobId").set(failedCount.toLong())
-      redissonClient.getAtomicLong("$REDIS_CANCELLED_COUNT_KEY_PREFIX$jobId").set(cancelledCount.toLong())
-      redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId").set(committedCount.toLong())
+      // Use setIfLower to avoid overwriting concurrent increments.
+      // If the counter is already > initial value, some execution has already updated it.
+      setIfLower(redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId"), runningCount.toLong())
+      setIfLower(redissonClient.getAtomicLong("$REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX$jobId"), completedChunksCount.toLong())
+      setIfLower(redissonClient.getAtomicLong("$REDIS_PROGRESS_COUNT_KEY_PREFIX$jobId"), progressCount)
+      setIfLower(redissonClient.getAtomicLong("$REDIS_FAILED_COUNT_KEY_PREFIX$jobId"), failedCount.toLong())
+      setIfLower(redissonClient.getAtomicLong("$REDIS_CANCELLED_COUNT_KEY_PREFIX$jobId"), cancelledCount.toLong())
+      setIfLower(redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId"), committedCount.toLong())
     } else {
-      localRunningCountMap[jobId] = java.util.concurrent.atomic.AtomicInteger(runningCount)
-      localCompletedChunksCountMap[jobId] = java.util.concurrent.atomic.AtomicInteger(completedChunksCount)
-      localProgressCountMap[jobId] = java.util.concurrent.atomic.AtomicLong(progressCount)
-      localFailedCountMap[jobId] = java.util.concurrent.atomic.AtomicInteger(failedCount)
-      localCancelledCountMap[jobId] = java.util.concurrent.atomic.AtomicInteger(cancelledCount)
-      localCommittedCountMap[jobId] = java.util.concurrent.atomic.AtomicInteger(committedCount)
+      // Use computeIfAbsent and setIfLower logic to avoid overwriting concurrent increments.
+      // Only set the counter if it doesn't exist, or if the current value is lower than initial.
+      setLocalCounterIfLower(localRunningCountMap, jobId, runningCount)
+      setLocalCounterIfLower(localCompletedChunksCountMap, jobId, completedChunksCount)
+      setLocalLongCounterIfLower(localProgressCountMap, jobId, progressCount)
+      setLocalCounterIfLower(localFailedCountMap, jobId, failedCount)
+      setLocalCounterIfLower(localCancelledCountMap, jobId, cancelledCount)
+      setLocalCounterIfLower(localCommittedCountMap, jobId, committedCount)
+    }
+  }
+
+  /**
+   * Sets the counter to the given value only if the current value is lower.
+   * This prevents overwriting concurrent increments during initialization.
+   */
+  private fun setIfLower(
+    counter: org.redisson.api.RAtomicLong,
+    value: Long,
+  ) {
+    while (true) {
+      val current = counter.get()
+      if (current >= value) {
+        // Current value is already >= the initial value, don't overwrite
+        return
+      }
+      if (counter.compareAndSet(current, value)) {
+        return
+      }
+      // CAS failed, retry
+    }
+  }
+
+  /**
+   * Sets a local AtomicInteger counter only if it doesn't exist or current value is lower.
+   */
+  private fun setLocalCounterIfLower(
+    map: ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicInteger>,
+    jobId: Long,
+    value: Int,
+  ) {
+    map.compute(jobId) { _, existing ->
+      if (existing == null) {
+        java.util.concurrent.atomic.AtomicInteger(value)
+      } else {
+        // Only update if existing value is lower than the initial value
+        while (true) {
+          val current = existing.get()
+          if (current >= value) {
+            break
+          }
+          if (existing.compareAndSet(current, value)) {
+            break
+          }
+        }
+        existing
+      }
+    }
+  }
+
+  /**
+   * Sets a local AtomicLong counter only if it doesn't exist or current value is lower.
+   */
+  private fun setLocalLongCounterIfLower(
+    map: ConcurrentHashMap<Long, java.util.concurrent.atomic.AtomicLong>,
+    jobId: Long,
+    value: Long,
+  ) {
+    map.compute(jobId) { _, existing ->
+      if (existing == null) {
+        java.util.concurrent.atomic.AtomicLong(value)
+      } else {
+        // Only update if existing value is lower than the initial value
+        while (true) {
+          val current = existing.get()
+          if (current >= value) {
+            break
+          }
+          if (existing.compareAndSet(current, value)) {
+            break
+          }
+        }
+        existing
+      }
     }
   }
 
@@ -251,6 +330,62 @@ class BatchJobStateProvider(
           java.util.concurrent.atomic
             .AtomicInteger(0)
         }.incrementAndGet()
+    }
+  }
+
+  /**
+   * Atomically increments the running count and returns the new value. O(1) atomic operation.
+   * Used for check-then-act patterns where we need to ensure atomicity.
+   */
+  fun incrementRunningCountAndGet(jobId: Long): Int {
+    if (usingRedisProvider.areWeUsingRedis) {
+      return redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").incrementAndGet().toInt()
+    }
+    return localRunningCountMap
+      .computeIfAbsent(jobId) {
+        java.util.concurrent.atomic
+          .AtomicInteger(0)
+      }.incrementAndGet()
+  }
+
+  /**
+   * Atomically tries to increment the running count if it would not exceed the limit.
+   * Returns true if incremented successfully, false if limit would be exceeded.
+   * Uses a lock to ensure atomicity of the check-and-increment operation.
+   */
+  fun tryIncrementRunningCount(
+    jobId: Long,
+    maxConcurrency: Int,
+  ): Boolean {
+    if (usingRedisProvider.areWeUsingRedis) {
+      // Use a lock to make check-and-increment atomic for Redis
+      return lockingProvider.withLocking("batch_job_running_count_$jobId") {
+        val counter = redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId")
+        val current = counter.get().toInt()
+        if (current >= maxConcurrency) {
+          false
+        } else {
+          counter.incrementAndGet()
+          true
+        }
+      }
+    }
+    // For local, use atomic compareAndSet loop
+    val counter =
+      localRunningCountMap
+        .computeIfAbsent(jobId) {
+          java.util.concurrent.atomic
+            .AtomicInteger(0)
+        }
+    while (true) {
+      val current = counter.get()
+      if (current >= maxConcurrency) {
+        return false
+      }
+      if (counter.compareAndSet(current, current + 1)) {
+        return true
+      }
+      // CAS failed, retry
     }
   }
 
@@ -361,16 +496,19 @@ class BatchJobStateProvider(
     return localCommittedCountMap[jobId]?.get() ?: 0
   }
 
-  fun incrementCommittedCount(jobId: Long) {
+  /**
+   * Atomically increments the committed count and returns the new value.
+   * This enables atomic check-and-act patterns (e.g., checking if job is completed).
+   */
+  fun incrementCommittedCountAndGet(jobId: Long): Int {
     if (usingRedisProvider.areWeUsingRedis) {
-      redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId").incrementAndGet()
-    } else {
-      localCommittedCountMap
-        .computeIfAbsent(jobId) {
-          java.util.concurrent.atomic
-            .AtomicInteger(0)
-        }.incrementAndGet()
+      return redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId").incrementAndGet().toInt()
     }
+    return localCommittedCountMap
+      .computeIfAbsent(jobId) {
+        java.util.concurrent.atomic
+          .AtomicInteger(0)
+      }.incrementAndGet()
   }
 
   // ===== Cleanup all counters =====
@@ -604,5 +742,20 @@ class BatchJobStateProvider(
       return keys.mapNotNull { it.removePrefix(REDIS_STATE_KEY_PREFIX).toLongOrNull() }.toMutableSet()
     }
     return localJobStatesMap.keys.toMutableSet()
+  }
+
+  /**
+   * Clears all local in-memory state. Used for testing to ensure clean state between tests.
+   * Only affects local (non-Redis) mode.
+   */
+  fun clearAllLocalState() {
+    localJobStatesMap.clear()
+    localRunningCountMap.clear()
+    localCompletedChunksCountMap.clear()
+    localProgressCountMap.clear()
+    localFailedCountMap.clear()
+    localCancelledCountMap.clear()
+    localCommittedCountMap.clear()
+    localInitializedJobs.clear()
   }
 }

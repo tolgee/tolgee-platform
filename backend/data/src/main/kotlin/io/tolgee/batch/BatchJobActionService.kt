@@ -27,6 +27,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.UnexpectedRollbackException
+import java.util.concurrent.CancellationException
 import kotlin.coroutines.coroutineContext
 
 @Service
@@ -99,6 +100,15 @@ class BatchJobActionService(
     } catch (e: Throwable) {
       progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
       when (e) {
+        is CancellationException, is kotlinx.coroutines.CancellationException -> {
+          // Coroutine was cancelled (e.g., during job cancellation)
+          // Update the execution status to CANCELLED in a new transaction
+          logger.debug(
+            "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId} was cancelled",
+          )
+          handleCancelledExecution(executionItem)
+        }
+
         is UnexpectedRollbackException -> {
           logger.debug(
             "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId}" +
@@ -111,6 +121,27 @@ class BatchJobActionService(
           Sentry.captureException(e)
         }
       }
+    }
+  }
+
+  private fun handleCancelledExecution(executionItem: ExecutionQueueItem) {
+    try {
+      val execution = executeInNewTransaction(transactionManager) {
+        val exec = entityManager.find(BatchJobChunkExecution::class.java, executionItem.chunkExecutionId)
+        if (exec != null && !exec.status.completed) {
+          exec.status = BatchJobChunkExecutionStatus.CANCELLED
+          entityManager.persist(exec)
+          progressManager.handleProgress(exec)
+          exec
+        } else {
+          null
+        }
+      }
+      execution?.let {
+        progressManager.handleChunkCompletedCommitted(it)
+      }
+    } catch (e: Exception) {
+      logger.warn("Failed to handle cancelled execution ${executionItem.chunkExecutionId}", e)
     }
   }
 

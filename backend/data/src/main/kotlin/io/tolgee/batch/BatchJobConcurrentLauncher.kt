@@ -44,6 +44,9 @@ class BatchJobConcurrentLauncher(
     set(value) {
       field = value
       if (value) {
+        // Cancel all running coroutines for faster cleanup during test teardown
+        // invokeOnCompletion will still be called, which triggers onJobCompleted
+        runningJobs.values.forEach { (_, job) -> job.cancel() }
         waitFor(30000) {
           runningJobs.size == 0
         }
@@ -219,6 +222,8 @@ class BatchJobConcurrentLauncher(
 
   private fun onJobCompleted(executionItem: ExecutionQueueItem) {
     runningJobs.remove(executionItem.chunkExecutionId)
+    // Decrement running count when coroutine actually finishes to align with runningJobs
+    progressManager.onExecutionCoroutineComplete(executionItem.jobId)
     logger.debug("Chunk ${executionItem.chunkExecutionId}: Completed")
     logger.debug("Running jobs: ${runningJobs.size}")
   }

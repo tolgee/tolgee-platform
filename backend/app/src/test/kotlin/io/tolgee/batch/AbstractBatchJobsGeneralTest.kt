@@ -4,6 +4,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
+import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
@@ -71,10 +72,14 @@ abstract class AbstractBatchJobsGeneralTest :
   @Autowired
   lateinit var autoTranslationService: io.tolgee.service.translation.AutoTranslationService
 
+  @Autowired
+  lateinit var batchJobStateProvider: BatchJobStateProvider
+
   lateinit var util: BatchJobTestUtil
 
   @BeforeEach
   fun setup() {
+    batchJobStateProvider.clearAllLocalState()
     Mockito.reset(batchJobProjectLockingManager)
     Mockito.reset(progressManager)
     Mockito.reset(autoTranslationService)

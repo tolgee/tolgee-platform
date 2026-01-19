@@ -49,9 +49,14 @@ class ProgressManager(
       return false
     }
 
+    // Increment running count (will be decremented in onExecutionCoroutineComplete)
+    batchJobStateProvider.incrementRunningCount(batchJobId)
+
     // O(1) check if execution already exists with terminal state
     val currentState = batchJobStateProvider.getSingleExecution(batchJobId, executionId)
     if (currentState?.status?.completed == true) {
+      // Already completed - decrement running count and reject
+      batchJobStateProvider.decrementRunningCount(batchJobId)
       return false
     }
 
@@ -67,8 +72,6 @@ class ProgressManager(
         transactionCommitted = currentState?.transactionCommitted ?: false,
       ),
     )
-    // O(1) increment running counter
-    batchJobStateProvider.incrementRunningCount(batchJobId)
     return true
   }
 
@@ -88,6 +91,14 @@ class ProgressManager(
     }
   }
 
+  /**
+   * Called when the coroutine executing a chunk finishes (via invokeOnCompletion).
+   * This decrements the running count to align with actual coroutine lifecycle.
+   */
+  fun onExecutionCoroutineComplete(batchJobId: Long) {
+    batchJobStateProvider.decrementRunningCount(batchJobId)
+  }
+
   fun handleProgress(execution: BatchJobChunkExecution) {
     val job = batchJobService.getJobDto(execution.batchJob.id)
 
@@ -104,9 +115,16 @@ class ProgressManager(
     }
 
     if (execution.status.completed) {
-      batchJobStateProvider.decrementRunningCount(job.id)
+      // NOTE: Running count is NOT decremented here. It's decremented in onExecutionCoroutineComplete
+      // which is called when the coroutine actually finishes (via invokeOnCompletion).
+      // This ensures the running count aligns with actual coroutine lifecycle, not just execution state.
       if (execution.retry != true) {
+        val beforeCount = batchJobStateProvider.getCompletedChunksCount(job.id)
         batchJobStateProvider.incrementCompletedChunksCount(job.id)
+        val afterCount = batchJobStateProvider.getCompletedChunksCount(job.id)
+        logger.info("incrementCompletedChunksCount: job=${job.id}, execution=${execution.id}, before=$beforeCount, after=$afterCount, retry=${execution.retry}")
+      } else {
+        logger.info("Skipping increment for job=${job.id}, execution=${execution.id}, retry=${execution.retry}")
       }
     }
     if (execution.status == BatchJobChunkExecutionStatus.FAILED && execution.retry != true) {
@@ -150,11 +168,20 @@ class ProgressManager(
       executionState,
     )
 
-    // Increment committed counter and check if job is completed
-    batchJobStateProvider.incrementCommittedCount(execution.batchJob.id)
-    val committedCount = batchJobStateProvider.getCommittedCount(execution.batchJob.id)
+    // Only count executions that are NOT going to be retried.
+    // Executions with retry=true are intermediate failures, not the final state of that chunk.
+    if (execution.retry) {
+      logger.debug {
+        "Skipping committed count increment for execution ${execution.id} (retry=true)"
+      }
+      return
+    }
+
+    // Atomically increment committed counter and get the new value
+    // This ensures only the thread that reaches totalChunks will trigger job completion
+    val committedCount = batchJobStateProvider.incrementCommittedCountAndGet(execution.batchJob.id)
     val job = batchJobService.getJobDto(execution.batchJob.id)
-    val isJobCompleted = committedCount >= job.totalChunks
+    val isJobCompleted = committedCount == job.totalChunks
 
     logger.debug {
       "Is job ${execution.batchJob.id} completed: $isJobCompleted " +
