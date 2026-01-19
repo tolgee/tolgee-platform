@@ -41,25 +41,22 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
       tb,
       bm.mergedAt,
       case when sb.revision = bm.sourceRevision and tb.revision = bm.targetRevision then true else false end,
-      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.ADD then 1 else 0 end), 0),
-      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.DELETE then 1 else 0 end), 0),
-      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.UPDATE then 1 else 0 end), 0),
-      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NULL then 1 else 0 end), 0),
-      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NOT NULL then 1 else 0 end), 0),
-      coalesce(
-        (
-          select count(t)
-          from Task t
-          where (
-            t.branch.id = sb.id
-            or (t.branch is null and sb.isDefault = true)
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.ADD then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.DELETE then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.UPDATE then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NULL then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NOT NULL then 1 end),
+      (
+        select count(t)
+        from Task t
+        where (
+          t.branch.id = sb.id
+          or (t.branch is null and sb.isDefault = true)
+        )
+          and t.state in (
+            io.tolgee.model.enums.TaskState.NEW,
+            io.tolgee.model.enums.TaskState.IN_PROGRESS
           )
-            and t.state in (
-              io.tolgee.model.enums.TaskState.NEW,
-              io.tolgee.model.enums.TaskState.IN_PROGRESS
-            )
-        ),
-        0
       )
     )
     from BranchMerge bm
@@ -84,25 +81,22 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
       tb,
       bm.mergedAt,
       case when sb.revision = bm.sourceRevision and tb.revision = bm.targetRevision then true else false end,
-      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.ADD then 1 else 0 end), 0),
-      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.DELETE then 1 else 0 end), 0),
-      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.UPDATE then 1 else 0 end), 0),
-      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NULL then 1 else 0 end), 0),
-      coalesce(sum(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NOT NULL then 1 else 0 end), 0),
-      coalesce(
-        (
-          select count(t)
-          from Task t
-          where (
-            t.branch.id = sb.id
-            or (t.branch is null and sb.isDefault = true)
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.ADD then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.DELETE then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.UPDATE then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NULL then 1 end),
+      count(case when ch.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT and ch.resolution IS NOT NULL then 1 end),
+      (
+        select count(t)
+        from Task t
+        where (
+          t.branch.id = sb.id
+          or (t.branch is null and sb.isDefault = true)
+        )
+          and t.state in (
+            io.tolgee.model.enums.TaskState.NEW,
+            io.tolgee.model.enums.TaskState.IN_PROGRESS
           )
-            and t.state in (
-              io.tolgee.model.enums.TaskState.NEW,
-              io.tolgee.model.enums.TaskState.IN_PROGRESS
-            )
-        ),
-        0
       )
     )
     from BranchMerge bm
