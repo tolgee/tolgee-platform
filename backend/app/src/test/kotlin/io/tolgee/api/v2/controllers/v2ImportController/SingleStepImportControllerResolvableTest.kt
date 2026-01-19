@@ -12,11 +12,11 @@ import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.generateImage
 import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.key.Key
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import io.tolgee.util.generateImage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
