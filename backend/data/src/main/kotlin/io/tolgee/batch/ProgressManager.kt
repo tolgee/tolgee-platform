@@ -69,18 +69,21 @@ class ProgressManager(
 
   /**
    * This method is called when the execution is not even started, because it was locked or something,
-   * it doesn't set it when the status is different from RUNNING
+   * it doesn't set it when the status is different from RUNNING.
+   * Always decrements the running count since it was already incremented in trySetExecutionRunning.
    */
   fun rollbackSetToRunning(
     executionId: Long,
     batchJobId: Long,
   ) {
-    // Lock-free: check and remove single execution
+    // Lock-free: check and remove single execution only if still RUNNING
     val currentState = batchJobStateProvider.getSingleExecution(batchJobId, executionId)
     if (currentState?.status == BatchJobChunkExecutionStatus.RUNNING) {
       batchJobStateProvider.removeSingleExecution(batchJobId, executionId)
-      batchJobStateProvider.decrementRunningCount(batchJobId)
     }
+    // Always decrement running count - it was incremented in trySetExecutionRunning
+    // and needs to be rolled back regardless of whether another worker changed the state
+    batchJobStateProvider.decrementRunningCount(batchJobId)
   }
 
   /**
@@ -150,6 +153,13 @@ class ProgressManager(
     batchJobDto: BatchJobDto? = null,
   ) {
     logger.debug("Setting transaction committed for chunk execution ${execution.id} to true")
+
+    // Idempotency guard: check if already marked as committed to prevent double-counting
+    val existingState = batchJobStateProvider.getSingleExecution(execution.batchJob.id, execution.id)
+    if (existingState?.transactionCommitted == true) {
+      logger.debug("Execution ${execution.id} already marked as transaction committed, skipping")
+      return
+    }
 
     // Lock-free: update single execution using atomic Redis HSET
     val executionState = batchJobStateProvider.getStateForExecution(execution)

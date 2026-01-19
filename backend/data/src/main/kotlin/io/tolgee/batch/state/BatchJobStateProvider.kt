@@ -625,6 +625,8 @@ class BatchJobStateProvider(
       redisHash.delete()
       // Also remove initialization marker
       redissonClient.getBucket<Boolean>("$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId").delete()
+      // Clear local initialization cache to allow re-initialization if jobId is reused
+      localInitializedJobs.remove(jobId)
       return state
     }
     localInitializedJobs.remove(jobId)
@@ -717,6 +719,8 @@ class BatchJobStateProvider(
         if (allCompleted) {
           redisHash.delete()
           redissonClient.getBucket<Boolean>("$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId").delete()
+          // Clear local initialization cache to allow re-initialization if jobId is reused
+          localInitializedJobs.remove(jobId)
           // Do NOT remove counters here - they're needed until job status is properly updated
           // Counters will be removed in removeJobState when job is finalized
         }

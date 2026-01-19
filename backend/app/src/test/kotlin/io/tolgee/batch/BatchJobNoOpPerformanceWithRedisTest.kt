@@ -209,6 +209,9 @@ class BatchJobNoOpPerformanceWithRedisTest :
                 "committedCount: ${batchJobStateProvider.getCommittedCount(job.id)}",
             )
           }
+        } else {
+          // Reset counter if condition is no longer met (non-consecutive detection)
+          allCompletedCount = 0
         }
       }
 
