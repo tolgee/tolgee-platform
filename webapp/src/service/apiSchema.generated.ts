@@ -503,6 +503,9 @@ export interface paths {
      */
     post: operations["exportPost"];
   };
+  "/v2/projects/{projectId}/glossaries": {
+    get: operations["getAssignedGlossaries"];
+  };
   "/v2/projects/{projectId}/glossary-highlights": {
     post: operations["getHighlights"];
   };
@@ -1567,6 +1570,11 @@ export interface components {
     CollectionModelScreenshotModel: {
       _embedded?: {
         screenshots?: components["schemas"]["ScreenshotModel"][];
+      };
+    };
+    CollectionModelSimpleGlossaryModel: {
+      _embedded?: {
+        glossaries?: components["schemas"]["SimpleGlossaryModel"][];
       };
     };
     CollectionModelSimpleOrganizationModel: {
@@ -12888,6 +12896,45 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["ExportParams"];
+      };
+    };
+  };
+  getAssignedGlossaries: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelSimpleGlossaryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
       };
     };
   };

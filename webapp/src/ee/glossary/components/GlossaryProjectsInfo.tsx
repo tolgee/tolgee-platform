@@ -2,6 +2,7 @@ import { Box, styled, Tooltip, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 import { ProjectLink } from 'tg.component/ProjectLink';
+import { useMemo } from 'react';
 
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
 
@@ -26,7 +27,10 @@ export const GlossaryProjectsInfo: React.FC<Props> = ({
     return null;
   }
 
-  const sortedProjects = projects.sort((a, b) => a.name.localeCompare(b.name));
+  const sortedProjects = useMemo(
+    () => [...projects].sort((a, b) => a.name.localeCompare(b.name)),
+    [projects]
+  );
   const displayedProjects = sortedProjects.slice(0, maxDisplay);
   const remainingProjects = sortedProjects.slice(maxDisplay);
   const hasMore = remainingProjects.length > 0;

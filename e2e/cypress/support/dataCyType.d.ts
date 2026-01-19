@@ -343,6 +343,7 @@ declare namespace DataCy {
         "glossary-list-languages" |
         "glossary-panel-container" |
         "glossary-panel-container-empty" |
+        "glossary-panel-searched-list" |
         "glossary-projects-info" |
         "glossary-switch" |
         "glossary-term-highlight" |

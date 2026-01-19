@@ -38,6 +38,13 @@ class GlossaryService(
     return glossaryRepository.findByOrganizationIdPaged(organizationId, pageable, search)
   }
 
+  fun findAssignedToProject(
+    organizationId: Long,
+    projectId: Long,
+  ): List<Glossary> {
+    return glossaryRepository.findAssignedToProject(organizationId, projectId)
+  }
+
   fun findAllWithStatsPaged(
     organizationId: Long,
     pageable: Pageable,
