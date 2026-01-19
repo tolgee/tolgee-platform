@@ -458,8 +458,49 @@ export interface paths {
     get: operations["currentJobs"];
   };
   "/v2/projects/{projectId}/export": {
+    /**
+     * Exports project data in various formats (JSON, properties, YAML, etc.).
+     *
+     *       ## HTTP Conditional Requests Support
+     *
+     *       This endpoint supports HTTP conditional requests using both If-Modified-Since and If-None-Match headers:
+     *
+     *       - **If-Modified-Since header provided**: The server checks if the project data has been modified since the specified date
+     *       - **If-None-Match header provided**: The server checks if the project data has changed by comparing the eTag value
+     *       - **Data not modified**: Returns HTTP 304 Not Modified with empty body
+     *       - **Data modified or no header**: Returns HTTP 200 OK with the exported data, Last-Modified header, and ETag header
+     *
+     *       The Last-Modified header in the response contains the timestamp of the last project modification,
+     *       and the ETag header contains a unique identifier for the current project state. Both can be used
+     *       for subsequent conditional requests to avoid unnecessary data transfer when the project hasn't changed.
+     *
+     *       Cache-Control header is set to max-age=0 to ensure validation on each request.
+     */
     get: operations["exportData"];
-    /** Exports data (post). Useful when exceeding allowed URL size. */
+    /**
+     * Exports project data in various formats (JSON, properties, YAML, etc.).
+     *       Useful when exceeding allowed URL size with GET requests.
+     *
+     *       ## HTTP Conditional Requests Support
+     *
+     *       This endpoint supports HTTP conditional requests using both If-Modified-Since and If-None-Match headers:
+     *
+     *       - **If-Modified-Since header provided**: The server checks if the project data has been modified since the specified date
+     *       - **If-None-Match header provided**: The server checks if the project data has changed by comparing the eTag value
+     *       - **Data not modified**: Returns HTTP 304 Not Modified with empty body
+     *       - **Data modified or no header**: Returns HTTP 200 OK with the exported data, Last-Modified header, and ETag header
+     *
+     *       Note: This endpoint uses a custom implementation that returns 304 Not Modified for all HTTP methods
+     *       (including POST) when conditional headers indicate the data hasn't changed. This differs from Spring's
+     *       default behavior which returns 412 for POST requests, but is appropriate here since POST is used only
+     *       to accommodate large request parameters, not to modify data.
+     *
+     *       The Last-Modified header in the response contains the timestamp of the last project modification,
+     *       and the ETag header contains a unique identifier for the current project state. Both can be used
+     *       for subsequent conditional requests to avoid unnecessary data transfer when the project hasn't changed.
+     *
+     *       Cache-Control header is set to max-age=0 to ensure validation on each request.
+     */
     post: operations["exportPost"];
   };
   "/v2/projects/{projectId}/glossary-highlights": {
@@ -1382,7 +1423,8 @@ export interface components {
         | "AUTOMATION"
         | "BILLING_TRIAL_EXPIRATION_NOTICE"
         | "ASSIGN_TRANSLATION_LABEL"
-        | "UNASSIGN_TRANSLATION_LABEL";
+        | "UNASSIGN_TRANSLATION_LABEL"
+        | "NO_OP";
       /**
        * Format: int64
        * @description The time when the job was last updated (status change)
@@ -2552,7 +2594,8 @@ export interface components {
         | "impersonation_of_admin_by_supporter_not_allowed"
         | "already_impersonating_user"
         | "operation_not_permitted_in_read_only_mode"
-        | "file_processing_failed";
+        | "file_processing_failed"
+        | "multiple_items_in_chunk_failed";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -3114,7 +3157,8 @@ export interface components {
         | "AUTOMATION"
         | "BILLING_TRIAL_EXPIRATION_NOTICE"
         | "ASSIGN_TRANSLATION_LABEL"
-        | "UNASSIGN_TRANSLATION_LABEL";
+        | "UNASSIGN_TRANSLATION_LABEL"
+        | "NO_OP";
     };
     JsonNode: unknown;
     JwtAuthenticationResponse: {
@@ -4531,7 +4575,10 @@ export interface components {
         | "ACCEPT_SUGGESTION"
         | "REVERSE_SUGGESTION"
         | "DELETE_SUGGESTION"
-        | "SUGGESTION_SET_ACTIVE";
+        | "SUGGESTION_SET_ACTIVE"
+        | "AI_PROMPT_CREATE"
+        | "AI_PROMPT_UPDATE"
+        | "AI_PROMPT_DELETE";
     };
     ProjectAiPromptCustomizationModel: {
       /**
@@ -4733,15 +4780,15 @@ export interface components {
       providerName: string;
       template?: string;
     };
-    PromptResponseDto: {
+    PromptResponseModel: {
       parsedJson?: components["schemas"]["JsonNode"];
       /** Format: int32 */
       price?: number;
       prompt: string;
       result: string;
-      usage?: components["schemas"]["PromptResponseUsageDto"];
+      usage?: components["schemas"]["PromptResponseUsageModel"];
     };
-    PromptResponseUsageDto: {
+    PromptResponseUsageModel: {
       /** Format: int64 */
       cachedTokens?: number;
       /** Format: int64 */
@@ -5821,7 +5868,8 @@ export interface components {
         | "impersonation_of_admin_by_supporter_not_allowed"
         | "already_impersonating_user"
         | "operation_not_permitted_in_read_only_mode"
-        | "file_processing_failed";
+        | "file_processing_failed"
+        | "multiple_items_in_chunk_failed";
       params?: unknown[];
       success: boolean;
     };
@@ -12611,6 +12659,24 @@ export interface operations {
       };
     };
   };
+  /**
+   * Exports project data in various formats (JSON, properties, YAML, etc.).
+   *
+   *       ## HTTP Conditional Requests Support
+   *
+   *       This endpoint supports HTTP conditional requests using both If-Modified-Since and If-None-Match headers:
+   *
+   *       - **If-Modified-Since header provided**: The server checks if the project data has been modified since the specified date
+   *       - **If-None-Match header provided**: The server checks if the project data has changed by comparing the eTag value
+   *       - **Data not modified**: Returns HTTP 304 Not Modified with empty body
+   *       - **Data modified or no header**: Returns HTTP 200 OK with the exported data, Last-Modified header, and ETag header
+   *
+   *       The Last-Modified header in the response contains the timestamp of the last project modification,
+   *       and the ETag header contains a unique identifier for the current project state. Both can be used
+   *       for subsequent conditional requests to avoid unnecessary data transfer when the project hasn't changed.
+   *
+   *       Cache-Control header is set to max-age=0 to ensure validation on each request.
+   */
   exportData: {
     parameters: {
       query: {
@@ -12766,7 +12832,30 @@ export interface operations {
       };
     };
   };
-  /** Exports data (post). Useful when exceeding allowed URL size. */
+  /**
+   * Exports project data in various formats (JSON, properties, YAML, etc.).
+   *       Useful when exceeding allowed URL size with GET requests.
+   *
+   *       ## HTTP Conditional Requests Support
+   *
+   *       This endpoint supports HTTP conditional requests using both If-Modified-Since and If-None-Match headers:
+   *
+   *       - **If-Modified-Since header provided**: The server checks if the project data has been modified since the specified date
+   *       - **If-None-Match header provided**: The server checks if the project data has changed by comparing the eTag value
+   *       - **Data not modified**: Returns HTTP 304 Not Modified with empty body
+   *       - **Data modified or no header**: Returns HTTP 200 OK with the exported data, Last-Modified header, and ETag header
+   *
+   *       Note: This endpoint uses a custom implementation that returns 304 Not Modified for all HTTP methods
+   *       (including POST) when conditional headers indicate the data hasn't changed. This differs from Spring's
+   *       default behavior which returns 412 for POST requests, but is appropriate here since POST is used only
+   *       to accommodate large request parameters, not to modify data.
+   *
+   *       The Last-Modified header in the response contains the timestamp of the last project modification,
+   *       and the ETag header contains a unique identifier for the current project state. Both can be used
+   *       for subsequent conditional requests to avoid unnecessary data transfer when the project hasn't changed.
+   *
+   *       Cache-Control header is set to max-age=0 to ensure validation on each request.
+   */
   exportPost: {
     parameters: {
       path: {
@@ -16236,7 +16325,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PromptResponseDto"];
+          "application/json": components["schemas"]["PromptResponseModel"];
         };
       };
       /** Bad Request */
