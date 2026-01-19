@@ -102,55 +102,21 @@ class ProgressManager(
   fun handleProgress(execution: BatchJobChunkExecution) {
     val job = batchJobService.getJobDto(execution.batchJob.id)
 
-    // Lock-free: update single execution using atomic Redis HSET
-    batchJobStateProvider.updateSingleExecution(
-      job.id,
-      execution.id,
-      batchJobStateProvider.getStateForExecution(execution),
-    )
+    // Use updateState to ensure atomicity of state update and job status aggregation
+    batchJobStateProvider.updateState(job.id) { state ->
+      // Preserve transactionCommitted flag from existing state
+      val existingState = state[execution.id]
+      val newState = batchJobStateProvider.getStateForExecution(execution)
+      newState.transactionCommitted = existingState?.transactionCommitted ?: false
+      state[execution.id] = newState
 
-    // Update counters atomically
-    if (execution.successTargets.isNotEmpty()) {
-      batchJobStateProvider.addProgressCount(job.id, execution.successTargets.size.toLong())
-    }
+      val info = state.getInfoForJobResult()
 
-    if (execution.status.completed) {
-      // NOTE: Running count is NOT decremented here. It's decremented in onExecutionCoroutineComplete
-      // which is called when the coroutine actually finishes (via invokeOnCompletion).
-      // This ensures the running count aligns with actual coroutine lifecycle, not just execution state.
-      if (execution.retry != true) {
-        val beforeCount = batchJobStateProvider.getCompletedChunksCount(job.id)
-        batchJobStateProvider.incrementCompletedChunksCount(job.id)
-        val afterCount = batchJobStateProvider.getCompletedChunksCount(job.id)
-        logger.info("incrementCompletedChunksCount: job=${job.id}, execution=${execution.id}, before=$beforeCount, after=$afterCount, retry=${execution.retry}")
-      } else {
-        logger.info("Skipping increment for job=${job.id}, execution=${execution.id}, retry=${execution.retry}")
+      if (execution.successTargets.isNotEmpty()) {
+        eventPublisher.publishEvent(OnBatchJobProgress(job, info.progress, job.totalItems.toLong()))
       }
+      handleJobStatus(job, info)
     }
-    if (execution.status == BatchJobChunkExecutionStatus.FAILED && execution.retry != true) {
-      batchJobStateProvider.incrementFailedCount(job.id)
-    }
-    if (execution.status == BatchJobChunkExecutionStatus.CANCELLED) {
-      batchJobStateProvider.incrementCancelledCount(job.id)
-    }
-
-    // Read counters for job result info (O(1) operations)
-    val completedChunks = batchJobStateProvider.getCompletedChunksCount(job.id)
-    val info = JobResultInfo(
-      completedChunks = completedChunks,
-      progress = batchJobStateProvider.getProgressCount(job.id),
-      isAnyCancelled = batchJobStateProvider.getCancelledCount(job.id) > 0,
-      isAnyFailed = batchJobStateProvider.getFailedCount(job.id) > 0,
-    )
-
-    if (completedChunks >= job.totalChunks - 5) {
-      logger.info("handleProgress: job=${job.id}, completedChunks=$completedChunks, totalChunks=${job.totalChunks}")
-    }
-
-    if (execution.successTargets.isNotEmpty()) {
-      eventPublisher.publishEvent(OnBatchJobProgress(job, info.progress, job.totalItems.toLong()))
-    }
-    handleJobStatus(job, info)
   }
 
   fun handleChunkCompletedCommitted(
@@ -283,6 +249,18 @@ class ProgressManager(
       batchJobProjectLockingManager.unlockJobForProject(jobDto.projectId, jobId)
       batchJobStateProvider.removeJobState(jobId)
     }
+  }
+
+  fun Map<Long, ExecutionState>.getInfoForJobResult(): JobResultInfo {
+    var completedChunks = 0
+    var progress = 0L
+    this.values.forEach {
+      if (it.status.completed && it.retry == false) completedChunks++
+      progress += it.successTargets.size
+    }
+    val isAnyCancelled = this.values.any { it.status == BatchJobChunkExecutionStatus.CANCELLED }
+    val isAnyFailed = this.values.any { it.status == BatchJobChunkExecutionStatus.FAILED && it.retry == false }
+    return JobResultInfo(completedChunks, progress, isAnyCancelled, isAnyFailed)
   }
 
   data class JobResultInfo(
