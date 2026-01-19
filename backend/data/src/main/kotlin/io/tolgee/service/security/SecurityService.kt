@@ -13,6 +13,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UploadedImage
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchVersionedEntity
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.enums.TranslationProtection
@@ -534,6 +535,39 @@ class SecurityService(
     branch: String?,
   ): Branch? {
     return branch?.let { branchService.getActiveBranch(projectId, it) }
+  }
+
+  fun checkProtectedBranchModify(
+    projectId: Long,
+    branchId: Long,
+  ) {
+    val branch = branchService.getActiveBranch(projectId, branchId)
+    checkProtectedBranchModify(branch, projectId)
+  }
+
+  fun checkProtectedBranchModify(
+    projectId: Long,
+    branchName: String?,
+  ) {
+    val branch =
+      branchName?.ifBlank { null }?.let { branchService.getActiveBranch(projectId, it) }
+        ?: branchService.getDefaultBranch(projectId)
+    checkProtectedBranchModify(branch, projectId)
+  }
+
+  fun checkProtectedBranchModify(entity: BranchVersionedEntity<*, *>) {
+    val key = entity.resolveKey() ?: return
+    val branch = key.branch ?: branchService.getDefaultBranch(key.project.id)
+    checkProtectedBranchModify(branch, key.project.id)
+  }
+
+  private fun checkProtectedBranchModify(
+    branch: Branch?,
+    projectId: Long,
+  ) {
+    if (branch?.isProtected == true) {
+      checkProjectPermission(projectId, Scope.BRANCH_PROTECTED_MODIFY)
+    }
   }
 
   /**
