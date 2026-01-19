@@ -189,6 +189,9 @@ class BatchJobConcurrentLauncher(
           "Other job from the project is currently running, skipping",
       )
 
+      // Rollback the state change made in trySetRunningState
+      progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
+
       // we haven't publish consuming, so we can add it only to the local queue
       batchJobChunkExecutionQueue.addItemsToLocalQueue(
         listOf(
@@ -269,13 +272,15 @@ class BatchJobConcurrentLauncher(
   }
 
   private fun ExecutionQueueItem.trySetRunningState(): Boolean {
-    return progressManager.trySetExecutionRunning(this.chunkExecutionId, this.jobId) {
-      val maxPerJobConcurrency = batchJobService.getJobDto(this.jobId).maxPerJobConcurrency
-      if (maxPerJobConcurrency == -1) {
-        return@trySetExecutionRunning true
-      }
+    // Check maxPerJobConcurrency before trying to set running state
+    val maxPerJobConcurrency = batchJobService.getJobDto(this.jobId).maxPerJobConcurrency
+    if (maxPerJobConcurrency != -1) {
       // Count only executions for THIS specific job, not all running executions globally
-      runningJobs.values.count { it.first.id == this.jobId } < maxPerJobConcurrency
+      val runningForThisJob = runningJobs.values.count { it.first.id == this.jobId }
+      if (runningForThisJob >= maxPerJobConcurrency) {
+        return false
+      }
     }
+    return progressManager.trySetExecutionRunning(this.chunkExecutionId, this.jobId)
   }
 }

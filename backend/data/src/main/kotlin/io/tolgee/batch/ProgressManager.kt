@@ -33,21 +33,13 @@ class ProgressManager(
   /**
    * This method tries to set execution running in the state.
    * Lock-free O(1) implementation using atomic counter and single-execution operations.
-   * @param canRunFn function that returns true if execution can be run (called with current state)
    */
   fun trySetExecutionRunning(
     executionId: Long,
     batchJobId: Long,
-    canRunFn: (Map<Long, ExecutionState>) -> Boolean,
   ): Boolean {
     // Ensure state is initialized (O(1) check after first call)
     batchJobStateProvider.ensureInitialized(batchJobId)
-
-    // Check if caller allows running (provides state for backward compatibility)
-    val state = batchJobStateProvider.get(batchJobId)
-    if (!canRunFn(state)) {
-      return false
-    }
 
     // Increment running count (will be decremented in onExecutionCoroutineComplete)
     batchJobStateProvider.incrementRunningCount(batchJobId)
