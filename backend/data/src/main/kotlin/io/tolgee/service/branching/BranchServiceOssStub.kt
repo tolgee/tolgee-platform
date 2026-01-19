@@ -39,6 +39,10 @@ class BranchServiceOssStub : BranchService {
     throw UnsupportedOperationException()
   }
 
+  override fun getDefaultBranch(projectId: Long): Branch? {
+    return null
+  }
+
   override fun renameBranch(
     projectId: Long,
     branchId: Long,

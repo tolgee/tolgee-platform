@@ -16,6 +16,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.key.TagService
+import io.tolgee.service.security.SecurityService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -50,6 +51,7 @@ class TagsController(
   private val branchService: BranchService,
   private val tagModelAssembler: TagModelAssembler,
   private val pagedResourcesAssembler: PagedResourcesAssembler<Tag>,
+  private val securityService: SecurityService,
 ) : IController {
   @PutMapping(value = ["keys/{keyId:[0-9]+}/tags"])
   @Operation(
@@ -101,6 +103,7 @@ class TagsController(
     @RequestBody req: ComplexTagKeysRequest,
     @RequestParam(required = false) branch: String? = null,
   ) {
+    securityService.checkProtectedBranchModify(projectHolder.project.id, branch)
     branch?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
     tagService.complexTagOperation(projectHolder.project.id, req, branch)
   }

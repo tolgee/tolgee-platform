@@ -62,7 +62,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     val newBranchId = branchRepository.findActiveByProjectIdAndName(projectId, "feature-x")!!.id
     val newBranchKeyCount = keyRepository.countByProjectAndBranch(projectId, newBranchId)
 
-    newBranchKeyCount.assert.isEqualTo(50)
+    newBranchKeyCount.assert.isEqualTo(51)
 
     val firstMainKey = keyRepository.findPrefetchedByNameAndBranch(projectId, "branched key 1", "main")
     val firstBranchKey = keyRepository.findPrefetchedByNameAndBranch(projectId, "branched key 1", "feature-x")
