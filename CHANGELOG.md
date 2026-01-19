@@ -1,3 +1,10 @@
+# [3.147.0](https://github.com/tolgee/tolgee-platform/compare/v3.146.2...v3.147.0) (2026-01-19)
+
+
+### Features
+
+* gh-3379 introduce aggregate exception handling for items in chunk ([#3382](https://github.com/tolgee/tolgee-platform/issues/3382)) ([8ff87c6](https://github.com/tolgee/tolgee-platform/commit/8ff87c604b999abd88f8694037a7dfa292153016)), closes [#3379](https://github.com/tolgee/tolgee-platform/issues/3379)
+
 ## [3.146.2](https://github.com/tolgee/tolgee-platform/compare/v3.146.1...v3.146.2) (2026-01-16)
 
 
