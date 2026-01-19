@@ -98,6 +98,57 @@ Using the timing aspect (`BatchJobTimingAspect`), we identified these bottleneck
    }
    ```
 
+## O(n) Bottleneck Elimination (2026-01-19)
+
+### Problem
+Throughput was degrading from ~500/s to ~30/s as the queue filled up. With 5000 chunks, this resulted in O(n²) total complexity.
+
+### Root Cause
+Two O(n) operations were being called on **every chunk**:
+
+1. **`BatchJobChunkExecutionQueue.getJobCharacterCounts()`** - Iterated entire queue to count job characters
+2. **`BatchJobConcurrentLauncher.canRunJobWithCharacter()`** - Filtered `runningJobs.values` to count by character
+
+### Solution
+Replace O(n) iterations with O(1) counter lookups:
+
+1. **`BatchJobChunkExecutionQueue`**: Added `jobCharacterCounts` counter map
+   ```kotlin
+   private val jobCharacterCounts = ConcurrentHashMap<JobCharacter, AtomicInteger>()
+
+   private fun incrementCharacterCount(character: JobCharacter) {
+     jobCharacterCounts.computeIfAbsent(character) { AtomicInteger(0) }.incrementAndGet()
+   }
+
+   fun getJobCharacterCounts(): Map<JobCharacter, Int> {
+     return jobCharacterCounts.mapValues { it.value.get() }  // O(1) lookup
+   }
+   ```
+
+2. **`BatchJobConcurrentLauncher`**: Added `runningJobCharacterCounts` counter map
+   ```kotlin
+   private val runningJobCharacterCounts = ConcurrentHashMap<JobCharacter, AtomicInteger>()
+
+   private fun canRunJobWithCharacter(character: JobCharacter): Boolean {
+     val runningCount = runningJobCharacterCounts[character]?.get() ?: 0  // O(1)
+     // ...
+   }
+   ```
+
+3. **Pass `BatchJobDto` through call chain** to reduce redundant `getJobDto` calls from ~10 per chunk to ~4
+
+### Results
+- **Before**: Throughput degraded from ~500/s to ~30/s as queue filled (O(n²) total)
+- **After**: Throughput stable at ~160-220 chunks/s regardless of queue size
+
+### Timing Report (5000 chunks with Redis)
+```
+Throughput: 163.54 chunks/second (consistent throughout test)
+GET_JOB_DTO: 20,285 calls, 1.18ms avg
+STATE_UPDATE_SINGLE_EXEC: 15,000 calls, 1.06ms avg
+STATE_GET_SINGLE_EXEC: 10,000 calls, 1.04ms avg
+```
+
 ## Expected Performance Improvement
 
 Removing the `STATE_GET` call should eliminate ~25 seconds of overhead for 5000 chunks (5ms × 5000 = 25,000ms).
