@@ -51,6 +51,14 @@ class BranchServiceOssStub : BranchService {
     throw UnsupportedOperationException()
   }
 
+  override fun setProtected(
+    projectId: Long,
+    branchId: Long,
+    isProtected: Boolean,
+  ): Branch {
+    throw UnsupportedOperationException()
+  }
+
   override fun createBranch(
     projectId: Long,
     name: String,

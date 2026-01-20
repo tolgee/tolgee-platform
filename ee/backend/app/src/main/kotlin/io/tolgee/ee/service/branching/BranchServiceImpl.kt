@@ -106,6 +106,18 @@ class BranchServiceImpl(
     return branch
   }
 
+  @Transactional
+  override fun setProtected(
+    projectId: Long,
+    branchId: Long,
+    isProtected: Boolean,
+  ): Branch {
+    val branch = getActiveBranchWithMerge(projectId, branchId)
+    branch.isProtected = isProtected
+    branchRepository.save(branch)
+    return branch
+  }
+
   private fun getBranch(
     projectId: Long,
     branchId: Long,

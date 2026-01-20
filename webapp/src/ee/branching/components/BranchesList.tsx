@@ -64,6 +64,12 @@ export const BranchesList = () => {
     invalidatePrefix: '/v2/projects/{projectId}/branches',
   });
 
+  const setProtectedMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/{branchId}/protected',
+    method: 'post',
+    invalidatePrefix: '/v2/projects/{projectId}/branches',
+  });
+
   const createBranchSubmit = async (values: BranchFormValues) => {
     await createMutation.mutateAsync({
       path: { projectId: project.id },
@@ -144,6 +150,28 @@ export const BranchesList = () => {
     setRenameBranch(null);
   };
 
+  const handleSetProtected = async (branch: BranchModel) => {
+    const willProtect = !branch.isProtected;
+    confirmation({
+      message: (
+        <T
+          keyName={
+            willProtect
+              ? 'project_branch_protect_confirmation'
+              : 'project_branch_unprotect_confirmation'
+          }
+          params={{ branchName: branch.name, b: <b /> }}
+        />
+      ),
+      onConfirm: async () => {
+        await setProtectedMutation.mutateAsync({
+          path: { projectId: project.id, branchId: branch.id },
+          content: { 'application/json': { isProtected: willProtect } },
+        });
+      },
+    });
+  };
+
   const handleMergeDetail = (branch: BranchModel) => {
     history.push(
       LINKS.PROJECT_BRANCHES_MERGE.build({
@@ -209,6 +237,9 @@ export const BranchesList = () => {
                 canManageBranches
                   ? (branch) => setRenameBranch(branch)
                   : undefined
+              }
+              onSetProtected={
+                canManageBranches ? handleSetProtected : undefined
               }
               onMergeInto={() => handleMergeInto(l)}
               onMergeDetail={() => handleMergeDetail(l)}
