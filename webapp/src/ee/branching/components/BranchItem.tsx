@@ -57,6 +57,7 @@ type Props = {
   branch: BranchModel;
   onRemove?: (branch: BranchModel) => void;
   onRename?: (branch: BranchModel) => void;
+  onSetProtected?: (branch: BranchModel) => void;
   onMergeInto: () => void;
   onMergeDetail: () => void;
 };
@@ -65,6 +66,7 @@ export const BranchItem: React.FC<Props> = ({
   branch,
   onRemove,
   onRename,
+  onSetProtected,
   onMergeInto,
   onMergeDetail,
 }) => {
@@ -79,7 +81,9 @@ export const BranchItem: React.FC<Props> = ({
 
   const handleMenuClose = () => setMenuAnchor(null);
   const hasMenuItems =
-    Boolean(onRename) || (!branch.isDefault && Boolean(onRemove));
+    Boolean(onRename) ||
+    (!branch.isDefault && Boolean(onRemove)) ||
+    Boolean(onSetProtected);
 
   return (
     <StyledListItem data-cy="project-settings-branch-item">
@@ -201,7 +205,7 @@ export const BranchItem: React.FC<Props> = ({
               open={openMenu}
               onClose={handleMenuClose}
             >
-              {onRename && (
+              {onRename && branch.active && (
                 <MenuItem
                   data-cy="project-settings-branches-rename-button"
                   onClick={() => {
@@ -210,6 +214,27 @@ export const BranchItem: React.FC<Props> = ({
                   }}
                 >
                   <T keyName="project_branch_rename" />
+                </MenuItem>
+              )}
+              {onSetProtected && branch.active && (
+                <MenuItem
+                  data-cy={
+                    branch.isProtected
+                      ? 'project-settings-branches-unprotect-button'
+                      : 'project-settings-branches-protect-button'
+                  }
+                  onClick={() => {
+                    handleMenuClose();
+                    onSetProtected(branch);
+                  }}
+                >
+                  <T
+                    keyName={
+                      branch.isProtected
+                        ? 'project_branch_unprotect'
+                        : 'project_branch_protect'
+                    }
+                  />
                 </MenuItem>
               )}
               {!branch.isDefault && onRemove && (
