@@ -18,6 +18,19 @@ export const BRANCH_ROUTES: Record<string, BranchRoute> = {
           })
         : LINKS.PROJECT_TRANSLATIONS.build({ [PARAMS.PROJECT_ID]: projectId }),
   },
+  translation: {
+    base: LINKS.PROJECT_TRANSLATIONS_SINGLE.template,
+    branched: LINKS.PROJECT_TRANSLATIONS_SINGLE_BRANCHED.template,
+    build: (projectId, branch) =>
+      branch
+        ? LINKS.PROJECT_TRANSLATIONS_SINGLE_WITH_BRANCH.build({
+            [PARAMS.PROJECT_ID]: projectId,
+            [PARAMS.BRANCH]: branch,
+          })
+        : LINKS.PROJECT_TRANSLATIONS_SINGLE.build({
+            [PARAMS.PROJECT_ID]: projectId,
+          }),
+  },
   dashboard: {
     base: LINKS.PROJECT_DASHBOARD.template,
     branched: LINKS.PROJECT_DASHBOARD_BRANCHED.template,

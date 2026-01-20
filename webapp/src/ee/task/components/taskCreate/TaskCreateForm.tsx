@@ -104,8 +104,8 @@ export const TaskCreateForm = ({
         branch,
       };
       return {
-        url: '/v2/projects/{projectId}/tasks/calculate-scope',
-        method: 'post',
+        url: '/v2/projects/{projectId}/tasks/calculate-scope' as const,
+        method: 'post' as const,
         path: { projectId },
         content: { 'application/json': content },
         query: {

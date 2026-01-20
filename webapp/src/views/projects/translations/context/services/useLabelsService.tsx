@@ -8,7 +8,7 @@ import {
   usePutLabel,
   usePutLabelWithoutTranslation,
 } from 'tg.service/TranslationHooks';
-import { useTranslationsService } from 'tg.views/projects/translations/context/services/useTranslationsService';
+import { useTranslationsService } from './useTranslationsService';
 import {
   AddLabel,
   RemoveLabel,

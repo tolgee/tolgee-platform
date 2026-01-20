@@ -5,16 +5,19 @@ type Props = {
   key?: string;
   languages?: string[];
   namespace?: string;
+  branch?: string;
 };
 
 export const visitSingleKey = ({
   projectId,
+  branch,
   key,
   languages,
   namespace,
 }: Props) => {
   cy.visit(
     `${HOST}/projects/${projectId}/translations/single?` +
+      (branch ? `branch=${branch}&` : '') +
       (key ? `key=${key}&` : '') +
       (namespace ? `ns=${namespace}&` : '') +
       (languages ? languages.map((l) => `languages=${l}&`).join('') : '')

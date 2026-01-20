@@ -93,12 +93,7 @@ type Props = {
   projectId: number;
 };
 
-export const TaskDetail = ({
-  onClose,
-  projectId,
-  taskNumber,
-  task,
-}: Props) => {
+export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
   const { t } = useTranslate();
   const formatDate = useDateFormatter();
 

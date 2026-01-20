@@ -2,11 +2,13 @@ import { Location } from 'history';
 
 const BRANCH_SEGMENT = '/tree/';
 
-export const extractBranchFromPathname = (pathname: string): string | null => {
+export const extractBranchFromPathname = (
+  pathname: string
+): string | undefined => {
   const idx = pathname.indexOf(BRANCH_SEGMENT);
-  if (idx === -1) return null;
+  if (idx === -1) return undefined;
   const after = pathname.substring(idx + BRANCH_SEGMENT.length);
-  if (!after) return null;
+  if (!after) return undefined;
   return after;
 };
 
@@ -18,10 +20,7 @@ export const applyBranchToUrl = (url: string, branch: string) => {
   return query ? `${newPath}?${query}` : newPath;
 };
 
-export const applyBranchToLocation = (
-  location: Location,
-  branch: string | null
-) => {
+export const applyBranchToLocation = (location: Location, branch?: string) => {
   const idx = location.pathname.indexOf(BRANCH_SEGMENT);
   const basePath =
     idx === -1 ? location.pathname : location.pathname.substring(0, idx);

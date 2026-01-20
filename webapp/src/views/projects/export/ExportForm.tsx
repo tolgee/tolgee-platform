@@ -19,7 +19,7 @@ import { downloadExported } from './downloadExported';
 import { useExportHelper } from 'tg.hooks/useExportHelper';
 import { ExportFormContent } from './ExportFormContent';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 
 const sortStates = (arr: StateType[]) =>
   [...arr].sort(
@@ -73,7 +73,7 @@ const StyledForm = styled('form')`
 
 export const ExportForm = () => {
   const project = useProject();
-  const { selected } = useBranchesService({ projectId: project.id });
+  const branchName = useBranchFromUrlPath();
 
   const exportLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/export',
@@ -188,7 +188,7 @@ export const ExportForm = () => {
                   ? format.defaultStructureDelimiter
                   : '',
                 filterNamespace: values.namespaces,
-                filterBranch: selected?.name,
+                filterBranch: branchName,
                 zip:
                   values.languages.length > 1 || values.namespaces.length > 1,
                 supportArrays: values.supportArrays || false,

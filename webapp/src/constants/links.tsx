@@ -361,6 +361,11 @@ export class LINKS {
     'single'
   );
 
+  static PROJECT_TRANSLATIONS_SINGLE_WITH_BRANCH = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS_SINGLE,
+    'tree/' + p(PARAMS.BRANCH)
+  );
+
   static PROJECT_TASKS = Link.ofParent(LINKS.PROJECT, 'tasks');
 
   static PROJECT_BRANCHES = Link.ofParent(LINKS.PROJECT, 'branches');
@@ -456,6 +461,10 @@ export class LINKS {
    */
   static PROJECT_TRANSLATIONS_BRANCHED = Link.ofParent(
     LINKS.PROJECT_TRANSLATIONS,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+  static PROJECT_TRANSLATIONS_SINGLE_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS_SINGLE,
     'tree/' + p(PARAMS.BRANCH) + '*'
   );
   static PROJECT_DASHBOARD_BRANCHED = Link.ofParent(

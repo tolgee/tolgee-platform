@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 import { getTaskUrl } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
-import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
 import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
+import { TASK_ACTIVE_STATES } from './taskActiveStates';
 
 type TaskModel = components['schemas']['TaskModel'];
 
@@ -22,7 +23,10 @@ export const TaskTranslationsLink = <
   component,
   ...rest
 }: Props<T>) => {
-  const { selectedName } = useBranchesService({ projectId });
+  const { selectedName } = useBranchesService({
+    projectId,
+    branchName: useBranchFromUrlPath(),
+  });
   const allowLink = !(
     task.branchName &&
     task.branchName != selectedName &&

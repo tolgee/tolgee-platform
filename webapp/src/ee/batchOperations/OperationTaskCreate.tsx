@@ -8,15 +8,13 @@ import { OperationContainer } from 'tg.views/projects/translations/BatchOperatio
 import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 import { getPreselectedLanguagesIds } from 'tg.views/projects/translations/BatchOperations/getPreselectedLanguages';
 import { TaskCreateDialog } from '../task/components/taskCreate/TaskCreateDialog';
-import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 
 type Props = OperationProps;
 
 export const OperationTaskCreate = ({ disabled, onFinished }: Props) => {
   const project = useProject();
-  const { selectedName: branch } = useBranchesService({
-    projectId: project.id,
-  });
+  const branch = useBranchFromUrlPath();
   const [dialogOpen, setDialogOpen] = useState(true);
 
   const allLanguages = useTranslationsSelector((c) => c.languages) ?? [];
@@ -53,7 +51,7 @@ export const OperationTaskCreate = ({ disabled, onFinished }: Props) => {
         allLanguages={allLanguages}
         projectId={project.id}
         onFinished={onFinished}
-        branch={branch || undefined}
+        branch={branch}
       />
     </OperationContainer>
   );
