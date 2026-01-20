@@ -161,6 +161,10 @@ class Project(
   @ActivityLoggedProp
   var useNamespaces: Boolean = false
 
+  @ColumnDefault("false")
+  @ActivityLoggedProp
+  var useBranching: Boolean = false
+
   @ColumnDefault("DISABLED")
   @ActivityLoggedProp
   @Enumerated(EnumType.STRING)
