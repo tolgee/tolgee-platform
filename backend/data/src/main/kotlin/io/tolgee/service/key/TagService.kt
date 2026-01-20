@@ -30,12 +30,12 @@ class TagService(
   @Lazy
   private val securityService: SecurityService,
 ) : Logging {
+  @Transactional
   fun tagKey(
     key: Key,
     tagName: String,
   ): Tag {
     val keyMeta = keyMetaService.getOrCreateForKey(key)
-    securityService.checkProtectedBranchModify(keyMeta)
     val tag =
       find(key.project, tagName)?.let {
         if (!keyMeta.tags.contains(it)) {
@@ -399,7 +399,15 @@ class TagService(
   ) {
     val key = keyService.getKeysWithTagsById(projectId, listOf(keyId)).singleOrNull() ?: throw NotFoundException()
     securityService.checkProtectedBranchModify(key)
-    val tag = getWithKeyMetasFetched(projectId, tagId)
+    removeKeyTag(key, tagId)
+  }
+
+  @Transactional
+  fun removeKeyTag(
+    key: Key,
+    tagId: Long,
+  ) {
+    val tag = getWithKeyMetasFetched(key.project.id, tagId)
     remove(key, tag)
   }
 }
