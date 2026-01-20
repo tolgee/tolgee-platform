@@ -16,6 +16,7 @@ data class ProjectDto(
   override var avatarHash: String? = null,
   override var icuPlaceholders: Boolean,
   var useNamespaces: Boolean,
+  var useBranching: Boolean,
   var suggestionsMode: SuggestionsMode,
   var translationProtection: TranslationProtection,
 ) : Serializable,
@@ -32,6 +33,7 @@ data class ProjectDto(
         avatarHash = entity.avatarHash,
         icuPlaceholders = entity.icuPlaceholders,
         useNamespaces = entity.useNamespaces,
+        useBranching = entity.useBranching,
         suggestionsMode = entity.suggestionsMode,
         translationProtection = entity.translationProtection,
       )
