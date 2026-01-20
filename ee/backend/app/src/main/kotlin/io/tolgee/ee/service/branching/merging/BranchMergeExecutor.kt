@@ -31,7 +31,9 @@ class BranchMergeExecutor(
 ) {
   @Transactional
   fun execute(merge: BranchMerge) {
-    val snapshotKeys = branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id).associateBy { it.originalKeyId }
+    val snapshotKeys by lazy {
+      branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id).associateBy { it.originalKeyId }
+    }
     merge.changes.forEach { change ->
       when (change.change) {
         BranchKeyMergeChangeType.ADD -> {
