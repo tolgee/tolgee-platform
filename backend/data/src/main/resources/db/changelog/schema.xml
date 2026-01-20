@@ -5067,4 +5067,11 @@
     <changeSet author="danielkrizan (generated)" id="1768911540294-4">
         <dropTable tableName="branch_key_meta_snapshot_tags"/>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768921361112-1">
+        <addColumn tableName="project">
+            <column defaultValueBoolean="false" name="use_branching" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
