@@ -3360,6 +3360,11 @@ export interface components {
       };
     };
     KeyWithTranslationsModel: {
+      /**
+       * @description Branch of key
+       * @example feature-branch
+       */
+      branch?: string;
       /** @description There is a context available for this key */
       contextPresent: boolean;
       /**

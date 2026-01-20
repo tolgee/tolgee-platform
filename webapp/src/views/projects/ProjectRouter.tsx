@@ -96,6 +96,10 @@ export const ProjectRouter = () => {
         </Route>
 
         {/*Branched views*/}
+        <Route exact path={BRANCH_ROUTES.translation.branched}>
+          <SingleKeyView />
+        </Route>
+
         <Route exact path={BRANCH_ROUTES.translations.branched}>
           <TranslationsView />
         </Route>
