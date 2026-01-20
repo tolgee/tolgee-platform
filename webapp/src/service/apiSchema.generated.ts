@@ -90,7 +90,7 @@ export interface paths {
   "/v2/api-keys": {
     get: operations["allByUser"];
     /** Creates new API key with provided scopes */
-    post: operations["create_16"];
+    post: operations["create_17"];
   };
   "/v2/api-keys/availableScopes": {
     get: operations["getScopes"];
@@ -148,7 +148,7 @@ export interface paths {
     post: operations["upload"];
   };
   "/v2/image-upload/{ids}": {
-    delete: operations["delete_16"];
+    delete: operations["delete_17"];
   };
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
@@ -172,7 +172,7 @@ export interface paths {
   "/v2/organizations": {
     /** Returns all organizations, which is current user allowed to view */
     get: operations["getAll_10"];
-    post: operations["create_13"];
+    post: operations["create_14"];
   };
   "/v2/organizations/{id}": {
     get: operations["get_15"];
@@ -206,7 +206,7 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/glossaries": {
     get: operations["getAll_12"];
-    post: operations["create_14"];
+    post: operations["create_15"];
   };
   "/v2/organizations/{organizationId}/glossaries-with-stats": {
     get: operations["getAllWithStats"];
@@ -230,7 +230,7 @@ export interface paths {
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms": {
     get: operations["getAll_13"];
-    post: operations["create_15"];
+    post: operations["create_16"];
     delete: operations["deleteMultiple"];
   };
   "/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}": {
@@ -335,7 +335,7 @@ export interface paths {
   };
   "/v2/pats": {
     get: operations["getAll_9"];
-    post: operations["create_12"];
+    post: operations["create_13"];
   };
   "/v2/pats/current": {
     /** Returns current Personal Access Token. If the request is not authenticated with a Personal Access Token, it will return 400 response status. */
@@ -463,6 +463,9 @@ export interface paths {
   "/v2/projects/{projectId}/branches/{branchId}": {
     post: operations["rename"];
     delete: operations["delete_13"];
+  };
+  "/v2/projects/{projectId}/branches/{branchId}/protected": {
+    post: operations["setProtected"];
   };
   "/v2/projects/{projectId}/content-delivery-configs": {
     get: operations["list_2"];
@@ -657,7 +660,7 @@ export interface paths {
     get: operations["selectKeys_2"];
   };
   "/v2/projects/{projectId}/keys/{ids}": {
-    delete: operations["delete_14"];
+    delete: operations["delete_15"];
   };
   "/v2/projects/{projectId}/keys/{id}": {
     get: operations["get_8"];
@@ -5546,6 +5549,13 @@ export interface components {
       prices: components["schemas"]["PlanPricesModel"];
       public: boolean;
     };
+    SetBranchProtectedModel: {
+      /**
+       * @description Whether the branch is protected
+       * @example true
+       */
+      isProtected: boolean;
+    };
     SetDisabledLanguagesRequest: {
       languageIds: number[];
     };
@@ -7702,7 +7712,7 @@ export interface operations {
     };
   };
   /** Creates new API key with provided scopes */
-  create_16: {
+  create_17: {
     responses: {
       /** OK */
       200: {
@@ -8437,7 +8447,7 @@ export interface operations {
       };
     };
   };
-  delete_16: {
+  delete_17: {
     parameters: {
       path: {
         ids: number[];
@@ -8785,7 +8795,7 @@ export interface operations {
       };
     };
   };
-  create_13: {
+  create_14: {
     responses: {
       /** OK */
       200: {
@@ -9306,7 +9316,7 @@ export interface operations {
       };
     };
   };
-  create_14: {
+  create_15: {
     parameters: {
       path: {
         organizationId: number;
@@ -9740,7 +9750,7 @@ export interface operations {
       };
     };
   };
-  create_15: {
+  create_16: {
     parameters: {
       path: {
         organizationId: number;
@@ -11179,7 +11189,7 @@ export interface operations {
       };
     };
   };
-  create_12: {
+  create_13: {
     responses: {
       /** Created */
       201: {
@@ -13039,6 +13049,51 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  setProtected: {
+    parameters: {
+      path: {
+        branchId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BranchModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetBranchProtectedModel"];
       };
     };
   };
@@ -15299,7 +15354,7 @@ export interface operations {
       };
     };
   };
-  delete_14: {
+  delete_15: {
     parameters: {
       path: {
         ids: number[];
