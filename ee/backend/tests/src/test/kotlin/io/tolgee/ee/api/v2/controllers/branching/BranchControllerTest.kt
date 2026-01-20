@@ -200,6 +200,41 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectApiKeyAuthTestMethod(
     scopes = [Scope.BRANCH_MANAGEMENT],
   )
+  fun `sets branch protected flag`() {
+    performProjectAuthPost(
+      "branches/${testData.featureBranch.id}/protected",
+      mapOf("isProtected" to true),
+    ).andIsOk.andAssertThatJson {
+      node("isProtected").isEqualTo(true)
+    }
+
+    testData.featureBranch
+      .refresh()
+      .isProtected.assert.isTrue
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod
+  fun `unable to set branch protected flag without proper permission`() {
+    performProjectAuthPost(
+      "branches/${testData.featureBranch.id}/protected",
+      mapOf("isProtected" to true),
+    ).andIsForbidden
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `set protected fails when branch not found`() {
+    performProjectAuthPost(
+      "branches/0/protected",
+      mapOf("isProtected" to true),
+    ).andIsNotFound.andHasErrorMessage(Message.BRANCH_NOT_FOUND)
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [Scope.BRANCH_MANAGEMENT],
+  )
   fun `deletes branch`() {
     performProjectAuthDelete("branches/${testData.mergeBranch.id}").andIsOk
     testData.mergeBranch.refresh().let {

@@ -39,6 +39,12 @@ interface BranchService {
     name: String,
   ): Branch
 
+  fun setProtected(
+    projectId: Long,
+    branchId: Long,
+    isProtected: Boolean,
+  ): Branch
+
   fun createBranch(
     projectId: Long,
     name: String,
