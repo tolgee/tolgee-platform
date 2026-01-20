@@ -8,6 +8,7 @@ import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/Langua
 import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
+import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { queryEncode } from 'tg.hooks/useUrlSearchState';
 import { invalidateUrlPrefix } from 'tg.service/http/useQueryApi';
 import {
@@ -56,6 +57,21 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
 
   const translation = translations?.[0];
 
+  if (keyId && translation?.branch) {
+    const { id: _id, ...searchWithoutId } = useUrlSearch();
+
+    history.replace(
+      LINKS.PROJECT_TRANSLATIONS_SINGLE_WITH_BRANCH.build({
+        [PARAMS.PROJECT_ID]: project.id,
+        [PARAMS.BRANCH]: translation.branch,
+      }) +
+        queryEncode({
+          ...searchWithoutId,
+          key: translation.keyName,
+        })
+    );
+  }
+
   const selectedLanguagesMapped = selectedLanguages
     ?.map((l) => {
       const language = languages?.find(({ tag }) => tag === l);
@@ -88,6 +104,7 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
           window.location.pathname + window.location.search,
         ],
       ]}
+      branching
     >
       <StyledContainer style={{ marginBottom: bottomPanelHeight + 20 }}>
         {keyExists ? (

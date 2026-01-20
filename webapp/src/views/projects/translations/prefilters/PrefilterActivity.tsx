@@ -44,6 +44,7 @@ export const PrefilterActivity = ({ revisionId }: Props) => {
     url: '/v2/projects/{projectId}/activity/revisions/{revisionId}',
     method: 'get',
     path: { projectId: project.id, revisionId: revisionId },
+    query: {},
   });
 
   const activity = data && buildActivity(data);
