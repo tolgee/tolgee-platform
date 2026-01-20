@@ -58,7 +58,7 @@ class Branch(
   var revision: Int = 0,
   @OneToMany(targetEntity = BranchMerge::class, mappedBy = "sourceBranch", fetch = FetchType.LAZY)
   @OrderBy("createdAt DESC")
-  var merges: List<BranchMerge> = listOf(),
+  var merges: MutableList<BranchMerge> = mutableListOf(),
   var deletedAt: Date? = null,
 ) : StandardAuditModel() {
   companion object {
