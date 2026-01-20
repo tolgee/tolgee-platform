@@ -21,12 +21,13 @@ class KeyWithTranslationsModelAssembler(
   ) {
   override fun toModel(view: KeyWithTranslationsView) =
     KeyWithTranslationsModel(
-      keyId = view.keyId,
       createdAt = view.createdAt.time,
+      keyId = view.keyId,
       keyName = view.keyName,
       keyNamespaceId = view.keyNamespaceId,
       keyIsPlural = view.keyIsPlural,
       keyPluralArgName = view.keyPluralArgName,
+      branch = view.branch,
       keyNamespace = view.keyNamespace,
       keyDescription = view.keyDescription,
       keyTags = view.keyTags.map { tagModelAssembler.toModel(it) },

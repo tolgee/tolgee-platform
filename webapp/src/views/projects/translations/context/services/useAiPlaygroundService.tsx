@@ -39,8 +39,8 @@ export const useAiPlaygroundService = ({
 
   const aiPlaygroundResult = useApiQueries(
     pagedKeys.map((keys) => ({
-      url: '/v2/projects/{projectId}/ai-playground-result',
-      method: 'post',
+      url: '/v2/projects/{projectId}/ai-playground-result' as const,
+      method: 'post' as const,
       path: {
         projectId,
       },
