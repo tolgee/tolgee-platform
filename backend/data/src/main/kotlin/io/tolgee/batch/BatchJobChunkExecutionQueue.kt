@@ -122,21 +122,23 @@ class BatchJobChunkExecutionQueue(
   }
 
   fun addItemsToLocalQueue(data: List<ExecutionQueueItem>) {
+    // Use Set for O(1) lookup instead of O(n) queue.contains()
+    val existingIds = queue.mapTo(HashSet()) { it.chunkExecutionId }
     val toAdd = mutableListOf<ExecutionQueueItem>()
-    val filteredOut = mutableListOf<ExecutionQueueItem>()
+    var filteredOutCount = 0
 
     data.forEach {
-      if (!queue.contains(it)) {
+      if (!existingIds.contains(it.chunkExecutionId)) {
         toAdd.add(it)
+        existingIds.add(it.chunkExecutionId) // Prevent duplicates within the batch
       } else {
-        filteredOut.add(it)
+        filteredOutCount++
       }
     }
-    metrics.batchJobManagementItemAlreadyQueuedCounter.increment(filteredOut.size.toDouble())
+    metrics.batchJobManagementItemAlreadyQueuedCounter.increment(filteredOutCount.toDouble())
     logger.trace {
       val itemsString = toAdd.joinToString(", ") { it.chunkExecutionId.toString() }
-      val filteredOutString = filteredOut.joinToString(", ") { it.chunkExecutionId.toString() }
-      "Adding chunks [$itemsString] to queue.\n Not Added Items (already in the queue): [$filteredOutString]"
+      "Adding ${toAdd.size} chunks to queue. Filtered out: $filteredOutCount"
     }
 
     queue.addAll(toAdd)
@@ -158,11 +160,16 @@ class BatchJobChunkExecutionQueue(
 
   fun addItemsToQueue(items: List<ExecutionQueueItem>) {
     if (usingRedisProvider.areWeUsingRedis) {
-      val event = JobQueueItemsEvent(items, QueueEventType.ADD)
-      redisTemplate.convertAndSend(
-        RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC,
-        jacksonObjectMapper().writeValueAsString(event),
-      )
+      // Batch Redis messages to avoid serializing huge JSON payloads
+      // For 100k items, sending one message would be ~10-15MB of JSON
+      val batchSize = 1000
+      items.chunked(batchSize).forEach { batch ->
+        val event = JobQueueItemsEvent(batch, QueueEventType.ADD)
+        redisTemplate.convertAndSend(
+          RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC,
+          jacksonObjectMapper().writeValueAsString(event),
+        )
+      }
       return
     }
 

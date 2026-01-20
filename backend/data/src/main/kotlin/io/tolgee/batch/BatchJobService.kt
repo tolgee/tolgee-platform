@@ -150,12 +150,12 @@ class BatchJobService(
     val sequenceIdProvider = SequenceIdProvider(SEQUENCE_NAME, ALLOCATION_SIZE)
     jdbcTemplate.batchUpdate(
       """
-        insert into tolgee_batch_job_chunk_execution 
-        (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets, execute_after) 
+        insert into tolgee_batch_job_chunk_execution
+        (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets, execute_after)
         values (?, ?, ?, ?, ?, ?, ?, ?)
         """,
       executions,
-      100,
+      5000,
     ) { ps, execution ->
       val id = sequenceIdProvider.next(ps.connection)
       execution.id = id

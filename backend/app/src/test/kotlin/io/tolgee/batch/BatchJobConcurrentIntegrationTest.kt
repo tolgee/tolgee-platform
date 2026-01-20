@@ -772,7 +772,6 @@ class BatchJobConcurrentIntegrationTest :
    */
   @Test
   fun `extended stress test with multiple job waves`() {
-    y
     val chunksPerJob = 200
     val jobsPerWave = 3
     val totalWaves = 3
