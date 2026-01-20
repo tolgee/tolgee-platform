@@ -1,6 +1,5 @@
-import { useLocation } from 'react-router-dom';
-
-import { applyBranchToUrl, extractBranchFromPathname } from './branchingPath';
+import { applyBranchToUrl } from './branchingPath';
+import { useBranchFromUrlPath } from './useBranchFromUrlPath';
 import { Link, LINKS } from 'tg.constants/links';
 import { getCachedBranch } from './branchCache';
 import { useProject } from 'tg.hooks/useProject';
@@ -15,12 +14,9 @@ const BRANCHING_LINKS = new Set<Link>([
 ]);
 
 export const useBranchLinks = (selectedBranch?: string) => {
-  const location = useLocation();
   const project = useProject();
   const branch =
-    selectedBranch ||
-    extractBranchFromPathname(location.pathname) ||
-    getCachedBranch(project.id);
+    selectedBranch || useBranchFromUrlPath() || getCachedBranch(project.id);
 
   const withBranchLink = (
     link: Link,

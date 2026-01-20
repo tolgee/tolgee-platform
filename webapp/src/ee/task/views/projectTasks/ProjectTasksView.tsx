@@ -16,7 +16,7 @@ import { TasksHeader } from 'tg.ee.module/task/components/tasksHeader/TasksHeade
 import { TaskView } from 'tg.ee.module/task/components/tasksHeader/TasksHeaderBig';
 import { TaskCreateDialog } from 'tg.ee.module/task/components/taskCreate/TaskCreateDialog';
 import { TaskDetail } from 'tg.ee.module/task/components/TaskDetail';
-import { useBranchesService } from 'tg.views/projects/translations/context/services/useBranchesService';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 
 import { ProjectTasksBoard } from './ProjectTasksBoard';
 import { ProjectTasksList } from './ProjectTasksList';
@@ -92,9 +92,7 @@ export const ProjectTasksView = () => {
   const [detail, setDetail] = useState<TaskModel>();
   const [addDialog, setAddDialog] = useState(false);
   const [orderTranslation, setOrderTranslation] = useState(false);
-  const { selectedName: branch } = useBranchesService({
-    projectId: project.id,
-  });
+  const branch = useBranchFromUrlPath();
 
   const allLanguages = languagesLoadable.data?._embedded?.languages ?? [];
 

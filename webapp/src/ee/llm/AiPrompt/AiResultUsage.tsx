@@ -2,7 +2,8 @@ import { Box, styled, Tooltip } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 
-type PromptResponseUsageDto = components['schemas']['PromptResponseUsageModel'];
+type PromptResponseUsageModel =
+  components['schemas']['PromptResponseUsageModel'];
 
 const StyledContainer = styled(Box)`
   display: flex;
@@ -18,7 +19,7 @@ const SpanUnderlined = styled('span')`
 `;
 
 type Props = {
-  usage: PromptResponseUsageDto | undefined;
+  usage: PromptResponseUsageModel | undefined;
   price: number | undefined;
 };
 

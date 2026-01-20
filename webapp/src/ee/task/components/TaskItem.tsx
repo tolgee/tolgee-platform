@@ -86,10 +86,7 @@ export const TaskItem = ({
   return (
     <StyledContainer data-cy="task-item">
       <TaskTranslationsLink {...linkProps}>
-        <TaskLabel
-          sx={{ padding: '12px 0px 12px 16px' }}
-          task={task}
-        />
+        <TaskLabel sx={{ padding: '12px 0px 12px 16px' }} task={task} />
       </TaskTranslationsLink>
       <TaskTranslationsLink
         {...linkProps}
