@@ -32,7 +32,7 @@ class BranchSnapshotServiceTest : AbstractSpringTest() {
   fun `snapshot stores key meta tags`() {
     val snapshotTags = getSnapshotKey().keyMetaSnapshot!!.tags
     snapshotTags.assert.hasSize(3)
-    snapshotTags.map { it.name }.assert.containsExactlyInAnyOrder("abc", "def", "ghi")
+    snapshotTags.assert.containsExactlyInAnyOrder("abc", "def", "ghi")
   }
 
   @Test

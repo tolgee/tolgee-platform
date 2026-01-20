@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.LabelServiceImpl
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Language
 import io.tolgee.model.branching.Branch
@@ -314,14 +315,15 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     key: Key,
     tag: Tag,
   ) {
-    tagService.removeTag(testData.project.id, key.id, tag.id)
+    tagService.removeKeyTag(key, tag.id)
   }
 
   private fun addTagToKey(
     key: Key,
     tagName: String,
   ) {
-    tagService.tagKey(testData.project.id, key.id, tagName)
+    val key = keyService.getKeysWithTagsById(key.project.id, listOf(key.id)).singleOrNull() ?: throw NotFoundException()
+    tagService.tagKey(key, tagName)
   }
 
   private fun updateKeyTranslation(

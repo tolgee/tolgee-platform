@@ -122,7 +122,7 @@ class BranchSnapshotService(
         KeyMetaSnapshot(
           description = meta.description,
           custom = meta.custom?.let { LinkedHashMap(it) },
-          tags = meta.tags.mapTo(mutableSetOf()) { it },
+          tags = meta.tags.mapTo(mutableSetOf()) { it.name },
         ).apply { disableActivityLogging = true }
       snapshotMeta.keySnapshot = snapshot
       snapshot.keyMetaSnapshot = snapshotMeta
@@ -166,19 +166,6 @@ class BranchSnapshotService(
   }
 
   private fun deleteSnapshots(branchId: Long) {
-    entityManager
-      .createNativeQuery(
-        """
-        delete from branch_key_meta_snapshot_tags
-        where key_meta_snapshot_id in (
-          select id from branch_key_meta_snapshot
-          where key_snapshot_id in (
-            select id from branch_key_snapshot where branch_id = :branchId
-          )
-        )
-        """.trimIndent(),
-      ).setParameter("branchId", branchId)
-      .executeUpdate()
     entityManager
       .createNativeQuery(
         """

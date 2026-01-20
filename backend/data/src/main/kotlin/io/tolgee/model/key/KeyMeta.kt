@@ -113,7 +113,8 @@ class KeyMeta(
   }
 
   override fun hasChanged(snapshot: KeyMetaSnapshot): Boolean {
-    return this.description != snapshot.description || this.custom != snapshot.custom || this.tags != snapshot.tags
+    val tagNames = this.tags.map { it.name }.toSet()
+    return this.description != snapshot.description || this.custom != snapshot.custom || tagNames != snapshot.tags
   }
 
   override fun isConflicting(
@@ -138,9 +139,13 @@ class KeyMeta(
     this.custom = chooseThreeWay(source.custom, this.custom, snapshot?.custom, resolution)
 
     val snapshotTags = snapshot?.tags?.toSet().orEmpty()
-    val sourceTags = source.tags.toSet()
-    val targetTags = this.tags.toSet()
-    val finalTags = mergeSetsWithBase(snapshotTags, sourceTags, targetTags)
+    val sourceTagsByName = source.tags.associateBy { it.name }
+    val targetTagsByName = this.tags.associateBy { it.name }
+    val sourceTagNames = sourceTagsByName.keys
+    val targetTagNames = targetTagsByName.keys
+    val finalTagNames = mergeSetsWithBase(snapshotTags, sourceTagNames, targetTagNames)
+    val tagsByName = sourceTagsByName + targetTagsByName
+    val finalTags = finalTagNames.mapNotNull { tagsByName[it] }.toSet()
 
     this.tags.clear()
     this.tags.addAll(finalTags)
