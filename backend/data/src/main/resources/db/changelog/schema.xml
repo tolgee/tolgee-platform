@@ -5053,4 +5053,18 @@
             <column name="branch_id"/>
         </createIndex>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768911540294-2">
+        <dropForeignKeyConstraint baseTableName="branch_key_meta_snapshot_tags" constraintName="FK3tslgyhdddfky2tdiaqng2s6f"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768911540294-3">
+        <dropForeignKeyConstraint baseTableName="branch_key_meta_snapshot_tags" constraintName="FK6grk5x5ho9jp85gktc2munh5m"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768911540294-1">
+        <addColumn tableName="branch_key_meta_snapshot">
+            <column name="tags" type="JSONB"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768911540294-4">
+        <dropTable tableName="branch_key_meta_snapshot_tags"/>
+    </changeSet>
 </databaseChangeLog>
