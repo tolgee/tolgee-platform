@@ -1,14 +1,10 @@
-import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { useTranslationsService } from 'tg.views/projects/translations/context/services/useTranslationsService';
-import { useLocation } from 'react-router-dom';
 import { components } from 'tg.service/apiSchema.generated';
-import { extractBranchFromPathname } from 'tg.component/branching/branchingPath';
 
 type Props = {
   projectId?: number;
-  translations?: ReturnType<typeof useTranslationsService>;
-  enabled?: boolean;
+  branchName?: string;
 };
 
 type BranchModel = components['schemas']['BranchModel'];
@@ -23,13 +19,10 @@ const defaultBranchObject: BranchModel = {
   isDefault: true,
 };
 
-export const useBranchesService = ({ projectId, enabled = true }: Props) => {
-  const location = useLocation();
-  const routeBranch = extractBranchFromPathname(location.pathname);
-
+export const useBranchesService = ({ projectId, branchName }: Props) => {
   projectId = projectId || useProject().id;
 
-  const loadableBranches = useApiInfiniteQuery({
+  const loadableBranches = useApiQuery({
     url: '/v2/projects/{projectId}/branches',
     method: 'get',
     path: { projectId: projectId },
@@ -44,30 +37,26 @@ export const useBranchesService = ({ projectId, enabled = true }: Props) => {
     },
   });
 
-  const loadedBranches = loadableBranches.data?.pages.flatMap(
-    (p) => p._embedded?.branches ?? []
-  );
+  const loadedBranches = loadableBranches.data?._embedded?.branches ?? [];
 
   const data =
-    loadableBranches.isFetched && loadedBranches!.length > 0
-      ? loadableBranches.data!.pages.flatMap((p) => p._embedded?.branches ?? [])
-      : Array.from([defaultBranchObject]);
+    loadableBranches.isFetched && loadedBranches.length > 0
+      ? loadedBranches
+      : [defaultBranchObject];
 
-  const urlBranch = routeBranch
-    ? data?.find((b) => b.name === routeBranch)
-    : undefined;
+  const urlBranch = branchName && data.find((b) => b.name === branchName);
 
   const defaultBranch = loadableBranches.isFetched
-    ? loadedBranches?.find((b) => b.isDefault) || defaultBranchObject
+    ? loadedBranches.find((b) => b.isDefault) || defaultBranchObject
     : null;
 
-  const selected = routeBranch ? (urlBranch ? urlBranch : null) : defaultBranch;
+  const selected = branchName ? urlBranch || null : defaultBranch;
 
   return {
     branches: data,
-    selected: selected,
+    selected,
     default: defaultBranch,
-    selectedName: routeBranch || undefined,
+    selectedName: branchName,
     loadable: loadableBranches,
   };
 };

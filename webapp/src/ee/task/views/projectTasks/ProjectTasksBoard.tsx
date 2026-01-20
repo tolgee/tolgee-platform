@@ -33,7 +33,7 @@ export const ProjectTasksBoard = ({
     filterLanguage: filter.languages,
     filterType: filter.types,
     filterAgency: filter.agencies,
-    branch: branch,
+    branch,
   } satisfies QueryParameters;
 
   const newTasks = useProjectBoardTasks({
