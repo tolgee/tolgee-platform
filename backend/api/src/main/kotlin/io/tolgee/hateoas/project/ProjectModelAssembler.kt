@@ -55,6 +55,7 @@ class ProjectModelAssembler(
       organizationOwner = view.organizationOwner.let { simpleOrganizationModelAssembler.toModel(it) },
       baseLanguage = baseLanguage.let { languageModelAssembler.toModel(LanguageDto.fromEntity(it, it.id)) },
       useNamespaces = view.useNamespaces,
+      useBranching = view.useBranching,
       defaultNamespace = defaultNamespace,
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),
