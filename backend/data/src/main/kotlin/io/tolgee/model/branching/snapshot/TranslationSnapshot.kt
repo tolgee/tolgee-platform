@@ -31,7 +31,7 @@ class TranslationSnapshot(
   @Column(columnDefinition = "text")
   var value: String,
   @Enumerated
-  @ColumnDefault(value = "2")
+  @ColumnDefault(value = "1")
   @ActivityLoggedProp
   var state: TranslationState = TranslationState.TRANSLATED,
 ) : StandardAuditModel() {

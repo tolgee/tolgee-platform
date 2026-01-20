@@ -4884,7 +4884,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="language" type="VARCHAR(255)"/>
-            <column defaultValueNumeric="2" name="state" type="SMALLINT"/>
+            <column defaultValueNumeric="1" name="state" type="SMALLINT"/>
             <column name="value" type="TEXT"/>
             <column name="key_snapshot_id" type="BIGINT">
                 <constraints nullable="false"/>
