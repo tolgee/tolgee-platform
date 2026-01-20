@@ -170,6 +170,7 @@ class ProjectService(
     project.description = dto.description
     project.icuPlaceholders = dto.icuPlaceholders
     project.useNamespaces = dto.useNamespaces
+    project.useBranching = dto.useBranching
     project.suggestionsMode = dto.suggestionsMode
     project.translationProtection = dto.translationProtection
 
