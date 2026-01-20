@@ -21,6 +21,7 @@ import io.tolgee.ee.api.v2.hateoas.model.branching.BranchMergeRefModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.BranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.CreateBranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.RenameBranchModel
+import io.tolgee.ee.api.v2.hateoas.model.branching.SetBranchProtectedModel
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.Scope
@@ -127,6 +128,19 @@ class BranchController(
     @RequestBody rename: RenameBranchModel,
   ): BranchModel {
     val branch = branchService.renameBranch(projectHolder.project.id, branchId, rename.name)
+    return branchModelAssembler.toModel(branch)
+  }
+
+  @PostMapping(value = ["/{branchId}/protected"])
+  @Operation(summary = "Set branch protected flag")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
+  @OpenApiOrderExtension(3)
+  fun setProtected(
+    @PathVariable branchId: Long,
+    @RequestBody request: SetBranchProtectedModel,
+  ): BranchModel {
+    val branch = branchService.setProtected(projectHolder.project.id, branchId, request.isProtected)
     return branchModelAssembler.toModel(branch)
   }
 
