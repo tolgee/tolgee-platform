@@ -16,7 +16,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
-import org.springframework.boot.context.properties.bind.DefaultValue
+import org.hibernate.annotations.ColumnDefault
 import java.util.Date
 
 /**
@@ -58,7 +58,7 @@ class Branch(
   @Column(name = "pending")
   var pending: Boolean = false,
   @Column(name = "revision")
-  @DefaultValue("0")
+  @ColumnDefault("0")
   var revision: Int = 0,
   @OneToMany(targetEntity = BranchMerge::class, mappedBy = "sourceBranch", fetch = FetchType.LAZY)
   @OrderBy("createdAt DESC")
