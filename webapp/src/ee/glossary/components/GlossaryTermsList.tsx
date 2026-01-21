@@ -115,6 +115,8 @@ export const GlossaryTermsList = ({
     const position = verticalScrollRef.current?.getBoundingClientRect();
     if (position) {
       const bottomSpacing = parseInt(theme.spacing(2), 10);
+      // This is very fragile. We need to find a better way of stretching
+      // the table to fill the view vertically.
       setTableHeight(
         window.innerHeight - position.top + window.scrollY - bottomSpacing
       );
