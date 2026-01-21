@@ -146,9 +146,12 @@ class OrganizationProjectsControllerTest : AuthorizedControllerTest() {
       .andAssertThatJson {
         node("_embedded.projects") {
           node("").isArray.hasSize(1)
-          node("[0].stats.translationStatePercentages") {
-            node("TRANSLATED").isNumber.isEqualTo("100.0")
-            node("UNTRANSLATED").isNumber.isEqualTo("0.0")
+          node("[0].stats") {
+            node("keyCount").isNumber.isEqualTo("1")
+            node("translationStatePercentages") {
+              node("TRANSLATED").isNumber.isEqualTo("100.0")
+              node("UNTRANSLATED").isNumber.isEqualTo("0.0")
+            }
           }
         }
       }
