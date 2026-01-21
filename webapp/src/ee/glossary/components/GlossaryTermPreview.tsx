@@ -28,6 +28,7 @@ import { getGlossaryTermSearchUrl } from 'tg.constants/links';
 import clsx from 'clsx';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { TooltipCard } from 'tg.component/common/TooltipCard';
 
 const StyledContainer = styled(Box)`
   display: flex;
@@ -278,7 +279,21 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
             {(isHovering || standalone) && (
               <>
                 {slim && term.description && (
-                  <Tooltip title={term.description}>
+                  <Tooltip
+                    placement="bottom-start"
+                    enterDelay={200}
+                    components={{ Tooltip: TooltipCard }}
+                    title={
+                      <GlossaryTermPreview
+                        term={term}
+                        languageTag={languageTag}
+                        targetLanguageTag={targetLanguageTag}
+                        editEnabled={editEnabled}
+                        standalone
+                        onTranslationUpdated={onTranslationUpdated}
+                      />
+                    }
+                  >
                     <IconButton
                       onClick={(e) => e.stopPropagation()}
                       sx={{
@@ -290,7 +305,7 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
                     </IconButton>
                   </Tooltip>
                 )}
-                {editEnabled && (
+                {!slim && editEnabled && (
                   <Tooltip
                     title={
                       <T keyName="glossary_term_preview_edit_translation_tooltip" />
@@ -308,26 +323,28 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
                     </IconButton>
                   </Tooltip>
                 )}
-                <Tooltip
-                  title={
-                    <T keyName="glossary_term_preview_open_full_view_tooltip" />
-                  }
-                >
-                  <IconButton
-                    sx={{
-                      margin: theme.spacing(-0.8),
-                    }}
-                    component={Link}
-                    to={getGlossaryTermSearchUrl(
-                      term.glossary.organizationOwner.slug,
-                      term.glossary.id,
-                      translation?.text || ''
-                    )}
-                    size="small"
+                {!slim && (
+                  <Tooltip
+                    title={
+                      <T keyName="glossary_term_preview_open_full_view_tooltip" />
+                    }
                   >
-                    <LinkExternal02 width={20} height={20} />
-                  </IconButton>
-                </Tooltip>
+                    <IconButton
+                      sx={{
+                        margin: theme.spacing(-0.8),
+                      }}
+                      component={Link}
+                      to={getGlossaryTermSearchUrl(
+                        term.glossary.organizationOwner.slug,
+                        term.glossary.id,
+                        translation?.text || ''
+                      )}
+                      size="small"
+                    >
+                      <LinkExternal02 width={20} height={20} />
+                    </IconButton>
+                  </Tooltip>
+                )}
               </>
             )}
           </>
