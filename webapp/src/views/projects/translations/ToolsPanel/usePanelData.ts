@@ -5,6 +5,7 @@ import {
 } from '../context/TranslationsContext';
 import { useMemo } from 'react';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useBranchEditAccess } from '../context/services/useBranchEditAccess';
 
 export const usePanelData = () => {
   const project = useProject();
@@ -32,6 +33,7 @@ export const usePanelData = () => {
     : undefined;
 
   const projectPermissions = useProjectPermissions();
+  const canEditProtectedBranch = useBranchEditAccess();
 
   const dataProps = {
     project,
@@ -42,19 +44,20 @@ export const usePanelData = () => {
     setValue: setEditValueString,
     appendValue: appendEditValueString,
     editEnabled: language
-      ? (projectPermissions.satisfiesLanguageAccess(
+      ? canEditProtectedBranch &&
+        ((projectPermissions.satisfiesLanguageAccess(
           'translations.edit',
           language.id
         ) &&
           translation?.state !== 'DISABLED') ||
-        Boolean(
-          keyData?.tasks?.find(
-            (t) =>
-              t.languageTag === language.tag &&
-              t.userAssigned &&
-              t.type === 'TRANSLATE'
-          )
-        )
+          Boolean(
+            keyData?.tasks?.find(
+              (t) =>
+                t.languageTag === language.tag &&
+                t.userAssigned &&
+                t.type === 'TRANSLATE'
+            )
+          ))
       : false,
     projectPermissions,
   };

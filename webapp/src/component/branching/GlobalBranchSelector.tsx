@@ -10,6 +10,7 @@ import {
   extractBranchFromPathname,
 } from './branchingPath';
 import { setCachedBranch } from './branchCache';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 type BranchModel = components['schemas']['BranchModel'];
 
@@ -18,6 +19,12 @@ export const GlobalBranchSelector = () => {
   const location = useLocation();
   const project = useProject();
   const branchInUrl = extractBranchFromPathname(location.pathname);
+  const { isEnabled } = useEnabledFeatures();
+
+  const isBranchingEnabled = isEnabled('BRANCHING') && project.useBranching;
+  if (!isBranchingEnabled) {
+    return null;
+  }
   const {
     selected,
     loadable,

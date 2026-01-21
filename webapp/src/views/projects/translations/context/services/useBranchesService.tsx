@@ -1,10 +1,12 @@
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
+import { useIsBranchingEnabled } from 'tg.component/branching/useIsBranchingEnabled';
 
 type Props = {
   projectId?: number;
   branchName?: string;
+  enabled?: boolean;
 };
 
 type BranchModel = components['schemas']['BranchModel'];
@@ -19,9 +21,22 @@ const defaultBranchObject: BranchModel = {
   isDefault: true,
 };
 
-export const useBranchesService = ({ projectId, branchName }: Props) => {
+export const useBranchesService = ({
+  projectId,
+  branchName,
+  enabled = true,
+}: Props) => {
   projectId = projectId || useProject().id;
-
+  const isBranchingEnabled = useIsBranchingEnabled();
+  if (!enabled || !isBranchingEnabled) {
+    return {
+      branches: [],
+      selected: null,
+      default: null,
+      selectedName: branchName || undefined,
+      loadable: { isLoading: false, isFetched: true, data: [] },
+    };
+  }
   const loadableBranches = useApiQuery({
     url: '/v2/projects/{projectId}/branches',
     method: 'get',

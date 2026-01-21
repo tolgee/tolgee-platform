@@ -69,7 +69,7 @@ class Branch(
         Branch(
           name = DEFAULT_BRANCH_NAME,
           isDefault = true,
-          isProtected = true,
+          isProtected = false,
         )
       branch.project = project
       project.branches.add(branch)

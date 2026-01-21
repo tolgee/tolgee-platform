@@ -59,8 +59,8 @@ import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
 import { useGlossaryTermHighlights as useGlossaryTermHighlightsInternal } from '../ee/glossary/hooks/useGlossaryTermHighlights';
 import { GlossaryTermPreview as GlossaryTermPreviewInternal } from '../ee/glossary/components/GlossaryTermPreview';
 import {
-  useGlossariesCount,
   GlossariesPanel,
+  useGlossariesCount,
 } from '../ee/glossary/components/GlossariesPanel';
 import { GlossaryRouter } from '../ee/glossary/views/GlossaryRouter';
 import { createAdder } from '../fixtures/pluginAdder';
@@ -404,7 +404,7 @@ export const useAddProjectMenuItems = () => {
     [
       {
         id: 'branches',
-        condition: ({ satisfiesPermission }) => true, // TODO change to permission
+        condition: ({ project }) => project.useBranching,
         link: LINKS.PROJECT_BRANCHES,
         icon: Branch,
         text: t('project_menu_branches'),

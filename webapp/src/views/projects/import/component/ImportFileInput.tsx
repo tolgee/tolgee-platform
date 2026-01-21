@@ -38,6 +38,7 @@ type ImportFileInputProps = {
   filesUploaded?: boolean;
   onProgressOverlayActiveChange: (isActive: boolean) => void;
   isProgressOverlayActive: boolean;
+  disabled?: boolean;
 };
 
 export type ValidationResult = {
@@ -96,6 +97,9 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
   }
 
   const onNewFiles = (files: FilesType) => {
+    if (props.disabled) {
+      return;
+    }
     resetInput();
     const validation = validate(files.map((f) => f.file));
     if (validation.valid) {
@@ -136,7 +140,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
   return (
     <DragDropArea
       onFilesReceived={onNewFiles}
-      active={!props.isProgressOverlayActive}
+      active={!props.isProgressOverlayActive && !props.disabled}
       maxItems={MAX_FILE_COUNT}
     >
       <QuickStartHighlight
@@ -167,6 +171,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
                 onChange={(e) => onFileSelected(e)}
                 multiple
                 webkitdirectory
+                disabled={props.disabled}
               />
               <ImportInputAreaLayoutTitle>
                 <T keyName="import_file_input_drop_file_text" />
@@ -179,6 +184,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
                 }
                 variant="outlined"
                 color="primary"
+                disabled={props.disabled}
               >
                 <T keyName="import_file_input_select_file_button" />
               </Button>
