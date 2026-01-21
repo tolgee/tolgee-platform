@@ -12,6 +12,8 @@ const StyledCard = styled(Card)`
   border-radius: 20px;
   background-color: ${({ theme }) =>
     theme.palette.tokens.background.onDefaultGrey};
+  padding-top: ${({ theme }) => theme.spacing(8)};
+  padding-bottom: ${({ theme }) => theme.spacing(8)};
 `;
 
 const StyledImage = styled(Box)`
@@ -24,12 +26,11 @@ const StyledText = styled('div')`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: ${({ theme }) => theme.spacing(8, 8, 2, 8)};
+  margin: ${({ theme }) => theme.spacing(0, 8, 2, 8)};
 `;
 
 const StyledButton = styled(Button)`
   margin-top: ${({ theme }) => theme.spacing(4)};
-  margin-bottom: ${({ theme }) => theme.spacing(8)};
 `;
 
 export type AddFirstGlossaryMessageProps = {
@@ -51,7 +52,7 @@ export const AddFirstGlossaryMessage: React.VFC<
             keyName="glossaries_list_empty_message"
             params={{
               bestPractice: (
-                <Link href="https://docs.tolgee.io/platform/projects_and_organizations/managing_glossaries" />
+                <Link href="https://docs.tolgee.io/platform/glossaries/managing_glossaries" />
               ),
             }}
           />

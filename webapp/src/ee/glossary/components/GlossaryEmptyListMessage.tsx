@@ -79,7 +79,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
             <T keyName="glossary_empty_placeholder_add_term_button" />
           </Button>
           <Link
-            href="https://docs.tolgee.io/platform/projects_and_organizations/managing_glossaries"
+            href="https://docs.tolgee.io/platform/glossaries/managing_glossaries"
             sx={{ visibility: 'hidden' }}
           >
             <Typography variant="body2">
@@ -104,7 +104,7 @@ export const GlossaryEmptyListMessage: React.VFC<Props> = ({
           >
             <T keyName="glossary_empty_placeholder_import_terms_button" />
           </Button>
-          <Link href="https://docs.tolgee.io/platform/projects_and_organizations/managing_glossaries#importing-terms-to-a-glossary">
+          <Link href="https://docs.tolgee.io/platform/glossaries/importing_and_exporting_glossaries">
             <Typography variant="body2">
               <T keyName="glossary_empty_placeholder_import_terms_csv_format" />
             </Typography>
