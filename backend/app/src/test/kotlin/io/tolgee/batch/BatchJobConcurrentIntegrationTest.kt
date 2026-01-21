@@ -138,7 +138,7 @@ class BatchJobConcurrentIntegrationTest :
 
   @BeforeEach
   fun setup() {
-    batchJobStateProvider.clearAllLocalState()
+    batchJobStateProvider.clearAllState()
     batchJobChunkExecutionQueue.clear()
     batchJobChunkExecutionQueue.populateQueue()
 
@@ -703,7 +703,7 @@ class BatchJobConcurrentIntegrationTest :
     // Phase 4: Clear Redis state to simulate state loss (like a Redis restart)
     logger.info("Phase 4: Clearing Redis batch job state (simulating Redis restart)...")
     clearRedisBatchJobState(allJobs.map { it.id })
-    batchJobStateProvider.clearAllLocalState()
+    batchJobStateProvider.clearAllState()
     logger.info("Redis state cleared")
 
     // Phase 5: Clear and repopulate the queue from database

@@ -79,7 +79,7 @@ abstract class AbstractBatchJobsGeneralTest :
 
   @BeforeEach
   fun setup() {
-    batchJobStateProvider.clearAllLocalState()
+    batchJobStateProvider.clearAllState()
     Mockito.reset(batchJobProjectLockingManager)
     Mockito.reset(progressManager)
     Mockito.reset(autoTranslationService)
