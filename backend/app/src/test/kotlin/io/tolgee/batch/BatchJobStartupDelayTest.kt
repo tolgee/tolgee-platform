@@ -110,7 +110,9 @@ class BatchJobStartupDelayTest :
     logger.info("Phase 1: Creating job...")
     val job = runNoOpJob(chunkCount)
     timestamps["job_created"] = System.currentTimeMillis()
-    logger.info("Phase 1 COMPLETE: Job ${job.id} created in ${timestamps["job_created"]!! - timestamps["test_start"]!!}ms")
+    logger.info(
+      "Phase 1 COMPLETE: Job ${job.id} created in ${timestamps["job_created"]!! - timestamps["test_start"]!!}ms",
+    )
 
     // Phase 2: Monitor queue population
     logger.info("Phase 2: Monitoring queue population...")
@@ -120,10 +122,14 @@ class BatchJobStartupDelayTest :
       val queueSize = batchJobChunkExecutionQueue.size
       if (queueSize > 0 && queuePopulatedTime == null) {
         queuePopulatedTime = System.currentTimeMillis()
-        logger.info("Phase 2: First items in queue at ${queuePopulatedTime - timestamps["job_created"]!!}ms after job creation, queue size: $queueSize")
+        logger.info(
+          "Phase 2: First items in queue at ${queuePopulatedTime - timestamps["job_created"]!!}ms after job creation, queue size: $queueSize",
+        )
       }
       if (queueSize >= chunkCount * 0.9) {
-        logger.info("Phase 2 COMPLETE: Queue ~90% populated ($queueSize items) at ${System.currentTimeMillis() - timestamps["job_created"]!!}ms")
+        logger.info(
+          "Phase 2 COMPLETE: Queue ~90% populated ($queueSize items) at ${System.currentTimeMillis() - timestamps["job_created"]!!}ms",
+        )
         break
       }
       Thread.sleep(10)
@@ -139,9 +145,10 @@ class BatchJobStartupDelayTest :
 
     val monitorStart = System.currentTimeMillis()
     while (System.currentTimeMillis() - monitorStart < 30000) {
-      val jobDto = executeInNewTransaction(transactionManager) {
-        batchJobService.getJobDto(job.id)
-      }
+      val jobDto =
+        executeInNewTransaction(transactionManager) {
+          batchJobService.getJobDto(job.id)
+        }
 
       val executions = batchJobService.getExecutions(job.id)
       val completed = executions.count { it.status == BatchJobChunkExecutionStatus.SUCCESS }
@@ -152,7 +159,9 @@ class BatchJobStartupDelayTest :
       // Log status changes
       if (jobDto.status != lastStatus) {
         val elapsed = System.currentTimeMillis() - timestamps["job_created"]!!
-        logger.info("Phase 3: Status changed to ${jobDto.status} at ${elapsed}ms (completed=$completed, running=$running, pending=$pending, queue=$queueSize)")
+        logger.info(
+          "Phase 3: Status changed to ${jobDto.status} at ${elapsed}ms (completed=$completed, running=$running, pending=$pending, queue=$queueSize)",
+        )
         if (jobDto.status == BatchJobStatus.RUNNING && firstRunningTime == null) {
           firstRunningTime = System.currentTimeMillis()
           timestamps["first_running"] = firstRunningTime
@@ -164,14 +173,20 @@ class BatchJobStartupDelayTest :
       if (completed > 0 && firstCompletedTime == null) {
         firstCompletedTime = System.currentTimeMillis()
         timestamps["first_completed"] = firstCompletedTime
-        logger.info("Phase 3: First chunk completed at ${firstCompletedTime - timestamps["job_created"]!!}ms after job creation")
+        logger.info(
+          "Phase 3: First chunk completed at ${firstCompletedTime - timestamps["job_created"]!!}ms after job creation",
+        )
       }
 
       // Log progress every 100 completions
       if (completed - lastCompletedCount >= 500) {
         val elapsed = System.currentTimeMillis() - timestamps["job_created"]!!
         val throughput = completed * 1000.0 / (System.currentTimeMillis() - (firstCompletedTime ?: monitorStart))
-        logger.info("Phase 3: Progress - completed=$completed, running=$running, pending=$pending, queue=$queueSize, throughput=${"%.1f".format(throughput)}/s, elapsed=${elapsed}ms")
+        val tps = "%.1f".format(throughput)
+        logger.info(
+          "Phase 3: Progress - completed=$completed, running=$running, " +
+            "pending=$pending, queue=$queueSize, throughput=$tps/s, elapsed=${elapsed}ms",
+        )
         lastCompletedCount = completed
       }
 
@@ -263,7 +278,9 @@ class BatchJobStartupDelayTest :
       if (System.currentTimeMillis() - lastLogTime >= 1000) {
         val pending = executions.count { it.status == BatchJobChunkExecutionStatus.PENDING }
         val running = executions.count { it.status == BatchJobChunkExecutionStatus.RUNNING }
-        logger.info("Status: ${jobDto?.status} (queue=$queueSize, pending=$pending, running=$running, completed=$completed)")
+        logger.info(
+          "Status: ${jobDto?.status} (queue=$queueSize, pending=$pending, running=$running, completed=$completed)",
+        )
         lastLogTime = System.currentTimeMillis()
       }
 

@@ -123,9 +123,15 @@ class ProgressManager(
       batchJobStateProvider.addProgressCount(job.id, progressDelta.toLong())
     }
 
+    // Track whether THIS execution triggered job completion
+    // Use atomic increment-and-get to ensure only one thread triggers completion
+    var thisExecutionTriggeredCompletion = false
+
     // Only update completion-related counters if status changed to countable
     if (isNowCountableAsCompleted && !wasCountableAsCompleted) {
-      batchJobStateProvider.incrementCompletedChunksCount(job.id)
+      // Use atomic increment-and-get to determine if THIS increment completed the job
+      val newCompletedChunks = batchJobStateProvider.incrementCompletedChunksCountAndGet(job.id)
+      thisExecutionTriggeredCompletion = newCompletedChunks == job.totalChunks
 
       if (execution.status == BatchJobChunkExecutionStatus.FAILED) {
         batchJobStateProvider.incrementFailedCount(job.id)
@@ -135,21 +141,23 @@ class ProgressManager(
       }
     }
 
-    // Use counters for job result info (O(1) operations)
-    val completedChunks = batchJobStateProvider.getCompletedChunksCount(job.id)
-    val info =
-      JobResultInfo(
-        completedChunks = completedChunks,
-        progress = batchJobStateProvider.getProgressCount(job.id),
-        isAnyCancelled = batchJobStateProvider.getCancelledCount(job.id) > 0,
-        isAnyFailed = batchJobStateProvider.getFailedCount(job.id) > 0,
-      )
-
     // Only publish progress event when there's actual progress
     if (progressDelta > 0) {
-      eventPublisher.publishEvent(OnBatchJobProgress(job, info.progress, job.totalItems.toLong()))
+      eventPublisher.publishEvent(OnBatchJobProgress(job, batchJobStateProvider.getProgressCount(job.id), job.totalItems.toLong()))
     }
-    handleJobStatus(job, info)
+
+    // Only trigger job status handling if THIS execution completed the job
+    // This prevents multiple threads from triggering completion simultaneously
+    if (thisExecutionTriggeredCompletion) {
+      val info =
+        JobResultInfo(
+          completedChunks = job.totalChunks,
+          progress = batchJobStateProvider.getProgressCount(job.id),
+          isAnyCancelled = batchJobStateProvider.getCancelledCount(job.id) > 0,
+          isAnyFailed = batchJobStateProvider.getFailedCount(job.id) > 0,
+        )
+      handleJobStatus(job, info)
+    }
   }
 
   fun handleChunkCompletedCommitted(

@@ -442,6 +442,22 @@ class BatchJobStateProvider(
     }
   }
 
+  /**
+   * Atomically increments the completed chunks count and returns the new value.
+   * This enables atomic check-and-act patterns (e.g., determining if THIS increment
+   * completed the job).
+   */
+  fun incrementCompletedChunksCountAndGet(jobId: Long): Int {
+    if (usingRedisProvider.areWeUsingRedis) {
+      return redissonClient.getAtomicLong("$REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX$jobId").incrementAndGet().toInt()
+    }
+    return localCompletedChunksCountMap
+      .computeIfAbsent(jobId) {
+        java.util.concurrent.atomic
+          .AtomicInteger(0)
+      }.incrementAndGet()
+  }
+
   // ===== Progress Counter =====
 
   fun getProgressCount(jobId: Long): Long {
