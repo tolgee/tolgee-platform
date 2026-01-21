@@ -222,7 +222,7 @@ export const GlossaryTermsList = ({
               cache[index] || estimateGlossaryViewListRowHeight(terms[index])
             }
             // @ts-ignore
-            scrollParentGetter={() => window}
+            scrollParentGetter={() => verticalScrollRef.current ?? window}
             length={terms.length}
             useTranslate3d
             itemRenderer={renderItem}
