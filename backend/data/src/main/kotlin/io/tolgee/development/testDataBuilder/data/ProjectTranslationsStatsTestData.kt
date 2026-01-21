@@ -23,6 +23,20 @@ class ProjectTranslationsStatsTestData {
             language = en.self
           }
         }
+        addBranch {
+          name = "feature"
+          project = self
+        }.build {
+          addKey {
+            name = "test_key_branched"
+            branch = self
+          }.build {
+            addTranslation {
+              text = "${en.self.name} text"
+              language = en.self
+            }
+          }
+        }
       }
     }
 }

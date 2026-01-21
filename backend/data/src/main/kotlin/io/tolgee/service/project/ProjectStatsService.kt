@@ -4,6 +4,9 @@ import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.model.ILanguage
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.Branch_
+import io.tolgee.model.key.Key_
 import io.tolgee.model.views.projectStats.ProjectStatsView
 import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.service.queryBuilders.ProjectStatsProvider
@@ -41,6 +44,7 @@ class ProjectStatsService(
     val root = query.from(Project::class.java)
     val languages = root.join(Project_.languages, JoinType.LEFT)
     val keys = root.join(Project_.keys, JoinType.LEFT)
+    val branch = keys.join(Key_.branch, JoinType.LEFT)
     val keyCountSelect = cb.countDistinct(keys)
     val languageCountSelect = cb.countDistinct(languages)
     query.multiselect(
@@ -48,7 +52,15 @@ class ProjectStatsService(
       keyCountSelect,
       languageCountSelect,
     )
-    query.where(root.get(Project_.id).`in`(*projectIds.toList().toTypedArray()))
+    query.where(
+      cb.and(
+        root.get(Project_.id).`in`(*projectIds.toList().toTypedArray()),
+        cb.or(
+          cb.isNull(keys.get(Key_.branch)),
+          cb.isTrue(branch.get(Branch_.isDefault)),
+        ),
+      ),
+    )
     query.groupBy(root.get(Project_.id))
     return entityManager.createQuery(query).resultList.associate { tuple ->
       tuple.get(root.get(Project_.id)) to ProjectTotals(tuple.get(languageCountSelect), tuple.get(keyCountSelect))
