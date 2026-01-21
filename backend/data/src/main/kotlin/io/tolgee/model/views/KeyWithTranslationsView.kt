@@ -27,7 +27,7 @@ data class KeyWithTranslationsView(
   var tasks: List<KeyTaskView>? = null
 
   companion object {
-    val FIELD_COUNT = 11
+    val LANGUAGES_FIELD_COUNT = 10
 
     fun of(
       queryData: Array<Any?>,
@@ -49,8 +49,8 @@ data class KeyWithTranslationsView(
           contextPresent = data.removeFirst() as Boolean,
         )
 
-      (0 until data.size step FIELD_COUNT).forEach { i ->
-        val language = languages[i / FIELD_COUNT].tag
+      (0 until data.size step LANGUAGES_FIELD_COUNT).forEach { i ->
+        val language = languages[i / LANGUAGES_FIELD_COUNT].tag
 
         val id = data[i] as Long?
         result.translations[language] =
