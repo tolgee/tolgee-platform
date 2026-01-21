@@ -143,7 +143,13 @@ class ProgressManager(
 
     // Only publish progress event when there's actual progress
     if (progressDelta > 0) {
-      eventPublisher.publishEvent(OnBatchJobProgress(job, batchJobStateProvider.getProgressCount(job.id), job.totalItems.toLong()))
+      eventPublisher.publishEvent(
+        OnBatchJobProgress(
+          job,
+          batchJobStateProvider.getProgressCount(job.id),
+          job.totalItems.toLong(),
+        ),
+      )
     }
 
     // Only trigger job status handling if THIS execution completed the job
