@@ -1,3 +1,11 @@
+## [3.147.2](https://github.com/tolgee/tolgee-platform/compare/v3.147.1...v3.147.2) (2026-01-21)
+
+
+### Bug Fixes
+
+* Handle rate-limiting exceptions consistently in LLM provider service ([#3370](https://github.com/tolgee/tolgee-platform/issues/3370)) ([5b66a9e](https://github.com/tolgee/tolgee-platform/commit/5b66a9ee3455b950eab1e7c7ce5b9a8f1a247ebf))
+* update LlmRateLimitedException to use retry time ([#3399](https://github.com/tolgee/tolgee-platform/issues/3399)) ([446f3a1](https://github.com/tolgee/tolgee-platform/commit/446f3a187fd6a91f1ac3b28c3966f7ee74b17982))
+
 ## [3.147.1](https://github.com/tolgee/tolgee-platform/compare/v3.147.0...v3.147.1) (2026-01-19)
 
 
