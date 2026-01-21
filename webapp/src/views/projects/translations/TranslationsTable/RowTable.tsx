@@ -48,7 +48,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
   bannerBefore,
   bannerAfter,
 }) {
-  const { satisfiesPermission } = useProjectPermissions();
+  const { satisfiesPermissionWithBranching } = useProjectPermissions();
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const active = hover || focus;
@@ -79,7 +79,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
     >
       <CellKey
         editInDialog
-        editEnabled={satisfiesPermission('keys.edit')}
+        editEnabled={satisfiesPermissionWithBranching('keys.edit')}
         data={data}
         active={relaxedActive}
         className={allClassName}

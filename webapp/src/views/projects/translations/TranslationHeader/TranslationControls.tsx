@@ -49,9 +49,9 @@ type Props = {
 };
 
 export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
-  const { satisfiesPermission } = useProjectPermissions();
+  const { satisfiesPermissionWithBranching } = useProjectPermissions();
   const project = useProject();
-  const canCreateKeys = satisfiesPermission('keys.create');
+  const canCreateKeys = satisfiesPermissionWithBranching('keys.create');
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
   const { t } = useTranslate();
