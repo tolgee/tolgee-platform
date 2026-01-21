@@ -36,6 +36,7 @@ import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresOneOfFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.security.UserAccountService
 import jakarta.validation.Valid
@@ -78,6 +79,7 @@ class TaskController(
   private val pagedUserResourcesAssembler: PagedResourcesAssembler<UserAccount>,
   private val taskPerUserReportModelAssembler: TaskPerUserReportModelAssembler,
   private val securityService: SecurityService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @PostMapping("")
   @Operation(summary = "Create task")
@@ -92,6 +94,7 @@ class TaskController(
     @ParameterObject
     filters: TranslationScopeFilters,
   ): TaskModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     val task = taskService.createTask(projectHolder.project.id, dto, filters)
     return taskModelAssembler.toModel(task)
   }
@@ -109,6 +112,8 @@ class TaskController(
     @ParameterObject
     filters: TranslationScopeFilters,
   ) {
+    val usedBranches = dto.tasks.mapNotNull { it.branch }.filter { it.isNotBlank() }
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, usedBranches)
     taskService.createMultipleTasks(projectHolder.project.id, dto.tasks, filters)
   }
 
@@ -141,6 +146,7 @@ class TaskController(
     @RequestParam("search", required = false)
     search: String?,
   ): PagedModel<TaskModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, filters.branch)
     val tasks = taskService.getAllPaged(projectHolder.project.id, pageable, search, filters)
     return pagedTaskResourcesAssembler.toModel(tasks, taskModelAssembler)
   }
@@ -340,6 +346,7 @@ class TaskController(
     @ParameterObject
     filters: TranslationScopeFilters,
   ): KeysScopeView {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     return taskService.calculateScope(projectHolder.projectEntity, dto, filters)
   }
 

@@ -12,6 +12,7 @@ import { useTranslationsActions } from '../context/TranslationsContext';
 import { TranslationTaskIndicator } from 'tg.ee';
 import { CloseButton } from 'tg.component/common/buttons/CloseButton';
 import React from 'react';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -59,9 +60,14 @@ export const TranslationFlags: React.FC<Props> = ({
   className,
 }) => {
   const project = useProject();
+  const { satisfiesPermissionWithBranching } = useProjectPermissions();
   const { t } = useTranslate();
   const translation = keyData.translations[lang];
   const task = keyData.tasks?.find((t) => t.languageTag === lang);
+
+  const canChangeState = satisfiesPermissionWithBranching(
+    'translations.state-edit'
+  );
 
   const { updateTranslation } = useTranslationsActions();
 
@@ -134,10 +140,13 @@ export const TranslationFlags: React.FC<Props> = ({
       {translation?.outdated && (
         <CloseButton
           data-cy="translations-outdated-clear-button"
-          onClose={(e) =>
-            handleClearOutdated(
-              e as React.MouseEvent<SVGSVGElement, MouseEvent>
-            )
+          onClose={
+            canChangeState
+              ? (e) =>
+                  handleClearOutdated(
+                    e as React.MouseEvent<SVGSVGElement, MouseEvent>
+                  )
+              : undefined
           }
           xs
         >
