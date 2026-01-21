@@ -23,10 +23,6 @@ export const GlossaryProjectsInfo: React.FC<Props> = ({
 }) => {
   const { t } = useTranslate();
 
-  if (projects.length === 0) {
-    return null;
-  }
-
   const sortedProjects = useMemo(
     () => [...projects].sort((a, b) => a.name.localeCompare(b.name)),
     [projects]
@@ -34,6 +30,10 @@ export const GlossaryProjectsInfo: React.FC<Props> = ({
   const displayedProjects = sortedProjects.slice(0, maxDisplay);
   const remainingProjects = sortedProjects.slice(maxDisplay);
   const hasMore = remainingProjects.length > 0;
+
+  if (displayedProjects.length === 0) {
+    return null;
+  }
 
   const content = (
     <StyledWrapper data-cy="glossary-projects-info">

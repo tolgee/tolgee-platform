@@ -171,7 +171,7 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
       ...organizationLanguagesValue,
       ...missingLanguages,
     ];
-  }, [glossaryLanguagesLoadable.data, organizationLanguages]);
+  }, [glossaryLanguagesLoadable.data, organizationLanguages, value]);
 
   const handleFetchMore = () => {
     if (

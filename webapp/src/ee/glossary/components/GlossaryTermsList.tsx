@@ -9,7 +9,7 @@ import {
   estimateGlossaryViewListRowHeight,
   GlossaryViewListRow,
 } from 'tg.ee.module/glossary/components/GlossaryViewListRow';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SelectionService } from 'tg.service/useSelectionService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useResizeObserver } from 'usehooks-ts';
@@ -111,20 +111,31 @@ export const GlossaryTermsList = ({
   const [tableHeight, setTableHeight] = useState(600);
   const theme = useTheme();
 
-  const onResize = () => {
+  const onResize = useCallback(() => {
     const position = verticalScrollRef.current?.getBoundingClientRect();
     if (position) {
       const bottomSpacing = parseInt(theme.spacing(2), 10);
       // This is very fragile. We need to find a better way of stretching
       // the table to fill the view vertically.
-      setTableHeight(
-        window.innerHeight - position.top + window.scrollY - bottomSpacing
-      );
+      setTableHeight(window.innerHeight - position.top - bottomSpacing);
     }
-  };
+  }, [theme]);
+
+  const verticalScrollRefCallback = useCallback(
+    (node) => {
+      verticalScrollRef.current = node;
+      onResize();
+    },
+    [onResize]
+  );
+
+  useEffect(() => {
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [onResize]);
 
   useResizeObserver({ ref: verticalScrollRef, onResize });
-  useEffect(onResize, [verticalScrollRef.current]);
 
   const renderItem = (index: number) => {
     const row = terms[index];
@@ -187,7 +198,7 @@ export const GlossaryTermsList = ({
         deps={[selectedLanguages]}
       />
       <StyledVerticalScroll
-        ref={verticalScrollRef}
+        ref={verticalScrollRefCallback}
         style={{ height: tableHeight }}
       >
         <StyledContent>

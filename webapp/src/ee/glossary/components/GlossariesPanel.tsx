@@ -76,7 +76,7 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
                   <LinkExternal
                     href={LINKS.ORGANIZATION_GLOSSARIES.build({
                       [PARAMS.ORGANIZATION_SLUG]:
-                        project.organizationOwner!.slug,
+                        project.organizationOwner?.slug || '',
                     })}
                   />
                 ),

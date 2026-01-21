@@ -12,7 +12,11 @@ export class GlossaryPreferencesService {
   }
 
   private setAll(data: AllType) {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+    } catch {
+      // ignore
+    }
   }
 
   getForGlossary(glossaryId: number): string[] | undefined {

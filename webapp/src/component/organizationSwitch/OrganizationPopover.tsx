@@ -96,7 +96,6 @@ export const OrganizationPopover: React.FC<Props> = ({
       renderItem={(item) => <OrganizationItem data={item} />}
       searchPlaceholder={t('global_search_organization')}
       headingText={t('organizations_title')}
-      data-cy="organization-switch"
       onSearchChange={handleSearchChange}
       onAddNew={canCreateOrganizations ? onAddNew : undefined}
       addNewTooltip={t('organizations_add_new')}

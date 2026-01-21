@@ -14,7 +14,7 @@ export const useSelectedGlossaryLanguages = () => {
       saved = [glossary.baseLanguageTag, ...saved];
     }
     return saved;
-  }, [glossary.id]);
+  }, [glossary]);
 
   const selectedWithBaseLanguage = useMemo(() => {
     if (selectedFor !== glossary.id) {
@@ -24,7 +24,7 @@ export const useSelectedGlossaryLanguages = () => {
       return defaultValue;
     }
     return [glossary?.baseLanguageTag || '', ...(selected ?? [])];
-  }, [selectedFor, selected, glossary]);
+  }, [selectedFor, selected, glossary, defaultValue]);
 
   const update = (languages: string[]) => {
     const withoutBase = languages.filter((l) => l !== glossary.baseLanguageTag);
