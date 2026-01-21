@@ -313,7 +313,7 @@ class BatchJobTestUtil(
     doAnswer {
       val callNumber = callCount.incrementAndGet()
       if (callNumber == 1) {
-        throw LlmRateLimitedException()
+        throw LlmRateLimitedException(currentDateProvider.date.time + 5L)
       }
       if (callNumber == 2) {
         throw FailedDependencyException(Message.LLM_PROVIDER_ERROR)
