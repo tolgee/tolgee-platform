@@ -18,6 +18,7 @@ import { useProjectNamespaces } from 'tg.hooks/useProjectNamespaces';
 import { DefaultNamespaceSelect } from './components/DefaultNamespaceSelect';
 import { LinkReadMore } from 'tg.component/LinkReadMore';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 type EditProjectRequest = components['schemas']['EditProjectRequest'];
 
@@ -26,8 +27,10 @@ export const ProjectSettingsAdvanced = () => {
   const { t } = useTranslate();
   const history = useHistory();
   const reportEvent = useReportEvent();
+  const { isEnabled } = useEnabledFeatures();
 
   const { allNamespacesWithNone } = useProjectNamespaces();
+  const isBranchingEnabled = isEnabled('BRANCHING');
 
   const deleteLoadable = useApiMutation({
     url: '/v2/projects/{projectId}',
@@ -144,6 +147,25 @@ export const ProjectSettingsAdvanced = () => {
         }}
         disabled={updateLoadable.isLoading}
       />
+
+      {isBranchingEnabled && (
+        <>
+          <Box mt={2} />
+
+          <SwitchWithDescription
+            data-cy="project-settings-use-branching-switch"
+            title={t('project_settings_use_branching')}
+            description={<T keyName="project_settings_use_branching_hint" />}
+            checked={project.useBranching}
+            onSwitch={() =>
+              updateSettings({
+                useBranching: !project.useBranching,
+              })
+            }
+            disabled={updateLoadable.isLoading || !isBranchingEnabled}
+          />
+        </>
+      )}
 
       <Typography variant="h5" mt={5} mb="20px">
         {t('project_settings_advanced_export_and_file_formats')}

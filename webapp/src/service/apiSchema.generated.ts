@@ -2228,6 +2228,7 @@ export interface components {
        * @enum {string}
        */
       translationProtection: "NONE" | "PROTECT_REVIEWED";
+      useBranching: boolean;
       useNamespaces: boolean;
     };
     EeSubscriptionModel: {
@@ -2257,6 +2258,7 @@ export interface components {
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
+        | "BRANCHING"
       )[];
       isPayAsYouGo: boolean;
       /** Format: date-time */
@@ -4449,6 +4451,7 @@ export interface components {
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
+        | "BRANCHING"
       )[];
       /** Format: int64 */
       id: number;
@@ -4685,6 +4688,7 @@ export interface components {
        * @enum {string}
        */
       translationProtection: "NONE" | "PROTECT_REVIEWED";
+      useBranching: boolean;
       useNamespaces: boolean;
     };
     ProjectStatistics: {
@@ -4856,6 +4860,7 @@ export interface components {
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
+        | "BRANCHING"
       )[];
       free: boolean;
       /** Format: int64 */
@@ -5191,6 +5196,7 @@ export interface components {
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
+        | "BRANCHING"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
