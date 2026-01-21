@@ -10,9 +10,12 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import io.tolgee.util.Logging
 import io.tolgee.util.StuckBatchJobTestUtil
+import io.tolgee.util.logger
 import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.RepeatedTest
+import org.junit.jupiter.api.RepetitionInfo
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
@@ -45,9 +48,12 @@ class BatchJobManagementControllerCancellationTest :
     simulateLongRunningChunkRun = false
   }
 
-  @Test
+  @RepeatedTest(1000, failureThreshold = 1)
   @ProjectJWTAuthTestMethod
-  fun `cancels a job`() {
+  fun `cancels a job`(repetitionInfo: RepetitionInfo) {
+    val repetition = repetitionInfo.currentRepetition
+    logger.info("=== Starting repetition $repetition of ${repetitionInfo.totalRepetitions} ===")
+
     batchDumper.finallyDump {
       val keys = testData.addTranslationOperationData(100)
       saveAndPrepare()
@@ -86,26 +92,50 @@ class BatchJobManagementControllerCancellationTest :
       }
 
       val job = util.getSingleJob()
+      logger.info("Repetition $repetition: Cancelling job ${job.id}")
       performProjectAuthPut("batch-jobs/${job.id}/cancel")
         .andIsOk
 
       waitForNotThrowing(pollTime = 100) {
         executeInNewTransaction {
-          util
-            .getSingleJob()
-            .status.assert
-            .isEqualTo(BatchJobStatus.CANCELLED)
+          val currentJob = util.getSingleJob()
+          logger.info("Repetition $repetition: Job ${currentJob.id} status = ${currentJob.status}")
+          currentJob.status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+
           verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
 
           // assert activity stored
-          entityManager
-            .createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
-            .setParameter("id", job.id)
-            .resultList
-            .assert
-            .hasSize(1)
+          val activityRevisions =
+            entityManager
+              .createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
+              .setParameter("id", job.id)
+              .resultList
+
+          // Also check for chunk execution-linked revisions (before merge)
+          val chunkLinkedRevisions =
+            entityManager
+              .createQuery(
+                """select ar from ActivityRevision ar
+                   join ar.batchJobChunkExecution b
+                   where b.batchJob.id = :jobId""",
+              ).setParameter("jobId", job.id)
+              .resultList
+
+          logger.info(
+            "Repetition $repetition: ActivityRevisions with batchJob.id=${job.id}: ${activityRevisions.size}, " +
+              "chunk-linked revisions: ${chunkLinkedRevisions.size}",
+          )
+
+          if (activityRevisions.size != 1) {
+            logger.error(
+              "FLAKY_DEBUG FAILURE: Expected 1 ActivityRevision, found ${activityRevisions.size}. " +
+                "Chunk-linked: ${chunkLinkedRevisions.size}. Job status: ${currentJob.status}",
+            )
+          }
+          activityRevisions.assert.hasSize(1)
         }
       }
+      logger.info("=== Repetition $repetition completed successfully ===")
     }
   }
 

@@ -7,10 +7,6 @@ import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFailed
 import io.tolgee.batch.events.OnBatchJobFinalized
 import io.tolgee.batch.events.OnBatchJobSucceeded
-import io.tolgee.batch.state.BatchJobStateProvider
-import io.tolgee.fixtures.WaitNotSatisfiedException
-import io.tolgee.fixtures.waitFor
-import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import jakarta.persistence.EntityManager
@@ -24,7 +20,6 @@ import org.springframework.stereotype.Component
 class BatchJobActivityFinalizer(
   private val entityManager: EntityManager,
   private val activityHolder: ActivityHolder,
-  private val batchJobStateProvider: BatchJobStateProvider,
   private val applicationEventPublisher: ApplicationEventPublisher,
 ) : Logging {
   @EventListener(OnBatchJobSucceeded::class)
@@ -47,8 +42,9 @@ class BatchJobActivityFinalizer(
       entityManager.clear()
       try {
         logger.debug("Finalizing activity for job ${job.id} (after flush)")
-        waitForOtherChunksToComplete(job)
-        val revisionIds = getRevisionIds(job.id)
+        // Get all chunk revisions, retrying if not all are visible yet.
+        // This handles the rare race condition where concurrent chunks are committing simultaneously.
+        val revisionIds = getRevisionsWithRetry(job)
         logger.debug("Merging revisions (${revisionIds.size})")
 
         val activityRevisionIdToMergeInto = revisionIds.firstOrNull() ?: return@afterFlush
@@ -66,36 +62,42 @@ class BatchJobActivityFinalizer(
     }
   }
 
-  private fun waitForOtherChunksToComplete(job: BatchJobDto) {
-    retryWaitingWithBatchJobResetting(job.id) {
-      // Use O(1) completedChunksCount counter instead of iterating the entire state map.
-      // We use completedChunksCount (not committedCount) because it's incremented INSIDE the transaction
-      // (in handleProgress), so it's already updated when this beforeTransactionCompletion callback runs.
-      // committedCount is incremented AFTER commit (in handleChunkCompletedCommitted), which would cause
-      // a race condition where chunks wait for each other to commit.
-      // Note: The current chunk has already incremented this counter, so we check for ALL chunks completed.
-      val completedChunks = batchJobStateProvider.getCompletedChunksCount(job.id)
-      logger.debug(
-        "Waiting for all chunks to complete ($completedChunks/${job.totalChunks})",
-      )
-      completedChunks == job.totalChunks
-    }
-  }
+  /**
+   * Gets all chunk ActivityRevisions, retrying a few times if none are visible yet.
+   * This handles the rare race condition where concurrent chunks are committing simultaneously.
+   * We retry until at least one revision is visible, then give other transactions
+   * a short time to commit before proceeding.
+   *
+   * Note: For cancelled jobs, not all chunks will create revisions (only chunks that
+   * actually started work). So we can't wait for job.totalChunks revisions.
+   */
+  private fun getRevisionsWithRetry(job: BatchJobDto): MutableList<Long> {
+    var revisionIds = getRevisionIds(job.id)
+    var retries = 0
+    val maxRetries = 20
+    val delayMs = 50L
 
-  private fun retryWaitingWithBatchJobResetting(
-    jobId: Long,
-    fn: () -> Boolean,
-  ) {
-    waitForNotThrowing(WaitNotSatisfiedException::class) {
-      try {
-        waitFor(2000) {
-          fn()
-        }
-      } catch (e: WaitNotSatisfiedException) {
-        batchJobStateProvider.removeJobState(jobId)
-        throw e
-      }
+    // Wait until at least one revision is visible
+    while (revisionIds.isEmpty() && retries < maxRetries) {
+      logger.debug(
+        "Waiting for chunk revisions to be visible (${revisionIds.size}), retry $retries",
+      )
+      Thread.sleep(delayMs)
+      entityManager.clear()
+      revisionIds = getRevisionIds(job.id)
+      retries++
     }
+
+    // If we found revisions, give other concurrent transactions a chance to commit
+    if (revisionIds.isNotEmpty() && retries > 0) {
+      // We had to retry, meaning there was a race. Wait a bit more for other transactions.
+      Thread.sleep(delayMs * 2)
+      entityManager.clear()
+      revisionIds = getRevisionIds(job.id)
+    }
+
+    logger.debug("Found ${revisionIds.size} revisions for job ${job.id} after $retries retries")
+    return revisionIds
   }
 
   private fun setJobIdAndAuthorIdToRevision(
