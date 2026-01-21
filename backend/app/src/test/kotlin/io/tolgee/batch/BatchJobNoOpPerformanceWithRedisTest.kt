@@ -17,6 +17,7 @@ import io.tolgee.util.logger
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -31,11 +32,15 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.transaction.PlatformTransactionManager
 
 /**
- * Performance test for batch job orchestration overhead WITH REDIS.
+ * Diagnostic performance test for batch job orchestration overhead WITH REDIS.
  *
- * Run with:
+ * This test is disabled by default as it's not intended to run in the CI pipeline.
+ * It's useful for diagnosing performance issues and optimizing batch job processing.
+ *
+ * To run manually:
  * ./gradlew :server-app:test --tests "io.tolgee.batch.BatchJobNoOpPerformanceWithRedisTest"
  */
+@Disabled("Diagnostic test - not intended for CI pipeline, useful for performance optimization")
 @SpringBootTest(
   properties = [
     "tolgee.cache.use-redis=true",

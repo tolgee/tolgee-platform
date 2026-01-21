@@ -16,6 +16,7 @@ import io.tolgee.util.logger
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -26,12 +27,16 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.transaction.PlatformTransactionManager
 
 /**
- * Test to diagnose the startup delay issue where batch jobs stay in PENDING
+ * Diagnostic test for the startup delay issue where batch jobs stay in PENDING
  * status for several seconds before processing begins.
  *
- * Run with visible output:
+ * This test is disabled by default as it's not intended to run in the CI pipeline.
+ * It's useful for diagnosing startup delays and optimizing batch job initialization.
+ *
+ * To run manually with visible output:
  * ./gradlew :server-app:test --tests "io.tolgee.batch.BatchJobStartupDelayTest" --info 2>&1 | grep -E "(INFO|DELAY|Phase|Status|Queue|Time|====)"
  */
+@Disabled("Diagnostic test - not intended for CI pipeline, useful for performance optimization")
 @SpringBootTest(
   properties = [
     "tolgee.cache.use-redis=true",
