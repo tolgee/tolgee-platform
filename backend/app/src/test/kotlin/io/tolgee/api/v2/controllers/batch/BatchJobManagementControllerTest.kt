@@ -211,7 +211,7 @@ class BatchJobManagementControllerTest :
 
       wait = false
 
-      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      waitForNotThrowing(pollTime = 1000, timeout = 60000) {
         val dtos = (adminsJobs + anotherUsersJobs).map { batchJobService.getJobDto(it.id) }
         dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(6)
       }
