@@ -10,7 +10,10 @@ export const useGlossaryTermHighlights = ({
   text,
   languageTag,
   enabled = true,
-}: GlossaryTermHighlightsProps): GlossaryTermHighlightModel[] => {
+}: GlossaryTermHighlightsProps): {
+  refetch: () => void;
+  data: GlossaryTermHighlightModel[];
+} => {
   const { isEnabled } = useEnabledFeatures();
   const glossaryFeatureEnabled = isEnabled('GLOSSARY');
   const project = useProject();
@@ -35,8 +38,14 @@ export const useGlossaryTermHighlights = ({
   });
 
   if (!glossaryFeatureEnabled || !hasText || !enabled || !highlights.data) {
-    return [];
+    return {
+      refetch: () => {},
+      data: [],
+    };
   }
 
-  return highlights.data._embedded?.glossaryHighlights ?? [];
+  return {
+    refetch: highlights.refetch,
+    data: highlights.data._embedded?.glossaryHighlights ?? [],
+  };
 };

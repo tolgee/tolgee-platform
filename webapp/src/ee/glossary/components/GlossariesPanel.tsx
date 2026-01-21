@@ -12,6 +12,7 @@ import { GlossaryTermPreview } from './GlossaryTermPreview';
 import { LinkExternal } from 'tg.component/LinkExternal';
 import { useProjectGlossaries } from 'tg.ee.module/glossary/hooks/useProjectGlossaries';
 import { GlossaryLinksList } from 'tg.ee.module/glossary/components/GlossaryLinksList';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -40,14 +41,18 @@ const useGlossaryTermsHighlightsForPanel = ({
 
 export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
   const { language, baseLanguage, project, appendValue } = data;
+  const { preferredOrganization } = usePreferredOrganization();
 
   const terms = useGlossaryTermsHighlightsForPanel(data);
+  const editEnabled = ['OWNER', 'MAINTAINER'].includes(
+    preferredOrganization?.currentUserRole || ''
+  );
   const assignedGlossaries = useProjectGlossaries({
     projectId: project.id,
-    enabled: terms.length === 0,
+    enabled: terms.data.length === 0,
   });
 
-  if (terms.length === 0) {
+  if (terms.data.length === 0) {
     const organizationSlug = project.organizationOwner?.slug;
     const hasAssignedGlossaries =
       assignedGlossaries.data && assignedGlossaries.data.length > 0;
@@ -84,7 +89,7 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
   }
 
   const found: number[] = [];
-  const previews = terms
+  const previews = terms.data
     .map((v) => v.value)
     .filter((term) => {
       if (found.includes(term.id)) {
@@ -101,6 +106,8 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
           languageTag={baseLanguage.tag}
           targetLanguageTag={language.tag}
           appendValue={appendValue}
+          editEnabled={editEnabled}
+          onTranslationUpdated={() => terms.refetch()}
           slim
         />
       );
@@ -113,4 +120,4 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
 };
 
 export const useGlossariesCount = (data: PanelContentData) =>
-  useGlossaryTermsHighlightsForPanel(data).length;
+  useGlossaryTermsHighlightsForPanel(data).data.length;

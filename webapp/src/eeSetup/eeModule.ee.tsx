@@ -480,7 +480,10 @@ export const useAddProjectSettingsTabs = (projectId: number) => {
 
 export const useGlossaryTermHighlights = (
   props: GlossaryTermHighlightsProps
-): GlossaryTermHighlightModel[] => useGlossaryTermHighlightsInternal(props);
+): {
+  refetch: () => void;
+  data: GlossaryTermHighlightModel[];
+} => useGlossaryTermHighlightsInternal(props);
 
 export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
   GlossaryTermPreviewInternal;

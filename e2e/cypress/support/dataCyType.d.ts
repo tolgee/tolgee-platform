@@ -348,10 +348,14 @@ declare namespace DataCy {
         "glossary-switch" |
         "glossary-term-highlight" |
         "glossary-term-list-item" |
+        "glossary-term-preview-cancel-button" |
         "glossary-term-preview-container" |
         "glossary-term-preview-description" |
         "glossary-term-preview-description-card" |
+        "glossary-term-preview-edit-button" |
+        "glossary-term-preview-edit-input" |
         "glossary-term-preview-empty-description" |
+        "glossary-term-preview-save-button" |
         "glossary-term-preview-source-text" |
         "glossary-term-preview-target-text" |
         "glossary-translation-cancel-button" |

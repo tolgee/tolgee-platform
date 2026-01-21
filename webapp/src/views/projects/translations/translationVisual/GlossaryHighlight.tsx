@@ -2,6 +2,7 @@ import { styled, Tooltip } from '@mui/material';
 import { TooltipCard } from 'tg.component/common/TooltipCard';
 import { GlossaryTermPreview } from 'tg.ee';
 import { components } from 'tg.service/apiSchema.generated';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
 type GlossaryTermModel = components['schemas']['GlossaryTermModel'];
 
@@ -16,6 +17,7 @@ type Props = {
   term: GlossaryTermModel;
   languageTag: string;
   targetLanguageTag?: string;
+  onTranslationUpdated?: () => void;
 };
 
 export const GlossaryHighlight = ({
@@ -23,7 +25,13 @@ export const GlossaryHighlight = ({
   term,
   languageTag,
   targetLanguageTag,
+  onTranslationUpdated,
 }: Props) => {
+  const { preferredOrganization } = usePreferredOrganization();
+  const editEnabled = ['OWNER', 'MAINTAINER'].includes(
+    preferredOrganization?.currentUserRole || ''
+  );
+
   return (
     <Tooltip
       placement="bottom-start"
@@ -34,7 +42,9 @@ export const GlossaryHighlight = ({
           term={term}
           languageTag={languageTag}
           targetLanguageTag={targetLanguageTag}
+          editEnabled={editEnabled}
           standalone
+          onTranslationUpdated={onTranslationUpdated}
         />
       }
     >

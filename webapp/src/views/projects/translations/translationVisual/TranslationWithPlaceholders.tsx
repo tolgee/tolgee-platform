@@ -105,7 +105,7 @@ export const TranslationWithPlaceholders = ({
     enabled: showHighlights ?? false,
   });
 
-  const modifiers = sortModifiers(placeholders, glossaryTerms);
+  const modifiers = sortModifiers(placeholders, glossaryTerms.data);
 
   const StyledPlaceholdersWrapper = useMemo(() => {
     return generatePlaceholdersStyle({
@@ -141,6 +141,7 @@ export const TranslationWithPlaceholders = ({
           term={modifier.highlight.value}
           languageTag={locale}
           targetLanguageTag={targetLocale}
+          onTranslationUpdated={() => glossaryTerms.refetch()}
         />
       );
     }

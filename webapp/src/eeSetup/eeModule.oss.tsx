@@ -67,7 +67,12 @@ export const AiPromptsList = Empty;
 
 export const useGlossaryTermHighlights = (
   props: GlossaryTermHighlightsProps
-): GlossaryTermHighlightModel[] => [];
+): {
+  refetch: () => void;
+  data: GlossaryTermHighlightModel[];
+} => {
+  return { refetch: () => {}, data: [] };
+};
 
 export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
   NotIncludedInOss('Glossaries');

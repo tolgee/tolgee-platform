@@ -3,6 +3,7 @@ import {
   Card,
   IconButton,
   styled,
+  TextField,
   Tooltip,
   Typography,
   useTheme,
@@ -14,6 +15,9 @@ import {
   BookClosed,
   LinkExternal02,
   InfoCircle,
+  Edit02,
+  Check,
+  XClose,
 } from '@untitled-ui/icons-react';
 import { GlossaryTermTags } from 'tg.ee.module/glossary/components/GlossaryTermTags';
 import { languageInfo } from '@tginternal/language-util/lib/generated/languageInfo';
@@ -22,6 +26,8 @@ import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import { getGlossaryTermSearchUrl } from 'tg.constants/links';
 import clsx from 'clsx';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
 const StyledContainer = styled(Box)`
   display: flex;
@@ -82,6 +88,20 @@ const StyledEmptyDescription = styled(StyledDescription)`
   font-style: italic;
 `;
 
+const StyledEditWrapper = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(1)};
+  flex-grow: 1;
+`;
+
+const StyledEditInput = styled(TextField)`
+  flex-grow: 1;
+  & .MuiInputBase-input {
+    padding: ${({ theme }) => theme.spacing(0.75, 1)};
+  }
+`;
+
 export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
   term,
   languageTag,
@@ -89,9 +109,15 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
   appendValue,
   standalone,
   slim,
+  editEnabled,
+  onTranslationUpdated,
 }) => {
   const theme = useTheme();
+  const { preferredOrganization } = usePreferredOrganization();
   const [isHovering, setIsHovering] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState('');
+
   const realLanguageTag = term.flagNonTranslatable
     ? term.glossary.baseLanguageTag
     : languageTag;
@@ -105,7 +131,69 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
     ? languageInfo[targetLanguageTag]?.flags?.[0]
     : undefined;
   const text = targetTranslation?.text || translation?.text || undefined;
-  const clickable = appendValue && text && text.length > 0;
+  const clickable = appendValue && text && text.length > 0 && !isEditing;
+
+  const editLanguageTag = term.flagNonTranslatable
+    ? term.glossary.baseLanguageTag
+    : targetLanguageTag || languageTag;
+  const editTranslation = term.translations.find(
+    (t) => t.languageTag === editLanguageTag
+  );
+
+  const saveMutation = useApiMutation({
+    url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations',
+    method: 'post',
+    invalidatePrefix:
+      '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms',
+  });
+
+  const handleStartEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditValue(editTranslation?.text || '');
+    setIsEditing(true);
+  };
+
+  const handleCancel = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditing(false);
+  };
+
+  const handleSave = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!preferredOrganization) return;
+
+    saveMutation.mutate(
+      {
+        path: {
+          organizationId: preferredOrganization.id,
+          glossaryId: term.glossary.id,
+          termId: term.id,
+        },
+        content: {
+          'application/json': {
+            languageTag: editLanguageTag,
+            text: editValue,
+          },
+        },
+      },
+      {
+        onSuccess: () => {
+          setIsEditing(false);
+          onTranslationUpdated?.();
+        },
+      }
+    );
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setIsEditing(false);
+    }
+  };
   return (
     <StyledContainer
       data-cy="glossary-term-preview-container"
@@ -124,66 +212,124 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
       }}
     >
       <StyledTitleWrapper>
-        {standalone && <BookClosed />}
-        <StyledTitleTextWrapper>
-          <StyledTitle
-            variant="body2"
-            data-cy="glossary-term-preview-source-text"
-          >
-            {translation?.text}
-          </StyledTitle>
-          {targetTranslation &&
-            languageTag != targetLanguageTag &&
-            !term.flagNonTranslatable && (
-              <>
-                <ArrowNarrowRight />
-                {targetLanguageFlag && (
-                  <FlagImage width={20} flagEmoji={targetLanguageFlag} />
-                )}
-                <StyledTitle
-                  variant="body2"
-                  data-cy="glossary-term-preview-target-text"
-                >
-                  {targetTranslation.text}
-                </StyledTitle>
-              </>
-            )}
-        </StyledTitleTextWrapper>
-        <StyledGap />
-        {(isHovering || standalone) && (
-          <>
-            {slim && term.description && (
-              <Tooltip title={term.description}>
-                <IconButton
-                  sx={{
-                    margin: theme.spacing(-0.8),
-                  }}
-                  size="small"
-                >
-                  <InfoCircle width={20} height={20} />
-                </IconButton>
-              </Tooltip>
-            )}
-            <Tooltip
-              title={
-                <T keyName="glossary_term_preview_open_full_view_tooltip" />
-              }
-            >
+        {standalone && !isEditing && <BookClosed />}
+        {isEditing ? (
+          <StyledEditWrapper>
+            <StyledEditInput
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onClick={(e) => e.stopPropagation()}
+              autoFocus
+              variant="outlined"
+              size="small"
+              data-cy="glossary-term-preview-edit-input"
+            />
+            <Tooltip title={<T keyName="translate_glossary_term_cell_save" />}>
               <IconButton
-                sx={{
-                  margin: theme.spacing(-0.8),
-                }}
-                component={Link}
-                to={getGlossaryTermSearchUrl(
-                  term.glossary.organizationOwner.slug,
-                  term.glossary.id,
-                  translation?.text || ''
-                )}
+                onClick={handleSave}
                 size="small"
+                color="primary"
+                disabled={saveMutation.isLoading}
+                data-cy="glossary-term-preview-save-button"
               >
-                <LinkExternal02 width={20} height={20} />
+                <Check width={20} height={20} />
               </IconButton>
             </Tooltip>
+            <Tooltip
+              title={<T keyName="translate_glossary_term_cell_cancel" />}
+            >
+              <IconButton
+                onClick={handleCancel}
+                size="small"
+                data-cy="glossary-term-preview-cancel-button"
+              >
+                <XClose width={20} height={20} />
+              </IconButton>
+            </Tooltip>
+          </StyledEditWrapper>
+        ) : (
+          <>
+            <StyledTitleTextWrapper>
+              <StyledTitle
+                variant="body2"
+                data-cy="glossary-term-preview-source-text"
+              >
+                {translation?.text}
+              </StyledTitle>
+              {targetTranslation &&
+                languageTag != targetLanguageTag &&
+                !term.flagNonTranslatable && (
+                  <>
+                    <ArrowNarrowRight />
+                    {targetLanguageFlag && (
+                      <FlagImage width={20} flagEmoji={targetLanguageFlag} />
+                    )}
+                    <StyledTitle
+                      variant="body2"
+                      data-cy="glossary-term-preview-target-text"
+                    >
+                      {targetTranslation.text}
+                    </StyledTitle>
+                  </>
+                )}
+            </StyledTitleTextWrapper>
+            <StyledGap />
+            {(isHovering || standalone) && (
+              <>
+                {slim && term.description && (
+                  <Tooltip title={term.description}>
+                    <IconButton
+                      onClick={(e) => e.stopPropagation()}
+                      sx={{
+                        margin: theme.spacing(-0.8),
+                      }}
+                      size="small"
+                    >
+                      <InfoCircle width={20} height={20} />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                {editEnabled && (
+                  <Tooltip
+                    title={
+                      <T keyName="glossary_term_preview_edit_translation_tooltip" />
+                    }
+                  >
+                    <IconButton
+                      onClick={handleStartEdit}
+                      sx={{
+                        margin: theme.spacing(-0.8),
+                      }}
+                      size="small"
+                      data-cy="glossary-term-preview-edit-button"
+                    >
+                      <Edit02 width={20} height={20} />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                <Tooltip
+                  title={
+                    <T keyName="glossary_term_preview_open_full_view_tooltip" />
+                  }
+                >
+                  <IconButton
+                    sx={{
+                      margin: theme.spacing(-0.8),
+                    }}
+                    component={Link}
+                    to={getGlossaryTermSearchUrl(
+                      term.glossary.organizationOwner.slug,
+                      term.glossary.id,
+                      translation?.text || ''
+                    )}
+                    size="small"
+                  >
+                    <LinkExternal02 width={20} height={20} />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
           </>
         )}
       </StyledTitleWrapper>
