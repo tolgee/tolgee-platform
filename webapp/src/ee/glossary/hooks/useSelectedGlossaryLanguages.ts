@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
+import { glossaryPreferencesService } from '../services/GlossaryPreferencesService';
 
 export const useSelectedGlossaryLanguages = () => {
   const glossary = useGlossary();
@@ -7,19 +8,29 @@ export const useSelectedGlossaryLanguages = () => {
   const [selectedFor, setSelectedFor] = useState<number | undefined>(undefined);
   const [selected, setSelected] = useState<string[] | undefined>(undefined);
 
+  const defaultValue = useMemo(() => {
+    let saved = glossaryPreferencesService.getForGlossary(glossary.id);
+    if (saved !== undefined && !saved.includes(glossary.baseLanguageTag)) {
+      saved = [glossary.baseLanguageTag, ...saved];
+    }
+    return saved;
+  }, [glossary.id]);
+
   const selectedWithBaseLanguage = useMemo(() => {
     if (selectedFor !== glossary.id) {
-      return undefined;
+      return defaultValue;
     }
     if (selected === undefined) {
-      return undefined;
+      return defaultValue;
     }
     return [glossary?.baseLanguageTag || '', ...(selected ?? [])];
   }, [selectedFor, selected, glossary]);
 
   const update = (languages: string[]) => {
+    const withoutBase = languages.filter((l) => l !== glossary.baseLanguageTag);
     setSelectedFor(glossary.id);
-    setSelected(languages.filter((l) => l !== glossary.baseLanguageTag));
+    setSelected(withoutBase);
+    glossaryPreferencesService.setForGlossary(glossary.id, withoutBase);
   };
 
   return [selectedWithBaseLanguage, update] as const;

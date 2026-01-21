@@ -21,6 +21,17 @@ function toSortedBaseFirst<T extends { base: boolean }>(list: T[]): T[] {
   });
 }
 
+function findLanguage(tag: string, base: boolean) {
+  const languageData = languageInfo[tag];
+  return {
+    base,
+    tag,
+    flagEmoji: languageData?.flags?.[0] || '',
+    originalName: languageData?.originalName || tag,
+    name: languageData?.englishName || tag,
+  };
+}
+
 type Props = {
   disabled?: boolean;
   value: string[] | undefined;
@@ -136,16 +147,7 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
     const glossaryLanguages =
       glossaryLanguagesLoadable.data?._embedded?.glossaryLanguageDtoList ?? [];
     const glossaryLanguagesBaseFirst = toSortedBaseFirst(glossaryLanguages);
-    const glossaryLanguagesValue = glossaryLanguagesBaseFirst.map((l) => {
-      const languageData = languageInfo[l.tag];
-      return {
-        base: l.base,
-        tag: l.tag,
-        flagEmoji: languageData?.flags?.[0] || '',
-        originalName: languageData?.originalName || l.tag,
-        name: languageData?.englishName || l.tag,
-      };
-    });
+    const glossaryLanguagesValue = glossaryLanguagesBaseFirst.map((l) => findLanguage(l.tag, l.base));
 
     const uniqueOrganizationLanguages = organizationLanguages.filter(
       (l) => !glossaryLanguages.some((pl) => pl.tag === l.tag)
@@ -157,7 +159,16 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
       (l) => ({ ...l, base: false })
     );
 
-    return [...glossaryLanguagesValue, ...organizationLanguagesValue];
+    const missingLanguages = (value || [])
+      .filter((v) => !glossaryLanguagesValue.some((l) => l.tag === v))
+      .filter((v) => !organizationLanguagesValue.some((l) => l.tag === v))
+      .map((l) => findLanguage(l, false));
+
+    return [
+      ...glossaryLanguagesValue,
+      ...organizationLanguagesValue,
+      ...missingLanguages,
+    ];
   }, [glossaryLanguagesLoadable.data, organizationLanguages]);
 
   const handleFetchMore = () => {
