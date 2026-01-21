@@ -16,6 +16,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { CellPosition } from '../types';
 import { getMeta } from 'tg.fixtures/isMac';
 import { isElementInput } from 'tg.fixtures/isElementInput';
+import { useBranchEditAccess } from '../services/useBranchEditAccess';
 
 export const KEY_MAP = {
   MOVE: ARROWS,
@@ -37,8 +38,9 @@ export const useTranslationsShortcuts = () => {
   const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
   const cursorLanguage = useTranslationsSelector((c) => c.cursor?.language);
   const view = useTranslationsSelector((c) => c.view);
-  const { satisfiesPermission, satisfiesLanguageAccess } =
+  const { satisfiesLanguageAccess, satisfiesPermissionWithBranching } =
     useProjectPermissions();
+  const canEditProtectedBranch = useBranchEditAccess();
   const elementsRef = useTranslationsSelector((c) => c.elementsRef);
   const fixedTranslations = useTranslationsSelector((c) => c.translations);
   const allLanguages = useTranslationsSelector((c) => c.languages);
@@ -48,7 +50,7 @@ export const useTranslationsShortcuts = () => {
   const hasCorrectTarget = (target: Element) =>
     target === document.body || root?.contains(target);
 
-  const canEditKey = satisfiesPermission('keys.edit');
+  const canEditKey = satisfiesPermissionWithBranching('keys.edit');
 
   const isTranslation = (position: CellPosition | undefined) =>
     position?.language;
@@ -106,11 +108,12 @@ export const useTranslationsShortcuts = () => {
         (t) => t.languageTag === focused.language
       );
       const canTranslate =
-        satisfiesLanguageAccess(
+        canEditProtectedBranch &&
+        (satisfiesLanguageAccess(
           'translations.edit',
           getLanguageId(focused.language)
         ) ||
-        (firstTask?.userAssigned && firstTask.type === 'TRANSLATE');
+          (firstTask?.userAssigned && firstTask.type === 'TRANSLATE'));
       if (
         (isTranslation(focused) && canTranslate) ||
         (!isTranslation(focused) && canEditKey)

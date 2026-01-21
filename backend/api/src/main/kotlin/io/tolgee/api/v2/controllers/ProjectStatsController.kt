@@ -6,6 +6,7 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.constants.Feature
 import io.tolgee.hateoas.project.stats.LanguageStatsModelAssembler
 import io.tolgee.hateoas.project.stats.ProjectStatsModel
 import io.tolgee.model.enums.Scope
@@ -16,6 +17,7 @@ import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.LanguageStatsService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.project.ProjectStatsService
 import org.springframework.http.MediaType
@@ -39,6 +41,7 @@ class ProjectStatsController(
   private val languageStatsModelAssembler: LanguageStatsModelAssembler,
   private val languageService: LanguageService,
   private val branchService: BranchService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @Operation(summary = "Get project stats")
   @GetMapping("", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -47,6 +50,7 @@ class ProjectStatsController(
   fun getProjectStats(
     @RequestParam(name = "branch", required = false) branchName: String? = null,
   ): ProjectStatsModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branchName)
     val branch = branchName?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
     val projectStats = projectStatsService.getProjectStats(projectHolder.project.id, branch?.id)
     val baseLanguage = projectService.getOrAssignBaseLanguage(projectHolder.project.id)
