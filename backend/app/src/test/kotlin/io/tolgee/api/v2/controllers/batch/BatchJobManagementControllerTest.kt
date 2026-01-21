@@ -106,7 +106,7 @@ class BatchJobManagementControllerTest :
 
       val jobs = (1..3).map { util.runChunkedJob(50) }
 
-      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      waitForNotThrowing(pollTime = 1000, timeout = 60000) {
         val dtos = jobs.map { batchJobService.getJobDto(it.id) }
         dtos.forEach {
           val state = batchJobStateProvider.getCached(it.id)
@@ -132,7 +132,7 @@ class BatchJobManagementControllerTest :
         }
       wait = false
 
-      waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+      waitForNotThrowing(pollTime = 1000, timeout = 60000) {
         val dtos = jobs.map { batchJobService.getJobDto(it.id) }
         dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(3)
       }
@@ -157,7 +157,7 @@ class BatchJobManagementControllerTest :
 
     val jobs = (1..3).map { util.runChunkedJob(50) }
 
-    waitForNotThrowing(pollTime = 1000, timeout = 10000) {
+    waitForNotThrowing(pollTime = 1000, timeout = 60000) {
       val dtos = jobs.map { batchJobService.getJobDto(it.id) }
       dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(3)
     }

@@ -342,7 +342,11 @@ class BatchJobTestUtil(
   }
 
   fun assertJobUnlocked() {
-    batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id).assert.isEqualTo(0L)
+    // Wait for the lock to be released - the unlock happens asynchronously
+    // in handleChunkCompletedCommitted after the transaction commits
+    waitFor(pollTime = 100, timeout = 5000) {
+      batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id) == 0L
+    }
   }
 
   fun getExecutions(jobIds: List<Long>): Map<Long, List<BatchJobChunkExecution>> =
@@ -508,7 +512,9 @@ class BatchJobTestUtil(
   }
 
   fun verifyProjectJobLockReleased() {
-    waitFor(pollTime = 200, timeout = 1000) {
+    // Wait for the lock to be released - the unlock happens asynchronously
+    // after the transaction commits
+    waitFor(pollTime = 100, timeout = 5000) {
       batchJobProjectLockingManager.getLockedForProject(testData.projectBuilder.self.id) == 0L
     }
   }

@@ -225,6 +225,16 @@ class BatchJobService(
     return this.findJobDto(id) ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
   }
 
+  /**
+   * Gets job DTO directly from database, bypassing the cache.
+   * Use this when you need to read the most recent committed state,
+   * especially in race-condition-sensitive code paths like finalizeIfCompleted.
+   */
+  fun getJobDtoNoCache(id: Long): BatchJobDto {
+    val entity = findJobEntity(id) ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
+    return BatchJobDto.fromEntity(entity)
+  }
+
   fun getViews(
     projectId: Long,
     userAccount: UserAccountDto?,
