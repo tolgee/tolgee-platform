@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityService
+import io.tolgee.constants.Feature
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.activity.ModifiedEntityModel
 import io.tolgee.hateoas.activity.ModifiedEntityModelAssembler
@@ -21,6 +22,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.branching.BranchService
+import io.tolgee.service.project.ProjectFeatureGuard
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -45,6 +47,7 @@ class ProjectActivityController(
   private val projectActivityModelAssembler: ProjectActivityModelAssembler,
   private val modifiedEntityModelAssembler: ModifiedEntityModelAssembler,
   private val branchService: BranchService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @Operation(summary = "Get project activity")
   @GetMapping("")
@@ -54,6 +57,7 @@ class ProjectActivityController(
     @ParameterObject pageable: Pageable,
     @RequestParam(required = false) branch: String? = null,
   ): PagedModel<ProjectActivityModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val branchEntity =
       branch?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
     val views =
@@ -73,6 +77,7 @@ class ProjectActivityController(
     @PathVariable revisionId: Long,
     @RequestParam(required = false) branch: String? = null,
   ): ProjectActivityModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val branchEntity =
       branch?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
     val views =
@@ -100,6 +105,7 @@ class ProjectActivityController(
     @RequestParam(required = false)
     branch: String? = null,
   ): PagedModel<ModifiedEntityModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val branchEntity =
       branch?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
     val page =

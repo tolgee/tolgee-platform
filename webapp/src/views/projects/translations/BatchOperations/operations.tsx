@@ -32,17 +32,25 @@ export const addOperations = createMultiAdder<BatchOperation>({
 export type BatchOperationAdder = ReturnType<typeof addOperations>;
 
 export const useBatchOperations = () => {
-  const { satisfiesPermission } = useProjectPermissions();
+  const { satisfiesPermission, satisfiesPermissionWithBranching } =
+    useProjectPermissions();
 
   const { t } = useTranslate();
 
-  const canEditKey = satisfiesPermission('keys.edit');
-  const canDeleteKey = satisfiesPermission('keys.delete');
-  const canMachineTranslate = satisfiesPermission('translations.batch-machine');
-  const canPretranslate = satisfiesPermission('translations.batch-by-tm');
-  const canChangeState = satisfiesPermission('translations.state-edit');
+  const canEditKey = satisfiesPermissionWithBranching('keys.edit');
+  const canDeleteKey = satisfiesPermissionWithBranching('keys.delete');
+  const canMachineTranslate = satisfiesPermissionWithBranching(
+    'translations.batch-machine'
+  );
+  const canPretranslate = satisfiesPermissionWithBranching(
+    'translations.batch-by-tm'
+  );
+  const canChangeState = satisfiesPermissionWithBranching(
+    'translations.state-edit'
+  );
   const canViewTranslations = satisfiesPermission('translations.view');
-  const canEditTranslations = satisfiesPermission('translations.edit');
+  const canEditTranslations =
+    satisfiesPermissionWithBranching('translations.edit');
 
   const publicOperations: BatchOperation[] = [
     {

@@ -1,4 +1,5 @@
 import { components } from '../service/apiSchema.generated';
+import { useBranchEditAccess } from 'tg.views/projects/translations/context/services/useBranchEditAccess';
 
 export type Scopes = components['schemas']['ComputedPermissionModel']['scopes'];
 export type ProjectModel = components['schemas']['ProjectModel'];
@@ -20,6 +21,14 @@ export type ScopeWithLanguage = keyof typeof SCOPE_TO_LANG_PROPERTY_MAP;
 
 export function satisfiesPermission(scopes: Scope[], scope: Scope): boolean {
   return !!scopes?.includes(scope);
+}
+
+export function satisfiesPermissionWithBranching(
+  scopes: Scope[],
+  scope: Scope
+): boolean {
+  const canEditProtectedBranch = useBranchEditAccess();
+  return canEditProtectedBranch && satisfiesPermission(scopes, scope);
 }
 
 export function satisfiesLanguageAccess(

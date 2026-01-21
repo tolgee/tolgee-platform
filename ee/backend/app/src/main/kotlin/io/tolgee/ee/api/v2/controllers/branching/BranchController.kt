@@ -2,6 +2,7 @@ package io.tolgee.ee.api.v2.controllers.branching
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
@@ -32,6 +33,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.branching.BranchService
+import io.tolgee.service.project.ProjectFeatureGuard
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -71,6 +73,7 @@ class BranchController(
   private val pagedBranchMergeChangeResourceAssembler: PagedResourcesAssembler<BranchMergeChangeView>,
   private val branchMergeRefModelAssembler: BranchMergeRefModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @PostMapping(value = [""])
   @Operation(summary = "Create branch")
@@ -80,6 +83,7 @@ class BranchController(
   fun create(
     @RequestBody branch: CreateBranchModel,
   ): BranchModel {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val branch =
       branchService.createBranch(
         projectHolder.project.id,
@@ -103,6 +107,7 @@ class BranchController(
     @RequestParam("activeOnly", required = false)
     activeOnly: Boolean?,
   ): PagedModel<BranchModel> {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val branches = branchService.getBranches(projectHolder.project.id, pageable, search, activeOnly)
     return pagedBranchResourceAssembler.toModel(branches, branchModelAssembler)
   }
@@ -115,6 +120,7 @@ class BranchController(
   fun delete(
     @PathVariable branchId: Long,
   ) {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     branchService.deleteBranch(projectHolder.project.id, branchId)
   }
 
@@ -127,6 +133,7 @@ class BranchController(
     @PathVariable branchId: Long,
     @RequestBody rename: RenameBranchModel,
   ): BranchModel {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val branch = branchService.renameBranch(projectHolder.project.id, branchId, rename.name)
     return branchModelAssembler.toModel(branch)
   }
@@ -140,6 +147,7 @@ class BranchController(
     @PathVariable branchId: Long,
     @RequestBody request: SetBranchProtectedModel,
   ): BranchModel {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val branch = branchService.setProtected(projectHolder.project.id, branchId, request.isProtected)
     return branchModelAssembler.toModel(branch)
   }
@@ -153,6 +161,7 @@ class BranchController(
     @ParameterObject
     pageable: Pageable,
   ): PagedModel<BranchMergeModel> {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val merges = branchService.getBranchMerges(projectHolder.project.id, pageable)
     return pagedBranchMergeResourceAssembler.toModel(merges, branchMergeModelAssembler)
   }
@@ -165,6 +174,7 @@ class BranchController(
   fun dryRunMerge(
     @RequestBody request: DryRunMergeBranchRequest,
   ): BranchMergeRefModel {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val merge = branchService.dryRunMerge(projectHolder.project.id, request)
     return branchMergeRefModelAssembler.toModel(merge)
   }
@@ -177,6 +187,7 @@ class BranchController(
   fun getBranchMergeSessionPreview(
     @PathVariable mergeId: Long,
   ): BranchMergeModel {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val merge = branchService.getBranchMergeView(projectHolder.project.id, mergeId)
     return branchMergeModelAssembler.toModel(merge)
   }
@@ -189,6 +200,7 @@ class BranchController(
   fun refreshBranchMerge(
     @PathVariable mergeId: Long,
   ): BranchMergeModel {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val merge = branchService.refreshMerge(projectHolder.project.id, mergeId)
     return branchMergeModelAssembler.toModel(merge)
   }
@@ -203,6 +215,7 @@ class BranchController(
     pageable: Pageable,
     @PathVariable mergeId: Long,
   ): PagedModel<BranchMergeConflictModel> {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val conflicts = branchService.getBranchMergeConflicts(projectHolder.project.id, mergeId, pageable)
     return pagedBranchMergeConflictResourceAssembler.toModel(conflicts, branchMergeConflictModelAssembler)
   }
@@ -217,6 +230,7 @@ class BranchController(
     @PathVariable mergeId: Long,
     @RequestParam(required = false) type: BranchKeyMergeChangeType?,
   ): PagedModel<BranchMergeChangeModel> {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val changes = branchService.getBranchMergeChanges(projectHolder.project.id, mergeId, type, pageable)
     return pagedBranchMergeChangeResourceAssembler.toModel(changes, branchMergeChangeModelAssembler)
   }
@@ -230,6 +244,7 @@ class BranchController(
     @PathVariable mergeId: Long,
     @RequestBody request: ResolveBranchMergeConflictRequest,
   ) {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     branchService.resolveConflict(projectHolder.project.id, mergeId, request)
   }
 
@@ -242,6 +257,7 @@ class BranchController(
     @PathVariable mergeId: Long,
     @RequestBody request: ResolveAllBranchMergeConflictsRequest,
   ) {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     branchService.resolveAllConflicts(projectHolder.project.id, mergeId, request)
   }
 
@@ -253,6 +269,7 @@ class BranchController(
   fun deleteBranchMerge(
     @PathVariable mergeId: Long,
   ) {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     branchService.deleteMerge(projectHolder.project.id, mergeId)
   }
 
@@ -265,6 +282,7 @@ class BranchController(
     @PathVariable mergeId: Long,
     @RequestBody(required = false) request: ApplyBranchMergeRequest?,
   ) {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     branchService.applyMerge(projectHolder.project.id, mergeId, request?.deleteBranch ?: true)
   }
 }

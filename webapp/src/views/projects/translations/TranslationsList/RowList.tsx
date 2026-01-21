@@ -46,7 +46,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
   bannerBefore,
   bannerAfter,
 }) {
-  const { satisfiesPermission } = useProjectPermissions();
+  const { satisfiesPermissionWithBranching } = useProjectPermissions();
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const active = hover || focus;
@@ -79,7 +79,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
     >
       <CellKey
         editInDialog
-        editEnabled={satisfiesPermission('keys.edit')}
+        editEnabled={satisfiesPermissionWithBranching('keys.edit')}
         data={data}
         widthPercent={columnSizesPercent[0]}
         width={columnSizes[0]}

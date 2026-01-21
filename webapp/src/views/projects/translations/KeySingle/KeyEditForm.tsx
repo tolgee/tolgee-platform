@@ -67,8 +67,8 @@ export const KeyEditForm: React.FC = () => {
   const { addTag, removeTag, updateKey } = useTranslationsActions();
   const { t } = useTranslate();
   const project = useProject();
-  const { satisfiesPermission } = useProjectPermissions();
-  const editEnabled = satisfiesPermission('keys.edit');
+  const { satisfiesPermissionWithBranching } = useProjectPermissions();
+  const editEnabled = satisfiesPermissionWithBranching('keys.edit');
 
   const keyData = useTranslationsSelector((c) => c.translations)?.[0];
   const translationOpen = useTranslationsSelector((c) =>

@@ -162,7 +162,8 @@ export const ProjectMenu = () => {
     <SideMenu>
       <SideLogo hidden={!topBarHeight} />
       {items.map((item, index) => {
-        if (!item.condition({ config, satisfiesPermission })) return null;
+        if (!item.condition({ config, satisfiesPermission, project }))
+          return null;
         const { dataCy, icon: Icon, link, ...rest } = item;
         return (
           <SideMenuItem
@@ -197,6 +198,7 @@ type ConditionProps = {
   satisfiesPermission: ReturnType<
     typeof useProjectPermissions
   >['satisfiesPermission'];
+  project: ReturnType<typeof useProject>;
 };
 
 export const addProjectMenuItems = createAdder<ProjectMenuItem>({

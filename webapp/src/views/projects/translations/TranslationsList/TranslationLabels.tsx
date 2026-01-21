@@ -77,8 +77,10 @@ export const TranslationLabels = ({
   onSelect,
   onDelete,
 }: Props) => {
-  const { satisfiesPermission } = useProjectPermissions();
-  const canAssignLabels = satisfiesPermission('translation-labels.assign');
+  const { satisfiesPermissionWithBranching } = useProjectPermissions();
+  const canAssignLabels = satisfiesPermissionWithBranching(
+    'translation-labels.assign'
+  );
   const { isEnabled } = useEnabledFeatures();
   const labelsEnabled = isEnabled('TRANSLATION_LABELS');
   if (!labelsEnabled) {

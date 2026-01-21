@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ErrorResponseBody
@@ -27,6 +28,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.dataImport.ForceMode
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.NamespaceService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.util.Logging
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.filterFiles
@@ -67,6 +69,7 @@ class V2ImportController(
   private val namespaceService: NamespaceService,
   private val streamingResponseBodyProvider: StreamingResponseBodyProvider,
   private val streamingImportProgressUtil: StreamingImportProgressUtil,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) : Logging {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(description = "Prepares provided files to import.", summary = "Add files")
@@ -77,6 +80,7 @@ class V2ImportController(
     @RequestPart("files") files: Array<MultipartFile>,
     @ParameterObject params: ImportAddFilesParams,
   ): ImportAddFilesResultModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, params.branch)
     val filteredFiles = filterFiles(files.map { (it.originalFilename ?: "") to it })
     val fileDtos =
       filteredFiles.map {
@@ -118,6 +122,7 @@ class V2ImportController(
     forceMode: ForceMode,
     @RequestParam branch: String? = null,
   ) {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val projectId = projectHolder.project.id
     this.importService.import(projectId, authenticationFacade.authenticatedUser.id, branch, forceMode)
   }
@@ -138,6 +143,7 @@ class V2ImportController(
     forceMode: ForceMode,
     @RequestParam branch: String? = null,
   ): ResponseEntity<StreamingResponseBody> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val projectId = projectHolder.project.id
 
     return streamingImportProgressUtil.stream { writeStatus ->
@@ -153,6 +159,7 @@ class V2ImportController(
     @ParameterObject pageable: Pageable,
     @RequestParam branch: String? = null,
   ): PagedModel<ImportLanguageModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val projectId = projectHolder.project.id
     val userId = authenticationFacade.authenticatedUser.id
     val languages = importService.getResult(projectId, userId, branch, pageable)
@@ -167,6 +174,7 @@ class V2ImportController(
   fun cancelImport(
     @RequestParam branch: String? = null,
   ) {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     this.importService.deleteImport(projectHolder.project.id, authenticationFacade.authenticatedUser.id, branch)
   }
 

@@ -6,6 +6,7 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.KeyComplexEditHelper
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.queryResults.KeyView
@@ -44,6 +45,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.withoutSort
 import jakarta.validation.Valid
@@ -95,6 +97,7 @@ class KeyController(
   private val screenshotModelAssembler: ScreenshotModelAssembler,
   private val keyWithScreenshotsModelAssembler: KeyWithScreenshotsModelAssembler,
   private val languageModelAssembler: LanguageModelAssembler,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) : IController {
   @PostMapping(value = ["/create", ""])
   @Operation(summary = "Create new key")
@@ -118,6 +121,7 @@ class KeyController(
     checkCanStoreBigMeta(dto)
     checkStateChangePermission(dto)
     checkNamespaceFeature(dto.namespace)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
 
     val key = keyService.create(projectHolder.projectEntity, dto)
     return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
@@ -150,6 +154,7 @@ class KeyController(
     @RequestParam
     branch: String? = null,
   ): PagedModel<KeyModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val data = keyService.getPaged(projectHolder.project.id, branch, pageable)
     return keyPagedResourcesAssembler.toModel(data, keyModelAssembler)
   }
@@ -169,6 +174,7 @@ class KeyController(
     val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
     key.checkInProject()
     checkNamespaceFeature(dto.namespace)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     keyService.edit(id, dto)
     val view =
       KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description, key.keyMeta?.custom, key.branch?.name)
@@ -208,6 +214,7 @@ class KeyController(
     dto: ComplexEditKeyDto,
   ): KeyWithDataModel {
     checkNamespaceFeature(dto.namespace)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
   }
 
@@ -244,6 +251,7 @@ class KeyController(
     dto: ImportKeysDto,
     @RequestParam branch: String?,
   ) {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     keyService.importKeys(dto.keys, projectHolder.projectEntity, branch)
   }
 

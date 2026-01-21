@@ -16,6 +16,7 @@ import {
 } from './context/types';
 import { useProject } from 'tg.hooks/useProject';
 import { getEditorActions } from './cell/editorMainActions/getEditorActions';
+import { useBranchEditAccess } from './context/services/useBranchEditAccess';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -55,6 +56,7 @@ export const useTranslationCell = ({
   } = useTranslationsActions();
 
   const { satisfiesLanguageAccess } = useProjectPermissions();
+  const canEditProtectedBranch = useBranchEditAccess();
 
   const keyId = keyData.keyId;
   const langTag = language.tag;
@@ -234,7 +236,8 @@ export const useTranslationCell = ({
     value: cursor?.value,
   });
 
-  const editEnabled = Boolean(editorActions.length) && !disabled;
+  const editEnabled =
+    Boolean(editorActions.length) && !disabled && canEditProtectedBranch;
 
   const aiPlaygroundData = useTranslationsSelector(
     (c) => c.aiPlaygroundData?.[keyId]?.[language.id]

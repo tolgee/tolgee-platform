@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.constants.Feature
 import io.tolgee.hateoas.key.KeyModel
 import io.tolgee.hateoas.key.KeyModelAssembler
 import io.tolgee.hateoas.key.disabledLanguages.KeyDisabledLanguagesModel
@@ -12,6 +13,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.project.ProjectFeatureGuard
 import org.springframework.hateoas.CollectionModel
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -34,6 +36,7 @@ class AllKeysController(
   private val projectHolder: ProjectHolder,
   private val keyModelAssembler: KeyModelAssembler,
   private val keyDisabledLanguagesModelAssembler: KeyDisabledLanguagesModelAssembler,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) : IController {
   @OpenApiOrderExtension(order = 0)
   @GetMapping(value = ["/all-keys"])
@@ -45,6 +48,7 @@ class AllKeysController(
     @RequestParam(required = false)
     branch: String? = null,
   ): CollectionModel<KeyModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val allKeys = keyService.getAllSortedById(projectHolder.project.id, branch)
     return keyModelAssembler.toCollectionModel(allKeys)
   }

@@ -1,6 +1,7 @@
 import {
   satisfiesLanguageAccess,
   satisfiesPermission,
+  satisfiesPermissionWithBranching,
   ScopeWithLanguage,
   Scope,
 } from 'tg.fixtures/permissions';
@@ -20,6 +21,9 @@ export const getPermissionTools = (permissions: PermissionModel) => {
       languageId: number | undefined
     ) {
       return satisfiesLanguageAccess(permissions, scope, languageId);
+    },
+    satisfiesPermissionWithBranching(scope: Scope) {
+      return satisfiesPermissionWithBranching(scopes, scope);
     },
   };
 };
