@@ -78,7 +78,6 @@ type SwitchPopoverProps<T extends { id: number; name: string }> = {
   renderItem: (item: T) => React.ReactNode;
   searchPlaceholder: string;
   headingText: string;
-  dataCyPrefix: string;
   searchThreshold?: number;
 
   // Optional "Add new" button
@@ -103,7 +102,6 @@ export function SwitchPopover<T extends { id: number; name: string }>({
   renderItem,
   searchPlaceholder,
   headingText,
-  dataCyPrefix,
   searchThreshold = DEFAULT_SEARCH_THRESHOLD,
   onAddNew,
   addNewTooltip,
@@ -170,7 +168,7 @@ export function SwitchPopover<T extends { id: number; name: string }>({
               <MenuItem
                 {...props}
                 selected={option.id === selectedId}
-                data-cy={`${dataCyPrefix}-item`}
+                data-cy="switch-popover-item"
               >
                 {renderItem(option)}
               </MenuItem>
@@ -192,7 +190,7 @@ export function SwitchPopover<T extends { id: number; name: string }>({
           renderInput={(params) => (
             <StyledInputWrapper>
               <StyledInput
-                data-cy={`${dataCyPrefix}-search`}
+                data-cy="switch-popover-search"
                 key={Number(open)}
                 sx={{ display: displaySearch ? undefined : 'none' }}
                 ref={params.InputProps.ref}
@@ -215,7 +213,7 @@ export function SwitchPopover<T extends { id: number; name: string }>({
                     size="small"
                     onClick={onAddNew}
                     sx={{ ml: 0.5 }}
-                    data-cy={`${dataCyPrefix}-new`}
+                    data-cy="switch-popover-new"
                   >
                     <Plus />
                   </IconButton>

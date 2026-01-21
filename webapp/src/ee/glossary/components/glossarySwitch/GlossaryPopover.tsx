@@ -85,7 +85,7 @@ export const GlossaryPopover: React.FC<Props> = ({
       renderItem={(item) => <GlossaryItem data={item} />}
       searchPlaceholder={t('glossary_switch_search_placeholder')}
       headingText={t('organization_glossaries_title')}
-      dataCyPrefix="glossary-switch"
+      data-cy="glossary-switch"
       onSearchChange={handleSearchChange}
     />
   );

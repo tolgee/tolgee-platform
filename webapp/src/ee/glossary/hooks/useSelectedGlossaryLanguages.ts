@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 import { glossaryPreferencesService } from '../services/GlossaryPreferencesService';
 

@@ -124,10 +124,10 @@ function changeUserRole(user: string, role: 'Admin' | 'Supporter' | 'User') {
 
 function assertOrganizationAddButtonVisible() {
   gcy('organization-switch').click();
-  gcy('organization-switch-new').should('be.visible');
+  gcy('switch-popover-new').should('be.visible');
 }
 
 function assertOrganizationAddButtonNotVisible() {
   gcy('organization-switch').click();
-  gcy('organization-switch-new').should('not.exist');
+  gcy('switch-popover-new').should('not.exist');
 }

@@ -160,10 +160,10 @@ export const getInputByName = (name: string): Chainable => {
 
 export const switchToOrganizationWithSearch = (name: string): Chainable => {
   cy.gcy('organization-switch').click();
-  cy.gcy('organization-switch-search').type(name);
+  cy.gcy('switch-popover-search').type(name);
   cy.waitForDom();
 
-  gcy('organization-switch-item')
+  gcy('switch-popover-item')
     .should('have.length', 1)
     .contains(name)
     .scrollIntoView()
@@ -175,7 +175,7 @@ export const switchToOrganization = (name: string): Chainable => {
   cy.waitForDom();
   cy.gcy('organization-switch').click();
   cy.waitForDom();
-  cy.gcy('organization-switch-item').contains(name).scrollIntoView().click();
+  cy.gcy('switch-popover-item').contains(name).scrollIntoView().click();
   return assertSwitchedToOrganization(name);
 };
 

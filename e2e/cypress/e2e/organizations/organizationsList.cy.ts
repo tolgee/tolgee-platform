@@ -87,11 +87,9 @@ describe('Organization List', () => {
     it('contains created data', () => {
       cy.waitForDom();
       cy.gcy('organization-switch').click();
-      cy.gcy('organization-switch-item')
-        .contains('Facebook')
-        .should('be.visible');
+      cy.gcy('switch-popover-item').contains('Facebook').should('be.visible');
 
-      cy.gcy('organization-switch-item')
+      cy.gcy('switch-popover-item')
         .contains('ZZZ Cool company 10')
         .should('be.visible');
       cy.contains('ZZZ Cool company 14').scrollIntoView().should('be.visible');
@@ -141,7 +139,7 @@ describe('Organization List', () => {
 
   const goToNewOrganizationForm = () => {
     gcy('organization-switch').click();
-    gcy('organization-switch-new').click();
+    gcy('switch-popover-new').click();
   };
 
   const visit = () => {

@@ -720,6 +720,9 @@ declare namespace DataCy {
         "subscriptions-trial-alert-reaching-the-limit" |
         "suggestion-action" |
         "suggestions-list" |
+        "switch-popover-item" |
+        "switch-popover-new" |
+        "switch-popover-search" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
         "task-date-picker" |
