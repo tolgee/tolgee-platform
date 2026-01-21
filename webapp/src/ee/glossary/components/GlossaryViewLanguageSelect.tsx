@@ -147,7 +147,9 @@ export const GlossaryViewLanguageSelect: React.VFC<Props> = ({
     const glossaryLanguages =
       glossaryLanguagesLoadable.data?._embedded?.glossaryLanguageDtoList ?? [];
     const glossaryLanguagesBaseFirst = toSortedBaseFirst(glossaryLanguages);
-    const glossaryLanguagesValue = glossaryLanguagesBaseFirst.map((l) => findLanguage(l.tag, l.base));
+    const glossaryLanguagesValue = glossaryLanguagesBaseFirst.map((l) =>
+      findLanguage(l.tag, l.base)
+    );
 
     const uniqueOrganizationLanguages = organizationLanguages.filter(
       (l) => !glossaryLanguages.some((pl) => pl.tag === l.tag)
