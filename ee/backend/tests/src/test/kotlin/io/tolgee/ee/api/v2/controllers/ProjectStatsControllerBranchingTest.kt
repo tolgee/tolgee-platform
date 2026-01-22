@@ -1,16 +1,27 @@
 package io.tolgee.ee.api.v2.controllers
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.ProjectStatsBranchingTestData
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class ProjectStatsControllerBranchingTest : ProjectAuthControllerTest("/v2/projects/") {
   private lateinit var testData: ProjectStatsBranchingTestData
+
+  @Autowired
+  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @BeforeEach
   fun setup() {
@@ -44,7 +55,9 @@ class ProjectStatsControllerBranchingTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `stats with branch use branch data`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     performProjectAuthGet("stats?branch=${testData.featureBranch.name}")
+      .andIsOk
       .andAssertThatJson {
         node("keyCount").isEqualTo(1)
         node("baseWordsCount").isEqualTo(3)
@@ -59,7 +72,15 @@ class ProjectStatsControllerBranchingTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `stats without branching feature enabled returns forbidden`() {
+    performProjectAuthGet("stats?branch=${testData.featureBranch.name}")
+      .andIsBadRequest
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `stats with unexisting branch returns 404`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     performProjectAuthGet("stats?branch=unexisting").andIsNotFound
   }
 }

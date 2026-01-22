@@ -19,11 +19,9 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
-import io.tolgee.repository.KeyRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchCopyService
 import io.tolgee.service.branching.BranchService
-import io.tolgee.service.language.LanguageService
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Primary
@@ -43,8 +41,6 @@ class BranchServiceImpl(
   private val applicationContext: ApplicationContext,
   private val branchMergeService: BranchMergeService,
   private val taskService: TaskService,
-  private val languageService: LanguageService,
-  private val keyRepository: KeyRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val projectBranchingMigrationService: ProjectBranchingMigrationService,
 ) : BranchService {
@@ -256,33 +252,8 @@ class BranchServiceImpl(
     pageable: Pageable,
   ): Page<BranchMergeConflictView> {
     val project = entityManager.getReference(Project::class.java, projectId)
-    val merge =
-      branchMergeService.findActiveMerge(projectId, branchMergeId)
-        ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
-    val conflicts = branchMergeService.getConflicts(projectId, branchMergeId, pageable)
-    val languages =
-      languageService.getLanguagesForTranslationsView(
-        project.languages.map { it.tag }.toSet(),
-        project.id,
-        authenticationFacade.authenticatedUser.id,
-      )
-    val allowedLanguageTags = languages.map { it.tag }.toSet()
-
-    val keyIds = (conflicts.map { it.sourceBranchKeyId } + conflicts.map { it.targetBranchKeyId }).toSet()
-    val keysById =
-      if (keyIds.isEmpty()) {
-        emptyMap()
-      } else {
-        keyRepository.findAllDetailedByIdIn(keyIds).associateBy { it.id }
-      }
-
-    conflicts.forEach { conflict ->
-      conflict.sourceBranchKey = keysById[conflict.sourceBranchKeyId]!!
-      conflict.targetBranchKey = keysById[conflict.targetBranchKeyId]!!
-      conflict.allowedLanguageTags = allowedLanguageTags
-    }
-    branchMergeService.enrichConflicts(conflicts, merge, allowedLanguageTags)
-    return conflicts
+    val user = authenticationFacade.authenticatedUser
+    return branchMergeService.getConflicts(project, branchMergeId, pageable, user.id)
   }
 
   @Transactional
@@ -293,37 +264,8 @@ class BranchServiceImpl(
     pageable: Pageable,
   ): Page<BranchMergeChangeView> {
     val project = entityManager.getReference(Project::class.java, projectId)
-    val merge =
-      branchMergeService.findActiveMerge(projectId, branchMergeId)
-        ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
-    val changes = branchMergeService.getChanges(projectId, branchMergeId, type, pageable)
-
-    val languages =
-      languageService.getLanguagesForTranslationsView(
-        project.languages.map { it.tag }.toSet(),
-        project.id,
-        authenticationFacade.authenticatedUser.id,
-      )
-    val allowedLanguageTags = languages.map { it.tag }.toSet()
-
-    val sourceIds = changes.mapNotNull { it.sourceBranchKeyId }
-    val targetIds = changes.mapNotNull { it.targetBranchKeyId }
-    val keyIds = (sourceIds + targetIds).toSet()
-    val keysById =
-      if (keyIds.isEmpty()) {
-        emptyMap()
-      } else {
-        keyRepository.findAllDetailedByIdIn(keyIds).associateBy { it.id }
-      }
-
-    changes.forEach { change ->
-      change.sourceBranchKeyId?.let { id -> change.sourceBranchKey = keysById[id] }
-      change.targetBranchKeyId?.let { id -> change.targetBranchKey = keysById[id] }
-      change.allowedLanguageTags = allowedLanguageTags
-    }
-    branchMergeService.enrichChanges(changes, merge, allowedLanguageTags)
-
-    return changes
+    val user = authenticationFacade.authenticatedUser
+    return branchMergeService.getChanges(project, branchMergeId, type, pageable, user.id)
   }
 
   @Transactional

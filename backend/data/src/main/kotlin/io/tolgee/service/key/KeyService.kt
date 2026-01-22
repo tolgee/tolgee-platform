@@ -143,7 +143,6 @@ class KeyService(
     project: Project,
     dto: CreateKeyDto,
   ): Key {
-    securityService.checkProtectedBranchModify(project.id, dto.branch)
     val key = create(project, dto.name, dto.namespace, dto.branch)
     key.isPlural = dto.isPlural
     if (key.isPlural) {
