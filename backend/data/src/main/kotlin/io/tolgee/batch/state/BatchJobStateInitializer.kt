@@ -47,8 +47,8 @@ class BatchJobStateInitializer(
             it.status,
             it.chunkNumber,
             it.retry,
-            // Only mark as transactionCommitted if the execution is actually completed
-            // PENDING/RUNNING executions haven't committed yet
+            // Only mark as committed if the execution has already completed.
+            // PENDING and RUNNING executions haven't committed their changes yet.
             it.status.completed,
           )
       }.toMutableMap()
