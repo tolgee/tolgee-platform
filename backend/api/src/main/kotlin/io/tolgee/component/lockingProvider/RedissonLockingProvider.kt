@@ -8,7 +8,8 @@ import org.redisson.api.RedissonClient
 
 open class RedissonLockingProvider(
   private val redissonClient: RedissonClient,
-) : LockingProvider, Logging {
+) : LockingProvider,
+  Logging {
   override fun getLock(name: String): RLock {
     return redissonClient.getLock(name)
   }

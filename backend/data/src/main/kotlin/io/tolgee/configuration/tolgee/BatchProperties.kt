@@ -9,6 +9,9 @@ class BatchProperties {
   @DocProperty(description = "How many parallel jobs can be run at once on single Tolgee instance")
   var concurrency: Int = 1
 
+  @DocProperty(description = "How many job chunks are added to the internal queue on each scheduled run")
+  var chunkQueuePopulationSize: Int = 1_000
+
   @DocProperty(
     description =
       "Concurrency among all tolgee instances per one machine translation job\n." +
@@ -20,4 +23,22 @@ class BatchProperties {
     defaultExplanation = "Unlimited (within tolgee.batch.concurrency)",
   )
   var maxPerMtJobConcurrency: Int = -1
+
+  @DocProperty(description = "Enable scheduled cleanup of old batch jobs")
+  var oldJobCleanupEnabled: Boolean = true
+
+  @DocProperty(description = "Retention period in days for completed batch jobs (SUCCESS, CANCELLED)")
+  var completedJobRetentionDays: Int = 3
+
+  @DocProperty(description = "Retention period in days for failed batch jobs")
+  var failedJobRetentionDays: Int = 30
+
+  @DocProperty(
+    description = "Delay between old batch job cleanup runs in milliseconds",
+    defaultExplanation = "8 hours",
+  )
+  var oldJobCleanupDelayInMs: Long = 28800000
+
+  @DocProperty(description = "Batch size for deleting old jobs (to avoid long-running transactions)")
+  var jobCleanupBatchSize: Int = 1000
 }

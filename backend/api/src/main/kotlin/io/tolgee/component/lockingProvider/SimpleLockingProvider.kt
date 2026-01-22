@@ -8,7 +8,9 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
-open class SimpleLockingProvider : LockingProvider, Logging {
+open class SimpleLockingProvider :
+  LockingProvider,
+  Logging {
   companion object {
     val map = ConcurrentHashMap<String, ReentrantLock>()
   }
