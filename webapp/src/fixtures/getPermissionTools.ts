@@ -6,6 +6,7 @@ import {
   Scope,
 } from 'tg.fixtures/permissions';
 import { components } from 'tg.service/apiSchema.generated';
+import { useBranchEditAccess } from 'tg.views/projects/translations/context/services/useBranchEditAccess';
 
 type PermissionModel = components['schemas']['PermissionModel'];
 
@@ -23,7 +24,11 @@ export const getPermissionTools = (permissions: PermissionModel) => {
       return satisfiesLanguageAccess(permissions, scope, languageId);
     },
     satisfiesPermissionWithBranching(scope: Scope) {
-      return satisfiesPermissionWithBranching(scopes, scope);
+      return satisfiesPermissionWithBranching(
+        scopes,
+        scope,
+        useBranchEditAccess()
+      );
     },
   };
 };

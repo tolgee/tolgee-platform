@@ -16,11 +16,13 @@ export const visitSingleKey = ({
   namespace,
 }: Props) => {
   cy.visit(
-    `${HOST}/projects/${projectId}/translations/single?` +
-      (branch ? `branch=${branch}&` : '') +
-      (key ? `key=${key}&` : '') +
-      (namespace ? `ns=${namespace}&` : '') +
-      (languages ? languages.map((l) => `languages=${l}&`).join('') : '')
+    `${HOST}/projects/${projectId}/translations/single` +
+      (branch ? `/tree/${encodeURIComponent(branch)}?` : '?') +
+      (key ? `key=${encodeURIComponent(key)}&` : '') +
+      (namespace ? `ns=${encodeURIComponent(namespace)}&` : '') +
+      (languages
+        ? languages.map((l) => `languages=${encodeURIComponent(l)}&`).join('')
+        : '')
   );
   return cy
     .get('[data-cy="global-base-view-content"', {

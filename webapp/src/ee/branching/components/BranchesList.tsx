@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, styled, Typography } from '@mui/material';
-import { T, useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
 import { Plus } from '@untitled-ui/icons-react';
 import { BranchItem } from 'tg.ee.module/branching/components/BranchItem';
@@ -27,7 +27,6 @@ type DryRunMergeBranchRequest =
 
 export const BranchesList = () => {
   const project = useProject();
-  const { t } = useTranslate();
   const history = useHistory();
   const { satisfiesPermission } = useProjectPermissions();
 
@@ -153,13 +152,14 @@ export const BranchesList = () => {
   const handleSetProtected = async (branch: BranchModel) => {
     const willProtect = !branch.isProtected;
     confirmation({
-      message: (
+      message: willProtect ? (
         <T
-          keyName={
-            willProtect
-              ? 'project_branch_protect_confirmation'
-              : 'project_branch_unprotect_confirmation'
-          }
+          keyName="project_branch_protect_confirmation"
+          params={{ branchName: branch.name, b: <b /> }}
+        />
+      ) : (
+        <T
+          keyName="project_branch_unprotect_confirmation"
           params={{ branchName: branch.name, b: <b /> }}
         />
       ),
@@ -212,7 +212,7 @@ export const BranchesList = () => {
               onClick={() => setAddBranchOpen(true)}
               data-cy="project-settings-branches-add"
             >
-              {t('project_branches_add_button')}
+              <T keyName="project_branches_add_button" />
             </Button>
           )}
         </Box>
@@ -225,7 +225,7 @@ export const BranchesList = () => {
           emptyPlaceholder={
             <Box m={2} display="flex" justifyContent="center">
               <Typography color="textSecondary">
-                {t('project_settings_no_labels_yet')}
+                <T keyName="project_settings_no_labels_yet" />
               </Typography>
             </Box>
           }
