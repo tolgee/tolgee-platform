@@ -25,10 +25,13 @@ class GlossaryExportService(
 
   private fun getOrganizationLanguageTagsForExport(glossary: Glossary): Set<String> {
     val assignedProjectIds = glossaryService.getAssignedProjectsIds(glossary)
-    return languageService
-      .getTagsByOrganization(
-        organizationId = glossary.organizationOwner.id,
-        projectIds = assignedProjectIds.ifEmpty { null }?.toList(),
-      )
+    if (assignedProjectIds.isEmpty()) {
+      return languageService.getTagsByOrganization(glossary.organizationOwner.id)
+    }
+
+    return languageService.getTagsByOrganizationAndProjectIds(
+      glossary.organizationOwner.id,
+      assignedProjectIds.toList(),
+    )
   }
 }
