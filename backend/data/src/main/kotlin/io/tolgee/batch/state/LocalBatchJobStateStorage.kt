@@ -25,6 +25,7 @@ class LocalBatchJobStateStorage(
   private val cancelledCountMap = ConcurrentHashMap<Long, AtomicInteger>()
   private val committedCountMap = ConcurrentHashMap<Long, AtomicInteger>()
   private val initializedJobs = ConcurrentHashMap.newKeySet<Long>()
+  private val startedJobs = ConcurrentHashMap.newKeySet<Long>()
 
   override fun updateSingleExecution(
     jobId: Long,
@@ -153,6 +154,10 @@ class LocalBatchJobStateStorage(
       .incrementAndGet()
   }
 
+  override fun tryMarkJobStarted(jobId: Long): Boolean {
+    return startedJobs.add(jobId)
+  }
+
   override fun get(jobId: Long): MutableMap<Long, ExecutionState> {
     return getLocal(jobId)
   }
@@ -165,6 +170,7 @@ class LocalBatchJobStateStorage(
     logger.debug("Removing job state for job $jobId")
     removeAllCounters(jobId)
     initializedJobs.remove(jobId)
+    startedJobs.remove(jobId)
     return jobStatesMap.remove(jobId)
   }
 
@@ -198,6 +204,7 @@ class LocalBatchJobStateStorage(
     cancelledCountMap.clear()
     committedCountMap.clear()
     initializedJobs.clear()
+    startedJobs.clear()
   }
 
   override fun getStateForExecution(execution: BatchJobChunkExecution): ExecutionState {

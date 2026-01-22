@@ -42,8 +42,8 @@ class ProgressManager(
     // Ensure state is initialized (O(1) check after first call)
     batchJobStateProvider.ensureInitialized(batchJobId)
 
-    // Use atomic increment-and-get to detect first start
-    val newRunningCount = batchJobStateProvider.incrementRunningCountAndGet(batchJobId)
+    // Use atomic increment for running count tracking
+    batchJobStateProvider.incrementRunningCount(batchJobId)
 
     // O(1) check if execution already exists with terminal state
     val currentState = batchJobStateProvider.getSingleExecution(batchJobId, executionId)
@@ -66,8 +66,8 @@ class ProgressManager(
       ),
     )
 
-    // Publish event when first execution starts
-    if (newRunningCount == 1) {
+    // Publish event exactly once when job first starts (atomic check-and-set)
+    if (batchJobStateProvider.tryMarkJobStarted(batchJobId)) {
       val jobDto = batchJobService.getJobDto(batchJobId)
       eventPublisher.publishEvent(OnBatchJobStarted(jobDto))
     }

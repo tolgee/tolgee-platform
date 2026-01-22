@@ -28,6 +28,7 @@ class RedisBatchJobStateStorage(
     private const val REDIS_FAILED_COUNT_KEY_PREFIX = "batch_job_failed:"
     private const val REDIS_CANCELLED_COUNT_KEY_PREFIX = "batch_job_cancelled:"
     private const val REDIS_COMMITTED_COUNT_KEY_PREFIX = "batch_job_committed:"
+    private const val REDIS_STARTED_KEY_PREFIX = "batch_job_started:"
   }
 
   // Local cache for initialization status - avoids Redis calls for already-initialized jobs
@@ -146,6 +147,11 @@ class RedisBatchJobStateStorage(
     return redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId").incrementAndGet().toInt()
   }
 
+  override fun tryMarkJobStarted(jobId: Long): Boolean {
+    val bucket = redissonClient.getBucket<Boolean>("$REDIS_STARTED_KEY_PREFIX$jobId")
+    return bucket.setIfAbsent(true)
+  }
+
   override fun get(jobId: Long): MutableMap<Long, ExecutionState> {
     val redisHash = getRedisHashForJob(jobId)
     ensureRedisHashInitialized(jobId, redisHash)
@@ -163,8 +169,9 @@ class RedisBatchJobStateStorage(
     val redisHash = getRedisHashForJob(jobId)
     val state = if (redisHash.isEmpty()) null else redisHash.readAllMap().toMutableMap()
     redisHash.delete()
-    // Also remove initialization marker
+    // Also remove initialization and started markers
     redissonClient.getBucket<Boolean>("$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId").delete()
+    redissonClient.getBucket<Boolean>("$REDIS_STARTED_KEY_PREFIX$jobId").delete()
     // Clear local initialization cache to allow re-initialization if jobId is reused
     localInitializedJobs.remove(jobId)
     return state
