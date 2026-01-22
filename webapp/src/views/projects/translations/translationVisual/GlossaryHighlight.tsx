@@ -27,11 +27,6 @@ export const GlossaryHighlight = ({
   targetLanguageTag,
   onTranslationUpdated,
 }: Props) => {
-  const { preferredOrganization } = usePreferredOrganization();
-  const editEnabled = ['OWNER', 'MAINTAINER'].includes(
-    preferredOrganization?.currentUserRole || ''
-  );
-
   return (
     <Tooltip
       placement="bottom-start"
