@@ -112,4 +112,6 @@ interface BranchService {
     projectId: Long,
     mergeId: Long,
   )
+
+  fun enableBranchingOnProject(projectId: Long)
 }

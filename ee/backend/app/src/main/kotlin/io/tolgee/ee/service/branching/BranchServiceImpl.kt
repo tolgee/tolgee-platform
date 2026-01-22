@@ -28,7 +28,6 @@ import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -42,12 +41,12 @@ class BranchServiceImpl(
   private val branchCopyService: BranchCopyService,
   private val branchSnapshotService: BranchSnapshotService,
   private val applicationContext: ApplicationContext,
-  private val defaultBranchCreator: DefaultBranchCreator,
   private val branchMergeService: BranchMergeService,
   private val taskService: TaskService,
   private val languageService: LanguageService,
   private val keyRepository: KeyRepository,
   private val authenticationFacade: AuthenticationFacade,
+  private val projectBranchingMigrationService: ProjectBranchingMigrationService,
 ) : BranchService {
   override fun getBranches(
     projectId: Long,
@@ -55,12 +54,7 @@ class BranchServiceImpl(
     search: String?,
     activeOnly: Boolean?,
   ): Page<Branch> {
-    val branches = branchRepository.getAllProjectBranches(projectId, page, search, activeOnly)
-    if (branches.isEmpty) {
-      val defaultBranch = defaultBranchCreator.create(projectId)
-      return PageImpl(listOf(defaultBranch))
-    }
-    return branches
+    return branchRepository.getAllProjectBranches(projectId, page, search, activeOnly)
   }
 
   override fun getActiveBranch(
@@ -368,5 +362,9 @@ class BranchServiceImpl(
     mergeId: Long,
   ) {
     branchMergeService.deleteMerge(projectId, mergeId)
+  }
+
+  override fun enableBranchingOnProject(projectId: Long) {
+    projectBranchingMigrationService.enableBranching(projectId)
   }
 }
