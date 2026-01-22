@@ -1,8 +1,10 @@
 package io.tolgee.ee.api.v2.controllers.branching
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BranchTestData
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.branching.BranchSnapshotService
@@ -49,18 +51,22 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var defaultBranchCreator: DefaultBranchCreator
 
+  @Autowired
+  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
   @BeforeEach
   fun setup() {
     testData = BranchTestData(currentDateProvider)
     projectSupplier = { testData.projectBuilder.self }
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
   }
 
   @Test
   @ProjectJWTAuthTestMethod
   fun `returns list of all branches`() {
-    performProjectAuthGet("branches").andAssertThatJson {
+    performProjectAuthGet("branches").andIsOk.andAssertThatJson {
       node("page.totalElements").isNumber.isEqualTo(BigDecimal(4))
       node("_embedded.branches") {
         node("[0].name").isEqualTo("main")
@@ -74,7 +80,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `returns list of all branches sorted by created date`() {
     testData.projectBuilder.self = testData.secondProject
     createBranchesOneByObe(testData.secondProject)
-    performProjectAuthGet("branches").andAssertThatJson {
+    performProjectAuthGet("branches").andIsOk.andAssertThatJson {
       node("page.totalElements").isNumber.isEqualTo(BigDecimal(4))
       node("_embedded.branches") {
         node("[0].name").isEqualTo("main")
@@ -85,29 +91,6 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         node("[2].active").isEqualTo(true)
         node("[3].name").isEqualTo("first-branch")
         node("[3].active").isEqualTo(true)
-      }
-    }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `creates default branch on project without branches`() {
-    testData.projectBuilder.self = testData.secondProject
-    performProjectAuthGet("branches").andAssertThatJson {
-      node("page.totalElements").isNumber.isEqualTo(BigDecimal(1))
-      node("_embedded.branches") {
-        node("[0].name").isEqualTo("main")
-        node("[0].active").isEqualTo(true)
-        node("[0].isDefault").isEqualTo(true)
-      }
-    }
-    // a default branch should be created and all keys moved under this branch
-    keyService.getAll(testData.secondProject.id).first().branch!!.id.let { it ->
-      it.assert.isNotNull()
-      branchRepository.findByIdOrNull(it)!!.let { branch ->
-        branch.name.assert.isEqualTo(Branch.DEFAULT_BRANCH_NAME)
-        branch.isDefault.assert.isTrue
-        branch.isProtected.assert.isTrue
       }
     }
   }

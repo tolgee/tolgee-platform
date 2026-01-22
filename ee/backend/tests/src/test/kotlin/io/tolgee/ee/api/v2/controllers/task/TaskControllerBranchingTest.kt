@@ -23,7 +23,7 @@ class TaskControllerBranchingTest : ProjectAuthControllerTest("/v2/projects/") {
     projectSupplier = { testData.projectBuilder.self }
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    enabledFeaturesProvider.forceEnabled = setOf(Feature.TASKS)
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.TASKS, Feature.BRANCHING)
   }
 
   @Test
