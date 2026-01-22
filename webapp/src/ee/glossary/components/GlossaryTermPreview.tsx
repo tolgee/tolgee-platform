@@ -166,13 +166,12 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
 
   const handleSave = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (!preferredOrganization) return;
     if (saveMutation.isLoading) return;
 
     saveMutation.mutate(
       {
         path: {
-          organizationId: preferredOrganization.id,
+          organizationId: preferredOrganization!.id,
           glossaryId: term.glossary.id,
           termId: term.id,
         },
