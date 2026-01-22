@@ -52,6 +52,7 @@ class KeysTestData {
           name = "Peter's project"
           organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
           project = this
+          useBranching = true
         }.build {
           english =
             addLanguage {
