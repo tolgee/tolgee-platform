@@ -228,13 +228,11 @@ export const BranchItem: React.FC<Props> = ({
                     onSetProtected(branch);
                   }}
                 >
-                  <T
-                    keyName={
-                      branch.isProtected
-                        ? 'project_branch_unprotect'
-                        : 'project_branch_protect'
-                    }
-                  />
+                  {branch.isProtected ? (
+                    <T keyName="project_branch_unprotect" />
+                  ) : (
+                    <T keyName="project_branch_protect" />
+                  )}
                 </MenuItem>
               )}
               {!branch.isDefault && onRemove && (

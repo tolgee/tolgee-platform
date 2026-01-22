@@ -253,7 +253,7 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
                   <TaskTranslationsLink
                     component={Button}
                     task={data}
-                    projectId={project?.id}
+                    projectId={projectId}
                     color="primary"
                   >
                     <T keyName="task_link_translations_tooltip" />
