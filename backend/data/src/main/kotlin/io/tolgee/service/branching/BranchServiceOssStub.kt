@@ -150,4 +150,8 @@ class BranchServiceOssStub : BranchService {
   ) {
     throw UnsupportedOperationException()
   }
+
+  override fun enableBranchingOnProject(projectId: Long) {
+    throw UnsupportedOperationException()
+  }
 }
