@@ -6,7 +6,7 @@ export const GlossaryListStyledRowCell = styled(Box)`
   padding: ${({ theme }) => theme.spacing(1.5, 1.5)};
   border-top: 1px solid ${({ theme }) => theme.palette.divider1};
 
-  &.clickable {
+  &.hoverable {
     cursor: pointer;
 
     &:focus-within {

@@ -133,7 +133,7 @@ export const GlossaryListTranslationCell: React.VFC<Props> = ({
     <Tooltip title={!editEnabled && editDisabledReason} placement="bottom">
       <StyledRowTranslationCell
         className={clsx({
-          clickable: editEnabled,
+          hoverable: editEnabled || editDisabledReason,
           editing: isEditing,
         })}
         onClick={onHandleEdit}
