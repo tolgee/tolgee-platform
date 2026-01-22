@@ -41,4 +41,10 @@ class BatchProperties {
 
   @DocProperty(description = "Batch size for deleting old jobs (to avoid long-running transactions)")
   var jobCleanupBatchSize: Int = 1000
+
+  @DocProperty(
+    description = "Lock lease time in milliseconds for old job cleanup (to prevent lock expiration during long cleanups)",
+    defaultExplanation = "1 day",
+  )
+  var jobCleanupLockLeaseTimeMs: Long = 86400000
 }

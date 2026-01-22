@@ -1,6 +1,5 @@
 package io.tolgee.batch.cleaning
 
-import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import io.tolgee.component.CurrentDateProvider
@@ -43,7 +42,8 @@ class OldBatchJobCleaner(
   }
 
   fun cleanup() {
-    lockingProvider.withLockingIfFree(CLEANUP_LOCK_NAME, CLEANUP_LOCK_LEASE_TIME) {
+    val leaseTime = Duration.ofMillis(batchProperties.jobCleanupLockLeaseTimeMs)
+    lockingProvider.withLockingIfFree(CLEANUP_LOCK_NAME, leaseTime) {
       runSentryCatching {
         cleanupTimer.record(
           Runnable {
@@ -233,7 +233,6 @@ class OldBatchJobCleaner(
     private const val METRIC_DELETED_CHUNKS = "tolgee_batch_job_cleanup_deleted_chunks_total"
     private const val METRIC_DURATION = "tolgee_batch_job_cleanup_duration_seconds"
     private const val CLEANUP_LOCK_NAME = "old_batch_job_cleanup_lock"
-    private val CLEANUP_LOCK_LEASE_TIME: Duration = Duration.ofDays(1)
   }
 
   // Metrics - placed at end of class per coding conventions
