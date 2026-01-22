@@ -71,7 +71,7 @@ export const GlossaryListTermCell: React.VFC<Props> = ({
   return (
     <StyledRowTermCell
       className={clsx({
-        clickable: editEnabled,
+        hoverable: editEnabled,
       })}
       onClick={
         editEnabled && !isEditingTerm ? () => setIsEditingTerm(true) : undefined
