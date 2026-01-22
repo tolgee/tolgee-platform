@@ -42,7 +42,6 @@ export const GlossaryHighlight = ({
           term={term}
           languageTag={languageTag}
           targetLanguageTag={targetLanguageTag}
-          editEnabled={editEnabled}
           standalone
           onTranslationUpdated={onTranslationUpdated}
         />
