@@ -1,9 +1,11 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.pat.CreatePatDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
@@ -21,6 +23,7 @@ import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
@@ -29,6 +32,9 @@ import org.springframework.http.HttpHeaders
 @AutoConfigureMockMvc
 class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
+
+  @Autowired
+  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @BeforeEach
   fun setup() {
@@ -402,6 +408,8 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
   @ProjectJWTAuthTestMethod
   @Test
   fun `sets translations for existing key in branch`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+
     saveTestData()
     performProjectAuthPut(
       "/translations",
@@ -437,6 +445,7 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
   @ProjectJWTAuthTestMethod
   @Test
   fun `cannot set translations for key in default branch with different branch provided`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     saveTestData()
     performProjectAuthPut(
       "/translations",

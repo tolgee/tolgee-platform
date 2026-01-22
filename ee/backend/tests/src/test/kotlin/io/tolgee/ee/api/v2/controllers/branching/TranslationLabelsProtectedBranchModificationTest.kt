@@ -17,7 +17,7 @@ class TranslationLabelsProtectedBranchModificationTest : ProtectedBranchModifica
   @BeforeEach
   override fun setup() {
     super.setup()
-    enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_LABELS)
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_LABELS, Feature.BRANCHING)
   }
 
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATION_LABEL_ASSIGN])
