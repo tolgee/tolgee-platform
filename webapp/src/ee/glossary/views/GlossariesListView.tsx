@@ -9,7 +9,7 @@ import { GlossaryListItem } from 'tg.ee.module/glossary/components/GlossaryListI
 import { Box, styled } from '@mui/material';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { GlossariesEmptyListMessage } from 'tg.ee.module/glossary/components/GlossariesEmptyListMessage';
-import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { useEnabledFeatures, useIsOrganizationOwnerOrMaintainer } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 
 const StyledWrapper = styled('div')`
@@ -57,9 +57,7 @@ export const GlossariesListView = () => {
     setCreateDialogOpen(true);
   };
 
-  const canCreate = ['OWNER', 'MAINTAINER'].includes(
-    organization?.currentUserRole || ''
-  );
+  const canCreate = useIsOrganizationOwnerOrMaintainer();
 
   return (
     <StyledWrapper>

@@ -12,7 +12,10 @@ import { GlossaryTermPreview } from './GlossaryTermPreview';
 import { LinkExternal } from 'tg.component/LinkExternal';
 import { useProjectGlossaries } from 'tg.ee.module/glossary/hooks/useProjectGlossaries';
 import { GlossaryLinksList } from 'tg.ee.module/glossary/components/GlossaryLinksList';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import {
+  useIsOrganizationOwnerOrMaintainer,
+  usePreferredOrganization,
+} from 'tg.globalContext/helpers';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -41,12 +44,9 @@ const useGlossaryTermsHighlightsForPanel = ({
 
 export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
   const { language, baseLanguage, project, appendValue } = data;
-  const { preferredOrganization } = usePreferredOrganization();
 
   const terms = useGlossaryTermsHighlightsForPanel(data);
-  const editEnabled = ['OWNER', 'MAINTAINER'].includes(
-    preferredOrganization?.currentUserRole || ''
-  );
+  const editEnabled = useIsOrganizationOwnerOrMaintainer();
   const assignedGlossaries = useProjectGlossaries({
     projectId: project.id,
     enabled: terms.data.length === 0,

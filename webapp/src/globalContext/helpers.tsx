@@ -53,6 +53,12 @@ export const usePreferredOrganization = () => {
   };
 };
 
+export const useIsOrganizationOwnerOrMaintainer = () => {
+  const { preferredOrganization } = usePreferredOrganization();
+  const role = preferredOrganization?.currentUserRole;
+  return ['OWNER', 'MAINTAINER'].includes(role || '');
+};
+
 export const useOrganizationUsage = () => {
   return useGlobalContext((v) => v.organizationUsage!);
 };
