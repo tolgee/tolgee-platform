@@ -261,6 +261,13 @@ class RateLimitInterceptorTest {
         lock.unlock()
       }
     }
+
+    override fun <T> withLockingIfFree(
+      name: String,
+      fn: () -> T,
+    ): T? {
+      TODO("Not yet implemented")
+    }
   }
 
   @RateLimited(2)
