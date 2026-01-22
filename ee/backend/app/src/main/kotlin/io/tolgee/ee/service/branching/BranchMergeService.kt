@@ -11,6 +11,7 @@ import io.tolgee.ee.service.branching.merging.BranchMergeAnalyzer
 import io.tolgee.ee.service.branching.merging.BranchMergeExecutor
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
@@ -19,7 +20,10 @@ import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.repository.KeyRepository
+import io.tolgee.service.language.LanguageService
 import io.tolgee.util.Logging
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -33,6 +37,9 @@ class BranchMergeService(
   private val branchMergeExecutor: BranchMergeExecutor,
   private val branchSnapshotService: BranchSnapshotService,
   private val branchMergeKeyCloneFactory: BranchMergeKeyCloneFactory,
+  private val keyRepository: KeyRepository,
+  @Lazy
+  private val languageService: LanguageService,
 ) : Logging {
   @Transactional
   fun dryRun(branchMerge: BranchMerge) {
@@ -107,20 +114,79 @@ class BranchMergeService(
   }
 
   fun getConflicts(
-    projectId: Long,
+    project: Project,
     mergeId: Long,
     pageable: Pageable,
+    userId: Long,
   ): Page<BranchMergeConflictView> {
-    return branchMergeChangeRepository.findBranchMergeConflicts(projectId, mergeId, pageable)
+    val merge =
+      this.findActiveMerge(project.id, mergeId)
+        ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    val conflicts = branchMergeChangeRepository.findBranchMergeConflicts(project.id, mergeId, pageable)
+
+    val languages =
+      languageService.getLanguagesForTranslationsView(
+        project.languages.map { it.tag }.toSet(),
+        project.id,
+        userId,
+      )
+    val allowedLanguageTags = languages.map { it.tag }.toSet()
+
+    val keyIds = (conflicts.map { it.sourceBranchKeyId } + conflicts.map { it.targetBranchKeyId }).toSet()
+    val keysById =
+      if (keyIds.isEmpty()) {
+        emptyMap()
+      } else {
+        keyRepository.findAllDetailedByIdIn(keyIds).associateBy { it.id }
+      }
+
+    conflicts.forEach { conflict ->
+      conflict.sourceBranchKey = keysById[conflict.sourceBranchKeyId]!!
+      conflict.targetBranchKey = keysById[conflict.targetBranchKeyId]!!
+      conflict.allowedLanguageTags = allowedLanguageTags
+    }
+    this.enrichConflicts(conflicts, merge, allowedLanguageTags)
+    return conflicts
   }
 
   fun getChanges(
-    projectId: Long,
+    project: Project,
     mergeId: Long,
     type: BranchKeyMergeChangeType?,
     pageable: Pageable,
+    userId: Long,
   ): Page<BranchMergeChangeView> {
-    return branchMergeChangeRepository.findBranchMergeChanges(projectId, mergeId, type, pageable)
+    val merge =
+      findActiveMerge(project.id, mergeId)
+        ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    val changes = branchMergeChangeRepository.findBranchMergeChanges(project.id, mergeId, type, pageable)
+
+    val languages =
+      languageService.getLanguagesForTranslationsView(
+        project.languages.map { it.tag }.toSet(),
+        project.id,
+        userId,
+      )
+    val allowedLanguageTags = languages.map { it.tag }.toSet()
+
+    val sourceIds = changes.mapNotNull { it.sourceBranchKeyId }
+    val targetIds = changes.mapNotNull { it.targetBranchKeyId }
+    val keyIds = (sourceIds + targetIds).toSet()
+    val keysById =
+      if (keyIds.isEmpty()) {
+        emptyMap()
+      } else {
+        keyRepository.findAllDetailedByIdIn(keyIds).associateBy { it.id }
+      }
+
+    changes.forEach { change ->
+      change.sourceBranchKeyId?.let { id -> change.sourceBranchKey = keysById[id] }
+      change.targetBranchKeyId?.let { id -> change.targetBranchKey = keysById[id] }
+      change.allowedLanguageTags = allowedLanguageTags
+    }
+    this.enrichChanges(changes, merge, allowedLanguageTags)
+
+    return changes
   }
 
   fun getConflict(
