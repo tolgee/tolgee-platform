@@ -43,7 +43,9 @@ class BatchProperties {
   var jobCleanupBatchSize: Int = 1000
 
   @DocProperty(
-    description = "Lock lease time in milliseconds for old job cleanup (to prevent lock expiration during long cleanups)",
+    description =
+      "Lock lease time in milliseconds for old job cleanup " +
+        "(to prevent lock expiration during long cleanups)",
     defaultExplanation = "1 day",
   )
   var jobCleanupLockLeaseTimeMs: Long = 86400000
