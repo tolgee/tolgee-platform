@@ -16,6 +16,7 @@ import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { useBatchOperationStatusTranslate } from 'tg.translationTools/useBatchOperationStatusTranslate';
 import { useBatchOperationActionPhrase } from 'tg.translationTools/useBatchOperationActionPhrase';
 import { AnimatedStars } from 'tg.component/AnimatedStars';
+import { ShimmerText } from 'tg.component/ShimmerText';
 
 import { BatchJobModel } from '../types';
 import { BatchProgress } from './BatchProgress';
@@ -110,7 +111,7 @@ export const BatchOperationDialog = ({
           {data.status === 'RUNNING' && !isFinalizing ? (
             <Box display="flex" alignItems="center" gap={0.5}>
               {isAiJob && <AnimatedStars sx={{ fontSize: 14 }} />}
-              {getActionPhrase(data.type)}
+              <ShimmerText>{getActionPhrase(data.type)}</ShimmerText>
             </Box>
           ) : (
             (isFinished || data.status === 'PENDING' || isFinalizing) && (
