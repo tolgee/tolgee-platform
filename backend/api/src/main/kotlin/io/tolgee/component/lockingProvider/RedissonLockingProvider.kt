@@ -1,12 +1,17 @@
 package io.tolgee.component.lockingProvider
 
 import io.tolgee.component.LockingProvider
+import io.tolgee.util.Logging
+import io.tolgee.util.logger
 import org.redisson.api.RLock
 import org.redisson.api.RedissonClient
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 
 open class RedissonLockingProvider(
   private val redissonClient: RedissonClient,
-) : LockingProvider {
+) : LockingProvider,
+  Logging {
   override fun getLock(name: String): RLock {
     return redissonClient.getLock(name)
   }
@@ -17,6 +22,26 @@ open class RedissonLockingProvider(
   ): T {
     val lock = this.getLock(name)
     lock.lock()
+    try {
+      return fn()
+    } finally {
+      if (lock.isHeldByCurrentThread) {
+        lock.unlock()
+      }
+    }
+  }
+
+  override fun <T> withLockingIfFree(
+    name: String,
+    leaseTime: Duration,
+    fn: () -> T,
+  ): T? {
+    val lock = this.getLock(name)
+    val acquired = lock.tryLock(0, leaseTime.toMillis(), TimeUnit.MILLISECONDS)
+    if (!acquired) {
+      logger.debug("Lock '$name' already held, skipping execution")
+      return null
+    }
     try {
       return fn()
     } finally {

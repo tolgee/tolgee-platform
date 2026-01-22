@@ -23,4 +23,30 @@ class BatchProperties {
     defaultExplanation = "Unlimited (within tolgee.batch.concurrency)",
   )
   var maxPerMtJobConcurrency: Int = -1
+
+  @DocProperty(description = "Enable scheduled cleanup of old batch jobs")
+  var oldJobCleanupEnabled: Boolean = true
+
+  @DocProperty(description = "Retention period in days for completed batch jobs (SUCCESS, CANCELLED)")
+  var completedJobRetentionDays: Int = 3
+
+  @DocProperty(description = "Retention period in days for failed batch jobs")
+  var failedJobRetentionDays: Int = 30
+
+  @DocProperty(
+    description = "Delay between old batch job cleanup runs in milliseconds",
+    defaultExplanation = "8 hours",
+  )
+  var oldJobCleanupDelayInMs: Long = 28800000
+
+  @DocProperty(description = "Batch size for deleting old jobs (to avoid long-running transactions)")
+  var jobCleanupBatchSize: Int = 1000
+
+  @DocProperty(
+    description =
+      "Lock lease time in milliseconds for old job cleanup " +
+        "(to prevent lock expiration during long cleanups)",
+    defaultExplanation = "1 day",
+  )
+  var jobCleanupLockLeaseTimeMs: Long = 86400000
 }

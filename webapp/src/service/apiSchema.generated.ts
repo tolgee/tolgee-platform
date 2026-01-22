@@ -1392,13 +1392,7 @@ export interface components {
        * @description Status of the batch job
        * @enum {string}
        */
-      status:
-        | "PENDING"
-        | "RUNNING"
-        | "SUCCESS"
-        | "FAILED"
-        | "CANCELLED"
-        | "DEBOUNCED";
+      status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELLED";
       /**
        * Format: int32
        * @description Total items
@@ -3134,13 +3128,7 @@ export interface components {
       /** Format: int64 */
       jobId: number;
       /** @enum {string} */
-      status:
-        | "PENDING"
-        | "RUNNING"
-        | "SUCCESS"
-        | "FAILED"
-        | "CANCELLED"
-        | "DEBOUNCED";
+      status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELLED";
       /** @enum {string} */
       type:
         | "AI_PLAYGROUND_TRANSLATE"

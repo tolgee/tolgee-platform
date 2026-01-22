@@ -98,6 +98,7 @@ tolgee:
     server: http://localhost:8080
   batch:
     concurrency: 10
+    old-job-cleanup-enabled: false
   front-end-url: https://dummy-url.com
   ee:
     scheduled-reporting-enabled: false

@@ -248,6 +248,14 @@ class RateLimitServiceTest {
         lock.unlock()
       }
     }
+
+    override fun <T> withLockingIfFree(
+      name: String,
+      leaseTime: java.time.Duration,
+      fn: () -> T,
+    ): T? {
+      TODO("Not yet implemented")
+    }
   }
 
   class TestException : Exception()
