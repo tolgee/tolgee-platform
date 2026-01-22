@@ -9,6 +9,7 @@ class ImportBranchTestData : BaseTestData() {
   init {
     this.root.apply {
       projectBuilder.apply {
+        self.useBranching = true
         featureBranch =
           addBranch {
             name = "feature"

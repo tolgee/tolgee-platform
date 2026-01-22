@@ -43,6 +43,7 @@ class TranslationsTestData {
         name = "Franta's project"
         organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
         project = this
+        useBranching = true
       }.build project@{
         addPermission {
           user = this@TranslationsTestData.user

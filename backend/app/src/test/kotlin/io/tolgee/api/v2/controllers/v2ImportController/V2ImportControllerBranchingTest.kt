@@ -1,7 +1,9 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportBranchTestData
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
@@ -9,6 +11,7 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.util.performImport
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.transaction.annotation.Transactional
@@ -19,6 +22,9 @@ class V2ImportControllerBranchingTest : ProjectAuthControllerTest("/v2/projects/
   lateinit var simpleJson: Resource
 
   lateinit var testData: ImportBranchTestData
+
+  @Autowired
+  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @BeforeEach
   fun setup() {
@@ -31,6 +37,7 @@ class V2ImportControllerBranchingTest : ProjectAuthControllerTest("/v2/projects/
   @Test
   @ProjectJWTAuthTestMethod
   fun `add files returns result only for selected branch`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     performImport(
       mvc = mvc,
       projectId = testData.project.id,
@@ -51,6 +58,7 @@ class V2ImportControllerBranchingTest : ProjectAuthControllerTest("/v2/projects/
   @Test
   @ProjectJWTAuthTestMethod
   fun `cancel removes only branch import`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     performImport(
       mvc = mvc,
       projectId = testData.project.id,

@@ -1,15 +1,28 @@
 package io.tolgee.api.v2.controllers.branching
 
+import io.tolgee.constants.Feature
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.ProtectedBranchModificationTestBase
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class KeysProtectedBranchModificationTest : ProtectedBranchModificationTestBase() {
+  @Autowired
+  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
+  @BeforeEach
+  override fun setup() {
+    super.setup()
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+  }
+
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_CREATE])
   @Test
   fun `forbid creating key on protected branch without protected scope`() {
