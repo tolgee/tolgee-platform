@@ -51,6 +51,15 @@ def getE2eTestsToRun() {
     return chunks[Integer.parseInt(jobIndex)]
 }
 
+def getE2eSpecsOverride() {
+    def overrideSpecs = project.findProperty("specs")
+    if (overrideSpecs == null) {
+        return null
+    }
+    def trimmed = overrideSpecs.toString().trim()
+    return trimmed.isEmpty() ? null : trimmed
+}
+
 task waitForRunningContainer(type: Task, group: "e2e") {
     doLast {
         while (true) {
@@ -85,7 +94,8 @@ task installE2eDeps(type: Exec, group: "e2e") {
 
 task runE2e(type: Exec, group: "e2e") {
     dependsOn "runDockerE2e", "installE2eDeps"
-    def specs = getE2eTestsToRun().join(",")
+    def overrideSpecs = getE2eSpecsOverride()
+    def specs = overrideSpecs != null ? overrideSpecs : getE2eTestsToRun().join(",")
 
     environment     "CYPRESS_HOST", "http://localhost:8201"
     commandLine npmCommandName, "run", "cy:run", "--", "--spec", specs
@@ -112,7 +122,12 @@ task saveServerLogs(type: Exec, group: "e2E") {
 task openE2e(type: Exec, group: "e2e") {
     dependsOn "runDockerE2e", "installE2eDeps"
 
-    commandLine npmCommandName, "run", "cy:open"
+    def overrideSpecs = getE2eSpecsOverride()
+    if (overrideSpecs != null) {
+        commandLine npmCommandName, "run", "cy:open", "--", "--spec", overrideSpecs
+    } else {
+        commandLine npmCommandName, "run", "cy:open"
+    }
 
     workingDir E2E_DIR
 
@@ -120,7 +135,12 @@ task openE2e(type: Exec, group: "e2e") {
 }
 
 task openE2eDev(type: Exec, group: "e2e") {
-    commandLine npmCommandName, "run", "cy:open"
+    def overrideSpecs = getE2eSpecsOverride()
+    if (overrideSpecs != null) {
+        commandLine npmCommandName, "run", "cy:open", "--", "--spec", overrideSpecs
+    } else {
+        commandLine npmCommandName, "run", "cy:open"
+    }
 
     environment "CYPRESS_HOST", "http://localhost:8081"
 
