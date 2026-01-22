@@ -4,6 +4,7 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFailed
 import io.tolgee.batch.events.OnBatchJobProgress
+import io.tolgee.batch.events.OnBatchJobStarted
 import io.tolgee.batch.events.OnBatchJobStatusUpdated
 import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.batch.state.BatchJobStateProvider
@@ -41,8 +42,8 @@ class ProgressManager(
     // Ensure state is initialized (O(1) check after first call)
     batchJobStateProvider.ensureInitialized(batchJobId)
 
-    // Increment running count (will be decremented in onExecutionCoroutineComplete)
-    batchJobStateProvider.incrementRunningCount(batchJobId)
+    // Use atomic increment-and-get to detect first start
+    val newRunningCount = batchJobStateProvider.incrementRunningCountAndGet(batchJobId)
 
     // O(1) check if execution already exists with terminal state
     val currentState = batchJobStateProvider.getSingleExecution(batchJobId, executionId)
@@ -64,6 +65,12 @@ class ProgressManager(
         transactionCommitted = currentState?.transactionCommitted ?: false,
       ),
     )
+
+    // Publish event when first execution starts
+    if (newRunningCount == 1) {
+      val jobDto = batchJobService.getJobDto(batchJobId)
+      eventPublisher.publishEvent(OnBatchJobStarted(jobDto))
+    }
     return true
   }
 

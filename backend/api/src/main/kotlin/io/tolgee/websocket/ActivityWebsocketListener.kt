@@ -6,6 +6,7 @@ import io.tolgee.batch.WebsocketProgressInfo
 import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFailed
 import io.tolgee.batch.events.OnBatchJobProgress
+import io.tolgee.batch.events.OnBatchJobStarted
 import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
@@ -108,6 +109,22 @@ class ActivityWebsocketListener(
       WebsocketEvent(
         actor = getActorInfo(event.job.authorId),
         data = WebsocketProgressInfo(event.job.id, event.processed, event.total, realStatus),
+        sourceActivity = null,
+        activityId = null,
+        dataCollapsed = false,
+        timestamp = currentDateProvider.date.time,
+      ),
+    )
+  }
+
+  @EventListener(OnBatchJobStarted::class)
+  fun onBatchJobStarted(event: OnBatchJobStarted) {
+    if (event.job.hidden) return
+    websocketEventPublisher(
+      "/projects/${event.job.projectId}/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}",
+      WebsocketEvent(
+        actor = getActorInfo(event.job.authorId),
+        data = WebsocketProgressInfo(event.job.id, 0L, event.job.totalItems.toLong(), BatchJobStatus.RUNNING),
         sourceActivity = null,
         activityId = null,
         dataCollapsed = false,
