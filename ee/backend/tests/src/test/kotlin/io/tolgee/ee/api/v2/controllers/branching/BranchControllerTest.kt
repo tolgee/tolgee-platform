@@ -395,7 +395,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun createBranchesOneByObe(project: Project) {
-    defaultBranchCreator.create(project.id)
+    defaultBranchCreator.create(project)
     val refreshed = project.refresh()
     val defaultBranch = refreshed.getDefaultBranch()!!
     branchService.createBranch(refreshed.id, "first-branch", defaultBranch.id, testData.user)
