@@ -1,11 +1,13 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
@@ -21,6 +23,7 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.ResultActions
@@ -31,6 +34,9 @@ import kotlin.system.measureTimeMillis
 @AutoConfigureMockMvc
 class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
+
+  @Autowired
+  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @BeforeEach
   fun setup() {
@@ -134,6 +140,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `return translations from featured branch only`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     testData.generateBranchedData(10)
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
@@ -157,6 +164,7 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   @ProjectJWTAuthTestMethod
   fun `return translations from active branch only`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     testData.generateBranchedData(10)
     testData.addDeletedBranch()
     testDataService.saveTestData(testData.root)

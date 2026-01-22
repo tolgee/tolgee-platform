@@ -1,16 +1,22 @@
 package io.tolgee.api.v2.controllers.tags
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TagsTestData
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import kotlin.time.measureTime
 
 class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TagsTestData
+
+  @Autowired
+  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @BeforeEach
   fun setup() {
@@ -281,6 +287,7 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   @ProjectJWTAuthTestMethod
   fun `works with branch - tag filtered within branch`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     saveAndPrepare()
 
     performProjectAuthPut(
@@ -305,6 +312,7 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   @ProjectJWTAuthTestMethod
   fun `works with branch - tag other within branch`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     saveAndPrepare()
 
     performProjectAuthPut(
