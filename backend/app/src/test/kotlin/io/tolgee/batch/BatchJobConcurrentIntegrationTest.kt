@@ -164,13 +164,11 @@ class BatchJobConcurrentIntegrationTest :
     batchJobConcurrentLauncher.pause = true
   }
 
-  // ============ SCENARIO 1: Multiple job types from different projects run in parallel ============
-
   @Test
   fun `multiple job types from different projects run in parallel`() {
-    makePreTranslateProcessorPass()
-    makeDeleteKeysProcessorPass()
-    makeMtProcessorPass()
+    makePreTranslateProcessorPassWithDelay(10)
+    makeDeleteKeysProcessorPassWithDelay(10)
+    makeMtProcessorPassWithDelay(10)
 
     val job1 = runPreTranslateJob(testData.projectA, testData.getProjectAKeyIds().take(50), testData.projectACzech.id)
     val job2 = runPreTranslateJob(testData.projectB, testData.getProjectBKeyIds().take(40), testData.projectBCzech.id)
@@ -192,8 +190,6 @@ class BatchJobConcurrentIntegrationTest :
     logger.info("All 3 jobs from different projects completed successfully in parallel")
   }
 
-  // ============ SCENARIO 2: Exclusive jobs on same project queue correctly ============
-
   @Test
   fun `exclusive jobs on same project queue correctly`() {
     makePreTranslateProcessorPass()
@@ -203,8 +199,8 @@ class BatchJobConcurrentIntegrationTest :
     val job2 = runPreTranslateJob(testData.projectA, keyIds.drop(30).take(30), testData.projectACzech.id)
 
     // Both jobs should eventually complete
-    waitForJobComplete(job1, timeoutMs = 60_000)
-    waitForJobComplete(job2, timeoutMs = 60_000)
+    waitForJobComplete(job1, timeoutMs = 15_000)
+    waitForJobComplete(job2, timeoutMs = 15_000)
 
     assertJobSuccess(job1)
     assertJobSuccess(job2)
@@ -213,8 +209,6 @@ class BatchJobConcurrentIntegrationTest :
     // by checking that one completed before the other started significant work
     logger.info("Both exclusive jobs on same project completed, project locking verified")
   }
-
-  // ============ SCENARIO 3: Non-exclusive jobs bypass project locking ============
 
   @Test
   fun `non-exclusive jobs bypass project locking`() {
@@ -240,8 +234,6 @@ class BatchJobConcurrentIntegrationTest :
 
     logger.info("Non-exclusive job completed while exclusive job was running - bypass verified")
   }
-
-  // ============ SCENARIO 4: maxPerJobConcurrency limits chunk parallelism ============
 
   @Test
   fun `maxPerJobConcurrency limits chunk parallelism`() {
@@ -270,8 +262,6 @@ class BatchJobConcurrentIntegrationTest :
     }
   }
 
-  // ============ SCENARIO 5: Job character fairness under load ============
-
   @Test
   fun `job character fairness under load`() {
     val slowExecutionCount = AtomicInteger(0)
@@ -299,8 +289,6 @@ class BatchJobConcurrentIntegrationTest :
       "Job character fairness test completed - SLOW executions: ${slowExecutionCount.get()}, FAST executions: ${fastExecutionCount.get()}",
     )
   }
-
-  // ============ SCENARIO 6: Progress tracking accuracy under concurrent load ============
 
   @Test
   fun `progress tracking accuracy under concurrent load`() {
@@ -341,8 +329,6 @@ class BatchJobConcurrentIntegrationTest :
     logger.info("Progress tracking accuracy verified for ${jobs.size} concurrent jobs")
   }
 
-  // ============ SCENARIO 7: Failure and retry with concurrent jobs ============
-
   @Test
   fun `failure and retry with concurrent jobs`() {
     makePreTranslateProcessorPass()
@@ -367,13 +353,11 @@ class BatchJobConcurrentIntegrationTest :
     assertJobSuccess(job2)
 
     // The failing job should eventually succeed after retries
-    waitForJobComplete(failingJob, timeoutMs = 60_000)
+    waitForJobComplete(failingJob, timeoutMs = 15_000)
     assertJobSuccess(failingJob)
 
     logger.info("Failure and retry test completed - failing job recovered after ${failCount.get()} failures")
   }
-
-  // ============ SCENARIO 8: Cancellation during concurrent execution ============
 
   @Test
   fun `cancellation during concurrent execution`() {
@@ -408,8 +392,6 @@ class BatchJobConcurrentIntegrationTest :
     logger.info("Cancellation test completed - job status: ${cancelledJobDto.status}")
   }
 
-  // ============ SCENARIO 9: Activity finalization with concurrent chunks ============
-
   @Test
   fun `activity finalization with concurrent chunks`() {
     makePreTranslateProcessorPass()
@@ -427,8 +409,6 @@ class BatchJobConcurrentIntegrationTest :
 
     logger.info("Activity finalization test completed with ${successfulExecutions.size} successful chunk executions")
   }
-
-  // ============ SCENARIO 10: Stress test - many jobs, many projects ============
 
   @Test
   fun `stress test - many jobs many projects`() {
@@ -451,7 +431,7 @@ class BatchJobConcurrentIntegrationTest :
 
     // Wait for all jobs to complete
     allJobs.forEach { job ->
-      waitForJobComplete(job, timeoutMs = 120_000)
+      waitForJobComplete(job, timeoutMs = 30_000)
     }
 
     val totalTime = System.currentTimeMillis() - startTime
@@ -480,8 +460,6 @@ class BatchJobConcurrentIntegrationTest :
         .isTrue()
     }
   }
-
-  // ============ Helper Methods ============
 
   private fun runPreTranslateJob(
     project: Project,
@@ -549,9 +527,9 @@ class BatchJobConcurrentIntegrationTest :
 
   private fun waitForJobComplete(
     job: BatchJob,
-    timeoutMs: Long = 30_000,
+    timeoutMs: Long = 10_000,
   ) {
-    waitForNotThrowing(pollTime = 200, timeout = timeoutMs) {
+    waitForNotThrowing(pollTime = 100, timeout = timeoutMs) {
       executeInNewTransaction(transactionManager) {
         val jobDto = batchJobService.getJobDto(job.id)
         jobDto.status.completed.assert
@@ -561,7 +539,7 @@ class BatchJobConcurrentIntegrationTest :
   }
 
   private fun waitForJobCancelled(job: BatchJob) {
-    waitFor(pollTime = 200, timeout = 30_000) {
+    waitFor(pollTime = 100, timeout = 10_000) {
       val jobDto =
         executeInNewTransaction(transactionManager) {
           batchJobService.getJobDto(job.id)
@@ -571,7 +549,7 @@ class BatchJobConcurrentIntegrationTest :
   }
 
   private fun waitForJobCancelledOrCompleted(job: BatchJob) {
-    waitFor(pollTime = 200, timeout = 30_000) {
+    waitFor(pollTime = 100, timeout = 10_000) {
       val jobDto =
         executeInNewTransaction(transactionManager) {
           batchJobService.getJobDto(job.id)
@@ -590,7 +568,6 @@ class BatchJobConcurrentIntegrationTest :
     jobView.progress.assert.isEqualTo(jobView.batchJob.totalItems)
   }
 
-  // Mock processors
   private fun makePreTranslateProcessorPass() {
     doAnswer { }.whenever(preTranslationByTmChunkProcessor).process(any(), any(), any(), any())
   }
@@ -621,6 +598,12 @@ class BatchJobConcurrentIntegrationTest :
     doAnswer { }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
   }
 
+  private fun makeMtProcessorPassWithDelay(delayMs: Long) {
+    doAnswer {
+      Thread.sleep(delayMs)
+    }.whenever(autoTranslationService).autoTranslateSync(any(), any(), any(), any(), any())
+  }
+
   private fun makeMtProcessorPassWithCounter(counter: AtomicInteger) {
     doAnswer {
       counter.incrementAndGet()
@@ -645,8 +628,6 @@ class BatchJobConcurrentIntegrationTest :
   private fun makeAutomationProcessorPass() {
     doAnswer { }.whenever(automationChunkProcessor).process(any(), any(), any(), any())
   }
-
-  // ============ SCENARIO 11: Production Load Test with Node Failure Simulation ============
 
   /**
    * This test simulates production-like load with:
@@ -720,7 +701,7 @@ class BatchJobConcurrentIntegrationTest :
     // Phase 7: Wait for all jobs to complete
     logger.info("Phase 7: Waiting for all jobs to complete...")
     allJobs.forEach { job ->
-      waitForJobComplete(job, timeoutMs = 120_000)
+      waitForJobComplete(job, timeoutMs = 30_000)
     }
 
     val totalTime = System.currentTimeMillis() - startTime
@@ -797,7 +778,7 @@ class BatchJobConcurrentIntegrationTest :
 
       // Wait for this wave to complete before starting next
       waveJobs.forEach { job ->
-        waitForJobComplete(job, timeoutMs = 60_000)
+        waitForJobComplete(job, timeoutMs = 15_000)
         assertJobSuccess(job)
       }
 
@@ -858,7 +839,7 @@ class BatchJobConcurrentIntegrationTest :
     batchJobConcurrentLauncher.pause = false
 
     // Wait for completion
-    waitForJobComplete(job, timeoutMs = 60_000)
+    waitForJobComplete(job, timeoutMs = 15_000)
 
     val finalView = batchJobService.getView(job.id)
     finalView.batchJob.status.assert
@@ -867,8 +848,6 @@ class BatchJobConcurrentIntegrationTest :
 
     logger.info("Job recovered and completed: progress=$chunkCount, status=SUCCESS")
   }
-
-  // ============ Additional Helper Methods for Load Tests ============
 
   private fun runNoOpJob(
     project: Project,

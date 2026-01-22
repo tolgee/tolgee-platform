@@ -61,7 +61,10 @@ class BatchJobChunkExecutionQueue(
   @EventListener
   fun onJobItemEvent(event: JobQueueItemsEvent) {
     when (event.type) {
-      QueueEventType.ADD -> this.addItemsToLocalQueue(event.items)
+      QueueEventType.ADD -> {
+        this.addItemsToLocalQueue(event.items)
+      }
+
       QueueEventType.REMOVE -> {
         // Remove and decrement atomically per item to prevent double-decrement
         // if poll() removes an item between removeAll and forEach
@@ -75,7 +78,7 @@ class BatchJobChunkExecutionQueue(
   }
 
   @Scheduled(fixedDelay = 60000)
-  @Transactional
+  @Transactional(readOnly = true)
   fun populateQueue() {
     logger.debug("Running scheduled populate queue")
     val data =

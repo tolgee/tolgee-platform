@@ -94,6 +94,26 @@ class ProgressManager(
     batchJobStateProvider.decrementRunningCount(batchJobId)
   }
 
+  /**
+   * Updates the state and progress for a batch job chunk execution.
+   *
+   * This method is called after a chunk has been processed (successfully or not) to:
+   * 1. Update the execution's state in the state provider (status, successTargets, etc.)
+   * 2. Track progress by counting successful items (with delta calculation to prevent double-counting)
+   * 3. Update completion counters when an execution reaches a terminal state (completed + not retrying)
+   * 4. Publish progress events to notify listeners of item-level progress
+   * 5. Trigger job completion handling when the last chunk completes
+   *
+   * Thread-safety: Uses atomic operations (increment-and-get) to ensure that exactly one thread
+   * triggers job completion when multiple chunks finish concurrently. The thread whose atomic
+   * increment reaches `totalChunks` is responsible for calling [handleJobStatus].
+   *
+   * Note: This method only tracks in-memory state. The actual database commit happens separately,
+   * and [handleChunkCompletedCommitted] is called afterward to track committed chunks.
+   *
+   * @param execution The chunk execution with updated status and results
+   * @param batchJobDto Optional cached job DTO to avoid a database lookup
+   */
   fun handleProgress(
     execution: BatchJobChunkExecution,
     batchJobDto: BatchJobDto? = null,

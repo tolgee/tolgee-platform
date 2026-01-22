@@ -101,9 +101,6 @@ class BatchJobActionService(
       }
       addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter)
     } catch (e: Throwable) {
-      // Note: Don't call rollbackSetToRunning here - the running count decrement will happen
-      // via onExecutionCoroutineComplete when the coroutine completes (invokeOnCompletion callback).
-      // Calling it here would cause double-decrement.
       when (e) {
         is CancellationException, is kotlinx.coroutines.CancellationException -> {
           // Coroutine was cancelled (e.g., during job cancellation)
