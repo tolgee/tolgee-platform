@@ -76,7 +76,6 @@ interface BatchJobStateProvider {
 
   fun getCachedJobIds(): MutableSet<Long>
 
-  // Job lifecycle
   /**
    * Atomically marks a job as started. Returns true only the first time
    * this method is called for a given jobId, false for subsequent calls.

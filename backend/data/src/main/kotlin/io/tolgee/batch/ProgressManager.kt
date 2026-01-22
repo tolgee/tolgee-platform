@@ -66,12 +66,25 @@ class ProgressManager(
       ),
     )
 
-    // Publish event exactly once when job first starts (atomic check-and-set)
+    return true
+  }
+
+  /**
+   * Publishes OnBatchJobStarted event exactly once when job first starts.
+   * Uses atomic check-and-set to ensure the event is published only once
+   * even with concurrent chunk executions.
+   *
+   * This should be called after all precondition checks (like project exclusivity)
+   * pass, to avoid sending "started" event for jobs that are actually queued.
+   */
+  fun tryPublishJobStarted(
+    batchJobId: Long,
+    batchJobDto: BatchJobDto? = null,
+  ) {
     if (batchJobStateProvider.tryMarkJobStarted(batchJobId)) {
-      val jobDto = batchJobService.getJobDto(batchJobId)
+      val jobDto = batchJobDto ?: batchJobService.getJobDto(batchJobId)
       eventPublisher.publishEvent(OnBatchJobStarted(jobDto))
     }
-    return true
   }
 
   /**
