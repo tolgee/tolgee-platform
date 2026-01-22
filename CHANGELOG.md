@@ -1,3 +1,10 @@
+## [3.147.3](https://github.com/tolgee/tolgee-platform/compare/v3.147.2...v3.147.3) (2026-01-22)
+
+
+### Bug Fixes
+
+* add scheduled job for cleaning old batch jobs ([#3401](https://github.com/tolgee/tolgee-platform/issues/3401)) ([8384258](https://github.com/tolgee/tolgee-platform/commit/8384258aba5a1e769805da5a85cf73ab8d753f08))
+
 ## [3.147.2](https://github.com/tolgee/tolgee-platform/compare/v3.147.1...v3.147.2) (2026-01-21)
 
 
