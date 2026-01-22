@@ -5,6 +5,8 @@ import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.redisson.api.RLock
 import org.redisson.api.RedissonClient
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 
 open class RedissonLockingProvider(
   private val redissonClient: RedissonClient,
@@ -31,10 +33,11 @@ open class RedissonLockingProvider(
 
   override fun <T> withLockingIfFree(
     name: String,
+    leaseTime: Duration,
     fn: () -> T,
   ): T? {
     val lock = this.getLock(name)
-    val acquired = lock.tryLock()
+    val acquired = lock.tryLock(0, leaseTime.toMillis(), TimeUnit.MILLISECONDS)
     if (!acquired) {
       logger.debug("Lock '$name' already held, skipping execution")
       return null

@@ -4,6 +4,7 @@ import io.tolgee.component.LockingProvider
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.scheduling.annotation.Scheduled
+import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
@@ -32,10 +33,13 @@ open class SimpleLockingProvider :
     }
   }
 
+  @Suppress("UNUSED_PARAMETER")
   override fun <T> withLockingIfFree(
     name: String,
+    leaseTime: Duration,
     fn: () -> T,
   ): T? {
+    // leaseTime is ignored for in-memory locks - lock is held until explicitly unlocked
     val lock = this.getLock(name) as ReentrantLock
     val acquired = lock.tryLock()
     if (!acquired) {
