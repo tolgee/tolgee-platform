@@ -13,6 +13,7 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
 
   init {
     projectBuilder.apply {
+      self.useBranching = true
       addKey {
         name = "no tag key"
         noTagKey = this
