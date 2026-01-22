@@ -40,6 +40,7 @@ class BranchRevisionData {
           name = "Branch project"
           organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
           project = this
+          useBranching = true
         }.build {
           english =
             addLanguage {

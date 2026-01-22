@@ -16,6 +16,7 @@ class ProjectStatsBranchingTestData :
 
   init {
     projectBuilder.apply {
+      self.useBranching = true
       germanLanguage =
         addLanguage {
           name = "German"

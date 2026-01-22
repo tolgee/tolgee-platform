@@ -3,8 +3,10 @@ package io.tolgee.ee.api.v2.controllers.activity
 import io.tolgee.ActivityTestUtil
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.batch.BatchJobService
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BranchRevisionData
 import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -39,6 +41,9 @@ class ProjectActivityBranchingTest : ProjectAuthControllerTest("/v2/projects/") 
   @Autowired
   private lateinit var batchJobService: BatchJobService
 
+  @Autowired
+  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
   @BeforeEach
   fun setup() {
     testData = BranchRevisionData()
@@ -51,6 +56,7 @@ class ProjectActivityBranchingTest : ProjectAuthControllerTest("/v2/projects/") 
   @Test
   @ProjectJWTAuthTestMethod
   fun `filters activity list by branch`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     performProjectAuthPost(
       "translations",
       mapOf("key" to "default_key", "translations" to mapOf("en" to "default text")),
@@ -83,6 +89,7 @@ class ProjectActivityBranchingTest : ProjectAuthControllerTest("/v2/projects/") 
   @Test
   @ProjectJWTAuthTestMethod
   fun `filters modified entities by branch in detail`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     val defaultKey = keyService.create(project, CreateKeyDto(name = "default_key"))
 
     performProjectAuthPost(

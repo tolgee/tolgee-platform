@@ -24,7 +24,7 @@ class ProjectFeatureGuard(
     val project = projectHolder.projectEntity
     enabledFeaturesProvider.checkFeatureEnabled(project.organizationOwner.id, feature)
     if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
-      throw ValidationException(Message.FEATURE_NOT_ENABLED)
+      throw ValidationException(Message.BRANCHING_NOT_ENABLED_FOR_PROJECT)
     }
   }
 
