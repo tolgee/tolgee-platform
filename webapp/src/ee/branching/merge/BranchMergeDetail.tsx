@@ -323,6 +323,9 @@ export const BranchMergeDetail: FC = () => {
                 onResolveAll={handleResolveAll}
                 resolveAllLoading={resolveAllMutation.isLoading}
               />
+              <Alert severity="info">
+                {t('branch_merge_tags_labels_screenshots_joined')}
+              </Alert>
               <Box
                 ref={actionsRef}
                 display="flex"
