@@ -1,7 +1,9 @@
 package io.tolgee.ee.api.v2.controllers.branching
 
 import io.tolgee.ProjectAuthControllerTest
+import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BranchTranslationsTestData
+import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
@@ -14,7 +16,6 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.timeout
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
@@ -41,10 +42,14 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   lateinit var keyRepository: KeyRepository
 
+  @Autowired
+  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
   @BeforeEach
   fun setup() {
     testData = BranchTranslationsTestData()
     projectSupplier = { testData.project }
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
   }
 
   @Test

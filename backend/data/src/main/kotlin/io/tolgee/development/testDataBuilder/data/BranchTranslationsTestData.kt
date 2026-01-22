@@ -42,6 +42,7 @@ class BranchTranslationsTestData {
         name = "Branch project"
         organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
         project = this
+        useBranching = true
       }.build project@{
         addPermission {
           user = this@BranchTranslationsTestData.user

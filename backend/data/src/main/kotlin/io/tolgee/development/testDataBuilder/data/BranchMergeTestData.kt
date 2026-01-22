@@ -48,6 +48,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
   init {
     root.apply {
       projectBuilder.apply {
+        self.useBranching = true
         addBranches()
         addLabels()
         addSharedKeys()

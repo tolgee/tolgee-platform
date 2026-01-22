@@ -20,6 +20,7 @@ class BranchTestData(
   init {
     this.root.apply {
       projectBuilder.apply {
+        self.useBranching = true
         // add test branches to test basic branch operations (create, update, delete)
         addBranches()
         // add keys to main and feature branches to test merging
@@ -34,6 +35,7 @@ class BranchTestData(
     secondProject =
       addProject {
         name = "empty-project"
+        useBranching = true
       }.build {
         addKey {
           name = "test"
