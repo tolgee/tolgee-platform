@@ -7,6 +7,14 @@ import ptDateLocale from 'date-fns/locale/pt';
 import daDateLocale from 'date-fns/locale/da';
 import jaDateLocale from 'date-fns/locale/ja';
 import zhCNDateLocale from 'date-fns/locale/zh-CN';
+import ukrDateLocale from 'date-fns/locale/uk';
+import huDateLocale from 'date-fns/locale/hu';
+import itDateLocale from 'date-fns/locale/it';
+import nlDateLocale from 'date-fns/locale/nl';
+import noDateLocale from 'date-fns/locale/nb';
+import plDateLocale from 'date-fns/locale/pl';
+import roDateLocale from 'date-fns/locale/ro';
+import ruDateLocale from 'date-fns/locale/ru';
 
 export const locales = {
   en: {
@@ -71,5 +79,61 @@ export const locales = {
     dateFnsLocale: zhCNDateLocale,
     translations: () =>
       import('../../../webapp/src/i18n/zh.json').then((m) => m.default),
+  },
+  uk: {
+    name: 'Українська',
+    flag: '🇺🇦',
+    dateFnsLocale: ukrDateLocale,
+    translations: () =>
+      import('../../../webapp/src/i18n/uk-UA.json').then((m) => m.default),
+  },
+  hu: {
+    name: 'Magyar',
+    flag: '🇭🇺',
+    dateFnsLocale: huDateLocale,
+    translations: () =>
+      import('../../../webapp/src/i18n/hu.json').then((m) => m.default),
+  },
+  it: {
+    name: 'Italiano',
+    flag: '🇮🇹',
+    dateFnsLocale: itDateLocale,
+    translations: () =>
+      import('../../../webapp/src/i18n/it-IT.json').then((m) => m.default),
+  },
+  nl: {
+    name: 'Nederlands',
+    flag: '🇳🇱',
+    dateFnsLocale: nlDateLocale,
+    translations: () =>
+      import('../../../webapp/src/i18n/nl.json').then((m) => m.default),
+  },
+  no: {
+    name: 'Norsk',
+    flag: '🇳🇴',
+    dateFnsLocale: noDateLocale,
+    translations: () =>
+      import('../../../webapp/src/i18n/no.json').then((m) => m.default),
+  },
+  pl: {
+    name: 'Polski',
+    flag: '🇵🇱',
+    dateFnsLocale: plDateLocale,
+    translations: () =>
+      import('../../../webapp/src/i18n/pl.json').then((m) => m.default),
+  },
+  ro: {
+    name: 'Română',
+    flag: '🇷🇴',
+    dateFnsLocale: roDateLocale,
+    translations: () =>
+      import('../../../webapp/src/i18n/ro.json').then((m) => m.default),
+  },
+  ru: {
+    name: 'Русский',
+    flag: '🇷🇺',
+    dateFnsLocale: ruDateLocale,
+    translations: () =>
+      import('../../../webapp/src/i18n/ru.json').then((m) => m.default),
   },
 };
