@@ -2,7 +2,6 @@ import { styled, Tooltip } from '@mui/material';
 import { TooltipCard } from 'tg.component/common/TooltipCard';
 import { GlossaryTermPreview } from 'tg.ee';
 import { components } from 'tg.service/apiSchema.generated';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
 
 type GlossaryTermModel = components['schemas']['GlossaryTermModel'];
 

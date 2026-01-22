@@ -5,10 +5,7 @@ import { GlossaryListTranslationCell } from 'tg.ee.module/glossary/components/Gl
 import { GlossaryListTermCell } from 'tg.ee.module/glossary/components/GlossaryListTermCell';
 import { SelectionService } from 'tg.service/useSelectionService';
 import { T } from '@tolgee/react';
-import {
-  useIsOrganizationOwnerOrMaintainer,
-  usePreferredOrganization,
-} from 'tg.globalContext/helpers';
+import { useIsOrganizationOwnerOrMaintainer } from 'tg.globalContext/helpers';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
 type SimpleGlossaryTermWithTranslationsModel =

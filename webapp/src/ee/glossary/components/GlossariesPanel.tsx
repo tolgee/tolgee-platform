@@ -12,10 +12,7 @@ import { GlossaryTermPreview } from './GlossaryTermPreview';
 import { LinkExternal } from 'tg.component/LinkExternal';
 import { useProjectGlossaries } from 'tg.ee.module/glossary/hooks/useProjectGlossaries';
 import { GlossaryLinksList } from 'tg.ee.module/glossary/components/GlossaryLinksList';
-import {
-  useIsOrganizationOwnerOrMaintainer,
-  usePreferredOrganization,
-} from 'tg.globalContext/helpers';
+import { useIsOrganizationOwnerOrMaintainer } from 'tg.globalContext/helpers';
 
 const StyledContainer = styled('div')`
   display: flex;
