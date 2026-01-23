@@ -12,11 +12,24 @@ interface BranchMergeRepository : JpaRepository<BranchMerge, Long> {
     """
       select bm from BranchMerge bm 
       join fetch bm.sourceBranch sb
-      join fetch bm.targetBranch tb
       where sb.project.id = :projectId and bm.id = :mergeId and bm.mergedAt IS NULL
     """,
   )
   fun findActiveMerge(
+    projectId: Long,
+    mergeId: Long,
+  ): BranchMerge?
+
+  @Query(
+    """
+      select bm from BranchMerge bm 
+      join fetch bm.sourceBranch sb
+      join fetch bm.targetBranch tb
+      left join fetch bm.changes ch
+      where sb.project.id = :projectId and bm.id = :mergeId and bm.mergedAt IS NULL
+    """,
+  )
+  fun findActiveMergeFull(
     projectId: Long,
     mergeId: Long,
   ): BranchMerge?
