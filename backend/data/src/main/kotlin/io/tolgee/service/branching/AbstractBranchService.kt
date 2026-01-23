@@ -1,0 +1,29 @@
+package io.tolgee.service.branching
+
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.branching.Branch
+import io.tolgee.repository.branching.BranchRepositoryOss
+
+abstract class AbstractBranchService(
+  protected open val branchRepository: BranchRepositoryOss,
+) : BranchService {
+  override fun getActiveBranch(
+    projectId: Long,
+    branchName: String,
+  ): Branch {
+    return branchRepository.findActiveByProjectIdAndName(projectId, branchName)
+      ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
+  }
+
+  override fun getActiveOrDefault(
+    projectId: Long,
+    branchName: String?,
+  ): Branch? {
+    return branchName?.let { getActiveBranch(projectId, it) } ?: getDefaultBranch(projectId)
+  }
+
+  override fun getDefaultBranch(projectId: Long): Branch? {
+    return branchRepository.findDefaultByProjectId(projectId)
+  }
+}
