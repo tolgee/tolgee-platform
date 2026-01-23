@@ -1,3 +1,10 @@
+## [3.147.5](https://github.com/tolgee/tolgee-platform/compare/v3.147.4...v3.147.5) (2026-01-23)
+
+
+### Bug Fixes
+
+* use subquery for batch job cleanup to avoid parameter limit ([#3407](https://github.com/tolgee/tolgee-platform/issues/3407)) ([76f63c3](https://github.com/tolgee/tolgee-platform/commit/76f63c3b306755436172b6bce37869bdd84bb236))
+
 ## [3.147.4](https://github.com/tolgee/tolgee-platform/compare/v3.147.3...v3.147.4) (2026-01-23)
 
 
