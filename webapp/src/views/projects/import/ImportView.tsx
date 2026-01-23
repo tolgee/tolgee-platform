@@ -3,7 +3,7 @@ import { Box, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { parseErrorResponse } from 'tg.fixtures/errorFixtures';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
