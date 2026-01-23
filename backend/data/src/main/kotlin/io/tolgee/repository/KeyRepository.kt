@@ -123,10 +123,21 @@ interface KeyRepository : JpaRepository<Key, Long> {
     left join fetch k.keyMeta km
     left join fetch k.translations t
     left join fetch t.language lang
+    left join fetch k.namespace ns
     where k.id in :ids
     """,
   )
   fun findAllDetailedByIdIn(ids: Collection<Long>): List<Key>
+
+  @Query(
+    """
+      select distinct k from Key k
+      left join fetch k.keyScreenshotReferences ksr
+      left join fetch ksr.screenshot s
+      where k.id in :ids
+    """,
+  )
+  fun findAllWithScreenshotsByIdIn(ids: Collection<Long>): List<Key>
 
   @Query(
     """

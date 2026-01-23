@@ -91,7 +91,7 @@ class Key(
   @OneToOne(mappedBy = "key", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   override var keyMeta: KeyMeta? = null
 
-  @OneToMany(mappedBy = "key", orphanRemoval = true)
+  @OneToMany(mappedBy = "key", orphanRemoval = true, cascade = [CascadeType.PERSIST])
   var keyScreenshotReferences: MutableList<KeyScreenshotReference> = mutableListOf()
 
   @ActivityLoggedProp
