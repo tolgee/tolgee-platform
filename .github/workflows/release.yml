@@ -54,22 +54,18 @@ jobs:
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
 
-      - name: Prepare for docker build
+      - name: Create docker image
         if: ${{ steps.version.outputs.VERSION != '' }}
-        run: ./gradlew dockerPrepare
+        run: |
+          docker buildx create --use
+          ./gradlew dockerPublish
+          VERSION=latest ./gradlew dockerPublish
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-
-      - name: Create docker image
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        run: |
-          OTEL_VERSION=$(grep '^opentelemetryJavaagentVersion=' ../../gradle.properties | cut -d'=' -f2)
-          docker buildx create --use
-          docker buildx build . -t tolgee/tolgee:${{ steps.version.outputs.VERSION }} --build-arg OTEL_AGENT_VERSION=$OTEL_VERSION --platform linux/arm64,linux/amd64 --cache-from type=registry,ref=tolgee/tolgee:latest --cache-to type=inline --push
-          docker buildx build . -t tolgee/tolgee:latest --build-arg OTEL_AGENT_VERSION=$OTEL_VERSION --platform linux/arm64,linux/amd64 --cache-from type=registry,ref=tolgee/tolgee:latest --cache-to type=inline --push
-        working-directory: build/docker
+          DOCKER_CACHE_FROM: type=registry,ref=tolgee/tolgee:latest
+          DOCKER_CACHE_TO: type=inline
 
       - name: Pack with webapp
         if: ${{ steps.version.outputs.VERSION != '' }}
