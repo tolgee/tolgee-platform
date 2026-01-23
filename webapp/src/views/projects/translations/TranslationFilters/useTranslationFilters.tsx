@@ -91,11 +91,22 @@ export const useTranslationFilters = ({
           filterHasComments: true,
           filterHasUnresolvedComments: undefined,
         });
-      case 'filterLabel':
+      case 'filterLabel': {
         return setFilters({
           ...filters,
-          filterLabel: add(filters.filterLabel, value),
+          filterLabel: add(filters.filterLabel, value.id),
+          filterLabelMeta:
+            value.name && value.color
+              ? {
+                  ...(filters.filterLabelMeta ?? {}),
+                  [value.id]: {
+                    name: value.name,
+                    color: value.color,
+                  },
+                }
+              : filters.filterLabelMeta,
         });
+      }
       case 'filterHasSuggestions':
         return setFilters({
           ...filters,
@@ -161,11 +172,20 @@ export const useTranslationFilters = ({
           ...filters,
           filterHasComments: undefined,
         });
-      case 'filterLabel':
+      case 'filterLabel': {
+        const nextMeta = filters.filterLabelMeta
+          ? { ...filters.filterLabelMeta }
+          : undefined;
+        if (nextMeta) {
+          delete nextMeta[value.id];
+        }
         return setFilters({
           ...filters,
-          filterLabel: remove(filters.filterLabel, value),
+          filterLabel: remove(filters.filterLabel, value.id),
+          filterLabelMeta:
+            nextMeta && Object.keys(nextMeta).length ? nextMeta : undefined,
         });
+      }
       case 'filterHasSuggestions':
         return setFilters({
           ...filters,

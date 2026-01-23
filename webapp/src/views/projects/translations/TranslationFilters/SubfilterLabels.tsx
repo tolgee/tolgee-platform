@@ -13,10 +13,7 @@ import { TranslationLabel } from 'tg.component/TranslationLabel';
 import { CompactListSubheader } from 'tg.component/ListComponents';
 import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 import { useLabelsService } from 'tg.views/projects/translations/context/services/useLabelsService';
-import {
-  useTranslationsActions,
-  useTranslationsSelector,
-} from 'tg.views/projects/translations/context/TranslationsContext';
+import { useTranslationsSelector } from 'tg.views/projects/translations/context/TranslationsContext';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 type LabelModel = components['schemas']['LabelModel'];
@@ -73,11 +70,16 @@ export const SubfilterLabels = ({
     });
   }
 
-  const handleToggleLabel = (id: string) => {
+  const handleToggleLabel = (label: LabelModel) => {
+    const id = label.id.toString();
     if (value.filterLabel?.includes(id)) {
-      actions.removeFilter('filterLabel', id);
+      actions.removeFilter('filterLabel', { id });
     } else {
-      actions.addFilter('filterLabel', id);
+      actions.addFilter('filterLabel', {
+        id,
+        name: label.name,
+        color: label.color,
+      });
     }
   };
 
@@ -95,7 +97,7 @@ export const SubfilterLabels = ({
       <FilterItem
         label={<TranslationLabel label={item} tooltip={item.description} />}
         selected={Boolean(value.filterLabel?.includes(item.id.toString()))}
-        onClick={() => handleToggleLabel(item.id.toString())}
+        onClick={() => handleToggleLabel(item)}
       />
     );
   }
@@ -210,12 +212,20 @@ export function getLabelFiltersLength(value: FiltersInternal) {
 
 export function getLabelFiltersName(value: FiltersInternal) {
   if (value.filterLabel?.length) {
-    const { fetchLabels } = useTranslationsActions();
-    const filterLabels = value.filterLabel?.map((id) => Number(id)) || [];
     const labelId = value.filterLabel[0];
-    const label = fetchLabels(filterLabels)?.find(
-      (l) => l.id.toString() === labelId
+    const meta = value.filterLabelMeta?.[labelId];
+    if (!meta) {
+      return undefined;
+    }
+    return (
+      <TranslationLabel
+        label={{
+          id: Number(labelId),
+          name: meta.name,
+          color: meta.color,
+        }}
+      />
     );
-    return label ? <TranslationLabel label={label} /> : null;
   }
+  return undefined;
 }
