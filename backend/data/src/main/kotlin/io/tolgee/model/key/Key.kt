@@ -167,8 +167,9 @@ class Key(
     if (this.translations.size != snapshot.translations.size) {
       return true
     }
-    this.translations.forEach { translation ->
-      if (translation.hasChanged(snapshot.translations.find { it.language == translation.language.tag }!!)) {
+    for (translation in this.translations) {
+      val snapshotTranslation = snapshot.translations.find { it.language == translation.language.tag } ?: return true
+      if (translation.hasChanged(snapshotTranslation)) {
         return true
       }
     }
@@ -199,12 +200,22 @@ class Key(
 
     val snapshotTranslations = snapshot.translations.associateBy { it.language }
     val targetTranslations = this.translations.associateBy { it.language.tag }
+    val sourceTranslations = source.translations.associateBy { it.language.tag }
 
     source.translations.forEach { sourceTranslation ->
       val languageTag = sourceTranslation.language.tag
       val targetTranslation = targetTranslations[languageTag] ?: return@forEach
       val snapshotTranslation = snapshotTranslations[languageTag] ?: return@forEach
       if (targetTranslation.isConflicting(sourceTranslation, snapshotTranslation)) {
+        return true
+      }
+    }
+
+    val languagesWithoutBase = sourceTranslations.keys.intersect(targetTranslations.keys) - snapshotTranslations.keys
+    for (languageTag in languagesWithoutBase) {
+      val sourceTranslation = sourceTranslations[languageTag] ?: continue
+      val targetTranslation = targetTranslations[languageTag] ?: continue
+      if (sourceTranslation.text != targetTranslation.text || sourceTranslation.state != targetTranslation.state) {
         return true
       }
     }

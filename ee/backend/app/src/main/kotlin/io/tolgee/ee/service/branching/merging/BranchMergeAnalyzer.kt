@@ -14,6 +14,11 @@ class BranchMergeAnalyzer(
   private val keyRepository: KeyRepository,
   private val branchSnapshotService: BranchSnapshotService,
 ) {
+  private data class KeySignature(
+    val namespace: String?,
+    val name: String,
+  )
+
   @Transactional
   fun compute(merge: BranchMerge): MutableList<BranchMergeChange> {
     val snapshots = branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id)
@@ -38,10 +43,23 @@ class BranchMergeAnalyzer(
     val sourceById = sourceKeys.associateBy { it.id }
     val targetById = targetKeys.associateBy { it.id }
     val snapshotByBranchKeyId = snapshots.associateBy { it.branchKeyId }
+    val sourceBySignature = sourceKeys.groupBy { KeySignature(it.namespace?.name, it.name) }
+    val snapshotsBySignature = snapshots.groupBy { KeySignature(it.namespace, it.name) }
+    val fallbackByBranchKeyId =
+      snapshotsBySignature
+        .mapNotNull { (signature, snapshotGroup) ->
+          if (snapshotGroup.size != 1) return@mapNotNull null
+          val sourceGroup = sourceBySignature[signature] ?: return@mapNotNull null
+          if (sourceGroup.size != 1) return@mapNotNull null
+          val snapshot = snapshotGroup.single()
+          val sourceKey = sourceGroup.single()
+          snapshot.branchKeyId to sourceKey
+        }.toMap()
+    val fallbackSourceKeyIds = fallbackByBranchKeyId.values.map { it.id }.toSet()
 
     // Keys created after branching
     sourceKeys.forEach { key ->
-      if (!snapshotByBranchKeyId.containsKey(key.id)) {
+      if (!snapshotByBranchKeyId.containsKey(key.id) && !fallbackSourceKeyIds.contains(key.id)) {
         changes.add(
           BranchMergeChange().apply {
             branchMerge = merge
@@ -54,7 +72,7 @@ class BranchMergeAnalyzer(
     }
 
     snapshots.forEach { snapshot ->
-      val sourceKey = sourceById[snapshot.branchKeyId]
+      val sourceKey = sourceById[snapshot.branchKeyId] ?: fallbackByBranchKeyId[snapshot.branchKeyId]
       val targetKey = targetById[snapshot.originalKeyId]
 
       when {
@@ -63,27 +81,33 @@ class BranchMergeAnalyzer(
         }
 
         sourceKey == null && targetKey != null -> {
-          // source deleted key
-          changes.add(
-            BranchMergeChange().apply {
-              branchMerge = merge
-              this.targetKey = targetKey
-              change = BranchKeyMergeChangeType.DELETE
-              resolution = BranchKeyMergeResolutionType.SOURCE
-            },
-          )
+          val targetChanged = targetKey.hasChanged(snapshot)
+          if (!targetChanged) {
+            // source deleted key
+            changes.add(
+              BranchMergeChange().apply {
+                branchMerge = merge
+                this.targetKey = targetKey
+                change = BranchKeyMergeChangeType.DELETE
+                resolution = BranchKeyMergeResolutionType.SOURCE
+              },
+            )
+          }
         }
 
         sourceKey != null && targetKey == null -> {
-          // target deleted key but source kept/modified -> treat as addition back
-          changes.add(
-            BranchMergeChange().apply {
-              branchMerge = merge
-              this.sourceKey = sourceKey
-              change = BranchKeyMergeChangeType.ADD
-              resolution = BranchKeyMergeResolutionType.SOURCE
-            },
-          )
+          val sourceChanged = sourceKey.hasChanged(snapshot)
+          if (sourceChanged) {
+            // target deleted key but source modified -> treat as addition back
+            changes.add(
+              BranchMergeChange().apply {
+                branchMerge = merge
+                this.sourceKey = sourceKey
+                change = BranchKeyMergeChangeType.ADD
+                resolution = BranchKeyMergeResolutionType.SOURCE
+              },
+            )
+          }
         }
 
         sourceKey != null && targetKey != null -> {
