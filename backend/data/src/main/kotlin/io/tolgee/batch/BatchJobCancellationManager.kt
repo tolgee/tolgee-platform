@@ -35,6 +35,7 @@ class BatchJobCancellationManager(
   private val batchJobStatusProvider: BatchJobStatusProvider,
   private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
+  private val batchProperties: io.tolgee.configuration.tolgee.BatchProperties,
 ) : Logging {
   @Transactional
   fun cancel(id: Long) {
@@ -134,7 +135,7 @@ class BatchJobCancellationManager(
   }
 
   private fun tryWaitForBatchJobCompletedStatus(jobId: Long) {
-    waitFor(pollTime = 200, timeout = 2000) {
+    waitFor(pollTime = 200, timeout = batchProperties.cancellationTimeoutMs) {
       executeInNewTransaction(transactionManager, readOnly = true) {
         batchJobService.getJobDto(jobId).status.completed
       }
