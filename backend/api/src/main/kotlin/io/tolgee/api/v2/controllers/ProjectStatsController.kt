@@ -51,7 +51,7 @@ class ProjectStatsController(
     @RequestParam(name = "branch", required = false) branchName: String? = null,
   ): ProjectStatsModel {
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branchName)
-    val branch = branchName?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
+    val branch = branchService.getActiveOrDefault(projectHolder.project.id, branchName)
     val projectStats = projectStatsService.getProjectStats(projectHolder.project.id, branch?.id)
     val baseLanguage = projectService.getOrAssignBaseLanguage(projectHolder.project.id)
     val languages = languageService.getProjectLanguages(projectHolder.project.id).associateBy { it.id }

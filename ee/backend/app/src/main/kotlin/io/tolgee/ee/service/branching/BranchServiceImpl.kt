@@ -309,4 +309,11 @@ class BranchServiceImpl(
   override fun enableBranchingOnProject(projectId: Long) {
     projectBranchingMigrationService.enableBranching(projectId)
   }
+
+  override fun getActiveOrDefault(
+    projectId: Long,
+    branchName: String?,
+  ): Branch? {
+    return branchName?.let { getActiveBranch(projectId, it) } ?: getDefaultBranch(projectId)
+  }
 }
