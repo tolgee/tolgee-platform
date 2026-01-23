@@ -156,7 +156,7 @@ class OldBatchJobCleaner(
       nullifyActivityRevisionBatchJobReferences(jobIds)
       return
     }
-    nullifyActivityRevisionAllReferences(jobIds, executionIds)
+    nullifyActivityRevisionAllReferences(jobIds)
   }
 
   private fun nullifyActivityRevisionBatchJobReferences(jobIds: List<Long>) {
@@ -171,20 +171,18 @@ class OldBatchJobCleaner(
       .executeUpdate()
   }
 
-  private fun nullifyActivityRevisionAllReferences(
-    jobIds: List<Long>,
-    executionIds: List<Long>,
-  ) {
+  private fun nullifyActivityRevisionAllReferences(jobIds: List<Long>) {
     entityManager
       .createNativeQuery(
         """
-        UPDATE activity_revision
+        UPDATE activity_revision ar
         SET batch_job_id = NULL, batch_job_chunk_execution_id = NULL
-        WHERE batch_job_id IN :jobIds
-        OR batch_job_chunk_execution_id IN :executionIds
+        WHERE ar.batch_job_id IN :jobIds
+        OR ar.batch_job_chunk_execution_id IN (
+          SELECT id FROM tolgee_batch_job_chunk_execution WHERE batch_job_id IN :jobIds
+        )
         """,
       ).setParameter("jobIds", jobIds)
-      .setParameter("executionIds", executionIds)
       .executeUpdate()
   }
 
