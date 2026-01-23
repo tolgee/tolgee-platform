@@ -2,13 +2,14 @@ package io.tolgee.ee.service.branching
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
+import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.LabelServiceImpl
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Language
+import io.tolgee.model.Screenshot
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
@@ -16,10 +17,13 @@ import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
+import io.tolgee.repository.KeyScreenshotReferenceRepository
+import io.tolgee.repository.ScreenshotRepository
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -47,6 +51,12 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   @Autowired
   lateinit var taskRepository: TaskRepository
+
+  @Autowired
+  lateinit var screenshotRepository: ScreenshotRepository
+
+  @Autowired
+  lateinit var keyScreenshotReferenceRepository: KeyScreenshotReferenceRepository
 
   private lateinit var testData: BranchMergeTestData
 
@@ -136,6 +146,23 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `dry-run detects language replacement even when translation count stays equal`() {
+    prepareFeatureKeyLanguageReplacement("de", "German", "Neue Ubersetzung")
+
+    val merge =
+      branchService.dryRunMerge(
+        testData.featureBranch.refresh()!!,
+        testData.mainBranch.refresh()!!,
+      )
+
+    merge.changes
+      .filter { it.change == BranchKeyMergeChangeType.UPDATE }
+      .mapNotNull { it.sourceKey?.name }
+      .assert
+      .contains(BranchMergeTestData.UPDATE_KEY_NAME)
+  }
+
+  @Test
   fun `dry-run treats deleted and re-added key as update`() {
     reAddFeatureDeletedKey()
 
@@ -163,15 +190,20 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     val merge = prepareMergeScenario()
     applyMerge(merge)
 
-    val additionInMain = testData.mainBranch.findKey(additionKeyName)
-    additionInMain.assert.isNotNull()
-    additionInMain!!.enTranslation().assert.isEqualTo(additionValue)
+    testData.mainBranch.findKey(additionKeyName).let {
+      it.assert.isNotNull()
+      it!!.enTranslation().assert.isEqualTo(additionValue)
+    }
 
     testData.mainKeyToUpdate
       .enTranslation()
       .assert
       .isEqualTo(updatedValue)
-    keyService.find(testData.mainKeyToDelete.id).assert.isNull()
+
+    testData.mainBranch
+      .findKey(testData.mainKeyToDelete.name)
+      .assert
+      .isNull()
   }
 
   @Test
@@ -273,11 +305,31 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     dryRunAndMergeFeatureBranch()
 
     val mergedTranslation =
-      getTranslation(testData.mainKeyToUpdate.refresh(), testData.englishLanguage)!!
+      getTranslation(testData.mainKeyToUpdate.refresh(), testData.englishLanguage)
     mergedTranslation.labels
-      .map { it.name }
+      .let { labels ->
+        labels.assert.hasSize(2)
+        labels.assert.containsExactlyInAnyOrder(testData.label3, testData.label4)
+        labels
+          .map { it.name }
+          .assert
+          .containsExactlyInAnyOrder("dev", "test")
+      }
+  }
+
+  @Test
+  fun `apply merge - screenshots merge correctly`() {
+    val mainScreenshot = addScreenshotReference(testData.mainKeyToUpdate)
+    val featureScreenshot = addScreenshotReference(testData.featureKeyToUpdate)
+
+    dryRunAndMergeFeatureBranch()
+
+    val mergedReferences = getScreenshotReferences(testData.mainKeyToUpdate.id)
+    mergedReferences.assert.hasSize(2)
+    mergedReferences
+      .map { it.screenshot }
       .assert
-      .containsExactlyInAnyOrder("dev", "test")
+      .containsExactlyInAnyOrder(mainScreenshot, featureScreenshot)
   }
 
   private fun setLabels(
@@ -293,12 +345,6 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     createFeatureOnlyKey()
     deleteFeatureKey()
     updateFeatureKey()
-    waitForNotThrowing(timeout = 5000, pollTime = 250) {
-      testData.featureBranch
-        .refresh()!!
-        .revision.assert
-        .isEqualTo(6)
-    }
     return dryRunFeatureBranchMerge()
   }
 
@@ -332,6 +378,44 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   private fun updateFeatureKey() {
     updateKeyTranslation(testData.featureKeyToUpdate, updatedValue)
+  }
+
+  private fun prepareFeatureKeyLanguageReplacement(
+    tag: String,
+    name: String,
+    value: String,
+  ) {
+    val language = addProjectLanguage(tag, name)
+    replaceTranslationLanguage(testData.featureKeyToUpdate, testData.englishLanguage, language, value)
+  }
+
+  private fun addProjectLanguage(
+    tag: String,
+    name: String,
+  ): Language {
+    return languageService.createLanguage(
+      LanguageRequest(
+        name = name,
+        originalName = name,
+        tag = tag,
+      ),
+      testData.project,
+    )
+  }
+
+  private fun replaceTranslationLanguage(
+    key: Key,
+    fromLanguage: Language,
+    toLanguage: Language,
+    value: String,
+  ) {
+    val managedKey = keyService.get(key.id)
+    translationService
+      .find(managedKey, fromLanguage)
+      .orElse(null)
+      ?.let { translationService.deleteByIdIn(listOf(it.id)) }
+    val translation = translationService.getOrCreate(managedKey, toLanguage)
+    translationService.setTranslationText(translation, value)
   }
 
   private fun reAddFeatureDeletedKey() {
@@ -373,6 +457,22 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     key: Key,
     language: Language,
   ): Translation = translationService.find(key, language).orElse(null)!!
+
+  private fun getScreenshotReferences(keyId: Long): List<KeyScreenshotReference> =
+    keyScreenshotReferenceRepository.getAllByKeyIdIn(listOf(keyId))
+
+  private fun addScreenshotReference(key: Key): Screenshot {
+    val screenshot = screenshotRepository.save(Screenshot())
+    val reference =
+      KeyScreenshotReference().apply {
+        this.key = keyService.get(key.id)
+        this.screenshot = screenshot
+        positions = mutableListOf()
+        originalText = "Screenshot text"
+      }
+    keyScreenshotReferenceRepository.save(reference)
+    return screenshot
+  }
 
   private fun Branch.findKey(name: String): Key? {
     return keyRepository.findAllByBranchId(this.id).firstOrNull { it.name == name }
