@@ -1,3 +1,15 @@
+# [3.149.0](https://github.com/tolgee/tolgee-platform/compare/v3.148.0...v3.149.0) (2026-01-23)
+
+
+### Bug Fixes
+
+* hotfix otel version docker argument in github workflows ([e07fb39](https://github.com/tolgee/tolgee-platform/commit/e07fb393e4865cab817473a2335ece44385793cd))
+
+
+### Features
+
+* Add OpenTelemetry instrumentation, local tracing infrastructure and tutorial ([#3406](https://github.com/tolgee/tolgee-platform/issues/3406)) ([14cfbe6](https://github.com/tolgee/tolgee-platform/commit/14cfbe6054cde92851f9a6032373a851fc0aa41f))
+
 # [3.148.0](https://github.com/tolgee/tolgee-platform/compare/v3.147.5...v3.148.0) (2026-01-23)
 
 
