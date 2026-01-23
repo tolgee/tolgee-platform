@@ -61,8 +61,9 @@ jobs:
       - name: Create docker image
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: |
+          OTEL_VERSION=$(grep '^opentelemetryJavaagentVersion=' ../../gradle.properties | cut -d'=' -f2)
           docker buildx create --use
-          docker buildx build . -t tolgee/tolgee:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --push
+          docker buildx build . -t tolgee/tolgee:${{ steps.version.outputs.VERSION }} --build-arg OTEL_AGENT_VERSION=$OTEL_VERSION --platform linux/arm64,linux/amd64 --push
         working-directory: build/docker
 
       - name: Pack with webapp
