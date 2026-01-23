@@ -136,6 +136,29 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `dry-run treats deleted and re-added key as update`() {
+    reAddFeatureDeletedKey()
+
+    val merge =
+      branchService.dryRunMerge(
+        testData.featureBranch.refresh()!!,
+        testData.mainBranch.refresh()!!,
+      )
+
+    merge.changes
+      .filter { it.change == BranchKeyMergeChangeType.ADD }
+      .mapNotNull { it.sourceKey?.name }
+      .assert
+      .doesNotContain(BranchMergeTestData.DELETE_KEY_NAME)
+
+    merge.changes
+      .filter { it.change == BranchKeyMergeChangeType.UPDATE }
+      .mapNotNull { it.sourceKey?.name }
+      .assert
+      .contains(BranchMergeTestData.DELETE_KEY_NAME)
+  }
+
+  @Test
   fun `apply merge - propagates additions, updates and deletions`() {
     val merge = prepareMergeScenario()
     applyMerge(merge)
@@ -309,6 +332,17 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   private fun updateFeatureKey() {
     updateKeyTranslation(testData.featureKeyToUpdate, updatedValue)
+  }
+
+  private fun reAddFeatureDeletedKey() {
+    keyService.delete(testData.featureKeyToDelete.id)
+    val dto =
+      CreateKeyDto(
+        name = BranchMergeTestData.DELETE_KEY_NAME,
+        translations = mapOf("en" to "Re-added feature value"),
+        branch = testData.featureBranch.name,
+      )
+    keyService.create(testData.project, dto)
   }
 
   private fun removeTagFromKey(

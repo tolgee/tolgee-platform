@@ -14,6 +14,8 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
 
 /**
  * Represents a change that occurred during a branch merge. This entity is used to record the nature
@@ -40,10 +42,12 @@ class BranchMergeChange :
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "source_key_id", nullable = true)
+  @OnDelete(action = OnDeleteAction.SET_NULL)
   var sourceKey: Key? = null
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "target_key_id", nullable = true)
+  @OnDelete(action = OnDeleteAction.SET_NULL)
   var targetKey: Key? = null
 
   @Column(nullable = false)
