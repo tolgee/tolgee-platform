@@ -1,3 +1,10 @@
+# [3.148.0](https://github.com/tolgee/tolgee-platform/compare/v3.147.5...v3.148.0) (2026-01-23)
+
+
+### Features
+
+* add real-time action feedback for batch operations ([#3405](https://github.com/tolgee/tolgee-platform/issues/3405)) ([0d99489](https://github.com/tolgee/tolgee-platform/commit/0d99489ddc2a046c6211ffae260684c0b81760a4))
+
 ## [3.147.5](https://github.com/tolgee/tolgee-platform/compare/v3.147.4...v3.147.5) (2026-01-23)
 
 
