@@ -97,7 +97,7 @@ class BranchCopyServiceSql(
       JOIN key tk ON tk.project_id = sk.project_id
                  AND tk.branch_id = :targetBranchId
                  AND tk.name = sk.name
-                 AND tk.namespace_id IS NOT DISTINCT FROM sk.namespace_id
+                 AND coalesce(tk.namespace_id,0) = coalesce(sk.namespace_id,0)
       WHERE sk.project_id = :projectId
         AND ${getSourceBranchFilter("sk", sourceBranch.isDefault)}
     """
@@ -252,7 +252,7 @@ class BranchCopyServiceSql(
         FROM source_keys sk
         LEFT JOIN existing_target et 
           ON et.name = sk.name 
-          AND et.namespace_id IS NOT DISTINCT FROM sk.namespace_id
+          AND coalesce(et.namespace_id,0) = coalesce(sk.namespace_id,0)
         WHERE et.id IS NULL
       )
       INSERT INTO key (id, name, project_id, namespace_id, branch_id, is_plural, plural_arg_name, created_at, updated_at)
