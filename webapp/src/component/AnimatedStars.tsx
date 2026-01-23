@@ -1,4 +1,4 @@
-import { styled, keyframes } from '@mui/material';
+import { keyframes, styled } from '@mui/material';
 import { Stars } from './CustomIcons';
 
 const twinkle = keyframes`
@@ -12,6 +12,7 @@ const pulse = keyframes`
 `;
 
 export const AnimatedStars = styled(Stars)`
-  animation: ${twinkle} 1.5s ease-in-out infinite, ${pulse} 2s ease-in-out infinite;
+  animation: ${twinkle} 1.5s ease-in-out infinite,
+    ${pulse} 2s ease-in-out infinite;
   color: ${({ theme }) => theme.palette.primary.main};
 `;
