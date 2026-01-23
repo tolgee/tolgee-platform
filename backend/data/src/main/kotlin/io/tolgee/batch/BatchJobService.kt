@@ -150,12 +150,12 @@ class BatchJobService(
     val sequenceIdProvider = SequenceIdProvider(SEQUENCE_NAME, ALLOCATION_SIZE)
     jdbcTemplate.batchUpdate(
       """
-        insert into tolgee_batch_job_chunk_execution 
-        (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets, execute_after) 
+        insert into tolgee_batch_job_chunk_execution
+        (id, batch_job_id, chunk_number, status, created_at, updated_at, success_targets, execute_after)
         values (?, ?, ?, ?, ?, ?, ?, ?)
         """,
       executions,
-      100,
+      5000,
     ) { ps, execution ->
       val id = sequenceIdProvider.next(ps.connection)
       execution.id = id
@@ -223,6 +223,16 @@ class BatchJobService(
 
   fun getJobDto(id: Long): BatchJobDto {
     return this.findJobDto(id) ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
+  }
+
+  /**
+   * Gets job DTO directly from database, bypassing the cache.
+   * Use this when you need to read the most recent committed state,
+   * especially in race-condition-sensitive code paths like finalizeIfCompleted.
+   */
+  fun getJobDtoNoCache(id: Long): BatchJobDto {
+    val entity = findJobEntity(id) ?: throw NotFoundException(Message.BATCH_JOB_NOT_FOUND)
+    return BatchJobDto.fromEntity(entity)
   }
 
   fun getViews(

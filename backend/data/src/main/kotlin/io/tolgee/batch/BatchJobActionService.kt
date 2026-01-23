@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.sentry.Sentry
 import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
@@ -27,6 +28,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.UnexpectedRollbackException
+import java.util.concurrent.CancellationException
 import kotlin.coroutines.coroutineContext
 
 @Service
@@ -47,7 +49,10 @@ class BatchJobActionService(
   private val activityHolder: ActivityHolder,
   private val metrics: Metrics,
 ) : Logging {
-  suspend fun handleItem(executionItem: ExecutionQueueItem) {
+  suspend fun handleItem(
+    executionItem: ExecutionQueueItem,
+    batchJobDto: BatchJobDto,
+  ) {
     val coroutineContext = coroutineContext
     var retryExecution: BatchJobChunkExecution? = null
     try {
@@ -61,8 +66,7 @@ class BatchJobActionService(
 
             publishRemoveConsuming(executionItem)
 
-            progressManager.handleJobRunning(lockedExecution.batchJob.id)
-            val batchJobDto = batchJobService.getJobDto(lockedExecution.batchJob.id)
+            progressManager.handleJobRunning(batchJobDto)
 
             logger.debug("Job ${batchJobDto.id}: 🟡 Processing chunk ${lockedExecution.id}")
             val savepoint = savePointManager.setSavepoint()
@@ -78,7 +82,7 @@ class BatchJobActionService(
               rollbackActivity()
             }
 
-            progressManager.handleProgress(lockedExecution)
+            progressManager.handleProgress(lockedExecution, batchJobDto)
             entityManager.persist(entityManager.merge(lockedExecution))
 
             if (lockedExecution.retry) {
@@ -93,12 +97,20 @@ class BatchJobActionService(
         }
       execution?.let {
         logger.debug("Job: ${it.batchJob.id} - Handling execution committed ${it.id} (standard flow)")
-        progressManager.handleChunkCompletedCommitted(it)
+        progressManager.handleChunkCompletedCommitted(it, batchJobDto = batchJobDto)
       }
       addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter)
     } catch (e: Throwable) {
-      progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
       when (e) {
+        is CancellationException, is kotlinx.coroutines.CancellationException -> {
+          // Coroutine was cancelled (e.g., during job cancellation)
+          // Update the execution status to CANCELLED in a new transaction
+          logger.debug(
+            "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId} was cancelled",
+          )
+          handleCancelledExecution(executionItem)
+        }
+
         is UnexpectedRollbackException -> {
           logger.debug(
             "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId}" +
@@ -111,6 +123,28 @@ class BatchJobActionService(
           Sentry.captureException(e)
         }
       }
+    }
+  }
+
+  private fun handleCancelledExecution(executionItem: ExecutionQueueItem) {
+    try {
+      val execution =
+        executeInNewTransaction(transactionManager) {
+          val exec = entityManager.find(BatchJobChunkExecution::class.java, executionItem.chunkExecutionId)
+          if (exec != null && !exec.status.completed) {
+            exec.status = BatchJobChunkExecutionStatus.CANCELLED
+            entityManager.persist(exec)
+            progressManager.handleProgress(exec)
+            exec
+          } else {
+            null
+          }
+        }
+      execution?.let {
+        progressManager.handleChunkCompletedCommitted(it)
+      }
+    } catch (e: Exception) {
+      logger.warn("Failed to handle cancelled execution ${executionItem.chunkExecutionId}", e)
     }
   }
 
@@ -185,7 +219,7 @@ class BatchJobActionService(
         execution
       }
     executeInNewTransaction(transactionManager) {
-      progressManager.handleProgress(execution, failOnly = true)
+      progressManager.handleProgress(execution)
     }
     progressManager.handleChunkCompletedCommitted(execution)
   }

@@ -8,7 +8,6 @@ import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
-import io.tolgee.util.Logging
 import io.tolgee.util.StuckBatchJobTestUtil
 import kotlinx.coroutines.ensureActive
 import org.junit.jupiter.api.AfterEach
@@ -28,8 +27,7 @@ import kotlin.coroutines.CoroutineContext
 class BatchJobManagementControllerCancellationTest :
   AbstractBatchJobManagementControllerTest(
     "/v2/projects/",
-  ),
-  Logging {
+  ) {
   @Autowired
   lateinit var stuckBatchJobTestUtil: StuckBatchJobTestUtil
 
@@ -91,19 +89,19 @@ class BatchJobManagementControllerCancellationTest :
 
       waitForNotThrowing(pollTime = 100) {
         executeInNewTransaction {
-          util
-            .getSingleJob()
-            .status.assert
-            .isEqualTo(BatchJobStatus.CANCELLED)
+          val currentJob = util.getSingleJob()
+          currentJob.status.assert.isEqualTo(BatchJobStatus.CANCELLED)
+
           verify(batchJobActivityFinalizer, times(1)).finalizeActivityWhenJobCompleted(any())
 
           // assert activity stored
-          entityManager
-            .createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
-            .setParameter("id", job.id)
-            .resultList
-            .assert
-            .hasSize(1)
+          val activityRevisions =
+            entityManager
+              .createQuery("""from ActivityRevision ar where ar.batchJob.id = :id""")
+              .setParameter("id", job.id)
+              .resultList
+
+          activityRevisions.assert.hasSize(1)
         }
       }
     }

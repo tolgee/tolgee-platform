@@ -54,6 +54,18 @@ Don't use the bare test task (it doesn't work) – always run a specific test su
 ./gradlew :data:test --tests "io.tolgee.unit.formats.android.out.AndroidSdkFileExporterTest"
 ```
 
+### Running Tests with Visible Output
+To see test output in real-time (like in an IDE), use `--console=plain` with grep to filter relevant logs:
+```bash
+# Run a specific test with visible INFO logs
+./gradlew :server-app:test --tests "io.tolgee.batch.SomeTest" --console=plain --info 2>&1 | grep -E "(INFO.*SomeTest|ERROR|WARN)" | head -100
+
+# See all test output without filtering
+./gradlew :server-app:test --tests "io.tolgee.batch.SomeTest" --console=plain --info 2>&1 | tail -200
+```
+
+Use `logger.info()` in tests for diagnostic output that will be visible with these commands.
+
 **TestData Pattern**: Use TestData classes for test setup:
 ```kotlin
 class YourControllerTest {

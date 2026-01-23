@@ -108,10 +108,10 @@ class BatchJobActivityFinalizer(
     entityManager
       .createNativeQuery(
         """
-        update activity_revision 
+        update activity_revision
         set
-         batch_job_chunk_execution_id = null, 
-         batch_job_id = :jobId, 
+         batch_job_chunk_execution_id = null,
+         batch_job_id = :jobId,
          author_id = :authorId
         where id = :activityRevisionIdToMergeInto
         """,

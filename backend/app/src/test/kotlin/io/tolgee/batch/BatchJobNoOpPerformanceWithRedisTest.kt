@@ -3,6 +3,7 @@ package io.tolgee.batch
 import io.tolgee.AbstractSpringTest
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.NoOpRequest
+import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.fixtures.RedisRunner
 import io.tolgee.model.batch.BatchJob
@@ -16,6 +17,7 @@ import io.tolgee.util.logger
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -30,11 +32,15 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.transaction.PlatformTransactionManager
 
 /**
- * Performance test for batch job orchestration overhead WITH REDIS.
+ * Diagnostic performance test for batch job orchestration overhead WITH REDIS.
  *
- * Run with:
+ * This test is disabled by default as it's not intended to run in the CI pipeline.
+ * It's useful for diagnosing performance issues and optimizing batch job processing.
+ *
+ * To run manually:
  * ./gradlew :server-app:test --tests "io.tolgee.batch.BatchJobNoOpPerformanceWithRedisTest"
  */
+@Disabled("Diagnostic test - not intended for CI pipeline, useful for performance optimization")
 @SpringBootTest(
   properties = [
     "tolgee.cache.use-redis=true",
@@ -94,6 +100,9 @@ class BatchJobNoOpPerformanceWithRedisTest :
   @Autowired
   lateinit var operationTimer: BatchJobOperationTimer
 
+  @Autowired
+  lateinit var batchJobStateProvider: BatchJobStateProvider
+
   @BeforeEach
   fun setup() {
     batchJobChunkExecutionQueue.clear()
@@ -111,8 +120,8 @@ class BatchJobNoOpPerformanceWithRedisTest :
   }
 
   @Test
-  fun `NO_OP job with 1000 chunks - measure throughput WITH REDIS`() {
-    val chunkCount = 1000
+  fun `NO_OP job with lot of chunks - measure throughput WITH REDIS`() {
+    val chunkCount = 5000
 
     logger.info("Starting NO_OP job with $chunkCount chunks (WITH REDIS)...")
 
@@ -165,6 +174,7 @@ class BatchJobNoOpPerformanceWithRedisTest :
   ) {
     val startTime = System.currentTimeMillis()
     var lastLogTime = startTime
+    var allCompletedCount = 0
 
     while (true) {
       val currentTime = System.currentTimeMillis()
@@ -193,6 +203,21 @@ class BatchJobNoOpPerformanceWithRedisTest :
 
         logger.info("Progress: completed=$completed, running=$running, pending=$pending, queueSize=$queueSize")
         lastLogTime = currentTime
+
+        // Fail fast if all chunks completed but job didn't transition
+        if (completed == jobDto.totalChunks && running == 0 && pending == 0) {
+          allCompletedCount++
+          if (allCompletedCount >= 2) {
+            throw AssertionError(
+              "All ${jobDto.totalChunks} chunks completed but job status is still ${jobDto.status}. " +
+                "Counter values - completedChunks: ${batchJobStateProvider.getCompletedChunksCount(job.id)}, " +
+                "committedCount: ${batchJobStateProvider.getCommittedCount(job.id)}",
+            )
+          }
+        } else {
+          // Reset counter if condition is no longer met (non-consecutive detection)
+          allCompletedCount = 0
+        }
       }
 
       Thread.sleep(100)

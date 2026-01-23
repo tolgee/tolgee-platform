@@ -16,8 +16,6 @@ import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import io.tolgee.util.trace
 import jakarta.persistence.EntityManager
-import org.hibernate.LockMode
-import org.hibernate.LockOptions
 import org.hibernate.Session
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Lazy
@@ -26,7 +24,9 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicInteger
 
 @Component
 class BatchJobChunkExecutionQueue(
@@ -43,18 +43,42 @@ class BatchJobChunkExecutionQueue(
      * It's static
      */
     private val queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
+
+    /**
+     * O(1) counter for job characters in queue - avoids O(n) iteration on every chunk
+     */
+    private val jobCharacterCounts = ConcurrentHashMap<JobCharacter, AtomicInteger>()
+  }
+
+  private fun incrementCharacterCount(character: JobCharacter) {
+    jobCharacterCounts.computeIfAbsent(character) { AtomicInteger(0) }.incrementAndGet()
+  }
+
+  private fun decrementCharacterCount(character: JobCharacter) {
+    jobCharacterCounts[character]?.decrementAndGet()
   }
 
   @EventListener
   fun onJobItemEvent(event: JobQueueItemsEvent) {
     when (event.type) {
-      QueueEventType.ADD -> this.addItemsToLocalQueue(event.items)
-      QueueEventType.REMOVE -> queue.removeAll(event.items.toSet())
+      QueueEventType.ADD -> {
+        this.addItemsToLocalQueue(event.items)
+      }
+
+      QueueEventType.REMOVE -> {
+        // Remove and decrement atomically per item to prevent double-decrement
+        // if poll() removes an item between removeAll and forEach
+        event.items.forEach { item ->
+          if (queue.remove(item)) {
+            decrementCharacterCount(item.jobCharacter)
+          }
+        }
+      }
     }
   }
 
   @Scheduled(fixedDelay = 60000)
-  @Transactional
+  @Transactional(readOnly = true)
   fun populateQueue() {
     logger.debug("Running scheduled populate queue")
     val data =
@@ -77,16 +101,6 @@ class BatchJobChunkExecutionQueue(
           BatchJobChunkExecutionDto::class.java,
         ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
         .setParameter("runningStatus", BatchJobStatus.RUNNING)
-        // setLockMode here is per alias of the tables from the queryString.
-        // will generate: "select ... for no key update of bjce skip locked"
-        .setLockMode("bjce", LockMode.PESSIMISTIC_WRITE) // block selected rows from the chunk table
-        .setLockMode("bk", LockMode.NONE) // don't block job table, so that other pods could select smth too
-        .setHint(
-          "jakarta.persistence.lock.timeout",
-          LockOptions.SKIP_LOCKED,
-        )
-        // Limit to get pending batches faster
-        .setMaxResults(batchProperties.chunkQueuePopulationSize)
         .resultList
 
     if (data.size > 0) {
@@ -100,7 +114,9 @@ class BatchJobChunkExecutionQueue(
     var count = 0
     data.forEach {
       if (!ids.contains(it.id)) {
-        queue.add(it.toItem())
+        val item = it.toItem()
+        queue.add(item)
+        incrementCharacterCount(item.jobCharacter)
         count++
       }
     }
@@ -109,24 +125,27 @@ class BatchJobChunkExecutionQueue(
   }
 
   fun addItemsToLocalQueue(data: List<ExecutionQueueItem>) {
+    // Use Set for O(1) lookup instead of O(n) queue.contains()
+    val existingIds = queue.mapTo(HashSet()) { it.chunkExecutionId }
     val toAdd = mutableListOf<ExecutionQueueItem>()
-    val filteredOut = mutableListOf<ExecutionQueueItem>()
+    var filteredOutCount = 0
 
     data.forEach {
-      if (!queue.contains(it)) {
+      if (!existingIds.contains(it.chunkExecutionId)) {
         toAdd.add(it)
+        existingIds.add(it.chunkExecutionId) // Prevent duplicates within the batch
       } else {
-        filteredOut.add(it)
+        filteredOutCount++
       }
     }
-    metrics.batchJobManagementItemAlreadyQueuedCounter.increment(filteredOut.size.toDouble())
+    metrics.batchJobManagementItemAlreadyQueuedCounter.increment(filteredOutCount.toDouble())
     logger.trace {
       val itemsString = toAdd.joinToString(", ") { it.chunkExecutionId.toString() }
-      val filteredOutString = filteredOut.joinToString(", ") { it.chunkExecutionId.toString() }
-      "Adding chunks [$itemsString] to queue.\n Not Added Items (already in the queue): [$filteredOutString]"
+      "Adding ${toAdd.size} chunks to queue. Filtered out: $filteredOutCount"
     }
 
     queue.addAll(toAdd)
+    toAdd.forEach { incrementCharacterCount(it.jobCharacter) }
   }
 
   fun addToQueue(
@@ -144,11 +163,16 @@ class BatchJobChunkExecutionQueue(
 
   fun addItemsToQueue(items: List<ExecutionQueueItem>) {
     if (usingRedisProvider.areWeUsingRedis) {
-      val event = JobQueueItemsEvent(items, QueueEventType.ADD)
-      redisTemplate.convertAndSend(
-        RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC,
-        jacksonObjectMapper().writeValueAsString(event),
-      )
+      // Batch Redis messages to avoid serializing huge JSON payloads
+      // For 100k items, sending one message would be ~10-15MB of JSON
+      val batchSize = 1000
+      items.chunked(batchSize).forEach { batch ->
+        val event = JobQueueItemsEvent(batch, QueueEventType.ADD)
+        redisTemplate.convertAndSend(
+          RedisPubSubReceiverConfiguration.JOB_QUEUE_TOPIC,
+          jacksonObjectMapper().writeValueAsString(event),
+        )
+      }
       return
     }
 
@@ -157,7 +181,14 @@ class BatchJobChunkExecutionQueue(
 
   fun removeJobExecutions(jobId: Long) {
     logger.debug("Removing job $jobId from queue, queue size: ${queue.size}")
-    queue.removeIf { it.jobId == jobId }
+    val iterator = queue.iterator()
+    while (iterator.hasNext()) {
+      val item = iterator.next()
+      if (item.jobId == jobId) {
+        iterator.remove()
+        decrementCharacterCount(item.jobCharacter)
+      }
+    }
     logger.debug("Removed job $jobId from queue, queue size: ${queue.size}")
   }
 
@@ -180,12 +211,15 @@ class BatchJobChunkExecutionQueue(
   ) = queue.joinToString(separator, transform = transform)
 
   fun poll(): ExecutionQueueItem? {
-    return queue.poll()
+    val item = queue.poll()
+    item?.let { decrementCharacterCount(it.jobCharacter) }
+    return item
   }
 
   fun clear() {
     logger.debug("Clearing queue")
     queue.clear()
+    jobCharacterCounts.clear()
   }
 
   fun find(function: (ExecutionQueueItem) -> Boolean): ExecutionQueueItem? {
@@ -199,7 +233,7 @@ class BatchJobChunkExecutionQueue(
   fun isEmpty(): Boolean = queue.isEmpty()
 
   fun getJobCharacterCounts(): Map<JobCharacter, Int> {
-    return queue.groupBy { it.jobCharacter }.map { it.key to it.value.size }.toMap()
+    return jobCharacterCounts.mapValues { it.value.get() }
   }
 
   override fun afterPropertiesSet() {
