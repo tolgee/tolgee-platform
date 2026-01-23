@@ -21,8 +21,12 @@ task docker {
     doLast {
         exec {
             workingDir dockerPath
-            commandLine "docker", "build", ".", "-t", "tolgee/tolgee", "--cache-from", "type=registry,ref=tolgee/tolgee:latest"
+            commandLine "docker", "build", ".", "-t", "tolgee/tolgee", "--cache-from", "type=registry,ref=tolgee/tolgee:latest-pg18"
         }
+		exec {
+			workingDir dockerPath
+			commandLine "docker", "build", ".", "-f", "legacy.Dockerfile", "-t", "tolgee/tolgee", "--cache-from", "type=registry,ref=tolgee/tolgee:latest"
+		}
     }
     dependsOn("dockerPrepare")
 }
@@ -32,13 +36,19 @@ void createDockerBuildxTask(String taskName, boolean isPush) {
         doLast {
             if (project.hasProperty('dockerImageTag')) {
                 def commandParams = ["docker", "buildx", "build", ".", "-t", project.property('dockerImageTag'), "--platform", "linux/arm64,linux/amd64"]
-                if (isPush) {
+				def commandParamsLegacy = ["docker", "buildx", "build", ".", "-f", "legacy.Dockerfile", "-t", project.property('dockerImageTag') + "-pg18", "--platform", "linux/arm64,linux/amd64"]
+				if (isPush) {
                     commandParams += ["--push"]
+					commandParamsLegacy += ["--push"]
                 }
-                exec {
-                    workingDir dockerPath
-                    commandLine commandParams
-                }
+				exec {
+					workingDir dockerPath
+					commandLine commandParams
+				}
+				exec {
+					workingDir dockerPath
+					commandLine commandParamsLegacy
+				}
             } else {
                 throw new GradleException('A "dockerImageTag" project property must be defined! e.g. ./gradlew dockerBuildx -PdockerImageTag=myImageTag');
             }
