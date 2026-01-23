@@ -11,6 +11,17 @@ export const isFilterEmpty = (filter: FiltersType) => {
 
 export type TranslationStateType = StateType | 'OUTDATED' | 'AUTO_TRANSLATED';
 
+export type LabelFilterMeta = {
+  name: string;
+  color: string;
+};
+
+export type LabelFilterInput = {
+  id: string;
+  name?: string;
+  color?: string;
+};
+
 export type FiltersInternal = {
   filterTag?: string[];
   filterNoTag?: string[];
@@ -22,6 +33,7 @@ export type FiltersInternal = {
   filterHasUnresolvedComments?: boolean;
   filterHasComments?: boolean;
   filterLabel?: string[];
+  filterLabelMeta?: Record<string, LabelFilterMeta>;
   filterHasSuggestions?: boolean;
   filterHasNoSuggestions?: boolean;
 
@@ -46,7 +58,7 @@ export type AddParams =
   | ['filterHasNoScreenshot']
   | ['filterHasUnresolvedComments']
   | ['filterHasComments']
-  | ['filterLabel', string]
+  | ['filterLabel', LabelFilterInput]
   | ['filterHasSuggestions']
   | ['filterHasNoSuggestions'];
 
