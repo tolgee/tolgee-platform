@@ -194,7 +194,7 @@ class BranchServiceImpl(
     deleteBranch: Boolean?,
   ) {
     val merge =
-      branchMergeService.findActiveMerge(projectId, mergeId)
+      branchMergeService.findActiveMergeFull(projectId, mergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     if (!merge.isReadyToMerge) {
       if (!merge.isRevisionValid) {
@@ -232,7 +232,7 @@ class BranchServiceImpl(
     mergeId: Long,
   ): BranchMergeView {
     val merge =
-      branchMergeService.findActiveMerge(projectId, mergeId)
+      branchMergeService.findActiveMergeFull(projectId, mergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     branchMergeService.refresh(merge)
     return branchMergeService.getMergeView(projectId, mergeId)
