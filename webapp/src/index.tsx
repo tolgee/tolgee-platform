@@ -45,7 +45,7 @@ const tolgee = Tolgee()
   .init({
     defaultLanguage: 'en',
     fallbackLanguage: 'en',
-    apiUrl: import.meta.env.VITE_APP_TOLGEE_API_URL,
+    apiUrl: import.meta.env.VITE_APP_TOLGEE_API_URL || 'https://app.tolgee.io',
     apiKey: import.meta.env.VITE_APP_TOLGEE_API_KEY,
     tagNewKeys: [`draft: ${getFeatureName(branchName)}`],
     staticData: {

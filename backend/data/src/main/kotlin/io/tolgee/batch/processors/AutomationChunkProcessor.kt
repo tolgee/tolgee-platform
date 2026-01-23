@@ -17,7 +17,6 @@ class AutomationChunkProcessor(
     job: BatchJobDto,
     chunk: List<AutomationTargetItem>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
     chunk.forEach {
       automationRunner.run(it.actionId, it.activityRevisionId)

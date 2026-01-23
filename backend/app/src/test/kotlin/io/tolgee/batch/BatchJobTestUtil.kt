@@ -63,7 +63,7 @@ class BatchJobTestUtil(
       verify(
         preTranslationByTmChunkProcessor,
         times(times),
-      ).process(any(), any(), any(), any())
+      ).process(any(), any(), any())
     }
   }
 
@@ -141,14 +141,13 @@ class BatchJobTestUtil(
         any(),
         argThat { this.containsAll((1L..10).toList()) },
         any(),
-        any(),
       )
   }
 
   fun makeAutomationChunkProcessorPass() {
     doAnswer { }
       .whenever(automationChunkProcessor)
-      .process(any(), any(), any(), any())
+      .process(any(), any(), any())
   }
 
   fun verifyConstantRepeats(
@@ -176,7 +175,7 @@ class BatchJobTestUtil(
 
     doThrow(*exceptions.toTypedArray())
       .whenever(deleteKeysChunkProcessor)
-      .process(any(), any(), any(), any())
+      .process(any(), any(), any())
   }
 
   fun fastForwardToFailedJob(job: BatchJob) {
@@ -216,17 +215,15 @@ class BatchJobTestUtil(
 
   fun makeDeleteChunkProcessorReportProgressOnEachItem() {
     doAnswer {
+      val job = it.arguments[0] as BatchJobDto
+
       @Suppress("UNCHECKED_CAST")
       val chunk = it.arguments[1] as List<Long>
 
-      @Suppress("UNCHECKED_CAST")
-      val onProgress = it.arguments[3] as ((progress: Int) -> Unit)
-
-      chunk.forEachIndexed { index, _ ->
-        onProgress(index + 1)
+      chunk.forEach { _ ->
+        progressManager.reportSingleChunkProgress(job.id)
       }
     }.whenever(deleteKeysChunkProcessor).process(
-      any(),
       any(),
       any(),
       any(),
@@ -245,7 +242,7 @@ class BatchJobTestUtil(
         }
       }
     }.whenever(preTranslationByTmChunkProcessor)
-      .process(any(), any(), any(), any())
+      .process(any(), any(), any())
 
     return {
       waitFor {
@@ -269,7 +266,6 @@ class BatchJobTestUtil(
     ).whenever(preTranslationByTmChunkProcessor).process(
       any(),
       argThat { this.containsAll(throwingChunk) },
-      any(),
       any(),
     )
   }
@@ -306,7 +302,7 @@ class BatchJobTestUtil(
     doThrow(*exceptions.toTypedArray())
       .doAnswer { }
       .whenever(preTranslationByTmChunkProcessor)
-      .process(any(), any(), any(), any())
+      .process(any(), any(), any())
   }
 
   fun makeAutoTranslationFailOnTwoFirstItemsInChunk() {
@@ -338,7 +334,7 @@ class BatchJobTestUtil(
   fun makePreTranslateProcessorPass() {
     doAnswer { }
       .whenever(preTranslationByTmChunkProcessor)
-      .process(any(), any(), any(), any())
+      .process(any(), any(), any())
   }
 
   fun assertJobUnlocked() {

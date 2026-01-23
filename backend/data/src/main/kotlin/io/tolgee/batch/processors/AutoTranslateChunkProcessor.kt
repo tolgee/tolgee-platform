@@ -3,6 +3,7 @@ package io.tolgee.batch.processors
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.MtProviderCatching
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.AutoTranslationRequest
@@ -17,17 +18,18 @@ class AutoTranslateChunkProcessor(
   private val autoTranslationService: AutoTranslationService,
   private val mtProviderCatching: MtProviderCatching,
   private val batchProperties: BatchProperties,
+  private val progressManager: ProgressManager,
 ) : ChunkProcessor<AutoTranslationRequest, AutoTranslationJobParams, BatchTranslationTargetItem> {
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
     val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
     mtProviderCatching.iterateCatching(chunk, coroutineContext) { item ->
       val (keyId, languageId) = item
       autoTranslationService.softAutoTranslate(projectId, keyId, languageId)
+      progressManager.reportSingleChunkProgress(job.id)
     }
   }
 

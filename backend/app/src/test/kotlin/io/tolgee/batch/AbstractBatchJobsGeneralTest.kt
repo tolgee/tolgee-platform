@@ -115,7 +115,8 @@ abstract class AbstractBatchJobsGeneralTest :
       .waitForCompleted(job)
       .status.assert
       .isEqualTo(BatchJobStatus.SUCCESS)
-    util.assertTotalWebsocketMessagesCount(101)
+    // 1 start + 100 progress + 1 success = 102
+    util.assertTotalWebsocketMessagesCount(102)
   }
 
   @Test
@@ -123,7 +124,8 @@ abstract class AbstractBatchJobsGeneralTest :
     val job = util.runChunkedJob(1000)
     util.makePreTranslateProcessorThrowOutOfCreditsTimes(50)
     util.waitForJobFailed(job)
-    util.assertTotalWebsocketMessagesCount(51)
+    // 1 start + 50 progress + 1 failure = 52
+    util.assertTotalWebsocketMessagesCount(52)
     util.assertMessagesContain("out_of_credits")
     util.assertJobFailedWithMessage(job, Message.OUT_OF_CREDITS)
     util.assertJobStateCacheCleared(job)
@@ -136,7 +138,8 @@ abstract class AbstractBatchJobsGeneralTest :
     util.verifyConstantRepeats(3, 2000)
     util.waitForJobFailed(job)
     util.assertTotalExecutionsCount(job, 103)
-    util.assertTotalWebsocketMessagesCount(100)
+    // 1 start + variable progress + 1 failure = 101
+    util.assertTotalWebsocketMessagesCount(101)
     util.assertStatusReported(BatchJobStatus.FAILED)
     util.assertJobStateCacheCleared(job)
   }
@@ -175,7 +178,8 @@ abstract class AbstractBatchJobsGeneralTest :
 
     util.waitForJobFailed(job)
     util.assertTotalExecutionsCount(job, 103)
-    util.assertTotalWebsocketMessagesCount(100)
+    // 1 start + variable progress + 1 failure = 101
+    util.assertTotalWebsocketMessagesCount(101)
     util.assertStatusReported(BatchJobStatus.FAILED)
     util.assertJobStateCacheCleared(job)
   }
@@ -190,7 +194,8 @@ abstract class AbstractBatchJobsGeneralTest :
       .status.assert
       .isEqualTo(BatchJobStatus.SUCCESS)
     util.assertTotalExecutionsCount(job, 1)
-    util.assertTotalWebsocketMessagesCount(101)
+    // 1 start + 100 progress + 1 success = 102
+    util.assertTotalWebsocketMessagesCount(102)
     util.assertStatusReported(BatchJobStatus.SUCCESS)
     util.assertJobStateCacheCleared(job)
   }

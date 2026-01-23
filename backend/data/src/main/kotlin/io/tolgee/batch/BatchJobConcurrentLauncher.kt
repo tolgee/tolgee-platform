@@ -221,6 +221,9 @@ class BatchJobConcurrentLauncher(
       return false
     }
 
+    // Publish OnBatchJobStarted event after all checks pass (including project exclusivity)
+    progressManager.tryPublishJobStarted(executionItem.jobId, batchJobDto)
+
     val job =
       launch {
         batchJobActionService.handleItem(executionItem, batchJobDto)

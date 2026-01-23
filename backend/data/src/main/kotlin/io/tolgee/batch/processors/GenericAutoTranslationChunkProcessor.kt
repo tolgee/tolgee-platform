@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
 import io.tolgee.batch.MtProviderCatching
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.service.PromptService
@@ -17,12 +18,12 @@ class GenericAutoTranslationChunkProcessor(
   private val languageService: LanguageService,
   private val promptService: PromptService,
   private val mtProviderCatching: MtProviderCatching,
+  private val progressManager: ProgressManager,
 ) {
   fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
     useTranslationMemory: Boolean,
     useMachineTranslation: Boolean,
   ) {
@@ -40,6 +41,7 @@ class GenericAutoTranslationChunkProcessor(
         useMachineTranslation = useMachineTranslation,
         isBatch = true,
       )
+      progressManager.reportSingleChunkProgress(job.id)
     }
   }
 }

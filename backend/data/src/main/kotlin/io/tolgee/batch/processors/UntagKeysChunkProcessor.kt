@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
 import io.tolgee.batch.ChunkProcessor
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.UntagKeysRequest
 import io.tolgee.model.batch.params.UntagKeysParams
@@ -14,24 +15,22 @@ import kotlin.coroutines.CoroutineContext
 class UntagKeysChunkProcessor(
   private val entityManager: EntityManager,
   private val tagService: TagService,
+  private val progressManager: ProgressManager,
 ) : ChunkProcessor<UntagKeysRequest, UntagKeysParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
     @Suppress("UNCHECKED_CAST")
     val subChunked = chunk.chunked(100) as List<List<Long>>
-    var progress = 0
     val params = getParams(job)
     val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
       tagService.untagKeys(projectId, subChunk.associateWith { params.tags })
       entityManager.flush()
-      progress += subChunk.size
-      onProgress.invoke(progress)
+      progressManager.reportSingleChunkProgress(job.id, subChunk.size)
     }
   }
 

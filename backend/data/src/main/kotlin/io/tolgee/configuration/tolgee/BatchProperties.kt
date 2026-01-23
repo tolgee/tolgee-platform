@@ -46,4 +46,12 @@ class BatchProperties {
     defaultExplanation = "1 day",
   )
   var jobCleanupLockLeaseTimeMs: Long = 86400000
+
+  @DocProperty(
+    description =
+      "Timeout in milliseconds to wait for running job chunks to complete when cancelling a batch job. " +
+        "AI translation operations can take longer, so this should be set high enough to accommodate them.",
+    defaultExplanation = "30 seconds",
+  )
+  var cancellationTimeoutMs: Long = 30000
 }

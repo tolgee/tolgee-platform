@@ -64,7 +64,7 @@ class BatchJobManagementControllerCancellationTest :
           }
         }
         it.callRealMethod()
-      }.whenever(machineTranslationChunkProcessor).process(any(), any(), any(), any())
+      }.whenever(machineTranslationChunkProcessor).process(any(), any(), any())
 
       performProjectAuthPost(
         "start-batch-job/machine-translate",

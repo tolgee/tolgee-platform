@@ -21,10 +21,12 @@ class LocalBatchJobStateStorage(
   private val runningCountMap = ConcurrentHashMap<Long, AtomicInteger>()
   private val completedChunksCountMap = ConcurrentHashMap<Long, AtomicInteger>()
   private val progressCountMap = ConcurrentHashMap<Long, AtomicLong>()
+  private val singleChunkProgressCountMap = ConcurrentHashMap<Long, AtomicLong>()
   private val failedCountMap = ConcurrentHashMap<Long, AtomicInteger>()
   private val cancelledCountMap = ConcurrentHashMap<Long, AtomicInteger>()
   private val committedCountMap = ConcurrentHashMap<Long, AtomicInteger>()
   private val initializedJobs = ConcurrentHashMap.newKeySet<Long>()
+  private val startedJobs = ConcurrentHashMap.newKeySet<Long>()
 
   override fun updateSingleExecution(
     jobId: Long,
@@ -123,6 +125,19 @@ class LocalBatchJobStateStorage(
       .addAndGet(delta)
   }
 
+  override fun getSingleChunkProgressCount(jobId: Long): Long {
+    return singleChunkProgressCountMap[jobId]?.get() ?: 0L
+  }
+
+  override fun addSingleChunkProgressCount(
+    jobId: Long,
+    delta: Long,
+  ) {
+    singleChunkProgressCountMap
+      .computeIfAbsent(jobId) { AtomicLong(0) }
+      .addAndGet(delta)
+  }
+
   override fun getFailedCount(jobId: Long): Int {
     return failedCountMap[jobId]?.get() ?: 0
   }
@@ -153,6 +168,10 @@ class LocalBatchJobStateStorage(
       .incrementAndGet()
   }
 
+  override fun tryMarkJobStarted(jobId: Long): Boolean {
+    return startedJobs.add(jobId)
+  }
+
   override fun get(jobId: Long): MutableMap<Long, ExecutionState> {
     return getLocal(jobId)
   }
@@ -165,6 +184,7 @@ class LocalBatchJobStateStorage(
     logger.debug("Removing job state for job $jobId")
     removeAllCounters(jobId)
     initializedJobs.remove(jobId)
+    startedJobs.remove(jobId)
     return jobStatesMap.remove(jobId)
   }
 
@@ -194,10 +214,12 @@ class LocalBatchJobStateStorage(
     runningCountMap.clear()
     completedChunksCountMap.clear()
     progressCountMap.clear()
+    singleChunkProgressCountMap.clear()
     failedCountMap.clear()
     cancelledCountMap.clear()
     committedCountMap.clear()
     initializedJobs.clear()
+    startedJobs.clear()
   }
 
   override fun getStateForExecution(execution: BatchJobChunkExecution): ExecutionState {
@@ -229,6 +251,7 @@ class LocalBatchJobStateStorage(
     runningCountMap.remove(jobId)
     completedChunksCountMap.remove(jobId)
     progressCountMap.remove(jobId)
+    singleChunkProgressCountMap.remove(jobId)
     failedCountMap.remove(jobId)
     cancelledCountMap.remove(jobId)
     committedCountMap.remove(jobId)

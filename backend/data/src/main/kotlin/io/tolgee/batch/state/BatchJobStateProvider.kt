@@ -53,6 +53,13 @@ interface BatchJobStateProvider {
     delta: Long,
   )
 
+  fun getSingleChunkProgressCount(jobId: Long): Long
+
+  fun addSingleChunkProgressCount(
+    jobId: Long,
+    delta: Long,
+  )
+
   fun getFailedCount(jobId: Long): Int
 
   fun incrementFailedCount(jobId: Long)
@@ -75,6 +82,13 @@ interface BatchJobStateProvider {
   fun hasCachedJobState(jobId: Long): Boolean
 
   fun getCachedJobIds(): MutableSet<Long>
+
+  /**
+   * Atomically marks a job as started. Returns true only the first time
+   * this method is called for a given jobId, false for subsequent calls.
+   * Used to ensure OnBatchJobStarted event fires exactly once per job.
+   */
+  fun tryMarkJobStarted(jobId: Long): Boolean
 
   // Cleanup & utility
   fun clearUnusedStates()

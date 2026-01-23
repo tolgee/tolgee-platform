@@ -14,6 +14,9 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectContext } from 'tg.hooks/ProjectContext';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import { useBatchOperationStatusTranslate } from 'tg.translationTools/useBatchOperationStatusTranslate';
+import { useBatchOperationActionPhrase } from 'tg.translationTools/useBatchOperationActionPhrase';
+import { AnimatedStars } from 'tg.component/AnimatedStars';
+import { ShimmerText } from 'tg.component/ShimmerText';
 
 import { BatchJobModel } from '../types';
 import { BatchProgress } from './BatchProgress';
@@ -57,6 +60,12 @@ export const BatchOperationDialog = ({
   const statusColor = getStatusColor(data.status);
   const statusLabel = useBatchOperationStatusTranslate()(data.status);
   const typeLabel = useBatchOperationTypeTranslate()(data.type);
+  const getActionPhrase = useBatchOperationActionPhrase();
+  const isAiJob = [
+    'AI_PLAYGROUND_TRANSLATE',
+    'MACHINE_TRANSLATE',
+    'AUTO_TRANSLATE',
+  ].includes(data.type);
   const isFinalizing =
     data.status === 'RUNNING' && data.progress === data.totalItems;
 
@@ -99,15 +108,22 @@ export const BatchOperationDialog = ({
               }}
             />
           </Box>
-          {(isFinished || data.status === 'PENDING' || isFinalizing) && (
-            <Box
-              data-cy="batch-operation-dialog-end-status"
-              color={isFinalizing ? undefined : statusColor}
-            >
-              {isFinalizing
-                ? t('batch-operation-dialog-finalizing')
-                : statusLabel}
+          {data.status === 'RUNNING' && !isFinalizing ? (
+            <Box display="flex" alignItems="center" gap={0.5}>
+              {isAiJob && <AnimatedStars sx={{ fontSize: 14 }} />}
+              <ShimmerText>{getActionPhrase(data.type)}</ShimmerText>
             </Box>
+          ) : (
+            (isFinished || data.status === 'PENDING' || isFinalizing) && (
+              <Box
+                data-cy="batch-operation-dialog-end-status"
+                color={isFinalizing ? undefined : statusColor}
+              >
+                {isFinalizing
+                  ? t('batch-operation-dialog-finalizing')
+                  : statusLabel}
+              </Box>
+            )
           )}
         </Box>
         {data.errorMessage && (

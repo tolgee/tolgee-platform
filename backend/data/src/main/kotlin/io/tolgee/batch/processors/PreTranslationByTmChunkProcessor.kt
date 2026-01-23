@@ -18,7 +18,6 @@ class PreTranslationByTmChunkProcessor(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
     val parameters = getParams(job)
     val languages = languageService.findByIdIn(parameters.targetLanguageIds)
@@ -35,7 +34,6 @@ class PreTranslationByTmChunkProcessor(
       job,
       preparedChunk,
       coroutineContext,
-      onProgress,
       useTranslationMemory = true,
       useMachineTranslation = false,
     )
