@@ -1,3 +1,10 @@
+## [3.147.4](https://github.com/tolgee/tolgee-platform/compare/v3.147.3...v3.147.4) (2026-01-23)
+
+
+### Bug Fixes
+
+* optimize batch job state management ([#3392](https://github.com/tolgee/tolgee-platform/issues/3392)) ([9f47a14](https://github.com/tolgee/tolgee-platform/commit/9f47a14f3541088c5e0eee8b95426bbd61325f29))
+
 ## [3.147.3](https://github.com/tolgee/tolgee-platform/compare/v3.147.2...v3.147.3) (2026-01-22)
 
 
