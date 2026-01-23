@@ -20,8 +20,8 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.branching.AbstractBranchService
 import io.tolgee.service.branching.BranchCopyService
-import io.tolgee.service.branching.BranchService
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Primary
@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional
 @Primary
 @Service
 class BranchServiceImpl(
-  private val branchRepository: BranchRepository,
+  override val branchRepository: BranchRepository,
   private val currentDateProvider: CurrentDateProvider,
   private val entityManager: EntityManager,
   private val branchCopyService: BranchCopyService,
@@ -43,7 +43,7 @@ class BranchServiceImpl(
   private val taskService: TaskService,
   private val authenticationFacade: AuthenticationFacade,
   private val projectBranchingMigrationService: ProjectBranchingMigrationService,
-) : BranchService {
+) : AbstractBranchService(branchRepository) {
   override fun getBranches(
     projectId: Long,
     page: Pageable,
@@ -53,24 +53,12 @@ class BranchServiceImpl(
     return branchRepository.getAllProjectBranches(projectId, page, search, activeOnly)
   }
 
-  override fun getActiveBranch(
+  private fun getActiveBranch(
     projectId: Long,
     branchId: Long,
   ): Branch {
     return branchRepository.findActiveByProjectIdAndId(projectId, branchId)
       ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
-  }
-
-  override fun getActiveBranch(
-    projectId: Long,
-    branchName: String,
-  ): Branch {
-    return branchRepository.findActiveByProjectIdAndName(projectId, branchName)
-      ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
-  }
-
-  override fun getDefaultBranch(projectId: Long): Branch? {
-    return branchRepository.findDefaultByProjectId(projectId)
   }
 
   private fun getActiveBranchWithMerge(
@@ -308,12 +296,5 @@ class BranchServiceImpl(
 
   override fun enableBranchingOnProject(projectId: Long) {
     projectBranchingMigrationService.enableBranching(projectId)
-  }
-
-  override fun getActiveOrDefault(
-    projectId: Long,
-    branchName: String?,
-  ): Branch? {
-    return branchName?.let { getActiveBranch(projectId, it) } ?: getDefaultBranch(projectId)
   }
 }

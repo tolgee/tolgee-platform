@@ -52,13 +52,4 @@ interface BranchRepository : BranchRepositoryOss {
     projectId: Long,
     branchId: Long,
   ): Branch?
-
-  @Query(
-    """
-    select b
-    from Branch b
-    where b.project.id = :projectId and b.deletedAt IS NULL and b.archivedAt IS NULL and b.isDefault = true
-    """,
-  )
-  fun findDefaultByProjectId(projectId: Long): Branch?
 }
