@@ -89,7 +89,7 @@ class ImportService(
     val import =
       findNotExpired(project.id, userAccount.id, params.branch) ?: Import(project).also {
         it.author = userAccount
-        it.branch = params.branch?.let { branch -> branchService.getActiveBranch(project.id, branch) }
+        it.branch = branchService.getActiveOrDefault(project.id, params.branch)
       }
 
     val languages = findLanguages(import)

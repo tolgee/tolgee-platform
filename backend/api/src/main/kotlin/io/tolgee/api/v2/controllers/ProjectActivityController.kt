@@ -58,13 +58,11 @@ class ProjectActivityController(
     @RequestParam(required = false) branch: String? = null,
   ): PagedModel<ProjectActivityModel> {
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
-    val branchEntity =
-      branch?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
     val views =
       activityService.findProjectActivity(
         projectId = projectHolder.project.id,
         pageable = pageable,
-        branchId = branchEntity?.id,
+        branchName = branch,
       )
     return activityPagedResourcesAssembler.toModel(views, projectActivityModelAssembler)
   }
@@ -78,13 +76,11 @@ class ProjectActivityController(
     @RequestParam(required = false) branch: String? = null,
   ): ProjectActivityModel {
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
-    val branchEntity =
-      branch?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
     val views =
       activityService.findProjectActivity(
         projectId = projectHolder.project.id,
         revisionId = revisionId,
-        branchId = branchEntity?.id,
+        branchName = branch,
       )
         ?: throw NotFoundException()
     return projectActivityModelAssembler.toModel(views)
@@ -106,15 +102,13 @@ class ProjectActivityController(
     branch: String? = null,
   ): PagedModel<ModifiedEntityModel> {
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
-    val branchEntity =
-      branch?.let { branchService.getActiveBranch(projectHolder.project.id, it) }
     val page =
       activityService.getRevisionModifications(
         projectId = projectHolder.project.id,
         revisionId,
         pageable,
         filterEntityClass,
-        branchEntity?.id,
+        branch,
       )
     return modificationResourcesAssembler.toModel(page, modifiedEntityModelAssembler)
   }

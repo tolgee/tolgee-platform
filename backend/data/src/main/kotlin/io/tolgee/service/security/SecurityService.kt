@@ -530,28 +530,11 @@ class SecurityService(
     }
   }
 
-  fun checkAndGetProjectBranch(
-    projectId: Long,
-    branch: String?,
-  ): Branch? {
-    return branch?.let { branchService.getActiveBranch(projectId, it) }
-  }
-
-  fun checkProtectedBranchModify(
-    projectId: Long,
-    branchId: Long,
-  ) {
-    val branch = branchService.getActiveBranch(projectId, branchId)
-    checkProtectedBranchModify(branch, projectId)
-  }
-
   fun checkProtectedBranchModify(
     projectId: Long,
     branchName: String?,
   ) {
-    val branch =
-      branchName?.ifBlank { null }?.let { branchService.getActiveBranch(projectId, it) }
-        ?: branchService.getDefaultBranch(projectId)
+    val branch = branchService.getActiveOrDefault(projectId, branchName)
     checkProtectedBranchModify(branch, projectId)
   }
 

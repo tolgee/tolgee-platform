@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.ProjectLastModifiedManager
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.exceptions.BadRequestException
@@ -17,6 +18,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.export.ExportService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.util.StreamingResponseBodyProvider
 import io.tolgee.util.nullIfEmpty
 import org.apache.tomcat.util.http.fileupload.IOUtils
@@ -54,6 +56,7 @@ class V2ExportController(
   private val projectLastModifiedManager: ProjectLastModifiedManager,
   private val rateLimitService: RateLimitService,
   private val tolgeeProperties: TolgeeProperties,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @GetMapping(value = [""])
   @Operation(
@@ -84,6 +87,7 @@ class V2ExportController(
     @ParameterObject params: ExportParams,
     request: WebRequest,
   ): ResponseEntity<StreamingResponseBody>? {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, params.filterBranch)
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
       rateLimitService.checkPerUserRateLimit(
         "export",
