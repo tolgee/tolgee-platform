@@ -29,6 +29,7 @@ class BranchMergeExecutor(
   private val branchSnapshotService: BranchSnapshotService,
 ) {
   fun execute(merge: BranchMerge) {
+    attachKeysForMerge(merge)
     val snapshotKeys = branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id).associateBy { it.originalKeyId }
     merge.changes.forEach { change ->
       when (change.change) {
@@ -54,6 +55,25 @@ class BranchMergeExecutor(
       }
     }
     merge.mergedAt = currentDateProvider.date
+  }
+
+  private fun attachKeysForMerge(merge: BranchMerge) {
+    val sourceIds = merge.changes.mapNotNull { it.sourceKey?.id }.toSet()
+    val targetIds = merge.changes.mapNotNull { it.targetKey?.id }.toSet()
+    if (sourceIds.isEmpty() && targetIds.isEmpty()) {
+      return
+    }
+
+    val detailedKeysById =
+      keyRepository.findAllDetailedByIdIn(sourceIds + targetIds).associateBy { it.id }
+    if (detailedKeysById.isNotEmpty()) {
+      keyRepository.findAllWithScreenshotsByIdIn(detailedKeysById.keys)
+    }
+
+    merge.changes.forEach { change ->
+      change.sourceKey?.id?.let { id -> change.sourceKey = detailedKeysById[id] }
+      change.targetKey?.id?.let { id -> change.targetKey = detailedKeysById[id] }
+    }
   }
 
   private fun applyConflict(
