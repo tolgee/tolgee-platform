@@ -34,11 +34,7 @@ open class ChunkProcessingUtil(
       measureTimeMillis {
         try {
           handleActivity()
-          processor.process(job, toProcess, coroutineContext) {
-            if (it != toProcess.size) {
-              progressManager.publishSingleChunkProgress(job.id, it)
-            }
-          }
+          processor.process(job, toProcess, coroutineContext)
           successfulTargets = toProcess
           execution.status = BatchJobChunkExecutionStatus.SUCCESS
         } catch (e: Throwable) {

@@ -339,7 +339,7 @@ class BatchJobConcurrentIntegrationTest :
       if (failCount.incrementAndGet() <= 2) {
         throw RuntimeException("Simulated failure #${failCount.get()}")
       }
-    }.whenever(deleteKeysChunkProcessor).process(any(), any(), any(), any())
+    }.whenever(deleteKeysChunkProcessor).process(any(), any(), any())
 
     val job1 = runPreTranslateJob(testData.projectA, testData.getProjectAKeyIds().take(20), testData.projectACzech.id)
     val job2 = runPreTranslateJob(testData.projectB, testData.getProjectBKeyIds().take(20), testData.projectBCzech.id)
@@ -569,29 +569,29 @@ class BatchJobConcurrentIntegrationTest :
   }
 
   private fun makePreTranslateProcessorPass() {
-    doAnswer { }.whenever(preTranslationByTmChunkProcessor).process(any(), any(), any(), any())
+    doAnswer { }.whenever(preTranslationByTmChunkProcessor).process(any(), any(), any())
   }
 
   private fun makePreTranslateProcessorPassWithDelay(delayMs: Long) {
     doAnswer {
       Thread.sleep(delayMs)
-    }.whenever(preTranslationByTmChunkProcessor).process(any(), any(), any(), any())
+    }.whenever(preTranslationByTmChunkProcessor).process(any(), any(), any())
   }
 
   private fun makePreTranslateProcessorPassWithCounter(counter: AtomicInteger) {
     doAnswer {
       counter.incrementAndGet()
-    }.whenever(preTranslationByTmChunkProcessor).process(any(), any(), any(), any())
+    }.whenever(preTranslationByTmChunkProcessor).process(any(), any(), any())
   }
 
   private fun makeDeleteKeysProcessorPass() {
-    doAnswer { }.whenever(deleteKeysChunkProcessor).process(any(), any(), any(), any())
+    doAnswer { }.whenever(deleteKeysChunkProcessor).process(any(), any(), any())
   }
 
   private fun makeDeleteKeysProcessorPassWithDelay(delayMs: Long) {
     doAnswer {
       Thread.sleep(delayMs)
-    }.whenever(deleteKeysChunkProcessor).process(any(), any(), any(), any())
+    }.whenever(deleteKeysChunkProcessor).process(any(), any(), any())
   }
 
   private fun makeMtProcessorPass() {
@@ -626,7 +626,7 @@ class BatchJobConcurrentIntegrationTest :
   }
 
   private fun makeAutomationProcessorPass() {
-    doAnswer { }.whenever(automationChunkProcessor).process(any(), any(), any(), any())
+    doAnswer { }.whenever(automationChunkProcessor).process(any(), any(), any())
   }
 
   /**

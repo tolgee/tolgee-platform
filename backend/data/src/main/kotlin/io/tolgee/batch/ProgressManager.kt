@@ -181,15 +181,22 @@ class ProgressManager(
       }
     }
 
-    // Only publish progress event when there's actual progress
+    // Only publish progress event when there's actual new progress to report.
+    // Skip if singleChunkProgressCount already published this progress level.
     if (progressDelta > 0) {
-      eventPublisher.publishEvent(
-        OnBatchJobProgress(
-          job,
-          batchJobStateProvider.getProgressCount(job.id),
-          job.totalItems.toLong(),
-        ),
-      )
+      val confirmedProgress = batchJobStateProvider.getProgressCount(job.id)
+      val optimisticProgress = batchJobStateProvider.getSingleChunkProgressCount(job.id)
+      // Only publish if confirmed progress exceeds what was already published via
+      // reportSingleChunkProgress. This avoids duplicate progress events.
+      if (confirmedProgress > optimisticProgress) {
+        eventPublisher.publishEvent(
+          OnBatchJobProgress(
+            job,
+            confirmedProgress,
+            job.totalItems.toLong(),
+          ),
+        )
+      }
     }
 
     // Only trigger job status handling if THIS execution completed the job
@@ -305,12 +312,29 @@ class ProgressManager(
     return batchJobStateProvider.getProgressCount(jobId)
   }
 
-  fun publishSingleChunkProgress(
+  /**
+   * Reports progress for a single item within a chunk. This is used for within-chunk progress
+   * tracking so users see updates more frequently during slow operations like machine translation.
+   *
+   * The progress is tracked in a separate counter (singleChunkProgressCount) that represents
+   * optimistic progress. When publishing events, we use max(progressCount, singleChunkProgressCount)
+   * to ensure users always see the highest progress value.
+   */
+  fun reportSingleChunkProgress(
     jobId: Long,
-    progress: Int,
+    delta: Int = 1,
   ) {
+    batchJobStateProvider.addSingleChunkProgressCount(jobId, delta.toLong())
     val job = batchJobService.getJobDto(jobId)
-    eventPublisher.publishEvent(OnBatchJobProgress(job, progress.toLong(), job.totalItems.toLong()))
+    val confirmedProgress = batchJobStateProvider.getProgressCount(jobId)
+    val optimisticProgress = batchJobStateProvider.getSingleChunkProgressCount(jobId)
+    eventPublisher.publishEvent(
+      OnBatchJobProgress(
+        job,
+        maxOf(confirmedProgress, optimisticProgress),
+        job.totalItems.toLong(),
+      ),
+    )
   }
 
   fun handleJobRunning(batchJobDto: BatchJobDto) {

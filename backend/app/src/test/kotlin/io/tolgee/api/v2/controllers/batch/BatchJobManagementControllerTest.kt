@@ -102,7 +102,7 @@ class BatchJobManagementControllerTest :
           jobIds.add(id)
         }
       }.whenever(preTranslationByTmChunkProcessor)
-        .process(any(), any(), any(), any())
+        .process(any(), any(), any())
 
       val jobs = (1..3).map { util.runChunkedJob(50) }
 
@@ -190,7 +190,7 @@ class BatchJobManagementControllerTest :
       while (wait) {
         Thread.sleep(100)
       }
-    }.whenever(preTranslationByTmChunkProcessor).process(any(), any(), any(), any())
+    }.whenever(preTranslationByTmChunkProcessor).process(any(), any(), any())
 
     val adminsJobs = (1..3).map { util.runChunkedJob(50) }
     val anotherUsersJobs = (1..3).map { util.runChunkedJob(50, testData.anotherUser) }

@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
 import io.tolgee.batch.ChunkProcessor
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.SetTranslationsStateStateRequest
 import io.tolgee.model.batch.params.SetTranslationStateJobParams
@@ -14,22 +15,20 @@ import kotlin.coroutines.CoroutineContext
 class SetTranslationsStateChunkProcessor(
   private val translationService: TranslationService,
   private val entityManager: EntityManager,
+  private val progressManager: ProgressManager,
 ) : ChunkProcessor<SetTranslationsStateStateRequest, SetTranslationStateJobParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
     val subChunked = chunk.chunked(1000)
-    var progress: Int = 0
     val params = getParams(job)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
       params.state?.let { translationService.setStateBatch(subChunk, params.languageIds, it) }
       entityManager.flush()
-      progress += subChunk.size
-      onProgress.invoke(progress)
+      progressManager.reportSingleChunkProgress(job.id, subChunk.size)
     }
   }
 

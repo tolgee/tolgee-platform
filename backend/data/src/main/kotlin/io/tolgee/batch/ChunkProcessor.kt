@@ -10,7 +10,6 @@ interface ChunkProcessor<RequestType, ParamsType, TargetItemType> {
     job: BatchJobDto,
     chunk: List<TargetItemType>,
     coroutineContext: CoroutineContext,
-    onProgress: ((Int) -> Unit),
   )
 
   fun getTarget(data: RequestType): List<TargetItemType>

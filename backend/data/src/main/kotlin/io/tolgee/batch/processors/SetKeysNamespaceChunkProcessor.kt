@@ -2,6 +2,7 @@ package io.tolgee.batch.processors
 
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.FailedDontRequeueException
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.SetKeysNamespaceRequest
 import io.tolgee.constants.Message
@@ -17,15 +18,14 @@ import kotlin.coroutines.CoroutineContext
 class SetKeysNamespaceChunkProcessor(
   private val entityManager: EntityManager,
   private val keyService: KeyService,
+  private val progressManager: ProgressManager,
 ) : ChunkProcessor<SetKeysNamespaceRequest, SetKeysNamespaceParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
     val subChunked = chunk.chunked(100)
-    var progress = 0
     val params = getParams(job)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
@@ -33,8 +33,7 @@ class SetKeysNamespaceChunkProcessor(
         keyService.setNamespace(subChunk, params.namespace)
         entityManager.flush()
       }
-      progress += subChunk.size
-      onProgress.invoke(progress)
+      progressManager.reportSingleChunkProgress(job.id, subChunk.size)
     }
   }
 

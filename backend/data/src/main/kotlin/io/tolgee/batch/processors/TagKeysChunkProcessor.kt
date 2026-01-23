@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
 import io.tolgee.batch.ChunkProcessor
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.TagKeysRequest
 import io.tolgee.model.batch.params.TagKeysParams
@@ -14,15 +15,14 @@ import kotlin.coroutines.CoroutineContext
 class TagKeysChunkProcessor(
   private val entityManager: EntityManager,
   private val tagService: TagService,
+  private val progressManager: ProgressManager,
 ) : ChunkProcessor<TagKeysRequest, TagKeysParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
     val subChunked = chunk.chunked(100) as List<List<Long>>
-    var progress: Int = 0
     val params = getParams(job)
 
     val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
@@ -31,8 +31,7 @@ class TagKeysChunkProcessor(
       coroutineContext.ensureActive()
       tagService.tagKeysById(projectId, subChunk.associateWith { params.tags })
       entityManager.flush()
-      progress += subChunk.size
-      onProgress.invoke(progress)
+      progressManager.reportSingleChunkProgress(job.id, subChunk.size)
     }
   }
 

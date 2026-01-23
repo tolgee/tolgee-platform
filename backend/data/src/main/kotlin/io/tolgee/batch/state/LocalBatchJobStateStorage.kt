@@ -21,6 +21,7 @@ class LocalBatchJobStateStorage(
   private val runningCountMap = ConcurrentHashMap<Long, AtomicInteger>()
   private val completedChunksCountMap = ConcurrentHashMap<Long, AtomicInteger>()
   private val progressCountMap = ConcurrentHashMap<Long, AtomicLong>()
+  private val singleChunkProgressCountMap = ConcurrentHashMap<Long, AtomicLong>()
   private val failedCountMap = ConcurrentHashMap<Long, AtomicInteger>()
   private val cancelledCountMap = ConcurrentHashMap<Long, AtomicInteger>()
   private val committedCountMap = ConcurrentHashMap<Long, AtomicInteger>()
@@ -124,6 +125,19 @@ class LocalBatchJobStateStorage(
       .addAndGet(delta)
   }
 
+  override fun getSingleChunkProgressCount(jobId: Long): Long {
+    return singleChunkProgressCountMap[jobId]?.get() ?: 0L
+  }
+
+  override fun addSingleChunkProgressCount(
+    jobId: Long,
+    delta: Long,
+  ) {
+    singleChunkProgressCountMap
+      .computeIfAbsent(jobId) { AtomicLong(0) }
+      .addAndGet(delta)
+  }
+
   override fun getFailedCount(jobId: Long): Int {
     return failedCountMap[jobId]?.get() ?: 0
   }
@@ -200,6 +214,7 @@ class LocalBatchJobStateStorage(
     runningCountMap.clear()
     completedChunksCountMap.clear()
     progressCountMap.clear()
+    singleChunkProgressCountMap.clear()
     failedCountMap.clear()
     cancelledCountMap.clear()
     committedCountMap.clear()
@@ -236,6 +251,7 @@ class LocalBatchJobStateStorage(
     runningCountMap.remove(jobId)
     completedChunksCountMap.remove(jobId)
     progressCountMap.remove(jobId)
+    singleChunkProgressCountMap.remove(jobId)
     failedCountMap.remove(jobId)
     cancelledCountMap.remove(jobId)
     committedCountMap.remove(jobId)

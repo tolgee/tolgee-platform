@@ -3,6 +3,7 @@ package io.tolgee.batch.processors
 import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.MtProviderCatching
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.MachineTranslationRequest
@@ -24,12 +25,12 @@ class AiPlaygroundChunkProcessor(
   private val promptService: PromptService,
   private val aiPlaygroundResultService: AiPlaygroundResultService,
   private val mtProviderCatching: MtProviderCatching,
+  private val progressManager: ProgressManager,
 ) : ChunkProcessor<MachineTranslationRequest, AiPlaygroundJobParams, BatchTranslationTargetItem> {
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
     val keys = keyService.find(chunk.map { it.keyId }).associateBy { it.id }
 
@@ -38,6 +39,7 @@ class AiPlaygroundChunkProcessor(
       val key = keys[keyId] ?: return@iterateCatching
       val llmPrompt = getParams(job).llmPrompt ?: throw InvalidStateException()
       translateAndSetResult(job, llmPrompt, key, languageId)
+      progressManager.reportSingleChunkProgress(job.id)
     }
   }
 

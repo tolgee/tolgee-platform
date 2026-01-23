@@ -53,6 +53,13 @@ interface BatchJobStateProvider {
     delta: Long,
   )
 
+  fun getSingleChunkProgressCount(jobId: Long): Long
+
+  fun addSingleChunkProgressCount(
+    jobId: Long,
+    delta: Long,
+  )
+
   fun getFailedCount(jobId: Long): Int
 
   fun incrementFailedCount(jobId: Long)

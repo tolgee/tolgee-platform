@@ -25,6 +25,7 @@ class RedisBatchJobStateStorage(
     private const val REDIS_STATE_INITIALIZED_KEY_PREFIX = "batch_job_state_initialized:"
     private const val REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX = "batch_job_completed_chunks:"
     private const val REDIS_PROGRESS_COUNT_KEY_PREFIX = "batch_job_progress:"
+    private const val REDIS_SINGLE_CHUNK_PROGRESS_COUNT_KEY_PREFIX = "batch_job_single_chunk_progress:"
     private const val REDIS_FAILED_COUNT_KEY_PREFIX = "batch_job_failed:"
     private const val REDIS_CANCELLED_COUNT_KEY_PREFIX = "batch_job_cancelled:"
     private const val REDIS_COMMITTED_COUNT_KEY_PREFIX = "batch_job_committed:"
@@ -121,6 +122,17 @@ class RedisBatchJobStateStorage(
     delta: Long,
   ) {
     redissonClient.getAtomicLong("$REDIS_PROGRESS_COUNT_KEY_PREFIX$jobId").addAndGet(delta)
+  }
+
+  override fun getSingleChunkProgressCount(jobId: Long): Long {
+    return redissonClient.getAtomicLong("$REDIS_SINGLE_CHUNK_PROGRESS_COUNT_KEY_PREFIX$jobId").get()
+  }
+
+  override fun addSingleChunkProgressCount(
+    jobId: Long,
+    delta: Long,
+  ) {
+    redissonClient.getAtomicLong("$REDIS_SINGLE_CHUNK_PROGRESS_COUNT_KEY_PREFIX$jobId").addAndGet(delta)
   }
 
   override fun getFailedCount(jobId: Long): Int {
@@ -268,6 +280,7 @@ class RedisBatchJobStateStorage(
     redissonClient.getAtomicLong("$REDIS_RUNNING_COUNT_KEY_PREFIX$jobId").delete()
     redissonClient.getAtomicLong("$REDIS_COMPLETED_CHUNKS_COUNT_KEY_PREFIX$jobId").delete()
     redissonClient.getAtomicLong("$REDIS_PROGRESS_COUNT_KEY_PREFIX$jobId").delete()
+    redissonClient.getAtomicLong("$REDIS_SINGLE_CHUNK_PROGRESS_COUNT_KEY_PREFIX$jobId").delete()
     redissonClient.getAtomicLong("$REDIS_FAILED_COUNT_KEY_PREFIX$jobId").delete()
     redissonClient.getAtomicLong("$REDIS_CANCELLED_COUNT_KEY_PREFIX$jobId").delete()
     redissonClient.getAtomicLong("$REDIS_COMMITTED_COUNT_KEY_PREFIX$jobId").delete()

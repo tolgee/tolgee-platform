@@ -1,21 +1,23 @@
 package io.tolgee.batch.processors
 
 import io.tolgee.batch.ChunkProcessor
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.NoOpRequest
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
 @Component
-class NoOpChunkProcessor : ChunkProcessor<NoOpRequest, Any?, Long> {
+class NoOpChunkProcessor(
+  private val progressManager: ProgressManager,
+) : ChunkProcessor<NoOpRequest, Any?, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: ((Int) -> Unit),
   ) {
-    // Do nothing, just report progress
-    onProgress.invoke(chunk.size)
+    // Report progress for the whole chunk at once
+    progressManager.reportSingleChunkProgress(job.id, chunk.size)
   }
 
   override fun getParamsType(): Class<Any?>? {

@@ -1,6 +1,7 @@
 package io.tolgee.batch.processors
 
 import io.tolgee.batch.ChunkProcessor
+import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.LabelTranslationsRequest
 import io.tolgee.model.batch.params.TranslationLabelParams
@@ -10,16 +11,15 @@ import kotlin.coroutines.CoroutineContext
 
 abstract class AbstractTranslationLabelChunkProcessor(
   private val entityManager: EntityManager,
+  private val progressManager: ProgressManager,
 ) : ChunkProcessor<LabelTranslationsRequest, TranslationLabelParams, Long> {
   override fun process(
     job: BatchJobDto,
     chunk: List<Long>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
     val subChunked = chunk.chunked(100)
     val params = getParams(job)
-    var progress = 0
 
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
@@ -27,8 +27,7 @@ abstract class AbstractTranslationLabelChunkProcessor(
       process(subChunk, params.languageIds, params.labelIds)
 
       entityManager.flush()
-      progress += subChunk.size
-      onProgress(progress)
+      progressManager.reportSingleChunkProgress(job.id, subChunk.size)
     }
   }
 

@@ -6,10 +6,8 @@ import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.configuration.tolgee.BatchProperties
-import io.tolgee.constants.MtServiceType
 import io.tolgee.model.batch.params.MachineTranslationJobParams
 import io.tolgee.service.machineTranslation.MtServiceConfigService
-import io.tolgee.service.project.ProjectService
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
@@ -23,14 +21,12 @@ class MachineTranslationChunkProcessor(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,
     coroutineContext: CoroutineContext,
-    onProgress: (Int) -> Unit,
   ) {
     @Suppress("UNCHECKED_CAST")
     genericAutoTranslationChunkProcessor.process(
       job,
       chunk,
       coroutineContext,
-      onProgress,
       useMachineTranslation = true,
       useTranslationMemory = false,
     )
