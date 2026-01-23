@@ -17,11 +17,15 @@ task dockerPrepare {
     dependsOn("unpack", "copyDist", "copyDockerIgnore", "addVersionFile")
 }
 
+// Builds Docker image with OpenTelemetry agent. See: docs/observability/
 task docker {
     doLast {
         exec {
             workingDir dockerPath
-            commandLine "docker", "build", ".", "-t", "tolgee/tolgee", "--cache-from", "type=registry,ref=tolgee/tolgee:latest"
+            commandLine "docker", "build", ".",
+                "-t", "tolgee/tolgee",
+                "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
+                "--cache-from", "type=registry,ref=tolgee/tolgee:latest"
         }
     }
     dependsOn("dockerPrepare")
@@ -31,7 +35,10 @@ void createDockerBuildxTask(String taskName, boolean isPush) {
     task(taskName) {
         doLast {
             if (project.hasProperty('dockerImageTag')) {
-                def commandParams = ["docker", "buildx", "build", ".", "-t", project.property('dockerImageTag'), "--platform", "linux/arm64,linux/amd64"]
+                def commandParams = ["docker", "buildx", "build", ".",
+                    "-t", project.property('dockerImageTag'),
+                    "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
+                    "--platform", "linux/arm64,linux/amd64"]
                 if (isPush) {
                     commandParams += ["--push"]
                 }

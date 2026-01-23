@@ -25,6 +25,15 @@ COPY META-INF /app/META-INF
 COPY BOOT-INF/classes /app
 COPY --chmod=755 cmd.sh /app
 
+# Download OpenTelemetry Java agent for distributed tracing
+# When OTEL_JAVAAGENT_ENABLED=true, cmd.sh will use this agent
+# See: docs/observability/
+# Version is passed from gradle.properties via --build-arg (see gradle/docker.gradle)
+ARG OTEL_AGENT_VERSION
+RUN test -n "$OTEL_AGENT_VERSION" || (echo "OTEL_AGENT_VERSION build arg is required" && exit 1)
+RUN wget -O /app/opentelemetry-javaagent.jar \
+    "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_AGENT_VERSION}/opentelemetry-javaagent.jar"
+
 #################
 ### Let's go   ##
 #################
