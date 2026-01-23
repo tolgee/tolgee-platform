@@ -1,21 +1,26 @@
 package io.tolgee.service.branching
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
 import io.tolgee.dtos.request.branching.DryRunMergeBranchRequest
 import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
+import io.tolgee.repository.branching.BranchRepositoryOss
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
-class BranchServiceOssStub : BranchService {
+class BranchServiceOssStub(
+  private val branchRepository: BranchRepositoryOss,
+) : BranchService {
   override fun getBranches(
     projectId: Long,
     page: Pageable,
@@ -36,7 +41,15 @@ class BranchServiceOssStub : BranchService {
     projectId: Long,
     branchName: String,
   ): Branch {
-    throw UnsupportedOperationException()
+    return branchRepository.findActiveByProjectIdAndName(projectId, branchName)
+      ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
+  }
+
+  override fun getActiveOrDefault(
+    projectId: Long,
+    branchName: String?,
+  ): Branch? {
+    return branchName?.let { getActiveBranch(projectId, it) } ?: getDefaultBranch(projectId)
   }
 
   override fun getDefaultBranch(projectId: Long): Branch? {
