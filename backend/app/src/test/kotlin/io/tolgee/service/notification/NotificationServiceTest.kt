@@ -3,6 +3,7 @@ package io.tolgee.service.notification
 import io.tolgee.AbstractSpringTest
 import io.tolgee.config.TestEmailConfiguration
 import io.tolgee.development.Base
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationChannel
 import io.tolgee.model.notifications.NotificationType
@@ -84,8 +85,10 @@ class NotificationServiceTest : AbstractSpringTest() {
   private fun assertInAppNotificationNotExists() = notificationTestUtil.assertNoInAppNotifications()
 
   private fun assertEmailNotificationExists() {
-    notificationTestUtil.newestEmailNotification().also {
-      assertThat(it).contains("Password has been changed for your account")
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      notificationTestUtil.newestEmailNotification().also {
+        assertThat(it).contains("Password has been changed for your account")
+      }
     }
   }
 

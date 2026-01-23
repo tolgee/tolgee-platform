@@ -31,6 +31,7 @@ class EmailTestUtil {
     messageArgumentCaptor = argumentCaptor()
     Mockito.clearInvocations(javaMailSender)
     tolgeeProperties.smtp.from = "aaa@a.a"
+    tolgeeProperties.backEndUrl = "https://example.com"
     whenever(javaMailSender.createMimeMessage()).thenAnswer {
       JavaMailSenderImpl().createMimeMessage()
     }
