@@ -6,6 +6,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.Namespace
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
@@ -29,11 +30,12 @@ class KeysImporter(
   private val tagService: TagService = applicationContext.getBean(TagService::class.java)
   private val securityService: SecurityService = applicationContext.getBean(SecurityService::class.java)
   private val keyMetaService: KeyMetaService = applicationContext.getBean(KeyMetaService::class.java)
+  private val branchService: BranchService = applicationContext.getBean(BranchService::class.java)
 
   fun import() {
     val languageTags = keys.flatMap { it.translations.keys }.toSet()
     securityService.checkLanguageTranslatePermissionByTag(project.id, languageTags)
-    val branchEntity = securityService.checkAndGetProjectBranch(project.id, branch)
+    val branchEntity = branchService.getActiveOrDefault(project.id, branch)
 
     val existing =
       keyService

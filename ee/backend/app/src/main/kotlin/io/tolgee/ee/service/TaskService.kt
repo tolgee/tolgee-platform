@@ -509,7 +509,7 @@ class TaskService(
     if (branchName.isNullOrBlank()) {
       return null
     }
-    return branchService.getActiveBranch(projectId, branchName)
+    return branchService.getActiveOrDefault(projectId, branchName)
   }
 
   private fun checkAssignees(
