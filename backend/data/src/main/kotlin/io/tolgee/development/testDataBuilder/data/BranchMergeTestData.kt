@@ -103,6 +103,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
     addMatchingKey(
       name = "stable-key",
       mainText = "Stable text",
+      additionalLabels = setOf(label4),
     )
 
     addMatchingKey(
@@ -206,8 +207,14 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
     mainText: String,
     featureText: String = mainText,
     extended: Boolean = false,
+    additionalLabels: Set<Label> = emptySet(),
     callback: (main: Key, feature: Key) -> Unit = { _, _ -> },
   ) {
+    val baseLabels =
+      mutableSetOf(label1, label2, label3).apply {
+        addAll(additionalLabels)
+      }
+
     val mainKey =
       addKey {
         this.name = name
@@ -216,7 +223,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
         addTranslation {
           language = englishLanguage
           text = mainText
-          labels = mutableSetOf(label1, label2, label3)
+          labels = baseLabels.toMutableSet()
         }
         if (extended) {
           tag1 = addTag("abc")
@@ -233,7 +240,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
         addTranslation {
           language = englishLanguage
           text = featureText
-          labels = mutableSetOf(label1, label2, label3)
+          labels = baseLabels.toMutableSet()
         }
         if (extended) {
           addTag("abc")

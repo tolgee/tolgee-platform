@@ -74,6 +74,14 @@ class BranchTestData(
         }
       }
       addBranch {
+        name = "z-archived-branch"
+        project = projectBuilder.self
+        isProtected = false
+        isDefault = false
+        archivedAt = currentDateProvider.date.addDays(-2)
+        originBranch = this
+      }
+      addBranch {
         name = "merged-and-deleted-branch"
         project = projectBuilder.self
         isProtected = false
