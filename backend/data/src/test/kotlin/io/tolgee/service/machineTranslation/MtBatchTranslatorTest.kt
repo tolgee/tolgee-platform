@@ -136,17 +136,17 @@ class MtBatchTranslatorTest {
           usedService = MtServiceType.GOOGLE,
         ),
         TranslateResult(
-          translatedText = "<x id=\"tolgee-number\">2</x> psi",
+          translatedText = "<x tolgee-id=\"tolgee-number\">2</x> psi",
           actualPrice = 100,
           usedService = MtServiceType.GOOGLE,
         ),
         TranslateResult(
-          translatedText = "<x id=\"tolgee-number\">0,5</x> psa",
+          translatedText = "<x tolgee-id=\"tolgee-number\">0,5</x> psa",
           actualPrice = 100,
           usedService = MtServiceType.GOOGLE,
         ),
         TranslateResult(
-          translatedText = "<x id=\"tolgee-number\">10</x> psů",
+          translatedText = "<x tolgee-id=\"tolgee-number\">10</x> psů",
           actualPrice = 100,
           usedService = MtServiceType.GOOGLE,
         ),
