@@ -226,6 +226,9 @@ class UserAccountService(
     toDelete.preferences?.let {
       entityManager.remove(it)
     }
+    // Clear the reference to avoid Hibernate 6.6's CHECK_ON_FLUSH validation error
+    // when the removed preferences entity is still referenced by the UserAccount
+    toDelete.preferences = null
     toDelete.invitations?.forEach {
       entityManager.remove(it)
     }
