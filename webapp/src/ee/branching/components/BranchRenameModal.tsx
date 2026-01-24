@@ -49,6 +49,7 @@ export const BranchRenameModal: React.FC<Props> = ({
               required
               size="small"
               autoFocus
+              data-cy="branch-name-input"
             />
           </Box>
         </StandardForm>

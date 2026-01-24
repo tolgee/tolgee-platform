@@ -214,6 +214,7 @@ declare namespace DataCy {
         "billing-usage-table-translations" |
         "billing_period_annual" |
         "branch-merge-detail-menu" |
+        "branch-name-input" |
         "cell-key-screenshot-dropzone" |
         "cell-key-screenshot-file-input" |
         "checkbox-group-multiselect" |
@@ -579,7 +580,10 @@ declare namespace DataCy {
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |
         "project-branch-merge-accept" |
+        "project-branch-merge-apply" |
+        "project-branch-merge-cancel" |
         "project-branch-merge-change" |
+        "project-branch-merge-delete-branch-checkbox" |
         "project-branch-merge-detail" |
         "project-dashboard-activity-chart" |
         "project-dashboard-activity-list" |
@@ -640,6 +644,7 @@ declare namespace DataCy {
         "project-settings-branches-actions-menu" |
         "project-settings-branches-add" |
         "project-settings-branches-merge-into-button" |
+        "project-settings-branches-protection-button" |
         "project-settings-branches-remove-button" |
         "project-settings-branches-rename-button" |
         "project-settings-button" |

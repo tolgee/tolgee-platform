@@ -21,6 +21,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { downloadExported } from 'tg.views/projects/export/downloadExported';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { getPreselectedLanguages } from './getPreselectedLanguages';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 
 const StyledForm = styled('form')`
   display: grid;
@@ -67,6 +68,7 @@ export const OperationExportTranslations = ({ disabled, onClose }: Props) => {
   const { t } = useTranslate();
   const [dialogOpen, setDialogOpen] = useState(true);
   const project = useProject();
+  const branchName = useBranchFromUrlPath();
   const allLanguages = useTranslationsSelector((c) => c.languages) || [];
   const translationsLanguages = useTranslationsSelector(
     (c) => c.translationsLanguages
@@ -155,7 +157,8 @@ export const OperationExportTranslations = ({ disabled, onClose }: Props) => {
                     response as unknown as Response,
                     values.languages,
                     format,
-                    project.name
+                    project.name,
+                    branchName
                   );
                 },
                 onSettled() {
