@@ -15,7 +15,7 @@ const StyledPanelBox = styled(Box)`
   margin-top: 24px;
   border: 1px solid ${({ theme }) => theme.palette.tokens.border.secondary};
   display: flex;
-  width: 1200px;
+  width: 100%;
   padding: 6px 16px;
   justify-content: center;
   align-items: center;

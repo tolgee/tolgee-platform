@@ -235,7 +235,9 @@ export const BranchesList = () => {
               onSetProtected={
                 canManageBranches ? handleSetProtected : undefined
               }
-              onMergeInto={() => handleMergeInto(l)}
+              onMergeInto={
+                canManageBranches ? () => handleMergeInto(l) : undefined
+              }
               onMergeDetail={() => handleMergeDetail(l)}
             />
           )}

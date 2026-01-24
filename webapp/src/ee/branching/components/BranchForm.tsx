@@ -55,7 +55,12 @@ export const BranchForm: FC<BranchFormProps> = ({
                 <BranchNameLabel />
               </Box>
             </FieldLabel>
-            <TextField size="small" name="name" required={true} />
+            <TextField
+              size="small"
+              name="name"
+              required={true}
+              data-cy="branch-name-input"
+            />
           </Box>
         </Box>
         <Box display="flex" mb={2}>

@@ -247,6 +247,7 @@ export const BranchMergeDetail: FC = () => {
             onChange={(event) =>
               setDeleteBranchAfterMerge(event.target.checked)
             }
+            data-cy="project-branch-merge-delete-branch-checkbox"
           />
         }
         label={
@@ -260,6 +261,7 @@ export const BranchMergeDetail: FC = () => {
         <Button
           variant="outlined"
           color="primary"
+          data-cy="project-branch-merge-cancel"
           onClick={() =>
             history.push(
               LINKS.PROJECT_BRANCHES.build({
@@ -273,6 +275,7 @@ export const BranchMergeDetail: FC = () => {
         <Button
           variant="contained"
           color="primary"
+          data-cy="project-branch-merge-apply"
           onClick={handleApply}
           disabled={!readyToMerge || applyMutation.isLoading}
         >
