@@ -23,6 +23,7 @@ import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
 import io.tolgee.util.Logging
+import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.context.annotation.Lazy
@@ -54,11 +55,15 @@ class ProjectHardDeletingService(
   private val importSettingsService: ImportSettingsService,
   private val glossaryCleanupService: GlossaryCleanupService,
   private val labelService: LabelService,
+  private val entityManager: EntityManager,
 ) : Logging {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
   fun hardDeleteProject(project: Project) {
     traceLogMeasureTime("deleteProject") {
+      // Store the project ID upfront to use after clearing the persistence context
+      val projectId = project.id
+
       try {
         projectHolder.project
       } catch (e: ProjectNotSelectedException) {
@@ -70,10 +75,10 @@ class ProjectHardDeletingService(
       }
 
       traceLogMeasureTime("deleteProject: delete project import settings") {
-        importSettingsService.deleteAllByProject(project.id)
+        importSettingsService.deleteAllByProject(projectId)
       }
 
-      importService.getAllByProject(project.id).forEach {
+      importService.getAllByProject(projectId).forEach {
         importService.hardDeleteImport(it)
       }
 
@@ -82,37 +87,112 @@ class ProjectHardDeletingService(
       projectRepository.saveAndFlush(project)
 
       traceLogMeasureTime("deleteProject: delete api keys") {
-        apiKeyService.deleteAllByProject(project.id)
+        apiKeyService.deleteAllByProject(projectId)
       }
 
       traceLogMeasureTime("deleteProject: delete permissions") {
-        permissionService.deleteAllByProject(project.id)
+        permissionService.deleteAllByProject(projectId)
       }
 
       traceLogMeasureTime("deleteProject: delete screenshots") {
-        screenshotService.deleteAllByProject(project.id)
+        screenshotService.deleteAllByProject(projectId)
       }
 
-      mtServiceConfigService.deleteAllByProjectId(project.id)
+      mtServiceConfigService.deleteAllByProjectId(projectId)
 
-      promptService.deleteAllByProjectId(project.id)
+      promptService.deleteAllByProjectId(projectId)
 
-      aiPlaygroundResultService.deleteResultsByProject(project.id)
+      aiPlaygroundResultService.deleteResultsByProject(projectId)
 
-      labelService.deleteLabelsByProjectId(project.id)
+      labelService.deleteLabelsByProjectId(projectId)
 
       traceLogMeasureTime("deleteProject: delete languages") {
-        languageService.deleteAllByProject(project.id)
+        languageService.deleteAllByProject(projectId)
       }
 
       traceLogMeasureTime("deleteProject: delete keys") {
-        keyService.deleteAllByProject(project.id)
+        keyService.deleteAllByProject(projectId)
       }
 
       avatarService.unlinkAvatarFiles(project)
-      batchJobService.deleteAllByProjectId(project.id)
-      bigMetaService.deleteAllByProjectId(project.id)
-      projectRepository.delete(project)
+
+      // Flush and clear before batch job deletion to prevent TransientObjectException
+      // The batch job service uses entity-based deletion which can cause issues
+      // when entities in the persistence context reference batch jobs
+      entityManager.flush()
+      entityManager.clear()
+
+      batchJobService.deleteAllByProjectId(projectId)
+
+      // Flush and clear after batch job deletion to prevent TransientObjectException
+      // when BigMetaService tries to query entities that might reference batch jobs
+      entityManager.flush()
+      entityManager.clear()
+
+      bigMetaService.deleteAllByProjectId(projectId)
+
+      // Flush and clear the persistence context to ensure deletions are synchronized
+      // and to prevent Hibernate 6.6's CHECK_ON_FLUSH from seeing stale relationships
+      entityManager.flush()
+      entityManager.clear()
+
+      // Delete entities with orphanRemoval=true that would normally be cascade-deleted
+      // We need to do this explicitly because we're using a bulk JPQL delete for the project
+      // Order matters due to foreign key constraints
+
+      // Delete Automation children first (they reference Automation and ContentDeliveryConfig)
+      entityManager
+        .createQuery("DELETE FROM AutomationTrigger t WHERE t.automation.project.id = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
+      entityManager
+        .createQuery("DELETE FROM AutomationAction a WHERE a.automation.project.id = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
+
+      // Now delete Automation and other project-level entities
+      entityManager
+        .createQuery("DELETE FROM Automation a WHERE a.project.id = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
+      entityManager
+        .createQuery("DELETE FROM AutoTranslationConfig a WHERE a.project.id = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
+      entityManager
+        .createQuery("DELETE FROM ContentDeliveryConfig c WHERE c.project.id = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
+
+      // Delete ContentStorage children first
+      entityManager
+        .createQuery("DELETE FROM AzureContentStorageConfig a WHERE a.contentStorage.project.id = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
+      entityManager
+        .createQuery("DELETE FROM S3ContentStorageConfig s WHERE s.contentStorage.project.id = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
+
+      entityManager
+        .createQuery("DELETE FROM ContentStorage c WHERE c.project.id = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
+      entityManager
+        .createQuery("DELETE FROM WebhookConfig w WHERE w.project.id = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
+      entityManager
+        .createQuery("DELETE FROM SlackConfig s WHERE s.project.id = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
+
+      // Use bulk delete to bypass Hibernate's orphan removal checking
+      // which can cause TransientObjectException with Hibernate 6.6's stricter validation
+      entityManager
+        .createQuery("DELETE FROM Project p WHERE p.id = :projectId")
+        .setParameter("projectId", projectId)
+        .executeUpdate()
     }
   }
 
