@@ -39,6 +39,7 @@ import jakarta.persistence.Table
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.ColumnDefault
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -92,6 +93,7 @@ class Key(
   override var keyMeta: KeyMeta? = null
 
   @OneToMany(mappedBy = "key", orphanRemoval = true, cascade = [CascadeType.PERSIST])
+  @BatchSize(size = 1000)
   var keyScreenshotReferences: MutableList<KeyScreenshotReference> = mutableListOf()
 
   @ActivityLoggedProp
