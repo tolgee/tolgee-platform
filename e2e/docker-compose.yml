@@ -6,7 +6,7 @@ services:
       - 8201:8201
       - 8091:8091
     environment:
-      - spring.profiles.active=docker,e2e
+      - SPRING_PROFILES_ACTIVE=docker,e2e
       - tolgee.smtp.host=fakesmtp
       - tolgee.smtp.port=1025
       - tolgee.frontend-url=http://localhost:8201

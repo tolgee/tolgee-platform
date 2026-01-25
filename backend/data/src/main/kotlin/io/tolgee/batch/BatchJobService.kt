@@ -341,50 +341,42 @@ class BatchJobService(
     applicationContext.getBean(type.processor.java) as ChunkProcessor<Any, Any, Any>
 
   fun deleteAllByProjectId(projectId: Long) {
-    val batchJobs = getAllByProjectId(projectId)
-    val batchJobIds = batchJobs.map { it.id }
-    val executions = findAllExecutionsByBatchJobIdIn(batchJobIds)
-    val executionIds = executions.map { it.id }
-    setActivityRevisionFieldsToNull(batchJobIds, executionIds)
-    deleteExecutions(executions)
-    batchJobRepository.deleteAll(batchJobs)
-  }
+    // Use bulk JPQL queries with project.id to avoid loading millions of entities into memory
+    // and to avoid Hibernate 6.6's CHECK_ON_FLUSH validation issues
 
-  private fun deleteExecutions(executions: List<BatchJobChunkExecution>) {
+    // Clear ActivityRevision references to batch jobs and executions for this project
     entityManager
       .createQuery(
         """
-        delete from BatchJobChunkExecution e where e.id in :executionIds
+        UPDATE ActivityRevision ar SET ar.batchJob = null
+        WHERE ar.batchJob.project.id = :projectId
         """.trimIndent(),
-      ).setParameter("executionIds", executions.map { it.id })
+      ).setParameter("projectId", projectId)
       .executeUpdate()
-  }
 
-  private fun setActivityRevisionFieldsToNull(
-    batchJobIds: List<Long>,
-    executionIds: List<Long>,
-  ) {
     entityManager
       .createQuery(
         """
-        update ActivityRevision ar set ar.batchJob = null, ar.batchJobChunkExecution = null
-        where ar.batchJob.id in :batchJobIds or ar.batchJobChunkExecution.id in :executionIds
+        UPDATE ActivityRevision ar SET ar.batchJobChunkExecution = null
+        WHERE ar.batchJobChunkExecution.batchJob.project.id = :projectId
         """.trimIndent(),
-      ).setParameter("batchJobIds", batchJobIds)
-      .setParameter("executionIds", executionIds)
+      ).setParameter("projectId", projectId)
       .executeUpdate()
-  }
 
-  private fun findAllExecutionsByBatchJobIdIn(jobIds: List<Long>): List<BatchJobChunkExecution> {
-    return entityManager
+    // Delete executions for batch jobs in this project
+    entityManager
       .createQuery(
         """
-        from BatchJobChunkExecution e
-        where e.batchJob.id in :jobIds
+        DELETE FROM BatchJobChunkExecution e WHERE e.batchJob.project.id = :projectId
         """.trimIndent(),
-        BatchJobChunkExecution::class.java,
-      ).setParameter("jobIds", jobIds)
-      .resultList
+      ).setParameter("projectId", projectId)
+      .executeUpdate()
+
+    // Delete batch jobs for this project
+    entityManager
+      .createQuery("DELETE FROM BatchJob b WHERE b.project.id = :projectId")
+      .setParameter("projectId", projectId)
+      .executeUpdate()
   }
 
   fun getAllByProjectId(projectId: Long): List<BatchJob> {

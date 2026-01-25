@@ -560,7 +560,12 @@ class TestDataService(
   }
 
   private fun saveUserPreferences(data: List<UserPreferencesBuilder>) {
-    data.forEach { userPreferencesService.save(it.self) }
+    data.forEach {
+      val savedPreferences = userPreferencesService.save(it.self)
+      // Synchronize the bidirectional relationship to avoid Hibernate 6.6's CHECK_ON_FLUSH
+      // validation error when UserAccount references an unsaved UserPreferences
+      it.userAccountBuilder.self.preferences = savedPreferences
+    }
   }
 
   private fun saveAuthProviderChangeRequests(data: List<AuthProviderChangeRequestBuilder>) {
