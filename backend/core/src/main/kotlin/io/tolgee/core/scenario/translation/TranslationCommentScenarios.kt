@@ -5,6 +5,9 @@ import io.tolgee.core.concepts.architecture.ScenarioService
 import io.tolgee.core.concepts.security.AuthorizationWitness
 import io.tolgee.core.concepts.types.FailureMarker
 import io.tolgee.core.concepts.types.InputMarker
+import io.tolgee.core.concepts.conversions.Into
+import io.tolgee.core.concepts.conversions.converting
+import io.tolgee.core.concepts.conversions.shortCircuit
 import io.tolgee.core.concepts.types.OutputMarker
 import io.tolgee.core.domain.project.data.ProjectId
 import io.tolgee.core.domain.project.service.ICheckProjectAuthorization
@@ -61,6 +64,25 @@ class FetchTranslationComments(
 
   class Witness internal constructor() : AuthorizationWitness
 
+  object IntoProof : Into<Witness> {
+    fun ICheckProjectAuthorization.Output.bind() = when (this) {
+      is ICheckProjectAuthorization.Output.Denied -> shortCircuit(null)
+      is ICheckProjectAuthorization.Output.Authorized -> ICheckProjectAuthorization.Output.Authorized
+    }
+  }
+
+  object IntoOutput : Into<Output> {
+    fun IFetchProjects.Output.bind() = when (this) {
+      is IFetchProjects.Output.NotFound -> shortCircuit(Output.ProjectNotFound)
+      is IFetchProjects.Output.Success -> Unit
+    }
+
+    fun IFetchTranslationComments.Output.bind() = when (this) {
+      is IFetchTranslationComments.Output.TranslationNotFound -> shortCircuit(Output.TranslationNotFound)
+      is IFetchTranslationComments.Output.Success -> this.page
+    }
+  }
+
   /**
    * Authorize access to the specified project for the given user.
    *
@@ -68,25 +90,18 @@ class FetchTranslationComments(
    * @param projectId The project to access
    * @return [Witness] if user has access, `null` if access is denied
    */
-  fun authorize(userId: UserId, projectId: ProjectId): Witness? {
-    return when (checkProjectAuthorization.hasAccess(userId, projectId)) {
-      is ICheckProjectAuthorization.Output.Authorized -> Witness()
-      is ICheckProjectAuthorization.Output.Denied -> null
-    }
+  fun authorize(userId: UserId, projectId: ProjectId): Witness? = converting(IntoProof) {
+      checkProjectAuthorization.hasAccess(userId, projectId).bind()
+      Witness()
   }
 
   @Transactional
-  override fun Witness.execute(input: Input): Output {
+  override fun Witness.execute(input: Input): Output = converting(IntoOutput) {
     // Check project exists
-    when (fetchProjects.byId(input.projectId)) {
-      is IFetchProjects.Output.NotFound -> return Output.ProjectNotFound
-      is IFetchProjects.Output.Success -> Unit
-    }
-
+    fetchProjects.byId(input.projectId).bind()
     // Fetch comments (includes translation existence check)
-    return when (val result = fetchComments.forTranslation(input.projectId, input.translationId, input.pageable)) {
-      is IFetchTranslationComments.Output.TranslationNotFound -> Output.TranslationNotFound
-      is IFetchTranslationComments.Output.Success -> Output.Success(result.page)
-    }
+    Output.Success(
+      fetchComments.forTranslation(input.projectId, input.translationId, input.pageable).bind()
+    )
   }
 }
