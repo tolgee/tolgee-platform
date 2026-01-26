@@ -116,7 +116,6 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
   standalone,
   slim,
   editEnabled,
-  onTranslationUpdated,
 }) => {
   const theme = useTheme();
   const { preferredOrganization } = usePreferredOrganization();
@@ -149,8 +148,10 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
   const saveMutation = useApiMutation({
     url: '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms/{termId}/translations',
     method: 'post',
-    invalidatePrefix:
+    invalidatePrefix: [
       '/v2/organizations/{organizationId}/glossaries/{glossaryId}/terms',
+      '/v2/projects/{projectId}/glossary-highlights',
+    ],
   });
 
   const handleStartEdit = (e: React.MouseEvent) => {
@@ -185,7 +186,6 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
       {
         onSuccess: () => {
           setIsEditing(false);
-          onTranslationUpdated?.();
         },
       }
     );
@@ -375,7 +375,6 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
             languageTag={languageTag}
             targetLanguageTag={targetLanguageTag}
             standalone
-            onTranslationUpdated={onTranslationUpdated}
           />
         }
       >

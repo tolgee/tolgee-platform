@@ -56,5 +56,4 @@ export type GlossaryTermPreviewProps = {
   standalone?: boolean;
   slim?: boolean;
   editEnabled?: boolean;
-  onTranslationUpdated?: () => void;
 };

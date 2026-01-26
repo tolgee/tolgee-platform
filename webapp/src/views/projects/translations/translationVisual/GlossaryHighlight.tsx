@@ -16,7 +16,6 @@ type Props = {
   term: GlossaryTermModel;
   languageTag: string;
   targetLanguageTag?: string;
-  onTranslationUpdated?: () => void;
 };
 
 export const GlossaryHighlight = ({
@@ -24,7 +23,6 @@ export const GlossaryHighlight = ({
   term,
   languageTag,
   targetLanguageTag,
-  onTranslationUpdated,
 }: Props) => {
   return (
     <Tooltip
@@ -37,7 +35,6 @@ export const GlossaryHighlight = ({
           languageTag={languageTag}
           targetLanguageTag={targetLanguageTag}
           standalone
-          onTranslationUpdated={onTranslationUpdated}
         />
       }
     >

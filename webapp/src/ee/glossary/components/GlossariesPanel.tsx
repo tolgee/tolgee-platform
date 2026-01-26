@@ -46,10 +46,10 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
   const editEnabled = useIsOrganizationOwnerOrMaintainer();
   const assignedGlossaries = useProjectGlossaries({
     projectId: project.id,
-    enabled: terms.data.length === 0,
+    enabled: terms.length === 0,
   });
 
-  if (terms.data.length === 0) {
+  if (terms.length === 0) {
     const organizationSlug = project.organizationOwner?.slug;
     const hasAssignedGlossaries =
       assignedGlossaries.data && assignedGlossaries.data.length > 0;
@@ -86,7 +86,7 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
   }
 
   const found: number[] = [];
-  const previews = terms.data
+  const previews = terms
     .map((v) => v.value)
     .filter((term) => {
       if (found.includes(term.id)) {
@@ -104,7 +104,6 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
           targetLanguageTag={language.tag}
           appendValue={appendValue}
           editEnabled={editEnabled}
-          onTranslationUpdated={() => terms.refetch()}
           slim
         />
       );
@@ -117,4 +116,4 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
 };
 
 export const useGlossariesCount = (data: PanelContentData) =>
-  useGlossaryTermsHighlightsForPanel(data).data.length;
+  useGlossaryTermsHighlightsForPanel(data).length;
