@@ -39,4 +39,6 @@ interface BranchRepositoryOss : JpaRepository<Branch, Long> {
     """,
   )
   fun findDefaultByProjectId(projectId: Long): Branch?
+
+  fun deleteAllByProjectId(projectId: Long)
 }

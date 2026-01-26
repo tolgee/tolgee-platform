@@ -2,6 +2,7 @@ package io.tolgee.model.key.screenshotReference
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.Screenshot
+import io.tolgee.model.branching.BranchVersionedEntity
 import io.tolgee.model.key.Key
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -20,7 +21,7 @@ import org.hibernate.annotations.Type
     Index(columnList = "screenshot_id"),
   ],
 )
-class KeyScreenshotReference {
+class KeyScreenshotReference : BranchVersionedEntity {
   @ManyToOne(optional = false)
   @Id
   lateinit var key: Key
@@ -35,4 +36,8 @@ class KeyScreenshotReference {
 
   @Column(columnDefinition = "text", length = 2000)
   var originalText: String? = null
+
+  override fun resolveKey(): Key? {
+    return key
+  }
 }
