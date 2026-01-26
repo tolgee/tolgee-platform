@@ -263,27 +263,30 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
               >
                 {translation?.text}
               </StyledTitle>
-              <ArrowNarrowRight />
-              {targetLanguageFlag && (
-                <FlagImage width={20} flagEmoji={targetLanguageFlag} />
-              )}
-              {targetTranslation &&
-              languageTag != targetLanguageTag &&
-              !term.flagNonTranslatable ? (
-                <StyledTitle
-                  variant="body2"
-                  data-cy="glossary-term-preview-target-text"
-                >
-                  {targetTranslation.text}
-                </StyledTitle>
-              ) : (
-                <StyledEmptyTitle
-                  variant="body2"
-                  data-cy="glossary-term-preview-target-text"
-                >
-                  <T keyName="glossary_term_preview_target_translation_empty" />
-                </StyledEmptyTitle>
-              )}
+              {!term.flagNonTranslatable &&
+                languageTag != targetLanguageTag && (
+                  <>
+                    <ArrowNarrowRight />
+                    {targetLanguageFlag && (
+                      <FlagImage width={20} flagEmoji={targetLanguageFlag} />
+                    )}
+                    {targetTranslation ? (
+                      <StyledTitle
+                        variant="body2"
+                        data-cy="glossary-term-preview-target-text"
+                      >
+                        {targetTranslation.text}
+                      </StyledTitle>
+                    ) : (
+                      <StyledEmptyTitle
+                        variant="body2"
+                        data-cy="glossary-term-preview-target-text"
+                      >
+                        <T keyName="glossary_term_preview_target_translation_empty" />
+                      </StyledEmptyTitle>
+                    )}
+                  </>
+                )}
             </StyledTitleTextWrapper>
             <StyledGap />
             {(isHovering || standalone) && (
