@@ -5,6 +5,9 @@ import io.tolgee.core.concepts.architecture.ScenarioService
 import io.tolgee.core.concepts.security.AuthorizationProof
 import io.tolgee.core.concepts.types.FailureMarker
 import io.tolgee.core.concepts.types.InputMarker
+import io.tolgee.core.concepts.conversions.Into
+import io.tolgee.core.concepts.conversions.converting
+import io.tolgee.core.concepts.conversions.shortCircuit
 import io.tolgee.core.concepts.types.OutputMarker
 import io.tolgee.core.domain.project.data.ProjectId
 import io.tolgee.core.domain.project.service.ICheckProjectAuthorization
@@ -13,6 +16,7 @@ import io.tolgee.core.domain.translation.comment.service.IFetchTranslationCommen
 import io.tolgee.core.domain.translation.data.TranslationId
 import io.tolgee.core.domain.user.data.UserId
 import io.tolgee.core.scenario.translation.FetchTranslationComments.Input
+import io.tolgee.core.scenario.translation.FetchTranslationComments.IntoOutput.bind
 import io.tolgee.core.scenario.translation.FetchTranslationComments.Output
 import io.tolgee.core.scenario.translation.FetchTranslationComments.Proof
 import io.tolgee.model.translation.TranslationComment
@@ -61,6 +65,25 @@ class FetchTranslationComments(
 
   class Proof internal constructor() : AuthorizationProof
 
+  object IntoProof : Into<Proof> {
+    fun ICheckProjectAuthorization.Output.bind() = when (this) {
+      is ICheckProjectAuthorization.Output.Denied -> shortCircuit(null)
+      is ICheckProjectAuthorization.Output.Authorized -> ICheckProjectAuthorization.Output.Authorized
+    }
+  }
+
+  object IntoOutput : Into<Output> {
+    fun IFetchProjects.Output.bind() = when (this) {
+      is IFetchProjects.Output.NotFound -> shortCircuit(Output.ProjectNotFound)
+      is IFetchProjects.Output.Success -> Unit
+    }
+
+    fun IFetchTranslationComments.Output.bind() = when (this) {
+      is IFetchTranslationComments.Output.TranslationNotFound -> shortCircuit(Output.TranslationNotFound)
+      is IFetchTranslationComments.Output.Success -> this.page
+    }
+  }
+
   /**
    * Authorize access to the specified project for the given user.
    *
@@ -68,25 +91,18 @@ class FetchTranslationComments(
    * @param projectId The project to access
    * @return [Proof] if user has access, `null` if access is denied
    */
-  fun authorize(userId: UserId, projectId: ProjectId): Proof? {
-    return when (checkProjectAuthorization.hasAccess(userId, projectId)) {
-      is ICheckProjectAuthorization.Output.Authorized -> Proof()
-      is ICheckProjectAuthorization.Output.Denied -> null
-    }
+  fun authorize(userId: UserId, projectId: ProjectId): Proof? = converting(IntoProof) {
+      checkProjectAuthorization.hasAccess(userId, projectId).bind()
+      Proof()
   }
 
   @Transactional
-  override fun Proof.execute(input: Input): Output {
+  override fun Proof.execute(input: Input): Output = converting(IntoOutput) {
     // Check project exists
-    when (fetchProjects.byId(input.projectId)) {
-      is IFetchProjects.Output.NotFound -> return Output.ProjectNotFound
-      is IFetchProjects.Output.Success -> Unit
-    }
-
+    fetchProjects.byId(input.projectId).bind()
     // Fetch comments (includes translation existence check)
-    return when (val result = fetchComments.forTranslation(input.projectId, input.translationId, input.pageable)) {
-      is IFetchTranslationComments.Output.TranslationNotFound -> Output.TranslationNotFound
-      is IFetchTranslationComments.Output.Success -> Output.Success(result.page)
-    }
+    Output.Success(
+      fetchComments.forTranslation(input.projectId, input.translationId, input.pageable).bind()
+    )
   }
 }
