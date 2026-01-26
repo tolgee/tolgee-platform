@@ -78,17 +78,5 @@ class ProjectBranchingMigrationService(
       ).setParameter("branch", defaultBranch)
       .setParameter("projectId", projectId)
       .executeUpdate()
-
-    entityManager
-      .createQuery(
-        """
-        update ActivityModifiedEntity ame
-        set ame.branchId = :branchId
-        where ame.branchId is null
-          and ame.activityRevision.projectId = :projectId
-        """,
-      ).setParameter("branchId", defaultBranch.id)
-      .setParameter("projectId", projectId)
-      .executeUpdate()
   }
 }

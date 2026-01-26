@@ -4,7 +4,7 @@ import io.tolgee.events.OnEntityCollectionPreUpdate
 import io.tolgee.events.OnEntityPreDelete
 import io.tolgee.events.OnEntityPrePersist
 import io.tolgee.events.OnEntityPreUpdate
-import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.BranchMergeableEntity
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 
@@ -43,7 +43,7 @@ class BranchContentEventListener(
     oldState: Map<String, Any>? = null,
   ) {
     if (entity == null) return
-    if (entity !is BranchVersionedEntity<*, *>) return
+    if (entity !is BranchMergeableEntity<*, *>) return
 
     val key = entity.resolveKey() ?: return
 
