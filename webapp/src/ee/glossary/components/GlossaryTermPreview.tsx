@@ -116,12 +116,14 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
   standalone,
   slim,
   editEnabled,
+  onClose,
 }) => {
   const theme = useTheme();
   const { preferredOrganization } = usePreferredOrganization();
   const [isHovering, setIsHovering] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
+  const [tooltipOpen, setTooltipOpen] = useState(false);
 
   const realLanguageTag = term.flagNonTranslatable
     ? term.glossary.baseLanguageTag
@@ -341,6 +343,27 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
                     </IconButton>
                   </Tooltip>
                 )}
+                {onClose && (
+                  <Tooltip
+                    title={
+                      <T keyName="glossary_term_preview_close_button_tooltip" />
+                    }
+                  >
+                    <IconButton
+                      sx={{
+                        margin: theme.spacing(-0.8),
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onClose();
+                      }}
+                      size="small"
+                      data-cy="glossary-term-preview-close-button"
+                    >
+                      <XClose width={20} height={20} />
+                    </IconButton>
+                  </Tooltip>
+                )}
               </>
             )}
           </>
@@ -369,6 +392,9 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
   if (slim) {
     return (
       <Tooltip
+        open={tooltipOpen}
+        onOpen={() => setTooltipOpen(true)}
+        onClose={() => setTooltipOpen(false)}
         placement="bottom-start"
         enterDelay={200}
         components={{ Tooltip: TooltipCard }}
@@ -378,6 +404,7 @@ export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> = ({
             languageTag={languageTag}
             targetLanguageTag={targetLanguageTag}
             standalone
+            onClose={() => setTooltipOpen(false)}
           />
         }
       >

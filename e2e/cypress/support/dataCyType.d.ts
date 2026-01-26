@@ -349,6 +349,7 @@ declare namespace DataCy {
         "glossary-term-highlight" |
         "glossary-term-list-item" |
         "glossary-term-preview-cancel-button" |
+        "glossary-term-preview-close-button" |
         "glossary-term-preview-container" |
         "glossary-term-preview-description" |
         "glossary-term-preview-description-card" |
