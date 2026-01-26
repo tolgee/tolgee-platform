@@ -9,10 +9,16 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.core.domain.project.data.ProjectId
+import io.tolgee.core.domain.translation.data.TranslationId
+import io.tolgee.core.scenario.translation.FetchTranslationComments
 import io.tolgee.dtos.request.translation.comment.TranslationCommentDto
 import io.tolgee.dtos.request.translation.comment.TranslationCommentWithLangKeyDto
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.security.ratelimit.RateLimitedException
+import io.tolgee.constants.Message
 import io.tolgee.hateoas.translations.TranslationModelAssembler
 import io.tolgee.hateoas.translations.comments.TranslationCommentModel
 import io.tolgee.hateoas.translations.comments.TranslationCommentModelAssembler
@@ -69,11 +75,60 @@ class TranslationCommentController(
   private val authenticationFacade: AuthenticationFacade,
   private val securityService: SecurityService,
   private val translationModelAssembler: TranslationModelAssembler,
+  private val fetchTranslationCommentsScenario: FetchTranslationComments,
 ) {
+  /**
+   * Returns paginated translation comments for a translation.
+   *
+   * ## HTTP Responses
+   *
+   * ### Success
+   * | HTTP | Description |
+   * |------|-------------|
+   * | 200  | Returns paginated comments |
+   *
+   * ### Authentication Failures (AuthenticationFilter)
+   * | HTTP | Error Code | Condition |
+   * |------|------------|-----------|
+   * | 401  | `unauthenticated` | No token provided |
+   * | 401  | `invalid_jwt_token` | Invalid JWT token |
+   * | 401  | `jwt_expired` | Expired JWT token |
+   * | 401  | `invalid_project_api_key` | Invalid PAK format |
+   * | 401  | `project_api_key_expired` | Expired PAK |
+   *
+   * ### Rate Limiting (GlobalIpRateLimitFilter / GlobalUserRateLimitFilter)
+   * | HTTP | Description |
+   * |------|-------------|
+   * | 429  | Global IP or user rate limit exceeded. Response includes `retryAfter`. |
+   *
+   * ### API Access Failures (AuthenticationInterceptor)
+   * | HTTP | Error Code | Condition |
+   * |------|------------|-----------|
+   * | 403  | `api_access_forbidden` | API auth used without @AllowApiAccess |
+   * | 403  | `pat_access_not_allowed` | PAT used but endpoint requires PAK only |
+   * | 403  | `pak_access_not_allowed` | PAK used but endpoint requires PAT only |
+   *
+   * ### Project Authorization (ProjectAuthorizationInterceptor)
+   * | HTTP | Error Code | Condition |
+   * |------|------------|-----------|
+   * | 400  | `project_not_selected` | Project doesn't exist in database |
+   * | 404  | `project_not_found` | User has no permissions on project (hides existence) |
+   * | 403  | `pak_created_for_different_project` | PAK used for different project than URL |
+   *
+   * ### Business Logic
+   * | HTTP | Error Code | Condition |
+   * |------|------------|-----------|
+   * | 404  | `translation_not_found` | Translation doesn't exist or belongs to different project |
+   *
+   * ### Input Validation
+   * | HTTP | Description |
+   * |------|-------------|
+   * | 400  | Invalid pageable params or unknown sort property |
+   */
   @GetMapping(value = ["{translationId}/comments"])
   @Operation(
     summary = "Get translation comments",
-    description = "Returns translation comments of translation",
+    description = "Returns paginated translation comments for a translation.",
   )
   @UseDefaultPermissions
   @AllowApiAccess
@@ -81,11 +136,28 @@ class TranslationCommentController(
     @PathVariable translationId: Long,
     @ParameterObject pageable: Pageable,
   ): PagedModel<TranslationCommentModel> {
-    val translation = translationService.get(projectHolder.project.id, translationId)
-    return pagedResourcesAssembler.toModel(
-      translationCommentService.getPaged(translation, pageable),
-      translationCommentModelAssembler,
-    )
+    val projectId = ProjectId(projectHolder.project.id)
+
+    // Execute scenario
+    val input =
+      FetchTranslationComments.Input(
+        projectId = projectId,
+        translationId = TranslationId(translationId),
+        pageable = pageable,
+      )
+
+    return when (val output = fetchTranslationCommentsScenario.execute(input)) {
+      is FetchTranslationComments.Output.Success ->
+        pagedResourcesAssembler.toModel(output.page, translationCommentModelAssembler)
+      is FetchTranslationComments.Output.ProjectNotFound ->
+        throw BadRequestException(Message.PROJECT_NOT_SELECTED)
+      is FetchTranslationComments.Output.ProjectNotAccessible ->
+        throw NotFoundException(Message.PROJECT_NOT_FOUND)
+      is FetchTranslationComments.Output.TranslationNotFound ->
+        throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+      is FetchTranslationComments.Output.RateLimited ->
+        throw RateLimitedException(output.retryAfterMs, false)
+    }
   }
 
   @GetMapping(value = ["{translationId}/comments/{commentId}"])
