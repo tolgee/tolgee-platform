@@ -145,6 +145,7 @@ dependencies {
     testImplementation libs.mockito
     implementation libs.jsonUnitAssert
     testImplementation(project(":testing"))
+    testImplementation libs.archunit
     ktlint(project(":ktlint"))
 
     /**

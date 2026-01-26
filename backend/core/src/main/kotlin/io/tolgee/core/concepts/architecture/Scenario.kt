@@ -1,5 +1,6 @@
 package io.tolgee.core.concepts.architecture
 
+import io.tolgee.core.concepts.security.AuthorizationWitness
 import io.tolgee.core.concepts.types.InputMarker
 import io.tolgee.core.concepts.types.OutputMarker
 import org.springframework.stereotype.Service
@@ -10,10 +11,11 @@ import org.springframework.stereotype.Service
  * scenarios, to reach a certain goal. As such, they should take care of delimiting transactions and defining
  * security policies.
  *
- * A scenario accepts an [InputMarker] [I] and returns an [OutputMarker] [O].
+ * A scenario accepts an [InputMarker] [I] and returns an [OutputMarker] [O] conditional on the existence of an
+ * [AuthorizationWitness] [A].
  */
-fun interface Scenario<I : InputMarker, O : OutputMarker> {
-  fun execute(input: I): O
+fun interface Scenario<I : InputMarker, O : OutputMarker, A : AuthorizationWitness> {
+  fun A.execute(input: I): O
 }
 
 /**

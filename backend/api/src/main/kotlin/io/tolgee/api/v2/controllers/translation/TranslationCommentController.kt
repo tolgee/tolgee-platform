@@ -11,6 +11,7 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.core.domain.project.data.ProjectId
 import io.tolgee.core.domain.translation.data.TranslationId
+import io.tolgee.core.domain.user.data.UserId
 import io.tolgee.core.scenario.translation.FetchTranslationComments
 import io.tolgee.dtos.request.translation.comment.TranslationCommentDto
 import io.tolgee.dtos.request.translation.comment.TranslationCommentWithLangKeyDto
@@ -136,7 +137,13 @@ class TranslationCommentController(
     @PathVariable translationId: Long,
     @ParameterObject pageable: Pageable,
   ): PagedModel<TranslationCommentModel> {
+    val userId = UserId(authenticationFacade.authenticatedUser.id)
     val projectId = ProjectId(projectHolder.project.id)
+
+    // Authorize: returns Proof if user can access project, null otherwise
+    val proof =
+      fetchTranslationCommentsScenario.authorize(userId, projectId)
+        ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
 
     // Execute scenario
     val input =
@@ -146,7 +153,7 @@ class TranslationCommentController(
         pageable = pageable,
       )
 
-    return when (val output = fetchTranslationCommentsScenario.execute(input)) {
+    return when (val output = with(fetchTranslationCommentsScenario) { proof.execute(input) }) {
       is FetchTranslationComments.Output.Success ->
         pagedResourcesAssembler.toModel(output.page, translationCommentModelAssembler)
       is FetchTranslationComments.Output.ProjectNotFound ->
