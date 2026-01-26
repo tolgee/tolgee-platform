@@ -96,7 +96,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
         response = performBranchCreation()
       }
     response.andIsOk
-    time.assert.isLessThan(3200)
+    time.assert.isLessThan(1500)
   }
 
   @Test
