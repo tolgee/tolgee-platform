@@ -44,7 +44,7 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
           branchKey = this
         }.build {
           addMeta {
-            tags.add(existingTag)
+            tags.add(existingTag2)
           }
         }
       }
