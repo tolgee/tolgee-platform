@@ -1,7 +1,9 @@
 package io.tolgee.model.branching
 
+import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
@@ -41,8 +43,10 @@ import java.util.Date
   // - project_id, is_default where is_default is TRUE
 )
 @ActivityLoggedEntity
+@ActivityReturnsExistence
 class Branch(
   @ActivityLoggedProp
+  @ActivityDescribingProp
   @Column(length = 200)
   var name: String = "",
   @ActivityLoggedProp

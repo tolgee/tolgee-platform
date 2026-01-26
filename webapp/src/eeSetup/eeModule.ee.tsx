@@ -73,6 +73,7 @@ import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
+export { BranchReference } from '../ee/branching/components/BranchReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
 export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle';
 export { TranslationTaskIndicator } from '../ee/task/components/TranslationTaskIndicator';

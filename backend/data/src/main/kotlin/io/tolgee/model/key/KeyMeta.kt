@@ -7,7 +7,7 @@ import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.propChangesProvider.TagsPropChangesProvider
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
-import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.BranchMergeableEntity
 import io.tolgee.model.branching.snapshot.KeyMetaSnapshot
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
@@ -36,7 +36,7 @@ class KeyMeta(
   @OneToOne
   var importKey: ImportKey? = null,
 ) : StandardAuditModel(),
-  BranchVersionedEntity<KeyMeta, KeyMetaSnapshot> {
+  BranchMergeableEntity<KeyMeta, KeyMetaSnapshot> {
   @OneToMany(mappedBy = "keyMeta")
   @OrderBy("id")
   var comments = mutableListOf<KeyComment>()

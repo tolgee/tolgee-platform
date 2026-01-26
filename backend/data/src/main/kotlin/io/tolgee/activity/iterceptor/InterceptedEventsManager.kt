@@ -13,15 +13,10 @@ import io.tolgee.activity.propChangesProvider.PropChangesProvider
 import io.tolgee.component.ActivityHolderProvider
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.EntityWithId
-import io.tolgee.model.Language
-import io.tolgee.model.Project
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
-import io.tolgee.model.branching.BranchVersionedEntity
-import io.tolgee.model.key.KeyComment
-import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
-import io.tolgee.model.task.Task
+import io.tolgee.model.branching.EntityWithBranch
 import jakarta.persistence.EntityManager
 import jakarta.persistence.FlushModeType
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCause
@@ -178,41 +173,8 @@ class InterceptedEventsManager(
   }
 
   private fun resolveBranchId(entity: EntityWithId): Long? {
-    val branchableKey =
-      (entity as? BranchVersionedEntity<*, *>)?.resolveKey()
-    if (branchableKey != null) {
-      return branchableKey.branch?.id ?: defaultBranchId(branchableKey.project.id)
-    }
-
-    return when (entity) {
-      is KeyComment -> {
-        entity.keyMeta.key
-          ?.branch
-          ?.id ?: entity.keyMeta.key
-          ?.project
-          ?.id
-          ?.let(::defaultBranchId)
-      }
-
-      is KeyScreenshotReference -> {
-        entity.key.branch?.id ?: defaultBranchId(entity.key.project.id)
-      }
-
-      is Task -> {
-        entity.branch?.id ?: defaultBranchId(entity.project.id)
-      }
-
-      is Project -> {
-        defaultBranchId(entity.id)
-      }
-
-      is Language -> {
-        defaultBranchId(entity.project.id)
-      }
-
-      else -> {
-        null
-      }
+    return (entity as? EntityWithBranch)?.let {
+      it.resolveBranch()?.id ?: defaultBranchId(it.resolveProject()?.id)
     }
   }
 

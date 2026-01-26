@@ -2,6 +2,8 @@ package io.tolgee.ee.api.v2.controllers.branching
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
@@ -77,6 +79,7 @@ class BranchController(
 ) {
   @PostMapping(value = [""])
   @Operation(summary = "Create branch")
+  @RequestActivity(ActivityType.BRANCH_CREATE)
   @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @AllowApiAccess
   @OpenApiOrderExtension(2)
@@ -115,6 +118,7 @@ class BranchController(
   @DeleteMapping(value = ["/{branchId}"])
   @Operation(summary = "Delete branch")
   @AllowApiAccess
+  @RequestActivity(ActivityType.BRANCH_DELETE)
   @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(3)
   fun delete(
@@ -127,6 +131,7 @@ class BranchController(
   @PostMapping(value = ["/{branchId}"])
   @Operation(summary = "Rename branch")
   @AllowApiAccess
+  @RequestActivity(ActivityType.BRANCH_RENAME)
   @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(3)
   fun rename(
@@ -141,6 +146,7 @@ class BranchController(
   @PostMapping(value = ["/{branchId}/protected"])
   @Operation(summary = "Set branch protected flag")
   @AllowApiAccess
+  @RequestActivity(ActivityType.BRANCH_PROTECTION_CHANGE)
   @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
   @OpenApiOrderExtension(3)
   fun setProtected(
@@ -276,6 +282,7 @@ class BranchController(
   @PostMapping(value = ["/merge/{mergeId}/apply"])
   @Operation(summary = "Merge source branch to target branch")
   @AllowApiAccess
+  @RequestActivity(ActivityType.BRANCH_MERGE)
   @UseDefaultPermissions
   @OpenApiOrderExtension(10)
   fun merge(

@@ -13,7 +13,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UploadedImage
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
-import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.BranchMergeableEntity
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.enums.TranslationProtection
@@ -538,7 +538,7 @@ class SecurityService(
     checkProtectedBranchModify(branch, projectId)
   }
 
-  fun checkProtectedBranchModify(entity: BranchVersionedEntity<*, *>) {
+  fun checkProtectedBranchModify(entity: BranchMergeableEntity<*, *>) {
     val key = entity.resolveKey() ?: return
     val branch = key.branch ?: branchService.getDefaultBranch(key.project.id)
     checkProtectedBranchModify(branch, key.project.id)

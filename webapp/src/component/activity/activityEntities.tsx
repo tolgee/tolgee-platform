@@ -1,6 +1,7 @@
 import { getDiffVersion } from './activityTools';
 import { T } from '@tolgee/react';
 import {
+  BranchReferenceData,
   ContentDeliveryConfigReferenceData,
   EntityEnum,
   EntityOptions,
@@ -531,6 +532,35 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
         result.push(keyRef);
       }
       return result;
+    },
+  },
+  Branch: {
+    label(params) {
+      return <T keyName="activity_entity_branch" params={params} />;
+    },
+    fields: {
+      name: {
+        type: 'text',
+        label(params) {
+          return <T keyName="activity_entity_branch.name" params={params} />;
+        },
+      },
+      isProtected: {
+        type: 'batch_boolean',
+        label(params) {
+          return (
+            <T keyName="activity_entity_branch.is_protected" params={params} />
+          );
+        },
+      },
+    },
+    references: ({ modifications, description }) => {
+      const name = (modifications?.['name']?.new ||
+        modifications?.['name']?.old ||
+        description?.['name']) as unknown as string | null | undefined;
+      return name
+        ? ([{ type: 'branch', name: name }] as BranchReferenceData[])
+        : undefined;
     },
   },
 };

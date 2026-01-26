@@ -10,6 +10,8 @@ import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.EntityWithBranch
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.translationAgency.TranslationAgency
@@ -45,7 +47,9 @@ import java.util.Date
 )
 @ActivityLoggedEntity
 @ActivityEntityDescribingPaths(["language"])
-class Task : StandardAuditModel() {
+class Task :
+  StandardAuditModel(),
+  EntityWithBranch {
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project = Project() // Initialize to avoid null issues
 
@@ -101,4 +105,12 @@ class Task : StandardAuditModel() {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = true)
   var agency: TranslationAgency? = null
+
+  override fun resolveBranch(): Branch? {
+    return branch
+  }
+
+  override fun resolveProject(): Project? {
+    return project
+  }
 }

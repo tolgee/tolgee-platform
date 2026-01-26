@@ -12,7 +12,7 @@ import io.tolgee.events.OnKeyPreRemove
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.branching.Branch
-import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.BranchMergeableEntity
 import io.tolgee.model.branching.snapshot.KeyScreenshotReferenceView
 import io.tolgee.model.branching.snapshot.KeySnapshot
 import io.tolgee.model.dataImport.WithKeyMeta
@@ -67,7 +67,7 @@ class Key(
   var name: String = "",
 ) : StandardAuditModel(),
   WithKeyMeta,
-  BranchVersionedEntity<Key, KeySnapshot> {
+  BranchMergeableEntity<Key, KeySnapshot> {
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var project: Project

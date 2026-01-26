@@ -10,7 +10,7 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
-import io.tolgee.model.branching.BranchVersionedEntity
+import io.tolgee.model.branching.BranchMergeableEntity
 import io.tolgee.model.branching.snapshot.TranslationSnapshot
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.enums.TranslationState
@@ -60,7 +60,7 @@ class Translation(
   @ActivityDescribingProp
   var text: String? = null,
 ) : StandardAuditModel(),
-  BranchVersionedEntity<Translation, TranslationSnapshot> {
+  BranchMergeableEntity<Translation, TranslationSnapshot> {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @NotNull
   lateinit var key: Key

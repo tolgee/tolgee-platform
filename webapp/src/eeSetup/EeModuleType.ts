@@ -58,3 +58,8 @@ export type GlossaryTermPreviewProps = {
   editEnabled?: boolean;
   onClose?: () => void;
 };
+
+export type BranchReferenceData = {
+  type: 'branch';
+  name: string;
+};

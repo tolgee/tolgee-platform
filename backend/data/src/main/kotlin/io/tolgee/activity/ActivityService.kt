@@ -118,7 +118,7 @@ class ActivityService(
     pageable: Pageable,
     branchName: String? = null,
   ): Page<ProjectActivityView> {
-    val branch = branchService.getActiveOrDefault(projectId, branchName)
+    val branch = branchService.getActiveNonDefaultBranch(projectId, branchName)
     return ProjectActivityViewByPageableProvider(
       applicationContext = applicationContext,
       projectId = projectId,
@@ -141,7 +141,7 @@ class ActivityService(
     revisionId: Long,
     branchName: String? = null,
   ): ProjectActivityView? {
-    val branch = branchService.getActiveOrDefault(projectId, branchName)
+    val branch = branchService.getActiveNonDefaultBranch(projectId, branchName)
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
       revisionId = revisionId,
@@ -169,7 +169,7 @@ class ActivityService(
     filterEntityClass: List<String>?,
     branchName: String? = null,
   ): Page<ModifiedEntityView> {
-    val branch = branchService.getActiveOrDefault(projectId, branchName)
+    val branch = branchService.getActiveNonDefaultBranch(projectId, branchName)
     val provider =
       ModificationsByRevisionsProvider(
         applicationContext,
