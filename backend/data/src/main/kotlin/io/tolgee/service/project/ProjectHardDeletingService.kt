@@ -13,6 +13,7 @@ import io.tolgee.service.AvatarService
 import io.tolgee.service.GlossaryCleanupService
 import io.tolgee.service.PromptService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.ImportSettingsService
 import io.tolgee.service.key.KeyService
@@ -54,6 +55,7 @@ class ProjectHardDeletingService(
   private val importSettingsService: ImportSettingsService,
   private val glossaryCleanupService: GlossaryCleanupService,
   private val labelService: LabelService,
+  private val branchService: BranchService,
 ) : Logging {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
@@ -112,6 +114,7 @@ class ProjectHardDeletingService(
       avatarService.unlinkAvatarFiles(project)
       batchJobService.deleteAllByProjectId(project.id)
       bigMetaService.deleteAllByProjectId(project.id)
+      branchService.deleteAllByProjectId(project.id)
       projectRepository.delete(project)
     }
   }
