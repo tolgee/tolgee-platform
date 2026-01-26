@@ -33,4 +33,8 @@ abstract class AbstractBranchService(
   override fun getDefaultBranch(projectId: Long): Branch? {
     return branchRepository.findDefaultByProjectId(projectId)
   }
+
+  override fun deleteAllByProjectId(projectId: Long) {
+    return branchRepository.deleteAllByProjectId(projectId)
+  }
 }
