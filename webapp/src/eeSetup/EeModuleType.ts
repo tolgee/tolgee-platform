@@ -56,3 +56,8 @@ export type GlossaryTermPreviewProps = {
   standalone?: boolean;
   slim?: boolean;
 };
+
+export type BranchReferenceData = {
+  type: 'branch';
+  name: string;
+};

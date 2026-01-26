@@ -17,15 +17,16 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     """
     from ActivityRevision ar
     where ar.projectId = :projectId and ar.type is not null and ar.batchJobChunkExecution is null and ar.type in :types
-    and (
-      :branchId is null
-      or exists (
-        select 1
-        from ActivityModifiedEntity me
-        left join Branch b on me.branchId = b.id
-        where me.activityRevision = ar
-            and ((b.id = :branchId and b.archivedAt is null) or (:branchId is null and (b is null or b.isDefault)))
-      )
+    and exists (                                                                                                                                                                                                       
+      select 1                                                                                                                                                                                                         
+      from ActivityModifiedEntity me                                                                                                                                                                                   
+      left join Branch b on me.branchId = b.id                                                                                                                                                                         
+      where me.activityRevision = ar                                                                                                                                                                                   
+        and (b.archivedAt is null or me.branchId is null)                                                                                                                                                              
+        and (                                                                                                                                                                                                          
+          (:branchId is null and (me.branchId is null or b.isDefault = true))                                                                                                                                          
+          or (:branchId is not null and me.branchId = :branchId)                                                                                                                                                       
+        )                                                                                                                                                                                                              
     )
   """,
   )
