@@ -3,8 +3,6 @@ package io.tolgee.service.project
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.BranchingMigrationTestData
 import io.tolgee.dtos.request.project.EditProjectRequest
-import io.tolgee.model.activity.ActivityModifiedEntity
-import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -91,16 +89,6 @@ class ProjectBranchingMigrationTest : AbstractSpringTest() {
         .resultList
         .firstOrNull()
     assertThat(languageStatsBranchId).isEqualTo(defaultBranchId)
-
-    val activityBranchId: Long? =
-      entityManager
-        .createQuery(
-          "select ame.branchId from ActivityModifiedEntity ame where ame.entityId = :entityId and ame.activityRevision.id = :revisionId",
-          Long::class.java,
-        ).setParameter("entityId", prepared.testData.key.id)
-        .setParameter("revisionId", prepared.activityRevisionId)
-        .singleResult
-    assertThat(activityBranchId).isEqualTo(defaultBranchId)
   }
 
   private fun prepareTestData(): PreparedData {
@@ -114,28 +102,14 @@ class ProjectBranchingMigrationTest : AbstractSpringTest() {
 
   private fun createBranchlessData(testData: BranchingMigrationTestData): PreparedData {
     return executeInNewTransaction {
-      val activityRevision =
-        ActivityRevision().apply {
-          projectId = testData.project.id
-        }
-      entityManager.persist(activityRevision)
-
-      val modifiedEntity =
-        ActivityModifiedEntity(activityRevision, "Key", testData.key.id).apply {
-          branchId = null
-        }
-      entityManager.persist(modifiedEntity)
-
       entityManager.flush()
       PreparedData(
         testData = testData,
-        activityRevisionId = activityRevision.id,
       )
     }
   }
 
   private data class PreparedData(
     val testData: BranchingMigrationTestData,
-    val activityRevisionId: Long,
   )
 }

@@ -4911,7 +4911,12 @@ export interface components {
         | "SUGGESTION_SET_ACTIVE"
         | "AI_PROMPT_CREATE"
         | "AI_PROMPT_UPDATE"
-        | "AI_PROMPT_DELETE";
+        | "AI_PROMPT_DELETE"
+        | "BRANCH_CREATE"
+        | "BRANCH_RENAME"
+        | "BRANCH_DELETE"
+        | "BRANCH_PROTECTION_CHANGE"
+        | "BRANCH_MERGE";
     };
     ProjectAiPromptCustomizationModel: {
       /**

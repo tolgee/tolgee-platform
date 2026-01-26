@@ -508,4 +508,44 @@ export const actionsConfiguration: Partial<
         ?.translation as any as string;
     },
   },
+  BRANCH_CREATE: {
+    label(params) {
+      return <T keyName="activity_branch_create" params={params} />;
+    },
+    entities: {
+      Branch: [],
+    },
+  },
+  BRANCH_RENAME: {
+    label(params) {
+      return <T keyName="activity_branch_rename" params={params} />;
+    },
+    entities: {
+      Branch: ['name'],
+    },
+  },
+  BRANCH_DELETE: {
+    label(params) {
+      return <T keyName="activity_branch_delete" params={params} />;
+    },
+    entities: {
+      Branch: [],
+    },
+  },
+  BRANCH_PROTECTION_CHANGE: {
+    label(params) {
+      return <T keyName="activity_branch_protection_change" params={params} />;
+    },
+    entities: {
+      Branch: ['isProtected'],
+    },
+  },
+  BRANCH_MERGE: {
+    label(params) {
+      return <T keyName="activity_branch_merge" params={params} />;
+    },
+    entities: {
+      Branch: [],
+    },
+  },
 };
