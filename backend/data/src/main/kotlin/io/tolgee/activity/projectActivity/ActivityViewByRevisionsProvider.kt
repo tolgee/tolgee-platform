@@ -192,7 +192,7 @@ class ActivityViewByRevisionsProvider(
     subquery.where(
       cb.equal(branch.get(Branch_.project).get(Project_.id), revision.get(ActivityRevision_.projectId)),
       cb.isTrue(branch.get(Branch_.isDefault)),
-      cb.isNull(branch.get(Branch_.archivedAt)),
+      cb.isNull(branch.get(Branch_.deletedAt)),
     )
 
     return cb.or(

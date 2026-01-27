@@ -212,7 +212,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     branchService.applyMerge(testData.project.id, merge.id, false)
 
     val refreshedBranch = testData.featureBranch.refresh()!!
-    refreshedBranch.archivedAt.assert.isNull()
+    refreshedBranch.deletedAt.assert.isNull()
     refreshedBranch.deletedAt.assert.isNull()
     testData.featureOpenTask
       .refresh()

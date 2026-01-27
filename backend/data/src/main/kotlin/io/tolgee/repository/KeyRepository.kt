@@ -46,7 +46,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
       k.name = :name 
       and k.project.id = :projectId 
       and (ns.name = :namespace or (ns is null and :namespace is null))
-      and ((br.name = :branch and br.archivedAt is null) or (:branch is null and (br is null or br.isDefault)))
+      and ((br.name = :branch and br.deletedAt is null) or (:branch is null and (br is null or br.isDefault)))
   """,
   )
   fun getByNameAndNamespace(
@@ -70,7 +70,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
         left join fetch k.namespace 
         left join fetch k.keyMeta 
     where k.project.id = :projectId
-    and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault))) 
+    and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault))) 
     """,
   )
   fun getAllByProjectIdAndBranch(
@@ -86,7 +86,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
      left join k.namespace ns
      left join k.branch br
      where k.project.id = :projectId
-        and ((br.name = :branch and br.archivedAt is null) or (:branch is null and (br is null or br.isDefault))) 
+        and ((br.name = :branch and br.deletedAt is null) or (:branch is null and (br is null or br.isDefault))) 
      order by k.id
     """,
   )
@@ -216,13 +216,13 @@ interface KeyRepository : JpaRepository<Key, Long> {
      left join k.namespace ns
      left join k.branch b
      where k.project.id = :projectId
-        and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault)))
+        and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault)))
     """,
     countQuery = """
       select count(k) from Key k 
       left join k.branch b
       where k.project.id = :projectId 
-        and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault)))
+        and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault)))
     """,
   )
   fun getAllByProjectId(
@@ -365,7 +365,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
       left join fetch c.author ca
       where k.project.id = :projectId 
         and k.name = :keyName
-        and ((b.name = :branchName and b.archivedAt is null) or (:branchName is null and (b is null or b.isDefault)))
+        and ((b.name = :branchName and b.deletedAt is null) or (:branchName is null and (b is null or b.isDefault)))
     """,
   )
   fun findPrefetchedByNameAndBranch(

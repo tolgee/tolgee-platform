@@ -247,7 +247,7 @@ class BigMetaService(
           cb.or(
             cb.and(
               cb.equalNullable(branch.get(Branch_.name), key.branch),
-              cb.isNull(branch.get(Branch_.archivedAt)),
+              cb.isNull(branch.get(Branch_.deletedAt)),
             ),
             cb.or(
               cb.isNull(root.get(Key_.branch)),
