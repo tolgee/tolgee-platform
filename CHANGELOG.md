@@ -1,3 +1,11 @@
+## [3.149.1](https://github.com/tolgee/tolgee-platform/compare/v3.149.0...v3.149.1) (2026-01-27)
+
+
+### Bug Fixes
+
+* add translation suggestions scope to Edit role ([#3385](https://github.com/tolgee/tolgee-platform/issues/3385)) ([3516865](https://github.com/tolgee/tolgee-platform/commit/3516865fb3c0122c077598ca4669364a30f62b58)), closes [#3386](https://github.com/tolgee/tolgee-platform/issues/3386)
+* use Authorization header for DeepL API requests ([#3416](https://github.com/tolgee/tolgee-platform/issues/3416)) ([619f118](https://github.com/tolgee/tolgee-platform/commit/619f1188cc55d1219187d65ceb0906d5947ec3b8)), closes [#3400](https://github.com/tolgee/tolgee-platform/issues/3400)
+
 # [3.149.0](https://github.com/tolgee/tolgee-platform/compare/v3.148.0...v3.149.0) (2026-01-23)
 
 
