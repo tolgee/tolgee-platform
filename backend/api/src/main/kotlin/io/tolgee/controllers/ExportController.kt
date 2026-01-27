@@ -58,13 +58,13 @@ class ExportController(
   @RateLimited(limit = 10, refillDurationInMs = 60_000)
   @Deprecated("Use v2 export controller")
   fun doExportJsonZip(request: WebRequest): ResponseEntity<StreamingResponseBody>? {
-    rateLimitService.checkPerUserRateLimit(
-      "export",
-      limit = tolgeeProperties.rateLimit.exportRequestLimit,
-      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimit.exportRequestWindow),
-    )
-
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
+      rateLimitService.checkPerUserRateLimit(
+        "export",
+        limit = tolgeeProperties.rateLimit.exportRequestLimit,
+        refillDuration = Duration.ofMillis(tolgeeProperties.rateLimit.exportRequestWindow),
+      )
+
       val allLanguages =
         permissionService.getPermittedViewLanguages(
           projectHolder.project.id,
