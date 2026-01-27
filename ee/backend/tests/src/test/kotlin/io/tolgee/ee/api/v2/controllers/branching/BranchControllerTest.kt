@@ -67,7 +67,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `returns list of all branches`() {
     performProjectAuthGet("branches").andIsOk.andAssertThatJson {
-      node("page.totalElements").isNumber.isEqualTo(BigDecimal(4))
+      node("page.totalElements").isNumber.isEqualTo(BigDecimal(3))
       node("_embedded.branches") {
         node("[0].name").isEqualTo("main")
         node("[0].active").isEqualTo(true)
@@ -221,7 +221,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `deletes branch`() {
     performProjectAuthDelete("branches/${testData.mergeBranch.id}").andIsOk
     testData.mergeBranch.refresh().let {
-      it.archivedAt.assert.isNotNull()
+      it.deletedAt.assert.isNotNull()
       it.deletedAt.assert.isNotNull()
     }
   }
@@ -238,7 +238,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthDelete("branches/${testData.mainBranch.id}").andIsForbidden
     testData.mainBranch
       .refresh()
-      .archivedAt.assert
+      .deletedAt.assert
       .isNull()
   }
 

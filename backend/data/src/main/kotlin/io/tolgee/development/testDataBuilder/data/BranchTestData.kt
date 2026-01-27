@@ -74,11 +74,11 @@ class BranchTestData(
         }
       }
       addBranch {
-        name = "merged-and-archived-branch"
+        name = "merged-and-deleted-branch"
         project = projectBuilder.self
         isProtected = false
         isDefault = false
-        archivedAt = currentDateProvider.date.addDays(-1)
+        deletedAt = currentDateProvider.date.addDays(-1)
         originBranch = this
       }
     }

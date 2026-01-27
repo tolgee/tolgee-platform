@@ -39,7 +39,7 @@ import java.util.Date
     Index(columnList = "name"),
   ],
   // unique indexes are created in schema.xml
-  // - project_id, name where archived_at IS NULL
+  // - project_id, name where deleted_at IS NULL
   // - project_id, is_default where is_default is TRUE
 )
 @ActivityLoggedEntity
@@ -53,8 +53,6 @@ class Branch(
   var isDefault: Boolean = false,
   @ActivityLoggedProp
   var isProtected: Boolean = false,
-  @ActivityLoggedProp
-  var archivedAt: Date? = null,
   @Column(name = "pending")
   var pending: Boolean = false,
   @Column(name = "revision")
@@ -97,5 +95,5 @@ class Branch(
     get() = merges.firstOrNull()
 
   val isActive: Boolean
-    get() = archivedAt == null
+    get() = deletedAt == null
 }

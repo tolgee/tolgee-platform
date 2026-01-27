@@ -16,7 +16,7 @@ interface ImportRepository : JpaRepository<Import, Long> {
     where i.project.id = :projectId 
         and i.author.id = :authorId 
         and i.deletedAt is null
-        and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault))) 
+        and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault))) 
   """,
   )
   fun findByProjectIdAndAuthorId(
