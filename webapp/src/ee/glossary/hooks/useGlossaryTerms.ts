@@ -24,7 +24,7 @@ export const useGlossaryTerms = ({ search, languageTags }: Props) => {
     search,
     languageTags,
     size: 30,
-    sort: ['tr.text,desc'],
+    sort: ['tr.text,asc'],
   };
 
   const loadable = useApiInfiniteQuery({

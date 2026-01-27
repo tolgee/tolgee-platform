@@ -55,4 +55,6 @@ export type GlossaryTermPreviewProps = {
   appendValue?: (val: string) => void;
   standalone?: boolean;
   slim?: boolean;
+  editEnabled?: boolean;
+  onClose?: () => void;
 };

@@ -38,6 +38,13 @@ class GlossaryService(
     return glossaryRepository.findByOrganizationIdPaged(organizationId, pageable, search)
   }
 
+  fun findAssignedToProject(
+    organizationId: Long,
+    projectId: Long,
+  ): List<Glossary> {
+    return glossaryRepository.findAssignedToProject(organizationId, projectId)
+  }
+
   fun findAllWithStatsPaged(
     organizationId: Long,
     pageable: Pageable,
@@ -122,6 +129,10 @@ class GlossaryService(
   ) {
     val glossary = get(organizationId, glossaryId)
     glossaryRepository.delete(glossary)
+  }
+
+  fun getAssignedProjectsIds(glossary: Glossary): Set<Long> {
+    return glossaryRepository.findAssignedProjectsIdsByGlossaryId(glossary.id)
   }
 
   @Transactional

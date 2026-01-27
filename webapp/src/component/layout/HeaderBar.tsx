@@ -21,6 +21,7 @@ export type HeaderBarProps = {
   noBorder?: boolean;
   reducedSpacing?: boolean;
   title?: ReactNode;
+  titleAdornment?: ReactNode;
   titleVariant?: React.ComponentProps<typeof Typography>['variant'];
   onAdd?: () => void;
   addLinkTo?: string;
@@ -39,6 +40,7 @@ export const HeaderBar: React.VFC<HeaderBarProps> = (props) => {
 
   const displayHeader =
     props.title !== undefined ||
+    props.titleAdornment !== undefined ||
     props.customHeader ||
     props.onSearch ||
     props.onAdd ||
@@ -65,6 +67,7 @@ export const HeaderBar: React.VFC<HeaderBarProps> = (props) => {
                   {props.title}
                 </Typography>
               )}
+              {props.titleAdornment}
               {typeof props.onSearch === 'function' && (
                 <Box>
                   <SecondaryBarSearchField

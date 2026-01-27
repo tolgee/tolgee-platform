@@ -15,7 +15,10 @@ import { T } from '@tolgee/react';
 import { SelectionService } from 'tg.service/useSelectionService';
 import { messageService } from 'tg.service/MessageService';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import {
+  useIsOrganizationOwnerOrMaintainer,
+  usePreferredOrganization,
+} from 'tg.globalContext/helpers';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
 const StyledCard = styled(Card)`
@@ -95,9 +98,7 @@ export const GlossaryBatchToolbar: React.VFC<Props> = ({
     });
   };
 
-  const canDelete = ['OWNER', 'MAINTAINER'].includes(
-    preferredOrganization?.currentUserRole || ''
-  );
+  const canDelete = useIsOrganizationOwnerOrMaintainer();
 
   return (
     <StyledCard

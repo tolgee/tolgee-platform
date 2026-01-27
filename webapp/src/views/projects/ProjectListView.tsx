@@ -13,6 +13,7 @@ import { Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
 import {
   useIsAdminOrSupporter,
+  useIsOrganizationOwnerOrMaintainer,
   usePreferredOrganization,
 } from 'tg.globalContext/helpers';
 import { OrganizationSwitch } from 'tg.component/organizationSwitch/OrganizationSwitch';
@@ -52,9 +53,7 @@ export const ProjectListView = () => {
 
   const { t } = useTranslate();
 
-  const isOrganizationOwnerOrMaintainer = ['OWNER', 'MAINTAINER'].includes(
-    preferredOrganization?.currentUserRole || ''
-  );
+  const isOrganizationOwnerOrMaintainer = useIsOrganizationOwnerOrMaintainer();
 
   const isAdminOrSupporter = useIsAdminOrSupporter();
 

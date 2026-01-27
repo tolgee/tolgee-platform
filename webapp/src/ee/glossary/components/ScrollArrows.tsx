@@ -72,9 +72,10 @@ export const ScrollArrows = ({
     ref: containerRef,
     onResize: () => {
       const position = containerRef.current?.getBoundingClientRect();
+      const windowBounds = window.document.body.getBoundingClientRect();
       if (position) {
         const left = position?.left;
-        const right = window.innerWidth - position?.right;
+        const right = windowBounds.right - position?.right;
         setTablePosition({ left, right });
       }
     },

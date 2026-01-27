@@ -5,7 +5,7 @@ import { GlossaryListTranslationCell } from 'tg.ee.module/glossary/components/Gl
 import { GlossaryListTermCell } from 'tg.ee.module/glossary/components/GlossaryListTermCell';
 import { SelectionService } from 'tg.service/useSelectionService';
 import { T } from '@tolgee/react';
-import { usePreferredOrganization } from 'tg.globalContext/helpers';
+import { useIsOrganizationOwnerOrMaintainer } from 'tg.globalContext/helpers';
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 
 type SimpleGlossaryTermWithTranslationsModel =
@@ -39,13 +39,8 @@ export const GlossaryViewListRow: React.VFC<Props> = ({
   selectedLanguages,
   selectionService,
 }) => {
-  const { preferredOrganization } = usePreferredOrganization();
   const glossary = useGlossary();
-
-  const editEnabled = ['OWNER', 'MAINTAINER'].includes(
-    preferredOrganization?.currentUserRole || ''
-  );
-
+  const editEnabled = useIsOrganizationOwnerOrMaintainer();
   const [editingTermId, editingLanguageTag] = editingTranslation;
 
   return (

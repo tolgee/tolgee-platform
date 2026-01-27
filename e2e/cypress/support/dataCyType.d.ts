@@ -343,12 +343,20 @@ declare namespace DataCy {
         "glossary-list-languages" |
         "glossary-panel-container" |
         "glossary-panel-container-empty" |
+        "glossary-panel-searched-list" |
+        "glossary-projects-info" |
+        "glossary-switch" |
         "glossary-term-highlight" |
         "glossary-term-list-item" |
+        "glossary-term-preview-cancel-button" |
+        "glossary-term-preview-close-button" |
         "glossary-term-preview-container" |
         "glossary-term-preview-description" |
         "glossary-term-preview-description-card" |
+        "glossary-term-preview-edit-button" |
+        "glossary-term-preview-edit-input" |
         "glossary-term-preview-empty-description" |
+        "glossary-term-preview-save-button" |
         "glossary-term-preview-source-text" |
         "glossary-term-preview-target-text" |
         "glossary-translation-cancel-button" |
@@ -541,9 +549,6 @@ declare namespace DataCy {
         "organization-role-select-item" |
         "organization-side-menu" |
         "organization-switch" |
-        "organization-switch-item" |
-        "organization-switch-new" |
-        "organization-switch-search" |
         "palette-color" |
         "pat-expiry-info" |
         "pat-list-item" |
@@ -716,6 +721,9 @@ declare namespace DataCy {
         "subscriptions-trial-alert-reaching-the-limit" |
         "suggestion-action" |
         "suggestions-list" |
+        "switch-popover-item" |
+        "switch-popover-new" |
+        "switch-popover-search" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
         "task-date-picker" |

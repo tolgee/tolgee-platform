@@ -11,13 +11,15 @@ import { SelectionService } from 'tg.service/useSelectionService';
 const StyledHeaderRow = styled('div')`
   position: sticky;
   background: ${({ theme }) => theme.palette.background.default};
-  top: 0px;
+  z-index: ${({ theme }) => theme.zIndex.fab - 1};
+  top: 0;
   margin-bottom: -1px;
   display: grid;
 `;
 
 const StyledHeaderCell = styled('div')`
   border-top: 1px solid ${({ theme }) => theme.palette.divider1};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1};
   box-sizing: border-box;
   display: flex;
   flex-grow: 0;

@@ -1,7 +1,8 @@
 import { HOST } from '../common/constants';
 import { E2KeyCreateDialog, KeyDialogFillProps } from './E2KeyCreateDialog';
 import { getTranslationCell } from '../common/translations';
-import { gcy } from '../common/shared';
+import { gcy, gcyAdvanced } from '../common/shared';
+import { E2GlossaryPanel } from './glossaries/E2GlossaryPanel';
 
 export class E2TranslationsView {
   visit(projectId: number) {
@@ -77,5 +78,14 @@ export class E2TranslationsView {
     this.openFilterSelect().selectLabelsFilter().selectLabelByName(labelName);
     gcy('translations-filter-select').contains(labelName);
     return this;
+  }
+
+  openGlossaryPanel() {
+    gcyAdvanced({
+      value: 'translation-panel-toggle',
+      id: 'glossaries',
+    }).click();
+    gcy('glossary-panel-container').should('exist');
+    return new E2GlossaryPanel();
   }
 }

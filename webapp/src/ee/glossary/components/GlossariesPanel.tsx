@@ -6,10 +6,13 @@ import {
 import { useGlossaryTermHighlights } from '../hooks/useGlossaryTermHighlights';
 import { TabMessage } from 'tg.views/projects/translations/ToolsPanel/common/TabMessage';
 import { T } from '@tolgee/react';
-import { Box, Link, styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { GlossaryTermPreview } from './GlossaryTermPreview';
-import { Link as RouterLink } from 'react-router-dom';
+import { LinkExternal } from 'tg.component/LinkExternal';
+import { useProjectGlossaries } from 'tg.ee.module/glossary/hooks/useProjectGlossaries';
+import { GlossaryLinksList } from 'tg.ee.module/glossary/components/GlossaryLinksList';
+import { useIsOrganizationOwnerOrMaintainer } from 'tg.globalContext/helpers';
 
 const StyledContainer = styled('div')`
   display: flex;
@@ -38,25 +41,45 @@ const useGlossaryTermsHighlightsForPanel = ({
 
 export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
   const { language, baseLanguage, project, appendValue } = data;
+
   const terms = useGlossaryTermsHighlightsForPanel(data);
+  const editEnabled = useIsOrganizationOwnerOrMaintainer();
+  const assignedGlossaries = useProjectGlossaries({
+    projectId: project.id,
+    enabled: terms.length === 0,
+  });
 
   if (terms.length === 0) {
+    const organizationSlug = project.organizationOwner?.slug;
+    const hasAssignedGlossaries =
+      assignedGlossaries.data && assignedGlossaries.data.length > 0;
+
     return (
       <StyledContainer data-cy="glossary-panel-container-empty">
         <TabMessage>
-          <T
-            keyName="translation_tools_glossary_no_terms"
-            params={{
-              glossariesLink: (
-                <Link
-                  component={RouterLink}
-                  to={LINKS.ORGANIZATION_GLOSSARIES.build({
-                    [PARAMS.ORGANIZATION_SLUG]: project.organizationOwner!.slug,
-                  })}
-                />
-              ),
-            }}
-          />
+          {hasAssignedGlossaries && organizationSlug ? (
+            <>
+              <T keyName="translation_tools_glossary_no_terms_in_prefix" />{' '}
+              <GlossaryLinksList
+                glossaries={assignedGlossaries.data ?? []}
+                organizationSlug={organizationSlug}
+              />
+            </>
+          ) : (
+            <T
+              keyName="translation_tools_glossary_no_terms_no_glossary"
+              params={{
+                glossariesLink: (
+                  <LinkExternal
+                    href={LINKS.ORGANIZATION_GLOSSARIES.build({
+                      [PARAMS.ORGANIZATION_SLUG]:
+                        project.organizationOwner?.slug || '',
+                    })}
+                  />
+                ),
+              }}
+            />
+          )}
         </TabMessage>
       </StyledContainer>
     );
@@ -80,6 +103,7 @@ export const GlossariesPanel: React.VFC<PanelContentProps> = (data) => {
           languageTag={baseLanguage.tag}
           targetLanguageTag={language.tag}
           appendValue={appendValue}
+          editEnabled={editEnabled}
           slim
         />
       );
