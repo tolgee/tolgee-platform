@@ -45,7 +45,7 @@ export const GlossaryLinksList = ({
     <Tooltip
       placement="bottom-start"
       title={
-        <Typography variant="body2" component="span">
+        <Typography variant="body2" component="div">
           {remainingGlossaries.map((glossary) => (
             <div key={glossary.id}>
               <GlossaryLink
