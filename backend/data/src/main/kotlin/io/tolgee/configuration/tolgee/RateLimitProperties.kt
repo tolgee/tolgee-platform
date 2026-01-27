@@ -59,7 +59,7 @@ class RateLimitProperties(
   var emailVerificationRequestWindow: Long = 1 * 60 * 1000,
   var emailVerificationRequestLimitEnabled: Boolean = true,
   @DocProperty(description = "Amount of export requests a user can do in a single time window.")
-  var exportRequestLimit: Int = 10,
+  var exportRequestLimit: Int = 100,
   @DocProperty(description = "Size, in milliseconds, of the time window for export-based limiting.")
-  var exportRequestWindow: Long = 1 * 60 * 1000,
+  var exportRequestWindow: Long = 5 * 60 * 1000,
 )
