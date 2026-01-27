@@ -1,7 +1,7 @@
 import { default as React, FunctionComponent } from 'react';
 import { Box } from '@mui/material';
 
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { parseErrorResponse } from 'tg.fixtures/errorFixtures';
 import { ErrorResponseDto } from 'tg.service/response.types';
 
 import { Alert } from '../Alert';
