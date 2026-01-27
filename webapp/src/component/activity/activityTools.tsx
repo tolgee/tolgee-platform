@@ -173,6 +173,7 @@ export const buildActivity = (
     entities: [],
     references: [],
     counts: data.counts || {},
+    params: data.params,
     options: options!,
   };
 

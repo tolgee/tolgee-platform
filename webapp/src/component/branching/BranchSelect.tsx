@@ -79,7 +79,10 @@ export const BranchSelect = ({
       return;
     }
 
-    if (derivedSelected.id !== selected?.id) {
+    if (
+      derivedSelected.id !== selected?.id ||
+      derivedSelected.name !== selected?.name
+    ) {
       setSelected(derivedSelected);
     }
 
