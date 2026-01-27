@@ -5107,4 +5107,7 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1769532586484-1">
+        <dropColumn columnName="archived_at" tableName="branch"/>
+    </changeSet>
 </databaseChangeLog>

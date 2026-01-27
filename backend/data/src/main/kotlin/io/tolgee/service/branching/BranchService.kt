@@ -18,7 +18,6 @@ interface BranchService {
     projectId: Long,
     page: Pageable,
     search: String? = null,
-    activeOnly: Boolean? = false,
   ): Page<Branch>
 
   fun getActiveBranch(

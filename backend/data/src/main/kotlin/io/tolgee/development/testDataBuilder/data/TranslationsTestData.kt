@@ -321,7 +321,7 @@ class TranslationsTestData {
       addBranch {
         this.name = name
         project = this@apply.self
-        archivedAt = Date(1759834567)
+        deletedAt = Date(1759834567)
       }.build {
         addBasicKey().apply {
           branch = self

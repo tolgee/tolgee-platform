@@ -51,9 +51,8 @@ class BranchServiceImpl(
     projectId: Long,
     page: Pageable,
     search: String?,
-    activeOnly: Boolean?,
   ): Page<Branch> {
-    return branchRepository.getAllProjectBranches(projectId, page, search, activeOnly)
+    return branchRepository.getAllProjectBranches(projectId, page, search)
   }
 
   private fun getActiveBranch(
@@ -200,7 +199,7 @@ class BranchServiceImpl(
     if (!merge.sourceBranch.isDefault) {
       if (deleteBranch == true) {
         taskService.moveTasksAfterMerge(projectId, merge.sourceBranch, merge.targetBranch)
-        archiveBranch(merge.sourceBranch)
+        softDeleteBranch(merge.sourceBranch)
       } else {
         branchSnapshotService.rebuildSnapshotFromSource(
           projectId = projectId,
@@ -278,16 +277,11 @@ class BranchServiceImpl(
     branchMergeService.resolveAllConflicts(projectId, mergeId, request.resolve)
   }
 
-  private fun archiveBranch(branch: Branch) {
-    branch.archivedAt = currentDateProvider.date
+  private fun softDeleteBranch(branch: Branch) {
+    branch.deletedAt = currentDateProvider.date
     branch.lastMerge?.sourceBranch?.let {
       taskService.cancelUnfinishedTasksForBranch(branch.project.id, it.id)
     }
-  }
-
-  private fun softDeleteBranch(branch: Branch) {
-    archiveBranch(branch)
-    branch.deletedAt = currentDateProvider.date
   }
 
   @Transactional

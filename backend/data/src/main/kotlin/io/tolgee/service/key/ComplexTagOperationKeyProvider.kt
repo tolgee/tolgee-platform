@@ -83,7 +83,7 @@ class ComplexTagOperationKeyProvider(
               } else {
                 cb.and(
                   cb.equal(branchJoin.get(Branch_.name), cb.literal(branch)),
-                  cb.isNull(branchJoin.get(Branch_.archivedAt)),
+                  cb.isNull(branchJoin.get(Branch_.deletedAt)),
                 )
               },
             ),
@@ -123,7 +123,7 @@ class ComplexTagOperationKeyProvider(
       } else {
         cb.and(
           cb.equal(branchJoin.get(Branch_.name), cb.literal(branch)),
-          cb.isNull(branchJoin.get(Branch_.archivedAt)),
+          cb.isNull(branchJoin.get(Branch_.deletedAt)),
         )
       },
     ).filterNotNull().toMutableList()
