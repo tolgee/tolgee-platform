@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslation
 import io.tolgee.model.mtServiceConfig.Formality
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -27,10 +28,10 @@ class DeeplApiService(
   ): String? {
     val headers = HttpHeaders()
     headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+    headers.set("Authorization", "DeepL-Auth-Key ${deeplMachineTranslationProperties.authKey}")
 
     val requestBody: MultiValueMap<String, String> = LinkedMultiValueMap()
     // Mandatory parameters
-    requestBody.add("auth_key", deeplMachineTranslationProperties.authKey)
     requestBody.add("text", text)
     requestBody.add("source_lang", sourceTag.uppercase())
     requestBody.add("target_lang", targetTag.uppercase())
@@ -39,10 +40,12 @@ class DeeplApiService(
     }
     addFormality(requestBody, formality)
 
+    val request = HttpEntity(requestBody, headers)
+
     val response =
       restTemplate.postForEntity<DeeplResponse>(
         apiEndpointFromKey(),
-        requestBody,
+        request,
       )
 
     return response.body
