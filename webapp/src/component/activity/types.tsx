@@ -77,7 +77,8 @@ export type FieldTypeEnum =
   | 'date'
   | 'task_state'
   | 'task_type'
-  | 'translation_labels';
+  | 'translation_labels'
+  | 'branch_protected';
 
 export type FieldOptionsObj = {
   label?: (params?: TranslateParams) => React.ReactElement;
@@ -169,6 +170,7 @@ export type Activity = {
   entities: Entity[];
   references: Reference[];
   counts: Record<string, number>;
+  params: any;
   options: ActivityOptions;
 };
 

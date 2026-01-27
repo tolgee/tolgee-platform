@@ -20,6 +20,7 @@ import { getDateChange } from './types/getDateChange';
 import { getTaskStateChange } from './types/getTaskStateChange';
 import { getTaskTypeChange } from './types/getTaskTypeChange';
 import { getTranslationLabelChange } from 'tg.component/activity/types/getTranslationLabelsChange';
+import { getBranchProtected } from 'tg.component/activity/types/getBranchProtectedChange';
 
 type Props = {
   value: DiffValue<any>;
@@ -75,6 +76,8 @@ export const formatDiff = ({
       return getTaskTypeChange(value);
     case 'translation_labels':
       return getTranslationLabelChange(value);
+    case 'branch_protected':
+      return getBranchProtected(value);
     default:
       return diffEnabled ? getGeneralChange(value) : getNoDiffChange(value);
   }
