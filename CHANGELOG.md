@@ -1,3 +1,10 @@
+# [3.150.0](https://github.com/tolgee/tolgee-platform/compare/v3.149.1...v3.150.0) (2026-01-27)
+
+
+### Features
+
+* glossary improvements ([#3381](https://github.com/tolgee/tolgee-platform/issues/3381)) ([2308d90](https://github.com/tolgee/tolgee-platform/commit/2308d90991dd591cc4bddb69e52f6586e8a400bd)), closes [#3320](https://github.com/tolgee/tolgee-platform/issues/3320)
+
 ## [3.149.1](https://github.com/tolgee/tolgee-platform/compare/v3.149.0...v3.149.1) (2026-01-27)
 
 
