@@ -25,6 +25,7 @@ import { BaseProjectView } from 'tg.views/projects/BaseProjectView';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { MENU_WIDTH } from 'tg.views/projects/projectMenu/SideMenu';
 import { confirmation } from 'tg.hooks/confirmation';
+import { BranchProgressModal } from '../components/BranchProgressModal';
 
 type RouteParams = {
   mergeId: string;
@@ -360,6 +361,11 @@ export const BranchMergeDetail: FC = () => {
           </StyledFloatingActions>
         </Portal>
       )}
+      <BranchProgressModal
+        open={applyMutation.isLoading}
+        title={<T keyName="branch_merge_applying_title" />}
+        message={<T keyName="branch_merge_applying_message" />}
+      />
     </BaseProjectView>
   );
 };
