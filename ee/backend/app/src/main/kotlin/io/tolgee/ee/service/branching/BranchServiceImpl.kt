@@ -156,7 +156,6 @@ class BranchServiceImpl(
     if (branch.isDefault) throw PermissionException(Message.CANNOT_DELETE_DEFAULT_BRANCH)
     activityHolder.forceEntityRevisionType(branch, RevisionType.DEL)
     softDeleteBranch(branch)
-    applicationContext.publishEvent(OnBranchDeleted(branch))
   }
 
   @Transactional
@@ -282,6 +281,7 @@ class BranchServiceImpl(
     branch.lastMerge?.sourceBranch?.let {
       taskService.cancelUnfinishedTasksForBranch(branch.project.id, it.id)
     }
+    applicationContext.publishEvent(OnBranchDeleted(branch))
   }
 
   @Transactional

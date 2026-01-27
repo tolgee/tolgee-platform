@@ -5,6 +5,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BranchTranslationsTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchRepository
+import io.tolgee.ee.repository.branching.KeySnapshotRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.waitForNotThrowing
@@ -44,6 +45,9 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
+  @Autowired
+  lateinit var keySnapshotRepository: KeySnapshotRepository
 
   @BeforeEach
   fun setup() {
@@ -108,7 +112,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
     performBranchDeletion(testData.toBeDeletedBranch.id).andIsOk
 
-    waitForNotThrowing(timeout = 10000, pollTime = 250) {
+    waitForNotThrowing(timeout = 5000, pollTime = 500) {
       keyRepository
         .countByProjectAndBranch(
           testData.project.id,
@@ -116,6 +120,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
         ).assert
         .isEqualTo(0)
     }
+    keySnapshotRepository.findAllByBranchId(testData.toBeDeletedBranch.id).assert.isEmpty()
     branchRepository.findByIdOrNull(testData.toBeDeletedBranch.id).assert.isNull()
   }
 
