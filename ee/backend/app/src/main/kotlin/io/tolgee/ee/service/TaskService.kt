@@ -506,9 +506,6 @@ class TaskService(
     projectId: Long,
     branchName: String?,
   ): Branch? {
-    if (branchName.isNullOrBlank()) {
-      return null
-    }
     return branchService.getActiveOrDefault(projectId, branchName)
   }
 
