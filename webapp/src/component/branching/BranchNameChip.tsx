@@ -41,6 +41,10 @@ export const BranchNameChip = ({
   );
 };
 
-export const BranchNameChipNode = ({ children }: { children?: string }) => (
-  <BranchNameChip name={children!} />
-);
+export const BranchNameChipNode = ({
+  children,
+  size,
+}: {
+  children?: string;
+  size?: 'small' | 'default';
+}) => <BranchNameChip name={children!} size={size} />;

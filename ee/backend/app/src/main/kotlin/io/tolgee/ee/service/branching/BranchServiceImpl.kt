@@ -1,5 +1,7 @@
 package io.tolgee.ee.service.branching
 
+import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.data.RevisionType
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
@@ -43,6 +45,7 @@ class BranchServiceImpl(
   private val taskService: TaskService,
   private val authenticationFacade: AuthenticationFacade,
   private val projectBranchingMigrationService: ProjectBranchingMigrationService,
+  private val activityHolder: ActivityHolder,
 ) : AbstractBranchService(branchRepository) {
   override fun getBranches(
     projectId: Long,
@@ -152,6 +155,7 @@ class BranchServiceImpl(
   ) {
     val branch = getBranch(projectId, branchId)
     if (branch.isDefault) throw PermissionException(Message.CANNOT_DELETE_DEFAULT_BRANCH)
+    activityHolder.forceEntityRevisionType(branch, RevisionType.DEL)
     softDeleteBranch(branch)
     applicationContext.publishEvent(OnBranchDeleted(branch))
   }

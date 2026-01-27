@@ -1,6 +1,7 @@
 package io.tolgee.activity
 
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.iterceptor.InterceptedEventsManager
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityDescribingEntity
@@ -26,6 +27,24 @@ open class ActivityHolder(
   }
 
   open var modifiedCollections: MutableMap<Pair<EntityWithId, String>, List<Any?>?> = mutableMapOf()
+
+  /**
+   * Allows forcing a specific revision type for an entity modification.
+   * Useful for soft-delete patterns where the entity is marked as deleted but not actually removed.
+   * Key: Pair of (entity class, entity id), Value: RevisionType to force
+   */
+  open var forcedRevisionTypes: MutableMap<Pair<KClass<out EntityWithId>, Long>, RevisionType> = mutableMapOf()
+
+  /**
+   * Force a specific revision type for an entity modification.
+   * Useful for soft-delete patterns where the entity is marked as deleted but not actually removed.
+   */
+  fun forceEntityRevisionType(
+    entity: EntityWithId,
+    revisionType: RevisionType,
+  ) {
+    forcedRevisionTypes[entity::class to entity.id] = revisionType
+  }
 
   open var transactionRollbackOnly = false
 

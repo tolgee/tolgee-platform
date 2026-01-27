@@ -2,6 +2,7 @@ package io.tolgee.activity.data
 
 import io.tolgee.activity.PublicParamsProvider
 import io.tolgee.batch.BatchActivityParamsProvider
+import io.tolgee.batch.BranchMergeActivityParamsProvider
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.Language
 import io.tolgee.model.glossary.Glossary
@@ -103,5 +104,5 @@ enum class ActivityType(
   BRANCH_RENAME,
   BRANCH_DELETE,
   BRANCH_PROTECTION_CHANGE,
-  BRANCH_MERGE,
+  BRANCH_MERGE(onlyCountsInList = true, paramsProvider = BranchMergeActivityParamsProvider::class),
 }

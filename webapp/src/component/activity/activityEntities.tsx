@@ -1,7 +1,6 @@
 import { getDiffVersion } from './activityTools';
 import { T } from '@tolgee/react';
 import {
-  BranchReferenceData,
   ContentDeliveryConfigReferenceData,
   EntityEnum,
   EntityOptions,
@@ -9,6 +8,7 @@ import {
   Reference,
   WebhookConfigReferenceData,
 } from './types';
+import { BranchReferenceData } from '../../eeSetup/EeModuleType';
 
 export const activityEntities: Record<EntityEnum, EntityOptions> = {
   Translation: {
@@ -546,7 +546,7 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
         },
       },
       isProtected: {
-        type: 'batch_boolean',
+        type: 'branch_protected',
         label(params) {
           return (
             <T keyName="activity_entity_branch.is_protected" params={params} />

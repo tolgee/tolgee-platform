@@ -1,5 +1,6 @@
 import { T } from '@tolgee/react';
 import { ActivityOptions, ActivityTypeEnum } from './types';
+import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
 
 export const actionsConfiguration: Partial<
   Record<ActivityTypeEnum, ActivityOptions>
@@ -542,7 +543,12 @@ export const actionsConfiguration: Partial<
   },
   BRANCH_MERGE: {
     label(params) {
-      return <T keyName="activity_branch_merge" params={params} />;
+      return (
+        <T
+          keyName="activity_branch_merge"
+          params={{ ...params, branch: <BranchNameChipNode size={'small'} /> }}
+        />
+      );
     },
     entities: {
       Branch: [],

@@ -28,7 +28,7 @@ export const ActivityTitle: React.FC<Props> = ({ activity }) => {
     }
   });
 
-  const titleParameters = {
+  let titleParameters = {
     references,
     KeyCount: 0,
     TranslationCount: 0,
@@ -39,6 +39,8 @@ export const ActivityTitle: React.FC<Props> = ({ activity }) => {
   Object.entries(activity.counts || {}).forEach(([entity, value]) => {
     titleParameters[`${entity}Count`] = value;
   });
+
+  titleParameters = { ...titleParameters, ...activity?.params };
 
   const title = activity.translation;
 

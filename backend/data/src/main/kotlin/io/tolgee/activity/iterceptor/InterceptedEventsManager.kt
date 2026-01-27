@@ -16,6 +16,7 @@ import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.EntityWithBranch
 import jakarta.persistence.EntityManager
 import jakarta.persistence.FlushModeType
@@ -118,11 +119,15 @@ class InterceptedEventsManager(
       return
     }
 
-    val activityModifiedEntity = getModifiedEntity(entity, revisionType)
+    // Check for forced revision type (e.g., for soft-delete patterns)
+    val effectiveRevisionType =
+      activityHolder.forcedRevisionTypes[entity::class to entity.id] ?: revisionType
+
+    val activityModifiedEntity = getModifiedEntity(entity, effectiveRevisionType)
 
     val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
-    activityModifiedEntity.revisionType = revisionType
+    activityModifiedEntity.revisionType = effectiveRevisionType
     activityModifiedEntity.modifications.putAll(changesMap)
 
     activityModifiedEntity.setEntityDescription(entity)
@@ -167,15 +172,25 @@ class InterceptedEventsManager(
           ).also { it.revisionType = revisionType }
         }
 
-    activityModifiedEntity.branchId = resolveBranchId(entity)
+    activityModifiedEntity.branchId = resolveBranchId(entity, revisionType)
 
     return activityModifiedEntity
   }
 
-  private fun resolveBranchId(entity: EntityWithId): Long? {
-    return (entity as? EntityWithBranch)?.let {
-      it.resolveBranch()?.id ?: defaultBranchId(it.resolveProject()?.id)
+  private fun resolveBranchId(
+    entity: EntityWithId,
+    revisionType: RevisionType,
+  ): Long? {
+    val id =
+      (entity as? EntityWithBranch)?.let {
+        it.resolveBranch()?.id ?: defaultBranchId(it.resolveProject()?.id)
+      }
+    if (id == null) {
+      if (entity is Branch && !revisionType.isDel()) {
+        return entity.id
+      }
     }
+    return id
   }
 
   private fun defaultBranchId(projectId: Long?): Long? {
