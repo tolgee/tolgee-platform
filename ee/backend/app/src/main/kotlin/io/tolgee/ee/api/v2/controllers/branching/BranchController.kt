@@ -107,11 +107,9 @@ class BranchController(
     pageable: Pageable,
     @RequestParam("search", required = false)
     search: String?,
-    @RequestParam("activeOnly", required = false)
-    activeOnly: Boolean?,
   ): PagedModel<BranchModel> {
     projectFeatureGuard.checkEnabled(Feature.BRANCHING)
-    val branches = branchService.getBranches(projectHolder.project.id, pageable, search, activeOnly)
+    val branches = branchService.getBranches(projectHolder.project.id, pageable, search)
     return pagedBranchResourceAssembler.toModel(branches, branchModelAssembler)
   }
 

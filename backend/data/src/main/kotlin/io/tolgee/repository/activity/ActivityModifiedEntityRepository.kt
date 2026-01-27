@@ -40,7 +40,7 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
         and ame.activityRevision.id in :revisionIds
         and cast(empty_json(ame.modifications) as boolean) = false 
         and (:filterEntityClass is null or ame.entityClass in :filterEntityClass)
-        and ((b.id = :branchId and b.archivedAt is null) or (:branchId is null and (b is null or b.isDefault)))
+        and ((b.id = :branchId and b.deletedAt is null) or (:branchId is null and (b is null or b.isDefault)))
         order by ame.activityRevision.id, ame.entityClass, ame.entityId
     """,
   )

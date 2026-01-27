@@ -160,7 +160,7 @@ class ExportDataProvider(
       whereConditions.add(
         cb.and(
           cb.equal(branchJoin.get(Branch_.name), exportParams.filterBranch),
-          cb.isNull(branchJoin.get(Branch_.archivedAt)),
+          cb.isNull(branchJoin.get(Branch_.deletedAt)),
         ),
       )
     } else {

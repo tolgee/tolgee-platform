@@ -23,7 +23,6 @@ class BranchServiceOssStub(
     projectId: Long,
     page: Pageable,
     search: String?,
-    activeOnly: Boolean?,
   ): Page<Branch> {
     return Page.empty()
   }

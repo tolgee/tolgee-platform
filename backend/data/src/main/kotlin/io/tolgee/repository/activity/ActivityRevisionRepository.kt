@@ -22,7 +22,7 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
       from ActivityModifiedEntity me                                                                                                                                                                                   
       left join Branch b on me.branchId = b.id                                                                                                                                                                         
       where me.activityRevision = ar                                                                                                                                                                                   
-        and (b.archivedAt is null or me.branchId is null)                                                                                                                                                              
+        and (b.deletedAt is null or me.branchId is null)                                                                                                                                                              
         and (                                                                                                                                                                                                          
           (:branchId is null and (me.branchId is null or b.isDefault = true))                                                                                                                                          
           or (:branchId is not null and me.branchId = :branchId)                                                                                                                                                       
@@ -45,7 +45,7 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
       left join Branch b on me.branchId = b.id
       where ar.id in :revisionIds
       and ar.type in :allowedTypes
-      and ((b.id = :branchId and b.archivedAt is null) or (:branchId is null and (b is null or b.isDefault)))
+      and ((b.id = :branchId and b.deletedAt is null) or (:branchId is null and (b is null or b.isDefault)))
       group by ar.id, me.entityClass
     """,
   )

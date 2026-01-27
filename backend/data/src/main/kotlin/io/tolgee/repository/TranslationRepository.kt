@@ -29,7 +29,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
         left join km.tags kmt
         join t.language l
         where t.key.project.id = :projectId
-         and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault))) 
+         and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault))) 
          and l.tag in :languages
          and ((n.name is null and :namespace is null) or n.name = :namespace)
          and (:filterTags is null or kmt.name in :filterTags)
@@ -92,7 +92,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
         left join k.branch b
         left join fetch k.keyMeta 
         where t.language.id = :languageId
-        and ((b.name = :branch and b.archivedAt is null) or (:branch is null and (b is null or b.isDefault))) 
+        and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault))) 
     """,
   )
   fun getAllByLanguageId(

@@ -11,7 +11,7 @@ interface BranchRepositoryOss : JpaRepository<Branch, Long> {
     """
     select b
     from Branch b
-    where b.project.id = :projectId and b.id = :branchId and b.archivedAt IS NULL and b.deletedAt IS NULL
+    where b.project.id = :projectId and b.id = :branchId and b.deletedAt IS NULL
     """,
   )
   fun findActiveByProjectIdAndId(
@@ -23,7 +23,7 @@ interface BranchRepositoryOss : JpaRepository<Branch, Long> {
     """
     select b
     from Branch b
-    where b.project.id = :projectId and b.deletedAt IS NULL and b.archivedAt IS NULL and lower(b.name) = lower(:name)
+    where b.project.id = :projectId and b.deletedAt IS NULL and lower(b.name) = lower(:name)
     """,
   )
   fun findActiveByProjectIdAndName(
@@ -35,7 +35,7 @@ interface BranchRepositoryOss : JpaRepository<Branch, Long> {
     """
     select b
     from Branch b
-    where b.project.id = :projectId and b.deletedAt IS NULL and b.archivedAt IS NULL and b.isDefault = true
+    where b.project.id = :projectId and b.deletedAt IS NULL and b.isDefault = true
     """,
   )
   fun findDefaultByProjectId(projectId: Long): Branch?

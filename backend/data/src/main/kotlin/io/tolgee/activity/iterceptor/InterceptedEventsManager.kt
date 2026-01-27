@@ -204,7 +204,6 @@ class InterceptedEventsManager(
         from Branch b
         where b.project.id = :projectId
           and b.isDefault = true
-          and b.archivedAt is null
           and b.deletedAt is null
         """,
         Long::class.java,

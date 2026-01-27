@@ -100,7 +100,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
         and $TASK_SEARCH
         and $TASK_FILTERS
         and (
-          (b.name = :#{#filters.branch} and b.archivedAt is null) 
+          (b.name = :#{#filters.branch} and b.deletedAt is null) 
           or (:#{#filters.branch} is null and (b is null or b.isDefault))
         )
     """,
@@ -229,7 +229,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
           left join branch b on b.id = key.branch_id
       where key.project_id = :projectId
           and key.id in :keyIds
-          and ((b.name = :branch and b.archived_at is null) or (:branch is null and (b is null or b.is_default))) 
+          and ((b.name = :branch and b.deleted_at is null) or (:branch is null and (b is null or b.is_default))) 
           and (
             COALESCE(t.state, 0) in :#{#filters.filterStateOrdinal} -- item fits the filter
             or (
@@ -271,7 +271,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
           left join branch b on b.id = key.branch_id
       where key.project_id = :projectId
           and key.id in :keyIds
-          and ((b.name = :branch and b.archived_at is null) or (:branch is null and (b is null or b.is_default))) 
+          and ((b.name = :branch and b.deleted_at is null) or (:branch is null and (b is null or b.is_default))) 
           and task IS NULL
           and (
             COALESCE(t.state, 0) in :#{#filters.filterStateOrdinal} -- item fits the filter

@@ -151,7 +151,7 @@ class Project(
   var slackConfigs: MutableList<SlackConfig> = mutableListOf()
 
   @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST], mappedBy = "project")
-  @SQLRestriction("archived_at IS NULL")
+  @SQLRestriction("deleted_at IS NULL")
   var branches: MutableList<Branch> = mutableListOf()
 
   @ColumnDefault("true")

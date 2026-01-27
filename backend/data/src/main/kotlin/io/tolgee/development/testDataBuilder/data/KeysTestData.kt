@@ -129,7 +129,7 @@ class KeysTestData {
           devBranch =
             addBranch {
               name = "dev"
-              archivedAt = Date(1759833439)
+              deletedAt = Date(1759833439)
             }.build {
               firstDevKey =
                 addKey {
