@@ -17,7 +17,8 @@ task dockerPrepare {
     dependsOn("unpack", "copyDist", "copyDockerIgnore", "addVersionFile")
 }
 
-// Builds Docker image with OpenTelemetry agent. See: docs/observability/
+// Builds Docker image for local development.
+// Single platform, no push, tagged as tolgee/tolgee.
 task docker {
     doLast {
         exec {
@@ -31,31 +32,41 @@ task docker {
     dependsOn("dockerPrepare")
 }
 
-void createDockerBuildxTask(String taskName, boolean isPush) {
-    task(taskName) {
-        doLast {
-            if (project.hasProperty('dockerImageTag')) {
-                def commandParams = ["docker", "buildx", "build", ".",
-                    "-t", project.property('dockerImageTag'),
-                    "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
-                    "--platform", "linux/arm64,linux/amd64"]
-                if (isPush) {
-                    commandParams += ["--push"]
-                }
-                exec {
-                    workingDir dockerPath
-                    commandLine commandParams
-                }
-            } else {
-                throw new GradleException('A "dockerImageTag" project property must be defined! e.g. ./gradlew dockerBuildx -PdockerImageTag=myImageTag');
-            }
-        }
-        dependsOn("dockerPrepare")
-    }
-}
+// Builds and pushes multi-platform Docker image for CI.
+// Reads configuration from environment variables:
+//   - VERSION: image tag version (default: 'latest')
+//   - DOCKER_IMAGE: image name (default: 'tolgee/tolgee')
+//   - DOCKER_CACHE_FROM: cache source (optional, e.g., 'type=registry,ref=tolgee/tolgee:latest')
+//   - DOCKER_CACHE_TO: cache destination (optional, e.g., 'type=inline')
+// Requires: docker buildx create --use (run once before calling this task)
+task dockerPublish {
+    doLast {
+        def version = System.getenv('VERSION') ?: 'latest'
+        def imageName = System.getenv('DOCKER_IMAGE') ?: 'tolgee/tolgee'
+        def tag = "${imageName}:${version}"
+        def cacheFrom = System.getenv('DOCKER_CACHE_FROM')
+        def cacheTo = System.getenv('DOCKER_CACHE_TO')
 
-createDockerBuildxTask("dockerBuildxPush", true)
-createDockerBuildxTask("dockerBuildx", false)
+        def commandParams = ["docker", "buildx", "build", ".",
+            "-t", tag,
+            "--build-arg", "OTEL_AGENT_VERSION=${opentelemetryJavaagentVersion}",
+            "--platform", "linux/arm64,linux/amd64",
+            "--push"]
+
+        if (cacheFrom) {
+            commandParams += ["--cache-from", cacheFrom]
+        }
+        if (cacheTo) {
+            commandParams += ["--cache-to", cacheTo]
+        }
+
+        exec {
+            workingDir dockerPath
+            commandLine commandParams
+        }
+    }
+    dependsOn("dockerPrepare")
+}
 
 task cleanDocker{
     delete(dockerPath)
