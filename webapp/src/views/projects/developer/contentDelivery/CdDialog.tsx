@@ -35,6 +35,7 @@ import {
 import { useCdActions } from './useCdActions';
 import { useExportHelper } from 'tg.hooks/useExportHelper';
 import { CdPruneBeforePublish } from './CdPruneBeforePublish';
+import { CdZipExport } from './CdZipExport';
 import { EscapeHtmlSelector } from 'tg.views/projects/export/components/EscapeHtmlSelector';
 
 const StyledDialogContent = styled(DialogContent)`
@@ -171,6 +172,7 @@ export const CdDialog = ({ onClose, data }: Props) => {
                     )}
                     <CdAutoPublish />
                     <CdPruneBeforePublish />
+                    <CdZipExport />
                     {getFormatById(values.format).showEscapeHtml && (
                       <EscapeHtmlSelector />
                     )}

@@ -1871,6 +1871,7 @@ export interface components {
        * e.g. Key hello[0] will be exported as {"hello": ["..."]}
        */
       supportArrays: boolean;
+      zip: boolean;
     };
     ContentDeliveryConfigRequest: {
       /** @description If true, data are published to the content delivery automatically after each change. */
@@ -2000,6 +2001,8 @@ export interface components {
        * e.g. Key hello[0] will be exported as {"hello": ["..."]}
        */
       supportArrays: boolean;
+      /** @description Whether to export all files as a single zip archive (translations.zip). */
+      zip: boolean;
     };
     ContentStorageModel: {
       azureContentStorageConfig?: components["schemas"]["AzureContentStorageConfigModel"];
