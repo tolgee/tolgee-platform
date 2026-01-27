@@ -47,6 +47,7 @@ enum class ProjectPermissionType(
       Scope.KEYS_VIEW,
       Scope.TRANSLATIONS_VIEW,
       Scope.TRANSLATIONS_EDIT,
+      Scope.TRANSLATIONS_SUGGEST,
       Scope.KEYS_EDIT,
       Scope.KEYS_DELETE,
       Scope.KEYS_CREATE,
