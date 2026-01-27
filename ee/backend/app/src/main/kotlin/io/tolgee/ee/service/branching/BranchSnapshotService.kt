@@ -165,7 +165,7 @@ class BranchSnapshotService(
     return keySnapshotRepository.findAllByBranchIdAndOriginalKeyIdIn(branchId, originalKeyIds)
   }
 
-  private fun deleteSnapshots(branchId: Long) {
+  fun deleteSnapshots(branchId: Long) {
     entityManager
       .createNativeQuery(
         """

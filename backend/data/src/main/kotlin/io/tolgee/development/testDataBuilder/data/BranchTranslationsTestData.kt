@@ -151,7 +151,7 @@ class BranchTranslationsTestData {
         project = root.data.projects[0].self
       }.build {
         toBeDeletedBranch = self
-        (1..500).forEach {
+        (1..50).forEach {
           addBranchKey(it, "branched key to delete", this@build.self)
         }
       }

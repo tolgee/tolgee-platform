@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
 
@@ -21,6 +23,7 @@ class BranchCleanupService(
   private val branchRepository: BranchRepository,
   private val branchMergeRepository: BranchMergeRepository,
   private val taskRepository: TaskRepository,
+  private val branchSnapshotService: BranchSnapshotService,
 ) {
   companion object {
     private const val BATCH_SIZE = 1000
@@ -31,55 +34,126 @@ class BranchCleanupService(
   }
 
   /**
-   * Async cleanup entry point. Deletes all keys and related data for the archived branch.
-   * Uses KeyService to cascade-delete related entities in batches.
+   * Event listener triggered after the branch soft deletion transaction completes.
    */
-  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)
   @Async
-  fun cleanupBranchAsync(event: OnBranchDeleted) {
-    cleanupBranch(event.branch.id)
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  fun onBranchDeleted(event: OnBranchDeleted) {
+    logger.info("Received OnBranchDeleted event for branch ${event.branch.id}")
+    cleanupBranchAsync(event.branch.id)
   }
 
   /**
-   * Synchronous cleanup
+   * Async cleanup orchestrator.
+   * Runs in a separate thread with its own transaction.
    */
-  fun cleanupBranch(branchId: Long) {
+
+  fun cleanupBranchAsync(branchId: Long) {
+    try {
+      cleanupBranch(branchId)
+    } catch (e: Exception) {
+      logger.error("Failed to cleanup branch $branchId", e)
+      throw e
+    }
+  }
+
+  /**
+   * Synchronous cleanup orchestrator.
+   * Ensures all branch-related data is removed in the correct order.
+   * Runs in the current transaction if one exists.
+   */
+  private fun cleanupBranch(branchId: Long) {
     val branch = branchRepository.findById(branchId).orElse(null) ?: return
     if (branch.deletedAt == null) return
 
-    logger.debug("Cleaning up branch ${branch.id}")
-    var page = 0
+    logger.info("Starting cleanup for branch ${branch.name} ($branchId)")
+
+    cleanupBranchKeys(branch.project.id, branchId)
+    cleanupBranchSnapshots(branchId)
+    cleanupBranchMerges(branchId)
+    deleteBranchIfPossible(branchId)
+
+    logger.info("Completed cleanup for branch ${branch.name} ($branchId)")
+  }
+
+  /**
+   * Deletes all keys associated with the branch in batches.
+   * KeyService.deleteMultiple handles cascading deletion of translations, metadata, etc.
+   * Always queries page 0 since deletion shifts remaining keys.
+   */
+  private fun cleanupBranchKeys(
+    projectId: Long,
+    branchId: Long,
+  ) {
+    logger.debug("Cleaning up keys for branch $branchId")
+    var totalDeleted = 0
+
     while (true) {
       val idsPage =
         keyRepository.findIdsByProjectAndBranch(
-          branch.project.id,
-          branch.id,
-          PageRequest.of(page, BATCH_SIZE),
+          projectId,
+          branchId,
+          PageRequest.of(0, BATCH_SIZE),
         )
+
       if (idsPage.isEmpty) break
+
       val ids = idsPage.content
-      if (ids.isNotEmpty()) {
-        keyService.deleteMultiple(ids)
-        logger.debug("Deleted ${ids.size} keys for branch ${branch.id}")
-      }
-      if (idsPage.numberOfElements < BATCH_SIZE) {
-        break
-      }
-      page++
+      if (ids.isEmpty()) break
+
+      keyService.deleteMultiple(ids)
+      totalDeleted += ids.size
+      logger.debug("Deleted batch of ${ids.size} keys (total: $totalDeleted) for branch $branchId")
     }
+
+    if (totalDeleted > 0) {
+      logger.debug("Completed deletion of $totalDeleted keys for branch $branchId")
+    }
+  }
+
+  /**
+   * Deletes all snapshots created for the branch.
+   * Snapshots are used during merge operations to track the original state.
+   */
+  private fun cleanupBranchSnapshots(branchId: Long) {
+    logger.debug("Cleaning up snapshots for branch $branchId")
+    branchSnapshotService.deleteSnapshots(branchId)
+  }
+
+  /**
+   * Deletes all merge records where this branch is either source or target.
+   * This includes merge changes and conflict resolutions.
+   */
+  private fun cleanupBranchMerges(branchId: Long) {
+    logger.debug("Cleaning up merges for branch $branchId")
+
     val merges =
       branchMergeRepository
-        .findAllBySourceBranchIdOrTargetBranchId(branch.id, branch.id)
+        .findAllBySourceBranchIdOrTargetBranchId(branchId, branchId)
+
     if (merges.isNotEmpty()) {
       branchMergeRepository.deleteAll(merges)
-      logger.debug("Deleted ${merges.size} merges for branch ${branch.id}")
+      logger.debug("Deleted ${merges.size} merges for branch $branchId")
     }
-    val taskCount = taskRepository.countByBranchId(branch.id)
+  }
+
+  /**
+   * Deletes the branch entity itself if no tasks reference it.
+   * Tasks may still need the branch for historical/audit purposes.
+   */
+  private fun deleteBranchIfPossible(branchId: Long) {
+    val taskCount = taskRepository.countByBranchId(branchId)
+
     if (taskCount > 0) {
-      logger.debug("Skipping deleting branch entity ${branch.id} because $taskCount tasks still exist")
+      logger.debug(
+        "Skipping branch entity deletion for $branchId because $taskCount tasks still reference it",
+      )
       return
     }
+
+    val branch = branchRepository.findById(branchId).orElse(null) ?: return
     branchRepository.delete(branch)
-    logger.debug("Deleted branch ${branch.name} (${branch.id})")
+    logger.debug("Deleted branch entity ${branch.name} ($branchId)")
   }
 }
