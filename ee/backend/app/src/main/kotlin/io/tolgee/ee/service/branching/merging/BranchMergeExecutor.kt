@@ -58,6 +58,7 @@ class BranchMergeExecutor(
         }
       }
     }
+    merge.changes.clear()
     merge.mergedAt = currentDateProvider.date
   }
 
