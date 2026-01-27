@@ -15,6 +15,7 @@ import { LINKS } from 'tg.constants/links';
 import { BranchRenameModal } from './BranchRenameModal';
 import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { BranchProgressModal } from './BranchProgressModal';
 
 const TableGrid = styled('div')`
   display: grid;
@@ -70,6 +71,7 @@ export const BranchesList = () => {
   });
 
   const createBranchSubmit = async (values: BranchFormValues) => {
+    setAddBranchOpen(false);
     await createMutation.mutateAsync({
       path: { projectId: project.id },
       content: {
@@ -78,7 +80,6 @@ export const BranchesList = () => {
         },
       },
     });
-    setAddBranchOpen(false);
   };
 
   const mergeIntoSubmit = async (values: DryRunMergeBranchRequest) => {
@@ -262,6 +263,16 @@ export const BranchesList = () => {
               onClose={() => setRenameBranch(null)}
             />
           )}
+          <BranchProgressModal
+            open={createMutation.isLoading}
+            title={<T keyName="branch_creating_title" />}
+            message={<T keyName="branch_creating_message" />}
+          />
+          <BranchProgressModal
+            open={createMergeMutation.isLoading}
+            title={<T keyName="branch_merge_creating_title" />}
+            message={<T keyName="branch_merge_creating_message" />}
+          />
         </>
       )}
     </Box>
