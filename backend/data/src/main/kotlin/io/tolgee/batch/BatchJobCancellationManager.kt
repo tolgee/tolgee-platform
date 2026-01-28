@@ -35,8 +35,10 @@ class BatchJobCancellationManager(
   private val batchJobStatusProvider: BatchJobStatusProvider,
   private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
-  private val batchProperties: io.tolgee.configuration.tolgee.BatchProperties,
+  private val tolgeeProperties: io.tolgee.configuration.tolgee.TolgeeProperties,
 ) : Logging {
+  private val batchProperties get() = tolgeeProperties.batch
+
   @Transactional
   fun cancel(id: Long) {
     try {

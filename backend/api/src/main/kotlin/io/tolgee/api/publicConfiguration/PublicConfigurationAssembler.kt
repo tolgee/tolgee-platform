@@ -10,6 +10,13 @@ import io.tolgee.component.publicBillingConfProvider.PublicBillingConfProvider
 import io.tolgee.configuration.PlausibleDto
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationServiceProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.response.PublicLlmConfigurationDTO
@@ -112,7 +119,7 @@ class PublicConfigurationAssembler(
         .associateWith {
           PublicConfigurationDTO.MtServiceDTO(
             applicationContext.getBean(it.providerClass).isEnabled,
-            it.propertyClass?.let { applicationContext.getBean(it).defaultEnabled } ?: true,
+            it.propertiesGetter(properties).defaultEnabled,
           )
         }
     return mtServices

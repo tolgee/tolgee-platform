@@ -2,7 +2,7 @@ package io.tolgee.component.machineTranslation.providers
 
 import com.google.cloud.translate.Translate
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -10,9 +10,10 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class GoogleTranslationProvider(
-  private val googleMachineTranslationProperties: GoogleMachineTranslationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val translate: Translate?,
 ) : AbstractMtValueProvider() {
+  private val googleMachineTranslationProperties get() = tolgeeProperties.machineTranslation.google
   override val isEnabled: Boolean
     get() = !googleMachineTranslationProperties.apiKey.isNullOrEmpty()
 

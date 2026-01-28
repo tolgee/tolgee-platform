@@ -1,6 +1,5 @@
 package io.tolgee.security
 
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.EmailTestUtil
@@ -21,9 +20,6 @@ import org.springframework.transaction.annotation.Transactional
 class EmailVerificationTest : AbstractControllerTest() {
   @Autowired
   private lateinit var emailTestUtil: EmailTestUtil
-
-  @Autowired
-  override lateinit var tolgeeProperties: TolgeeProperties
 
   private var defaultFrontendUrl: String? = null
 

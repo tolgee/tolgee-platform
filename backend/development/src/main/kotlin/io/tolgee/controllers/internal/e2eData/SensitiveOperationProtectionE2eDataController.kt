@@ -1,7 +1,7 @@
 package io.tolgee.controllers.internal.e2eData
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.controllers.internal.InternalController
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.data.SensitiveOperationProtectionTestData
@@ -14,12 +14,14 @@ import java.util.Date
 
 @InternalController(["internal/e2e-data/sensitive-operation-protection"])
 class SensitiveOperationProtectionE2eDataController(
-  private val authenticationProperties: AuthenticationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val currentDateProvider: CurrentDateProvider,
   private val mfaService: MfaService,
   private val jwtService: JwtService,
   private val userAccountRepository: UserAccountRepository,
 ) : AbstractE2eDataController() {
+  private val authenticationProperties get() = tolgeeProperties.authentication
+
   @GetMapping(value = ["/generate"])
   @Transactional
   fun generateBasicTestData(): Map<String, Any> {

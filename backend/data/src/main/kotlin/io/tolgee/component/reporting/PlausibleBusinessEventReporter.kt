@@ -1,6 +1,6 @@
 package io.tolgee.component.reporting
 
-import io.tolgee.configuration.tolgee.PlausibleProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.util.RequestIpProvider
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,10 +28,12 @@ private val ALLOWED_EVENTS =
 
 @Component
 class PlausibleBusinessEventReporter(
-  private val plausibleProperties: PlausibleProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val restTemplate: RestTemplate,
   private val requestIpProvider: RequestIpProvider,
 ) {
+  private val plausibleProperties get() = tolgeeProperties.plausible
+
   @Lazy
   @Autowired
   private lateinit var selfProxied: PlausibleBusinessEventReporter

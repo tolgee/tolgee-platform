@@ -7,7 +7,7 @@ import com.slack.api.methods.request.apps.AppsUninstallRequest
 import com.slack.api.methods.response.apps.AppsUninstallResponse
 import io.sentry.Sentry
 import io.tolgee.component.FrontendUrlProvider
-import io.tolgee.configuration.tolgee.SlackProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.ConnectToSlackDto
 import io.tolgee.ee.repository.slackIntegration.OrganizationSlackWorkspaceRepository
@@ -31,11 +31,13 @@ import org.springframework.web.client.RestTemplate
 class OrganizationSlackWorkspaceService(
   private val organizationSlackWorkspaceRepository: OrganizationSlackWorkspaceRepository,
   private val restTemplate: RestTemplate,
-  private val slackProperties: SlackProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val objectMapper: ObjectMapper,
   private val frontendUrlProvider: FrontendUrlProvider,
   private val slackClient: Slack,
 ) : Logging {
+  private val slackProperties get() = tolgeeProperties.slack
+
   @Transactional
   fun findBySlackTeamId(teamId: String): OrganizationSlackWorkspace? {
     return organizationSlackWorkspaceRepository.findBySlackTeamId(teamId)

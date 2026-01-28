@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.recaptcha")
 @DocProperty(
+  prefix = "tolgee.recaptcha",
   description =
     "When configured, reCAPTCHA v3 is used to protect the sign up page against bots. " +
       "By default, reCAPTCHA is disabled.\n" +
