@@ -24,6 +24,7 @@ import jakarta.persistence.OrderBy
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.validation.constraints.Size
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.Type
 
 @Entity
@@ -48,6 +49,7 @@ class KeyMeta(
   @ManyToMany
   @OrderBy("id")
   @ActivityLoggedProp(TagsPropChangesProvider::class)
+  @BatchSize(size = 1000)
   var tags: MutableSet<Tag> = mutableSetOf()
 
   @ActivityLoggedProp

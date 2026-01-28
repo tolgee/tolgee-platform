@@ -198,6 +198,7 @@ class BranchMergeService(
       ?: throw NotFoundException(Message.BRANCH_MERGE_CHANGE_NOT_FOUND)
   }
 
+  @Transactional
   fun resolveConflict(
     projectId: Long,
     mergeId: Long,
@@ -208,6 +209,7 @@ class BranchMergeService(
     change.resolution = resolution
   }
 
+  @Transactional
   fun resolveAllConflicts(
     projectId: Long,
     mergeId: Long,

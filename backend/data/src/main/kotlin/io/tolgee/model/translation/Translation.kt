@@ -36,6 +36,7 @@ import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotNull
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
@@ -106,6 +107,7 @@ class Translation(
   )
   @OrderBy("name ASC")
   @ActivityLoggedProp(LabelPropChangesProvider::class)
+  @BatchSize(size = 1000)
   var labels: MutableSet<Label> = mutableSetOf()
 
   @ActivityLoggedProp
