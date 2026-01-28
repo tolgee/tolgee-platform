@@ -240,13 +240,25 @@ class BatchJobChunkExecutionQueue(
   /**
    * Polls an item from the queue with job fairness.
    * Prioritizes jobs that are underrepresented in currently running executions.
+   * Only applies fairness when multiple jobs are competing for resources.
    */
   fun pollFairly(runningJobCounts: Map<Long, Int>): ExecutionQueueItem? {
     if (queue.isEmpty()) {
       return null
     }
 
-    val targetJobId = findUnderrepresentedJob(runningJobCounts) ?: return poll()
+    // Find jobs that have items in the queue
+    val queuedJobs = queuedChunksPerJob.filter { it.value.get() > 0 }.keys
+
+    // If only one job (or none) has items queued, use regular FIFO poll
+    if (queuedJobs.size <= 1) {
+      return poll()
+    }
+
+    val targetJobId = findUnderrepresentedJob(queuedJobs, runningJobCounts)
+    if (targetJobId == null) {
+      return poll()
+    }
 
     // Try to find and remove an item for the target job
     val item = pollForJob(targetJobId)
@@ -258,8 +270,10 @@ class BatchJobChunkExecutionQueue(
     return poll()
   }
 
-  private fun findUnderrepresentedJob(runningJobCounts: Map<Long, Int>): Long? {
-    val queuedJobs = queuedChunksPerJob.filter { it.value.get() > 0 }.keys
+  private fun findUnderrepresentedJob(
+    queuedJobs: Set<Long>,
+    runningJobCounts: Map<Long, Int>,
+  ): Long? {
     if (queuedJobs.isEmpty()) {
       return null
     }
