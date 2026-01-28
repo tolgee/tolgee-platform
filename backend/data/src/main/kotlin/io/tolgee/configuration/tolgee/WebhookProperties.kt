@@ -2,10 +2,8 @@ package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
 import jakarta.annotation.PostConstruct
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.webhook")
-@DocProperty(description = "Configuration for webhook behavior.", displayName = "Webhooks")
+@DocProperty(prefix = "tolgee.webhook", description = "Configuration for webhook behavior.", displayName = "Webhooks")
 class WebhookProperties {
   @DocProperty(
     description = "Whether the automatic disabling of failing webhooks is enabled.",
