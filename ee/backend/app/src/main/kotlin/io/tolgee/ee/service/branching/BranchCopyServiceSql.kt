@@ -14,10 +14,10 @@ class BranchCopyServiceSql(
   private val keyRepository: KeyRepository,
 ) : BranchCopyService,
   Logging {
-
   companion object {
     private const val BATCH_SIZE = 1000
   }
+
   /**
    * Copies keys and its related entities from a source branch to target branch
    * - translations
