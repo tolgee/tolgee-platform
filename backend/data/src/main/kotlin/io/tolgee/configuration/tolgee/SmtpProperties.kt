@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.smtp")
 @DocProperty(
+  prefix = "tolgee.smtp",
   description =
     "Configuration of SMTP server used to send emails to your users " +
       "like password reset links or notifications.\n" +

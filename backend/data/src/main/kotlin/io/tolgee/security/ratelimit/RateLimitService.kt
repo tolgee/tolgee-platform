@@ -19,7 +19,7 @@ package io.tolgee.security.ratelimit
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.ResilientCacheAccessor
-import io.tolgee.configuration.tolgee.RateLimitProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.servlet.http.HttpServletRequest
@@ -34,11 +34,12 @@ class RateLimitService(
   private val cacheManager: CacheManager,
   private val lockingProvider: LockingProvider,
   private val currentDateProvider: CurrentDateProvider,
-  private val rateLimitProperties: RateLimitProperties,
+  private val tolgeeProperties: TolgeeProperties,
   @Lazy
   private val authenticationFacade: AuthenticationFacade,
   private val resilientCacheAccessor: ResilientCacheAccessor,
 ) {
+  private val rateLimitProperties get() = tolgeeProperties.rateLimits
   private val cache: Cache by lazy {
     cacheManager.getCache(Caches.RATE_LIMITS)
       ?: throw RuntimeException("Could not initialize cache!")

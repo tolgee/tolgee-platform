@@ -1,7 +1,7 @@
 package io.tolgee.controllers.resetPassword
 
 import io.swagger.v3.oas.annotations.Operation
-import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.controllers.AuthenticationTag
 import io.tolgee.dtos.request.auth.ResetPassword
@@ -28,8 +28,10 @@ import org.springframework.web.bind.annotation.RestController
 class PasswordResetController(
   private val userAccountService: UserAccountService,
   private val applicationContext: ApplicationContext,
-  private val authProperties: AuthenticationProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
+  private val authProperties get() = tolgeeProperties.authentication
+
   @Operation(summary = "Request password reset")
   @PostMapping("/reset_password_request")
   @OpenApiHideFromPublicDocs

@@ -2,7 +2,7 @@ package io.tolgee.component.machineTranslation
 
 import io.sentry.Sentry
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
-import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.LanguageNotSupportedException
@@ -22,9 +22,10 @@ import org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class MtServiceManager(
   private val applicationContext: ApplicationContext,
-  private val internalProperties: InternalProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val cacheManager: CacheManager,
 ) {
+  private val internalProperties get() = tolgeeProperties.internal
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   fun translate(params: TranslationParams): TranslateResult {

@@ -19,7 +19,7 @@ package io.tolgee.security.authentication
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import io.tolgee.component.fileStorage.FileStorage
-import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -27,9 +27,11 @@ import java.security.Key
 
 @Configuration
 class AuthenticationConfig(
-  private val authenticationProperties: AuthenticationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val fileStorage: FileStorage,
 ) {
+  private val authenticationProperties get() = tolgeeProperties.authentication
+
   @Bean("jwt_signing_key")
   fun jwtSigningKey(
     @Qualifier("jwt_signing_secret") bytes: ByteArray,

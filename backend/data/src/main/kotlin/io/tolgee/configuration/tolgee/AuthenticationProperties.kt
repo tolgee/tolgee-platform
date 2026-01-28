@@ -7,9 +7,7 @@ package io.tolgee.configuration.tolgee
 import io.tolgee.configuration.annotations.AdditionalDocsProperties
 import io.tolgee.configuration.annotations.DocProperty
 import jakarta.validation.constraints.Size
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.authentication")
 @AdditionalDocsProperties(
   properties = [
     DocProperty(
@@ -37,7 +35,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
     ),
   ],
 )
-@DocProperty(description = "Configuration of Tolgee's authentication.", displayName = "Authentication")
+@DocProperty(
+  prefix = "tolgee.authentication",
+  description = "Configuration of Tolgee's authentication.",
+  displayName = "Authentication",
+)
 class AuthenticationProperties(
   @E2eRuntimeMutable
   @DocProperty(

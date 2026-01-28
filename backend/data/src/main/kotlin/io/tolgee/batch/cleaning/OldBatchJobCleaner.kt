@@ -5,7 +5,7 @@ import io.micrometer.core.instrument.Timer
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.SchedulingManager
-import io.tolgee.configuration.tolgee.BatchProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.util.Logging
 import io.tolgee.util.addDays
 import io.tolgee.util.executeInNewTransaction
@@ -24,12 +24,14 @@ import java.util.concurrent.atomic.AtomicLong
 class OldBatchJobCleaner(
   private val entityManager: EntityManager,
   private val currentDateProvider: CurrentDateProvider,
-  private val batchProperties: BatchProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val meterRegistry: MeterRegistry,
   private val lockingProvider: LockingProvider,
   private val transactionManager: PlatformTransactionManager,
   private val schedulingManager: SchedulingManager,
 ) : Logging {
+  private val batchProperties get() = tolgeeProperties.batch
+
   @EventListener(ApplicationReadyEvent::class)
   fun scheduleCleanup() {
     if (!batchProperties.oldJobCleanupEnabled) {
