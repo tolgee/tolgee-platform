@@ -332,6 +332,93 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       .containsExactlyInAnyOrder(mainScreenshot, featureScreenshot)
   }
 
+  @Test
+  fun `dry-run does not re-add key when target deleted but source unchanged`() {
+    deleteTargetKey()
+
+    val merge = dryRunFeatureBranchMerge()
+
+    merge.changes
+      .filter { it.change == BranchKeyMergeChangeType.ADD }
+      .mapNotNull { it.sourceKey?.name }
+      .assert
+      .doesNotContain(BranchMergeTestData.DELETE_KEY_NAME)
+  }
+
+  @Test
+  fun `dry-run handles target key deleted and re-created with same name`() {
+    val originalName = reCreateTargetKeyWithSameName()
+
+    val merge = dryRunFeatureBranchMerge()
+
+    val changes =
+      merge.changes.filter {
+        it.sourceKey?.name == originalName || it.targetKey?.name == originalName
+      }
+    changes.assert.isNotEmpty()
+  }
+
+  @Test
+  fun `dry-run detects key rename in source branch`() {
+    renameFeatureKey("renamed-key")
+
+    val merge = dryRunFeatureBranchMerge()
+
+    val updates = merge.changes.filter { it.change == BranchKeyMergeChangeType.UPDATE }
+    updates.assert.isNotEmpty()
+  }
+
+  @Test
+  fun `dry-run detects key moved to different namespace`() {
+    moveFeatureKeyToNamespace("new-namespace")
+
+    val merge = dryRunFeatureBranchMerge()
+
+    val changes =
+      merge.changes.filter {
+        it.sourceKey?.id == testData.featureKeyToUpdate.id
+      }
+    changes.assert.isNotEmpty()
+  }
+
+  @Test
+  fun `dry-run handles namespace deleted and re-created with same name`() {
+    prepareNamespaceRecreation()
+
+    val merge = dryRunFeatureBranchMerge()
+
+    merge.changes.assert.isNotEmpty()
+  }
+
+  @Test
+  fun `dry-run detects conflict when both branches add translations for new language`() {
+    addDifferentTranslationsForNewLanguage("fr", "French", "Main French text", "Feature French text")
+
+    val merge = dryRunFeatureBranchMerge()
+
+    val changes =
+      merge.changes.filter {
+        it.sourceKey?.name == BranchMergeTestData.UPDATE_KEY_NAME
+      }
+    changes.assert.isNotEmpty()
+  }
+
+  @Test
+  fun `dry-run detects conflict when both branches change screenshot references`() {
+    addScreenshotsToBothBranches()
+
+    val merge = dryRunFeatureBranchMerge()
+
+    val changes =
+      merge.changes.filter {
+        it.sourceKey?.name == BranchMergeTestData.UPDATE_KEY_NAME
+      }
+
+    changes.assert.isNotEmpty()
+
+    val conflicts = changes.filter { it.change == BranchKeyMergeChangeType.CONFLICT }
+  }
+
   private fun setLabels(
     translation: Translation,
     vararg labels: Label,
@@ -363,13 +450,21 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   private fun createFeatureOnlyKey() {
+    createKey(additionKeyName, additionValue, testData.featureBranch)
+  }
+
+  private fun createKey(
+    name: String,
+    enTranslation: String,
+    branch: Branch,
+  ): Key {
     val dto =
       CreateKeyDto(
-        name = additionKeyName,
-        translations = mapOf("en" to additionValue),
-        branch = testData.featureBranch.name,
+        name = name,
+        translations = mapOf("en" to enTranslation),
+        branch = branch.name,
       )
-    keyService.create(testData.project, dto)
+    return keyService.create(testData.project, dto)
   }
 
   private fun deleteFeatureKey() {
@@ -493,5 +588,75 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   private fun Key.enTranslation(): String? {
     val key = keyService.find(this.id) ?: return null
     return translationService.find(key, testData.englishLanguage).orElse(null)?.text
+  }
+
+  private fun deleteTargetKey() {
+    keyService.delete(testData.mainKeyToDelete.id)
+  }
+
+  private fun reCreateTargetKeyWithSameName(): String {
+    val originalName = testData.mainKeyToDelete.name
+    keyService.delete(testData.mainKeyToDelete.id)
+    createKey(originalName, "Re-created in target", testData.mainBranch)
+    return originalName
+  }
+
+  private fun renameFeatureKey(newName: String) {
+    val key = keyService.get(testData.featureKeyToUpdate.id)
+    keyService.edit(
+      key,
+      newName,
+      key.namespace?.name,
+      null,
+    )
+  }
+
+  private fun moveFeatureKeyToNamespace(namespaceName: String) {
+    namespaceService.create(namespaceName, testData.project.id)
+    val key = keyService.get(testData.featureKeyToUpdate.id)
+    keyService.edit(
+      key,
+      key.name,
+      namespaceName,
+      null,
+    )
+  }
+
+  private fun prepareNamespaceRecreation() {
+    val namespaceName = "temp-namespace"
+    val namespace1 = namespaceService.create(namespaceName, testData.project.id)!!
+
+    createKey("namespace-test-key", "Test value", testData.featureBranch)
+
+    branchSnapshotService.createInitialSnapshot(
+      testData.project.id,
+      testData.mainBranch,
+      testData.featureBranch,
+    )
+
+    namespaceService.delete(namespace1)
+    namespaceService.create(namespaceName, testData.project.id)
+  }
+
+  private fun addDifferentTranslationsForNewLanguage(
+    tag: String,
+    name: String,
+    mainValue: String,
+    featureValue: String,
+  ) {
+    val newLanguage = addProjectLanguage(tag, name)
+
+    val mainKey = keyService.get(testData.mainKeyToUpdate.id)
+    val mainTranslation = translationService.getOrCreate(mainKey, newLanguage)
+    translationService.setTranslationText(mainTranslation, mainValue)
+
+    val featureKey = keyService.get(testData.featureKeyToUpdate.id)
+    val featureTranslation = translationService.getOrCreate(featureKey, newLanguage)
+    translationService.setTranslationText(featureTranslation, featureValue)
+  }
+
+  private fun addScreenshotsToBothBranches() {
+    addScreenshotReference(testData.mainKeyToUpdate)
+    addScreenshotReference(testData.featureKeyToUpdate)
   }
 }

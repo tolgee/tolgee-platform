@@ -155,7 +155,10 @@ class Key(
 
   override fun hasChanged(snapshot: KeySnapshot): Boolean {
     val changed =
-      this.name != snapshot.name || this.isPlural != snapshot.isPlural || this.pluralArgName != snapshot.pluralArgName
+      this.name != snapshot.name ||
+        this.namespace?.name != snapshot.namespace ||
+        this.isPlural != snapshot.isPlural ||
+        this.pluralArgName != snapshot.pluralArgName
     if (changed) {
       return true
     }
@@ -185,6 +188,9 @@ class Key(
     source: Key,
     snapshot: KeySnapshot,
   ): Boolean {
+    if (isConflictingThreeWay(source.namespace?.name, this.namespace?.name, snapshot.namespace)) {
+      return true
+    }
     if (isConflictingThreeWay(source.isPlural, this.isPlural, snapshot.isPlural)) {
       return true
     }
