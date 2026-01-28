@@ -23,16 +23,18 @@ export const useMergeTabs = (
 
   const tabs: TabConfig[] = useMemo(() => {
     if (!merge) return [];
-    return [
-      { key: 'ADD', label: labels.ADD, count: merge.keyAdditionsCount },
-      {
-        key: 'UPDATE',
-        label: labels.UPDATE,
-        count: merge.keyModificationsCount,
-      },
-      { key: 'DELETE', label: labels.DELETE, count: merge.keyDeletionsCount },
-      { key: 'CONFLICT', label: labels.CONFLICT, count: totalConflicts },
-    ];
+    return (
+      [
+        { key: 'ADD', label: labels.ADD, count: merge.keyAdditionsCount },
+        {
+          key: 'UPDATE',
+          label: labels.UPDATE,
+          count: merge.keyModificationsCount,
+        },
+        { key: 'DELETE', label: labels.DELETE, count: merge.keyDeletionsCount },
+        { key: 'CONFLICT', label: labels.CONFLICT, count: totalConflicts },
+      ] satisfies TabConfig[]
+    ).filter((tab) => tab.count > 0);
   }, [merge, labels, totalConflicts]);
 
   useEffect(() => {

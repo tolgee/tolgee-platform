@@ -1,7 +1,8 @@
 import { ArrowDropDown, Branch } from 'tg.component/CustomIcons';
 import { DefaultChip } from 'tg.component/common/chips/DefaultChip';
 import React from 'react';
-import { Box } from '@mui/material';
+import { Box, styled } from '@mui/material';
+import { ShieldTick } from '@untitled-ui/icons-react';
 
 type Props = {
   name: string;
@@ -9,7 +10,12 @@ type Props = {
   disabled?: boolean;
   arrow?: boolean;
   size?: 'small' | 'default';
+  isProtected?: boolean;
 };
+
+const StyledShieldTick = styled(ShieldTick)`
+  margin-left: 4px;
+`;
 
 export const BranchNameChip = ({
   name,
@@ -17,9 +23,11 @@ export const BranchNameChip = ({
   disabled,
   arrow,
   size = 'default',
+  isProtected,
 }: Props) => {
   const iconSize = size === 'small' ? 14 : 18;
   const dropdownIconSize = size === 'small' ? 18 : 24;
+  const protectedIconSize = size === 'small' ? 14 : 18;
   return (
     <ChipComponent
       disabled={disabled}
@@ -27,6 +35,12 @@ export const BranchNameChip = ({
       label={
         <Box display="flex" alignItems="center" flexWrap="nowrap">
           <span>{name}</span>
+          {isProtected && (
+            <StyledShieldTick
+              width={protectedIconSize}
+              height={protectedIconSize}
+            />
+          )}
           {arrow && (
             <ArrowDropDown
               width={dropdownIconSize}
