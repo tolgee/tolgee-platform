@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.authentication.oauth2")
 @DocProperty(
+  prefix = "tolgee.authentication.oauth2",
   description =
     "OAuth 2.0 is the industry-standard protocol for authorization.\n" +
       "This enables the integration of a wide range of authorization providers into tolgee, " +

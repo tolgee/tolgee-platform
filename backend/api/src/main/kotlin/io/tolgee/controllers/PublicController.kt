@@ -2,7 +2,7 @@ package io.tolgee.controllers
 
 import com.fasterxml.jackson.databind.node.TextNode
 import io.swagger.v3.oas.annotations.Operation
-import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.security.LoginRequest
@@ -48,12 +48,14 @@ class PublicController(
   private val signUpService: SignUpService,
   private val mfaService: MfaService,
   private val userCredentialsService: UserCredentialsService,
-  private val authProperties: AuthenticationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val thirdPartyAuthenticationService: ThirdPartyAuthenticationService,
   private val publicInvitationModelAssembler: PublicInvitationModelAssembler,
   private val invitationService: InvitationService,
   private val authenticationFacade: AuthenticationFacade,
 ) {
+  private val authProperties get() = tolgeeProperties.authentication
+
   @Operation(summary = "Generate JWT token")
   @PostMapping("/generatetoken")
   @RateLimited(5, isAuthentication = true)

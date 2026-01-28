@@ -1,6 +1,5 @@
 package io.tolgee.commandLineRunners
 
-import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.model.UserAccount
@@ -25,7 +24,6 @@ class InitialUserCreatorCommandLineRunner(
   private val initialPasswordManager: InitialPasswordManager,
   private val organizationService: OrganizationService,
   private val passwordEncoder: PasswordEncoder,
-  private val internalProperties: InternalProperties,
   private val quickStartService: QuickStartService,
 ) : CommandLineRunner,
   ApplicationListener<ContextClosedEvent> {
@@ -33,7 +31,7 @@ class InitialUserCreatorCommandLineRunner(
 
   @Transactional
   override fun run(vararg args: String) {
-    if (internalProperties.disableInitialUserCreation) {
+    if (properties.internal.disableInitialUserCreation) {
       return
     }
     val initialUser = userAccountService.findInitialUser()

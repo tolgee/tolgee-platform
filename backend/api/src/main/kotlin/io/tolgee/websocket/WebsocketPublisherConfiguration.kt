@@ -1,6 +1,6 @@
 package io.tolgee.websocket
 
-import io.tolgee.configuration.tolgee.WebsocketProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -9,9 +9,11 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 
 @Configuration
 class WebsocketPublisherConfiguration(
-  private val websocketProperties: WebsocketProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val applicationContext: ApplicationContext,
 ) {
+  private val websocketProperties get() = tolgeeProperties.websocket
+
   @Bean
   fun websocketEventPublisher(): WebsocketEventPublisher {
     if (websocketProperties.useRedis) {

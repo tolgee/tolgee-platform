@@ -1,7 +1,7 @@
 package io.tolgee.ee.service
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -49,10 +49,11 @@ class LlmProviderService(
   private val cacheManager: CacheManager,
   private val currentDateProvider: CurrentDateProvider,
   private val restTemplateBuilder: RestTemplateBuilder,
-  private val internalProperties: InternalProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val anthropicApiService: AnthropicApiService,
   private val googleAiApiService: GoogleAiApiService,
 ) {
+  private val internalProperties get() = tolgeeProperties.internal
   private val cache: Cache by lazy { cacheManager.getCache(Caches.LLM_PROVIDERS) ?: throw InvalidStateException() }
   private var lastUsedMap: MutableMap<String, Long> = mutableMapOf()
 

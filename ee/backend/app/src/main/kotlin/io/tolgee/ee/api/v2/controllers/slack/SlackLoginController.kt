@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
-import io.tolgee.configuration.tolgee.SlackProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.ee.component.slackIntegration.SlackChannelMessagesOperations
@@ -43,11 +43,13 @@ class SlackLoginController(
   private val slackNotificationBlocksProvider: SlackNotificationBlocksProvider,
   private val slackOperations: SlackChannelMessagesOperations,
   private val slackClient: Slack,
-  private val slackProperties: SlackProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val slackWorkspaceService: OrganizationSlackWorkspaceService,
   private val organizationRoleService: OrganizationRoleService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) : Logging {
+  private val slackProperties get() = tolgeeProperties.slack
+
   @PostMapping("/user-login")
   @Operation(summary = "User login", description = "Pairs user account with slack account.")
   fun userLogin(

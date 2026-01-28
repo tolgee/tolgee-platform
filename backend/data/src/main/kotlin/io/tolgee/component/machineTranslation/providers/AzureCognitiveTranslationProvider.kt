@@ -1,7 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -9,9 +9,10 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class AzureCognitiveTranslationProvider(
-  private val azureCognitiveTranslationProperties: AzureCognitiveTranslationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val azureCognitiveApiService: AzureCognitiveApiService,
 ) : AbstractMtValueProvider() {
+  private val azureCognitiveTranslationProperties get() = tolgeeProperties.machineTranslation.azure
   override val isEnabled: Boolean
     get() = !azureCognitiveTranslationProperties.authKey.isNullOrEmpty()
 

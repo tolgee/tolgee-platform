@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee.machineTranslation
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.machine-translation.azurecognitive")
 @DocProperty(
+  prefix = "tolgee.machine-translation.azurecognitive",
   description =
     "See " +
       "[Azure Cognitive Translation]" +

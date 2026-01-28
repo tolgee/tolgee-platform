@@ -2,7 +2,7 @@ package io.tolgee.service
 
 import io.sentry.Sentry
 import io.tolgee.component.HttpClient
-import io.tolgee.configuration.tolgee.TelemetryProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.TelemetryReportRequest
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -17,8 +17,10 @@ class TelemetryService(
   private val instanceIdService: InstanceIdService,
   private val entityManager: EntityManager,
   private val httpClient: HttpClient,
-  private val telemetryProperties: TelemetryProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
+  private val telemetryProperties get() = tolgeeProperties.telemetry
+
   companion object {
     const val TELEMETRY_REPORT_PERIOD_MS = 24 * 60 * 60 * 1000L
   }

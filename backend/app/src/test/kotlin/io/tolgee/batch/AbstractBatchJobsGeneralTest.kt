@@ -5,7 +5,6 @@ import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.state.BatchJobStateProvider
-import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.BatchJobsTestData
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
@@ -32,8 +31,7 @@ abstract class AbstractBatchJobsGeneralTest :
   @Autowired
   lateinit var batchJobService: BatchJobService
 
-  @Autowired
-  lateinit var batchProperties: BatchProperties
+  val batchProperties get() = tolgeeProperties.batch
 
   @MockitoSpyBean
   @Autowired

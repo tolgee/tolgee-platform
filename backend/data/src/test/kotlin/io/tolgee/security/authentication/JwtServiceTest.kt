@@ -20,6 +20,7 @@ import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.UserAccount
@@ -50,6 +51,8 @@ class JwtServiceTest {
 
   private val authenticationProperties = Mockito.mock(AuthenticationProperties::class.java)
 
+  private val tolgeeProperties = Mockito.mock(TolgeeProperties::class.java)
+
   private val currentDateProvider = Mockito.mock(CurrentDateProvider::class.java)
 
   private val userAccountService = Mockito.mock(UserAccountService::class.java)
@@ -63,7 +66,7 @@ class JwtServiceTest {
   private val jwtService: JwtService =
     JwtService(
       testSigningKey,
-      authenticationProperties,
+      tolgeeProperties,
       currentDateProvider,
       userAccountService,
       authenticationFacade,
@@ -73,6 +76,7 @@ class JwtServiceTest {
   fun setupMocks() {
     val now = Date()
 
+    Mockito.`when`(tolgeeProperties.authentication).thenReturn(authenticationProperties)
     Mockito.`when`(authenticationProperties.jwtExpiration).thenReturn(JWT_LIFETIME)
     Mockito.`when`(authenticationProperties.jwtSuperExpiration).thenReturn(SUPER_JWT_LIFETIME)
 

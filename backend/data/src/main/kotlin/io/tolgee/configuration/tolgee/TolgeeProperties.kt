@@ -9,6 +9,7 @@ import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.NestedConfigurationProperty
 
 @AdditionalDocsProperties(
   [
@@ -67,8 +68,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "tolgee")
 @DocProperty(description = "Configuration specific to Tolgee.", displayName = "Tolgee")
 class TolgeeProperties(
+  @NestedConfigurationProperty
   var authentication: AuthenticationProperties = AuthenticationProperties(),
+  @NestedConfigurationProperty
   var smtp: SmtpProperties = SmtpProperties(),
+  @NestedConfigurationProperty
   var sentry: SentryProperties = SentryProperties(),
   @DocProperty(hidden = true)
   var chatwootToken: String? = null,
@@ -81,6 +85,7 @@ class TolgeeProperties(
   @DocProperty(hidden = true, description = "Ask user where did they found Tolgee in SignUp form")
   var userSourceField: Boolean = false,
   @DocProperty(hidden = true)
+  @NestedConfigurationProperty
   var internal: InternalProperties = InternalProperties(),
   @DocProperty(
     description = "Public base path where files are accessible. Used by the user interface.",
@@ -91,6 +96,7 @@ class TolgeeProperties(
   var maxUploadFileSize: Int = 51200,
   @DocProperty(description = "Maximum amount of screenshots which can be uploaded per API key.")
   val maxScreenshotsPerKey: Int = 20,
+  @NestedConfigurationProperty
   var fileStorage: FileStorageProperties = FileStorageProperties(),
   @DocProperty(
     description =
@@ -102,26 +108,40 @@ class TolgeeProperties(
         "recommended especially if you are managing publicly accessible Tolgee instance. ",
   )
   var frontEndUrl: String? = null,
+  @NestedConfigurationProperty
   var websocket: WebsocketProperties = WebsocketProperties(),
   @DocProperty(description = "Name of the application.", hidden = true)
   var appName: String = "Tolgee",
   @DocProperty(description = "Maximum length of translations.")
   var maxTranslationTextLength: Long = 10000,
+  @NestedConfigurationProperty
   var batch: BatchProperties = BatchProperties(),
+  @NestedConfigurationProperty
   var cache: CacheProperties = CacheProperties(),
+  @NestedConfigurationProperty
   var recaptcha: ReCaptchaProperties = ReCaptchaProperties(),
+  @NestedConfigurationProperty
   var machineTranslation: MachineTranslationProperties = MachineTranslationProperties(),
+  @NestedConfigurationProperty
   var postgresAutostart: PostgresAutostartProperties = PostgresAutostartProperties(),
   @DocProperty(hidden = true)
+  @NestedConfigurationProperty
   var mailjet: MailjetProperties = MailjetProperties(),
+  @NestedConfigurationProperty
   var import: ImportProperties = ImportProperties(),
-  var rateLimit: RateLimitProperties = RateLimitProperties(),
+  @NestedConfigurationProperty
+  var rateLimits: RateLimitProperties = RateLimitProperties(),
   @DocProperty(hidden = true)
+  @NestedConfigurationProperty
   var postHog: PostHogProperties = PostHogProperties(),
+  @NestedConfigurationProperty
   var telemetry: TelemetryProperties = TelemetryProperties(),
+  @NestedConfigurationProperty
   var contentDelivery: ContentDeliveryProperties = ContentDeliveryProperties(),
+  @NestedConfigurationProperty
   var slack: SlackProperties = SlackProperties(),
   @DocProperty(hidden = true)
+  @NestedConfigurationProperty
   var plausible: PlausibleProperties = PlausibleProperties(),
   @DocProperty(
     description = "Maximum amount of languages that can be selected in the Translations view",
@@ -130,5 +150,6 @@ class TolgeeProperties(
   @DocProperty(
     description = "LLM Providers configuration",
   )
-  var llmProperties: LlmProperties = LlmProperties(),
+  @NestedConfigurationProperty
+  var llm: LlmProperties = LlmProperties(),
 )

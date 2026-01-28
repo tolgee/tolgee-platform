@@ -12,7 +12,6 @@ import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.batch.request.NoOpRequest
 import io.tolgee.batch.request.PreTranslationByTmRequest
 import io.tolgee.batch.state.BatchJobStateProvider
-import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.development.testDataBuilder.data.ConcurrentBatchJobsTestData
 import io.tolgee.fixtures.RedisRunner
 import io.tolgee.fixtures.waitFor
@@ -103,8 +102,7 @@ class BatchJobConcurrentIntegrationTest :
   @Autowired
   lateinit var batchJobCancellationManager: BatchJobCancellationManager
 
-  @Autowired
-  lateinit var batchProperties: BatchProperties
+  val batchProperties get() = tolgeeProperties.batch
 
   @Autowired
   lateinit var transactionManager: PlatformTransactionManager

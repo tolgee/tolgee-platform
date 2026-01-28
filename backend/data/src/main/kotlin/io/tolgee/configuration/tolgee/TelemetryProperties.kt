@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.telemetry")
 @DocProperty(
+  prefix = "tolgee.telemetry",
   description = """By default, self-hosted instances send anonymous data about usage to help us improve Tolgee.
 
 :::info

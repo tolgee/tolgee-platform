@@ -7,9 +7,8 @@ package io.tolgee.configuration.tolgee
 import io.tolgee.configuration.annotations.AdditionalDocsProperties
 import io.tolgee.configuration.annotations.DocProperty
 import jakarta.validation.constraints.Size
-import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.NestedConfigurationProperty
 
-@ConfigurationProperties(prefix = "tolgee.authentication")
 @AdditionalDocsProperties(
   properties = [
     DocProperty(
@@ -37,7 +36,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
     ),
   ],
 )
-@DocProperty(description = "Configuration of Tolgee's authentication.", displayName = "Authentication")
+@DocProperty(
+  prefix = "tolgee.authentication",
+  description = "Configuration of Tolgee's authentication.",
+  displayName = "Authentication",
+)
 class AuthenticationProperties(
   @E2eRuntimeMutable
   @DocProperty(
@@ -143,9 +146,14 @@ class AuthenticationProperties(
         "own organization automatically created no matter the value of this setting.",
   )
   var userCanCreateOrganizations: Boolean = true,
+  @NestedConfigurationProperty
   var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
+  @NestedConfigurationProperty
   var google: GoogleAuthenticationProperties = GoogleAuthenticationProperties(),
+  @NestedConfigurationProperty
   var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),
+  @NestedConfigurationProperty
   var ssoGlobal: SsoGlobalProperties = SsoGlobalProperties(),
+  @NestedConfigurationProperty
   var ssoOrganizations: SsoOrganizationsProperties = SsoOrganizationsProperties(),
 )

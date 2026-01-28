@@ -1,10 +1,10 @@
 package io.tolgee.configuration.tolgee
 
+import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.model.contentDelivery.ContentDeliveryCachePurgingType
 import io.tolgee.model.contentDelivery.ContentDeliveryPurgingConfig
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.content-delivery.cache-purging.bunny")
+@DocProperty(prefix = "tolgee.content-delivery.cache-purging.bunny")
 class ContentDeliveryBunnyProperties(
   var apiKey: String? = null,
   var urlPrefix: String? = null,

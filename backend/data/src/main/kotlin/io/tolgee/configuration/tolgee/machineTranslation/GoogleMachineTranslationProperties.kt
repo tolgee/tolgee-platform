@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee.machineTranslation
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.machine-translation.google")
 @DocProperty(
+  prefix = "tolgee.machine-translation.google",
   description =
     "See [Google Cloud Translation](https://cloud.google.com/translate) page " +
       "for more information and applicable pricing.",

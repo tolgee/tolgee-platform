@@ -19,6 +19,7 @@ package io.tolgee.security.ratelimit
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.configuration.tolgee.RateLimitProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andIsRateLimited
@@ -45,6 +46,8 @@ import kotlin.reflect.jvm.javaMethod
 class RateLimitInterceptorTest {
   private val rateLimitProperties = Mockito.spy(RateLimitProperties::class.java)
 
+  private val tolgeeProperties = Mockito.mock(TolgeeProperties::class.java)
+
   private val currentDateProvider = Mockito.mock(CurrentDateProvider::class.java)
 
   private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
@@ -57,7 +60,7 @@ class RateLimitInterceptorTest {
         ConcurrentMapCacheManager(),
         TestLockingProvider(),
         currentDateProvider,
-        rateLimitProperties,
+        tolgeeProperties,
         authenticationFacade,
       ),
     )
@@ -76,6 +79,7 @@ class RateLimitInterceptorTest {
 
   @BeforeEach
   fun setupMocks() {
+    Mockito.`when`(tolgeeProperties.rateLimits).thenReturn(rateLimitProperties)
     Mockito.`when`(currentDateProvider.date).thenReturn(Date())
     Mockito.`when`(userAccount.id).thenReturn(1337L)
   }
