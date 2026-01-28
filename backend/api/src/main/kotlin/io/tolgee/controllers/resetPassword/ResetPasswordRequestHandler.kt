@@ -126,7 +126,7 @@ class ResetPasswordRequestHandler(
   }
 
   private val authProperties: AuthenticationProperties by lazy {
-    applicationContext.getBean(AuthenticationProperties::class.java)
+    tolgeeProperties.authentication
   }
 
   private val userAccountService: UserAccountService by lazy {

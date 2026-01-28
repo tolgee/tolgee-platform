@@ -1,6 +1,5 @@
 package io.tolgee.ee.api.v2.controllers.slack
 
-import io.tolgee.configuration.tolgee.SlackProperties
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -40,8 +39,7 @@ class OrganizationSlackControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var restTemplate: RestTemplate
 
-  @Autowired
-  lateinit var slackProperties: SlackProperties
+  private val slackProperties get() = tolgeeProperties.slack
 
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider

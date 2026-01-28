@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.content-delivery")
 @DocProperty(
+  prefix = "tolgee.content-delivery",
   displayName = "Content Delivery",
   description =
     "These properties are used to configure " +

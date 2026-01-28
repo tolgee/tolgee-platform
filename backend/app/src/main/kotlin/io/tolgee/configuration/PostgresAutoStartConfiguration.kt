@@ -1,7 +1,7 @@
 package io.tolgee.configuration
 
 import io.tolgee.PostgresRunner
-import io.tolgee.configuration.tolgee.PostgresAutostartProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.util.Logging
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -16,8 +16,9 @@ import javax.sql.DataSource
 @Configuration
 @ConditionalOnProperty(name = ["tolgee.postgres-autostart.enabled"], havingValue = "true")
 class PostgresAutoStartConfiguration(
-  val postgresAutostartProperties: PostgresAutostartProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : Logging {
+  private val postgresAutostartProperties get() = tolgeeProperties.postgresAutostart
   private var dataSource: DataSource? = null
 
   @Bean("dataSource")

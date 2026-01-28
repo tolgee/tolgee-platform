@@ -5,7 +5,6 @@
 package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.configuration.tolgee.TelemetryProperties
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.TelemetryReportRequest
 import io.tolgee.fixtures.mockHttpRequest
@@ -33,8 +32,7 @@ class TelemetryServiceTest : AbstractSpringTest() {
   @Autowired
   lateinit var restTemplate: RestTemplate
 
-  @Autowired
-  lateinit var telemetryProperties: TelemetryProperties
+  private val telemetryProperties get() = tolgeeProperties.telemetry
 
   @AfterEach
   fun clean() {

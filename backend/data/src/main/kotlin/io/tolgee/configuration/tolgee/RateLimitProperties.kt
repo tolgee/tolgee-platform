@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.rate-limits")
 @DocProperty(
+  prefix = "tolgee.rate-limits",
   displayName = "Rate limits",
   description =
     "Configuration of the rate limit behavior of the server.\n" +

@@ -1,6 +1,6 @@
 package io.tolgee.ee.service.slackIntegration
 
-import io.tolgee.configuration.tolgee.SlackProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.ee.repository.slackIntegration.SlackConfigRepository
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.slackIntegration.OrganizationSlackWorkspace
@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service
 class SlackConfigReadService(
   private val slackConfigRepository: SlackConfigRepository,
   private val organizationSlackWorkspaceService: OrganizationSlackWorkspaceService,
-  private val slackProperties: SlackProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
+  private val slackProperties get() = tolgeeProperties.slack
+
   fun find(
     projectId: Long,
     channelId: String,

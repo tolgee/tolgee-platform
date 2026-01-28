@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee.machineTranslation
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.machine-translation.deepl")
 @DocProperty(
+  prefix = "tolgee.machine-translation.deepl",
   description = "See [DeepL's](https://www.deepl.com/) page for more information and applicable pricing.",
   displayName = "DeepL",
 )

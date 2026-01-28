@@ -2,14 +2,16 @@ package io.tolgee.configuration
 
 import com.posthog.server.PostHog
 import com.posthog.server.PostHogConfig
-import io.tolgee.configuration.tolgee.PostHogProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
 class PostHogConfiguration(
-  private val properties: PostHogProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
+  private val properties get() = tolgeeProperties.postHog
+
   @Bean(destroyMethod = "close")
   fun postHog(): PostHog? {
     return properties.apiKey?.let { postHogApiKey ->

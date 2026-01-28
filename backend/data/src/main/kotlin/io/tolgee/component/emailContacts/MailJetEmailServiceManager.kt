@@ -6,7 +6,7 @@ import com.mailjet.client.MailjetRequest
 import com.mailjet.client.resource.Contact
 import com.mailjet.client.resource.Contactdata
 import com.mailjet.client.resource.Listrecipient
-import io.tolgee.configuration.tolgee.MailjetProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.util.runSentryCatching
 import org.json.JSONArray
 import org.json.JSONObject
@@ -15,8 +15,9 @@ import org.springframework.stereotype.Component
 
 @Component
 class MailJetEmailServiceManager(
-  private val mailjetProperties: MailjetProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : EmailServiceManager {
+  private val mailjetProperties get() = tolgeeProperties.mailjet
   private val client by lazy {
     if (mailjetProperties.apiKey.isNullOrEmpty() || mailjetProperties.secretKey.isNullOrEmpty()) {
       return@lazy null

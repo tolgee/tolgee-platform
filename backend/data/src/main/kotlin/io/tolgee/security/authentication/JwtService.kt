@@ -25,7 +25,7 @@ import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.security.SignatureException
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.cacheable.isAdmin
@@ -45,11 +45,12 @@ import javax.crypto.SecretKey
 class JwtService(
   @Qualifier("jwt_signing_key")
   private val signingKey: SecretKey,
-  private val authenticationProperties: AuthenticationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val currentDateProvider: CurrentDateProvider,
   private val userAccountService: UserAccountService,
   private val authenticationFacade: AuthenticationFacade,
 ) {
+  private val authenticationProperties get() = tolgeeProperties.authentication
   private val jwtParser: JwtParser =
     Jwts
       .parser()

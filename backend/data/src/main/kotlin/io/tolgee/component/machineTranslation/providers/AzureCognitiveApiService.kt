@@ -1,7 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.http.HttpEntity
@@ -17,9 +17,11 @@ import java.util.LinkedList
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class AzureCognitiveApiService(
-  private val azureCognitiveTranslationProperties: AzureCognitiveTranslationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val restTemplate: RestTemplate,
 ) {
+  private val azureCognitiveTranslationProperties get() = tolgeeProperties.machineTranslation.azure
+
   fun translate(
     text: String,
     sourceTag: String,
