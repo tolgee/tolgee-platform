@@ -1,8 +1,8 @@
 package io.tolgee.configuration.tolgee
 
-import org.springframework.boot.context.properties.ConfigurationProperties
+import io.tolgee.configuration.annotations.DocProperty
 
-@ConfigurationProperties(prefix = "tolgee.content-delivery.cache-purging")
+@DocProperty(prefix = "tolgee.content-delivery.cache-purging")
 class ContentDeliveryCachePurgingProperties {
   var azureFrontDoor = ContentDeliveryAzureFrontDoorProperties()
   var cloudflare = ContentDeliveryCloudflareProperties()

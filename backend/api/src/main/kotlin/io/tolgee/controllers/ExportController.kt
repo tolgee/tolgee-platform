@@ -61,8 +61,8 @@ class ExportController(
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
       rateLimitService.checkPerUserRateLimit(
         "export",
-        limit = tolgeeProperties.rateLimit.exportRequestLimit,
-        refillDuration = Duration.ofMillis(tolgeeProperties.rateLimit.exportRequestWindow),
+        limit = tolgeeProperties.rateLimits.exportRequestLimit,
+        refillDuration = Duration.ofMillis(tolgeeProperties.rateLimits.exportRequestWindow),
       )
 
       val allLanguages =

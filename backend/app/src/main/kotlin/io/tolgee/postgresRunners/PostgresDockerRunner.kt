@@ -1,13 +1,14 @@
 package io.tolgee.postgresRunners
 
 import io.tolgee.PostgresRunner
-import io.tolgee.configuration.tolgee.PostgresAutostartProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.misc.dockerRunner.DockerContainerRunner
 import org.slf4j.LoggerFactory
 
 class PostgresDockerRunner(
-  private val postgresAutostartProperties: PostgresAutostartProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : PostgresRunner {
+  private val postgresAutostartProperties get() = tolgeeProperties.postgresAutostart
   private var instance: DockerContainerRunner? = null
   private val logger = LoggerFactory.getLogger(javaClass)
 

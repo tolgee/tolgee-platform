@@ -1,6 +1,7 @@
 package io.tolgee.security.authentication
 
 import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
@@ -20,7 +21,9 @@ class AuthenticationInterceptorTest {
 
   private val authenticationProperties = Mockito.mock(AuthenticationProperties::class.java)
 
-  private val authenticationInterceptor = AuthenticationInterceptor(authenticationFacade, authenticationProperties)
+  private val tolgeeProperties = Mockito.mock(TolgeeProperties::class.java)
+
+  private val authenticationInterceptor = AuthenticationInterceptor(authenticationFacade, tolgeeProperties)
 
   private val mockMvc =
     MockMvcBuilders
@@ -30,6 +33,7 @@ class AuthenticationInterceptorTest {
 
   @BeforeEach
   fun setupMocks() {
+    Mockito.`when`(tolgeeProperties.authentication).thenReturn(authenticationProperties)
     Mockito.`when`(authenticationProperties.enabled).thenReturn(true)
     Mockito.`when`(authenticationFacade.authenticatedUser).thenReturn(userAccount)
     Mockito.`when`(authenticationFacade.isApiAuthentication).thenReturn(false)

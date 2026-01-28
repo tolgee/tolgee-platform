@@ -5,18 +5,18 @@ import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.MachineTranslationRequest
-import io.tolgee.configuration.tolgee.BatchProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.batch.params.MachineTranslationJobParams
-import io.tolgee.service.machineTranslation.MtServiceConfigService
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
 @Component
 class MachineTranslationChunkProcessor(
   private val genericAutoTranslationChunkProcessor: GenericAutoTranslationChunkProcessor,
-  private val mtServiceConfigService: MtServiceConfigService,
-  private val batchProperties: BatchProperties,
+  private val tolgeeProperties: TolgeeProperties,
 ) : ChunkProcessor<MachineTranslationRequest, MachineTranslationJobParams, BatchTranslationTargetItem> {
+  private val batchProperties get() = tolgeeProperties.batch
+
   override fun process(
     job: BatchJobDto,
     chunk: List<BatchTranslationTargetItem>,

@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.import")
 @DocProperty(
+  prefix = "tolgee.import",
   description =
     "Properties for importing data to Tolgee and " +
       "bulk-imports exported json files in the database during startup. " +

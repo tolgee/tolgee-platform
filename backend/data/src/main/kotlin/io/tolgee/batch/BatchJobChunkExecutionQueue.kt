@@ -7,7 +7,6 @@ import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.component.UsingRedisProvider
-import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
@@ -30,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @Component
 class BatchJobChunkExecutionQueue(
-  private val batchProperties: BatchProperties,
   private val entityManager: EntityManager,
   private val usingRedisProvider: UsingRedisProvider,
   @Lazy

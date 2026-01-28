@@ -1,7 +1,7 @@
 package io.tolgee.service
 
 import io.tolgee.api.EeSubscriptionProvider
-import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties.LlmProvider
 import io.tolgee.exceptions.InvalidStateException
 import io.tolgee.model.enums.LlmProviderType
@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class LlmPropertiesService(
-  private val llmProperties: LlmProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val eeSubscriptionProvider: EeSubscriptionProvider?,
 ) {
+  private val llmProperties get() = tolgeeProperties.llm
+
   fun subscriptionActive(): Boolean {
     return eeSubscriptionProvider?.findSubscriptionDto()?.licenseKey != null
   }

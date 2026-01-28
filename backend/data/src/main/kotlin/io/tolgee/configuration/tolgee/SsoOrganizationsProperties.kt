@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.authentication.sso-organizations")
 @DocProperty(
+  prefix = "tolgee.authentication.sso-organizations",
   description =
     "Single sign-on (SSO) is an authentication process that allows a user to" +
       " access multiple applications with one set of login credentials. To use SSO" +

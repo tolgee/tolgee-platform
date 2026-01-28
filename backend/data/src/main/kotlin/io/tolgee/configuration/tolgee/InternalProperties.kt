@@ -1,8 +1,8 @@
 package io.tolgee.configuration.tolgee
 
-import org.springframework.boot.context.properties.ConfigurationProperties
+import io.tolgee.configuration.annotations.DocProperty
 
-@ConfigurationProperties(prefix = "tolgee.internal")
+@DocProperty(prefix = "tolgee.internal")
 class InternalProperties {
   var controllerEnabled = false
   var fakeThirdPartyLogin = false

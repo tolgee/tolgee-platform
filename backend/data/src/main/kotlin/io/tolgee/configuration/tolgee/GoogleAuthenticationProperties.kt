@@ -1,10 +1,9 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.authentication.google")
 @DocProperty(
+  prefix = "tolgee.authentication.google",
   description =
     "The following instructions explain how to set up Google OAuth. " +
       "[Setting up OAuth 2.0](https://support.google.com/cloud/answer/6158849).",

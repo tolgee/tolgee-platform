@@ -4,10 +4,9 @@ import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
-import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "tolgee.llm")
 @DocProperty(
+  prefix = "tolgee.llm",
   name = "llm",
   displayName = "LLM Providers",
 )

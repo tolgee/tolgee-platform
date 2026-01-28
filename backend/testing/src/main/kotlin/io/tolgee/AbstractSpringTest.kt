@@ -7,16 +7,7 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.SchedulingManager
 import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.machineTranslation.MtServiceManager
-import io.tolgee.configuration.tolgee.AuthenticationProperties
-import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.AzureCognitiveTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
-import io.tolgee.configuration.tolgee.machineTranslation.LlmProperties
-import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.constants.MtServiceType
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
@@ -145,29 +136,21 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   lateinit var fileStorage: FileStorage
 
-  @Autowired
-  open lateinit var machineTranslationProperties: MachineTranslationProperties
+  open val machineTranslationProperties get() = tolgeeProperties.machineTranslation
 
-  @Autowired
-  lateinit var awsMachineTranslationProperties: AwsMachineTranslationProperties
+  val awsMachineTranslationProperties get() = tolgeeProperties.machineTranslation.aws
 
-  @Autowired
-  lateinit var googleMachineTranslationProperties: GoogleMachineTranslationProperties
+  val googleMachineTranslationProperties get() = tolgeeProperties.machineTranslation.google
 
-  @Autowired
-  lateinit var deeplMachineTranslationProperties: DeeplMachineTranslationProperties
+  val deeplMachineTranslationProperties get() = tolgeeProperties.machineTranslation.deepl
 
-  @Autowired
-  lateinit var azureCognitiveTranslationProperties: AzureCognitiveTranslationProperties
+  val azureCognitiveTranslationProperties get() = tolgeeProperties.machineTranslation.azure
 
-  @Autowired
-  lateinit var baiduMachineTranslationProperties: BaiduMachineTranslationProperties
+  val baiduMachineTranslationProperties get() = tolgeeProperties.machineTranslation.baidu
 
-  @Autowired
-  lateinit var llmProperties: LlmProperties
+  val llmProperties get() = tolgeeProperties.llm
 
-  @Autowired
-  open lateinit var internalProperties: InternalProperties
+  open val internalProperties get() = tolgeeProperties.internal
 
   @Autowired
   lateinit var mtServiceConfigService: MtServiceConfigService
@@ -234,8 +217,8 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   }
 
   @Autowired
-  private fun initInitialUser(authenticationProperties: AuthenticationProperties) {
-    initialUsername = authenticationProperties.initialUsername
+  private fun initInitialUser() {
+    initialUsername = tolgeeProperties.authentication.initialUsername
     initialPassword = initialPasswordManager.initialPassword
   }
 

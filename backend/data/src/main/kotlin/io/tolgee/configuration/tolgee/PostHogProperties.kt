@@ -1,8 +1,8 @@
 package io.tolgee.configuration.tolgee
 
-import org.springframework.boot.context.properties.ConfigurationProperties
+import io.tolgee.configuration.annotations.DocProperty
 
-@ConfigurationProperties(prefix = "tolgee.post-hog")
+@DocProperty(prefix = "tolgee.post-hog")
 class PostHogProperties {
   var apiKey: String? = null
   var host: String? = null

@@ -1,7 +1,7 @@
 package io.tolgee.component.machineTranslation.providers
 
 import io.tolgee.component.machineTranslation.MtValueProvider
-import io.tolgee.configuration.tolgee.machineTranslation.BaiduMachineTranslationProperties
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -9,9 +9,10 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class BaiduTranslationProvider(
-  private val baiduMachineTranslationProperties: BaiduMachineTranslationProperties,
+  private val tolgeeProperties: TolgeeProperties,
   private val baiduApiService: BaiduApiService,
 ) : AbstractMtValueProvider() {
+  private val baiduMachineTranslationProperties get() = tolgeeProperties.machineTranslation.baidu
   override val isEnabled: Boolean
     get() =
       !baiduMachineTranslationProperties.appId.isNullOrEmpty() &&

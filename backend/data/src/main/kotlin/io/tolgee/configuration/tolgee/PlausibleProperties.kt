@@ -1,8 +1,8 @@
 package io.tolgee.configuration.tolgee
 
-import org.springframework.boot.context.properties.ConfigurationProperties
+import io.tolgee.configuration.annotations.DocProperty
 
-@ConfigurationProperties(prefix = "tolgee.plausible")
+@DocProperty(prefix = "tolgee.plausible")
 class PlausibleProperties {
   var domain: String? = null
   var url: String = "https://tolgee.io"

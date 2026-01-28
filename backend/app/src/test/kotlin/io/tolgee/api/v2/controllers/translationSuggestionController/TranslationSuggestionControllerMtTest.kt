@@ -11,7 +11,6 @@ import io.tolgee.component.machineTranslation.providers.BaiduApiService
 import io.tolgee.component.machineTranslation.providers.DeeplApiService
 import io.tolgee.component.machineTranslation.providers.LlmTranslationProvider
 import io.tolgee.component.machineTranslation.providers.ProviderTranslateParams
-import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
@@ -88,11 +87,6 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   @MockitoBean
   override lateinit var cacheManager: CacheManager
 
-  @Suppress("LateinitVarOverridesLateinitVar")
-  @MockitoBean
-  @Autowired
-  override lateinit var machineTranslationProperties: MachineTranslationProperties
-
   lateinit var cacheMock: Cache
 
   lateinit var promptTranslateCaptor: KArgumentCaptor<ProviderTranslateParams>
@@ -118,9 +112,7 @@ class TranslationSuggestionControllerMtTest : ProjectAuthControllerTest("/v2/pro
   }
 
   private fun mockDefaultMtBucketSize(size: Long) {
-    whenever(machineTranslationProperties.freeCreditsAmount).thenAnswer {
-      size
-    }
+    machineTranslationProperties.freeCreditsAmount = size
   }
 
   private fun initMachineTranslationMocks() {
