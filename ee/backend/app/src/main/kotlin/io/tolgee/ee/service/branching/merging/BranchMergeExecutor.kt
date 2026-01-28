@@ -17,6 +17,7 @@ import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.LinkedHashMap
 
 @Service
@@ -28,9 +29,12 @@ class BranchMergeExecutor(
   private val currentDateProvider: CurrentDateProvider,
   private val branchSnapshotService: BranchSnapshotService,
 ) {
+  @Transactional
   fun execute(merge: BranchMerge) {
     attachKeysForMerge(merge)
-    val snapshotKeys = branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id).associateBy { it.originalKeyId }
+    val snapshotKeys by lazy {
+      branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id).associateBy { it.originalKeyId }
+    }
     merge.changes.forEach { change ->
       when (change.change) {
         BranchKeyMergeChangeType.ADD -> {

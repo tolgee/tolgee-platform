@@ -4720,10 +4720,10 @@
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1758202102054-2" runInTransaction="false">
         <sql>
-            create unique index concurrently on public.key (project_id, "name", coalesce(branch_id, -1)) where namespace_id is null;
+            create unique index concurrently on public.key (project_id, coalesce(branch_id, -1), "name") where namespace_id is null;
         </sql>
         <sql>
-            create unique index concurrently on public.key (project_id, "name", coalesce(branch_id, -1), namespace_id) where namespace_id is not null;
+            create unique index concurrently on public.key (project_id, coalesce(branch_id, -1), "name", namespace_id) where namespace_id is not null;
         </sql>
         <sql>
             create unique index concurrently on public.branch (project_id, is_default) where is_default is TRUE;
@@ -4884,7 +4884,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="language" type="VARCHAR(255)"/>
-            <column defaultValueNumeric="2" name="state" type="SMALLINT"/>
+            <column defaultValueNumeric="1" name="state" type="SMALLINT"/>
             <column name="value" type="TEXT"/>
             <column name="key_snapshot_id" type="BIGINT">
                 <constraints nullable="false"/>
