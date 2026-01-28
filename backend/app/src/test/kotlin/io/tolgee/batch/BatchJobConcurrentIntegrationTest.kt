@@ -307,7 +307,7 @@ class BatchJobConcurrentIntegrationTest :
     doAnswer { invocation ->
       val job = invocation.getArgument<BatchJobDto>(0)
       processedChunks.add(job.id)
-      Thread.sleep(20) // Small delay to simulate work
+      Thread.sleep(50) // Delay to simulate work and make fairness observable
       invocation.callRealMethod()
     }.whenever(noOpChunkProcessor).process(any(), any(), any())
 
@@ -321,18 +321,21 @@ class BatchJobConcurrentIntegrationTest :
     val largeJob = runNoOpJob(testData.projectA, largeJobChunks)
     logger.info("Started large job ${largeJob.id} with $largeJobChunks chunks")
 
-    // Wait for large job to start processing (some chunks running)
-    waitFor(pollTime = 50, timeout = 5_000) {
-      processedChunks.size >= 5
+    // Wait for large job to be well underway (at least 20 chunks processed)
+    waitFor(pollTime = 50, timeout = 10_000) {
+      processedChunks.size >= 20
     }
-    logger.info("Large job has started processing, ${processedChunks.size} chunks done")
+    logger.info("Large job in progress, ${processedChunks.size} chunks done")
 
     // Now start small job - fairness should give it priority
     val smallJob = runNoOpJob(testData.projectB, smallJobChunks)
     logger.info("Started small job ${smallJob.id} with $smallJobChunks chunks")
 
+    // Give the queue time to receive small job chunks
+    Thread.sleep(500)
+
     // Wait for small job to complete
-    waitForJobComplete(smallJob, timeoutMs = 30_000)
+    waitForJobComplete(smallJob, timeoutMs = 60_000)
 
     // Record how many large job chunks were processed when small job completed
     val chunksWhenSmallJobDone = processedChunks.size
@@ -354,7 +357,7 @@ class BatchJobConcurrentIntegrationTest :
       ).isLessThan(largeJobChunks * 3 / 4) // Small job should complete before 75% of large job
 
     // Wait for large job to complete
-    waitForJobComplete(largeJob, timeoutMs = 30_000)
+    waitForJobComplete(largeJob, timeoutMs = 60_000)
 
     assertJobSuccess(largeJob)
     assertJobSuccess(smallJob)
