@@ -1,10 +1,12 @@
 package io.tolgee.batch
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.MachineTranslationChunkProcessor
+import io.tolgee.batch.processors.NoOpChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.request.AutomationBjRequest
 import io.tolgee.batch.request.DeleteKeysRequest
@@ -45,6 +47,8 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.transaction.PlatformTransactionManager
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -132,6 +136,10 @@ class BatchJobConcurrentIntegrationTest :
   @Autowired
   lateinit var autoTranslationService: AutoTranslationService
 
+  @MockitoSpyBean
+  @Autowired
+  lateinit var noOpChunkProcessor: NoOpChunkProcessor
+
   // Track concurrent execution for monitoring
   private val concurrentExecutionTracker = ConcurrentHashMap<Long, AtomicInteger>()
   private val maxConcurrentPerJob = ConcurrentHashMap<Long, AtomicInteger>()
@@ -147,6 +155,7 @@ class BatchJobConcurrentIntegrationTest :
     Mockito.reset(machineTranslationChunkProcessor)
     Mockito.reset(automationChunkProcessor)
     Mockito.reset(autoTranslationService)
+    Mockito.reset(noOpChunkProcessor)
 
     concurrentExecutionTracker.clear()
     maxConcurrentPerJob.clear()
@@ -288,6 +297,92 @@ class BatchJobConcurrentIntegrationTest :
     logger.info(
       "Job character fairness test completed - SLOW executions: ${slowExecutionCount.get()}, FAST executions: ${fastExecutionCount.get()}",
     )
+  }
+
+  @Test
+  fun `job fairness prevents starvation under load`() {
+    val concurrency = batchProperties.concurrency
+
+    // Latch to keep job1 chunks blocked until we verify job2 completed
+    val blockJob1Latch = java.util.concurrent.CountDownLatch(1)
+
+    // Track how many job1 chunks are blocked (running)
+    val blockedJob1Count = AtomicInteger(0)
+
+    // We'll block (concurrency - 1) job1 chunks, leaving 1 slot free for job2
+    val chunksToBlock = concurrency - 1
+
+    // Track job1 ID once we know it
+    var job1Id: Long = -1
+
+    doAnswer { invocation ->
+      val job = invocation.getArgument<BatchJobDto>(0)
+
+      // Block job1 chunks to keep them "running"
+      if (job.id == job1Id && blockedJob1Count.get() < chunksToBlock) {
+        val count = blockedJob1Count.incrementAndGet()
+        logger.info("Blocking job1 chunk #$count")
+        blockJob1Latch.await(60, java.util.concurrent.TimeUnit.SECONDS)
+      }
+
+      invocation.callRealMethod()
+    }.whenever(noOpChunkProcessor).process(any(), any(), any())
+
+    try {
+      // Job1 needs enough chunks to fill blocked slots + have more queued
+      val job1Chunks = chunksToBlock + 10
+      val job2Chunks = 5
+
+      logger.info("Starting fairness test: concurrency=$concurrency, blocking $chunksToBlock chunks")
+
+      // Step 1: Start job1 (large job)
+      val job1 = runNoOpJob(testData.projectA, job1Chunks)
+      job1Id = job1.id
+      logger.info("Started job1 ${job1.id} with $job1Chunks chunks")
+
+      // Step 2: Wait until chunksToBlock threads are blocked on job1
+      waitFor(pollTime = 50, timeout = 10_000) {
+        blockedJob1Count.get() >= chunksToBlock
+      }
+      logger.info("$chunksToBlock job1 chunks are now blocked (running)")
+
+      // At this point:
+      // - Job1 has chunksToBlock (9) chunks "running" (blocked in processor)
+      // - Job1 has 10 more chunks queued
+      // - 1 concurrency slot is free
+
+      // Step 3: Start job2 (small job) - it should be prioritized because job1 has
+      // many running while job2 has 0 running
+      val job2 = runNoOpJob(testData.projectB, job2Chunks)
+      logger.info("Started job2 ${job2.id} with $job2Chunks chunks")
+
+      // Step 4: Wait for job2 to complete
+      // With fairness, job2 should complete even though job1 has many chunks queued
+      // because job2 (0 running) is prioritized over job1 (9 running)
+      waitForJobComplete(job2, timeoutMs = 30_000)
+      logger.info("Job2 completed while job1 chunks are still blocked")
+
+      // Step 5: Verify job1 is still running (blocked chunks haven't completed)
+      val job1StatusBeforeRelease = batchJobService.getJobDto(job1.id).status
+      job1StatusBeforeRelease.assert
+        .describedAs("Job1 should still be running while its chunks are blocked")
+        .isEqualTo(io.tolgee.model.batch.BatchJobStatus.RUNNING)
+
+      // Step 6: Release blocked job1 chunks
+      logger.info("Releasing blocked job1 chunks...")
+      blockJob1Latch.countDown()
+
+      // Step 7: Wait for job1 to complete
+      waitForJobComplete(job1, timeoutMs = 30_000)
+
+      assertJobSuccess(job1)
+      assertJobSuccess(job2)
+
+      logger.info("Fairness test passed: Job2 completed while Job1 was blocked")
+    } finally {
+      // Always release latch to prevent hanging threads
+      blockJob1Latch.countDown()
+    }
   }
 
   @Test
