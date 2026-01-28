@@ -131,7 +131,7 @@ class CoreImportFileProcessorUnitTest {
     fileProcessorContext.addTranslation("not colliding key", "lng", "not colliding value")
     fileProcessorContext.addTranslation("equal key", "lng", "equal text")
 
-    whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(
+    whenever(translationServiceMock.getAllByLanguageId(any(), any())).thenReturn(
       listOf(
         existingTranslation,
         Translation("equal text").also {
@@ -156,7 +156,7 @@ class CoreImportFileProcessorUnitTest {
     fileProcessorContext.addKeyCodeReference("test_key", "hello.php", 10)
     fileProcessorContext.addKeyCodeReference("test_key", "hello2.php", 10)
     fileProcessorContext.addKeyDescription("test_key", "test comment")
-    whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(listOf())
+    whenever(translationServiceMock.getAllByLanguageId(any(), any())).thenReturn(listOf())
 
     processor.processFiles(listOf(importFileDto))
     verify(keyMetaServiceMock).save(

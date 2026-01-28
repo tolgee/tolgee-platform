@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers.branching
+package io.tolgee.ee.api.v2.controllers.branching
 
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
@@ -8,11 +8,8 @@ import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class KeysProtectedBranchModificationTest : ProtectedBranchModificationTestBase() {
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider

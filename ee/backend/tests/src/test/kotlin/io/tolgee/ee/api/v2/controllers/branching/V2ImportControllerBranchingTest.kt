@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers.v2ImportController
+package io.tolgee.ee.api.v2.controllers.branching
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Feature
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.transaction.annotation.Transactional
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Transactional
 class V2ImportControllerBranchingTest : ProjectAuthControllerTest("/v2/projects/") {
   @Value("classpath:import/simple.json")

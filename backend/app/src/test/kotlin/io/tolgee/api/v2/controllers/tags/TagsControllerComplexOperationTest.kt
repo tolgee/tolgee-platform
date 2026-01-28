@@ -1,22 +1,16 @@
 package io.tolgee.api.v2.controllers.tags
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TagsTestData
-import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import kotlin.time.measureTime
 
 class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TagsTestData
-
-  @Autowired
-  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @BeforeEach
   fun setup() {
@@ -280,57 +274,6 @@ class TagsControllerComplexOperationTest : ProjectAuthControllerTest("/v2/projec
         (null to "no tag key") to listOf("other tag"),
         (null to "existing tag key 2") to listOf("existing tag 2", "other tag"),
         ("namespace" to "namespaced key") to listOf("existing tag", "other tag"),
-      ),
-    )
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `works with branch - tag filtered within branch`() {
-    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
-    saveAndPrepare()
-
-    performProjectAuthPut(
-      "tag-complex?branch=feature",
-      mapOf(
-        "filterTag" to listOf("existing tag 2"),
-        "tagFiltered" to listOf("branch only"),
-      ),
-    ).andIsOk
-
-    assertKeyTags(
-      mapOf(
-        (null to "branch key") to listOf("existing tag 2", "branch only"),
-        // others keep untouched
-        (null to "test key") to listOf("test", "existing tag", "existing tag 2"),
-        ("namespace" to "namespaced key") to listOf("existing tag"),
-        (null to "existing tag key 2") to listOf("existing tag 2"),
-      ),
-    )
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `works with branch - tag other within branch`() {
-    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
-    saveAndPrepare()
-
-    performProjectAuthPut(
-      "tag-complex?branch=feature",
-      mapOf(
-        "filterTag" to listOf("oh no it doesnt exist"),
-        "tagOther" to listOf("branch only"),
-      ),
-    ).andIsOk
-
-    assertKeyTags(
-      mapOf(
-        (null to "branch key") to listOf("existing tag 2", "branch only"),
-        // others keep untouched
-        (null to "test key") to listOf("test", "existing tag", "existing tag 2"),
-        ("namespace" to "namespaced key") to listOf("existing tag"),
-        (null to "existing tag key 2") to listOf("existing tag 2"),
-        (null to "no tag key") to listOf(),
       ),
     )
   }

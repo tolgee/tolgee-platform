@@ -1,19 +1,17 @@
-package io.tolgee.api.v2.controllers.branching
+package io.tolgee.ee.api.v2.controllers.branching
 
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.ProtectedBranchModificationTestBase
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
-import io.tolgee.util.InMemoryFileStorage
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class KeyScreenshotsProtectedBranchModificationTest : ProtectedBranchModificationTestBase() {
   lateinit var initialScreenshotUrl: String
 
@@ -34,7 +32,7 @@ class KeyScreenshotsProtectedBranchModificationTest : ProtectedBranchModificatio
   @AfterAll
   fun after() {
     tolgeeProperties.fileStorageUrl = initialScreenshotUrl
-    (fileStorage as InMemoryFileStorage).clear()
+//    (fileStorage as InMemoryFileStorage).clear()
   }
 
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.SCREENSHOTS_UPLOAD])

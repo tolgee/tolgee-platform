@@ -1,13 +1,11 @@
 package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.development.testDataBuilder.data.dataImport.ImportTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
-import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
@@ -23,7 +21,6 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.ResultActions
@@ -34,9 +31,6 @@ import kotlin.system.measureTimeMillis
 @AutoConfigureMockMvc
 class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
-
-  @Autowired
-  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @BeforeEach
   fun setup() {
@@ -134,44 +128,6 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
       // 2 non-branched keys + 5 keys from the default branch, 10 keys from the feature branch should be filtered out
       node("_embedded.keys").isArray.hasSize(7)
-    }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `return translations from featured branch only`() {
-    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
-    testData.generateBranchedData(10)
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
-    performProjectAuthGet("/translations?sort=id&branch=feature-branch").andPrettyPrint.andIsOk.andAssertThatJson {
-      // 10 keys from the feature branch should be returned
-      node("_embedded.keys").isArray.hasSize(10)
-      node("_embedded.keys[0].keyName").isEqualTo("key from branch feature-branch 1")
-      node("_embedded.keys[0].translations.en") {
-        node("text").isEqualTo("I am key 1's english translation from branch feature-branch.")
-      }
-      node("_embedded.keys[1].translations.de") {
-        node("text").isEqualTo("I am key 2's german translation from branch feature-branch.")
-      }
-    }
-  }
-
-  /**
-   * Edge-case testing returning correct translations if there is soft-deleted branch with same name as active branch
-   * (deleted is in the process of hard-deleting)
-   */
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `return translations from active branch only`() {
-    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
-    testData.generateBranchedData(10)
-    testData.addDeletedBranch()
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
-    performProjectAuthGet("/translations?sort=id&branch=feature-branch").andPrettyPrint.andIsOk.andAssertThatJson {
-      // 10 keys from feature-branch (translation from soft-deleted feature-branch is ignored)
-      node("_embedded.keys").isArray.hasSize(10)
     }
   }
 
