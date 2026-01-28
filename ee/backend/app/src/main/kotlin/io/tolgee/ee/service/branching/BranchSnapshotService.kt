@@ -36,7 +36,7 @@ class BranchSnapshotService(
         includeOrphanDefault = sourceBranch.isDefault,
       )
     val targetKeys =
-      keyRepository.findAllDetailedByBranch(
+      keyRepository.findAllFetchBranchAndNamespace(
         projectId = projectId,
         branchId = targetBranch.id,
         includeOrphanDefault = false,
@@ -75,7 +75,7 @@ class BranchSnapshotService(
         includeOrphanDefault = sourceBranch.isDefault,
       )
     val targetKeys =
-      keyRepository.findAllDetailedByBranch(
+      keyRepository.findAllFetchBranchAndNamespace(
         projectId = projectId,
         branchId = targetBranch.id,
         includeOrphanDefault = targetBranch.isDefault,
