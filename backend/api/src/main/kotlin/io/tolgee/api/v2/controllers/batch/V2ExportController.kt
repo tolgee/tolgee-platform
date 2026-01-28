@@ -84,12 +84,13 @@ class V2ExportController(
     @ParameterObject params: ExportParams,
     request: WebRequest,
   ): ResponseEntity<StreamingResponseBody>? {
-    rateLimitService.checkPerUserRateLimit(
-      "export",
-      limit = tolgeeProperties.rateLimit.exportRequestLimit,
-      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimit.exportRequestWindow),
-    )
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) { headersBuilder ->
+      rateLimitService.checkPerUserRateLimit(
+        "export",
+        limit = tolgeeProperties.rateLimit.exportRequestLimit,
+        refillDuration = Duration.ofMillis(tolgeeProperties.rateLimit.exportRequestWindow),
+      )
+
       params.languages =
         languageService
           .getLanguagesForExport(params.languages, projectHolder.project.id, authenticationFacade.authenticatedUser.id)
