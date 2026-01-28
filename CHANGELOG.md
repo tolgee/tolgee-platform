@@ -1,3 +1,10 @@
+## [3.150.1](https://github.com/tolgee/tolgee-platform/compare/v3.150.0...v3.150.1) (2026-01-28)
+
+
+### Bug Fixes
+
+* dont count requests which result in "304 Not Modified" towards export rate limit ([#3420](https://github.com/tolgee/tolgee-platform/issues/3420)) ([6703b47](https://github.com/tolgee/tolgee-platform/commit/6703b47b137e78ca8140d4b235dd0184d3b5885c))
+
 # [3.150.0](https://github.com/tolgee/tolgee-platform/compare/v3.149.1...v3.150.0) (2026-01-27)
 
 
