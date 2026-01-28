@@ -54,6 +54,12 @@ class BatchJobConcurrentLauncher(
     runningJobCharacterCounts[character]?.decrementAndGet()
   }
 
+  private fun getRunningJobCounts(): Map<Long, Int> {
+    return runningJobs.values
+      .groupBy { it.first.id }
+      .mapValues { it.value.size }
+  }
+
   var pause = false
     set(value) {
       field = value
@@ -122,9 +128,10 @@ class BatchJobConcurrentLauncher(
             return@repeatForever false
           }
 
+          val runningJobCounts = getRunningJobCounts()
           val items =
             (1..jobsToLaunch)
-              .mapNotNull { batchJobChunkExecutionQueue.poll() }
+              .mapNotNull { batchJobChunkExecutionQueue.pollFairly(runningJobCounts) }
 
           logItemsPulled(items)
 

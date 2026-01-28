@@ -48,6 +48,11 @@ class BatchJobChunkExecutionQueue(
      * O(1) counter for job characters in queue - avoids O(n) iteration on every chunk
      */
     private val jobCharacterCounts = ConcurrentHashMap<JobCharacter, AtomicInteger>()
+
+    /**
+     * O(1) counter for queued chunks per job (jobId -> count) - used for fair polling across jobs
+     */
+    private val queuedChunksPerJob = ConcurrentHashMap<Long, AtomicInteger>()
   }
 
   private fun incrementCharacterCount(character: JobCharacter) {
@@ -56,6 +61,14 @@ class BatchJobChunkExecutionQueue(
 
   private fun decrementCharacterCount(character: JobCharacter) {
     jobCharacterCounts[character]?.decrementAndGet()
+  }
+
+  private fun incrementQueuedChunks(jobId: Long) {
+    queuedChunksPerJob.computeIfAbsent(jobId) { AtomicInteger(0) }.incrementAndGet()
+  }
+
+  private fun decrementQueuedChunks(jobId: Long) {
+    queuedChunksPerJob[jobId]?.decrementAndGet()
   }
 
   @EventListener
@@ -71,6 +84,7 @@ class BatchJobChunkExecutionQueue(
         event.items.forEach { item ->
           if (queue.remove(item)) {
             decrementCharacterCount(item.jobCharacter)
+            decrementQueuedChunks(item.jobId)
           }
         }
       }
@@ -117,6 +131,7 @@ class BatchJobChunkExecutionQueue(
         val item = it.toItem()
         queue.add(item)
         incrementCharacterCount(item.jobCharacter)
+        incrementQueuedChunks(item.jobId)
         count++
       }
     }
@@ -140,12 +155,14 @@ class BatchJobChunkExecutionQueue(
     }
     metrics.batchJobManagementItemAlreadyQueuedCounter.increment(filteredOutCount.toDouble())
     logger.trace {
-      val itemsString = toAdd.joinToString(", ") { it.chunkExecutionId.toString() }
       "Adding ${toAdd.size} chunks to queue. Filtered out: $filteredOutCount"
     }
 
     queue.addAll(toAdd)
-    toAdd.forEach { incrementCharacterCount(it.jobCharacter) }
+    toAdd.forEach {
+      incrementCharacterCount(it.jobCharacter)
+      incrementQueuedChunks(it.jobId)
+    }
   }
 
   fun addToQueue(
@@ -187,6 +204,7 @@ class BatchJobChunkExecutionQueue(
       if (item.jobId == jobId) {
         iterator.remove()
         decrementCharacterCount(item.jobCharacter)
+        decrementQueuedChunks(item.jobId)
       }
     }
     logger.debug("Removed job $jobId from queue, queue size: ${queue.size}")
@@ -212,14 +230,71 @@ class BatchJobChunkExecutionQueue(
 
   fun poll(): ExecutionQueueItem? {
     val item = queue.poll()
-    item?.let { decrementCharacterCount(it.jobCharacter) }
+    item?.let {
+      decrementCharacterCount(it.jobCharacter)
+      decrementQueuedChunks(it.jobId)
+    }
     return item
+  }
+
+  /**
+   * Polls an item from the queue with job fairness.
+   * Prioritizes jobs that are underrepresented in currently running executions.
+   */
+  fun pollFairly(runningJobCounts: Map<Long, Int>): ExecutionQueueItem? {
+    if (queue.isEmpty()) {
+      return null
+    }
+
+    val targetJobId = findUnderrepresentedJob(runningJobCounts) ?: return poll()
+
+    // Try to find and remove an item for the target job
+    val item = pollForJob(targetJobId)
+    if (item != null) {
+      return item
+    }
+
+    // Fallback to regular poll if target job's items were taken by other threads
+    return poll()
+  }
+
+  private fun findUnderrepresentedJob(runningJobCounts: Map<Long, Int>): Long? {
+    val queuedJobs = queuedChunksPerJob.filter { it.value.get() > 0 }.keys
+    if (queuedJobs.isEmpty()) {
+      return null
+    }
+
+    return queuedJobs.minWithOrNull(
+      compareBy(
+        { runningJobCounts[it] ?: 0 }, // fewer running = higher priority
+        { -(queuedChunksPerJob[it]?.get() ?: 0) }, // more queued = tiebreaker
+      ),
+    )
+  }
+
+  private fun pollForJob(targetJobId: Long): ExecutionQueueItem? {
+    // Find candidates for the target job (snapshot of queue)
+    val candidates = queue.filter { it.jobId == targetJobId }
+
+    // Try to atomically remove one of them
+    for (item in candidates) {
+      if (queue.remove(item)) {
+        // Successfully removed - decrement counters
+        decrementCharacterCount(item.jobCharacter)
+        decrementQueuedChunks(item.jobId)
+        return item
+      }
+      // Item was already removed by another thread, try next candidate
+    }
+
+    return null // All candidates were taken by other threads
   }
 
   fun clear() {
     logger.debug("Clearing queue")
     queue.clear()
     jobCharacterCounts.clear()
+    queuedChunksPerJob.clear()
   }
 
   fun find(function: (ExecutionQueueItem) -> Boolean): ExecutionQueueItem? {

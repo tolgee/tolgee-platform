@@ -1,10 +1,12 @@
 package io.tolgee.batch
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.MachineTranslationChunkProcessor
+import io.tolgee.batch.processors.NoOpChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.request.AutomationBjRequest
 import io.tolgee.batch.request.DeleteKeysRequest
@@ -45,6 +47,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.transaction.PlatformTransactionManager
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -132,6 +135,10 @@ class BatchJobConcurrentIntegrationTest :
   @Autowired
   lateinit var autoTranslationService: AutoTranslationService
 
+  @MockitoSpyBean
+  @Autowired
+  lateinit var noOpChunkProcessor: NoOpChunkProcessor
+
   // Track concurrent execution for monitoring
   private val concurrentExecutionTracker = ConcurrentHashMap<Long, AtomicInteger>()
   private val maxConcurrentPerJob = ConcurrentHashMap<Long, AtomicInteger>()
@@ -147,6 +154,7 @@ class BatchJobConcurrentIntegrationTest :
     Mockito.reset(machineTranslationChunkProcessor)
     Mockito.reset(automationChunkProcessor)
     Mockito.reset(autoTranslationService)
+    Mockito.reset(noOpChunkProcessor)
 
     concurrentExecutionTracker.clear()
     maxConcurrentPerJob.clear()
@@ -288,6 +296,68 @@ class BatchJobConcurrentIntegrationTest :
     logger.info(
       "Job character fairness test completed - SLOW executions: ${slowExecutionCount.get()}, FAST executions: ${fastExecutionCount.get()}",
     )
+  }
+
+  @Test
+  fun `job fairness prevents starvation under load`() {
+    // Track processing order to verify fairness
+    val processedChunks = ConcurrentLinkedQueue<Long>() // stores jobId for each processed chunk
+
+    // Add delay to chunk processing so we can observe the order
+    doAnswer { invocation ->
+      val job = invocation.getArgument<BatchJobDto>(0)
+      processedChunks.add(job.id)
+      Thread.sleep(20) // Small delay to simulate work
+      invocation.callRealMethod()
+    }.whenever(noOpChunkProcessor).process(any(), any(), any())
+
+    // Large job: 100 chunks, Small job: 10 chunks
+    val largeJobChunks = 100
+    val smallJobChunks = 10
+
+    logger.info("Starting job fairness test")
+
+    // Start large job first - it will start filling the queue
+    val largeJob = runNoOpJob(testData.projectA, largeJobChunks)
+    logger.info("Started large job ${largeJob.id} with $largeJobChunks chunks")
+
+    // Wait for large job to start processing (some chunks running)
+    waitFor(pollTime = 50, timeout = 5_000) {
+      processedChunks.size >= 5
+    }
+    logger.info("Large job has started processing, ${processedChunks.size} chunks done")
+
+    // Now start small job - fairness should give it priority
+    val smallJob = runNoOpJob(testData.projectB, smallJobChunks)
+    logger.info("Started small job ${smallJob.id} with $smallJobChunks chunks")
+
+    // Wait for small job to complete
+    waitForJobComplete(smallJob, timeoutMs = 30_000)
+
+    // Record how many large job chunks were processed when small job completed
+    val chunksWhenSmallJobDone = processedChunks.size
+    val largeJobChunksProcessed = processedChunks.count { it == largeJob.id }
+
+    logger.info("=".repeat(60))
+    logger.info("JOB FAIRNESS TEST RESULTS:")
+    logger.info("  Small job completed after $chunksWhenSmallJobDone total chunks processed")
+    logger.info("  Large job chunks processed: $largeJobChunksProcessed / $largeJobChunks")
+    logger.info("=".repeat(60))
+
+    // Fairness assertion: Small job should complete well before large job finishes
+    // Without fairness, small job would wait until most/all of large job is done
+    // With fairness, small job should complete when roughly 50% or less of large job is done
+    largeJobChunksProcessed.assert
+      .describedAs(
+        "With fairness, small job ($smallJobChunks chunks) should complete before large job " +
+          "($largeJobChunks chunks) is mostly done. Large job progress: $largeJobChunksProcessed/$largeJobChunks",
+      ).isLessThan(largeJobChunks * 3 / 4) // Small job should complete before 75% of large job
+
+    // Wait for large job to complete
+    waitForJobComplete(largeJob, timeoutMs = 30_000)
+
+    assertJobSuccess(largeJob)
+    assertJobSuccess(smallJob)
   }
 
   @Test
