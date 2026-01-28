@@ -4,6 +4,7 @@ import io.tolgee.configuration.annotations.DocProperty
 import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
+import org.springframework.boot.context.properties.NestedConfigurationProperty
 
 @DocProperty(
   prefix = "tolgee.llm",
@@ -48,6 +49,7 @@ class LlmProperties : MachineTranslationServiceProperties {
     Check [llm providers documentation](/platform/projects_and_organizations/llm-providers#self-hosted-server-configuration) for more information.
   """,
   )
+  @NestedConfigurationProperty
   var providers: MutableList<LlmProvider> = mutableListOf()
 
   class LlmProvider(
