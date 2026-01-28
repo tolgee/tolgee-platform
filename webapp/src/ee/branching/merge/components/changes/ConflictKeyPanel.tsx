@@ -5,7 +5,7 @@ import { T } from '@tolgee/react';
 import { BranchMergeKeyModel } from '../../types';
 import {
   AcceptButton,
-  KeyFooter,
+  KeyFooterToggle,
   KeyHeader,
   KeyPanel,
   KeyWrapper,
@@ -68,17 +68,11 @@ export const ConflictKeyPanel: FC<ConflictPanelProps> = ({
       />
     </KeyPanel>
     {onToggleShowAll && (
-      <KeyFooter>
-        <Button size="small" variant="text" onClick={onToggleShowAll}>
-          {showAll
-            ? toggleLabels?.showLess ?? (
-                <T keyName="branch_merge_show_changed_translations" />
-              )
-            : toggleLabels?.showAll ?? (
-                <T keyName="branch_merge_show_all_translations" />
-              )}
-        </Button>
-      </KeyFooter>
+      <KeyFooterToggle
+        showAll={showAll}
+        onToggleShowAll={onToggleShowAll}
+        toggleLabels={toggleLabels}
+      />
     )}
   </KeyWrapper>
 );

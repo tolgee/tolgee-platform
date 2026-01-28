@@ -70,7 +70,7 @@ export const BranchMergeDetail: FC = () => {
 
   const [selectedTab, setSelectedTab] =
     useState<BranchMergeChangeType>('CONFLICT');
-  const [deleteBranchAfterMerge, setDeleteBranchAfterMerge] = useState(true);
+  const [deleteBranchAfterMerge, setDeleteBranchAfterMerge] = useState(false);
 
   const labels = {
     ADD: t('branch_merges_additions'),
@@ -120,10 +120,21 @@ export const BranchMergeDetail: FC = () => {
 
   useEffect(() => {
     if (!merge) return;
-    if (merge.outdated && !previewLoadable.isLoading) {
-      refreshPreviewMutation.mutate({
-        path: { projectId: project.id, mergeId: numericMergeId },
-      });
+    if (
+      merge.outdated &&
+      !previewLoadable.isLoading &&
+      !refreshPreviewMutation.isLoading
+    ) {
+      refreshPreviewMutation
+        .mutateAsync({
+          path: { projectId: project.id, mergeId: numericMergeId },
+        })
+        .then(() => {
+          Promise.all([
+            previewLoadable.refetch?.(),
+            changesLoadable.refetch?.(),
+          ]);
+        });
     }
   }, [merge?.outdated]);
 
@@ -185,6 +196,9 @@ export const BranchMergeDetail: FC = () => {
             keyName="branch_merges_uncompleted_tasks_confirmation"
             params={{ value: merge?.uncompletedTasksCount, b: <b /> }}
           />
+        ),
+        title: (
+          <T keyName="branch_merges_uncompleted_tasks_confirmation_title" />
         ),
         confirmButtonText: <T keyName="branch_merges_apply_button" />,
         onConfirm: applyMerge,
@@ -286,15 +300,6 @@ export const BranchMergeDetail: FC = () => {
           <StyledDetail>
             <MergeHeader merge={merge} onDelete={handleCancel} />
 
-            {merge.uncompletedTasksCount > 0 && (
-              <Alert severity="warning">
-                <T
-                  keyName="branch_merges_uncompleted_tasks_alert"
-                  params={{ value: merge.uncompletedTasksCount, b: <b /> }}
-                />
-              </Alert>
-            )}
-
             {isOutdated && (
               <Box mt={1}>
                 <Alert severity="warning">
@@ -365,6 +370,11 @@ export const BranchMergeDetail: FC = () => {
         open={applyMutation.isLoading}
         title={<T keyName="branch_merge_applying_title" />}
         message={<T keyName="branch_merge_applying_message" />}
+      />
+      <BranchProgressModal
+        open={refreshPreviewMutation.isLoading}
+        title={<T keyName="branch_merge_refreshing_title" />}
+        message={<T keyName="branch_merge_refreshing_message" />}
       />
     </BaseProjectView>
   );

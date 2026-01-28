@@ -12,11 +12,18 @@ type Props = {
   title: React.ReactNode;
   children: React.ReactNode;
   sx?: SxProps;
+  disableInteractive?: boolean;
 };
 
-export const LabelHint = ({ children, title, size = 15, sx }: Props) => {
+export const LabelHint = ({
+  children,
+  title,
+  size = 15,
+  sx,
+  disableInteractive = true,
+}: Props) => {
   return (
-    <Tooltip title={title} disableInteractive>
+    <Tooltip title={title} disableInteractive={disableInteractive}>
       <StyledLabelBody {...{ sx }}>
         {children}
         <HelpCircle style={{ width: size, height: size }} />

@@ -50,16 +50,25 @@ export const MergeHeader: React.FC<Props> = ({ merge, onDelete }) => {
       <StyledBody data-cy="project-branch-merge-detail">
         <MergeTitle merge={merge} />
 
-        <StatsBlock merge={merge} />
-
         {hasUnresolvedConflicts && (
           <Alert severity="warning">
             <T
               keyName="branch_merges_unresolved_conflicts_alert"
-              params={{ value: merge.keyUnresolvedConflictsCount }}
+              params={{ value: merge.keyUnresolvedConflictsCount, b: <b /> }}
             />
           </Alert>
         )}
+
+        {merge.uncompletedTasksCount > 0 && (
+          <Alert severity="warning">
+            <T
+              keyName="branch_merges_uncompleted_tasks_alert"
+              params={{ value: merge.uncompletedTasksCount, b: <b /> }}
+            />
+          </Alert>
+        )}
+
+        <StatsBlock merge={merge} />
       </StyledBody>
     </>
   );

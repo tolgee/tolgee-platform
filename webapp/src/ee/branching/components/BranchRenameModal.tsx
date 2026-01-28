@@ -1,10 +1,18 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogTitle, Box } from '@mui/material';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogActions,
+  Box,
+  Button,
+} from '@mui/material';
 import { useTranslate, T } from '@tolgee/react';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { BranchNameLabel } from 'tg.ee.module/branching/components/form/BranchNameLabel';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 type Props = {
   open: boolean;
@@ -31,8 +39,8 @@ export const BranchRenameModal: React.FC<Props> = ({
           initialValues={{ name: initialName }}
           validationSchema={Validation.BRANCH(t)}
           onSubmit={(values) => onSubmit(values.name)}
-          onCancel={onClose}
-          submitButtonInner={<T keyName="global_form_save" />}
+          formId="branch-rename-form"
+          submitButtons={<></>}
         >
           <Box mb={2}>
             <TextField
@@ -45,6 +53,20 @@ export const BranchRenameModal: React.FC<Props> = ({
           </Box>
         </StandardForm>
       </DialogContent>
+      <DialogActions>
+        <Button data-cy="global-form-cancel-button" onClick={onClose}>
+          <T keyName="global_form_cancel" />
+        </Button>
+        <LoadingButton
+          data-cy="global-form-save-button"
+          color="primary"
+          variant="contained"
+          type="submit"
+          form="branch-rename-form"
+        >
+          <T keyName="global_form_save" />
+        </LoadingButton>
+      </DialogActions>
     </Dialog>
   );
 };
