@@ -77,6 +77,7 @@ class KeyService(
     projectId: Long,
     branch: String?,
   ): List<KeyView> {
+    branchService.getActiveOrDefault(projectId, branch)
     return keyRepository.getAllByProjectIdSortedById(projectId, branch)
   }
 
