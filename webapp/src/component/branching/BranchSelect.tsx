@@ -33,6 +33,7 @@ type Props = {
   hideDefault?: boolean;
   disabled?: boolean;
   hiddenIds?: number[];
+  showProtectedIcon?: boolean;
 };
 
 export const BranchSelect = ({
@@ -42,6 +43,7 @@ export const BranchSelect = ({
   hideDefault,
   disabled,
   hiddenIds,
+  showProtectedIcon,
 }: Props) => {
   const project = useProject();
   const { default: defaultBranch, branches } = useBranchesService({
@@ -138,6 +140,7 @@ export const BranchSelect = ({
             as={TransparentChip}
             disabled={disabled}
             arrow
+            isProtected={showProtectedIcon ? selected.isProtected : undefined}
           />
         )}
       </Label>

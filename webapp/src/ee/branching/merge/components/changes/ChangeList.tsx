@@ -38,6 +38,10 @@ const ConflictsHeaderColumn = styled(Box)`
   justify-content: space-between;
 `;
 
+const CenteredConflictsHeaderColumn = styled(ConflictsHeaderColumn)`
+  justify-content: center;
+`;
+
 const ConflictColumns = styled(Box)`
   display: flex;
   gap: ${({ theme }) => theme.spacing(2)};
@@ -86,8 +90,8 @@ export const ChangeList = ({
     }
   }, [inView, hasNextPage, isFetchingNextPage, onLoadMore]);
 
-  const toggleShowAll = (key: string) => {
-    setShowAllMap((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggleShowAll = (changeId: number) => {
+    setShowAllMap((prev) => ({ ...prev, [changeId]: !prev[changeId] }));
   };
 
   const showMergedColumn =
@@ -110,7 +114,8 @@ export const ChangeList = ({
                 </Box>
                 {merge.mergedAt == null &&
                   selectedTab === 'CONFLICT' &&
-                  onResolveAll && (
+                  onResolveAll &&
+                  changes.length > 1 && (
                     <Button
                       size="small"
                       variant="outlined"
@@ -123,11 +128,11 @@ export const ChangeList = ({
                   )}
               </ConflictsHeaderColumn>
               {showMergedColumn && (
-                <ConflictsHeaderColumn>
+                <CenteredConflictsHeaderColumn>
                   <Typography variant="body2" fontWeight="medium">
                     <T keyName="branch_merges_merged_column" />
                   </Typography>
-                </ConflictsHeaderColumn>
+                </CenteredConflictsHeaderColumn>
               )}
               <ConflictsHeaderColumn>
                 <Box display="flex" gap={1}>
@@ -138,7 +143,8 @@ export const ChangeList = ({
                 </Box>
                 {merge.mergedAt == null &&
                   selectedTab === 'CONFLICT' &&
-                  onResolveAll && (
+                  onResolveAll &&
+                  changes.length > 1 && (
                     <Button
                       size="small"
                       variant="outlined"
@@ -165,9 +171,7 @@ export const ChangeList = ({
               const showTwoColumns = isAddition || isDeletion;
               const acceptedSource = change.resolution === 'SOURCE';
               const acceptedTarget = change.resolution === 'TARGET';
-              const showAllSource = showAllMap[`${change.id}-source`] ?? false;
-              const showAllMerged = showAllMap[`${change.id}-merged`] ?? false;
-              const showAllTarget = showAllMap[`${change.id}-target`] ?? false;
+              const showAll = showAllMap[change.id] ?? false;
               const toggleLabels = {
                 showAll: t('branch_merge_show_translations'),
                 showLess: t('branch_merge_hide_translations'),
@@ -196,8 +200,8 @@ export const ChangeList = ({
                     keyData={sourceKey}
                     accepted={isConflict ? acceptedSource : undefined}
                     changedTranslations={changedTranslations}
-                    showAll={showAllSource}
-                    onToggleShowAll={() => toggleShowAll(`${change.id}-source`)}
+                    showAll={showAll}
+                    onToggleShowAll={() => toggleShowAll(change.id)}
                     onAccept={
                       isConflict && merge.mergedAt == null && onResolve
                         ? () =>
@@ -214,8 +218,8 @@ export const ChangeList = ({
                   <SingleKeyPanel
                     keyData={mergedKey}
                     changedTranslations={changedTranslations}
-                    showAll={showAllMerged}
-                    onToggleShowAll={() => toggleShowAll(`${change.id}-merged`)}
+                    showAll={showAll}
+                    onToggleShowAll={() => toggleShowAll(change.id)}
                   />
                 ) : (
                   unresolvedMergedPlaceholder
@@ -226,8 +230,8 @@ export const ChangeList = ({
                     keyData={targetKey}
                     accepted={isConflict ? acceptedTarget : undefined}
                     changedTranslations={changedTranslations}
-                    showAll={showAllTarget}
-                    onToggleShowAll={() => toggleShowAll(`${change.id}-target`)}
+                    showAll={showAll}
+                    onToggleShowAll={() => toggleShowAll(change.id)}
                     onAccept={
                       isConflict && merge.mergedAt == null && onResolve
                         ? () =>
@@ -243,8 +247,8 @@ export const ChangeList = ({
                 leftPanel = sourceKey ? (
                   <SingleKeyPanel
                     keyData={sourceKey}
-                    showAll={showAllSource}
-                    onToggleShowAll={() => toggleShowAll(`${change.id}-source`)}
+                    showAll={showAll}
+                    onToggleShowAll={() => toggleShowAll(change.id)}
                     hideAllWhenFalse
                     toggleLabels={toggleLabels}
                     variant="added"
@@ -258,8 +262,8 @@ export const ChangeList = ({
                 rightPanel = targetKey ? (
                   <SingleKeyPanel
                     keyData={targetKey}
-                    showAll={showAllTarget}
-                    onToggleShowAll={() => toggleShowAll(`${change.id}-target`)}
+                    showAll={showAll}
+                    onToggleShowAll={() => toggleShowAll(change.id)}
                     hideAllWhenFalse
                     toggleLabels={toggleLabels}
                     variant="deleted"

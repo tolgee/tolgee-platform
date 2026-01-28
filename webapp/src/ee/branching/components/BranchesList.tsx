@@ -16,6 +16,7 @@ import { BranchRenameModal } from './BranchRenameModal';
 import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { BranchProgressModal } from './BranchProgressModal';
+import { confirmProtected } from 'tg.ee.module/branching/components/utils/branchConfirmations';
 
 const TableGrid = styled('div')`
   display: grid;
@@ -152,18 +153,10 @@ export const BranchesList = () => {
 
   const handleSetProtected = async (branch: BranchModel) => {
     const willProtect = !branch.isProtected;
-    confirmation({
-      message: willProtect ? (
-        <T
-          keyName="project_branch_protect_confirmation"
-          params={{ branchName: branch.name, b: <b /> }}
-        />
-      ) : (
-        <T
-          keyName="project_branch_unprotect_confirmation"
-          params={{ branchName: branch.name, b: <b /> }}
-        />
-      ),
+
+    confirmProtected({
+      branchName: branch.name,
+      willProtect,
       onConfirm: async () => {
         await setProtectedMutation.mutateAsync({
           path: { projectId: project.id, branchId: branch.id },
