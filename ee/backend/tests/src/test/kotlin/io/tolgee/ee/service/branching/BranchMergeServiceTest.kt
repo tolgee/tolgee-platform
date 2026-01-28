@@ -207,6 +207,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  @Transactional
   fun `apply merge - keeps branch and resets snapshot`() {
     val merge = prepareMergeScenario()
     branchService.applyMerge(testData.project.id, merge.id, false)
