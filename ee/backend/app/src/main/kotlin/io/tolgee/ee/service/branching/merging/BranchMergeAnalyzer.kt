@@ -44,7 +44,10 @@ class BranchMergeAnalyzer(
     val targetById = targetKeys.associateBy { it.id }
     val snapshotByBranchKeyId = snapshots.associateBy { it.branchKeyId }
     val sourceBySignature = sourceKeys.groupBy { KeySignature(it.namespace?.name, it.name) }
+    val targetBySignature = targetKeys.groupBy { KeySignature(it.namespace?.name, it.name) }
     val snapshotsBySignature = snapshots.groupBy { KeySignature(it.namespace, it.name) }
+
+    // Fallback mapping for source keys that were deleted and recreated
     val fallbackByBranchKeyId =
       snapshotsBySignature
         .mapNotNull { (signature, snapshotGroup) ->
@@ -56,6 +59,20 @@ class BranchMergeAnalyzer(
           snapshot.branchKeyId to sourceKey
         }.toMap()
     val fallbackSourceKeyIds = fallbackByBranchKeyId.values.map { it.id }.toSet()
+
+    // Fallback mapping for target keys that were deleted and recreated with the same name/namespace
+    val fallbackTargetByOriginalKeyId =
+      snapshotsBySignature
+        .mapNotNull { (signature, snapshotGroup) ->
+          if (snapshotGroup.size != 1) return@mapNotNull null
+          val snapshot = snapshotGroup.single()
+          // Only use fallback if the original target key is actually missing (deleted)
+          if (targetById.containsKey(snapshot.originalKeyId)) return@mapNotNull null
+          val targetGroup = targetBySignature[signature] ?: return@mapNotNull null
+          if (targetGroup.size != 1) return@mapNotNull null
+          val targetKey = targetGroup.single()
+          snapshot.originalKeyId to targetKey
+        }.toMap()
 
     // Keys created after branching
     sourceKeys.forEach { key ->
@@ -73,7 +90,7 @@ class BranchMergeAnalyzer(
 
     snapshots.forEach { snapshot ->
       val sourceKey = sourceById[snapshot.branchKeyId] ?: fallbackByBranchKeyId[snapshot.branchKeyId]
-      val targetKey = targetById[snapshot.originalKeyId]
+      val targetKey = targetById[snapshot.originalKeyId] ?: fallbackTargetByOriginalKeyId[snapshot.originalKeyId]
 
       when {
         sourceKey == null && targetKey == null -> {
@@ -113,6 +130,8 @@ class BranchMergeAnalyzer(
         sourceKey != null && targetKey != null -> {
           val sourceChanged = sourceKey.hasChanged(snapshot)
           val targetChanged = targetKey.hasChanged(snapshot)
+          // Check if target key was deleted and recreated (different ID from snapshot)
+          val targetRecreated = targetKey.id != snapshot.originalKeyId
 
           when {
             sourceChanged && targetChanged -> {
@@ -150,9 +169,22 @@ class BranchMergeAnalyzer(
               )
             }
 
-            targetChanged -> {
-              Unit
-            } // target changed, source not -> keep target state
+            targetChanged || targetRecreated -> {
+              // If target was recreated even without content changes, treat as UPDATE
+              // This ensures the recreation is properly tracked in the merge
+              if (targetRecreated) {
+                changes.add(
+                  BranchMergeChange().apply {
+                    branchMerge = merge
+                    this.sourceKey = sourceKey
+                    this.targetKey = targetKey
+                    change = BranchKeyMergeChangeType.UPDATE
+                    resolution = BranchKeyMergeResolutionType.TARGET
+                  },
+                )
+              }
+              // Otherwise: target changed, source not -> keep target state (no change needed)
+            }
           }
         }
       }
