@@ -27,6 +27,12 @@ const EmptyTranslation = styled(Typography)`
   font-style: italic;
 `;
 
+const StyledTranslationList = styled(TranslationList)`
+  & > div:last-child {
+    border-bottom: 0;
+  }
+`;
+
 type Props = {
   keyData: BranchMergeKeyModel;
   changedTranslations?: string[];
@@ -56,7 +62,7 @@ export const KeyTranslations: FC<Props> = ({
       : orderedTags.filter((tag) => changedTranslations.includes(tag));
 
   return (
-    <TranslationList>
+    <StyledTranslationList>
       {visibleTags.map((lang) => {
         const language = languages?.find((l) => l.tag === lang);
         const translation = keyData.translations[lang];
@@ -81,13 +87,15 @@ export const KeyTranslations: FC<Props> = ({
                     isPlural={keyData.keyIsPlural}
                   />
                 ) : (
-                  <EmptyTranslation variant="body2">—</EmptyTranslation>
+                  <EmptyTranslation variant="body2">
+                    <br />
+                  </EmptyTranslation>
                 )}
               </Box>
             </TranslationRow>
           </StyledLanguageField>
         );
       })}
-    </TranslationList>
+    </StyledTranslationList>
   );
 };

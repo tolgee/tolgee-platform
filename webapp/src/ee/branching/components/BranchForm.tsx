@@ -16,13 +16,19 @@ export type BranchFormValues = {
   originBranchId: number;
 };
 
-export const BranchForm: FC<{
+export type BranchFormProps = {
   branch?: BranchModel;
   defaultBranch?: BranchModel;
   submit: (values: BranchFormValues) => void;
   cancel?: () => void;
   submitText?: string;
-}> = ({ submit, cancel, submitText }) => {
+};
+
+export const BranchForm: FC<BranchFormProps> = ({
+  submit,
+  cancel,
+  submitText,
+}) => {
   const { t } = useTranslate();
   const initValues = {
     name: '',
@@ -38,8 +44,8 @@ export const BranchForm: FC<{
       validationSchema={Validation.BRANCH(t)}
       initialValues={initValues}
       onSubmit={onSubmit}
-      onCancel={cancel}
-      submitButtonInner={submitText}
+      formId="branch-form"
+      submitButtons={<></>}
     >
       <Box mb={4}>
         <Box display="flex" mb={2}>

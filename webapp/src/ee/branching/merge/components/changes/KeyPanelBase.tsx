@@ -1,4 +1,6 @@
-import { Box, styled } from '@mui/material';
+import { Box, Button, styled } from '@mui/material';
+import { FC, ReactNode } from 'react';
+import { T } from '@tolgee/react';
 
 export const KeyWrapper = styled(Box)`
   flex: 1;
@@ -64,3 +66,30 @@ export const KeyFooter = styled(Box)`
   padding: ${({ theme }) => theme.spacing(1, 2)};
   border-top: 1px solid ${({ theme }) => theme.palette.divider1};
 `;
+
+type KeyFooterToggleProps = {
+  showAll?: boolean;
+  onToggleShowAll: () => void;
+  toggleLabels?: {
+    showAll: string | ReactNode;
+    showLess: string | ReactNode;
+  };
+};
+
+export const KeyFooterToggle: FC<KeyFooterToggleProps> = ({
+  showAll,
+  onToggleShowAll,
+  toggleLabels,
+}) => (
+  <KeyFooter>
+    <Button size="small" variant="text" onClick={onToggleShowAll}>
+      {showAll
+        ? toggleLabels?.showLess ?? (
+            <T keyName="branch_merge_show_changed_translations" />
+          )
+        : toggleLabels?.showAll ?? (
+            <T keyName="branch_merge_show_all_translations" />
+          )}
+    </Button>
+  </KeyFooter>
+);

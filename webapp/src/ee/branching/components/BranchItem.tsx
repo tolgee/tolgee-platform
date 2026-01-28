@@ -19,6 +19,7 @@ import { useTimeDistance } from 'tg.hooks/useTimeDistance';
 import { DefaultChip } from 'tg.component/common/chips/DefaultChip';
 import { T } from '@tolgee/react';
 import { PointerLink } from 'tg.component/layout/QuickStartGuide/StyledComponents';
+import { LabelHint } from 'tg.component/common/LabelHint';
 
 const StyledListItem = styled('div')`
   display: contents;
@@ -91,7 +92,31 @@ export const BranchItem: React.FC<Props> = ({
         <BranchNameLink name={branch.name} deleted={!branch.active} />
         <Box gap={1} display="flex" alignItems="center">
           {branch.isDefault && <DefaultBranchChip />}
-          {branch.isProtected && <ShieldTick height={20} width={20} />}
+          {branch.isProtected && (
+            <>
+              <LabelHint
+                disableInteractive={false}
+                title={
+                  <T
+                    keyName="branch_protected_tooltip"
+                    params={{
+                      a: (
+                        <a
+                          href={
+                            'https://docs.tolgee.io/platform/projects_and_organizations/members'
+                          }
+                          target={'_blank'}
+                          rel="noreferrer"
+                        />
+                      ),
+                    }}
+                  />
+                }
+              >
+                <ShieldTick height={20} width={20} />
+              </LabelHint>
+            </>
+          )}
           {branch.merge?.mergedAt && (
             <PointerLink onClick={onMergeDetail}>
               <Tooltip

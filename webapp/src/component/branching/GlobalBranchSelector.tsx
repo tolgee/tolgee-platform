@@ -52,7 +52,11 @@ export const GlobalBranchSelector = () => {
 
   return (
     <Box display="grid">
-      <BranchSelect branch={selected} onSelect={changeBranch} />
+      <BranchSelect
+        branch={selected}
+        onSelect={changeBranch}
+        showProtectedIcon
+      />
     </Box>
   );
 };
