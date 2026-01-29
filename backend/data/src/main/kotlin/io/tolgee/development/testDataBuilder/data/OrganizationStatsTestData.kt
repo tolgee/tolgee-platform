@@ -90,9 +90,10 @@ class OrganizationStatsTestData : BaseTestData("org-stats", "Stats Project") {
     }
 
     // Key "key4" with namespace in main branch - has DE translation
-    val namespace1 = addNamespace {
-      name = "namespace1"
-    }.self
+    val namespace1 =
+      addNamespace {
+        name = "namespace1"
+      }.self
 
     addKey {
       name = "key4"
@@ -112,9 +113,10 @@ class OrganizationStatsTestData : BaseTestData("org-stats", "Stats Project") {
     }
 
     // Key "key4" with different namespace (should be counted as separate) - no translations
-    val namespace2 = addNamespace {
-      name = "namespace2"
-    }.self
+    val namespace2 =
+      addNamespace {
+        name = "namespace2"
+      }.self
 
     addKey {
       name = "key4"
@@ -132,65 +134,66 @@ class OrganizationStatsTestData : BaseTestData("org-stats", "Stats Project") {
   }
 
   private fun TestDataBuilder.addSecondProject() {
-    secondProject = addProject {
-      name = "Second Project"
-      organizationOwner = this@OrganizationStatsTestData.organization
-      useBranching = true
-    }.build {
-      addLanguage {
-        name = "English"
-        tag = "en"
-        originalName = "English"
-        this@build.self.baseLanguage = this
-      }
-
-      addLanguage {
-        name = "German"
-        tag = "de"
-        originalName = "Deutsch"
-        secondProjectGermanLanguage = this
-      }
-
-      addBranch {
-        name = "main"
-        project = self
-        isDefault = true
+    secondProject =
+      addProject {
+        name = "Second Project"
+        organizationOwner = this@OrganizationStatsTestData.organization
+        useBranching = true
       }.build {
-        secondProjectMainBranch = self
-      }
+        addLanguage {
+          name = "English"
+          tag = "en"
+          originalName = "English"
+          this@build.self.baseLanguage = this
+        }
 
-      addBranch {
-        name = "feature"
-        project = self
-        originBranch = secondProjectMainBranch
-      }.build {
-        secondProjectFeatureBranch = self
-      }
+        addLanguage {
+          name = "German"
+          tag = "de"
+          originalName = "Deutsch"
+          secondProjectGermanLanguage = this
+        }
 
-      // Key "key1" in second project (same name as first project, should be counted separately) - has EN translation
-      addKey {
-        name = "key1"
-        branch = secondProjectMainBranch
-      }.build {
-        addTranslation("en", "Second Project Key 1 English Main")
-      }
+        addBranch {
+          name = "main"
+          project = self
+          isDefault = true
+        }.build {
+          secondProjectMainBranch = self
+        }
 
-      // Key "key1" in second project feature branch (should NOT be counted separately) - has EN translation
-      addKey {
-        name = "key1"
-        branch = secondProjectFeatureBranch
-      }.build {
-        addTranslation("en", "Second Project Key 1 English Feature")
-      }
+        addBranch {
+          name = "feature"
+          project = self
+          originBranch = secondProjectMainBranch
+        }.build {
+          secondProjectFeatureBranch = self
+        }
 
-      // Key "key5" only in second project - has EN and DE translations
-      addKey {
-        name = "key5"
-        branch = secondProjectMainBranch
-      }.build {
-        addTranslation("en", "Key 5 English")
-        addTranslation("de", "Key 5 German")
-      }
-    }.self
+        // Key "key1" in second project (same name as first project, should be counted separately) - has EN translation
+        addKey {
+          name = "key1"
+          branch = secondProjectMainBranch
+        }.build {
+          addTranslation("en", "Second Project Key 1 English Main")
+        }
+
+        // Key "key1" in second project feature branch (should NOT be counted separately) - has EN translation
+        addKey {
+          name = "key1"
+          branch = secondProjectFeatureBranch
+        }.build {
+          addTranslation("en", "Second Project Key 1 English Feature")
+        }
+
+        // Key "key5" only in second project - has EN and DE translations
+        addKey {
+          name = "key5"
+          branch = secondProjectMainBranch
+        }.build {
+          addTranslation("en", "Key 5 English")
+          addTranslation("de", "Key 5 German")
+        }
+      }.self
   }
 }
