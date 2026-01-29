@@ -104,6 +104,7 @@ class BranchMergeExecutor(
         return
       }
     targetKey.merge(sourceKey, snapshotKey, resolution)
+    persistAfterMerge(targetKey)
   }
 
   private fun applyAddition(
@@ -170,6 +171,10 @@ class BranchMergeExecutor(
     val targetKey = change.targetKey ?: return
     change.targetKey = null
     keyService.delete(targetKey.id)
+  }
+
+  private fun persistAfterMerge(key: Key) {
+    key.translations.filter { it.id == 0L }.forEach { translationService.save(it) }
   }
 
   private inline fun BranchMergeChange.withSnapshotKey(
