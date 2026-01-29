@@ -665,6 +665,7 @@
   "branches_merge_merged_detail": "合并详情",
   "branches_merge_title": "合并分支",
   "branches_title": "分支",
+  "branching_not_enabled_for_project": "此项目未启用分支功能",
   "branching_title": "分支",
   "branch_merge_applying_message": "正在合并更改，请稍候…",
   "branch_merge_applying_title": "合并分支",

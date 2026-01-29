@@ -665,6 +665,7 @@
   "branches_merge_merged_detail": "Detalles de la combinación",
   "branches_merge_title": "Combinar ramas",
   "branches_title": "Ramas",
+  "branching_not_enabled_for_project": "Ramas no están habilitadas para este proyecto",
   "branching_title": "Bifurcación",
   "branch_merge_applying_message": "Espera mientras se aplican los cambios",
   "branch_merge_applying_title": "Combinando ramas",

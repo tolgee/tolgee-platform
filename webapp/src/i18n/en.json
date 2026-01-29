@@ -666,6 +666,7 @@
   "branches_merge_merged_detail": "Merge details",
   "branches_merge_title": "Merge branches",
   "branches_title": "Branches",
+  "branching_not_enabled_for_project": "Branching is not enabled for this project",
   "branching_title": "Branching",
   "branch_merge_applying_message": "Please wait while the changes are being merged...",
   "branch_merge_applying_title": "Merging branches",

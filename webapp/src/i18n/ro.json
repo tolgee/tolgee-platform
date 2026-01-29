@@ -666,6 +666,7 @@
   "branches_merge_merged_detail": "Detalii îmbinare",
   "branches_merge_title": "Unește ramuri",
   "branches_title": "Ramuri",
+  "branching_not_enabled_for_project": "Ramificarea nu este activată pentru acest proiect",
   "branching_title": "Ramificare",
   "branch_merge_applying_message": "Așteptați în timp ce modificările sunt îmbinate",
   "branch_merge_applying_title": "Se îmbină ramuri",

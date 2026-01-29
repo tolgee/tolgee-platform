@@ -571,6 +571,7 @@
   "billing_upgrade_preview_dialog_total": "Всього {total, number, :: currency/EUR}",
   "branch_creating_message": "Зачекайте, триває створення гілки...",
   "branch_creating_title": "Створення гілки",
+  "branching_not_enabled_for_project": "Розгалуження не ввімкнено для цього проєкту",
   "branch_merge_applying_message": "Зачекайте, триває злиття змін...",
   "branch_merge_applying_title": "Злиття гілок",
   "branch_merge_creating_message": "Зачекайте, триває підготовка попереднього перегляду злиття...",

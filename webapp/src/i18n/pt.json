@@ -665,6 +665,7 @@
   "branches_merge_merged_detail": "Detalhes da mesclagem",
   "branches_merge_title": "Mesclar branches",
   "branches_title": "Branches",
+  "branching_not_enabled_for_project": "O branching não está habilitado para este projeto",
   "branching_title": "Ramificação",
   "branch_merge_applying_message": "Aguarde enquanto as alterações estão sendo mescladas",
   "branch_merge_applying_title": "Mesclando branches",

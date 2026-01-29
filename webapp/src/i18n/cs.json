@@ -666,6 +666,7 @@
   "branches_merge_merged_detail": "Podrobnosti sloučení",
   "branches_merge_title": "Sloučit větve",
   "branches_title": "Větve",
+  "branching_not_enabled_for_project": "Větvení není pro tento projekt povoleno",
   "branching_title": "Větvení",
   "branch_merge_applying_message": "Počkejte, než se sloučí změny",
   "branch_merge_applying_title": "Slučování větví",

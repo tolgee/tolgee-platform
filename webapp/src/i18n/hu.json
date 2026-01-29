@@ -665,6 +665,7 @@
   "branches_merge_merged_detail": "Egyesítés részletei",
   "branches_merge_title": "Ágak egyesítése",
   "branches_title": "Ágak",
+  "branching_not_enabled_for_project": "A projektben nincs engedélyezve az elágazás",
   "branching_title": "Elágazás",
   "branch_merge_applying_message": "Kérjük, várjon, amíg a változtatások egyesítése folyamatban van",
   "branch_merge_applying_title": "Ágak egyesítése folyamatban",

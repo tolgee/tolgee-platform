@@ -666,6 +666,7 @@
   "branches_merge_merged_detail": "Fletningsdetaljer",
   "branches_merge_title": "Flet grene",
   "branches_title": "Grener",
+  "branching_not_enabled_for_project": "Forgrening er ikke aktiveret for dette projekt",
   "branching_title": "Forgrening",
   "branch_merge_applying_message": "Vent venligst, mens ændringerne flettes",
   "branch_merge_applying_title": "Flettes grene",

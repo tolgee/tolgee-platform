@@ -666,6 +666,7 @@
   "branches_merge_merged_detail": "マージの詳細",
   "branches_merge_title": "ブランチをマージ",
   "branches_title": "ブランチ",
+  "branching_not_enabled_for_project": "このプロジェクトでは ブランチ機能 が有効化されていません",
   "branching_title": "ブランチング",
   "branch_merge_applying_message": "変更をマージしています。しばらくお待ちください",
   "branch_merge_applying_title": "ブランチをマージ中",

@@ -666,6 +666,7 @@
   "branches_merge_merged_detail": "Samenvoegdetails",
   "branches_merge_title": "Branches mergen",
   "branches_title": "Branches",
+  "branching_not_enabled_for_project": "Branching is niet ingeschakeld voor dit project",
   "branching_title": "Branching",
   "branch_merge_applying_message": "Even geduld terwijl de wijzigingen worden samengevoegd...",
   "branch_merge_applying_title": "Branches mergen",

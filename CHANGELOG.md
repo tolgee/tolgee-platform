@@ -1,3 +1,16 @@
+# [3.151.0](https://github.com/tolgee/tolgee-platform/compare/v3.150.3...v3.151.0) (2026-01-29)
+
+
+### Bug Fixes
+
+* publish events for organization level activity ([#3435](https://github.com/tolgee/tolgee-platform/issues/3435)) ([1eaca46](https://github.com/tolgee/tolgee-platform/commit/1eaca4610b16d9c81e12009de4052af1eaeeccac)), closes [#3377](https://github.com/tolgee/tolgee-platform/issues/3377)
+* publish glossary export as business event + use enriched event for generating key for publishOnceInTime cache ([#3433](https://github.com/tolgee/tolgee-platform/issues/3433)) ([61b2954](https://github.com/tolgee/tolgee-platform/commit/61b295446097ff2667f4cc39bba7cfaa42c6df3a))
+
+
+### Features
+
+* add indexes on activity_revision and batch_job timestamps ([#3431](https://github.com/tolgee/tolgee-platform/issues/3431)) ([8b3f14b](https://github.com/tolgee/tolgee-platform/commit/8b3f14b691bba7b807f1345dd6ed79cb10cd3e53))
+
 ## [3.150.3](https://github.com/tolgee/tolgee-platform/compare/v3.150.2...v3.150.3) (2026-01-29)
 
 

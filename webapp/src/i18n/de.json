@@ -665,6 +665,7 @@
   "branches_merge_merged_detail": "Merge-Details",
   "branches_merge_title": "Zweige zusammenführen",
   "branches_title": "Zweige",
+  "branching_not_enabled_for_project": "Branching ist für dieses Projekt nicht aktiviert",
   "branching_title": "Verzweigungen",
   "branch_merge_applying_message": "Bitte warten, während die Änderungen zusammengeführt werden...",
   "branch_merge_applying_title": "Zweige werden zusammengeführt",

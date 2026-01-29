@@ -661,6 +661,7 @@
   "branches_merge_merged_detail": "Dettagli dell'unione",
   "branches_merge_title": "Unisci rami",
   "branches_title": "Rami",
+  "branching_not_enabled_for_project": "Il branching non è abilitato per questo progetto",
   "branching_title": "Diramazioni",
   "branch_merge_applying_message": "Attendere mentre le modifiche vengono unite",
   "branch_merge_applying_title": "Unione dei rami",

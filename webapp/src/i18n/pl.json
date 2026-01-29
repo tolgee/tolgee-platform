@@ -571,6 +571,7 @@
   "billing_upgrade_preview_dialog_total": "Razem {total, number, :: currency/EUR}",
   "branch_creating_message": "Proszę czekać, gałąź jest tworzona...",
   "branch_creating_title": "Tworzenie gałęzi",
+  "branching_not_enabled_for_project": "Rozgałęzianie nie jest włączone dla tego projektu",
   "branch_merge_applying_message": "Proszę czekać, zmiany są scalane...",
   "branch_merge_applying_title": "Scalanie gałęzi",
   "branch_merge_creating_message": "Proszę czekać, podgląd scalania jest przygotowywany...",

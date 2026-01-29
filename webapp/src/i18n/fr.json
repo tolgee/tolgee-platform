@@ -665,6 +665,7 @@
   "branches_merge_merged_detail": "Détails de la fusion",
   "branches_merge_title": "Fusionner des branches",
   "branches_title": "Branches",
+  "branching_not_enabled_for_project": "La branchement n’est pas activé pour ce projet",
   "branching_title": "Création de branches",
   "branch_merge_applying_message": "Veuillez patienter pendant l’application des modifications en cours de fusion...",
   "branch_merge_applying_title": "Fusion des branches",
