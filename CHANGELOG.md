@@ -1,3 +1,10 @@
+## [3.151.1](https://github.com/tolgee/tolgee-platform/compare/v3.151.0...v3.151.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* use CREATE INDEX CONCURRENTLY for large table migrations ([#3436](https://github.com/tolgee/tolgee-platform/issues/3436)) ([39b2913](https://github.com/tolgee/tolgee-platform/commit/39b2913efdf7afb245d84c4814f72bfaafc8541e))
+
 # [3.151.0](https://github.com/tolgee/tolgee-platform/compare/v3.150.3...v3.151.0) (2026-01-29)
 
 
