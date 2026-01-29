@@ -1,7 +1,11 @@
 import { useGlossary } from 'tg.ee.module/glossary/hooks/useGlossary';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
-const downloadExported = async (response: Response, glossaryName: string) => {
+const downloadExported = async (
+  response: Response,
+  glossaryName: string,
+  branchName?: string
+) => {
   const data = await response.blob();
   const url = URL.createObjectURL(data);
   try {
@@ -9,7 +13,9 @@ const downloadExported = async (response: Response, glossaryName: string) => {
     try {
       a.href = url;
       const dateStr = new Date().toISOString().split('T')[0];
-      a.download = 'glossary_' + glossaryName + '_' + dateStr + '.csv';
+      const branchStr = branchName ? `(${branchName})` : '';
+      a.download =
+        'glossary_' + glossaryName + branchStr + '_' + dateStr + '.csv';
       a.click();
     } finally {
       a.remove();

@@ -165,6 +165,7 @@ export function enableNamespaces(projectId: number) {
 
 type CreateKeyOptions = {
   isPlural?: boolean;
+  branch?: string;
 };
 
 export const createKey = (
@@ -195,10 +196,11 @@ export const createKeyPromise = (
 export const setTranslations = (
   projectId,
   key: string,
-  translations: { [lang: string]: string }
+  translations: { [lang: string]: string },
+  branch?: string
 ) =>
   v2apiFetch(`projects/${projectId}/translations`, {
-    body: { key, translations },
+    body: { key, translations, branch },
     method: 'POST',
   });
 

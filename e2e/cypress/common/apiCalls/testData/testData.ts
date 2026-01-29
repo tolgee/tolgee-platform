@@ -128,6 +128,10 @@ export const prompt = generateTestDataObject('prompt');
 
 export const batchJobs = generateTestDataObject('batch-jobs');
 
+export const branchTestData = generateTestDataObject('branch');
+
+export const branchMergeTestData = generateTestDataObject('branch-merge');
+
 export const glossaryTestData = generateTestDataObject('glossary');
 
 export const notificationTestData = generateTestDataObject('notification');

@@ -59,7 +59,7 @@ type Props = {
   onRemove?: (branch: BranchModel) => void;
   onRename?: (branch: BranchModel) => void;
   onSetProtected?: (branch: BranchModel) => void;
-  onMergeInto: () => void;
+  onMergeInto?: () => void;
   onMergeDetail: () => void;
 };
 
@@ -243,11 +243,8 @@ export const BranchItem: React.FC<Props> = ({
               )}
               {onSetProtected && branch.active && (
                 <MenuItem
-                  data-cy={
-                    branch.isProtected
-                      ? 'project-settings-branches-unprotect-button'
-                      : 'project-settings-branches-protect-button'
-                  }
+                  data-cy="project-settings-branches-protection-button"
+                  data-cy-protect={branch.isProtected ? 'false' : 'true'}
                   onClick={() => {
                     handleMenuClose();
                     onSetProtected(branch);

@@ -206,7 +206,8 @@ export const ExportForm = () => {
                 response as unknown as Response,
                 values.languages,
                 format,
-                project.name
+                project.name,
+                branchName
               );
             },
             onSettled() {

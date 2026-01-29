@@ -57,4 +57,5 @@ before(() => {
   setFeature('SSO', true);
   setFeature('GLOSSARY', true);
   setFeature('TRANSLATION_LABELS', true);
+  setFeature('BRANCHING', true);
 });
