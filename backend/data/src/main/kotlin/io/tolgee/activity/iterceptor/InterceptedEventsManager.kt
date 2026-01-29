@@ -200,8 +200,8 @@ class InterceptedEventsManager(
     }
 
     // For BranchVersionedEntity find Key in the state array to avoid lazy loading
-    if (entity is BranchVersionedEntity && state != null) {
-      val key = state.firstNotNullOfOrNull { it as? Key }
+    if (entity is BranchVersionedEntity) {
+      val key = state?.firstNotNullOfOrNull { it as? Key } ?: entity.resolveKey()
       return key?.let { extractEntityId(it.branch) }
     }
 

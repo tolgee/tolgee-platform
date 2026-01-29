@@ -7,14 +7,13 @@ import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BranchRevisionData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.satisfies
 import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.model.Project
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.branching.Branch
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -36,9 +35,6 @@ class ProjectActivityBranchingTest : ProjectAuthControllerTest("/v2/projects/") 
   private lateinit var activityTestUtil: ActivityTestUtil
 
   @Autowired
-  private lateinit var branchRepository: BranchRepository
-
-  @Autowired
   private lateinit var batchJobService: BatchJobService
 
   @Autowired
@@ -50,7 +46,7 @@ class ProjectActivityBranchingTest : ProjectAuthControllerTest("/v2/projects/") 
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     projectSupplier = { testData.project }
-    defaultBranch = ensureDefaultBranch()
+    defaultBranch = testData.defaultBranch
   }
 
   @Test
@@ -90,11 +86,15 @@ class ProjectActivityBranchingTest : ProjectAuthControllerTest("/v2/projects/") 
   @ProjectJWTAuthTestMethod
   fun `filters modified entities by branch in detail`() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
-    val defaultKey = keyService.create(project, CreateKeyDto(name = "default_key"))
+    val defaultKeyId =
+      performProjectAuthPost("keys", CreateKeyDto(name = "default_key"))
+        .andIsCreated
+        .andReturn()
+        .mapResponseTo<Map<String, Any>>()["id"] as Int
 
     performProjectAuthPost(
       "start-batch-job/tag-keys",
-      mapOf("keyIds" to listOf(testData.firstKey.id, defaultKey.id), "tags" to listOf("tag_1")),
+      mapOf("keyIds" to listOf(testData.firstKey.id, defaultKeyId.toLong()), "tags" to listOf("tag_1")),
     ).andIsOk.waitForJobCompleted()
 
     val revisionId = activityTestUtil.getLastRevision()!!.id
@@ -148,8 +148,8 @@ class ProjectActivityBranchingTest : ProjectAuthControllerTest("/v2/projects/") 
         .andIsOk
         .andReturn()
     val body = response.mapResponseTo<Map<String, Any?>>()
-    val embedded = body["_embedded"] as Map<*, *>
-    val modifiedEntities = embedded["modifiedEntities"] as List<Map<String, Any?>>
+    val embedded = body["_embedded"] as? Map<*, *> ?: return emptySet()
+    val modifiedEntities = embedded["modifiedEntities"] as? List<Map<String, Any?>> ?: return emptySet()
     return modifiedEntities
       .mapNotNull {
         val entityClass = it["entityClass"] as? String ?: return@mapNotNull null
@@ -171,19 +171,6 @@ class ProjectActivityBranchingTest : ProjectAuthControllerTest("/v2/projects/") 
         }
       }
     }
-
-  private fun ensureDefaultBranch(): Branch {
-    return branchRepository.findActiveByProjectIdAndName(testData.project.id, Branch.DEFAULT_BRANCH_NAME)
-      ?: branchRepository.saveAndFlush(
-        Branch(
-          name = Branch.DEFAULT_BRANCH_NAME,
-          isDefault = true,
-          isProtected = true,
-        ).apply {
-          project = entityManager.getReference(Project::class.java, testData.project.id)
-        },
-      )
-  }
 
   private fun waitForNewRevisionId(excluding: Long? = null): Long {
     var revisionId: Long? = null
