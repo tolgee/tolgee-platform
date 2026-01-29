@@ -227,6 +227,10 @@ class BatchJobChunkExecutionQueue(
    * Polls using round-robin across jobs for fair distribution.
    * Each job gets one chunk processed before any job gets a second chunk.
    * This prevents large jobs from monopolizing all worker coroutines.
+   *
+   * Thread-safety: This method handles concurrent modifications gracefully.
+   * If another thread removes an item between finding and removing it,
+   * we verify the removal succeeded and retry if needed.
    */
   fun pollRoundRobin(): ExecutionQueueItem? {
     if (queue.isEmpty()) {
@@ -254,20 +258,18 @@ class BatchJobChunkExecutionQueue(
       val jobIndex = (startIndex + i) % jobIds.size
       val targetJobId = jobIds[jobIndex]
 
-      // Find and remove first item for this job
-      val iterator = queue.iterator()
-      while (iterator.hasNext()) {
-        val item = iterator.next()
-        if (item.jobId == targetJobId) {
-          iterator.remove()
-          decrementCharacterCount(item.jobCharacter)
-          lastServedJobId = targetJobId
-          return item
-        }
+      // Find first item for this job and try to remove it
+      val item = queue.firstOrNull { it.jobId == targetJobId }
+      if (item != null && queue.remove(item)) {
+        // Successfully removed - update state and return
+        decrementCharacterCount(item.jobCharacter)
+        lastServedJobId = targetJobId
+        return item
       }
+      // Item was null or already removed by another thread, try next job
     }
 
-    // Fallback if concurrent modification occurred
+    // Fallback if all targeted items were concurrently removed
     return poll()
   }
 
