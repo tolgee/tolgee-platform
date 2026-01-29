@@ -22,6 +22,7 @@ class BranchRevisionData {
   lateinit var tag: Tag
   lateinit var firstKey: Key
   lateinit var devBranch: Branch
+  lateinit var defaultBranch: Branch
   lateinit var translation: Translation
   lateinit var label: Label
 
@@ -64,6 +65,12 @@ class BranchRevisionData {
             user = this@BranchRevisionData.user
             type = ProjectPermissionType.MANAGE
           }
+
+          defaultBranch =
+            addBranch {
+              name = Branch.DEFAULT_BRANCH_NAME
+              isDefault = true
+            }.self
 
           devBranch =
             addBranch {
