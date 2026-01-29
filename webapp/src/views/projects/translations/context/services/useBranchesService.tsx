@@ -43,7 +43,6 @@ export const useBranchesService = ({
     path: { projectId: projectId },
     query: {
       size: 10000,
-      activeOnly: true,
     },
     options: {
       keepPreviousData: true,
