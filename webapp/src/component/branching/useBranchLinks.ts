@@ -4,6 +4,7 @@ import { Link, LINKS } from 'tg.constants/links';
 import { getCachedBranch } from './branchCache';
 import { useProject } from 'tg.hooks/useProject';
 import { BRANCH_ROUTES, BranchRouteKey } from '../../branching/branchRoutes';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 const BRANCHING_LINKS = new Set<Link>([
   LINKS.PROJECT_DASHBOARD,
@@ -15,8 +16,11 @@ const BRANCHING_LINKS = new Set<Link>([
 
 export const useBranchLinks = (selectedBranch?: string) => {
   const project = useProject();
+  const { isEnabled } = useEnabledFeatures();
+  const isBranchingEnabled = isEnabled('BRANCHING') && project.useBranching;
   const branch =
-    selectedBranch || useBranchFromUrlPath() || getCachedBranch(project.id);
+    isBranchingEnabled &&
+    (selectedBranch || useBranchFromUrlPath() || getCachedBranch(project.id));
 
   const withBranchLink = (
     link: Link,
