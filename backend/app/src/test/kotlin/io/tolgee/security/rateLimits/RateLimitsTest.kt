@@ -30,6 +30,8 @@ import org.springframework.boot.test.context.SpringBootTest
     "tolgee.rate-limits.user-request-window=10000",
     "tolgee.rate-limits.email-verification-request-limit=5",
     "tolgee.rate-limits.email-verification-request-window=10000",
+    "tolgee.rate-limits.export-request-limit=5",
+    "tolgee.rate-limits.export-request-window=10000",
   ],
 )
 class RateLimitsTest : AuthorizedControllerTest() {
@@ -81,7 +83,7 @@ class RateLimitsTest : AuthorizedControllerTest() {
     val projectTestData = TranslationsTestData()
     testDataService.saveTestData(projectTestData.root)
     loginAsUser(projectTestData.user.username)
-    (1..10).forEach { _ ->
+    (1..5).forEach { _ ->
       // ignore spring bug here, because we're not interested in result, and rateLimit will still be updated
       ignoreSpringBugAndContinue {
         performAuthGet("/v2/projects/${projectTestData.project.id}/export").andIsOk
