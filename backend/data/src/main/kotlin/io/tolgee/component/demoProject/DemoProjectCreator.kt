@@ -9,6 +9,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -73,6 +74,7 @@ class DemoProjectCreator(
         this@apply.organizationOwner = organization
         this.description = "This is a demo project of a packing list app"
       }
+    Branch.createMainBranch(project)
     projectService.save(project)
     setAvatar(project)
     project
