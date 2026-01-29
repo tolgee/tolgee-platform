@@ -101,7 +101,7 @@ class ProjectsControllerCreateTest : AuthorizedControllerTest() {
             .isEqualTo(1)
           it.branches.first().let { branch ->
             branch.isDefault.assert.isTrue
-            branch.isProtected.assert.isTrue
+            branch.isProtected.assert.isFalse
             branch.name.assert.isEqualTo(Branch.Companion.DEFAULT_BRANCH_NAME)
           }
         }
