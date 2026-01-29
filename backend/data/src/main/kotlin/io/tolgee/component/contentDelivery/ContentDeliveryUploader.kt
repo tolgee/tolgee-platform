@@ -35,10 +35,10 @@ class ContentDeliveryUploader(
     val withFullPaths = files.mapKeys { "${config.slug}/${it.key}" }
     pruneIfNeeded(config, storage)
     storeToStorage(withFullPaths, storage)
-    config.lastPublishedFiles = files.map { it.key }.toList()
     purgeCacheIfConfigured(config, files.keys)
 
     config.lastPublished = currentDateProvider.date
+    config.lastPublishedFiles = files.map { it.key }.toList()
     contentDeliveryConfigService.save(config)
   }
 
