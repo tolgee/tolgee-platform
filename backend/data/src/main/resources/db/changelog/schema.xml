@@ -4664,7 +4664,6 @@
             <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name="archived_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
             <column name="is_default" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
@@ -4682,12 +4681,6 @@
         <addColumn tableName="key">
             <column name="branch_id" type="BIGINT"/>
         </addColumn>
-    </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1758015935878-3">
-        <addUniqueConstraint columnNames="origin_branch_id" constraintName="UC_BRANCHORIGIN_BRANCH_ID_COL" tableName="branch"/>
-    </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1758015935878-4">
-        <addUniqueConstraint columnNames="project_id, name" constraintName="UKnw2fc76ly83tb8fsqpqkbhm4m" tableName="branch"/>
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1758015935878-5">
         <createIndex indexName="IDX2qdmejoguc37exo9i2fjxb0qo" tableName="branch">
@@ -4735,13 +4728,6 @@
         <addColumn tableName="content_delivery_config">
             <column name="filter_branch" type="VARCHAR(255)"/>
         </addColumn>
-    </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1759504369747-1">
-        <dropUniqueConstraint constraintName="uc_branchorigin_branch_id_col" tableName="branch"/>
-    </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1759830410260-1">
-        <dropUniqueConstraint constraintName="UKnw2fc76ly83tb8fsqpqkbhm4m" tableName="branch"/>
-        <sql>create unique index on public.branch (project_id, name) where archived_at is NULL;</sql>
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1759924061136-1">
         <addColumn tableName="branch">
@@ -4965,16 +4951,6 @@
             create unique index import_author_project_unique on import(author_id, project_id, coalesce(branch_id, -1)) where deleted_at is null
         </sql>
     </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1765539301819-1">
-        <createTable tableName="branch_key_meta_snapshot_tags">
-            <column name="key_meta_snapshot_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="branch_key_meta_snapshot_tagsPK"/>
-            </column>
-            <column name="tags_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="branch_key_meta_snapshot_tagsPK"/>
-            </column>
-        </createTable>
-    </changeSet>
     <changeSet author="danielkrizan (generated)" id="1765539301819-2">
         <addColumn tableName="branch_translation_snapshot">
             <column name="labels" type="JSONB"/>
@@ -4984,12 +4960,6 @@
         <addColumn tableName="branch_key_snapshot">
             <column name="screenshot_references" type="JSONB"/>
         </addColumn>
-    </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1765539301819-4">
-        <addForeignKeyConstraint baseColumnNames="key_meta_snapshot_id" baseTableName="branch_key_meta_snapshot_tags" constraintName="FK3tslgyhdddfky2tdiaqng2s6f" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch_key_meta_snapshot" validate="true"/>
-    </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1765539301819-5">
-        <addForeignKeyConstraint baseColumnNames="tags_id" baseTableName="branch_key_meta_snapshot_tags" constraintName="FK6grk5x5ho9jp85gktc2munh5m" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tag" validate="true"/>
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1767813368518-1">
         <addColumn tableName="task">
@@ -5053,19 +5023,10 @@
             <column name="branch_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1768911540294-2">
-        <dropForeignKeyConstraint baseTableName="branch_key_meta_snapshot_tags" constraintName="FK3tslgyhdddfky2tdiaqng2s6f"/>
-    </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1768911540294-3">
-        <dropForeignKeyConstraint baseTableName="branch_key_meta_snapshot_tags" constraintName="FK6grk5x5ho9jp85gktc2munh5m"/>
-    </changeSet>
     <changeSet author="danielkrizan (generated)" id="1768911540294-1">
         <addColumn tableName="branch_key_meta_snapshot">
             <column name="tags" type="JSONB"/>
         </addColumn>
-    </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1768911540294-4">
-        <dropTable tableName="branch_key_meta_snapshot_tags"/>
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1768921361112-1">
         <addColumn tableName="project">
@@ -5073,8 +5034,5 @@
                 <constraints nullable="false"/>
             </column>
         </addColumn>
-    </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1769532586484-1">
-        <dropColumn columnName="archived_at" tableName="branch"/>
     </changeSet>
 </databaseChangeLog>
