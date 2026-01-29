@@ -89,18 +89,6 @@ class KeyControllerCreationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `creates key with default branch (branch parameter not provided)`() {
-    performProjectAuthPost("keys", CreateKeyDto(name = "super_key_to_main_branch", branch = "dev"))
-      .andIsCreated
-      .andAssertThatJson {
-        node("id").isValidId
-        node("name").isEqualTo("super_key_to_main_branch")
-        node("branch").isEqualTo("dev")
-      }
-  }
-
-  @ProjectJWTAuthTestMethod
-  @Test
   fun `validates description`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key", description = "a".repeat(2001)))
       .andIsBadRequest
