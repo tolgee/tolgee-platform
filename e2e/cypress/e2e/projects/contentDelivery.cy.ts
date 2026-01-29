@@ -229,6 +229,7 @@ describe('Content delivery', () => {
     deleteContentDeliveryConfig('Azure');
     deleteContentDeliveryConfig('S3');
     deleteContentDeliveryConfig('Custom Slug');
+    deleteContentDeliveryConfig('Zip Enabled');
 
     cy.contains('Only single content delivery configuration enabled');
     cy.gcy('content-delivery-add-button').should('be.disabled');
