@@ -16,6 +16,7 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.ProjectLastModifiedManager
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
@@ -42,6 +43,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.queryBuilders.CursorUtil
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.task.ITaskService
@@ -104,6 +106,7 @@ class TranslationsController(
   private val taskService: ITaskService,
   private val translationSuggestionService: TranslationSuggestionService,
   private val projectLastModifiedManager: ProjectLastModifiedManager,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(
@@ -158,8 +161,11 @@ When null, resulting file will be a flat key-value object.
     )
     @RequestParam(value = "filterTag", required = false)
     filterTag: List<String>? = null,
+    @Parameter(description = "Branch name to return translations from")
+    branch: String? = null,
     request: WebRequest,
   ): ResponseEntity<Map<String, Any>>? {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) {
       val permittedTags =
         securityService
@@ -168,6 +174,7 @@ When null, resulting file will be a flat key-value object.
       translationService.getTranslations(
         languageTags = permittedTags,
         namespace = ns,
+        branch = branch,
         projectId = projectHolder.project.id,
         structureDelimiter = request.getStructureDelimiter(),
         filterTag = filterTag,
@@ -185,6 +192,7 @@ When null, resulting file will be a flat key-value object.
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     return createOrUpdateTranslationsFacade.setTranslations(dto)
   }
 
@@ -202,6 +210,7 @@ When null, resulting file will be a flat key-value object.
     @RequestBody @Valid
     dto: SetTranslationsWithKeyDto,
   ): SetTranslationsResponseModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     return createOrUpdateTranslationsFacade.createOrUpdateTranslations(dto)
   }
 
@@ -217,6 +226,7 @@ When null, resulting file will be a flat key-value object.
     val translation = translationService.get(translationId)
     translation.checkFromProject()
     securityService.checkStateChangePermission(translation)
+    securityService.checkProtectedBranchModify(translation)
     return translationModelAssembler.toModel(translationService.setStateBatch(translation, state.translationState))
   }
 
@@ -241,6 +251,7 @@ When null, resulting file will be a flat key-value object.
     params: GetTranslationsParams,
     @ParameterObject pageable: Pageable,
   ): KeysWithTranslationsPageModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, params.branch)
     val languages =
       languageService.getLanguagesForTranslationsView(
         params.languages,
@@ -325,6 +336,7 @@ When null, resulting file will be a flat key-value object.
     val translation = translationService.get(translationId)
     translation.checkFromProject()
     securityService.checkStateChangePermission(translation)
+    securityService.checkProtectedBranchModify(translation)
     translationService.dismissAutoTranslated(translation)
     return translationModelAssembler.toModel(translation)
   }
@@ -345,6 +357,7 @@ When null, resulting file will be a flat key-value object.
   ): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
+    securityService.checkProtectedBranchModify(translation)
     translationService.setOutdated(translation, state)
     return translationModelAssembler.toModel(translation)
   }

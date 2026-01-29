@@ -14,6 +14,7 @@ data class KeyWithTranslationsView(
   val keyName: String,
   val keyIsPlural: Boolean,
   val keyPluralArgName: String?,
+  val branch: String?,
   val keyNamespaceId: Long?,
   val keyNamespace: String?,
   val keyDescription: String?,
@@ -26,7 +27,7 @@ data class KeyWithTranslationsView(
   var tasks: List<KeyTaskView>? = null
 
   companion object {
-    val FIELD_COUNT = 10
+    val LANGUAGES_FIELD_COUNT = 10
 
     fun of(
       queryData: Array<Any?>,
@@ -40,6 +41,7 @@ data class KeyWithTranslationsView(
           keyName = data.removeFirst() as String,
           keyIsPlural = data.removeFirst() as Boolean,
           keyPluralArgName = data.removeFirst() as String?,
+          branch = data.removeFirst() as String?,
           keyNamespaceId = data.removeFirst() as Long?,
           keyNamespace = data.removeFirst() as String?,
           keyDescription = data.removeFirst() as String?,
@@ -47,8 +49,8 @@ data class KeyWithTranslationsView(
           contextPresent = data.removeFirst() as Boolean,
         )
 
-      (0 until data.size step FIELD_COUNT).forEach { i ->
-        val language = languages[i / FIELD_COUNT].tag
+      (0 until data.size step LANGUAGES_FIELD_COUNT).forEach { i ->
+        val language = languages[i / LANGUAGES_FIELD_COUNT].tag
 
         val id = data[i] as Long?
         result.translations[language] =
@@ -86,6 +88,7 @@ data class KeyWithTranslationsView(
       KeyWithTranslationsView::keyNamespace.name -> keyNamespace
       KeyWithTranslationsView::keyName.name -> keyName
       KeyWithTranslationsView::screenshotCount.name -> screenshotCount.toString()
+      KeyWithTranslationsView::branch.name -> branch
       KeyWithTranslationsView::translations.name -> {
         val translation = translations[path[1]]
         when (path[2]) {

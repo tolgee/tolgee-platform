@@ -23,6 +23,7 @@ enum class Feature {
   ORDER_TRANSLATION,
   GLOSSARY,
   TRANSLATION_LABELS,
+  BRANCHING,
   ;
 
   companion object {

@@ -38,6 +38,7 @@ import io.tolgee.repository.dataImport.ImportRepository
 import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
@@ -75,6 +76,8 @@ class ImportService(
   private val jdbcTemplate: JdbcTemplate,
   @Lazy
   private val importSettingsService: ImportSettingsService,
+  @Lazy
+  private val branchService: BranchService,
 ) {
   @Transactional
   fun addFiles(
@@ -84,8 +87,9 @@ class ImportService(
     params: ImportAddFilesParams = ImportAddFilesParams(),
   ): Pair<List<ErrorResponseBody>, List<ErrorResponseBody>> {
     val import =
-      findNotExpired(project.id, userAccount.id) ?: Import(project).also {
+      findNotExpired(project.id, userAccount.id, params.branch) ?: Import(project).also {
         it.author = userAccount
+        it.branch = branchService.getActiveOrDefault(project.id, params.branch)
       }
 
     val languages = findLanguages(import)
@@ -119,10 +123,11 @@ class ImportService(
   fun import(
     projectId: Long,
     authorId: Long,
+    branch: String? = null,
     forceMode: ForceMode = ForceMode.NO_FORCE,
     reportStatus: (ImportApplicationStatus) -> Unit = {},
   ): ImportResult {
-    return import(getNotExpired(projectId, authorId), forceMode, reportStatus)
+    return import(getNotExpired(projectId, authorId, branch), forceMode, reportStatus)
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
@@ -210,8 +215,9 @@ class ImportService(
   fun getNotExpired(
     projectId: Long,
     authorId: Long,
+    branch: String? = null,
   ): Import {
-    return findNotExpired(projectId, authorId) ?: throw NotFoundException()
+    return findNotExpired(projectId, authorId, branch) ?: throw NotFoundException()
   }
 
   fun findDeleted(importId: Long): Import? {
@@ -221,23 +227,26 @@ class ImportService(
   private fun findNotExpired(
     projectId: Long,
     userAccountId: Long,
+    branch: String? = null,
   ): Import? {
-    val import = this.find(projectId, userAccountId)
+    val import = this.find(projectId, userAccountId, branch)
     return removeExpiredImportService.removeIfExpired(import)
   }
 
   fun find(
     projectId: Long,
     authorId: Long,
+    branch: String? = null,
   ): Import? {
-    return this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
+    return this.importRepository.findByProjectIdAndAuthorId(projectId, authorId, branch)
   }
 
   fun get(
     projectId: Long,
     authorId: Long,
+    branch: String? = null,
   ): Import {
-    return this.find(projectId, authorId) ?: throw NotFoundException()
+    return this.find(projectId, authorId, branch) ?: throw NotFoundException()
   }
 
   fun get(id: Long): Import {
@@ -310,9 +319,10 @@ class ImportService(
   fun getResult(
     projectId: Long,
     userId: Long,
+    branch: String?,
     pageable: Pageable,
   ): Page<ImportLanguageView> {
-    return this.getNotExpired(projectId, userId).let {
+    return this.getNotExpired(projectId, userId, branch).let {
       this.importLanguageRepository.findImportLanguagesView(it.id, pageable)
     }
   }
@@ -357,7 +367,8 @@ class ImportService(
   fun deleteImport(
     projectId: Long,
     authorId: Long,
-  ) = this.deleteImport(get(projectId, authorId))
+    branch: String? = null,
+  ) = this.deleteImport(get(projectId, authorId, branch))
 
   @Transactional
   fun deleteLanguage(language: ImportLanguage) {

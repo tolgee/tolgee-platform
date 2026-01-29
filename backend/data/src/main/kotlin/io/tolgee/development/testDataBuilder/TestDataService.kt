@@ -17,6 +17,7 @@ import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.development.testDataBuilder.builders.slack.SlackUserConnectionBuilder
 import io.tolgee.model.Project
+import io.tolgee.repository.KeyCodeReferenceRepository
 import io.tolgee.service.TenantService
 import io.tolgee.service.automations.AutomationService
 import io.tolgee.service.bigMeta.BigMetaService
@@ -92,6 +93,7 @@ class TestDataService(
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
   private val languageStatsListener: LanguageStatsListener,
   private val invitationService: InvitationService,
+  private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
 ) : Logging {
   @Transactional
   fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
@@ -305,7 +307,10 @@ class TestDataService(
     savePermissions(builder)
     saveMtServiceConfigs(builder)
     saveAllNamespaces(builder)
+    saveBranches(builder)
+    saveBranchMerges(builder)
     saveKeyData(builder)
+    saveBranchMergeChanges(builder)
     saveTranslationData(builder)
     saveImportData(builder)
     saveAutoTranslationConfigs(builder)
@@ -324,6 +329,7 @@ class TestDataService(
     savePrompts(builder)
     saveAiPlaygroundResults(builder)
     saveLabels(builder)
+    saveTags(builder)
     saveSuggestions(builder)
   }
 
@@ -486,6 +492,7 @@ class TestDataService(
   private fun saveAllKeyDependants(keyBuilders: List<KeyBuilder>) {
     val metas = keyBuilders.map { it.data.meta?.self }.filterNotNull()
     tagService.saveAll(metas.flatMap { it.tags })
+    keyCodeReferenceRepository.saveAll(metas.flatMap { it.codeReferences })
     keyMetaService.saveAll(metas)
   }
 
@@ -611,6 +618,30 @@ class TestDataService(
 
   private fun saveLabels(builder: ProjectBuilder) {
     builder.data.labels.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveTags(builder: ProjectBuilder) {
+    builder.data.tags.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveBranches(builder: ProjectBuilder) {
+    builder.data.branches.filter { it.self.id == 0L }.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveBranchMerges(builder: ProjectBuilder) {
+    builder.data.branchMerges.filter { it.self.id == 0L }.forEach {
+      entityManager.persist(it.self)
+    }
+  }
+
+  private fun saveBranchMergeChanges(builder: ProjectBuilder) {
+    builder.data.branchMergeChanges.filter { it.self.id == 0L }.forEach {
       entityManager.persist(it.self)
     }
   }

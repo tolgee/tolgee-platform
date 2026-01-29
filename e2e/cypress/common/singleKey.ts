@@ -5,19 +5,24 @@ type Props = {
   key?: string;
   languages?: string[];
   namespace?: string;
+  branch?: string;
 };
 
 export const visitSingleKey = ({
   projectId,
+  branch,
   key,
   languages,
   namespace,
 }: Props) => {
   cy.visit(
-    `${HOST}/projects/${projectId}/translations/single?` +
-      (key ? `key=${key}&` : '') +
-      (namespace ? `ns=${namespace}&` : '') +
-      (languages ? languages.map((l) => `languages=${l}&`).join('') : '')
+    `${HOST}/projects/${projectId}/translations/single` +
+      (branch ? `/tree/${encodeURIComponent(branch)}?` : '?') +
+      (key ? `key=${encodeURIComponent(key)}&` : '') +
+      (namespace ? `ns=${encodeURIComponent(namespace)}&` : '') +
+      (languages
+        ? languages.map((l) => `languages=${encodeURIComponent(l)}&`).join('')
+        : '')
   );
   return cy
     .get('[data-cy="global-base-view-content"', {

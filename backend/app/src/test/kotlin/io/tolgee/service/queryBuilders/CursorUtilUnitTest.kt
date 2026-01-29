@@ -23,6 +23,7 @@ class CursorUtilUnitTest {
         keyName = "Super key",
         keyIsPlural = false,
         keyPluralArgName = null,
+        branch = null,
         keyNamespaceId = null,
         keyNamespace = null,
         keyDescription = "Super key description",

@@ -12,6 +12,8 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Project
 import io.tolgee.model.UploadedImage
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchMergeableEntity
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.enums.TranslationProtection
@@ -19,6 +21,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.task.ITaskService
@@ -32,6 +35,7 @@ class SecurityService(
   private val languageService: LanguageService,
   private val keyRepository: KeyRepository,
   private val projectHolder: ProjectHolder,
+  private val branchService: BranchService,
 ) {
   @set:Autowired
   lateinit var apiKeyService: ApiKeyService
@@ -523,6 +527,29 @@ class SecurityService(
       if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
         throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
       }
+    }
+  }
+
+  fun checkProtectedBranchModify(
+    projectId: Long,
+    branchName: String?,
+  ) {
+    val branch = branchService.getActiveOrDefault(projectId, branchName)
+    checkProtectedBranchModify(branch, projectId)
+  }
+
+  fun checkProtectedBranchModify(entity: BranchMergeableEntity<*, *>) {
+    val key = entity.resolveKey() ?: return
+    val branch = key.branch ?: branchService.getDefaultBranch(key.project.id)
+    checkProtectedBranchModify(branch, key.project.id)
+  }
+
+  private fun checkProtectedBranchModify(
+    branch: Branch?,
+    projectId: Long,
+  ) {
+    if (branch?.isProtected == true) {
+      checkProjectPermission(projectId, Scope.BRANCH_PROTECTED_MODIFY)
     }
   }
 

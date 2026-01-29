@@ -8,6 +8,7 @@ import io.tolgee.model.Screenshot
 import io.tolgee.model.Screenshot_
 import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.TranslationSuggestion_
+import io.tolgee.model.branching.Branch_
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.TranslationSuggestionState
@@ -76,6 +77,7 @@ class QueryBase<T>(
   }
 
   private fun addLeftJoinedColumns() {
+    addBranch()
     addNamespace()
     addDescription()
     addScreenshotCounts()
@@ -266,6 +268,13 @@ class QueryBase<T>(
     val keyScreenshotReference = subQueryRoot.join(Key_.keyScreenshotReferences)
     subquery.where(cb.equal(subQueryRoot.get(Key_.id), this.root.get(Key_.id)))
     return subquery.select(keyScreenshotReference.get(KeyScreenshotReference_.screenshot).get(Screenshot_.id))
+  }
+
+  private fun addBranch() {
+    val branch = this.root.join(Key_.branch, JoinType.LEFT)
+    val branchName = branch.get(Branch_.name)
+    this.querySelection[KeyWithTranslationsView::branch.name] = branchName
+    groupByExpressions.add(branchName)
   }
 
   private fun addNamespace() {

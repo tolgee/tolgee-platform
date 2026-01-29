@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslate } from '@tolgee/react';
 import { Box, IconButton, styled, Tooltip, useTheme } from '@mui/material';
 import { AlarmClock, DotsVertical, InfoCircle } from '@untitled-ui/icons-react';
@@ -14,7 +13,7 @@ import { TaskLabel } from './TaskLabel';
 import { TaskState } from 'tg.component/task/TaskState';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import { TaskAssignees } from './TaskAssignees';
-import { getTaskUrl } from 'tg.constants/links';
+import { TaskTranslationsLink } from 'tg.component/task/TaskTranslationsLink';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
@@ -79,24 +78,25 @@ export const TaskItem = ({
   };
 
   const linkProps = {
-    component: Link,
-    to: getTaskUrl(project.id, task.number),
+    component: StyledItem,
+    task,
+    projectId: project.id,
   };
 
   return (
     <StyledContainer data-cy="task-item">
-      <StyledItem {...linkProps}>
+      <TaskTranslationsLink {...linkProps}>
         <TaskLabel sx={{ padding: '12px 0px 12px 16px' }} task={task} />
-      </StyledItem>
-      <StyledItem
+      </TaskTranslationsLink>
+      <TaskTranslationsLink
         {...linkProps}
         color={theme.palette.tokens.text.secondary}
         alignItems="center"
         justifyContent="center"
       >
         {t('task_word_count', { value: task.baseWordCount })}
-      </StyledItem>
-      <StyledProgress {...linkProps}>
+      </TaskTranslationsLink>
+      <TaskTranslationsLink {...linkProps} component={StyledProgress}>
         {['IN_PROGRESS', 'NEW'].includes(task.state) ? (
           <BatchProgress progress={task.doneItems} max={task.totalItems} />
         ) : (
@@ -108,9 +108,9 @@ export const TaskItem = ({
             {formatDate(task.dueDate, { timeZone: 'UTC' })}
           </Box>
         ) : null}
-      </StyledProgress>
+      </TaskTranslationsLink>
       {showProject && (
-        <StyledItem {...linkProps}>
+        <TaskTranslationsLink {...linkProps}>
           <Tooltip title={<div>{project.name}</div>} disableInteractive>
             <div>
               <AvatarImg
@@ -124,11 +124,16 @@ export const TaskItem = ({
               />
             </div>
           </Tooltip>
-        </StyledItem>
+        </TaskTranslationsLink>
       )}
-      <StyledAssignees sx={{ paddingRight: '10px' }} {...linkProps}>
+      <TaskTranslationsLink
+        component={StyledAssignees}
+        task={task}
+        projectId={project.id}
+        sx={{ paddingRight: '10px' }}
+      >
         <TaskAssignees task={task} />
-      </StyledAssignees>
+      </TaskTranslationsLink>
       <StyledItem sx={{ pr: 1, gap: 0.5 }} style={{ cursor: 'auto' }}>
         <Tooltip title={t('task_detail_tooltip')} disableInteractive>
           <IconButton

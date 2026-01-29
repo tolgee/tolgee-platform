@@ -9,6 +9,7 @@ import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
 import io.tolgee.repository.TagRepository
+import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
@@ -26,7 +27,10 @@ class TagService(
   private val keyService: KeyService,
   private val entityManager: EntityManager,
   private val applicationContext: ApplicationContext,
+  @Lazy
+  private val securityService: SecurityService,
 ) : Logging {
+  @Transactional
   fun tagKey(
     key: Key,
     tagName: String,
@@ -324,9 +328,11 @@ class TagService(
   fun complexTagOperation(
     projectId: Long,
     req: ComplexTagKeysRequest,
+    branch: String?,
   ) {
+    securityService.checkProtectedBranchModify(projectId, branch)
     val provider =
-      ComplexTagOperationKeyProvider(projectId, req, applicationContext)
+      ComplexTagOperationKeyProvider(projectId, req, branch, applicationContext)
 
     if (req.tagFiltered != null || req.untagFiltered != null) {
       val untagFilteredWithAppliedWildcards = req.untagFiltered?.applyWildcards(projectId)?.toList()
@@ -382,7 +388,9 @@ class TagService(
     keyId: Long,
     tagName: String,
   ): Tag {
-    return tagKeysById(projectId, mapOf(keyId to listOf(tagName))).values.singleOrNull()?.singleOrNull()
+    val key = keyService.getKeysWithTagsById(projectId, listOf(keyId)).singleOrNull() ?: throw NotFoundException()
+    securityService.checkProtectedBranchModify(key)
+    return tagKeys(listOf(key), mapOf(key.id to listOf(tagName))).values.singleOrNull()?.singleOrNull()
       ?: throw IllegalStateException("No single tag found in result.")
   }
 
@@ -393,7 +401,16 @@ class TagService(
     tagId: Long,
   ) {
     val key = keyService.getKeysWithTagsById(projectId, listOf(keyId)).singleOrNull() ?: throw NotFoundException()
-    val tag = getWithKeyMetasFetched(projectId, tagId)
+    securityService.checkProtectedBranchModify(key)
+    removeKeyTag(key, tagId)
+  }
+
+  @Transactional
+  fun removeKeyTag(
+    key: Key,
+    tagId: Long,
+  ) {
+    val tag = getWithKeyMetasFetched(key.project.id, tagId)
     remove(key, tag)
   }
 }

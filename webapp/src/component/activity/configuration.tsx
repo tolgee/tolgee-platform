@@ -1,5 +1,6 @@
 import { T } from '@tolgee/react';
 import { ActivityOptions, ActivityTypeEnum } from './types';
+import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
 
 export const actionsConfiguration: Partial<
   Record<ActivityTypeEnum, ActivityOptions>
@@ -506,6 +507,51 @@ export const actionsConfiguration: Partial<
     description(data) {
       return data.modifiedEntities?.TranslationSuggestion?.[0]?.description
         ?.translation as any as string;
+    },
+  },
+  BRANCH_CREATE: {
+    label(params) {
+      return <T keyName="activity_branch_create" params={params} />;
+    },
+    entities: {
+      Branch: [],
+    },
+  },
+  BRANCH_RENAME: {
+    label(params) {
+      return <T keyName="activity_branch_rename" params={params} />;
+    },
+    entities: {
+      Branch: ['name'],
+    },
+  },
+  BRANCH_DELETE: {
+    label(params) {
+      return <T keyName="activity_branch_delete" params={params} />;
+    },
+    entities: {
+      Branch: [],
+    },
+  },
+  BRANCH_PROTECTION_CHANGE: {
+    label(params) {
+      return <T keyName="activity_branch_protection_change" params={params} />;
+    },
+    entities: {
+      Branch: ['isProtected'],
+    },
+  },
+  BRANCH_MERGE: {
+    label(params) {
+      return (
+        <T
+          keyName="activity_branch_merge"
+          params={{ ...params, branch: <BranchNameChipNode size={'small'} /> }}
+        />
+      );
+    },
+    entities: {
+      Branch: [],
     },
   },
 };

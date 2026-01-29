@@ -42,10 +42,11 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
   @Test
   fun `returns correct data`() {
     testData.generateLotOfData()
+    testData.addDeletedBranch()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
-      node("page.totalElements").isNumber.isGreaterThan(BigDecimal(100))
+      node("page.totalElements").isNumber.isEqualTo(BigDecimal(101))
       node("page.size").isEqualTo(20)
       node("selectedLanguages") {
         isArray.hasSize(2)
@@ -102,6 +103,31 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
           }
         }
       }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `return translations from non-branched keys`() {
+    testData.generateBranchedData(10)
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
+      // 2 keys from the default branch, 10 keys from the feature branch should be filtered out
+      node("_embedded.keys").isArray.hasSize(2)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `return translations from default branch only`() {
+    testData.generateBranchedData(5, "main", true)
+    testData.generateBranchedData(10)
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
+      // 2 non-branched keys + 5 keys from the default branch, 10 keys from the feature branch should be filtered out
+      node("_embedded.keys").isArray.hasSize(7)
     }
   }
 

@@ -1,10 +1,12 @@
 package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.development.testDataBuilder.data.NamespacesTestData
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.service.export.ExportService
 import io.tolgee.service.export.dataProvider.ExportDataProvider
@@ -227,5 +229,23 @@ class ExportServiceTest : AbstractSpringTest() {
     val exportParams =
       ExportParams(fileStructureTemplate = "{namespace}/{languageTag}.{extension}")
     exportService.export(testData.project.id, exportParams)
+  }
+
+  @Test
+  fun `export fails for non existing branch`() {
+    val testData = KeysTestData()
+    testDataService.saveTestData(testData.root)
+
+    assertThatThrownBy {
+      exportService.export(testData.project.id, ExportParams(filterBranch = "unknown"))
+    }.isInstanceOf(NotFoundException::class.java)
+  }
+
+  @Test
+  fun `export accepts existing branch`() {
+    val testData = KeysTestData()
+    testDataService.saveTestData(testData.root)
+
+    exportService.export(testData.project.id, ExportParams(filterBranch = "dev"))
   }
 }

@@ -6,9 +6,11 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
+import java.util.Date
 
 class KeysTestData {
   lateinit var enOnlyUserAccount: UserAccount
@@ -21,6 +23,8 @@ class KeysTestData {
   lateinit var english: Language
   lateinit var german: Language
   lateinit var screenshot: Screenshot
+  lateinit var firstDevKey: Key
+  lateinit var devBranch: Branch
 
   var projectBuilder: ProjectBuilder
 
@@ -48,6 +52,7 @@ class KeysTestData {
           name = "Peter's project"
           organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
           project = this
+          useBranching = true
         }.build {
           english =
             addLanguage {
@@ -100,10 +105,42 @@ class KeysTestData {
               addCodeReference {
                 line = 20
                 path = "./code/exist.extension"
+                author = user
               }
               custom = mutableMapOf("custom" to "value")
             }
           }
+
+          addBranch {
+            name = "main"
+            isDefault = true
+          }
+
+          addBranch {
+            name = "dev"
+          }.build {
+            addKey {
+              name = "first_key"
+              branch = self
+            }
+          }
+
+          // deleted branch with the same name
+          devBranch =
+            addBranch {
+              name = "dev"
+              deletedAt = Date(1759833439)
+            }.build {
+              firstDevKey =
+                addKey {
+                  name = "first_key"
+                  branch = self
+                }.build {
+                  addMeta {
+                    description = "default"
+                  }
+                }.self
+            }.self
         }
 
       addUserAccountWithoutOrganization {
@@ -122,6 +159,27 @@ class KeysTestData {
       projectBuilder.apply {
         addKey {
           name = "key_$it"
+        }
+      }
+    }
+  }
+
+  fun addNBranchedKeys(
+    n: Int,
+    branchName: String = "feature",
+  ) {
+    projectBuilder.apply {
+      addBranch {
+        name = branchName
+        project = projectBuilder.self
+      }.build {
+        (1..n).forEach {
+          addKey {
+            name = "branch_key_$it"
+            this.branch = self
+          }.build {
+            setDescription("description of branched key")
+          }
         }
       }
     }

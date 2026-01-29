@@ -7,6 +7,7 @@ import io.tolgee.dtos.dataImport.SimpleImportConflictResult
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
@@ -382,7 +383,7 @@ class StoredDataImporter(
         // or get it from conflict or create new one
         val newKey =
           importDataManager.existingKeys[this.key.file.namespace to this.key.name]
-            ?: createNewKey(this.key.name, this.key.file.namespace)
+            ?: createNewKey(this.key.name, this.key.file.namespace, import.branch?.name)
         newKey
       }
     }
@@ -392,17 +393,19 @@ class StoredDataImporter(
     keyName: String,
   ): Key {
     return keysToSave.computeIfAbsent(namespace to keyName) {
-      importDataManager.existingKeys[namespace to keyName] ?: createNewKey(keyName, namespace)
+      importDataManager.existingKeys[namespace to keyName] ?: createNewKey(keyName, namespace, import.branch?.name)
     }
   }
 
   private fun createNewKey(
     name: String,
     namespace: String?,
+    branch: String?,
   ): Key {
     return Key(name = name).apply {
       project = import.project
       this.namespace = getNamespace(namespace)
+      this.branch = getBranch(branch)
       newKeys.add(this)
     }
   }
@@ -441,6 +444,11 @@ class StoredDataImporter(
     return importDataManager.existingNamespaces[name] ?: namespacesToSave.computeIfAbsent(name) {
       Namespace(name, import.project)
     }
+  }
+
+  private fun getBranch(name: String?): Branch? {
+    name ?: return null
+    return import.project.branches.find { it.name == name }
   }
 
   private val tagService by lazy {

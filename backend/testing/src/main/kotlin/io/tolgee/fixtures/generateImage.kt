@@ -1,4 +1,4 @@
-package io.tolgee.util
+package io.tolgee.fixtures
 
 import org.springframework.core.io.InputStreamSource
 import java.awt.image.BufferedImage

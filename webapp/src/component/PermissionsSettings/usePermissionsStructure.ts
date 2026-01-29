@@ -173,6 +173,17 @@ export const usePermissionsStructure = () => {
       {
         value: 'languages.edit',
       },
+      {
+        label: t('permissions_branching'),
+        children: [
+          {
+            value: 'branch.management',
+          },
+          {
+            value: 'branch.protected-modify',
+          },
+        ],
+      },
     ],
   } as HierarchyType;
 };

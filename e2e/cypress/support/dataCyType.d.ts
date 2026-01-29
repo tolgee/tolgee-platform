@@ -213,6 +213,7 @@ declare namespace DataCy {
         "billing-usage-table-seats" |
         "billing-usage-table-translations" |
         "billing_period_annual" |
+        "branch-merge-detail-menu" |
         "cell-key-screenshot-dropzone" |
         "cell-key-screenshot-file-input" |
         "checkbox-group-multiselect" |
@@ -576,6 +577,9 @@ declare namespace DataCy {
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |
+        "project-branch-merge-accept" |
+        "project-branch-merge-change" |
+        "project-branch-merge-detail" |
         "project-dashboard-activity-chart" |
         "project-dashboard-activity-list" |
         "project-dashboard-base-word-count" |
@@ -612,6 +616,7 @@ declare namespace DataCy {
         "project-members-invitation-item" |
         "project-menu-item" |
         "project-menu-item-ai" |
+        "project-menu-item-branches" |
         "project-menu-item-dashboard" |
         "project-menu-item-developer" |
         "project-menu-item-export" |
@@ -628,6 +633,14 @@ declare namespace DataCy {
         "project-name-field" |
         "project-select" |
         "project-settings" |
+        "project-settings-branch-item" |
+        "project-settings-branch-item-name" |
+        "project-settings-branch-item-properties" |
+        "project-settings-branches-actions-menu" |
+        "project-settings-branches-add" |
+        "project-settings-branches-merge-into-button" |
+        "project-settings-branches-remove-button" |
+        "project-settings-branches-rename-button" |
         "project-settings-button" |
         "project-settings-delete-button" |
         "project-settings-description" |
@@ -650,6 +663,7 @@ declare namespace DataCy {
         "project-settings-suggestions-mode-switch" |
         "project-settings-transfer-button" |
         "project-settings-translation-protection-switch" |
+        "project-settings-use-branching-switch" |
         "project-settings-use-namespaces-default-namespace-select" |
         "project-settings-use-namespaces-switch" |
         "project-settings-use-tolgee-placeholders-switch" |

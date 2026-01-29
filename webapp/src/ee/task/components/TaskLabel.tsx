@@ -1,14 +1,16 @@
-import { Box, styled, SxProps, Tooltip } from '@mui/material';
+import { Box, styled, SxProps, Tooltip, Typography } from '@mui/material';
 import { FlagImage } from '@tginternal/library/components/languages/FlagImage';
 import { components } from 'tg.service/apiSchema.generated';
 import { TaskNumber, TaskNumberWithLink } from './TaskId';
 import { TaskTypeChip } from 'tg.component/task/TaskTypeChip';
 import { AgencyLabel } from 'tg.ee';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import clsx from 'clsx';
+import { BranchNameChip } from 'tg.component/branching/BranchNameChip';
 
 type TaskModel = components['schemas']['TaskModel'];
 type SimpleProjectModel = components['schemas']['SimpleProjectModel'];
+type TaskModelWithOrigin = TaskModel & { originBranchName?: string };
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -22,6 +24,7 @@ const StyledContainer = styled(Box)`
     opacity: 0.6;
     filter: grayscale(1);
   }
+
   &.finished {
     opacity: 0.6;
   }
@@ -51,6 +54,7 @@ export const TaskLabel = ({
   hideType,
 }: Props) => {
   const { t } = useTranslate();
+  const originBranchName = (task as TaskModelWithOrigin).originBranchName;
   return (
     <StyledContainer
       {...{
@@ -73,11 +77,27 @@ export const TaskLabel = ({
         {task.name || t('task_default_name')}
       </StyledTaskName>
       {project ? (
-        <TaskNumberWithLink project={project} taskNumber={task.number} />
+        <TaskNumberWithLink project={project} task={task} />
       ) : (
         <TaskNumber taskNumber={task.number} />
       )}
       {!hideType && <TaskTypeChip type={task.type} />}
+      {originBranchName && (
+        <Typography
+          color="text.secondary"
+          fontSize={14}
+          display="flex"
+          alignItems="center"
+          gap={1}
+        >
+          <T
+            keyName="task_label_from_branch"
+            params={{
+              branch: <BranchNameChip name={originBranchName} size="small" />,
+            }}
+          />
+        </Typography>
+      )}
       {task.agency && (
         <Tooltip title={t('task_label_agency_tooltip')}>
           <span>

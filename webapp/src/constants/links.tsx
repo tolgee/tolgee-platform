@@ -63,6 +63,8 @@ export enum PARAMS {
   TRANSLATION_ID = 'translationId',
   PLAN_ID = 'planId',
   TA_ID = 'taId',
+  BRANCH = 'branch',
+  MERGE_ID = 'mergeId',
 }
 
 export class LINKS {
@@ -349,12 +351,34 @@ export class LINKS {
 
   static PROJECT_TRANSLATIONS = Link.ofParent(LINKS.PROJECT, 'translations');
 
+  static PROJECT_TRANSLATIONS_WITH_BRANCH = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS,
+    'tree/' + p(PARAMS.BRANCH)
+  );
+
   static PROJECT_TRANSLATIONS_SINGLE = Link.ofParent(
     LINKS.PROJECT_TRANSLATIONS,
     'single'
   );
 
+  static PROJECT_TRANSLATIONS_SINGLE_WITH_BRANCH = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS_SINGLE,
+    'tree/' + p(PARAMS.BRANCH)
+  );
+
   static PROJECT_TASKS = Link.ofParent(LINKS.PROJECT, 'tasks');
+
+  static PROJECT_BRANCHES = Link.ofParent(LINKS.PROJECT, 'branches');
+
+  static PROJECT_BRANCHES_MERGES = Link.ofParent(
+    LINKS.PROJECT_BRANCHES,
+    'merges'
+  );
+
+  static PROJECT_BRANCHES_MERGE = Link.ofParent(
+    LINKS.PROJECT_BRANCHES,
+    'merge/' + p(PARAMS.MERGE_ID)
+  );
 
   static PROJECT_EXPORT = Link.ofParent(LINKS.PROJECT, 'export');
 
@@ -431,6 +455,31 @@ export class LINKS {
   static SLACK = Link.ofRoot('slack');
   static SLACK_CONNECT = Link.ofParent(LINKS.SLACK, 'connect');
   static SLACK_CONNECTED = Link.ofParent(LINKS.SLACK, 'connected');
+
+  /**
+   * Represents a generated link for branched project views
+   */
+  static PROJECT_TRANSLATIONS_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+  static PROJECT_TRANSLATIONS_SINGLE_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS_SINGLE,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+  static PROJECT_DASHBOARD_BRANCHED = Link.ofParent(
+    LINKS.PROJECT,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+  static PROJECT_IMPORT_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_IMPORT,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+  static PROJECT_EXPORT_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_EXPORT,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+  static PROJECT_TASKS_BRANCHED = Link.ofParent(LINKS.PROJECT_TASKS, '*');
 }
 
 export enum QUERY {

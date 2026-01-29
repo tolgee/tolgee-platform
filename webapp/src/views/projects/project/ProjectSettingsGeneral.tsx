@@ -75,6 +75,7 @@ export const ProjectSettingsGeneral = () => {
           translationProtection: project.translationProtection,
           defaultNamespaceId: project.defaultNamespace?.id,
           useNamespaces: project.useNamespaces,
+          useBranching: project.useBranching,
           ...values,
           description: values.description || undefined,
         },

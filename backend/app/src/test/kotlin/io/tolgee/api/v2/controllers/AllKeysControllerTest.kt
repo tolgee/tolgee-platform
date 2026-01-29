@@ -28,7 +28,7 @@ class AllKeysControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `returns all keys sorted`() {
+  fun `returns default branch keys sorted`() {
     performProjectAuthGet("all-keys").andPrettyPrint.andIsOk.andAssertThatJson {
       node("_embedded.keys") {
         isArray.hasSize(3)
@@ -36,6 +36,15 @@ class AllKeysControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("id").isValidId
           node("namespace").isNull()
           node("name").isEqualTo("first_key")
+          node("branch").isNull()
+        }
+        node("[1]") {
+          node("name").isEqualTo("second_key")
+          node("branch").isNull()
+        }
+        node("[2]") {
+          node("name").isEqualTo("key_with_referecnces")
+          node("branch").isNull()
         }
       }
     }

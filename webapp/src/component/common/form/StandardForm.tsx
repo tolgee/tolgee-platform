@@ -32,6 +32,7 @@ interface FormProps<T> {
   rootSx?: SxProps;
   hideCancel?: boolean;
   showResourceError?: boolean;
+  formId?: string;
 }
 
 export function StandardForm<T extends FormikValues>({
@@ -41,6 +42,7 @@ export function StandardForm<T extends FormikValues>({
   rootSx = { mb: 2 },
   hideCancel,
   showResourceError = true,
+  formId,
   ...props
 }: FormProps<T>) {
   const history = useHistory();
@@ -69,7 +71,7 @@ export function StandardForm<T extends FormikValues>({
               : history.goBack();
 
           return (
-            <Form>
+            <Form id={formId}>
               {(typeof props.children === 'function' &&
                 !props.loading &&
                 props.children(formikProps)) ||

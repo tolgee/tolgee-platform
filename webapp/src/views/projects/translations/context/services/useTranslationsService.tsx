@@ -35,6 +35,7 @@ type TranslationModel = components['schemas']['TranslationViewModel'];
 
 type Props = {
   projectId: number;
+  branchName?: string;
   keyName?: string;
   keyNamespace?: string;
   keyId?: number;
@@ -149,6 +150,7 @@ export const useTranslationsService = (props: Props) => {
     filterTaskNumber:
       props.prefilter?.task !== undefined ? [props.prefilter.task] : undefined,
     filterTaskKeysNotDone: props.prefilter?.taskFilterNotDone || undefined,
+    branch: props.branchName,
     sort: ['keyNamespace', order, 'keyId'],
   };
 

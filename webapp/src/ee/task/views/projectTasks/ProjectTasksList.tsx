@@ -23,6 +23,7 @@ type Props = {
   onOpenDetail: (task: TaskModel) => void;
   search: string;
   newTaskActions: boolean;
+  branch?: string;
 };
 
 export const ProjectTasksList = ({
@@ -30,6 +31,7 @@ export const ProjectTasksList = ({
   search,
   onOpenDetail,
   newTaskActions,
+  branch,
 }: Props) => {
   const project = useProject();
   const { t } = useTranslate();
@@ -51,6 +53,7 @@ export const ProjectTasksList = ({
       filterType: filter.types,
       filterNotClosedBefore: filter.filterNotClosedBefore,
       filterAgency: filter.agencies,
+      branch,
     },
     options: {
       keepPreviousData: true,

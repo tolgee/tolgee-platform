@@ -2,6 +2,7 @@ package io.tolgee.model.key
 
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.BranchVersionedEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -25,7 +26,8 @@ class KeyComment(
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   var author: UserAccount? = null,
 ) : StandardAuditModel(),
-  WithKeyMetaReference {
+  WithKeyMetaReference,
+  BranchVersionedEntity {
   var fromImport: Boolean = false
 
   @field:NotBlank
@@ -34,5 +36,9 @@ class KeyComment(
 
   override fun toString(): String {
     return "KeyComment(text='$text', fromImport=$fromImport)"
+  }
+
+  override fun resolveKey(): Key? {
+    return keyMeta.key
   }
 }

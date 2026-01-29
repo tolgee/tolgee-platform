@@ -16,7 +16,10 @@ import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.EntityWithBranch
 import jakarta.persistence.EntityManager
+import jakarta.persistence.FlushModeType
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCause
 import org.hibernate.Transaction
 import org.hibernate.action.spi.BeforeTransactionCompletionProcess
@@ -37,6 +40,7 @@ import kotlin.reflect.jvm.javaField
 @Scope(SCOPE_SINGLETON)
 class InterceptedEventsManager(
   private val applicationContext: ApplicationContext,
+  private val preCommitEventPublisher: PreCommitEventPublisher,
 ) {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -66,7 +70,8 @@ class InterceptedEventsManager(
 
     val provider = getChangesProvider(collectionOwner, ownerField.name) ?: return
 
-    val stored = (collection.storedSnapshot as? HashMap<*, *>)?.values?.toList()
+    val storedSnapshotCollection = (collection.storedSnapshot as? HashMap<*, *>)?.values
+    val stored = storedSnapshotCollection?.toList()
 
     val old =
       activityHolder.modifiedCollections.computeIfAbsent(collectionOwner to ownerField.name) {
@@ -80,6 +85,10 @@ class InterceptedEventsManager(
     activityModifiedEntity.modifications = (newChanges).toMutableMap()
 
     activityModifiedEntity.setEntityDescription(collectionOwner)
+    preCommitEventPublisher.onCollectionUpdate(
+      collectionOwner,
+      storedSnapshotCollection,
+    )
   }
 
   private fun KCallable<*>.callIfInitialized(instance: Any?): Any? {
@@ -110,11 +119,15 @@ class InterceptedEventsManager(
       return
     }
 
-    val activityModifiedEntity = getModifiedEntity(entity, revisionType)
+    // Check for forced revision type (e.g., for soft-delete patterns)
+    val effectiveRevisionType =
+      activityHolder.forcedRevisionTypes[entity::class to entity.id] ?: revisionType
+
+    val activityModifiedEntity = getModifiedEntity(entity, effectiveRevisionType)
 
     val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
-    activityModifiedEntity.revisionType = revisionType
+    activityModifiedEntity.revisionType = effectiveRevisionType
     activityModifiedEntity.modifications.putAll(changesMap)
 
     activityModifiedEntity.setEntityDescription(entity)
@@ -159,7 +172,45 @@ class InterceptedEventsManager(
           ).also { it.revisionType = revisionType }
         }
 
+    activityModifiedEntity.branchId = resolveBranchId(entity, revisionType)
+
     return activityModifiedEntity
+  }
+
+  private fun resolveBranchId(
+    entity: EntityWithId,
+    revisionType: RevisionType,
+  ): Long? {
+    val id =
+      (entity as? EntityWithBranch)?.let {
+        it.resolveBranch()?.id ?: defaultBranchId(it.resolveProject()?.id)
+      }
+    if (id == null) {
+      if (entity is Branch && !revisionType.isDel()) {
+        return entity.id
+      }
+    }
+    return id
+  }
+
+  private fun defaultBranchId(projectId: Long?): Long? {
+    if (projectId == null) {
+      return null
+    }
+    return entityManager
+      .createQuery(
+        """
+        select b.id
+        from Branch b
+        where b.project.id = :projectId
+          and b.isDefault = true
+          and b.deletedAt is null
+        """,
+        Long::class.java,
+      ).setParameter("projectId", projectId)
+      .setFlushMode(FlushModeType.COMMIT)
+      .resultList
+      .firstOrNull()
   }
 
   private fun getChangeEntityDescription(

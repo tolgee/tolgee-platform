@@ -13,14 +13,13 @@ import {
 } from 'tg.service/TranslationHooks';
 import { components } from 'tg.service/apiSchema.generated';
 
-import { useTranslationsService } from './useTranslationsService';
-import { useRefsService } from './useRefsService';
+import type { useTranslationsService } from './useTranslationsService';
+import type { useRefsService } from './useRefsService';
 import { AfterCommand, ChangeValue, SetEdit } from '../types';
-import { useTaskService } from './useTaskService';
+import type { useTaskService } from './useTaskService';
 import { composeValue, taskEditControlsShouldBeVisible } from './utils';
-import { usePositionService } from './usePositionService';
+import type { usePositionService } from './usePositionService';
 import { TranslationViewModel } from '../../ToolsPanel/common/types';
-
 type LanguageModel = components['schemas']['LanguageModel'];
 
 type Props = {
@@ -28,6 +27,7 @@ type Props = {
   translationService: ReturnType<typeof useTranslationsService>;
   viewRefs: ReturnType<typeof useRefsService>;
   taskService: ReturnType<typeof useTaskService>;
+  branchName?: string;
   allLanguages: LanguageModel[];
 };
 
@@ -35,6 +35,7 @@ export const useEditService = ({
   positionService,
   translationService,
   taskService,
+  branchName,
   allLanguages,
 }: Props) => {
   const {
@@ -82,6 +83,7 @@ export const useEditService = ({
               'application/json': {
                 key: keyName,
                 namespace: keyNamespace,
+                branch: branchName,
                 translations: {
                   [language!]: value,
                 },

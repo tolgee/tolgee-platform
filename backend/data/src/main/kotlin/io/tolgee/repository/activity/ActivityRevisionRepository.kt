@@ -17,12 +17,24 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     """
     from ActivityRevision ar
     where ar.projectId = :projectId and ar.type is not null and ar.batchJobChunkExecution is null and ar.type in :types
+    and exists (                                                                                                                                                                                                       
+      select 1                                                                                                                                                                                                         
+      from ActivityModifiedEntity me                                                                                                                                                                                   
+      left join Branch b on me.branchId = b.id                                                                                                                                                                         
+      where me.activityRevision = ar                                                                                                                                                                                   
+        and (b.deletedAt is null or me.branchId is null)                                                                                                                                                              
+        and (                                                                                                                                                                                                          
+          (:branchId is null and (me.branchId is null or b.isDefault = true))                                                                                                                                          
+          or (:branchId is not null and me.branchId = :branchId)                                                                                                                                                       
+        )                                                                                                                                                                                                              
+    )
   """,
   )
   fun getForProject(
     projectId: Long,
     pageable: Pageable,
     types: List<ActivityType>,
+    branchId: Long? = null,
   ): Page<ActivityRevision>
 
   @Query(
@@ -30,14 +42,17 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
       select ar.id, me.entityClass, count(me)
       from ActivityRevision ar 
       join ar.modifiedEntities me
+      left join Branch b on me.branchId = b.id
       where ar.id in :revisionIds
       and ar.type in :allowedTypes
+      and ((b.id = :branchId and b.deletedAt is null) or (:branchId is null and (b is null or b.isDefault)))
       group by ar.id, me.entityClass
     """,
   )
   fun getModifiedEntityTypeCounts(
     revisionIds: List<Long>,
     allowedTypes: Collection<ActivityType>,
+    branchId: Long? = null,
   ): List<Array<Any>>
 
   @Query(

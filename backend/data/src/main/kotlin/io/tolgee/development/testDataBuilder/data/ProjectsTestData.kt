@@ -121,6 +121,16 @@ class ProjectsTestData : BaseTestData() {
             language = project2English
           }
         }
+
+        addBranch {
+          name = "feature"
+          project = self
+        }.build {
+          addKey {
+            name = "untranslated_branched"
+            branch = self
+          }
+        }
       }
     }
   }

@@ -24,8 +24,10 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
+import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.util.Logging
 import io.tolgee.util.setSimilarityLimit
@@ -55,22 +57,38 @@ class KeyService(
   private val activityHolder: ActivityHolder,
   @Lazy
   private val aiPlaygroundResultService: AiPlaygroundResultService,
+  @Lazy
+  private val branchService: BranchService,
+  @Lazy
+  private val securityService: SecurityService,
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
   }
 
-  fun getAllSortedById(projectId: Long): List<KeyView> {
-    return keyRepository.getAllByProjectIdSortedById(projectId)
+  fun getAllByBranch(
+    projectId: Long,
+    branch: String?,
+  ): Set<Key> {
+    return keyRepository.getAllByProjectIdAndBranch(projectId, branch)
+  }
+
+  fun getAllSortedById(
+    projectId: Long,
+    branch: String?,
+  ): List<KeyView> {
+    branchService.getActiveOrDefault(projectId, branch)
+    return keyRepository.getAllByProjectIdSortedById(projectId, branch)
   }
 
   fun get(
     projectId: Long,
     name: String,
     namespace: String?,
+    branchName: String? = null,
   ): Key {
     return keyRepository
-      .getByNameAndNamespace(projectId, name, namespace)
+      .getByNameAndNamespace(projectId, name, namespace, branchName)
       .orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }!!
   }
 
@@ -78,16 +96,18 @@ class KeyService(
     projectId: Long,
     name: String,
     namespace: String?,
+    branch: String? = null,
   ): Key? {
-    return this.findOptional(projectId, name, namespace).orElseGet { null }
+    return this.findOptional(projectId, name, namespace, branch).orElseGet { null }
   }
 
   private fun findOptional(
     projectId: Long,
     name: String,
     namespace: String?,
+    branch: String?,
   ): Optional<Key> {
-    return keyRepository.getByNameAndNamespace(projectId, name, namespace)
+    return keyRepository.getByNameAndNamespace(projectId, name, namespace, branch)
   }
 
   fun get(id: Long): Key {
@@ -123,7 +143,7 @@ class KeyService(
     project: Project,
     dto: CreateKeyDto,
   ): Key {
-    val key = create(project, dto.name, dto.namespace)
+    val key = create(project, dto.name, dto.namespace, dto.branch)
     key.isPlural = dto.isPlural
     if (key.isPlural) {
       key.pluralArgName = dto.pluralArgName
@@ -194,10 +214,11 @@ class KeyService(
     project: Project,
     name: String,
     namespace: String?,
+    branch: String? = null,
     isPlural: Boolean = false,
   ): Key {
-    checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace)
-    return createWithoutExistenceCheck(project, name, namespace, isPlural)
+    checkKeyNotExisting(projectId = project.id, name = name, namespace = namespace, branch = branch)
+    return createWithoutExistenceCheck(project, name, namespace, branch, isPlural)
   }
 
   @Transactional
@@ -205,12 +226,14 @@ class KeyService(
     project: Project,
     name: String,
     namespace: String?,
+    branch: String?,
     isPlural: Boolean,
   ): Key {
     val key = Key(name = name, project = project).apply { this.isPlural = isPlural }
     if (!namespace.isNullOrBlank()) {
       key.namespace = namespaceService.findOrCreate(namespace, project.id)
     }
+    key.branch = branchService.getActiveOrDefault(project.id, branch)
     return save(key)
   }
 
@@ -220,22 +243,24 @@ class KeyService(
     dto: EditKeyDto,
   ): Key {
     val key = findOptional(keyId).orElseThrow { NotFoundException() }
+    securityService.checkProtectedBranchModify(key)
     keyMetaService.getOrCreateForKey(key).apply {
       description = dto.description
     }
-    return edit(key, dto.name, dto.namespace)
+    return edit(key, dto.name, dto.namespace, dto.branch)
   }
 
   fun edit(
     key: Key,
     newName: String,
     newNamespace: String?,
+    branch: String?,
   ): Key {
     if (key.name == newName && key.namespace?.name == newNamespace) {
       return key
     }
 
-    checkKeyNotExisting(key.project.id, newName, newNamespace)
+    checkKeyNotExisting(key.project.id, newName, newNamespace, branch)
 
     key.name = newName
 
@@ -284,8 +309,9 @@ class KeyService(
     projectId: Long,
     name: String,
     namespace: String?,
+    branch: String?,
   ) {
-    if (findOptional(projectId, name, namespace).isPresent) {
+    if (findOptional(projectId, name, namespace, branch).isPresent) {
       throw ValidationException(Message.KEY_EXISTS)
     }
   }
@@ -358,8 +384,9 @@ class KeyService(
   fun importKeys(
     keys: List<ImportKeysItemDto>,
     project: Project,
+    branch: String?,
   ) {
-    KeysImporter(applicationContext, keys, project).import()
+    KeysImporter(applicationContext, keys, project, branch).import()
   }
 
   @Transactional
@@ -397,8 +424,9 @@ class KeyService(
 
   fun getPaged(
     projectId: Long,
+    branch: String?,
     pageable: Pageable,
-  ): Page<KeyView> = keyRepository.getAllByProjectId(projectId, pageable)
+  ): Page<KeyView> = keyRepository.getAllByProjectId(projectId, branch, pageable)
 
   fun getKeysWithTags(keys: Set<Key>): List<Key> = keyRepository.getWithTags(keys)
 
@@ -459,6 +487,7 @@ class KeyService(
     languageIds: List<Long>,
   ): List<Language> {
     val key = keyRepository.findByProjectIdAndId(projectId, keyId) ?: throw NotFoundException()
+    securityService.checkProtectedBranchModify(key)
     enableRestOfLanguages(projectId, languageIds, key)
     return disableLanguages(projectId, languageIds, key)
   }

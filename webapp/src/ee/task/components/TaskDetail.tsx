@@ -8,7 +8,6 @@ import {
   styled,
   Typography,
 } from '@mui/material';
-import { Link } from 'react-router-dom';
 import { X } from '@untitled-ui/icons-react';
 
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -27,7 +26,7 @@ import { TaskLabel } from './TaskLabel';
 import { TaskInfoItem } from './TaskInfoItem';
 import { TaskScope } from './TaskScope';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { getTaskUrl } from 'tg.constants/links';
+import { TaskTranslationsLink } from 'tg.component/task/TaskTranslationsLink';
 import { TaskDetailActions } from './TaskDetailActions';
 
 type TaskModel = components['schemas']['TaskModel'];
@@ -251,13 +250,14 @@ export const TaskDetail = ({ onClose, projectId, taskNumber, task }: Props) => {
                   <Typography variant="subtitle2">
                     {t('task_detail_scope_title')}
                   </Typography>
-                  <Button
+                  <TaskTranslationsLink
+                    component={Button}
+                    task={data}
+                    projectId={projectId}
                     color="primary"
-                    component={Link}
-                    to={project ? getTaskUrl(project.id, data.number) : ''}
                   >
                     <T keyName="task_link_translations_tooltip" />
-                  </Button>
+                  </TaskTranslationsLink>
                 </Box>
 
                 <TaskScope

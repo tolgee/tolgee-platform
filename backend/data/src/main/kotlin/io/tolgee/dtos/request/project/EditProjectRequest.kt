@@ -16,6 +16,7 @@ data class EditProjectRequest(
   var slug: String? = null,
   var baseLanguageId: Long? = null,
   var useNamespaces: Boolean = false,
+  var useBranching: Boolean = false,
   var defaultNamespaceId: Long? = null,
   @field:Size(min = 3, max = 2000)
   var description: String? = null,

@@ -59,8 +59,8 @@ import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
 import { useGlossaryTermHighlights as useGlossaryTermHighlightsInternal } from '../ee/glossary/hooks/useGlossaryTermHighlights';
 import { GlossaryTermPreview as GlossaryTermPreviewInternal } from '../ee/glossary/components/GlossaryTermPreview';
 import {
-  useGlossariesCount,
   GlossariesPanel,
+  useGlossariesCount,
 } from '../ee/glossary/components/GlossariesPanel';
 import { GlossaryRouter } from '../ee/glossary/views/GlossaryRouter';
 import { createAdder } from '../fixtures/pluginAdder';
@@ -68,8 +68,12 @@ import { ProjectSettingsTab } from '../views/projects/project/ProjectSettingsVie
 import { OperationAssignTranslationLabel } from '../ee/batchOperations/OperationAssignTranslationLabel';
 import { OperationUnassignTranslationLabel } from '../ee/batchOperations/OperationUnassignTranslationLabel';
 import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
+import { BranchesView } from '../ee/branching/BranchesView';
+import { BranchMergePage } from '../ee/branching/BranchMergePage';
+import { Branch } from '../component/CustomIcons';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
+export { BranchReference } from '../ee/branching/components/BranchReference';
 export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
 export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle';
 export { TranslationTaskIndicator } from '../ee/task/components/TranslationTaskIndicator';
@@ -207,6 +211,12 @@ export const routes = {
     <Switch>
       <Route path={LINKS.PROJECT_TASKS.template}>
         <ProjectTasksView />
+      </Route>
+      <Route path={LINKS.PROJECT_BRANCHES_MERGE.template}>
+        <BranchMergePage />
+      </Route>
+      <Route path={LINKS.PROJECT_BRANCHES.template}>
+        <BranchesView />
       </Route>
     </Switch>
   ),
@@ -393,6 +403,15 @@ export const useAddProjectMenuItems = () => {
 
   return addProjectMenuItems(
     [
+      {
+        id: 'branches',
+        condition: ({ project }) => project.useBranching,
+        link: LINKS.PROJECT_BRANCHES,
+        icon: Branch,
+        text: t('project_menu_branches'),
+        dataCy: 'project-menu-item-branches',
+        matchAsPrefix: true,
+      },
       {
         id: 'tasks',
         condition: ({ satisfiesPermission }) =>

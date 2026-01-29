@@ -10,18 +10,26 @@ To just run it, you can execute the runE2e Gradle task. This command runs a comp
 ./gradlew runE2e
 ```
 
+To run only selected specs, pass `specs` property with a comma-separated list or glob:
+
+```shell
+./gradlew runE2e -Pspecs="**/translations/plurals.cy.ts,**/translations/singleKeyForm.cy.ts"
+```
+
 ## Step-by-step run
 
-1. Prepare the environment by the [development guide](../DEVELOPMENT.md)
-2. Install dependencies
+1. Prepare the environment by the [development guide](../DEVELOPMENT.md).
+2. Install dependencies:
+
    ```shell
-   cd e2e && npm i
+   npm --prefix e2e ci
    ```
 
-3. Run the tested environment
+3. Run the tested environment:
+
    ```shell
    # Run frontend with E2E settings
-   cd webapp && VITE_APP_API_URL=http://localhost:8201 npm run start -- --port 8081 --host --no-open
+   VITE_APP_API_URL=http://localhost:8201 npm --prefix webapp run start -- --port 8081 --host --no-open
    # Run the E2E Docker services (like fake SMTP server)
    ./gradlew runDockerE2eDev
    # Run backend with e2e profile
@@ -30,12 +38,14 @@ To just run it, you can execute the runE2e Gradle task. This command runs a comp
    # Then you will be also able to debug the backend and hotswap classes while running the tests, which can be pretty useful.
    ```
 
-4. Run the tests
+4. Run the tests:
+
    ```shell
    ./gradlew openE2eDev
    ```
 
-5. Stop the environment when done
+5. Stop the environment when done:
+
    ```shell
    ./gradlew stopDockerE2e
    ```

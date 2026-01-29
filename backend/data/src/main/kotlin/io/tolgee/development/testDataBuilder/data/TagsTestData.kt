@@ -9,9 +9,11 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
   lateinit var existingTag2: Tag
   lateinit var existingTagKey: Key
   lateinit var existingTagKey2: Key
+  lateinit var branchKey: Key
 
   init {
     projectBuilder.apply {
+      self.useBranching = true
       addKey {
         name = "no tag key"
         noTagKey = this
@@ -30,6 +32,20 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
       }.build {
         addMeta {
           tags.add(existingTag2)
+        }
+      }
+      addBranch {
+        name = "feature"
+        project = projectBuilder.self
+      }.build {
+        addKey {
+          name = "branch key"
+          branch = self
+          branchKey = this
+        }.build {
+          addMeta {
+            tags.add(existingTag2)
+          }
         }
       }
       (1..20).forEach { keyNum ->

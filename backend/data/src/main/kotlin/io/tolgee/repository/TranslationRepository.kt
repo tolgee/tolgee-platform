@@ -23,11 +23,13 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     """select t.text as text, l.tag as languageTag, k.name as key
         from Translation t
         join t.key k
+        left join k.branch b
         left join k.namespace n
         left join k.keyMeta km
         left join km.tags kmt
         join t.language l
         where t.key.project.id = :projectId
+         and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault))) 
          and l.tag in :languages
          and ((n.name is null and :namespace is null) or n.name = :namespace)
          and (:filterTags is null or kmt.name in :filterTags)
@@ -38,6 +40,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun getTranslations(
     languages: Set<String>,
     namespace: String?,
+    branch: String?,
     projectId: Long,
     filterTags: List<String>?,
   ): List<SimpleTranslationView>
@@ -73,10 +76,29 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   @Query(
     """
-        from Translation t join fetch t.key k left join fetch k.keyMeta where t.language.id = :languageId
+    select b.id
+    from Translation t
+    join t.key k
+    left join k.branch b
+    where t.id in :ids
+  """,
+  )
+  fun getBranchIdsByIds(ids: Collection<Long>): List<Long?>
+
+  @Query(
+    """
+        from Translation t 
+        join fetch t.key k 
+        left join k.branch b
+        left join fetch k.keyMeta 
+        where t.language.id = :languageId
+        and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault))) 
     """,
   )
-  fun getAllByLanguageId(languageId: Long): List<Translation>
+  fun getAllByLanguageId(
+    languageId: Long,
+    branch: String?,
+  ): List<Translation>
 
   @Query(
     """from Translation t 

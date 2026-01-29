@@ -22,6 +22,7 @@ const Empty: (props?: any) => any = () => {
 };
 
 export const TaskReference = NotIncludedInOss('TaskReference');
+export const BranchReference = NotIncludedInOss('BranchReference');
 export const PermissionsAdvancedEe = NotIncludedInOss('PermissionsAdvancedEe');
 export const GlobalLimitPopover = Empty;
 export const billingMenuItems = [] as React.FC<BillingMenuItemsProps>[];

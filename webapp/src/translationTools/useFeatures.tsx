@@ -38,5 +38,6 @@ export function useFeatures() {
     ),
     TEAM_TRAINING: t('billing_subscriptions_team_training'),
     TRANSLATION_LABELS: t('billing_subscriptions_translation_labels'),
+    BRANCHING: t('billing_subscriptions_branching'),
   } as const satisfies Record<Feature, string>;
 }

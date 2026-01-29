@@ -36,6 +36,7 @@ type Props = {
   doneTasks: TasksLoadable;
   project?: SimpleProjectModel;
   newTaskActions: boolean;
+  showBranchLabel?: boolean;
 };
 
 export const TasksBoard = ({
@@ -46,6 +47,7 @@ export const TasksBoard = ({
   doneTasks,
   project,
   newTaskActions,
+  showBranchLabel,
 }: Props) => {
   const theme = useTheme();
   const { t } = useTranslate();

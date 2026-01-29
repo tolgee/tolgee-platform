@@ -29,6 +29,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.AvatarService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.NamespaceService
@@ -76,6 +77,8 @@ class ProjectService(
   private val screenshotService: ScreenshotService,
   @Lazy
   private val batchJobService: BatchJobService,
+  @Lazy
+  private val branchService: BranchService,
 ) : Logging {
   @set:Autowired
   @set:Lazy
@@ -161,6 +164,7 @@ class ProjectService(
       projectRepository
         .findById(id)
         .orElseThrow { NotFoundException() }!!
+    val wasBranchingEnabled = project.useBranching
 
     if (!dto.useNamespaces && project.namespaces.isNotEmpty()) {
       throw ValidationException(Message.NAMESPACES_CANNOT_BE_DISABLED_WHEN_NAMESPACE_EXISTS)
@@ -170,6 +174,7 @@ class ProjectService(
     project.description = dto.description
     project.icuPlaceholders = dto.icuPlaceholders
     project.useNamespaces = dto.useNamespaces
+    project.useBranching = dto.useBranching
     project.suggestionsMode = dto.suggestionsMode
     project.translationProtection = dto.translationProtection
 
@@ -206,6 +211,10 @@ class ProjectService(
     }
 
     entityManager.persist(project)
+
+    if (!wasBranchingEnabled && dto.useBranching) {
+      branchService.enableBranchingOnProject(project.id)
+    }
     return project
   }
 
