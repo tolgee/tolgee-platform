@@ -26,30 +26,24 @@ class ContentDeliveryUploader(
     val config = contentDeliveryConfigService.get(contentDeliveryConfigId)
     logger.debug("Uploading content delivery config ${config.id}")
     val storage = getStorage(config)
-    val files = exportService.export(config.project.id, config)
-    pruneIfNeeded(config, storage)
+    var files = exportService.export(config.project.id, config)
 
     if (config.zip) {
-      val zipFileName = "translations.zip"
-      val zipBytes = createZipArchive(files)
-      storage.storeFile(
-        storageFilePath = "${config.slug}/$zipFileName",
-        bytes = zipBytes,
-      )
-      config.lastPublishedFiles = listOf(zipFileName)
-      purgeCacheIfConfigured(config, setOf(zipFileName))
-    } else {
-      val withFullPaths = files.mapKeys { "${config.slug}/${it.key}" }
-      storeToStorage(withFullPaths, storage)
-      config.lastPublishedFiles = files.map { it.key }.toList()
-      purgeCacheIfConfigured(config, files.keys)
+      files = createZipArchive(files)
     }
+
+    val withFullPaths = files.mapKeys { "${config.slug}/${it.key}" }
+    pruneIfNeeded(config, storage)
+    storeToStorage(withFullPaths, storage)
+    config.lastPublishedFiles = files.map { it.key }.toList()
+    purgeCacheIfConfigured(config, files.keys)
 
     config.lastPublished = currentDateProvider.date
     contentDeliveryConfigService.save(config)
   }
 
-  private fun createZipArchive(files: Map<String, InputStream>): ByteArray {
+  private fun createZipArchive(files: Map<String, InputStream>): Map<String, InputStream> {
+    val zipFileName = "translations.zip"
     val outputStream = ByteArrayOutputStream()
     ZipOutputStream(outputStream).use { zip ->
       files.forEach { (path, input) ->
@@ -58,7 +52,7 @@ class ContentDeliveryUploader(
         zip.closeEntry()
       }
     }
-    return outputStream.toByteArray()
+    return mapOf(zipFileName to outputStream.toByteArray().inputStream())
   }
 
   private fun pruneIfNeeded(

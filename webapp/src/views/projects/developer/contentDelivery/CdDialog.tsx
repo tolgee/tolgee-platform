@@ -170,9 +170,9 @@ export const CdDialog = ({ onClose, data }: Props) => {
                     {getFormatById(values.format).showSupportArrays && (
                       <SupportArraysSelector />
                     )}
+                    <CdZipExport />
                     <CdAutoPublish />
                     <CdPruneBeforePublish />
-                    <CdZipExport />
                     {getFormatById(values.format).showEscapeHtml && (
                       <EscapeHtmlSelector />
                     )}
