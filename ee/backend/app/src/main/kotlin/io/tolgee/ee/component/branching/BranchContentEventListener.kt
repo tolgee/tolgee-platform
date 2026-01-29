@@ -5,6 +5,7 @@ import io.tolgee.events.OnEntityPreDelete
 import io.tolgee.events.OnEntityPrePersist
 import io.tolgee.events.OnEntityPreUpdate
 import io.tolgee.model.branching.BranchMergeableEntity
+import io.tolgee.util.extractEntityId
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 
@@ -48,7 +49,8 @@ class BranchContentEventListener(
     val key = entity.resolveKey() ?: return
 
     if (oldState == null || entity.isModified(oldState)) {
-      branchRevisionUpdater.snapshot(key)
+      val branchId = extractEntityId(key.branch)
+      branchRevisionUpdater.snapshot(branchId)
     }
   }
 }

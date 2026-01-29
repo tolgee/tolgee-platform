@@ -103,9 +103,6 @@ class Key(
   @ActivityLoggedProp
   var pluralArgName: String? = null
 
-  @Column(nullable = true)
-  var cascadeUpdatedAt: Date? = null
-
   constructor(
     name: String,
     project: Project,
@@ -117,9 +114,6 @@ class Key(
 
   val path: PathDTO
     get() = PathDTO.fromFullPath(name)
-
-  val modifiedAt: Date
-    get() = cascadeUpdatedAt ?: updatedAt!!
 
   companion object {
     @Configurable

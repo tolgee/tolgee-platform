@@ -17,7 +17,10 @@ import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.BranchVersionedEntity
 import io.tolgee.model.branching.EntityWithBranch
+import io.tolgee.model.key.Key
+import io.tolgee.util.extractEntityId
 import jakarta.persistence.EntityManager
 import jakarta.persistence.FlushModeType
 import org.apache.commons.lang3.exception.ExceptionUtils.getRootCause
@@ -123,7 +126,12 @@ class InterceptedEventsManager(
     val effectiveRevisionType =
       activityHolder.forcedRevisionTypes[entity::class to entity.id] ?: revisionType
 
-    val activityModifiedEntity = getModifiedEntity(entity, effectiveRevisionType)
+    val activityModifiedEntity =
+      getModifiedEntity(
+        entity,
+        effectiveRevisionType,
+        currentState ?: previousState,
+      )
 
     val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
@@ -158,6 +166,7 @@ class InterceptedEventsManager(
   private fun getModifiedEntity(
     entity: EntityWithId,
     revisionType: RevisionType,
+    state: Array<out Any>? = null,
   ): ActivityModifiedEntity {
     val activityModifiedEntity =
       activityHolder.modifiedEntities
@@ -172,7 +181,7 @@ class InterceptedEventsManager(
           ).also { it.revisionType = revisionType }
         }
 
-    activityModifiedEntity.branchId = resolveBranchId(entity, revisionType)
+    activityModifiedEntity.branchId = resolveBranchId(entity, revisionType, state)
 
     return activityModifiedEntity
   }
@@ -180,17 +189,32 @@ class InterceptedEventsManager(
   private fun resolveBranchId(
     entity: EntityWithId,
     revisionType: RevisionType,
+    state: Array<out Any>? = null,
   ): Long? {
-    val id =
-      (entity as? EntityWithBranch)?.let {
-        it.resolveBranch()?.id ?: defaultBranchId(it.resolveProject()?.id)
-      }
-    if (id == null) {
-      if (entity is Branch && !revisionType.isDel()) {
-        return entity.id
-      }
+    if (entity is Branch && !revisionType.isDel()) {
+      return entity.id
     }
-    return id
+
+    if (entity is Key) {
+      return extractEntityId(entity.branch)
+    }
+
+    // For BranchVersionedEntity find Key in the state array to avoid lazy loading
+    if (entity is BranchVersionedEntity && state != null) {
+      val key = state.firstNotNullOfOrNull { it as? Key }
+      return key?.let { extractEntityId(it.branch) }
+    }
+
+    val projectId = resolveProjectIdSafely(entity)
+    return defaultBranchId(projectId)
+  }
+
+  private fun resolveProjectIdSafely(entity: EntityWithId): Long? {
+    return try {
+      (entity as? EntityWithBranch)?.resolveProject()?.id
+    } catch (_: Exception) {
+      null
+    }
   }
 
   private fun defaultBranchId(projectId: Long?): Long? {
