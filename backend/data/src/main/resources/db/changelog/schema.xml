@@ -4805,11 +4805,6 @@
             <column name="target_key_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1760095023333-3">
-        <addColumn tableName="key">
-            <column name="cascade_updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
-        </addColumn>
-    </changeSet>
     <changeSet author="danielkrizan (generated)" id="1760095023333-4">
         <addForeignKeyConstraint baseColumnNames="source_branch_id" baseTableName="branch_merge" constraintName="FK3jm93ogvu4cm5eom5bghlspul" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
     </changeSet>
