@@ -27,6 +27,7 @@ import java.util.Date
     Index(columnList = "project_id"),
     Index(columnList = "author_id"),
     Index(columnList = "debouncing_key"),
+    Index(columnList = "created_at"),
   ],
 )
 class BatchJob :

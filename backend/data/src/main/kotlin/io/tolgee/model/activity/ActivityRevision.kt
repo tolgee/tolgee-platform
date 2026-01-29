@@ -36,6 +36,7 @@ import java.util.Date
     Index(columnList = "authorId"),
     Index(columnList = "type"),
     Index(columnList = "organizationId"),
+    Index(columnList = "timestamp"),
   ],
 )
 @EntityListeners(ActivityRevision.Companion.ActivityRevisionListener::class)
