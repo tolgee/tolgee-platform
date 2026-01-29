@@ -117,6 +117,13 @@ class BatchJobTimingAspect(
     }
   }
 
+  @Around("execution(* io.tolgee.batch.BatchJobChunkExecutionQueue.pollRoundRobin(..))")
+  fun measureQueuePollRoundRobin(joinPoint: ProceedingJoinPoint): Any? {
+    return timer.measure("QUEUE_POLL_ROUND_ROBIN") {
+      joinPoint.proceed()
+    }
+  }
+
   // Measure Redis publish
   @Around("execution(* io.tolgee.batch.BatchJobActionService.publishRemoveConsuming(..))")
   fun measureRedisPublish(joinPoint: ProceedingJoinPoint): Any? {
