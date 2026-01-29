@@ -109,10 +109,13 @@ describe('Content delivery', () => {
       .click();
     saveForm();
     waitForGlobalLoading();
+    openEditDialog('ZipTest');
     cy.gcy('content-delivery-zip-export-checkbox')
       .find('input')
       .should('be.checked')
       .click();
+    saveForm();
+    waitForGlobalLoading();
     openEditDialog('ZipTest');
     cy.gcy('content-delivery-zip-export-checkbox')
       .find('input')
