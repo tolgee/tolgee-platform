@@ -1,3 +1,10 @@
+## [3.150.2](https://github.com/tolgee/tolgee-platform/compare/v3.150.1...v3.150.2) (2026-01-29)
+
+
+### Bug Fixes
+
+* inconsistent property names vs prefixes ([#3429](https://github.com/tolgee/tolgee-platform/issues/3429)) ([2551645](https://github.com/tolgee/tolgee-platform/commit/2551645d063829a4a4bffb498be06802d2e9701c))
+
 ## [3.150.1](https://github.com/tolgee/tolgee-platform/compare/v3.150.0...v3.150.1) (2026-01-28)
 
 
