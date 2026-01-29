@@ -112,13 +112,6 @@ class GlossaryController(
     @PathVariable
     glossaryId: Long,
   ) {
-    businessEventPublisher.publish(
-      OnBusinessEventToCaptureEvent(
-        eventName = "GLOSSARY_DELETE",
-        userAccountDto = authenticationFacade.authenticatedUser,
-      ),
-    )
-
     glossaryService.delete(organizationHolder.organization.id, glossaryId)
   }
 
