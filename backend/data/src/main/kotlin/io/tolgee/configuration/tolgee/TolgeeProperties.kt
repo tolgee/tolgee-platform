@@ -115,7 +115,7 @@ class TolgeeProperties(
   @DocProperty(hidden = true)
   var mailjet: MailjetProperties = MailjetProperties(),
   var import: ImportProperties = ImportProperties(),
-  var rateLimit: RateLimitProperties = RateLimitProperties(),
+  var rateLimits: RateLimitProperties = RateLimitProperties(),
   @DocProperty(hidden = true)
   var postHog: PostHogProperties = PostHogProperties(),
   var telemetry: TelemetryProperties = TelemetryProperties(),
@@ -130,5 +130,5 @@ class TolgeeProperties(
   @DocProperty(
     description = "LLM Providers configuration",
   )
-  var llmProperties: LlmProperties = LlmProperties(),
+  var llm: LlmProperties = LlmProperties(),
 )
