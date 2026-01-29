@@ -5085,6 +5085,7 @@
             )
             WHERE k.branch_id IS NULL;
         </sql>
+        <addNotNullConstraint tableName="key" columnName="branch_id" constraintName="key_branch_id_not_null"/>
     </changeSet>
     <changeSet author="dmitrii.bocharov" id="1769500000000-3">
         <sql>
@@ -5095,6 +5096,7 @@
             )
             WHERE t.branch_id IS NULL;
         </sql>
+        <addNotNullConstraint tableName="task" columnName="branch_id" constraintName="task_branch_id_not_null"/>
     </changeSet>
     <changeSet author="dmitrii.bocharov" id="1769500000000-4">
         <sql>
@@ -5105,6 +5107,7 @@
             )
             WHERE i.branch_id IS NULL;
         </sql>
+        <addNotNullConstraint tableName="import" columnName="branch_id" constraintName="import_branch_id_not_null"/>
     </changeSet>
     <changeSet author="dmitrii.bocharov" id="1769500000000-5">
         <sql>
