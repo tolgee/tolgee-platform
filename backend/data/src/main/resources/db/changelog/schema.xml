@@ -4653,14 +4653,28 @@
             <column name="storage_json" type="JSONB"/>
         </addColumn>
     </changeSet>
-    <changeSet author="gabriel.shanahan (generated)" id="1769694787155-164">
-        <createIndex indexName="IDXcg7y08d599p7jxdebbxwavak0" tableName="activity_revision">
-            <column name="timestamp"/>
-        </createIndex>
+    <changeSet author="gabriel.shanahan (generated)" id="1769694787155-164"
+               runInTransaction="false" failOnError="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="IDXcg7y08d599p7jxdebbxwavak0"/>
+            </not>
+        </preConditions>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDXcg7y08d599p7jxdebbxwavak0"
+            ON activity_revision (timestamp);
+        </sql>
     </changeSet>
-    <changeSet author="gabriel.shanahan (generated)" id="1769694787155-144">
-        <createIndex indexName="IDX71c7yr8a185u5jsdyndom5fa7" tableName="tolgee_batch_job">
-            <column name="created_at"/>
-        </createIndex>
+    <changeSet author="gabriel.shanahan (generated)" id="1769694787155-144"
+               runInTransaction="false" failOnError="false">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="IDX71c7yr8a185u5jsdyndom5fa7"/>
+            </not>
+        </preConditions>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX71c7yr8a185u5jsdyndom5fa7"
+            ON tolgee_batch_job (created_at);
+        </sql>
     </changeSet>
 </databaseChangeLog>
