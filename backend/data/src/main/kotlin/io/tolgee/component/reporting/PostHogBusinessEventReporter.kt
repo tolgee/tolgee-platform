@@ -64,6 +64,7 @@ class PostHogBusinessEventReporter(
           ),
         "organizationId" to data.organizationId,
         "organizationName" to data.organizationName,
+        "glossaryId" to data.glossaryId,
       ) + (data.utmData ?: emptyMap()) + (data.data ?: emptyMap()) + setEntry
 
     postHog?.capture(

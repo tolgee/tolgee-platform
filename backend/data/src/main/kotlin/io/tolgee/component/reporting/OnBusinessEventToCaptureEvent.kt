@@ -10,6 +10,7 @@ data class OnBusinessEventToCaptureEvent(
   val projectId: Long? = null,
   val organizationId: Long? = null,
   val organizationName: String? = null,
+  val glossaryId: Long? = null,
   val userAccountId: Long? = null,
   val userAccountDto: UserAccountDto? = null,
   val utmData: Map<String, Any?>? = null,
