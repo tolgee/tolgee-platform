@@ -100,6 +100,25 @@ describe('Content delivery', () => {
       .should('be.checked');
   });
 
+  it('stores zip export setting', () => {
+    cy.gcy('content-delivery-add-button').click();
+    fillContentDeliveryConfigForm('ZipTest');
+    cy.gcy('content-delivery-zip-export-checkbox')
+      .find('input')
+      .should('not.be.checked')
+      .click();
+    saveForm();
+    waitForGlobalLoading();
+    cy.gcy('content-delivery-zip-export-checkbox')
+      .find('input')
+      .should('be.checked')
+      .click();
+    openEditDialog('ZipTest');
+    cy.gcy('content-delivery-zip-export-checkbox')
+      .find('input')
+      .should('not.be.checked');
+  });
+
   it('creates content delivery config with proper export params ', () => {
     testExportFormats(
       () => {

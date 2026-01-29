@@ -54,6 +54,13 @@ class ContentDeliveryConfigTestData : BaseTestData() {
       customSlug = true
     }
 
+  val zipEnabledContentDeliveryConfig =
+    projectBuilder.addContentDeliveryConfig {
+      contentStorage = s3ContentStorage.self
+      name = "Zip Enabled"
+      zip = true
+    }
+
   val automation =
     projectBuilder.addAutomation {
       this.triggers.add(

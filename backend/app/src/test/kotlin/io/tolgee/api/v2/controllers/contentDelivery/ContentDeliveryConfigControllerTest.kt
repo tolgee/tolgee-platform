@@ -109,10 +109,26 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     assertPruned(mocked)
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `publishes as zip when zip option is enabled`() {
+    tolgeeProperties.contentDelivery.storage.s3.bucketName = "my-bucket"
+    val mocked = mockS3FileStorage()
+    performProjectAuthPost("content-delivery-configs/${testData.zipEnabledContentDeliveryConfig.self.id}").andIsOk
+    assertStoredAsZip(mocked)
+    assertPruned(mocked)
+  }
+
   private fun assertStored(mocked: FileStorage) {
     mocked.getStoreFileInvocations().assert.hasSize(1)
     getLastStoreFileInvocationPath(mocked)
       .matches("[a-f0-9]{32}/en\\.json".toRegex())
+  }
+
+  private fun assertStoredAsZip(mocked: FileStorage) {
+    mocked.getStoreFileInvocations().assert.hasSize(1)
+    getLastStoreFileInvocationPath(mocked)
+      .matches("[a-f0-9]{32}/translations\\.zip".toRegex())
   }
 
   private fun getLastStoreFileInvocationPath(mocked: FileStorage): String =
