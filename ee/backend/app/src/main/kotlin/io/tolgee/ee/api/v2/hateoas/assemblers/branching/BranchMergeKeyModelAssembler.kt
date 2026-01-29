@@ -43,6 +43,7 @@ class BranchMergeKeyModelAssembler {
       keyIsPlural = key.isPlural,
       keyDescription = key.keyMeta?.description,
       translations = translationsByLang,
+      key.namespace?.name,
     )
   }
 }

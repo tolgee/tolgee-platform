@@ -1545,6 +1545,8 @@ export interface components {
       keyIsPlural: boolean;
       /** @description Key name */
       keyName: string;
+      /** @description Namespace of the key */
+      namespace?: string;
       /** @description Translations indexed by language tag */
       translations: {
         [key: string]: components["schemas"]["BranchMergeTranslationModel"];
