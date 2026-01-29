@@ -124,7 +124,7 @@ class BatchJobConcurrentLauncher(
 
           val items =
             (1..jobsToLaunch)
-              .mapNotNull { batchJobChunkExecutionQueue.poll() }
+              .mapNotNull { batchJobChunkExecutionQueue.pollRoundRobin() }
 
           logItemsPulled(items)
 

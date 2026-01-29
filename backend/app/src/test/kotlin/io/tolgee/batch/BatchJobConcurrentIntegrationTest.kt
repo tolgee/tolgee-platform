@@ -811,6 +811,66 @@ class BatchJobConcurrentIntegrationTest :
   }
 
   /**
+   * Tests that round-robin scheduling gives fair access to all jobs.
+   * Verifies that pollRoundRobin() interleaves chunks from different jobs
+   * instead of draining one job before starting another.
+   */
+  @Test
+  fun `round-robin scheduling prioritizes second job over more chunks from first job`() {
+    // Pause the launcher so we control queue polling manually
+    batchJobConcurrentLauncher.pause = true
+
+    // Start two jobs - one large, one small
+    val largeJob = runNoOpJob(testData.projectA, 20)
+    val smallJob = runNoOpJob(testData.projectB, 5)
+
+    // Wait for chunks to be added to the queue
+    waitForNotThrowing(pollTime = 50, timeout = 5_000) {
+      batchJobChunkExecutionQueue.size.assert.isGreaterThanOrEqualTo(25)
+    }
+
+    logger.info("Queue populated with ${batchJobChunkExecutionQueue.size} items")
+
+    // Poll items using round-robin and track which jobs they belong to
+    val polledJobIds = mutableListOf<Long>()
+    repeat(10) {
+      val item = batchJobChunkExecutionQueue.pollRoundRobin()
+      if (item != null) {
+        polledJobIds.add(item.jobId)
+      }
+    }
+
+    logger.info("Polled job IDs in order: $polledJobIds")
+
+    // With round-robin, we should see interleaving: A, B, A, B, A, B...
+    // Not: A, A, A, A, A, A, A, A, A, A (which would be FIFO)
+
+    // Count how many times we switch between jobs in the first 10 polls
+    var switches = 0
+    for (i in 1 until polledJobIds.size) {
+      if (polledJobIds[i] != polledJobIds[i - 1]) {
+        switches++
+      }
+    }
+
+    logger.info("Job switches in first 10 polls: $switches")
+
+    // With round-robin between 2 jobs, we expect close to 9 switches (alternating)
+    // With FIFO, we'd expect 0 or 1 switch
+    // Allow some tolerance - at least 4 switches means good interleaving
+    switches.assert.isGreaterThanOrEqualTo(4)
+
+    // Verify both jobs appear in the first 10 polled items
+    polledJobIds.contains(largeJob.id).assert.isTrue()
+    polledJobIds.contains(smallJob.id).assert.isTrue()
+
+    logger.info("Round-robin scheduling verified: $switches job switches in first 10 polls")
+
+    // Note: We don't wait for job completion here because we manually polled items
+    // from the queue for testing purposes. The round-robin behavior is verified above.
+  }
+
+  /**
    * Test that simulates processing interruption and restart mid-job.
    */
   @Test
