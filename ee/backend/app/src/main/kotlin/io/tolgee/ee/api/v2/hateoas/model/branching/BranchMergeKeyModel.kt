@@ -13,4 +13,6 @@ data class BranchMergeKeyModel(
   val keyDescription: String?,
   @Schema(description = "Translations indexed by language tag")
   val translations: Map<String, BranchMergeTranslationModel>,
+  @Schema(description = "Namespace of the key")
+  val namespace: String?,
 )

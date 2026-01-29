@@ -80,7 +80,7 @@ export const MergeKeyHeader: React.FC<Props> = ({ data, variant }) => {
         <TextColumn strike={strike}>
           <StyledKey data-cy="translations-key-name">
             <LimitedHeightText maxLines={3} wrap="break-all">
-              {data.keyName}
+              {[data.namespace, data.keyName].filter(Boolean).join('.')}
             </LimitedHeightText>
           </StyledKey>
           {data.keyDescription && (
