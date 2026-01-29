@@ -1,3 +1,11 @@
+## [3.150.3](https://github.com/tolgee/tolgee-platform/compare/v3.150.2...v3.150.3) (2026-01-29)
+
+
+### Bug Fixes
+
+* implement round-robin scheduling for batch job chunks ([#3428](https://github.com/tolgee/tolgee-platform/issues/3428)) ([d4043bf](https://github.com/tolgee/tolgee-platform/commit/d4043bf4bf4d5cc14b06436ef69619208df808d2))
+* increase default export rate limit ([#3419](https://github.com/tolgee/tolgee-platform/issues/3419)) ([d07f849](https://github.com/tolgee/tolgee-platform/commit/d07f8494e2e10e6904ac10b312a810cbf6e74f87))
+
 ## [3.150.2](https://github.com/tolgee/tolgee-platform/compare/v3.150.1...v3.150.2) (2026-01-29)
 
 
