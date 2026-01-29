@@ -169,8 +169,8 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-    select k.id as id, ns.name as namespace, km.description as description, 
-        k.name as name, bt.text as baseTranslation, t.text as translation 
+    select k.id as id, ns.name as namespace, km.description as description,
+        k.name as name, bt.text as baseTranslation, t.text as translation
         from key k
        join project p on p.id = k.project_id and p.id = :projectId
        left join branch br on k.branch_id = br.id
@@ -185,11 +185,14 @@ interface KeyRepository : JpaRepository<Key, Long> {
           or lower(f_unaccent(k.name)) %> searchUnaccent
           or lower(f_unaccent(t.text)) %> searchUnaccent
           or lower(f_unaccent(bt.text)) %> searchUnaccent
-          ) and (br.id is null or br.is_default)
-       order by 
+          ) and (
+            (br.name = :branch and br.deleted_at is null)
+            or (:branch is null and (br.id is null or br.is_default))
+          )
+       order by
        (
-       3 * (ns.name <-> searchUnaccent) + 
-       3 * (k.name <-> searchUnaccent) + 
+       3 * (ns.name <-> searchUnaccent) +
+       3 * (k.name <-> searchUnaccent) +
        (t.text <-> searchUnaccent) +
        (bt.text <-> searchUnaccent)
        ) desc, k.id
@@ -198,7 +201,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
   """,
     nativeQuery = true,
     countQuery = """
-      select count(k.id) 
+      select count(k.id)
       from key k
        join project p on p.id = k.project_id and p.id = :projectId
        left join branch br on k.branch_id = br.id
@@ -206,19 +209,23 @@ interface KeyRepository : JpaRepository<Key, Long> {
        left join language l on p.id = l.project_id and l.tag = :languageTag
        left join translation bt on bt.key_id = k.id and (bt.language_id = p.base_language_id)
        left join translation t on t.key_id = k.id and (t.language_id = l.id),
-      lower(f_unaccent(:search)) as searchUnaccent  
+      lower(f_unaccent(:search)) as searchUnaccent
       where (
           lower(f_unaccent(ns.name)) %> searchUnaccent
           or lower(f_unaccent(k.name)) %> searchUnaccent
           or lower(f_unaccent(t.text)) %> searchUnaccent
           or lower(f_unaccent(bt.text)) %> searchUnaccent
-          ) and (br.id is null or br.is_default)
+          ) and (
+            (br.name = :branch and br.deleted_at is null)
+            or (:branch is null and (br.id is null or br.is_default))
+          )
       """,
   )
   fun searchKeys(
     search: String,
     projectId: Long,
     languageTag: String?,
+    branch: String?,
     pageable: Pageable,
   ): Page<KeySearchResultView>
 
