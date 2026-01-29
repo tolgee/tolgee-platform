@@ -394,10 +394,12 @@ class KeyService(
     search: String,
     languageTag: String?,
     project: ProjectDto,
+    branch: String?,
     pageable: Pageable,
   ): Page<KeySearchResultView> {
+    branchService.getActiveOrDefault(project.id, branch)
     entityManager.setSimilarityLimit(0.00001)
-    return keyRepository.searchKeys(search, project.id, languageTag, pageable)
+    return keyRepository.searchKeys(search, project.id, languageTag, branch, pageable)
   }
 
   @Transactional
@@ -418,8 +420,10 @@ class KeyService(
   fun getKeysInfo(
     dto: GetKeysRequestDto,
     projectId: Long,
+    branch: String?,
   ): List<Pair<Key, List<Screenshot>>> {
-    return KeyInfoProvider(applicationContext, projectId, dto).get()
+    branchService.getActiveOrDefault(projectId, branch)
+    return KeyInfoProvider(applicationContext, projectId, dto, branch).get()
   }
 
   fun getPaged(

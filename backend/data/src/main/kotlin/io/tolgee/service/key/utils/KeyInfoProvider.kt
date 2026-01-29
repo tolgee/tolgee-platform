@@ -3,6 +3,8 @@ package io.tolgee.service.key.utils
 import io.tolgee.dtos.request.GetKeysRequestDto
 import io.tolgee.model.Project_
 import io.tolgee.model.Screenshot
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.Branch_
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
@@ -21,6 +23,7 @@ class KeyInfoProvider(
   applicationContext: ApplicationContext,
   val projectId: Long,
   val dto: GetKeysRequestDto,
+  val branch: String?,
 ) {
   private val entityManager: EntityManager = applicationContext.getBean(EntityManager::class.java)
   private val screenshotService: ScreenshotService = applicationContext.getBean(ScreenshotService::class.java)
@@ -35,6 +38,21 @@ class KeyInfoProvider(
     val namespace = root.fetch(Key_.namespace, JoinType.LEFT) as Join<Key, Namespace>
     val keyMeta = root.fetch(Key_.keyMeta, JoinType.LEFT)
     keyMeta.fetch(KeyMeta_.tags, JoinType.LEFT)
+    val branchJoin = root.join(Key_.branch, JoinType.LEFT) as Join<Key, Branch>
+
+    val branchPredicate =
+      if (branch.isNullOrEmpty()) {
+        cb.or(
+          branchJoin.get(Branch_.id).isNull,
+          cb.isTrue(branchJoin.get(Branch_.isDefault)),
+        )
+      } else {
+        cb.and(
+          cb.equal(branchJoin.get(Branch_.name), cb.literal(branch)),
+          cb.isNull(branchJoin.get(Branch_.deletedAt)),
+        )
+      }
+
     val predicates =
       dto.keys.map { key ->
         cb.and(
@@ -45,7 +63,7 @@ class KeyInfoProvider(
 
     val keyPredicates = cb.or(*predicates.toTypedArray())
 
-    query.where(keyPredicates)
+    query.where(cb.and(keyPredicates, branchPredicate))
     query.orderBy(cb.asc(namespace.get(Namespace_.name)), cb.asc(root.get(Key_.name)))
 
     val result = entityManager.createQuery(query).resultList

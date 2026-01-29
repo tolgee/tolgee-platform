@@ -304,15 +304,18 @@ class KeyController(
     @RequestParam
     @Parameter(description = "Language to search in")
     languageTag: String? = null,
+    @RequestParam
+    branch: String? = null,
     @ParameterObject pageable: Pageable,
   ): PagedModel<KeySearchSearchResultModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     languageTag?.let {
       securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(languageTag))
     }
     projectHolder.projectEntity.baseLanguage?.let {
       securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(it.tag))
     }
-    val result = keyService.searchKeys(search, languageTag, projectHolder.project, pageable.withoutSort)
+    val result = keyService.searchKeys(search, languageTag, projectHolder.project, branch, pageable.withoutSort)
     return pagedResourcesAssembler.toModel(result, keySearchResultModelAssembler)
   }
 
@@ -330,8 +333,11 @@ class KeyController(
     @RequestBody
     @Valid
     dto: GetKeysRequestDto,
+    @RequestParam
+    branch: String? = null,
   ): CollectionModel<KeyWithDataModel> {
-    val result = keyService.getKeysInfo(dto, projectHolder.project.id)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    val result = keyService.getKeysInfo(dto, projectHolder.project.id, branch)
     return keyWithScreenshotsModelAssembler.toCollectionModel(result)
   }
 
