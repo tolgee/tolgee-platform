@@ -8,8 +8,6 @@ import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.TranslationState
-import io.tolgee.model.key.Key
-import io.tolgee.repository.KeyRepository
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.BeforeEach
@@ -27,9 +25,6 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
   @Autowired
   private lateinit var branchRepository: BranchRepository
 
-  @Autowired
-  private lateinit var keyRepository: KeyRepository
-
   @BeforeEach
   fun setup() {
     testData = BranchRevisionData()
@@ -44,7 +39,6 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `editing key increases branch revision`() {
     keyService.edit(testData.firstKey.id, EditKeyDto(name = "first_key", description = "test description"))
     assertBranchMetadataChanged()
-    assertKeyCascadeUpdateChanged()
   }
 
   @Test
@@ -55,7 +49,6 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
       mapOf("en" to "new translation text"),
     )
     assertBranchMetadataChanged()
-    assertKeyCascadeUpdateChanged()
   }
 
   @Test
@@ -63,7 +56,6 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `changing translation state increases branch revision`() {
     translationService.setStateBatch(testData.translation, TranslationState.REVIEWED)
     assertBranchMetadataChanged()
-    assertKeyCascadeUpdateChanged()
   }
 
   @Test
@@ -78,7 +70,6 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `deleting translation increases branch revision`() {
     translationService.deleteByIdIn(listOf(testData.translation.id))
     assertBranchMetadataChanged()
-    assertKeyCascadeUpdateChanged()
   }
 
   @Test
@@ -111,16 +102,5 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
-  private fun assertKeyCascadeUpdateChanged() {
-    testData.firstKey.refresh().let {
-      it.cascadeUpdatedAt.assert.isNotNull
-      it.cascadeUpdatedAt!!
-        .time.assert
-        .isEqualTo(currentDateProvider.date.time)
-    }
-  }
-
   private fun Branch.refresh(): Branch = branchRepository.findByIdOrNull(this.id)!!
-
-  private fun Key.refresh(): Key = keyRepository.findByIdOrNull(this.id)!!
 }

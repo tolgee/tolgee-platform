@@ -1,8 +1,6 @@
 package io.tolgee.ee.component.branching
 
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.ee.repository.branching.BranchRepository
-import io.tolgee.model.key.Key
 import jakarta.transaction.Transactional
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
@@ -10,15 +8,16 @@ import org.springframework.stereotype.Service
 @Service
 class BranchMetaUpdater(
   private val branchRepository: BranchRepository,
-  private val currentDateProvider: CurrentDateProvider,
 ) {
+  /**
+   * Updates branch revision for a key modification.
+   * Takes branch ID instead of entity to avoid lazy loading issues during Hibernate event processing.
+   */
   @Async
   @Transactional
-  fun snapshot(key: Key) {
-    key.branch?.let { b ->
-      val branch = branchRepository.findById(b.id).orElse(null) ?: return@let
-      branch.revision++
-      key.cascadeUpdatedAt = currentDateProvider.date
-    }
+  fun snapshot(branchId: Long?) {
+    if (branchId == null) return
+    val branch = branchRepository.findById(branchId).orElse(null) ?: return
+    branch.revision++
   }
 }
