@@ -6,10 +6,8 @@ import io.tolgee.development.testDataBuilder.data.ProjectStatsBranchingTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
-import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -73,6 +71,7 @@ class ProjectStatsControllerBranchingTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `stats without branching feature enabled returns forbidden`() {
+    enabledFeaturesProvider.forceEnabled = setOf()
     performProjectAuthGet("stats?branch=${testData.featureBranch.name}")
       .andIsBadRequest
   }
