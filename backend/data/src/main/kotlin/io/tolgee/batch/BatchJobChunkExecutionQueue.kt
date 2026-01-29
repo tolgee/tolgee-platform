@@ -48,6 +48,13 @@ class BatchJobChunkExecutionQueue(
      * O(1) counter for job characters in queue - avoids O(n) iteration on every chunk
      */
     private val jobCharacterCounts = ConcurrentHashMap<JobCharacter, AtomicInteger>()
+
+    /**
+     * Tracks the last job that was served a chunk for round-robin fairness.
+     * This ensures large jobs don't monopolize all worker coroutines.
+     */
+    @Volatile
+    private var lastServedJobId: Long? = null
   }
 
   private fun incrementCharacterCount(character: JobCharacter) {
@@ -214,6 +221,56 @@ class BatchJobChunkExecutionQueue(
     val item = queue.poll()
     item?.let { decrementCharacterCount(it.jobCharacter) }
     return item
+  }
+
+  /**
+   * Polls using round-robin across jobs for fair distribution.
+   * Each job gets one chunk processed before any job gets a second chunk.
+   * This prevents large jobs from monopolizing all worker coroutines.
+   *
+   * Thread-safety: This method handles concurrent modifications gracefully.
+   * If another thread removes an item between finding and removing it,
+   * we verify the removal succeeded and retry if needed.
+   */
+  fun pollRoundRobin(): ExecutionQueueItem? {
+    if (queue.isEmpty()) {
+      return null
+    }
+
+    // Get distinct job IDs in queue order
+    val jobIds = queue.mapTo(LinkedHashSet()) { it.jobId }.toList()
+    if (jobIds.isEmpty()) {
+      return null
+    }
+
+    // Find next job in rotation
+    val lastJobId = lastServedJobId
+    val startIndex =
+      if (lastJobId == null) {
+        0
+      } else {
+        val idx = jobIds.indexOf(lastJobId)
+        if (idx == -1) 0 else (idx + 1) % jobIds.size
+      }
+
+    // Try each job in round-robin order
+    for (i in jobIds.indices) {
+      val jobIndex = (startIndex + i) % jobIds.size
+      val targetJobId = jobIds[jobIndex]
+
+      // Find first item for this job and try to remove it
+      val item = queue.firstOrNull { it.jobId == targetJobId }
+      if (item != null && queue.remove(item)) {
+        // Successfully removed - update state and return
+        decrementCharacterCount(item.jobCharacter)
+        lastServedJobId = targetJobId
+        return item
+      }
+      // Item was null or already removed by another thread, try next job
+    }
+
+    // Fallback if all targeted items were concurrently removed
+    return poll()
   }
 
   fun clear() {

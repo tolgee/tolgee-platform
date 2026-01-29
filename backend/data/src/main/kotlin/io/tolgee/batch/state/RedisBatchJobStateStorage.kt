@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Redis-based implementation of BatchJobStateProvider.
  * Uses Redisson for distributed state management.
  */
-class RedisBatchJobStateStorage(
+open class RedisBatchJobStateStorage(
   private val initializer: BatchJobStateInitializer,
   private val lockingProvider: LockingProvider,
   private val redissonClient: RedissonClient,
