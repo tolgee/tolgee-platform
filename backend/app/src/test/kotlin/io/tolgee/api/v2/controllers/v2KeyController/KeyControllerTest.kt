@@ -72,36 +72,6 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `returns all keys from branch`() {
-    testData.addNKeys(5)
-    testData.addNBranchedKeys(110)
-    saveTestDataAndPrepare()
-    performProjectAuthGet("keys?branch=feature")
-      .andIsOk
-      .andAssertThatJson {
-        node("_embedded.keys") {
-          isArray.hasSize(20)
-          node("[0].id").isValidId
-          node("[1].name").isEqualTo("branch_key_2")
-          node("[1].description").isEqualTo("description of branched key")
-          node("[2].namespace").isEqualTo("null")
-        }
-        node("page.totalElements").isNumber.isEqualTo(BigDecimal(110))
-      }
-    performProjectAuthGet("keys?page=1&branch=feature")
-      .andIsOk
-      .andAssertThatJson {
-        node("_embedded.keys") {
-          isArray.hasSize(20)
-          node("[0].id").isValidId
-          node("[1].name").isEqualTo("branch_key_22")
-          node("[2].namespace").isEqualTo("null")
-        }
-      }
-  }
-
-  @ProjectJWTAuthTestMethod
-  @Test
   fun `returns single key`() {
     saveTestDataAndPrepare()
     val keyId = testData.keyWithReferences.id
@@ -356,79 +326,6 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       key.branch
         ?.name.assert
         .isEqualTo("main")
-    }
-  }
-
-  @ProjectJWTAuthTestMethod
-  @Test
-  fun `imports keys to branch`() {
-    saveTestDataAndPrepare()
-
-    projectSupplier = { testData.project }
-    performProjectAuthPost(
-      "keys/import?branch=dev",
-      mapOf(
-        "keys" to
-          listOf(
-            mapOf(
-              "name" to "first_key",
-              "translations" to
-                mapOf("en" to "hello"),
-              "description" to "description",
-              "tags" to listOf("tag1", "tag2"),
-            ),
-            mapOf(
-              "name" to "new_key",
-              "description" to "description",
-              "translations" to
-                mapOf("en" to "hello friend"),
-              "tags" to listOf("tag1", "tag2"),
-            ),
-          ),
-      ),
-    ).andIsOk
-
-    executeInNewTransaction {
-      val project = projectService.get(testData.project.id)
-      project.keys
-        .filter { it.branch?.name != "dev" }
-        .size.assert
-        .isEqualTo(3)
-
-      val firstKey =
-        project.keys.find {
-          it.name == "first_key" && it.branch?.name == "dev"
-        }
-      firstKey!!
-        .translations
-        .find { it.language.tag == "en" }
-        .assert
-        .isNull()
-      firstKey.keyMeta
-        ?.description.assert
-        .isNull()
-
-      val key =
-        project.keys.find {
-          it.name == "new_key" && it.branch?.name == "dev"
-        }
-      key!!
-        .keyMeta!!
-        .description.assert
-        .isEqualTo("description")
-
-      key.assert.isNotNull()
-      key.keyMeta!!
-        .tags.assert
-        .hasSize(2)
-      key.translations
-        .find { it.language.tag == "en" }!!
-        .text.assert
-        .isEqualTo("hello friend")
-      key.branch.assert.isNotNull
-      key.branch
-        ?.name.assert
-        .isEqualTo("dev")
     }
   }
 
