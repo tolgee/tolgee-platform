@@ -235,11 +235,31 @@ class Key(
 
     val snapshotTranslations = snapshot?.translations?.associateBy { it.language } ?: emptyMap()
     val targetTranslations = this.translations.associateBy { it.language.tag }
+
     source.translations.forEach { sourceTranslation ->
       val languageTag = sourceTranslation.language.tag
-      val targetTranslation = targetTranslations[languageTag] ?: return@forEach
+      val targetTranslation = targetTranslations[languageTag]
       val translationSnapshot = snapshotTranslations[languageTag]
-      targetTranslation.merge(sourceTranslation, translationSnapshot, resolution)
+
+      if (targetTranslation != null) {
+        // Both have it - merge
+        targetTranslation.merge(sourceTranslation, translationSnapshot, resolution)
+      } else {
+        // Source has it, target doesn't - add if new in source or source wins
+        val shouldAdd = translationSnapshot == null || resolution == BranchKeyMergeResolutionType.SOURCE
+        if (shouldAdd) {
+          val newTranslation =
+            Translation(sourceTranslation.text).apply {
+              key = this@Key
+              language = sourceTranslation.language
+              state = sourceTranslation.state
+              auto = sourceTranslation.auto
+              outdated = sourceTranslation.outdated
+              mtProvider = sourceTranslation.mtProvider
+            }
+          this.translations.add(newTranslation)
+        }
+      }
     }
 
     this.keyMeta?.let { meta ->

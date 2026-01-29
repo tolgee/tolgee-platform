@@ -416,8 +416,34 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       }
 
     changes.assert.isNotEmpty()
+  }
 
-    val conflicts = changes.filter { it.change == BranchKeyMergeChangeType.CONFLICT }
+  @Test
+  fun `apply merge - adds translation when source has language that target does not have`() {
+    val germanLanguage = addProjectLanguage("de", "German")
+    val germanValue = "Deutsche Übersetzung"
+
+    // Add German translation only to feature branch key
+    val featureKey = keyService.get(testData.featureKeyToUpdate.id)
+    val featureTranslation = translationService.getOrCreate(featureKey, germanLanguage)
+    translationService.setTranslationText(featureTranslation, germanValue)
+
+    // Main branch key should not have the German translation
+    translationService
+      .find(testData.mainKeyToUpdate, germanLanguage)
+      .orElse(null)
+      .assert
+      .isNull()
+
+    dryRunAndMergeFeatureBranch()
+
+    // After merge, main branch key should have the German translation
+    val mergedTranslation =
+      translationService
+        .find(testData.mainKeyToUpdate.refresh(), germanLanguage)
+        .orElse(null)
+    mergedTranslation.assert.isNotNull()
+    mergedTranslation!!.text.assert.isEqualTo(germanValue)
   }
 
   private fun setLabels(
