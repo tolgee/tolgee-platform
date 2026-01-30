@@ -292,8 +292,8 @@ class TaskService(
   ) {
     val tasks = taskRepository.findAllByProjectIdAndBranchId(projectId, sourceBranch.id)
     tasks.forEach { task ->
-      if (task.originBranch == null) {
-        task.originBranch = sourceBranch
+      if (task.originBranchName == null) {
+        task.originBranchName = sourceBranch.name
       }
       task.branch = targetBranch
       if (task.state == TaskState.NEW || task.state == TaskState.IN_PROGRESS) {
@@ -560,7 +560,7 @@ class TaskService(
         keys = task.keys,
         author = task.author!!,
         branch = task.branch,
-        originBranch = task.originBranch,
+        originBranchName = task.originBranchName,
         createdAt = task.createdAt,
         state = task.state,
         closedAt = task.closedAt,

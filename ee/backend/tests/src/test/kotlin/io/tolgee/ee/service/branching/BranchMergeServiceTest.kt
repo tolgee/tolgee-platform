@@ -242,9 +242,8 @@ class BranchMergeServiceTest : AbstractSpringTest() {
         task.branch!!
           .id.assert
           .isEqualTo(testData.mainBranch.id)
-        task.originBranch!!
-          .id.assert
-          .isEqualTo(testData.featureBranch.id)
+        task.originBranchName.assert
+          .isEqualTo(testData.featureBranch.name)
       }
     testData.featureFinishedTask
       .refresh()
@@ -253,9 +252,8 @@ class BranchMergeServiceTest : AbstractSpringTest() {
         task.branch!!
           .id.assert
           .isEqualTo(testData.mainBranch.id)
-        task.originBranch!!
-          .id.assert
-          .isEqualTo(testData.featureBranch.id)
+        task.originBranchName.assert
+          .isEqualTo(testData.featureBranch.name)
       }
   }
 
