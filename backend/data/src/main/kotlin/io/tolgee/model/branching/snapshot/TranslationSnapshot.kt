@@ -27,7 +27,6 @@ import org.hibernate.annotations.Type
 class TranslationSnapshot(
   @field:NotBlank
   var language: String,
-  @field:NotBlank
   @Column(columnDefinition = "text")
   var value: String,
   @Enumerated
