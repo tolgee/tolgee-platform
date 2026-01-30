@@ -43,19 +43,21 @@ export const TranslationFilters = ({
   const anchorEl = useRef(null);
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
-  const { fetchLabels } = useTranslationsActions();
-  const labels = useTranslationsSelector((c) => c.labels);
-  const selectedLabels = useTranslationsSelector((c) => c.selectedLabels);
+  const translationsActions = useTranslationsActions();
+  const labels = useTranslationsSelector((c) => c?.labels ?? []);
+  const selectedLabels = useTranslationsSelector(
+    (c) => c?.selectedLabels ?? []
+  );
 
   const numberOfFilters = countFilters(value);
   const labelIds = value.filterLabel?.map((id) => Number(id)) || [];
   const labelsForFilter = selectedLabels?.length ? selectedLabels : labels;
 
   useEffect(() => {
-    if (labelIds.length) {
-      fetchLabels(labelIds);
+    if (labelIds.length && translationsActions?.fetchLabels) {
+      translationsActions.fetchLabels(labelIds);
     }
-  }, [fetchLabels, labelIds.join(',')]);
+  }, [translationsActions, labelIds.join(',')]);
 
   function handleClick() {
     setOpen(true);
