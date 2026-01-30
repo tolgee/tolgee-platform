@@ -202,6 +202,7 @@ export const useLabelsService = ({
     removeLabel,
     selectedLabels,
     setSelectedIds,
+    selectedIds,
     isLoading: putLabel.isLoading || deleteLabel.isLoading,
   };
 };
