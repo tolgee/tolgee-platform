@@ -4655,6 +4655,7 @@
     </changeSet>
     <changeSet author="gabriel.shanahan (generated)" id="1769694787155-164"
                runInTransaction="false" failOnError="false">
+        <validCheckSum>9:cd29e48b8d2b7bc2fe7cc462945e2a72</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists indexName="IDXcg7y08d599p7jxdebbxwavak0"/>
@@ -4667,6 +4668,7 @@
     </changeSet>
     <changeSet author="gabriel.shanahan (generated)" id="1769694787155-144"
                runInTransaction="false" failOnError="false">
+        <validCheckSum>9:4c6a8f0ac5e40cb7577ffe67c385137f</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <not>
                 <indexExists indexName="IDX71c7yr8a185u5jsdyndom5fa7"/>
