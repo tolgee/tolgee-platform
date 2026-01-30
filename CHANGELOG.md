@@ -1,3 +1,10 @@
+# [3.152.0](https://github.com/tolgee/tolgee-platform/compare/v3.151.1...v3.152.0) (2026-01-30)
+
+
+### Features
+
+* add zip output support for CDN ([#3432](https://github.com/tolgee/tolgee-platform/issues/3432)) ([d31df7e](https://github.com/tolgee/tolgee-platform/commit/d31df7e9cd1dd7cbfce8f8b1b43378c1af1516a5))
+
 ## [3.151.1](https://github.com/tolgee/tolgee-platform/compare/v3.151.0...v3.151.1) (2026-01-29)
 
 
