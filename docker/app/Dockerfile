@@ -1,9 +1,14 @@
-FROM postgres:13.21-alpine3.22
+FROM postgres:13.23-alpine3.22
 
 ENTRYPOINT []
 
-RUN apk --no-cache add openjdk21
-RUN apk --no-cache add libxml2
+RUN apk --no-cache upgrade \
+    busybox=1.37.0-r20 \
+    libcrypto3=3.5.5-r0 \
+    libssl3=3.5.5-r0
+
+RUN apk --no-cache add openjdk21=21.0.10_p7-r0
+RUN apk --no-cache add libxml2=2.13.9-r0
 
 #############
 ### Tolgee  #
