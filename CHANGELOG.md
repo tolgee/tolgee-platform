@@ -1,3 +1,10 @@
+## [3.152.2](https://github.com/tolgee/tolgee-platform/compare/v3.152.1...v3.152.2) (2026-01-30)
+
+
+### Bug Fixes
+
+* properly format plural C-like placeholders ([#3441](https://github.com/tolgee/tolgee-platform/issues/3441)) ([64d3da8](https://github.com/tolgee/tolgee-platform/commit/64d3da86ef88617f3939e8c0c1a5695836183ad4)), closes [#3409](https://github.com/tolgee/tolgee-platform/issues/3409)
+
 ## [3.152.1](https://github.com/tolgee/tolgee-platform/compare/v3.152.0...v3.152.1) (2026-01-30)
 
 
