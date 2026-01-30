@@ -16,4 +16,5 @@ data class LanguageStatsDto(
   override val translatedPercentage: Double,
   override val reviewedPercentage: Double,
   override val translationsUpdatedAt: Date?,
+  val isDefaultBranch: Boolean?,
 ) : ILanguageStats

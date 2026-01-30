@@ -35,7 +35,8 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
       ls.untranslatedPercentage,
       ls.translatedPercentage,
       ls.reviewedPercentage,
-      ls.translationsUpdatedAt
+      ls.translationsUpdatedAt,
+      b.isDefault
     )
     from LanguageStats ls
     left join ls.branch b
