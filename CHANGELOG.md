@@ -1,3 +1,10 @@
+## [3.152.1](https://github.com/tolgee/tolgee-platform/compare/v3.152.0...v3.152.1) (2026-01-30)
+
+
+### Bug Fixes
+
+* add validCheckSum for modified index changesets ([#3440](https://github.com/tolgee/tolgee-platform/issues/3440)) ([f595943](https://github.com/tolgee/tolgee-platform/commit/f59594385fdb5c6f4ec9a204744a28c176eed06c)), closes [#3436](https://github.com/tolgee/tolgee-platform/issues/3436) [#3439](https://github.com/tolgee/tolgee-platform/issues/3439)
+
 # [3.152.0](https://github.com/tolgee/tolgee-platform/compare/v3.151.1...v3.152.0) (2026-01-30)
 
 
