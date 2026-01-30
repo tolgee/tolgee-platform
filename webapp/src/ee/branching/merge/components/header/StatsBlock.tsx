@@ -6,7 +6,7 @@ import {
   PlusCircle,
   RefreshCcw02,
 } from '@untitled-ui/icons-react';
-import { ElementType, FC, useMemo } from 'react';
+import { FC } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { BranchMergeModel } from '../../types';
 
@@ -31,26 +31,6 @@ const StatCard = styled(Box)`
 export const StatsBlock: FC<{ merge: BranchMergeModel }> = ({ merge }) => {
   const { t } = useTranslate();
   const theme = useTheme();
-  const baseStats = useMemo(
-    () => [
-      {
-        label: t('branch_merges_additions'),
-        value: merge.keyAdditionsCount,
-        icon: PlusCircle,
-      },
-      {
-        label: t('branch_merges_modifications'),
-        value: merge.keyModificationsCount,
-        icon: RefreshCcw02,
-      },
-      {
-        label: t('branch_merges_deletions'),
-        value: merge.keyDeletionsCount,
-        icon: MinusCircle,
-      },
-    ],
-    [merge, t]
-  );
 
   const conflictsTotal =
     merge.keyUnresolvedConflictsCount + merge.keyResolvedConflictsCount;
@@ -58,25 +38,52 @@ export const StatsBlock: FC<{ merge: BranchMergeModel }> = ({ merge }) => {
 
   return (
     <StatsRow>
-      {baseStats.map((stat) => {
-        const Icon = stat.icon as ElementType;
-        return (
-          <StatCard key={stat.label}>
-            <Box display="flex" alignItems="center" gap={1} flexGrow={0}>
-              <Box display="flex" alignItems="center">
-                <Icon />
-              </Box>
-              <Typography variant="h3">
-                <div>{stat.value}</div>
-              </Typography>
-            </Box>
-            <Typography variant="body1" fontSize={18}>
-              {stat.label}
-            </Typography>
-          </StatCard>
-        );
-      })}
-      <StatCard>
+      <StatCard data-cy="merge-stat-additions">
+        <Box display="flex" alignItems="center" gap={1} flexGrow={0}>
+          <Box display="flex" alignItems="center">
+            <PlusCircle />
+          </Box>
+          <Typography variant="h3">
+            <div data-cy="merge-stat-additions-count">
+              {merge.keyAdditionsCount}
+            </div>
+          </Typography>
+        </Box>
+        <Typography variant="body1" fontSize={18}>
+          {t('branch_merges_additions')}
+        </Typography>
+      </StatCard>
+      <StatCard data-cy="merge-stat-modifications">
+        <Box display="flex" alignItems="center" gap={1} flexGrow={0}>
+          <Box display="flex" alignItems="center">
+            <RefreshCcw02 />
+          </Box>
+          <Typography variant="h3">
+            <div data-cy="merge-stat-modifications-count">
+              {merge.keyModificationsCount}
+            </div>
+          </Typography>
+        </Box>
+        <Typography variant="body1" fontSize={18}>
+          {t('branch_merges_modifications')}
+        </Typography>
+      </StatCard>
+      <StatCard data-cy="merge-stat-deletions">
+        <Box display="flex" alignItems="center" gap={1} flexGrow={0}>
+          <Box display="flex" alignItems="center">
+            <MinusCircle />
+          </Box>
+          <Typography variant="h3">
+            <div data-cy="merge-stat-deletions-count">
+              {merge.keyDeletionsCount}
+            </div>
+          </Typography>
+        </Box>
+        <Typography variant="body1" fontSize={18}>
+          {t('branch_merges_deletions')}
+        </Typography>
+      </StatCard>
+      <StatCard data-cy="merge-stat-conflicts">
         <Box display="flex" alignItems="center" gap={1} flexGrow={0}>
           <Box display="flex" alignItems="center">
             {conflictsTotal > 0 && resolvedConflicts === conflictsTotal ? (
@@ -92,7 +99,9 @@ export const StatsBlock: FC<{ merge: BranchMergeModel }> = ({ merge }) => {
             )}
           </Box>
           <Typography variant="h3">
-            <div>{resolvedConflicts + '/' + conflictsTotal}</div>
+            <div data-cy="merge-stat-conflicts-count">
+              {resolvedConflicts + '/' + conflictsTotal}
+            </div>
           </Typography>
         </Box>
         <Typography variant="body1" fontSize={18}>

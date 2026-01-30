@@ -217,6 +217,8 @@ declare namespace DataCy {
         "branch-merge-detail-menu" |
         "branch-name-input" |
         "branch-protected-icon" |
+        "branch-select-item" |
+        "branch-selector" |
         "cell-key-screenshot-dropzone" |
         "cell-key-screenshot-file-input" |
         "checkbox-group-multiselect" |
@@ -483,6 +485,23 @@ declare namespace DataCy {
         "machine-translations-settings-language-enabled-service" |
         "machine-translations-settings-language-options" |
         "machine-translations-settings-language-primary-service" |
+        "merge-changes-tabs" |
+        "merge-stat-additions" |
+        "merge-stat-additions-count" |
+        "merge-stat-conflicts" |
+        "merge-stat-conflicts-count" |
+        "merge-stat-deletions" |
+        "merge-stat-deletions-count" |
+        "merge-stat-modifications" |
+        "merge-stat-modifications-count" |
+        "merge-tab-add" |
+        "merge-tab-add-count" |
+        "merge-tab-conflict" |
+        "merge-tab-conflict-count" |
+        "merge-tab-delete" |
+        "merge-tab-delete-count" |
+        "merge-tab-update" |
+        "merge-tab-update-count" |
         "mfa-disable-button" |
         "mfa-disable-dialog" |
         "mfa-disable-dialog-content" |
