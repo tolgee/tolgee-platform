@@ -62,5 +62,6 @@ class LanguageStats(
       translatedPercentage = translatedPercentage,
       reviewedPercentage = reviewedPercentage,
       translationsUpdatedAt = translationsUpdatedAt,
+      isDefaultBranch = branch?.isDefault,
     )
 }
