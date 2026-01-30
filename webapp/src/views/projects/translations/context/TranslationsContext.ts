@@ -340,7 +340,13 @@ export const [
       return labelService.removeLabel(data);
     },
     fetchLabels(ids: number[]) {
-      labelService.setSelectedIds(ids);
+      const current = labelService.selectedIds;
+      const isSame =
+        ids.length === current.length &&
+        ids.every((id, index) => id === current[index]);
+      if (!isSame) {
+        labelService.setSelectedIds(ids);
+      }
       return labelService.selectedLabels;
     },
   };
@@ -386,6 +392,7 @@ export const [
     aiPlaygroundData: aiPlaygroundService.data,
     aiPlaygroundEnabled: props.aiPlayground,
     labels: labelService.labels,
+    selectedLabels: labelService.selectedLabels,
     branches: {
       available: branchesService.branches,
       selected: branchesService.selected,
