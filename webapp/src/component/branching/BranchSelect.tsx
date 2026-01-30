@@ -99,6 +99,8 @@ export const BranchSelect = ({
         {...props}
         selected={item.id === selected?.id}
         onClick={() => select(item)}
+        data-cy="branch-select-item"
+        data-cy-branch={item.name}
       >
         <StyledLabel>
           <div>{item.name}</div>
@@ -133,6 +135,7 @@ export const BranchSelect = ({
       <Label
         onClick={!disabled ? handleOpen : undefined}
         className={clsx(disabled && 'disabled')}
+        data-cy="branch-selector"
       >
         {selected && (
           <BranchNameChip
