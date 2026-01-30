@@ -11,7 +11,7 @@ import io.tolgee.formats.pluralData.PluralData
 
 class IcuToPoMessageConvertor(
   val message: String,
-  val placeholderConvertor: FromIcuPlaceholderConvertor,
+  val placeholderConvertorFactory: (() -> FromIcuPlaceholderConvertor),
   val languageTag: String = "en",
   private val forceIsPlural: Boolean,
   private val projectIcuPlaceholdersSupport: Boolean = true,
@@ -44,9 +44,8 @@ class IcuToPoMessageConvertor(
         message,
         forceIsPlural,
         projectIcuPlaceholdersSupport,
-      ) {
-        placeholderConvertor
-      }.create().convert()
+        placeholderConvertorFactory,
+      ).create().convert()
     val poPluralResult = getPluralResult(result.formsResult ?: mutableMapOf())
     return ToPoConversionResult(null, poPluralResult)
   }
@@ -57,9 +56,8 @@ class IcuToPoMessageConvertor(
         message,
         forceIsPlural = false,
         projectIcuPlaceholdersSupport,
-      ) {
-        placeholderConvertor
-      }.create().convert()
+        placeholderConvertorFactory,
+      ).create().convert()
     return ToPoConversionResult(result.singleResult, null)
   }
 

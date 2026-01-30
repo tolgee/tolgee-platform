@@ -64,6 +64,10 @@ class AndroidXmlFileExporterTest {
     |    <item quantity="one">%1${'$'}s dog</item>
     |    <item quantity="other">%1${'$'}s dogs</item>
     |  </plurals>
+    |  <plurals name="numbered_plural">
+    |    <item quantity="one">%2${'$'}d store selected</item>
+    |    <item quantity="other">%2${'$'}d stores selected</item>
+    |  </plurals>
     |</resources>
     |
       """.trimMargin(),
@@ -266,6 +270,13 @@ class AndroidXmlFileExporterTest {
           languageTag = "en",
           keyName = "plural with placeholders",
           text = "{count, plural, one {{0} dog} other {{0} dogs}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "en",
+          keyName = "numbered_plural",
+          text = "{1, plural, one {# store selected} other {# stores selected}}",
         ) {
           key.isPlural = true
         }

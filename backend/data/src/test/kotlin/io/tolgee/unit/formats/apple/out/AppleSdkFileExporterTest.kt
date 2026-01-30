@@ -71,7 +71,7 @@ class AppleSdkFileExporterTest {
     |  "key3": {
     |    "variations": {
     |      "plural": {
-    |        "one": "%lld den %2${'$'}lld",
+    |        "one": "%lld den %lld",
     |        "few": "%lld dny",
     |        "other": "%lld dní"
     |      }
