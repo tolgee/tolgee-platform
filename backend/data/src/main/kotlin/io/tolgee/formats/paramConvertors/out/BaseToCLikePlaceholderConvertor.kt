@@ -73,6 +73,12 @@ class BaseToCLikePlaceholderConvertor(
     return ""
   }
 
+  fun convertReplaceNumber(argNum: Int?): String {
+    argIndex++
+    val argNumString = getArgNumString(argNum)
+    return "%${argNumString}$numberSpecifier"
+  }
+
   private val MessagePatternUtil.ArgNode.argNumOrNull get() = this.name?.toLongOrNull()
 
   companion object {

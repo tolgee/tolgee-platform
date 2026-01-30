@@ -10,7 +10,7 @@ class IcuToPoMessageConvertorTest {
   fun `converts simple message`() {
     IcuToPoMessageConvertor(
       "Hello {hello} {hello, number} {hello, number, .00}",
-      IcuToPhpPlaceholderConvertor(),
+      { IcuToPhpPlaceholderConvertor() },
       forceIsPlural = false,
     ).convert().singleResult.assert.isEqualTo("Hello %s %d %.2f")
   }
@@ -19,7 +19,7 @@ class IcuToPoMessageConvertorTest {
   fun `converts message with complex escape sequences`() {
     IcuToPoMessageConvertor(
       "Normal hashtag # and escaped hashtag '#' and double escaped hashtag '''#'''",
-      IcuToPhpPlaceholderConvertor(),
+      { IcuToPhpPlaceholderConvertor() },
       forceIsPlural = false,
     ).convert().singleResult.assert.isEqualTo(
       "Normal hashtag # and escaped hashtag '#' and double escaped hashtag ''#''",
@@ -30,7 +30,7 @@ class IcuToPoMessageConvertorTest {
   fun `converts message with complex escape sequences and icu disabled`() {
     IcuToPoMessageConvertor(
       "Normal hashtag # and escaped hashtag '#' and double escaped hashtag '''#'''",
-      IcuToPhpPlaceholderConvertor(),
+      { IcuToPhpPlaceholderConvertor() },
       forceIsPlural = false,
       projectIcuPlaceholdersSupport = false,
     ).convert().singleResult.assert.isEqualTo(
@@ -43,7 +43,7 @@ class IcuToPoMessageConvertorTest {
     val forms =
       IcuToPoMessageConvertor(
         "{0, plural, one {# dog} other {# dogs}}",
-        IcuToPhpPlaceholderConvertor(),
+        placeholderConvertorFactory = { IcuToPhpPlaceholderConvertor() },
         forceIsPlural = true,
       ).convert()
         .formsResult
@@ -58,7 +58,7 @@ class IcuToPoMessageConvertorTest {
       IcuToPoMessageConvertor(
         message = "{0, plural, one {# pes} few {# psi} other {# psů}}",
         languageTag = "cs",
-        placeholderConvertor = IcuToPhpPlaceholderConvertor(),
+        placeholderConvertorFactory = { IcuToPhpPlaceholderConvertor() },
         forceIsPlural = true,
       ).convert().formsResult
 
@@ -78,7 +78,7 @@ class IcuToPoMessageConvertorTest {
             " other {# znaků '''''#''''' a '#' pro psi}" +
             "}",
         languageTag = "cs",
-        placeholderConvertor = IcuToPhpPlaceholderConvertor(),
+        placeholderConvertorFactory = { IcuToPhpPlaceholderConvertor() },
         forceIsPlural = true,
       ).convert().formsResult
 
@@ -98,7 +98,7 @@ class IcuToPoMessageConvertorTest {
             " other {'#' znaků '''''#''''' a '#' pro psi}" +
             "}",
         languageTag = "cs",
-        placeholderConvertor = IcuToPhpPlaceholderConvertor(),
+        placeholderConvertorFactory = { IcuToPhpPlaceholderConvertor() },
         forceIsPlural = true,
         projectIcuPlaceholdersSupport = false,
       ).convert().formsResult
@@ -114,7 +114,7 @@ class IcuToPoMessageConvertorTest {
       IcuToPoMessageConvertor(
         message = "{0, plural, one {# pes} other {# psů}}",
         languageTag = "cs",
-        placeholderConvertor = IcuToPhpPlaceholderConvertor(),
+        placeholderConvertorFactory = { IcuToPhpPlaceholderConvertor() },
         forceIsPlural = true,
       ).convert().formsResult
 
@@ -129,7 +129,7 @@ class IcuToPoMessageConvertorTest {
       IcuToPoMessageConvertor(
         message = "{0, plural, one {# pes} many {# pesos} other {# psů}}",
         languageTag = "cs",
-        placeholderConvertor = IcuToPhpPlaceholderConvertor(),
+        placeholderConvertorFactory = { IcuToPhpPlaceholderConvertor() },
         forceIsPlural = true,
       ).convert().formsResult
 

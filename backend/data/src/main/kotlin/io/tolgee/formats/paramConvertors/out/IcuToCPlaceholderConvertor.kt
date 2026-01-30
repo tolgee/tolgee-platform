@@ -26,6 +26,6 @@ class IcuToCPlaceholderConvertor : FromIcuPlaceholderConvertor {
     node: MessagePatternUtil.MessageContentsNode,
     argName: String?,
   ): String {
-    return "%d"
+    return baseToCLikePlaceholderConvertor.convertReplaceNumber(argName?.toIntOrNull())
   }
 }

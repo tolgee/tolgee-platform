@@ -43,7 +43,7 @@ class PoFileExporter(
     return IcuToPoMessageConvertor(
       message = translation.text ?: "",
       languageTag = translation.languageTag,
-      placeholderConvertor = messageFormat.paramConvertorFactory(),
+      placeholderConvertorFactory = messageFormat.paramConvertorFactory,
       forceIsPlural = translation.key.isPlural,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
     ).convert()

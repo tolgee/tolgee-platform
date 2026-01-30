@@ -33,7 +33,7 @@ class CPoConversionTest {
       IcuToPoMessageConvertor(
         icuString!!,
         forceIsPlural = false,
-        placeholderConvertor = IcuToCPlaceholderConvertor(),
+        placeholderConvertorFactory = { IcuToCPlaceholderConvertor() },
       ).convert().singleResult
     cString.assert
       .describedAs("Input:\n${string}\nICU:\n$icuString\nC String:\n$cString")

@@ -31,7 +31,7 @@ class PhpPoConversionTest {
       IcuToPoMessageConvertor(
         icuString!!,
         forceIsPlural = false,
-        placeholderConvertor = IcuToPhpPlaceholderConvertor(),
+        placeholderConvertorFactory = { IcuToPhpPlaceholderConvertor() },
       ).convert().singleResult
     phpString.assert
       .describedAs("Input:\n${string}\nICU:\n$icuString\nPhpString:\n$phpString")
