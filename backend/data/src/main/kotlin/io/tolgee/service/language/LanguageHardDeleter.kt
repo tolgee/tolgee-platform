@@ -46,6 +46,7 @@ class LanguageHardDeleter(
             join fetch t.key k
             left join fetch k.keyMeta km
             left join fetch k.namespace
+            left join fetch k.branch
             left join fetch t.comments
             left join fetch t.labels
             where t.id in :ids""",

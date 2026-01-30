@@ -8,6 +8,7 @@ import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.LabelServiceImpl
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Language
 import io.tolgee.model.Screenshot
 import io.tolgee.model.branching.Branch
@@ -242,9 +243,8 @@ class BranchMergeServiceTest : AbstractSpringTest() {
         task.branch!!
           .id.assert
           .isEqualTo(testData.mainBranch.id)
-        task.originBranch!!
-          .id.assert
-          .isEqualTo(testData.featureBranch.id)
+        task.originBranchName.assert
+          .isEqualTo(testData.featureBranch.name)
       }
     testData.featureFinishedTask
       .refresh()
@@ -253,9 +253,8 @@ class BranchMergeServiceTest : AbstractSpringTest() {
         task.branch!!
           .id.assert
           .isEqualTo(testData.mainBranch.id)
-        task.originBranch!!
-          .id.assert
-          .isEqualTo(testData.featureBranch.id)
+        task.originBranchName.assert
+          .isEqualTo(testData.featureBranch.name)
       }
   }
 
@@ -272,11 +271,26 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   @Test
   fun `apply merge - tags merge correctly`() {
+    val mainRevisionBefore = testData.mainBranch.refresh()!!.revision
+    val featureRevisionBefore = testData.featureBranch.refresh()!!.revision
+
     // remove one tag from each key
     removeTagFromKey(testData.mainKeyToUpdate, testData.tag1)
     removeTagFromKey(testData.featureKeyToUpdate, testData.tag2)
     // add one to the feature key
     addTagToKey(testData.featureKeyToUpdate, "xyz")
+
+    // Wait for async branch revision updates to complete
+    waitForNotThrowing(timeout = 10000, pollTime = 100) {
+      testData.mainBranch
+        .refresh()!!
+        .revision.assert
+        .isGreaterThan(mainRevisionBefore)
+      testData.featureBranch
+        .refresh()!!
+        .revision.assert
+        .isGreaterThan(featureRevisionBefore)
+    }
 
     dryRunAndMergeFeatureBranch()
 
@@ -420,6 +434,8 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   @Test
   fun `apply merge - adds translation when source has language that target does not have`() {
+    val featureRevisionBefore = testData.featureBranch.refresh()!!.revision
+
     val germanLanguage = addProjectLanguage("de", "German")
     val germanValue = "Deutsche Übersetzung"
 
@@ -434,6 +450,14 @@ class BranchMergeServiceTest : AbstractSpringTest() {
       .orElse(null)
       .assert
       .isNull()
+
+    // Wait for async branch revision updates to complete
+    waitForNotThrowing(timeout = 10000, pollTime = 100) {
+      testData.featureBranch
+        .refresh()!!
+        .revision.assert
+        .isGreaterThan(featureRevisionBefore)
+    }
 
     dryRunAndMergeFeatureBranch()
 

@@ -173,7 +173,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
         language = englishLanguage
         author = user
         branch = mainBranch
-        originBranch = featureBranch
+        originBranchName = featureBranch.name
       }.self
 
     addTaskKey {

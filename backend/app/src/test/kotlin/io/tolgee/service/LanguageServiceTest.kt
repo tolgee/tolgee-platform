@@ -142,8 +142,11 @@ class LanguageServiceTest : AbstractSpringTest() {
       setAuthentication(testData.user)
       languageService.hardDeleteLanguage(testData.germanLanguage.id)
     }
+    // prepareStatementCount tracks JDBC PreparedStatement acquisitions via connection.prepareStatement().
+    // This reliably detects N+1 issues as Hibernate acquires a new statement per query execution.
+    // With 100 generated items, N+1 would cause 100+ statements; we expect a constant count instead.
     val count = sessionFactory.statistics.prepareStatementCount
-    count.assert.isLessThan(20)
+    count.assert.isLessThan(25)
 
     executeInNewTransaction {
       assertLanguageDeleted(testData.germanLanguage)

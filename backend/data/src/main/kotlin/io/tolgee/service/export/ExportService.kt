@@ -6,6 +6,7 @@ import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.dtos.IExportParams
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.export.dataProvider.ExportDataProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.service.project.ProjectService
@@ -24,12 +25,14 @@ class ExportService(
   private val applicationContext: ApplicationContext,
   private val businessEventPublisher: BusinessEventPublisher,
   private val objectMapper: ObjectMapper,
+  private val branchService: BranchService,
 ) : Logging {
   fun export(
     projectId: Long,
     exportParams: IExportParams,
   ): Map<String, InputStream> {
     traceLogExportInfo(exportParams, projectId)
+    validateBranch(projectId, exportParams)
     return traceLogMeasureTime("Export project $projectId data") {
       val data = getDataForExport(projectId, exportParams)
       val baseLanguage = getProjectBaseLanguage(projectId)
@@ -95,6 +98,15 @@ class ExportService(
       Duration.ofDays(1),
     ) {
       "EXPORT_$projectId"
+    }
+  }
+
+  private fun validateBranch(
+    projectId: Long,
+    exportParams: IExportParams,
+  ) {
+    exportParams.filterBranch?.let {
+      branchService.getActiveBranch(projectId, it)
     }
   }
 
