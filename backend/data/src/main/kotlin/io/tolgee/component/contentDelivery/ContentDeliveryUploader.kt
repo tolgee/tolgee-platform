@@ -9,7 +9,10 @@ import io.tolgee.service.export.ExportService
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.stereotype.Component
+import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 @Component
 class ContentDeliveryUploader(
@@ -23,14 +26,33 @@ class ContentDeliveryUploader(
     val config = contentDeliveryConfigService.get(contentDeliveryConfigId)
     logger.debug("Uploading content delivery config ${config.id}")
     val storage = getStorage(config)
-    val files = exportService.export(config.project.id, config)
+    var files = exportService.export(config.project.id, config)
+
+    if (config.zip) {
+      files = createZipArchive(files)
+    }
+
     val withFullPaths = files.mapKeys { "${config.slug}/${it.key}" }
     pruneIfNeeded(config, storage)
     storeToStorage(withFullPaths, storage)
     purgeCacheIfConfigured(config, files.keys)
+
     config.lastPublished = currentDateProvider.date
     config.lastPublishedFiles = files.map { it.key }.toList()
     contentDeliveryConfigService.save(config)
+  }
+
+  private fun createZipArchive(files: Map<String, InputStream>): Map<String, InputStream> {
+    val zipFileName = "translations.zip"
+    val outputStream = ByteArrayOutputStream()
+    ZipOutputStream(outputStream).use { zip ->
+      files.forEach { (path, input) ->
+        zip.putNextEntry(ZipEntry(path))
+        input.use { it.copyTo(zip) }
+        zip.closeEntry()
+      }
+    }
+    return mapOf(zipFileName to outputStream.toByteArray().inputStream())
   }
 
   private fun pruneIfNeeded(

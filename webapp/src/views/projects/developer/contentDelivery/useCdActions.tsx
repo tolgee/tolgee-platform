@@ -54,6 +54,7 @@ export function useCdActions({ allNamespaces, onClose }: UseCdActionsProps) {
         format.messageFormat ?? normalizeSelectedMessageFormat(values),
       slug: values.contentStorageId ? values.slug : undefined,
       pruneBeforePublish: values.pruneBeforePublish ?? true,
+      zip: values.zip ?? false,
       escapeHtml: values.escapeHtml ?? false,
     };
   }

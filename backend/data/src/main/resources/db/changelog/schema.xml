@@ -4677,4 +4677,11 @@
             ON tolgee_batch_job (created_at);
         </sql>
     </changeSet>
+    <changeSet author="anty (generated)" id="1769517069552-1">
+        <addColumn tableName="content_delivery_config">
+            <column defaultValueBoolean="false" name="zip" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

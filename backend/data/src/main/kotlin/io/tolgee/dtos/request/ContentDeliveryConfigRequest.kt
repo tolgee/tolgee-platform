@@ -45,6 +45,11 @@ class ContentDeliveryConfigRequest : IExportParams {
   )
   var pruneBeforePublish = true
 
+  @Schema(
+    description = "Whether to export all files as a single zip archive (translations.zip).",
+  )
+  var zip: Boolean = false
+
   override var languages: Set<String>? = null
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = '.'

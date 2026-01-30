@@ -241,6 +241,7 @@ declare namespace DataCy {
         "content-delivery-storage-selector" |
         "content-delivery-storage-selector-item" |
         "content-delivery-subtitle" |
+        "content-delivery-zip-export-checkbox" |
         "create-edit-glossary-cancel" |
         "create-edit-glossary-dialog" |
         "create-edit-glossary-submit" |

@@ -69,6 +69,10 @@ class ContentDeliveryConfig(
   @ColumnDefault("false")
   var pruneBeforePublish = true
 
+  @ColumnDefault("false")
+  @ActivityLoggedProp
+  var zip: Boolean = false
+
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
   @ActivityLoggedProp

@@ -49,6 +49,7 @@ class ContentDeliveryConfigService(
     config.copyPropsFrom(dto)
     setSlugForCreation(config, dto)
     config.pruneBeforePublish = dto.pruneBeforePublish
+    config.zip = dto.zip
     config.escapeHtml = dto.escapeHtml
     contentDeliveryConfigRepository.save(config)
     if (dto.autoPublish) {
@@ -135,6 +136,7 @@ class ContentDeliveryConfigService(
     config.contentStorage = getStorage(projectId, dto.contentStorageId)
     config.name = dto.name
     config.pruneBeforePublish = dto.pruneBeforePublish
+    config.zip = dto.zip
     config.copyPropsFrom(dto)
     handleUpdateAutoPublish(dto, config)
     return save(config)
