@@ -419,6 +419,32 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `dry-run detects conflict when both branches create same key name`() {
+    val sharedName = "same-name-new-key"
+    createKey(sharedName, "Main value", testData.mainBranch)
+    createKey(sharedName, "Feature value", testData.featureBranch)
+
+    val merge = dryRunFeatureBranchMerge()
+
+    val conflicts = merge.changes.filter { it.change == BranchKeyMergeChangeType.CONFLICT }
+    conflicts.assert.hasSize(1)
+    conflicts
+      .first()
+      .sourceKey!!
+      .name.assert
+      .isEqualTo(sharedName)
+    conflicts
+      .first()
+      .targetKey!!
+      .name.assert
+      .isEqualTo(sharedName)
+    conflicts
+      .first()
+      .resolution.assert
+      .isNull()
+  }
+
+  @Test
   fun `dry-run detects conflict when both branches change screenshot references`() {
     addScreenshotsToBothBranches()
 

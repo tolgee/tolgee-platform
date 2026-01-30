@@ -43,6 +43,7 @@ class BranchMergeAnalyzer(
     val sourceById = sourceKeys.associateBy { it.id }
     val targetById = targetKeys.associateBy { it.id }
     val snapshotByBranchKeyId = snapshots.associateBy { it.branchKeyId }
+    val snapshotOriginalIds = snapshots.map { it.originalKeyId }.toSet()
     val sourceBySignature = sourceKeys.groupBy { KeySignature(it.namespace?.name, it.name) }
     val targetBySignature = targetKeys.groupBy { KeySignature(it.namespace?.name, it.name) }
     val snapshotsBySignature = snapshots.groupBy { KeySignature(it.namespace, it.name) }
@@ -77,6 +78,20 @@ class BranchMergeAnalyzer(
     // Keys created after branching
     sourceKeys.forEach { key ->
       if (!snapshotByBranchKeyId.containsKey(key.id) && !fallbackSourceKeyIds.contains(key.id)) {
+        val signature = KeySignature(key.namespace?.name, key.name)
+        val targetKey = targetBySignature[signature]?.singleOrNull()
+        val targetIsNew = targetKey != null && !snapshotOriginalIds.contains(targetKey.id)
+        if (targetIsNew) {
+          changes.add(
+            BranchMergeChange().apply {
+              branchMerge = merge
+              sourceKey = key
+              this.targetKey = targetKey
+              change = BranchKeyMergeChangeType.CONFLICT
+            },
+          )
+          return@forEach
+        }
         changes.add(
           BranchMergeChange().apply {
             branchMerge = merge
