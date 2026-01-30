@@ -213,8 +213,10 @@ declare namespace DataCy {
         "billing-usage-table-seats" |
         "billing-usage-table-translations" |
         "billing_period_annual" |
+        "branch-default-chip" |
         "branch-merge-detail-menu" |
         "branch-name-input" |
+        "branch-protected-icon" |
         "cell-key-screenshot-dropzone" |
         "cell-key-screenshot-file-input" |
         "checkbox-group-multiselect" |

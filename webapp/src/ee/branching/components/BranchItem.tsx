@@ -93,29 +93,31 @@ export const BranchItem: React.FC<Props> = ({
         <Box gap={1} display="flex" alignItems="center">
           {branch.isDefault && <DefaultBranchChip />}
           {branch.isProtected && (
-            <>
-              <LabelHint
-                disableInteractive={false}
-                title={
-                  <T
-                    keyName="branch_protected_tooltip"
-                    params={{
-                      a: (
-                        <a
-                          href={
-                            'https://docs.tolgee.io/platform/projects_and_organizations/members'
-                          }
-                          target={'_blank'}
-                          rel="noreferrer"
-                        />
-                      ),
-                    }}
-                  />
-                }
-              >
-                <ShieldTick height={20} width={20} />
-              </LabelHint>
-            </>
+            <LabelHint
+              disableInteractive={false}
+              title={
+                <T
+                  keyName="branch_protected_tooltip"
+                  params={{
+                    a: (
+                      <a
+                        href={
+                          'https://docs.tolgee.io/platform/projects_and_organizations/members'
+                        }
+                        target={'_blank'}
+                        rel="noreferrer"
+                      />
+                    ),
+                  }}
+                />
+              }
+            >
+              <ShieldTick
+                height={20}
+                width={20}
+                data-cy="branch-protected-icon"
+              />
+            </LabelHint>
           )}
           {branch.merge?.mergedAt && (
             <PointerLink onClick={onMergeDetail}>

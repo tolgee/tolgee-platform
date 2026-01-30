@@ -4,8 +4,10 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
+import io.tolgee.model.enums.Scope
 import io.tolgee.util.addDays
 
 class BranchTestData(
@@ -16,6 +18,7 @@ class BranchTestData(
   lateinit var mergeBranch: Branch
   lateinit var secondProject: Project
   lateinit var mergedBranchMerge: BranchMerge
+  lateinit var viewerUser: UserAccount
 
   init {
     this.root.apply {
@@ -28,6 +31,9 @@ class BranchTestData(
       }
       // add a project without a branch to test default branch creation
       addProjectWithoutBranch()
+
+      // add viewer user without branch management permission
+      addViewerUser()
     }
   }
 
@@ -41,6 +47,22 @@ class BranchTestData(
           name = "test"
         }
       }.self
+  }
+
+  private fun TestDataBuilder.addViewerUser() {
+    val builder =
+      addUserAccount {
+        username = "branch-viewer"
+      }
+    viewerUser = builder.self
+
+    projectBuilder.build {
+      addPermission {
+        project = this@build.self
+        user = viewerUser
+        scopes = arrayOf(Scope.TRANSLATIONS_VIEW)
+      }
+    }
   }
 
   private fun ProjectBuilder.addBranches() {
@@ -78,7 +100,7 @@ class BranchTestData(
         project = projectBuilder.self
         isProtected = false
         isDefault = false
-        archivedAt = currentDateProvider.date.addDays(-2)
+        deletedAt = currentDateProvider.date.addDays(-2)
         originBranch = this
       }
       addBranch {
