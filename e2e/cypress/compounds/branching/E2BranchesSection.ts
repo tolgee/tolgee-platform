@@ -96,4 +96,30 @@ export class E2BranchesSection {
       .findDcy('project-settings-branches-actions-menu')
       .should('not.exist');
   }
+
+  openCreateBranchDialog() {
+    this.getAddButton().click();
+  }
+
+  typeBranchNameAndBlur(name: string) {
+    gcy('branch-name-input').find('input').clear().type(name).blur();
+  }
+
+  clearBranchNameAndBlur() {
+    gcy('branch-name-input').find('input').clear().blur();
+  }
+
+  assertBranchNameInputHasError(name = 'This is not valid branch name') {
+    gcy('branch-name-input').contains(name).should('be.visible');
+  }
+
+  assertBranchNameInputHasNoError() {
+    gcy('branch-name-input')
+      .contains('This is not valid branch name')
+      .should('not.exist');
+  }
+
+  closeCreateBranchDialog() {
+    cy.get('body').type('{esc}');
+  }
 }

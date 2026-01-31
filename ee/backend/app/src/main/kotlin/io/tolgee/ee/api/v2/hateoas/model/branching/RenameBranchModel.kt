@@ -5,6 +5,6 @@ import io.tolgee.ee.api.v2.validation.ValidBranchName
 
 data class RenameBranchModel(
   @Schema(description = "New branch name", example = "feature/rename-branch")
-  @ValidBranchName
+  @field:ValidBranchName
   val name: String,
 )

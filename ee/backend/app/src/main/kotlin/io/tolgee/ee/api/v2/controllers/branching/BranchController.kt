@@ -36,6 +36,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.project.ProjectFeatureGuard
+import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -84,7 +85,7 @@ class BranchController(
   @AllowApiAccess
   @OpenApiOrderExtension(2)
   fun create(
-    @RequestBody branch: CreateBranchModel,
+    @RequestBody @Valid branch: CreateBranchModel,
   ): BranchModel {
     projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val branch =
@@ -134,7 +135,7 @@ class BranchController(
   @OpenApiOrderExtension(3)
   fun rename(
     @PathVariable branchId: Long,
-    @RequestBody rename: RenameBranchModel,
+    @RequestBody @Valid rename: RenameBranchModel,
   ): BranchModel {
     projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val branch = branchService.renameBranch(projectHolder.project.id, branchId, rename.name)
