@@ -41,6 +41,39 @@ Yup.setLocale({
   },
 });
 
+const isValidBranchName = (name: string | undefined): boolean => {
+  if (!name) return false;
+
+  // Allowed characters only: a-z, 0-9, . - _ / (lowercase)
+  if (!/^[a-z0-9.\-_/]+$/.test(name)) return false;
+
+  // Start: letter, number, or dot
+  if (!/^[a-z0-9.]/.test(name)) return false;
+
+  // End: letter, number, or dot
+  if (!/[a-z0-9.]$/.test(name)) return false;
+
+  // No consecutive slashes
+  if (name.includes('//')) return false;
+
+  // No consecutive dots
+  if (name.includes('..')) return false;
+
+  // Check slash-separated parts
+  const parts = name.split('/');
+  for (let i = 1; i < parts.length; i++) {
+    // Parts after first slash cannot start with dot
+    if (parts[i].startsWith('.')) return false;
+  }
+
+  // No part can end with .lock
+  for (const part of parts) {
+    if (part.endsWith('.lock')) return false;
+  }
+
+  return true;
+};
+
 export class Validation {
   static readonly USER_PASSWORD = (t: TranslateFunction) =>
     Yup.string().min(8).max(50).required();
@@ -528,9 +561,10 @@ export class Validation {
         .required()
         .min(2)
         .max(100)
-        .matches(
-          /^[a-z0-9]([a-z0-9-_/]*[a-z0-9])?$/i,
-          t('validation_invalid_branch_name')
+        .test(
+          'valid-branch-name',
+          t('validation_invalid_branch_name'),
+          (value) => isValidBranchName(value)
         ),
     });
 

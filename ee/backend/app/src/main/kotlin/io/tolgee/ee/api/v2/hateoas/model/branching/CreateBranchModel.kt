@@ -7,7 +7,7 @@ import org.springframework.hateoas.RepresentationModel
 @Suppress("unused")
 open class CreateBranchModel(
   @Schema(description = "Branch name", example = "feature/new-branch")
-  @ValidBranchName
+  @field:ValidBranchName
   val name: String,
   @Schema(description = "Origin branch id")
   val originBranchId: Long,

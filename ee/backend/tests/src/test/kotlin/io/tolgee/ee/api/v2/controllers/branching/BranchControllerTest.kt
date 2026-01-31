@@ -327,6 +327,122 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.BRANCH_MANAGEMENT])
+  fun `accepts valid branch names`() {
+    val validNames =
+      listOf(
+        "ab",
+        "my-feature",
+        "feature123",
+        "my-feature-branch",
+        "my_feature_branch",
+        "my/branch",
+        "my/sub/branch",
+        ".hidden",
+        "my-feature.",
+        "v1.0.0",
+        "my.feature.branch",
+      )
+
+    validNames.forEach { name ->
+      performProjectAuthPost(
+        "branches",
+        mapOf(
+          "name" to name,
+          "originBranchId" to testData.mainBranch.id,
+        ),
+      ).andIsOk
+      // Delete branch to allow next creation
+      val branch = branchRepository.findActiveByProjectIdAndName(testData.project.id, name)
+      branch?.let { branchRepository.delete(it) }
+    }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.BRANCH_MANAGEMENT])
+  fun `rejects branch names with uppercase`() {
+    listOf("Feature", "BRANCH", "myBranch").forEach { name ->
+      performProjectAuthPost(
+        "branches",
+        mapOf(
+          "name" to name,
+          "originBranchId" to testData.mainBranch.id,
+        ),
+      ).andIsBadRequest
+    }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.BRANCH_MANAGEMENT])
+  fun `rejects branch names with invalid start or end characters`() {
+    listOf("-branch", "_branch", "/branch", "branch-", "branch_", "branch/").forEach { name ->
+      performProjectAuthPost(
+        "branches",
+        mapOf(
+          "name" to name,
+          "originBranchId" to testData.mainBranch.id,
+        ),
+      ).andIsBadRequest
+    }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.BRANCH_MANAGEMENT])
+  fun `rejects branch names with consecutive slashes or dots`() {
+    listOf("feature//branch", "feature..branch").forEach { name ->
+      performProjectAuthPost(
+        "branches",
+        mapOf(
+          "name" to name,
+          "originBranchId" to testData.mainBranch.id,
+        ),
+      ).andIsBadRequest
+    }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.BRANCH_MANAGEMENT])
+  fun `rejects branch names with dot after slash`() {
+    listOf("feature/.hidden", "a/.b").forEach { name ->
+      performProjectAuthPost(
+        "branches",
+        mapOf(
+          "name" to name,
+          "originBranchId" to testData.mainBranch.id,
+        ),
+      ).andIsBadRequest
+    }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.BRANCH_MANAGEMENT])
+  fun `rejects branch names ending with dot lock`() {
+    listOf("branch.lock", "feature/branch.lock").forEach { name ->
+      performProjectAuthPost(
+        "branches",
+        mapOf(
+          "name" to name,
+          "originBranchId" to testData.mainBranch.id,
+        ),
+      ).andIsBadRequest
+    }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.BRANCH_MANAGEMENT])
+  fun `rejects branch names with disallowed characters`() {
+    listOf("feature branch", "feature@branch", "feature#branch").forEach { name ->
+      performProjectAuthPost(
+        "branches",
+        mapOf(
+          "name" to name,
+          "originBranchId" to testData.mainBranch.id,
+        ),
+      ).andIsBadRequest
+    }
+  }
+
   private fun createConflictKeys(): Pair<Key, Key> {
     fun createKey(
       name: String,
