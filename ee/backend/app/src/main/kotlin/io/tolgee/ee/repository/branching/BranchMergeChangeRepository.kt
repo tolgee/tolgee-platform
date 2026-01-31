@@ -26,6 +26,7 @@ interface BranchMergeChangeRepository : JpaRepository<BranchMergeChange, Long> {
       bm.id = :mergeId
       and bm.sourceBranch.project.id = :projectId
       and bmc.change = io.tolgee.model.enums.BranchKeyMergeChangeType.CONFLICT
+    order by bmc.id asc
   """,
   )
   fun findBranchMergeConflicts(
@@ -48,6 +49,7 @@ interface BranchMergeChangeRepository : JpaRepository<BranchMergeChange, Long> {
     where bm.id = :mergeId
       and bm.sourceBranch.project.id = :projectId
       and (:type is null or bmc.change = :type)
+    order by bmc.id asc
     """,
   )
   fun findBranchMergeChanges(
