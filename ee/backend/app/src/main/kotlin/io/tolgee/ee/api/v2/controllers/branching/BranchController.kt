@@ -240,11 +240,25 @@ class BranchController(
     return pagedBranchMergeChangeResourceAssembler.toModel(changes, branchMergeChangeModelAssembler)
   }
 
+  @GetMapping(value = ["/merge/{mergeId}/changes/{changeId}"])
+  @Operation(summary = "Get single branch merge session change")
+  @AllowApiAccess
+  @UseDefaultPermissions
+  @OpenApiOrderExtension(8)
+  fun getBranchMergeSessionChange(
+    @PathVariable mergeId: Long,
+    @PathVariable changeId: Long,
+  ): BranchMergeChangeModel {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
+    val change = branchService.getBranchMergeChange(projectHolder.project.id, mergeId, changeId)
+    return branchMergeChangeModelAssembler.toModel(change)
+  }
+
   @PutMapping(value = ["/merge/{mergeId}/resolve"])
   @Operation(summary = "Resolve branch merge session conflicts")
   @AllowApiAccess
   @UseDefaultPermissions
-  @OpenApiOrderExtension(8)
+  @OpenApiOrderExtension(9)
   fun resolveConflict(
     @PathVariable mergeId: Long,
     @RequestBody request: ResolveBranchMergeConflictRequest,
@@ -257,7 +271,7 @@ class BranchController(
   @Operation(summary = "Resolve all branch merge session conflicts")
   @AllowApiAccess
   @UseDefaultPermissions
-  @OpenApiOrderExtension(8)
+  @OpenApiOrderExtension(10)
   fun resolveAllConflicts(
     @PathVariable mergeId: Long,
     @RequestBody request: ResolveAllBranchMergeConflictsRequest,
@@ -270,7 +284,7 @@ class BranchController(
   @Operation(summary = "Delete branch merge session")
   @AllowApiAccess
   @UseDefaultPermissions
-  @OpenApiOrderExtension(9)
+  @OpenApiOrderExtension(11)
   fun deleteBranchMerge(
     @PathVariable mergeId: Long,
   ) {
@@ -283,7 +297,7 @@ class BranchController(
   @AllowApiAccess
   @RequestActivity(ActivityType.BRANCH_MERGE)
   @UseDefaultPermissions
-  @OpenApiOrderExtension(10)
+  @OpenApiOrderExtension(12)
   fun merge(
     @PathVariable mergeId: Long,
     @RequestBody(required = false) request: ApplyBranchMergeRequest?,

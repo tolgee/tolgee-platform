@@ -328,6 +328,111 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @ProjectJWTAuthTestMethod
+  fun `gets single merge change`() {
+    initConflicts()
+
+    // Create merge
+    val mergeResult =
+      performProjectAuthPost(
+        "branches/merge/preview",
+        mapOf("sourceBranchId" to testData.featureBranch.id),
+      ).andIsOk.andReturn().mapResponseTo<Map<String, Any>>()
+    val mergeId = mergeResult["id"]!! as Int
+
+    // Get all changes to find the change ID
+    val changesResult =
+      performProjectAuthGet("branches/merge/$mergeId/changes?type=CONFLICT")
+        .andIsOk
+        .andReturn()
+        .mapResponseTo<Map<String, Any>>()
+
+    @Suppress("UNCHECKED_CAST")
+    val changes =
+      (changesResult["_embedded"] as Map<String, Any>)["branchMergeChanges"] as List<Map<String, Any>>
+    val changeId = changes[0]["id"] as Int
+
+    // Get single change
+    performProjectAuthGet("branches/merge/$mergeId/changes/$changeId")
+      .andIsOk
+      .andAssertThatJson {
+        node("id").isEqualTo(changeId)
+        node("type").isEqualTo("CONFLICT")
+        node("resolution").isNull()
+        node("sourceKey") {
+          node("keyName").isEqualTo("conflict-key")
+        }
+        node("targetKey") {
+          node("keyName").isEqualTo("conflict-key")
+        }
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `gets single merge change after resolution`() {
+    initConflicts()
+
+    // Create merge
+    val mergeResult =
+      performProjectAuthPost(
+        "branches/merge/preview",
+        mapOf("sourceBranchId" to testData.featureBranch.id),
+      ).andIsOk.andReturn().mapResponseTo<Map<String, Any>>()
+    val mergeId = mergeResult["id"]!! as Int
+
+    // Get all changes to find the change ID
+    val changesResult =
+      performProjectAuthGet("branches/merge/$mergeId/changes?type=CONFLICT")
+        .andIsOk
+        .andReturn()
+        .mapResponseTo<Map<String, Any>>()
+
+    @Suppress("UNCHECKED_CAST")
+    val changes =
+      (changesResult["_embedded"] as Map<String, Any>)["branchMergeChanges"] as List<Map<String, Any>>
+    val changeId = changes[0]["id"] as Int
+
+    // Resolve the conflict
+    performProjectAuthPut(
+      "branches/merge/$mergeId/resolve",
+      mapOf("changeId" to changeId, "resolve" to "SOURCE"),
+    ).andIsOk
+
+    // Get single change - should show resolution and merged key
+    performProjectAuthGet("branches/merge/$mergeId/changes/$changeId")
+      .andIsOk
+      .andAssertThatJson {
+        node("id").isEqualTo(changeId)
+        node("type").isEqualTo("CONFLICT")
+        node("resolution").isEqualTo("SOURCE")
+        node("effectiveResolution").isEqualTo("SOURCE")
+        node("mergedKey") {
+          node("keyName").isEqualTo("conflict-key")
+          node("translations.en.text").isEqualTo("new translation")
+        }
+      }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns not found for non-existent change`() {
+    initConflicts()
+
+    // Create merge
+    val mergeResult =
+      performProjectAuthPost(
+        "branches/merge/preview",
+        mapOf("sourceBranchId" to testData.featureBranch.id),
+      ).andIsOk.andReturn().mapResponseTo<Map<String, Any>>()
+    val mergeId = mergeResult["id"]!! as Int
+
+    performProjectAuthGet("branches/merge/$mergeId/changes/999999")
+      .andIsNotFound
+      .andHasErrorMessage(Message.BRANCH_MERGE_CHANGE_NOT_FOUND)
+  }
+
+  @Test
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.BRANCH_MANAGEMENT])
   fun `accepts valid branch names`() {
     val validNames =

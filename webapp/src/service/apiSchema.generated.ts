@@ -445,6 +445,9 @@ export interface paths {
   "/v2/projects/{projectId}/branches/merge/{mergeId}/changes": {
     get: operations["getBranchMergeSessionChanges"];
   };
+  "/v2/projects/{projectId}/branches/merge/{mergeId}/changes/{changeId}": {
+    get: operations["getBranchMergeSessionChange"];
+  };
   "/v2/projects/{projectId}/branches/merge/{mergeId}/conflicts": {
     get: operations["getBranchMergeSessionConflicts"];
   };
@@ -12755,6 +12758,47 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelBranchMergeChangeModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getBranchMergeSessionChange: {
+    parameters: {
+      path: {
+        mergeId: number;
+        changeId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BranchMergeChangeModel"];
         };
       };
       /** Bad Request */

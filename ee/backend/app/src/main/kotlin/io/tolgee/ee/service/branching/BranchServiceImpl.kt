@@ -259,6 +259,17 @@ class BranchServiceImpl(
   }
 
   @Transactional
+  override fun getBranchMergeChange(
+    projectId: Long,
+    branchMergeId: Long,
+    changeId: Long,
+  ): BranchMergeChangeView {
+    val project = entityManager.getReference(Project::class.java, projectId)
+    val user = authenticationFacade.authenticatedUser
+    return branchMergeService.getChange(project, branchMergeId, changeId, user.id)
+  }
+
+  @Transactional
   override fun resolveConflict(
     projectId: Long,
     mergeId: Long,
