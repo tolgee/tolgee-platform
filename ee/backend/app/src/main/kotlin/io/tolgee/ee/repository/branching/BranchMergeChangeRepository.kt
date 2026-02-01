@@ -89,4 +89,26 @@ interface BranchMergeChangeRepository : JpaRepository<BranchMergeChange, Long> {
     mergeId: Long,
     resolution: BranchKeyMergeResolutionType,
   ): Int
+
+  @Query(
+    """
+    select new io.tolgee.dtos.queryResults.branching.BranchMergeChangeView(
+        bmc.id,
+        bmc.change,
+        bmc.resolution,
+        bmc.sourceKey.id,
+        bmc.targetKey.id
+      )
+    from BranchMergeChange bmc
+    join bmc.branchMerge bm
+    where bm.id = :mergeId
+      and bm.sourceBranch.project.id = :projectId
+      and bmc.id = :changeId
+    """,
+  )
+  fun findBranchMergeChangeById(
+    projectId: Long,
+    mergeId: Long,
+    changeId: Long,
+  ): BranchMergeChangeView?
 }

@@ -104,6 +104,14 @@ class BranchServiceOssStub(
     return Page.empty()
   }
 
+  override fun getBranchMergeChange(
+    projectId: Long,
+    branchMergeId: Long,
+    changeId: Long,
+  ): BranchMergeChangeView {
+    throw UnsupportedOperationException()
+  }
+
   override fun resolveConflict(
     projectId: Long,
     mergeId: Long,

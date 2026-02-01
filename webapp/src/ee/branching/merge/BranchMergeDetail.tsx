@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
+import { useQueryClient } from 'react-query';
 import {
   Box,
   Button,
@@ -26,6 +27,7 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { MENU_WIDTH } from 'tg.views/projects/projectMenu/SideMenu';
 import { confirmation } from 'tg.hooks/confirmation';
 import { BranchProgressModal } from '../components/BranchProgressModal';
+import { apiSchemaHttpService } from 'tg.service/http/ApiSchemaHttpService';
 
 type RouteParams = {
   mergeId: string;
@@ -58,6 +60,7 @@ const StyledFloatingActionsInner = styled(Box)`
 export const BranchMergeDetail: FC = () => {
   const { t } = useTranslate();
   const project = useProject();
+  const queryClient = useQueryClient();
   const messaging = useMessage();
   const history = useHistory();
   const { mergeId } = useParams<RouteParams>();
@@ -151,10 +154,45 @@ export const BranchMergeDetail: FC = () => {
         },
       },
     });
-    await Promise.all([
-      changesLoadable.refetch?.(),
-      previewLoadable.refetch?.(),
-    ]);
+
+    // Fetch just the updated change instead of all pages
+    const updatedChange = await apiSchemaHttpService.schemaRequest(
+      '/v2/projects/{projectId}/branches/merge/{mergeId}/changes/{changeId}',
+      'get'
+    )({
+      path: {
+        projectId: project.id,
+        mergeId: numericMergeId,
+        changeId: conflict.id,
+      },
+    });
+
+    // Update the cache with the single changed item
+    const queryKey = [
+      '/v2/projects/{projectId}/branches/merge/{mergeId}/changes',
+      { projectId: project.id, mergeId: numericMergeId },
+      { size: 10, type: selectedTab },
+    ];
+
+    queryClient.setQueryData(queryKey, (oldData: any) => {
+      if (!oldData?.pages) return oldData;
+      return {
+        ...oldData,
+        pages: oldData.pages.map((page: any) => ({
+          ...page,
+          _embedded: {
+            ...page._embedded,
+            branchMergeChanges: page._embedded?.branchMergeChanges?.map(
+              (change: any) =>
+                change.id === conflict.id ? updatedChange : change
+            ),
+          },
+        })),
+      };
+    });
+
+    // Only refetch preview for updated stats (conflict counts)
+    await previewLoadable.refetch?.();
   };
 
   const handleResolveAll = async (resolution: 'SOURCE' | 'TARGET') => {
@@ -166,6 +204,7 @@ export const BranchMergeDetail: FC = () => {
         },
       },
     });
+    // For resolve all, we need to refetch all conflicts since every item is updated
     await Promise.all([
       changesLoadable.refetch?.(),
       previewLoadable.refetch?.(),

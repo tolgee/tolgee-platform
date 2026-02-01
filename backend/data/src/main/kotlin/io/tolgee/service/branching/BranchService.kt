@@ -94,6 +94,12 @@ interface BranchService {
     pageable: Pageable,
   ): Page<BranchMergeChangeView>
 
+  fun getBranchMergeChange(
+    projectId: Long,
+    branchMergeId: Long,
+    changeId: Long,
+  ): BranchMergeChangeView
+
   fun resolveConflict(
     projectId: Long,
     mergeId: Long,

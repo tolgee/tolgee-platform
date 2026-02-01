@@ -161,6 +161,44 @@ class BranchMergeService(
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
     val changes = branchMergeChangeRepository.findBranchMergeChanges(project.id, mergeId, type, pageable)
 
+    getChanges(changes.toList(), merge, project, userId)
+
+    return changes
+  }
+
+  fun getConflict(
+    projectId: Long,
+    mergeId: Long,
+    changeId: Long,
+  ): BranchMergeChange {
+    return branchMergeChangeRepository.findActiveMergeConflict(projectId, mergeId, changeId)
+      ?: throw NotFoundException(Message.BRANCH_MERGE_CHANGE_NOT_FOUND)
+  }
+
+  fun getChange(
+    project: Project,
+    mergeId: Long,
+    changeId: Long,
+    userId: Long,
+  ): BranchMergeChangeView {
+    val merge =
+      findActiveMerge(project.id, mergeId)
+        ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    val change =
+      branchMergeChangeRepository.findBranchMergeChangeById(project.id, mergeId, changeId)
+        ?: throw NotFoundException(Message.BRANCH_MERGE_CHANGE_NOT_FOUND)
+
+    getChanges(listOf(change), merge, project, userId)
+
+    return change
+  }
+
+  private fun getChanges(
+    changes: List<BranchMergeChangeView>,
+    merge: BranchMerge,
+    project: Project,
+    userId: Long,
+  ) {
     val languages =
       languageService.getLanguagesForTranslationsView(
         project.languages.map { it.tag }.toSet(),
@@ -179,23 +217,18 @@ class BranchMergeService(
         keyRepository.findAllDetailedByIdIn(keyIds).associateBy { it.id }
       }
 
+    val snapshotOriginalKeyIds = changes.mapNotNull { it.targetBranchKeyId }.toSet()
+    val snapshotByTargetKeyId =
+      branchSnapshotService
+        .getSnapshotKeysByOriginalKeyIdIn(merge.sourceBranch.id, snapshotOriginalKeyIds)
+        .associateBy { it.originalKeyId }
+
     changes.forEach { change ->
       change.sourceBranchKeyId?.let { id -> change.sourceBranchKey = keysById[id] }
       change.targetBranchKeyId?.let { id -> change.targetBranchKey = keysById[id] }
       change.allowedLanguageTags = allowedLanguageTags
+      enrichChangeWithSnapshot(change, snapshotByTargetKeyId, allowedLanguageTags)
     }
-    this.enrichChanges(changes, merge, allowedLanguageTags)
-
-    return changes
-  }
-
-  fun getConflict(
-    projectId: Long,
-    mergeId: Long,
-    changeId: Long,
-  ): BranchMergeChange {
-    return branchMergeChangeRepository.findActiveMergeConflict(projectId, mergeId, changeId)
-      ?: throw NotFoundException(Message.BRANCH_MERGE_CHANGE_NOT_FOUND)
   }
 
   @Transactional
@@ -264,33 +297,26 @@ class BranchMergeService(
     }
   }
 
-  fun enrichChanges(
-    changes: Page<BranchMergeChangeView>,
-    merge: BranchMerge,
+  private fun enrichChangeWithSnapshot(
+    change: BranchMergeChangeView,
+    snapshotByTargetKeyId: Map<Long, KeySnapshot>,
     allowedLanguageTags: Set<String>,
   ) {
-    val snapshotOriginalKeyIds = changes.mapNotNull { it.targetBranchKeyId }.toSet()
-    val snapshotByTargetKeyId =
-      branchSnapshotService
-        .getSnapshotKeysByOriginalKeyIdIn(merge.sourceBranch.id, snapshotOriginalKeyIds)
-        .associateBy { it.originalKeyId }
-    changes.forEach { change ->
-      change.effectiveResolutionType = change.resolutionType
-      if (change.changeType == BranchKeyMergeChangeType.UPDATE ||
-        change.changeType == BranchKeyMergeChangeType.CONFLICT
-      ) {
-        val sourceKey = change.sourceBranchKey
-        val targetKey = change.targetBranchKey
-        change.changedTranslations = computeChangedTranslations(sourceKey, targetKey, allowedLanguageTags)
-        val resolution =
-          when (change.changeType) {
-            BranchKeyMergeChangeType.CONFLICT -> change.resolutionType
-            else -> change.resolutionType ?: BranchKeyMergeResolutionType.SOURCE
-          }
-        if (sourceKey != null && targetKey != null && resolution != null) {
-          val snapshot = change.targetBranchKeyId?.let { snapshotByTargetKeyId[it] }
-          change.mergedBranchKey = mergeKeyView(sourceKey, targetKey, snapshot, resolution)
+    change.effectiveResolutionType = change.resolutionType
+    if (change.changeType == BranchKeyMergeChangeType.UPDATE ||
+      change.changeType == BranchKeyMergeChangeType.CONFLICT
+    ) {
+      val sourceKey = change.sourceBranchKey
+      val targetKey = change.targetBranchKey
+      change.changedTranslations = computeChangedTranslations(sourceKey, targetKey, allowedLanguageTags)
+      val resolution =
+        when (change.changeType) {
+          BranchKeyMergeChangeType.CONFLICT -> change.resolutionType
+          else -> change.resolutionType ?: BranchKeyMergeResolutionType.SOURCE
         }
+      if (sourceKey != null && targetKey != null && resolution != null) {
+        val snapshot = change.targetBranchKeyId?.let { snapshotByTargetKeyId[it] }
+        change.mergedBranchKey = mergeKeyView(sourceKey, targetKey, snapshot, resolution)
       }
     }
   }

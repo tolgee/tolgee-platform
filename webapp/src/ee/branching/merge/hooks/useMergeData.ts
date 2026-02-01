@@ -24,6 +24,7 @@ export const useMergeData = (
     options: {
       enabled: Boolean(previewLoadable.data),
       keepPreviousData: true,
+      staleTime: 60000, // 1 minute - prevent refetch on tab switch
       getNextPageParam: (lastPage) => {
         if (
           lastPage.page &&
