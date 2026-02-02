@@ -88,6 +88,18 @@ class ProjectBuilder(
 
   var data = DATA()
 
+  /**
+   * Lazily creates a default branch for the project.
+   * This is used to automatically set branch on Keys, Tasks, and Imports.
+   */
+  val defaultBranch: Branch by lazy {
+    // Check if a default branch already exists
+    data.branches.find { it.self.isDefault }?.self
+      ?: Branch.createMainBranch(self).also { branch ->
+        data.branches.add(BranchBuilder.forExistingBranch(this, branch))
+      }
+  }
+
   fun addPermission(ft: FT<Permission>) = addOperation(data.permissions, ft)
 
   fun addApiKey(ft: FT<ApiKey>) = addOperation(data.apiKeys, ft)

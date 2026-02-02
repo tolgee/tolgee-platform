@@ -23,6 +23,7 @@ class KeyBuilder(
   override var self: Key =
     Key().also {
       it.project = projectBuilder.self
+      it.branch = projectBuilder.defaultBranch
     }
 
   fun addTranslation(ft: FT<Translation>): TranslationBuilder {
