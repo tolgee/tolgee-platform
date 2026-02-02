@@ -10,6 +10,7 @@ import io.tolgee.dtos.dataImport.ImportAddFilesParams
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.formats.ImportFileProcessorFactory
 import io.tolgee.model.Project
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportTranslation
@@ -125,7 +126,9 @@ class FileProcessorContextMockUtil {
     fileName: String,
     resourcesFilePath: String,
   ) {
-    importMock = Import(project = Project())
+    val project = Project()
+    val branch = Branch().apply { this.project = project }
+    importMock = Import(project = project).apply { this.branch = branch }
     importFile = ImportFile(fileName, importMock)
     importFileDto =
       ImportFileDto(

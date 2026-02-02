@@ -78,10 +78,10 @@ class Key(
   var namespace: Namespace? = null
 
   // Nullable for backward compatibility: NULL represents default branch for legacy data
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "branch_id")
   @ActivityLoggedProp
-  var branch: Branch? = null
+  lateinit var branch: Branch
 
   @OneToMany(mappedBy = "key")
   var translations: MutableList<Translation> = mutableListOf()

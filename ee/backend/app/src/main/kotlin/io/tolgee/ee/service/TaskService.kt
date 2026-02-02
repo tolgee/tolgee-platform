@@ -505,7 +505,7 @@ class TaskService(
   private fun getBranchForTask(
     projectId: Long,
     branchName: String?,
-  ): Branch? {
+  ): Branch {
     return branchService.getActiveOrDefault(projectId, branchName)
   }
 

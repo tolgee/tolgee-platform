@@ -88,8 +88,8 @@ class Task :
   @ActivityLoggedProp
   var author: UserAccount? = null
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = true)
-  var branch: Branch? = null
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  lateinit var branch: Branch
 
   @field:Size(max = 255)
   @Column(name = "origin_branch_name", length = 255)
