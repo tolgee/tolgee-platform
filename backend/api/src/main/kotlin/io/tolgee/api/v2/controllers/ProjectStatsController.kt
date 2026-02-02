@@ -57,7 +57,7 @@ class ProjectStatsController(
     val languages = languageService.getProjectLanguages(projectHolder.project.id).associateBy { it.id }
     val languageStats =
       languageStatsService
-        .getLanguageStats(projectHolder.project.id, branch?.id)
+        .getLanguageStats(projectHolder.project.id, languages.keys, branch?.id)
         .sortedBy { languages[it.languageId]?.name }
         .sortedBy { languages[it.languageId]?.base == false }
 

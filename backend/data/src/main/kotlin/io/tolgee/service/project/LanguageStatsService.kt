@@ -130,8 +130,17 @@ class LanguageStatsService(
     projectId: Long,
     branchId: Long? = null,
   ): List<LanguageStatsDto> {
-    val data = languageStatsRepository.getDtosByProjectIdAndBranchId(projectId, branchId)
-    if (data.isNotEmpty()) {
+    return languageStatsRepository.getDtosByProjectIdAndBranchId(projectId, branchId)
+  }
+
+  fun getLanguageStats(
+    projectId: Long,
+    expectedLangs: Set<Long>,
+    branchId: Long? = null,
+  ): List<LanguageStatsDto> {
+    val data = getLanguageStats(projectId, branchId)
+    val missingStats = expectedLangs.minus(data.map { it.languageId }.toSet())
+    if (missingStats.isEmpty()) {
       return data
     }
 
