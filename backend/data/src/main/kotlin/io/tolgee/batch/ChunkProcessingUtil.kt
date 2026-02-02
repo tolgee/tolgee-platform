@@ -67,12 +67,18 @@ open class ChunkProcessingUtil(
       return
     }
 
-    execution.stackTrace = exception.stackTraceToString()
     execution.status = BatchJobChunkExecutionStatus.FAILED
     execution.errorMessage = (exception as? ExceptionWithMessage)?.tolgeeMessage
     if (exception !is MultipleItemsFailedException) {
+      execution.stackTrace = exception.stackTraceToString().take(MAX_STACK_TRACE_LENGTH)
       execution.errorKey = ExceptionUtils.getRootCause(exception)?.javaClass?.simpleName
     } else {
+      execution.stackTrace =
+        exception.exceptions
+          .distinctBy { it.code }
+          .mapIndexed { index, e -> "Exception $index:\n${e.stackTraceToString()}" }
+          .joinToString("\n\n")
+          .take(MAX_STACK_TRACE_LENGTH)
       execution.errorKey =
         exception.exceptions
           .map { ExceptionUtils.getRootCause(it)?.javaClass?.simpleName }
@@ -250,5 +256,9 @@ open class ChunkProcessingUtil(
         "jakarta.persistence.lock.timeout",
         LockOptions.NO_WAIT,
       ).resultList as List<BatchJobChunkExecution>
+  }
+
+  companion object {
+    private const val MAX_STACK_TRACE_LENGTH = 65535
   }
 }
