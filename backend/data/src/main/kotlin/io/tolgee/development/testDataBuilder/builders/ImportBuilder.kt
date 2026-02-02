@@ -18,6 +18,7 @@ class ImportBuilder(
       projectBuilder.onlyUser?.let {
         author = it
       }
+      branch = projectBuilder.defaultBranch
     }
 
   fun addImportFile(ft: FT<ImportFile>) = addOperation(data.importFiles, ft)

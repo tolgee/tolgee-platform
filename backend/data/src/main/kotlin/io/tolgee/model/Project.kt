@@ -3,6 +3,7 @@ package io.tolgee.model
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.api.ISimpleProject
+import io.tolgee.exceptions.DefaultBranchNotFoundException
 import io.tolgee.model.automations.Automation
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
@@ -198,8 +199,9 @@ class Project(
     return branches.any { it.isDefault }
   }
 
-  fun getDefaultBranch(): Branch? {
+  fun getDefaultBranch(): Branch {
     return branches.find { it.isDefault }
+      ?: throw DefaultBranchNotFoundException()
   }
 
   /**

@@ -629,6 +629,9 @@ class TestDataService(
   }
 
   private fun saveBranches(builder: ProjectBuilder) {
+    // Ensure a default branch exists before saving
+    // This forces the lazy property to be evaluated, which creates the default branch if needed
+    builder.defaultBranch
     builder.data.branches.filter { it.self.id == 0L }.forEach {
       entityManager.persist(it.self)
     }
