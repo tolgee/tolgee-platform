@@ -15,4 +15,6 @@ export const AnimatedStars = styled(Stars)`
   animation: ${twinkle} 1.5s ease-in-out infinite,
     ${pulse} 2s ease-in-out infinite;
   color: ${({ theme }) => theme.palette.primary.main};
+  width: 14px;
+  height: 14px;
 `;
