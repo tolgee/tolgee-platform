@@ -226,6 +226,9 @@ class UserAccountService(
     toDelete.preferences?.let {
       entityManager.remove(it)
     }
+    // Clear the reference to avoid Hibernate 6.6's CHECK_ON_FLUSH validation error
+    // when the removed preferences entity is still referenced by the UserAccount
+    toDelete.preferences = null
     toDelete.invitations?.forEach {
       entityManager.remove(it)
     }
@@ -608,44 +611,50 @@ class UserAccountService(
     // We need to migrate what's owned by `___implicit_user` to the initial user
     val initialUser = findInitialUser() ?: throw IllegalStateException("Initial user does not exist?")
 
-    legacyImplicitUser.apiKeys?.forEach {
+    // Collect entities to transfer before modifying collections
+    // This avoids issues with Hibernate 6.6's stricter orphanRemoval handling
+    val apiKeysToTransfer = legacyImplicitUser.apiKeys?.toList() ?: emptyList()
+    val patsToTransfer = legacyImplicitUser.pats?.toList() ?: emptyList()
+    val permissionsToTransfer = legacyImplicitUser.permissions.toList()
+    val organizationRolesToTransfer = legacyImplicitUser.organizationRoles.toList()
+    val preferencesToTransfer = legacyImplicitUser.preferences
+
+    // Detach the legacy user to prevent orphanRemoval from deleting reassigned entities
+    entityManager.detach(legacyImplicitUser)
+
+    // Transfer entities to the initial user
+    apiKeysToTransfer.forEach {
       it.userAccount = initialUser
-      initialUser.apiKeys!!.add(it)
       entityManager.merge(it)
     }
 
-    legacyImplicitUser.pats?.forEach {
+    patsToTransfer.forEach {
       it.userAccount = initialUser
-      initialUser.pats!!.add(it)
       entityManager.merge(it)
     }
 
-    legacyImplicitUser.permissions.forEach {
+    permissionsToTransfer.forEach {
       it.user = initialUser
-      initialUser.permissions.add(it)
       entityManager.merge(it)
     }
 
-    legacyImplicitUser.preferences?.let {
+    preferencesToTransfer?.let {
       it.userAccount = initialUser
       entityManager.merge(it)
     }
 
-    legacyImplicitUser.organizationRoles.forEach {
+    organizationRolesToTransfer.forEach {
       it.user = initialUser
-      initialUser.organizationRoles.add(it)
       entityManager.merge(it)
     }
-
-    legacyImplicitUser.apiKeys?.clear()
-    legacyImplicitUser.pats?.clear()
-    legacyImplicitUser.permissions.clear()
-    legacyImplicitUser.organizationRoles.clear()
 
     entityManager.flush()
     userAccountRepository.save(initialUser)
 
-    userAccountRepository.deleteById(legacyImplicitUser.id)
+    // Re-fetch and delete the legacy user (it's detached so we need to get it fresh)
+    findActive("___implicit_user")?.let {
+      userAccountRepository.deleteById(it.id)
+    }
   }
 
   fun findActiveView(id: Long): UserAccountView? = userAccountRepository.findActiveView(id)

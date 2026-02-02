@@ -168,7 +168,7 @@ class ImportService(
     if (importLanguage.existingLanguage == existingLanguage) {
       return
     }
-    val import = importLanguage.file.import
+    val import = importLanguage.file.importData
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val dataManager = ImportDataManager(applicationContext, import)
     val oldExistingLanguage = importLanguage.existingLanguage
@@ -186,7 +186,7 @@ class ImportService(
     namespace: String?,
   ) {
     val file = findFile(projectId, authorId, fileId) ?: throw NotFoundException()
-    val import = file.import
+    val import = file.importData
     Sentry.addBreadcrumb("Import ID: ${import.id}")
     val dataManager = ImportDataManager(applicationContext, import)
     file.namespace = getSafeNamespace(namespace)
@@ -256,7 +256,7 @@ class ImportService(
             left join fetch ik.keyMeta ikm
             left join fetch ikm.comments ikc
             join ik.file if
-            where if.import = :import
+            where if.importData = :import
             """,
         ).setParameter("import", import)
         .resultList as List<ImportKey>
@@ -361,10 +361,10 @@ class ImportService(
 
   @Transactional
   fun deleteLanguage(language: ImportLanguage) {
-    val import = language.file.import
+    val import = language.file.importData
     this.importTranslationRepository.deleteAllByLanguage(language)
     this.importLanguageRepository.delete(language)
-    if (this.findLanguages(import = language.file.import).isEmpty()) {
+    if (this.findLanguages(import = language.file.importData).isEmpty()) {
       deleteImport(import)
       return
     }

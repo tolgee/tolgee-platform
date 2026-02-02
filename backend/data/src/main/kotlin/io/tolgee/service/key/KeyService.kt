@@ -22,6 +22,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.repository.TaskKeyRepository
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.key.utils.KeyInfoProvider
@@ -55,6 +56,7 @@ class KeyService(
   private val activityHolder: ActivityHolder,
   @Lazy
   private val aiPlaygroundResultService: AiPlaygroundResultService,
+  private val taskKeyRepository: TaskKeyRepository,
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -293,11 +295,19 @@ class KeyService(
   @Transactional
   fun delete(id: Long) {
     val key = findOptional(id).orElseThrow { NotFoundException() }
+    val namespace = key.namespace
     translationService.deleteAllByKey(id)
     keyMetaService.deleteAllByKeyId(id)
     screenshotService.deleteAllByKeyId(id)
-    keyRepository.delete(key)
-    namespaceService.deleteIfUnused(key.namespace)
+    taskKeyRepository.deleteAllByKeyIdIn(listOf(id))
+    // Flush and clear the persistence context to ensure deletions are synchronized
+    // and to prevent Hibernate 6.6's CHECK_ON_FLUSH from seeing stale relationships
+    entityManager.flush()
+    entityManager.clear()
+    // Re-fetch the key after clearing the persistence context
+    val keyToDelete = keyRepository.findById(id).orElseThrow { NotFoundException() }
+    keyRepository.delete(keyToDelete)
+    namespaceService.deleteIfUnused(namespace)
     aiPlaygroundResultService.deleteResultsByKeys(listOf(id))
   }
 
@@ -315,6 +325,15 @@ class KeyService(
       screenshotService.deleteAllByKeyId(ids)
     }
     aiPlaygroundResultService.deleteResultsByKeys(ids)
+
+    traceLogMeasureTime("delete multiple keys: delete task keys") {
+      taskKeyRepository.deleteAllByKeyIdIn(ids)
+    }
+
+    // Flush and clear the persistence context to ensure deletions are synchronized
+    // and to prevent Hibernate 6.6's CHECK_ON_FLUSH from seeing stale relationships
+    entityManager.flush()
+    entityManager.clear()
 
     val keys =
       traceLogMeasureTime("delete multiple keys: fetch keys") {
@@ -334,6 +353,7 @@ class KeyService(
   fun deleteAllByProject(projectId: Long) {
     keyMetaService.deleteAllByProject(projectId)
     screenshotService.deleteAllByProject(projectId)
+    taskKeyRepository.deleteAllByKeyProjectId(projectId)
 
     entityManager
       .createQuery("""delete from Key where project.id = :projectId""")
