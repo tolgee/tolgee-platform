@@ -7,10 +7,12 @@ This file provides Tolgee-specific guidance for AI coding agents working on the 
 This project uses a multi-repository setup managed by a wrapper repository:
 
 ```
-tolgee-platform/                    # platform-dev-start (wrapper repo)
+tolgee-company/                     # platform-dev-start (wrapper repo)
 ├── .git/                           # git@github.com:tolgee/platform-dev-start.git
 ├── start.sh                        # Development startup script
-├── public/                         # tolgee-platform (main repo)
+├── CLAUDE.md                       # Shared Claude Code config
+├── .claude/                        # Shared Claude Code config dir
+├── tolgee-platform/                # tolgee-platform (main repo)
 │   ├── .git/                       # git@github.com:tolgee/tolgee-platform.git
 │   ├── backend/                    # Kotlin/Spring Boot backend
 │   ├── webapp/                     # React frontend
@@ -20,9 +22,9 @@ tolgee-platform/                    # platform-dev-start (wrapper repo)
 ```
 
 **Important**: When working with git commands, ensure you're in the correct repository:
-- For platform code changes: `cd public/` then run git commands
+- For platform code changes: `cd tolgee-platform/` then run git commands
 - For billing changes: `cd billing/` then run git commands
-- The wrapper repo (`platform-dev-start`) ignores `public/` and `billing/` in its `.gitignore`
+- The wrapper repo (`platform-dev-start`) ignores everything except its own tracked files in `.gitignore`
 
 ## Backend Development
 
