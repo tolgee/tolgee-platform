@@ -1,3 +1,10 @@
+## [3.152.4](https://github.com/tolgee/tolgee-platform/compare/v3.152.3...v3.152.4) (2026-02-02)
+
+
+### Bug Fixes
+
+* aggregate stack traces for MultipleItemsFailedException ([#3444](https://github.com/tolgee/tolgee-platform/issues/3444)) ([4b54c5f](https://github.com/tolgee/tolgee-platform/commit/4b54c5f2de8bd0af75dcc0968357cabcfaf6a03e))
+
 ## [3.152.3](https://github.com/tolgee/tolgee-platform/compare/v3.152.2...v3.152.3) (2026-02-02)
 
 
