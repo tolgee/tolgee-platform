@@ -725,7 +725,7 @@
   "branch_merges_target_branch": "Målg gren",
   "branch_merges_title": "Grenfletninger",
   "branch_merges_uncompleted_tasks_alert": "{value, plural, one {Denne gren har # uafsluttet opgave} other {Denne gren har # uafsluttede opgaver}}",
-  "branch_merges_uncompleted_tasks_confirmation": "{value, plural, one {<b># uafsluttet</b> opgave vil blive annulleret. Flet alligevel?} other {<b># uafsluttede</b> opgaver vil blive annulleret. Flet alligevel?}}",
+  "branch_merges_uncompleted_tasks_confirmation": "{value, plural, one {<b># uafsluttet</b> opgave vil blive annulleret. Vil du flette alligevel?} other {<b># uafsluttede</b> opgaver vil blive annulleret. Vil du flette alligevel?}}",
   "branch_merges_uncompleted_tasks_confirmation_title": "Bekræft fletning",
   "branch_merges_unresolved_conflicts_alert": "{value, plural, one {Løs <b># konflikt</b> før fletning.} other {Løs <b># konflikter</b> før fletning.}}",
   "branch_merge_tags_labels_screenshots_joined": "tags, labels, screenshots kombineres fra begge grene",

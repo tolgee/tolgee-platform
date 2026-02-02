@@ -1,3 +1,10 @@
+## [3.152.3](https://github.com/tolgee/tolgee-platform/compare/v3.152.2...v3.152.3) (2026-02-02)
+
+
+### Bug Fixes
+
+* Fix stars icon size ([#3443](https://github.com/tolgee/tolgee-platform/issues/3443)) ([e18707f](https://github.com/tolgee/tolgee-platform/commit/e18707fcbdb7f761d4a8d6f9e99b40fa6183b999))
+
 ## [3.152.2](https://github.com/tolgee/tolgee-platform/compare/v3.152.1...v3.152.2) (2026-01-30)
 
 

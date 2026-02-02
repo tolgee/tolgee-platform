@@ -754,7 +754,7 @@
   "confirmation_dialog_confirm": "Confirm",
   "confirmation_dialog_delete": "Delete",
   "confirmation_dialog_message": "Are you sure?",
-  "confirmation_dialog_title": "Merge branches",
+  "confirmation_dialog_title": "Confirmation",
   "confirmation_discard_unsaved_confirm": "Discard",
   "confirmation_discard_unsaved_message": "Are you sure you want to discard unsaved changes?",
   "confirmation_discard_unsaved_title": "Discard changes",

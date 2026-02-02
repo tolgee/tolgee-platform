@@ -725,7 +725,7 @@
   "branch_merges_target_branch": "Cílová větev",
   "branch_merges_title": "Sloučení větví",
   "branch_merges_uncompleted_tasks_alert": "{value, plural, one {Tato větev má # nedokončený úkol} few {Tato větev má # nedokončené úkoly} other {Tato větev má # nedokončených úkolů} }",
-  "branch_merges_uncompleted_tasks_confirmation": "{value, plural, one {<b># nedokončený</b> úkol bude zrušen. Sloučit i tak?} few {<b># nedokončené</b> úkoly budou zrušeny. Sloučit i tak?} other {<b># nedokončených</b> úkolů bude zrušeno. Sloučit i tak?} }",
+  "branch_merges_uncompleted_tasks_confirmation": "{value, plural, one {<b># nedokončený</b> úkol bude zrušen. Chcete přesto sloučit?} few {<b># nedokončené</b> úkoly budou zrušeny. Chcete přesto sloučit?} other {<b># nedokončených</b> úkolů bude zrušeno. Chcete přesto sloučit?} }",
   "branch_merges_uncompleted_tasks_confirmation_title": "Potvrdit sloučení",
   "branch_merges_unresolved_conflicts_alert": "{value, plural, one {Vyřešte <b># konflikt</b> před sloučením.} few {Vyřešte <b># konflikty</b> před sloučením.} many {Vyřešte <b># konfliktů</b> před sloučením.} other {Vyřešte <b># konfliktu</b> před sloučením.}}",
   "branch_merge_tags_labels_screenshots_joined": "Tagy, štítky, screenshoty budou sloučeny z obou větví",
