@@ -1,5 +1,6 @@
 package io.tolgee.batch
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.component.UsingRedisProvider
 import io.tolgee.util.Logging
