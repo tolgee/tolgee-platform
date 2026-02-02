@@ -8,6 +8,7 @@ import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.Namespace
 import io.tolgee.model.key.Tag
 import io.tolgee.model.task.Task
 import io.tolgee.model.translation.Label
@@ -38,11 +39,16 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
   lateinit var featureFinishedTask: Task
   lateinit var mergedFeatureTask: Task
   lateinit var conflictsBranchTask: Task
+  lateinit var testNamespace: Namespace
+  lateinit var mainNamespacedKey: Key
+  lateinit var featureNamespacedKey: Key
 
   companion object {
     const val UPDATE_KEY_NAME = "shared-update-key"
     const val DELETE_KEY_NAME = "shared-delete-key"
     const val CONFLICT_KEY_NAME = "shared-conflict-key"
+    const val NAMESPACED_KEY_NAME = "namespaced-key"
+    const val TEST_NAMESPACE_NAME = "test-namespace"
   }
 
   init {
@@ -52,6 +58,7 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
         addBranches()
         addLabels()
         addSharedKeys()
+        addNamespacedKeys()
         createMergeWithConflicts()
         addTasks()
       }
@@ -113,6 +120,37 @@ class BranchMergeTestData : BaseTestData("branch_merge", "Project prepared for b
       mainConflictKey = mainKey
       featureConflictKey = featureKey
     }
+  }
+
+  private fun ProjectBuilder.addNamespacedKeys() {
+    testNamespace =
+      addNamespace {
+        name = TEST_NAMESPACE_NAME
+      }.self
+
+    mainNamespacedKey =
+      addKey {
+        this.name = NAMESPACED_KEY_NAME
+        this.branch = mainBranch
+        this.namespace = testNamespace
+      }.build {
+        addTranslation {
+          language = englishLanguage
+          text = "Namespaced key value"
+        }
+      }.self
+
+    featureNamespacedKey =
+      addKey {
+        this.name = NAMESPACED_KEY_NAME
+        this.branch = featureBranch
+        this.namespace = testNamespace
+      }.build {
+        addTranslation {
+          language = englishLanguage
+          text = "Namespaced key value"
+        }
+      }.self
   }
 
   private fun ProjectBuilder.addTasks() {

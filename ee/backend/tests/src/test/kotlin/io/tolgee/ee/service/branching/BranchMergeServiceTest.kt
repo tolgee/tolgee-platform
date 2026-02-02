@@ -459,6 +459,19 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `dry-run shows no changes when both branches have identical key with namespace`() {
+    val merge = dryRunFeatureBranchMerge()
+
+    // Should have no changes for the namespaced key since both branches have identical key
+    val namespacedKeyChanges =
+      merge.changes.filter {
+        it.sourceKey?.name == BranchMergeTestData.NAMESPACED_KEY_NAME ||
+          it.targetKey?.name == BranchMergeTestData.NAMESPACED_KEY_NAME
+      }
+    namespacedKeyChanges.assert.isEmpty()
+  }
+
+  @Test
   fun `apply merge - adds translation when source has language that target does not have`() {
     val featureRevisionBefore = testData.featureBranch.refresh()!!.revision
 

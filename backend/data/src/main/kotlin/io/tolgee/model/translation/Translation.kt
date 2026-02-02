@@ -234,7 +234,7 @@ class Translation(
   }
 
   override fun hasChanged(snapshot: TranslationSnapshot): Boolean {
-    if (this.text != snapshot.value || this.state != snapshot.state) {
+    if (this.text.orEmpty() != snapshot.value || this.state != snapshot.state) {
       return true
     }
     val labelNames = this.labels.map { it.name }.toSet()
@@ -245,7 +245,7 @@ class Translation(
     source: Translation,
     snapshot: TranslationSnapshot,
   ): Boolean {
-    if (isConflictingThreeWay(source.text, this.text, snapshot.value)) return true
+    if (isConflictingThreeWay(source.text.orEmpty(), this.text.orEmpty(), snapshot.value)) return true
     if (isConflictingThreeWay(source.state, this.state, snapshot.state)) return true
     return false
   }
