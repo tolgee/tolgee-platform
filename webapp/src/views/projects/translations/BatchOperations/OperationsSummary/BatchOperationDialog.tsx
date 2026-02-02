@@ -110,7 +110,7 @@ export const BatchOperationDialog = ({
           </Box>
           {data.status === 'RUNNING' && !isFinalizing ? (
             <Box display="flex" alignItems="center" gap={0.5}>
-              {isAiJob && <AnimatedStars sx={{ fontSize: 14 }} />}
+              {isAiJob && <AnimatedStars />}
               <ShimmerText>{getActionPhrase(data.type)}</ShimmerText>
             </Box>
           ) : (
