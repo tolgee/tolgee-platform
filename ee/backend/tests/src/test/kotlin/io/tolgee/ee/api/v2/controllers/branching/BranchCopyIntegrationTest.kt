@@ -8,7 +8,6 @@ import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyMetaRepository
 import io.tolgee.repository.KeyRepository
@@ -112,14 +111,13 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
     performBranchDeletion(testData.toBeDeletedBranch.id).andIsOk
 
-    waitForNotThrowing(timeout = 5000, pollTime = 500) {
-      keyRepository
-        .countByProjectAndBranch(
-          testData.project.id,
-          testData.toBeDeletedBranch.id,
-        ).assert
-        .isEqualTo(0)
-    }
+    // All cleanup is synchronous — verify immediately
+    keyRepository
+      .countByProjectAndBranch(
+        testData.project.id,
+        testData.toBeDeletedBranch.id,
+      ).assert
+      .isEqualTo(0)
     keySnapshotRepository.findAllByBranchId(testData.toBeDeletedBranch.id).assert.isEmpty()
     branchRepository.findByIdOrNull(testData.toBeDeletedBranch.id).assert.isNull()
   }

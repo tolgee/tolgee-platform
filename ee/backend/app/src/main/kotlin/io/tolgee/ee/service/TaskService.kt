@@ -285,6 +285,15 @@ class TaskService(
   }
 
   @Transactional
+  fun deleteTasksForBranch(
+    projectId: Long,
+    branchId: Long,
+  ) {
+    val tasks = taskRepository.findAllByProjectIdAndBranchId(projectId, branchId)
+    deleteAll(tasks)
+  }
+
+  @Transactional
   fun moveTasksAfterMerge(
     projectId: Long,
     sourceBranch: Branch,

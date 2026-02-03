@@ -2,7 +2,6 @@ package io.tolgee.ee.service.branching
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.RevisionType
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
@@ -12,7 +11,6 @@ import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.TaskService
-import io.tolgee.events.OnBranchDeleted
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -25,7 +23,6 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.AbstractBranchService
 import io.tolgee.service.branching.BranchCopyService
 import jakarta.persistence.EntityManager
-import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -36,17 +33,16 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class BranchServiceImpl(
   override val branchRepository: BranchRepository,
-  private val currentDateProvider: CurrentDateProvider,
+  override val branchMergeService: BranchMergeService,
   private val entityManager: EntityManager,
   private val branchCopyService: BranchCopyService,
   private val branchSnapshotService: BranchSnapshotService,
-  private val applicationContext: ApplicationContext,
-  private val branchMergeService: BranchMergeService,
   private val taskService: TaskService,
   private val authenticationFacade: AuthenticationFacade,
   private val projectBranchingMigrationService: ProjectBranchingMigrationService,
   private val activityHolder: ActivityHolder,
-) : AbstractBranchService(branchRepository) {
+  private val branchCleanupService: BranchCleanupService,
+) : AbstractBranchService(branchRepository, branchMergeService) {
   override fun getBranches(
     projectId: Long,
     page: Pageable,
@@ -155,7 +151,7 @@ class BranchServiceImpl(
     val branch = getBranch(projectId, branchId)
     if (branch.isDefault) throw PermissionException(Message.CANNOT_DELETE_DEFAULT_BRANCH)
     activityHolder.forceEntityRevisionType(branch, RevisionType.DEL)
-    softDeleteBranch(branch)
+    branchCleanupService.cleanupBranch(projectId, branchId)
   }
 
   @Transactional
@@ -197,8 +193,11 @@ class BranchServiceImpl(
     branchMergeService.applyMerge(merge)
     if (!merge.sourceBranch.isDefault) {
       if (deleteBranch == true) {
-        taskService.moveTasksAfterMerge(projectId, merge.sourceBranch, merge.targetBranch)
-        softDeleteBranch(merge.sourceBranch)
+        val defaultBranch =
+          getDefaultBranch(projectId)
+            ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
+        taskService.moveTasksAfterMerge(projectId, merge.sourceBranch, defaultBranch)
+        deleteBranch(projectId, merge.sourceBranch.id)
       } else {
         branchSnapshotService.rebuildSnapshotFromSource(
           projectId = projectId,
@@ -285,14 +284,6 @@ class BranchServiceImpl(
     request: ResolveAllBranchMergeConflictsRequest,
   ) {
     branchMergeService.resolveAllConflicts(projectId, mergeId, request.resolve)
-  }
-
-  private fun softDeleteBranch(branch: Branch) {
-    branch.deletedAt = currentDateProvider.date
-    branch.lastMerge?.sourceBranch?.let {
-      taskService.cancelUnfinishedTasksForBranch(branch.project.id, it.id)
-    }
-    applicationContext.publishEvent(OnBranchDeleted(branch))
   }
 
   @Transactional

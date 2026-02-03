@@ -18,7 +18,8 @@ import org.springframework.stereotype.Service
 @Service
 class BranchServiceOssStub(
   branchRepository: BranchRepositoryOss,
-) : AbstractBranchService(branchRepository) {
+  branchMergeService: BranchMergeService,
+) : AbstractBranchService(branchRepository, branchMergeService) {
   override fun getBranches(
     projectId: Long,
     page: Pageable,

@@ -5,13 +5,13 @@ import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.model.branching.BranchMergeChange
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
+import io.tolgee.repository.branching.BranchMergeChangeRepositoryOss
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 
-interface BranchMergeChangeRepository : JpaRepository<BranchMergeChange, Long> {
+interface BranchMergeChangeRepository : BranchMergeChangeRepositoryOss {
   @Query(
     """
     select new io.tolgee.dtos.queryResults.branching.BranchMergeConflictView(

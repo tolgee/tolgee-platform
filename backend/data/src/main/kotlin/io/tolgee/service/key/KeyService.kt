@@ -24,6 +24,7 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.service.branching.BranchMergeService
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
@@ -61,6 +62,8 @@ class KeyService(
   private val branchService: BranchService,
   @Lazy
   private val securityService: SecurityService,
+  @Lazy
+  private val branchMergeService: BranchMergeService,
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -322,6 +325,7 @@ class KeyService(
     translationService.deleteAllByKey(id)
     keyMetaService.deleteAllByKeyId(id)
     screenshotService.deleteAllByKeyId(id)
+    branchMergeService.deleteChangesByKeyIds(listOf(id))
     keyRepository.delete(key)
     namespaceService.deleteIfUnused(key.namespace)
     aiPlaygroundResultService.deleteResultsByKeys(listOf(id))
@@ -341,6 +345,8 @@ class KeyService(
       screenshotService.deleteAllByKeyId(ids)
     }
     aiPlaygroundResultService.deleteResultsByKeys(ids)
+
+    branchMergeService.deleteChangesByKeyIds(ids)
 
     val keys =
       traceLogMeasureTime("delete multiple keys: fetch keys") {
