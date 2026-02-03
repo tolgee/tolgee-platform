@@ -7,6 +7,7 @@ import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.security.ProjectHolder
 import io.tolgee.testing.AbstractControllerTest
+import io.tolgee.testing.assert
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.BeforeEach
@@ -70,7 +71,7 @@ class LanguageStatsListenerTest : AbstractControllerTest() {
     val projectLanguages = languageService.getProjectLanguages(testData.project.id).associateBy { it.id }
     return executeInNewTransaction(platformTransactionManager) {
       languageStatsService
-        .getLanguageStats(projectId = testData.project.id, branchId)
+        .getLanguageStats(projectId = testData.project.id, projectLanguages.keys, branchId)
         .find { projectLanguages[it.languageId]!!.tag == languageTag }
     }
   }
