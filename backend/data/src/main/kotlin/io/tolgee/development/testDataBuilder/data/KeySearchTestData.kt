@@ -37,7 +37,7 @@ class KeySearchTestData : BaseTestData() {
   ) {
     addKey {
       name = keyName
-      this.branch = branch
+      branch?.let { this.branch = it }
       addTranslation {
         key = this@addKey
         language = getLanguageByTag("en")!!.self

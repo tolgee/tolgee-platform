@@ -12,7 +12,7 @@ interface BranchVersionedEntity : EntityWithBranch {
   fun resolveKey(): Key?
 
   override fun resolveBranch(): Branch? {
-    return resolveKey()?.branch?.let { return it }
+    return resolveKey()?.branch
   }
 
   override fun resolveProject(): Project? {

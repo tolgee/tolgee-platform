@@ -9,5 +9,6 @@ class TaskBuilder(
   override var self: Task =
     Task().apply {
       this.project = projectBuilder.self
+      this.branch = projectBuilder.defaultBranch
     }
 }
