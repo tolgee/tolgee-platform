@@ -51,7 +51,7 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
     left join ls.branch b
     where ls.language.project.id = :projectId
       and ls.language.deletedAt is null
-      and ((b.id = :branchId and b.deletedAt is null) or (:branchId is null and b is null))
+      and ((b.id = :branchId and b.deletedAt is null) or (:branchId is null and (b is null or b.isDefault)))
   """,
   )
   fun getDtosByProjectIdAndBranchId(
