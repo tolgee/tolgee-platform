@@ -79,6 +79,7 @@ dependencyResolutionManagement {
             // OpenTelemetry Java Agent for bytecode instrumentation
             // See: https://opentelemetry.io/docs/zero-code/java/agent/
             library('opentelemetryJavaagent', 'io.opentelemetry.javaagent', 'opentelemetry-javaagent').version(opentelemetryJavaagentVersion)
+            library('opentelemetryInstrumentationAnnotations', 'io.opentelemetry.instrumentation', 'opentelemetry-instrumentation-annotations').version(opentelemetryInstrumentationVersion)
         }
     }
 }
