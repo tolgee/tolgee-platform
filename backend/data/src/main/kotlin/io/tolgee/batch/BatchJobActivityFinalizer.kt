@@ -1,5 +1,6 @@
 package io.tolgee.batch
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.sentry.Sentry
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.batch.data.BatchJobDto
@@ -42,6 +43,7 @@ class BatchJobActivityFinalizer(
     finalizeActivityWhenJobCompleted(event.job)
   }
 
+  @WithSpan
   fun finalizeActivityWhenJobCompleted(job: BatchJobDto) {
     activityHolder.afterActivityFlushed = afterFlush@{
       entityManager.clear()
@@ -101,6 +103,7 @@ class BatchJobActivityFinalizer(
     }
   }
 
+  @WithSpan
   private fun setJobIdAndAuthorIdToRevision(
     activityRevisionIdToMergeInto: Long,
     job: BatchJobDto,
@@ -121,6 +124,7 @@ class BatchJobActivityFinalizer(
       .executeUpdate()
   }
 
+  @WithSpan
   private fun deleteUnusedRevisions(revisionIds: MutableList<Long>) {
     entityManager
       .createNativeQuery(
@@ -131,6 +135,7 @@ class BatchJobActivityFinalizer(
       .executeUpdate()
   }
 
+  @WithSpan
   private fun mergeModifiedEntities(
     activityRevisionIdToMergeInto: Long,
     revisionIds: MutableList<Long>,
@@ -146,6 +151,7 @@ class BatchJobActivityFinalizer(
       .executeUpdate()
   }
 
+  @WithSpan
   private fun mergeDescribingEntities(
     activityRevisionIdToMergeInto: Long,
     revisionIds: MutableList<Long>,
@@ -163,6 +169,7 @@ class BatchJobActivityFinalizer(
       .executeUpdate()
   }
 
+  @WithSpan
   private fun removeDuplicityDescribingEntities(
     activityRevisionIdToMergeInto: Long,
     revisionIds: MutableList<Long>,

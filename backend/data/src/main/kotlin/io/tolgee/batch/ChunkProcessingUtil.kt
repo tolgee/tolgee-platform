@@ -1,6 +1,7 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.sentry.Sentry
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.CurrentDateProvider
@@ -29,6 +30,7 @@ open class ChunkProcessingUtil(
   private val applicationContext: ApplicationContext,
   private val coroutineContext: CoroutineContext,
 ) : Logging {
+  @WithSpan
   open fun processChunk() {
     val time =
       measureTimeMillis {

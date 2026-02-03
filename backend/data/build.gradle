@@ -182,6 +182,7 @@ dependencies {
     implementation("org.apache.commons:commons-configuration2:2.10.1")
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion"
     implementation("com.fasterxml.woodstox:woodstox-core:7.1.1")
+    implementation libs.opentelemetryInstrumentationAnnotations
 
     /**
      * Table formats

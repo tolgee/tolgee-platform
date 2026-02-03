@@ -2,6 +2,7 @@ package io.tolgee.batch.cleaning
 
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
 import io.tolgee.component.SchedulingManager
@@ -41,6 +42,7 @@ class OldBatchJobCleaner(
     logger.debug("Scheduled old batch job cleanup task with period: {}", period)
   }
 
+  @WithSpan
   fun cleanup() {
     val leaseTime = Duration.ofMillis(batchProperties.jobCleanupLockLeaseTimeMs)
     lockingProvider.withLockingIfFree(CLEANUP_LOCK_NAME, leaseTime) {
@@ -56,16 +58,19 @@ class OldBatchJobCleaner(
     }
   }
 
+  @WithSpan
   fun cleanupCompletedJobs() {
     val cutoffDate = currentDateProvider.date.addDays(-batchProperties.completedJobRetentionDays)
     deleteJobsOlderThan(listOf("SUCCESS", "CANCELLED"), cutoffDate, "completed")
   }
 
+  @WithSpan
   fun cleanupFailedJobs() {
     val cutoffDate = currentDateProvider.date.addDays(-batchProperties.failedJobRetentionDays)
     deleteJobsOlderThan(listOf("FAILED"), cutoffDate, "failed")
   }
 
+  @WithSpan
   private fun deleteJobsOlderThan(
     statuses: List<String>,
     cutoffDate: Date,
@@ -94,6 +99,7 @@ class OldBatchJobCleaner(
     recordMetrics(jobType, totalDeleted, totalChunksDeleted)
   }
 
+  @WithSpan
   private fun deleteJobBatch(
     statuses: List<String>,
     cutoffDate: Date,
@@ -148,6 +154,7 @@ class OldBatchJobCleaner(
       .resultList as List<Long>
   }
 
+  @WithSpan
   private fun nullifyActivityRevisionReferences(
     jobIds: List<Long>,
     executionIds: List<Long>,
@@ -159,6 +166,7 @@ class OldBatchJobCleaner(
     nullifyActivityRevisionAllReferences(jobIds)
   }
 
+  @WithSpan
   private fun nullifyActivityRevisionBatchJobReferences(jobIds: List<Long>) {
     entityManager
       .createNativeQuery(
@@ -171,6 +179,7 @@ class OldBatchJobCleaner(
       .executeUpdate()
   }
 
+  @WithSpan
   private fun nullifyActivityRevisionAllReferences(jobIds: List<Long>) {
     entityManager
       .createNativeQuery(
@@ -186,6 +195,7 @@ class OldBatchJobCleaner(
       .executeUpdate()
   }
 
+  @WithSpan
   private fun deleteChunkExecutions(
     jobIds: List<Long>,
     executionIds: List<Long>,
@@ -202,6 +212,7 @@ class OldBatchJobCleaner(
       .executeUpdate()
   }
 
+  @WithSpan
   private fun deleteBatchJobs(jobIds: List<Long>) {
     entityManager
       .createNativeQuery(

@@ -1,6 +1,9 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.trace.StatusCode
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.sentry.Sentry
 import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
@@ -49,10 +52,16 @@ class BatchJobActionService(
   private val activityHolder: ActivityHolder,
   private val metrics: Metrics,
 ) : Logging {
+  @WithSpan
   suspend fun handleItem(
     executionItem: ExecutionQueueItem,
     batchJobDto: BatchJobDto,
   ) {
+    val span = Span.current()
+    span.setAttribute("batch.job.id", batchJobDto.id.toString())
+    span.setAttribute("batch.chunk.execution.id", executionItem.chunkExecutionId.toString())
+    batchJobDto.projectId?.let { span.setAttribute("project.id", it.toString()) }
+
     val coroutineContext = coroutineContext
     var retryExecution: BatchJobChunkExecution? = null
     try {
@@ -101,6 +110,8 @@ class BatchJobActionService(
       }
       addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter)
     } catch (e: Throwable) {
+      span.recordException(e)
+      span.setStatus(StatusCode.ERROR)
       when (e) {
         is CancellationException, is kotlinx.coroutines.CancellationException -> {
           // Coroutine was cancelled (e.g., during job cancellation)
@@ -233,6 +244,7 @@ class BatchJobActionService(
     }
   }
 
+  @WithSpan
   private fun getExecutionIfCanAcquireLockInDb(id: Long): BatchJobChunkExecution? {
     entityManager.createNativeQuery("""SET enable_seqscan=off""")
     return entityManager
