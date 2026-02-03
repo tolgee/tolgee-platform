@@ -192,7 +192,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
 
     testData.featureBranch
-      .refresh()
+      .refresh()!!
       .isProtected.assert.isTrue
   }
 
@@ -220,10 +220,10 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   )
   fun `deletes branch`() {
     performProjectAuthDelete("branches/${testData.mergeBranch.id}").andIsOk
-    testData.mergeBranch.refresh().let {
-      it.deletedAt.assert.isNotNull()
-      it.deletedAt.assert.isNotNull()
-    }
+    testData.mergeBranch
+      .refresh()
+      .assert
+      .isNull()
   }
 
   @Test
@@ -237,7 +237,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `cannot delete default branch`() {
     performProjectAuthDelete("branches/${testData.mainBranch.id}").andIsForbidden
     testData.mainBranch
-      .refresh()
+      .refresh()!!
       .deletedAt.assert
       .isNull()
   }
@@ -619,8 +619,8 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     return keys
   }
 
-  private fun Branch.refresh(): Branch {
-    return branchRepository.findByIdOrNull(this.id)!!
+  private fun Branch.refresh(): Branch? {
+    return branchRepository.findByIdOrNull(this.id)
   }
 
   private fun Project.refresh(): Project {

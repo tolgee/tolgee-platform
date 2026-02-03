@@ -21,6 +21,15 @@ interface LanguageStatsRepository : JpaRepository<LanguageStats, Long> {
   )
   fun deleteAllByLanguage(languageId: Long)
 
+  @Modifying
+  @Transactional
+  @Query(
+    """
+    delete from LanguageStats ls where ls.branch.id = :branchId
+  """,
+  )
+  fun deleteAllByBranchId(branchId: Long)
+
   @Query(
     """
     select new io.tolgee.dtos.queryResults.LanguageStatsDto(

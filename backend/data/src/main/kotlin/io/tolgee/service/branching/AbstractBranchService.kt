@@ -7,6 +7,7 @@ import io.tolgee.repository.branching.BranchRepositoryOss
 
 abstract class AbstractBranchService(
   protected open val branchRepository: BranchRepositoryOss,
+  protected open val branchMergeService: BranchMergeService,
 ) : BranchService {
   override fun getActiveBranch(
     projectId: Long,
@@ -36,5 +37,8 @@ abstract class AbstractBranchService(
 
   override fun deleteAllByProjectId(projectId: Long) {
     return branchRepository.deleteAllByProjectId(projectId)
+  }
+
+  override fun deleteBranchMergeChangesByKeyIds(keyIds: Set<Long>) {
   }
 }

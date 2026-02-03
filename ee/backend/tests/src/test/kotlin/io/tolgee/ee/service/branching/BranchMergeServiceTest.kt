@@ -361,6 +361,15 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
+  fun `dry-run reports no changes when target key is deleted and source unchanged`() {
+    deleteTargetKey()
+
+    val merge = dryRunFeatureBranchMerge()
+
+    merge.changes.assert.isEmpty()
+  }
+
+  @Test
   fun `dry-run handles target key deleted and re-created with same name`() {
     val originalName = reCreateTargetKeyWithSameName()
 

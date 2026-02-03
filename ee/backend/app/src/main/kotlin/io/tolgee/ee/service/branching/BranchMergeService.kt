@@ -21,6 +21,7 @@ import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
+import io.tolgee.service.branching.AbstractBranchMergeService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.util.Logging
 import org.springframework.context.annotation.Lazy
@@ -40,7 +41,8 @@ class BranchMergeService(
   private val keyRepository: KeyRepository,
   @Lazy
   private val languageService: LanguageService,
-) : Logging {
+) : AbstractBranchMergeService(branchMergeChangeRepository),
+  Logging {
   @Transactional
   fun dryRun(branchMerge: BranchMerge) {
     val changes = branchMergeAnalyzer.compute(branchMerge)
