@@ -9,6 +9,8 @@ import {
   Translate01,
   UploadCloud02,
   User01,
+  ChevronLeft,
+  ChevronRight,
 } from '@untitled-ui/icons-react';
 import { Link, LINKS, PARAMS } from 'tg.constants/links';
 import { useConfig } from 'tg.globalContext/helpers';
@@ -19,10 +21,20 @@ import { SideLogo } from './SideLogo';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { Integration, Stars } from 'tg.component/CustomIcons';
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { createAdder } from 'tg.fixtures/pluginAdder';
 import { useAddProjectMenuItems } from 'tg.ee';
 import { useProject } from 'tg.hooks/useProject';
+import { IconButton, styled } from '@mui/material';
+
+const StyledToggleButton = styled(IconButton)`
+  margin: auto;
+  margin-bottom: 70px;
+  color: ${({ theme }) => theme.palette.emphasis[600]};
+  &:hover {
+    color: ${({ theme }) => theme.palette.emphasis[800]};
+  }
+`;
 
 export const ProjectMenu = () => {
   const project = useProject();
@@ -33,6 +45,8 @@ export const ProjectMenu = () => {
   const { t } = useTranslate();
 
   const topBarHeight = useGlobalContext((c) => c.layout.topBarHeight);
+
+  const [expanded, setExpanded] = useState(false);
 
   const baseItems = [
     {
@@ -157,9 +171,9 @@ export const ProjectMenu = () => {
   const items = addEeItems(baseItems);
 
   return (
-    <SideMenu>
+    <SideMenu expanded={expanded}>
       <SideLogo hidden={!topBarHeight} />
-      {items.map((item, index) => {
+      {items.map((item) => {
         if (!item.condition({ config, satisfiesPermission })) return null;
         const { dataCy, icon: Icon, link, ...rest } = item;
         return (
@@ -172,9 +186,16 @@ export const ProjectMenu = () => {
             {...rest}
             icon={<Icon />}
             data-cy={dataCy}
+            expanded={expanded}
           />
         );
       })}
+      <StyledToggleButton
+        onClick={() => setExpanded((prev) => !prev)}
+        size="small"
+      >
+        {expanded ? <ChevronLeft /> : <ChevronRight />}
+      </StyledToggleButton>
     </SideMenu>
   );
 };
