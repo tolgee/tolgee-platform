@@ -1,7 +1,7 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.opentelemetry.api.GlobalOpenTelemetry
+import io.opentelemetry.api.trace.Span
 import io.opentelemetry.api.trace.StatusCode
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.sentry.Sentry
@@ -52,95 +52,88 @@ class BatchJobActionService(
   private val activityHolder: ActivityHolder,
   private val metrics: Metrics,
 ) : Logging {
+  @WithSpan
   suspend fun handleItem(
     executionItem: ExecutionQueueItem,
     batchJobDto: BatchJobDto,
   ) {
-    val tracer = GlobalOpenTelemetry.getTracer("tolgee")
-    val span = tracer.spanBuilder("BatchJobActionService.handleItem").startSpan()
-    val scope = span.makeCurrent()
+    val span = Span.current()
+    span.setAttribute("batch.job.id", batchJobDto.id.toString())
+    span.setAttribute("batch.chunk.execution.id", executionItem.chunkExecutionId.toString())
+    batchJobDto.projectId?.let { span.setAttribute("project.id", it.toString()) }
 
+    val coroutineContext = coroutineContext
+    var retryExecution: BatchJobChunkExecution? = null
     try {
-      span.setAttribute("batch.job.id", batchJobDto.id.toString())
-      span.setAttribute("batch.chunk.execution.id", executionItem.chunkExecutionId.toString())
-      batchJobDto.projectId?.let { span.setAttribute("project.id", it.toString()) }
+      val execution =
+        catchingExceptions(executionItem) {
+          executeInNewTransaction(transactionManager) { transactionStatus ->
 
-      val coroutineContext = coroutineContext
-      var retryExecution: BatchJobChunkExecution? = null
-      try {
-        val execution =
-          catchingExceptions(executionItem) {
-            executeInNewTransaction(transactionManager) { transactionStatus ->
+            val lockedExecution =
+              getPendingUnlockedExecutionItem(executionItem)
+                ?: return@executeInNewTransaction null
 
-              val lockedExecution =
-                getPendingUnlockedExecutionItem(executionItem)
-                  ?: return@executeInNewTransaction null
+            publishRemoveConsuming(executionItem)
 
-              publishRemoveConsuming(executionItem)
+            progressManager.handleJobRunning(batchJobDto)
 
-              progressManager.handleJobRunning(batchJobDto)
+            logger.debug("Job ${batchJobDto.id}: 🟡 Processing chunk ${lockedExecution.id}")
+            val savepoint = savePointManager.setSavepoint()
+            val util = ChunkProcessingUtil(lockedExecution, applicationContext, coroutineContext)
+            util.processChunk()
 
-              logger.debug("Job ${batchJobDto.id}: 🟡 Processing chunk ${lockedExecution.id}")
-              val savepoint = savePointManager.setSavepoint()
-              val util = ChunkProcessingUtil(lockedExecution, applicationContext, coroutineContext)
-              util.processChunk()
-
-              if (transactionStatus.isRollbackOnly) {
-                logger.debug("Job ${batchJobDto.id}: 🛑 Rollbacking chunk ${lockedExecution.id}")
-                savePointManager.rollbackSavepoint(savepoint)
-                // we have rolled back the transaction, so no targets were actually successfull
-                lockedExecution.successTargets = listOf()
-                entityManager.clear()
-                rollbackActivity()
-              }
-
-              progressManager.handleProgress(lockedExecution, batchJobDto)
-              entityManager.persist(entityManager.merge(lockedExecution))
-
-              if (lockedExecution.retry) {
-                retryExecution = util.retryExecution
-                entityManager.persist(util.retryExecution)
-                entityManager.flush()
-              }
-
-              logger.debug("Job ${batchJobDto.id}: ✅ Processed chunk ${lockedExecution.id}")
-              return@executeInNewTransaction lockedExecution
+            if (transactionStatus.isRollbackOnly) {
+              logger.debug("Job ${batchJobDto.id}: 🛑 Rollbacking chunk ${lockedExecution.id}")
+              savePointManager.rollbackSavepoint(savepoint)
+              // we have rolled back the transaction, so no targets were actually successfull
+              lockedExecution.successTargets = listOf()
+              entityManager.clear()
+              rollbackActivity()
             }
+
+            progressManager.handleProgress(lockedExecution, batchJobDto)
+            entityManager.persist(entityManager.merge(lockedExecution))
+
+            if (lockedExecution.retry) {
+              retryExecution = util.retryExecution
+              entityManager.persist(util.retryExecution)
+              entityManager.flush()
+            }
+
+            logger.debug("Job ${batchJobDto.id}: ✅ Processed chunk ${lockedExecution.id}")
+            return@executeInNewTransaction lockedExecution
           }
-        execution?.let {
-          logger.debug("Job: ${it.batchJob.id} - Handling execution committed ${it.id} (standard flow)")
-          progressManager.handleChunkCompletedCommitted(it, batchJobDto = batchJobDto)
         }
-        addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter)
-      } catch (e: Throwable) {
-        span.recordException(e)
-        span.setStatus(StatusCode.ERROR)
-        when (e) {
-          is CancellationException, is kotlinx.coroutines.CancellationException -> {
-            // Coroutine was cancelled (e.g., during job cancellation)
-            // Update the execution status to CANCELLED in a new transaction
-            logger.debug(
-              "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId} was cancelled",
-            )
-            handleCancelledExecution(executionItem)
-          }
+      execution?.let {
+        logger.debug("Job: ${it.batchJob.id} - Handling execution committed ${it.id} (standard flow)")
+        progressManager.handleChunkCompletedCommitted(it, batchJobDto = batchJobDto)
+      }
+      addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter)
+    } catch (e: Throwable) {
+      span.recordException(e)
+      span.setStatus(StatusCode.ERROR)
+      when (e) {
+        is CancellationException, is kotlinx.coroutines.CancellationException -> {
+          // Coroutine was cancelled (e.g., during job cancellation)
+          // Update the execution status to CANCELLED in a new transaction
+          logger.debug(
+            "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId} was cancelled",
+          )
+          handleCancelledExecution(executionItem)
+        }
 
-          is UnexpectedRollbackException -> {
-            logger.debug(
-              "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId}" +
-                " thrown UnexpectedRollbackException",
-            )
-          }
+        is UnexpectedRollbackException -> {
+          logger.debug(
+            "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId}" +
+              " thrown UnexpectedRollbackException",
+          )
+        }
 
-          else -> {
-            logger.error("Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId} thrown error", e)
-            Sentry.captureException(e)
-          }
+        else -> {
+          logger.error("Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId} thrown error", e)
+          Sentry.captureException(e)
         }
       }
-    } finally {
-      scope.close()
-      span.end()
     }
   }
 
