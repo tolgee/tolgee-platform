@@ -150,6 +150,9 @@ class BranchServiceImpl(
   ) {
     val branch = getBranch(projectId, branchId)
     if (branch.isDefault) throw PermissionException(Message.CANNOT_DELETE_DEFAULT_BRANCH)
+    if (branchRepository.existsActiveByOriginBranchId(branchId)) {
+      throw BadRequestException(Message.CANNOT_DELETE_BRANCH_WITH_CHILDREN)
+    }
     activityHolder.forceEntityRevisionType(branch, RevisionType.DEL)
     branchCleanupService.cleanupBranch(projectId, branchId)
   }

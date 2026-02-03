@@ -39,8 +39,17 @@ describe('Branch management', () => {
 
   it('deletes an existing branch', () => {
     branchesSection.visit(projectId);
+    branchesSection.deleteBranch('merge-branch');
+    branchesSection.assertBranchNotExists('merge-branch');
+  });
+
+  it('cannot delete a branch with children', () => {
+    branchesSection.visit(projectId);
     branchesSection.deleteBranch('feature-branch');
-    branchesSection.assertBranchNotExists('feature-branch');
+    cy.contains(
+      'Cannot delete this branch because other branches were created from it'
+    ).should('be.visible');
+    branchesSection.assertBranchExists('feature-branch');
   });
 
   it('protects a branch', () => {

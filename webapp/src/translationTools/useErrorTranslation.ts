@@ -211,6 +211,8 @@ export function useErrorTranslation() {
         return t('duplicate_suggestion');
       case 'operation_not_permitted_in_read_only_mode':
         return t('operation_not_permitted_in_read_only_mode');
+      case 'cannot_delete_branch_with_children':
+        return t('cannot_delete_branch_with_children');
       default:
         return code;
     }

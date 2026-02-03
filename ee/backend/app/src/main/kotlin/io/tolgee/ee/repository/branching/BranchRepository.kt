@@ -51,4 +51,13 @@ interface BranchRepository : BranchRepositoryOss {
     projectId: Long,
     branchId: Long,
   ): Branch?
+
+  @Query(
+    """
+    select case when count(b) > 0 then true else false end
+    from Branch b
+    where b.originBranch.id = :branchId and b.deletedAt IS NULL
+    """,
+  )
+  fun existsActiveByOriginBranchId(branchId: Long): Boolean
 }
