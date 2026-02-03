@@ -298,6 +298,49 @@ bootRun {
     }
 }
 
+// Copy OTEL agent to a predictable location for IntelliJ usage
+// See: docs/observability/
+tasks.register('copyOtelAgent', Copy) {
+    from configurations.otelAgent
+    into "${buildDir}/otel"
+    rename { 'opentelemetry-javaagent.jar' }
+}
+
+// Run with local observability stack (docker-compose.local-observability-stack-dev.yaml)
+// See: docs/observability/
+tasks.register('bootRunWithObservability') {
+    group = 'application'
+    description = 'Runs Tolgee with OpenTelemetry tracing, using the local Docker observability stack'
+
+    doFirst {
+        bootRun.configure {
+            // Spring profile
+            args '--spring.profiles.active=dev'
+
+            // OTEL configuration
+            environment 'OTEL_JAVAAGENT_ENABLED', 'true'
+            environment 'OTEL_SERVICE_NAME', 'tolgee-platform'
+            environment 'OTEL_EXPORTER_OTLP_ENDPOINT', 'http://localhost:4318'
+            environment 'OTEL_RESOURCE_ATTRIBUTES', 'deployment.environment=local-dev'
+            environment 'OTEL_LOGS_EXPORTER', 'none'
+            environment 'OTEL_METRICS_EXPORTER', 'none'
+            environment 'OTEL_INSTRUMENTATION_LOGBACK_MDC_ENABLED', 'true'
+            environment 'OTEL_SEMCONV_STABILITY_OPT_IN', 'http'
+
+            // Database configuration (use Docker stack's PostgreSQL/Redis)
+            environment 'spring.datasource.url', 'jdbc:postgresql://localhost:5432/tolgee'
+            environment 'spring.datasource.username', 'tolgee'
+            environment 'spring.datasource.password', 'tolgee'
+            environment 'spring.redis.host', 'localhost'
+            environment 'spring.redis.port', '6379'
+            environment 'spring.redis.password', 'tolgee'
+            environment 'tolgee.postgres-autostart.enabled', 'false'
+        }
+    }
+
+    finalizedBy bootRun
+}
+
 // ===== Apply custom tasks, if exist, from gitignored .local directory =====
 def customTasksFile = rootProject.file('.local/gradle/backend-app.gradle')
 if (customTasksFile.exists()) {
