@@ -1,9 +1,11 @@
 package io.tolgee.ee.service.branching
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.constants.Caches
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.LabelServiceImpl
@@ -59,6 +61,9 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   @Autowired
   lateinit var keyScreenshotReferenceRepository: KeyScreenshotReferenceRepository
 
+  @Autowired
+  lateinit var eeSubscriptionRepository: EeSubscriptionRepository
+
   private lateinit var testData: BranchMergeTestData
 
   private val additionKeyName = "feature-only-key"
@@ -67,6 +72,9 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   @BeforeEach
   fun setup() {
+    // Clear any existing subscription to avoid key limit issues from other tests
+    eeSubscriptionRepository.deleteAll()
+    cacheManager.getCache(Caches.EE_SUBSCRIPTION)?.clear()
     testData = BranchMergeTestData()
     testDataService.saveTestData(testData.root)
     branchSnapshotService.createInitialSnapshot(
