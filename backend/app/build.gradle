@@ -145,6 +145,9 @@ dependencies {
      * OPENTELEMETRY
      */
     otelAgent libs.opentelemetryJavaagent
+    // OTEL API for context propagation in TaskDecorators
+    implementation libs.opentelemetryApi
+    implementation libs.opentelemetryContext
 
     /**
      * KOTLIN

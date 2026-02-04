@@ -79,6 +79,12 @@ dependencyResolutionManagement {
             // OpenTelemetry Java Agent for bytecode instrumentation
             // See: https://opentelemetry.io/docs/zero-code/java/agent/
             library('opentelemetryJavaagent', 'io.opentelemetry.javaagent', 'opentelemetry-javaagent').version(opentelemetryJavaagentVersion)
+            library('opentelemetryInstrumentationAnnotations', 'io.opentelemetry.instrumentation', 'opentelemetry-instrumentation-annotations').version(opentelemetryInstrumentationVersion)
+            // OpenTelemetry API for context propagation in TaskDecorators
+            // Agent 2.24.0 targets API 1.58.0 - see https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases
+            library('opentelemetryApi', 'io.opentelemetry', 'opentelemetry-api').version(opentelemetryApiVersion)
+            library('opentelemetryContext', 'io.opentelemetry', 'opentelemetry-context').version(opentelemetryApiVersion)
+            library('opentelemetryExtensionKotlin', 'io.opentelemetry', 'opentelemetry-extension-kotlin').version(opentelemetryApiVersion)
         }
     }
 }
