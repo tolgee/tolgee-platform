@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.branching
 
+import io.tolgee.Metrics
 import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.TaskService
@@ -20,6 +21,7 @@ class BranchCleanupService(
   private val taskService: TaskService,
   private val branchSnapshotService: BranchSnapshotService,
   private val languageStatsRepository: LanguageStatsRepository,
+  private val metrics: Metrics,
 ) {
   companion object {
     private const val BATCH_SIZE = 1000
@@ -69,6 +71,7 @@ class BranchCleanupService(
     branchId: Long,
   ) {
     var totalDeleted = 0
+    var batchCount = 0
 
     while (true) {
       val idsPage =
@@ -85,10 +88,12 @@ class BranchCleanupService(
 
       keyService.deleteMultiple(ids)
       totalDeleted += ids.size
+      batchCount++
+      metrics.branchCleanupBatchesCounter.increment()
     }
 
     if (totalDeleted > 0) {
-      logger.debug("Deleted $totalDeleted keys for branch $branchId")
+      logger.debug("Deleted $totalDeleted keys in $batchCount batches for branch $branchId")
     }
   }
 

@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.branching
 
+import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.constants.Message
@@ -42,6 +43,7 @@ class BranchServiceImpl(
   private val projectBranchingMigrationService: ProjectBranchingMigrationService,
   private val activityHolder: ActivityHolder,
   private val branchCleanupService: BranchCleanupService,
+  private val metrics: Metrics,
 ) : AbstractBranchService(branchRepository, branchMergeService) {
   override fun getBranches(
     projectId: Long,
@@ -109,21 +111,23 @@ class BranchServiceImpl(
     originBranchId: Long,
     author: UserAccount,
   ): Branch {
-    val originBranch =
-      branchRepository.findActiveByProjectIdAndId(projectId, originBranchId) ?: throw NotFoundException(
-        Message.ORIGIN_BRANCH_NOT_FOUND,
-      )
+    return metrics.branchCreateTimer.recordCallable {
+      val originBranch =
+        branchRepository.findActiveByProjectIdAndId(projectId, originBranchId) ?: throw NotFoundException(
+          Message.ORIGIN_BRANCH_NOT_FOUND,
+        )
 
-    val branch =
-      createBranch(projectId, name, author).also {
-        it.originBranch = originBranch
-        it.pending = true
-      }
-    branchRepository.save(branch)
+      val branch =
+        createBranch(projectId, name, author).also {
+          it.originBranch = originBranch
+          it.pending = true
+        }
+      branchRepository.save(branch)
 
-    branchCopyService.copy(projectId, originBranch, branch)
-    branchSnapshotService.createInitialSnapshot(projectId, originBranch, branch)
-    return branch
+      branchCopyService.copy(projectId, originBranch, branch)
+      branchSnapshotService.createInitialSnapshot(projectId, originBranch, branch)
+      branch
+    }!!
   }
 
   private fun createBranch(
@@ -148,13 +152,15 @@ class BranchServiceImpl(
     projectId: Long,
     branchId: Long,
   ) {
-    val branch = getBranch(projectId, branchId)
-    if (branch.isDefault) throw PermissionException(Message.CANNOT_DELETE_DEFAULT_BRANCH)
-    if (branchRepository.existsActiveByOriginBranchId(branchId)) {
-      throw BadRequestException(Message.CANNOT_DELETE_BRANCH_WITH_CHILDREN)
+    metrics.branchDeleteTimer.record {
+      val branch = getBranch(projectId, branchId)
+      if (branch.isDefault) throw PermissionException(Message.CANNOT_DELETE_DEFAULT_BRANCH)
+      if (branchRepository.existsActiveByOriginBranchId(branchId)) {
+        throw BadRequestException(Message.CANNOT_DELETE_BRANCH_WITH_CHILDREN)
+      }
+      activityHolder.forceEntityRevisionType(branch, RevisionType.DEL)
+      branchCleanupService.cleanupBranch(projectId, branchId)
     }
-    activityHolder.forceEntityRevisionType(branch, RevisionType.DEL)
-    branchCleanupService.cleanupBranch(projectId, branchId)
   }
 
   @Transactional

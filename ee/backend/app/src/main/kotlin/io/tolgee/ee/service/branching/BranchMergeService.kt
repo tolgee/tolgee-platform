@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.branching
 
+import io.tolgee.Metrics
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
@@ -43,6 +44,7 @@ class BranchMergeService(
   private val keyRepository: KeyRepository,
   @Lazy
   private val languageService: LanguageService,
+  private val metrics: Metrics,
 ) : AbstractBranchMergeService(branchMergeChangeRepository),
   Logging {
   @Transactional
@@ -59,16 +61,18 @@ class BranchMergeService(
     sourceBranch: Branch,
     targetBranch: Branch,
   ): BranchMerge {
-    val branchMerge =
-      BranchMerge().apply {
-        this.sourceBranch = sourceBranch
-        this.targetBranch = targetBranch
-        this.sourceRevision = sourceBranch.revision
-        this.targetRevision = targetBranch.revision
-      }
-    dryRun(branchMerge)
-    branchMergeRepository.save(branchMerge)
-    return branchMerge
+    return metrics.branchMergePreviewTimer.recordCallable {
+      val branchMerge =
+        BranchMerge().apply {
+          this.sourceBranch = sourceBranch
+          this.targetBranch = targetBranch
+          this.sourceRevision = sourceBranch.revision
+          this.targetRevision = targetBranch.revision
+        }
+      dryRun(branchMerge)
+      branchMergeRepository.save(branchMerge)
+      branchMerge
+    }!!
   }
 
   @Transactional
@@ -95,10 +99,12 @@ class BranchMergeService(
   )
 
   fun applyMerge(merge: BranchMerge) {
-    try {
-      branchMergeExecutor.execute(merge)
-    } catch (_: BranchMergeConflictNotResolvedException) {
-      throw BadRequestException(Message.BRANCH_MERGE_CONFLICTS_NOT_RESOLVED)
+    metrics.branchMergeApplyTimer.record {
+      try {
+        branchMergeExecutor.execute(merge)
+      } catch (_: BranchMergeConflictNotResolvedException) {
+        throw BadRequestException(Message.BRANCH_MERGE_CONFLICTS_NOT_RESOLVED)
+      }
     }
   }
 
@@ -244,6 +250,7 @@ class BranchMergeService(
   ) {
     val change = getConflict(projectId, mergeId, changeId)
     change.resolution = resolution
+    metrics.branchMergeConflictCounter(resolution.name).increment()
   }
 
   @Transactional
