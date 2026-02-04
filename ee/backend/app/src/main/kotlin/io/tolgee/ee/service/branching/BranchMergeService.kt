@@ -99,13 +99,15 @@ class BranchMergeService(
   )
 
   fun applyMerge(merge: BranchMerge) {
-    metrics.branchMergeApplyTimer.record {
-      try {
-        branchMergeExecutor.execute(merge)
-      } catch (_: BranchMergeConflictNotResolvedException) {
-        throw BadRequestException(Message.BRANCH_MERGE_CONFLICTS_NOT_RESOLVED)
-      }
-    }
+    metrics.branchMergeApplyTimer.record(
+      Runnable {
+        try {
+          branchMergeExecutor.execute(merge)
+        } catch (_: BranchMergeConflictNotResolvedException) {
+          throw BadRequestException(Message.BRANCH_MERGE_CONFLICTS_NOT_RESOLVED)
+        }
+      },
+    )
   }
 
   fun getMerges(
