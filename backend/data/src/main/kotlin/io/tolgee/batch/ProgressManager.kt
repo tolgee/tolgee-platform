@@ -1,5 +1,7 @@
 package io.tolgee.batch
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
+import io.tolgee.Metrics
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.events.OnBatchJobCancelled
 import io.tolgee.batch.events.OnBatchJobFailed
@@ -9,15 +11,17 @@ import io.tolgee.batch.events.OnBatchJobStatusUpdated
 import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.batch.state.BatchJobStateProvider
 import io.tolgee.batch.state.ExecutionState
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
+import io.tolgee.service.project.ProjectService
 import io.tolgee.util.Logging
 import io.tolgee.util.debug
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
-import io.tolgee.util.trace
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 
@@ -30,7 +34,19 @@ class ProgressManager(
   private val cachingBatchJobService: CachingBatchJobService,
   private val batchJobProjectLockingManager: BatchJobProjectLockingManager,
   private val queue: BatchJobChunkExecutionQueue,
+  private val metrics: Metrics,
+  private val currentDateProvider: CurrentDateProvider,
+  @Lazy
+  private val projectService: ProjectService,
 ) : Logging {
+  /**
+   * Looks up organization ID for a given projectId.
+   * Returns null if projectId is null or project/organization is not found.
+   */
+  private fun getOrganizationId(projectId: Long?): Long? {
+    return projectId?.let { projectService.findDto(it)?.organizationOwnerId }
+  }
+
   /**
    * This method tries to set execution running in the state.
    * Lock-free O(1) implementation using atomic counter and single-execution operations.
@@ -83,6 +99,19 @@ class ProgressManager(
   ) {
     if (batchJobStateProvider.tryMarkJobStarted(batchJobId)) {
       val jobDto = batchJobDto ?: batchJobService.getJobDto(batchJobId)
+
+      // Look up organization ID from project
+      val orgId = getOrganizationId(jobDto.projectId)
+
+      // Record queue wait time (time from creation to first chunk starting)
+      jobDto.createdAt?.let { createdAt ->
+        val waitTimeMs = currentDateProvider.date.time - createdAt
+        metrics.recordQueueWaitTime(jobDto.type.name, jobDto.jobCharacter.name, waitTimeMs)
+      }
+
+      // Record job started metric
+      metrics.recordJobStarted(jobDto.type.name, jobDto.jobCharacter.name, jobDto.projectId, orgId)
+
       eventPublisher.publishEvent(OnBatchJobStarted(jobDto))
     }
   }
@@ -134,6 +163,7 @@ class ProgressManager(
    * @param execution The chunk execution with updated status and results
    * @param batchJobDto Optional cached job DTO to avoid a database lookup
    */
+  @WithSpan
   fun handleProgress(
     execution: BatchJobChunkExecution,
     batchJobDto: BatchJobDto? = null,
@@ -213,6 +243,7 @@ class ProgressManager(
     }
   }
 
+  @WithSpan
   fun handleChunkCompletedCommitted(
     execution: BatchJobChunkExecution,
     triggerJobCompleted: Boolean = true,
@@ -272,6 +303,7 @@ class ProgressManager(
     batchJobStateProvider.removeJobState(batchJob.id)
   }
 
+  @WithSpan
   fun handleJobStatus(
     job: BatchJobDto,
     info: JobResultInfo,
@@ -281,6 +313,14 @@ class ProgressManager(
     }
 
     val jobEntity = batchJobService.getJobEntity(job.id)
+    val finalStatus =
+      when {
+        info.isAnyFailed -> BatchJobStatus.FAILED
+        info.isAnyCancelled -> BatchJobStatus.CANCELLED
+        else -> BatchJobStatus.SUCCESS
+      }
+
+    recordJobCompletionMetrics(job, finalStatus, info.progress)
 
     if (info.isAnyFailed) {
       jobEntity.status = BatchJobStatus.FAILED
@@ -303,6 +343,25 @@ class ProgressManager(
     logger.debug { "Publishing success event for job ${job.id}" }
     eventPublisher.publishEvent(OnBatchJobSucceeded(jobEntity.dto))
     cachingBatchJobService.saveJob(jobEntity)
+  }
+
+  private fun recordJobCompletionMetrics(
+    job: BatchJobDto,
+    finalStatus: BatchJobStatus,
+    progress: Long,
+  ) {
+    val orgId = getOrganizationId(job.projectId)
+    val createdAt = job.createdAt
+
+    if (createdAt != null) {
+      val durationMs = currentDateProvider.date.time - createdAt
+      metrics.recordJobCompleted(job.type.name, finalStatus.name, job.projectId, orgId, durationMs)
+    } else {
+      logger.debug { "Job ${job.id} has no createdAt timestamp, skipping duration metric" }
+      metrics.recordJobCompleted(job.type.name, finalStatus.name, job.projectId, orgId, 0)
+    }
+
+    metrics.batchJobItemsProcessed.record(progress.toDouble())
   }
 
   fun getJobCachedProgress(jobId: Long): Long? {

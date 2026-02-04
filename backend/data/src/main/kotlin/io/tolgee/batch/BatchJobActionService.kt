@@ -1,6 +1,9 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.trace.StatusCode
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.sentry.Sentry
 import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
@@ -15,6 +18,8 @@ import io.tolgee.constants.Message
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.pubSub.RedisPubSubReceiverConfiguration
+import io.tolgee.service.project.ProjectService
+import io.tolgee.tracing.TolgeeTracingContext
 import io.tolgee.util.Logging
 import io.tolgee.util.addSeconds
 import io.tolgee.util.executeInNewTransaction
@@ -39,8 +44,6 @@ class BatchJobActionService(
   private val usingRedisProvider: UsingRedisProvider,
   @Lazy
   private val progressManager: ProgressManager,
-  @Lazy
-  private val batchJobService: BatchJobService,
   private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   @Lazy
   private val redisTemplate: StringRedisTemplate,
@@ -48,11 +51,32 @@ class BatchJobActionService(
   private val currentDateProvider: CurrentDateProvider,
   private val activityHolder: ActivityHolder,
   private val metrics: Metrics,
+  private val tracingContext: TolgeeTracingContext,
+  @Lazy
+  private val projectService: ProjectService,
 ) : Logging {
+  @WithSpan
   suspend fun handleItem(
     executionItem: ExecutionQueueItem,
     batchJobDto: BatchJobDto,
   ) {
+    // Set tracing context for this batch job execution.
+    // This adds project/org context to all spans within this coroutine.
+    // Note: We look up organizationId here rather than caching in BatchJobDto to avoid
+    // eager loading the Project->Organization relationship at DTO creation time.
+    val organizationId =
+      batchJobDto.projectId?.let {
+        projectService.findDto(it)?.organizationOwnerId
+      }
+    tracingContext.setContext(batchJobDto.projectId, organizationId)
+
+    // Add batch job specific attributes to the current span
+    // Note: project/org context is already set via tracingContext.setContext() above
+    val span = Span.current()
+    span.setAttribute("batch.job.id", batchJobDto.id)
+    span.setAttribute("batch.job.type", batchJobDto.type.name)
+    span.setAttribute("batch.chunk.execution.id", executionItem.chunkExecutionId)
+
     val coroutineContext = coroutineContext
     var retryExecution: BatchJobChunkExecution? = null
     try {
@@ -102,9 +126,8 @@ class BatchJobActionService(
       addRetryExecutionToQueue(retryExecution, jobCharacter = executionItem.jobCharacter)
     } catch (e: Throwable) {
       when (e) {
-        is CancellationException, is kotlinx.coroutines.CancellationException -> {
-          // Coroutine was cancelled (e.g., during job cancellation)
-          // Update the execution status to CANCELLED in a new transaction
+        is CancellationException -> {
+          // Coroutine was cancelled - don't record as span error (expected control flow)
           logger.debug(
             "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId} was cancelled",
           )
@@ -112,6 +135,7 @@ class BatchJobActionService(
         }
 
         is UnexpectedRollbackException -> {
+          recordSpanError(span, e)
           logger.debug(
             "Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId}" +
               " thrown UnexpectedRollbackException",
@@ -119,6 +143,7 @@ class BatchJobActionService(
         }
 
         else -> {
+          recordSpanError(span, e)
           logger.error("Job ${executionItem.jobId}: ⚠️ Chunk ${executionItem.chunkExecutionId} thrown error", e)
           Sentry.captureException(e)
         }
@@ -151,6 +176,14 @@ class BatchJobActionService(
   private fun rollbackActivity() {
     activityHolder.modifiedEntities.clear()
     activityHolder.activityRevision.describingRelations.clear()
+  }
+
+  private fun recordSpanError(
+    span: Span,
+    e: Throwable,
+  ) {
+    span.recordException(e)
+    span.setStatus(StatusCode.ERROR)
   }
 
   private fun getPendingUnlockedExecutionItem(executionItem: ExecutionQueueItem): BatchJobChunkExecution? {
@@ -233,6 +266,7 @@ class BatchJobActionService(
     }
   }
 
+  @WithSpan
   private fun getExecutionIfCanAcquireLockInDb(id: Long): BatchJobChunkExecution? {
     entityManager.createNativeQuery("""SET enable_seqscan=off""")
     return entityManager

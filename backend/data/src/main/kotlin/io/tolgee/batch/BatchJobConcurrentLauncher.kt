@@ -6,6 +6,7 @@ import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.fixtures.waitFor
+import io.tolgee.tracing.TolgeeTracingContext
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import io.tolgee.util.trace
@@ -29,6 +30,7 @@ class BatchJobConcurrentLauncher(
   private val batchJobService: BatchJobService,
   private val progressManager: ProgressManager,
   private val batchJobActionService: BatchJobActionService,
+  private val tracingContext: TolgeeTracingContext,
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 100
@@ -224,8 +226,10 @@ class BatchJobConcurrentLauncher(
     // Publish OnBatchJobStarted event after all checks pass (including project exclusivity)
     progressManager.tryPublishJobStarted(executionItem.jobId, batchJobDto)
 
+    // Launch with OTEL context propagation to ensure tracing context
+    // survives coroutine suspension/resumption
     val job =
-      launch {
+      launch(tracingContext.asCoroutineContext()) {
         batchJobActionService.handleItem(executionItem, batchJobDto)
       }
 

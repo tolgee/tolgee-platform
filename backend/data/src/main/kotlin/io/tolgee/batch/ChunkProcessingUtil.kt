@@ -1,7 +1,10 @@
 package io.tolgee.batch
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.sentry.Sentry
+import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.exceptions.ExceptionWithMessage
@@ -29,7 +32,15 @@ open class ChunkProcessingUtil(
   private val applicationContext: ApplicationContext,
   private val coroutineContext: CoroutineContext,
 ) : Logging {
+  @WithSpan
   open fun processChunk() {
+    // Add batch job span attributes for tracing
+    val span = Span.current()
+    span.setAttribute("batch.job.id", job.id)
+    span.setAttribute("batch.job.type", job.type.name)
+    span.setAttribute("batch.chunk.execution.id", execution.id)
+    span.setAttribute("batch.chunk.number", execution.chunkNumber.toLong())
+
     val time =
       measureTimeMillis {
         try {
@@ -45,6 +56,10 @@ open class ChunkProcessingUtil(
           }
         }
       }
+
+    // Record chunk execution time metric
+    metrics.recordChunkExecutionTime(job.type.name, execution.status.name, time)
+
     logger.debug("Chunk ${execution.id} executed in ${time}ms")
   }
 
@@ -185,6 +200,10 @@ open class ChunkProcessingUtil(
 
   private val projectService by lazy {
     applicationContext.getBean(ProjectService::class.java)
+  }
+
+  private val metrics by lazy {
+    applicationContext.getBean(Metrics::class.java)
   }
 
   private var successfulTargets: List<Any>? = null
