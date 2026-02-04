@@ -25,11 +25,13 @@ import io.tolgee.service.branching.AbstractBranchMergeService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.util.Logging
 import org.springframework.context.annotation.Lazy
+import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+@Primary
 @Service
 class BranchMergeService(
   private val branchMergeRepository: BranchMergeRepository,
