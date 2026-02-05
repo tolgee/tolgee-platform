@@ -18,6 +18,7 @@ import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @AutoConfigureMockMvc
 @ContextRecreatingTest
@@ -32,6 +33,8 @@ import org.springframework.boot.test.context.SpringBootTest
     "tolgee.rate-limits.email-verification-request-window=10000",
     "tolgee.rate-limits.export-request-limit=5",
     "tolgee.rate-limits.export-request-window=10000",
+    "tolgee.rate-limits.max-strikes-before-block=3",
+    "tolgee.rate-limits.strike-reset-window-ms=10000",
   ],
 )
 class RateLimitsTest : AuthorizedControllerTest() {
@@ -92,5 +95,20 @@ class RateLimitsTest : AuthorizedControllerTest() {
     ignoreTestOnSpringBug {
       performAuthGet("/v2/projects/${projectTestData.project.id}/export").andIsRateLimited
     }
+  }
+
+  @Test
+  fun `connection dropped after exceeding max strikes`() {
+    // Use up the IP limit (10 requests)
+    (1..10).forEach { _ ->
+      performGet("/api/public/configuration").andIsOk
+    }
+    // First 3 violations get normal 429 responses (max strikes = 3)
+    (1..3).forEach { _ ->
+      performGet("/api/public/configuration").andIsRateLimited
+    }
+    // 4th violation should result in connection drop (status 444)
+    performGet("/api/public/configuration")
+      .andExpect(status().`is`(444))
   }
 }

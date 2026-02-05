@@ -16,6 +16,7 @@
 
 package io.tolgee.security.ratelimit
 
+import io.tolgee.Metrics
 import io.tolgee.security.authentication.AuthenticationFacade
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -27,6 +28,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 class GlobalUserRateLimitFilter(
   private val rateLimitService: RateLimitService,
   private val authenticationFacade: AuthenticationFacade,
+  private val metrics: Metrics,
 ) : OncePerRequestFilter() {
   override fun doFilterInternal(
     request: HttpServletRequest,
@@ -34,7 +36,15 @@ class GlobalUserRateLimitFilter(
     filterChain: FilterChain,
   ) {
     if (authenticationFacade.isAuthenticated) {
-      rateLimitService.consumeGlobalUserRateLimitPolicy(request, authenticationFacade.authenticatedUser.id)
+      try {
+        rateLimitService.consumeGlobalUserRateLimitPolicy(request, authenticationFacade.authenticatedUser.id)
+      } catch (ex: RateLimitBlockedException) {
+        // HTTP 444 (nginx "No Response") - intentionally drop connection without response body.
+        // This saves bandwidth from clients that repeatedly ignore rate limits.
+        metrics.rateLimitConnectionDropsCounter.increment()
+        response.status = 444
+        return
+      }
     }
 
     filterChain.doFilter(request, response)

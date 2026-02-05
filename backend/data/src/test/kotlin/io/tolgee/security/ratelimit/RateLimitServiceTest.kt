@@ -221,6 +221,115 @@ class RateLimitServiceTest {
     assertThat(authPolicy).isNull()
   }
 
+  @Test
+  fun `strike count increments on rate limit violations`() {
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(5)
+    Mockito.`when`(rateLimitProperties.strikeResetWindowMs).thenReturn(60_000L)
+
+    val testPolicy = RateLimitPolicy("strike_test", 2, Duration.ofSeconds(10), false)
+
+    // Use up tokens
+    rateLimitService.consumeBucket(testPolicy)
+    rateLimitService.consumeBucket(testPolicy)
+
+    // First violation - strike 1
+    val ex1 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex1.strikeCount).isEqualTo(1)
+
+    // Second violation - strike 2
+    val ex2 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex2.strikeCount).isEqualTo(2)
+
+    // Third violation - strike 3
+    val ex3 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex3.strikeCount).isEqualTo(3)
+  }
+
+  @Test
+  fun `strikes reset after strike window passes`() {
+    val baseTime = currentDateProvider.date.time
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(5)
+    Mockito.`when`(rateLimitProperties.strikeResetWindowMs).thenReturn(1000L) // 1 second window
+
+    val testPolicy = RateLimitPolicy("strike_reset_test", 1, Duration.ofSeconds(10), false)
+
+    // Consume the only token
+    rateLimitService.consumeBucket(testPolicy)
+
+    // Get a strike
+    val ex1 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex1.strikeCount).isEqualTo(1)
+
+    // Get another strike
+    val ex2 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex2.strikeCount).isEqualTo(2)
+
+    // Advance time past the strike window
+    Mockito.`when`(currentDateProvider.date).thenReturn(Date(baseTime + 1500))
+
+    // Strike count should reset
+    val ex3 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex3.strikeCount).isEqualTo(1)
+  }
+
+  @Test
+  fun `connection dropped after max strikes exceeded`() {
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(3)
+    Mockito.`when`(rateLimitProperties.strikeResetWindowMs).thenReturn(60_000L)
+
+    val testPolicy = RateLimitPolicy("block_test", 1, Duration.ofSeconds(10), false)
+
+    // Use up the token
+    rateLimitService.consumeBucket(testPolicy)
+
+    // Get 3 strikes (max allowed)
+    assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+
+    // 4th violation should trigger block
+    assertThrows<RateLimitBlockedException> { rateLimitService.consumeBucket(testPolicy) }
+  }
+
+  @Test
+  fun `connection dropping disabled when maxStrikesBeforeBlock is 0`() {
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(0)
+    Mockito.`when`(rateLimitProperties.strikeResetWindowMs).thenReturn(60_000L)
+
+    val testPolicy = RateLimitPolicy("no_block_test", 1, Duration.ofSeconds(10), false)
+
+    // Use up the token
+    rateLimitService.consumeBucket(testPolicy)
+
+    // Should always throw RateLimitedException, never RateLimitBlockedException
+    repeat(10) {
+      val ex = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+      assertThat(ex.strikeCount).isEqualTo(it + 1)
+    }
+  }
+
+  @Test
+  fun `strikes persist across bucket refills`() {
+    val baseTime = currentDateProvider.date.time
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(5)
+    Mockito.`when`(rateLimitProperties.strikeResetWindowMs).thenReturn(60_000L)
+
+    val testPolicy = RateLimitPolicy("refill_strike_test", 1, Duration.ofSeconds(1), false)
+
+    // Use up token and get a strike
+    rateLimitService.consumeBucket(testPolicy)
+    val ex1 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex1.strikeCount).isEqualTo(1)
+
+    // Wait for bucket refill but not strike window
+    Mockito.`when`(currentDateProvider.date).thenReturn(Date(baseTime + 2000))
+
+    // Use up token and get another strike - count should continue from 1
+    rateLimitService.consumeBucket(testPolicy)
+    val ex2 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
+    assertThat(ex2.strikeCount).isEqualTo(2)
+  }
+
   // --- HELPERS
   private fun makeFakeGenericRequest(): MockHttpServletRequest {
     val fakeRequest = MockHttpServletRequest()

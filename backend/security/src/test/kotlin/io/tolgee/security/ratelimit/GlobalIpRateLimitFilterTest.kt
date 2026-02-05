@@ -16,6 +16,7 @@
 
 package io.tolgee.security.ratelimit
 
+import io.tolgee.Metrics
 import io.tolgee.security.authentication.AuthenticationFacade
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -33,7 +34,9 @@ class GlobalIpRateLimitFilterTest {
 
   private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
 
-  private val rateLimitFilter = GlobalIpRateLimitFilter(rateLimitService, authenticationFacade)
+  private val metrics = Mockito.mock(Metrics::class.java)
+
+  private val rateLimitFilter = GlobalIpRateLimitFilter(rateLimitService, authenticationFacade, metrics)
 
   @BeforeEach
   fun setupMocks() {

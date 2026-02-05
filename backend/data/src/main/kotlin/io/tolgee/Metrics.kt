@@ -20,6 +20,21 @@ class Metrics(
       .register(meterRegistry)
   }
 
+  // ==========================================================================
+  // Rate Limiting Metrics
+  // ==========================================================================
+
+  val rateLimitConnectionDropsCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.ratelimit.connection_drops")
+      .description("Number of connections dropped due to repeated rate limit violations")
+      .register(meterRegistry)
+  }
+
+  // ==========================================================================
+  // Batch Job Metrics
+  // ==========================================================================
+
   val batchJobManagementItemAlreadyQueuedCounter: Counter by lazy {
     Counter
       .builder("tolgee.batch.job.execution.queue.already_queued")
