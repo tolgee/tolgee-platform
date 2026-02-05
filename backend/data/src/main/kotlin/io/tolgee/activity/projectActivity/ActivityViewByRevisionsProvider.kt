@@ -172,6 +172,7 @@ class ActivityViewByRevisionsProvider(
     }
 
     query.where(cb.and(*whereConditions.toTypedArray()))
+    query.orderBy(cb.asc(root.get(ActivityModifiedEntity_.entityId)))
     return entityManager.createQuery(query).resultList
   }
 
