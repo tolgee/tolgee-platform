@@ -1,6 +1,7 @@
 package io.tolgee.fixtures
 
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 
@@ -14,6 +15,9 @@ object RedisTesting {
   class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
       redisRunner.run()
+      TestPropertyValues.of(
+        "spring.data.redis.port=${RedisRunner.port}",
+      ).applyTo(configurableApplicationContext)
     }
   }
 }
@@ -22,7 +26,6 @@ object RedisTesting {
   properties = [
     "tolgee.cache.use-redis=true",
     "tolgee.cache.enabled=true",
-    "spring.data.redis.port=56379",
   ],
 )
 annotation class RedisTest

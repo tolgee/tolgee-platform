@@ -1,19 +1,19 @@
 services:
   app:
-    container_name: tolgee_e2e
+    container_name: ${TOLGEE_E2E_CONTAINER_NAME:-tolgee_e2e}
     image: tolgee/tolgee:local
     ports:
-      - 8201:8201
-      - 8091:8091
+      - "${TOLGEE_E2E_PORT:-8201}:8201"
+      - "${TOLGEE_E2E_ACTUATOR_PORT:-8091}:8091"
     environment:
       - spring.profiles.active=docker,e2e
       - tolgee.smtp.host=fakesmtp
       - tolgee.smtp.port=1025
-      - tolgee.frontend-url=http://localhost:8201
+      - tolgee.frontend-url=http://localhost:${TOLGEE_E2E_PORT:-8201}
   fakesmtp:
     image: reachfive/fake-smtp-server:0.8.1
     ports:
-      - "21025:1025"
-      - "21080:1080"
+      - "${TOLGEE_E2E_SMTP_PORT:-21025}:1025"
+      - "${TOLGEE_E2E_SMTP_HTTP_PORT:-21080}:1080"
 volumes:
   e2e-db-data:

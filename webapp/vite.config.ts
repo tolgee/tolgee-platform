@@ -66,6 +66,13 @@ export default defineConfig(({ mode }) => {
         allow: [resolve(__dirname, '../library/src'), __dirname],
       },
     },
+    preview: {
+      port:
+        Number(process.env.VITE_PREVIEW_PORT) ||
+        (Number(process.env.VITE_PORT)
+          ? Number(process.env.VITE_PORT) + 1000
+          : 4173),
+    },
     build: {
       rollupOptions: {
         external: ['src/eeModule.ee.tsx', 'src/eeModule.oss.tsx'],

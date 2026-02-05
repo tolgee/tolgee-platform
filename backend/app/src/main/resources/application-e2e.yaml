@@ -12,7 +12,7 @@ tolgee:
         token-price-in-credits-output: 1.5
   billing:
     enabled: false
-  frontend-url: http://localhost:8202
+  frontend-url: http://localhost:${TOLGEE_E2E_FRONTEND_PORT:8202}
   authentication:
     enabled: true
     needs-email-verification: true
@@ -48,7 +48,7 @@ tolgee:
     global-limits: false
     endpoint-limits: false
     authentication-limits: false
-  file-storage-url: http://localhost:8201
+  file-storage-url: http://localhost:${TOLGEE_E2E_PORT:8201}
   internal:
     controller-enabled: true
     fake-third-party-login: true
@@ -57,7 +57,7 @@ tolgee:
     fake-llm-providers: true
   smtp:
     host: localhost
-    port: 21025
+    port: ${TOLGEE_E2E_SMTP_PORT:21025}
     ssl-enabled: false
     auth: false
     tls-enabled: false
@@ -89,10 +89,10 @@ tolgee:
   batch:
     concurrency: 10
   postgres-autostart:
-    container-name: tolgee-postgres-e2e
-    port: 58532
+    container-name: ${TOLGEE_E2E_PG_CONTAINER:tolgee-postgres-e2e}
+    port: ${TOLGEE_E2E_PG_PORT:58532}
 server:
-  port: 8201
+  port: ${TOLGEE_E2E_PORT:8201}
   error:
     include-exception: true
     include-stacktrace: always
