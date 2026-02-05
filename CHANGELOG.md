@@ -1,3 +1,10 @@
+# [3.154.0](https://github.com/tolgee/tolgee-platform/compare/v3.153.0...v3.154.0) (2026-02-05)
+
+
+### Features
+
+* Strike-based connection dropping for rate limit bandwidth reduction ([#3451](https://github.com/tolgee/tolgee-platform/issues/3451)) ([68b5250](https://github.com/tolgee/tolgee-platform/commit/68b5250832eabe372f00e6f397f7fa38bf67e1f7))
+
 # [3.153.0](https://github.com/tolgee/tolgee-platform/compare/v3.152.4...v3.153.0) (2026-02-05)
 
 
