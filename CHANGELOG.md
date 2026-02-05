@@ -1,3 +1,10 @@
+# [3.155.0](https://github.com/tolgee/tolgee-platform/compare/v3.154.0...v3.155.0) (2026-02-05)
+
+
+### Features
+
+* Add version-aware cache clearing mechanism ([#3452](https://github.com/tolgee/tolgee-platform/issues/3452)) ([7808583](https://github.com/tolgee/tolgee-platform/commit/7808583b1e73ea95e6764e492858947ba86115e7))
+
 # [3.154.0](https://github.com/tolgee/tolgee-platform/compare/v3.153.0...v3.154.0) (2026-02-05)
 
 
