@@ -734,6 +734,7 @@
   "cannot_add_api_key_without_project_message": "Impossible d'ajouter la clé API sans le projet :( Ajoutez d'abord le projet",
   "cannot_change_your_own_access_tooltip": "Impossible de révoquer l'accès à vous-même",
   "cannot_delete_base_language_message": "Impossible de supprimer la langue de base",
+  "cannot_delete_branch_with_children": "Impossible de supprimer cette branche, car d’autres branches ont été créées à partir de celle-ci.",
   "cannot_leave_project_with_organization_role_error_message": "Impossible d'abandonner le projet de l'organisation dont vous êtes membre.",
   "cannot_modify_disabled_translation": "Impossible de modifier la traduction désactivée",
   "cannot_modify_reviewed_translation": "Impossible de modifier la traduction validée",

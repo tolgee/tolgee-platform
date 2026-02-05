@@ -735,6 +735,7 @@
   "cannot_add_api_key_without_project_message": "Kan geen API-sleutel toevoegen zonder project :( Voeg eerst een project toe",
   "cannot_change_your_own_access_tooltip": "U kunt uw eigen toegang niet intrekken",
   "cannot_delete_base_language_message": "Kan basis taal niet verwijderen",
+  "cannot_delete_branch_with_children": "Kan deze branch niet verwijderen omdat andere branches ervan zijn gemaakt",
   "cannot_leave_project_with_organization_role_error_message": "Kan geen project verlaten dat eigendom is van de organisatie waarvan u lid bent.",
   "cannot_modify_disabled_translation": "Kan uitgeschakelde vertaling niet wijzigen",
   "cannot_modify_reviewed_translation": "Kan beoordeelde vertaling niet wijzigen",

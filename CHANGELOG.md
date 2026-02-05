@@ -1,3 +1,10 @@
+# [3.153.0](https://github.com/tolgee/tolgee-platform/compare/v3.152.4...v3.153.0) (2026-02-05)
+
+
+### Features
+
+* Add batch job performance monitoring ([#3450](https://github.com/tolgee/tolgee-platform/issues/3450)) ([cc2dc7e](https://github.com/tolgee/tolgee-platform/commit/cc2dc7e4a1ce8cbd9492162c85c55310fb001c1b))
+
 ## [3.152.4](https://github.com/tolgee/tolgee-platform/compare/v3.152.3...v3.152.4) (2026-02-02)
 
 

@@ -734,6 +734,7 @@
   "cannot_add_api_key_without_project_message": "没有项目，无法添加 API 密钥 :( 请先添加项目",
   "cannot_change_your_own_access_tooltip": "无法撤销对自己的访问权限",
   "cannot_delete_base_language_message": "无法删除基础语言",
+  "cannot_delete_branch_with_children": "无法删除此分支，因为其他分支是从它创建的",
   "cannot_leave_project_with_organization_role_error_message": "您不能离开您所属团队拥有的项目。",
   "cannot_modify_disabled_translation": "无法修改已禁用的翻译",
   "cannot_modify_reviewed_translation": "无法修改已审阅的翻译",

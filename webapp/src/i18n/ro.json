@@ -735,6 +735,7 @@
   "cannot_add_api_key_without_project_message": "Nu se poate adăuga o cheie API fără un proiect :( Adăugați mai întâi un proiect",
   "cannot_change_your_own_access_tooltip": "Nu puteți revoca accesul propriu",
   "cannot_delete_base_language_message": "Nu se poate șterge limba de bază",
+  "cannot_delete_branch_with_children": "Nu se poate șterge această ramură deoarece din ea au fost create alte ramuri",
   "cannot_leave_project_with_organization_role_error_message": "Nu puteți părăsi proiectul deținut de organizația din care faceți parte.",
   "cannot_modify_disabled_translation": "Nu se poate modifica traducerea dezactivată",
   "cannot_modify_reviewed_translation": "Nu se poate modifica traducerea revizuită",

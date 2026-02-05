@@ -735,6 +735,7 @@
   "cannot_add_api_key_without_project_message": "プロジェクトなしでは APIキーを追加できません。まずプロジェクトを追加してください。",
   "cannot_change_your_own_access_tooltip": "自分自身のアクセス権を取り消すことはできません",
   "cannot_delete_base_language_message": "基本言語を削除できません",
+  "cannot_delete_branch_with_children": "このブランチは、そこから作成された他のブランチがあるため削除できません",
   "cannot_leave_project_with_organization_role_error_message": "あなたが所属している組織が所有するプロジェクトを離れることはできません。",
   "cannot_modify_disabled_translation": "無効化された翻訳を変更できません",
   "cannot_modify_reviewed_translation": "レビュー済み翻訳を変更できません",

@@ -734,6 +734,7 @@
   "cannot_add_api_key_without_project_message": "API-Schlüssel kann ohne Projekt nicht hinzugefügt werden :( Projekt zuerst hinzufügen",
   "cannot_change_your_own_access_tooltip": "Sie können den Zugang für sich selbst nicht widerrufen",
   "cannot_delete_base_language_message": "Basissprache kann nicht gelöscht werden",
+  "cannot_delete_branch_with_children": "Dieser Zweig kann nicht gelöscht werden, da andere Zweige daraus erstellt wurden.",
   "cannot_leave_project_with_organization_role_error_message": "Sie können ein Projekt einer Ihrer Organisationen, nicht verlassen.",
   "cannot_modify_disabled_translation": "Deaktivierte Übersetzung kann nicht bearbeitet werden",
   "cannot_modify_reviewed_translation": "Überprüfte Übersetzung kann nicht bearbeitet werden",

@@ -735,6 +735,7 @@
   "cannot_add_api_key_without_project_message": "Nelze přidat API klíč bez projektu :( Přidejte nejdříve projekt",
   "cannot_change_your_own_access_tooltip": "Nelze změnit přístup sobě sama",
   "cannot_delete_base_language_message": "Nelze smazat základní jazyk",
+  "cannot_delete_branch_with_children": "Tuto větev nelze smazat, protože z ní byly vytvořeny jiné větve.",
   "cannot_leave_project_with_organization_role_error_message": "Nelze opustit projekt organizace, jejímž jste členem.",
   "cannot_modify_disabled_translation": "Nelze upravit deaktivovaný překlad",
   "cannot_modify_reviewed_translation": "Nelze upravit zkontrolovaný překlad",

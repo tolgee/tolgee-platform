@@ -734,6 +734,7 @@
   "cannot_add_api_key_without_project_message": "Nem lehet API-kulcsot hozzáadni projekt nélkül :( Először adj hozzá egy projektet",
   "cannot_change_your_own_access_tooltip": "Nem vonhatja vissza a saját hozzáférését",
   "cannot_delete_base_language_message": "Alap nyelv nem törölhető",
+  "cannot_delete_branch_with_children": "Nem törölhető ez az ág, mert más ágak jöttek létre belőle.",
   "cannot_leave_project_with_organization_role_error_message": "Nem hagyhatja el a szervezetéhez tartozó projektet.",
   "cannot_modify_disabled_translation": "Letiltott fordítás nem módosítható",
   "cannot_modify_reviewed_translation": "Ellenőrzött fordítás nem módosítható",

@@ -736,6 +736,7 @@
   "cannot_add_api_key_without_project_message": "Cannot add API key without project :( Add project first",
   "cannot_change_your_own_access_tooltip": "Cannot revoke access to yourself",
   "cannot_delete_base_language_message": "Cannot delete base language",
+  "cannot_delete_branch_with_children": "Cannot delete this branch because other branches were created from it.",
   "cannot_leave_project_with_organization_role_error_message": "Cannot leave project owned by the organization you are member of.",
   "cannot_modify_disabled_translation": "Cannot modify disabled translation",
   "cannot_modify_reviewed_translation": "Cannot modify reviewed translation",

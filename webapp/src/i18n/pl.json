@@ -586,6 +586,7 @@
   "cannot_add_api_key_without_project_message": "Nie można dodać klucza API bez projektu :( Najpierw dodaj projekt",
   "cannot_change_your_own_access_tooltip": "Nie można cofnąć dostępu do siebie",
   "cannot_delete_base_language_message": "Nie można usunąć języka bazowego",
+  "cannot_delete_branch_with_children": "Nie można usunąć tej gałęzi, ponieważ utworzono z niej inne gałęzie",
   "cannot_leave_project_with_organization_role_error_message": "Nie można opuścić projektu należącego do organizacji, której jesteś członkiem.",
   "cannot_modify_disabled_translation": "Nie można modyfikować wyłączonego tłumaczenia",
   "cannot_set_sso_provider_missing_fields": "Nie można zapisać konfiguracji logowania jednokrotnego - niektóre pola nie mają wartości.",

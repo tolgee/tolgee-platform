@@ -734,6 +734,7 @@
   "cannot_add_api_key_without_project_message": "Kan ikke legge til API-nøkkel uten prosjekt :( Legg til prosjekt først",
   "cannot_change_your_own_access_tooltip": "Kan ikke tilbakekalle tilgangen til deg selv",
   "cannot_delete_base_language_message": "Kan ikke slette grunnspråket",
+  "cannot_delete_branch_with_children": "Kan ikke slette denne grenen fordi andre grener ble opprettet fra den",
   "cannot_leave_project_with_organization_role_error_message": "Kan ikke forlate prosjektet som eies av organisasjonen du er medlem av.",
   "cannot_modify_disabled_translation": "Kan ikke endre deaktivert oversettelse",
   "cannot_modify_reviewed_translation": "Kan ikke endre gjennomgått oversettelse",

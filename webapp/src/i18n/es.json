@@ -734,6 +734,7 @@
   "cannot_add_api_key_without_project_message": "No se puede añadir la clave de API sin proyecto :( Primero añade el proyecto ",
   "cannot_change_your_own_access_tooltip": "No se puede revocar el acceso a usted mismo",
   "cannot_delete_base_language_message": "No se puede eliminar el idioma base",
+  "cannot_delete_branch_with_children": "No se puede eliminar esta rama porque se crearon otras a partir de ella",
   "cannot_leave_project_with_organization_role_error_message": "No se puede dejar el proyecto que pertenece a la organización de la que es miembro.",
   "cannot_modify_disabled_translation": "No se puede modificar la traducción deshabilitada",
   "cannot_modify_reviewed_translation": "No se puede modificar la traducción revisada",

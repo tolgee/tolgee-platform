@@ -586,6 +586,7 @@
   "cannot_add_api_key_without_project_message": "Неможливо додати API ключ без проєкту :( Спочатку додайте проєкт",
   "cannot_change_your_own_access_tooltip": "Не можна скасувати доступ до себе",
   "cannot_delete_base_language_message": "Не можна видалити базову мову",
+  "cannot_delete_branch_with_children": "Неможливо видалити цю гілку, оскільки від неї були створені інші гілки",
   "cannot_leave_project_with_organization_role_error_message": "Не можна покинути проєкт, який належить організації, членом якої ви є.",
   "cannot_modify_disabled_translation": "Неможливо змінити вимкнений переклад",
   "cannot_set_sso_provider_missing_fields": "Не вдалося зберегти конфігурацію єдиного входу - деякі поля не заповнені.",
