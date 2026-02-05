@@ -78,6 +78,8 @@ class RateLimitInterceptorTest {
   fun setupMocks() {
     Mockito.`when`(currentDateProvider.date).thenReturn(Date())
     Mockito.`when`(userAccount.id).thenReturn(1337L)
+    // Disable strike-based connection dropping for tests
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(0)
   }
 
   @AfterEach
@@ -128,6 +130,29 @@ class RateLimitInterceptorTest {
     mockMvc.perform(get("/rate-limited-shared-2")).andIsOk
     mockMvc.perform(get("/rate-limited-shared")).andIsRateLimited
     mockMvc.perform(get("/rate-limited-shared-2")).andIsRateLimited
+  }
+
+  @Test
+  fun `it throws RateLimitBlockedException after max strikes when blocking is enabled`() {
+    // Enable blocking with max 2 strikes
+    Mockito.`when`(rateLimitProperties.maxStrikesBeforeBlock).thenReturn(2)
+    Mockito.`when`(rateLimitProperties.strikeResetWindowMs).thenReturn(60_000L)
+
+    // First 2 requests use up tokens
+    mockMvc.perform(get("/rate-limited")).andIsOk
+    mockMvc.perform(get("/rate-limited")).andIsOk
+
+    // Next 2 requests are rate limited (strikes 1 and 2)
+    mockMvc.perform(get("/rate-limited")).andIsRateLimited
+    mockMvc.perform(get("/rate-limited")).andIsRateLimited
+
+    // 3rd violation exceeds max strikes - RateLimitBlockedException should propagate
+    // (In a real setup, this is caught by the filters which return HTTP 444)
+    val exception =
+      org.junit.jupiter.api.assertThrows<jakarta.servlet.ServletException> {
+        mockMvc.perform(get("/rate-limited"))
+      }
+    assertThat(exception.cause).isInstanceOf(RateLimitBlockedException::class.java)
   }
 
   @Test

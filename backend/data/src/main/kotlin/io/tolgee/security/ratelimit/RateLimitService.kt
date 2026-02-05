@@ -59,6 +59,7 @@ class RateLimitService(
    *
    * @param policy The rate limit policy.
    * @throws RateLimitedException There are no longer any tokens in the bucket.
+   * @throws RateLimitBlockedException The client has exceeded the maximum strike count.
    */
   fun consumeBucketUnless(
     policy: RateLimitPolicy?,
@@ -69,13 +70,21 @@ class RateLimitService(
     val lockName = getLockName(policy)
     lockingProvider.withLocking(lockName) {
       val bucket = cache.get(policy.bucketName, Bucket::class.java)
-      val consumed = doConsumeBucket(policy, bucket)
       try {
-        if (!cond()) {
+        val consumed = doConsumeBucket(policy, bucket)
+        try {
+          if (!cond()) {
+            cache.put(policy.bucketName, consumed)
+          }
+        } catch (e: Exception) {
           cache.put(policy.bucketName, consumed)
+          throw e
         }
-      } catch (e: Exception) {
-        cache.put(policy.bucketName, consumed)
+      } catch (e: RateLimitedException) {
+        updateCacheWithStrike(policy.bucketName, bucket, e.strikeCount, e.lastStrikeAt)
+        throw e
+      } catch (e: RateLimitBlockedException) {
+        updateCacheWithStrike(policy.bucketName, bucket, e.strikeCount, e.lastStrikeAt)
         throw e
       }
     }
@@ -208,6 +217,7 @@ class RateLimitService(
    * @param bucket The bucket to consume. Can be null or expired.
    * @return The updated rate limit bucket.
    * @throws RateLimitedException There are no longer any tokens in the bucket.
+   * @throws RateLimitBlockedException The client has exceeded the maximum strike count.
    */
   private fun doConsumeBucket(
     policy: RateLimitPolicy,
@@ -218,14 +228,65 @@ class RateLimitService(
       val tokensRemaining = policy.limit - 1
       val tokensResetAt = policy.refillDuration.toMillis() + time
 
-      return Bucket(tokensRemaining, tokensResetAt)
+      // Preserve or reset strikes based on time window
+      val (newStrikeCount, newLastStrikeAt) =
+        if (shouldResetStrikes(bucket?.lastStrikeAt, time)) {
+          0 to 0L
+        } else {
+          bucket!!.strikeCount to bucket.lastStrikeAt
+        }
+
+      return Bucket(tokensRemaining, tokensResetAt, newStrikeCount, newLastStrikeAt)
     }
 
     if (bucket.tokens == 0) {
-      throw RateLimitedException(bucket.refillAt - time, policy.global)
+      val currentStrikes =
+        if (shouldResetStrikes(bucket.lastStrikeAt, time)) 0 else bucket.strikeCount
+
+      val newStrikeCount = currentStrikes + 1
+      val maxStrikes = rateLimitProperties.maxStrikesBeforeBlock
+
+      // If max strikes exceeded and feature is enabled (maxStrikes > 0), block the client
+      if (maxStrikes > 0 && newStrikeCount > maxStrikes) {
+        throw RateLimitBlockedException(newStrikeCount, time)
+      }
+
+      throw RateLimitedException(bucket.refillAt - time, policy.global, newStrikeCount, time)
     }
 
-    return Bucket(bucket.tokens - 1, bucket.refillAt)
+    return Bucket(bucket.tokens - 1, bucket.refillAt, bucket.strikeCount, bucket.lastStrikeAt)
+  }
+
+  /**
+   * Persists strike information to the cache when a rate limit exception is thrown.
+   * When bucket is null (rare edge case), creates a bucket with zero tokens to store the strike.
+   */
+  private fun updateCacheWithStrike(
+    bucketName: String,
+    bucket: Bucket?,
+    strikeCount: Int,
+    lastStrikeAt: Long,
+  ) {
+    val updatedBucket =
+      Bucket(
+        tokens = bucket?.tokens ?: 0,
+        refillAt = bucket?.refillAt ?: 0L,
+        strikeCount = strikeCount,
+        lastStrikeAt = lastStrikeAt,
+      )
+    cache.put(bucketName, updatedBucket)
+  }
+
+  /**
+   * Determines if strikes should be reset based on the time window.
+   * Strikes reset if there's no previous strike or if enough time has passed since the last one.
+   */
+  private fun shouldResetStrikes(
+    lastStrikeAt: Long?,
+    currentTime: Long,
+  ): Boolean {
+    if (lastStrikeAt == null || lastStrikeAt <= 0) return true
+    return (currentTime - lastStrikeAt) >= rateLimitProperties.strikeResetWindowMs
   }
 
   private fun getLockName(policy: RateLimitPolicy): String {

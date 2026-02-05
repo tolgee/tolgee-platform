@@ -26,5 +26,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 class RateLimitedException(
   val retryAfter: Long,
   val global: Boolean,
+  val strikeCount: Int = 0,
+  val lastStrikeAt: Long = 0,
 ) : ExceptionWithMessage(Message.RATE_LIMITED),
   ExpectedException

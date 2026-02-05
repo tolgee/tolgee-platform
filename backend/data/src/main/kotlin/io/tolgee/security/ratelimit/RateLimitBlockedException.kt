@@ -16,11 +16,17 @@
 
 package io.tolgee.security.ratelimit
 
-import java.io.Serializable
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.ExceptionWithMessage
+import io.tolgee.exceptions.ExpectedException
 
-data class Bucket(
-  val tokens: Int,
-  val refillAt: Long,
-  val strikeCount: Int = 0,
-  val lastStrikeAt: Long = 0,
-) : Serializable
+/**
+ * Exception thrown when a client has exceeded the maximum number of rate limit strikes.
+ * This signals that the connection should be dropped without sending a response body
+ * to save bandwidth from repeat offenders.
+ */
+class RateLimitBlockedException(
+  val strikeCount: Int,
+  val lastStrikeAt: Long,
+) : ExceptionWithMessage(Message.RATE_LIMITED),
+  ExpectedException

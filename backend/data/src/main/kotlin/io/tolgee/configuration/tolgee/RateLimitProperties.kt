@@ -62,4 +62,18 @@ class RateLimitProperties(
   var exportRequestLimit: Int = 100,
   @DocProperty(description = "Size, in milliseconds, of the time window for export-based limiting.")
   var exportRequestWindow: Long = 5 * 60 * 1000,
+  @DocProperty(
+    description =
+      "Number of rate limit violations before the server stops responding to the client.\n" +
+        "After this threshold, the connection is dropped without sending a response body, saving bandwidth.\n" +
+        "Set to 0 to disable connection dropping (always send 429 responses).",
+  )
+  var maxStrikesBeforeBlock: Int = 3,
+  @DocProperty(
+    description =
+      "Time window, in milliseconds, after which strikes are reset if the client behaves well.\n" +
+        "If a client doesn't hit rate limits for this duration, their strike count is reset to zero.",
+    defaultExplanation = "= 1 minute",
+  )
+  var strikeResetWindowMs: Long = 60_000,
 )
