@@ -34,6 +34,7 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.redisson.api.RedissonClient
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
@@ -59,6 +60,9 @@ abstract class AbstractBatchJobConcurrentTest :
     class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
       override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         redisRunner.run()
+        TestPropertyValues
+          .of("spring.data.redis.port=${RedisRunner.port}")
+          .applyTo(configurableApplicationContext)
       }
     }
   }

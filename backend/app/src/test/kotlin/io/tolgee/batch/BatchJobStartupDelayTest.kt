@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.annotation.DirtiesContext
@@ -42,7 +43,6 @@ import org.springframework.transaction.PlatformTransactionManager
     "tolgee.cache.use-redis=true",
     "tolgee.cache.enabled=true",
     "tolgee.websocket.use-redis=true",
-    "spring.redis.port=56379",
   ],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
@@ -64,6 +64,9 @@ class BatchJobStartupDelayTest :
     class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
       override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         redisRunner.run()
+        TestPropertyValues
+          .of("spring.data.redis.port=${RedisRunner.port}")
+          .applyTo(configurableApplicationContext)
       }
     }
   }
