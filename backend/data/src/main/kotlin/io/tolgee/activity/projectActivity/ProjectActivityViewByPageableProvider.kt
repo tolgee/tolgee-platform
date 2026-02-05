@@ -14,6 +14,7 @@ class ProjectActivityViewByPageableProvider(
   private val projectId: Long,
   private val pageable: Pageable,
   private val branchId: Long?,
+  private val defaultBranchId: Long? = null,
 ) {
   fun get(): Page<ProjectActivityView> {
     val revisions = getProjectActivityRevisions(pageable)
@@ -28,7 +29,7 @@ class ProjectActivityViewByPageableProvider(
 
   private fun getProjectActivityRevisions(pageable: Pageable): Page<ActivityRevision> {
     val types = ActivityType.entries.filter { !it.hideInList }
-    return activityRevisionRepository.getForProject(projectId, pageable, types, branchId)
+    return activityRevisionRepository.getForProject(projectId, pageable, types, branchId, defaultBranchId)
   }
 
   private val activityRevisionRepository: ActivityRevisionRepository =

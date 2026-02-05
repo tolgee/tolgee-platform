@@ -119,11 +119,13 @@ class ActivityService(
     branchName: String? = null,
   ): Page<ProjectActivityView> {
     val branch = branchService.getActiveNonDefaultBranch(projectId, branchName)
+    val defaultBranchId = if (branch == null) branchService.getDefaultBranch(projectId)?.id else null
     return ProjectActivityViewByPageableProvider(
       applicationContext = applicationContext,
       projectId = projectId,
       pageable = pageable,
       branchId = branch?.id,
+      defaultBranchId = defaultBranchId,
     ).get()
   }
 

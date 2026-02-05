@@ -14,19 +14,31 @@ import org.springframework.stereotype.Repository
 @Lazy
 interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
   @Query(
-    """
+    value = """
     from ActivityRevision ar
     where ar.projectId = :projectId and ar.type is not null and ar.batchJobChunkExecution is null and ar.type in :types
-    and exists (                                                                                                                                                                                                       
-      select 1                                                                                                                                                                                                         
-      from ActivityModifiedEntity me                                                                                                                                                                                   
-      left join Branch b on me.branchId = b.id                                                                                                                                                                         
-      where me.activityRevision = ar                                                                                                                                                                                   
-        and (b.deletedAt is null or me.branchId is null)                                                                                                                                                              
-        and (                                                                                                                                                                                                          
-          (:branchId is null and (me.branchId is null or b.isDefault = true))                                                                                                                                          
-          or (:branchId is not null and me.branchId = :branchId)                                                                                                                                                       
-        )                                                                                                                                                                                                              
+    and exists (
+      select 1
+      from ActivityModifiedEntity me
+      where me.activityRevision = ar
+        and (
+          (:branchId is not null and me.branchId = :branchId)
+          or (:branchId is null and (me.branchId is null or me.branchId = :defaultBranchId))
+        )
+    )
+  """,
+    countQuery = """
+    select count(ar.id)
+    from ActivityRevision ar
+    where ar.projectId = :projectId and ar.type is not null and ar.batchJobChunkExecution is null and ar.type in :types
+    and exists (
+      select 1
+      from ActivityModifiedEntity me
+      where me.activityRevision = ar
+        and (
+          (:branchId is not null and me.branchId = :branchId)
+          or (:branchId is null and (me.branchId is null or me.branchId = :defaultBranchId))
+        )
     )
   """,
   )
@@ -35,6 +47,7 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     pageable: Pageable,
     types: List<ActivityType>,
     branchId: Long? = null,
+    defaultBranchId: Long? = null,
   ): Page<ActivityRevision>
 
   @Query(

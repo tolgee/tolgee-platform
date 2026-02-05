@@ -5042,10 +5042,8 @@
             <column name="branch_id" type="BIGINT"/>
         </addColumn>
     </changeSet>
-    <changeSet author="danielkrizan (generated)" id="1768473852506-2">
-        <createIndex indexName="IDX7ofy2tesqs3c5b8j1us8ajtjd" tableName="activity_modified_entity">
-            <column name="branch_id"/>
-        </createIndex>
+    <changeSet author="danielkrizan (generated)" id="1768473852506-2" runInTransaction="false">
+        <sql>CREATE INDEX CONCURRENTLY idx_activity_modified_entity_revision_branch ON activity_modified_entity (activity_revision_id, branch_id)</sql>
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1768911540294-1">
         <addColumn tableName="branch_key_meta_snapshot">
