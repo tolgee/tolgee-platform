@@ -15,9 +15,9 @@ object RedisTesting {
   class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
       redisRunner.run()
-      TestPropertyValues.of(
-        "spring.data.redis.port=${RedisRunner.port}",
-      ).applyTo(configurableApplicationContext)
+      TestPropertyValues
+        .of("spring.data.redis.port=${RedisRunner.port}")
+        .applyTo(configurableApplicationContext)
     }
   }
 }
