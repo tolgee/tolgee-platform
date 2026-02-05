@@ -18,6 +18,7 @@ package io.tolgee.security.ratelimit
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
+import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.andIsOk
@@ -59,6 +60,7 @@ class RateLimitInterceptorTest {
         currentDateProvider,
         rateLimitProperties,
         authenticationFacade,
+        ResilientCacheAccessor(),
       ),
     )
 

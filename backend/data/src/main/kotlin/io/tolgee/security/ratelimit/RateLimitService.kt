@@ -18,6 +18,7 @@ package io.tolgee.security.ratelimit
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
+import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.constants.Caches
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -36,6 +37,7 @@ class RateLimitService(
   private val rateLimitProperties: RateLimitProperties,
   @Lazy
   private val authenticationFacade: AuthenticationFacade,
+  private val resilientCacheAccessor: ResilientCacheAccessor,
 ) {
   private val cache: Cache by lazy {
     cacheManager.getCache(Caches.RATE_LIMITS)
@@ -69,7 +71,7 @@ class RateLimitService(
 
     val lockName = getLockName(policy)
     lockingProvider.withLocking(lockName) {
-      val bucket = cache.get(policy.bucketName, Bucket::class.java)
+      val bucket = resilientCacheAccessor.get(cache, policy.bucketName, Bucket::class.java)
       try {
         val consumed = doConsumeBucket(policy, bucket)
         try {

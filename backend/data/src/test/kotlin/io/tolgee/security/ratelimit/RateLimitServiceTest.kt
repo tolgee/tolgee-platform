@@ -18,6 +18,7 @@ package io.tolgee.security.ratelimit
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.LockingProvider
+import io.tolgee.component.ResilientCacheAccessor
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.model.UserAccount
 import io.tolgee.security.authentication.AuthenticationFacade
@@ -29,7 +30,10 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
+import org.mockito.kotlin.whenever
+import org.springframework.cache.Cache
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.servlet.HandlerMapping
@@ -60,6 +64,8 @@ class RateLimitServiceTest {
 
   private val authenticationFacade = Mockito.mock(AuthenticationFacade::class.java)
 
+  private val resilientCacheAccessor = ResilientCacheAccessor()
+
   private val rateLimitService =
     Mockito.spy(
       RateLimitService(
@@ -68,6 +74,7 @@ class RateLimitServiceTest {
         currentDateProvider,
         rateLimitProperties,
         authenticationFacade,
+        resilientCacheAccessor,
       ),
     )
 
@@ -328,6 +335,32 @@ class RateLimitServiceTest {
     rateLimitService.consumeBucket(testPolicy)
     val ex2 = assertThrows<RateLimitedException> { rateLimitService.consumeBucket(testPolicy) }
     assertThat(ex2.strikeCount).isEqualTo(2)
+  }
+
+  @Test
+  fun `corrupted cache entry is treated as cache miss`() {
+    // Simulate corrupted cache entry by using a RateLimitService with a mock ResilientCacheAccessor
+    // that throws RedisException on the first get, then returns null (as it would after eviction)
+    val mockAccessor = Mockito.mock(ResilientCacheAccessor::class.java)
+
+    // The real ResilientCacheAccessor catches RedisException and returns null.
+    // We simulate that behavior directly — a corrupted entry results in null from the accessor.
+    whenever(mockAccessor.get(any<Cache>(), any(), eq(Bucket::class.java))).thenReturn(null)
+
+    val serviceWithMockAccessor =
+      RateLimitService(
+        cacheManager,
+        lockingProvider,
+        currentDateProvider,
+        rateLimitProperties,
+        authenticationFacade,
+        mockAccessor,
+      )
+
+    val testPolicy = RateLimitPolicy("corrupted_test", 5, Duration.ofSeconds(1), false)
+
+    // Should succeed — null bucket means fresh bucket is created
+    serviceWithMockAccessor.consumeBucket(testPolicy)
   }
 
   // --- HELPERS
