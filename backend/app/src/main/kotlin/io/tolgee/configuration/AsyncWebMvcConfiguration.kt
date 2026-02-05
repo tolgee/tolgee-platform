@@ -16,7 +16,13 @@ class AsyncWebMvcConfiguration : WebMvcConfigurer {
 
   private fun asyncExecutor(): AsyncTaskExecutor {
     val asyncExecutor = ThreadPoolTaskExecutor()
-    asyncExecutor.setTaskDecorator(SentryTaskDecorator())
+    // Chain decorators: OTEL context propagation + Sentry context propagation
+    asyncExecutor.setTaskDecorator(
+      CompositeTaskDecorator(
+        OtelContextTaskDecorator(),
+        SentryTaskDecorator(),
+      ),
+    )
     asyncExecutor.initialize()
     return DelegatingSecurityContextAsyncTaskExecutor(asyncExecutor)
   }

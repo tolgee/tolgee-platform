@@ -37,6 +37,7 @@ import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.security.authentication.WriteOperation
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
+import io.tolgee.tracing.TolgeeTracingContext
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -79,6 +80,7 @@ class ProjectAuthorizationInterceptorTest {
       Mockito.mock(ProjectHolder::class.java),
       Mockito.mock(OrganizationHolder::class.java),
       Mockito.mock(ActivityHolder::class.java, Mockito.RETURNS_DEEP_STUBS),
+      Mockito.mock(TolgeeTracingContext::class.java),
     )
 
   private val mockMvc =

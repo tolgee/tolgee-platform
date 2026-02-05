@@ -10,7 +10,13 @@ import java.util.concurrent.Executor
 class AsyncMethodConfiguration : AsyncConfigurer {
   override fun getAsyncExecutor(): Executor {
     val executor = ThreadPoolTaskExecutor()
-    executor.setTaskDecorator(SentryTaskDecorator())
+    // Chain decorators: OTEL context propagation + Sentry context propagation
+    executor.setTaskDecorator(
+      CompositeTaskDecorator(
+        OtelContextTaskDecorator(),
+        SentryTaskDecorator(),
+      ),
+    )
     executor.initialize()
     return executor
   }

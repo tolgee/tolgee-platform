@@ -1,10 +1,12 @@
 package io.tolgee
 
 import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import org.springframework.stereotype.Component
+import java.time.Duration
 import java.util.concurrent.ConcurrentLinkedQueue
 
 @Component
@@ -73,5 +75,118 @@ class Metrics(
       .builder("tolgee.big_meta.new_distances.compute.timer")
       .description("Time spent computing new distances for big meta data")
       .register(meterRegistry)
+  }
+
+  // ==========================================================================
+  // Batch Job Performance Metrics
+  // ==========================================================================
+
+  /**
+   * Distribution of items processed per job.
+   */
+  val batchJobItemsProcessed: DistributionSummary by lazy {
+    DistributionSummary
+      .builder("tolgee.batch.job.items_processed")
+      .description("Number of items processed per batch job")
+      .publishPercentileHistogram()
+      .register(meterRegistry)
+  }
+
+  /**
+   * Records job completion with duration and tags.
+   *
+   * Note on cardinality: project_id and organization_id are included intentionally to enable
+   * per-customer performance analysis during debugging. In production with many projects,
+   * consider using Prometheus recording rules to pre-aggregate if cardinality becomes an issue.
+   * organization_name is excluded to limit cardinality and avoid exposing customer data in metrics.
+   */
+  fun recordJobCompleted(
+    jobType: String,
+    status: String,
+    projectId: Long?,
+    organizationId: Long?,
+    durationMs: Long,
+  ) {
+    val projectTag = projectId?.toString() ?: "unknown"
+    val orgIdTag = organizationId?.toString() ?: "unknown"
+
+    // Create a tagged timer for this specific combination
+    Timer
+      .builder("tolgee.batch.job.duration")
+      .description("Total duration of batch jobs from creation to completion")
+      .publishPercentileHistogram()
+      .tag("job_type", jobType)
+      .tag("status", status)
+      .tag("project_id", projectTag)
+      .tag("organization_id", orgIdTag)
+      .register(meterRegistry)
+      .record(Duration.ofMillis(durationMs.coerceAtLeast(0)))
+
+    Counter
+      .builder("tolgee.batch.job.completed")
+      .tag("job_type", jobType)
+      .tag("status", status)
+      .tag("project_id", projectTag)
+      .tag("organization_id", orgIdTag)
+      .description("Total number of completed batch jobs")
+      .register(meterRegistry)
+      .increment()
+  }
+
+  /**
+   * Records job started with tags.
+   * Note: organization_name intentionally excluded to limit cardinality and avoid exposing customer data in metrics.
+   */
+  fun recordJobStarted(
+    jobType: String,
+    jobCharacter: String,
+    projectId: Long?,
+    organizationId: Long?,
+  ) {
+    Counter
+      .builder("tolgee.batch.job.started")
+      .tag("job_type", jobType)
+      .tag("job_character", jobCharacter)
+      .tag("project_id", projectId?.toString() ?: "unknown")
+      .tag("organization_id", organizationId?.toString() ?: "unknown")
+      .description("Total number of started batch jobs")
+      .register(meterRegistry)
+      .increment()
+  }
+
+  /**
+   * Records queue wait time with tags.
+   */
+  fun recordQueueWaitTime(
+    jobType: String,
+    jobCharacter: String,
+    waitTimeMs: Long,
+  ) {
+    Timer
+      .builder("tolgee.batch.job.queue_wait")
+      .description("Time jobs wait before first chunk executes")
+      .publishPercentileHistogram()
+      .tag("job_type", jobType)
+      .tag("job_character", jobCharacter)
+      .register(meterRegistry)
+      .record(Duration.ofMillis(waitTimeMs.coerceAtLeast(0)))
+  }
+
+  /**
+   * Records chunk execution time with tags.
+   */
+  fun recordChunkExecutionTime(
+    jobType: String,
+    status: String,
+    executionTimeMs: Long,
+  ) {
+    Timer
+      .builder("tolgee.batch.chunk.execution")
+      .description("Time to execute a single batch job chunk")
+      .publishPercentileHistogram()
+      .tag("job_type", jobType)
+      .tag("status", status)
+      .register(meterRegistry)
+      .record(Duration.ofMillis(executionTimeMs.coerceAtLeast(0)))
   }
 }

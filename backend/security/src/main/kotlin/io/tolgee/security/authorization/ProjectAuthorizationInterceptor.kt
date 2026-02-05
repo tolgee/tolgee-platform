@@ -31,6 +31,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.isReadOnly
 import io.tolgee.service.organization.OrganizationService
 import io.tolgee.service.security.SecurityService
+import io.tolgee.tracing.TolgeeTracingContext
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
@@ -50,6 +51,7 @@ class ProjectAuthorizationInterceptor(
   private val projectHolder: ProjectHolder,
   private val organizationHolder: OrganizationHolder,
   private val activityHolder: ActivityHolder,
+  private val tracingContext: TolgeeTracingContext,
 ) : AbstractAuthorizationInterceptor() {
   private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -142,6 +144,9 @@ class ProjectAuthorizationInterceptor(
     activityHolder.activityRevision.projectId = project.id
     organizationHolder.organization = organizationService.findDto(project.organizationOwnerId)
       ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+
+    // Add project/org context to OpenTelemetry traces
+    tracingContext.setContext(project.id, project.organizationOwnerId)
 
     return true
   }
