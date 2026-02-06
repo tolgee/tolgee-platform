@@ -3,6 +3,9 @@ package io.tolgee.unit.formats.po.out
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
+import io.tolgee.formats.po.PO_FILE_MSG_CTXT_CUSTOM_KEY
+import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
+import io.tolgee.formats.po.PO_MSGCTXT_SEPARATOR
 import io.tolgee.formats.po.out.PoFileExporter
 import io.tolgee.model.ILanguage
 import io.tolgee.model.enums.TranslationState
@@ -357,6 +360,121 @@ class PoFileExporterTest {
         )
       }
     return getExporter(built.translations, false)
+  }
+
+  @Test
+  fun `exports msgctxt correctly`() {
+    val exporter = getMsgctxtExporter()
+    val files = exporter.produceFiles().map { it.key to it.value.bufferedReader().readText() }.toMap()
+    files["en.po"].assert.isEqualTo(
+      """
+      msgid ""
+      msgstr ""
+      "Language: en\n"
+      "MIME-Version: 1.0\n"
+      "Content-Type: text/plain; charset=UTF-8\n"
+      "Content-Transfer-Encoding: 8bit\n"
+      "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+      "X-Generator: Tolgee\n"
+
+      msgctxt "menu"
+      msgid "Open"
+      msgstr "Open file"
+
+      msgctxt "dialog"
+      msgid "Open"
+      msgstr "Open dialog"
+
+      msgid "Hello"
+      msgstr "Hello!"${"\n"}
+      """.trimIndent(),
+    )
+  }
+
+  @Test
+  fun `exports msgctxt with plurals correctly`() {
+    val exporter = getMsgctxtPluralExporter()
+    val files = exporter.produceFiles().map { it.key to it.value.bufferedReader().readText() }.toMap()
+    files["en.po"].assert.isEqualTo(
+      """
+      msgid ""
+      msgstr ""
+      "Language: en\n"
+      "MIME-Version: 1.0\n"
+      "Content-Type: text/plain; charset=UTF-8\n"
+      "Content-Transfer-Encoding: 8bit\n"
+      "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+      "X-Generator: Tolgee\n"
+
+      msgctxt "stats"
+      msgid "%d file"
+      msgid_plural "%d files"
+      msgstr[0] "%d file"
+      msgstr[1] "%d files"${"\n"}
+      """.trimIndent(),
+    )
+  }
+
+  private fun getMsgctxtExporter(): PoFileExporter {
+    val menuOpenKey = "menu${PO_MSGCTXT_SEPARATOR}Open"
+    val dialogOpenKey = "dialog${PO_MSGCTXT_SEPARATOR}Open"
+    return getExporter(
+      listOf(
+        ExportTranslationView(
+          1,
+          "Open file",
+          TranslationState.TRANSLATED,
+          ExportKeyView(
+            1,
+            menuOpenKey,
+            custom = mapOf(PO_FILE_MSG_CTXT_CUSTOM_KEY to "menu"),
+          ),
+          "en",
+        ),
+        ExportTranslationView(
+          2,
+          "Open dialog",
+          TranslationState.TRANSLATED,
+          ExportKeyView(
+            2,
+            dialogOpenKey,
+            custom = mapOf(PO_FILE_MSG_CTXT_CUSTOM_KEY to "dialog"),
+          ),
+          "en",
+        ),
+        ExportTranslationView(
+          3,
+          "Hello!",
+          TranslationState.TRANSLATED,
+          ExportKeyView(3, "Hello"),
+          "en",
+        ),
+      ),
+    )
+  }
+
+  private fun getMsgctxtPluralExporter(): PoFileExporter {
+    val keyName = "stats${PO_MSGCTXT_SEPARATOR}%d file"
+    return getExporter(
+      listOf(
+        ExportTranslationView(
+          1,
+          "{count, plural, one {# file} other {# files}}",
+          TranslationState.TRANSLATED,
+          ExportKeyView(
+            1,
+            keyName,
+            custom =
+              mapOf(
+                PO_FILE_MSG_CTXT_CUSTOM_KEY to "stats",
+                PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY to "%d files",
+              ),
+            isPlural = true,
+          ),
+          "en",
+        ),
+      ),
+    )
   }
 
   private fun getExporter(

@@ -4,14 +4,13 @@ import io.tolgee.exceptions.PoParserException
 import io.tolgee.formats.po.`in`.data.PoParsedTranslation
 import io.tolgee.formats.po.`in`.data.PoParserMeta
 import io.tolgee.formats.po.`in`.data.PoParserResult
-import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
-import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import java.util.Locale
 
 class PoParser(
   private val context: FileProcessorContext,
 ) {
+  private var expectMsgCtxt = false
   private var expectMsgId = false
   private var expectMsgStr = false
   private var expectMsgIdPlural = false
@@ -253,10 +252,8 @@ class PoParser(
       }
 
       isKeyword("msgctxt") -> {
-        context.fileEntity.addIssue(
-          FileIssueType.PO_MSGCTXT_NOT_SUPPORTED,
-          mapOf(FileIssueParamType.LINE to currentLine.toString()),
-        )
+        possibleEndTranslationBefore()
+        expectMsgCtxt = true
       }
 
       current.matches("^msgstr\\[\\d+]$".toRegex()) -> {
@@ -294,6 +291,10 @@ class PoParser(
 
   private fun storeCurrent() {
     createdTranslation.apply {
+      if (expectMsgCtxt) {
+        this.msgctxt.append(currentSequence)
+      }
+
       if (expectMsgId) {
         this.msgid.append(currentSequence)
       }
@@ -322,6 +323,7 @@ class PoParser(
 
   private fun resetValueExpectations() {
     expectValue = false
+    expectMsgCtxt = false
     expectMsgId = false
     expectMsgStr = false
     expectMsgIdPlural = false

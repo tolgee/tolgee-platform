@@ -133,6 +133,31 @@ const StyledBolt = styled(Zap)`
   height: 14px;
 `;
 
+const MSGCTXT_SEPARATOR = '\u0004';
+
+const StyledMsgctxt = styled('span')`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  &::after {
+    content: ' | ';
+    color: ${({ theme }) => theme.palette.divider};
+  }
+`;
+
+const KeyNameWithContext: React.FC<{ keyName: string }> = ({ keyName }) => {
+  const separatorIndex = keyName.indexOf(MSGCTXT_SEPARATOR);
+  if (separatorIndex === -1) {
+    return <>{keyName}</>;
+  }
+  const context = keyName.substring(0, separatorIndex);
+  const msgid = keyName.substring(separatorIndex + 1);
+  return (
+    <>
+      <StyledMsgctxt>{context}</StyledMsgctxt>
+      {msgid}
+    </>
+  );
+};
+
 type Props = {
   data: KeyWithTranslationsModel;
   widthPercent?: string | number;
@@ -240,7 +265,7 @@ export const CellKey: React.FC<Props> = ({
               maxLines={3}
               wrap="break-all"
             >
-              {data.keyName}
+              <KeyNameWithContext keyName={data.keyName} />
             </LimitedHeightText>
           </StyledKey>
           {data.keyDescription && (

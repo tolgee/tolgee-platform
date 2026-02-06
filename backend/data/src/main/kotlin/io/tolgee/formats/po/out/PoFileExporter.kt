@@ -3,7 +3,9 @@ package io.tolgee.formats.po.out
 import io.tolgee.dtos.IExportParams
 import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.formats.getPluralData
+import io.tolgee.formats.po.PO_FILE_MSG_CTXT_CUSTOM_KEY
 import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
+import io.tolgee.formats.po.PO_MSGCTXT_SEPARATOR
 import io.tolgee.model.ILanguage
 import io.tolgee.service.export.ExportFilePathProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
@@ -32,9 +34,17 @@ class PoFileExporter(
     translations.forEach { translation ->
       val resultBuilder = getResultStringBuilder(translation)
       val converted = convertMessage(translation)
+      val msgCtxt = translation.key.custom?.get(PO_FILE_MSG_CTXT_CUSTOM_KEY) as? String
+      val actualMsgId =
+        if (msgCtxt != null) {
+          translation.key.name.removePrefix("$msgCtxt$PO_MSGCTXT_SEPARATOR")
+        } else {
+          translation.key.name
+        }
       resultBuilder.appendLine()
-      resultBuilder.writeMsgId(translation.key.name)
-      resultBuilder.writeMsgIdPlural(translation, converted)
+      resultBuilder.writeMsgCtxt(msgCtxt)
+      resultBuilder.writeMsgId(actualMsgId)
+      resultBuilder.writeMsgIdPlural(translation, converted, actualMsgId)
       resultBuilder.writeMsgStr(converted)
     }
   }
@@ -47,6 +57,11 @@ class PoFileExporter(
       forceIsPlural = translation.key.isPlural,
       projectIcuPlaceholdersSupport = projectIcuPlaceholdersSupport,
     ).convert()
+  }
+
+  private fun StringBuilder.writeMsgCtxt(msgCtxt: String?) {
+    msgCtxt ?: return
+    this.append(convertToPoMultilineString("msgctxt", msgCtxt))
   }
 
   private fun StringBuilder.writeMsgId(keyName: String) {
@@ -100,8 +115,9 @@ class PoFileExporter(
   private fun StringBuilder.writeMsgIdPlural(
     translation: ExportTranslationView,
     converted: ToPoConversionResult,
+    actualMsgId: String,
   ) {
-    val msgIdPlural = translation.key.custom?.get(PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY) as? String ?: translation.key.name
+    val msgIdPlural = translation.key.custom?.get(PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY) as? String ?: actualMsgId
     if (converted.isPlural()) {
       this.append(
         convertToPoMultilineString(
