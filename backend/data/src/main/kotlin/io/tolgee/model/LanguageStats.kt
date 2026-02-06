@@ -6,20 +6,22 @@ package io.tolgee.model
 
 import io.tolgee.api.ILanguageStats
 import io.tolgee.dtos.queryResults.LanguageStatsDto
+import io.tolgee.model.branching.Branch
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
-import jakarta.persistence.OneToOne
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
-import jakarta.persistence.UniqueConstraint
 import java.util.Date
 
 @Entity
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["language_id"], name = "language_stats_language_id_key")])
+@Table
 class LanguageStats(
-  @OneToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
   val language: Language,
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  var branch: Branch? = null,
 ) : StandardAuditModel(),
   ILanguageStats {
   override var untranslatedWords: Long = 0
@@ -60,5 +62,6 @@ class LanguageStats(
       translatedPercentage = translatedPercentage,
       reviewedPercentage = reviewedPercentage,
       translationsUpdatedAt = translationsUpdatedAt,
+      isDefaultBranch = branch?.isDefault,
     )
 }

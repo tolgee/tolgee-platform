@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityService
+import io.tolgee.constants.Feature
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.activity.ModifiedEntityModel
 import io.tolgee.hateoas.activity.ModifiedEntityModelAssembler
@@ -20,6 +21,8 @@ import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.branching.BranchService
+import io.tolgee.service.project.ProjectFeatureGuard
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -43,6 +46,8 @@ class ProjectActivityController(
   private val modificationResourcesAssembler: PagedResourcesAssembler<ModifiedEntityView>,
   private val projectActivityModelAssembler: ProjectActivityModelAssembler,
   private val modifiedEntityModelAssembler: ModifiedEntityModelAssembler,
+  private val branchService: BranchService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @Operation(summary = "Get project activity")
   @GetMapping("")
@@ -50,8 +55,15 @@ class ProjectActivityController(
   @AllowApiAccess
   fun getActivity(
     @ParameterObject pageable: Pageable,
+    @RequestParam(required = false) branch: String? = null,
   ): PagedModel<ProjectActivityModel> {
-    val views = activityService.findProjectActivity(projectId = projectHolder.project.id, pageable)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    val views =
+      activityService.findProjectActivity(
+        projectId = projectHolder.project.id,
+        pageable = pageable,
+        branchName = branch,
+      )
     return activityPagedResourcesAssembler.toModel(views, projectActivityModelAssembler)
   }
 
@@ -61,9 +73,15 @@ class ProjectActivityController(
   @AllowApiAccess
   fun getSingleRevision(
     @PathVariable revisionId: Long,
+    @RequestParam(required = false) branch: String? = null,
   ): ProjectActivityModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val views =
-      activityService.findProjectActivity(projectId = projectHolder.project.id, revisionId)
+      activityService.findProjectActivity(
+        projectId = projectHolder.project.id,
+        revisionId = revisionId,
+        branchName = branch,
+      )
         ?: throw NotFoundException()
     return projectActivityModelAssembler.toModel(views)
   }
@@ -80,13 +98,17 @@ class ProjectActivityController(
     )
     @RequestParam(required = false)
     filterEntityClass: List<String>?,
+    @RequestParam(required = false)
+    branch: String? = null,
   ): PagedModel<ModifiedEntityModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val page =
       activityService.getRevisionModifications(
         projectId = projectHolder.project.id,
         revisionId,
         pageable,
         filterEntityClass,
+        branch,
       )
     return modificationResourcesAssembler.toModel(page, modifiedEntityModelAssembler)
   }

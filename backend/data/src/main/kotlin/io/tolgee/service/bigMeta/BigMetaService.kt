@@ -9,6 +9,7 @@ import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
+import io.tolgee.model.branching.Branch_
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Namespace_
@@ -237,11 +238,22 @@ class BigMetaService(
     val query = cb.createQuery(KeyIdFindResult::class.java)
     val root = query.from(Key::class.java)
     val namespace = root.join(Key_.namespace, JoinType.LEFT)
+    val branch = root.join(Key_.branch, JoinType.LEFT)
     val predicates =
       relatedKeysInOrderChunk.map { key ->
         cb.and(
           cb.equal(root.get(Key_.name), key.keyName),
           cb.equalNullable(namespace.get(Namespace_.name), key.namespace),
+          cb.or(
+            cb.and(
+              cb.equalNullable(branch.get(Branch_.name), key.branch),
+              cb.isNull(branch.get(Branch_.deletedAt)),
+            ),
+            cb.or(
+              cb.isNull(root.get(Key_.branch)),
+              cb.isTrue(branch.get(Branch_.isDefault)),
+            ),
+          ),
         )
       }
     val keyPredicates = cb.or(*predicates.toTypedArray())
@@ -250,6 +262,7 @@ class BigMetaService(
       root.get(Key_.id).alias("id"),
       namespace.get(Namespace_.name).alias("namespace"),
       root.get(Key_.name).alias("name"),
+      branch.get(Branch_.name).alias("branch"),
     )
     return query
   }

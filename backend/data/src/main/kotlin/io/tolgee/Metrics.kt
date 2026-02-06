@@ -204,4 +204,52 @@ class Metrics(
       .register(meterRegistry)
       .record(Duration.ofMillis(executionTimeMs.coerceAtLeast(0)))
   }
+
+  // Branch operations - Priority 1 (Must Have)
+  val branchCreateTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.branch.create.timer")
+      .description("Time spent creating branches")
+      .register(meterRegistry)
+  }
+
+  val branchDeleteTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.branch.delete.timer")
+      .description("Time spent deleting branches (includes cleanup)")
+      .register(meterRegistry)
+  }
+
+  // Merge operations
+  val branchMergePreviewTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.branch.merge.preview.timer")
+      .description("Time spent generating merge preview")
+      .register(meterRegistry)
+  }
+
+  val branchMergeApplyTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.branch.merge.apply.timer")
+      .description("Time spent applying merge")
+      .register(meterRegistry)
+  }
+
+  fun branchMergeConflictCounter(resolution: String): Counter =
+    meterRegistry.counter("tolgee.branch.merge.conflicts.total", "resolution", resolution)
+
+  // Branch operations - Priority 2 (Should Have)
+  val branchCleanupBatchesCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.branch.cleanup.batches.total")
+      .description("Number of cleanup batches processed")
+      .register(meterRegistry)
+  }
+
+  val languageStatsRefreshTimer: Timer by lazy {
+    Timer
+      .builder("tolgee.language_stats.refresh.timer")
+      .description("Time spent refreshing language stats")
+      .register(meterRegistry)
+  }
 }

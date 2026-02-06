@@ -1,7 +1,11 @@
 import { HOST } from './constants';
 
-export const visitTasks = (projectId: number) => {
-  return cy.visit(`${HOST}/projects/${projectId}/tasks`);
+export const visitTasks = (projectId: number, branchName?: string) => {
+  return cy.visit(
+    `${HOST}/projects/${projectId}/tasks${
+      branchName ? `/tree/${encodeURIComponent(branchName)}` : ''
+    }`
+  );
 };
 
 export const visitMyTasks = () => {

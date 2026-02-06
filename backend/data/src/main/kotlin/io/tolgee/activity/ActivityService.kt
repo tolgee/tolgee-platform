@@ -15,6 +15,7 @@ import io.tolgee.model.views.activity.ModifiedEntityView
 import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.repository.activity.ActivityModifiedEntityRepository
 import io.tolgee.repository.activity.ActivityRevisionRepository
+import io.tolgee.service.branching.BranchService
 import io.tolgee.util.Logging
 import io.tolgee.util.flushAndClear
 import jakarta.persistence.EntityManager
@@ -34,6 +35,7 @@ class ActivityService(
   private val objectMapper: ObjectMapper,
   private val jdbcTemplate: JdbcTemplate,
   private val activityRevisionRepository: ActivityRevisionRepository,
+  private val branchService: BranchService,
 ) : Logging {
   @Transactional
   fun storeActivityData(
@@ -59,8 +61,8 @@ class ActivityService(
     jdbcTemplate.batchUpdate(
       "INSERT INTO activity_modified_entity " +
         "(entity_class, entity_id, describing_data, " +
-        "describing_relations, modifications, revision_type, activity_revision_id) " +
-        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        "describing_relations, modifications, revision_type, activity_revision_id, branch_id) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       list,
       100,
     ) { ps, entity ->
@@ -71,6 +73,7 @@ class ActivityService(
       ps.setObject(5, getJsonbObject(entity.modifications))
       ps.setInt(6, RevisionType.values().indexOf(entity.revisionType))
       ps.setLong(7, entity.activityRevision.id)
+      ps.setObject(8, entity.branchId)
     }
 
     return list
@@ -113,11 +116,16 @@ class ActivityService(
   fun findProjectActivity(
     projectId: Long,
     pageable: Pageable,
+    branchName: String? = null,
   ): Page<ProjectActivityView> {
+    val branch = branchService.getActiveNonDefaultBranch(projectId, branchName)
+    val defaultBranchId = if (branch == null) branchService.getDefaultBranch(projectId)?.id else null
     return ProjectActivityViewByPageableProvider(
       applicationContext = applicationContext,
       projectId = projectId,
       pageable = pageable,
+      branchId = branch?.id,
+      defaultBranchId = defaultBranchId,
     ).get()
   }
 
@@ -133,11 +141,14 @@ class ActivityService(
   fun findProjectActivity(
     projectId: Long,
     revisionId: Long,
+    branchName: String? = null,
   ): ProjectActivityView? {
+    val branch = branchService.getActiveNonDefaultBranch(projectId, branchName)
     return ProjectActivityViewByRevisionProvider(
       applicationContext = applicationContext,
       revisionId = revisionId,
       projectId = projectId,
+      branchId = branch?.id,
     ).get()
   }
 
@@ -158,9 +169,18 @@ class ActivityService(
     revisionId: Long,
     pageable: Pageable,
     filterEntityClass: List<String>?,
+    branchName: String? = null,
   ): Page<ModifiedEntityView> {
+    val branch = branchService.getActiveNonDefaultBranch(projectId, branchName)
     val provider =
-      ModificationsByRevisionsProvider(applicationContext, projectId, listOf(revisionId), pageable, filterEntityClass)
+      ModificationsByRevisionsProvider(
+        applicationContext,
+        projectId,
+        listOf(revisionId),
+        pageable,
+        filterEntityClass,
+        branch?.id,
+      )
     return provider.get()
   }
 

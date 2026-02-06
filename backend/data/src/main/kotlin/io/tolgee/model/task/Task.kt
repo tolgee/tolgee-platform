@@ -9,6 +9,8 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.EntityWithBranch
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.translationAgency.TranslationAgency
@@ -38,11 +40,14 @@ import java.util.Date
     Index(columnList = "author_id"),
     Index(columnList = "language_id"),
     Index(columnList = "agency_id"),
+    Index(columnList = "branch_id"),
   ],
 )
 @ActivityLoggedEntity
 @ActivityEntityDescribingPaths(["language"])
-class Task : StandardAuditModel() {
+class Task :
+  StandardAuditModel(),
+  EntityWithBranch {
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project = Project() // Initialize to avoid null issues
 
@@ -83,6 +88,13 @@ class Task : StandardAuditModel() {
   @ActivityLoggedProp
   var author: UserAccount? = null
 
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  var branch: Branch? = null
+
+  @field:Size(max = 255)
+  @Column(name = "origin_branch_name", length = 255)
+  var originBranchName: String? = null
+
   @ActivityLoggedProp
   @Enumerated(EnumType.STRING)
   var state: TaskState = TaskState.NEW
@@ -92,4 +104,12 @@ class Task : StandardAuditModel() {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = true)
   var agency: TranslationAgency? = null
+
+  override fun resolveBranch(): Branch? {
+    return branch
+  }
+
+  override fun resolveProject(): Project? {
+    return project
+  }
 }

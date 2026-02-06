@@ -24,6 +24,9 @@ import {
   getSuggestionsFiltersLength,
   getSuggestionsFiltersName,
 } from './SubfilterSuggestions';
+import { components } from 'tg.service/apiSchema.generated';
+
+type LabelModel = components['schemas']['LabelModel'];
 
 export function countFilters(value: FiltersInternal) {
   return (
@@ -37,14 +40,14 @@ export function countFilters(value: FiltersInternal) {
   );
 }
 
-export function getFilterName(value: FiltersInternal) {
+export function getFilterName(value: FiltersInternal, labels?: LabelModel[]) {
   return (
     getCommentsFiltersName(value) ||
     getNamespaceFiltersName(value) ||
     getScreenshotFiltersName(value) ||
     getTagFiltersName(value) ||
     getTranslationFiltersName(value) ||
-    getLabelFiltersName(value) ||
+    getLabelFiltersName(value, labels) ||
     getSuggestionsFiltersName(value)
   );
 }

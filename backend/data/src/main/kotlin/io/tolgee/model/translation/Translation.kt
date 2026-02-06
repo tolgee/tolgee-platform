@@ -10,8 +10,14 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.branching.BranchMergeableEntity
+import io.tolgee.model.branching.snapshot.TranslationSnapshot
+import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.service.branching.chooseThreeWay
+import io.tolgee.service.branching.isConflictingThreeWay
+import io.tolgee.service.branching.mergeSetsWithBase
 import io.tolgee.util.TranslationStatsUtil
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -30,6 +36,7 @@ import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import jakarta.validation.constraints.NotNull
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
@@ -53,7 +60,8 @@ class Translation(
   @ActivityLoggedProp
   @ActivityDescribingProp
   var text: String? = null,
-) : StandardAuditModel() {
+) : StandardAuditModel(),
+  BranchMergeableEntity<Translation, TranslationSnapshot> {
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @NotNull
   lateinit var key: Key
@@ -81,7 +89,7 @@ class Translation(
   var mtProvider: MtServiceType? = null
 
   @OneToMany(mappedBy = "translation", orphanRemoval = true)
-  var comments: MutableList<TranslationComment> = mutableListOf()
+  var comments: MutableSet<TranslationComment> = mutableSetOf()
 
   var wordCount: Int? = null
 
@@ -99,6 +107,7 @@ class Translation(
   )
   @OrderBy("name ASC")
   @ActivityLoggedProp(LabelPropChangesProvider::class)
+  @BatchSize(size = 1000)
   var labels: MutableSet<Label> = mutableSetOf()
 
   @ActivityLoggedProp
@@ -171,6 +180,19 @@ class Translation(
   }
 
   companion object {
+    fun differ(
+      source: Translation?,
+      target: Translation?,
+    ): Boolean {
+      if (source == null && target == null) {
+        return false
+      }
+      if (source == null || target == null) {
+        return true
+      }
+      return (source.text != target.text)
+    }
+
     class UpdateStatsListener {
       @PrePersist
       @PreUpdate
@@ -203,5 +225,51 @@ class Translation(
         }
       }
     }
+  }
+
+  override fun resolveKey(): Key? = key
+
+  override fun isModified(oldState: Map<String, Any>): Boolean {
+    return oldState["text"] != this.text || oldState["state"] != this.state || oldState["labels"] != this.labels
+  }
+
+  override fun hasChanged(snapshot: TranslationSnapshot): Boolean {
+    if (this.text.orEmpty() != snapshot.value || this.state != snapshot.state) {
+      return true
+    }
+    val labelNames = this.labels.map { it.name }.toSet()
+    return labelNames != snapshot.labels
+  }
+
+  override fun isConflicting(
+    source: Translation,
+    snapshot: TranslationSnapshot,
+  ): Boolean {
+    if (isConflictingThreeWay(source.text.orEmpty(), this.text.orEmpty(), snapshot.value)) return true
+    if (isConflictingThreeWay(source.state, this.state, snapshot.state)) return true
+    return false
+  }
+
+  override fun merge(
+    source: Translation,
+    snapshot: TranslationSnapshot?,
+    resolution: BranchKeyMergeResolutionType,
+  ) {
+    this.text = chooseThreeWay(source.text, this.text, snapshot?.value, resolution)
+    this.state = chooseThreeWay(source.state, this.state, snapshot?.state, resolution) ?: this.state
+    this.outdated = chooseThreeWay(source.outdated, this.outdated, null, resolution) ?: false
+    this.auto = chooseThreeWay(source.auto, this.auto, null, resolution) ?: false
+    this.mtProvider = chooseThreeWay(source.mtProvider, this.mtProvider, null, resolution)
+
+    val snapshotLabels = snapshot?.labels?.toSet() ?: emptySet()
+    val sourceByName = source.labels.associateBy { it.name }
+    val targetByName = this.labels.associateBy { it.name }
+    val finalLabels =
+      mergeSetsWithBase(snapshotLabels, sourceByName.keys, targetByName.keys)
+        .mapNotNull { name -> sourceByName[name] ?: targetByName[name] }
+        .toMutableSet()
+
+    this.labels.clear()
+    this.labels.addAll(finalLabels)
   }
 }

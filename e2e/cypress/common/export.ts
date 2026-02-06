@@ -27,8 +27,12 @@ export function createExportableProject(): Chainable<ProjectDTO> {
   });
 }
 
-export const visitExport = (projectId: number) => {
-  return cy.visit(`${HOST}/projects/${projectId}/export`);
+export const visitExport = (projectId: number, branchName?: string) => {
+  return cy.visit(
+    `${HOST}/projects/${projectId}/export${
+      branchName ? `/tree/${encodeURIComponent(branchName)}` : ''
+    }`
+  );
 };
 
 export const create4Translations = (projectId: number) => {
@@ -322,11 +326,13 @@ type SupportedMessageFormat = keyof typeof messageFormatParamMap;
 export const getFileName = (
   projectName: string,
   extension: string,
-  language?: string
+  language?: string,
+  branchName?: string
 ) => {
   const dateStr = '_' + new Date().toISOString().split('T')[0];
   const languageStr = language ? `_${language}` : '';
-  return `${projectName}${languageStr}${dateStr}.${extension}`;
+  const branchStr = branchName ? `(${branchName})` : '';
+  return `${projectName}${branchStr}${languageStr}${dateStr}.${extension}`;
 };
 
 type ZipContentProps = {

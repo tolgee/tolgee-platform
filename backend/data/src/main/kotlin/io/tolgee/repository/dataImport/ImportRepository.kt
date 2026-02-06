@@ -11,12 +11,18 @@ import org.springframework.stereotype.Repository
 interface ImportRepository : JpaRepository<Import, Long> {
   @Query(
     """
-    select i from Import i where i.project.id = :projectId and i.author.id = :authorId and i.deletedAt is null
+    select i from Import i 
+    left join i.branch b
+    where i.project.id = :projectId 
+        and i.author.id = :authorId 
+        and i.deletedAt is null
+        and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault))) 
   """,
   )
   fun findByProjectIdAndAuthorId(
     projectId: Long,
     authorId: Long,
+    branch: String?,
   ): Import?
 
   @Query(

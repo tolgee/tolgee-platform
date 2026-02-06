@@ -71,6 +71,7 @@ type Props = {
   hideDueDate?: boolean;
   hideAssignees?: boolean;
   onScopeChange?: (data: (KeysScopeView | undefined)[]) => void;
+  branch?: string;
 };
 
 export const TaskCreateForm = ({
@@ -87,6 +88,7 @@ export const TaskCreateForm = ({
   hideDueDate,
   hideAssignees,
   onScopeChange,
+  branch,
 }: Props) => {
   const { t } = useTranslate();
   const translateTaskType = useTaskTypeTranslation();
@@ -99,10 +101,11 @@ export const TaskCreateForm = ({
         keys: selectedKeys,
         type: values.type,
         languageId,
+        branch,
       };
       return {
-        url: '/v2/projects/{projectId}/tasks/calculate-scope',
-        method: 'post',
+        url: '/v2/projects/{projectId}/tasks/calculate-scope' as const,
+        method: 'post' as const,
         path: { projectId },
         content: { 'application/json': content },
         query: {

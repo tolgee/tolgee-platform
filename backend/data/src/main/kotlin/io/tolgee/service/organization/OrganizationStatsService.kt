@@ -23,7 +23,7 @@ class OrganizationStatsService(
     return entityManager
       .createQuery(
         """
-        select count(k) from Key k
+        select count(distinct k.name, k.namespace) from Key k
         where k.project.id = :projectId and k.project.deletedAt is null
         """.trimIndent(),
       ).setParameter("projectId", projectId)
@@ -44,7 +44,7 @@ class OrganizationStatsService(
     return entityManager
       .createQuery(
         """
-        select count(t.id) from Translation t
+        select count(distinct k.project.id, k.name, k.namespace, t.language) from Translation t
         join t.key k
         join k.project p on p.deletedAt is null
         join t.language l on l.deletedAt is null
@@ -58,7 +58,7 @@ class OrganizationStatsService(
     return entityManager
       .createQuery(
         """
-        select count(k.id) from Key k
+        select count(distinct k.project.id, k.name, k.namespace) from Key k
         join k.project p on p.deletedAt is null
         where p.organizationOwner.id = :organizationId
         """.trimIndent(),

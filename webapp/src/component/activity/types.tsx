@@ -1,6 +1,9 @@
 import { TranslateParams } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
-import { TaskReferenceData } from '../../eeSetup/EeModuleType';
+import {
+  BranchReferenceData,
+  TaskReferenceData,
+} from '../../eeSetup/EeModuleType';
 
 type ModifiedEntityModel = components['schemas']['ModifiedEntityModel'];
 export type TranslationHistoryModel =
@@ -49,7 +52,8 @@ export type EntityEnum =
   | 'ContentStorage'
   | 'Task'
   | 'Label'
-  | 'TranslationSuggestion';
+  | 'TranslationSuggestion'
+  | 'Branch';
 
 export type FieldTypeEnum =
   | 'text'
@@ -73,7 +77,8 @@ export type FieldTypeEnum =
   | 'date'
   | 'task_state'
   | 'task_type'
-  | 'translation_labels';
+  | 'translation_labels'
+  | 'branch_protected';
 
 export type FieldOptionsObj = {
   label?: (params?: TranslateParams) => React.ReactElement;
@@ -130,7 +135,8 @@ export type Reference =
   | ContentDeliveryConfigReferenceData
   | ContentStorageReferenceData
   | WebhookConfigReferenceData
-  | TaskReferenceData;
+  | TaskReferenceData
+  | BranchReferenceData;
 
 export type ReferenceBuilder = (
   data: ModifiedEntityModel
@@ -164,6 +170,7 @@ export type Activity = {
   entities: Entity[];
   references: Reference[];
   counts: Record<string, number>;
+  params: any;
   options: ActivityOptions;
 };
 

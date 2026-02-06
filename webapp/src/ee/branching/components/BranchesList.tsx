@@ -1,0 +1,275 @@
+import React, { useState } from 'react';
+import { Box, Button, styled, Typography } from '@mui/material';
+import { T } from '@tolgee/react';
+import { useProject } from 'tg.hooks/useProject';
+import { Plus } from '@untitled-ui/icons-react';
+import { BranchItem } from 'tg.ee.module/branching/components/BranchItem';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { components } from 'tg.service/apiSchema.generated';
+import { BranchModal } from 'tg.ee.module/branching/components/BranchModal';
+import { BranchFormValues } from 'tg.ee.module/branching/components/BranchForm';
+import { confirmation } from 'tg.hooks/confirmation';
+import { useHistory } from 'react-router-dom';
+import { LINKS } from 'tg.constants/links';
+import { BranchRenameModal } from './BranchRenameModal';
+import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { BranchProgressModal } from './BranchProgressModal';
+import { confirmProtected } from 'tg.ee.module/branching/components/utils/branchConfirmations';
+
+const TableGrid = styled('div')`
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+`;
+
+type BranchModel = components['schemas']['BranchModel'];
+type DryRunMergeBranchRequest =
+  components['schemas']['DryRunMergeBranchRequest'];
+
+export const BranchesList = () => {
+  const project = useProject();
+  const history = useHistory();
+  const { satisfiesPermission } = useProjectPermissions();
+
+  const [addBranchOpen, setAddBranchOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [renameBranch, setRenameBranch] = useState<BranchModel | null>(null);
+
+  const canManageBranches = satisfiesPermission('branch.management');
+
+  function handleCloseMergeIntoModal() {
+    setAddBranchOpen(false);
+  }
+
+  const createMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches',
+    method: 'post',
+    invalidatePrefix: '/v2/projects/{projectId}/branches',
+  });
+
+  const createMergeMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/merge/preview',
+    method: 'post',
+  });
+
+  const deleteMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/{branchId}',
+    method: 'delete',
+    invalidatePrefix: '/v2/projects/{projectId}/branches',
+  });
+
+  const renameMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/{branchId}',
+    method: 'post',
+    invalidatePrefix: '/v2/projects/{projectId}/branches',
+  });
+
+  const setProtectedMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/branches/{branchId}/protected',
+    method: 'post',
+    invalidatePrefix: '/v2/projects/{projectId}/branches',
+  });
+
+  const createBranchSubmit = async (values: BranchFormValues) => {
+    setAddBranchOpen(false);
+    await createMutation.mutateAsync({
+      path: { projectId: project.id },
+      content: {
+        'application/json': {
+          ...values,
+        },
+      },
+    });
+  };
+
+  const mergeIntoSubmit = async (values: DryRunMergeBranchRequest) => {
+    const response = await createMergeMutation.mutateAsync({
+      path: { projectId: project.id },
+      content: {
+        'application/json': {
+          sourceBranchId: values.sourceBranchId,
+        },
+      },
+    });
+    history.push(
+      LINKS.PROJECT_BRANCHES_MERGE.build({
+        projectId: project.id,
+        mergeId: response.id,
+      })
+    );
+  };
+
+  const deleteBranch = async (branch: BranchModel) => {
+    confirmation({
+      message: (
+        <T
+          keyName="project_branch_delete_confirmation"
+          params={{ branchName: branch.name, b: <b /> }}
+        />
+      ),
+      confirmButtonText: <T keyName="confirmation_dialog_delete" />,
+      async onConfirm() {
+        await deleteMutation.mutateAsync({
+          path: { projectId: project.id, branchId: branch.id },
+        });
+      },
+    });
+  };
+
+  const handleMergeInto = (branch: BranchModel) => {
+    if (branch.merge && !branch.merge.mergedAt) {
+      handleMergeDetail(branch);
+    } else {
+      confirmation({
+        message: (
+          <T
+            keyName="branch_merges_create_title"
+            params={{
+              name: branch?.name,
+              branch: <BranchNameChipNode />,
+              targetName: branch?.originBranchName,
+            }}
+          />
+        ),
+        confirmButtonText: <T keyName="branch_merges_create_button" />,
+        async onConfirm() {
+          await mergeIntoSubmit({
+            sourceBranchId: branch.id,
+          });
+        },
+      });
+    }
+  };
+
+  const handleRenameSubmit = async (name: string) => {
+    if (!renameBranch) return;
+    await renameMutation.mutateAsync({
+      path: { projectId: project.id, branchId: renameBranch.id },
+      content: { 'application/json': { name } },
+    });
+    setRenameBranch(null);
+  };
+
+  const handleSetProtected = async (branch: BranchModel) => {
+    const willProtect = !branch.isProtected;
+
+    confirmProtected({
+      branchName: branch.name,
+      willProtect,
+      onConfirm: async () => {
+        await setProtectedMutation.mutateAsync({
+          path: { projectId: project.id, branchId: branch.id },
+          content: { 'application/json': { isProtected: willProtect } },
+        });
+      },
+    });
+  };
+
+  const handleMergeDetail = (branch: BranchModel) => {
+    history.push(
+      LINKS.PROJECT_BRANCHES_MERGE.build({
+        projectId: project.id,
+        mergeId: branch.merge!.id,
+      })
+    );
+  };
+
+  const branchesLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/branches',
+    method: 'get',
+    path: { projectId: project.id },
+    query: {
+      size: 25,
+      page: page,
+    },
+  });
+
+  return (
+    <Box mb={6}>
+      <Box>
+        <Box
+          mt={4}
+          mb={3}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Typography variant="h4">
+            <T keyName="branches_title" />
+          </Typography>
+          {canManageBranches && (
+            <Button
+              color="primary"
+              variant="contained"
+              startIcon={<Plus width={19} height={19} />}
+              onClick={() => setAddBranchOpen(true)}
+              data-cy="project-settings-branches-add"
+            >
+              <T keyName="project_branches_add_button" />
+            </Button>
+          )}
+        </Box>
+
+        <PaginatedHateoasList
+          loadable={branchesLoadable}
+          onPageChange={setPage}
+          listComponent={TableGrid}
+          data-cy="project-settings-labels-list"
+          emptyPlaceholder={
+            <Box m={2} display="flex" justifyContent="center">
+              <Typography color="textSecondary">
+                <T keyName="project_settings_no_labels_yet" />
+              </Typography>
+            </Box>
+          }
+          renderItem={(l: BranchModel) => (
+            <BranchItem
+              branch={l}
+              onRemove={canManageBranches ? deleteBranch : undefined}
+              onRename={
+                canManageBranches
+                  ? (branch) => setRenameBranch(branch)
+                  : undefined
+              }
+              onSetProtected={
+                canManageBranches ? handleSetProtected : undefined
+              }
+              onMergeInto={
+                canManageBranches ? () => handleMergeInto(l) : undefined
+              }
+              onMergeDetail={() => handleMergeDetail(l)}
+            />
+          )}
+        />
+      </Box>
+      {branchesLoadable.data && (
+        <>
+          <BranchModal
+            open={addBranchOpen}
+            close={handleCloseMergeIntoModal}
+            submit={createBranchSubmit}
+          />
+          {renameBranch && (
+            <BranchRenameModal
+              open={Boolean(renameBranch)}
+              initialName={renameBranch.name}
+              onSubmit={handleRenameSubmit}
+              onClose={() => setRenameBranch(null)}
+            />
+          )}
+          <BranchProgressModal
+            open={createMutation.isLoading}
+            title={<T keyName="branch_creating_title" />}
+            message={<T keyName="branch_creating_message" />}
+          />
+          <BranchProgressModal
+            open={createMergeMutation.isLoading}
+            title={<T keyName="branch_merge_creating_title" />}
+            message={<T keyName="branch_merge_creating_message" />}
+          />
+        </>
+      )}
+    </Box>
+  );
+};

@@ -7,6 +7,7 @@ import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
@@ -396,6 +397,20 @@ class TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/pr
     val translation = testData.aKeyGermanTranslation
     testOutdated(translation, false)
     testOutdated(translation, true)
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `cannot set translations for key in branch without branch provided`() {
+    saveTestData()
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "branch key",
+        null,
+        mutableMapOf("en" to "Cannot do that"),
+      ),
+    ).andIsNotFound
   }
 
   private fun testOutdated(

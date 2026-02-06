@@ -7,7 +7,13 @@ import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.propChangesProvider.TagsPropChangesProvider
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.BranchMergeableEntity
+import io.tolgee.model.branching.snapshot.KeyMetaSnapshot
 import io.tolgee.model.dataImport.ImportKey
+import io.tolgee.model.enums.BranchKeyMergeResolutionType
+import io.tolgee.service.branching.chooseThreeWay
+import io.tolgee.service.branching.isConflictingThreeWay
+import io.tolgee.service.branching.mergeSetsWithBase
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -18,6 +24,7 @@ import jakarta.persistence.OrderBy
 import jakarta.persistence.PrePersist
 import jakarta.persistence.PreUpdate
 import jakarta.validation.constraints.Size
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.Type
 
 @Entity
@@ -29,7 +36,8 @@ class KeyMeta(
   var key: Key? = null,
   @OneToOne
   var importKey: ImportKey? = null,
-) : StandardAuditModel() {
+) : StandardAuditModel(),
+  BranchMergeableEntity<KeyMeta, KeyMetaSnapshot> {
   @OneToMany(mappedBy = "keyMeta")
   @OrderBy("id")
   var comments = mutableListOf<KeyComment>()
@@ -41,6 +49,7 @@ class KeyMeta(
   @ManyToMany
   @OrderBy("id")
   @ActivityLoggedProp(TagsPropChangesProvider::class)
+  @BatchSize(size = 1000)
   var tags: MutableSet<Tag> = mutableSetOf()
 
   @ActivityLoggedProp
@@ -97,5 +106,50 @@ class KeyMeta(
         }
       }
     }
+  }
+
+  override fun resolveKey(): Key? = key
+
+  override fun isModified(oldState: Map<String, Any>): Boolean {
+    return oldState["description"] != this.description || oldState["custom"] != this.custom
+  }
+
+  override fun hasChanged(snapshot: KeyMetaSnapshot): Boolean {
+    val tagNames = this.tags.map { it.name }.toSet()
+    return this.description != snapshot.description || this.custom != snapshot.custom || tagNames != snapshot.tags
+  }
+
+  override fun isConflicting(
+    source: KeyMeta,
+    snapshot: KeyMetaSnapshot,
+  ): Boolean {
+    if (isConflictingThreeWay(source.description, this.description, snapshot.description)) {
+      return true
+    }
+    if (isConflictingThreeWay(source.custom, this.custom, snapshot.custom)) {
+      return true
+    }
+    return false
+  }
+
+  override fun merge(
+    source: KeyMeta,
+    snapshot: KeyMetaSnapshot?,
+    resolution: BranchKeyMergeResolutionType,
+  ) {
+    this.description = chooseThreeWay(source.description, this.description, snapshot?.description, resolution)
+    this.custom = chooseThreeWay(source.custom, this.custom, snapshot?.custom, resolution)
+
+    val snapshotTags = snapshot?.tags?.toSet().orEmpty()
+    val sourceTagsByName = source.tags.associateBy { it.name }
+    val targetTagsByName = this.tags.associateBy { it.name }
+    val sourceTagNames = sourceTagsByName.keys
+    val targetTagNames = targetTagsByName.keys
+    val finalTagNames = mergeSetsWithBase(snapshotTags, sourceTagNames, targetTagNames)
+    val tagsByName = sourceTagsByName + targetTagsByName
+    val finalTags = finalTagNames.mapNotNull { tagsByName[it] }.toSet()
+
+    this.tags.clear()
+    this.tags.addAll(finalTags)
   }
 }

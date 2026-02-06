@@ -60,6 +60,8 @@ data class ComplexEditKeyDto(
   val warnOnDataLoss: Boolean? = false,
   @Schema(description = "Custom values of the key. If not provided, custom values won't be modified")
   val custom: Map<String, Any?>? = null,
+  @Schema(description = "Branch of the key. If not provided, default branch will be used")
+  val branch: String? = null,
 ) : WithRelatedKeysInOrder {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {

@@ -43,10 +43,12 @@ class KeysDistanceUtil(
   private val currentUpdated by lazy {
     val result: DistancesMutableMap = mutableMapOf()
     distinctKeys.forEachIndexed forEach1@{ index1, item1 ->
-      val key1Id = getKeyId(item1.namespace, item1.keyName) ?: return@forEach1
+      val key1Id =
+        getKeyId(item1.namespace, item1.keyName, item1.branch ?: project.getDefaultBranch()?.name) ?: return@forEach1
       distinctKeys.forEachIndexed forEach2@{ index2, item2 ->
         if (index2 >= index1) return@forEach2
-        val key2Id = getKeyId(item2.namespace, item2.keyName) ?: return@forEach2
+        val key2Id =
+          getKeyId(item2.namespace, item2.keyName, item1.branch ?: project.getDefaultBranch()?.name) ?: return@forEach2
         val distance =
           distances
             .get(key1Id, key2Id)
@@ -75,24 +77,26 @@ class KeysDistanceUtil(
         !currentUpdated.containsKey(it.key)
       }
 
-    distinctKeys.map { getKeyId(it.namespace, it.keyName) }.forEachIndexed { index, keyId ->
-      // by this, we are pushing unprovided keys out of the "focus zone", so they should "converge" to become deleted
-      val maxDistance = MAX_STORED
-      otherThanCurrent
-        .asSequence()
-        .filter {
-          it.key.first == keyId || it.key.second == keyId
-        }.sortedBy { it.value.distance }
-        .forEachIndexed { index, (key, value) ->
-          value.distance =
-            computeDistance(
-              oldDistance = value.distance,
-              hits = value.hits,
-              newDistance = maxDistance,
-            )
-          value.hits++
-        }
-    }
+    distinctKeys
+      .map { getKeyId(it.namespace, it.keyName, it.branch ?: project.getDefaultBranch()?.name) }
+      .forEachIndexed { index, keyId ->
+        // by this, we are pushing unprovided keys out of the "focus zone", so they should "converge" to become deleted
+        val maxDistance = MAX_STORED
+        otherThanCurrent
+          .asSequence()
+          .filter {
+            it.key.first == keyId || it.key.second == keyId
+          }.sortedBy { it.value.distance }
+          .forEachIndexed { index, (key, value) ->
+            value.distance =
+              computeDistance(
+                oldDistance = value.distance,
+                hits = value.hits,
+                newDistance = maxDistance,
+              )
+            value.hits++
+          }
+      }
 
     otherThanCurrent
   }
@@ -106,7 +110,7 @@ class KeysDistanceUtil(
   }
 
   private val keyIdMap by lazy {
-    keys.associate { (it.namespace to it.name) to it.id }
+    keys.associate { Triple(it.branch ?: project.getDefaultBranch()?.name, it.namespace, it.name) to it.id }
   }
 
   private val existing: DistancesMap by lazy {
@@ -120,8 +124,9 @@ class KeysDistanceUtil(
   private fun getKeyId(
     namespace: String?,
     keyName: String,
+    branch: String?,
   ): Long? {
-    return keyIdMap[namespace to keyName]
+    return keyIdMap[Triple(branch, namespace, keyName)]
   }
 
   private val distances: DistancesMutableMap by lazy {

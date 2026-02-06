@@ -10,4 +10,5 @@ data class CalculateScopeRequest(
   var type: TaskType,
   @field:NotNull
   var keys: MutableSet<Long> = mutableSetOf(),
+  var branch: String? = null,
 )

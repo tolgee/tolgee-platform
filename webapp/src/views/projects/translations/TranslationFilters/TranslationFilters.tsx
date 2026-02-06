@@ -1,7 +1,7 @@
 import { T, useTranslate } from '@tolgee/react';
 import { XClose } from '@untitled-ui/icons-react';
 import { IconButton, styled, SxProps, Box } from '@mui/material';
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { FilterOptions, FiltersType, LanguageModel } from './tools';
@@ -11,6 +11,10 @@ import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { TranslationFiltersPopup } from './TranslationFiltersPopup';
 import { type FilterActions } from './tools';
 import { countFilters, getFilterName } from './summary';
+import {
+  useTranslationsActions,
+  useTranslationsSelector,
+} from 'tg.views/projects/translations/context/TranslationsContext';
 
 const StyledInputButton = styled(IconButton)`
   margin: ${({ theme }) => theme.spacing(-1, -0.5, -1, -0.25)};
@@ -39,8 +43,21 @@ export const TranslationFilters = ({
   const anchorEl = useRef(null);
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
+  const translationsActions = useTranslationsActions();
+  const labels = useTranslationsSelector((c) => c?.labels ?? []);
+  const selectedLabels = useTranslationsSelector(
+    (c) => c?.selectedLabels ?? []
+  );
 
   const numberOfFilters = countFilters(value);
+  const labelIds = value.filterLabel?.map((id) => Number(id)) || [];
+  const labelsForFilter = selectedLabels?.length ? selectedLabels : labels;
+
+  useEffect(() => {
+    if (labelIds.length && translationsActions?.fetchLabels) {
+      translationsActions.fetchLabels(labelIds);
+    }
+  }, [translationsActions, labelIds.join(',')]);
 
   function handleClick() {
     setOpen(true);
@@ -79,7 +96,7 @@ export const TranslationFilters = ({
                 textOverflow="ellipsis"
                 whiteSpace="nowrap"
               >
-                {getFilterName(value)}
+                {getFilterName(value, labelsForFilter)}
               </Box>
             ) : numberOfFilters > 0 ? (
               <T

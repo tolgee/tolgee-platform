@@ -27,27 +27,29 @@ import {
   ViewMode,
 } from './types';
 
-import { useTranslationsService } from './services/useTranslationsService';
-import { useEditService } from './services/useEditService';
-import { useRefsService } from './services/useRefsService';
-import { useTagsService } from './services/useTagsService';
-import { useSelectionService } from './services/useSelectionService';
-import { useStateService } from './services/useStateService';
-import { useWebsocketService } from './services/useWebsocketService';
-import { PrefilterType } from '../prefilters/usePrefilter';
-import { useTaskService } from './services/useTaskService';
-import { usePositionService } from './services/usePositionService';
-import { useLayoutService } from './services/useLayoutService';
-import { AddParams } from '../TranslationFilters/tools';
 import { FiltersType } from 'tg.views/projects/translations/TranslationFilters/tools';
-import { useAiPlaygroundService } from './services/useAiPlaygroundService';
 import { usePreventPageLeave } from 'tg.hooks/usePreventPageLeave';
 import { QUERY } from 'tg.constants/links';
-import { useLabelsService } from 'tg.views/projects/translations/context/services/useLabelsService';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { useAiPlaygroundService } from './services/useAiPlaygroundService';
+import { useBranchesService } from './services/useBranchesService';
+import { useEditService } from './services/useEditService';
+import { useLabelsService } from './services/useLabelsService';
+import { useLayoutService } from './services/useLayoutService';
+import { usePositionService } from './services/usePositionService';
+import { useRefsService } from './services/useRefsService';
+import { useSelectionService } from './services/useSelectionService';
+import { useStateService } from './services/useStateService';
+import { useTagsService } from './services/useTagsService';
+import { useTaskService } from './services/useTaskService';
+import { useTranslationsService } from './services/useTranslationsService';
+import { useWebsocketService } from './services/useWebsocketService';
+import { PrefilterType } from '../prefilters/usePrefilter';
+import { AddParams } from '../TranslationFilters/tools';
 
 type Props = {
   projectId: number;
+  branchName?: string;
   baseLang: string | undefined;
   keyId?: number;
   keyName?: string;
@@ -114,6 +116,7 @@ export const [
 
   const translationService = useTranslationsService({
     projectId: props.projectId,
+    branchName: props.branchName,
     keyId: props.keyId,
     keyName: props.keyName,
     keyNamespace: props.keyNamespace,
@@ -154,11 +157,17 @@ export const [
     [languagesLoadable.data]
   );
 
+  const branchesService = useBranchesService({
+    projectId: props.projectId,
+    branchName: props.branchName,
+  });
+
   const editService = useEditService({
     positionService,
     translationService,
     viewRefs,
     taskService,
+    branchName: branchesService.selectedName,
     allLanguages: allLanguagesData,
   });
 
@@ -331,14 +340,18 @@ export const [
       return labelService.removeLabel(data);
     },
     fetchLabels(ids: number[]) {
-      labelService.setSelectedIds(ids);
+      const current = labelService.selectedIds;
+      const isSame =
+        ids.length === current.length &&
+        ids.every((id, index) => id === current[index]);
+      if (!isSame) {
+        labelService.setSelectedIds(ids);
+      }
       return labelService.selectedLabels;
     },
   };
 
-  const dataReady = Boolean(
-    languagesLoadable.data && translationService.fixedTranslations
-  );
+  const dataReady = languagesLoadable.isFetched;
 
   const state = {
     baseLanguage: props.baseLang!,
@@ -379,6 +392,12 @@ export const [
     aiPlaygroundData: aiPlaygroundService.data,
     aiPlaygroundEnabled: props.aiPlayground,
     labels: labelService.labels,
+    selectedLabels: labelService.selectedLabels,
+    branches: {
+      available: branchesService.branches,
+      selected: branchesService.selected,
+      loadable: branchesService.loadable,
+    },
   };
 
   return [state, actions];

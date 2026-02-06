@@ -4,6 +4,7 @@ import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.api.ISimpleProject
 import io.tolgee.model.automations.Automation
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.model.enums.SuggestionsMode
@@ -42,6 +43,7 @@ import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Filter
+import org.hibernate.annotations.SQLRestriction
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
@@ -148,12 +150,20 @@ class Project(
   @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "project")
   var slackConfigs: MutableList<SlackConfig> = mutableListOf()
 
+  @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST], mappedBy = "project")
+  @SQLRestriction("deleted_at IS NULL")
+  var branches: MutableList<Branch> = mutableListOf()
+
   @ColumnDefault("true")
   override var icuPlaceholders: Boolean = true
 
   @ColumnDefault("false")
   @ActivityLoggedProp
   var useNamespaces: Boolean = false
+
+  @ColumnDefault("false")
+  @ActivityLoggedProp
+  var useBranching: Boolean = false
 
   @ColumnDefault("DISABLED")
   @ActivityLoggedProp
@@ -182,6 +192,14 @@ class Project(
 
   fun findLanguage(tag: String): Language? {
     return findLanguageOptional(tag).orElse(null)
+  }
+
+  fun hasDefaultBranch(): Boolean {
+    return branches.any { it.isDefault }
+  }
+
+  fun getDefaultBranch(): Branch? {
+    return branches.find { it.isDefault }
   }
 
   /**

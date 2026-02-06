@@ -38,6 +38,7 @@ class KeyWithScreenshotsModelAssembler(
       isPlural = entity.isPlural,
       pluralArgName = entity.pluralArgName,
       custom = entity.keyMeta?.custom ?: mapOf(),
+      branch = entity.branch?.name,
     )
   }
 }

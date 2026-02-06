@@ -4686,4 +4686,375 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-1">
+        <createTable tableName="branch">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="branchPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_default" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_protected" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(200)"/>
+            <column name="origin_branch_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-2">
+        <addColumn tableName="key">
+            <column name="branch_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-5">
+        <createIndex indexName="IDX2qdmejoguc37exo9i2fjxb0qo" tableName="branch">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-6">
+        <createIndex indexName="IDXcnxnkidwa096ndrfgijylnqar" tableName="branch">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-7" runInTransaction="false">
+        <sql>
+            create index concurrently if not exists IDXd8omyxfow1rcm177dxgdpabwn on public.key (branch_id);
+        </sql>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-8">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="branch" constraintName="FK1sg3b030lhwn3huugkpnja4sh" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-9">
+        <addForeignKeyConstraint baseColumnNames="branch_id" baseTableName="key" constraintName="FKncoig3r2h5515bow46r0f8b67" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758015935878-10">
+        <addForeignKeyConstraint baseColumnNames="origin_branch_id" baseTableName="branch" constraintName="FKr1rv3tnqib0bpad7mjna0qvo0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758202102054-1">
+        <addColumn tableName="branch">
+            <column name="pending" type="BOOLEAN"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758202102054-2" runInTransaction="false">
+        <sql>
+            create unique index concurrently on public.key (project_id, coalesce(branch_id, -1), "name") where namespace_id is null;
+        </sql>
+        <sql>
+            create unique index concurrently on public.key (project_id, coalesce(branch_id, -1), "name", namespace_id) where namespace_id is not null;
+        </sql>
+        <sql>
+            create unique index concurrently on public.branch (project_id, is_default) where is_default is TRUE;
+        </sql>
+        <sql>
+            drop index concurrently if exists key_project_id_name_idx;
+        </sql>
+        <sql>
+            drop index concurrently if exists key_project_id_name_namespace_id_idx;
+        </sql>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1758531127134-1">
+        <addColumn tableName="content_delivery_config">
+            <column name="filter_branch" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1759924061136-1">
+        <addColumn tableName="branch">
+            <column name="revision" type="INTEGER" defaultValue="0"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-1">
+        <createTable tableName="branch_merge">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="branch_mergePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_revision" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_revision" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_branch_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_branch_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-2">
+        <createTable tableName="branch_merge_change">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="branch_merge_changePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="change" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resolution" type="VARCHAR(255)"/>
+            <column name="branch_merge_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_key_id" type="BIGINT"/>
+            <column name="target_key_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-4">
+        <addForeignKeyConstraint baseColumnNames="source_branch_id" baseTableName="branch_merge" constraintName="FK3jm93ogvu4cm5eom5bghlspul" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-5">
+        <addForeignKeyConstraint baseColumnNames="branch_merge_id" baseTableName="branch_merge_change" constraintName="FK506698uwde6m0vh8mdmh7i27" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch_merge" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-6">
+        <addForeignKeyConstraint baseColumnNames="target_branch_id" baseTableName="branch_merge" constraintName="FK60sjoh1t5n5olrrn3jik0fkct" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-7">
+        <addForeignKeyConstraint baseColumnNames="target_key_id" baseTableName="branch_merge_change" constraintName="FK94kksu80fathi13wll04u4u1m" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1760095023333-8">
+        <addForeignKeyConstraint baseColumnNames="source_key_id" baseTableName="branch_merge_change" constraintName="FKgj7gopnadk65ph9l7x5kixsaf" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762354887870-1">
+        <addColumn tableName="branch">
+            <column name="author_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762354887870-2">
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="branch" constraintName="FKcm1eh6bg6wx174vo1lsmr0s5f" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-1">
+        <createTable tableName="branch_key_meta_snapshot">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="branch_key_meta_snapshotPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="custom" type="JSONB"/>
+            <column name="description" type="TEXT"/>
+            <column name="key_snapshot_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-2">
+        <createTable tableName="branch_key_snapshot">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="branch_key_snapshotPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="branch_key_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_plural" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(2000)"/>
+            <column name="namespace" type="VARCHAR(255)"/>
+            <column name="original_key_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="plural_arg_name" type="VARCHAR(255)"/>
+            <column name="branch_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-3">
+        <createTable tableName="branch_translation_snapshot">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="branch_translation_snapshotPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language" type="VARCHAR(255)"/>
+            <column defaultValueNumeric="1" name="state" type="SMALLINT"/>
+            <column name="value" type="TEXT"/>
+            <column name="key_snapshot_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-4">
+        <addUniqueConstraint columnNames="key_snapshot_id" constraintName="UC_BRANCH_KEY_META_SNAPSHOTKEY_SNAPSHOT_ID_COL" tableName="branch_key_meta_snapshot"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-5">
+        <createIndex indexName="IDX6qhhx33rv87d9exjkxkr2f9bu" tableName="branch_key_snapshot">
+            <column name="branch_key_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-6">
+        <createIndex indexName="IDX7etc2y3onp6e4yqj7c68qfh06" tableName="branch_key_snapshot">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-7">
+        <createIndex indexName="IDXb4l7738jdxbacq0xu026wvr04" tableName="branch_key_snapshot">
+            <column name="original_key_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-8">
+        <createIndex indexName="IDXkohthisiucup95hfdn92u43fr" tableName="branch_key_snapshot">
+            <column name="branch_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-9">
+        <createIndex indexName="IDXrs1h3yyioxqb92muxjsu9a206" tableName="branch_translation_snapshot">
+            <column name="key_snapshot_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-10">
+        <createIndex indexName="IDXsvrkfl6d1di82cuhtmtnwghtl" tableName="branch_translation_snapshot">
+            <column name="language"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-11">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="branch_key_snapshot" constraintName="FK9hi0034rmxdyl1326p1wpueq0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-12">
+        <addForeignKeyConstraint baseColumnNames="key_snapshot_id" baseTableName="branch_key_meta_snapshot" constraintName="FKo5xvd7qdr36bvjx9lsdsrrcgl" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch_key_snapshot" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-13">
+        <addForeignKeyConstraint baseColumnNames="key_snapshot_id" baseTableName="branch_translation_snapshot" constraintName="FKoribk9ectrdyu50od83alrscs" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch_key_snapshot" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762803836964-14">
+        <addForeignKeyConstraint baseColumnNames="branch_id" baseTableName="branch_key_snapshot" constraintName="FKsa2xg2my10r56m8otmovgg1ln" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1762876451091-1">
+        <addColumn tableName="branch_merge">
+            <column name="merged_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1763103914172-1">
+        <addColumn tableName="branch">
+            <column name="deleted_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1764843997114-1">
+        <addColumn tableName="import">
+            <column name="branch_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1764843997114-2">
+        <addForeignKeyConstraint baseColumnNames="branch_id" baseTableName="import" constraintName="FKopvqh82o6l414c1s303md2pov" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1764848705878-1">
+        <createIndex indexName="IDX6x1mvj1s52qxnrd1naym069v1" tableName="import">
+            <column name="branch_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1764848705878-2" >
+        <dropIndex indexName="import_author_project_unique" tableName="import" />
+        <sql>
+            create unique index import_author_project_unique on import(author_id, project_id, coalesce(branch_id, -1)) where deleted_at is null
+        </sql>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1765539301819-2">
+        <addColumn tableName="branch_translation_snapshot">
+            <column name="labels" type="JSONB"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1765539301819-3">
+        <addColumn tableName="branch_key_snapshot">
+            <column name="screenshot_references" type="JSONB"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1767813368518-1">
+        <addColumn tableName="task">
+            <column name="branch_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1767813368518-2">
+        <createIndex indexName="IDX8ym0mywgtoacu67e7xejvef38" tableName="task">
+            <column name="branch_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1767813368518-3">
+        <addForeignKeyConstraint baseColumnNames="branch_id" baseTableName="task" constraintName="FKnomxhqrycqxv0cyqtn9f0h39j" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768315146361-1">
+        <addColumn tableName="task">
+            <column name="origin_branch_name" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768340754107-1">
+        <addColumn tableName="language_stats">
+            <column name="branch_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768340754107-2">
+        <dropUniqueConstraint
+                constraintName="language_stats_language_id_key"
+                tableName="language_stats"/>
+        <createIndex
+                indexName="language_stats_language_branch_id_key"
+                tableName="language_stats"
+                unique="true">
+            <column name="language_id"/>
+            <column name="branch_id"/>
+        </createIndex>
+
+        <sql>
+            create unique index language_stats_language_id_default_branch_key
+                on language_stats (language_id)
+                where branch_id is null;
+        </sql>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768340754107-3">
+        <addForeignKeyConstraint baseColumnNames="branch_id" baseTableName="language_stats" constraintName="FKanv7yhl65oxk2tsiek8fx54kw" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768473852506-1">
+        <addColumn tableName="activity_modified_entity">
+            <column name="branch_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768473852506-2" runInTransaction="false">
+        <sql>CREATE INDEX CONCURRENTLY idx_activity_modified_entity_revision_branch ON activity_modified_entity (activity_revision_id, branch_id)</sql>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768911540294-1">
+        <addColumn tableName="branch_key_meta_snapshot">
+            <column name="tags" type="JSONB"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1768921361112-1">
+        <addColumn tableName="project">
+            <column defaultValueBoolean="false" name="use_branching" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

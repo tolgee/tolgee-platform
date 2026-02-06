@@ -9,7 +9,9 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.IdClass
+import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 import org.hibernate.annotations.Type
 import java.io.Serializable
 
@@ -17,6 +19,11 @@ import java.io.Serializable
  * Entity which is modified by the activity.
  */
 @Entity
+@Table(
+  indexes = [
+    Index(columnList = "branch_id"),
+  ],
+)
 @IdClass(ActivityModifiedEntityId::class)
 class ActivityModifiedEntity(
   @ManyToOne
@@ -34,6 +41,9 @@ class ActivityModifiedEntity(
   @Id
   val entityId: Long,
 ) : Serializable {
+  @Column(name = "branch_id")
+  var branchId: Long? = null
+
   /**
    * Map of field to object containing old and new values
    */

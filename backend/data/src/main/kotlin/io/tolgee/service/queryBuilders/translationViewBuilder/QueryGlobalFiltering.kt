@@ -6,6 +6,7 @@ import io.tolgee.model.activity.ActivityDescribingEntity_
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityModifiedEntity_
 import io.tolgee.model.activity.ActivityRevision_
+import io.tolgee.model.branching.Branch_
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
@@ -43,6 +44,7 @@ class QueryGlobalFiltering(
     filterRevisionId()
     filterFailedTargets()
     filterTask()
+    filterBranch()
   }
 
   private fun filterFailedTargets() {
@@ -260,6 +262,28 @@ class QueryGlobalFiltering(
         cb.or(
           queryBase.root.get(Key_.id).`in`(modifiedEntitySubquery),
           queryBase.root.get(Key_.id).`in`(describingEntitySubquery),
+        ),
+      )
+    }
+  }
+
+  private fun filterBranch() {
+    val branchJoin = queryBase.root.join(Key_.branch, JoinType.LEFT)
+    if (params.filterKeyId?.isNotEmpty() == true) {
+      return
+    }
+    if (params.branch.isNullOrEmpty()) {
+      queryBase.whereConditions.add(
+        cb.or(
+          branchJoin.get(Branch_.id).isNull,
+          cb.isTrue(branchJoin.get(Branch_.isDefault)),
+        ),
+      )
+    } else {
+      queryBase.whereConditions.add(
+        cb.and(
+          cb.equal(branchJoin.get(Branch_.name), cb.literal(params.branch)),
+          cb.isNull(branchJoin.get(Branch_.deletedAt)),
         ),
       )
     }

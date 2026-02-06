@@ -22,13 +22,13 @@ import { BaseProjectView } from '../BaseProjectView';
 import { ImportResultLoadingOverlay } from './component/ImportResultLoadingOverlay';
 import { ImportSettingsPanel } from './component/ImportSettingsPanel';
 import { TranslatedWarningBox } from 'tg.translationTools/TranslatedWarningBox';
-import { useOnFilePaste } from 'tg.fixtures/useOnFilePaste';
+import { useBranchEditAccess } from 'tg.views/projects/translations/context/services/useBranchEditAccess';
 
 export const ImportView: FunctionComponent = () => {
   const dataHelper = useImportDataHelper();
-  useOnFilePaste(dataHelper.onNewFiles);
 
   const project = useProject();
+  const canEditProtectedBranch = useBranchEditAccess({ projectId: project.id });
 
   const applyImportHelper = useApplyImportHelper(dataHelper);
 
@@ -60,6 +60,9 @@ export const ImportView: FunctionComponent = () => {
   }, [applyImportHelper.error]);
 
   const onApply = () => {
+    if (!canEditProtectedBranch) {
+      return;
+    }
     dataHelper.touchApply();
     if (dataHelper.isValid) {
       applyImportHelper.onApplyImport();
@@ -90,6 +93,7 @@ export const ImportView: FunctionComponent = () => {
       ]}
       maxWidth="wide"
       overflow="auto"
+      branching
     >
       <ImportConflictResolutionDialog
         row={resolveRow}
@@ -101,6 +105,7 @@ export const ImportView: FunctionComponent = () => {
           loading={loading}
           operationStatus={applyImportHelper.status}
           importDone={applyImportHelper.loaded}
+          disabled={!canEditProtectedBranch}
           operation={
             applyImportHelper.loading
               ? 'apply'
@@ -165,6 +170,7 @@ export const ImportView: FunctionComponent = () => {
                   variant="contained"
                   color="primary"
                   data-cy="import_apply_import_button"
+                  disabled={!canEditProtectedBranch}
                   onClick={onApply}
                 >
                   <T keyName="import_apply_button" />

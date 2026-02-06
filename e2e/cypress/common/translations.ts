@@ -75,8 +75,12 @@ export function translationsBeforeEach(
   });
 }
 
-export const visitTranslations = (projectId: number) => {
-  return cy.visit(`${HOST}/projects/${projectId}/translations`);
+export const visitTranslations = (projectId: number, branchName?: string) => {
+  return cy.visit(
+    `${HOST}/projects/${projectId}/translations${
+      branchName ? `/tree/${encodeURIComponent(branchName)}` : ''
+    }`
+  );
 };
 
 export function openKeyEditDialog(keyName: string) {

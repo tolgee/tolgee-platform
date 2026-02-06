@@ -1,6 +1,7 @@
 package io.tolgee.facade
 
 import io.sentry.Sentry
+import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.dtos.queryResults.ProjectStatistics
 import io.tolgee.hateoas.project.ProjectWithStatsModel
 import io.tolgee.hateoas.project.ProjectWithStatsModelAssembler
@@ -31,17 +32,19 @@ class ProjectWithStatsFacade(
     val projectIds = projects.content.map { it.id }
     val totals = projectStatsService.getProjectsTotals(projectIds)
     val languages = languageService.getDtosOfProjects(projectIds)
-    val languageStats = languageStatsService.getLanguageStatsDtos(projectIds)
+    val allLanguageStats =
+      languageStatsService
+        .getLanguageStatsDtos(projectIds)
+        .mapValues { (_, stats) -> dedupeLanguageStats(stats) }
 
     val projectsWithStatsContent =
       projects.content.map { projectWithLanguagesView ->
         val projectTotals = totals[projectWithLanguagesView.id]
         val baseLanguage = languages[projectWithLanguagesView.id]?.find { it.base }
-        val projectLanguageStats =
-          languageStats[projectWithLanguagesView.id]
+        val projectLanguageStats = allLanguageStats[projectWithLanguagesView.id] ?: emptyList()
 
         var stateTotals: ProjectStatsService.ProjectStateTotals? = null
-        if (baseLanguage != null && projectLanguageStats != null) {
+        if (baseLanguage != null) {
           stateTotals =
             projectStatsService.computeProjectTotals(
               baseLanguage,
@@ -83,6 +86,16 @@ class ProjectWithStatsFacade(
       }
     val page = PageImpl(projectsWithStatsContent, projects.pageable, projects.totalElements)
     return pagedWithStatsResourcesAssembler.toModel(page, projectWithStatsModelAssembler)
+  }
+
+  private fun dedupeLanguageStats(stats: List<LanguageStatsDto>): List<LanguageStatsDto> {
+    if (stats.isEmpty()) return stats
+    return stats
+      .groupBy { it.languageId }
+      .map { (_, items) ->
+        // Prefer default branch stats (isDefaultBranch = true) over legacy null-branch stats (isDefaultBranch = null)
+        items.firstOrNull { it.isDefaultBranch == true } ?: items.first()
+      }
   }
 
   fun Double?.toPercentValue(): BigDecimal {

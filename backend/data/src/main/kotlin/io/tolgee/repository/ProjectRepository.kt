@@ -19,6 +19,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
     const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
         r.slug as slug, r.avatarHash as avatarHash,
         r.useNamespaces as useNamespaces,
+        r.useBranching as useBranching,
         r.suggestionsMode as suggestionsMode,
         r.translationProtection as translationProtection,
         dn as defaultNamespace, o as organizationOwner,
@@ -158,6 +159,15 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   """,
   )
   fun find(id: Long): Project?
+
+  @Query(
+    """
+    from Project p
+    left join fetch p.branches
+    where p.id = :id and p.deletedAt is null
+    """,
+  )
+  fun findWithBranches(id: Long): Project?
 
   @Query(
     """

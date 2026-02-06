@@ -5,6 +5,7 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.invitation.TagModel
 import io.tolgee.api.v2.hateoas.invitation.TagModelAssembler
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.request.ComplexTagKeysRequest
 import io.tolgee.dtos.request.key.TagKeyDto
 import io.tolgee.model.enums.Scope
@@ -14,7 +15,10 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.key.TagService
+import io.tolgee.service.project.ProjectFeatureGuard
+import io.tolgee.service.security.SecurityService
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -46,8 +50,11 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
 class TagsController(
   private val projectHolder: ProjectHolder,
   private val tagService: TagService,
+  private val branchService: BranchService,
   private val tagModelAssembler: TagModelAssembler,
   private val pagedResourcesAssembler: PagedResourcesAssembler<Tag>,
+  private val securityService: SecurityService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) : IController {
   @PutMapping(value = ["keys/{keyId:[0-9]+}/tags"])
   @Operation(
@@ -97,8 +104,10 @@ class TagsController(
   @RequestActivity(ActivityType.COMPLEX_TAG_OPERATION)
   fun executeComplexTagOperation(
     @RequestBody req: ComplexTagKeysRequest,
+    @RequestParam(required = false) branch: String? = null,
   ) {
-    tagService.complexTagOperation(projectHolder.project.id, req)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    tagService.complexTagOperation(projectHolder.project.id, req, branch)
   }
 
   private val Tag.model: TagModel

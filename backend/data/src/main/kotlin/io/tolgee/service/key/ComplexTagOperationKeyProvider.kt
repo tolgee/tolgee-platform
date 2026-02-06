@@ -3,6 +3,7 @@ package io.tolgee.service.key
 import io.tolgee.dtos.request.ComplexTagKeysRequest
 import io.tolgee.dtos.request.KeyId
 import io.tolgee.model.Project_
+import io.tolgee.model.branching.Branch_
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.KeyMeta_
@@ -21,6 +22,7 @@ import org.springframework.context.ApplicationContext
 class ComplexTagOperationKeyProvider(
   private val projectId: Long,
   private val request: ComplexTagKeysRequest,
+  private val branch: String?,
   private val applicationContext: ApplicationContext,
 ) {
   private val cb: CriteriaBuilder = entityManager.criteriaBuilder
@@ -28,6 +30,7 @@ class ComplexTagOperationKeyProvider(
   private val root = query.from(Key::class.java)
   private val namespace = root.join(Key_.namespace, JoinType.LEFT)
   private val keyMeta = root.fetch(Key_.keyMeta, JoinType.LEFT)
+  private val branchJoin = root.join(Key_.branch, JoinType.LEFT)
 
   val filtered: List<Key> by lazy {
     @Suppress("UNCHECKED_CAST")
@@ -61,6 +64,7 @@ class ComplexTagOperationKeyProvider(
     val query = cb.createQuery(Key::class.java)
     val root = query.from(Key::class.java)
     val keyMeta = root.fetch(Key_.keyMeta, JoinType.LEFT)
+    val branchJoin = root.join(Key_.branch, JoinType.LEFT)
     @Suppress("UNCHECKED_CAST")
     (keyMeta as Join<Key, KeyMeta>).fetch(KeyMeta_.tags, JoinType.LEFT) as Join<KeyMeta, Tag>
     entityManager
@@ -71,6 +75,17 @@ class ComplexTagOperationKeyProvider(
             cb.and(
               cb.equal(root.get(Key_.project).get(Project_.id), projectId),
               cb.notIn(root.get(Key_.id), returnedIds),
+              if (branch.isNullOrEmpty()) {
+                cb.or(
+                  branchJoin.get(Branch_.id).isNull,
+                  cb.isTrue(branchJoin.get(Branch_.isDefault)),
+                )
+              } else {
+                cb.and(
+                  cb.equal(branchJoin.get(Branch_.name), cb.literal(branch)),
+                  cb.isNull(branchJoin.get(Branch_.deletedAt)),
+                )
+              },
             ),
           ),
       ).resultList
@@ -100,7 +115,18 @@ class ComplexTagOperationKeyProvider(
   private fun getBaseConditions() =
     mutableListOf(
       cb.equal(root.get(Key_.project).get(Project_.id), projectId),
-    )
+      if (branch.isNullOrEmpty()) {
+        cb.or(
+          branchJoin.get(Branch_.id).isNull,
+          cb.isTrue(branchJoin.get(Branch_.isDefault)),
+        )
+      } else {
+        cb.and(
+          cb.equal(branchJoin.get(Branch_.name), cb.literal(branch)),
+          cb.isNull(branchJoin.get(Branch_.deletedAt)),
+        )
+      },
+    ).filterNotNull().toMutableList()
 
   /**
    * It's extremely and inconvenient hard to write criteria query for this, so we will first get all the key ids

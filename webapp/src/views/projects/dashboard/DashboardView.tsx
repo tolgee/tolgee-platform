@@ -2,6 +2,7 @@ import { Box, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProject } from 'tg.hooks/useProject';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
@@ -54,6 +55,7 @@ const StyledTopInfo = styled(Box)`
 
 export const DashboardView = () => {
   const project = useProject();
+  const branch = useBranchFromUrlPath();
 
   const reportEvent = useReportEvent();
   useEffect(() => {
@@ -68,7 +70,7 @@ export const DashboardView = () => {
   const canViewActivity = satisfiesPermission('activity.view');
 
   const path = { projectId: project.id };
-  const query = { size: 15, sort: ['timestamp,desc'] };
+  const query = { size: 15, sort: ['timestamp,desc'], branch };
   const activityLoadable = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/activity',
     method: 'get',
@@ -101,6 +103,9 @@ export const DashboardView = () => {
     path: {
       projectId: project.id,
     },
+    query: {
+      branch,
+    },
   });
 
   const dailyActivityLoadable = useApiQuery({
@@ -120,7 +125,11 @@ export const DashboardView = () => {
     dailyActivityLoadable.isLoading;
 
   return (
-    <BaseProjectView windowTitle={t('project_dashboard_title')} maxWidth="wide">
+    <BaseProjectView
+      windowTitle={t('project_dashboard_title')}
+      maxWidth="wide"
+      branching
+    >
       <ProjectLanguagesProvider>
         {anythingLoading ? (
           <EmptyListMessage loading={true} />

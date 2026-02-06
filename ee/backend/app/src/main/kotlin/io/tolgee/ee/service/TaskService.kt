@@ -17,6 +17,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.TaskState
 import io.tolgee.model.enums.TaskType
 import io.tolgee.model.notifications.Notification
@@ -30,6 +31,7 @@ import io.tolgee.model.views.TaskWithScopeView
 import io.tolgee.model.views.TranslationToTaskView
 import io.tolgee.repository.TaskKeyRepository
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.notification.NotificationService
@@ -72,6 +74,8 @@ class TaskService(
   @Lazy
   private val taskService: TaskService,
   private val notificationService: NotificationService,
+  @Lazy
+  private val branchService: BranchService,
 ) : ITaskService {
   fun getAllPaged(
     projectId: Long,
@@ -172,6 +176,7 @@ class TaskService(
   ): Task {
     val newNumber = getNextTaskNumber(projectId)
     val language = checkLanguage(dto.languageId!!, projectId)
+    val branch = getBranchForTask(projectId, dto.branch)
     val assignees = checkAssignees(dto.assignees ?: mutableSetOf(), projectId)
     val keyIds =
       getOnlyProjectKeys(
@@ -180,6 +185,7 @@ class TaskService(
         dto.type,
         dto.keys ?: mutableSetOf(),
         filters,
+        branch,
       )
 
     val task = Task()
@@ -194,6 +200,7 @@ class TaskService(
     task.language = language
     task.assignees = assignees
     task.author = entityManager.getReference(UserAccount::class.java, authorId)
+    task.branch = branch
     task.agency = agencyId?.let {
       entityManager.getReference(TranslationAgency::class.java, it)
     } ?: permissionService.findPermissionNonCached(projectId, authorId)?.agency
@@ -240,6 +247,16 @@ class TaskService(
     state: TaskState,
   ): TaskWithScopeView {
     val task = findByNumber(projectId, taskNumber)
+    setTaskState(task, state)
+    taskRepository.saveAndFlush(task)
+    createNotificationIfApplicable(task)
+    return getTask(projectId, taskNumber)
+  }
+
+  fun setTaskState(
+    task: Task,
+    state: TaskState,
+  ) {
     val taskWithScope = getTaskWithScope(task)
     if (state == TaskState.FINISHED && taskWithScope.doneItems != taskWithScope.totalItems) {
       throw BadRequestException(Message.TASK_NOT_FINISHED)
@@ -251,9 +268,47 @@ class TaskService(
       task.closedAt = currentDateProvider.date
       task.state = state
     }
-    taskRepository.saveAndFlush(task)
-    createNotificationIfApplicable(task)
-    return getTask(projectId, taskNumber)
+  }
+
+  @Transactional
+  fun cancelUnfinishedTasksForBranch(
+    projectId: Long,
+    branchId: Long,
+  ) {
+    val tasks =
+      taskRepository.findAllByProjectIdAndBranchIdAndStateIn(
+        projectId,
+        branchId,
+        listOf(TaskState.NEW, TaskState.IN_PROGRESS),
+      )
+    tasks.forEach { setTaskState(it, TaskState.CANCELED) }
+  }
+
+  @Transactional
+  fun deleteTasksForBranch(
+    projectId: Long,
+    branchId: Long,
+  ) {
+    val tasks = taskRepository.findAllByProjectIdAndBranchId(projectId, branchId)
+    deleteAll(tasks)
+  }
+
+  @Transactional
+  fun moveTasksAfterMerge(
+    projectId: Long,
+    sourceBranch: Branch,
+    targetBranch: Branch,
+  ) {
+    val tasks = taskRepository.findAllByProjectIdAndBranchId(projectId, sourceBranch.id)
+    tasks.forEach { task ->
+      if (task.originBranchName == null) {
+        task.originBranchName = sourceBranch.name
+      }
+      task.branch = targetBranch
+      if (task.state == TaskState.NEW || task.state == TaskState.IN_PROGRESS) {
+        setTaskState(task, TaskState.CANCELED)
+      }
+    }
   }
 
   @Transactional
@@ -365,12 +420,14 @@ class TaskService(
     filters: TranslationScopeFilters,
   ): KeysScopeView {
     val language = languageService.get(dto.languageId, projectEntity.id)
+    val branch = getBranchForTask(projectEntity.id, dto.branch)
     val keysIncludingConflicts =
       taskRepository.getKeysIncludingConflicts(
         projectEntity.id,
         language.id,
         dto.keys,
         filters,
+        branch?.name,
       )
     val relevantKeys =
       taskRepository.getKeysWithoutConflicts(
@@ -379,6 +436,7 @@ class TaskService(
         dto.type.toString(),
         dto.keys,
         filters,
+        branch?.name,
       )
     val result =
       taskRepository.calculateScope(
@@ -440,6 +498,7 @@ class TaskService(
     type: TaskType,
     keys: Collection<Long>,
     filters: TranslationScopeFilters,
+    branch: Branch?,
   ): MutableSet<Long> {
     return taskRepository
       .getKeysWithoutConflicts(
@@ -448,7 +507,15 @@ class TaskService(
         type.toString(),
         keys,
         filters,
+        branch?.name,
       ).toMutableSet()
+  }
+
+  private fun getBranchForTask(
+    projectId: Long,
+    branchName: String?,
+  ): Branch? {
+    return branchService.getActiveOrDefault(projectId, branchName)
   }
 
   private fun checkAssignees(
@@ -501,6 +568,8 @@ class TaskService(
         assignees = task.assignees,
         keys = task.keys,
         author = task.author!!,
+        branch = task.branch,
+        originBranchName = task.originBranchName,
         createdAt = task.createdAt,
         state = task.state,
         closedAt = task.closedAt,
@@ -583,7 +652,7 @@ class TaskService(
         type = notificationType
         user = author
         project = task.project
-        originatingUser = authenticationFacade.authenticatedUserEntity
+        originatingUser = authenticationFacade.authenticatedUserEntityOrNull
         linkedTask = task
       },
     )

@@ -6,6 +6,7 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.KeyComplexEditHelper
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.queryResults.KeyView
@@ -44,6 +45,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.withoutSort
 import jakarta.validation.Valid
@@ -95,6 +97,7 @@ class KeyController(
   private val screenshotModelAssembler: ScreenshotModelAssembler,
   private val keyWithScreenshotsModelAssembler: KeyWithScreenshotsModelAssembler,
   private val languageModelAssembler: LanguageModelAssembler,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) : IController {
   @PostMapping(value = ["/create", ""])
   @Operation(summary = "Create new key")
@@ -118,7 +121,8 @@ class KeyController(
     checkCanStoreBigMeta(dto)
     checkStateChangePermission(dto)
     checkNamespaceFeature(dto.namespace)
-
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
+    securityService.checkProtectedBranchModify(projectHolder.projectEntity.id, dto.branch)
     val key = keyService.create(projectHolder.projectEntity, dto)
     return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
   }
@@ -147,8 +151,11 @@ class KeyController(
     @ParameterObject
     @SortDefault("id")
     pageable: Pageable,
+    @RequestParam
+    branch: String? = null,
   ): PagedModel<KeyModel> {
-    val data = keyService.getPaged(projectHolder.project.id, pageable)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    val data = keyService.getPaged(projectHolder.project.id, branch, pageable)
     return keyPagedResourcesAssembler.toModel(data, keyModelAssembler)
   }
 
@@ -167,8 +174,10 @@ class KeyController(
     val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
     key.checkInProject()
     checkNamespaceFeature(dto.namespace)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     keyService.edit(id, dto)
-    val view = KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description, key.keyMeta?.custom)
+    val view =
+      KeyView(key.id, key.name, key?.namespace?.name, key.keyMeta?.description, key.keyMeta?.custom, key.branch?.name)
     return keyModelAssembler.toModel(view)
   }
 
@@ -182,7 +191,12 @@ class KeyController(
   fun delete(
     @PathVariable ids: Set<Long>,
   ) {
-    keyService.findAllWithProjectsAndMetas(ids).forEach { it.checkInProject() }
+    keyService.findAllWithProjectsAndMetas(ids).forEach {
+      it.run {
+        checkInProject()
+        checkBranchPermission()
+      }
+    }
     keyService.deleteMultiple(ids)
   }
 
@@ -200,6 +214,7 @@ class KeyController(
     dto: ComplexEditKeyDto,
   ): KeyWithDataModel {
     checkNamespaceFeature(dto.namespace)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
     return KeyComplexEditHelper(applicationContext, id, dto).doComplexUpdate()
   }
 
@@ -234,13 +249,10 @@ class KeyController(
   fun importKeys(
     @RequestBody @Valid
     dto: ImportKeysDto,
+    @RequestParam branch: String?,
   ) {
-    securityService.checkLanguageTranslatePermissionByTag(
-      projectHolder.project.id,
-      dto.keys.flatMap { it.translations.keys }.toSet(),
-    )
-
-    keyService.importKeys(dto.keys, projectHolder.projectEntity)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    keyService.importKeys(dto.keys, projectHolder.projectEntity, branch)
   }
 
   @PostMapping("/import-resolvable")
@@ -292,15 +304,18 @@ class KeyController(
     @RequestParam
     @Parameter(description = "Language to search in")
     languageTag: String? = null,
+    @RequestParam
+    branch: String? = null,
     @ParameterObject pageable: Pageable,
   ): PagedModel<KeySearchSearchResultModel> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     languageTag?.let {
       securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(languageTag))
     }
     projectHolder.projectEntity.baseLanguage?.let {
       securityService.checkLanguageViewPermissionByTag(projectHolder.project.id, listOf(it.tag))
     }
-    val result = keyService.searchKeys(search, languageTag, projectHolder.project, pageable.withoutSort)
+    val result = keyService.searchKeys(search, languageTag, projectHolder.project, branch, pageable.withoutSort)
     return pagedResourcesAssembler.toModel(result, keySearchResultModelAssembler)
   }
 
@@ -318,8 +333,11 @@ class KeyController(
     @RequestBody
     @Valid
     dto: GetKeysRequestDto,
+    @RequestParam
+    branch: String? = null,
   ): CollectionModel<KeyWithDataModel> {
-    val result = keyService.getKeysInfo(dto, projectHolder.project.id)
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
+    val result = keyService.getKeysInfo(dto, projectHolder.project.id, branch)
     return keyWithScreenshotsModelAssembler.toCollectionModel(result)
   }
 
@@ -360,6 +378,10 @@ class KeyController(
 
   private fun Key.checkInProject() {
     keyService.checkInProject(this, projectHolder.project.id)
+  }
+
+  private fun Key.checkBranchPermission() {
+    securityService.checkProtectedBranchModify(this)
   }
 
   private fun Project.checkScreenshotsUploadPermission() {

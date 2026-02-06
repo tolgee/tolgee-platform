@@ -22,6 +22,14 @@ export function satisfiesPermission(scopes: Scope[], scope: Scope): boolean {
   return !!scopes?.includes(scope);
 }
 
+export function satisfiesPermissionWithBranching(
+  scopes: Scope[],
+  scope: Scope,
+  canEditProtectedBranch: boolean
+): boolean {
+  return canEditProtectedBranch && satisfiesPermission(scopes, scope);
+}
+
 export function satisfiesLanguageAccess(
   permissions: PermissionModel,
   scope: keyof typeof SCOPE_TO_LANG_PROPERTY_MAP,
