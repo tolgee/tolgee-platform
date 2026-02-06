@@ -92,6 +92,10 @@ class UserAccountService(
     return userAccountRepository.findActive(username)
   }
 
+  fun findActiveOrDisabled(username: String): UserAccount? {
+    return userAccountRepository.findActiveOrDisabled(username)
+  }
+
   operator fun get(username: String): UserAccount {
     return this.findActive(username) ?: throw NotFoundException(Message.USER_NOT_FOUND)
   }
