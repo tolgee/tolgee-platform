@@ -36,6 +36,8 @@ class BatchJobCancellationManager(
   private val batchJobChunkExecutionQueue: BatchJobChunkExecutionQueue,
   private val concurrentExecutionLauncher: BatchJobConcurrentLauncher,
   private val batchProperties: io.tolgee.configuration.tolgee.BatchProperties,
+  @Lazy
+  private val batchApiCancellationHandler: BatchApiCancellationHandler?,
 ) : Logging {
   @Transactional
   fun cancel(id: Long) {
@@ -86,7 +88,7 @@ class BatchJobCancellationManager(
   private fun cancelExecutions(jobId: Long): MutableList<BatchJobChunkExecution> =
     executeInNewTransaction(transactionManager) {
       entityManager.createNativeQuery("""SET enable_seqscan=off""")
-      val executions = getUnlockedPendingExecutions(jobId)
+      val executions = getUnlockedCancellableExecutions(jobId)
 
       logger.debug(
         "Cancelling job $jobId, cancelling unlocked execution ids: ${
@@ -95,19 +97,22 @@ class BatchJobCancellationManager(
       )
 
       executions.forEach { execution ->
+        if (execution.status == BatchJobChunkExecutionStatus.WAITING_FOR_EXTERNAL) {
+          cancelExternalExecution(execution)
+        }
         cancelExecution(execution)
       }
 
       executions
     }
 
-  private fun getUnlockedPendingExecutions(jobId: Long): MutableList<BatchJobChunkExecution> =
+  private fun getUnlockedCancellableExecutions(jobId: Long): MutableList<BatchJobChunkExecution> =
     entityManager
       .createQuery(
         """
-            from BatchJobChunkExecution bjce  
+            from BatchJobChunkExecution bjce
             where bjce.batchJob.id = :id
-            and status = :status
+            and status in :statuses
           """,
         BatchJobChunkExecution::class.java,
       ).setLockMode(LockModeType.PESSIMISTIC_WRITE)
@@ -115,8 +120,13 @@ class BatchJobCancellationManager(
         "jakarta.persistence.lock.timeout",
         LockOptions.SKIP_LOCKED,
       ).setParameter("id", jobId)
-      .setParameter("status", BatchJobChunkExecutionStatus.PENDING)
-      .resultList
+      .setParameter(
+        "statuses",
+        listOf(
+          BatchJobChunkExecutionStatus.PENDING,
+          BatchJobChunkExecutionStatus.WAITING_FOR_EXTERNAL,
+        ),
+      ).resultList
 
   private fun handleJobStatusAfterCancellation(jobId: Long) {
     var statusUpdated = tryUpdateJobStatusToCompleted(jobId)
@@ -174,6 +184,18 @@ class BatchJobCancellationManager(
         BatchJobChunkExecutionStatus::class.java,
       ).setParameter("id", jobId)
       .resultList
+
+  private fun cancelExternalExecution(execution: BatchJobChunkExecution) {
+    try {
+      batchApiCancellationHandler?.cancelExternalBatch(execution)
+    } catch (e: Exception) {
+      logger.warn(
+        "Failed to cancel external batch for execution ${execution.id}: ${e.message}. " +
+          "The poller will handle cleanup on next poll.",
+        e,
+      )
+    }
+  }
 
   fun cancelExecution(execution: BatchJobChunkExecution) {
     execution.status = BatchJobChunkExecutionStatus.CANCELLED
