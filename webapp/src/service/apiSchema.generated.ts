@@ -3955,6 +3955,8 @@ export interface components {
       /** @enum {string} */
       priority?: "LOW" | "HIGH";
       reasoningEffort?: string;
+      /** Format: double */
+      temperature?: number;
       /** @enum {string} */
       type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE" | "ANTHROPIC" | "GOOGLE_AI";
     };
@@ -3969,6 +3971,8 @@ export interface components {
       /** @enum {string} */
       priority?: "LOW" | "HIGH";
       reasoningEffort?: string;
+      /** Format: double */
+      temperature?: number;
       /** @enum {string} */
       type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE" | "ANTHROPIC" | "GOOGLE_AI";
     };
