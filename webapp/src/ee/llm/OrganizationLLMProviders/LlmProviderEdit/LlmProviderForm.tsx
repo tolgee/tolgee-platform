@@ -87,7 +87,9 @@ export const LlmProviderForm = ({ type, onTypeChange }: Props) => {
               label={labelWithHint}
               data-cy="llm-provider-form-text-field"
               data-cy-name={name}
-              {...(options.numeric ? { type: 'number', inputProps: { step: 0.1, min: 0, max: 2 } } : {})}
+              {...(options.numeric
+                ? { type: 'number', inputProps: { step: 0.1, min: 0, max: 2 } }
+                : {})}
             />
           );
         }

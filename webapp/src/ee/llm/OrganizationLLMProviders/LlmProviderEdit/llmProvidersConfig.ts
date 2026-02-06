@@ -121,7 +121,11 @@ export const getValidationSchema = (
     const options: ProviderOptions = { ...llmProvidersDefaults(t)[name], ...o };
     let field: Yup.AnySchema;
     if (options.numeric) {
-      field = Yup.number().nullable().transform((value) => (value === '' || isNaN(value) ? undefined : value));
+      field = Yup.number()
+        .nullable()
+        .transform((value) =>
+          value === '' || isNaN(value) ? undefined : value
+        );
     } else {
       field = Yup.string();
     }
