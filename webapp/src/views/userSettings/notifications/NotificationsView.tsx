@@ -79,6 +79,15 @@ export const NotificationsView: React.FC = () => {
             afterChange={() => settingsLoadable.refetch()}
           />
         )}
+        <SettingsRow
+          description={t('settings_notifications_batch_jobs_description')}
+          subdescription={t(
+            'settings_notifications_batch_jobs_subdescription'
+          )}
+          group="BATCH_JOBS"
+          channels={settings.batchJobs}
+          afterChange={() => settingsLoadable.refetch()}
+        />
       </StyledRoot>
     </BaseUserSettingsView>
   );

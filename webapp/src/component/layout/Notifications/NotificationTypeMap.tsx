@@ -4,6 +4,7 @@ import { TaskCanceledItem } from 'tg.component/layout/Notifications/TaskCanceled
 import { MfaEnabledItem } from 'tg.component/layout/Notifications/MfaEnabledItem';
 import { MfaDisabledItem } from 'tg.component/layout/Notifications/MfaDisabledItem';
 import { PasswordChangedItem } from 'tg.component/layout/Notifications/PasswordChangedItem';
+import { BatchJobFinishedItem } from 'tg.component/layout/Notifications/BatchJobFinishedItem';
 import { components } from 'tg.service/apiSchema.generated';
 import { NotificationItemProps } from 'tg.component/layout/Notifications/NotificationItem';
 import React from 'react';
@@ -20,4 +21,5 @@ export const notificationComponents: NotificationsComponentMap = {
   MFA_ENABLED: MfaEnabledItem,
   MFA_DISABLED: MfaDisabledItem,
   PASSWORD_CHANGED: PasswordChangedItem,
+  BATCH_JOB_FINISHED: BatchJobFinishedItem,
 };

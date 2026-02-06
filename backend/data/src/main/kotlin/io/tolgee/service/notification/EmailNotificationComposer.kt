@@ -11,6 +11,7 @@ class EmailNotificationComposer(
   private val taskEmailComposer: TaskEmailComposer,
   private val mfaEmailComposer: MfaEmailComposer,
   private val passwordChangedEmailComposer: PasswordChangedEmailComposer,
+  private val batchJobEmailComposer: BatchJobEmailComposer,
 ) {
   fun composeEmailSubject(notification: Notification) =
     i18n.translate("notifications.email.subject.${notification.type}")
@@ -28,5 +29,8 @@ class EmailNotificationComposer(
 
       NotificationType.PASSWORD_CHANGED,
       -> passwordChangedEmailComposer
+
+      NotificationType.BATCH_JOB_FINISHED,
+      -> batchJobEmailComposer
     }.composeEmail(notification)
 }

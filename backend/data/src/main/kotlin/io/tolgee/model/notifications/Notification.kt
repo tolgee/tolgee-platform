@@ -3,6 +3,7 @@ package io.tolgee.model.notifications
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
+import io.tolgee.model.batch.BatchJob
 import io.tolgee.model.task.Task
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -35,6 +36,9 @@ class Notification : StandardAuditModel() {
 
   @ManyToOne(fetch = FetchType.LAZY)
   var linkedTask: Task? = null
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  var linkedBatchJob: BatchJob? = null
 
   @ColumnDefault("false")
   var seen: Boolean = false
