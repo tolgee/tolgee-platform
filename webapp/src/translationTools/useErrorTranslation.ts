@@ -11,6 +11,8 @@ export function useErrorTranslation() {
 
       case 'bad_credentials':
         return t('bad_credentials');
+      case 'user_account_disabled':
+        return t('user_account_disabled');
       case 'invalid_otp_code':
         return t('invalid_otp_code');
       case 'invitation_code_does_not_exist_or_expired':
