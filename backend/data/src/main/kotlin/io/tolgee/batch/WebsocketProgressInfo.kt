@@ -8,4 +8,11 @@ data class WebsocketProgressInfo(
   val total: Long?,
   val status: BatchJobStatus,
   val errorMessage: String? = null,
+  val batchApiPhase: BatchApiPhase? = null,
 )
+
+enum class BatchApiPhase {
+  SUBMITTING,
+  WAITING_FOR_OPENAI,
+  APPLYING_RESULTS,
+}

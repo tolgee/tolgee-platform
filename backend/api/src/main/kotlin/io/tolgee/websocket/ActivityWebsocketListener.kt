@@ -108,7 +108,14 @@ class ActivityWebsocketListener(
       "/projects/${event.job.projectId}/${WebsocketEventType.BATCH_JOB_PROGRESS.typeName}",
       WebsocketEvent(
         actor = getActorInfo(event.job.authorId),
-        data = WebsocketProgressInfo(event.job.id, event.processed, event.total, realStatus),
+        data =
+          WebsocketProgressInfo(
+            event.job.id,
+            event.processed,
+            event.total,
+            realStatus,
+            batchApiPhase = event.batchApiPhase,
+          ),
         sourceActivity = null,
         activityId = null,
         dataCollapsed = false,

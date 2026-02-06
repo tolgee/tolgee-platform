@@ -380,6 +380,28 @@ class ProgressManager(
     }
   }
 
+  /**
+   * Reports progress from an external source (e.g. OpenAI Batch API poller).
+   * Used to provide progress updates while a batch job is in WAITING_FOR_EXTERNAL status.
+   * This publishes a WebSocket event so the frontend can show intermediate progress.
+   */
+  fun reportExternalProgress(
+    jobId: Long,
+    completedRequests: Int,
+    totalRequests: Int,
+    phase: BatchApiPhase,
+  ) {
+    val job = batchJobService.getJobDto(jobId)
+    eventPublisher.publishEvent(
+      OnBatchJobProgress(
+        job,
+        completedRequests.toLong(),
+        totalRequests.toLong(),
+        phase,
+      ),
+    )
+  }
+
   data class JobResultInfo(
     val completedChunks: Int,
     val progress: Long,

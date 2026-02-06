@@ -25,6 +25,7 @@ class BatchJobModelAssembler(
       updatedAt = view.batchJob.updatedAt?.time ?: 0,
       activityRevisionId = view.batchJob.activityRevision?.id,
       errorMessage = view.errorMessage?.code,
+      batchApiPhase = view.batchApiPhase,
     )
   }
 }

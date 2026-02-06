@@ -7,4 +7,5 @@ class BatchJobView(
   val batchJob: BatchJob,
   val progress: Int,
   val errorMessage: Message?,
+  val batchApiPhase: String? = null,
 )

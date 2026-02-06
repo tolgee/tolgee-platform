@@ -31,5 +31,11 @@ open class BatchJobModel(
   val activityRevisionId: Long?,
   @Schema(description = "If the job failed, this is the error message")
   val errorMessage: String?,
+  @Schema(
+    description =
+      "Phase of batch API processing, if applicable. " +
+        "Values: SUBMITTING, WAITING_FOR_EXTERNAL, APPLYING_RESULTS, null if not a batch API job.",
+  )
+  val batchApiPhase: String? = null,
 ) : RepresentationModel<BatchJobModel>(),
   Serializable
