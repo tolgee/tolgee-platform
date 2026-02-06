@@ -1,4 +1,4 @@
-import { Box, styled, Typography } from '@mui/material';
+import { Box, styled, Typography, Button } from '@mui/material';
 import { T } from '@tolgee/react';
 import React from 'react';
 import TolgeeLogo from 'tg.svgs/tolgeeLogo.svg?react';
@@ -15,6 +15,8 @@ import I18nextLogo from 'tg.svgs/logos/i18next.svg?react';
 import CsvLogo from 'tg.svgs/logos/csv.svg?react';
 import DotnetLogo from 'tg.svgs/logos/dotnet.svg?react';
 import XlsxLogo from 'tg.svgs/logos/xlsx.svg?react';
+import JavaLogo from 'tg.svgs/logos/java.svg?react';
+import FileYamlLogo from 'tg.svgs/logos/file-yaml.svg?react';
 
 const TechLogo = ({
   svg,
@@ -46,12 +48,17 @@ const FORMATS = [
     logoWidth: '24px',
   },
   {
+    name: 'Structured JSON',
+    logo: <IcuLogo />,
+  },
+  {
     name: 'XLIFF',
     logo: <IcuLogo />,
   },
   { name: 'PO PHP', logo: <PhoLogo /> },
   { name: 'PO C/C++', logo: <CLogo /> },
   { name: 'PO Python', logo: <PythonLogo /> },
+  { name: 'Java Properties', logo: <JavaLogo />, logoHeight: '24px',logoWidth: '24px', },
   { name: 'Apple Strings', logo: <AppleLogo /> },
   { name: 'Apple Stringsdict', logo: <AppleLogo /> },
   { name: 'Apple Strings Catalog', logo: <AppleLogo /> },
@@ -60,6 +67,7 @@ const FORMATS = [
   { name: 'Compose Multiplatform XML', logo: <ComposeMultiplatformLogo /> },
   { name: 'Flutter ARB', logo: <FluttrerLogo /> },
   { name: 'Ruby YAML', logo: <RailsLogo /> },
+  { name: 'Structured YAML', logo: <FileYamlLogo />, logoHeight: '24px',logoWidth: '24px', },
   { name: 'i18next', logo: <I18nextLogo /> },
   { name: 'CSV', logo: <CsvLogo /> },
   { name: '.NET RESX', logo: <DotnetLogo /> },
@@ -91,6 +99,30 @@ export const ImportSupportedFormats = () => {
           />
         ))}
       </StyledContainer>
+      <Box sx={{ mt: 3, textAlign: 'center' }}>
+        <Button
+          component="a"
+          href="https://docs.tolgee.io/platform/supported_formats"
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="outlined"
+          size="small"
+          sx={{
+            textTransform: 'none',
+            fontSize: '0.875rem',
+            color: (theme) => theme.palette.tokens.text.secondary,
+            borderColor: (theme) => theme.palette.tokens.border.secondary,
+            '&:hover': {
+              backgroundColor: (theme) =>
+                theme.palette.tokens.background['paper-2'],
+              borderColor: (theme) => theme.palette.tokens.text.secondary,
+            },
+          }}
+        >
+          <T keyName="See all supported formats" />
+          {' →'}
+        </Button>
+      </Box>
     </>
   );
 };
