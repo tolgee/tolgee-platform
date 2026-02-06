@@ -5,6 +5,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.request.ImportFileMapping
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.formats.importCommon.ImportFormat
+import io.tolgee.formats.po.PO_FILE_MSG_CTXT_CUSTOM_KEY
+import io.tolgee.formats.po.PO_MSGCTXT_SEPARATOR
 import io.tolgee.formats.po.`in`.PoFileProcessor
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
@@ -189,6 +191,89 @@ class PoFileProcessorTest {
     processFile()
     // it's not converted to ICU
     mockUtil.fileProcessorContext.assertTranslations("de", "%d page read.")
+  }
+
+  @Test
+  fun `processes msgctxt correctly`() {
+    mockImportFile("example_msgctxt.po")
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
+    assertThat(mockUtil.fileProcessorContext.languages).hasSize(1)
+    // 4 simple entries + 1 plural entry = 5 translations
+    assertThat(mockUtil.fileProcessorContext.translations).hasSize(5)
+
+    // entries with msgctxt get prefixed key names
+    val menuOpenKey = "menu${PO_MSGCTXT_SEPARATOR}Open"
+    val menuCloseKey = "menu${PO_MSGCTXT_SEPARATOR}Close"
+    val dialogOpenKey = "dialog${PO_MSGCTXT_SEPARATOR}Open"
+    val statsPluralKey = "stats${PO_MSGCTXT_SEPARATOR}%d file"
+
+    assertThat(mockUtil.fileProcessorContext.translations).containsKey(menuOpenKey)
+    assertThat(mockUtil.fileProcessorContext.translations).containsKey(menuCloseKey)
+    assertThat(mockUtil.fileProcessorContext.translations).containsKey("Hello")
+    assertThat(mockUtil.fileProcessorContext.translations).containsKey(dialogOpenKey)
+    assertThat(mockUtil.fileProcessorContext.translations).containsKey(statsPluralKey)
+
+    // same msgid "Open" with different msgctxt creates distinct keys
+    assertThat(menuOpenKey).isNotEqualTo(dialogOpenKey)
+
+    // verify translations
+    assertThat(
+      mockUtil.fileProcessorContext.translations[menuOpenKey]
+        ?.get(0)
+        ?.text,
+    ).isEqualTo("Öffnen")
+    assertThat(
+      mockUtil.fileProcessorContext.translations[dialogOpenKey]
+        ?.get(0)
+        ?.text,
+    ).isEqualTo("Datei öffnen")
+
+    // entry without msgctxt has plain key name
+    assertThat(
+      mockUtil.fileProcessorContext.translations["Hello"]
+        ?.get(0)
+        ?.text,
+    ).isEqualTo("Hallo")
+
+    // verify custom values store msgctxt
+    assertThat(
+      mockUtil.fileProcessorContext.keys[menuOpenKey]
+        ?.keyMeta
+        ?.custom
+        ?.get(PO_FILE_MSG_CTXT_CUSTOM_KEY),
+    ).isEqualTo("menu")
+    assertThat(
+      mockUtil.fileProcessorContext.keys[dialogOpenKey]
+        ?.keyMeta
+        ?.custom
+        ?.get(PO_FILE_MSG_CTXT_CUSTOM_KEY),
+    ).isEqualTo("dialog")
+
+    // entry without msgctxt should not have custom value
+    assertThat(
+      mockUtil.fileProcessorContext.keys["Hello"]
+        ?.keyMeta
+        ?.custom
+        ?.get(PO_FILE_MSG_CTXT_CUSTOM_KEY),
+    ).isNull()
+
+    // plural entry with msgctxt
+    assertThat(
+      mockUtil.fileProcessorContext.keys[statsPluralKey]
+        ?.keyMeta
+        ?.custom
+        ?.get(PO_FILE_MSG_CTXT_CUSTOM_KEY),
+    ).isEqualTo("stats")
+  }
+
+  @Test
+  fun `processes msgctxt metadata correctly`() {
+    mockImportFile("example_msgctxt.po")
+    PoFileProcessor(mockUtil.fileProcessorContext).process()
+
+    // verify description from extracted comments on entry without msgctxt
+    val helloKeyMeta = mockUtil.fileProcessorContext.keys["Hello"]?.keyMeta
+    assertThat(helloKeyMeta?.description).isEqualTo("This is a greeting")
   }
 
   private fun mockPlaceholderConversionTestFile(
