@@ -1,5 +1,6 @@
 package io.tolgee.ee.component.llm
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
@@ -36,6 +37,7 @@ class OllamaApiService :
         model = config.model!!,
         messages = messages,
         format = if (params.shouldOutputJson && config.format == "json") "json" else null,
+        temperature = config.temperature,
       )
 
     val request = HttpEntity(requestBody, headers)
@@ -89,6 +91,8 @@ class OllamaApiService :
       val messages: List<RequestMessage>,
       val stream: Boolean = false,
       val format: String? = "json",
+      @JsonInclude(JsonInclude.Include.NON_NULL)
+      val temperature: Double? = null,
     )
 
     class RequestMessage(

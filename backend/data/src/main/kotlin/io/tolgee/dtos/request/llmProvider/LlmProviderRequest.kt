@@ -24,6 +24,7 @@ data class LlmProviderRequest(
   var format: String? = null,
   @field:Size(max = 255)
   var reasoningEffort: String? = null,
+  var temperature: Double? = null,
 ) {
   @JsonSetter("type")
   fun setType(type: String) {

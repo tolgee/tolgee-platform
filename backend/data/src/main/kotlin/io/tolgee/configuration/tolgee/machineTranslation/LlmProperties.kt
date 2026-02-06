@@ -74,6 +74,8 @@ class LlmProperties : MachineTranslationServiceProperties {
     override var maxTokens: Long = MAX_TOKENS_DEFAULT,
     @DocProperty(description = "ChatGPT reasoning effort")
     override var reasoningEffort: String? = null,
+    @DocProperty(description = "LLM sampling temperature")
+    override var temperature: Double? = null,
     @DocProperty(description = "Set to `json_schema` if the API supports JSON Schema")
     override var format: String? = null,
     @DocProperty(
@@ -102,6 +104,7 @@ class LlmProperties : MachineTranslationServiceProperties {
         deployment = deployment,
         format = format,
         reasoningEffort = reasoningEffort,
+        temperature = temperature,
         tokenPriceInCreditsInput = tokenPriceInCreditsInput,
         tokenPriceInCreditsOutput = tokenPriceInCreditsOutput,
         attempts = attempts,

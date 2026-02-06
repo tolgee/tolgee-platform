@@ -35,6 +35,7 @@ class GoogleAiApiService :
         generationConfig =
           RequestGenerationConfig(
             responseMimeType = if (params.shouldOutputJson) "application/json" else null,
+            temperature = config.temperature,
           ),
       )
 
@@ -126,6 +127,8 @@ class GoogleAiApiService :
 
     class RequestGenerationConfig(
       val responseMimeType: String? = null,
+      @JsonInclude(JsonInclude.Include.NON_NULL)
+      val temperature: Double? = null,
     )
 
     class RequestPart(

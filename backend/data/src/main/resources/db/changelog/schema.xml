@@ -5057,4 +5057,14 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="anty (generated)" id="1770379929953-1">
+        <addColumn tableName="llm_provider">
+            <column name="temperature" type="FLOAT(53)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1770379929953-2">
+        <createIndex indexName="IDX7ofy2tesqs3c5b8j1us8ajtjd" tableName="activity_modified_entity">
+            <column name="branch_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
