@@ -1,3 +1,10 @@
+# [3.156.0](https://github.com/tolgee/tolgee-platform/compare/v3.155.0...v3.156.0) (2026-02-06)
+
+
+### Features
+
+* branching ([#3246](https://github.com/tolgee/tolgee-platform/issues/3246)) ([528a17e](https://github.com/tolgee/tolgee-platform/commit/528a17e4279bc764d8b7574f896dfc47a013f62e))
+
 # [3.155.0](https://github.com/tolgee/tolgee-platform/compare/v3.154.0...v3.155.0) (2026-02-05)
 
 
