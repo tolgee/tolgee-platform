@@ -24,6 +24,7 @@ class LlmProviderModelAssembler :
       deployment = entity.deployment,
       format = entity.format,
       reasoningEffort = entity.reasoningEffort,
+      batchApiEnabled = entity.batchApiEnabled,
     )
   }
 }

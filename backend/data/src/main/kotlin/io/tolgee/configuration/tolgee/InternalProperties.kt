@@ -40,4 +40,8 @@ class InternalProperties {
   var useInMemoryFileStorage: Boolean = false
 
   var clearLiquibaseChecksums: Boolean = false
+
+  var fakeBatchApi: Boolean = false
+
+  var fakeBatchApiCompletionDelayMs: Long = 0
 }

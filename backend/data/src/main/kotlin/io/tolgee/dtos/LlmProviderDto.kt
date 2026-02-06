@@ -20,6 +20,9 @@ data class LlmProviderDto(
   override var tokenPriceInCreditsOutput: Double?,
   override var attempts: List<Int>?,
   override var maxTokens: Long,
+  override var batchApiEnabled: Boolean? = null,
+  override var batchTokenPriceInCreditsInput: Double? = null,
+  override var batchTokenPriceInCreditsOutput: Double? = null,
 ) : LlmProviderInterface {
   @JsonSetter("type")
   fun setType(type: String) {

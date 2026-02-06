@@ -4686,4 +4686,96 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="batch-api" id="batch-api-add-batch-api-enabled">
+        <addColumn tableName="llm_provider">
+            <column name="batch_api_enabled" type="BOOLEAN"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="tolgee" id="openai-batch-api-tracker-1">
+        <createTable tableName="openai_batch_job_tracker">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"
+                             primaryKeyName="openai_batch_job_trackerPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="batch_job_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="chunk_execution_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="openai_batch_id" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"
+                             uniqueConstraintName="uk_openai_batch_tracker_batch_id"/>
+            </column>
+            <column name="openai_input_file_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="openai_output_file_id" type="VARCHAR(255)"/>
+            <column name="openai_error_file_id" type="VARCHAR(255)"/>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="openai_status" type="VARCHAR(50)"/>
+            <column name="total_requests" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="completed_requests" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="failed_requests" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="results" type="jsonb"/>
+            <column name="error_message" type="TEXT"/>
+            <column name="provider_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="tolgee" id="openai-batch-api-tracker-indexes">
+        <createIndex indexName="idx_openai_batch_tracker_batch_job"
+                     tableName="openai_batch_job_tracker">
+            <column name="batch_job_id"/>
+        </createIndex>
+        <createIndex indexName="idx_openai_batch_tracker_status"
+                     tableName="openai_batch_job_tracker">
+            <column name="status"/>
+        </createIndex>
+        <createIndex indexName="idx_openai_batch_tracker_openai_batch_id"
+                     tableName="openai_batch_job_tracker">
+            <column name="openai_batch_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="tolgee" id="openai-batch-api-tracker-fks">
+        <addForeignKeyConstraint
+            baseTableName="openai_batch_job_tracker"
+            baseColumnNames="batch_job_id"
+            referencedTableName="tolgee_batch_job"
+            referencedColumnNames="id"
+            constraintName="fk_openai_batch_tracker_batch_job"/>
+        <addForeignKeyConstraint
+            baseTableName="openai_batch_job_tracker"
+            baseColumnNames="chunk_execution_id"
+            referencedTableName="tolgee_batch_job_chunk_execution"
+            referencedColumnNames="id"
+            constraintName="fk_openai_batch_tracker_chunk_execution"/>
+    </changeSet>
+    <changeSet author="tolgee" id="notification-linked-batch-job">
+        <addColumn tableName="notification">
+            <column name="linked_batch_job_id" type="BIGINT"/>
+        </addColumn>
+        <addForeignKeyConstraint
+            baseTableName="notification"
+            baseColumnNames="linked_batch_job_id"
+            referencedTableName="tolgee_batch_job"
+            referencedColumnNames="id"
+            constraintName="fk_notification_linked_batch_job"/>
+    </changeSet>
 </databaseChangeLog>

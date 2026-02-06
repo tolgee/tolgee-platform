@@ -236,6 +236,14 @@ class ProgressManager(
       executionState,
     )
 
+    // Skip committed count for non-terminal statuses (e.g. WAITING_FOR_EXTERNAL)
+    if (!execution.status.completed) {
+      logger.debug {
+        "Skipping committed count for execution ${execution.id} (status: ${execution.status})"
+      }
+      return
+    }
+
     // Only count executions that are NOT going to be retried.
     // Executions with retry=true are intermediate failures, not the final state of that chunk.
     if (execution.retry) {

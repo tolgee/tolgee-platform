@@ -5,6 +5,7 @@ enum class BatchJobChunkExecutionStatus(
 ) {
   PENDING(false),
   RUNNING(false),
+  WAITING_FOR_EXTERNAL(false),
   SUCCESS(true),
   FAILED(true),
   CANCELLED(true),

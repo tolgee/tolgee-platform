@@ -55,6 +55,7 @@ tolgee:
     fake-mt-providers: true
     verify-sso-account-available-bypass: true
     fake-llm-providers: true
+    fake-batch-api: true
   smtp:
     host: localhost
     port: 21025

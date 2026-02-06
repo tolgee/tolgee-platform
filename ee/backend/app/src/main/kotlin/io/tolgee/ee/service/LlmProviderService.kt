@@ -91,6 +91,7 @@ class LlmProviderService(
         keepAlive = dto.keepAlive,
         format = dto.format,
         reasoningEffort = dto.reasoningEffort,
+        batchApiEnabled = dto.batchApiEnabled,
         organization = organizationService.get(organizationId),
       )
     llmProviderRepository.save(provider)
@@ -114,6 +115,7 @@ class LlmProviderService(
     provider.keepAlive = dto.keepAlive
     provider.format = dto.format
     provider.reasoningEffort = dto.reasoningEffort
+    provider.batchApiEnabled = dto.batchApiEnabled
     provider.organization = organizationService.get(organizationId)
     llmProviderRepository.save(provider)
     return provider.toDto()
@@ -262,9 +264,23 @@ class LlmProviderService(
   fun calculatePrice(
     providerConfig: LlmProviderDto,
     usage: PromptResult.Usage?,
+    isBatchApi: Boolean = false,
   ): Int {
-    val tokenPriceInCreditsInput: Double = (providerConfig.tokenPriceInCreditsInput ?: 0.0)
-    val tokenPriceInCreditsOutput: Double = (providerConfig.tokenPriceInCreditsOutput ?: 0.0)
+    val tokenPriceInCreditsInput: Double
+    val tokenPriceInCreditsOutput: Double
+
+    if (isBatchApi) {
+      tokenPriceInCreditsInput = providerConfig.batchTokenPriceInCreditsInput
+        ?: providerConfig.tokenPriceInCreditsInput
+        ?: 0.0
+      tokenPriceInCreditsOutput = providerConfig.batchTokenPriceInCreditsOutput
+        ?: providerConfig.tokenPriceInCreditsOutput
+        ?: 0.0
+    } else {
+      tokenPriceInCreditsInput = providerConfig.tokenPriceInCreditsInput ?: 0.0
+      tokenPriceInCreditsOutput = providerConfig.tokenPriceInCreditsOutput ?: 0.0
+    }
+
     val inputTokens: Long = usage?.inputTokens ?: 0L
     val outputTokens: Long = usage?.outputTokens ?: 0L
     val cachedTokens: Long = usage?.cachedTokens ?: 0L
@@ -275,6 +291,39 @@ class LlmProviderService(
     val price = inputPrice + outputPrice
 
     return (price * 100).roundToInt()
+  }
+
+  fun findBatchEnabledProvider(organizationId: Long): LlmProviderDto? {
+    val batchSupportedTypes = setOf(LlmProviderType.OPENAI, LlmProviderType.OPENAI_AZURE)
+    return getMergedProviders(organizationId).find {
+      it.batchApiEnabled == true && it.type in batchSupportedTypes
+    }
+  }
+
+  fun getProviderById(
+    organizationId: Long,
+    providerId: Long,
+  ): LlmProviderDto? {
+    return getMergedProviders(organizationId).find { it.id == providerId }
+  }
+
+  private fun getMergedProviders(organizationId: Long): List<LlmProviderDto> {
+    val customProviders = getAll(organizationId)
+    val serverProviders = getAllServerProviders()
+
+    val existing = mutableSetOf<String>()
+    val result = mutableListOf<LlmProviderDto>()
+    customProviders.forEach {
+      if (existing.add(it.name)) {
+        result.add(it)
+      }
+    }
+    serverProviders.forEach {
+      if (existing.add(it.name)) {
+        result.add(it)
+      }
+    }
+    return result
   }
 
   fun suspendProvider(

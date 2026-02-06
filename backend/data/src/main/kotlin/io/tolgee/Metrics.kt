@@ -1,11 +1,13 @@
 package io.tolgee
 
 import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicLong
 
 @Component
 class Metrics(
@@ -72,6 +74,69 @@ class Metrics(
     Timer
       .builder("tolgee.big_meta.new_distances.compute.timer")
       .description("Time spent computing new distances for big meta data")
+      .register(meterRegistry)
+  }
+
+  // Batch API metrics
+
+  val batchApiJobsSubmittedCounter: Counter by lazy {
+    Counter
+      .builder("tolgee.batch_api.jobs.submitted")
+      .description("Total number of batch API jobs submitted to OpenAI")
+      .register(meterRegistry)
+  }
+
+  fun batchApiJobsCompletedCounter(status: String): Counter =
+    Counter
+      .builder("tolgee.batch_api.jobs.completed")
+      .tag("status", status)
+      .description("Total number of batch API jobs completed, by status")
+      .register(meterRegistry)
+
+  fun batchApiTranslationsProcessedCounter(status: String): Counter =
+    Counter
+      .builder("tolgee.batch_api.translations.processed")
+      .tag("status", status)
+      .description("Total number of translations processed via batch API, by status")
+      .register(meterRegistry)
+
+  fun batchApiFallbackTriggeredCounter(reason: String): Counter =
+    Counter
+      .builder("tolgee.batch_api.fallback.triggered")
+      .tag("reason", reason)
+      .description("Total number of batch API fallbacks triggered, by reason")
+      .register(meterRegistry)
+
+  val batchApiJobDurationSeconds: Timer by lazy {
+    Timer
+      .builder("tolgee.batch_api.job.duration")
+      .description("Duration of batch API jobs from submission to completion")
+      .register(meterRegistry)
+  }
+
+  private val batchApiActiveJobsCount = AtomicLong(0)
+
+  val batchApiActiveJobsGauge: Gauge by lazy {
+    Gauge
+      .builder("tolgee.batch_api.active_jobs", batchApiActiveJobsCount) { it.toDouble() }
+      .description("Number of currently active batch API jobs")
+      .register(meterRegistry)
+  }
+
+  fun incrementBatchApiActiveJobs() {
+    batchApiActiveJobsGauge // ensure registered
+    batchApiActiveJobsCount.incrementAndGet()
+  }
+
+  fun decrementBatchApiActiveJobs() {
+    batchApiActiveJobsGauge // ensure registered
+    batchApiActiveJobsCount.decrementAndGet()
+  }
+
+  val batchApiPollDurationSeconds: Timer by lazy {
+    Timer
+      .builder("tolgee.batch_api.poll.duration")
+      .description("Duration of individual batch API poll cycles")
       .register(meterRegistry)
   }
 }

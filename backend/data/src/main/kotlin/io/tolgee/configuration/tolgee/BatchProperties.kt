@@ -54,4 +54,25 @@ class BatchProperties {
     defaultExplanation = "30 seconds",
   )
   var cancellationTimeoutMs: Long = 30000
+
+  @DocProperty(description = "Poll interval in seconds for checking OpenAI Batch API status")
+  var batchApiPollIntervalSeconds: Int = 60
+
+  @DocProperty(description = "Maximum hours to wait for an OpenAI batch to complete before timing out")
+  var batchApiMaxWaitHours: Int = 24
+
+  @DocProperty(description = "Number of translation items per OpenAI batch file chunk")
+  var batchApiChunkSize: Int = 5000
+
+  @DocProperty(description = "Maximum number of items allowed in a single batch API job")
+  var batchApiMaxItemsPerJob: Int = 50000
+
+  @DocProperty(description = "Maximum concurrent OpenAI batch API jobs per organization")
+  var batchApiMaxConcurrentPerOrg: Int = 5
+
+  @DocProperty(description = "Maximum concurrent OpenAI batch API jobs globally")
+  var batchApiMaxConcurrentGlobal: Int = 100
+
+  @DocProperty(description = "Maximum number of OpenAI batch statuses to poll in a single poll cycle")
+  var batchApiMaxPollBatchSize: Int = 50
 }

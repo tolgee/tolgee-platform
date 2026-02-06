@@ -12,4 +12,6 @@ class MachineTranslationRequest {
   var targetLanguageIds: List<Long> = listOf()
 
   var llmPrompt: PromptDto? = null
+
+  var useBatchApi: Boolean = false
 }

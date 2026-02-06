@@ -67,6 +67,11 @@ open class ChunkProcessingUtil(
       return
     }
 
+    if (exception is WaitingForExternalException) {
+      execution.status = BatchJobChunkExecutionStatus.WAITING_FOR_EXTERNAL
+      return
+    }
+
     execution.status = BatchJobChunkExecutionStatus.FAILED
     execution.errorMessage = (exception as? ExceptionWithMessage)?.tolgeeMessage
     if (exception !is MultipleItemsFailedException) {

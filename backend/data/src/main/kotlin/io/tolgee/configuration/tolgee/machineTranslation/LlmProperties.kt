@@ -89,6 +89,12 @@ class LlmProperties : MachineTranslationServiceProperties {
     override var tokenPriceInCreditsInput: Double? = null,
     @DocProperty(hidden = true)
     override var tokenPriceInCreditsOutput: Double? = null,
+    @DocProperty(description = "Whether to enable OpenAI Batch API for this provider")
+    override var batchApiEnabled: Boolean? = null,
+    @DocProperty(hidden = true)
+    override var batchTokenPriceInCreditsInput: Double? = null,
+    @DocProperty(hidden = true)
+    override var batchTokenPriceInCreditsOutput: Double? = null,
   ) : LlmProviderInterface {
     fun toDto(id: Long): LlmProviderDto {
       return LlmProviderDto(
@@ -106,6 +112,9 @@ class LlmProperties : MachineTranslationServiceProperties {
         tokenPriceInCreditsOutput = tokenPriceInCreditsOutput,
         attempts = attempts,
         maxTokens = maxTokens,
+        batchApiEnabled = batchApiEnabled,
+        batchTokenPriceInCreditsInput = batchTokenPriceInCreditsInput,
+        batchTokenPriceInCreditsOutput = batchTokenPriceInCreditsOutput,
       )
     }
 

@@ -42,6 +42,7 @@ class LlmProvider(
   var keepAlive: String? = null,
   var format: String? = null,
   var reasoningEffort: String? = null,
+  var batchApiEnabled: Boolean? = null,
   @ManyToOne
   var organization: Organization,
 ) : AuditModel() {
@@ -61,6 +62,9 @@ class LlmProvider(
       tokenPriceInCreditsInput = null,
       tokenPriceInCreditsOutput = null,
       maxTokens = MAX_TOKENS_DEFAULT,
+      batchApiEnabled = batchApiEnabled,
+      batchTokenPriceInCreditsInput = null,
+      batchTokenPriceInCreditsOutput = null,
     )
   }
 }

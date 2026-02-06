@@ -46,4 +46,13 @@ interface LlmProviderInterface {
 
   @DocProperty(description = "List of attempts (values are timeouts in seconds)")
   var attempts: List<Int>?
+
+  @DocProperty(description = "Whether to enable OpenAI Batch API for this provider")
+  var batchApiEnabled: Boolean?
+
+  @DocProperty(hidden = true)
+  var batchTokenPriceInCreditsInput: Double?
+
+  @DocProperty(hidden = true)
+  var batchTokenPriceInCreditsOutput: Double?
 }
