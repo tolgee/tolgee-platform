@@ -6,15 +6,31 @@
 
 ---
 
-## 1.1 Build and Start the Stack
+## Choose Your Setup
 
-The tracing stack includes Tolgee with OpenTelemetry already configured. First, build the Docker image:
+There are two ways to run Tolgee with the observability stack:
+
+|                   | Option A: Full Docker Stack                      | Option B: Local Tolgee + Docker Observability            |
+|-------------------|--------------------------------------------------|----------------------------------------------------------|
+| **Best for**      | Quick setup, testing production-like environment | Active development, debugging with IDE, faster iteration |
+| **Tolgee runs**   | In Docker                                        | Locally via Gradle                                       |
+| **Observability** | In Docker                                        | In Docker                                                |
+
+Pick the option that fits your workflow and follow the corresponding section below.
+
+---
+
+## 1.1 Option A: Full Docker Stack
+
+This runs everything in Docker, including Tolgee with OpenTelemetry already configured.
+
+**Build the Docker image:**
 
 ```bash
 ./gradlew docker
 ```
 
-Then start everything from the `docker` directory:
+**Start the stack** from the `docker` directory:
 
 ```bash
 cd docker && docker compose -f docker-compose.local-observability-stack.yaml up -d
@@ -30,7 +46,7 @@ This starts:
 - **OpenTelemetry Collector** - receives traces and forwards them
 - **PostgreSQL** and **Redis** - Tolgee dependencies
 
-Verify all services are healthy:
+**Verify all services are healthy:**
 
 ```bash
 docker compose -f docker-compose.local-observability-stack.yaml ps
@@ -38,7 +54,44 @@ docker compose -f docker-compose.local-observability-stack.yaml ps
 
 All services should show `Up` or `healthy`.
 
-## 1.2 Access Grafana
+---
+
+## 1.2 Option B: Local Tolgee with Docker Observability
+
+This runs Tolgee locally via Gradle while observability services and dependencies run in Docker. Useful for development when you want to debug Tolgee in your IDE.
+
+**Start the observability stack** from the `docker` directory:
+
+```bash
+cd docker && docker compose -f docker-compose.local-observability-stack-dev.yaml up -d
+```
+
+This starts:
+- **Grafana** (port 3000) - UI for viewing traces and logs
+- **Tempo** - stores and queries traces
+- **Loki** - stores and queries logs
+- **Promtail** - ships logs from containers to Loki
+- **Prometheus** - stores metrics generated from traces
+- **OpenTelemetry Collector** - receives traces and forwards them
+- **PostgreSQL** and **Redis** - Tolgee dependencies
+
+**Run Tolgee locally with tracing enabled:**
+
+```bash
+./gradlew server-app:bootRunWithObservability --args='--spring.profiles.active=dev'
+```
+
+**Verify all services are healthy:**
+
+```bash
+docker compose -f docker-compose.local-observability-stack-dev.yaml ps
+```
+
+All services should show `Up` or `healthy`.
+
+---
+
+## 1.3 Access Grafana
 
 Open http://localhost:3000 in your browser.
 
@@ -60,9 +113,9 @@ No login required - anonymous access is enabled for local development.
 
 If you see "Datasource not found", the infrastructure may still be starting. Wait 30 seconds and refresh.
 
-## 1.3 Verify Traces Are Generated
+## 1.4 Verify Traces Are Generated
 
-Tolgee is already running with tracing enabled as part of the Docker Compose stack we started earlier. Let's verify traces are being collected.
+Tolgee should now be running with tracing enabled (either in Docker or locally, depending on your chosen option). Let's verify traces are being collected.
 
 1. Make a request to Tolgee, e.g.:
    ```bash
@@ -78,10 +131,11 @@ Tolgee is already running with tracing enabled as part of the Docker Compose sta
 
 ![Trace results showing Tolgee requests](images/1-4-grafana-trace-results.png)
 
-If no traces appear:
-- Check that the Tolgee container is healthy: `docker compose -f docker-compose.local-observability-stack.yaml ps`
-- Check Tolgee logs for OpenTelemetry messages: `docker compose -f docker-compose.local-observability-stack.yaml logs app`
-- Verify the OTel Collector is running: `docker compose -f docker-compose.local-observability-stack.yaml logs otel-collector`
+If no traces appear, check the following (use the compose file matching your chosen option):
+
+- Check that services are healthy: `docker compose -f <your-compose-file>.yaml ps`
+- Check Tolgee logs for OpenTelemetry messages (Option A only): `docker compose -f docker-compose.local-observability-stack.yaml logs app`
+- Verify the OTel Collector is running: `docker compose -f <your-compose-file>.yaml logs otel-collector`
 - Wait 10-15 seconds for traces to be ingested
 
 ---

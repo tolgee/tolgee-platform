@@ -31,10 +31,10 @@ Three capabilities for debugging and monitoring:
 
 ### Two Ways to Run with Tracing
 
-| Method | Use Case | How |
-|--------|----------|-----|
-| `./gradlew bootRun` | Local development, quick iteration | `OTEL_JAVAAGENT_ENABLED=true ./gradlew bootRun` |
-| Docker | Testing the full stack, CI, production-like | Set `OTEL_JAVAAGENT_ENABLED=true` in docker-compose environment (already done in `docker-compose.local-observability-stack.yaml`) |
+| Method                         | Use Case                                    | How                                                                                                                                                                |
+|--------------------------------|---------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `./gradlew server-app:bootRun` | Local development, quick iteration          | `docker compose -f docker-compose.local-observability-stack-dev.yaml up -d && ./gradlew server-app:bootRunWithObservability --args='--spring.profiles.active=dev'` |
+| Docker (full stack)            | Testing the full stack, CI, production-like | `docker compose -f docker-compose.local-observability-stack.yaml up -d`                                                                                            |
 
 Both methods use the same agent version from `gradle.properties`.
 
