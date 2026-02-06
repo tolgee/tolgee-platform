@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
+import io.tolgee.dtos.BatchTranslateInfoDto
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.LlmProviderDto
 import io.tolgee.dtos.PromptResult
@@ -293,6 +294,22 @@ class LlmProviderService(
     return (price * 100).roundToInt()
   }
 
+  fun calculateBatchDiscountPercent(providerConfig: LlmProviderDto): Double? {
+    val syncInput = providerConfig.tokenPriceInCreditsInput ?: return null
+    val syncOutput = providerConfig.tokenPriceInCreditsOutput ?: return null
+    val batchInput = providerConfig.batchTokenPriceInCreditsInput ?: return null
+    val batchOutput = providerConfig.batchTokenPriceInCreditsOutput ?: return null
+
+    // Weighted average discount using typical 1:3 input:output ratio
+    val syncWeighted = syncInput + (syncOutput * 3)
+    val batchWeighted = batchInput + (batchOutput * 3)
+
+    if (syncWeighted <= 0.0) return null
+
+    return ((syncWeighted - batchWeighted) / syncWeighted * 100)
+      .coerceIn(0.0, 100.0)
+  }
+
   fun findBatchEnabledProvider(organizationId: Long): LlmProviderDto? {
     val batchSupportedTypes = setOf(LlmProviderType.OPENAI, LlmProviderType.OPENAI_AZURE)
     return getMergedProviders(organizationId).find {
@@ -305,6 +322,26 @@ class LlmProviderService(
     providerId: Long,
   ): LlmProviderDto? {
     return getMergedProviders(organizationId).find { it.id == providerId }
+  }
+
+  fun getBatchInfo(organizationId: Long): BatchTranslateInfoDto {
+    val batchProvider = findBatchEnabledProvider(organizationId)
+
+    if (batchProvider == null) {
+      return BatchTranslateInfoDto(
+        available = false,
+        discountPercent = null,
+        userChoiceAllowed = false,
+        providerType = null,
+      )
+    }
+
+    return BatchTranslateInfoDto(
+      available = true,
+      discountPercent = calculateBatchDiscountPercent(batchProvider),
+      userChoiceAllowed = true,
+      providerType = batchProvider.type,
+    )
   }
 
   private fun getMergedProviders(organizationId: Long): List<LlmProviderDto> {

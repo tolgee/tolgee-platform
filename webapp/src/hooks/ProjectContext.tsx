@@ -18,6 +18,7 @@ type BatchJobUpdateModel = {
   progress: number;
   status: BatchJobStatus;
   id: number;
+  batchApiPhase?: BatchJobModel['batchApiPhase'];
 };
 
 type Props = {
@@ -93,6 +94,8 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
               totalItems: data.total,
               status: data.status,
               errorMessage: data.errorMessage,
+              batchApiPhase:
+                data.batchApiPhase as BatchJobModel['batchApiPhase'],
             },
           ]);
         }
@@ -110,6 +113,9 @@ export const [ProjectContext, useProjectActions, useProjectContext] =
                 progress: data.processed ?? job.progress,
                 status: data.status ?? job.status,
                 errorMessage: data.errorMessage ?? job.errorMessage,
+                batchApiPhase:
+                  (data.batchApiPhase as BatchJobModel['batchApiPhase']) ??
+                  job.batchApiPhase,
               };
             }
             return job;

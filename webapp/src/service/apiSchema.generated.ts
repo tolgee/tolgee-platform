@@ -786,6 +786,10 @@ export interface paths {
   "/v2/projects/{projectId}/start-batch-job/delete-keys": {
     post: operations["deleteKeys"];
   };
+  "/v2/projects/{projectId}/batch-translate-info": {
+    /** Get batch translate availability info for the project. */
+    get: operations["getBatchTranslateInfo"];
+  };
   "/v2/projects/{projectId}/start-batch-job/machine-translate": {
     /** Translate provided keys to provided languages through primary MT provider. */
     post: operations["machineTranslation"];
@@ -1366,6 +1370,16 @@ export interface components {
     AzureContentStorageConfigModel: {
       containerName?: string;
     };
+    BatchTranslateInfoResponse: {
+      /** @description Whether batch API is available for this project's provider */
+      available: boolean;
+      /** @description Approximate discount percentage compared to sync pricing, or null if not computable */
+      discountPercent?: number;
+      /** @description Whether the user is allowed to choose batch mode */
+      userChoiceAllowed: boolean;
+      /** @description Provider type used for translation */
+      providerType?: string;
+    };
     BatchJobModel: {
       /**
        * Format: int64
@@ -1374,6 +1388,8 @@ export interface components {
       activityRevisionId?: number;
       /** @description The user who started the job */
       author?: components["schemas"]["SimpleUserAccountModel"];
+      /** @description Phase of batch API processing, only set for batch API jobs */
+      batchApiPhase?: "SUBMITTING" | "WAITING_FOR_OPENAI" | "APPLYING_RESULTS";
       /**
        * Format: int64
        * @description The time when the job created
@@ -3632,6 +3648,7 @@ export interface components {
     LlmProviderModel: {
       apiKey?: string;
       apiUrl?: string;
+      batchApiEnabled?: boolean;
       deployment?: string;
       format?: string;
       /** Format: int64 */
@@ -3647,6 +3664,7 @@ export interface components {
     LlmProviderRequest: {
       apiKey?: string;
       apiUrl: string;
+      batchApiEnabled?: boolean;
       deployment?: string;
       format?: string;
       keepAlive?: string;
@@ -3718,6 +3736,7 @@ export interface components {
       keyIds: number[];
       llmPrompt?: components["schemas"]["PromptDto"];
       targetLanguageIds: number[];
+      useBatchApi?: boolean;
     };
     ModifiedEntityModel: {
       description?: { [key: string]: unknown };
@@ -3767,6 +3786,7 @@ export interface components {
       createdAt?: string;
       /** Format: int64 */
       id: number;
+      linkedBatchJob?: components["schemas"]["BatchJobModel"];
       linkedTask?: components["schemas"]["TaskModel"];
       originatingUser?: components["schemas"]["SimpleUserAccountModel"];
       project?: components["schemas"]["SimpleProjectModel"];
@@ -3777,7 +3797,8 @@ export interface components {
         | "TASK_CANCELED"
         | "MFA_ENABLED"
         | "MFA_DISABLED"
-        | "PASSWORD_CHANGED";
+        | "PASSWORD_CHANGED"
+        | "BATCH_JOB_FINISHED";
     };
     NotificationSettingGroupModel: {
       email: boolean;
@@ -3785,6 +3806,7 @@ export interface components {
     };
     NotificationSettingModel: {
       accountSecurity: components["schemas"]["NotificationSettingGroupModel"];
+      batchJobs: components["schemas"]["NotificationSettingGroupModel"];
       tasks: components["schemas"]["NotificationSettingGroupModel"];
     };
     NotificationSettingsRequest: {
@@ -3802,7 +3824,7 @@ export interface components {
        * @example TASKS
        * @enum {string}
        */
-      group: "ACCOUNT_SECURITY" | "TASKS";
+      group: "ACCOUNT_SECURITY" | "TASKS" | "BATCH_JOBS";
     };
     NotificationsMarkSeenRequest: {
       /**
@@ -16829,6 +16851,25 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["DeleteKeysRequest"];
+      };
+    };
+  };
+  /** Get batch translate availability info for the project. */
+  getBatchTranslateInfo: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+      query?: {
+        targetLanguageIds?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchTranslateInfoResponse"];
+        };
       };
     };
   };

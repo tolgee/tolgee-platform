@@ -5,6 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Typography,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useEffect } from 'react';
@@ -66,6 +67,7 @@ export const BatchOperationDialog = ({
     'MACHINE_TRANSLATE',
     'AUTO_TRANSLATE',
   ].includes(data.type);
+  const isBatchApiJob = data.batchApiPhase != null;
   const isFinalizing =
     data.status === 'RUNNING' && data.progress === data.totalItems;
 
@@ -126,6 +128,21 @@ export const BatchOperationDialog = ({
             )
           )}
         </Box>
+        {isBatchApiJob && data.status === 'RUNNING' && (
+          <Box mt={1}>
+            <Typography variant="body2" color="textSecondary">
+              {t(
+                `batch_api_phase_${data.batchApiPhase?.toLowerCase()}`
+              )}
+            </Typography>
+            {(data.batchApiPhase === 'WAITING_FOR_OPENAI' ||
+              data.batchApiPhase === 'SUBMITTING') && (
+              <Typography variant="caption" color="textSecondary">
+                {t('batch_api_processing_hint')}
+              </Typography>
+            )}
+          </Box>
+        )}
         {data.errorMessage && (
           <Box
             display="flex"

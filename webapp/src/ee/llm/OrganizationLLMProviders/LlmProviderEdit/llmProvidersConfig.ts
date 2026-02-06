@@ -99,6 +99,11 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
   };
 };
 
+const BATCH_SUPPORTED_TYPES: LlmProviderType[] = ['OPENAI', 'OPENAI_AZURE'];
+
+export const supportsBatchApi = (type: LlmProviderType) =>
+  BATCH_SUPPORTED_TYPES.includes(type);
+
 export const getValidationSchema = (
   type: LlmProviderType,
   t: TranslateFunction
@@ -112,10 +117,14 @@ export const getValidationSchema = (
     }
     fields[name] = field;
   });
-  return Yup.object({
+  const schema: Record<string, Yup.AnySchema> = {
     type: Yup.string(),
     ...fields,
-  });
+  };
+  if (supportsBatchApi(type)) {
+    schema.batchApiEnabled = Yup.boolean();
+  }
+  return Yup.object(schema);
 };
 
 export const getInitialValues = (
@@ -143,6 +152,9 @@ export const getInitialValues = (
         ? options.defaultValue
         : options.defaultValue ?? '';
     });
+  }
+  if (supportsBatchApi(type)) {
+    result['batchApiEnabled'] = result['batchApiEnabled'] ?? false;
   }
   return result;
 };

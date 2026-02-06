@@ -12,6 +12,7 @@ import { Select as MuiSelect } from 'tg.component/common/Select';
 import { Box, MenuItem, styled, useTheme } from '@mui/material';
 import { useLlmProviderTranslation } from 'tg.translationTools/useLlmProviderTranslation';
 import { LabelHint } from 'tg.component/common/LabelHint';
+import { BatchApiSettings } from './BatchApiSettings';
 
 const StyledEmpty = styled(Box)`
   font-style: italic;
@@ -131,6 +132,8 @@ export const LlmProviderForm = ({ type, onTypeChange }: Props) => {
           </MenuItem>
         </Select>
       </Box>
+
+      <BatchApiSettings providerType={type} />
     </>
   );
 };

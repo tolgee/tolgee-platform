@@ -174,6 +174,7 @@ export type BatchJobProgress = WebsocketEvent<{
   status: BatchJobModelStatus;
   total: number;
   errorMessage: string | undefined;
+  batchApiPhase?: string;
 }>;
 
 export type NotificationsChanged = WebsocketEvent<{
