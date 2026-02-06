@@ -298,7 +298,10 @@ bootRun {
     }
 }
 
-// Copy OTEL agent to a predictable location for IntelliJ usage
+// Copy OTEL agent JAR to a predictable location for manual IntelliJ run configuration.
+// Not used by bootRun or bootRunWithObservability (they resolve the agent from Gradle's dependency cache).
+// Usage: ./gradlew server-app:copyOtelAgent → build/otel/opentelemetry-javaagent.jar
+// Then add -javaagent:backend/app/build/otel/opentelemetry-javaagent.jar to your IntelliJ VM options.
 // See: docs/observability/
 tasks.register('copyOtelAgent', Copy) {
     from configurations.otelAgent
@@ -316,6 +319,12 @@ tasks.register('bootRunWithObservability') {
         bootRun.configure {
             // Spring profile
             args '--spring.profiles.active=dev'
+
+            // Attach the OTEL javaagent directly. We cannot rely on bootRun's
+            // System.getenv("OTEL_JAVAAGENT_ENABLED") check because that runs at Gradle
+            // configuration time (before any task executes), while this doFirst block
+            // runs at execution time.
+            jvmArgs "-javaagent:${configurations.otelAgent.singleFile.absolutePath}"
 
             // OTEL configuration
             environment 'OTEL_JAVAAGENT_ENABLED', 'true'
