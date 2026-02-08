@@ -1,3 +1,10 @@
+## [3.156.1](https://github.com/tolgee/tolgee-platform/compare/v3.156.0...v3.156.1) (2026-02-08)
+
+
+### Bug Fixes
+
+* stop escaping percent signs in Compose Multiplatform XML export ([#3457](https://github.com/tolgee/tolgee-platform/issues/3457)) ([86d4a1a](https://github.com/tolgee/tolgee-platform/commit/86d4a1a5159abf94d239198a890c6e1bf732bea5)), closes [#3368](https://github.com/tolgee/tolgee-platform/issues/3368)
+
 # [3.156.0](https://github.com/tolgee/tolgee-platform/compare/v3.155.0...v3.156.0) (2026-02-06)
 
 
