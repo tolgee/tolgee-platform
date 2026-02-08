@@ -9,6 +9,7 @@ import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.component.fileStorage.S3FileStorageFactory
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.exceptions.FileStoreException
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.ContextRecreatingTest
