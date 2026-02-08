@@ -90,4 +90,47 @@ class GlobalUserRateLimitFilterTest {
 
     assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
   }
+
+  @Test
+  fun `it skips rate limiting for actuator endpoints`() {
+    val req = MockHttpServletRequest()
+    val res = MockHttpServletResponse()
+    val chain = MockFilterChain()
+    req.requestURI = "/actuator/health"
+
+    Mockito
+      .`when`(rateLimitService.consumeGlobalUserRateLimitPolicy(any(), any()))
+      .thenThrow(RateLimitedException(1000, true))
+
+    assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
+  }
+
+  @Test
+  fun `it skips rate limiting for bare actuator endpoint`() {
+    val req = MockHttpServletRequest()
+    val res = MockHttpServletResponse()
+    val chain = MockFilterChain()
+    req.requestURI = "/actuator"
+
+    Mockito
+      .`when`(rateLimitService.consumeGlobalUserRateLimitPolicy(any(), any()))
+      .thenThrow(RateLimitedException(1000, true))
+
+    assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
+  }
+
+  @Test
+  fun `it skips rate limiting for actuator endpoints with context path`() {
+    val req = MockHttpServletRequest()
+    val res = MockHttpServletResponse()
+    val chain = MockFilterChain()
+    req.contextPath = "/api"
+    req.requestURI = "/api/actuator/health"
+
+    Mockito
+      .`when`(rateLimitService.consumeGlobalUserRateLimitPolicy(any(), any()))
+      .thenThrow(RateLimitedException(1000, true))
+
+    assertDoesNotThrow { rateLimitFilter.doFilter(req, res, chain) }
+  }
 }
