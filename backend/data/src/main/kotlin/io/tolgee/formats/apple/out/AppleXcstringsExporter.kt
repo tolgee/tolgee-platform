@@ -15,6 +15,7 @@ class AppleXcstringsExporter(
   private val objectMapper: ObjectMapper,
   private val isProjectIcuPlaceholdersEnabled: Boolean = true,
   private val filePathProvider: ExportFilePathProvider,
+  private val baseLanguageTag: String,
 ) : FileExporter {
   private val preparedFiles = mutableMapOf<String, ObjectNode>()
 
@@ -24,7 +25,7 @@ class AppleXcstringsExporter(
     return preparedFiles.mapValues { (_, jsonContent) ->
       val root =
         objectMapper.createObjectNode().apply {
-          put("sourceLanguage", exportParams.languages?.firstOrNull() ?: "en")
+          put("sourceLanguage", baseLanguageTag)
           put("version", "1.0")
           set<ObjectNode>("strings", jsonContent)
         }

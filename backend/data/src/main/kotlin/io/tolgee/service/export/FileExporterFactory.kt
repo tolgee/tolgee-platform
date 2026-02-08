@@ -151,6 +151,7 @@ class FileExporterFactory(
           objectMapper = objectMapper,
           isProjectIcuPlaceholdersEnabled = projectIcuPlaceholdersSupport,
           filePathProvider = getFilePathProvider(exportParams, data),
+          baseLanguageTag = baseLanguage.tag,
         )
       }
 
