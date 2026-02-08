@@ -117,6 +117,12 @@ class ContentDeliveryConfigController(
     @PathVariable id: Long,
   ) {
     val exporter = contentDeliveryService.get(projectHolder.project.id, id)
+    try {
     contentDeliveryUploader.upload(exporter.id)
+    if (e.message?.contains("prune", ignoreCase = true) == true) {
+      throw BadRequestException(Message.CANNOT_PRUNE_CONTENT_STORAGE)
+    }
+    throw BadRequestException(Message.CANNOT_STORE_FILE_TO_CONTENT_STORAGE)
+   }
   }
 }

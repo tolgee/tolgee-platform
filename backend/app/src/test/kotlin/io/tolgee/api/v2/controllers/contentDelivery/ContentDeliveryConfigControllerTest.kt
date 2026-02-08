@@ -99,6 +99,20 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     assertStored(mocked)
     assertPruned(mocked)
   }
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns specific error when prune fails`() {
+    tolgeeProperties.contentDelivery.storage.s3.bucketName = "my-bucket"
+    val mocked = mockS3FileStorage()
+    whenever(mocked.pruneDirectory(any())).thenThrow(
+      FileStoreException("Can not prune directory in s3 bucket!", "test-path")
+    )
+    performProjectAuthPost(
+      "content-delivery-configs/${testData.defaultServerContentDeliveryConfig.self.id}"
+    ).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("cannot_prune_content_storage")
+    }
+  }
 
   @Test
   @ProjectJWTAuthTestMethod
