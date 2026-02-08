@@ -117,6 +117,10 @@ class ContentDeliveryConfigController(
     @PathVariable id: Long,
   ) {
     val exporter = contentDeliveryService.get(projectHolder.project.id, id)
-    contentDeliveryUploader.upload(exporter.id)
+   try {
+     contentDeliveryUploader.upload(exporter.id)
+  } catch (e: FileStoreException) {
+      throw BadRequestException(Message.CANNOT_PRUNE_CONTENT_STORAGE)
+   }
   }
 }
