@@ -223,6 +223,7 @@ class TextToXmlResourcesConvertor(
       escapeNewLines = isAndroid && escapeNewLines,
       utfSymbolCharacter = 'u',
       escapeQuotes = isAndroid,
+      escapePercentWithBackslash = isAndroid,
     ).escape()
   }
 

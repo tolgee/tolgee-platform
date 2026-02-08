@@ -14,6 +14,7 @@ class MobileStringEscaper(
   private val escapeQuotes: Boolean,
   // Android need 'u' and iOS 'U'
   private val utfSymbolCharacter: Char,
+  private val escapePercentWithBackslash: Boolean = true,
 ) {
   private enum class State {
     DEFAULT,
@@ -135,7 +136,8 @@ class MobileStringEscaper(
 
   private fun handlePercentEnd(char: Char?) {
     if (!keepPercentSignEscaped) {
-      val unescaped = percents.toString().replace("%%", "\\%")
+      val replacement = if (escapePercentWithBackslash) "\\%" else "%"
+      val unescaped = percents.toString().replace("%%", replacement)
       stringBuilder.append(unescaped)
     } else {
       stringBuilder.append(percents)
