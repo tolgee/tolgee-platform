@@ -7,6 +7,9 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.contentDelivery.ContentDeliveryUploader
 import io.tolgee.dtos.request.ContentDeliveryConfigRequest
+import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.FileStoreException
+import io.tolgee.constants.Message
 import io.tolgee.hateoas.contentDelivery.ContentDeliveryConfigModel
 import io.tolgee.hateoas.contentDelivery.ContentDeliveryConfigModelAssembler
 import io.tolgee.model.contentDelivery.ContentDeliveryConfig
@@ -117,10 +120,11 @@ class ContentDeliveryConfigController(
     @PathVariable id: Long,
   ) {
     val exporter = contentDeliveryService.get(projectHolder.project.id, id)
-   try {
-     contentDeliveryUploader.upload(exporter.id)
-  } catch (e: FileStoreException) {
+
+    try {
+      contentDeliveryUploader.upload(exporter.id)
+    } catch (e: FileStoreException) {
       throw BadRequestException(Message.CANNOT_PRUNE_CONTENT_STORAGE)
-   }
+    }
   }
 }

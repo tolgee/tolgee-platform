@@ -8,8 +8,8 @@ import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.component.fileStorage.S3FileStorageFactory
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
-import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.exceptions.FileStoreException
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.ContextRecreatingTest
@@ -100,16 +100,17 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     assertStored(mocked)
     assertPruned(mocked)
   }
+
   @Test
   @ProjectJWTAuthTestMethod
   fun `returns specific error when prune fails`() {
     tolgeeProperties.contentDelivery.storage.s3.bucketName = "my-bucket"
     val mocked = mockS3FileStorage()
     whenever(mocked.pruneDirectory(any())).thenThrow(
-      FileStoreException("Can not prune directory in s3 bucket!", "test-path")
+      FileStoreException("Can not prune directory in s3 bucket!", "test-path"),
     )
     performProjectAuthPost(
-      "content-delivery-configs/${testData.defaultServerContentDeliveryConfig.self.id}"
+      "content-delivery-configs/${testData.defaultServerContentDeliveryConfig.self.id}",
     ).andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("cannot_prune_content_storage")
     }
