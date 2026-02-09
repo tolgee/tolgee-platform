@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.branching.merging
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
@@ -19,6 +20,7 @@ class BranchMergeAnalyzer(
     val name: String,
   )
 
+  @WithSpan
   @Transactional
   fun compute(merge: BranchMerge): MutableList<BranchMergeChange> {
     val snapshots = branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id)
