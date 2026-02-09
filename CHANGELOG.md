@@ -1,3 +1,10 @@
+## [3.156.2](https://github.com/tolgee/tolgee-platform/compare/v3.156.1...v3.156.2) (2026-02-09)
+
+
+### Bug Fixes
+
+* use project base language for xcstrings sourceLanguage field ([#3446](https://github.com/tolgee/tolgee-platform/issues/3446)) ([b0a050e](https://github.com/tolgee/tolgee-platform/commit/b0a050eacfdc1d54587dcb2adcac916983626316))
+
 ## [3.156.1](https://github.com/tolgee/tolgee-platform/compare/v3.156.0...v3.156.1) (2026-02-08)
 
 
