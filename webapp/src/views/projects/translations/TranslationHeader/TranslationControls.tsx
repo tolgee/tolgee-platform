@@ -121,6 +121,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
           value={selectedLanguages || []}
           languages={languages || []}
           context="translations"
+          enableEmpty
         />
         <ButtonGroup>
           <StyledToggleButton
