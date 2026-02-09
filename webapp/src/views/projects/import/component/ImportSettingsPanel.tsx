@@ -110,7 +110,11 @@ export const ImportSettingsPanel: FC = (props) => {
           checked={state?.convertPlaceholdersToIcu}
           {...additionalCheckboxProps}
           customHelpIcon={
-            <StyledLink href={DOCS_LINKS.importingPlaceholders}>
+            <StyledLink
+              href={DOCS_LINKS.importingPlaceholders}
+              rel="noreferrer noopener"
+              target="_blank"
+            >
               <HelpCircle className="icon" />
             </StyledLink>
           }
@@ -126,10 +130,12 @@ export const ImportSettingsPanel: FC = (props) => {
         label={t('import_override_key_descriptions_label')}
         checked={state?.overrideKeyDescriptions}
         customHelpIcon={
-          <StyledLink href={DOCS_LINKS.importOverridingDescriptions}>
-            <Box display="flex">
-              <HelpCircle className="icon" />
-            </Box>
+          <StyledLink
+            href={DOCS_LINKS.importOverridingDescriptions}
+            rel="noreferrer noopener"
+            target="_blank"
+          >
+            <HelpCircle className="icon" />
           </StyledLink>
         }
         {...additionalCheckboxProps}
@@ -143,6 +149,11 @@ export const ImportSettingsPanel: FC = (props) => {
         hint={t('import_only_update_without_add_key_label_hint')}
         label={t('import_only_update_without_add_key_label')}
         checked={state?.createNewKeys}
+        customHelpIcon={
+          <StyledLink>
+            <HelpCircle className="icon" />
+          </StyledLink>
+        }
         {...additionalCheckboxProps}
       />
     </StyledPanelBox>
