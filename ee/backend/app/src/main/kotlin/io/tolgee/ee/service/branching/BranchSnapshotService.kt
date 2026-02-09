@@ -43,6 +43,9 @@ class BranchSnapshotService(
 
   private fun createSnapshotMappingTable() {
     entityManager
+      .createNativeQuery("DROP TABLE IF EXISTS temp_snapshot_mapping")
+      .executeUpdate()
+    entityManager
       .createNativeQuery(
         """
         CREATE TEMPORARY TABLE temp_snapshot_mapping (
