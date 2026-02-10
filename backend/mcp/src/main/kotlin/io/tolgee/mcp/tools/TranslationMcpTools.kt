@@ -1,0 +1,124 @@
+package io.tolgee.mcp.tools
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.modelcontextprotocol.server.McpSyncServer
+import io.tolgee.api.v2.controllers.translation.TranslationsController
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.mcp.McpSecurityContext
+import io.tolgee.mcp.McpToolsProvider
+import io.tolgee.mcp.buildSpec
+import io.tolgee.security.ProjectHolder
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.language.LanguageService
+import io.tolgee.service.translation.TranslationService
+import org.springframework.stereotype.Component
+
+@Component
+class TranslationMcpTools(
+  private val mcpSecurityContext: McpSecurityContext,
+  private val keyService: KeyService,
+  private val translationService: TranslationService,
+  private val languageService: LanguageService,
+  private val projectHolder: ProjectHolder,
+  private val objectMapper: ObjectMapper,
+) : McpToolsProvider {
+  private val getTranslationsSpec = buildSpec(TranslationsController::getAllTranslations, "get_translations")
+  private val setTranslationsSpec = buildSpec(TranslationsController::setTranslations, "set_translation")
+
+  override fun register(server: McpSyncServer) {
+    server.addTool(
+      "get_translations",
+      "Get translations for a specific key in a Tolgee project. Returns translations in all or specified languages.",
+      toolSchema {
+        number("projectId", "ID of the project", required = true)
+        string("keyName", "The translation key name", required = true)
+        string("namespace", "Optional: namespace of the key")
+        string("branch", "Optional: branch name (for branching projects)")
+      },
+    ) { request ->
+      val projectId = request.arguments.getLong("projectId")!!
+      mcpSecurityContext.executeAs(getTranslationsSpec, projectId) {
+        val key =
+          keyService.find(
+            projectId = projectId,
+            name = request.arguments.getString("keyName") ?: "",
+            namespace = request.arguments.getString("namespace"),
+            branch = request.arguments.getString("branch"),
+          )
+
+        if (key == null) {
+          errorResult("Key not found")
+        } else {
+          val languageIds = languageService.findAll(projectId).map { it.id }
+          val translations =
+            if (languageIds.isNotEmpty()) {
+              translationService.getTranslations(listOf(key.id), languageIds)
+            } else {
+              emptyList()
+            }
+          val result =
+            mapOf(
+              "keyId" to key.id,
+              "keyName" to key.name,
+              "namespace" to key.namespace?.name,
+              "translations" to
+                translations.map { t ->
+                  mapOf(
+                    "languageTag" to t.language.tag,
+                    "text" to t.text,
+                    "state" to t.state.name,
+                  )
+                },
+            )
+          textResult(objectMapper.writeValueAsString(result))
+        }
+      }
+    }
+
+    server.addTool(
+      "set_translation",
+      "Set or update a translation for a key in a specific language. Creates the key if it doesn't exist.",
+      toolSchema {
+        number("projectId", "ID of the project", required = true)
+        string("keyName", "The translation key name", required = true)
+        string("namespace", "Optional: namespace of the key")
+        stringMap("translations", "Translations as {languageTag: text} map (e.g. {\"en\": \"Hello\", \"de\": \"Hallo\"})", required = true)
+        string("branch", "Optional: branch name (for branching projects)")
+      },
+    ) { request ->
+      val projectId = request.arguments.getLong("projectId")!!
+      mcpSecurityContext.executeAs(setTranslationsSpec, projectId) {
+        val dto =
+          SetTranslationsWithKeyDto(
+            key = request.arguments.getString("keyName") ?: "",
+            namespace = request.arguments.getString("namespace"),
+            translations = request.arguments.getStringMap("translations") ?: emptyMap(),
+            branch = request.arguments.getString("branch"),
+          )
+        val key =
+          keyService.find(
+            projectId = projectId,
+            name = dto.key,
+            namespace = dto.namespace,
+            branch = dto.branch,
+          )
+
+        if (key != null) {
+          val translations = translationService.setForKey(key, dto.translations)
+          val result =
+            mapOf(
+              "keyId" to key.id,
+              "keyName" to key.name,
+              "translations" to
+                translations.map { (tag, t) ->
+                  mapOf("languageTag" to tag, "text" to t.text, "state" to t.state.name)
+                },
+            )
+          textResult(objectMapper.writeValueAsString(result))
+        } else {
+          errorResult("Key '${dto.key}' not found. Use create_key to create it first.")
+        }
+      }
+    }
+  }
+}

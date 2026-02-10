@@ -211,6 +211,11 @@ dependencies {
      */
     implementation(project(':security'))
 
+    /**
+     * MCP module
+     */
+    implementation(project(':mcp'))
+
 }
 
 test {

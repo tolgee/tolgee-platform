@@ -135,5 +135,8 @@ project(':api').projectDir = new File('backend/api')
 include ':security'
 project(':security').projectDir = new File('backend/security')
 
+include ':mcp'
+project(':mcp').projectDir = new File('backend/mcp')
+
 include ':ktlint'
 project(':ktlint').projectDir = new File('backend/ktlint')
