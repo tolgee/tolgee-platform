@@ -26,8 +26,8 @@ class ComposeXmlFileExporterTest {
     |  <string name="key1">Ahoj! I%d, %s, %e, %f</string>
     |  <string name="percent_no_placeholders">I am just a percent % sign!</string>
     |  <!-- This is a description -->
-    |  <string name="percent_and_placeholders">I am not just a percent %s %% sign!</string>
-    |  <string name="percent_and_placeholders_and_tags">I am not just a percent <![CDATA[<b>%s</b>]]> %% sign!</string>
+    |  <string name="percent_and_placeholders">I am not just a percent %s % sign!</string>
+    |  <string name="percent_and_placeholders_and_tags">I am not just a percent <![CDATA[<b>%s</b>]]> % sign!</string>
     |  <string name="forced_CDATA"><![CDATA[Forced CDATA <b>Hey!</b> sign!]]></string>
     |  <plurals name="Empty_plural">
     |    <item quantity="one"/>
