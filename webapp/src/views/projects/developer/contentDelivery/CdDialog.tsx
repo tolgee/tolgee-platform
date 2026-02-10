@@ -37,6 +37,11 @@ import { useExportHelper } from 'tg.hooks/useExportHelper';
 import { CdPruneBeforePublish } from './CdPruneBeforePublish';
 import { CdZipExport } from './CdZipExport';
 import { EscapeHtmlSelector } from 'tg.views/projects/export/components/EscapeHtmlSelector';
+import { BranchSelect } from 'tg.component/branching/BranchSelect';
+import { useIsBranchingEnabled } from 'tg.component/branching/useIsBranchingEnabled';
+import { FieldLabel } from 'tg.component/FormField';
+import React from 'react';
+import { StyledInputLabel } from 'tg.component/common/TextField';
 
 const StyledDialogContent = styled(DialogContent)`
   display: grid;
@@ -62,6 +67,7 @@ type Props = {
 export const CdDialog = ({ onClose, data }: Props) => {
   const project = useProject();
   const messaging = useMessage();
+  const isBranchingEnabled = useIsBranchingEnabled();
 
   const storagesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/content-storages',
@@ -125,7 +131,7 @@ export const CdDialog = ({ onClose, data }: Props) => {
             return actions.create(values, formikHelpers);
           }}
         >
-          {({ isSubmitting, handleSubmit, isValid, values }) => {
+          {({ isSubmitting, handleSubmit, isValid, values, setFieldValue }) => {
             return (
               <>
                 <DialogTitle>
@@ -151,6 +157,32 @@ export const CdDialog = ({ onClose, data }: Props) => {
                     languages={allowedLanguages}
                   />
                   <FormatSelector className="format" />
+                  {isBranchingEnabled && (
+                    <Box
+                      sx={{
+                        gridColumn: '1 / span 2',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 1,
+                      }}
+                      data-cy="content-delivery-form-branch"
+                    >
+                      <StyledInputLabel>
+                        <T keyName="content_delivery_branch" />
+                      </StyledInputLabel>
+                      <BranchSelect
+                        branch={values.filterBranch}
+                        onSelect={(branch) =>
+                          setFieldValue('filterBranch', branch.name)
+                        }
+                        onDefaultValue={(branch) => {
+                          if (!values.filterBranch) {
+                            setFieldValue('filterBranch', branch.name);
+                          }
+                        }}
+                      />
+                    </Box>
+                  )}
                   <NsSelector className="ns" namespaces={allNamespaces} />
                   <MessageFormatSelector className="messageFormat" />
                   {Boolean(

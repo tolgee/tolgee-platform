@@ -11,6 +11,8 @@ import io.tolgee.formats.ExportMessageFormat
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.automations.AutomationAction
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.EntityWithBranch
 import io.tolgee.model.enums.TranslationState
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -21,6 +23,7 @@ import jakarta.persistence.Index
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import java.util.Date
@@ -31,13 +34,15 @@ import java.util.Date
   indexes = [
     Index(columnList = "project_id"),
     Index(columnList = "content_storage_id"),
+    Index(columnList = "branch_id"),
   ],
 )
 class ContentDeliveryConfig(
   @ManyToOne(fetch = FetchType.LAZY)
   var project: Project,
 ) : StandardAuditModel(),
-  IExportParams {
+  IExportParams,
+  EntityWithBranch {
   @ActivityLoggedProp
   @ActivityDescribingProp
   lateinit var name: String
@@ -139,6 +144,15 @@ class ContentDeliveryConfig(
   @ActivityLoggedProp
   override var escapeHtml: Boolean? = false
 
-  @ActivityLoggedProp
-  override var filterBranch: String? = null
+  @get:Transient
+  override var filterBranch: String?
+    get() = branch?.name
+    set(value) {} // no-op; branch FK is the source of truth
+
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  var branch: Branch? = null
+
+  override fun resolveBranch(): Branch? = branch
+
+  override fun resolveProject(): Project? = project
 }
