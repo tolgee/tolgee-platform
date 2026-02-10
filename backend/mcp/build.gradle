@@ -67,12 +67,20 @@ dependencies {
     /**
      * TESTING
      */
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testImplementation libs.mockito
+    testImplementation libs.assertJCore
     ktlint(project(":ktlint"))
 }
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
+}
+
+test {
+    useJUnitPlatform()
+    maxHeapSize = "4096m"
 }
 
 dependencyManagement {
