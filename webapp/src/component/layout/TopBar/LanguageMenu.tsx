@@ -1,11 +1,11 @@
 import { default as React, FunctionComponent, useState } from 'react';
-import { Box, IconButton, styled } from '@mui/material';
+import { Box, IconButton, styled, Tooltip } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { CircledLanguageIcon } from '../../languages/CircledLanguageIcon';
 import { locales } from '@tginternal/library/constants/locales';
 import { useCurrentLanguage } from '@tginternal/library/hooks/useCurrentLanguage';
-import { useTolgee } from '@tolgee/react';
+import { useTolgee, useTranslate } from '@tolgee/react';
 
 const StyledMenu = styled(Menu)`
   .MuiPaper-root {
@@ -22,6 +22,7 @@ const StyledIconButton = styled(IconButton)`
 `;
 
 export const LanguageMenu: FunctionComponent<{ className?: string }> = () => {
+  const { t } = useTranslate();
   const tolgee = useTolgee();
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     // @ts-ignore
@@ -39,20 +40,27 @@ export const LanguageMenu: FunctionComponent<{ className?: string }> = () => {
   return (
     <>
       <div>
-        <StyledIconButton
-          color="inherit"
-          aria-controls="language-menu"
-          aria-haspopup="true"
-          data-cy="global-language-menu"
-          onClick={handleOpen}
-          size="large"
+        <Tooltip
+          title={t('language_menu_title')}
+          placement="bottom-end"
+          classes={{ tooltip: 'tooltip' }}
+          disableInteractive
         >
-          <CircledLanguageIcon
-            flag={language ? locales[language].flag : undefined}
-            size={24}
-            draggable="false"
-          />
-        </StyledIconButton>
+          <StyledIconButton
+            color="inherit"
+            aria-controls="language-menu"
+            aria-haspopup="true"
+            data-cy="global-language-menu"
+            onClick={handleOpen}
+            size="large"
+          >
+            <CircledLanguageIcon
+              flag={language ? locales[language].flag : undefined}
+              size={24}
+              draggable="false"
+            />
+          </StyledIconButton>
+        </Tooltip>
         <StyledMenu
           id="language-menu"
           keepMounted
