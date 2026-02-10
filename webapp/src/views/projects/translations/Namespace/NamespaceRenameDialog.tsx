@@ -15,7 +15,7 @@ import { NsBannerRecord } from '../context/useNsBanners';
 import { useProject } from 'tg.hooks/useProject';
 import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { parseErrorResponse } from 'tg.fixtures/errorFixtures';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import {
   useTranslationsActions,
