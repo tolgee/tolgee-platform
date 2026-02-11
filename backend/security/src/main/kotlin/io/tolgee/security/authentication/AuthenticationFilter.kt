@@ -22,6 +22,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthExpiredException
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.security.BILLING_API_KEY_PREFIX
 import io.tolgee.security.PAT_PREFIX
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.security.thirdParty.SsoDelegate
@@ -99,6 +100,10 @@ class AuthenticationFilter(
 
     val apiKey = request.getHeader("X-API-Key") ?: request.getParameter("ak")
     if (apiKey != null) {
+      if (apiKey.startsWith(BILLING_API_KEY_PREFIX)) {
+        return // Skip - handled by billing stats controller
+      }
+
       if (apiKey.startsWith(PAT_PREFIX)) {
         patAuth(apiKey)
         return
