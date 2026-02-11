@@ -63,7 +63,7 @@ class TextToXmlResourcesConvertor(
         document.createCDATASection(
           string.escape(
             escapeApos = true,
-            keepPercentSignEscaped = true,
+            keepPercentSignEscaped = isAndroid,
             quoteMoreWhitespaces = false,
             escapeNewLines = true,
           ),
@@ -73,7 +73,10 @@ class TextToXmlResourcesConvertor(
 
   private fun escapeTextNodes() {
     analysisResult.textNodes.forEach { node ->
-      node.escapeText(keepPercentSignEscaped = analysisResult.containsPlaceholders, quoteMoreWhitespaces = true)
+      node.escapeText(
+        keepPercentSignEscaped = isAndroid && analysisResult.containsPlaceholders,
+        quoteMoreWhitespaces = true,
+      )
     }
   }
 
@@ -86,7 +89,7 @@ class TextToXmlResourcesConvertor(
         doc.createCDATASection(
           node.writeToString().escape(
             escapeApos = true,
-            keepPercentSignEscaped = analysisResult.containsPlaceholders,
+            keepPercentSignEscaped = isAndroid && analysisResult.containsPlaceholders,
             quoteMoreWhitespaces = false,
             escapeNewLines = true,
           ),
