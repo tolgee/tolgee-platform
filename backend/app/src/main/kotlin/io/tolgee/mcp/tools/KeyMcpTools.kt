@@ -22,6 +22,7 @@ class KeyMcpTools(
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
 ) : McpToolsProvider {
+  private val listKeysSpec = buildSpec(KeyController::getAll, "list_keys")
   private val searchKeysSpec = buildSpec(KeyController::searchForKey, "search_keys")
   private val createKeySpec = buildSpec(KeyController::create, "create_key")
   private val importKeysSpec =
@@ -36,6 +37,46 @@ class KeyMcpTools(
   private val getKeySpec = buildSpec(KeyController::get, "get_key")
 
   override fun register(server: McpSyncServer) {
+    server.addTool(
+      "list_keys",
+      "List translation keys in a Tolgee project. Returns up to 100 keys sorted by ID. Use search_keys to find specific keys by name or translation text.",
+      toolSchema {
+        number("projectId", "ID of the project", required = true)
+        string("branch", "Optional: branch name (for branching projects)")
+      },
+    ) { request ->
+      val projectId = request.arguments.getLong("projectId")!!
+      mcpRequestContext.executeAs(listKeysSpec, projectId) {
+        val page =
+          keyService.getPaged(
+            projectId,
+            request.arguments.getString("branch"),
+            PageRequest.of(0, 100),
+          )
+        val keys =
+          page.content.map { key ->
+            mapOf(
+              "keyId" to key.id,
+              "keyName" to key.name,
+              "keyNamespace" to key.namespace,
+            )
+          }
+        val result =
+          mapOf(
+            "keys" to keys,
+            "totalKeys" to page.totalElements,
+            "hasMore" to (page.totalElements > 100),
+            "hint" to
+              if (page.totalElements > 100) {
+                "Showing first 100 of ${page.totalElements} keys. Use search_keys to find specific keys."
+              } else {
+                null
+              },
+          )
+        textResult(objectMapper.writeValueAsString(result))
+      }
+    }
+
     server.addTool(
       "search_keys",
       "Search for translation keys in a Tolgee project by name or translation text. Returns up to 50 matching keys.",

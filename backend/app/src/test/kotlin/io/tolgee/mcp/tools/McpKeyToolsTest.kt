@@ -16,6 +16,29 @@ class McpKeyToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `list_keys returns empty for project with no keys`() {
+    val json = callToolAndGetJson(client, "list_keys", mapOf("projectId" to data.projectId))
+    assertThat(json["keys"].isArray).isTrue()
+    assertThat(json["keys"].size()).isEqualTo(0)
+    assertThat(json["totalKeys"].asLong()).isEqualTo(0)
+    assertThat(json["hasMore"].asBoolean()).isFalse()
+  }
+
+  @Test
+  fun `list_keys returns project keys`() {
+    listOf("first.key", "second.key", "third.key").forEach { name ->
+      keyService.create(data.testData.projectBuilder.self, name, null)
+    }
+
+    val json = callToolAndGetJson(client, "list_keys", mapOf("projectId" to data.projectId))
+    assertThat(json["keys"].isArray).isTrue()
+    assertThat(json["totalKeys"].asLong()).isEqualTo(3)
+    assertThat(json["hasMore"].asBoolean()).isFalse()
+    val keyNames = (0 until json["keys"].size()).map { json["keys"][it]["keyName"].asText() }
+    assertThat(keyNames).containsExactlyInAnyOrder("first.key", "second.key", "third.key")
+  }
+
+  @Test
   fun `create_key creates a key`() {
     val json =
       callToolAndGetJson(

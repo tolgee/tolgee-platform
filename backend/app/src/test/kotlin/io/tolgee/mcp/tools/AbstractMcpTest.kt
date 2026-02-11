@@ -63,6 +63,10 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
         pat = this
       }
     }
+    base.projectBuilder.addBranch {
+      name = "main"
+      isDefault = true
+    }
     testDataService.saveTestData(base.root)
     return McpTestData(
       testData = base,

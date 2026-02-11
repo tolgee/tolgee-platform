@@ -26,7 +26,7 @@ class McpAuthenticationTest : AbstractMcpTest() {
   }
 
   @Test
-  fun `listTools returns all 18 tools`() {
+  fun `listTools returns all 19 tools`() {
     val client = createMcpClient(data.pat.token!!)
     val tools = client.listTools()
     val toolNames = tools.tools().map { it.name() }.toSet()
@@ -34,6 +34,7 @@ class McpAuthenticationTest : AbstractMcpTest() {
       "list_projects",
       "create_project",
       "get_project_stats",
+      "list_keys",
       "search_keys",
       "create_key",
       "get_key",
