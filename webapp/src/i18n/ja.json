@@ -765,6 +765,7 @@
   "conflict_should_not_edit_reviewed_hint": "翻訳は レビュー済み 状態です",
   "connect_sso": "SSOに移行",
   "content_delivery_add_button": "コンテンツ配信",
+  "content_delivery_branch": "ブランチ",
   "content_delivery_create_success": "コンテンツ配信が正常に作成されました！",
   "content_delivery_create_title": "コンテンツ配信を追加",
   "content_delivery_delete_success": "コンテンツ配信が正常に削除されました！",

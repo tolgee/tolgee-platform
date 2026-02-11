@@ -766,6 +766,7 @@
   "conflict_should_not_edit_reviewed_hint": "Translation is in reviewed state",
   "connect_sso": "Migrate to SSO",
   "content_delivery_add_button": "Content Delivery",
+  "content_delivery_branch": "Branch",
   "content_delivery_create_success": "Content delivery successfully created!",
   "content_delivery_create_title": "Add content delivery",
   "content_delivery_delete_success": "Content delivery successfully deleted!",

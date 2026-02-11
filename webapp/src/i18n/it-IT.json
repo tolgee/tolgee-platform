@@ -758,6 +758,7 @@
   "conflict_should_not_edit_reviewed_hint": "La traduzione è in stato revisionato",
   "connect_sso": "Migra a SSO",
   "content_delivery_add_button": "Consegna dei contenuti",
+  "content_delivery_branch": "Ramo",
   "content_delivery_create_success": "Consegna dei contenuti creata con successo!",
   "content_delivery_create_title": "Aggiungi consegna dei contenuti",
   "content_delivery_delete_success": "Consegna dei contenuti eliminata con successo!",

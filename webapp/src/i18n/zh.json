@@ -762,6 +762,7 @@
   "conflict_should_not_edit_reviewed_hint": "翻译处于已审阅状态",
   "connect_sso": "迁移到 SSO",
   "content_delivery_add_button": "内容分发",
+  "content_delivery_branch": "分支",
   "content_delivery_create_success": "内容分发设置已成功创建！",
   "content_delivery_create_title": "添加内容分发",
   "content_delivery_delete_success": "内容分发设置已成功删除！",

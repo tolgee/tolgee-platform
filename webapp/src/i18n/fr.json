@@ -764,6 +764,7 @@
   "conflict_should_not_edit_reviewed_hint": "La traduction est dans l'état révisé",
   "connect_sso": "Migrer vers l'authentification unique",
   "content_delivery_add_button": "Diffusion de contenu",
+  "content_delivery_branch": "Branche",
   "content_delivery_create_success": "Diffusion de contenu créée avec succès !",
   "content_delivery_create_title": "Ajouter une diffusion de contenu",
   "content_delivery_delete_success": "Suppression de la diffusion de contenu réussie!",

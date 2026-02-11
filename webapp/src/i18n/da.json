@@ -765,6 +765,7 @@
   "conflict_should_not_edit_reviewed_hint": "Oversættelsen er i gennemset tilstand",
   "connect_sso": "Migrer til SSO",
   "content_delivery_add_button": "Indholdsdistribution",
+  "content_delivery_branch": "Gren",
   "content_delivery_create_success": "Indholdsdistribution oprettet!",
   "content_delivery_create_title": "Tilføj indholdsdistribution",
   "content_delivery_delete_success": "Indholdsdistribution slettet!",

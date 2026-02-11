@@ -762,6 +762,7 @@
   "conflict_should_not_edit_reviewed_hint": "La traducción está en estado revisado",
   "connect_sso": "Migrar a SSO",
   "content_delivery_add_button": "Entrega de contenido",
+  "content_delivery_branch": "Rama",
   "content_delivery_create_success": "¡Entrega de contenido creada con éxito!",
   "content_delivery_create_title": "Agregar entrega de contenido",
   "content_delivery_delete_success": "¡Entrega de contenido eliminada con éxito!",

@@ -762,6 +762,7 @@
   "conflict_should_not_edit_reviewed_hint": "A fordítás ellenőrzött állapotban van",
   "connect_sso": "Áttérés SSO-ra",
   "content_delivery_add_button": "Tartalom szállítás",
+  "content_delivery_branch": "Ág",
   "content_delivery_create_success": "A tartalom szállítás sikeresen létrehozva!",
   "content_delivery_create_title": "Tartalom szállítás hozzáadása",
   "content_delivery_delete_success": "A tartalom szállítás sikeresen törölve!",

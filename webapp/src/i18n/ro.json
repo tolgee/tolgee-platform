@@ -765,6 +765,7 @@
   "conflict_should_not_edit_reviewed_hint": "Traducerea este în stare revizuită",
   "connect_sso": "Migrați la SSO",
   "content_delivery_add_button": "Livrare conținut",
+  "content_delivery_branch": "Ramură",
   "content_delivery_create_success": "Livrarea conținutului a fost creată cu succes!",
   "content_delivery_create_title": "Adăugați livrarea de conținut",
   "content_delivery_delete_success": "Livrarea conținutului a fost ștearsă cu succes!",

@@ -608,6 +608,7 @@
   "conflict_is_not_resolved": "Конфлікти не вирішені",
   "connect_sso": "Перейти на SSO",
   "content_delivery_add_button": "Доставка вмісту",
+  "content_delivery_branch": "Гілка",
   "content_delivery_create_success": "Доставка вмісту успішно створена!",
   "content_delivery_create_title": "Додати доставку вмісту",
   "content_delivery_delete_success": "Доставка вмісту успішно видалена!",

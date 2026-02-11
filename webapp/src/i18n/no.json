@@ -762,6 +762,7 @@
   "conflict_should_not_edit_reviewed_hint": "Oversettelsen er i gjennomgått tilstand",
   "connect_sso": "Migrer til SSO",
   "content_delivery_add_button": "Innholdlevering",
+  "content_delivery_branch": "Gren",
   "content_delivery_create_success": "Innholdlevering opprettet!",
   "content_delivery_create_title": "Legg til innholdlevering",
   "content_delivery_delete_success": "Innholdlevering slettet!",

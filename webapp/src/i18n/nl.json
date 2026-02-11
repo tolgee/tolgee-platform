@@ -765,6 +765,7 @@
   "conflict_should_not_edit_reviewed_hint": "Vertaling is in beoordeelde staat",
   "connect_sso": "Migreren naar SSO",
   "content_delivery_add_button": "Inhoudslevering",
+  "content_delivery_branch": "Branch",
   "content_delivery_create_success": "Inhoudslevering succesvol aangemaakt!",
   "content_delivery_create_title": "Inhoudslevering toevoegen",
   "content_delivery_delete_success": "Inhoudslevering succesvol verwijderd!",

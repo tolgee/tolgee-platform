@@ -762,6 +762,7 @@
   "conflict_should_not_edit_reviewed_hint": "A tradução está no estado revisado",
   "connect_sso": "Migrar para SSO",
   "content_delivery_add_button": "Entrega de conteúdo",
+  "content_delivery_branch": "Branch",
   "content_delivery_create_success": "Entrega de conteúdo criada com sucesso!",
   "content_delivery_create_title": "Adicionar entrega de conteúdo",
   "content_delivery_delete_success": "Entrega de conteúdo excluída com sucesso!",

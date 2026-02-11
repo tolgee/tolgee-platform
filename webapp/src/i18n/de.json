@@ -764,6 +764,7 @@
   "conflict_should_not_edit_reviewed_hint": "Übersetzung befindet sich im geprüften Zustand",
   "connect_sso": "Zu SSO migrieren",
   "content_delivery_add_button": "Inhaltsbereitstellung",
+  "content_delivery_branch": "Zweig",
   "content_delivery_create_success": "Inhaltsbereitstellung erfolgreich erstellt!",
   "content_delivery_create_title": "Inhaltsbereitstellung hinzufügen",
   "content_delivery_delete_success": "Inhaltsbereitstellung erfolgreich gelöscht!",
