@@ -82,7 +82,11 @@ class TranslationMcpTools(
         number("projectId", "ID of the project", required = true)
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
-        stringMap("translations", "Translations as {languageTag: text} map (e.g. {\"en\": \"Hello\", \"de\": \"Hallo\"})", required = true)
+        stringMap(
+          "translations",
+          "Translations as {languageTag: text} map (e.g. {\"en\": \"Hello\", \"de\": \"Hallo\"})",
+          required = true,
+        )
         string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->

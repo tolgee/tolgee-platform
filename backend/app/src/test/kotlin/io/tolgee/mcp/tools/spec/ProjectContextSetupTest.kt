@@ -1,4 +1,4 @@
-package io.tolgee.mcp.tools
+package io.tolgee.mcp.tools.spec
 
 import io.tolgee.model.enums.Scope
 import org.junit.jupiter.api.Test

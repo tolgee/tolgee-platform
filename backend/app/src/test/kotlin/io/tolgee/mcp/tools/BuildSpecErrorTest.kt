@@ -1,5 +1,6 @@
-package io.tolgee.mcp
+package io.tolgee.mcp.tools
 
+import io.tolgee.mcp.buildSpec
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import org.assertj.core.api.Assertions.assertThatThrownBy

@@ -25,7 +25,13 @@ class KeyMcpTools(
   private val searchKeysSpec = buildSpec(KeyController::searchForKey, "search_keys")
   private val createKeySpec = buildSpec(KeyController::create, "create_key")
   private val importKeysSpec =
-    buildSpec(KeyController::class.java, "importKeys", "batch_create_keys", ImportKeysDto::class.java, String::class.java)
+    buildSpec(
+      KeyController::class.java,
+      "importKeys",
+      "batch_create_keys",
+      ImportKeysDto::class.java,
+      String::class.java,
+    )
   private val editKeySpec = buildSpec(KeyController::edit, "update_key")
   private val getKeySpec = buildSpec(KeyController::get, "get_key")
 

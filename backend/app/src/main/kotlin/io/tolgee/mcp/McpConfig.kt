@@ -21,11 +21,6 @@ class McpConfig {
   }
 
   @Bean
-  fun mcpRouterFunction(transportProvider: WebMvcStreamableServerTransportProvider): RouterFunction<ServerResponse> {
-    return transportProvider.routerFunction
-  }
-
-  @Bean
   fun mcpServer(
     transportProvider: WebMvcStreamableServerTransportProvider,
     buildProperties: BuildProperties,
@@ -46,5 +41,13 @@ class McpConfig {
     toolsProviders.forEach { it.register(server) }
 
     return server
+  }
+
+  @Bean
+  fun mcpRouterFunction(
+    transportProvider: WebMvcStreamableServerTransportProvider,
+    @Suppress("unused") mcpServer: McpSyncServer,
+  ): RouterFunction<ServerResponse> {
+    return transportProvider.routerFunction
   }
 }

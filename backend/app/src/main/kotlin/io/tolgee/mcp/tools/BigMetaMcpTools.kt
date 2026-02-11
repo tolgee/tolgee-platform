@@ -37,12 +37,14 @@ class BigMetaMcpTools(
       val projectId = request.arguments.getLong("projectId")!!
       mcpSecurityContext.executeAs(storeBigMetaSpec, projectId) {
         val relatedKeys =
-          request.arguments.getList("relatedKeysInOrder")?.map { k ->
-            RelatedKeyDto(
-              keyName = k.getString("keyName") ?: "",
-              namespace = k.getString("namespace"),
-            )
-          }?.toMutableList()
+          request.arguments
+            .getList("relatedKeysInOrder")
+            ?.map { k ->
+              RelatedKeyDto(
+                keyName = k.getString("keyName") ?: "",
+                namespace = k.getString("namespace"),
+              )
+            }?.toMutableList()
 
         val dto = BigMetaDto()
         dto.relatedKeysInOrder = relatedKeys

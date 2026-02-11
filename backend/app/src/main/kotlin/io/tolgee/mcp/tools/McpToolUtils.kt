@@ -8,14 +8,16 @@ import io.modelcontextprotocol.spec.McpSchema.JsonSchema
 import io.modelcontextprotocol.spec.McpSchema.TextContent
 
 fun textResult(text: String): CallToolResult {
-  return CallToolResult.builder()
+  return CallToolResult
+    .builder()
     .content(listOf(TextContent(text)))
     .isError(false)
     .build()
 }
 
 fun errorResult(message: String): CallToolResult {
-  return CallToolResult.builder()
+  return CallToolResult
+    .builder()
     .content(listOf(TextContent(message)))
     .isError(true)
     .build()
@@ -139,7 +141,8 @@ fun McpSyncServer.addTool(
   handler: (McpSchema.CallToolRequest) -> CallToolResult,
 ) {
   val tool =
-    McpSchema.Tool.builder()
+    McpSchema.Tool
+      .builder()
       .name(name)
       .description(description)
       .inputSchema(schema)

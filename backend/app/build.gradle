@@ -212,9 +212,11 @@ dependencies {
     implementation(project(':security'))
 
     /**
-     * MCP module
+     * MCP SDK
      */
-    implementation(project(':mcp'))
+    implementation platform("io.modelcontextprotocol.sdk:mcp-bom:0.17.2")
+    implementation "io.modelcontextprotocol.sdk:mcp"
+    implementation "io.modelcontextprotocol.sdk:mcp-spring-webmvc"
 
 }
 

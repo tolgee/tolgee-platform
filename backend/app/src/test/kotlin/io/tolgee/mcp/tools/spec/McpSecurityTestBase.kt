@@ -1,4 +1,4 @@
-package io.tolgee.mcp.tools
+package io.tolgee.mcp.tools.spec
 
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.ActivityType
