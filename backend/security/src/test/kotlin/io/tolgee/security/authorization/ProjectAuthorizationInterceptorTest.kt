@@ -28,6 +28,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.OrganizationHolder
+import io.tolgee.security.ProjectContextService
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.RequestContextService
@@ -36,6 +37,7 @@ import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.security.authentication.WriteOperation
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.tracing.TolgeeTracingContext
 import org.junit.jupiter.api.AfterEach
@@ -63,6 +65,14 @@ class ProjectAuthorizationInterceptorTest {
 
   private val requestContextService = Mockito.mock(RequestContextService::class.java)
 
+  private val projectHolder = Mockito.mock(ProjectHolder::class.java)
+
+  private val organizationHolder = Mockito.mock(OrganizationHolder::class.java)
+
+  private val activityHolder = Mockito.mock(ActivityHolder::class.java, Mockito.RETURNS_DEEP_STUBS)
+
+  private val tracingContext = Mockito.mock(TolgeeTracingContext::class.java)
+
   private val project = Mockito.mock(Project::class.java)
 
   private val projectDto = Mockito.mock(ProjectDto::class.java)
@@ -71,16 +81,22 @@ class ProjectAuthorizationInterceptorTest {
 
   private val apiKey = Mockito.mock(ApiKeyDto::class.java)
 
-  private val projectAuthenticationInterceptor =
-    ProjectAuthorizationInterceptor(
+  private val projectContextService =
+    ProjectContextService(
       authenticationFacade,
+      Mockito.mock(ProjectService::class.java),
       organizationService,
       securityService,
+      projectHolder,
+      organizationHolder,
+      activityHolder,
+    )
+
+  private val projectAuthenticationInterceptor =
+    ProjectAuthorizationInterceptor(
       requestContextService,
-      Mockito.mock(ProjectHolder::class.java),
-      Mockito.mock(OrganizationHolder::class.java),
-      Mockito.mock(ActivityHolder::class.java, Mockito.RETURNS_DEEP_STUBS),
-      Mockito.mock(TolgeeTracingContext::class.java),
+      projectContextService,
+      tracingContext,
     )
 
   private val mockMvc =
@@ -108,6 +124,7 @@ class ProjectAuthorizationInterceptorTest {
     Mockito.`when`(userAccount.role).thenReturn(UserAccount.Role.USER)
     Mockito.`when`(userAccount.id).thenReturn(1337L)
     Mockito.`when`(projectDto.id).thenReturn(1337L)
+    Mockito.`when`(projectDto.organizationOwnerId).thenReturn(1L)
     Mockito.`when`(project.id).thenReturn(1337L)
 
     Mockito.`when`(apiKey.projectId).thenReturn(1337L)
@@ -132,7 +149,7 @@ class ProjectAuthorizationInterceptorTest {
 
   @Test
   fun `it has no effect on endpoints not specific to a single project`() {
-    Mockito.`when`(requestContextService.getTargetOrganization(any())).thenReturn(null)
+    Mockito.`when`(requestContextService.getTargetProject(any())).thenReturn(null)
     mockMvc.perform(MockMvcRequestBuilders.get("/v2/projects")).andIsOk
   }
 
