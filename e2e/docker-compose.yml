@@ -11,9 +11,9 @@ services:
       - tolgee.smtp.port=1025
       - tolgee.frontend-url=http://localhost:${TOLGEE_E2E_PORT:-8201}
   fakesmtp:
-    image: reachfive/fake-smtp-server:0.8.1
+    image: axllent/mailpit:v1.27
     ports:
       - "${TOLGEE_E2E_SMTP_PORT:-21025}:1025"
-      - "${TOLGEE_E2E_SMTP_HTTP_PORT:-21080}:1080"
+      - "${TOLGEE_E2E_SMTP_HTTP_PORT:-21080}:8025"
 volumes:
   e2e-db-data:

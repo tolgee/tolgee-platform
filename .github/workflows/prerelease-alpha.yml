@@ -50,15 +50,20 @@ jobs:
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
 
-      - name: Create docker image
+      - name: Prepare for docker build
         if: ${{ steps.version.outputs.VERSION != '' }}
-        run: |
-          docker buildx create --use
-          ./gradlew dockerPublish
+        run: ./gradlew dockerPrepare
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+
+      - name: Create docker image
+        if: ${{ steps.version.outputs.VERSION != '' }}
+        run: |
+          docker buildx create --use
+          docker buildx build . -t tolgee/tolgee:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --push
+        working-directory: build/docker
 
       - name: Pack with webapp
         if: ${{ steps.version.outputs.VERSION != '' }}
