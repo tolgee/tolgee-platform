@@ -8,7 +8,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import java.time.Duration
 
-class ApplyRateLimitTest : McpSecurityTestBase() {
+class ApplyRateLimitTest : McpToolEndpointSpecTestBase() {
   @Test
   fun `no rate limit policy does not call rateLimitService`() {
     sut.executeAs(spec(rateLimitPolicy = null)) {}

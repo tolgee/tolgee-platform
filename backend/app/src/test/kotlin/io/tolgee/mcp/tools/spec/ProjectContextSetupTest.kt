@@ -7,7 +7,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 
-class ProjectContextSetupTest : McpSecurityTestBase() {
+class ProjectContextSetupTest : McpToolEndpointSpecTestBase() {
   @Test
   fun `isGlobalRoute true does not call projectContextService setup`() {
     sut.executeAs(spec(isGlobalRoute = true), projectId = 1L) {}

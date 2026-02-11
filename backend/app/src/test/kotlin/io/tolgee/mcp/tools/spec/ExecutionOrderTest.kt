@@ -15,7 +15,7 @@ import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-class ExecutionOrderTest : McpSecurityTestBase() {
+class ExecutionOrderTest : McpToolEndpointSpecTestBase() {
   @Test
   fun `interceptors execute in correct order`() {
     val inOrder =

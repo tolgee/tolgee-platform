@@ -12,7 +12,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-class CheckOrgRoleTest : McpSecurityTestBase() {
+class CheckOrgRoleTest : McpToolEndpointSpecTestBase() {
   @Test
   fun `no required role skips check`() {
     sut.executeAs(spec(requiredOrgRole = null)) {}

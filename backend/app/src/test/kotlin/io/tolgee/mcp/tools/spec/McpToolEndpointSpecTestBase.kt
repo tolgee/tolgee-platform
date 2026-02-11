@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-abstract class McpSecurityTestBase {
+abstract class McpToolEndpointSpecTestBase {
   protected lateinit var authenticationFacade: AuthenticationFacade
   protected lateinit var organizationRoleService: OrganizationRoleService
   protected lateinit var organizationHolder: OrganizationHolder

@@ -7,7 +7,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 
-class ActivityAndPostHogTest : McpSecurityTestBase() {
+class ActivityAndPostHogTest : McpToolEndpointSpecTestBase() {
   @Test
   fun `activity type set assigns to activityHolder`() {
     sut.executeAs(spec(activityType = ActivityType.CREATE_KEY)) {}

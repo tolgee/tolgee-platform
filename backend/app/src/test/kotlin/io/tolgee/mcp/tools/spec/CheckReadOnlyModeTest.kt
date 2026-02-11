@@ -7,7 +7,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 
-class CheckReadOnlyModeTest : McpSecurityTestBase() {
+class CheckReadOnlyModeTest : McpToolEndpointSpecTestBase() {
   @Test
   fun `write op with readOnly auth throws OPERATION_NOT_PERMITTED_IN_READ_ONLY_MODE`() {
     whenever(authenticationFacade.isReadOnly).thenReturn(true)

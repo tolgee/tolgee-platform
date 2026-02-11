@@ -8,7 +8,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 
-class CheckTokenTypeTest : McpSecurityTestBase() {
+class CheckTokenTypeTest : McpToolEndpointSpecTestBase() {
   @Test
   fun `non-API auth skips token type check`() {
     whenever(authenticationFacade.isApiAuthentication).thenReturn(false)

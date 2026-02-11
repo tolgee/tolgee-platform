@@ -10,7 +10,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-class CheckFeaturesTest : McpSecurityTestBase() {
+class CheckFeaturesTest : McpToolEndpointSpecTestBase() {
   @Test
   fun `no features required skips check`() {
     whenever(organizationHolder.organizationOrNull).thenReturn(null)
