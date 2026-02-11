@@ -235,6 +235,7 @@ declare namespace DataCy {
         "content-delivery-auto-publish-checkbox" |
         "content-delivery-delete-button" |
         "content-delivery-files-button" |
+        "content-delivery-form-branch" |
         "content-delivery-form-custom-slug" |
         "content-delivery-form-name" |
         "content-delivery-form-save" |

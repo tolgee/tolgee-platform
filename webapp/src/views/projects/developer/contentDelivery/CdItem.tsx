@@ -12,6 +12,8 @@ import { useMessage } from 'tg.hooks/useSuccessMessage';
 import { CdDialog } from './CdDialog';
 import { CdFilesRow } from './CdFilesRow';
 import { useDateFormatter } from 'tg.hooks/useLocale';
+import { BranchNameChip } from 'tg.component/branching/BranchNameChip';
+import { useIsBranchingEnabled } from 'tg.component/branching/useIsBranchingEnabled';
 
 type ContentDeliveryConfigModel =
   components['schemas']['ContentDeliveryConfigModel'];
@@ -57,6 +59,7 @@ export const CdItem = ({ data }: Props) => {
   const messaging = useMessage();
   const project = useProject();
   const formatDate = useDateFormatter();
+  const isBranchingEnabled = useIsBranchingEnabled();
 
   const { satisfiesPermission } = useProjectPermissions();
 
@@ -77,6 +80,9 @@ export const CdItem = ({ data }: Props) => {
       <StyledWrapper>
         <Box display="flex" gap={2} alignItems="center">
           <StyledName>{data.name}</StyledName>
+          {isBranchingEnabled && data.branchName && (
+            <BranchNameChip name={data.branchName} size={'small'} />
+          )}
           <Chip
             data-cy="content-delivery-item-type"
             size="small"

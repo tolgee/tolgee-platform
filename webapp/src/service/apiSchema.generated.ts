@@ -2000,6 +2000,8 @@ export interface components {
     };
     ContentDeliveryConfigModel: {
       autoPublish: boolean;
+      /** @description Branch name this CDN config is associated with. Null means default branch or no branching. */
+      branchName?: string;
       /**
        * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *

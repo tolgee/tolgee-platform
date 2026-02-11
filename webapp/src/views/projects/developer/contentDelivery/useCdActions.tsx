@@ -56,6 +56,7 @@ export function useCdActions({ allNamespaces, onClose }: UseCdActionsProps) {
       pruneBeforePublish: values.pruneBeforePublish ?? true,
       zip: values.zip ?? false,
       escapeHtml: values.escapeHtml ?? false,
+      filterBranch: values.filterBranch || undefined,
     };
   }
 

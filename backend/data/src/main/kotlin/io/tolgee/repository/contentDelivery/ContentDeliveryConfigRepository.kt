@@ -24,6 +24,7 @@ interface ContentDeliveryConfigRepository : JpaRepository<ContentDeliveryConfig?
     """
     from ContentDeliveryConfig e
     left join fetch e.automationActions
+    left join fetch e.branch
     where e.project.id in :projectId
   """,
     countQuery = """
@@ -50,4 +51,17 @@ interface ContentDeliveryConfigRepository : JpaRepository<ContentDeliveryConfig?
   ): ContentDeliveryConfig
 
   fun countByProject(project: Project): Int
+
+  @Query(
+    """
+    from ContentDeliveryConfig e
+    left join fetch e.automationActions
+    left join fetch e.branch
+    where e.project.id = :projectId and e.branch.id = :branchId
+  """,
+  )
+  fun findAllByProjectIdAndBranchId(
+    projectId: Long,
+    branchId: Long,
+  ): List<ContentDeliveryConfig>
 }
