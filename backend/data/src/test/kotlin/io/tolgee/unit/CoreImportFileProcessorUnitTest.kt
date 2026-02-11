@@ -11,6 +11,7 @@ import io.tolgee.formats.ImportFileProcessorFactory
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
@@ -104,6 +105,7 @@ class CoreImportFileProcessorUnitTest {
     fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
     whenever(typeProcessorMock.context).then { fileProcessorContext }
     whenever(importMock.project).thenReturn(Project(1, "test repo"))
+    whenever(importMock.branch).thenReturn(Branch(name = "main"))
     whenever(importServiceMock.saveFile(any())).thenReturn(importFile)
     whenever(languageServiceMock.findByTag(eq("lng"), any<Long>()))
       .thenReturn(existingLanguage)

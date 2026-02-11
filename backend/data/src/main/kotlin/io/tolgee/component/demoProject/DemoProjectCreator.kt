@@ -192,6 +192,7 @@ class DemoProjectCreator(
             this.pluralArgName = pluralArgName
           }
           this@apply.project = this@DemoProjectCreator.project
+          this@apply.branch = this@DemoProjectCreator.project.getDefaultBranch()
         }
       keyService.save(key)
       key

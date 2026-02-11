@@ -8,6 +8,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.ProjectPermissionType
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.PermissionRepository
@@ -97,13 +98,13 @@ class ProjectsE2eDataController(
         }
 
       val project =
-        projectRepository.save(
-          Project(
-            name = projectData.name,
-            slug = projectService.generateSlug(projectData.name),
-            organizationOwner = organizationOwner!!,
-          ),
+        Project(
+          name = projectData.name,
+          slug = projectService.generateSlug(projectData.name),
+          organizationOwner = organizationOwner!!,
         )
+      Branch.createMainBranch(project)
+      projectRepository.save(project)
 
       projectData.permittedUsers.forEach {
         val user = createdUsers[it.userName]!!
