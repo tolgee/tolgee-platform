@@ -8,7 +8,6 @@ import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.branching.BranchSnapshotService
-import io.tolgee.ee.service.branching.DefaultBranchCreator
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
@@ -47,9 +46,6 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var branchService: BranchService
-
-  @Autowired
-  lateinit var defaultBranchCreator: DefaultBranchCreator
 
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
@@ -599,9 +595,8 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   private fun createBranchesOneByObe(project: Project) {
-    defaultBranchCreator.create(project)
     val refreshed = project.refresh()
-    val defaultBranch = refreshed.getDefaultBranch()!!
+    val defaultBranch = refreshed.getDefaultBranch()
     branchService.createBranch(refreshed.id, "first-branch", defaultBranch.id, testData.user)
     branchService.createBranch(refreshed.id, "second-branch", defaultBranch.id, testData.user)
     branchService.createBranch(refreshed.id, "third-branch", defaultBranch.id, testData.user)
