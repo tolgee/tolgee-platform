@@ -3,7 +3,7 @@ package io.tolgee.mcp.tools
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.TagsController
-import io.tolgee.mcp.McpSecurityContext
+import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.service.key.KeyService
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class TagMcpTools(
-  private val mcpSecurityContext: McpSecurityContext,
+  private val mcpRequestContext: McpRequestContext,
   private val tagService: TagService,
   private val keyService: KeyService,
   private val objectMapper: ObjectMapper,
@@ -32,7 +32,7 @@ class TagMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(listTagsSpec, projectId) {
+      mcpRequestContext.executeAs(listTagsSpec, projectId) {
         val search = request.arguments.getString("search")
         val tags =
           tagService.getProjectTags(
@@ -61,7 +61,7 @@ class TagMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(tagKeySpec, projectId) {
+      mcpRequestContext.executeAs(tagKeySpec, projectId) {
         val keyId = request.arguments.getLong("keyId")!!
         val tagName = request.arguments.getString("tagName") ?: ""
         val tag = tagService.tagKey(projectId, keyId, tagName)

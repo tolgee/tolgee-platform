@@ -7,7 +7,7 @@ import io.tolgee.api.v2.controllers.batch.StartBatchJobController
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.MachineTranslationRequest
-import io.tolgee.mcp.McpSecurityContext
+import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class BatchMcpTools(
-  private val mcpSecurityContext: McpSecurityContext,
+  private val mcpRequestContext: McpRequestContext,
   private val batchJobService: BatchJobService,
   private val securityService: SecurityService,
   private val projectHolder: ProjectHolder,
@@ -37,7 +37,7 @@ class BatchMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(getBatchJobSpec, projectId) {
+      mcpRequestContext.executeAs(getBatchJobSpec, projectId) {
         val jobId = request.arguments.getLong("jobId")!!
         val view = batchJobService.getView(jobId)
         val result =
@@ -63,7 +63,7 @@ class BatchMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(machineTranslateSpec, projectId) {
+      mcpRequestContext.executeAs(machineTranslateSpec, projectId) {
         val keyIds = request.arguments.getLongList("keyIds") ?: emptyList()
         val targetLanguageIds = request.arguments.getLongList("targetLanguageIds") ?: emptyList()
 

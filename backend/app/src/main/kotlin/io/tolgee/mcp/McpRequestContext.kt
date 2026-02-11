@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 
 @Component
-class McpSecurityContext(
+class McpRequestContext(
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val organizationHolder: OrganizationHolder,

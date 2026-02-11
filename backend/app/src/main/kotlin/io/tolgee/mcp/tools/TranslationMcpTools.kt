@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.translation.TranslationsController
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
-import io.tolgee.mcp.McpSecurityContext
+import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class TranslationMcpTools(
-  private val mcpSecurityContext: McpSecurityContext,
+  private val mcpRequestContext: McpRequestContext,
   private val keyService: KeyService,
   private val translationService: TranslationService,
   private val languageService: LanguageService,
@@ -37,7 +37,7 @@ class TranslationMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(getTranslationsSpec, projectId) {
+      mcpRequestContext.executeAs(getTranslationsSpec, projectId) {
         val key =
           keyService.find(
             projectId = projectId,
@@ -91,7 +91,7 @@ class TranslationMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(setTranslationsSpec, projectId) {
+      mcpRequestContext.executeAs(setTranslationsSpec, projectId) {
         val dto =
           SetTranslationsWithKeyDto(
             key = request.arguments.getString("keyName") ?: "",

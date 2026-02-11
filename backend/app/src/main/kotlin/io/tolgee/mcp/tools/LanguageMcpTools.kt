@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.V2LanguagesController
 import io.tolgee.dtos.request.LanguageRequest
-import io.tolgee.mcp.McpSecurityContext
+import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class LanguageMcpTools(
-  private val mcpSecurityContext: McpSecurityContext,
+  private val mcpRequestContext: McpRequestContext,
   private val languageService: LanguageService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
@@ -32,7 +32,7 @@ class LanguageMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(listLanguagesSpec, projectId) {
+      mcpRequestContext.executeAs(listLanguagesSpec, projectId) {
         val languages =
           languageService.getPaged(
             projectId,
@@ -66,7 +66,7 @@ class LanguageMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(createLanguageSpec, projectId) {
+      mcpRequestContext.executeAs(createLanguageSpec, projectId) {
         val dto =
           LanguageRequest(
             name = request.arguments.getString("name") ?: "",

@@ -7,7 +7,7 @@ import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysDto
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
-import io.tolgee.mcp.McpSecurityContext
+import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class KeyMcpTools(
-  private val mcpSecurityContext: McpSecurityContext,
+  private val mcpRequestContext: McpRequestContext,
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
@@ -47,7 +47,7 @@ class KeyMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(searchKeysSpec, projectId) {
+      mcpRequestContext.executeAs(searchKeysSpec, projectId) {
         val results =
           keyService.searchKeys(
             search = request.arguments.getString("query") ?: "",
@@ -84,7 +84,7 @@ class KeyMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(createKeySpec, projectId) {
+      mcpRequestContext.executeAs(createKeySpec, projectId) {
         val args = request.arguments
         val dto =
           CreateKeyDto(
@@ -115,7 +115,7 @@ class KeyMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(getKeySpec, projectId) {
+      mcpRequestContext.executeAs(getKeySpec, projectId) {
         val keyId = request.arguments.getLong("keyId")!!
         val view = keyService.getView(projectId, keyId)
         val result =
@@ -142,7 +142,7 @@ class KeyMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(editKeySpec, projectId) {
+      mcpRequestContext.executeAs(editKeySpec, projectId) {
         val keyId = request.arguments.getLong("keyId")!!
         val dto =
           EditKeyDto(
@@ -178,7 +178,7 @@ class KeyMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(importKeysSpec, projectId) {
+      mcpRequestContext.executeAs(importKeysSpec, projectId) {
         val branch = request.arguments.getString("branch")
         val keys =
           request.arguments.getList("keys")?.map { k ->

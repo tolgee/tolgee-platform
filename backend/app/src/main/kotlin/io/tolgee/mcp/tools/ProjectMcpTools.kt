@@ -6,7 +6,7 @@ import io.tolgee.api.v2.controllers.ProjectStatsController
 import io.tolgee.api.v2.controllers.project.ProjectsController
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
-import io.tolgee.mcp.McpSecurityContext
+import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.service.organization.OrganizationRoleService
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class ProjectMcpTools(
-  private val mcpSecurityContext: McpSecurityContext,
+  private val mcpRequestContext: McpRequestContext,
   private val projectService: ProjectService,
   private val projectCreationService: ProjectCreationService,
   private val projectStatsService: ProjectStatsService,
@@ -37,7 +37,7 @@ class ProjectMcpTools(
         string("search", "Optional search query to filter projects by name")
       },
     ) { request ->
-      mcpSecurityContext.executeAs(listProjectsSpec) {
+      mcpRequestContext.executeAs(listProjectsSpec) {
         val search = request.arguments?.getString("search")
         val projects =
           projectService.findPermittedInOrganizationPaged(
@@ -74,7 +74,7 @@ class ProjectMcpTools(
         string("baseLanguageTag", "Tag of the base language (default: first language)")
       },
     ) { request ->
-      mcpSecurityContext.executeAs(createProjectSpec) {
+      mcpRequestContext.executeAs(createProjectSpec) {
         val args = request.arguments
         val languages =
           args.getList("languages")?.map { lang ->
@@ -115,7 +115,7 @@ class ProjectMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(getProjectStatsSpec, projectId) {
+      mcpRequestContext.executeAs(getProjectStatsSpec, projectId) {
         val stats = projectStatsService.getProjectStats(projectId)
         val result =
           mapOf(

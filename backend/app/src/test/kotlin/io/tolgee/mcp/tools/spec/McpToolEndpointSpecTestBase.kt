@@ -3,7 +3,7 @@ package io.tolgee.mcp.tools.spec
 import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
-import io.tolgee.mcp.McpSecurityContext
+import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.RateLimitSpec
 import io.tolgee.mcp.ToolEndpointSpec
 import io.tolgee.model.enums.OrganizationRoleType
@@ -28,7 +28,7 @@ abstract class McpToolEndpointSpecTestBase {
   protected lateinit var rateLimitService: RateLimitService
   protected lateinit var projectContextService: ProjectContextService
 
-  protected lateinit var sut: McpSecurityContext
+  protected lateinit var sut: McpRequestContext
 
   protected val businessEventData = mutableMapOf<String, String?>()
 
@@ -46,7 +46,7 @@ abstract class McpToolEndpointSpecTestBase {
     whenever(activityHolder.businessEventData).thenReturn(businessEventData)
 
     sut =
-      McpSecurityContext(
+      McpRequestContext(
         authenticationFacade,
         organizationRoleService,
         organizationHolder,

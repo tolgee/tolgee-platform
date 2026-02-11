@@ -5,7 +5,7 @@ import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.BigMetaController
 import io.tolgee.dtos.BigMetaDto
 import io.tolgee.dtos.RelatedKeyDto
-import io.tolgee.mcp.McpSecurityContext
+import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class BigMetaMcpTools(
-  private val mcpSecurityContext: McpSecurityContext,
+  private val mcpRequestContext: McpRequestContext,
   private val bigMetaService: BigMetaService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
@@ -36,7 +36,7 @@ class BigMetaMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(storeBigMetaSpec, projectId) {
+      mcpRequestContext.executeAs(storeBigMetaSpec, projectId) {
         val relatedKeys =
           request.arguments
             .getList("relatedKeysInOrder")

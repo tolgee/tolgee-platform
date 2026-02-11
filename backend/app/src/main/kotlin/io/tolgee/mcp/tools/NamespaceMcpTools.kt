@@ -3,7 +3,7 @@ package io.tolgee.mcp.tools
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.NamespaceController
-import io.tolgee.mcp.McpSecurityContext
+import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class NamespaceMcpTools(
-  private val mcpSecurityContext: McpSecurityContext,
+  private val mcpRequestContext: McpRequestContext,
   private val namespaceService: NamespaceService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
@@ -30,7 +30,7 @@ class NamespaceMcpTools(
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpSecurityContext.executeAs(listNamespacesSpec, projectId) {
+      mcpRequestContext.executeAs(listNamespacesSpec, projectId) {
         val namespaces =
           namespaceService.getAllInProject(projectId)
         val result =
