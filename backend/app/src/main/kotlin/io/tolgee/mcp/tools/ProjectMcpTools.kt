@@ -32,7 +32,7 @@ class ProjectMcpTools(
   override fun register(server: McpSyncServer) {
     server.addTool(
       "list_projects",
-      "List all Tolgee projects accessible to the current user",
+      "List Tolgee projects accessible to the current user (up to 100 results)",
       toolSchema {
         string("search", "Optional search query to filter projects by name")
       },

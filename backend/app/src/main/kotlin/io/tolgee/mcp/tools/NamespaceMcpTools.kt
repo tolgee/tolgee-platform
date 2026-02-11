@@ -24,7 +24,7 @@ class NamespaceMcpTools(
   override fun register(server: McpSyncServer) {
     server.addTool(
       "list_namespaces",
-      "List all namespaces in a Tolgee project",
+      "List all namespaces in a Tolgee project. Namespaces organize translation keys into logical groups (e.g. by feature, page, or module).",
       toolSchema {
         number("projectId", "ID of the project", required = true)
       },

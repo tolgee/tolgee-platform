@@ -55,7 +55,7 @@ class BatchMcpTools(
 
     server.addTool(
       "machine_translate",
-      "Start machine translation for specified keys into target languages. Returns a batch job ID to poll for completion.",
+      "Start machine translation for specified keys into target languages. Returns a batch job ID — use get_batch_job_status to poll for completion. Use list_languages to get target language IDs.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
         numberArray("keyIds", "IDs of keys to translate", required = true)

@@ -38,7 +38,7 @@ class KeyMcpTools(
   override fun register(server: McpSyncServer) {
     server.addTool(
       "search_keys",
-      "Search for translation keys in a Tolgee project by name or translation text",
+      "Search for translation keys in a Tolgee project by name or translation text. Returns up to 50 matching keys.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
         string("query", "Search query (matches key name or translation text)", required = true)
@@ -108,7 +108,7 @@ class KeyMcpTools(
 
     server.addTool(
       "get_key",
-      "Get a translation key by its ID",
+      "Get a translation key's metadata (name, namespace, description) by its ID. To get the key's translations, use get_translations.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
         number("keyId", "ID of the key", required = true)
@@ -135,7 +135,7 @@ class KeyMcpTools(
       toolSchema {
         number("projectId", "ID of the project", required = true)
         number("keyId", "ID of the key to update", required = true)
-        string("name", "New key name", required = true)
+        string("name", "New key name (provide the current name if unchanged)", required = true)
         string("namespace", "Optional: new namespace for the key")
         string("description", "Optional: new description for the key")
         string("branch", "Optional: branch name (for branching projects)")

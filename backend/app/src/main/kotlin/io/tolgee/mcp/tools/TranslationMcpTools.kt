@@ -28,7 +28,7 @@ class TranslationMcpTools(
   override fun register(server: McpSyncServer) {
     server.addTool(
       "get_translations",
-      "Get translations for a specific key in a Tolgee project. Returns translations in all or specified languages.",
+      "Get translations for a specific key in a Tolgee project. Returns translations in all project languages.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
         string("keyName", "The translation key name", required = true)
@@ -77,7 +77,7 @@ class TranslationMcpTools(
 
     server.addTool(
       "set_translation",
-      "Set or update a translation for a key in a specific language. Creates the key if it doesn't exist.",
+      "Set or update translations for a key in one or more languages. The key must already exist — use create_key to create it first.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
         string("keyName", "The translation key name", required = true)
