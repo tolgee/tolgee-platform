@@ -39,7 +39,6 @@ import { CdZipExport } from './CdZipExport';
 import { EscapeHtmlSelector } from 'tg.views/projects/export/components/EscapeHtmlSelector';
 import { BranchSelect } from 'tg.component/branching/BranchSelect';
 import { useIsBranchingEnabled } from 'tg.component/branching/useIsBranchingEnabled';
-import { FieldLabel } from 'tg.component/FormField';
 import React from 'react';
 import { StyledInputLabel } from 'tg.component/common/TextField';
 
