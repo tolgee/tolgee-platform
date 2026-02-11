@@ -147,6 +147,21 @@ This way, IDEA is started with correct environment from zsh or bash and so the G
 If you don't like this solution (I don't like it too), you can start looking for better solution.
 This thread is a good starting point: https://discuss.gradle.org/t/exec-execute-in-gradle-doesnt-use-path/25598/3
 
+## MCP Server
+
+Tolgee includes an [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) server at `/mcp/developer` that lets AI coding assistants manage translations directly.
+
+### Connecting with Claude Code
+
+```bash
+claude mcp add --transport http tolgee http://localhost:8080/mcp/developer \
+  --header "X-API-Key: tgpat_<your_personal_access_token>"
+```
+
+Replace `tgpat_<your_personal_access_token>` with a [Personal Access Token](https://docs.tolgee.io/platform/account_settings/api_keys_and_pat_tokens) generated in your Tolgee account settings. When connecting to a deployed instance, replace `http://localhost:8080` with that instance's URL.
+
+Once connected, your AI assistant can use Tolgee tools such as `search_keys`, `create_key`, `set_translation`, `list_languages`, `machine_translate`, and others.
+
 ## Logging business events
 
 To monitor business activities in the Tolgee platform, we use PostHog for event tracking. There are three ways to log business events:
