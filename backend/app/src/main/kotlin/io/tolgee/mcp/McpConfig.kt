@@ -4,7 +4,7 @@ import io.modelcontextprotocol.server.McpServer
 import io.modelcontextprotocol.server.McpSyncServer
 import io.modelcontextprotocol.server.transport.WebMvcStreamableServerTransportProvider
 import io.modelcontextprotocol.spec.McpSchema
-import org.springframework.boot.info.BuildProperties
+import io.tolgee.util.VersionProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.function.RouterFunction
@@ -23,13 +23,13 @@ class McpConfig {
   @Bean
   fun mcpServer(
     transportProvider: WebMvcStreamableServerTransportProvider,
-    buildProperties: BuildProperties,
+    versionProvider: VersionProvider,
     toolsProviders: List<McpToolsProvider>,
   ): McpSyncServer {
     val server =
       McpServer
         .sync(transportProvider)
-        .serverInfo("tolgee", buildProperties.version ?: "dev")
+        .serverInfo("tolgee", versionProvider.version)
         .capabilities(
           McpSchema.ServerCapabilities
             .builder()
