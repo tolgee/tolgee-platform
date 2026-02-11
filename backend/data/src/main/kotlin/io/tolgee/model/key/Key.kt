@@ -77,7 +77,6 @@ class Key(
   @ActivityLoggedProp
   var namespace: Namespace? = null
 
-  // Nullable for backward compatibility: NULL represents default branch for legacy data
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "branch_id")
   @ActivityLoggedProp
