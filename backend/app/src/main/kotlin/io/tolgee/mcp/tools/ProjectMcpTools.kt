@@ -9,10 +9,11 @@ import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectService
-import io.tolgee.service.project.ProjectStatsService
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 
@@ -21,13 +22,15 @@ class ProjectMcpTools(
   private val mcpRequestContext: McpRequestContext,
   private val projectService: ProjectService,
   private val projectCreationService: ProjectCreationService,
-  private val projectStatsService: ProjectStatsService,
+  private val languageStatsService: LanguageStatsService,
+  private val languageService: LanguageService,
   private val organizationRoleService: OrganizationRoleService,
   private val objectMapper: ObjectMapper,
 ) : McpToolsProvider {
   private val listProjectsSpec = buildSpec(ProjectsController::getAll, "list_projects")
   private val createProjectSpec = buildSpec(ProjectsController::createProject, "create_project")
-  private val getProjectStatsSpec = buildSpec(ProjectStatsController::getProjectStats, "get_project_stats")
+  private val getLanguageStatsSpec =
+    buildSpec(ProjectStatsController::getProjectStats, "get_project_language_statistics")
 
   override fun register(server: McpSyncServer) {
     server.addTool(
@@ -108,23 +111,34 @@ class ProjectMcpTools(
     }
 
     server.addTool(
-      "get_project_stats",
-      "Get project statistics including key count, member count, tag count, and task count",
+      "get_project_language_statistics",
+      "Get translation status and progress for each language in a project. " +
+        "Returns per-language statistics including translated, reviewed, and untranslated percentages.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpRequestContext.executeAs(getProjectStatsSpec, projectId) {
-        val stats = projectStatsService.getProjectStats(projectId)
+      mcpRequestContext.executeAs(getLanguageStatsSpec, projectId) {
+        val languages = languageService.findAll(projectId)
+        val languageIds = languages.map { it.id }.toSet()
+        val stats = languageStatsService.getLanguageStats(projectId, languageIds)
+        val languageById = languages.associateBy { it.id }
+
         val result =
-          mapOf(
-            "projectId" to stats.id,
-            "keyCount" to stats.keyCount,
-            "memberCount" to stats.memberCount,
-            "tagCount" to stats.tagCount,
-            "taskCount" to stats.taskCount,
-          )
+          stats.map { stat ->
+            val lang = languageById[stat.languageId]
+            mapOf(
+              "languageTag" to lang?.tag,
+              "languageName" to lang?.name,
+              "translatedPercentage" to stat.translatedPercentage,
+              "reviewedPercentage" to stat.reviewedPercentage,
+              "untranslatedPercentage" to stat.untranslatedPercentage,
+              "translatedKeys" to stat.translatedKeys,
+              "reviewedKeys" to stat.reviewedKeys,
+              "untranslatedKeys" to stat.untranslatedKeys,
+            )
+          }
         textResult(objectMapper.writeValueAsString(result))
       }
     }

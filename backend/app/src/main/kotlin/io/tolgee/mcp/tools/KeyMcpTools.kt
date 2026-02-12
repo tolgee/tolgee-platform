@@ -3,7 +3,6 @@ package io.tolgee.mcp.tools
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.keys.KeyController
-import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.dtos.request.translation.ImportKeysDto
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
@@ -24,17 +23,23 @@ class KeyMcpTools(
 ) : McpToolsProvider {
   private val listKeysSpec = buildSpec(KeyController::getAll, "list_keys")
   private val searchKeysSpec = buildSpec(KeyController::searchForKey, "search_keys")
-  private val createKeySpec = buildSpec(KeyController::create, "create_key")
-  private val importKeysSpec =
+  private val createKeysSpec =
     buildSpec(
       KeyController::class.java,
       "importKeys",
-      "batch_create_keys",
+      "create_keys",
       ImportKeysDto::class.java,
       String::class.java,
     )
   private val editKeySpec = buildSpec(KeyController::edit, "update_key")
   private val getKeySpec = buildSpec(KeyController::get, "get_key")
+  private val deleteKeysSpec =
+    buildSpec(
+      KeyController::class.java,
+      "delete",
+      "delete_keys",
+      Set::class.java,
+    )
 
   override fun register(server: McpSyncServer) {
     server.addTool(
@@ -79,7 +84,8 @@ class KeyMcpTools(
 
     server.addTool(
       "search_keys",
-      "Search for translation keys in a Tolgee project by name or translation text. Returns up to 50 matching keys.",
+      "Search for translation keys in a Tolgee project by name or translation text. Returns up to 50 matching keys. " +
+        "Note: namespace and tags filtering is not yet supported — filter results client-side if needed.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
         string("query", "Search query (matches key name or translation text)", required = true)
@@ -112,61 +118,74 @@ class KeyMcpTools(
     }
 
     server.addTool(
-      "create_key",
-      "Create a new translation key in a Tolgee project, optionally with initial translations and tags",
+      "create_keys",
+      "Create translation keys in a Tolgee project with optional translations and tags. " +
+        "Keys that already exist are silently skipped — their translations and tags are not updated. " +
+        "Use update_key and set_translation to modify existing keys.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
-        string("keyName", "Key name (e.g. 'home.welcome_message')", required = true)
-        string("namespace", "Optional: namespace for the key")
-        stringMap("translations", "Optional: initial translations as {languageTag: text} map")
-        stringArray("tags", "Optional: tags to assign to the key")
-        string("description", "Optional: description / developer context for the key")
+        objectArray("keys", "List of keys to create", required = true) {
+          string("name", "Key name (e.g. 'home.welcome_message')", required = true)
+          string("namespace", "Optional: namespace for the key (overrides top-level namespace)")
+          stringMap("translations", "Optional: translations as {languageTag: text} map")
+          stringArray("tags", "Optional: tags to assign to the key")
+          string("description", "Optional: description / developer context for the key")
+        }
+        string("namespace", "Optional: default namespace for all keys (individual keys can override)")
         string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpRequestContext.executeAs(createKeySpec, projectId) {
-        val args = request.arguments
-        val dto =
-          CreateKeyDto(
-            name = args.getString("keyName") ?: "",
-            namespace = args.getString("namespace"),
-            translations = args.getStringMap("translations"),
-            tags = args.getStringList("tags"),
-            description = args.getString("description"),
-            branch = args.getString("branch"),
-          )
-        val key = keyService.create(projectHolder.projectEntity, dto)
-        val result =
-          mapOf(
-            "id" to key.id,
-            "name" to key.name,
-            "namespace" to key.namespace?.name,
-          )
-        textResult(objectMapper.writeValueAsString(result))
+      mcpRequestContext.executeAs(createKeysSpec, projectId) {
+        val branch = request.arguments.getString("branch")
+        val defaultNamespace = request.arguments.getString("namespace")
+        val keys =
+          request.arguments.getList("keys")?.map { k ->
+            ImportKeysItemDto(
+              name = k.getString("name") ?: "",
+              namespace = k.getString("namespace") ?: defaultNamespace,
+              translations = k.getStringMap("translations") ?: emptyMap(),
+              tags = k.getStringList("tags"),
+              description = k.getString("description"),
+            )
+          } ?: emptyList()
+
+        keyService.importKeys(keys, projectHolder.projectEntity, branch)
+        textResult(objectMapper.writeValueAsString(mapOf("created" to true, "keyCount" to keys.size)))
       }
     }
 
     server.addTool(
       "get_key",
-      "Get a translation key's metadata (name, namespace, description) by its ID. To get the key's translations, use get_translations.",
+      "Get a translation key's metadata (name, namespace, description) by its name. To get the key's translations, use get_translations.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
-        number("keyId", "ID of the key", required = true)
+        string("keyName", "The translation key name", required = true)
+        string("namespace", "Optional: namespace of the key")
+        string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
       mcpRequestContext.executeAs(getKeySpec, projectId) {
-        val keyId = request.arguments.getLong("keyId")!!
-        val view = keyService.getView(projectId, keyId)
-        val result =
-          mapOf(
-            "keyId" to view.id,
-            "keyName" to view.name,
-            "namespace" to view.namespace,
-            "description" to view.description,
+        val key =
+          keyService.find(
+            projectId = projectId,
+            name = request.arguments.getString("keyName") ?: "",
+            namespace = request.arguments.getString("namespace"),
+            branch = request.arguments.getString("branch"),
           )
-        textResult(objectMapper.writeValueAsString(result))
+        if (key == null) {
+          errorResult("Key not found")
+        } else {
+          val result =
+            mapOf(
+              "keyId" to key.id,
+              "keyName" to key.name,
+              "namespace" to key.namespace?.name,
+              "description" to key.keyMeta?.description,
+            )
+          textResult(objectMapper.writeValueAsString(result))
+        }
       }
     }
 
@@ -175,65 +194,84 @@ class KeyMcpTools(
       "Update an existing translation key's name, namespace, or description",
       toolSchema {
         number("projectId", "ID of the project", required = true)
-        number("keyId", "ID of the key to update", required = true)
-        string("name", "New key name (provide the current name if unchanged)", required = true)
-        string("namespace", "Optional: new namespace for the key")
-        string("description", "Optional: new description for the key")
-        string("branch", "Optional: branch name (for branching projects)")
+        string("keyName", "Current key name (used to find the key)", required = true)
+        string("keyNamespace", "Optional: current namespace of the key (used to find the key)")
+        string("keyBranch", "Optional: branch name (used to find the key, for branching projects)")
+        string("newName", "New key name (provide the current name if unchanged)", required = true)
+        string("newNamespace", "Optional: new namespace for the key")
+        string("newDescription", "Optional: new description for the key")
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
       mcpRequestContext.executeAs(editKeySpec, projectId) {
-        val keyId = request.arguments.getLong("keyId")!!
-        val dto =
-          EditKeyDto(
-            name = request.arguments.getString("name") ?: "",
-            namespace = request.arguments.getString("namespace"),
-            description = request.arguments.getString("description"),
-            branch = request.arguments.getString("branch"),
+        val key =
+          keyService.find(
+            projectId = projectId,
+            name = request.arguments.getString("keyName") ?: "",
+            namespace = request.arguments.getString("keyNamespace"),
+            branch = request.arguments.getString("keyBranch"),
           )
-        val key = keyService.edit(keyId, dto)
-        val result =
-          mapOf(
-            "id" to key.id,
-            "name" to key.name,
-            "namespace" to key.namespace?.name,
-          )
-        textResult(objectMapper.writeValueAsString(result))
+        if (key == null) {
+          errorResult("Key not found")
+        } else {
+          val dto =
+            EditKeyDto(
+              name = request.arguments.getString("newName") ?: "",
+              namespace = request.arguments.getString("newNamespace"),
+              description = request.arguments.getString("newDescription"),
+            )
+          val updated = keyService.edit(key.id, dto)
+          val result =
+            mapOf(
+              "id" to updated.id,
+              "name" to updated.name,
+              "namespace" to updated.namespace?.name,
+            )
+          textResult(objectMapper.writeValueAsString(result))
+        }
       }
     }
 
     server.addTool(
-      "batch_create_keys",
-      "Import multiple keys with translations at once. If a key already exists, its translations and tags are not updated.",
+      "delete_keys",
+      "Delete translation keys from a Tolgee project. " +
+        "IMPORTANT: This is a destructive operation. The AI assistant should always confirm with the user before calling this tool.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
-        objectArray("keys", "List of keys to import", required = true) {
-          string("name", "Key name", required = true)
-          string("namespace", "Optional: namespace for the key")
-          stringMap("translations", "Translations as {languageTag: text} map")
-          stringArray("tags", "Optional: tags for the key")
-          string("description", "Optional: description of the key")
-        }
+        stringArray("keyNames", "Names of the keys to delete", required = true)
+        string("namespace", "Optional: namespace of the keys")
         string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpRequestContext.executeAs(importKeysSpec, projectId) {
+      mcpRequestContext.executeAs(deleteKeysSpec, projectId) {
+        val keyNames = request.arguments.getStringList("keyNames") ?: emptyList()
+        val namespace = request.arguments.getString("namespace")
         val branch = request.arguments.getString("branch")
-        val keys =
-          request.arguments.getList("keys")?.map { k ->
-            ImportKeysItemDto(
-              name = k.getString("name") ?: "",
-              namespace = k.getString("namespace"),
-              translations = k.getStringMap("translations") ?: emptyMap(),
-              tags = k.getStringList("tags"),
-              description = k.getString("description"),
-            )
-          } ?: emptyList()
 
-        keyService.importKeys(keys, projectHolder.projectEntity, branch)
-        textResult(objectMapper.writeValueAsString(mapOf("imported" to true, "keyCount" to keys.size)))
+        val resolved =
+          keyNames.map { name ->
+            name to
+              keyService.find(
+                projectId = projectId,
+                name = name,
+                namespace = namespace,
+                branch = branch,
+              )
+          }
+
+        val notFound = resolved.filter { it.second == null }.map { it.first }
+        if (notFound.isNotEmpty()) {
+          errorResult("Keys not found: ${notFound.joinToString(", ")}")
+        } else {
+          val ids = resolved.mapNotNull { it.second?.id }.toSet()
+          keyService.deleteMultiple(ids)
+          textResult(
+            objectMapper.writeValueAsString(
+              mapOf("deleted" to true, "keyCount" to ids.size),
+            ),
+          )
+        }
       }
     }
   }

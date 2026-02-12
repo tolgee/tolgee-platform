@@ -25,13 +25,15 @@ class McpBigMetaToolsTest : AbstractMcpTest() {
   fun `store_big_meta stores key relationships`() {
     callTool(
       client,
-      "create_key",
-      mapOf("projectId" to data.projectId, "keyName" to "key.one"),
-    )
-    callTool(
-      client,
-      "create_key",
-      mapOf("projectId" to data.projectId, "keyName" to "key.two"),
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to
+          listOf(
+            mapOf("name" to "key.one"),
+            mapOf("name" to "key.two"),
+          ),
+      ),
     )
 
     val json =

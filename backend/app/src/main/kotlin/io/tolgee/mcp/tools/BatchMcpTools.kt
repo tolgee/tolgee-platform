@@ -12,6 +12,8 @@ import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
+import io.tolgee.service.key.KeyService
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
 import org.springframework.stereotype.Component
 
@@ -20,6 +22,8 @@ class BatchMcpTools(
   private val mcpRequestContext: McpRequestContext,
   private val batchJobService: BatchJobService,
   private val securityService: SecurityService,
+  private val keyService: KeyService,
+  private val languageService: LanguageService,
   private val projectHolder: ProjectHolder,
   private val authenticationFacade: AuthenticationFacade,
   private val objectMapper: ObjectMapper,
@@ -55,17 +59,49 @@ class BatchMcpTools(
 
     server.addTool(
       "machine_translate",
-      "Start machine translation for specified keys into target languages. Returns a batch job ID — use get_batch_job_status to poll for completion. Use list_languages to get target language IDs.",
+      "Start machine translation for specified keys into target languages. Returns a batch job ID — use get_batch_job_status to poll for completion.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
-        numberArray("keyIds", "IDs of keys to translate", required = true)
-        numberArray("targetLanguageIds", "IDs of target languages to translate into", required = true)
+        stringArray("keyNames", "Names of keys to translate", required = true)
+        stringArray("targetLanguageTags", "Language tags to translate into (e.g. ['de', 'fr'])", required = true)
+        string("namespace", "Optional: namespace of the keys")
+        string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
       mcpRequestContext.executeAs(machineTranslateSpec, projectId) {
-        val keyIds = request.arguments.getLongList("keyIds") ?: emptyList()
-        val targetLanguageIds = request.arguments.getLongList("targetLanguageIds") ?: emptyList()
+        val keyNames = request.arguments.getStringList("keyNames") ?: emptyList()
+        val targetLanguageTags = request.arguments.getStringList("targetLanguageTags") ?: emptyList()
+        val namespace = request.arguments.getString("namespace")
+        val branch = request.arguments.getString("branch")
+
+        // Resolve key names to IDs
+        val resolvedKeys =
+          keyNames.map { name ->
+            name to
+              keyService.find(
+                projectId = projectId,
+                name = name,
+                namespace = namespace,
+                branch = branch,
+              )
+          }
+        val notFoundKeys = resolvedKeys.filter { it.second == null }.map { it.first }
+        if (notFoundKeys.isNotEmpty()) {
+          return@executeAs errorResult("Keys not found: ${notFoundKeys.joinToString(", ")}")
+        }
+        val keyIds = resolvedKeys.mapNotNull { it.second?.id }
+
+        // Resolve language tags to IDs
+        val resolvedLangs =
+          targetLanguageTags.map { tag ->
+            tag to languageService.findByTag(tag, projectId)
+          }
+        val notFoundLangs = resolvedLangs.filter { it.second == null }.map { it.first }
+        if (notFoundLangs.isNotEmpty()) {
+          return@executeAs errorResult("Languages not found: ${notFoundLangs.joinToString(", ")}")
+        }
+        val targetLanguageIds = resolvedLangs.mapNotNull { it.second?.id }
 
         securityService.checkLanguageTranslatePermission(projectId, targetLanguageIds)
         securityService.checkKeyIdsExistAndIsFromProject(keyIds, projectId)

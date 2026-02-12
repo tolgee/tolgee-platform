@@ -20,7 +20,7 @@ class TagMcpTools(
   private val objectMapper: ObjectMapper,
 ) : McpToolsProvider {
   private val listTagsSpec = buildSpec(TagsController::getAll, "list_tags")
-  private val tagKeySpec = buildSpec(TagsController::tagKey, "tag_key")
+  private val tagKeysSpec = buildSpec(TagsController::tagKey, "tag_keys")
 
   override fun register(server: McpSyncServer) {
     server.addTool(
@@ -52,25 +52,50 @@ class TagMcpTools(
     }
 
     server.addTool(
-      "tag_key",
-      "Add a tag to a translation key. Creates the tag if it doesn't exist.",
+      "tag_keys",
+      "Add tags to translation keys. Creates tags if they don't exist.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
-        number("keyId", "ID of the key to tag", required = true)
-        string("tagName", "Name of the tag to add", required = true)
+        stringArray("keyNames", "Names of the keys to tag", required = true)
+        stringArray("tags", "Names of the tags to add", required = true)
+        string("namespace", "Optional: namespace of the keys")
+        string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
-      mcpRequestContext.executeAs(tagKeySpec, projectId) {
-        val keyId = request.arguments.getLong("keyId")!!
-        val tagName = request.arguments.getString("tagName") ?: ""
-        val tag = tagService.tagKey(projectId, keyId, tagName)
-        val result =
-          mapOf(
-            "id" to tag.id,
-            "name" to tag.name,
+      mcpRequestContext.executeAs(tagKeysSpec, projectId) {
+        val keyNames = request.arguments.getStringList("keyNames") ?: emptyList()
+        val tags = request.arguments.getStringList("tags") ?: emptyList()
+        val namespace = request.arguments.getString("namespace")
+        val branch = request.arguments.getString("branch")
+
+        val resolved =
+          keyNames.map { name ->
+            name to
+              keyService.find(
+                projectId = projectId,
+                name = name,
+                namespace = namespace,
+                branch = branch,
+              )
+          }
+
+        val notFound = resolved.filter { it.second == null }.map { it.first }
+        if (notFound.isNotEmpty()) {
+          errorResult("Keys not found: ${notFound.joinToString(", ")}")
+        } else {
+          val keyIdToTags = resolved.associate { (_, key) -> key!!.id to tags }
+          tagService.tagKeysById(projectId, keyIdToTags)
+          textResult(
+            objectMapper.writeValueAsString(
+              mapOf(
+                "tagged" to true,
+                "keyCount" to keyNames.size,
+                "tags" to tags,
+              ),
+            ),
           )
-        textResult(objectMapper.writeValueAsString(result))
+        }
       }
     }
   }

@@ -33,10 +33,12 @@ class BigMetaMcpTools(
           string("keyName", "Key name", required = true)
           string("namespace", "Optional: key namespace")
         }
+        string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!
       mcpRequestContext.executeAs(storeBigMetaSpec, projectId) {
+        val branch = request.arguments.getString("branch")
         val relatedKeys =
           request.arguments
             .getList("relatedKeysInOrder")
@@ -44,6 +46,7 @@ class BigMetaMcpTools(
               RelatedKeyDto(
                 keyName = k.getString("keyName") ?: "",
                 namespace = k.getString("namespace"),
+                branch = branch,
               )
             }?.toMutableList()
 

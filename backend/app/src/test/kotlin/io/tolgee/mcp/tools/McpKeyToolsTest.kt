@@ -39,30 +39,37 @@ class McpKeyToolsTest : AbstractMcpTest() {
   }
 
   @Test
-  fun `create_key creates a key`() {
+  fun `create_keys creates keys`() {
     val json =
       callToolAndGetJson(
         client,
-        "create_key",
+        "create_keys",
         mapOf(
           "projectId" to data.projectId,
-          "keyName" to "home.welcome",
+          "keys" to
+            listOf(
+              mapOf("name" to "home.welcome"),
+              mapOf("name" to "home.subtitle", "translations" to mapOf("en" to "Welcome")),
+            ),
         ),
       )
-    assertThat(json["id"]).isNotNull()
-    assertThat(json["name"].asText()).isEqualTo("home.welcome")
+    assertThat(json["created"].asBoolean()).isTrue()
+    assertThat(json["keyCount"].asInt()).isEqualTo(2)
 
-    val key = keyService.get(json["id"].asLong())
-    assertThat(key.name).isEqualTo("home.welcome")
-    assertThat(key.project.id).isEqualTo(data.projectId)
+    val keys = keyService.getAll(data.projectId)
+    val keyNames = keys.map { it.name }
+    assertThat(keyNames).contains("home.welcome", "home.subtitle")
   }
 
   @Test
   fun `search_keys finds created key`() {
     callTool(
       client,
-      "create_key",
-      mapOf("projectId" to data.projectId, "keyName" to "search.target"),
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "search.target")),
+      ),
     )
     val json =
       callToolAndGetJson(
@@ -76,66 +83,98 @@ class McpKeyToolsTest : AbstractMcpTest() {
   }
 
   @Test
-  fun `get_key returns key details`() {
-    val createResult =
-      callToolAndGetJson(
-        client,
-        "create_key",
-        mapOf("projectId" to data.projectId, "keyName" to "detail.key"),
-      )
-    val keyId = createResult["id"].asLong()
+  fun `get_key returns key details by name`() {
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "detail.key")),
+      ),
+    )
 
     val json =
       callToolAndGetJson(
         client,
         "get_key",
-        mapOf("projectId" to data.projectId, "keyId" to keyId),
+        mapOf("projectId" to data.projectId, "keyName" to "detail.key"),
       )
-    assertThat(json["keyId"].asLong()).isEqualTo(keyId)
+    assertThat(json["keyId"]).isNotNull()
     assertThat(json["keyName"].asText()).isEqualTo("detail.key")
   }
 
   @Test
-  fun `update_key changes name`() {
-    val createResult =
-      callToolAndGetJson(
-        client,
-        "create_key",
-        mapOf("projectId" to data.projectId, "keyName" to "old.name"),
-      )
-    val keyId = createResult["id"].asLong()
+  fun `update_key changes name by key name lookup`() {
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "old.name")),
+      ),
+    )
 
     val json =
       callToolAndGetJson(
         client,
         "update_key",
-        mapOf("projectId" to data.projectId, "keyId" to keyId, "name" to "new.name"),
+        mapOf(
+          "projectId" to data.projectId,
+          "keyName" to "old.name",
+          "newName" to "new.name",
+        ),
       )
     assertThat(json["name"].asText()).isEqualTo("new.name")
 
-    val key = keyService.get(keyId)
-    assertThat(key.name).isEqualTo("new.name")
+    val key = keyService.find(data.projectId, "new.name", null)
+    assertThat(key).isNotNull()
+    assertThat(key!!.name).isEqualTo("new.name")
   }
 
   @Test
-  fun `batch_create_keys creates multiple`() {
+  fun `delete_keys deletes keys by name`() {
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to
+          listOf(
+            mapOf("name" to "delete.one"),
+            mapOf("name" to "delete.two"),
+            mapOf("name" to "keep.me"),
+          ),
+      ),
+    )
+
     val json =
       callToolAndGetJson(
         client,
-        "batch_create_keys",
+        "delete_keys",
         mapOf(
           "projectId" to data.projectId,
-          "keys" to
-            listOf(
-              mapOf("name" to "batch.one", "translations" to mapOf("en" to "One")),
-              mapOf("name" to "batch.two", "translations" to mapOf("en" to "Two")),
-            ),
+          "keyNames" to listOf("delete.one", "delete.two"),
         ),
       )
-    assertThat(json).isNotNull()
+    assertThat(json["deleted"].asBoolean()).isTrue()
+    assertThat(json["keyCount"].asInt()).isEqualTo(2)
 
-    val keys = keyService.getAll(data.projectId)
-    val keyNames = keys.map { it.name }
-    assertThat(keyNames).contains("batch.one", "batch.two")
+    assertThat(keyService.find(data.projectId, "delete.one", null)).isNull()
+    assertThat(keyService.find(data.projectId, "delete.two", null)).isNull()
+    assertThat(keyService.find(data.projectId, "keep.me", null)).isNotNull()
+  }
+
+  @Test
+  fun `delete_keys returns error for non-existent key`() {
+    val result =
+      callTool(
+        client,
+        "delete_keys",
+        mapOf(
+          "projectId" to data.projectId,
+          "keyNames" to listOf("does.not.exist"),
+        ),
+      )
+    assertThat(result.isError).isTrue()
   }
 }

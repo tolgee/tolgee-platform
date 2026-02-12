@@ -45,11 +45,10 @@ class McpLanguageToolsTest : AbstractMcpTest() {
     // Create a key with a namespace
     callTool(
       client,
-      "create_key",
+      "create_keys",
       mapOf(
         "projectId" to data.projectId,
-        "keyName" to "ns.key",
-        "namespace" to "my-namespace",
+        "keys" to listOf(mapOf("name" to "ns.key", "namespace" to "my-namespace")),
       ),
     )
 

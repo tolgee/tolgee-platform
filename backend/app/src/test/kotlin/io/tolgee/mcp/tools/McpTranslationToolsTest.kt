@@ -17,11 +17,10 @@ class McpTranslationToolsTest : AbstractMcpTest() {
     // Create a key with a translation for testing
     callTool(
       client,
-      "create_key",
+      "create_keys",
       mapOf(
         "projectId" to data.projectId,
-        "keyName" to "greeting",
-        "translations" to mapOf("en" to "Hello"),
+        "keys" to listOf(mapOf("name" to "greeting", "translations" to mapOf("en" to "Hello"))),
       ),
     )
   }
@@ -85,16 +84,18 @@ class McpTranslationToolsTest : AbstractMcpTest() {
       ),
     )
 
+    // Request only German translations
     val json =
       callToolAndGetJson(
         client,
         "get_translations",
-        mapOf("projectId" to data.projectId, "keyName" to "greeting"),
+        mapOf("projectId" to data.projectId, "keyName" to "greeting", "languages" to listOf("de")),
       )
     assertThat(json).isNotNull()
     assertThat(json.has("translations")).isTrue()
     val translations = json["translations"]
     val languageTags = (0 until translations.size()).map { translations[it]["languageTag"].asText() }
     assertThat(languageTags).contains("de")
+    assertThat(languageTags).doesNotContain("en")
   }
 }

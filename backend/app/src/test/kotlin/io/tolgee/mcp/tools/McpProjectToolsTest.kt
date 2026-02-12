@@ -52,9 +52,19 @@ class McpProjectToolsTest : AbstractMcpTest() {
   }
 
   @Test
-  fun `get_project_stats returns stats`() {
-    val json = callToolAndGetJson(client, "get_project_stats", mapOf("projectId" to data.projectId))
-    assertThat(json["keyCount"]).isNotNull()
-    assertThat(json["memberCount"]).isNotNull()
+  fun `get_project_language_statistics returns per-language stats`() {
+    val json =
+      callToolAndGetJson(
+        client,
+        "get_project_language_statistics",
+        mapOf("projectId" to data.projectId),
+      )
+    assertThat(json.isArray).isTrue()
+    if (json.size() > 0) {
+      assertThat(json[0].has("languageTag")).isTrue()
+      assertThat(json[0].has("translatedPercentage")).isTrue()
+      assertThat(json[0].has("reviewedPercentage")).isTrue()
+      assertThat(json[0].has("untranslatedPercentage")).isTrue()
+    }
   }
 }

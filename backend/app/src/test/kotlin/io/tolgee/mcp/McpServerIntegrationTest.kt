@@ -199,8 +199,11 @@ class McpServerIntegrationTest : AbstractMcpTest() {
       runCatching {
         callTool(
           client,
-          "create_key",
-          mapOf("projectId" to data.projectId, "keyName" to "readonly.test"),
+          "create_keys",
+          mapOf(
+            "projectId" to data.projectId,
+            "keys" to listOf(mapOf("name" to "readonly.test")),
+          ),
         )
       }.exceptionOrNull(),
     ).isNotNull()

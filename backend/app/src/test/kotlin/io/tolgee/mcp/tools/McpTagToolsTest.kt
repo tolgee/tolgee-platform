@@ -18,23 +18,24 @@ class McpTagToolsTest : AbstractMcpTest() {
   }
 
   @Test
-  fun `tag_key tags a key`() {
-    val createResult =
-      callToolAndGetJson(
-        client,
-        "create_key",
-        mapOf("projectId" to data.projectId, "keyName" to "taggable.key"),
-      )
-    val keyId = createResult["id"].asLong()
+  fun `tag_keys tags keys`() {
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "taggable.key")),
+      ),
+    )
 
     val json =
       callToolAndGetJson(
         client,
-        "tag_key",
-        mapOf("projectId" to data.projectId, "keyId" to keyId, "tagName" to "my-tag"),
+        "tag_keys",
+        mapOf("projectId" to data.projectId, "keyNames" to listOf("taggable.key"), "tags" to listOf("my-tag")),
       )
-    assertThat(json["id"]).isNotNull()
-    assertThat(json["name"].asText()).isEqualTo("my-tag")
+    assertThat(json["tagged"].asBoolean()).isTrue()
+    assertThat(json["keyCount"].asInt()).isEqualTo(1)
 
     val tags =
       tagService.getProjectTags(
@@ -47,17 +48,18 @@ class McpTagToolsTest : AbstractMcpTest() {
 
   @Test
   fun `list_tags returns project tags`() {
-    val createResult =
-      callToolAndGetJson(
-        client,
-        "create_key",
-        mapOf("projectId" to data.projectId, "keyName" to "tagged.key"),
-      )
-    val keyId = createResult["id"].asLong()
     callTool(
       client,
-      "tag_key",
-      mapOf("projectId" to data.projectId, "keyId" to keyId, "tagName" to "my-tag"),
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "tagged.key")),
+      ),
+    )
+    callTool(
+      client,
+      "tag_keys",
+      mapOf("projectId" to data.projectId, "keyNames" to listOf("tagged.key"), "tags" to listOf("my-tag")),
     )
 
     val json = callToolAndGetJson(client, "list_tags", mapOf("projectId" to data.projectId))
@@ -76,22 +78,18 @@ class McpTagToolsTest : AbstractMcpTest() {
 
   @Test
   fun `list_tags with search filter`() {
-    val createResult =
-      callToolAndGetJson(
-        client,
-        "create_key",
-        mapOf("projectId" to data.projectId, "keyName" to "multi.tag.key"),
-      )
-    val keyId = createResult["id"].asLong()
     callTool(
       client,
-      "tag_key",
-      mapOf("projectId" to data.projectId, "keyId" to keyId, "tagName" to "alpha-tag"),
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "multi.tag.key")),
+      ),
     )
     callTool(
       client,
-      "tag_key",
-      mapOf("projectId" to data.projectId, "keyId" to keyId, "tagName" to "beta-tag"),
+      "tag_keys",
+      mapOf("projectId" to data.projectId, "keyNames" to listOf("multi.tag.key"), "tags" to listOf("alpha-tag", "beta-tag")),
     )
 
     val json =

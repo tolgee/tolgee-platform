@@ -28,25 +28,20 @@ class McpBatchToolsTest : AbstractMcpTest() {
 
   @Test
   fun `machine_translate starts a batch job`() {
-    val createKeyResult =
-      callToolAndGetJson(
-        client,
-        "create_key",
-        mapOf(
-          "projectId" to data.projectId,
-          "keyName" to "mt.key",
-          "translations" to mapOf("en" to "Hello"),
-        ),
-      )
-    val keyId = createKeyResult["id"].asLong()
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "mt.key", "translations" to mapOf("en" to "Hello"))),
+      ),
+    )
 
-    val createLangResult =
-      callToolAndGetJson(
-        client,
-        "create_language",
-        mapOf("projectId" to data.projectId, "name" to "German", "tag" to "de"),
-      )
-    val germanLangId = createLangResult["id"].asLong()
+    callTool(
+      client,
+      "create_language",
+      mapOf("projectId" to data.projectId, "name" to "German", "tag" to "de"),
+    )
 
     val json =
       callToolAndGetJson(
@@ -54,8 +49,8 @@ class McpBatchToolsTest : AbstractMcpTest() {
         "machine_translate",
         mapOf(
           "projectId" to data.projectId,
-          "keyIds" to listOf(keyId),
-          "targetLanguageIds" to listOf(germanLangId),
+          "keyNames" to listOf("mt.key"),
+          "targetLanguageTags" to listOf("de"),
         ),
       )
     assertThat(json["jobId"]).isNotNull()
@@ -68,25 +63,20 @@ class McpBatchToolsTest : AbstractMcpTest() {
 
   @Test
   fun `get_batch_job_status returns job status`() {
-    val createKeyResult =
-      callToolAndGetJson(
-        client,
-        "create_key",
-        mapOf(
-          "projectId" to data.projectId,
-          "keyName" to "status.key",
-          "translations" to mapOf("en" to "Hi"),
-        ),
-      )
-    val keyId = createKeyResult["id"].asLong()
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "status.key", "translations" to mapOf("en" to "Hi"))),
+      ),
+    )
 
-    val createLangResult =
-      callToolAndGetJson(
-        client,
-        "create_language",
-        mapOf("projectId" to data.projectId, "name" to "German", "tag" to "de"),
-      )
-    val germanLangId = createLangResult["id"].asLong()
+    callTool(
+      client,
+      "create_language",
+      mapOf("projectId" to data.projectId, "name" to "German", "tag" to "de"),
+    )
 
     val mtResult =
       callToolAndGetJson(
@@ -94,8 +84,8 @@ class McpBatchToolsTest : AbstractMcpTest() {
         "machine_translate",
         mapOf(
           "projectId" to data.projectId,
-          "keyIds" to listOf(keyId),
-          "targetLanguageIds" to listOf(germanLangId),
+          "keyNames" to listOf("status.key"),
+          "targetLanguageTags" to listOf("de"),
         ),
       )
     val jobId = mtResult["jobId"].asLong()
