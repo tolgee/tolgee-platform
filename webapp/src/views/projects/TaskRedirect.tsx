@@ -21,7 +21,7 @@ export const TaskRedirect = () => {
     defaultVal: undefined,
   });
   const [detail] = useUrlSearchState('detail');
-  const { withBranchLink } = useBranchLinks();
+  const { withBranchLink, branch } = useBranchLinks();
 
   const getLinkToTask = (task: TaskModel) => {
     const languages = new Set([project.baseLanguage!.tag, task.language.tag]);
@@ -31,7 +31,7 @@ export const TaskRedirect = () => {
       {
         [PARAMS.PROJECT_ID]: project.id,
       },
-      task.branchName
+      branch ? task.branchName : undefined
     )}?${QUERY.TRANSLATIONS_PREFILTERS_TASK}=${task.number}`;
 
     if (detail === 'true') {
