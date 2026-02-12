@@ -1,6 +1,7 @@
 package io.tolgee.mcp.tools
 
 import io.modelcontextprotocol.client.McpSyncClient
+import io.tolgee.AbstractMcpTest
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.repository.KeysDistanceRepository
 import io.tolgee.testing.assertions.Assertions.assertThat

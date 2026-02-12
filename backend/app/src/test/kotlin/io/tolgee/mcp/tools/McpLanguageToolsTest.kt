@@ -1,6 +1,7 @@
 package io.tolgee.mcp.tools
 
 import io.modelcontextprotocol.client.McpSyncClient
+import io.tolgee.AbstractMcpTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

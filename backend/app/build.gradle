@@ -214,9 +214,9 @@ dependencies {
     /**
      * MCP SDK
      */
-    implementation platform("io.modelcontextprotocol.sdk:mcp-bom:0.17.2")
-    implementation "io.modelcontextprotocol.sdk:mcp"
-    implementation "io.modelcontextprotocol.sdk:mcp-spring-webmvc"
+    implementation platform(libs.mcpBom)
+    implementation libs.mcp
+    implementation libs.mcpSpringWebmvc
 
 }
 

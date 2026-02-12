@@ -32,7 +32,10 @@ class TranslationMcpTools(
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
         string("branch", "Optional: branch name (for branching projects)")
-        stringArray("languages", "Optional: language tags to filter by (e.g. ['en', 'de']). If omitted, returns all languages.")
+        stringArray(
+          "languages",
+          "Optional: language tags to filter by (e.g. ['en', 'de']). If omitted, returns all languages.",
+        )
       },
     ) { request ->
       val projectId = request.arguments.getLong("projectId")!!

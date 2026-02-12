@@ -1,11 +1,10 @@
-package io.tolgee.mcp.tools
+package io.tolgee
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.modelcontextprotocol.client.McpClient
 import io.modelcontextprotocol.client.McpSyncClient
 import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport
 import io.modelcontextprotocol.spec.McpSchema
-import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.model.Pat
 import org.junit.jupiter.api.AfterEach

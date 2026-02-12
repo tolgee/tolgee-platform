@@ -1,8 +1,9 @@
-package io.tolgee.mcp.tools
+package io.tolgee.ee.mcp
 
 import io.modelcontextprotocol.client.McpSyncClient
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.AbstractMcpTest
 import io.tolgee.service.branching.BranchService
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach

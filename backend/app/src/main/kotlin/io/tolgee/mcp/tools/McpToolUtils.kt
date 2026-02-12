@@ -1,13 +1,13 @@
 package io.tolgee.mcp.tools
 
 import io.modelcontextprotocol.server.McpServerFeatures
-import io.tolgee.model.key.Key
-import io.tolgee.service.key.KeyService
 import io.modelcontextprotocol.server.McpSyncServer
 import io.modelcontextprotocol.spec.McpSchema
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult
 import io.modelcontextprotocol.spec.McpSchema.JsonSchema
 import io.modelcontextprotocol.spec.McpSchema.TextContent
+import io.tolgee.model.key.Key
+import io.tolgee.service.key.KeyService
 
 fun textResult(text: String): CallToolResult {
   return CallToolResult

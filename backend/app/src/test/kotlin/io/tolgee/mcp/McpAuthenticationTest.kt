@@ -3,7 +3,7 @@ package io.tolgee.mcp
 import io.modelcontextprotocol.client.McpClient
 import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport
 import io.modelcontextprotocol.spec.McpSchema
-import io.tolgee.mcp.tools.AbstractMcpTest
+import io.tolgee.AbstractMcpTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

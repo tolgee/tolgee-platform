@@ -1,6 +1,6 @@
 package io.tolgee.mcp
 
-import io.tolgee.mcp.tools.AbstractMcpTest
+import io.tolgee.AbstractMcpTest
 import io.tolgee.testing.WithoutEeTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
