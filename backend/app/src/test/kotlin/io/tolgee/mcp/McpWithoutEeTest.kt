@@ -57,14 +57,24 @@ class McpWithoutEeTest : AbstractMcpTest() {
   @Test
   fun `core tools are always available`() {
     val client = createMcpClient(data.pat.token!!)
-    val toolNames = client.listTools().tools().map { it.name() }.toSet()
+    val toolNames =
+      client
+        .listTools()
+        .tools()
+        .map { it.name() }
+        .toSet()
     assertThat(toolNames).containsAll(coreTools)
   }
 
   @Test
   fun `branch tools are only available with EE module`() {
     val client = createMcpClient(data.pat.token!!)
-    val toolNames = client.listTools().tools().map { it.name() }.toSet()
+    val toolNames =
+      client
+        .listTools()
+        .tools()
+        .map { it.name() }
+        .toSet()
     if (eePresent) {
       assertThat(toolNames).containsAll(eeBranchTools)
     } else {

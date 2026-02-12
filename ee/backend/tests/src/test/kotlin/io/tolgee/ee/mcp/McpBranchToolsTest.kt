@@ -1,9 +1,9 @@
 package io.tolgee.ee.mcp
 
 import io.modelcontextprotocol.client.McpSyncClient
+import io.tolgee.AbstractMcpTest
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.AbstractMcpTest
 import io.tolgee.service.branching.BranchService
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -34,9 +34,10 @@ class McpBranchToolsTest : AbstractMcpTest() {
   fun `branch tools fail when branching feature is not enabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     assertThat(
-      org.junit.jupiter.api.assertThrows<io.modelcontextprotocol.spec.McpError> {
-        callTool(client, "list_branches", mapOf("projectId" to data.projectId))
-      }.message,
+      org.junit.jupiter.api
+        .assertThrows<io.modelcontextprotocol.spec.McpError> {
+          callTool(client, "list_branches", mapOf("projectId" to data.projectId))
+        }.message,
     ).contains("feature_not_enabled")
   }
 

@@ -90,7 +90,11 @@ class McpTagToolsTest : AbstractMcpTest() {
     callTool(
       client,
       "tag_keys",
-      mapOf("projectId" to data.projectId, "keyNames" to listOf("multi.tag.key"), "tags" to listOf("alpha-tag", "beta-tag")),
+      mapOf(
+        "projectId" to data.projectId,
+        "keyNames" to listOf("multi.tag.key"),
+        "tags" to listOf("alpha-tag", "beta-tag"),
+      ),
     )
 
     val json =

@@ -4,12 +4,12 @@ import com.posthog.server.PostHog
 import io.modelcontextprotocol.client.McpClient
 import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport
 import io.modelcontextprotocol.spec.McpSchema
+import io.tolgee.AbstractMcpTest
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.fixtures.waitForNotThrowing
-import io.tolgee.AbstractMcpTest
 import io.tolgee.repository.activity.ActivityRevisionRepository
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
