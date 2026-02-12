@@ -59,7 +59,7 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
         left join ImportSettings is on is.project = ik.file.import.project 
         left join ik.file.import.branch b
         where (itc.id is not null or :onlyConflicts = false)
-        and ((b is null and (ekb is null or ekb.isDefault)) or (b.id = ekb.id))
+        and (ek is null or (b is null and (ekb is null or ekb.isDefault)) or (b.id = ekb.id))
         and ((itc.id is not null and it.resolvedHash is null) or :onlyUnresolved = false)
         and it.language.id = :languageId
         and (ik.shouldBeImported)
