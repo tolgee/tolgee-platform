@@ -35,6 +35,9 @@ interface LlmProviderInterface {
   @DocProperty(description = "ChatGPT reasoning effort")
   var reasoningEffort: String?
 
+  @DocProperty(description = "LLM sampling temperature")
+  var temperature: Double?
+
   var maxTokens: Long
 
   // pricing
