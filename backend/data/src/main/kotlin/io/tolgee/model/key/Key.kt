@@ -163,11 +163,14 @@ class Key(
         }
       }
     }
-    if (this.translations.size != snapshot.translations.size) {
+    val distinctTranslations = this.translations.distinctBy { it.language.tag }
+    val distinctSnapshotTranslations = snapshot.translations.distinctBy { it.language }
+    if (distinctTranslations.size != distinctSnapshotTranslations.size) {
       return true
     }
-    for (translation in this.translations) {
-      val snapshotTranslation = snapshot.translations.find { it.language == translation.language.tag } ?: return true
+    for (translation in distinctTranslations) {
+      val snapshotTranslation =
+        distinctSnapshotTranslations.find { it.language == translation.language.tag } ?: return true
       if (translation.hasChanged(snapshotTranslation)) {
         return true
       }
