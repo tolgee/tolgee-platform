@@ -1,5 +1,6 @@
 package io.tolgee.model.branching
 
+import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.StandardAuditModel
@@ -20,6 +21,7 @@ import java.util.Date
 @Entity
 @Table()
 @ActivityLoggedEntity
+@ActivityEntityDescribingPaths(["sourceBranch", "targetBranch"])
 class BranchMerge :
   StandardAuditModel(),
   EntityWithId {
