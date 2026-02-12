@@ -6,17 +6,13 @@ import io.tolgee.api.v2.controllers.NamespaceController
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
-import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.NamespaceService
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 
 @Component
 class NamespaceMcpTools(
   private val mcpRequestContext: McpRequestContext,
   private val namespaceService: NamespaceService,
-  private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
 ) : McpToolsProvider {
   private val listNamespacesSpec = buildSpec(NamespaceController::getAllNamespaces, "list_namespaces")

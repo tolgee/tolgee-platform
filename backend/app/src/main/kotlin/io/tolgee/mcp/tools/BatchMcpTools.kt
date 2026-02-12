@@ -76,21 +76,11 @@ class BatchMcpTools(
         val branch = request.arguments.getString("branch")
 
         // Resolve key names to IDs
-        val resolvedKeys =
-          keyNames.map { name ->
-            name to
-              keyService.find(
-                projectId = projectId,
-                name = name,
-                namespace = namespace,
-                branch = branch,
-              )
-          }
-        val notFoundKeys = resolvedKeys.filter { it.second == null }.map { it.first }
+        val (resolvedKeys, notFoundKeys) = keyService.resolveKeysByName(projectId, keyNames, namespace, branch)
         if (notFoundKeys.isNotEmpty()) {
           return@executeAs errorResult("Keys not found: ${notFoundKeys.joinToString(", ")}")
         }
-        val keyIds = resolvedKeys.mapNotNull { it.second?.id }
+        val keyIds = resolvedKeys.map { it.id }
 
         // Resolve language tags to IDs
         val resolvedLangs =

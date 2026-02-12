@@ -69,22 +69,11 @@ class TagMcpTools(
         val namespace = request.arguments.getString("namespace")
         val branch = request.arguments.getString("branch")
 
-        val resolved =
-          keyNames.map { name ->
-            name to
-              keyService.find(
-                projectId = projectId,
-                name = name,
-                namespace = namespace,
-                branch = branch,
-              )
-          }
-
-        val notFound = resolved.filter { it.second == null }.map { it.first }
+        val (keys, notFound) = keyService.resolveKeysByName(projectId, keyNames, namespace, branch)
         if (notFound.isNotEmpty()) {
           errorResult("Keys not found: ${notFound.joinToString(", ")}")
         } else {
-          val keyIdToTags = resolved.associate { (_, key) -> key!!.id to tags }
+          val keyIdToTags = keys.associate { key -> key.id to tags }
           tagService.tagKeysById(projectId, keyIdToTags)
           textResult(
             objectMapper.writeValueAsString(

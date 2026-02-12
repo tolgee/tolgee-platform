@@ -7,7 +7,6 @@ import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
-import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.TranslationService
@@ -19,7 +18,6 @@ class TranslationMcpTools(
   private val keyService: KeyService,
   private val translationService: TranslationService,
   private val languageService: LanguageService,
-  private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
 ) : McpToolsProvider {
   private val getTranslationsSpec = buildSpec(TranslationsController::getAllTranslations, "get_translations")

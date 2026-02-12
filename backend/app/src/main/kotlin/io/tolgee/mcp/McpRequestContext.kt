@@ -13,7 +13,6 @@ import io.tolgee.security.authentication.ReadOnlyModeInterceptor
 import io.tolgee.security.authorization.FeatureAuthorizationInterceptor
 import io.tolgee.security.authorization.FeatureCheckService
 import io.tolgee.security.authorization.OrganizationAuthorizationInterceptor
-import io.tolgee.security.authorization.ProjectAuthorizationInterceptor
 import io.tolgee.security.ratelimit.RateLimitInterceptor
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.organization.OrganizationRoleService

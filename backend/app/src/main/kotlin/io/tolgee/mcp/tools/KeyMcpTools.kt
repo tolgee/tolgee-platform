@@ -249,22 +249,11 @@ class KeyMcpTools(
         val namespace = request.arguments.getString("namespace")
         val branch = request.arguments.getString("branch")
 
-        val resolved =
-          keyNames.map { name ->
-            name to
-              keyService.find(
-                projectId = projectId,
-                name = name,
-                namespace = namespace,
-                branch = branch,
-              )
-          }
-
-        val notFound = resolved.filter { it.second == null }.map { it.first }
+        val (keys, notFound) = keyService.resolveKeysByName(projectId, keyNames, namespace, branch)
         if (notFound.isNotEmpty()) {
           errorResult("Keys not found: ${notFound.joinToString(", ")}")
         } else {
-          val ids = resolved.mapNotNull { it.second?.id }.toSet()
+          val ids = keys.map { it.id }.toSet()
           keyService.deleteMultiple(ids)
           textResult(
             objectMapper.writeValueAsString(
