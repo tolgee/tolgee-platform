@@ -307,6 +307,7 @@ class DbPopulatorReal(
         .lowercase(Locale.getDefault())
         .replace("\\.+$".toRegex(), "")
     key.project = project
+    key.branch = project.getDefaultBranch()
     val translation = Translation()
     translation.language = en
     translation.key = key
