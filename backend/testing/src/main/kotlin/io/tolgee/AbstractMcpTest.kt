@@ -9,6 +9,7 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Pat
 import io.tolgee.model.enums.Scope
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
@@ -121,6 +122,26 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
     val result = callTool(client, name, arguments)
     val textContent = result.content().first() as McpSchema.TextContent
     return objectMapper.readTree(textContent.text())
+  }
+
+  fun assertToolSucceeds(
+    client: McpSyncClient,
+    name: String,
+    arguments: Map<String, Any?> = emptyMap(),
+  ) {
+    val result = callTool(client, name, arguments)
+    assertThat(result.isError).isFalse()
+  }
+
+  fun assertToolFails(
+    client: McpSyncClient,
+    name: String,
+    arguments: Map<String, Any?> = emptyMap(),
+    expectedError: String = "operation_not_permitted",
+  ) {
+    val exception = runCatching { callTool(client, name, arguments) }.exceptionOrNull()
+    assertThat(exception).isNotNull()
+    assertThat(exception!!.toString()).contains(expectedError)
   }
 
   data class McpPatTestData(
