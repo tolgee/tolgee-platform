@@ -6,6 +6,7 @@ import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.service.branching.BranchService
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,6 +29,11 @@ class McpBranchToolsTest : AbstractMcpTest() {
     testDataService.saveTestData(data.testData.root)
     enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     client = createMcpClientWithPak(data.apiKey.encodedKey!!)
+  }
+
+  @AfterEach
+  fun tearDown() {
+    enabledFeaturesProvider.forceEnabled = null
   }
 
   @Test
