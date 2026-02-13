@@ -44,6 +44,9 @@ class BatchMcpTools(
       mcpRequestContext.executeAs(getBatchJobSpec, projectId) {
         val jobId = request.arguments.getLong("jobId")!!
         val view = batchJobService.getView(jobId)
+        if (view.batchJob.project?.id != projectId) {
+          return@executeAs errorResult("Batch job $jobId does not belong to this project")
+        }
         val result =
           mapOf(
             "id" to view.batchJob.id,
