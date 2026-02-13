@@ -112,6 +112,12 @@ dependencies {
      */
     implementation project(':data')
 
+    /**
+     * MCP SDK (for AbstractMcpTest)
+     */
+    implementation platform(libs.mcpBom)
+    implementation libs.mcp
+
 
     /**
      * MISC

@@ -60,6 +60,8 @@ dependencies {
     testImplementation libs.mockito
     testImplementation libs.stripe
     testImplementation libs.jacksonModuleKotlin
+    testImplementation platform(libs.mcpBom)
+    testImplementation libs.mcp
     ktlint(project(":ktlint"))
 }
 

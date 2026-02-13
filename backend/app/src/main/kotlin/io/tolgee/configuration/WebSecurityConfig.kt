@@ -101,7 +101,7 @@ class WebSecurityConfig(
         )
         it.requestMatchers(*PUBLIC_ENDPOINTS).permitAll()
         it.requestMatchers(*ADMIN_ENDPOINTS).hasRole("SUPPORTER")
-        it.requestMatchers("/api/**", "/v2/**").authenticated()
+        it.requestMatchers("/api/**", "/v2/**", "/mcp/**").authenticated()
         it.anyRequest().permitAll()
       }.headers { headers ->
         headers.xssProtection(Customizer.withDefaults())

@@ -16,25 +16,13 @@
 
 package io.tolgee.security.authorization
 
-import io.tolgee.activity.ActivityHolder
-import io.tolgee.constants.Message
-import io.tolgee.dtos.cacheable.isAdmin
-import io.tolgee.dtos.cacheable.isSupporterOrAdmin
-import io.tolgee.exceptions.NotFoundException
-import io.tolgee.exceptions.PermissionException
-import io.tolgee.exceptions.ProjectNotFoundException
 import io.tolgee.model.enums.Scope
-import io.tolgee.security.OrganizationHolder
-import io.tolgee.security.ProjectHolder
+import io.tolgee.security.ProjectContextService
 import io.tolgee.security.RequestContextService
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.isReadOnly
-import io.tolgee.service.organization.OrganizationService
-import io.tolgee.service.security.SecurityService
 import io.tolgee.tracing.TolgeeTracingContext
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
@@ -44,23 +32,15 @@ import org.springframework.web.method.HandlerMethod
  */
 @Component
 class ProjectAuthorizationInterceptor(
-  private val authenticationFacade: AuthenticationFacade,
-  private val organizationService: OrganizationService,
-  private val securityService: SecurityService,
   private val requestContextService: RequestContextService,
-  private val projectHolder: ProjectHolder,
-  private val organizationHolder: OrganizationHolder,
-  private val activityHolder: ActivityHolder,
+  private val projectContextService: ProjectContextService,
   private val tracingContext: TolgeeTracingContext,
 ) : AbstractAuthorizationInterceptor() {
-  private val logger = LoggerFactory.getLogger(this::class.java)
-
   override fun preHandleInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
     handler: HandlerMethod,
   ): Boolean {
-    val userId = authenticationFacade.authenticatedUser.id
     val project =
       requestContextService.getTargetProject(request)
         // Two possible scenarios: we're on a "global" route, or the project was not found.
@@ -68,96 +48,20 @@ class ProjectAuthorizationInterceptor(
         // It is not the job of the interceptor to return a 404 error.
         ?: return true
 
-    var bypassed = false
     val requiredScopes = getRequiredScopes(request, handler)
+    val isWriteOperation = !handler.isReadOnly(request.method)
 
-    val formattedRequirements = requiredScopes?.joinToString(", ") { it.value } ?: "read-only"
-    logger.debug("Checking access to proj#${project.id} by user#$userId (Requires $formattedRequirements)")
-
-    val scopes = securityService.getCurrentPermittedScopes(project.id)
-
-    if (scopes.isEmpty()) {
-      if (!canBypass(request, handler)) {
-        logger.debug(
-          "Rejecting access to proj#{} for user#{} - No view permissions",
-          project.id,
-          userId,
-        )
-
-        if (!canBypassForReadOnly()) {
-          // Security consideration: if the user cannot see the project, pretend it does not exist.
-          throw ProjectNotFoundException(project.id)
-        }
-
-        // Admin access for read-only operations is allowed, but it's not enough for the current operation.
-        throw PermissionException()
-      }
-
-      bypassed = true
-    }
-
-    val missingScopes = getMissingScopes(requiredScopes, scopes)
-
-    if (missingScopes.isNotEmpty()) {
-      if (!canBypass(request, handler)) {
-        logger.debug(
-          "Rejecting access to proj#{} for user#{} - Insufficient permissions",
-          project.id,
-          userId,
-        )
-
-        throw PermissionException(
-          Message.OPERATION_NOT_PERMITTED,
-          missingScopes.map { it.value },
-        )
-      }
-
-      bypassed = true
-    }
-
-    if (authenticationFacade.isProjectApiKeyAuth) {
-      val pak = authenticationFacade.projectApiKey
-      // Verify the key matches the project
-      if (project.id != pak.projectId) {
-        logger.debug(
-          "Rejecting access to proj#{} for user#{} via pak#{} - API Key mismatch",
-          project.id,
-          userId,
-          pak.id,
-        )
-
-        throw PermissionException(Message.PAK_CREATED_FOR_DIFFERENT_PROJECT)
-      }
-    }
-
-    if (bypassed) {
-      logger.info(
-        "Use of admin privileges: user#{} failed local security checks for proj#{} - bypassing for {} {}",
-        userId,
-        project.id,
-        request.method,
-        request.requestURI,
-      )
-    }
-
-    projectHolder.project = project
-    activityHolder.activityRevision.projectId = project.id
-    organizationHolder.organization = organizationService.findDto(project.organizationOwnerId)
-      ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+    projectContextService.setup(
+      project,
+      requiredScopes,
+      useDefaultPermissions = requiredScopes == null,
+      isWriteOperation = isWriteOperation,
+    )
 
     // Add project/org context to OpenTelemetry traces
     tracingContext.setContext(project.id, project.organizationOwnerId)
 
     return true
-  }
-
-  private fun getMissingScopes(
-    requiredScopes: Array<Scope>?,
-    permittedScopes: Collection<Scope>?,
-  ): Set<Scope> {
-    val permitted = permittedScopes?.toSet() ?: setOf()
-    val required = requiredScopes?.toSet() ?: setOf()
-    return required - permitted
   }
 
   private fun getRequiredScopes(
@@ -187,28 +91,5 @@ class ProjectAuthorizationInterceptor(
     }
 
     return projectPerms?.scopes
-  }
-
-  private val canUseAdminPermissions
-    get() = !authenticationFacade.isProjectApiKeyAuth
-
-  private fun canBypass(
-    request: HttpServletRequest,
-    handler: HandlerMethod,
-  ): Boolean {
-    if (!canUseAdminPermissions) {
-      return false
-    }
-
-    if (authenticationFacade.authenticatedUser.isAdmin()) {
-      return true
-    }
-
-    val forReadOnly = handler.isReadOnly(request.method)
-    return forReadOnly && canBypassForReadOnly()
-  }
-
-  private fun canBypassForReadOnly(): Boolean {
-    return canUseAdminPermissions && authenticationFacade.authenticatedUser.isSupporterOrAdmin()
   }
 }
