@@ -7,6 +7,7 @@ import io.tolgee.AbstractMcpTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.Duration
 import java.util.Date
 
@@ -74,13 +75,10 @@ class McpAuthenticationTest : AbstractMcpTest() {
         .build()
 
     try {
-      client.initialize()
-      val result = callTool(client, "list_projects")
-      // If we get here, the call should have returned an error
-      assertThat(result.isError).isTrue()
-    } catch (e: Exception) {
-      // Expected — auth failure
-      assertThat(e).isNotNull()
+      assertThrows<Exception> {
+        client.initialize()
+        callTool(client, "list_projects")
+      }
     } finally {
       try {
         client.close()
@@ -120,11 +118,10 @@ class McpAuthenticationTest : AbstractMcpTest() {
         .build()
 
     try {
-      client.initialize()
-      val result = callTool(client, "list_projects")
-      assertThat(result.isError).isTrue()
-    } catch (e: Exception) {
-      assertThat(e).isNotNull()
+      assertThrows<Exception> {
+        client.initialize()
+        callTool(client, "list_projects")
+      }
     } finally {
       try {
         client.close()
