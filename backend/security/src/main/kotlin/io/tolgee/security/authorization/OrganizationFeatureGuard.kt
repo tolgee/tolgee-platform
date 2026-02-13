@@ -24,6 +24,7 @@ class OrganizationFeatureGuard(
     organizationId: Long,
     features: Array<out Feature>,
   ) {
+    if (features.isEmpty()) return
     val anyEnabled = features.any { enabledFeaturesProvider.isFeatureEnabled(organizationId, it) }
     if (!anyEnabled) {
       throw BadRequestException(Message.FEATURE_NOT_ENABLED, features.toList())
