@@ -8,7 +8,6 @@ import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.service.key.KeyService
-import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.stereotype.Component
 
@@ -17,7 +16,6 @@ class TranslationMcpTools(
   private val mcpRequestContext: McpRequestContext,
   private val keyService: KeyService,
   private val translationService: TranslationService,
-  private val languageService: LanguageService,
   private val objectMapper: ObjectMapper,
 ) : McpToolsProvider {
   private val getTranslationsSpec = buildSpec(TranslationsController::getAllTranslations, "get_translations")
@@ -51,20 +49,12 @@ class TranslationMcpTools(
         if (key == null) {
           errorResult("Key not found")
         } else {
-          val allLanguages = languageService.findAll(projectId)
-          val requestedTags = request.arguments.getStringList("languages")
-          val filteredLanguages =
-            if (requestedTags.isNullOrEmpty()) {
-              allLanguages
-            } else {
-              allLanguages.filter { requestedTags.contains(it.tag) }
-            }
-          val languageIds = filteredLanguages.map { it.id }
+          val languageTags = request.arguments.getStringList("languages")
           val translations =
-            if (languageIds.isNotEmpty()) {
-              translationService.getTranslations(listOf(key.id), languageIds)
+            if (languageTags.isNullOrEmpty()) {
+              translationService.getAllByKeyId(key.id)
             } else {
-              emptyList()
+              translationService.findForKeyByLanguages(key, languageTags)
             }
           val result =
             mapOf(
