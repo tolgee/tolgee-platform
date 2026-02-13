@@ -14,7 +14,7 @@ import org.springframework.web.method.HandlerMethod
  */
 @Component
 class FeatureAuthorizationInterceptor(
-  private val featureCheckService: FeatureCheckService,
+  private val organizationFeatureGuard: OrganizationFeatureGuard,
   private val organizationHolder: OrganizationHolder,
 ) : AbstractAuthorizationInterceptor(allowGlobalRoutes = false) {
   override fun preHandleInternal(
@@ -40,11 +40,11 @@ class FeatureAuthorizationInterceptor(
     val orgId = organizationHolder.organization.id
 
     if (requiresFeatures != null) {
-      featureCheckService.checkFeaturesEnabled(orgId, requiresFeatures.features)
+      organizationFeatureGuard.checkFeaturesEnabled(orgId, requiresFeatures.features)
     }
 
     if (requiresOneOfFeatures != null) {
-      featureCheckService.checkOneOfFeaturesEnabled(orgId, requiresOneOfFeatures.features)
+      organizationFeatureGuard.checkOneOfFeaturesEnabled(orgId, requiresOneOfFeatures.features)
     }
 
     return true

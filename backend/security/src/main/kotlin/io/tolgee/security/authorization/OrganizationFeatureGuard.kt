@@ -7,7 +7,7 @@ import io.tolgee.exceptions.BadRequestException
 import org.springframework.stereotype.Component
 
 @Component
-class FeatureCheckService(
+class OrganizationFeatureGuard(
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
   fun checkFeaturesEnabled(

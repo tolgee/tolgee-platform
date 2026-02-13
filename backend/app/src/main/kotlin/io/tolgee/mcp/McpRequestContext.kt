@@ -12,7 +12,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.AuthenticationInterceptor
 import io.tolgee.security.authentication.ReadOnlyModeInterceptor
 import io.tolgee.security.authorization.FeatureAuthorizationInterceptor
-import io.tolgee.security.authorization.FeatureCheckService
+import io.tolgee.security.authorization.OrganizationFeatureGuard
 import io.tolgee.security.authorization.OrganizationAuthorizationInterceptor
 import io.tolgee.security.ratelimit.RateLimitInterceptor
 import io.tolgee.security.ratelimit.RateLimitService
@@ -26,7 +26,7 @@ class McpRequestContext(
   private val organizationRoleService: OrganizationRoleService,
   private val organizationHolder: OrganizationHolder,
   private val activityHolder: ActivityHolder,
-  private val featureCheckService: FeatureCheckService,
+  private val organizationFeatureGuard: OrganizationFeatureGuard,
   private val rateLimitService: RateLimitService,
   private val projectContextService: ProjectContextService,
 ) {
@@ -109,16 +109,16 @@ class McpRequestContext(
     }
   }
 
-  /** Mirrors [FeatureAuthorizationInterceptor.preHandleInternal], reuses [FeatureCheckService] */
+  /** Mirrors [FeatureAuthorizationInterceptor.preHandleInternal], reuses [OrganizationFeatureGuard] */
   private fun checkFeatures(spec: ToolEndpointSpec) {
     val orgId = organizationHolder.organizationOrNull?.id ?: return
 
     if (spec.requiredFeatures != null) {
-      featureCheckService.checkFeaturesEnabled(orgId, spec.requiredFeatures)
+      organizationFeatureGuard.checkFeaturesEnabled(orgId, spec.requiredFeatures)
     }
 
     if (spec.requiredOneOfFeatures != null) {
-      featureCheckService.checkOneOfFeaturesEnabled(orgId, spec.requiredOneOfFeatures)
+      organizationFeatureGuard.checkOneOfFeaturesEnabled(orgId, spec.requiredOneOfFeatures)
     }
   }
 

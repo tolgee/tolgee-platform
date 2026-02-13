@@ -12,7 +12,7 @@ import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectContextService
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
-import io.tolgee.security.authorization.FeatureCheckService
+import io.tolgee.security.authorization.OrganizationFeatureGuard
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.organization.OrganizationRoleService
 import org.junit.jupiter.api.BeforeEach
@@ -24,7 +24,7 @@ abstract class McpToolEndpointSpecTestBase {
   protected lateinit var organizationRoleService: OrganizationRoleService
   protected lateinit var organizationHolder: OrganizationHolder
   protected lateinit var activityHolder: ActivityHolder
-  protected lateinit var featureCheckService: FeatureCheckService
+  protected lateinit var organizationFeatureGuard: OrganizationFeatureGuard
   protected lateinit var rateLimitService: RateLimitService
   protected lateinit var projectContextService: ProjectContextService
 
@@ -39,7 +39,7 @@ abstract class McpToolEndpointSpecTestBase {
     organizationRoleService = mock()
     organizationHolder = mock()
     activityHolder = mock()
-    featureCheckService = mock()
+    organizationFeatureGuard = mock()
     rateLimitService = mock()
     projectContextService = mock()
 
@@ -51,7 +51,7 @@ abstract class McpToolEndpointSpecTestBase {
         organizationRoleService,
         organizationHolder,
         activityHolder,
-        featureCheckService,
+        organizationFeatureGuard,
         rateLimitService,
         projectContextService,
       )

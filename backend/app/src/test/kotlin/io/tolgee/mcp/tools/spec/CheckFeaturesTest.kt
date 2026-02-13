@@ -17,8 +17,8 @@ class CheckFeaturesTest : McpToolEndpointSpecTestBase() {
 
     sut.executeAs(spec(requiredFeatures = null, requiredOneOfFeatures = null)) {}
 
-    verify(featureCheckService, never()).checkFeaturesEnabled(any(), any())
-    verify(featureCheckService, never()).checkOneOfFeaturesEnabled(any(), any())
+    verify(organizationFeatureGuard, never()).checkFeaturesEnabled(any(), any())
+    verify(organizationFeatureGuard, never()).checkOneOfFeaturesEnabled(any(), any())
   }
 
   @Test
@@ -31,7 +31,7 @@ class CheckFeaturesTest : McpToolEndpointSpecTestBase() {
 
     sut.executeAs(spec(requiredFeatures = features)) {}
 
-    verify(featureCheckService).checkFeaturesEnabled(eq(42L), eq(features))
+    verify(organizationFeatureGuard).checkFeaturesEnabled(eq(42L), eq(features))
   }
 
   @Test
@@ -44,7 +44,7 @@ class CheckFeaturesTest : McpToolEndpointSpecTestBase() {
 
     sut.executeAs(spec(requiredOneOfFeatures = features)) {}
 
-    verify(featureCheckService).checkOneOfFeaturesEnabled(eq(42L), eq(features))
+    verify(organizationFeatureGuard).checkOneOfFeaturesEnabled(eq(42L), eq(features))
   }
 
   @Test
@@ -53,6 +53,6 @@ class CheckFeaturesTest : McpToolEndpointSpecTestBase() {
 
     sut.executeAs(spec(requiredFeatures = arrayOf(Feature.GRANULAR_PERMISSIONS))) {}
 
-    verify(featureCheckService, never()).checkFeaturesEnabled(any(), any())
+    verify(organizationFeatureGuard, never()).checkFeaturesEnabled(any(), any())
   }
 }

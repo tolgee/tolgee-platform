@@ -25,7 +25,7 @@ class ExecutionOrderTest : McpToolEndpointSpecTestBase() {
         projectContextService,
         organizationRoleService,
         organizationHolder,
-        featureCheckService,
+        organizationFeatureGuard,
         activityHolder,
       )
 
@@ -72,7 +72,7 @@ class ExecutionOrderTest : McpToolEndpointSpecTestBase() {
     // 5. Read-only mode
     inOrder.verify(authenticationFacade).isReadOnly
     // 6. Feature check
-    inOrder.verify(featureCheckService).checkFeaturesEnabled(any(), any())
+    inOrder.verify(organizationFeatureGuard).checkFeaturesEnabled(any(), any())
     // 7. Activity setup
     inOrder.verify(activityHolder).activity = ActivityType.CREATE_KEY
     // 8. PostHog event (accesses businessEventData twice — once per map put)

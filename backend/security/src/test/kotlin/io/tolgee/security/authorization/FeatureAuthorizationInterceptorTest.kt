@@ -35,13 +35,13 @@ import org.springframework.web.bind.annotation.RestController
 
 class FeatureAuthorizationInterceptorTest {
   private val enabledFeaturesProvider = Mockito.mock(EnabledFeaturesProvider::class.java)
-  private val featureCheckService = FeatureCheckService(enabledFeaturesProvider)
+  private val organizationFeatureGuard = OrganizationFeatureGuard(enabledFeaturesProvider)
   private val organizationHolder = Mockito.mock(OrganizationHolder::class.java)
   private val organization = Mockito.mock(OrganizationDto::class.java)
 
   private val featureAuthorizationInterceptor =
     FeatureAuthorizationInterceptor(
-      featureCheckService,
+      organizationFeatureGuard,
       organizationHolder,
     )
 
