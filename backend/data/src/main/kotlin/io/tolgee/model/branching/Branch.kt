@@ -1,6 +1,7 @@
 package io.tolgee.model.branching
 
 import io.tolgee.activity.annotation.ActivityDescribingProp
+import io.tolgee.activity.annotation.ActivityIgnoredProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.annotation.ActivityReturnsExistence
@@ -57,6 +58,7 @@ class Branch(
   var pending: Boolean = false,
   @Column(name = "revision")
   @ColumnDefault("0")
+  @ActivityIgnoredProp
   var revision: Int = 0,
   @OneToMany(targetEntity = BranchMerge::class, mappedBy = "sourceBranch", fetch = FetchType.LAZY)
   @OrderBy("createdAt DESC")
