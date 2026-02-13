@@ -118,7 +118,7 @@ class ProjectMcpTools(
         number("projectId", "ID of the project", required = true)
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(getLanguageStatsSpec, projectId) {
         val languages = languageService.findAll(projectId)
         val languageIds = languages.map { it.id }.toSet()

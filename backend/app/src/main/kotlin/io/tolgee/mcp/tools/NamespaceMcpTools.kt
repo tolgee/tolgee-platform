@@ -25,7 +25,7 @@ class NamespaceMcpTools(
         number("projectId", "ID of the project", required = true)
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(listNamespacesSpec, projectId) {
         val namespaces =
           namespaceService.getAllInProject(projectId)

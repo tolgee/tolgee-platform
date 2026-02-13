@@ -50,7 +50,7 @@ class KeyMcpTools(
         string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(listKeysSpec, projectId) {
         val page =
           keyService.getPaged(
@@ -93,7 +93,7 @@ class KeyMcpTools(
         string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(searchKeysSpec, projectId) {
         val results =
           keyService.searchKeys(
@@ -135,7 +135,7 @@ class KeyMcpTools(
         string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(createKeysSpec, projectId) {
         val branch = request.arguments.getString("branch")
         val defaultNamespace = request.arguments.getString("namespace")
@@ -165,7 +165,7 @@ class KeyMcpTools(
         string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(getKeySpec, projectId) {
         val key =
           keyService.find(
@@ -202,7 +202,7 @@ class KeyMcpTools(
         string("newDescription", "Optional: new description for the key")
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(editKeySpec, projectId) {
         val key =
           keyService.find(
@@ -243,7 +243,7 @@ class KeyMcpTools(
         string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(deleteKeysSpec, projectId) {
         val keyNames = request.arguments.getStringList("keyNames") ?: emptyList()
         val namespace = request.arguments.getString("namespace")

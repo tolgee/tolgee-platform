@@ -31,7 +31,7 @@ class TagMcpTools(
         string("search", "Optional: search filter for tag names")
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(listTagsSpec, projectId) {
         val search = request.arguments.getString("search")
         val tags =
@@ -62,7 +62,7 @@ class TagMcpTools(
         string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(tagKeysSpec, projectId) {
         val keyNames = request.arguments.getStringList("keyNames") ?: emptyList()
         val tags = request.arguments.getStringList("tags") ?: emptyList()

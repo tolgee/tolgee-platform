@@ -6,6 +6,7 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.OrganizationHolder
 import io.tolgee.security.ProjectContextService
+import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.AuthenticationInterceptor
@@ -40,7 +41,8 @@ class McpRequestContext(
     // 2. AuthenticationInterceptor (token type check)
     checkTokenType(spec)
     // 3–4. Reuses [ProjectContextService.setup], mirrors [ProjectAuthorizationInterceptor.preHandleInternal]
-    if (!spec.isGlobalRoute && projectId != null) {
+    if (!spec.isGlobalRoute) {
+      if (projectId == null) throw ProjectNotSelectedException()
       projectContextService.setup(
         projectId,
         spec.requiredScopes,

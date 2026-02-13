@@ -36,7 +36,7 @@ class BigMetaMcpTools(
         string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(storeBigMetaSpec, projectId) {
         val branch = request.arguments.getString("branch")
         val relatedKeys =

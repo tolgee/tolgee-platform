@@ -80,7 +80,7 @@ class BranchMcpTools(
         string("search", "Optional: search filter for branch names")
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(listBranchesSpec, projectId) {
         projectFeatureGuard.checkEnabled(Feature.BRANCHING)
         val search = request.arguments.getString("search")
@@ -117,7 +117,7 @@ class BranchMcpTools(
         number("originBranchId", "ID of the branch to fork from", required = true)
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(createBranchSpec, projectId) {
         projectFeatureGuard.checkEnabled(Feature.BRANCHING)
         val name = request.arguments.getString("name") ?: ""
@@ -149,7 +149,7 @@ class BranchMcpTools(
         number("branchId", "ID of the branch to delete", required = true)
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(deleteBranchSpec, projectId) {
         projectFeatureGuard.checkEnabled(Feature.BRANCHING)
         val branchId = request.arguments.getLong("branchId")!!

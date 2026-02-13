@@ -7,6 +7,7 @@ import io.modelcontextprotocol.spec.McpSchema.CallToolResult
 import io.modelcontextprotocol.spec.McpSchema.JsonSchema
 import io.modelcontextprotocol.spec.McpSchema.TextContent
 import io.tolgee.model.key.Key
+import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.service.key.KeyService
 
 fun textResult(text: String): CallToolResult {
@@ -174,6 +175,8 @@ fun KeyService.resolveKeysByName(
   val notFound = resolved.filter { it.second == null }.map { it.first }
   return found to notFound
 }
+
+fun Map<String, Any?>.getProjectId(): Long = getLong("projectId") ?: throw ProjectNotSelectedException()
 
 fun Map<String, Any?>.getLong(key: String): Long? = (this[key] as? Number)?.toLong()
 

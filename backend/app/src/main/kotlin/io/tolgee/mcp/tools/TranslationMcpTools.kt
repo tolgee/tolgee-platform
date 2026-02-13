@@ -38,7 +38,7 @@ class TranslationMcpTools(
         )
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(getTranslationsSpec, projectId) {
         val key =
           keyService.find(
@@ -100,7 +100,7 @@ class TranslationMcpTools(
         string("branch", "Optional: branch name (for branching projects)")
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(setTranslationsSpec, projectId) {
         val dto =
           SetTranslationsWithKeyDto(

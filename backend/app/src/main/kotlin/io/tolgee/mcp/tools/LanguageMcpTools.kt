@@ -31,7 +31,7 @@ class LanguageMcpTools(
         number("projectId", "ID of the project", required = true)
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(listLanguagesSpec, projectId) {
         val languages =
           languageService.getPaged(
@@ -65,7 +65,7 @@ class LanguageMcpTools(
         string("flagEmoji", "Flag emoji for this language")
       },
     ) { request ->
-      val projectId = request.arguments.getLong("projectId")!!
+      val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(createLanguageSpec, projectId) {
         val dto =
           LanguageRequest(
