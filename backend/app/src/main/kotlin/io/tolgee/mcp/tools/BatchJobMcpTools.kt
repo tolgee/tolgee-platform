@@ -18,7 +18,7 @@ import io.tolgee.service.security.SecurityService
 import org.springframework.stereotype.Component
 
 @Component
-class BatchMcpTools(
+class BatchJobMcpTools(
   private val mcpRequestContext: McpRequestContext,
   private val batchJobService: BatchJobService,
   private val securityService: SecurityService,
