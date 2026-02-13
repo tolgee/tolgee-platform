@@ -1,7 +1,9 @@
 package io.tolgee.mcp.tools.spec
 
 import io.tolgee.model.enums.Scope
+import io.tolgee.security.ProjectNotSelectedException
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
@@ -16,8 +18,10 @@ class ProjectContextSetupTest : McpToolEndpointSpecTestBase() {
   }
 
   @Test
-  fun `projectId null does not call projectContextService setup`() {
-    sut.executeAs(spec(isGlobalRoute = false), projectId = null) {}
+  fun `projectId null throws ProjectNotSelectedException`() {
+    assertThrows<ProjectNotSelectedException> {
+      sut.executeAs(spec(isGlobalRoute = false), projectId = null) {}
+    }
 
     verify(projectContextService, never()).setup(any<Long>(), any(), any(), any())
   }
