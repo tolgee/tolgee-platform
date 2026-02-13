@@ -33,15 +33,15 @@ data class RateLimitSpec(
 data class ToolEndpointSpec(
   val mcpOperation: String,
   val requiredScopes: Array<Scope>?,
-  val useDefaultPermissions: Boolean,
-  val isGlobalRoute: Boolean,
-  val requiredOrgRole: OrganizationRoleType?,
-  val requiredFeatures: Array<out Feature>?,
-  val requiredOneOfFeatures: Array<out Feature>?,
-  val activityType: ActivityType?,
-  val rateLimitPolicy: RateLimitSpec?,
   val allowedTokenType: AuthTokenType,
   val isWriteOperation: Boolean,
+  val useDefaultPermissions: Boolean = false,
+  val isGlobalRoute: Boolean = false,
+  val requiredOrgRole: OrganizationRoleType? = null,
+  val requiredFeatures: Array<out Feature>? = null,
+  val requiredOneOfFeatures: Array<out Feature>? = null,
+  val activityType: ActivityType? = null,
+  val rateLimitPolicy: RateLimitSpec? = null,
 )
 
 fun buildSpec(

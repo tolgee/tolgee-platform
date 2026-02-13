@@ -71,8 +71,9 @@ abstract class McpToolEndpointSpecTestBase {
     isWriteOperation: Boolean = false,
   ) = ToolEndpointSpec(
     mcpOperation = mcpOperation,
-    allowedTokenType = allowedTokenType,
     requiredScopes = requiredScopes,
+    allowedTokenType = allowedTokenType,
+    isWriteOperation = isWriteOperation,
     useDefaultPermissions = useDefaultPermissions,
     isGlobalRoute = isGlobalRoute,
     requiredOrgRole = requiredOrgRole,
@@ -80,6 +81,5 @@ abstract class McpToolEndpointSpecTestBase {
     requiredOneOfFeatures = requiredOneOfFeatures,
     activityType = activityType,
     rateLimitPolicy = rateLimitPolicy,
-    isWriteOperation = isWriteOperation,
   )
 }

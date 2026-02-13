@@ -255,16 +255,11 @@ class McpServerIntegrationTest : AbstractMcpTest() {
       val rateLimitedSpec =
         ToolEndpointSpec(
           mcpOperation = "test_rate_limited",
-          rateLimitPolicy = RateLimitSpec(limit = 2, refillDurationInMs = 60_000),
           requiredScopes = null,
-          useDefaultPermissions = false,
-          isGlobalRoute = true,
-          requiredOrgRole = null,
-          requiredFeatures = null,
-          requiredOneOfFeatures = null,
-          activityType = null,
           allowedTokenType = AuthTokenType.ANY,
           isWriteOperation = false,
+          isGlobalRoute = true,
+          rateLimitPolicy = RateLimitSpec(limit = 2, refillDurationInMs = 60_000),
         )
 
       // First 2 calls should succeed (bucket has 2 tokens)
