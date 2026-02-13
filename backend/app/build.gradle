@@ -310,44 +310,39 @@ tasks.register('copyOtelAgent', Copy) {
 }
 
 // Run with local observability stack (docker-compose.local-observability-stack-dev.yaml)
+// Drop-in replacement for bootRun: supports --args and all other BootRun options.
 // See: docs/observability/
-tasks.register('bootRunWithObservability') {
+tasks.register('bootRunWithObservability', org.springframework.boot.gradle.tasks.run.BootRun) {
     group = 'application'
     description = 'Runs Tolgee with OpenTelemetry tracing, using the local Docker observability stack'
 
+    // Inherit classpath and main class from bootRun (configured by Spring Boot plugin)
+    classpath = bootRun.classpath
+    mainClass.set(bootRun.mainClass)
+
+    // OTEL configuration
+    environment 'OTEL_JAVAAGENT_ENABLED', 'true'
+    environment 'OTEL_SERVICE_NAME', 'tolgee-platform'
+    environment 'OTEL_EXPORTER_OTLP_ENDPOINT', 'http://localhost:4318'
+    environment 'OTEL_RESOURCE_ATTRIBUTES', 'deployment.environment=local-dev'
+    environment 'OTEL_LOGS_EXPORTER', 'none'
+    environment 'OTEL_METRICS_EXPORTER', 'none'
+    environment 'OTEL_INSTRUMENTATION_LOGBACK_MDC_ENABLED', 'true'
+    environment 'OTEL_SEMCONV_STABILITY_OPT_IN', 'http'
+
+    // Database configuration (use Docker stack's PostgreSQL/Redis)
+    environment 'spring.datasource.url', 'jdbc:postgresql://localhost:5432/tolgee'
+    environment 'spring.datasource.username', 'tolgee'
+    environment 'spring.datasource.password', 'tolgee'
+    environment 'spring.redis.host', 'localhost'
+    environment 'spring.redis.port', '6379'
+    environment 'spring.redis.password', 'tolgee'
+    environment 'tolgee.postgres-autostart.enabled', 'false'
+
     doFirst {
-        bootRun.configure {
-            // Spring profile
-            args '--spring.profiles.active=dev'
-
-            // Attach the OTEL javaagent directly. We cannot rely on bootRun's
-            // System.getenv("OTEL_JAVAAGENT_ENABLED") check because that runs at Gradle
-            // configuration time (before any task executes), while this doFirst block
-            // runs at execution time.
-            jvmArgs "-javaagent:${configurations.otelAgent.singleFile.absolutePath}"
-
-            // OTEL configuration
-            environment 'OTEL_JAVAAGENT_ENABLED', 'true'
-            environment 'OTEL_SERVICE_NAME', 'tolgee-platform'
-            environment 'OTEL_EXPORTER_OTLP_ENDPOINT', 'http://localhost:4318'
-            environment 'OTEL_RESOURCE_ATTRIBUTES', 'deployment.environment=local-dev'
-            environment 'OTEL_LOGS_EXPORTER', 'none'
-            environment 'OTEL_METRICS_EXPORTER', 'none'
-            environment 'OTEL_INSTRUMENTATION_LOGBACK_MDC_ENABLED', 'true'
-            environment 'OTEL_SEMCONV_STABILITY_OPT_IN', 'http'
-
-            // Database configuration (use Docker stack's PostgreSQL/Redis)
-            environment 'spring.datasource.url', 'jdbc:postgresql://localhost:5432/tolgee'
-            environment 'spring.datasource.username', 'tolgee'
-            environment 'spring.datasource.password', 'tolgee'
-            environment 'spring.redis.host', 'localhost'
-            environment 'spring.redis.port', '6379'
-            environment 'spring.redis.password', 'tolgee'
-            environment 'tolgee.postgres-autostart.enabled', 'false'
-        }
+        // Resolve agent JAR at execution time (not configuration time)
+        jvmArgs "-javaagent:${configurations.otelAgent.singleFile.absolutePath}"
     }
-
-    finalizedBy bootRun
 }
 
 // ===== Apply custom tasks, if exist, from gitignored .local directory =====
