@@ -9,6 +9,7 @@ import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.LanguageStatsService
@@ -25,6 +26,7 @@ class ProjectMcpTools(
   private val languageStatsService: LanguageStatsService,
   private val languageService: LanguageService,
   private val organizationRoleService: OrganizationRoleService,
+  private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
 ) : McpToolsProvider {
   private val listProjectsSpec = buildSpec(ProjectsController::getAll, "list_projects")
@@ -117,14 +119,13 @@ class ProjectMcpTools(
       "Get translation status and progress for each language in a project. " +
         "Returns per-language statistics including translated, reviewed, and untranslated percentages.",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(getLanguageStatsSpec, projectId) {
-        val languages = languageService.findAll(projectId)
+      mcpRequestContext.executeAs(getLanguageStatsSpec, request.arguments.getProjectId()) {
+        val languages = languageService.findAll(projectHolder.project.id)
         val languageIds = languages.map { it.id }.toSet()
-        val stats = languageStatsService.getLanguageStats(projectId, languageIds)
+        val stats = languageStatsService.getLanguageStats(projectHolder.project.id, languageIds)
         val languageById = languages.associateBy { it.id }
 
         val result =

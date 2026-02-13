@@ -23,6 +23,35 @@ class McpBigMetaToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `store_big_meta auto-resolves projectId from PAK`() {
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf("name" to "auto.one"),
+            mapOf("name" to "auto.two"),
+          ),
+      ),
+    )
+
+    val json =
+      callToolAndGetJson(
+        client,
+        "store_big_meta",
+        mapOf(
+          "relatedKeysInOrder" to
+            listOf(
+              mapOf("keyName" to "auto.one"),
+              mapOf("keyName" to "auto.two"),
+            ),
+        ),
+      )
+    assertThat(json["stored"].asBoolean()).isTrue()
+  }
+
+  @Test
   fun `store_big_meta stores key relationships`() {
     callTool(
       client,

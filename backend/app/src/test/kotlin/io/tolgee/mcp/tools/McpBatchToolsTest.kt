@@ -28,6 +28,34 @@ class McpBatchToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `machine_translate auto-resolves projectId from PAK`() {
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "keys" to listOf(mapOf("name" to "auto.mt.key", "translations" to mapOf("en" to "Auto"))),
+      ),
+    )
+    callTool(
+      client,
+      "create_language",
+      mapOf("name" to "French", "tag" to "fr"),
+    )
+
+    val json =
+      callToolAndGetJson(
+        client,
+        "machine_translate",
+        mapOf(
+          "keyNames" to listOf("auto.mt.key"),
+          "targetLanguageTags" to listOf("fr"),
+        ),
+      )
+    assertThat(json["jobId"]).isNotNull()
+    assertThat(json["type"].asText()).isEqualTo("MACHINE_TRANSLATE")
+  }
+
+  @Test
   fun `machine_translate starts a batch job`() {
     callTool(
       client,

@@ -17,6 +17,14 @@ class McpLanguageToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `list_languages auto-resolves projectId from PAK`() {
+    val json = callToolAndGetJson(client, "list_languages")
+    assertThat(json["items"].isArray).isTrue()
+    val tags = (0 until json["items"].size()).map { json["items"][it]["tag"].asText() }
+    assertThat(tags).contains("en")
+  }
+
+  @Test
   fun `list_languages returns project languages`() {
     val json = callToolAndGetJson(client, "list_languages", mapOf("projectId" to data.projectId))
     assertThat(json["items"].isArray).isTrue()

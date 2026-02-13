@@ -8,7 +8,6 @@ import io.modelcontextprotocol.spec.McpSchema.JsonSchema
 import io.modelcontextprotocol.spec.McpSchema.TextContent
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.security.ProjectNotSelectedException
 import org.springframework.data.domain.Page
 
 fun textResult(text: String): CallToolResult {
@@ -62,7 +61,7 @@ fun <T> pagedResponse(
     "totalItems" to page.totalElements,
   )
 
-fun Map<String, Any?>.getProjectId(): Long = getLong("projectId") ?: throw ProjectNotSelectedException()
+fun Map<String, Any?>.getProjectId(): Long? = getLong("projectId")
 
 private fun missingParam(key: String): Nothing =
   throw BadRequestException(Message.REQUEST_VALIDATION_ERROR, listOf(key))

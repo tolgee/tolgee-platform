@@ -46,17 +46,16 @@ class KeyMcpTools(
       "list_keys",
       "List translation keys in a Tolgee project. Returns up to 100 keys per page. Use search_keys to find specific keys by name or translation text.",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         string("branch", "Optional: branch name")
         number("page", "Optional: page number (0-based, default 0)")
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(listKeysSpec, projectId) {
+      mcpRequestContext.executeAs(listKeysSpec, request.arguments.getProjectId()) {
         val pageNum = request.arguments.getInt("page") ?: 0
         val page =
           keyService.getPaged(
-            projectId,
+            projectHolder.project.id,
             request.arguments.getString("branch"),
             PageRequest.of(pageNum, 100),
           )
@@ -77,15 +76,14 @@ class KeyMcpTools(
       "Search for translation keys in a Tolgee project by name or translation text. Returns up to 50 matching keys per page. " +
         "Note: namespace and tags filtering is not yet supported — filter results client-side if needed.",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         string("query", "Search query (matches key name or translation text)", required = true)
         string("languageTag", "Optional: language tag to search translations in")
         string("branch", "Optional: branch name")
         number("page", "Optional: page number (0-based, default 0)")
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(searchKeysSpec, projectId) {
+      mcpRequestContext.executeAs(searchKeysSpec, request.arguments.getProjectId()) {
         val pageNum = request.arguments.getInt("page") ?: 0
         val results =
           keyService.searchKeys(
@@ -115,7 +113,7 @@ class KeyMcpTools(
         "Keys that already exist are silently skipped — their translations and tags are not updated. " +
         "Use update_key and set_translation to modify existing keys.",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         objectArray("keys", "List of keys to create", required = true) {
           string("name", "Key name (e.g. 'home.welcome_message')", required = true)
           string("namespace", "Optional: namespace for the key (overrides top-level namespace)")
@@ -127,8 +125,7 @@ class KeyMcpTools(
         string("branch", "Optional: branch name")
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(createKeysSpec, projectId) {
+      mcpRequestContext.executeAs(createKeysSpec, request.arguments.getProjectId()) {
         val branch = request.arguments.getString("branch")
         val defaultNamespace = request.arguments.getString("namespace")
         val keys =
@@ -151,17 +148,16 @@ class KeyMcpTools(
       "get_key",
       "Get a translation key's metadata (name, namespace, description) by its name. To get the key's translations, use get_translations.",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
         string("branch", "Optional: branch name")
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(getKeySpec, projectId) {
+      mcpRequestContext.executeAs(getKeySpec, request.arguments.getProjectId()) {
         val key =
           keyService.find(
-            projectId = projectId,
+            projectId = projectHolder.project.id,
             name = request.arguments.requireString("keyName"),
             namespace = request.arguments.getString("namespace"),
             branch = request.arguments.getString("branch"),
@@ -185,7 +181,7 @@ class KeyMcpTools(
       "update_key",
       "Update an existing translation key's name, namespace, or description",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         string("keyName", "Current key name (used to find the key)", required = true)
         string("keyNamespace", "Optional: current namespace of the key (used to find the key)")
         string("keyBranch", "Optional: branch name (used to find the key, for branching projects)")
@@ -194,11 +190,10 @@ class KeyMcpTools(
         string("newDescription", "Optional: new description for the key")
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(editKeySpec, projectId) {
+      mcpRequestContext.executeAs(editKeySpec, request.arguments.getProjectId()) {
         val key =
           keyService.find(
-            projectId = projectId,
+            projectId = projectHolder.project.id,
             name = request.arguments.requireString("keyName"),
             namespace = request.arguments.getString("keyNamespace"),
             branch = request.arguments.getString("keyBranch"),
@@ -229,19 +224,18 @@ class KeyMcpTools(
       "Delete translation keys from a Tolgee project. " +
         "IMPORTANT: This is a destructive operation. The AI assistant should always confirm with the user before calling this tool.",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         stringArray("keyNames", "Names of the keys to delete", required = true)
         string("namespace", "Optional: namespace of the keys")
         string("branch", "Optional: branch name")
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(deleteKeysSpec, projectId) {
+      mcpRequestContext.executeAs(deleteKeysSpec, request.arguments.getProjectId()) {
         val keyNames = request.arguments.requireStringList("keyNames")
         val namespace = request.arguments.getString("namespace")
         val branch = request.arguments.getString("branch")
 
-        val (keys, notFound) = keyService.resolveKeysByName(projectId, keyNames, namespace, branch)
+        val (keys, notFound) = keyService.resolveKeysByName(projectHolder.project.id, keyNames, namespace, branch)
         if (notFound.isNotEmpty()) {
           errorResult("Keys not found: ${notFound.joinToString(", ")}")
         } else {

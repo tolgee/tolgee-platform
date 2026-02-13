@@ -7,6 +7,7 @@ import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.translation.TranslationService
 import org.springframework.stereotype.Component
@@ -16,6 +17,7 @@ class TranslationMcpTools(
   private val mcpRequestContext: McpRequestContext,
   private val keyService: KeyService,
   private val translationService: TranslationService,
+  private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
 ) : McpToolsProvider {
   private val getTranslationsSpec = buildSpec(TranslationsController::getAllTranslations, "get_translations")
@@ -26,7 +28,7 @@ class TranslationMcpTools(
       "get_translations",
       "Get translations for a specific key in a Tolgee project. Returns translations in all project languages, or only the specified languages if provided.",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
         string("branch", "Optional: branch name")
@@ -36,11 +38,10 @@ class TranslationMcpTools(
         )
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(getTranslationsSpec, projectId) {
+      mcpRequestContext.executeAs(getTranslationsSpec, request.arguments.getProjectId()) {
         val key =
           keyService.find(
-            projectId = projectId,
+            projectId = projectHolder.project.id,
             name = request.arguments.requireString("keyName"),
             namespace = request.arguments.getString("namespace"),
             branch = request.arguments.getString("branch"),
@@ -79,7 +80,7 @@ class TranslationMcpTools(
       "set_translation",
       "Set or update translations for a key in one or more languages. The key must already exist — use create_keys to create it first.",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
         stringMap(
@@ -90,8 +91,7 @@ class TranslationMcpTools(
         string("branch", "Optional: branch name")
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(setTranslationsSpec, projectId) {
+      mcpRequestContext.executeAs(setTranslationsSpec, request.arguments.getProjectId()) {
         val dto =
           SetTranslationsWithKeyDto(
             key = request.arguments.requireString("keyName"),
@@ -101,7 +101,7 @@ class TranslationMcpTools(
           )
         val key =
           keyService.find(
-            projectId = projectId,
+            projectId = projectHolder.project.id,
             name = dto.key,
             namespace = dto.namespace,
             branch = dto.branch,

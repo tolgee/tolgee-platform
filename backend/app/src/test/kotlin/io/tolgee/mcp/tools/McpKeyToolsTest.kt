@@ -17,6 +17,15 @@ class McpKeyToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `list_keys auto-resolves projectId from PAK`() {
+    keyService.create(data.testData.projectBuilder.self, "auto.key", null)
+
+    val json = callToolAndGetJson(client, "list_keys")
+    assertThat(json["items"].isArray).isTrue()
+    assertThat(json["totalItems"].asLong()).isEqualTo(1)
+  }
+
+  @Test
   fun `list_keys returns empty for project with no keys`() {
     val json = callToolAndGetJson(client, "list_keys", mapOf("projectId" to data.projectId))
     assertThat(json["items"].isArray).isTrue()

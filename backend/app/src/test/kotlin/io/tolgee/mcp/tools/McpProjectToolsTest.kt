@@ -70,4 +70,15 @@ class McpProjectToolsTest : AbstractMcpTest() {
     assertThat(json[0].has("reviewedPercentage")).isTrue()
     assertThat(json[0].has("untranslatedPercentage")).isTrue()
   }
+
+  @Test
+  fun `get_project_language_statistics auto-resolves projectId from PAK`() {
+    val pakData = createTestDataWithPak()
+    val pakClient = createMcpClientWithPak(pakData.apiKey.encodedKey!!)
+
+    val json = callToolAndGetJson(pakClient, "get_project_language_statistics")
+    assertThat(json.isArray).isTrue()
+    assertThat(json.size()).isGreaterThan(0)
+    assertThat(json[0].has("languageTag")).isTrue()
+  }
 }

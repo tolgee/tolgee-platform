@@ -19,6 +19,28 @@ class McpTagToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `list_tags auto-resolves projectId from PAK`() {
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "auto.key")),
+      ),
+    )
+    callTool(
+      client,
+      "tag_keys",
+      mapOf("projectId" to data.projectId, "keyNames" to listOf("auto.key"), "tags" to listOf("auto-tag")),
+    )
+
+    val json = callToolAndGetJson(client, "list_tags")
+    assertThat(json["items"].isArray).isTrue()
+    val tagNames = (0 until json["items"].size()).map { json["items"][it]["name"].asText() }
+    assertThat(tagNames).contains("auto-tag")
+  }
+
+  @Test
   fun `tag_keys tags keys`() {
     callTool(
       client,

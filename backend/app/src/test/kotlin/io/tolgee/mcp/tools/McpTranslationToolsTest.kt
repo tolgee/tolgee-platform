@@ -27,6 +27,18 @@ class McpTranslationToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `get_translations auto-resolves projectId from PAK`() {
+    val json =
+      callToolAndGetJson(
+        client,
+        "get_translations",
+        mapOf("keyName" to "greeting"),
+      )
+    assertThat(json["keyName"].asText()).isEqualTo("greeting")
+    assertThat(json["translations"].isArray).isTrue()
+  }
+
+  @Test
   fun `get_translations returns translations`() {
     val json =
       callToolAndGetJson(

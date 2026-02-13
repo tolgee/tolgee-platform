@@ -31,6 +31,15 @@ class McpBranchToolsTest : AbstractMcpTest() {
   }
 
   @Test
+  fun `list_branches auto-resolves projectId from PAK`() {
+    val json = callToolAndGetJson(client, "list_branches")
+    assertThat(json["items"].isArray).isTrue()
+    assertThat(json["totalItems"].asLong()).isGreaterThanOrEqualTo(1)
+    val branchNames = (0 until json["items"].size()).map { json["items"][it]["name"].asText() }
+    assertThat(branchNames).contains("main")
+  }
+
+  @Test
   fun `branch tools fail when branching feature is not enabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     assertThat(

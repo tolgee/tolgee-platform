@@ -42,9 +42,9 @@ class McpRequestContext(
     checkTokenType(spec)
     // 3–4. Reuses [ProjectContextService.setup], mirrors [ProjectAuthorizationInterceptor.preHandleInternal]
     if (!spec.isGlobalRoute) {
-      if (projectId == null) throw ProjectNotSelectedException()
+      val resolvedProjectId = projectId ?: resolveProjectIdFromPak()
       projectContextService.setup(
-        projectId,
+        resolvedProjectId,
         spec.requiredScopes,
         spec.useDefaultPermissions,
         spec.isWriteOperation,
@@ -126,6 +126,13 @@ class McpRequestContext(
   private fun setupActivity(spec: ToolEndpointSpec) {
     val activityType = spec.activityType ?: return
     activityHolder.activity = activityType
+  }
+
+  private fun resolveProjectIdFromPak(): Long {
+    if (authenticationFacade.isProjectApiKeyAuth) {
+      return authenticationFacade.projectApiKey.projectId
+    }
+    throw ProjectNotSelectedException()
   }
 
   private fun emitPostHogEvent(spec: ToolEndpointSpec) {

@@ -36,15 +36,14 @@ class BatchJobMcpTools(
       "get_batch_job_status",
       "Get the status of a batch job (e.g. machine translation) by its ID. Use to poll for completion.",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         number("jobId", "ID of the batch job", required = true)
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(getBatchJobSpec, projectId) {
+      mcpRequestContext.executeAs(getBatchJobSpec, request.arguments.getProjectId()) {
         val jobId = request.arguments.requireLong("jobId")
         val view = batchJobService.getView(jobId)
-        if (view.batchJob.project?.id != projectId) {
+        if (view.batchJob.project?.id != projectHolder.project.id) {
           return@executeAs errorResult("Batch job $jobId does not belong to this project")
         }
         val result =
@@ -64,22 +63,21 @@ class BatchJobMcpTools(
       "machine_translate",
       "Start machine translation for specified keys into target languages. Returns a batch job ID — use get_batch_job_status to poll for completion.",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         stringArray("keyNames", "Names of keys to translate", required = true)
         stringArray("targetLanguageTags", "Language tags to translate into (e.g. ['de', 'fr'])", required = true)
         string("namespace", "Optional: namespace of the keys")
         string("branch", "Optional: branch name")
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(machineTranslateSpec, projectId) {
+      mcpRequestContext.executeAs(machineTranslateSpec, request.arguments.getProjectId()) {
         val keyNames = request.arguments.requireStringList("keyNames")
         val targetLanguageTags = request.arguments.requireStringList("targetLanguageTags")
         val namespace = request.arguments.getString("namespace")
         val branch = request.arguments.getString("branch")
 
         // Resolve key names to IDs
-        val (resolvedKeys, notFoundKeys) = keyService.resolveKeysByName(projectId, keyNames, namespace, branch)
+        val (resolvedKeys, notFoundKeys) = keyService.resolveKeysByName(projectHolder.project.id, keyNames, namespace, branch)
         if (notFoundKeys.isNotEmpty()) {
           return@executeAs errorResult("Keys not found: ${notFoundKeys.joinToString(", ")}")
         }
@@ -88,7 +86,7 @@ class BatchJobMcpTools(
         // Resolve language tags to IDs
         val resolvedLangs =
           targetLanguageTags.map { tag ->
-            tag to languageService.findByTag(tag, projectId)
+            tag to languageService.findByTag(tag, projectHolder.project.id)
           }
         val notFoundLangs = resolvedLangs.filter { it.second == null }.map { it.first }
         if (notFoundLangs.isNotEmpty()) {
@@ -96,8 +94,8 @@ class BatchJobMcpTools(
         }
         val targetLanguageIds = resolvedLangs.mapNotNull { it.second?.id }
 
-        securityService.checkLanguageTranslatePermission(projectId, targetLanguageIds)
-        securityService.checkKeyIdsExistAndIsFromProject(keyIds, projectId)
+        securityService.checkLanguageTranslatePermission(projectHolder.project.id, targetLanguageIds)
+        securityService.checkKeyIdsExistAndIsFromProject(keyIds, projectHolder.project.id)
 
         val data = MachineTranslationRequest()
         data.keyIds = keyIds

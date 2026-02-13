@@ -28,16 +28,15 @@ class LanguageMcpTools(
       "list_languages",
       "List all languages configured for a Tolgee project. Returns up to 1000 results per page.",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         number("page", "Optional: page number (0-based, default 0)")
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(listLanguagesSpec, projectId) {
+      mcpRequestContext.executeAs(listLanguagesSpec, request.arguments.getProjectId()) {
         val pageNum = request.arguments.getInt("page") ?: 0
         val languages =
           languageService.getPaged(
-            projectId,
+            projectHolder.project.id,
             PageRequest.of(pageNum, 1000, Sort.by("tag")),
             null,
           )
@@ -60,15 +59,14 @@ class LanguageMcpTools(
       "create_language",
       "Add a new language to a Tolgee project",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         string("name", "Language display name (e.g. 'German')", required = true)
         string("tag", "Language tag / IETF BCP 47 code (e.g. 'de')", required = true)
         string("originalName", "Native name of the language (e.g. 'Deutsch')")
         string("flagEmoji", "Flag emoji for this language")
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(createLanguageSpec, projectId) {
+      mcpRequestContext.executeAs(createLanguageSpec, request.arguments.getProjectId()) {
         val dto =
           LanguageRequest(
             name = request.arguments.requireString("name"),

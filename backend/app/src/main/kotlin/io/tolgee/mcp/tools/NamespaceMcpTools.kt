@@ -6,6 +6,7 @@ import io.tolgee.api.v2.controllers.NamespaceController
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.NamespaceService
 import org.springframework.stereotype.Component
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component
 class NamespaceMcpTools(
   private val mcpRequestContext: McpRequestContext,
   private val namespaceService: NamespaceService,
+  private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
 ) : McpToolsProvider {
   private val listNamespacesSpec = buildSpec(NamespaceController::getAllNamespaces, "list_namespaces")
@@ -22,13 +24,12 @@ class NamespaceMcpTools(
       "list_namespaces",
       "List all namespaces in a Tolgee project. Namespaces organize translation keys into logical groups (e.g. by feature, page, or module).",
       toolSchema {
-        number("projectId", "ID of the project", required = true)
+        number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
       },
     ) { request ->
-      val projectId = request.arguments.getProjectId()
-      mcpRequestContext.executeAs(listNamespacesSpec, projectId) {
+      mcpRequestContext.executeAs(listNamespacesSpec, request.arguments.getProjectId()) {
         val namespaces =
-          namespaceService.getAllInProject(projectId)
+          namespaceService.getAllInProject(projectHolder.project.id)
         val result =
           namespaces.map { ns ->
             mapOf(
