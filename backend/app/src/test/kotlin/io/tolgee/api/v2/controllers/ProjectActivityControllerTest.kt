@@ -40,7 +40,7 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
   @ProjectJWTAuthTestMethod
   fun `returns single activity`() {
     performProjectAuthPut("/import/apply").andIsOk
-    val revision = activityUtil.getLastRevision()
+    val revision = activityUtil.getLastRevision(project.id)
     performProjectAuthGet("activity/revisions/${revision?.id}")
       .andIsOk
       .andAssertThatJson {
@@ -125,7 +125,7 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
   @ProjectJWTAuthTestMethod
   fun `returns modified entities with pagination`() {
     performProjectAuthPut("/import/apply").andIsOk
-    val revision = activityUtil.getLastRevision()
+    val revision = activityUtil.getLastRevision(project.id)
     performProjectAuthGet("activity/revisions/${revision?.id}/modified-entities")
       .andIsOk
       .andAssertThatJson {
@@ -142,7 +142,7 @@ class ProjectActivityControllerTest : ProjectAuthControllerTest("/v2/projects/")
   @ProjectJWTAuthTestMethod
   fun `filters modified entities by class`() {
     performProjectAuthPut("/import/apply").andIsOk
-    val revision = activityUtil.getLastRevision()
+    val revision = activityUtil.getLastRevision(project.id)
     performProjectAuthGet("activity/revisions/${revision?.id}/modified-entities?filterEntityClass=Key")
       .andIsOk
       .andAssertThatJson {

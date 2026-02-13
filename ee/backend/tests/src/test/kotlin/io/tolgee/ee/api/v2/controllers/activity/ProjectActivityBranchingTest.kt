@@ -97,7 +97,7 @@ class ProjectActivityBranchingTest : ProjectAuthControllerTest("/v2/projects/") 
       mapOf("keyIds" to listOf(testData.firstKey.id, defaultKeyId.toLong()), "tags" to listOf("tag_1")),
     ).andIsOk.waitForJobCompleted()
 
-    val revisionId = activityTestUtil.getLastRevision()!!.id
+    val revisionId = activityTestUtil.getLastRevision(project.id)!!.id
     val defaultBranchId = getDefaultBranchId()
 
     val expectedDev = getModifiedEntities(revisionId, testData.devBranch.id)
@@ -175,7 +175,7 @@ class ProjectActivityBranchingTest : ProjectAuthControllerTest("/v2/projects/") 
   private fun waitForNewRevisionId(excluding: Long? = null): Long {
     var revisionId: Long? = null
     waitForNotThrowing(timeout = 5000, pollTime = 200) {
-      val revision = activityTestUtil.getLastRevision() ?: throw AssertionError("No activity revision found")
+      val revision = activityTestUtil.getLastRevision(project.id) ?: throw AssertionError("No activity revision found")
       if (excluding != null && revision.id == excluding) {
         throw AssertionError("Activity revision didn't change yet")
       }
