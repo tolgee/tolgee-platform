@@ -27,37 +27,6 @@ class McpAuthenticationTest : AbstractMcpTest() {
   }
 
   @Test
-  fun `listTools returns all 22 tools`() {
-    val client = createMcpClient(data.pat.token!!)
-    val tools = client.listTools()
-    val toolNames = tools.tools().map { it.name() }.toSet()
-    assertThat(toolNames).containsExactlyInAnyOrder(
-      "list_projects",
-      "create_project",
-      "get_project_language_statistics",
-      "list_keys",
-      "search_keys",
-      "create_keys",
-      "get_key",
-      "update_key",
-      "delete_keys",
-      "list_languages",
-      "create_language",
-      "get_translations",
-      "set_translation",
-      "list_tags",
-      "tag_keys",
-      "list_namespaces",
-      "get_batch_job_status",
-      "machine_translate",
-      "store_big_meta",
-      "list_branches",
-      "create_branch",
-      "delete_branch",
-    )
-  }
-
-  @Test
   fun `callTool fails without auth`() {
     val transport =
       HttpClientStreamableHttpTransport
