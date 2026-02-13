@@ -50,22 +50,16 @@ class ProjectMcpTools(
             search,
           )
         val result =
-          mapOf(
-            "items" to
-              projects.content.map { p ->
-                mapOf(
-                  "id" to p.id,
-                  "name" to p.name,
-                  "slug" to p.slug,
-                  "description" to p.description,
-                  "organizationOwnerName" to p.organizationOwner.name,
-                  "organizationOwnerSlug" to p.organizationOwner.slug,
-                )
-              },
-            "page" to projects.number,
-            "totalPages" to projects.totalPages,
-            "totalItems" to projects.totalElements,
-          )
+          pagedResponse(projects) { p ->
+            mapOf(
+              "id" to p.id,
+              "name" to p.name,
+              "slug" to p.slug,
+              "description" to p.description,
+              "organizationOwnerName" to p.organizationOwner.name,
+              "organizationOwnerSlug" to p.organizationOwner.slug,
+            )
+          }
         textResult(objectMapper.writeValueAsString(result))
       }
     }

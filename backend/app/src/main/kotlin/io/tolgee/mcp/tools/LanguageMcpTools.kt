@@ -42,22 +42,16 @@ class LanguageMcpTools(
             null,
           )
         val result =
-          mapOf(
-            "items" to
-              languages.content.map { lang ->
-                mapOf(
-                  "id" to lang.id,
-                  "name" to lang.name,
-                  "tag" to lang.tag,
-                  "originalName" to lang.originalName,
-                  "flagEmoji" to lang.flagEmoji,
-                  "base" to lang.base,
-                )
-              },
-            "page" to languages.number,
-            "totalPages" to languages.totalPages,
-            "totalItems" to languages.totalElements,
-          )
+          pagedResponse(languages) { lang ->
+            mapOf(
+              "id" to lang.id,
+              "name" to lang.name,
+              "tag" to lang.tag,
+              "originalName" to lang.originalName,
+              "flagEmoji" to lang.flagEmoji,
+              "base" to lang.base,
+            )
+          }
         textResult(objectMapper.writeValueAsString(result))
       }
     }

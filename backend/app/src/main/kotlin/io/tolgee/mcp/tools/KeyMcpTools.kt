@@ -61,19 +61,13 @@ class KeyMcpTools(
             PageRequest.of(pageNum, 100),
           )
         val result =
-          mapOf(
-            "items" to
-              page.content.map { key ->
-                mapOf(
-                  "keyId" to key.id,
-                  "keyName" to key.name,
-                  "keyNamespace" to key.namespace,
-                )
-              },
-            "page" to page.number,
-            "totalPages" to page.totalPages,
-            "totalItems" to page.totalElements,
-          )
+          pagedResponse(page) { key ->
+            mapOf(
+              "keyId" to key.id,
+              "keyName" to key.name,
+              "keyNamespace" to key.namespace,
+            )
+          }
         textResult(objectMapper.writeValueAsString(result))
       }
     }
@@ -102,21 +96,15 @@ class KeyMcpTools(
             pageable = PageRequest.of(pageNum, 50),
           )
         val result =
-          mapOf(
-            "items" to
-              results.content.map { r ->
-                mapOf(
-                  "keyId" to r.id,
-                  "keyName" to r.name,
-                  "keyNamespace" to r.namespace,
-                  "baseTranslation" to r.baseTranslation,
-                  "translation" to r.translation,
-                )
-              },
-            "page" to results.number,
-            "totalPages" to results.totalPages,
-            "totalItems" to results.totalElements,
-          )
+          pagedResponse(results) { r ->
+            mapOf(
+              "keyId" to r.id,
+              "keyName" to r.name,
+              "keyNamespace" to r.namespace,
+              "baseTranslation" to r.baseTranslation,
+              "translation" to r.translation,
+            )
+          }
         textResult(objectMapper.writeValueAsString(result))
       }
     }

@@ -93,20 +93,14 @@ class BranchMcpTools(
             search = search,
           )
         val result =
-          mapOf(
-            "items" to
-              page.content.map { branch ->
-                mapOf(
-                  "id" to branch.id,
-                  "name" to branch.name,
-                  "isDefault" to branch.isDefault,
-                  "isProtected" to branch.isProtected,
-                )
-              },
-            "page" to page.number,
-            "totalPages" to page.totalPages,
-            "totalItems" to page.totalElements,
-          )
+          pagedResponse(page) { branch ->
+            mapOf(
+              "id" to branch.id,
+              "name" to branch.name,
+              "isDefault" to branch.isDefault,
+              "isProtected" to branch.isProtected,
+            )
+          }
         textResult(objectMapper.writeValueAsString(result))
       }
     }

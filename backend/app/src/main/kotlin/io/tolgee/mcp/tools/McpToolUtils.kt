@@ -9,6 +9,7 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.security.ProjectNotSelectedException
+import org.springframework.data.domain.Page
 
 fun textResult(text: String): CallToolResult {
   return CallToolResult
@@ -49,6 +50,17 @@ fun McpSyncServer.addTool(
     },
   )
 }
+
+fun <T> pagedResponse(
+  page: Page<T>,
+  mapper: (T) -> Any?,
+): Map<String, Any?> =
+  mapOf(
+    "items" to page.content.map(mapper),
+    "page" to page.number,
+    "totalPages" to page.totalPages,
+    "totalItems" to page.totalElements,
+  )
 
 fun Map<String, Any?>.getProjectId(): Long = getLong("projectId") ?: throw ProjectNotSelectedException()
 

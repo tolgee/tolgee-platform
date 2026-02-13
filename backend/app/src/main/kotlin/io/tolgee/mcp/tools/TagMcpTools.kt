@@ -43,18 +43,12 @@ class TagMcpTools(
             pageable = PageRequest.of(pageNum, 1000, Sort.by("name")),
           )
         val result =
-          mapOf(
-            "items" to
-              tags.content.map { tag ->
-                mapOf(
-                  "id" to tag.id,
-                  "name" to tag.name,
-                )
-              },
-            "page" to tags.number,
-            "totalPages" to tags.totalPages,
-            "totalItems" to tags.totalElements,
-          )
+          pagedResponse(tags) { tag ->
+            mapOf(
+              "id" to tag.id,
+              "name" to tag.name,
+            )
+          }
         textResult(objectMapper.writeValueAsString(result))
       }
     }
