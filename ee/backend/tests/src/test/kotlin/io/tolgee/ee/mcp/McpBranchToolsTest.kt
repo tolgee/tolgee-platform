@@ -100,7 +100,7 @@ class McpBranchToolsTest : AbstractMcpTest() {
       callToolAndGetJson(
         client,
         "delete_branch",
-        mapOf("projectId" to data.projectId, "branchId" to branchId),
+        mapOf("projectId" to data.projectId, "branchName" to "to-delete"),
       )
     assertThat(json["deleted"].asBoolean()).isTrue()
 

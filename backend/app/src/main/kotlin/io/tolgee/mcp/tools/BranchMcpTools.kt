@@ -2,17 +2,15 @@ package io.tolgee.mcp.tools
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
-import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
-import io.tolgee.mcp.ToolEndpointSpec
-import io.tolgee.model.enums.Scope
-import io.tolgee.security.authentication.AuthTokenType
+import io.tolgee.mcp.buildSpec
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.project.ProjectFeatureGuard
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
@@ -26,50 +24,19 @@ class BranchMcpTools(
   private val authenticationFacade: AuthenticationFacade,
   private val objectMapper: ObjectMapper,
 ) : McpToolsProvider {
+  companion object {
+    private val branchControllerClass =
+      Class.forName("io.tolgee.ee.api.v2.controllers.branching.BranchController")
+    private val createBranchModelClass =
+      Class.forName("io.tolgee.ee.api.v2.hateoas.model.branching.CreateBranchModel")
+  }
+
   private val listBranchesSpec =
-    ToolEndpointSpec(
-      mcpOperation = "list_branches",
-      requiredScopes = null,
-      useDefaultPermissions = true,
-      isGlobalRoute = false,
-      requiredOrgRole = null,
-      requiredFeatures = arrayOf(Feature.BRANCHING),
-      requiredOneOfFeatures = null,
-      activityType = null,
-      rateLimitPolicy = null,
-      allowedTokenType = AuthTokenType.ONLY_PAT,
-      isWriteOperation = false,
-    )
-
+    buildSpec(branchControllerClass, "all", "list_branches", Pageable::class.java, String::class.java)
   private val createBranchSpec =
-    ToolEndpointSpec(
-      mcpOperation = "create_branch",
-      requiredScopes = arrayOf(Scope.BRANCH_MANAGEMENT),
-      useDefaultPermissions = false,
-      isGlobalRoute = false,
-      requiredOrgRole = null,
-      requiredFeatures = arrayOf(Feature.BRANCHING),
-      requiredOneOfFeatures = null,
-      activityType = ActivityType.BRANCH_CREATE,
-      rateLimitPolicy = null,
-      allowedTokenType = AuthTokenType.ONLY_PAT,
-      isWriteOperation = true,
-    )
-
+    buildSpec(branchControllerClass, "create", "create_branch", createBranchModelClass)
   private val deleteBranchSpec =
-    ToolEndpointSpec(
-      mcpOperation = "delete_branch",
-      requiredScopes = arrayOf(Scope.BRANCH_MANAGEMENT),
-      useDefaultPermissions = false,
-      isGlobalRoute = false,
-      requiredOrgRole = null,
-      requiredFeatures = arrayOf(Feature.BRANCHING),
-      requiredOneOfFeatures = null,
-      activityType = ActivityType.BRANCH_DELETE,
-      rateLimitPolicy = null,
-      allowedTokenType = AuthTokenType.ONLY_PAT,
-      isWriteOperation = true,
-    )
+    buildSpec(branchControllerClass, "delete", "delete_branch", Long::class.javaPrimitiveType!!)
 
   override fun register(server: McpSyncServer) {
     server.addTool(
@@ -143,14 +110,15 @@ class BranchMcpTools(
         "IMPORTANT: This is a destructive operation. The AI assistant should always confirm with the user before calling this tool.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
-        number("branchId", "ID of the branch to delete", required = true)
+        string("branchName", "Name of the branch to delete", required = true)
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(deleteBranchSpec, projectId) {
         projectFeatureGuard.checkEnabled(Feature.BRANCHING)
-        val branchId = request.arguments.requireLong("branchId")
-        branchService.deleteBranch(projectId, branchId)
+        val branchName = request.arguments.requireString("branchName")
+        val branch = branchService.getActiveBranch(projectId, branchName)
+        branchService.deleteBranch(projectId, branch.id)
         textResult(objectMapper.writeValueAsString(mapOf("deleted" to true)))
       }
     }
