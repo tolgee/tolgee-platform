@@ -12,7 +12,7 @@ import java.time.Duration
 import java.util.Date
 
 class McpAuthenticationTest : AbstractMcpTest() {
-  lateinit var data: McpTestData
+  lateinit var data: McpPatTestData
 
   @BeforeEach
   fun setup() {
@@ -21,9 +21,25 @@ class McpAuthenticationTest : AbstractMcpTest() {
 
   @Test
   fun `initialize succeeds with valid PAT`() {
-    val client = createMcpClient(data.pat.token!!)
+    val client = createMcpClientWithPat(data.pat.token!!)
     val tools = client.listTools()
     assertThat(tools.tools()).isNotEmpty
+  }
+
+  @Test
+  fun `initialize succeeds with valid PAK`() {
+    val pakData = createTestDataWithPak()
+    val client = createMcpClientWithPak(pakData.apiKey.encodedKey!!)
+    val tools = client.listTools()
+    assertThat(tools.tools()).isNotEmpty
+  }
+
+  @Test
+  fun `callTool succeeds with PAK for project-scoped tool`() {
+    val pakData = createTestDataWithPak()
+    val client = createMcpClientWithPak(pakData.apiKey.encodedKey!!)
+    val result = callToolAndGetJson(client, "list_keys", mapOf("projectId" to pakData.projectId))
+    assertThat(result["items"]).isNotNull
   }
 
   @Test

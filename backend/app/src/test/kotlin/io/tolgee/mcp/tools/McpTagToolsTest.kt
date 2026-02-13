@@ -9,13 +9,13 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 
 class McpTagToolsTest : AbstractMcpTest() {
-  lateinit var data: McpTestData
+  lateinit var data: McpPakTestData
   lateinit var client: McpSyncClient
 
   @BeforeEach
   fun setup() {
-    data = createTestDataWithPat()
-    client = createMcpClient(data.pat.token!!)
+    data = createTestDataWithPak()
+    client = createMcpClientWithPak(data.apiKey.encodedKey!!)
   }
 
   @Test

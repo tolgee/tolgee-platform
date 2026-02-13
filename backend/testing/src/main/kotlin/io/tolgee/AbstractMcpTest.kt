@@ -6,7 +6,9 @@ import io.modelcontextprotocol.client.McpSyncClient
 import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport
 import io.modelcontextprotocol.spec.McpSchema
 import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.model.ApiKey
 import io.tolgee.model.Pat
+import io.tolgee.model.enums.Scope
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
@@ -21,13 +23,17 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
 
   private val clients = mutableListOf<McpSyncClient>()
 
-  fun createMcpClient(patToken: String): McpSyncClient {
+  fun createMcpClientWithPat(pat: String): McpSyncClient = createMcpClientWithHeader("tgpat_$pat")
+
+  fun createMcpClientWithPak(pak: String): McpSyncClient = createMcpClientWithHeader("tgpak_$pak")
+
+  private fun createMcpClientWithHeader(apiKeyHeader: String): McpSyncClient {
     val transport =
       HttpClientStreamableHttpTransport
         .builder("http://localhost:$port")
         .endpoint("/mcp/developer")
         .customizeRequest { builder ->
-          builder.header("X-API-Key", "tgpat_$patToken")
+          builder.header("X-API-Key", apiKeyHeader)
         }.build()
 
     val client =
@@ -53,7 +59,7 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
     clients.clear()
   }
 
-  fun createTestDataWithPat(): McpTestData {
+  fun createTestDataWithPat(): McpPatTestData {
     var pat: Pat? = null
     val base = BaseTestData()
     base.userAccountBuilder.build {
@@ -67,9 +73,33 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
       isDefault = true
     }
     testDataService.saveTestData(base.root)
-    return McpTestData(
+    return McpPatTestData(
       testData = base,
       pat = pat!!,
+      projectId = base.project.id,
+      organizationId = base.projectBuilder.self.organizationOwner.id,
+    )
+  }
+
+  fun createTestDataWithPak(scopes: Set<Scope> = Scope.entries.toSet()): McpPakTestData {
+    var apiKey: ApiKey? = null
+    val base = BaseTestData(userName = "pak_test_user", projectName = "pak_test_project")
+    base.projectBuilder.build {
+      addApiKey {
+        key = "test_pak_key"
+        scopesEnum = scopes.toMutableSet()
+        userAccount = base.userAccountBuilder.self
+        apiKey = this
+      }
+    }
+    base.projectBuilder.addBranch {
+      name = "main"
+      isDefault = true
+    }
+    testDataService.saveTestData(base.root)
+    return McpPakTestData(
+      testData = base,
+      apiKey = apiKey!!,
       projectId = base.project.id,
       organizationId = base.projectBuilder.self.organizationOwner.id,
     )
@@ -93,9 +123,16 @@ abstract class AbstractMcpTest : AbstractSpringTest() {
     return objectMapper.readTree(textContent.text())
   }
 
-  data class McpTestData(
+  data class McpPatTestData(
     val testData: BaseTestData,
     val pat: Pat,
+    val projectId: Long,
+    val organizationId: Long,
+  )
+
+  data class McpPakTestData(
+    val testData: BaseTestData,
+    val apiKey: ApiKey,
     val projectId: Long,
     val organizationId: Long,
   )

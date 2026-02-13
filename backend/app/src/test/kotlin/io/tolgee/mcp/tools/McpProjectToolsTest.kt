@@ -7,13 +7,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class McpProjectToolsTest : AbstractMcpTest() {
-  lateinit var data: McpTestData
+  lateinit var data: McpPatTestData
   lateinit var client: McpSyncClient
 
   @BeforeEach
   fun setup() {
     data = createTestDataWithPat()
-    client = createMcpClient(data.pat.token!!)
+    client = createMcpClientWithPat(data.pat.token!!)
   }
 
   @Test

@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 
 class McpBranchToolsTest : AbstractMcpTest() {
-  lateinit var data: McpTestData
+  lateinit var data: McpPakTestData
   lateinit var client: McpSyncClient
 
   @Autowired
@@ -23,11 +23,11 @@ class McpBranchToolsTest : AbstractMcpTest() {
 
   @BeforeEach
   fun setup() {
-    data = createTestDataWithPat()
+    data = createTestDataWithPak()
     data.testData.projectBuilder.self.useBranching = true
     testDataService.saveTestData(data.testData.root)
     enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
-    client = createMcpClient(data.pat.token!!)
+    client = createMcpClientWithPak(data.apiKey.encodedKey!!)
   }
 
   @Test

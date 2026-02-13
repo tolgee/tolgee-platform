@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 
 @WithoutEeTest
 class McpWithoutEeTest : AbstractMcpTest() {
-  lateinit var data: McpTestData
+  lateinit var data: McpPakTestData
 
   private val eePresent: Boolean by lazy {
     try {
@@ -51,12 +51,12 @@ class McpWithoutEeTest : AbstractMcpTest() {
 
   @BeforeEach
   fun setup() {
-    data = createTestDataWithPat()
+    data = createTestDataWithPak()
   }
 
   @Test
   fun `core tools are always available`() {
-    val client = createMcpClient(data.pat.token!!)
+    val client = createMcpClientWithPak(data.apiKey.encodedKey!!)
     val toolNames =
       client
         .listTools()
@@ -68,7 +68,7 @@ class McpWithoutEeTest : AbstractMcpTest() {
 
   @Test
   fun `branch tools are only available with EE module`() {
-    val client = createMcpClient(data.pat.token!!)
+    val client = createMcpClientWithPak(data.apiKey.encodedKey!!)
     val toolNames =
       client
         .listTools()

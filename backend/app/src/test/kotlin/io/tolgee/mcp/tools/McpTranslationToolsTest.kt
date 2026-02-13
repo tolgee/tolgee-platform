@@ -7,13 +7,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class McpTranslationToolsTest : AbstractMcpTest() {
-  lateinit var data: McpTestData
+  lateinit var data: McpPakTestData
   lateinit var client: McpSyncClient
 
   @BeforeEach
   fun setup() {
-    data = createTestDataWithPat()
-    client = createMcpClient(data.pat.token!!)
+    data = createTestDataWithPak()
+    client = createMcpClientWithPak(data.apiKey.encodedKey!!)
 
     // Create a key with a translation for testing
     callTool(

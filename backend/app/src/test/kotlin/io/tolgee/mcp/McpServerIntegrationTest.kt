@@ -56,7 +56,7 @@ class McpServerIntegrationTest : AbstractMcpTest() {
   @Autowired
   lateinit var rateLimitService: io.tolgee.security.ratelimit.RateLimitService
 
-  lateinit var data: McpTestData
+  lateinit var data: McpPatTestData
 
   @BeforeEach
   fun setup() {
@@ -68,7 +68,7 @@ class McpServerIntegrationTest : AbstractMcpTest() {
 
   @Test
   fun `write tool records activity in database`() {
-    val client = createMcpClient(data.pat.token!!)
+    val client = createMcpClientWithPat(data.pat.token!!)
 
     callTool(
       client,
@@ -90,7 +90,7 @@ class McpServerIntegrationTest : AbstractMcpTest() {
 
   @Test
   fun `tool call emits PostHog event with mcp metadata`() {
-    val client = createMcpClient(data.pat.token!!)
+    val client = createMcpClientWithPat(data.pat.token!!)
 
     callTool(
       client,
@@ -182,7 +182,7 @@ class McpServerIntegrationTest : AbstractMcpTest() {
   fun `read-only mode allows read tools`() {
     doReturn(true).whenever(authenticationFacadeSpy).isReadOnly
 
-    val client = createMcpClient(data.pat.token!!)
+    val client = createMcpClientWithPat(data.pat.token!!)
 
     val readResult = callTool(client, "list_projects")
     assertThat(readResult.isError).isFalse()
@@ -192,7 +192,7 @@ class McpServerIntegrationTest : AbstractMcpTest() {
   fun `read-only mode blocks write tools`() {
     doReturn(true).whenever(authenticationFacadeSpy).isReadOnly
 
-    val client = createMcpClient(data.pat.token!!)
+    val client = createMcpClientWithPat(data.pat.token!!)
 
     // MCP SDK throws McpError for server-side exceptions rather than returning isError
     assertThat(
@@ -212,7 +212,7 @@ class McpServerIntegrationTest : AbstractMcpTest() {
 
   @Test
   fun `rapid tool calls all succeed without false rate limiting`() {
-    val client = createMcpClient(data.pat.token!!)
+    val client = createMcpClientWithPat(data.pat.token!!)
 
     val results =
       (1..10).map {
