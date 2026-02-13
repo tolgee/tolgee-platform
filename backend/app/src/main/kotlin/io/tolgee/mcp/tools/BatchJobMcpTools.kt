@@ -68,7 +68,7 @@ class BatchJobMcpTools(
         stringArray("keyNames", "Names of keys to translate", required = true)
         stringArray("targetLanguageTags", "Language tags to translate into (e.g. ['de', 'fr'])", required = true)
         string("namespace", "Optional: namespace of the keys")
-        string("branch", "Optional: branch name (for branching projects)")
+        string("branch", "Optional: branch name")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()

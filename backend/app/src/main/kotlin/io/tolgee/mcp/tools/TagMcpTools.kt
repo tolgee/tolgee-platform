@@ -59,7 +59,7 @@ class TagMcpTools(
         stringArray("keyNames", "Names of the keys to tag", required = true)
         stringArray("tags", "Names of the tags to add", required = true)
         string("namespace", "Optional: namespace of the keys")
-        string("branch", "Optional: branch name (for branching projects)")
+        string("branch", "Optional: branch name")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()

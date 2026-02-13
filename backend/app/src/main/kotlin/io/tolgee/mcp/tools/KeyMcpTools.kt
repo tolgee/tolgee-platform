@@ -47,7 +47,7 @@ class KeyMcpTools(
       "List translation keys in a Tolgee project. Returns up to 100 keys sorted by ID. Use search_keys to find specific keys by name or translation text.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
-        string("branch", "Optional: branch name (for branching projects)")
+        string("branch", "Optional: branch name")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()
@@ -90,7 +90,7 @@ class KeyMcpTools(
         number("projectId", "ID of the project", required = true)
         string("query", "Search query (matches key name or translation text)", required = true)
         string("languageTag", "Optional: language tag to search translations in")
-        string("branch", "Optional: branch name (for branching projects)")
+        string("branch", "Optional: branch name")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()
@@ -132,7 +132,7 @@ class KeyMcpTools(
           string("description", "Optional: description / developer context for the key")
         }
         string("namespace", "Optional: default namespace for all keys (individual keys can override)")
-        string("branch", "Optional: branch name (for branching projects)")
+        string("branch", "Optional: branch name")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()
@@ -162,7 +162,7 @@ class KeyMcpTools(
         number("projectId", "ID of the project", required = true)
         string("keyName", "The translation key name", required = true)
         string("namespace", "Optional: namespace of the key")
-        string("branch", "Optional: branch name (for branching projects)")
+        string("branch", "Optional: branch name")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()
@@ -240,7 +240,7 @@ class KeyMcpTools(
         number("projectId", "ID of the project", required = true)
         stringArray("keyNames", "Names of the keys to delete", required = true)
         string("namespace", "Optional: namespace of the keys")
-        string("branch", "Optional: branch name (for branching projects)")
+        string("branch", "Optional: branch name")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()

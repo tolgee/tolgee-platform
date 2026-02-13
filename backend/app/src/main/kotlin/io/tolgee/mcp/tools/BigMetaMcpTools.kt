@@ -33,7 +33,7 @@ class BigMetaMcpTools(
           string("keyName", "Key name", required = true)
           string("namespace", "Optional: key namespace")
         }
-        string("branch", "Optional: branch name (for branching projects)")
+        string("branch", "Optional: branch name")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()
