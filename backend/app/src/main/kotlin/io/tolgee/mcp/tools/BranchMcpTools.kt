@@ -120,8 +120,8 @@ class BranchMcpTools(
       val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(createBranchSpec, projectId) {
         projectFeatureGuard.checkEnabled(Feature.BRANCHING)
-        val name = request.arguments.getString("name") ?: ""
-        val originBranchId = request.arguments.getLong("originBranchId")!!
+        val name = request.arguments.requireString("name")
+        val originBranchId = request.arguments.requireLong("originBranchId")
         val branch =
           branchService.createBranch(
             projectId = projectId,
@@ -152,7 +152,7 @@ class BranchMcpTools(
       val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(deleteBranchSpec, projectId) {
         projectFeatureGuard.checkEnabled(Feature.BRANCHING)
-        val branchId = request.arguments.getLong("branchId")!!
+        val branchId = request.arguments.requireLong("branchId")
         branchService.deleteBranch(projectId, branchId)
         textResult(objectMapper.writeValueAsString(mapOf("deleted" to true)))
       }

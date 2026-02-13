@@ -97,7 +97,7 @@ class KeyMcpTools(
       mcpRequestContext.executeAs(searchKeysSpec, projectId) {
         val results =
           keyService.searchKeys(
-            search = request.arguments.getString("query") ?: "",
+            search = request.arguments.requireString("query"),
             languageTag = request.arguments.getString("languageTag"),
             project = projectHolder.project,
             branch = request.arguments.getString("branch"),
@@ -140,15 +140,15 @@ class KeyMcpTools(
         val branch = request.arguments.getString("branch")
         val defaultNamespace = request.arguments.getString("namespace")
         val keys =
-          request.arguments.getList("keys")?.map { k ->
+          request.arguments.requireList("keys").map { k ->
             ImportKeysItemDto(
-              name = k.getString("name") ?: "",
+              name = k.requireString("name"),
               namespace = k.getString("namespace") ?: defaultNamespace,
               translations = k.getStringMap("translations") ?: emptyMap(),
               tags = k.getStringList("tags"),
               description = k.getString("description"),
             )
-          } ?: emptyList()
+          }
 
         keyService.importKeys(keys, projectHolder.projectEntity, branch)
         textResult(objectMapper.writeValueAsString(mapOf("created" to true, "keyCount" to keys.size)))
@@ -170,7 +170,7 @@ class KeyMcpTools(
         val key =
           keyService.find(
             projectId = projectId,
-            name = request.arguments.getString("keyName") ?: "",
+            name = request.arguments.requireString("keyName"),
             namespace = request.arguments.getString("namespace"),
             branch = request.arguments.getString("branch"),
           )
@@ -207,7 +207,7 @@ class KeyMcpTools(
         val key =
           keyService.find(
             projectId = projectId,
-            name = request.arguments.getString("keyName") ?: "",
+            name = request.arguments.requireString("keyName"),
             namespace = request.arguments.getString("keyNamespace"),
             branch = request.arguments.getString("keyBranch"),
           )
@@ -216,7 +216,7 @@ class KeyMcpTools(
         } else {
           val dto =
             EditKeyDto(
-              name = request.arguments.getString("newName") ?: "",
+              name = request.arguments.requireString("newName"),
               namespace = request.arguments.getString("newNamespace"),
               description = request.arguments.getString("newDescription"),
             )
@@ -245,7 +245,7 @@ class KeyMcpTools(
     ) { request ->
       val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(deleteKeysSpec, projectId) {
-        val keyNames = request.arguments.getStringList("keyNames") ?: emptyList()
+        val keyNames = request.arguments.requireStringList("keyNames")
         val namespace = request.arguments.getString("namespace")
         val branch = request.arguments.getString("branch")
 

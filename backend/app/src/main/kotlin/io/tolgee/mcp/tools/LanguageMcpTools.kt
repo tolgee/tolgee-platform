@@ -69,8 +69,8 @@ class LanguageMcpTools(
       mcpRequestContext.executeAs(createLanguageSpec, projectId) {
         val dto =
           LanguageRequest(
-            name = request.arguments.getString("name") ?: "",
-            tag = request.arguments.getString("tag") ?: "",
+            name = request.arguments.requireString("name"),
+            tag = request.arguments.requireString("tag"),
             originalName = request.arguments.getString("originalName"),
             flagEmoji = request.arguments.getString("flagEmoji"),
           )

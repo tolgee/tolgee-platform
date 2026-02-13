@@ -43,7 +43,7 @@ class TranslationMcpTools(
         val key =
           keyService.find(
             projectId = projectId,
-            name = request.arguments.getString("keyName") ?: "",
+            name = request.arguments.requireString("keyName"),
             namespace = request.arguments.getString("namespace"),
             branch = request.arguments.getString("branch"),
           )
@@ -104,9 +104,9 @@ class TranslationMcpTools(
       mcpRequestContext.executeAs(setTranslationsSpec, projectId) {
         val dto =
           SetTranslationsWithKeyDto(
-            key = request.arguments.getString("keyName") ?: "",
+            key = request.arguments.requireString("keyName"),
             namespace = request.arguments.getString("namespace"),
-            translations = request.arguments.getStringMap("translations") ?: emptyMap(),
+            translations = request.arguments.requireStringMap("translations"),
             branch = request.arguments.getString("branch"),
           )
         val key =

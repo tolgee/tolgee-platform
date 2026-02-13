@@ -64,8 +64,8 @@ class TagMcpTools(
     ) { request ->
       val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(tagKeysSpec, projectId) {
-        val keyNames = request.arguments.getStringList("keyNames") ?: emptyList()
-        val tags = request.arguments.getStringList("tags") ?: emptyList()
+        val keyNames = request.arguments.requireStringList("keyNames")
+        val tags = request.arguments.requireStringList("tags")
         val namespace = request.arguments.getString("namespace")
         val branch = request.arguments.getString("branch")
 

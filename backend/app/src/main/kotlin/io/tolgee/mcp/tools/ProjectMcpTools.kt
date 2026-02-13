@@ -80,10 +80,10 @@ class ProjectMcpTools(
       mcpRequestContext.executeAs(createProjectSpec) {
         val args = request.arguments
         val languages =
-          args.getList("languages")?.map { lang ->
+          args.requireList("languages").map { lang ->
             LanguageRequest(
-              name = lang.getString("name") ?: "",
-              tag = lang.getString("tag") ?: "",
+              name = lang.requireString("name"),
+              tag = lang.requireString("tag"),
               originalName = lang.getString("originalName"),
               flagEmoji = lang.getString("flagEmoji"),
             )
@@ -91,8 +91,8 @@ class ProjectMcpTools(
 
         val dto =
           CreateProjectRequest(
-            name = args.getString("name") ?: "",
-            organizationId = args.getLong("organizationId") ?: 0,
+            name = args.requireString("name"),
+            organizationId = args.requireLong("organizationId"),
             languages = languages,
             baseLanguageTag = args.getString("baseLanguageTag"),
           )

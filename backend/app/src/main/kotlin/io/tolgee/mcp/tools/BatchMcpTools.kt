@@ -42,7 +42,7 @@ class BatchMcpTools(
     ) { request ->
       val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(getBatchJobSpec, projectId) {
-        val jobId = request.arguments.getLong("jobId")!!
+        val jobId = request.arguments.requireLong("jobId")
         val view = batchJobService.getView(jobId)
         if (view.batchJob.project?.id != projectId) {
           return@executeAs errorResult("Batch job $jobId does not belong to this project")
@@ -73,8 +73,8 @@ class BatchMcpTools(
     ) { request ->
       val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(machineTranslateSpec, projectId) {
-        val keyNames = request.arguments.getStringList("keyNames") ?: emptyList()
-        val targetLanguageTags = request.arguments.getStringList("targetLanguageTags") ?: emptyList()
+        val keyNames = request.arguments.requireStringList("keyNames")
+        val targetLanguageTags = request.arguments.requireStringList("targetLanguageTags")
         val namespace = request.arguments.getString("namespace")
         val branch = request.arguments.getString("branch")
 

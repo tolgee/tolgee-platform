@@ -41,19 +41,19 @@ class BigMetaMcpTools(
         val branch = request.arguments.getString("branch")
         val relatedKeys =
           request.arguments
-            .getList("relatedKeysInOrder")
-            ?.map { k ->
+            .requireList("relatedKeysInOrder")
+            .map { k ->
               RelatedKeyDto(
-                keyName = k.getString("keyName") ?: "",
+                keyName = k.requireString("keyName"),
                 namespace = k.getString("namespace"),
                 branch = branch,
               )
-            }?.toMutableList()
+            }.toMutableList()
 
         val dto = BigMetaDto()
         dto.relatedKeysInOrder = relatedKeys
         bigMetaService.store(dto, projectHolder.projectEntity)
-        textResult(objectMapper.writeValueAsString(mapOf("stored" to true, "keyCount" to (relatedKeys?.size ?: 0))))
+        textResult(objectMapper.writeValueAsString(mapOf("stored" to true, "keyCount" to relatedKeys.size)))
       }
     }
   }
