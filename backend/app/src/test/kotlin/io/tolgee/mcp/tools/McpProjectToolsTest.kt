@@ -61,11 +61,10 @@ class McpProjectToolsTest : AbstractMcpTest() {
         mapOf("projectId" to data.projectId),
       )
     assertThat(json.isArray).isTrue()
-    if (json.size() > 0) {
-      assertThat(json[0].has("languageTag")).isTrue()
-      assertThat(json[0].has("translatedPercentage")).isTrue()
-      assertThat(json[0].has("reviewedPercentage")).isTrue()
-      assertThat(json[0].has("untranslatedPercentage")).isTrue()
-    }
+    assertThat(json.size()).isGreaterThan(0)
+    assertThat(json[0].has("languageTag")).isTrue()
+    assertThat(json[0].has("translatedPercentage")).isTrue()
+    assertThat(json[0].has("reviewedPercentage")).isTrue()
+    assertThat(json[0].has("untranslatedPercentage")).isTrue()
   }
 }
