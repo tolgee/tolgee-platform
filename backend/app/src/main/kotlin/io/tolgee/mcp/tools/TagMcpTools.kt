@@ -25,28 +25,36 @@ class TagMcpTools(
   override fun register(server: McpSyncServer) {
     server.addTool(
       "list_tags",
-      "List all tags used in a Tolgee project",
+      "List all tags used in a Tolgee project. Returns up to 1000 results per page.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
         string("search", "Optional: search filter for tag names")
+        number("page", "Optional: page number (0-based, default 0)")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(listTagsSpec, projectId) {
         val search = request.arguments.getString("search")
+        val pageNum = request.arguments.getInt("page") ?: 0
         val tags =
           tagService.getProjectTags(
             projectId = projectId,
             search = search,
-            pageable = PageRequest.of(0, 1000, Sort.by("name")),
+            pageable = PageRequest.of(pageNum, 1000, Sort.by("name")),
           )
         val result =
-          tags.content.map { tag ->
-            mapOf(
-              "id" to tag.id,
-              "name" to tag.name,
-            )
-          }
+          mapOf(
+            "items" to
+              tags.content.map { tag ->
+                mapOf(
+                  "id" to tag.id,
+                  "name" to tag.name,
+                )
+              },
+            "page" to tags.number,
+            "totalPages" to tags.totalPages,
+            "totalItems" to tags.totalElements,
+          )
         textResult(objectMapper.writeValueAsString(result))
       }
     }

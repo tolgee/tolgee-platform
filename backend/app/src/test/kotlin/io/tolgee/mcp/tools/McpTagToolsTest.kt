@@ -64,8 +64,8 @@ class McpTagToolsTest : AbstractMcpTest() {
     )
 
     val json = callToolAndGetJson(client, "list_tags", mapOf("projectId" to data.projectId))
-    assertThat(json.isArray).isTrue()
-    val tagNames = (0 until json.size()).map { json[it]["name"].asText() }
+    assertThat(json["items"].isArray).isTrue()
+    val tagNames = (0 until json["items"].size()).map { json["items"][it]["name"].asText() }
     assertThat(tagNames).contains("my-tag")
 
     val dbTags =
@@ -103,8 +103,8 @@ class McpTagToolsTest : AbstractMcpTest() {
         "list_tags",
         mapOf("projectId" to data.projectId, "search" to "alpha"),
       )
-    assertThat(json.isArray).isTrue()
-    val tagNames = (0 until json.size()).map { json[it]["name"].asText() }
+    assertThat(json["items"].isArray).isTrue()
+    val tagNames = (0 until json["items"].size()).map { json["items"][it]["name"].asText() }
     assertThat(tagNames).contains("alpha-tag")
     assertThat(tagNames).doesNotContain("beta-tag")
 

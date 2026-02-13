@@ -74,35 +74,38 @@ class BranchMcpTools(
   override fun register(server: McpSyncServer) {
     server.addTool(
       "list_branches",
-      "List branches in a Tolgee project. Only available for projects with branching enabled (enterprise feature).",
+      "List branches in a Tolgee project. Returns up to 100 results per page. Only available for projects with branching enabled (enterprise feature).",
       toolSchema {
         number("projectId", "ID of the project", required = true)
         string("search", "Optional: search filter for branch names")
+        number("page", "Optional: page number (0-based, default 0)")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(listBranchesSpec, projectId) {
         projectFeatureGuard.checkEnabled(Feature.BRANCHING)
         val search = request.arguments.getString("search")
+        val pageNum = request.arguments.getInt("page") ?: 0
         val page =
           branchService.getBranches(
             projectId = projectId,
-            page = PageRequest.of(0, 100, Sort.by("id")),
+            page = PageRequest.of(pageNum, 100, Sort.by("id")),
             search = search,
           )
-        val branches =
-          page.content.map { branch ->
-            mapOf(
-              "id" to branch.id,
-              "name" to branch.name,
-              "isDefault" to branch.isDefault,
-              "isProtected" to branch.isProtected,
-            )
-          }
         val result =
           mapOf(
-            "branches" to branches,
-            "total" to page.totalElements,
+            "items" to
+              page.content.map { branch ->
+                mapOf(
+                  "id" to branch.id,
+                  "name" to branch.name,
+                  "isDefault" to branch.isDefault,
+                  "isProtected" to branch.isProtected,
+                )
+              },
+            "page" to page.number,
+            "totalPages" to page.totalPages,
+            "totalItems" to page.totalElements,
           )
         textResult(objectMapper.writeValueAsString(result))
       }

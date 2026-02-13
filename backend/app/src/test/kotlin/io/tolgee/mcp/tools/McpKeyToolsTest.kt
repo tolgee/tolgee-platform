@@ -19,10 +19,9 @@ class McpKeyToolsTest : AbstractMcpTest() {
   @Test
   fun `list_keys returns empty for project with no keys`() {
     val json = callToolAndGetJson(client, "list_keys", mapOf("projectId" to data.projectId))
-    assertThat(json["keys"].isArray).isTrue()
-    assertThat(json["keys"].size()).isEqualTo(0)
-    assertThat(json["totalKeys"].asLong()).isEqualTo(0)
-    assertThat(json["hasMore"].asBoolean()).isFalse()
+    assertThat(json["items"].isArray).isTrue()
+    assertThat(json["items"].size()).isEqualTo(0)
+    assertThat(json["totalItems"].asLong()).isEqualTo(0)
   }
 
   @Test
@@ -32,10 +31,11 @@ class McpKeyToolsTest : AbstractMcpTest() {
     }
 
     val json = callToolAndGetJson(client, "list_keys", mapOf("projectId" to data.projectId))
-    assertThat(json["keys"].isArray).isTrue()
-    assertThat(json["totalKeys"].asLong()).isEqualTo(3)
-    assertThat(json["hasMore"].asBoolean()).isFalse()
-    val keyNames = (0 until json["keys"].size()).map { json["keys"][it]["keyName"].asText() }
+    assertThat(json["items"].isArray).isTrue()
+    assertThat(json["totalItems"].asLong()).isEqualTo(3)
+    assertThat(json["page"].asInt()).isEqualTo(0)
+    assertThat(json["totalPages"].asInt()).isEqualTo(1)
+    val keyNames = (0 until json["items"].size()).map { json["items"][it]["keyName"].asText() }
     assertThat(keyNames).containsExactlyInAnyOrder("first.key", "second.key", "third.key")
   }
 
@@ -78,8 +78,8 @@ class McpKeyToolsTest : AbstractMcpTest() {
         "search_keys",
         mapOf("projectId" to data.projectId, "query" to "search.target"),
       )
-    assertThat(json.isArray).isTrue()
-    val keyNames = (0 until json.size()).map { json[it]["keyName"].asText() }
+    assertThat(json["items"].isArray).isTrue()
+    val keyNames = (0 until json["items"].size()).map { json["items"][it]["keyName"].asText() }
     assertThat(keyNames).contains("search.target")
   }
 

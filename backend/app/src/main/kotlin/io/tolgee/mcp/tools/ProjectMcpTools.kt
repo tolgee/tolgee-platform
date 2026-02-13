@@ -35,29 +35,37 @@ class ProjectMcpTools(
   override fun register(server: McpSyncServer) {
     server.addTool(
       "list_projects",
-      "List Tolgee projects accessible to the current user (up to 100 results)",
+      "List Tolgee projects accessible to the current user. Returns up to 100 results per page.",
       toolSchema {
         string("search", "Optional search query to filter projects by name")
+        number("page", "Optional: page number (0-based, default 0)")
       },
     ) { request ->
       mcpRequestContext.executeAs(listProjectsSpec) {
         val search = request.arguments?.getString("search")
+        val pageNum = request.arguments?.getInt("page") ?: 0
         val projects =
           projectService.findPermittedInOrganizationPaged(
-            PageRequest.of(0, 100),
+            PageRequest.of(pageNum, 100),
             search,
           )
         val result =
-          projects.content.map { p ->
-            mapOf(
-              "id" to p.id,
-              "name" to p.name,
-              "slug" to p.slug,
-              "description" to p.description,
-              "organizationOwnerName" to p.organizationOwner.name,
-              "organizationOwnerSlug" to p.organizationOwner.slug,
-            )
-          }
+          mapOf(
+            "items" to
+              projects.content.map { p ->
+                mapOf(
+                  "id" to p.id,
+                  "name" to p.name,
+                  "slug" to p.slug,
+                  "description" to p.description,
+                  "organizationOwnerName" to p.organizationOwner.name,
+                  "organizationOwnerSlug" to p.organizationOwner.slug,
+                )
+              },
+            "page" to projects.number,
+            "totalPages" to projects.totalPages,
+            "totalItems" to projects.totalElements,
+          )
         textResult(objectMapper.writeValueAsString(result))
       }
     }

@@ -44,39 +44,35 @@ class KeyMcpTools(
   override fun register(server: McpSyncServer) {
     server.addTool(
       "list_keys",
-      "List translation keys in a Tolgee project. Returns up to 100 keys sorted by ID. Use search_keys to find specific keys by name or translation text.",
+      "List translation keys in a Tolgee project. Returns up to 100 keys per page. Use search_keys to find specific keys by name or translation text.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
         string("branch", "Optional: branch name")
+        number("page", "Optional: page number (0-based, default 0)")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(listKeysSpec, projectId) {
+        val pageNum = request.arguments.getInt("page") ?: 0
         val page =
           keyService.getPaged(
             projectId,
             request.arguments.getString("branch"),
-            PageRequest.of(0, 100),
+            PageRequest.of(pageNum, 100),
           )
-        val keys =
-          page.content.map { key ->
-            mapOf(
-              "keyId" to key.id,
-              "keyName" to key.name,
-              "keyNamespace" to key.namespace,
-            )
-          }
         val result =
           mapOf(
-            "keys" to keys,
-            "totalKeys" to page.totalElements,
-            "hasMore" to (page.totalElements > 100),
-            "hint" to
-              if (page.totalElements > 100) {
-                "Showing first 100 of ${page.totalElements} keys. Use search_keys to find specific keys."
-              } else {
-                null
+            "items" to
+              page.content.map { key ->
+                mapOf(
+                  "keyId" to key.id,
+                  "keyName" to key.name,
+                  "keyNamespace" to key.namespace,
+                )
               },
+            "page" to page.number,
+            "totalPages" to page.totalPages,
+            "totalItems" to page.totalElements,
           )
         textResult(objectMapper.writeValueAsString(result))
       }
@@ -84,36 +80,44 @@ class KeyMcpTools(
 
     server.addTool(
       "search_keys",
-      "Search for translation keys in a Tolgee project by name or translation text. Returns up to 50 matching keys. " +
+      "Search for translation keys in a Tolgee project by name or translation text. Returns up to 50 matching keys per page. " +
         "Note: namespace and tags filtering is not yet supported — filter results client-side if needed.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
         string("query", "Search query (matches key name or translation text)", required = true)
         string("languageTag", "Optional: language tag to search translations in")
         string("branch", "Optional: branch name")
+        number("page", "Optional: page number (0-based, default 0)")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(searchKeysSpec, projectId) {
+        val pageNum = request.arguments.getInt("page") ?: 0
         val results =
           keyService.searchKeys(
             search = request.arguments.requireString("query"),
             languageTag = request.arguments.getString("languageTag"),
             project = projectHolder.project,
             branch = request.arguments.getString("branch"),
-            pageable = PageRequest.of(0, 50),
+            pageable = PageRequest.of(pageNum, 50),
           )
-        val mapped =
-          results.content.map { r ->
-            mapOf(
-              "keyId" to r.id,
-              "keyName" to r.name,
-              "keyNamespace" to r.namespace,
-              "baseTranslation" to r.baseTranslation,
-              "translation" to r.translation,
-            )
-          }
-        textResult(objectMapper.writeValueAsString(mapped))
+        val result =
+          mapOf(
+            "items" to
+              results.content.map { r ->
+                mapOf(
+                  "keyId" to r.id,
+                  "keyName" to r.name,
+                  "keyNamespace" to r.namespace,
+                  "baseTranslation" to r.baseTranslation,
+                  "translation" to r.translation,
+                )
+              },
+            "page" to results.number,
+            "totalPages" to results.totalPages,
+            "totalItems" to results.totalElements,
+          )
+        textResult(objectMapper.writeValueAsString(result))
       }
     }
 

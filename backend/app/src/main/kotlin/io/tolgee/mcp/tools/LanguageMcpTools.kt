@@ -26,30 +26,38 @@ class LanguageMcpTools(
   override fun register(server: McpSyncServer) {
     server.addTool(
       "list_languages",
-      "List all languages configured for a Tolgee project",
+      "List all languages configured for a Tolgee project. Returns up to 1000 results per page.",
       toolSchema {
         number("projectId", "ID of the project", required = true)
+        number("page", "Optional: page number (0-based, default 0)")
       },
     ) { request ->
       val projectId = request.arguments.getProjectId()
       mcpRequestContext.executeAs(listLanguagesSpec, projectId) {
+        val pageNum = request.arguments.getInt("page") ?: 0
         val languages =
           languageService.getPaged(
             projectId,
-            PageRequest.of(0, 1000, Sort.by("tag")),
+            PageRequest.of(pageNum, 1000, Sort.by("tag")),
             null,
           )
         val result =
-          languages.content.map { lang ->
-            mapOf(
-              "id" to lang.id,
-              "name" to lang.name,
-              "tag" to lang.tag,
-              "originalName" to lang.originalName,
-              "flagEmoji" to lang.flagEmoji,
-              "base" to lang.base,
-            )
-          }
+          mapOf(
+            "items" to
+              languages.content.map { lang ->
+                mapOf(
+                  "id" to lang.id,
+                  "name" to lang.name,
+                  "tag" to lang.tag,
+                  "originalName" to lang.originalName,
+                  "flagEmoji" to lang.flagEmoji,
+                  "base" to lang.base,
+                )
+              },
+            "page" to languages.number,
+            "totalPages" to languages.totalPages,
+            "totalItems" to languages.totalElements,
+          )
         textResult(objectMapper.writeValueAsString(result))
       }
     }

@@ -19,18 +19,21 @@ class McpProjectToolsTest : AbstractMcpTest() {
   @Test
   fun `list_projects returns user projects`() {
     val json = callToolAndGetJson(client, "list_projects")
-    assertThat(json.isArray).isTrue()
-    assertThat(json.size()).isGreaterThanOrEqualTo(1)
-    val projectNames = (0 until json.size()).map { json[it]["name"].asText() }
+    assertThat(json["items"].isArray).isTrue()
+    assertThat(json["items"].size()).isGreaterThanOrEqualTo(1)
+    assertThat(json["page"].asInt()).isEqualTo(0)
+    assertThat(json["totalPages"].asInt()).isGreaterThanOrEqualTo(1)
+    assertThat(json["totalItems"].asLong()).isGreaterThanOrEqualTo(1)
+    val projectNames = (0 until json["items"].size()).map { json["items"][it]["name"].asText() }
     assertThat(projectNames).contains("test_project")
   }
 
   @Test
   fun `list_projects with search filter`() {
     val json = callToolAndGetJson(client, "list_projects", mapOf("search" to "test_project"))
-    assertThat(json.isArray).isTrue()
-    assertThat(json.size()).isGreaterThanOrEqualTo(1)
-    assertThat(json[0]["name"].asText()).isEqualTo("test_project")
+    assertThat(json["items"].isArray).isTrue()
+    assertThat(json["items"].size()).isGreaterThanOrEqualTo(1)
+    assertThat(json["items"][0]["name"].asText()).isEqualTo("test_project")
   }
 
   @Test

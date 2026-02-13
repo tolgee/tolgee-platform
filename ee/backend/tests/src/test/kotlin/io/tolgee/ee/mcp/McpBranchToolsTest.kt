@@ -44,9 +44,9 @@ class McpBranchToolsTest : AbstractMcpTest() {
   @Test
   fun `list_branches returns project branches`() {
     val json = callToolAndGetJson(client, "list_branches", mapOf("projectId" to data.projectId))
-    assertThat(json["branches"].isArray).isTrue()
-    assertThat(json["total"].asLong()).isGreaterThanOrEqualTo(1)
-    val branchNames = (0 until json["branches"].size()).map { json["branches"][it]["name"].asText() }
+    assertThat(json["items"].isArray).isTrue()
+    assertThat(json["totalItems"].asLong()).isGreaterThanOrEqualTo(1)
+    val branchNames = (0 until json["items"].size()).map { json["items"][it]["name"].asText() }
     assertThat(branchNames).contains("main")
   }
 
