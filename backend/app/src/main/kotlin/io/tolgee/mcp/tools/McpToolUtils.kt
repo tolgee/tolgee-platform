@@ -8,9 +8,7 @@ import io.modelcontextprotocol.spec.McpSchema.JsonSchema
 import io.modelcontextprotocol.spec.McpSchema.TextContent
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.model.key.Key
 import io.tolgee.security.ProjectNotSelectedException
-import io.tolgee.service.key.KeyService
 
 fun textResult(text: String): CallToolResult {
   return CallToolResult
@@ -161,21 +159,6 @@ fun McpSyncServer.addTool(
       handler(request)
     },
   )
-}
-
-fun KeyService.resolveKeysByName(
-  projectId: Long,
-  names: List<String>,
-  namespace: String?,
-  branch: String?,
-): Pair<List<Key>, List<String>> {
-  val resolved =
-    names.map { name ->
-      name to find(projectId = projectId, name = name, namespace = namespace, branch = branch)
-    }
-  val found = resolved.mapNotNull { it.second }
-  val notFound = resolved.filter { it.second == null }.map { it.first }
-  return found to notFound
 }
 
 fun Map<String, Any?>.getProjectId(): Long = getLong("projectId") ?: throw ProjectNotSelectedException()

@@ -545,4 +545,19 @@ class KeyService(
   fun countAllOnInstance(): Long {
     return keyRepository.countAllOnInstance()
   }
+
+  fun resolveKeysByName(
+    projectId: Long,
+    names: List<String>,
+    namespace: String?,
+    branch: String?,
+  ): Pair<List<Key>, List<String>> {
+    val resolved =
+      names.map { name ->
+        name to find(projectId = projectId, name = name, namespace = namespace, branch = branch)
+      }
+    val found = resolved.mapNotNull { it.second }
+    val notFound = resolved.filter { it.second == null }.map { it.first }
+    return found to notFound
+  }
 }
