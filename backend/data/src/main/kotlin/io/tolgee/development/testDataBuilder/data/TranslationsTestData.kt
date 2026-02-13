@@ -292,11 +292,23 @@ class TranslationsTestData {
     isBranchDefault: Boolean = false,
   ) {
     root.data.projects[0].apply {
-      addBranch {
-        name = branchName
-        project = this@apply.self
-        isDefault = isBranchDefault
-      }.build {
+      val branchBuilder =
+        if (isBranchDefault) {
+          // Reuse the existing default branch to avoid duplicate default branch constraint violation
+          data.branches.find { it.self.isDefault }
+            ?: addBranch {
+              name = branchName
+              project = this@apply.self
+              isDefault = true
+            }
+        } else {
+          addBranch {
+            name = branchName
+            project = this@apply.self
+            isDefault = false
+          }
+        }
+      branchBuilder.build {
         (1..count).forEach {
           addKey {
             name = "key from branch $branchName $it"
