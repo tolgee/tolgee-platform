@@ -36,15 +36,15 @@ class AllKeysControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("id").isValidId
           node("namespace").isNull()
           node("name").isEqualTo("first_key")
-          node("branch").isNull()
+          node("branch").isEqualTo("main")
         }
         node("[1]") {
           node("name").isEqualTo("second_key")
-          node("branch").isNull()
+          node("branch").isEqualTo("main")
         }
         node("[2]") {
           node("name").isEqualTo("key_with_referecnces")
-          node("branch").isNull()
+          node("branch").isEqualTo("main")
         }
       }
     }

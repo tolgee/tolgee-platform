@@ -1,6 +1,7 @@
 package io.tolgee.service.branching
 
 import io.tolgee.constants.Message
+import io.tolgee.exceptions.DefaultBranchNotFoundException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.branching.Branch
 import io.tolgee.repository.branching.BranchRepositoryOss
@@ -20,7 +21,7 @@ abstract class AbstractBranchService(
   override fun getActiveOrDefault(
     projectId: Long,
     branchName: String?,
-  ): Branch? {
+  ): Branch {
     return branchName?.let { getActiveBranch(projectId, it) } ?: getDefaultBranch(projectId)
   }
 
@@ -31,8 +32,9 @@ abstract class AbstractBranchService(
     return branchName?.let { getActiveBranch(projectId, branchName).takeUnless { it.isDefault } }
   }
 
-  override fun getDefaultBranch(projectId: Long): Branch? {
+  override fun getDefaultBranch(projectId: Long): Branch {
     return branchRepository.findDefaultByProjectId(projectId)
+      ?: throw DefaultBranchNotFoundException()
   }
 
   override fun deleteAllByProjectId(projectId: Long) {

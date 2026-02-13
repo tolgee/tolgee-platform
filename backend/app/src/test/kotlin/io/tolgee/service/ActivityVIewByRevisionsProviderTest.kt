@@ -47,7 +47,6 @@ class ActivityVIewByRevisionsProviderTest : ProjectAuthControllerTest() {
     val testData = ImportTestData()
     testData.setAllResolved()
     testData.setAllOverride()
-    testData.addDefaultBranch()
     testDataService.saveTestData(testData.root)
     val user =
       testData.root.data.userAccounts[0]
@@ -77,7 +76,7 @@ class ActivityVIewByRevisionsProviderTest : ProjectAuthControllerTest() {
         ).setParameter("revisionId", revision.first().id)
         .resultList
 
-    branchIds.any { it == testData.defaultBranch.id }.assert.isTrue()
+    branchIds.any { it == testData.projectBuilder.defaultBranch.id }.assert.isTrue()
 
     val views = ActivityViewByRevisionsProvider(applicationContext, revision, null, onlyCountInListAbove = 1).get()
     views

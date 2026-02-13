@@ -8,6 +8,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
@@ -123,6 +124,7 @@ class DbPopulatorReal(
     project.name = projectName
     project.organizationOwner = organization
     project.slug = slugGenerator.generate(projectName, 3, 60) { true }
+    Branch.createMainBranch(project)
     en = createLanguage("en", project)
     project.baseLanguage = en
     de = createLanguage("de", project)
@@ -150,6 +152,7 @@ class DbPopulatorReal(
     val project = Project()
     project.name = projectName
     project.organizationOwner = organization
+    Branch.createMainBranch(project)
     projectService.save(project)
     en = createLanguage("en", project)
     project.baseLanguage = en
@@ -304,6 +307,7 @@ class DbPopulatorReal(
         .lowercase(Locale.getDefault())
         .replace("\\.+$".toRegex(), "")
     key.project = project
+    key.branch = project.getDefaultBranch()
     val translation = Translation()
     translation.language = en
     translation.key = key

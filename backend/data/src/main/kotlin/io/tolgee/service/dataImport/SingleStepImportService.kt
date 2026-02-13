@@ -15,6 +15,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.ScreenshotImporter.Companion.ScreenshotToImport
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import jakarta.persistence.EntityManager
@@ -33,6 +34,7 @@ class SingleStepImportService(
   private val currentDateProvider: CurrentDateProvider,
   private val applicationContext: ApplicationContext,
   private val entityManager: EntityManager,
+  private val branchService: BranchService,
 ) {
   @Transactional
   fun singleStepImport(
@@ -45,7 +47,11 @@ class SingleStepImportService(
     resolveConflict: ((translation: ImportTranslation) -> ForceMode?)? = null,
   ): ImportResult {
     reportStatus?.invoke(ImportApplicationStatus.ANALYZING_FILES)
-    val import = Import(project).also { it.author = userAccount }
+    val import =
+      Import(project).also {
+        it.author = userAccount
+        it.branch = branchService.getActiveOrDefault(project.id, params.branch)
+      }
 
     importService.publishImportBusinessEvent(project.id, userAccount.id)
 

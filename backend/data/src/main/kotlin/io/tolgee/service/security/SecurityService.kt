@@ -540,7 +540,7 @@ class SecurityService(
 
   fun checkProtectedBranchModify(entity: BranchMergeableEntity<*, *>) {
     val key = entity.resolveKey() ?: return
-    val branch = key.branch ?: branchService.getDefaultBranch(key.project.id)
+    val branch = key.branch
     checkProtectedBranchModify(branch, key.project.id)
   }
 

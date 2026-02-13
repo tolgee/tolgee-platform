@@ -81,7 +81,7 @@ class ImportDataManager(
         result[language.id] =
           mutableMapOf<Pair<String?, String>, Translation>().apply {
             translationService
-              .getAllByLanguageId(language.id, import.branch?.name)
+              .getAllByLanguageId(language.id, import.branch.name)
               .forEach { translation -> put(translation.key.namespace?.name to translation.key.name, translation) }
           }
       }
@@ -91,7 +91,7 @@ class ImportDataManager(
 
   val existingKeys: MutableMap<Pair<String?, String>, Key> by lazy {
     keyService
-      .getAllByBranch(import.project.id, import.branch?.name)
+      .getAllByBranch(import.project.id, import.branch.name)
       .asSequence()
       .map { (it.namespace?.name to it.name) to it }
       .toMap(mutableMapOf())

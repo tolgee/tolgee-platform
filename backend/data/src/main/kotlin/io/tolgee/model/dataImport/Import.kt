@@ -35,9 +35,9 @@ class Import(
   @OneToMany(mappedBy = "import", orphanRemoval = true)
   var files = mutableListOf<ImportFile>()
 
-  @ManyToOne(targetEntity = Branch::class)
-  @JoinColumn(name = "branch_id", nullable = true)
-  var branch: Branch? = null
+  @ManyToOne(targetEntity = Branch::class, optional = false)
+  @JoinColumn(name = "branch_id", nullable = false)
+  lateinit var branch: Branch
 
   override var deletedAt: Date? = null
 }

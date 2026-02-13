@@ -23,11 +23,12 @@ export const TaskTranslationsLink = <
   component,
   ...rest
 }: Props<T>) => {
-  const { selectedName } = useBranchesService({
+  const { selectedName, selected } = useBranchesService({
     projectId,
     branchName: useBranchFromUrlPath(),
   });
   const allowLink = !(
+    selected &&
     task.branchName &&
     task.branchName != selectedName &&
     !TASK_ACTIVE_STATES.includes(task.state)
