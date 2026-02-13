@@ -18,11 +18,12 @@ class ProjectBranchingMigrationService(
       projectRepository.findWithBranches(projectId)
         ?: throw NotFoundException()
 
-    if (project.hasDefaultBranch()) {
-      return
-    }
-
-    val defaultBranch = defaultBranchCreator.create(project)
+    val defaultBranch =
+      if (project.hasDefaultBranch()) {
+        project.getDefaultBranch()
+      } else {
+        defaultBranchCreator.create(project)
+      }
     entityManager.flush()
 
     entityManager

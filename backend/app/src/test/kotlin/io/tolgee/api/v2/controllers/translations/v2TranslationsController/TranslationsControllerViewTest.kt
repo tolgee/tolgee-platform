@@ -523,9 +523,10 @@ class TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects/"
     return entityManager
       .createQuery(
         """
-        from ActivityRevision ar order by ar.id desc limit 1
+        from ActivityRevision ar where ar.projectId = :projectId order by ar.id desc limit 1
         """.trimMargin(),
         ActivityRevision::class.java,
-      ).singleResult
+      ).setParameter("projectId", project.id)
+      .singleResult
   }
 }
