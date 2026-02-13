@@ -12,8 +12,8 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.AuthenticationInterceptor
 import io.tolgee.security.authentication.ReadOnlyModeInterceptor
 import io.tolgee.security.authorization.FeatureAuthorizationInterceptor
-import io.tolgee.security.authorization.OrganizationFeatureGuard
 import io.tolgee.security.authorization.OrganizationAuthorizationInterceptor
+import io.tolgee.security.authorization.OrganizationFeatureGuard
 import io.tolgee.security.ratelimit.RateLimitInterceptor
 import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.organization.OrganizationRoleService

@@ -33,7 +33,15 @@ class ProjectContextSetupTest : McpToolEndpointSpecTestBase() {
 
   @Test
   fun `projectId null with PAK auth resolves from token`() {
-    val pakDto = ApiKeyDto(id = 1, hash = "h", expiresAt = null, projectId = 42, userAccountId = 1, scopes = setOf(Scope.KEYS_VIEW))
+    val pakDto =
+      ApiKeyDto(
+        id = 1,
+        hash = "h",
+        expiresAt = null,
+        projectId = 42,
+        userAccountId = 1,
+        scopes = setOf(Scope.KEYS_VIEW),
+      )
     whenever(authenticationFacade.isProjectApiKeyAuth).thenReturn(true)
     whenever(authenticationFacade.projectApiKey).thenReturn(pakDto)
 

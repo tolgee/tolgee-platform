@@ -452,8 +452,7 @@ class TranslationService(
     languageIds: List<Long>,
   ) = translationRepository.getAllByKeyIdInAndLanguageIdIn(keyIds, languageIds)
 
-  fun getAllByKeyId(keyId: Long): List<Translation> =
-    translationRepository.getAllByKeyIdIn(listOf(keyId)).toList()
+  fun getAllByKeyId(keyId: Long): List<Translation> = translationRepository.getAllByKeyIdIn(listOf(keyId)).toList()
 
   fun clearBatch(
     keyIds: List<Long>,

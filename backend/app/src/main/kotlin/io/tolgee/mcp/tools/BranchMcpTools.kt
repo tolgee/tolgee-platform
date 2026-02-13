@@ -11,8 +11,8 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.project.ProjectFeatureGuard
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
-import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 

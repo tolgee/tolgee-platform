@@ -44,7 +44,8 @@ class KeyMcpTools(
   override fun register(server: McpSyncServer) {
     server.addTool(
       "list_keys",
-      "List translation keys in a Tolgee project. Returns up to 100 keys per page. Use search_keys to find specific keys by name or translation text.",
+      "List translation keys in a Tolgee project. " +
+        "Returns up to 100 keys per page. Use search_keys to find specific keys by name or translation text.",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")
         string("branch", "Optional: branch name")
@@ -73,7 +74,8 @@ class KeyMcpTools(
 
     server.addTool(
       "search_keys",
-      "Search for translation keys in a Tolgee project by name or translation text. Returns up to 50 matching keys per page. " +
+      "Search for translation keys in a Tolgee project by name or translation text. " +
+        "Returns up to 50 matching keys per page. " +
         "Note: namespace and tags filtering is not yet supported — filter results client-side if needed.",
       toolSchema {
         number("projectId", "ID of the project (required for PAT, auto-resolved for PAK)")

@@ -64,19 +64,20 @@ class McpTokenTypeEnforcementTest : AbstractMcpTest() {
       }
     }
     val projectB =
-      base.root.addProject {
-        name = "project_b"
-        organizationOwner = base.projectBuilder.self.organizationOwner
-      }.build {
-        addPermission {
-          user = base.user
-          type = ProjectPermissionType.MANAGE
+      base.root
+        .addProject {
+          name = "project_b"
+          organizationOwner = base.projectBuilder.self.organizationOwner
+        }.build {
+          addPermission {
+            user = base.user
+            type = ProjectPermissionType.MANAGE
+          }
+          addLanguage {
+            name = "English"
+            tag = "en"
+          }
         }
-        addLanguage {
-          name = "English"
-          tag = "en"
-        }
-      }
     testDataService.saveTestData(base.root)
 
     val client = createMcpClientWithPak(apiKey!!.encodedKey!!)

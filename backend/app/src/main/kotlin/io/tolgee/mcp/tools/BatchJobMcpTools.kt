@@ -77,7 +77,13 @@ class BatchJobMcpTools(
         val branch = request.arguments.getString("branch")
 
         // Resolve key names to IDs
-        val (resolvedKeys, notFoundKeys) = keyService.resolveKeysByName(projectHolder.project.id, keyNames, namespace, branch)
+        val (resolvedKeys, notFoundKeys) =
+          keyService.resolveKeysByName(
+            projectHolder.project.id,
+            keyNames,
+            namespace,
+            branch,
+          )
         if (notFoundKeys.isNotEmpty()) {
           return@executeAs errorResult("Keys not found: ${notFoundKeys.joinToString(", ")}")
         }
