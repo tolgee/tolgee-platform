@@ -22,10 +22,10 @@ class I18nextFileExporterTest {
       "cs.json",
       """
     |{
+    |  "item": "I will be first {icuParam, number}",
     |  "key3_one": "# den {icuParam}",
     |  "key3_few": "# dny",
-    |  "key3_other": "# dní",
-    |  "item": "I will be first {icuParam, number}"
+    |  "key3_other": "# dní"
     |}
       """.trimMargin(),
     )
@@ -62,10 +62,10 @@ class I18nextFileExporterTest {
       "cs.json",
       """
     |{
+    |  "item": "I will be first {icuParam} {{hello, number}}",
     |  "key3_one": "{{count, number}} den {{icuParam, number}}",
     |  "key3_few": "{{count, number}} dny",
-    |  "key3_other": "{{count, number}} dní",
-    |  "item": "I will be first {icuParam} {{hello, number}}"
+    |  "key3_other": "{{count, number}} dní"
     |}
       """.trimMargin(),
     )

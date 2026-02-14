@@ -23,12 +23,12 @@ class AndroidSdkFileExporterTest {
       "cs.json",
       """
     |{
+    |  "item": "I will be first %1${'$'}d",
     |  "key3": {
     |    "one": "%1${'$'}d den %2${'$'}s",
     |    "few": "%1${'$'}d dny",
     |    "other": "%1${'$'}d dní"
-    |  },
-    |  "item": "I will be first %1${'$'}d"
+    |  }
     |}
       """.trimMargin(),
     )
@@ -65,12 +65,12 @@ class AndroidSdkFileExporterTest {
       "cs.json",
       """
     |{
+    |  "item": "I will be first {icuParam} %1${'$'}d",
     |  "key3": {
     |    "one": "%1${'$'}d den %2${'$'}d",
     |    "few": "%1${'$'}d dny",
     |    "other": "%1${'$'}d dní"
-    |  },
-    |  "item": "I will be first {icuParam} %1${'$'}d"
+    |  }
     |}
       """.trimMargin(),
     )

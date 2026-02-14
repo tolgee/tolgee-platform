@@ -19,6 +19,10 @@ class YamlFileExporterTest {
       "cs.yaml",
       """
     |---
+    |indexed params: "I will be first {0}, {1}"
+    |named params: "I will be first {param1}, {param2}"
+    |this-is-array:
+    |- object: "I will be first {icuParam, number}"
     |this:
     |  is:
     |    nested:
@@ -26,10 +30,6 @@ class YamlFileExporterTest {
     |  '[1]':
     |    is:
     |      collision: "Colission"
-    |this-is-array:
-    |- object: "I will be first {icuParam, number}"
-    |indexed params: "I will be first {0}, {1}"
-    |named params: "I will be first {param1}, {param2}"
     |
       """.trimMargin(),
     )
@@ -39,6 +39,10 @@ class YamlFileExporterTest {
       "cs.yaml",
       """
     |---
+    |indexed params: "I will be first {0}, {1}"
+    |named params: "I will be first {param1}, {param2}"
+    |this-is-array[1]:
+    |  object: "I will be first {icuParam, number}"
     |this:
     |  is:
     |    nested:
@@ -46,10 +50,6 @@ class YamlFileExporterTest {
     |this[1]:
     |  is:
     |    collision: "Colission"
-    |this-is-array[1]:
-    |  object: "I will be first {icuParam, number}"
-    |indexed params: "I will be first {0}, {1}"
-    |named params: "I will be first {param1}, {param2}"
     |
       """.trimMargin(),
     )
@@ -64,6 +64,10 @@ class YamlFileExporterTest {
       "cs.yaml",
       """
     |---
+    |indexed params: "I will be first %s, %s"
+    |named params: "I will be first %{param1}, %{param2}"
+    |this-is-array[1]:
+    |  object: "I will be first %<icuParam>d"
     |this:
     |  is:
     |    nested:
@@ -74,10 +78,6 @@ class YamlFileExporterTest {
     |this[1]:
     |  is:
     |    collision: "Colission"
-    |this-is-array[1]:
-    |  object: "I will be first %<icuParam>d"
-    |indexed params: "I will be first %s, %s"
-    |named params: "I will be first %{param1}, %{param2}"
     |
       """.trimMargin(),
     )
@@ -92,12 +92,12 @@ class YamlFileExporterTest {
       "cs.yaml",
       """
     |---
+    |indexed params: "I will be first {0}, {1}"
+    |named params: "I will be first {param1}, {param2}"
+    |this-is-array[1].object: "I will be first {icuParam, number}"
     |this.is.nested.plural: "{count, plural, one {# den {icuParam}} few {# dny} other {#\
     |  \ dní}}"
     |this[1].is.collision: "Colission"
-    |this-is-array[1].object: "I will be first {icuParam, number}"
-    |indexed params: "I will be first {0}, {1}"
-    |named params: "I will be first {param1}, {param2}"
     |
       """.trimMargin(),
     )

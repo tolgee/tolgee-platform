@@ -39,7 +39,7 @@ class GenericStructuredFileExporter(
   }
 
   private fun prepare() {
-    translations.forEach { translation ->
+    translations.sortedBy { it.key.name }.forEach { translation ->
       addTranslationToBuilder(translation)
     }
   }
