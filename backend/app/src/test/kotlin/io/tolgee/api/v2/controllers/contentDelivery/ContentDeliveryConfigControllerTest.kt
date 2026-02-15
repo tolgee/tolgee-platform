@@ -5,14 +5,14 @@ import io.tolgee.batch.BatchJobConcurrentLauncher
 import io.tolgee.component.fileStorage.AzureBlobFileStorage
 import io.tolgee.component.fileStorage.AzureFileStorageFactory
 import io.tolgee.component.fileStorage.FileStorage
-import io.tolgee.exceptions.FileStoreException
 import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.component.fileStorage.S3FileStorageFactory
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.node
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
+import io.tolgee.exceptions.FileStoreException
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
