@@ -22,6 +22,7 @@ class AppleSdkFileExporterTest {
       "cs.json",
       """
     |{
+    |  "item": "I will be first %lld",
     |  "key3": {
     |    "variations": {
     |      "plural": {
@@ -30,8 +31,7 @@ class AppleSdkFileExporterTest {
     |        "other": "%lld dní"
     |      }
     |    }
-    |  },
-    |  "item": "I will be first %lld"
+    |  }
     |}
       """.trimMargin(),
     )
@@ -68,6 +68,7 @@ class AppleSdkFileExporterTest {
       "cs.json",
       """
     |{
+    |  "item": "I will be first {icuParam} %lld",
     |  "key3": {
     |    "variations": {
     |      "plural": {
@@ -76,8 +77,7 @@ class AppleSdkFileExporterTest {
     |        "other": "%lld dní"
     |      }
     |    }
-    |  },
-    |  "item": "I will be first {icuParam} %lld"
+    |  }
     |}
       """.trimMargin(),
     )

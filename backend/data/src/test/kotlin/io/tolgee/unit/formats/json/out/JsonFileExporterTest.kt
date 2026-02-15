@@ -103,8 +103,8 @@ class JsonFileExporterTest {
       "cs.json",
       """
     |{
-    |  "key3": "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}",
-    |  "item": "I will be first {icuParam, number} '{hey}'"
+    |  "item": "I will be first {icuParam, number} '{hey}'",
+    |  "key3": "{count, plural, one {# den {icuParam}} few {# dny} other {# dní}}"
     |}
       """.trimMargin(),
     )
@@ -121,12 +121,12 @@ class JsonFileExporterTest {
       "cs.json",
       """
     |{
+    |  "item": "I will be first {icuParam, number} '{hey}'",
     |  "key3": {
     |    "one": "# den {icuParam}",
     |    "few": "# dny",
     |    "other": "# dní"
-    |  },
-    |  "item": "I will be first {icuParam, number} '{hey}'"
+    |  }
     |}
       """.trimMargin(),
     )
@@ -159,8 +159,8 @@ class JsonFileExporterTest {
       "cs.json",
       """
     |{
-    |  "key3": "{count, plural, one {# den {icuParam, number}} few {# dny} other {# dní}}",
-    |  "item": "I will be first '{'icuParam'}' {hello, number}"
+    |  "item": "I will be first '{'icuParam'}' {hello, number}",
+    |  "key3": "{count, plural, one {# den {icuParam, number}} few {# dny} other {# dní}}"
     |}
       """.trimMargin(),
     )
@@ -304,6 +304,32 @@ class JsonFileExporterTest {
     val files = exporter.produceFiles()
 
     files["cs-rCZ/hello.json"].assert.isNotNull()
+  }
+
+  @Test
+  fun `does not throw when translations are unsorted and key is prefix of another`() {
+    // Regression test: when database collation returns keys in non-alphabetical order,
+    // the exporter should sort them before building the nested structure.
+    // Keys like "profile.my-goals" and "profile.my-goals.plan_other" must be sorted
+    // so the parent path is processed before the child path.
+    val unsortedKeys = listOf("profile.my-goals.plan_other", "profile.my-goals")
+    val data = generateTranslationsForUnsortedKeys(unsortedKeys)
+    val exported = getExporter(data).produceFiles()
+    val json = exported.getFileTextContent("en.json")
+    assertThatJson(json) {
+      node("profile.my-goals").isEqualTo("text")
+      node("profile.my-goals\\.plan_other").isEqualTo("text")
+    }
+  }
+
+  private fun generateTranslationsForUnsortedKeys(keys: List<String>): List<ExportTranslationView> {
+    // Deliberately does NOT sort, to simulate wrong ordering from the database
+    return keys.map { keyName ->
+      val key = ExportKeyView(1, keyName, namespace = null)
+      val trans = ExportTranslationView(1, "text", TranslationState.TRANSLATED, key, "en")
+      key.translations["en"] = trans
+      trans
+    }
   }
 
   private fun Map<String, InputStream>.getFileTextContent(fileName: String): String {

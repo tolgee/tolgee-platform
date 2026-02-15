@@ -19,6 +19,10 @@ class RubyYamlFileExporterTest {
       """
     |---
     |cs:
+    |  indexed params: "I will be first %s, %s"
+    |  named params: "I will be first %{param1}, %{param2}"
+    |  this-is-array:
+    |  - object: "I will be first %<icuParam>d"
     |  this:
     |    is:
     |      nested:
@@ -29,10 +33,6 @@ class RubyYamlFileExporterTest {
     |    '[1]':
     |      is:
     |        collision: "Colission"
-    |  this-is-array:
-    |  - object: "I will be first %<icuParam>d"
-    |  indexed params: "I will be first %s, %s"
-    |  named params: "I will be first %{param1}, %{param2}"
     |
       """.trimMargin(),
     )
@@ -47,11 +47,11 @@ class RubyYamlFileExporterTest {
       """
     |---
     |cs:
+    |  item: "I will be first {icuParam, number}"
     |  key3:
     |    one: "# den {icuParam}"
     |    few: "# dny"
     |    other: "# dní"
-    |  item: "I will be first {icuParam, number}"
     |
       """.trimMargin(),
     )
@@ -66,11 +66,11 @@ class RubyYamlFileExporterTest {
       """
     |---
     |cs:
+    |  item: "I will be first {icuParam} %<hello>d"
     |  key3:
     |    one: "%{count} den %<icuParam>d"
     |    few: "%{count} dny"
     |    other: "%{count} dní"
-    |  item: "I will be first {icuParam} %<hello>d"
     |
       """.trimMargin(),
     )
