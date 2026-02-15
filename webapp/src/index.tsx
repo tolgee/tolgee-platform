@@ -58,6 +58,14 @@ const tolgee = Tolgee()
       da: () => import('./i18n/da.json').then((m) => m.default),
       ja: () => import('./i18n/ja.json').then((m) => m.default),
       zh: () => import('./i18n/zh.json').then((m) => m.default),
+      uk: () => import('./i18n/uk-UA.json').then((m) => m.default),
+      hu: () => import('./i18n/hu.json').then((m) => m.default),
+      it: () => import('./i18n/it-IT.json').then((m) => m.default),
+      nl: () => import('./i18n/nl.json').then((m) => m.default),
+      no: () => import('./i18n/no.json').then((m) => m.default),
+      pl: () => import('./i18n/pl.json').then((m) => m.default),
+      ro: () => import('./i18n/ro.json').then((m) => m.default),
+      ru: () => import('./i18n/ru.json').then((m) => m.default),
     },
   });
 
