@@ -210,6 +210,7 @@ class BranchServiceImpl(
         taskService.moveTasksAfterMerge(projectId, merge.sourceBranch, defaultBranch)
         deleteBranch(projectId, merge.sourceBranch.id)
       } else {
+        entityManager.flush()
         branchSnapshotService.rebuildSnapshotFromSource(
           projectId = projectId,
           sourceBranch = merge.sourceBranch,
