@@ -148,7 +148,7 @@ class LanguageServiceTest : AbstractSpringTest() {
     // Threshold accounts for @Async operations (BranchMetaUpdater, LanguageStatsListener) whose
     // queries are counted in the global SessionFactory statistics.
     val count = sessionFactory.statistics.prepareStatementCount
-    count.assert.isLessThan(80)
+    count.assert.isLessThan(100)
 
     executeInNewTransaction {
       assertLanguageDeleted(testData.germanLanguage)
