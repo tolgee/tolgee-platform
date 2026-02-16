@@ -5072,5 +5072,10 @@
     </changeSet>
     <changeSet author="danielkrizan (generated)" id="1770751028716-4">
         <dropColumn columnName="filter_branch" tableName="content_delivery_config"/>
+        <rollback>
+            <addColumn tableName="content_delivery_config">
+                <column name="filter_branch" type="VARCHAR(255)"/>
+            </addColumn>
+        </rollback>
     </changeSet>
 </databaseChangeLog>

@@ -18,11 +18,11 @@ import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
 import jakarta.persistence.EntityManager
-import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import kotlin.random.Random
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -224,6 +224,7 @@ class ContentDeliveryConfigService(
     return contentDeliveryConfigRepository.save(config)
   }
 
+  @Transactional
   fun deleteAllByBranchId(
     projectId: Long,
     branchId: Long,
