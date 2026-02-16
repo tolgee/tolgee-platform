@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger
     "tolgee.cache.use-redis=true",
     "tolgee.cache.enabled=true",
     "tolgee.websocket.use-redis=true",
-    "spring.redis.port=56379",
     "tolgee.batch.concurrency=10",
   ],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,

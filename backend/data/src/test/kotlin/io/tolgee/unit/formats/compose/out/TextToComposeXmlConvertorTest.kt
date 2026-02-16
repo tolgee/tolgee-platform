@@ -33,7 +33,7 @@ class TextToComposeXmlConvertorTest {
 
   @Test
   fun `trailing percents are handled`() {
-    "%s %%".assertSingleTextNode().isEqualTo("%s %%")
+    "%s %%".assertSingleTextNode().isEqualTo("%s %")
   }
 
   @Test
@@ -44,7 +44,7 @@ class TextToComposeXmlConvertorTest {
         .toList()
     nodes[0].assertTextContent("What a ")
     nodes[1].nodeAssertCdataNodeText(
-      "<unsupported attr=\"https://example.com\">link \' \\% \" " +
+      "<unsupported attr=\"https://example.com\">link \' % \" " +
         "</unsupported>",
     )
     nodes[2].assertTextContent(".")
@@ -56,7 +56,7 @@ class TextToComposeXmlConvertorTest {
       ).convertedNodes().toList()
     nodes[0].assertTextContent("What a ")
     nodes[1].nodeAssertCdataNodeText(
-      "<unsupported attr=\"https://example.com\">link \' %% %s \"    " +
+      "<unsupported attr=\"https://example.com\">link \' % %s \"    " +
         "</unsupported>",
     )
     nodes[2].assertTextContent(".")
@@ -79,7 +79,7 @@ class TextToComposeXmlConvertorTest {
 
   @Test
   fun `percent signs are escaped`() {
-    "I am just a %% sign".assertSingleTextNode("I am just a \\% sign")
+    "I am just a %% sign".assertSingleTextNode("I am just a % sign")
   }
 
   @Test

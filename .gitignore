@@ -83,3 +83,6 @@ ngrok.local.yml
 
 # Sentry Config File
 /webapp/.env.sentry-build-plugin
+
+# Worktree
+/worktree-env.sh

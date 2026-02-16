@@ -1,3 +1,24 @@
+## [3.156.3](https://github.com/tolgee/tolgee-platform/compare/v3.156.2...v3.156.3) (2026-02-11)
+
+
+### Bug Fixes
+
+* stop doubling percent signs in Compose Multiplatform XML export ([#3465](https://github.com/tolgee/tolgee-platform/issues/3465)) ([67d2e29](https://github.com/tolgee/tolgee-platform/commit/67d2e299155b9991a242ad7a3ce7bb6ea8f1ab26)), closes [#3368](https://github.com/tolgee/tolgee-platform/issues/3368)
+
+## [3.156.2](https://github.com/tolgee/tolgee-platform/compare/v3.156.1...v3.156.2) (2026-02-09)
+
+
+### Bug Fixes
+
+* use project base language for xcstrings sourceLanguage field ([#3446](https://github.com/tolgee/tolgee-platform/issues/3446)) ([b0a050e](https://github.com/tolgee/tolgee-platform/commit/b0a050eacfdc1d54587dcb2adcac916983626316))
+
+## [3.156.1](https://github.com/tolgee/tolgee-platform/compare/v3.156.0...v3.156.1) (2026-02-08)
+
+
+### Bug Fixes
+
+* stop escaping percent signs in Compose Multiplatform XML export ([#3457](https://github.com/tolgee/tolgee-platform/issues/3457)) ([86d4a1a](https://github.com/tolgee/tolgee-platform/commit/86d4a1a5159abf94d239198a890c6e1bf732bea5)), closes [#3368](https://github.com/tolgee/tolgee-platform/issues/3368)
+
 # [3.156.0](https://github.com/tolgee/tolgee-platform/compare/v3.155.0...v3.156.0) (2026-02-06)
 
 

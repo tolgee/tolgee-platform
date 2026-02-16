@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 class BranchMergeServiceTest : AbstractSpringTest() {
@@ -214,10 +213,11 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  @Transactional
   fun `apply merge - keeps branch and resets snapshot`() {
-    val merge = prepareMergeScenario()
-    branchService.applyMerge(testData.project.id, merge.id, false)
+    executeInNewTransaction {
+      val merge = prepareMergeScenario()
+      branchService.applyMerge(testData.project.id, merge.id, false)
+    }
 
     val refreshedBranch = testData.featureBranch.refresh()!!
     refreshedBranch.deletedAt.assert.isNull()
@@ -315,7 +315,6 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  @Transactional
   fun `apply merge - labels merge correctly`() {
     val mainTranslation = getTranslation(testData.mainKeyToUpdate, testData.englishLanguage)
     val featureTranslation = getTranslation(testData.featureKeyToUpdate, testData.englishLanguage)
@@ -656,7 +655,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   private fun getTranslation(
     key: Key,
     language: Language,
-  ): Translation = translationService.find(key, language).orElse(null)!!
+  ): Translation = translationService.getTranslationsWithLabels(listOf(key.id), listOf(language.id)).single()
 
   private fun getScreenshotReferences(keyId: Long): List<KeyScreenshotReference> =
     keyScreenshotReferenceRepository.getAllByKeyIdIn(listOf(keyId))

@@ -17,6 +17,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -29,7 +30,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
     "tolgee.cache.use-redis=true",
     "tolgee.cache.enabled=true",
     "tolgee.websocket.use-redis=true",
-    "spring.redis.port=56379",
   ],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
@@ -49,6 +49,9 @@ class BatchJobsGeneralWithRedisTest : AbstractBatchJobsGeneralTest() {
     class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
       override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         redisRunner.run()
+        TestPropertyValues
+          .of("spring.data.redis.port=${RedisRunner.port}")
+          .applyTo(configurableApplicationContext)
       }
     }
   }
