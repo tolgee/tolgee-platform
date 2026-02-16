@@ -1,3 +1,10 @@
+# [3.157.0](https://github.com/tolgee/tolgee-platform/compare/v3.156.3...v3.157.0) (2026-02-16)
+
+
+### Features
+
+* mcp server ([#3467](https://github.com/tolgee/tolgee-platform/issues/3467)) ([9ac079a](https://github.com/tolgee/tolgee-platform/commit/9ac079ae3d08d64392d3a829b6796805e5dcdede))
+
 ## [3.156.3](https://github.com/tolgee/tolgee-platform/compare/v3.156.2...v3.156.3) (2026-02-11)
 
 
