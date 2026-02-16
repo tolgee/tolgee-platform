@@ -55,6 +55,8 @@ class EeSubscriptionProviderImplTest : AbstractSpringTest() {
 
   @AfterEach
   fun cleanup() {
+    schedulingManager.cancelAll()
+    eeSubscriptionServiceImpl.delete()
     eeProperties.checkPeriodInMs = oldCheckPeriodProperty
   }
 
