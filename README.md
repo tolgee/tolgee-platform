@@ -85,6 +85,10 @@ If something seems off, let others know what you'd change. You can leave comment
 
 Easily track changes to specific translations of a particular key in a specific language. If something's amiss, you'll know exactly where to point the finger!
 
+## MCP Server
+
+Tolgee exposes an [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) server that lets AI coding assistants manage translations directly — search keys, create and update translations, manage languages, trigger machine translation, and more — all without leaving your editor. See [DEVELOPMENT.md](DEVELOPMENT.md#mcp-server) for setup instructions.
+
 ## Documentation
 
 The docs cover all aspects of using Tolgee. Some highlights include:

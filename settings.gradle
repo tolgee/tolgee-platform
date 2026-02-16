@@ -75,6 +75,9 @@ dependencyResolutionManagement {
             library('slackApiModelKotlinExtension', "com.slack.api:slack-api-model-kotlin-extension:$slackSdkVersion")
             library('slackApiClientKotlinExtension', "com.slack.api:slack-api-client-kotlin-extension:$slackSdkVersion")
             library('jakartaMail', 'org.eclipse.angus', 'jakarta.mail').version('2.0.4')
+            library('mcpBom', 'io.modelcontextprotocol.sdk', 'mcp-bom').version('0.17.2')
+            library('mcp', 'io.modelcontextprotocol.sdk', 'mcp').withoutVersion()
+            library('mcpSpringWebmvc', 'io.modelcontextprotocol.sdk', 'mcp-spring-webmvc').withoutVersion()
 
             // OpenTelemetry Java Agent for bytecode instrumentation
             // See: https://opentelemetry.io/docs/zero-code/java/agent/

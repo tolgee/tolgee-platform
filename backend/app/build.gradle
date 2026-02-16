@@ -211,6 +211,13 @@ dependencies {
      */
     implementation(project(':security'))
 
+    /**
+     * MCP SDK
+     */
+    implementation platform(libs.mcpBom)
+    implementation libs.mcp
+    implementation libs.mcpSpringWebmvc
+
 }
 
 test {
