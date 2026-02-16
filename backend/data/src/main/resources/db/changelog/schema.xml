@@ -5057,4 +5057,25 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1770751028716-1">
+        <addColumn tableName="content_delivery_config">
+            <column name="branch_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1770751028716-2">
+        <createIndex indexName="IDXmpg39yyj1lqn91onyyb64471v" tableName="content_delivery_config">
+            <column name="branch_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1770751028716-3">
+        <addForeignKeyConstraint baseColumnNames="branch_id" baseTableName="content_delivery_config" constraintName="FK5jtc226unswiodyqp8r4isds6" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="branch" validate="true"/>
+    </changeSet>
+    <changeSet author="danielkrizan (generated)" id="1770751028716-4">
+        <dropColumn columnName="filter_branch" tableName="content_delivery_config"/>
+        <rollback>
+            <addColumn tableName="content_delivery_config">
+                <column name="filter_branch" type="VARCHAR(255)"/>
+            </addColumn>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

@@ -6,9 +6,11 @@ import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.TaskService
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageStatsRepository
+import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.service.key.KeyService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 
@@ -22,6 +24,8 @@ class BranchCleanupService(
   private val branchSnapshotService: BranchSnapshotService,
   private val languageStatsRepository: LanguageStatsRepository,
   private val metrics: Metrics,
+  @Lazy
+  private val contentDeliveryConfigService: ContentDeliveryConfigService,
 ) {
   companion object {
     private const val BATCH_SIZE = 1000
@@ -41,6 +45,7 @@ class BranchCleanupService(
   ) {
     logger.info("Starting cleanup for branch $branchId")
 
+    cleanupBranchContentDeliveryConfigs(projectId, branchId)
     cleanupBranchTasks(projectId, branchId)
     cleanupBranchKeys(projectId, branchId)
     cleanupBranchMerges(branchId)
@@ -49,6 +54,13 @@ class BranchCleanupService(
     deleteBranch(branchId)
 
     logger.info("Completed cleanup for branch $branchId")
+  }
+
+  private fun cleanupBranchContentDeliveryConfigs(
+    projectId: Long,
+    branchId: Long,
+  ) {
+    contentDeliveryConfigService.deleteAllByBranchId(projectId, branchId)
   }
 
   /**

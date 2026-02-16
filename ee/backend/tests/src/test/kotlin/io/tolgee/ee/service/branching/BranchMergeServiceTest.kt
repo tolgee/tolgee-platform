@@ -4,10 +4,10 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.key.CreateKeyDto
-import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.LabelServiceImpl
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Language
@@ -60,7 +60,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   lateinit var keyScreenshotReferenceRepository: KeyScreenshotReferenceRepository
 
   @Autowired
-  lateinit var eeSubscriptionRepository: EeSubscriptionRepository
+  lateinit var eeSubscriptionServiceImpl: EeSubscriptionServiceImpl
 
   private lateinit var testData: BranchMergeTestData
 
@@ -71,9 +71,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     // Clear any existing subscription to avoid key limit issues from other tests
-    executeInNewTransaction {
-      eeSubscriptionRepository.deleteAll()
-    }
+    eeSubscriptionServiceImpl.delete()
     testData = BranchMergeTestData()
     testDataService.saveTestData(testData.root)
     branchSnapshotService.createInitialSnapshot(

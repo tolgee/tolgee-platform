@@ -36,6 +36,9 @@ export function getCdEditInitialValues(
     zip: data?.zip ?? false,
     escapeHtml: data?.escapeHtml ?? false,
     slug: data?.slug,
+    filterBranch: (data?.branchName ?? data?.filterBranch ?? null) as
+      | string
+      | null,
   };
 }
 

@@ -13,14 +13,16 @@ import io.tolgee.model.contentDelivery.ContentDeliveryConfig
 import io.tolgee.model.contentDelivery.ContentStorage
 import io.tolgee.repository.contentDelivery.ContentDeliveryConfigRepository
 import io.tolgee.service.automations.AutomationService
+import io.tolgee.service.branching.BranchService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
 import jakarta.persistence.EntityManager
-import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import kotlin.random.Random
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -35,17 +37,22 @@ class ContentDeliveryConfigService(
   @Lazy
   private val contentDeliveryUploader: ContentDeliveryUploader,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  @Lazy
+  private val branchService: BranchService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @Transactional
   fun create(
     projectId: Long,
     dto: ContentDeliveryConfigRequest,
   ): ContentDeliveryConfig {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.filterBranch)
     val project = entityManager.getReference(Project::class.java, projectId)
     checkMultipleConfigsFeature(project)
     val config = ContentDeliveryConfig(project)
     config.name = dto.name
     config.contentStorage = getStorage(projectId, dto.contentStorageId)
+    config.branch = branchService.getActiveOrDefault(projectId, dto.filterBranch)
     config.copyPropsFrom(dto)
     setSlugForCreation(config, dto)
     config.pruneBeforePublish = dto.pruneBeforePublish
@@ -130,6 +137,7 @@ class ContentDeliveryConfigService(
     id: Long,
     dto: ContentDeliveryConfigRequest,
   ): ContentDeliveryConfig {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.filterBranch)
     checkMultipleConfigsFeature(projectService.get(projectId), maxCurrentAllowed = 1)
     val config = get(projectId, id)
     handleUpdateSlug(config, dto)
@@ -137,6 +145,7 @@ class ContentDeliveryConfigService(
     config.name = dto.name
     config.pruneBeforePublish = dto.pruneBeforePublish
     config.zip = dto.zip
+    config.branch = branchService.getActiveOrDefault(projectId, dto.filterBranch)
     config.copyPropsFrom(dto)
     handleUpdateAutoPublish(dto, config)
     return save(config)
@@ -213,5 +222,19 @@ class ContentDeliveryConfigService(
 
   fun save(config: ContentDeliveryConfig): ContentDeliveryConfig {
     return contentDeliveryConfigRepository.save(config)
+  }
+
+  @Transactional
+  fun deleteAllByBranchId(
+    projectId: Long,
+    branchId: Long,
+  ) {
+    val configs = contentDeliveryConfigRepository.findAllByProjectIdAndBranchId(projectId, branchId)
+    configs.forEach { config ->
+      config.automationActions.map { it.automation }.forEach {
+        automationService.delete(it)
+      }
+      contentDeliveryConfigRepository.deleteById(config.id)
+    }
   }
 }

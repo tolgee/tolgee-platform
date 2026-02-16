@@ -78,5 +78,17 @@ class ProjectBranchingMigrationService(
       ).setParameter("branch", defaultBranch)
       .setParameter("projectId", projectId)
       .executeUpdate()
+
+    entityManager
+      .createQuery(
+        """
+        update ContentDeliveryConfig cdc
+        set cdc.branch = :branch
+        where cdc.project.id = :projectId
+          and cdc.branch is null
+        """,
+      ).setParameter("branch", defaultBranch)
+      .setParameter("projectId", projectId)
+      .executeUpdate()
   }
 }
