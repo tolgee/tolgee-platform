@@ -2,7 +2,11 @@
 import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoView';
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { T, useTranslate } from '@tolgee/react';
-import { BookClosed, ClipboardCheck } from '@untitled-ui/icons-react';
+import {
+  AlertTriangle,
+  BookClosed,
+  ClipboardCheck,
+} from '@untitled-ui/icons-react';
 import { Link, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { Badge, Box, MenuItem } from '@mui/material';
 
@@ -62,6 +66,10 @@ import {
   GlossariesPanel,
   useGlossariesCount,
 } from '../ee/glossary/components/GlossariesPanel';
+import {
+  QaChecksPanel,
+  useQaChecksCount,
+} from '../ee/qa/components/QaChecksPanel';
 import { GlossaryRouter } from '../ee/glossary/views/GlossaryRouter';
 import { createAdder } from '../fixtures/pluginAdder';
 import { ProjectSettingsTab } from '../views/projects/project/ProjectSettingsView';
@@ -331,6 +339,19 @@ export const glossaryPanelAdder = addPanel(
     },
   ],
   { position: 'after', value: 'translation_memory' }
+);
+
+export const qaChecksPanelAdder = addPanel(
+  [
+    {
+      id: 'qa_checks',
+      icon: <AlertTriangle />,
+      name: <T keyName="translation_tools_qa_checks" />,
+      component: QaChecksPanel,
+      itemsCountFunction: useQaChecksCount,
+    },
+  ],
+  { position: 'after', value: 'comments' }
 );
 
 export const useAddDeveloperViewItems = () => {

@@ -806,6 +806,9 @@ export interface paths {
     put: operations["updatePrompt"];
     delete: operations["deletePrompt"];
   };
+  "/v2/projects/{projectId}/qa-check/preview": {
+    post: operations["preview"];
+  };
   "/v2/projects/{projectId}/single-step-import": {
     /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
     post: operations["singleStepFromFiles"];
@@ -1802,6 +1805,11 @@ export interface components {
         transferOptions?: components["schemas"]["ProjectTransferOptionModel"][];
       };
     };
+    CollectionModelQaCheckResultModel: {
+      _embedded?: {
+        qaCheckResults?: components["schemas"]["QaCheckResultModel"][];
+      };
+    };
     CollectionModelQueueItemModel: {
       _embedded?: {
         queueItemModelList?: components["schemas"]["QueueItemModel"][];
@@ -2548,6 +2556,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       isPayAsYouGo: boolean;
       /** Format: date-time */
@@ -4791,6 +4800,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       /** Format: int64 */
       id: number;
@@ -5205,6 +5215,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       free: boolean;
       /** Format: int64 */
@@ -5384,6 +5395,42 @@ export interface components {
        * @description Currently used credits including credits used over the limit
        */
       usedMtCredits: number;
+    };
+    QaCheckPreviewRequest: {
+      /** Format: int64 */
+      keyId: number;
+      /**
+       * @description Language tag according to BCP 47 definition
+       * @example cs-CZ
+       */
+      languageTag: string;
+      text: string;
+    };
+    QaCheckResultModel: {
+      /** @enum {string} */
+      message: "qa_empty_translation";
+      /** Format: int32 */
+      positionEnd: number;
+      /** Format: int32 */
+      positionStart: number;
+      replacement?: string;
+      /** @enum {string} */
+      type:
+        | "EMPTY_TRANSLATION"
+        | "SPACES_MISMATCH"
+        | "UNMATCHED_NEWLINES"
+        | "CHARACTER_CASE_MISMATCH"
+        | "MISSING_NUMBERS"
+        | "PUNCTUATION_MISMATCH"
+        | "BRACKETS_MISMATCH"
+        | "SPECIAL_CHARACTER_MISMATCH"
+        | "DIFFERENT_URLS"
+        | "INCONSISTENT_PLACEHOLDERS"
+        | "INCONSISTENT_HTML"
+        | "ICU_SYNTAX"
+        | "REPEATED_WORDS"
+        | "SPELLING"
+        | "UNRESOLVED_COMMENTS";
     };
     QueueItemModel: {
       /** Format: int64 */
@@ -5565,6 +5612,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -17641,6 +17689,50 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  preview: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelQaCheckResultModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaCheckPreviewRequest"];
       };
     };
   };
