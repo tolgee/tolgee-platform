@@ -1,0 +1,30 @@
+msgid ""
+msgstr ""
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgctxt "menu"
+msgid "Open"
+msgstr "Öffnen"
+
+msgctxt "menu"
+msgid "Close"
+msgstr "Schließen"
+
+#. This is a greeting
+msgid "Hello"
+msgstr "Hallo"
+
+msgctxt "dialog"
+msgid "Open"
+msgstr "Datei öffnen"
+
+#, c-format
+msgctxt "stats"
+msgid "%d file"
+msgid_plural "%d files"
+msgstr[0] "%d Datei"
+msgstr[1] "%d Dateien"
