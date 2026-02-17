@@ -1,3 +1,10 @@
+# [3.158.0](https://github.com/tolgee/tolgee-platform/compare/v3.157.0...v3.158.0) (2026-02-17)
+
+
+### Features
+
+* add branching support to single-step import ([#3471](https://github.com/tolgee/tolgee-platform/issues/3471)) ([a4e87e7](https://github.com/tolgee/tolgee-platform/commit/a4e87e7bdbf59c4ebb6b6417724e4ec5d01bc966))
+
 # [3.157.0](https://github.com/tolgee/tolgee-platform/compare/v3.156.3...v3.157.0) (2026-02-16)
 
 
