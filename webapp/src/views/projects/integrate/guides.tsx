@@ -80,4 +80,9 @@ export const guides = [
     icon: getTechnologyImgComponent('jetpackcompose'),
     guide: React.lazy(() => import('./guides/AndroidJetpackCompose.mdx')),
   },
+  {
+    name: 'MCP',
+    icon: getTechnologyImgComponent('mcp'),
+    guide: React.lazy(() => import('./guides/Mcp.mdx')),
+  },
 ] as Guide[];

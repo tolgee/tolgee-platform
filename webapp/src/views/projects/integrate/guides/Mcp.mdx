@@ -1,0 +1,40 @@
+import { GoToDocsButton } from '../component/GoToDocsButton';
+
+<GoToDocsButton
+  href="https://tolgee.io/platform/integrations/mcp_server/usage"
+  style={{ float: 'right' }}
+/>
+
+To read full documentation about the Tolgee MCP Server, visit [docs](https://tolgee.io/platform/integrations/mcp_server).
+
+## What is MCP?
+
+The [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) allows AI assistants like Claude, Cursor, or Windsurf to interact with Tolgee directly — managing keys, translations, and more from your AI-powered development environment.
+
+## Configure your MCP client
+
+Add the following to your MCP client configuration (e.g. `claude_desktop_config.json`, `.cursor/mcp.json`, etc.):
+
+```json
+{
+  "mcpServers": {
+    "tolgee": {
+      "url": "{{{apiUrl}}}/mcp/developer",
+      "headers": {
+        "X-API-Key": "{{{apiKey}}}"
+      }
+    }
+  }
+}
+```
+
+## Some of the available tools
+
+Once connected, your AI assistant can:
+
+- **List and manage projects** — browse your Tolgee projects
+- **Create, update, and delete keys** — manage translation keys
+- **Set and update translations** — modify translations across languages
+- **Manage languages** — list and configure project languages
+- **Work with namespaces and tags** — organize your translations
+- **Trigger batch machine translation** — translate keys in bulk
