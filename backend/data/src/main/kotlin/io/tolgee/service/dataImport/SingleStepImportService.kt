@@ -13,8 +13,10 @@ import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableReq
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.ScreenshotImporter.Companion.ScreenshotToImport
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import jakarta.persistence.EntityManager
@@ -33,6 +35,7 @@ class SingleStepImportService(
   private val currentDateProvider: CurrentDateProvider,
   private val applicationContext: ApplicationContext,
   private val entityManager: EntityManager,
+  private val branchingService: BranchService,
 ) {
   @Transactional
   fun singleStepImport(
@@ -45,7 +48,11 @@ class SingleStepImportService(
     resolveConflict: ((translation: ImportTranslation) -> ForceMode?)? = null,
   ): ImportResult {
     reportStatus?.invoke(ImportApplicationStatus.ANALYZING_FILES)
-    val import = Import(project).also { it.author = userAccount }
+    val import =
+      Import(project).also {
+        it.author = userAccount
+        it.branch = getBranch(project, params.branch)
+      }
 
     importService.publishImportBusinessEvent(project.id, userAccount.id)
 
@@ -145,8 +152,14 @@ class SingleStepImportService(
             ?.get(translation.key.name)
 
         when (resolution) {
-          null -> ForceMode.OVERRIDE
-          ResolvableTranslationResolution.OVERRIDE -> ForceMode.OVERRIDE
+          null -> {
+            ForceMode.OVERRIDE
+          }
+
+          ResolvableTranslationResolution.OVERRIDE -> {
+            ForceMode.OVERRIDE
+          }
+
           ResolvableTranslationResolution.EXPECT_NO_CONFLICT -> {
             if (translation.text != translation.conflict?.text) {
               throw BadRequestException(Message.EXPECT_NO_CONFLICT_FAILED, getConflictingKeys(translation))
@@ -163,5 +176,12 @@ class SingleStepImportService(
     return importKey.conflict?.let {
       listOf(SimpleKeyResult(it.id, it.key.name, it.key.namespace?.name))
     } ?: emptyList()
+  }
+
+  private fun getBranch(
+    project: Project,
+    name: String?,
+  ): Branch? {
+    return branchingService.getActiveOrDefault(project.id, name)
   }
 }

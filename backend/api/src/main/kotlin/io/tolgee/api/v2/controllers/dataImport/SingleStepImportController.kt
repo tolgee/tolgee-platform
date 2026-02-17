@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Encoding
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.ImportResult
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.request.SingleStepImportRequest
@@ -20,6 +21,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.dataImport.SingleStepImportService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.security.SecurityService
 import io.tolgee.util.Logging
 import io.tolgee.util.filterFiles
@@ -43,6 +45,7 @@ class SingleStepImportController(
   private val projectHolder: ProjectHolder,
   private val securityService: SecurityService,
   private val singleStepImportService: SingleStepImportService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) : Logging {
   @PostMapping("single-step-import", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @Operation(
@@ -72,6 +75,7 @@ class SingleStepImportController(
     @RequestPart
     @Valid params: SingleStepImportRequest,
   ): ImportResult {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, params.branch)
     val filteredFiles = filterFiles(files.map { (it.originalFilename ?: "") to it })
     val fileDtos =
       filteredFiles.map {
