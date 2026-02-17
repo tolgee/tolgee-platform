@@ -12,6 +12,7 @@ import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ErrorResponseTyped
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.security.ratelimit.RateLimitBlockedException
 import io.tolgee.security.ratelimit.RateLimitResponseBody
 import io.tolgee.security.ratelimit.RateLimitedException
 import io.tolgee.util.Logging
@@ -254,6 +255,12 @@ class ExceptionHandlers : Logging {
       RateLimitResponseBody(Message.RATE_LIMITED, ex.retryAfter, ex.global),
       HttpStatus.TOO_MANY_REQUESTS,
     )
+  }
+
+  @ExceptionHandler(RateLimitBlockedException::class)
+  fun handleRateLimitBlocked(ex: RateLimitBlockedException): ResponseEntity<Unit> {
+    logger.debug("Rate limit blocked (strike {})", ex.strikeCount)
+    return ResponseEntity.status(444).build()
   }
 
   @ExceptionHandler(NoResourceFoundException::class)
