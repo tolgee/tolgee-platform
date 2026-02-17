@@ -24,6 +24,7 @@ import org.mockito.Mockito
 import org.mockito.invocation.Invocation
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -180,6 +181,8 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     doAnswer {
       mockedFileStorage
     }.whenever(s3FileStorageFactory).create(any())
+    doNothing().whenever(mockedFileStorage).pruneDirectory(any())
+    doNothing().whenever(mockedFileStorage).storeFile(any(), any())
     return mockedFileStorage
   }
 
@@ -188,6 +191,8 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     doAnswer {
       mockedFileStorage
     }.whenever(azureFileStorageFactory).create(any())
+    doNothing().whenever(mockedFileStorage).pruneDirectory(any())
+    doNothing().whenever(mockedFileStorage).storeFile(any(), any())
     return mockedFileStorage
   }
 }
