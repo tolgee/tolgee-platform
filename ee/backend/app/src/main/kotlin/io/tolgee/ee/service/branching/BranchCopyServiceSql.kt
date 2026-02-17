@@ -1,8 +1,11 @@
 package io.tolgee.ee.service.branching
 
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.tolgee.model.branching.Branch
 import io.tolgee.repository.KeyRepository
 import io.tolgee.service.branching.BranchCopyService
+import io.tolgee.tracing.TolgeeTracingContext
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service
 class BranchCopyServiceSql(
   private val entityManager: EntityManager,
   private val keyRepository: KeyRepository,
+  private val tracingContext: TolgeeTracingContext,
 ) : BranchCopyService,
   Logging {
   companion object {
@@ -33,6 +37,7 @@ class BranchCopyServiceSql(
    *
    * BATCHING: Processes keys in batches of 1000 to avoid SQL timeout on large projects.
    */
+  @WithSpan
   @Transactional
   override fun copy(
     projectId: Long,
@@ -41,13 +46,14 @@ class BranchCopyServiceSql(
   ) {
     require(sourceBranch.id != targetBranch.id) { "Source and target branch must differ" }
 
-    // Get total key count for batching
     val totalKeys =
       keyRepository.countByProjectAndBranchIncludingOrphan(
         projectId,
         sourceBranch.id,
         sourceBranch.isDefault,
       )
+
+    setTracingAttributes(projectId, sourceBranch, targetBranch, totalKeys)
 
     // Create empty temporary key mapping table once (reused across batches)
     traceLogMeasureTime("branchCopyService: createKeyMappingTable") {
@@ -104,10 +110,28 @@ class BranchCopyServiceSql(
     }
   }
 
+  private fun setTracingAttributes(
+    projectId: Long,
+    sourceBranch: Branch,
+    targetBranch: Branch,
+    totalKeys: Long,
+  ) {
+    tracingContext.setContext(projectId, null)
+
+    val span = Span.current()
+    span.setAttribute("tolgee.branch.source.id", sourceBranch.id)
+    span.setAttribute("tolgee.branch.source.name", sourceBranch.name)
+    span.setAttribute("tolgee.branch.target.id", targetBranch.id)
+    span.setAttribute("tolgee.branch.target.name", targetBranch.name)
+    span.setAttribute("tolgee.branch.copy.totalKeys", totalKeys)
+    span.setAttribute("tolgee.branch.copy.batchSize", BATCH_SIZE.toLong())
+  }
+
   /**
    * Creates an empty temporary table for key mapping.
    * This table is created once and reused across all batches.
    */
+  @WithSpan
   private fun createKeyMappingTable() {
     val createTableSql = """
       CREATE TEMPORARY TABLE temp_key_mapping (
@@ -126,6 +150,7 @@ class BranchCopyServiceSql(
    * Truncates and populates the key mapping table for a batch.
    * Maps source key IDs to target key IDs.
    */
+  @WithSpan
   private fun createKeyMapping(
     projectId: Long,
     sourceBranch: Branch,
@@ -177,6 +202,7 @@ class BranchCopyServiceSql(
   /**
    * Copies key metas using the pre-computed key mapping.
    */
+  @WithSpan
   private fun copyKeyMetas(targetBranch: Branch) {
     val sql = """
       INSERT INTO key_meta (id, key_id, description, custom, created_at, updated_at)
@@ -194,6 +220,7 @@ class BranchCopyServiceSql(
   /**
    * Copies key meta tags using the pre-computed key mapping.
    */
+  @WithSpan
   private fun copyKeyMetaTags() {
     val sql = """
       INSERT INTO key_meta_tags (key_metas_id, tags_id)
@@ -209,6 +236,7 @@ class BranchCopyServiceSql(
   /**
    * Copies key meta comments using the pre-computed key mapping.
    */
+  @WithSpan
   private fun copyKeyMetaComments(targetBranch: Branch) {
     val sql = """
       INSERT INTO key_comment (id, key_meta_id, author_id, text, from_import, created_at, updated_at)
@@ -228,6 +256,7 @@ class BranchCopyServiceSql(
   /**
    * Copies key meta code references using the pre-computed key mapping.
    */
+  @WithSpan
   private fun copyKeyMetaCodeReferences(targetBranch: Branch) {
     val sql = """
       INSERT INTO key_code_reference (id, key_meta_id, author_id, path, line, from_import, created_at, updated_at)
@@ -247,6 +276,7 @@ class BranchCopyServiceSql(
   /**
    * Copies key screenshot references using the pre-computed key mapping.
    */
+  @WithSpan
   private fun copyKeyScreenshotReferences() {
     val sql = """
       INSERT INTO key_screenshot_reference (key_id, screenshot_id, positions, original_text)
@@ -260,6 +290,7 @@ class BranchCopyServiceSql(
   /**
    * Copies translation comments using the pre-computed key mapping.
    */
+  @WithSpan
   private fun copyTranslationComments(targetBranch: Branch) {
     val sql = """
       INSERT INTO translation_comment (id, text, state, translation_id, author_id, created_at, updated_at)
@@ -277,6 +308,7 @@ class BranchCopyServiceSql(
       .executeUpdate()
   }
 
+  @WithSpan
   private fun copyKeys(
     projectId: Long,
     sourceBranch: Branch,
@@ -327,6 +359,7 @@ class BranchCopyServiceSql(
    * Copies translations using the pre-computed key mapping.
    * Much simpler and faster than the original 4-way join.
    */
+  @WithSpan
   private fun copyTranslations(targetBranch: Branch) {
     val sql = """
       INSERT INTO translation (
@@ -349,6 +382,7 @@ class BranchCopyServiceSql(
   /**
    * Copies translation labels using the pre-computed key mapping.
    */
+  @WithSpan
   private fun copyTranslationLabels() {
     val sql = """
       INSERT INTO translation_label (translation_id, label_id)
