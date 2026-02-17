@@ -184,6 +184,13 @@ class ActivityService(
     return provider.get()
   }
 
+  fun hasModifiedEntitiesOnBranch(
+    revisionId: Long,
+    branchId: Long,
+  ): Boolean {
+    return activityModifiedEntityRepository.hasModifiedEntitiesOnBranch(revisionId, branchId)
+  }
+
   fun findActivityRevisionInfo(id: Long): ActivityRevisionInfo? {
     return activityRevisionRepository.findInfo(id)
   }

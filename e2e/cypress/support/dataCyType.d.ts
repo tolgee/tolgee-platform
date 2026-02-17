@@ -214,7 +214,6 @@ declare namespace DataCy {
         "billing-usage-table-translations" |
         "billing_period_annual" |
         "branch-default-chip" |
-        "branch-merge-detail-menu" |
         "branch-name-input" |
         "branch-protected-icon" |
         "branch-select-item" |
