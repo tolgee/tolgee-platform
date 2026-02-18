@@ -322,6 +322,40 @@ jobs:
           fi
           echo "✅ Schema files are up to date"
 
+  migration-check:
+    name: Migration Check 🗃️
+    needs: [backend-build]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          node: "false"
+
+      - name: Download backend build result
+        uses: ./.github/actions/download-backend-build
+
+      - name: Generate migration diff
+        run: ./gradlew diffChangeLog
+        env:
+          SKIP_SERVER_BUILD: true
+
+      - name: Check for uncommitted migration changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ Migration files are out of date! Please run './gradlew diffChangeLog' locally and commit the changes."
+            echo ""
+            echo "Changed files:"
+            git status --porcelain
+            echo ""
+            echo "Diff:"
+            git diff
+            exit 1
+          fi
+          echo "✅ Migration files are up to date"
+
   e2e-code-checks:
     name: E2E Static Check 🪲
     runs-on: ubuntu-24.04
@@ -399,6 +433,7 @@ jobs:
       - frontend-build
       - frontend-code-check
       - schema-check
+      - migration-check
       - e2e
       - e2e-code-checks
       - e2e-install-deps
@@ -431,6 +466,10 @@ jobs:
 
           if [[ "${{ needs.schema-check.result }}" != "success" ]]; then
             failed_jobs+=("schema-check")
+          fi
+
+          if [[ "${{ needs.migration-check.result }}" != "success" ]]; then
+            failed_jobs+=("migration-check")
           fi
 
           if [[ "${{ needs.e2e.result }}" != "success" ]]; then
