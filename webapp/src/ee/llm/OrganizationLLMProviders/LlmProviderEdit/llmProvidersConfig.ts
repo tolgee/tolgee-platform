@@ -12,6 +12,7 @@ export type ProviderOptions = {
   enum?: (string | undefined)[];
   optional?: boolean;
   defaultValue?: string;
+  numeric?: boolean;
 };
 
 type ProvidersConfig = Record<
@@ -31,6 +32,11 @@ export const llmProvidersDefaults = (
   model: { label: t('llm_provider_form_model') },
   format: { label: t('llm_provider_form_format') },
   deployment: { label: t('llm_provider_form_deployment') },
+  temperature: {
+    label: t('llm_provider_form_temperature'),
+    hint: t('llm_provider_form_temperature_hint'),
+    numeric: true,
+  },
 });
 
 export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
@@ -40,6 +46,9 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
     optional: true,
     enum: [undefined, 'minimal', 'low', 'medium', 'high'],
     defaultValue: undefined,
+  };
+  const temperature: Partial<ProviderOptions> = {
+    optional: true,
   };
   return {
     OPENAI: {
@@ -60,6 +69,7 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
         defaultValue: 'json_schema',
       },
       reasoningEffort,
+      temperature,
     },
     OPENAI_AZURE: {
       name: {},
@@ -75,6 +85,7 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
         defaultValue: 'json_schema',
       },
       reasoningEffort,
+      temperature,
     },
     ANTHROPIC: {
       name: {},
@@ -85,6 +96,7 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
       model: {
         hint: t('llm_provider_form_anthropic_model_hint'),
       },
+      temperature,
     },
     GOOGLE_AI: {
       name: {},
@@ -95,6 +107,7 @@ export const llmProvidersConfig = (t: TranslateFunction): ProvidersConfig => {
       model: {
         hint: t('llm_provider_form_google_ai_model_hint'),
       },
+      temperature,
     },
   };
 };
@@ -106,7 +119,16 @@ export const getValidationSchema = (
   const fields: Record<string, Yup.AnySchema> = {};
   Object.entries(llmProvidersConfig(t)[type]).forEach(([name, o]) => {
     const options: ProviderOptions = { ...llmProvidersDefaults(t)[name], ...o };
-    let field: Yup.AnySchema = Yup.string();
+    let field: Yup.AnySchema;
+    if (options.numeric) {
+      field = Yup.number()
+        .nullable()
+        .transform((value) =>
+          value === '' || isNaN(value) ? undefined : value
+        );
+    } else {
+      field = Yup.string();
+    }
     if (!options.optional) {
       field = field.required();
     }
@@ -131,7 +153,7 @@ export const getInitialValues = (
   };
   if (existingData?.type === type) {
     Object.entries(existingData).forEach(([name, value]) => {
-      result[name] = value ?? undefined;
+      result[name] = value != null ? value : undefined;
     });
   } else {
     Object.entries(llmProvidersConfig(t)[type]).forEach(([name, o]) => {

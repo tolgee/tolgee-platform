@@ -1,5 +1,6 @@
 package io.tolgee.ee.component.llm
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
@@ -34,6 +35,7 @@ class AnthropicApiService :
         messages = messages,
         model = config.model,
         max_tokens = config.maxTokens,
+        temperature = config.temperature,
       )
 
     val request = HttpEntity(requestBody, headers)
@@ -119,7 +121,8 @@ class AnthropicApiService :
       val stream: Boolean = false,
       val messages: List<RequestMessage>,
       val model: String?,
-      val temperature: Long? = 0,
+      @JsonInclude(JsonInclude.Include.NON_NULL)
+      val temperature: Double? = null,
     )
 
     class RequestMessage(
