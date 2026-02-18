@@ -13,6 +13,7 @@ export type PanelContentData = {
   language: LanguageModel;
   baseLanguage: LanguageModel;
   activeVariant: string | undefined;
+  editingText: string | undefined;
   editEnabled: boolean;
   projectPermissions: ReturnType<typeof useProjectPermissions>;
 };
