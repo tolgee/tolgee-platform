@@ -1826,6 +1826,8 @@
   "project_transferred_message": "Prosjekt overført",
   "project_transfer_rewrite_project_name_to_confirm_message": "Skriv inn prosjektnavnet for å bekrefte handlingen.",
   "prompt_not_found": "Prompt ikke funnet",
+  "qa_check_action_correct": "Korriger",
+  "qa_check_action_ignore": "Ignorer",
   "qa_check_failed": "En kvalitetskontroll kunne ikke utføres",
   "qa_check_type_empty_translation": "Tom oversettelse",
   "qa_issue_empty_translation": "Oversettelsen er tom",

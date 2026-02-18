@@ -1827,6 +1827,8 @@
   "project_transferred_message": "项目已转移",
   "project_transfer_rewrite_project_name_to_confirm_message": "要确认此操作，请输入项目名称。",
   "prompt_not_found": "未找到提示",
+  "qa_check_action_correct": "更正",
+  "qa_check_action_ignore": "忽略",
   "qa_check_failed": "质量检查执行失败",
   "qa_check_type_empty_translation": "翻译为空",
   "qa_issue_empty_translation": "翻译为空",

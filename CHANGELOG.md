@@ -1,3 +1,10 @@
+## [3.159.1](https://github.com/tolgee/tolgee-platform/compare/v3.159.0...v3.159.1) (2026-02-18)
+
+
+### Bug Fixes
+
+* handle RateLimitBlockedException in ExceptionHandlers ([#3472](https://github.com/tolgee/tolgee-platform/issues/3472)) ([c91aaef](https://github.com/tolgee/tolgee-platform/commit/c91aaeffdb4cefce17e207be9286a846ba0cb9bb)), closes [#3451](https://github.com/tolgee/tolgee-platform/issues/3451)
+
 # [3.159.0](https://github.com/tolgee/tolgee-platform/compare/v3.158.0...v3.159.0) (2026-02-18)
 
 

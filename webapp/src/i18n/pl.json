@@ -1602,6 +1602,8 @@
   "project_transferred_message": "Projekt przeniesiony",
   "project_transfer_rewrite_project_name_to_confirm_message": "Aby potwierdzić tę akcję, wpisz nazwę projektu.",
   "prompt_not_found": "Nie znaleziono promptu",
+  "qa_check_action_correct": "Popraw",
+  "qa_check_action_ignore": "Ignoruj",
   "qa_check_failed": "Nie udało się wykonać kontroli jakości",
   "qa_check_type_empty_translation": "Puste tłumaczenie",
   "qa_issue_empty_translation": "Tłumaczenie jest puste",

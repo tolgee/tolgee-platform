@@ -1830,6 +1830,8 @@
   "project_transferred_message": "Proiect transferat",
   "project_transfer_rewrite_project_name_to_confirm_message": "Pentru a confirma această acțiune, tastați numele proiectului.",
   "prompt_not_found": "Promptul nu a fost găsit",
+  "qa_check_action_correct": "Corectează",
+  "qa_check_action_ignore": "Ignoră",
   "qa_check_failed": "O verificare a calității a eșuat să ruleze",
   "qa_check_type_empty_translation": "Traducere goală",
   "qa_issue_empty_translation": "Traducerea este goală",

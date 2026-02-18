@@ -1602,6 +1602,8 @@
   "project_transferred_message": "Проєкт передано",
   "project_transfer_rewrite_project_name_to_confirm_message": "Щоб підтвердити цю дію, введіть назву проєкту.",
   "prompt_not_found": "Промт не знайдено",
+  "qa_check_action_correct": "Виправити",
+  "qa_check_action_ignore": "Ігнорувати",
   "qa_check_failed": "Не вдалося виконати перевірку якості",
   "qa_check_type_empty_translation": "Порожній переклад",
   "qa_issue_empty_translation": "Переклад порожній",

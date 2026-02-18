@@ -1835,6 +1835,8 @@
   "project_transferred_message": "Project overgedragen",
   "project_transfer_rewrite_project_name_to_confirm_message": "Typ de projectnaam om deze actie te bevestigen.",
   "prompt_not_found": "Prompt niet gevonden",
+  "qa_check_action_correct": "Corrigeren",
+  "qa_check_action_ignore": "Negeren",
   "qa_check_failed": "Een kwaliteitscontrole kon niet worden uitgevoerd",
   "qa_check_type_empty_translation": "Lege vertaling",
   "qa_issue_empty_translation": "Vertaling is leeg",

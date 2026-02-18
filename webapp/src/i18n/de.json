@@ -1832,6 +1832,8 @@
   "project_transferred_message": "Projekt übertragen",
   "project_transfer_rewrite_project_name_to_confirm_message": "Um diese Aktion zu bestätigen, geben Sie den Projektnamen ein.",
   "prompt_not_found": "Eingabeaufforderung nicht gefunden",
+  "qa_check_action_correct": "Korrigieren",
+  "qa_check_action_ignore": "Ignorieren",
   "qa_check_failed": "Eine Qualitätsprüfung konnte nicht ausgeführt werden",
   "qa_check_type_empty_translation": "Leere Übersetzung",
   "qa_issue_empty_translation": "Übersetzung ist leer",

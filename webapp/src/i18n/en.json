@@ -1837,6 +1837,8 @@
   "project_transferred_message": "Project transferred",
   "project_transfer_rewrite_project_name_to_confirm_message": "To confirm this action type project name.",
   "prompt_not_found": "Prompt not found",
+  "qa_check_action_correct": "Correct",
+  "qa_check_action_ignore": "Ignore",
   "qa_check_failed": "A quality check failed to execute",
   "qa_check_type_empty_translation": "Empty translation",
   "qa_issue_empty_translation": "Translation is empty",

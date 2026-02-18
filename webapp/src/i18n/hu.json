@@ -1826,6 +1826,8 @@
   "project_transferred_message": "Projekt átvitele megtörtént",
   "project_transfer_rewrite_project_name_to_confirm_message": "A művelet megerősítéséhez írja be a projekt nevét.",
   "prompt_not_found": "Felszólítás nem található",
+  "qa_check_action_correct": "Javítás",
+  "qa_check_action_ignore": "Mellőzés",
   "qa_check_failed": "Minőségellenőrzési ellenőrzés végrehajtása sikertelen",
   "qa_check_type_empty_translation": "Üres fordítás",
   "qa_issue_empty_translation": "A fordítás üres",

@@ -1834,6 +1834,8 @@
   "project_transferred_message": "Projekt převeden",
   "project_transfer_rewrite_project_name_to_confirm_message": "Pro potvrzení přepište název projektu.",
   "prompt_not_found": "Prompt nenalezen",
+  "qa_check_action_correct": "Opravit",
+  "qa_check_action_ignore": "Ignorovat",
   "qa_check_failed": "Kontrola kvality se nepodařila spustit",
   "qa_check_type_empty_translation": "Prázdný překlad",
   "qa_issue_empty_translation": "Překlad je prázdný",

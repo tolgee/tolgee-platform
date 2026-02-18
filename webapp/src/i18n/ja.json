@@ -1835,6 +1835,8 @@
   "project_transferred_message": "プロジェクトが移管されました",
   "project_transfer_rewrite_project_name_to_confirm_message": "このアクションを確認するには、プロジェクト名を入力します。",
   "prompt_not_found": "プロンプトが見つかりません",
+  "qa_check_action_correct": "修正",
+  "qa_check_action_ignore": "無視",
   "qa_check_failed": "品質チェックの実行に失敗しました",
   "qa_check_type_empty_translation": "空の翻訳",
   "qa_issue_empty_translation": "翻訳が空です",

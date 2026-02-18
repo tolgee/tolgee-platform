@@ -1834,6 +1834,8 @@
   "project_transferred_message": "Projekt overført",
   "project_transfer_rewrite_project_name_to_confirm_message": "Indtast projektets navn for at bekræfte denne handling.",
   "prompt_not_found": "Prompt ikke fundet",
+  "qa_check_action_correct": "Korrigér",
+  "qa_check_action_ignore": "Ignorer",
   "qa_check_failed": "En kvalitetskontrol kunne ikke udføres",
   "qa_check_type_empty_translation": "Tom oversættelse",
   "qa_issue_empty_translation": "Oversættelse er tom",
