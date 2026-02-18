@@ -107,7 +107,13 @@ class CreditLimitTest : ProjectAuthControllerTest("/v2/projects/") {
       }
     val parsed = NdJsonParser(objectMapper).parse(response)
     parsed.assert.hasSize(3)
-    (parsed[1] as Map<*, *>)["errorMessage"].assert.isEqualTo(errorCode)
+    val errorMessage =
+      parsed
+        .drop(1)
+        .filterIsInstance<Map<*, *>>()
+        .mapNotNull { it["errorMessage"] }
+        .firstOrNull()
+    errorMessage.assert.isEqualTo(errorCode)
   }
 
   private fun mockBadRequest(errorCode: String): HttpClientErrorException {
