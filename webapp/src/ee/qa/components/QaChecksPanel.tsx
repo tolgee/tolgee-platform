@@ -31,6 +31,7 @@ const useQaChecksForPanel = (data: PanelContentData) => {
 
 export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
   const issues = useQaChecksForPanel(data);
+  const text = data.editingText ?? '';
 
   if (issues.length === 0) {
     return (
@@ -45,7 +46,13 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
   return (
     <StyledContainer data-cy="qa-panel-container">
       {issues.map((issue, index) => (
-        <QaCheckItem key={`${issue.type}-${index}`} issue={issue} />
+        <QaCheckItem
+          key={`${issue.type}-${index}`}
+          issue={issue}
+          index={index + 1}
+          text={text}
+          slim={true}
+        />
       ))}
     </StyledContainer>
   );
