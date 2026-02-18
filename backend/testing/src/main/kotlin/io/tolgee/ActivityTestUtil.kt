@@ -8,13 +8,14 @@ import org.springframework.stereotype.Component
 class ActivityTestUtil(
   private val entityManager: EntityManager,
 ) {
-  fun getLastRevision(): ActivityRevision? {
+  fun getLastRevision(projectId: Long): ActivityRevision? {
     return entityManager
       .createQuery(
         """
-        from ActivityRevision ar order by ar.id desc limit 1
+        from ActivityRevision ar where ar.projectId = :projectId order by ar.id desc limit 1
         """.trimMargin(),
         ActivityRevision::class.java,
-      ).singleResult
+      ).setParameter("projectId", projectId)
+      .singleResult
   }
 }

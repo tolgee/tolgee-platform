@@ -66,13 +66,13 @@ class BranchRevisionData {
             type = ProjectPermissionType.MANAGE
           }
 
-          defaultBranch =
+          this@BranchRevisionData.defaultBranch =
             addBranch {
               name = Branch.DEFAULT_BRANCH_NAME
               isDefault = true
             }.self
 
-          devBranch =
+          this@BranchRevisionData.devBranch =
             addBranch {
               name = "dev"
             }.build {

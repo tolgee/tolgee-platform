@@ -28,14 +28,14 @@ interface BranchService {
   fun getActiveOrDefault(
     projectId: Long,
     branchName: String?,
-  ): Branch?
+  ): Branch
 
   fun getActiveNonDefaultBranch(
     projectId: Long,
     branchName: String?,
   ): Branch?
 
-  fun getDefaultBranch(projectId: Long): Branch?
+  fun getDefaultBranch(projectId: Long): Branch
 
   fun renameBranch(
     projectId: Long,

@@ -67,9 +67,9 @@ class BigMetaControllerTest :
     measureTime {
       storeAndAssertSize(keys, 0, 30, 354)
       storeAndAssertSize(keys, 500, 100, 1409)
-      storeAndAssertSize(keys, 10, 200, 3155)
-      storeAndAssertSize(keys, 800, 50, 3710)
-      storeAndAssertSize(keys, 800, 50, 3710)
+      storeAndAssertSize(keys, 10, 200, 3268)
+      storeAndAssertSize(keys, 800, 50, 3823)
+      storeAndAssertSize(keys, 800, 50, 3823)
     }.inWholeSeconds.assert.isLessThan(5)
   }
 

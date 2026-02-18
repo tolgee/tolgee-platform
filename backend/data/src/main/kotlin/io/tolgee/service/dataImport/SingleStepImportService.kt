@@ -13,7 +13,6 @@ import io.tolgee.dtos.request.importKeysResolvable.SingleStepImportResolvableReq
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.branching.Branch
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.service.branching.BranchService
@@ -35,7 +34,7 @@ class SingleStepImportService(
   private val currentDateProvider: CurrentDateProvider,
   private val applicationContext: ApplicationContext,
   private val entityManager: EntityManager,
-  private val branchingService: BranchService,
+  private val branchService: BranchService,
 ) {
   @Transactional
   fun singleStepImport(
@@ -51,7 +50,7 @@ class SingleStepImportService(
     val import =
       Import(project).also {
         it.author = userAccount
-        it.branch = getBranch(project, params.branch)
+        it.branch = branchService.getActiveOrDefault(project.id, params.branch)
       }
 
     importService.publishImportBusinessEvent(project.id, userAccount.id)
@@ -178,10 +177,4 @@ class SingleStepImportService(
     } ?: emptyList()
   }
 
-  private fun getBranch(
-    project: Project,
-    name: String?,
-  ): Branch? {
-    return branchingService.getActiveOrDefault(project.id, name)
-  }
 }

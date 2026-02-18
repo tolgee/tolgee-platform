@@ -18,6 +18,7 @@ import io.tolgee.model.key.Namespace
 import io.tolgee.model.translation.Translation
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
+import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
@@ -382,7 +383,7 @@ class StoredDataImporter(
         // or get it from conflict or create new one
         val newKey =
           importDataManager.existingKeys[this.key.file.namespace to this.key.name]
-            ?: createNewKey(this.key.name, this.key.file.namespace)
+            ?: createNewKey(this.key.name, this.key.file.namespace, import.branch.name)
         newKey
       }
     }
@@ -392,13 +393,14 @@ class StoredDataImporter(
     keyName: String,
   ): Key {
     return keysToSave.computeIfAbsent(namespace to keyName) {
-      importDataManager.existingKeys[namespace to keyName] ?: createNewKey(keyName, namespace)
+      importDataManager.existingKeys[namespace to keyName] ?: createNewKey(keyName, namespace, import.branch.name)
     }
   }
 
   private fun createNewKey(
     name: String,
     namespace: String?,
+    branch: String,
   ): Key {
     return Key(name = name).apply {
       project = import.project
@@ -446,5 +448,9 @@ class StoredDataImporter(
 
   private val tagService by lazy {
     applicationContext.getBean(TagService::class.java)
+  }
+
+  private val branchService by lazy {
+    applicationContext.getBean(BranchService::class.java)
   }
 }

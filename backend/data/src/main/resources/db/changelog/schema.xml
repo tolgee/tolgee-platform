@@ -5057,4 +5057,73 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="dmitrii.bocharov" id="1769500000000-1">
+        <sql>
+            INSERT INTO branch (id, created_at, updated_at, is_default, is_protected, name, project_id, pending, revision)
+            SELECT
+                nextval('hibernate_sequence'),
+                now(),
+                now(),
+                true,
+                false,
+                'main',
+                p.id,
+                false,
+                0
+            FROM project p
+            WHERE NOT EXISTS (
+                SELECT 1 FROM branch b WHERE b.project_id = p.id AND b.is_default = true
+            );
+        </sql>
+    </changeSet>
+    <changeSet author="dmitrii.bocharov" id="1769500000000-2">
+        <sql>
+            UPDATE key k
+            SET branch_id = (
+                SELECT b.id FROM branch b
+                WHERE b.project_id = k.project_id AND b.is_default = true
+            )
+            WHERE k.branch_id IS NULL;
+        </sql>
+        <addNotNullConstraint tableName="key" columnName="branch_id" constraintName="key_branch_id_not_null"/>
+    </changeSet>
+    <changeSet author="dmitrii.bocharov" id="1769500000000-3">
+        <sql>
+            UPDATE task t
+            SET branch_id = (
+                SELECT b.id FROM branch b
+                WHERE b.project_id = t.project_id AND b.is_default = true
+            )
+            WHERE t.branch_id IS NULL;
+        </sql>
+        <addNotNullConstraint tableName="task" columnName="branch_id" constraintName="task_branch_id_not_null"/>
+    </changeSet>
+    <changeSet author="dmitrii.bocharov" id="1769500000000-4">
+        <sql>
+            UPDATE import i
+            SET branch_id = (
+                SELECT b.id FROM branch b
+                WHERE b.project_id = i.project_id AND b.is_default = true
+            )
+            WHERE i.branch_id IS NULL;
+        </sql>
+        <addNotNullConstraint tableName="import" columnName="branch_id" constraintName="import_branch_id_not_null"/>
+    </changeSet>
+    <changeSet author="dmitrii.bocharov" id="1769500000000-5">
+        <sql>
+            UPDATE language_stats ls
+            SET branch_id = (
+                SELECT b.id FROM branch b
+                JOIN language l ON l.project_id = b.project_id
+                WHERE l.id = ls.language_id AND b.is_default = true
+            )
+            WHERE ls.branch_id IS NULL
+             AND NOT EXISTS (
+              SELECT 1 FROM language_stats ls2
+                JOIN language l ON l.id = ls.language_id
+                JOIN branch b ON b.project_id = l.project_id AND b.is_default = true
+              WHERE ls2.language_id = ls.language_id AND ls2.branch_id = b.id
+             );
+        </sql>
+    </changeSet>
 </databaseChangeLog>
