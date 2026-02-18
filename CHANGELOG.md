@@ -1,3 +1,10 @@
+# [3.159.0](https://github.com/tolgee/tolgee-platform/compare/v3.158.0...v3.159.0) (2026-02-18)
+
+
+### Features
+
+* add MCP Server integration to the integrations page ([#3473](https://github.com/tolgee/tolgee-platform/issues/3473)) ([ce0eb6d](https://github.com/tolgee/tolgee-platform/commit/ce0eb6db714043bca915663e18be3832196326b9))
+
 # [3.158.0](https://github.com/tolgee/tolgee-platform/compare/v3.157.0...v3.158.0) (2026-02-17)
 
 
