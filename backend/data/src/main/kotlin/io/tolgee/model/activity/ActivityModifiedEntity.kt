@@ -21,7 +21,7 @@ import java.io.Serializable
 @Entity
 @Table(
   indexes = [
-    Index(columnList = "branch_id"),
+    Index(columnList = "activity_revision_id,branch_id"),
   ],
 )
 @IdClass(ActivityModifiedEntityId::class)
