@@ -19,11 +19,11 @@ const StyledContainer = styled('div')`
 `;
 
 const useQaChecksForPanel = (data: PanelContentData) => {
-  const { keyData, language } = data;
-  const translation = keyData.translations[language.tag];
+  const { keyData, language, editingText } = data;
+  const text = editingText ?? '';
 
   return useQaCheckPreview({
-    text: translation?.text,
+    text,
     languageTag: language.tag,
     keyId: keyData.keyId,
   });
