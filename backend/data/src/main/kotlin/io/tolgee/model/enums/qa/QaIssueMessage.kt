@@ -5,6 +5,7 @@ import java.util.Locale
 
 enum class QaIssueMessage {
   QA_EMPTY_TRANSLATION,
+  QA_CHECK_FAILED,
   ;
 
   @JsonValue
