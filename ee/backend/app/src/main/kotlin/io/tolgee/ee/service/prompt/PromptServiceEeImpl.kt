@@ -9,12 +9,14 @@ import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.request.prompt.PromptDto
 import io.tolgee.dtos.request.prompt.PromptRunDto
 import io.tolgee.ee.component.PromptLazyMap
+import io.tolgee.ee.service.LlmProviderResolver
 import io.tolgee.ee.service.LlmProviderService
 import io.tolgee.ee.service.prompt.PromptResultParser.ParsedResult
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.FailedDependencyException
+import io.tolgee.exceptions.LlmProviderNotFoundException
 import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.TooManyRequestsException
@@ -26,6 +28,7 @@ import io.tolgee.service.PromptService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
@@ -49,13 +52,15 @@ class PromptServiceEeImpl(
   private val applicationContext: ApplicationContext,
   private val promptParamsHelper: PromptParamsHelper,
   private val objectMapper: ObjectMapper,
+  private val llmProviderResolver: LlmProviderResolver,
+  private val entityManager: EntityManager,
 ) : PromptService {
   fun getAllPaged(
     projectId: Long,
     pageable: Pageable,
     search: String?,
   ): Page<Prompt> {
-    return promptRepository.getAllPaged(projectId, pageable, search)
+    return promptRepository.getAllPaged(projectId, pageable, search).map { withResolvedProviderName(it) }
   }
 
   fun createPrompt(
@@ -71,7 +76,7 @@ class PromptServiceEeImpl(
         basicPromptOptions = dto.basicPromptOptions?.toTypedArray(),
       )
     promptRepository.save(prompt)
-    return prompt
+    return withResolvedProviderName(prompt)
   }
 
   override fun findPromptOrDefaultDto(
@@ -98,6 +103,13 @@ class PromptServiceEeImpl(
     return promptRepository.findPrompt(projectId, promptId) ?: throw NotFoundException(Message.PROMPT_NOT_FOUND)
   }
 
+  fun findPromptWithResolvedProvider(
+    projectId: Long,
+    promptId: Long,
+  ): Prompt {
+    return withResolvedProviderName(findPrompt(projectId, promptId))
+  }
+
   override fun deleteAllByProjectId(projectId: Long) {
     return promptRepository.deleteAllByProjectId(projectId)
   }
@@ -113,7 +125,7 @@ class PromptServiceEeImpl(
     prompt.providerName = dto.providerName
     prompt.basicPromptOptions = dto.basicPromptOptions?.toTypedArray()
     promptRepository.save(prompt)
-    return prompt
+    return withResolvedProviderName(prompt)
   }
 
   fun deletePrompt(
@@ -271,5 +283,31 @@ class PromptServiceEeImpl(
     applicationContext.publishEvent(
       OnAfterMachineTranslationEvent(this, organizationId, actualPriceInCents),
     )
+  }
+
+  /**
+   * Resolves the provider name through the fallback chain before returning to the API.
+   *
+   * Prompts store the original provider name in the DB. When a provider is delisted and
+   * replaced by a successor (e.g. "gpt-4o" -> "gpt-4.1") with a fallback configured,
+   * the stored name becomes stale. This method resolves it so the frontend sees a provider
+   * name that actually exists among the available providers.
+   *
+   * The entity is detached before mutation to prevent OSIV from flushing the resolved name
+   * back to the DB — the stored value must remain the original.
+   */
+  private fun withResolvedProviderName(prompt: Prompt): Prompt {
+    if (prompt.providerName.isEmpty()) return prompt
+    // Access lazy association while still managed
+    val organizationId = prompt.project.organizationOwner.id
+    val resolvedName =
+      try {
+        llmProviderResolver.resolveProviderName(organizationId, prompt.providerName)
+      } catch (e: LlmProviderNotFoundException) {
+        prompt.providerName
+      }
+    entityManager.detach(prompt)
+    prompt.providerName = resolvedName
+    return prompt
   }
 }
