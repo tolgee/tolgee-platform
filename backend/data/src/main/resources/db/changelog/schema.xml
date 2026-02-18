@@ -5091,10 +5091,10 @@
             </column>
             <column name="created_by_id" type="BIGINT"/>
             <column name="updated_by_id" type="BIGINT"/>
-            <column name="type" type="INTEGER">
+            <column name="type" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="message" type="INTEGER">
+            <column name="message" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="replacement" type="TEXT"/>
@@ -5104,7 +5104,7 @@
             <column name="position_end" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
-            <column defaultValueNumeric="0" name="state" type="INTEGER">
+            <column defaultValue="OPEN" name="state" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="translation_id" type="BIGINT">
