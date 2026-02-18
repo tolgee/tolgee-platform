@@ -32,7 +32,7 @@ class QaCheckPreviewController(
   private val modelAssembler: QaCheckResultModelAssembler,
 ) {
   @PostMapping("/preview")
-  @Operation(summary = "Returns QA check issues for the provided text without persisting")
+  @Operation(summary = "Runs QA checks for the provided text without storing them")
   @ReadOnlyOperation
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
