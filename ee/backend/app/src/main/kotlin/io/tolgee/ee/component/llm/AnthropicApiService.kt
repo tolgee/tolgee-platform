@@ -1,5 +1,6 @@
 package io.tolgee.ee.component.llm
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.dtos.LlmParams
 import io.tolgee.dtos.PromptResult
@@ -34,6 +35,12 @@ class AnthropicApiService :
         messages = messages,
         model = config.model,
         max_tokens = config.maxTokens,
+        output_config =
+          if (params.shouldOutputJson && config.format == "json_schema") {
+            OutputConfig(format = OutputFormat())
+          } else {
+            null
+          },
       )
 
     val request = HttpEntity(requestBody, headers)
@@ -120,6 +127,27 @@ class AnthropicApiService :
       val messages: List<RequestMessage>,
       val model: String?,
       val temperature: Long? = 0,
+      @JsonInclude(JsonInclude.Include.NON_NULL)
+      val output_config: OutputConfig? = null,
+    )
+
+    class OutputConfig(
+      val format: OutputFormat,
+    )
+
+    class OutputFormat(
+      val type: String = "json_schema",
+      val schema: Map<String, Any> =
+        mapOf(
+          "type" to "object",
+          "properties" to
+            mapOf(
+              "output" to mapOf("type" to "string"),
+              "contextDescription" to mapOf("type" to "string"),
+            ),
+          "required" to listOf("output", "contextDescription"),
+          "additionalProperties" to false,
+        ),
     )
 
     class RequestMessage(
