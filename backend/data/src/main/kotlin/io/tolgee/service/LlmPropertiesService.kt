@@ -20,6 +20,10 @@ class LlmPropertiesService(
     return llmProperties.enabled ?: getProviders().isNotEmpty()
   }
 
+  fun getFallbackProviderName(providerName: String): String? {
+    return llmProperties.fallbacks[providerName]
+  }
+
   fun getProviders(): List<LlmProvider> {
     val result = llmProperties.providers.toMutableList()
     if (subscriptionActive()) {

@@ -17,6 +17,7 @@ import io.tolgee.ee.component.llm.TolgeeApiService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.FailedDependencyException
 import io.tolgee.exceptions.InvalidStateException
+import io.tolgee.exceptions.LlmProviderNotFoundException
 import io.tolgee.exceptions.LlmRateLimitedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.LlmProvider
@@ -52,11 +53,22 @@ class LlmProviderService(
   private val internalProperties: InternalProperties,
   private val anthropicApiService: AnthropicApiService,
   private val googleAiApiService: GoogleAiApiService,
+  private val llmProviderResolver: LlmProviderResolver,
 ) {
   private val cache: Cache by lazy { cacheManager.getCache(Caches.LLM_PROVIDERS) ?: throw InvalidStateException() }
   private var lastUsedMap: MutableMap<String, Long> = mutableMapOf()
 
   fun callProvider(
+    organizationId: Long,
+    provider: String,
+    params: LlmParams,
+    attempts: List<Int>? = null,
+  ): PromptResult {
+    val resolvedProvider = llmProviderResolver.resolveProviderName(organizationId, provider)
+    return callProviderInternal(organizationId, resolvedProvider, params, attempts)
+  }
+
+  private fun callProviderInternal(
     organizationId: Long,
     provider: String,
     params: LlmParams,
@@ -211,7 +223,7 @@ class LlmProviderService(
       }
 
     if (providersWithPriority.isEmpty()) {
-      throw BadRequestException(Message.LLM_PROVIDER_NOT_FOUND, listOf(name))
+      throw LlmProviderNotFoundException(name)
     }
 
     val providerInfo = cache.get(name, ProviderInfo::class.java)

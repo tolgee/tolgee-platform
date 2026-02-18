@@ -51,6 +51,26 @@ class LlmProperties : MachineTranslationServiceProperties {
   )
   var providers: MutableList<LlmProvider> = mutableListOf()
 
+  @DocProperty(
+    description = """
+    Named fallback mapping. When a provider is not found, Tolgee will try the fallback provider.
+
+    ``` yaml
+    fallbacks:
+      openai: anthropic
+      anthropic: google-ai
+    ```
+
+    or using environment variables:
+
+    ```
+    TOLGEE_LLM_FALLBACKS_OPENAI=anthropic
+    TOLGEE_LLM_FALLBACKS_ANTHROPIC=google-ai
+    ```
+  """,
+  )
+  var fallbacks: MutableMap<String, String> = mutableMapOf()
+
   class LlmProvider(
     @DocProperty(description = "Enable/disable provider")
     var enabled: Boolean = true,
