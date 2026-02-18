@@ -1,6 +1,5 @@
 package io.tolgee.ee.api.v2.controllers.branching
 
-import io.tolgee.ActivityTestUtil
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
@@ -49,9 +48,6 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
-
-  @Autowired
-  lateinit var activityTestUtil: ActivityTestUtil
 
   @BeforeEach
   fun setup() {
