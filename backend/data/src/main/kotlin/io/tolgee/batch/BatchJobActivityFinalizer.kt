@@ -171,7 +171,8 @@ class BatchJobActivityFinalizer(
       .createNativeQuery(
         """
         delete from activity_describing_entity
-        where (entity_class, entity_id) in
+        where (activity_revision_id in (:revisionIds) or activity_revision_id = :activityRevisionIdToMergeInto)
+        and (entity_class, entity_id) in
               (select entity_class, entity_id
                from activity_describing_entity
                where activity_revision_id in (:revisionIds)
