@@ -12,7 +12,7 @@ class PunctuationMismatchCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.PUNCTUATION_MISMATCH
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    val base = params.baseTranslationText ?: return emptyList()
+    val base = params.baseText ?: return emptyList()
     if (base.isBlank()) return emptyList()
     val text = params.text
     if (text.isBlank()) return emptyList()
@@ -33,38 +33,43 @@ class PunctuationMismatchCheck : QaCheck {
           QaCheckResult(
             type = QaCheckType.PUNCTUATION_MISMATCH,
             message = QaIssueMessage.QA_PUNCTUATION_ADD,
-            replacement = textTrimmed + basePunct,
+            replacement = basePunct.toString(),
             positionStart = textEnd,
             positionEnd = textEnd,
             params = mapOf("punctuation" to basePunct.toString()),
           ),
         )
       }
+
       basePunct == null && textPunct != null -> {
         listOf(
           QaCheckResult(
             type = QaCheckType.PUNCTUATION_MISMATCH,
             message = QaIssueMessage.QA_PUNCTUATION_REMOVE,
-            replacement = textTrimmed.dropLast(1),
+            replacement = "",
             positionStart = textEnd - 1,
             positionEnd = textEnd,
             params = mapOf("punctuation" to textPunct.toString()),
           ),
         )
       }
+
       basePunct != null && textPunct != null -> {
         listOf(
           QaCheckResult(
             type = QaCheckType.PUNCTUATION_MISMATCH,
             message = QaIssueMessage.QA_PUNCTUATION_REPLACE,
-            replacement = textTrimmed.dropLast(1) + basePunct,
+            replacement = basePunct.toString(),
             positionStart = textEnd - 1,
             positionEnd = textEnd,
             params = mapOf("punctuation" to textPunct.toString(), "expected" to basePunct.toString()),
           ),
         )
       }
-      else -> emptyList()
+
+      else -> {
+        emptyList()
+      }
     }
   }
 
