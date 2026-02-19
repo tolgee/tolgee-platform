@@ -15,6 +15,8 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.language.LanguageService
+import io.tolgee.service.translation.TranslationService
 import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.PostMapping
@@ -30,6 +32,8 @@ class QaCheckPreviewController(
   private val projectHolder: ProjectHolder,
   private val qaCheckRunnerService: QaCheckRunnerService,
   private val modelAssembler: QaCheckResultModelAssembler,
+  private val languageService: LanguageService,
+  private val translationService: TranslationService,
 ) {
   @PostMapping("/preview")
   @Operation(summary = "Runs QA checks for the provided text without storing them")
@@ -41,14 +45,23 @@ class QaCheckPreviewController(
     @RequestBody @Valid
     dto: QaCheckPreviewRequest,
   ): CollectionModel<QaCheckResultModel> {
+    val baseTranslationText = fetchBaseTranslationText(dto.keyId)
     val params =
       QaCheckParams(
         text = dto.text,
-        baseTranslationText = null,
+        baseTranslationText = baseTranslationText,
         languageTag = dto.languageTag,
         keyId = dto.keyId,
       )
     val results = qaCheckRunnerService.runChecks(params)
     return modelAssembler.toCollectionModel(results)
+  }
+
+  private fun fetchBaseTranslationText(keyId: Long): String? {
+    if (keyId == 0L) return null
+    val projectId = projectHolder.project.id
+    val baseLanguage = languageService.getProjectBaseLanguage(projectId)
+    val translations = translationService.getTranslations(listOf(keyId), listOf(baseLanguage.id))
+    return translations.firstOrNull()?.text
   }
 }

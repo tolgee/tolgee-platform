@@ -15,6 +15,7 @@ export type QaCheckResultItem = {
   replacement: string | null;
   positionStart: number;
   positionEnd: number;
+  params: Record<string, string> | null;
 };
 
 export const useQaCheckPreview = ({

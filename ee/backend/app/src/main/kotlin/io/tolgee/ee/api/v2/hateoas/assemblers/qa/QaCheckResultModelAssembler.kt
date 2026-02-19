@@ -19,6 +19,7 @@ class QaCheckResultModelAssembler :
       replacement = entity.replacement,
       positionStart = entity.positionStart,
       positionEnd = entity.positionEnd,
+      params = entity.params,
     )
   }
 }
