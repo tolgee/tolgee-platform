@@ -11,17 +11,18 @@ class MissingNumbersCheckTest {
 
   private fun params(
     text: String,
-    base: String?,
+    base: String? = null,
+    baseLanguageTag: String? = null,
   ) = QaCheckParams(
+    baseText = base,
     text = text,
-    baseTranslationText = base,
+    baseLanguageTag = baseLanguageTag,
     languageTag = "en",
-    keyId = 1,
   )
 
   @Test
   fun `returns empty when base is null`() {
-    val results = check.check(params("Hello 42", null))
+    val results = check.check(params("Hello 42"))
     assertThat(results).isEmpty()
   }
 

@@ -12,7 +12,7 @@ class MissingNumbersCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.MISSING_NUMBERS
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    val base = params.baseTranslationText ?: return emptyList()
+    val base = params.baseText ?: return emptyList()
     if (base.isBlank()) return emptyList()
     val text = params.text
     if (text.isBlank()) return emptyList()

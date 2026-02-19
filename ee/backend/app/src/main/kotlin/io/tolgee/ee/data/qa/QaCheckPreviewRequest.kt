@@ -15,5 +15,5 @@ class QaCheckPreviewRequest {
   @field:Pattern(regexp = "^[^,]*$", message = "can not contain coma")
   val languageTag: String = ""
 
-  val keyId: Long = 0
+  val keyId: Long? = null
 }

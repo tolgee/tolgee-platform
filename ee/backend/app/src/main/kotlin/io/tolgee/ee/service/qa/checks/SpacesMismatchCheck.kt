@@ -12,9 +12,10 @@ class SpacesMismatchCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.SPACES_MISMATCH
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    val base = params.baseTranslationText ?: return emptyList()
+    val base = params.baseText ?: return emptyList()
     if (base.isBlank()) return emptyList()
     val text = params.text
+    if (text.isBlank()) return emptyList()
 
     val results = mutableListOf<QaCheckResult>()
 
@@ -40,7 +41,7 @@ class SpacesMismatchCheck : QaCheck {
         QaCheckResult(
           type = QaCheckType.SPACES_MISMATCH,
           message = QaIssueMessage.QA_SPACES_LEADING_ADDED,
-          replacement = text.substring(extra),
+          replacement = "",
           positionStart = 0,
           positionEnd = extra,
         ),
@@ -51,7 +52,7 @@ class SpacesMismatchCheck : QaCheck {
         QaCheckResult(
           type = QaCheckType.SPACES_MISMATCH,
           message = QaIssueMessage.QA_SPACES_LEADING_REMOVED,
-          replacement = missing + text,
+          replacement = missing,
           positionStart = 0,
           positionEnd = 0,
         ),
@@ -74,7 +75,7 @@ class SpacesMismatchCheck : QaCheck {
         QaCheckResult(
           type = QaCheckType.SPACES_MISMATCH,
           message = QaIssueMessage.QA_SPACES_TRAILING_ADDED,
-          replacement = text.substring(0, start),
+          replacement = "",
           positionStart = start,
           positionEnd = text.length,
         ),
@@ -85,7 +86,7 @@ class SpacesMismatchCheck : QaCheck {
         QaCheckResult(
           type = QaCheckType.SPACES_MISMATCH,
           message = QaIssueMessage.QA_SPACES_TRAILING_REMOVED,
-          replacement = text + missing,
+          replacement = missing,
           positionStart = text.length,
           positionEnd = text.length,
         ),
