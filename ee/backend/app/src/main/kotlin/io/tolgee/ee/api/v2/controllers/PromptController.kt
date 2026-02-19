@@ -114,7 +114,7 @@ class PromptController(
   fun getPrompt(
     @PathVariable promptId: Long,
   ): PromptModel {
-    val result = promptService.findPrompt(projectHolder.project.id, promptId)
+    val result = promptService.findPromptWithResolvedProvider(projectHolder.project.id, promptId)
     return promptModelAssembler.toModel(result)
   }
 
