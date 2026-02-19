@@ -434,21 +434,4 @@ interface KeyRepository : JpaRepository<Key, Long> {
     branchId: Long,
     includeOrphanDefault: Boolean,
   ): List<Key>
-
-  @Query(
-    """
-    select k from Key k
-    left join fetch k.namespace ns
-    left join fetch k.branch b
-    where k.project.id = :projectId and (
-      (:includeOrphanDefault = true and (b.id = :branchId or b is null))
-      or (:includeOrphanDefault = false and b.id = :branchId)
-    )
-    """,
-  )
-  fun findAllFetchBranchAndNamespace(
-    projectId: Long,
-    branchId: Long,
-    includeOrphanDefault: Boolean,
-  ): List<Key>
 }

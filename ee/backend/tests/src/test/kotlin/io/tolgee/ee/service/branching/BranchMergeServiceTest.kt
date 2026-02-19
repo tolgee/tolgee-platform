@@ -1,14 +1,13 @@
 package io.tolgee.ee.service.branching
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.constants.Caches
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.key.CreateKeyDto
-import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.LabelServiceImpl
+import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Language
@@ -33,7 +32,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 class BranchMergeServiceTest : AbstractSpringTest() {
@@ -62,7 +60,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   lateinit var keyScreenshotReferenceRepository: KeyScreenshotReferenceRepository
 
   @Autowired
-  lateinit var eeSubscriptionRepository: EeSubscriptionRepository
+  lateinit var eeSubscriptionServiceImpl: EeSubscriptionServiceImpl
 
   private lateinit var testData: BranchMergeTestData
 
@@ -73,8 +71,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     // Clear any existing subscription to avoid key limit issues from other tests
-    eeSubscriptionRepository.deleteAll()
-    cacheManager.getCache(Caches.EE_SUBSCRIPTION)?.clear()
+    eeSubscriptionServiceImpl.delete()
     testData = BranchMergeTestData()
     testDataService.saveTestData(testData.root)
     branchSnapshotService.createInitialSnapshot(
@@ -216,10 +213,11 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  @Transactional
   fun `apply merge - keeps branch and resets snapshot`() {
-    val merge = prepareMergeScenario()
-    branchService.applyMerge(testData.project.id, merge.id, false)
+    executeInNewTransaction {
+      val merge = prepareMergeScenario()
+      branchService.applyMerge(testData.project.id, merge.id, false)
+    }
 
     val refreshedBranch = testData.featureBranch.refresh()!!
     refreshedBranch.deletedAt.assert.isNull()
@@ -317,7 +315,6 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  @Transactional
   fun `apply merge - labels merge correctly`() {
     val mainTranslation = getTranslation(testData.mainKeyToUpdate, testData.englishLanguage)
     val featureTranslation = getTranslation(testData.featureKeyToUpdate, testData.englishLanguage)
@@ -658,7 +655,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   private fun getTranslation(
     key: Key,
     language: Language,
-  ): Translation = translationService.find(key, language).orElse(null)!!
+  ): Translation = translationService.getTranslationsWithLabels(listOf(key.id), listOf(language.id)).single()
 
   private fun getScreenshotReferences(keyId: Long): List<KeyScreenshotReference> =
     keyScreenshotReferenceRepository.getAllByKeyIdIn(listOf(keyId))

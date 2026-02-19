@@ -214,7 +214,6 @@ declare namespace DataCy {
         "billing-usage-table-translations" |
         "billing_period_annual" |
         "branch-default-chip" |
-        "branch-merge-detail-menu" |
         "branch-name-input" |
         "branch-protected-icon" |
         "branch-select-item" |
@@ -235,6 +234,7 @@ declare namespace DataCy {
         "content-delivery-auto-publish-checkbox" |
         "content-delivery-delete-button" |
         "content-delivery-files-button" |
+        "content-delivery-form-branch" |
         "content-delivery-form-custom-slug" |
         "content-delivery-form-name" |
         "content-delivery-form-save" |

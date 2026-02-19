@@ -34,6 +34,18 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
 
   @Query(
     """
+    select case when count(ame) > 0 then true else false end
+    from ActivityModifiedEntity ame
+    where ame.activityRevision.id = :revisionId and ame.branchId = :branchId
+    """,
+  )
+  fun hasModifiedEntitiesOnBranch(
+    revisionId: Long,
+    branchId: Long,
+  ): Boolean
+
+  @Query(
+    """
       from ActivityModifiedEntity ame
         left join Branch b on ame.branchId = b.id
         where ame.activityRevision.projectId = :projectId 

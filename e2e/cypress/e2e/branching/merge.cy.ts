@@ -41,7 +41,6 @@ describe('Branch merging', () => {
     // 2. Initiate merge from branches page
     branchesSection.visit(projectId);
     mergeSection.initiateMergeFromBranches('feature');
-    mergeSection.confirmMergeCreation();
 
     // 3. Verify UPDATE tab shows the change
     mergeSection.assertStats({ modifications: 1 });
@@ -77,7 +76,6 @@ describe('Branch merging', () => {
     // 2. Initiate merge
     branchesSection.visit(projectId);
     mergeSection.initiateMergeFromBranches('feature');
-    mergeSection.confirmMergeCreation();
 
     // 3. Verify ADD tab shows the new key
     mergeSection.selectTab('ADD');
@@ -103,7 +101,6 @@ describe('Branch merging', () => {
     // 2. Initiate merge
     branchesSection.visit(projectId);
     mergeSection.initiateMergeFromBranches('feature');
-    mergeSection.confirmMergeCreation();
 
     // 3. Verify DELETE tab shows the deleted key
     mergeSection.assertStats({ deletions: 1 });
@@ -136,7 +133,6 @@ describe('Branch merging', () => {
     // 3. Initiate merge from feature branch
     branchesSection.visit(projectId);
     mergeSection.initiateMergeFromBranches('feature');
-    mergeSection.confirmMergeCreation();
 
     // 4. Verify CONFLICT tab shows unresolved conflicts
     mergeSection.assertStats({ conflicts: '0/1' });
@@ -175,7 +171,7 @@ describe('Branch merging', () => {
     // 2. Initiate merge
     branchesSection.visit(projectId);
     mergeSection.initiateMergeFromBranches('feature');
-    mergeSection.confirmMergeCreation();
+    mergeSection.assertKeyInTab('shared-update-key');
 
     // 3. Check "delete branch after merge" option
     mergeSection.setDeleteBranchAfterMerge(true);

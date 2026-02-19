@@ -13,7 +13,6 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import { BranchRenameModal } from './BranchRenameModal';
-import { BranchNameChipNode } from 'tg.component/branching/BranchNameChip';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { BranchProgressModal } from './BranchProgressModal';
 import { confirmProtected } from 'tg.ee.module/branching/components/utils/branchConfirmations';
@@ -121,23 +120,8 @@ export const BranchesList = () => {
     if (branch.merge && !branch.merge.mergedAt) {
       handleMergeDetail(branch);
     } else {
-      confirmation({
-        message: (
-          <T
-            keyName="branch_merges_create_title"
-            params={{
-              name: branch?.name,
-              branch: <BranchNameChipNode />,
-              targetName: branch?.originBranchName,
-            }}
-          />
-        ),
-        confirmButtonText: <T keyName="branch_merges_create_button" />,
-        async onConfirm() {
-          await mergeIntoSubmit({
-            sourceBranchId: branch.id,
-          });
-        },
+      mergeIntoSubmit({
+        sourceBranchId: branch.id,
       });
     }
   };

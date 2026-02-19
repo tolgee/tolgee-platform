@@ -28,6 +28,7 @@ class ContentDeliveryConfigModelAssembler(
       lastPublished = entity.lastPublished?.time,
       lastPublishedFiles = entity.lastPublishedFiles ?: listOf(),
       escapeHtml = entity.escapeHtml,
+      branchName = entity.branch?.name,
     ).also {
       it.copyPropsFrom(entity)
     }

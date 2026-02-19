@@ -127,6 +127,44 @@ class BranchControllerMergingTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `merge activity includes source and target branch names in params`() {
+    val keys = initConflicts()
+    waitForNotThrowing(timeout = 10000, pollTime = 250) {
+      testData.featureBranch
+        .refresh()
+        .revision.assert
+        .isGreaterThan(0)
+      testData.mainBranch
+        .refresh()
+        .revision.assert
+        .isGreaterThan(0)
+    }
+    val change =
+      createMergeWithConflict(
+        keys.second,
+        keys.first,
+        BranchKeyMergeResolutionType.SOURCE,
+      )
+    val mergeId = change.branchMerge.id
+
+    performProjectAuthPost("branches/merge/$mergeId/apply").andIsOk
+
+    waitForNotThrowing(timeout = 5000, pollTime = 250) {
+      performProjectAuthGet("activity")
+        .andIsOk
+        .andAssertThatJson {
+          node("_embedded.activities") {
+            isArray.isNotEmpty
+            node("[0].type").isEqualTo("BRANCH_MERGE")
+            node("[0].params.source").isEqualTo("feature")
+            node("[0].params.target").isEqualTo("main")
+          }
+        }
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `refreshes merge preview without losing resolved conflicts`() {
     branchSnapshotService.createInitialSnapshot(
       testData.project.id,

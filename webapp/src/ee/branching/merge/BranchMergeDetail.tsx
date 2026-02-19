@@ -90,7 +90,6 @@ export const BranchMergeDetail: FC = () => {
     resolveMutation,
     resolveAllMutation,
     applyMutation,
-    deleteMutation,
     refreshPreviewMutation,
   } = useMergeData(project.id, numericMergeId, selectedTab);
 
@@ -247,17 +246,6 @@ export const BranchMergeDetail: FC = () => {
     await applyMerge();
   };
 
-  const handleCancel = async () => {
-    await deleteMutation.mutateAsync({
-      path: { projectId: project.id, mergeId: numericMergeId },
-    });
-    history.push(
-      LINKS.PROJECT_BRANCHES.build({
-        [PARAMS.PROJECT_ID]: project.id,
-      })
-    );
-  };
-
   const handleTabSelect = (tab: BranchMergeChangeType) => {
     userSelectedTab.current = true;
     setSelectedTab(tab);
@@ -340,7 +328,7 @@ export const BranchMergeDetail: FC = () => {
       ) : (
         merge && (
           <StyledDetail>
-            <MergeHeader merge={merge} onDelete={handleCancel} />
+            <MergeHeader merge={merge} />
 
             {isOutdated && (
               <Box mt={1}>
