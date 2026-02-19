@@ -33,6 +33,8 @@ open class TranslationViewModel(
   val activeSuggestionCount: Long,
   @Schema(description = "Number of all suggestions")
   val totalSuggestionCount: Long,
+  @Schema(description = "Number of open QA issues")
+  val qaIssueCount: Long = 0,
   @get:Schema(description = "First suggestion")
   val suggestions: List<TranslationSuggestionSimpleModel>? = null,
 ) : RepresentationModel<TranslationViewModel>() {
