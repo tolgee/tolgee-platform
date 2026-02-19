@@ -5078,54 +5078,47 @@
             </addColumn>
         </rollback>
     </changeSet>
-    <changeSet author="jirikuchynka" id="1739800000000-1">
+    <changeSet author="anty (generated)" id="1771511337241-1">
         <createTable tableName="translation_qa_issue">
-            <column autoIncrement="true" name="id" type="BIGINT">
+            <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="translation_qa_issuePK"/>
             </column>
-            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_by_id" type="BIGINT"/>
-            <column name="updated_by_id" type="BIGINT"/>
-            <column name="type" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="message" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="replacement" type="TEXT"/>
-            <column name="position_start" type="INTEGER">
-                <constraints nullable="false"/>
-            </column>
+            <column name="message" type="VARCHAR(255)"/>
+            <column name="params" type="TEXT"/>
             <column name="position_end" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
-            <column defaultValue="OPEN" name="state" type="VARCHAR(255)">
+            <column name="position_start" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
-            <column name="translation_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
+            <column name="replacement" type="TEXT"/>
+            <column defaultValue="OPEN" name="state" type="VARCHAR(255)"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="translation_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet author="jirikuchynka" id="1739800000000-2">
-        <createIndex indexName="idx_translation_qa_issue_translation_id" tableName="translation_qa_issue">
+    <changeSet author="anty (generated)" id="1771511337241-2">
+        <createIndex indexName="IDX6i58wyh7spkq55jpas6nqjo09" tableName="translation_qa_issue">
             <column name="translation_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="jirikuchynka" id="1739800000000-3">
-        <createIndex indexName="idx_translation_qa_issue_state" tableName="translation_qa_issue">
+    <changeSet author="anty (generated)" id="1771511337241-3">
+        <createIndex indexName="IDX7ofy2tesqs3c5b8j1us8ajtjd" tableName="activity_modified_entity">
+            <column name="branch_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1771511337241-4">
+        <createIndex indexName="IDXmsavtlerphpab06ckcqxn8o5e" tableName="translation_qa_issue">
             <column name="state"/>
         </createIndex>
     </changeSet>
-    <changeSet author="jirikuchynka" id="1739800000000-4">
-        <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="translation_qa_issue" constraintName="FK_translation_qa_issue_translation" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="translation" validate="true"/>
-    </changeSet>
-    <changeSet author="jirikuchynka" id="1739800000000-5">
-        <createSequence sequenceName="translation_qa_issue_sequence" startValue="1" incrementBy="50"/>
+    <changeSet author="anty (generated)" id="1771511337241-5">
+        <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="translation_qa_issue" constraintName="FKn7e25ywkkivr4mwn1vqe1lowb" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="translation" validate="true"/>
     </changeSet>
 </databaseChangeLog>

@@ -12,6 +12,7 @@ import io.tolgee.model.branching.Branch_
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.enums.TranslationSuggestionState
+import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
@@ -19,6 +20,8 @@ import io.tolgee.model.key.Namespace_
 import io.tolgee.model.key.screenshotReference.KeyScreenshotReference_
 import io.tolgee.model.keyBigMeta.KeysDistance
 import io.tolgee.model.keyBigMeta.KeysDistance_
+import io.tolgee.model.qa.TranslationQaIssue
+import io.tolgee.model.qa.TranslationQaIssue_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 import io.tolgee.model.translation.TranslationComment_
@@ -107,6 +110,7 @@ class QueryBase<T>(
       val unresolvedCommentsExpression = addUnresolvedComments(translation, language)
       val activeSuggestionsExpression = addActiveSuggestionsCount(language)
       addTotalSuggestionsCount(language)
+      addQaIssueCount(translation, language)
 
       queryTranslationFiltering.apply(
         language,
@@ -203,6 +207,25 @@ class QueryBase<T>(
       ),
     )
     this.querySelection[language to TranslationView::totalSuggestionCount] = subquery
+    return subquery
+  }
+
+  private fun addQaIssueCount(
+    translation: ListJoin<Key, Translation>,
+    language: LanguageDto,
+  ): Expression<Long> {
+    val subquery = this.query.subquery(Long::class.java)
+    val subqueryRoot = subquery.from(TranslationQaIssue::class.java)
+
+    subquery.select(cb.count(subqueryRoot.get(TranslationQaIssue_.id)))
+    subquery.where(
+      cb.equal(
+        subqueryRoot.get(TranslationQaIssue_.translation).get(Translation_.id),
+        translation.get(Translation_.id),
+      ),
+      cb.equal(subqueryRoot.get(TranslationQaIssue_.state), QaIssueState.OPEN),
+    )
+    this.querySelection[language to TranslationView::qaIssueCount] = subquery
     return subquery
   }
 

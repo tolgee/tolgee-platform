@@ -33,6 +33,8 @@ class TranslationQaIssue(
   @Enumerated(EnumType.STRING)
   @ColumnDefault("'OPEN'")
   var state: QaIssueState = QaIssueState.OPEN,
+  @Column(columnDefinition = "text")
+  var params: String? = null,
   @ManyToOne
   var translation: Translation,
 ) : StandardAuditModel()

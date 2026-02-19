@@ -27,7 +27,7 @@ data class KeyWithTranslationsView(
   var tasks: List<KeyTaskView>? = null
 
   companion object {
-    val LANGUAGES_FIELD_COUNT = 10
+    val LANGUAGES_FIELD_COUNT = 11
 
     fun of(
       queryData: Array<Any?>,
@@ -73,6 +73,7 @@ data class KeyWithTranslationsView(
             unresolvedCommentCount = (data[i + 7] ?: 0L) as Long,
             activeSuggestionCount = (data[i + 8] ?: 0L) as Long,
             totalSuggestionCount = (data[i + 9] ?: 0L) as Long,
+            qaIssueCount = (data[i + 10] ?: 0L) as Long,
           )
       }
 
