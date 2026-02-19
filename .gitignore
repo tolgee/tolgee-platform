@@ -11,6 +11,8 @@ bin
 server.iml
 trace.db
 
+/.tolgee-data
+
 webapp/node_modules/
 webapp/lib
 webapp/dist

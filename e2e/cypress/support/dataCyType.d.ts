@@ -705,6 +705,9 @@ declare namespace DataCy {
         "project-transfer-dialog" |
         "prompt-basic-option" |
         "prompt-basic-option-edit" |
+        "qa-check-item" |
+        "qa-panel-container" |
+        "qa-panel-container-empty" |
         "quick-start-action" |
         "quick-start-dialog" |
         "quick-start-finish-action" |

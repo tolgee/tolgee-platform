@@ -53,6 +53,7 @@ export const useAddDeveloperViewItems = () => (existingItems) => existingItems;
 export const useAddBatchOperations = () => (existingItems) => existingItems;
 export const translationPanelAdder = (existingItems) => existingItems;
 export const glossaryPanelAdder = (existingItems) => existingItems;
+export const qaChecksPanelAdder = (existingItems) => existingItems;
 export const useAddProjectMenuItems = () => (existingItems) => existingItems;
 export const useAddUserMenuItems = () => (existingItems) => existingItems;
 export const useAddAdministrationMenuItems = () => (existingItems) =>
