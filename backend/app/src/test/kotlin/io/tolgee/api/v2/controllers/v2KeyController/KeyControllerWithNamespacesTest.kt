@@ -187,7 +187,11 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
     performProjectAuthDelete("keys/${ids.joinToString(",")}").andIsOk
     executeInNewTransaction {
       // Keys are soft-deleted, so they still exist by ID but have deletedAt set
-      ids.forEach { keyService.find(it)!!.deletedAt.assert.isNotNull }
+      ids.forEach {
+        keyService
+          .find(it)!!
+          .deletedAt.assert.isNotNull
+      }
     }
 
     // Namespaces are preserved because soft-deleted keys still reference them

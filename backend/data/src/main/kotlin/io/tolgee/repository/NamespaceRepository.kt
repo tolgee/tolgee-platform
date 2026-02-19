@@ -33,6 +33,15 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
 
   fun getAllByProjectId(id: Long): List<Namespace>
 
+  @Query(
+    """
+    select ns from Namespace ns
+    where ns.project.id = :projectId
+      and exists (select k from Key k where k.namespace = ns and k.deletedAt is null)
+  """,
+  )
+  fun getAllWithActiveKeysByProjectId(projectId: Long): List<Namespace>
+
   fun getAllByProjectId(
     id: Long,
     pageable: Pageable,

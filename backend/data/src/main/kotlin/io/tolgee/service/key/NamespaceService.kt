@@ -103,6 +103,8 @@ class NamespaceService(
 
   fun getAllInProject(projectId: Long) = namespaceRepository.getAllByProjectId(projectId)
 
+  fun getAllWithActiveKeysInProject(projectId: Long) = namespaceRepository.getAllWithActiveKeysByProjectId(projectId)
+
   fun getAllInProject(
     projectId: Long,
     pageable: Pageable,
