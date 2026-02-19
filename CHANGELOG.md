@@ -1,3 +1,10 @@
+# [3.160.0](https://github.com/tolgee/tolgee-platform/compare/v3.159.1...v3.160.0) (2026-02-19)
+
+
+### Features
+
+* branching improvements ([#3474](https://github.com/tolgee/tolgee-platform/issues/3474)) ([255a5d0](https://github.com/tolgee/tolgee-platform/commit/255a5d06dec7054e8b913bb4ce6b97d2c7eaf0b5)), closes [#3462](https://github.com/tolgee/tolgee-platform/issues/3462) [#3469](https://github.com/tolgee/tolgee-platform/issues/3469) [#3466](https://github.com/tolgee/tolgee-platform/issues/3466)
+
 ## [3.159.1](https://github.com/tolgee/tolgee-platform/compare/v3.159.0...v3.159.1) (2026-02-18)
 
 
