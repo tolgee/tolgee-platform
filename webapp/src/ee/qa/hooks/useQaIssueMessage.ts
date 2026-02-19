@@ -1,8 +1,9 @@
 import { useTranslate } from '@tolgee/react';
+import type { QaCheckResultItem } from './useQaCheckPreview';
 
 export function useQaIssueMessage(
-  message: string,
-  params?: Record<string, string>
+  message: QaCheckResultItem['message'],
+  params?: QaCheckResultItem['params']
 ): string {
   const { t } = useTranslate();
   switch (message) {
