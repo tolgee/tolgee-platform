@@ -52,6 +52,17 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
           index={index + 1}
           text={text}
           slim={true}
+          onCorrect={
+            issue.replacement != null
+              ? () => {
+                  const corrected =
+                    text.slice(0, issue.positionStart) +
+                    issue.replacement +
+                    text.slice(issue.positionEnd);
+                  data.setValue(corrected);
+                }
+              : undefined
+          }
         />
       ))}
     </StyledContainer>
