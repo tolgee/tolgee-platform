@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.util.AopTestUtils
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
@@ -58,12 +57,6 @@ class QaCheckTranslationListenerTest : AuthorizedControllerTest() {
     frTranslation = entityManager.find(Translation::class.java, frTranslation.id)
   }
 
-  // Unwrap Spring proxy to bypass @Async and call synchronously
-  private fun callListenerDirectly(event: OnTranslationsSet) {
-    val rawListener = AopTestUtils.getTargetObject<QaCheckTranslationListener>(listener)
-    rawListener.onTranslationsSet(event)
-  }
-
   @Test
   @Transactional
   fun `creates QA issues when translation has problems`() {
@@ -77,7 +70,7 @@ class QaCheckTranslationListenerTest : AuthorizedControllerTest() {
         translations = listOf(frTranslation),
       )
 
-    callListenerDirectly(event)
+    listener.processTranslationsSet(event)
     entityManager.flush()
 
     val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
@@ -101,7 +94,7 @@ class QaCheckTranslationListenerTest : AuthorizedControllerTest() {
         translations = listOf(frTranslation),
       )
 
-    callListenerDirectly(event)
+    listener.processTranslationsSet(event)
     entityManager.flush()
 
     val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
@@ -121,7 +114,7 @@ class QaCheckTranslationListenerTest : AuthorizedControllerTest() {
         translations = listOf(frTranslation),
       )
 
-    callListenerDirectly(event)
+    listener.processTranslationsSet(event)
     entityManager.flush()
     val issuesBefore = qaIssueRepository.findAllByTranslationId(frTranslation.id)
     assertThat(issuesBefore).isNotEmpty
@@ -137,7 +130,7 @@ class QaCheckTranslationListenerTest : AuthorizedControllerTest() {
         oldValues = mapOf("fr" to "bonjour monde"),
         translations = listOf(frTranslation),
       )
-    callListenerDirectly(event2)
+    listener.processTranslationsSet(event2)
     entityManager.flush()
 
     val issuesAfter = qaIssueRepository.findAllByTranslationId(frTranslation.id)
