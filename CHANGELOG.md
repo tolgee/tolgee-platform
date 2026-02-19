@@ -1,3 +1,10 @@
+# [3.162.0](https://github.com/tolgee/tolgee-platform/compare/v3.161.0...v3.162.0) (2026-02-19)
+
+
+### Features
+
+* support billing stats API authentication ([#3468](https://github.com/tolgee/tolgee-platform/issues/3468)) ([4432f20](https://github.com/tolgee/tolgee-platform/commit/4432f20591afeaeac572d68f5764b6a0e2ebca7c))
+
 # [3.161.0](https://github.com/tolgee/tolgee-platform/compare/v3.160.0...v3.161.0) (2026-02-19)
 
 
