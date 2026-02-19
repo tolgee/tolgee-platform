@@ -10,6 +10,7 @@ import io.tolgee.model.enums.LlmProviderType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -144,7 +145,7 @@ class AnthropicApiServiceTest {
     private val onBody: (String) -> Unit,
   ) : ClientHttpRequest {
     private val outputStream = ByteArrayOutputStream()
-    private val headers = org.springframework.http.HttpHeaders()
+    private val headers = HttpHeaders()
 
     override fun getMethod() = httpMethod
 
@@ -166,7 +167,7 @@ class AnthropicApiServiceTest {
     private val body: String,
   ) : ClientHttpResponse {
     private val headers =
-      org.springframework.http.HttpHeaders().apply {
+      HttpHeaders().apply {
         contentType = MediaType.APPLICATION_JSON
       }
 
