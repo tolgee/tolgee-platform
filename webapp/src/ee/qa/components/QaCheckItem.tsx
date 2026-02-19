@@ -134,11 +134,8 @@ export const QaCheckItem: React.FC<Props> = ({
   slim = false,
 }) => {
   const typeLabel = useQaCheckTypeLabel(issue.type);
-  const messageText = useQaIssueMessage(
-    issue.message,
-    issue.params ?? undefined
-  );
-  const hasReplacement = issue.replacement !== null;
+  const messageText = useQaIssueMessage(issue.message, issue.params);
+  const hasReplacement = issue.replacement != null;
 
   return (
     <StyledItem data-cy="qa-check-item">

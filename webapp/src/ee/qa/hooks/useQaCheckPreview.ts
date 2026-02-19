@@ -1,21 +1,15 @@
+import { components } from 'tg.service/apiSchema.generated';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
+
+export type QaCheckResultItem = components['schemas']['QaCheckResultModel'];
 
 type QaCheckPreviewProps = {
   text: string | undefined | null;
   languageTag: string;
   keyId: number;
   enabled?: boolean;
-};
-
-export type QaCheckResultItem = {
-  type: string;
-  message: string;
-  replacement: string | null;
-  positionStart: number;
-  positionEnd: number;
-  params: Record<string, string> | null;
 };
 
 export const useQaCheckPreview = ({
@@ -53,5 +47,5 @@ export const useQaCheckPreview = ({
     return [];
   }
 
-  return (results.data._embedded?.qaCheckResults ?? []) as QaCheckResultItem[];
+  return results.data._embedded?.qaCheckResults ?? [];
 };

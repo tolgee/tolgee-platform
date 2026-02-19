@@ -1,6 +1,7 @@
 import { useTranslate } from '@tolgee/react';
+import type { QaCheckResultItem } from './useQaCheckPreview';
 
-export function useQaCheckTypeLabel(type: string): string {
+export function useQaCheckTypeLabel(type: QaCheckResultItem['type']): string {
   const { t } = useTranslate();
   switch (type) {
     case 'EMPTY_TRANSLATION':
