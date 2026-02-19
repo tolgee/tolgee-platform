@@ -45,7 +45,7 @@ class SpacesMismatchCheckTest {
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_SPACES_LEADING_ADDED)
     assertThat(results[0].positionStart).isEqualTo(0)
     assertThat(results[0].positionEnd).isEqualTo(2)
-    assertThat(results[0].replacement).isEqualTo("Hello")
+    assertThat(results[0].replacement).isEqualTo("")
   }
 
   @Test
@@ -53,7 +53,7 @@ class SpacesMismatchCheckTest {
     val results = check.check(params("Hello", "  Hello"))
     assertThat(results).hasSize(1)
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_SPACES_LEADING_REMOVED)
-    assertThat(results[0].replacement).isEqualTo("  Hello")
+    assertThat(results[0].replacement).isEqualTo("  ")
   }
 
   @Test
@@ -63,7 +63,7 @@ class SpacesMismatchCheckTest {
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_SPACES_TRAILING_ADDED)
     assertThat(results[0].positionStart).isEqualTo(5)
     assertThat(results[0].positionEnd).isEqualTo(7)
-    assertThat(results[0].replacement).isEqualTo("Hello")
+    assertThat(results[0].replacement).isEqualTo("")
   }
 
   @Test
@@ -71,7 +71,7 @@ class SpacesMismatchCheckTest {
     val results = check.check(params("Hello", "Hello  "))
     assertThat(results).hasSize(1)
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_SPACES_TRAILING_REMOVED)
-    assertThat(results[0].replacement).isEqualTo("Hello  ")
+    assertThat(results[0].replacement).isEqualTo("  ")
   }
 
   @Test
@@ -79,9 +79,9 @@ class SpacesMismatchCheckTest {
     val results = check.check(params("Hello  world", "Hello world"))
     assertThat(results).hasSize(1)
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_SPACES_DOUBLED)
-    assertThat(results[0].positionStart).isEqualTo(5)
+    assertThat(results[0].positionStart).isEqualTo(6)
     assertThat(results[0].positionEnd).isEqualTo(7)
-    assertThat(results[0].replacement).isEqualTo(" ")
+    assertThat(results[0].replacement).isEqualTo("")
   }
 
   @Test
