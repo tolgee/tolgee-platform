@@ -111,8 +111,8 @@ class SpacesMismatchCheck : QaCheck {
         QaCheckResult(
           type = QaCheckType.SPACES_MISMATCH,
           message = QaIssueMessage.QA_SPACES_DOUBLED,
-          replacement = " ",
-          positionStart = absStart,
+          replacement = "",
+          positionStart = absStart + 1,
           positionEnd = absEnd,
         ),
       )
