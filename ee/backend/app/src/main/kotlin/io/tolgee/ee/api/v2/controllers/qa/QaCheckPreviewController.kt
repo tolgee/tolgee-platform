@@ -53,13 +53,22 @@ class QaCheckPreviewController(
   private fun buildQaCheckParams(dto: QaCheckPreviewRequest): QaCheckParams {
     val projectId = projectHolder.project.id
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
-    val translations =
-      dto.keyId?.let { translationService.getTranslations(listOf(it), listOf(baseLanguage.id)) }
+
+    var baseTag: String? = baseLanguage.tag
+    if (dto.languageTag == baseTag) {
+      baseTag = null
+    }
+
+    var baseText: String? = null
+    if (baseTag != null && dto.keyId != null) {
+      val translations = translationService.getTranslations(listOf(dto.keyId), listOf(baseLanguage.id))
+      baseText = translations.firstOrNull()?.text
+    }
 
     return QaCheckParams(
-      baseText = translations?.firstOrNull()?.text,
+      baseText = baseText,
       text = dto.text,
-      baseLanguageTag = baseLanguage.tag,
+      baseLanguageTag = baseTag,
       languageTag = dto.languageTag,
     )
   }
