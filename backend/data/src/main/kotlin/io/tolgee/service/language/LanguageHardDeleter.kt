@@ -49,6 +49,7 @@ class LanguageHardDeleter(
             left join fetch k.branch
             left join fetch t.comments
             left join fetch t.labels
+            left join fetch t.qaIssues
             where t.id in :ids""",
               Translation::class.java,
             ).setParameter("ids", it.map { it.id })
