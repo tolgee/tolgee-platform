@@ -2,6 +2,7 @@ package io.tolgee.unit.formats.i18next.out
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.exceptions.ExportCollidingKeysException
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.genericStructuredFile.out.CustomPrettyPrinter
 import io.tolgee.formats.json.out.JsonFileExporter
@@ -11,6 +12,8 @@ import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.unit.util.assertFile
 import io.tolgee.unit.util.getExported
 import io.tolgee.util.buildExportTranslationList
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class I18nextFileExporterTest {
@@ -87,6 +90,38 @@ class I18nextFileExporterTest {
     |}
       """.trimMargin(),
     )
+  }
+
+  @Test
+  fun `throws on plural suffix collision with existing key`() {
+    val built =
+      buildExportTranslationList {
+        add(
+          languageTag = "en",
+          keyName = "profile.my-goals.plan",
+          text = "{count, plural, other {Other}}",
+        ) {
+          key.isPlural = true
+        }
+        add(
+          languageTag = "en",
+          keyName = "profile.my-goals.plan_other",
+          text = "Some translation",
+        )
+      }
+    val exporter =
+      getExporter(
+        built.translations,
+        exportParams = ExportParams(format = ExportFormat.JSON_I18NEXT),
+      )
+    assertThatThrownBy { exporter.produceFiles() }
+      .isInstanceOf(ExportCollidingKeysException::class.java)
+      .satisfies({ ex ->
+        val bre = ex as ExportCollidingKeysException
+        assertThat(bre.pluralKey).isEqualTo("profile.my-goals.plan")
+        assertThat(bre.collidingKey).isEqualTo("profile.my-goals.plan_other")
+        assertThat(bre.suffix).isEqualTo("other")
+      })
   }
 
   private fun getTranslationWithColon(): MutableList<ExportTranslationView> {

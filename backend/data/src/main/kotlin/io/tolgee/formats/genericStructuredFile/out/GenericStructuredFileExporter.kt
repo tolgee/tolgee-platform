@@ -2,8 +2,10 @@ package io.tolgee.formats.genericStructuredFile.out
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.dtos.IExportParams
+import io.tolgee.exceptions.ExportCollidingKeysException
 import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.ExportMessageFormat
+import io.tolgee.formats.formKeywords
 import io.tolgee.formats.generic.IcuToGenericFormatMessageConvertor
 import io.tolgee.formats.nestedStructureModel.StructureModelBuilder
 import io.tolgee.formats.path.ObjectPathItem
@@ -39,8 +41,27 @@ class GenericStructuredFileExporter(
   }
 
   private fun prepare() {
+    if (pluralsViaSuffixes) {
+      checkPluralSuffixCollisions()
+    }
     translations.forEach { translation ->
       addTranslationToBuilder(translation)
+    }
+  }
+
+  private fun checkPluralSuffixCollisions() {
+    val allKeyNames = translations.map { it.key.name }.toSet()
+    translations.filter { it.key.isPlural }.forEach { translation ->
+      for (suffix in formKeywords) {
+        val suffixedName = "${translation.key.name}_$suffix"
+        if (suffixedName in allKeyNames) {
+          throw ExportCollidingKeysException(
+            pluralKey = translation.key.name,
+            collidingKey = suffixedName,
+            suffix = suffix,
+          )
+        }
+      }
     }
   }
 
