@@ -6,6 +6,7 @@ import io.tolgee.ee.service.qa.QaCheckResult
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import org.springframework.stereotype.Component
+import java.util.Locale
 
 @Component
 class CharacterCaseMismatchCheck : QaCheck {
@@ -20,13 +21,15 @@ class CharacterCaseMismatchCheck : QaCheck {
     val (_, baseFirstChar) = firstLetter(base) ?: return emptyList()
     val (textFirstIndex, textFirstChar) = firstLetter(text) ?: return emptyList()
 
+    val locale = Locale.forLanguageTag(params.languageTag) ?: Locale.ROOT
+
     if (baseFirstChar.isUpperCase() && textFirstChar.isLowerCase()) {
-      val upper = textFirstChar.uppercaseChar()
+      val upper = textFirstChar.toString().uppercase(locale)
       return listOf(
         QaCheckResult(
           type = QaCheckType.CHARACTER_CASE_MISMATCH,
           message = QaIssueMessage.QA_CASE_CAPITALIZE,
-          replacement = upper.toString(),
+          replacement = upper,
           positionStart = textFirstIndex,
           positionEnd = textFirstIndex + 1,
         ),
@@ -34,12 +37,12 @@ class CharacterCaseMismatchCheck : QaCheck {
     }
 
     if (baseFirstChar.isLowerCase() && textFirstChar.isUpperCase()) {
-      val lower = textFirstChar.lowercaseChar()
+      val lower = textFirstChar.toString().lowercase(locale)
       return listOf(
         QaCheckResult(
           type = QaCheckType.CHARACTER_CASE_MISMATCH,
           message = QaIssueMessage.QA_CASE_LOWERCASE,
-          replacement = lower.toString(),
+          replacement = lower,
           positionStart = textFirstIndex,
           positionEnd = textFirstIndex + 1,
         ),

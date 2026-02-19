@@ -13,11 +13,12 @@ class CharacterCaseMismatchCheckTest {
     text: String,
     base: String? = null,
     baseLanguageTag: String? = null,
+    languageTag: String = "en",
   ) = QaCheckParams(
     baseText = base,
     text = text,
     baseLanguageTag = baseLanguageTag,
-    languageTag = "en",
+    languageTag = languageTag,
   )
 
   @Test
@@ -89,6 +90,22 @@ class CharacterCaseMismatchCheckTest {
   fun `returns empty when no letters in base`() {
     val results = check.check(params("Hello", "123"))
     assertThat(results).isEmpty()
+  }
+
+  @Test
+  fun `uses Turkish locale for uppercase conversion`() {
+    val results = check.check(params("istanbul", "Hello", languageTag = "tr"))
+    assertThat(results).hasSize(1)
+    assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_CASE_CAPITALIZE)
+    assertThat(results[0].replacement).isEqualTo("\u0130") // İ (Turkish capital I with dot)
+  }
+
+  @Test
+  fun `uses Turkish locale for lowercase conversion`() {
+    val results = check.check(params("Istanbul", "hello", languageTag = "tr"))
+    assertThat(results).hasSize(1)
+    assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_CASE_LOWERCASE)
+    assertThat(results[0].replacement).isEqualTo("\u0131") // ı (Turkish lowercase dotless i)
   }
 
   @Test
