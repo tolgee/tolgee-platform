@@ -21,6 +21,10 @@ class QaCheckTranslationListener(
   @TransactionalEventListener
   @Async
   fun onTranslationsSet(event: OnTranslationsSet) {
+    processTranslationsSet(event)
+  }
+
+  fun processTranslationsSet(event: OnTranslationsSet) {
     try {
       val projectId = event.key.project.id
       val baseLanguage = languageService.getProjectBaseLanguage(projectId)
