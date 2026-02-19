@@ -56,7 +56,7 @@ class PunctuationMismatchCheckTest {
     assertThat(results).hasSize(1)
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_PUNCTUATION_ADD)
     assertThat(results[0].params).containsEntry("punctuation", ".")
-    assertThat(results[0].replacement).isEqualTo("Bonjour.")
+    assertThat(results[0].replacement).isEqualTo(".")
   }
 
   @Test
@@ -65,7 +65,7 @@ class PunctuationMismatchCheckTest {
     assertThat(results).hasSize(1)
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_PUNCTUATION_REMOVE)
     assertThat(results[0].params).containsEntry("punctuation", "!")
-    assertThat(results[0].replacement).isEqualTo("Bonjour")
+    assertThat(results[0].replacement).isEqualTo("")
   }
 
   @Test
@@ -75,7 +75,7 @@ class PunctuationMismatchCheckTest {
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_PUNCTUATION_REPLACE)
     assertThat(results[0].params).containsEntry("punctuation", "!")
     assertThat(results[0].params).containsEntry("expected", ".")
-    assertThat(results[0].replacement).isEqualTo("Bonjour.")
+    assertThat(results[0].replacement).isEqualTo(".")
   }
 
   @Test
