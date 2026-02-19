@@ -170,7 +170,7 @@ class BranchMergeExecutor(
     }
     val targetKey = change.targetKey ?: return
     change.targetKey = null
-    keyService.delete(targetKey.id)
+    keyService.hardDelete(targetKey.id)
   }
 
   private fun persistAfterMerge(key: Key) {

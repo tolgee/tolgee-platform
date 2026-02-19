@@ -152,6 +152,8 @@
   "activity_group_create_key_item_table_header_key_name": "Name",
   "activity_import": "{KeyCount, plural, one {Imported one key ({TranslationCount, plural, \n  one {1 translation} \n  other {# translations}\n})} other {Imported # keys ({TranslationCount, plural, \n  one {1 translation} \n  other {# translations}\n})}}",
   "activity_key_delete": "{KeyCount, plural, one {Deleted 1 key} other {Deleted # keys}}",
+  "activity_key_restore": "Restored key",
+  "activity_key_soft_delete": "{KeyCount, plural, one {Moved 1 key to trash} other {Moved # keys to trash}}",
   "activity_key_name_edit": "Edited key name",
   "activity_key_soft_delete": "{KeyCount, plural, one {Moved # key to trash} other {Moved # keys to trash}}",
   "activity_key_tags_edit": "Key tags updated",

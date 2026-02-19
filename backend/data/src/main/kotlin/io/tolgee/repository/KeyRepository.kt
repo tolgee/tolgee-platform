@@ -11,13 +11,17 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import java.util.Date
 import java.util.Optional
 
 @Repository
 @Lazy
 interface KeyRepository : JpaRepository<Key, Long> {
   @Query(
-    value = "select count(k.id) from key k where k.project_id = :projectId and k.branch_id = :branchId",
+    value = """
+      select count(k.id) from key k
+      where k.project_id = :projectId and k.branch_id = :branchId and k.deleted_at is null
+    """,
     nativeQuery = true,
   )
   fun countByProjectAndBranch(
@@ -30,6 +34,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
       select count(k.id) from key k
       where k.project_id = :projectId
       and (k.branch_id = :branchId or (:includeOrphanDefault = true and k.branch_id is null))
+      and k.deleted_at is null
     """,
     nativeQuery = true,
   )
@@ -43,6 +48,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
     select k.id from Key k
     where k.project.id = :projectId and k.branch.id = :branchId
+      and k.deletedAt is null
     """,
   )
   fun findIdsByProjectAndBranch(
@@ -56,11 +62,12 @@ interface KeyRepository : JpaRepository<Key, Long> {
     from Key k
     left join k.namespace ns
     left join k.branch br
-    where 
-      k.name = :name 
-      and k.project.id = :projectId 
+    where
+      k.name = :name
+      and k.project.id = :projectId
       and (ns.name = :namespace or (ns is null and :namespace is null))
       and ((br.name = :branch and br.deletedAt is null) or (:branch is null and (br is null or br.isDefault)))
+      and k.deletedAt is null
   """,
   )
   fun getByNameAndNamespace(
@@ -72,19 +79,20 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-      from Key k left join fetch k.namespace left join fetch k.keyMeta where k.project.id = :projectId
+      from Key k left join fetch k.namespace left join fetch k.keyMeta where k.project.id = :projectId and k.deletedAt is null
     """,
   )
   fun getAllByProjectId(projectId: Long): Set<Key>
 
   @Query(
     """
-      from Key k 
+      from Key k
         left join k.branch b
-        left join fetch k.namespace 
-        left join fetch k.keyMeta 
+        left join fetch k.namespace
+        left join fetch k.keyMeta
     where k.project.id = :projectId
-    and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault))) 
+    and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault)))
+    and k.deletedAt is null
     """,
   )
   fun getAllByProjectIdAndBranch(
@@ -100,7 +108,8 @@ interface KeyRepository : JpaRepository<Key, Long> {
      left join k.namespace ns
      left join k.branch br
      where k.project.id = :projectId
-        and ((br.name = :branch and br.deletedAt is null) or (:branch is null and (br is null or br.isDefault))) 
+        and ((br.name = :branch and br.deletedAt is null) or (:branch is null and (br is null or br.isDefault)))
+        and k.deletedAt is null
      order by k.id
     """,
   )
@@ -109,7 +118,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     branch: String?,
   ): List<KeyView>
 
-  @Query("select k from Key k left join fetch k.keyMeta km where k.project.id = :projectId")
+  @Query("select k from Key k left join fetch k.keyMeta km where k.project.id = :projectId and k.deletedAt is null")
   fun getByProjectIdWithFetchedMetas(projectId: Long?): List<Key>
 
   fun deleteAllByIdIn(ids: Collection<Long>)
@@ -155,10 +164,10 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
-      from Key k 
-      left join fetch k.namespace 
-      left join fetch k.keyMeta 
-      left join fetch k.keyScreenshotReferences 
+      from Key k
+      left join fetch k.namespace
+      left join fetch k.keyMeta
+      left join fetch k.keyScreenshotReferences
       where k.id in :ids
     """,
   )
@@ -189,6 +198,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
             (br.name = :branch and br.deleted_at is null)
             or (:branch is null and (br.id is null or br.is_default))
           )
+          and k.deleted_at is null
        order by
        (
        3 * (ns.name <-> searchUnaccent) +
@@ -219,6 +229,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
             (br.name = :branch and br.deleted_at is null)
             or (:branch is null and (br.id is null or br.is_default))
           )
+          and k.deleted_at is null
       """,
   )
   fun searchKeys(
@@ -238,12 +249,14 @@ interface KeyRepository : JpaRepository<Key, Long> {
      left join k.branch b
      where k.project.id = :projectId
         and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault)))
+        and k.deletedAt is null
     """,
     countQuery = """
-      select count(k) from Key k 
+      select count(k) from Key k
       left join k.branch b
-      where k.project.id = :projectId 
+      where k.project.id = :projectId
         and ((b.name = :branch and b.deletedAt is null) or (:branch is null and (b is null or b.isDefault)))
+        and k.deletedAt is null
     """,
   )
   fun getAllByProjectId(
@@ -261,6 +274,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
      left join k.branch br
      where k.project.id = :projectId
      and k.id = :id
+     and k.deletedAt is null
     """,
   )
   fun findView(
@@ -342,6 +356,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     join k.translations t on t.state = io.tolgee.model.enums.TranslationState.DISABLED
     join t.language l
     where k.project.id = :projectId
+      and k.deletedAt is null
     order by k.id, l.id
   """,
   )
@@ -369,6 +384,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     select count(k) from Key k
     join k.project p on p.deletedAt is null
     join p.organizationOwner o on o.deletedAt is null
+    where k.deletedAt is null
   """,
   )
   fun countAllOnInstance(): Long
@@ -384,9 +400,10 @@ interface KeyRepository : JpaRepository<Key, Long> {
       left join fetch km.tags tg
       left join fetch t.comments c
       left join fetch c.author ca
-      where k.project.id = :projectId 
+      where k.project.id = :projectId
         and k.name = :keyName
         and ((b.name = :branchName and b.deletedAt is null) or (:branchName is null and (b is null or b.isDefault)))
+        and k.deletedAt is null
     """,
   )
   fun findPrefetchedByNameAndBranch(
@@ -427,11 +444,70 @@ interface KeyRepository : JpaRepository<Key, Long> {
       (:includeOrphanDefault = true and (b.id = :branchId or b is null))
       or (:includeOrphanDefault = false and b.id = :branchId)
     )
+    and k.deletedAt is null
     """,
   )
   fun findAllDetailedByBranch(
     projectId: Long,
     branchId: Long,
     includeOrphanDefault: Boolean,
+  ): List<Key>
+
+  @Query(
+    """
+    select k from Key k
+    left join fetch k.namespace ns
+    left join fetch k.branch b
+    where k.project.id = :projectId and (
+      (:includeOrphanDefault = true and (b.id = :branchId or b is null))
+      or (:includeOrphanDefault = false and b.id = :branchId)
+    )
+    and k.deletedAt is null
+    """,
+  )
+  fun findAllFetchBranchAndNamespace(
+    projectId: Long,
+    branchId: Long,
+    includeOrphanDefault: Boolean,
+  ): List<Key>
+
+  // --- Trash queries ---
+
+  @Query(
+    """
+    from Key k
+    left join fetch k.namespace ns
+    left join k.branch br
+    where k.project.id = :projectId
+      and k.deletedAt is not null
+      and ((br.name = :branch and br.deletedAt is null) or (:branch is null and (br is null or br.isDefault)))
+    """,
+    countQuery = """
+      select count(k) from Key k
+      left join k.branch br
+      where k.project.id = :projectId
+        and k.deletedAt is not null
+        and ((br.name = :branch and br.deletedAt is null) or (:branch is null and (br is null or br.isDefault)))
+    """,
+  )
+  fun findSoftDeletedByProjectId(
+    projectId: Long,
+    branch: String?,
+    pageable: Pageable,
+  ): Page<Key>
+
+  @Query("from Key k where k.deletedAt is not null and k.deletedAt < :before")
+  fun findAllSoftDeletedBefore(before: Date): List<Key>
+
+  @Query(
+    """
+    from Key k
+    left join fetch k.namespace
+    where k.id in :ids and k.project.id = :projectId and k.deletedAt is not null
+    """,
+  )
+  fun findSoftDeletedByIdsAndProjectId(
+    ids: Collection<Long>,
+    projectId: Long,
   ): List<Key>
 }

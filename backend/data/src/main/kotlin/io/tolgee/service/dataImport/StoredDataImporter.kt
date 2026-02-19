@@ -219,7 +219,7 @@ class StoredDataImporter(
       val importedKeys = importDataManager.storedKeys.entries.map { (pair) -> Pair(pair.first.namespace, pair.second) }
       val otherKeys = existingKeys.filter { existing -> !importedKeys.contains(existing.key) }
       if (otherKeys.isNotEmpty()) {
-        keyService.deleteMultiple(otherKeys.map { it.value.id })
+        keyService.hardDeleteMultiple(otherKeys.map { it.value.id })
       }
     }
   }

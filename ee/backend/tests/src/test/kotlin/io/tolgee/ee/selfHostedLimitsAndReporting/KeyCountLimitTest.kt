@@ -76,7 +76,7 @@ class KeyCountLimitTest : AbstractSpringTest() {
       testData.projectBuilder.data.keys
         .first()
         .self
-    keyService.delete(keyToDelete.id)
+    keyService.hardDelete(keyToDelete.id)
   }
 
   @Test

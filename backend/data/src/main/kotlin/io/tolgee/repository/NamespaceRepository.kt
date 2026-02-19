@@ -19,10 +19,17 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
 
   @Query(
     """
-    select ns.id, count(k.id) from Key k join k.namespace ns on ns.id in :namespaceIds group by ns.id
+    select ns.id, count(k.id) from Key k join k.namespace ns on ns.id in :namespaceIds where k.deletedAt is null group by ns.id
   """,
   )
   fun getKeysInNamespaceCount(namespaceIds: Collection<Long>): List<Array<Long>>
+
+  @Query(
+    """
+    select ns.id, count(k.id) from Key k join k.namespace ns on ns.id in :namespaceIds group by ns.id
+  """,
+  )
+  fun getKeysInNamespaceCountIncludingSoftDeleted(namespaceIds: Collection<Long>): List<Array<Long>>
 
   fun getAllByProjectId(id: Long): List<Namespace>
 
@@ -48,7 +55,7 @@ interface NamespaceRepository : JpaRepository<Namespace, Long> {
 
   @Query(
     """
-    select count(k) > 0 from Key k where k.namespace is null and k.project.id = :projectId
+    select count(k) > 0 from Key k where k.namespace is null and k.project.id = :projectId and k.deletedAt is null
   """,
   )
   fun isDefaultUsed(projectId: Long): Boolean

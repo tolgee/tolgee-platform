@@ -165,7 +165,8 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
   fun `deletes ns when empty`() {
     performProjectAuthDelete("keys/${testData.singleKeyInNs2.id}").andIsOk
     keyService.find(project.id, "super_k", "ns-2").assert.isNull()
-    namespaceService.find("ns-2", project.id).assert.isNull()
+    // Namespace is preserved because the soft-deleted key still references it
+    namespaceService.find("ns-2", project.id).assert.isNotNull
   }
 
   @ProjectJWTAuthTestMethod
@@ -185,10 +186,12 @@ class KeyControllerWithNamespacesTest : ProjectAuthControllerTest("/v2/projects/
         .map { it.self.id }
     performProjectAuthDelete("keys/${ids.joinToString(",")}").andIsOk
     executeInNewTransaction {
-      ids.forEach { keyService.find(it).assert.isNull() }
+      // Keys are soft-deleted, so they still exist by ID but have deletedAt set
+      ids.forEach { keyService.find(it)!!.deletedAt.assert.isNotNull }
     }
 
-    namespaceService.getAllInProject(testData.projectBuilder.self.id).assert.isEmpty()
+    // Namespaces are preserved because soft-deleted keys still reference them
+    namespaceService.getAllInProject(testData.projectBuilder.self.id).assert.isNotEmpty()
   }
 
   @ProjectJWTAuthTestMethod

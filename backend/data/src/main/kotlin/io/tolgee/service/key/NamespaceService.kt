@@ -29,10 +29,11 @@ class NamespaceService(
 
   fun deleteUnusedNamespaces(namespaces: List<Namespace?>) {
     val namespaceIds = namespaces.mapNotNull { it?.id }.toSet()
+    if (namespaceIds.isEmpty()) return
 
     val counts =
       namespaceRepository
-        .getKeysInNamespaceCount(namespaceIds)
+        .getKeysInNamespaceCountIncludingSoftDeleted(namespaceIds)
         .associate { it[0] to it[1] }
 
     namespaceIds.forEach {

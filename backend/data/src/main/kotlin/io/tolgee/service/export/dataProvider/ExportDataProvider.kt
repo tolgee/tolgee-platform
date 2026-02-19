@@ -88,6 +88,7 @@ class ExportDataProvider(
 
   private fun addWhereConditions() {
     filterProjectId()
+    filterDeletedKeys()
     filterKeyId()
     applyTagFilters()
     filterKeyIdNot()
@@ -102,6 +103,10 @@ class ExportDataProvider(
 
   private fun filterProjectId() {
     whereConditions.add(cb.equal(projectJoin.get(Project_.id), projectId))
+  }
+
+  private fun filterDeletedKeys() {
+    whereConditions.add(cb.isNull(key.get(Key_.deletedAt)))
   }
 
   private fun applyTagFilters() {

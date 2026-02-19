@@ -572,7 +572,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   private fun deleteFeatureKey() {
-    keyService.delete(testData.featureKeyToDelete.id)
+    keyService.hardDelete(testData.featureKeyToDelete.id)
   }
 
   private fun updateFeatureKey() {
@@ -618,7 +618,7 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   private fun reAddFeatureDeletedKey() {
-    keyService.delete(testData.featureKeyToDelete.id)
+    keyService.hardDelete(testData.featureKeyToDelete.id)
     val dto =
       CreateKeyDto(
         name = BranchMergeTestData.DELETE_KEY_NAME,
@@ -695,12 +695,12 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   private fun deleteTargetKey() {
-    keyService.delete(testData.mainKeyToDelete.id)
+    keyService.hardDelete(testData.mainKeyToDelete.id)
   }
 
   private fun reCreateTargetKeyWithSameName(): String {
     val originalName = testData.mainKeyToDelete.name
-    keyService.delete(testData.mainKeyToDelete.id)
+    keyService.hardDelete(testData.mainKeyToDelete.id)
     createKey(originalName, "Re-created in target", testData.mainBranch)
     return originalName
   }

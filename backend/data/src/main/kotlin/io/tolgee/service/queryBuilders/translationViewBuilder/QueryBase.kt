@@ -71,6 +71,7 @@ class QueryBase<T>(
     querySelection[KeyWithTranslationsView::keyIsPlural.name] = keyIsPluralExpression
     querySelection[KeyWithTranslationsView::keyPluralArgName.name] = keyArgNameExpression
     whereConditions.add(cb.equal(root.get<Any>(Key_.PROJECT).get<Any>(Project_.ID), this.projectId))
+    whereConditions.add(cb.isNull(root.get(Key_.deletedAt)))
     fullTextFields.add(root.get(Key_.name))
     addLeftJoinedColumns()
     queryGlobalFiltering.apply()

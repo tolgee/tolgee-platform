@@ -61,7 +61,7 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectJWTAuthTestMethod
   fun `deleting key increases branch revision`() {
-    keyService.delete(testData.firstKey.id)
+    keyService.hardDelete(testData.firstKey.id)
     assertBranchMetadataChanged()
   }
 

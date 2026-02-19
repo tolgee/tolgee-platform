@@ -26,7 +26,7 @@ class DeleteKeysChunkProcessor(
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
       @Suppress("UNCHECKED_CAST")
-      keyService.deleteMultiple(subChunk)
+      keyService.softDeleteMultiple(subChunk)
       entityManager.flush()
       progressManager.reportSingleChunkProgress(job.id, subChunk.size)
     }

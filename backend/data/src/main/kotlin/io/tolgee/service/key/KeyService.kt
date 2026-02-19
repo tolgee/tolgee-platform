@@ -1,6 +1,7 @@
 package io.tolgee.service.key
 
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.KeyImportResolvableResult
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -40,6 +41,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.Date
 import java.util.Optional
 
 @Service
@@ -64,6 +66,7 @@ class KeyService(
   private val securityService: SecurityService,
   @Lazy
   private val branchMergeService: BranchMergeService,
+  private val currentDateProvider: CurrentDateProvider,
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -320,7 +323,7 @@ class KeyService(
   }
 
   @Transactional
-  fun delete(id: Long) {
+  fun hardDelete(id: Long) {
     val key = findOptional(id).orElseThrow { NotFoundException() }
     translationService.deleteAllByKey(id)
     keyMetaService.deleteAllByKeyId(id)
@@ -332,16 +335,44 @@ class KeyService(
   }
 
   @Transactional
-  fun deleteMultiple(ids: Collection<Long>) {
-    traceLogMeasureTime("delete multiple keys: delete translations") {
+  fun softDeleteMultiple(ids: Collection<Long>) {
+    val keys = keyRepository.findAllByIdIn(ids.toList())
+    val now = currentDateProvider.date
+    keys.forEach { it.deletedAt = now }
+    keyRepository.saveAll(keys)
+  }
+
+  @Transactional
+  fun restoreKey(
+    projectId: Long,
+    keyId: Long,
+  ): Key {
+    val key =
+      keyRepository.findSoftDeletedByIdsAndProjectId(listOf(keyId), projectId).firstOrNull()
+        ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+
+    // Check that no active key with the same name+namespace+branch exists
+    val branch = key.branch?.name
+    val existing = find(projectId, key.name, key.namespace?.name, branch)
+    if (existing != null) {
+      throw BadRequestException(Message.KEY_EXISTS)
+    }
+
+    key.deletedAt = null
+    return save(key)
+  }
+
+  @Transactional
+  fun hardDeleteMultiple(ids: Collection<Long>) {
+    traceLogMeasureTime("hard delete multiple keys: delete translations") {
       translationService.deleteAllByKeys(ids)
     }
 
-    traceLogMeasureTime("delete multiple keys: delete key metas") {
+    traceLogMeasureTime("hard delete multiple keys: delete key metas") {
       keyMetaService.deleteAllByKeyIdIn(ids)
     }
 
-    traceLogMeasureTime("delete multiple keys: delete screenshots") {
+    traceLogMeasureTime("hard delete multiple keys: delete screenshots") {
       screenshotService.deleteAllByKeyId(ids)
     }
     aiPlaygroundResultService.deleteResultsByKeys(ids)
@@ -349,17 +380,36 @@ class KeyService(
     branchMergeService.deleteChangesByKeyIds(ids)
 
     val keys =
-      traceLogMeasureTime("delete multiple keys: fetch keys") {
+      traceLogMeasureTime("hard delete multiple keys: fetch keys") {
         keyRepository.findAllByIdInForDelete(ids)
       }
 
     val namespaces = keys.map { it.namespace }
 
-    traceLogMeasureTime("delete multiple keys: delete the keys") {
+    traceLogMeasureTime("hard delete multiple keys: delete the keys") {
       keyRepository.deleteAll(keys)
     }
 
     namespaceService.deleteUnusedNamespaces(namespaces)
+  }
+
+  fun getSoftDeletedKeys(
+    projectId: Long,
+    branch: String?,
+    pageable: Pageable,
+  ): Page<Key> {
+    return keyRepository.findSoftDeletedByProjectId(projectId, branch, pageable)
+  }
+
+  fun findAllSoftDeletedBefore(before: Date): List<Key> {
+    return keyRepository.findAllSoftDeletedBefore(before)
+  }
+
+  fun findSoftDeletedByIdsAndProjectId(
+    ids: Collection<Long>,
+    projectId: Long,
+  ): List<Key> {
+    return keyRepository.findSoftDeletedByIdsAndProjectId(ids, projectId)
   }
 
   @Transactional

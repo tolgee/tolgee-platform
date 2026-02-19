@@ -55,7 +55,7 @@ enum class BatchJobType(
     exclusive = false,
   ),
   DELETE_KEYS(
-    activityType = ActivityType.KEY_DELETE,
+    activityType = ActivityType.KEY_SOFT_DELETE,
     maxRetries = 3,
     processor = DeleteKeysChunkProcessor::class,
   ),

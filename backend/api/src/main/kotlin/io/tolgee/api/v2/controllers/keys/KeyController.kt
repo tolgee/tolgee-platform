@@ -184,7 +184,7 @@ class KeyController(
   @DeleteMapping(value = ["/{ids:[0-9,]+}"])
   @Transactional
   @Operation(summary = "Delete one or multiple keys")
-  @RequestActivity(ActivityType.KEY_DELETE)
+  @RequestActivity(ActivityType.KEY_SOFT_DELETE)
   @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
   @OpenApiOrderExtension(5)
@@ -197,7 +197,7 @@ class KeyController(
         checkBranchPermission()
       }
     }
-    keyService.deleteMultiple(ids)
+    keyService.softDeleteMultiple(ids)
   }
 
   @PutMapping(value = ["/{id}/complex-update"])
@@ -226,7 +226,7 @@ class KeyController(
       "Delete one or multiple keys by their IDs in request body. Useful for larger requests" +
         " esxceeding allowed URL length.",
   )
-  @RequestActivity(ActivityType.KEY_DELETE)
+  @RequestActivity(ActivityType.KEY_SOFT_DELETE)
   @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
   fun delete(

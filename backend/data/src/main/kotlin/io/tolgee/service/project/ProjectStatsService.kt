@@ -59,6 +59,7 @@ class ProjectStatsService(
           cb.isNull(keys.get(Key_.branch)),
           cb.isTrue(branch.get(Branch_.isDefault)),
         ),
+        cb.isNull(keys.get(Key_.deletedAt)),
       ),
     )
     query.groupBy(root.get(Project_.id))

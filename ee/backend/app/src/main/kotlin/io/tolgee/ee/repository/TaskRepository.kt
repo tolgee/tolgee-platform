@@ -143,11 +143,13 @@ interface TaskRepository : JpaRepository<Task, Long> {
         t.type as taskType
      from task t
         join task_key tt on (t.id = tt.task_id)
+        join key k on (tt.key_id = k.id)
         left join task_assignees ta on (ta.tasks_id = t.id and ta.assignees_id = :currentUserId)
         left join user_account u on ta.assignees_id = u.id
         left join language l on (t.language_id = l.id)
      where
         tt.key_id in :keyIds
+        and k.deleted_at is null
         and l.deleted_at is null
         and (t.state = 'IN_PROGRESS' or t.state = 'NEW')
      order by l.id, tt.key_id, taskAssigned, t.type desc, t.id desc
@@ -229,7 +231,8 @@ interface TaskRepository : JpaRepository<Task, Long> {
           left join branch b on b.id = key.branch_id
       where key.project_id = :projectId
           and key.id in :keyIds
-          and ((b.name = :branch and b.deleted_at is null) or (:branch is null and (b is null or b.is_default))) 
+          and key.deleted_at is null
+          and ((b.name = :branch and b.deleted_at is null) or (:branch is null and (b is null or b.is_default)))
           and (
             COALESCE(t.state, 0) in :#{#filters.filterStateOrdinal} -- item fits the filter
             or (
@@ -266,12 +269,14 @@ interface TaskRepository : JpaRepository<Task, Long> {
                 and task.language_id = :languageId
                 and (task.state = 'IN_PROGRESS' or task.state = 'NEW')
                 and l.deleted_at is null
+                and key.deleted_at is null
           ) as task on task.key_id = key.id
           left join translation t on t.key_id = key.id and t.language_id = :languageId
           left join branch b on b.id = key.branch_id
       where key.project_id = :projectId
           and key.id in :keyIds
-          and ((b.name = :branch and b.deleted_at is null) or (:branch is null and (b is null or b.is_default))) 
+          and key.deleted_at is null
+          and ((b.name = :branch and b.deleted_at is null) or (:branch is null and (b is null or b.is_default)))
           and task IS NULL
           and (
             COALESCE(t.state, 0) in :#{#filters.filterStateOrdinal} -- item fits the filter
@@ -302,7 +307,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
       from Key k
           left join k.tasks tt
           left join tt.task t
-      where k.project.id = :projectId and t.number = :taskNumber
+      where k.project.id = :projectId and t.number = :taskNumber and k.deletedAt is null
     """,
   )
   fun getTaskKeys(
@@ -318,6 +323,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
       where k.project.id = :projectId
         and (t.language.id = :baseLangId or t.id is NULL)
         and k.id in :keyIds
+        and k.deletedAt is null
     """,
   )
   fun calculateScope(
@@ -337,7 +343,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
       from Task tk
           left join tk.project p
           left join tk.keys tt
-          left join Key k on element(tt).key.id = k.id
+          left join Key k on element(tt).key.id = k.id and k.deletedAt is null
           left join k.translations bt on (bt.language.id = p.baseLanguage.id)
       where tk in :tasks
       group by tk.id, tk.project.id
@@ -351,8 +357,8 @@ interface TaskRepository : JpaRepository<Task, Long> {
       from Task tk
         left join tk.keys as tt
         left join tt.author as u
-        left join Key k on element(tt).key.id = k.id
-        left join k.translations as btr on btr.language.id = :baseLangId 
+        left join Key k on element(tt).key.id = k.id and k.deletedAt is null
+        left join k.translations as btr on btr.language.id = :baseLangId
       where tk.project.id = :projectId
         and tk.number = :taskNumber
         and tt.done
@@ -388,11 +394,13 @@ interface TaskRepository : JpaRepository<Task, Long> {
       from UserAccount u
         join u.tasks tk
         join tk.keys tt
+        join Key k on element(tt).key.id = k.id
       where (:type is NULL OR tk.type = :type)
         and tk.language.id = :languageId
         and (tk.state = 'IN_PROGRESS' or tk.state = 'NEW')
         and u.id = :userId
-        and element(tt).key.id = :keyId
+        and k.id = :keyId
+        and k.deletedAt is null
     """,
   )
   fun findAssigneeByKey(
@@ -414,6 +422,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
         and t.language = at.language
         and t.type >= at.type
         and (t.state = 'IN_PROGRESS' or t.state = 'NEW')
+        and k.deletedAt is null
     """,
   )
   fun getBlockingTaskNumbers(

@@ -61,7 +61,8 @@ open class ProjectStatsProvider(
     val branch = key.join(Key_.branch, JoinType.LEFT)
     sub.where(
       key.get(Key_.project) equal project
-        and branchPredicate(branch, key.get(Key_.branch)),
+        and branchPredicate(branch, key.get(Key_.branch))
+        and cb.isNull(key.get(Key_.deletedAt)),
     )
     return sub.select(cb.countDistinct(key.get(Key_.id)))
   }

@@ -33,6 +33,8 @@ enum class ActivityType(
   KEY_TAGS_EDIT,
   KEY_NAME_EDIT,
   KEY_DELETE(true),
+  KEY_SOFT_DELETE(true),
+  KEY_RESTORE,
   CREATE_KEY,
   COMPLEX_EDIT,
   IMPORT(true),
