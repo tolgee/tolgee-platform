@@ -135,6 +135,7 @@ type Props = {
   index?: number;
   text: string;
   slim?: boolean;
+  onCorrect?: () => void;
 };
 
 export const QaCheckItem: React.FC<Props> = ({
@@ -142,6 +143,7 @@ export const QaCheckItem: React.FC<Props> = ({
   index,
   text,
   slim = false,
+  onCorrect,
 }) => {
   const typeLabel = useQaCheckTypeLabel(issue.type);
   const messageText = useQaIssueMessage(issue.message, issue.params);
@@ -175,7 +177,7 @@ export const QaCheckItem: React.FC<Props> = ({
           </StyledDiffText>
           {slim && (
             <StyledDiffActions>
-              <IconButton size="small" color="primary">
+              <IconButton size="small" color="primary" onClick={onCorrect}>
                 <Check width={20} height={20} />
               </IconButton>
               <IconButton size="small">
@@ -189,7 +191,7 @@ export const QaCheckItem: React.FC<Props> = ({
       {(!slim || !hasReplacement) && (
         <StyledNormalActions>
           {hasReplacement && (
-            <Button variant="outlined" color="primary" size="small">
+            <Button variant="outlined" color="primary" size="small" onClick={onCorrect}>
               <T keyName="qa_check_action_correct" />
             </Button>
           )}
