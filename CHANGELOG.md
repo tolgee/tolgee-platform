@@ -1,3 +1,11 @@
+# [3.161.0](https://github.com/tolgee/tolgee-platform/compare/v3.160.0...v3.161.0) (2026-02-19)
+
+
+### Features
+
+* add LLM provider fallback configuration ([#3477](https://github.com/tolgee/tolgee-platform/issues/3477)) ([b56ad5d](https://github.com/tolgee/tolgee-platform/commit/b56ad5db702fb7d0c740f6e307dc68c0d0c08734))
+* add structured JSON output support for Anthropic provider ([#3475](https://github.com/tolgee/tolgee-platform/issues/3475)) ([64fcaec](https://github.com/tolgee/tolgee-platform/commit/64fcaecdb4b9c979937b3108dc9c6f8b72d17d88))
+
 # [3.160.0](https://github.com/tolgee/tolgee-platform/compare/v3.159.1...v3.160.0) (2026-02-19)
 
 
