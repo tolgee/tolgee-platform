@@ -5398,7 +5398,7 @@ export interface components {
     };
     QaCheckPreviewRequest: {
       /** Format: int64 */
-      keyId: number;
+      keyId?: number;
       /**
        * @description Language tag according to BCP 47 definition
        * @example cs-CZ
@@ -5408,7 +5408,23 @@ export interface components {
     };
     QaCheckResultModel: {
       /** @enum {string} */
-      message: "qa_empty_translation";
+      message:
+        | "qa_empty_translation"
+        | "qa_check_failed"
+        | "qa_spaces_leading_added"
+        | "qa_spaces_leading_removed"
+        | "qa_spaces_trailing_added"
+        | "qa_spaces_trailing_removed"
+        | "qa_spaces_doubled"
+        | "qa_spaces_non_breaking_added"
+        | "qa_spaces_non_breaking_removed"
+        | "qa_punctuation_add"
+        | "qa_punctuation_remove"
+        | "qa_punctuation_replace"
+        | "qa_case_capitalize"
+        | "qa_case_lowercase"
+        | "qa_numbers_missing";
+      params?: { [key: string]: string };
       /** Format: int32 */
       positionEnd: number;
       /** Format: int32 */
