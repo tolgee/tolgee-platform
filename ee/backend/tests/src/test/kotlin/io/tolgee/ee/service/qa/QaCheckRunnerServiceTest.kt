@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test
 class QaCheckRunnerServiceTest {
   private val params =
     QaCheckParams(
+      baseText = null,
       text = "Hello",
-      baseTranslationText = null,
+      baseLanguageTag = null,
       languageTag = "en",
-      keyId = 1,
     )
 
   @Test

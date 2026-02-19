@@ -45,23 +45,22 @@ class QaCheckPreviewController(
     @RequestBody @Valid
     dto: QaCheckPreviewRequest,
   ): CollectionModel<QaCheckResultModel> {
-    val baseTranslationText = fetchBaseTranslationText(dto.keyId)
-    val params =
-      QaCheckParams(
-        text = dto.text,
-        baseTranslationText = baseTranslationText,
-        languageTag = dto.languageTag,
-        keyId = dto.keyId,
-      )
+    val params = buildQaCheckParams(dto)
     val results = qaCheckRunnerService.runChecks(params)
     return modelAssembler.toCollectionModel(results)
   }
 
-  private fun fetchBaseTranslationText(keyId: Long): String? {
-    if (keyId == 0L) return null
+  private fun buildQaCheckParams(dto: QaCheckPreviewRequest): QaCheckParams {
     val projectId = projectHolder.project.id
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
-    val translations = translationService.getTranslations(listOf(keyId), listOf(baseLanguage.id))
-    return translations.firstOrNull()?.text
+    val translations =
+      dto.keyId?.let { translationService.getTranslations(listOf(it), listOf(baseLanguage.id)) }
+
+    return QaCheckParams(
+      baseText = translations?.firstOrNull()?.text,
+      text = dto.text,
+      baseLanguageTag = baseLanguage.tag,
+      languageTag = dto.languageTag,
+    )
   }
 }
