@@ -71,6 +71,7 @@ const StyledDiffText = styled('span')`
   flex: 1;
   font-size: 14px;
   overflow-wrap: break-word;
+  white-space: pre-wrap;
   min-width: 0;
 `;
 
@@ -85,6 +86,10 @@ const StyledRemoved = styled('span')`
 
 const StyledAdded = styled('span')`
   color: ${({ theme }) => theme.palette.primary.main};
+`;
+
+const StyledAddedSpaces = styled('span')`
+  background-color: ${({ theme }) => theme.palette.success.light};
 `;
 
 const StyledDiffActions = styled(Box)`
@@ -110,11 +115,16 @@ function renderDiff(
   const before = text.slice(0, positionStart);
   const removed = text.slice(positionStart, positionEnd);
   const after = text.slice(positionEnd);
+  const isReplacementSpacesOnly = /^\s+$/.test(replacement);
   return (
     <>
       {before && <StyledUnchanged>{before}</StyledUnchanged>}
       {removed && <StyledRemoved>{removed}</StyledRemoved>}
-      <StyledAdded>{replacement}</StyledAdded>
+      {isReplacementSpacesOnly ? (
+        <StyledAddedSpaces>{replacement}</StyledAddedSpaces>
+      ) : (
+        <StyledAdded>{replacement}</StyledAdded>
+      )}
       {after && <StyledUnchanged>{after}</StyledUnchanged>}
     </>
   );
