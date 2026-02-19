@@ -9,4 +9,5 @@ data class QaCheckResult(
   val replacement: String?,
   val positionStart: Int,
   val positionEnd: Int,
+  val params: Map<String, String>? = null,
 )

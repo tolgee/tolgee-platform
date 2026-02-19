@@ -126,7 +126,12 @@ export const useApiQuery = <
   const { url, method, fetchOptions, options, ...request } = props;
 
   return useQuery<ResponseContent<Url, Method, Paths>, ApiError>(
-    [url, (request as any)?.path, (request as any)?.query, (request as any)?.content],
+    [
+      url,
+      (request as any)?.path,
+      (request as any)?.query,
+      (request as any)?.content,
+    ],
     ({ signal }) =>
       apiSchemaHttpService.schemaRequest<Url, Method, Paths>(url, method, {
         signal,
