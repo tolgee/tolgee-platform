@@ -191,7 +191,12 @@ export const QaCheckItem: React.FC<Props> = ({
       {(!slim || !hasReplacement) && (
         <StyledNormalActions>
           {hasReplacement && (
-            <Button variant="outlined" color="primary" size="small" onClick={onCorrect}>
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              onClick={onCorrect}
+            >
               <T keyName="qa_check_action_correct" />
             </Button>
           )}
