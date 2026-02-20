@@ -1,0 +1,40 @@
+{
+  "name": "@tginternal/client",
+  "version": "0.0.0-prerelease.45c1441e6",
+  "type": "module",
+  "files": [
+    "dist",
+    "lib"
+  ],
+  "main": "./dist/client.umd.cjs",
+  "module": "./dist/client.js",
+  "types": "./lib/main.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/main.d.ts",
+      "import": "./dist/client.js",
+      "require": "./dist/client.umd.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "update-version": "node scripts/updateVersion.js",
+    "schema": "openapi-typescript http://localhost:8201/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output src/schema.generated.ts",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.14.0"
+  },
+  "devDependencies": {
+    "base32-decode": "^1.0.0",
+    "openapi-typescript": "^7.9.1",
+    "typescript": "~5.8.3",
+    "vite": "^7.1.2",
+    "vitest": "^3.2.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
