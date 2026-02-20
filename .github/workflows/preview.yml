@@ -42,15 +42,17 @@ jobs:
         id: version
         run: echo "VERSION=$(echo $GITHUB_REF | sed -e 's/refs\/tags\///g' -e 's/\//-/g')" >> $GITHUB_OUTPUT
 
-      - name: Create docker image
-        run: |
-          docker buildx create --use
-          ./gradlew dockerPublish
+      - name: Prepare for docker build
+        run: ./gradlew dockerPrepare
         env:
-          VERSION: ${{ steps.version.outputs.VERSION }}
-          DOCKER_IMAGE: tgint/tgpreview
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+
+      - name: Create docker image
+        run: |
+          docker buildx create --use 
+          docker buildx build . -t tgint/tgpreview:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --push
+        working-directory: build/docker
 
       - name: Deploy
         uses: nickgronow/kubectl@master

@@ -38,27 +38,25 @@ if (System.getenv().containsKey("VERSION")) {
 
 apply plugin: 'idea'
 
-repositories {
-    mavenCentral()
-}
-
 def unpackTarget = "${project.buildDir}/dependency"
 
 project(':server-app').afterEvaluate {
-    task unpack(type: Copy) {
+    tasks.register('unpack', Copy) {
         // cleanup the unpackTarget first so we don't have duplicated dependencies or other files, which
         // can be there from previous builds
         doFirst {
             delete(unpackTarget)
         }
-        from(zipTree(project(':server-app').tasks.findByName("bootJar").outputs.files.singleFile))
-        into(unpackTarget)
+        from project(':server-app').tasks.named('bootJar').map {
+            zipTree(it.outputs.files.singleFile)
+        }
+        into unpackTarget
         if (System.getenv("SKIP_SERVER_BUILD") != "true") {
             dependsOn "bootJar"
         }
     }
 
-    task addVersionFile(type: Task) {
+    tasks.register('addVersionFile', Task) {
         mustRunAfter unpack
         doLast {
             def file = new File("${unpackTarget}/BOOT-INF/classes/.VERSION")
@@ -70,9 +68,11 @@ project(':server-app').afterEvaluate {
     apply from: "./gradle/docker.gradle"
     apply from: "./gradle/e2e.gradle"
 
-    project.tasks.findByName("docker").mustRunAfter(copyDist)
+    tasks.named("docker") {
+        mustRunAfter copyDist
+    }
 
-    task packResources(type: Zip) {
+    tasks.register('packResources', Zip) {
         dependsOn "unpack"
         dependsOn "copyDist"
         dependsOn "addVersionFile"
@@ -82,21 +82,21 @@ project(':server-app').afterEvaluate {
         entryCompression ZipEntryCompression.STORED
     }
 
-    task build {
-        dependsOn project(':server-app').tasks.findByName("build")
+    tasks.register('build') {
+        dependsOn ':server-app:build'
         dependsOn runE2e
     }
 
-    task check {
-        dependsOn project(':server-app').tasks.findByName("check")
+    tasks.register('check') {
+        dependsOn ':server-app:check'
         dependsOn ktlint
     }
 
-    task bootJar {
-        dependsOn project(':server-app').tasks.findByName("bootJar")
+    tasks.register('bootJar') {
+        dependsOn ':server-app:bootJar'
     }
 
-    task startDbChangelogContainer {
+    tasks.register('startDbChangelogContainer') {
         doLast {
             exec {
                 ignoreExitValue = true
@@ -109,79 +109,75 @@ project(':server-app').afterEvaluate {
         }
     }
 
-    task stopDbChangelogContainer(type: Exec) {
+    tasks.register('stopDbChangelogContainer', Exec) {
+        mustRunAfter ':data:diffChangelog'
+        mustRunAfter ':ee-app:diffChangelog'
+
         commandLine "docker", "rm", "--force", "--volumes", dbSchemaContainerName
-        mustRunAfter project(':data').tasks.findByName("diffChangelog")
-        if (gradle.ext.eeAppDirectoryExists) {
-            mustRunAfter project(':ee-app').tasks.findByName("diffChangelog")
-        }
     }
 
-    task diffChangeLog {
-        subprojects.forEach({
-            it.tasks.findByName("diffChangelog")?.mustRunAfter(project(':server-app').tasks.findByName("bootRun"))
-        })
-
-        project(':server-app').tasks.findByName("bootRun").mustRunAfter(startDbChangelogContainer)
-
+    tasks.register('diffChangeLog') {
+        project(':server-app').tasks.named("bootRun") {
+            mustRunAfter(startDbChangelogContainer)
+        }
 
         finalizedBy = [
-                startDbChangelogContainer,
-                project(':server-app').tasks.findByName("bootRun"),
-                project(':data').tasks.findByName("diffChangelog"),
+            startDbChangelogContainer,
+            ':server-app:bootRun',
+            ':data:diffChangelog',
         ]
 
         if (gradle.ext.billingAppDirectory.exists()) {
-            def billingDiffChangelog = project(':billing-app').tasks.findByName("diffChangelog")
-            finalizedBy.add(billingDiffChangelog)
+            finalizedBy.add(':billing-app:diffChangelog')
         }
 
         if (gradle.ext.eeAppDirectoryExists) {
-            finalizedBy.add(project(':ee-app').tasks.findByName("diffChangelog"))
+            finalizedBy.add(':ee-app:diffChangelog')
         }
 
         finalizedBy.add(stopDbChangelogContainer)
 
-
         doFirst {
             project(':server-app').bootRun
-                    .systemProperty('spring.profiles.active', 'dbschema')
-                    // Use an unlikely-to-be-used port
-                    .systemProperty('server.port', '61987')
+                .systemProperty('spring.profiles.active', 'dbschema')
+                // Use an unlikely-to-be-used port
+                .systemProperty('server.port', '61987')
         }
     }
-}
 
-ktlint {
-    debug = true
-    verbose = true
-}
-
-rootProject.subprojects {
-    gradle.taskGraph.whenReady {
-        def skipServerBuild = System.getenv("SKIP_SERVER_BUILD") == "true"
-        tasks.findByName("classes")?.onlyIf { !skipServerBuild }
-        tasks.findByName("compileJava")?.onlyIf {!skipServerBuild}
-        tasks.findByName("compileKotlin")?.onlyIf { !skipServerBuild }
-        tasks.findByName("kaptKotlin")?.onlyIf { !skipServerBuild }
-        tasks.findByName("kaptGenerateStubsKotlin")?.onlyIf { !skipServerBuild }
-        tasks.findByName("bootBuildInfo")?.onlyIf { !skipServerBuild }
-        tasks.findByName("bootJarMainClassName")?.onlyIf { !skipServerBuild }
-        tasks.findByName("jar")?.onlyIf { !skipServerBuild }
-        tasks.findByName("bootJar")?.onlyIf { !skipServerBuild }
+    subprojects.forEach {
+        tasks.matching { name == 'diffChangelog' }.configureEach {
+            mustRunAfter ':server-app:bootRun'
+        }
     }
 }
 
 subprojects {
-    task allDeps(type: DependencyReportTask) {}
+    tasks.register('allDeps', DependencyReportTask)
+
     ext['hibernate.version'] = hibernateVersion
     ext['commons-lang3.version'] = commonsLang3Version
     ext['jackson.version'] = jacksonVersion
 
-    tasks.withType(Test) {
+    tasks.withType(Test).configureEach {
         testLogging {
             events "passed", "skipped", "failed", "started"
         }
+    }
+
+    tasks.matching {
+        it.name in [
+            "classes",
+            "compileJava",
+            "compileKotlin",
+            "kaptKotlin",
+            "bootBuildInfo",
+            "bootJarMainClassName",
+            "jar",
+            "bootJar"
+        ]
+    }.configureEach {
+        onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
     }
 }
 

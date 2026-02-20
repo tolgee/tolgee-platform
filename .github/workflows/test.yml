@@ -18,12 +18,13 @@ jobs:
 
       # Don't build test classes here; they'll only be used once during the test run anyway.
       # This amortizes the cost of compilation across each test job, rather than paying it upfront.
+      # Test emails are built nonetheless, as they may be used by multiple subprojects...
       #
       # Note: seems like running in parallel has the weird side effect of causing Spring dependency management to hang
       # It's very occasional, and doesn't seem to occur locally, but parallel being the issue is possible
       # See: https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/370
       - name: Build backend
-        run: ./gradlew classes jar bootJar
+        run: ./gradlew classes jar bootJar buildTestEmails
 
       - name: Upload backend build result
         uses: ./.github/actions/upload-backend-build
@@ -71,6 +72,7 @@ jobs:
           command: ./gradlew ${{ matrix.command }}
         env:
           SKIP_SERVER_BUILD: true
+          SKIP_EMAIL_BUILD: true
           CI_RELEASE: ${{ github.event_name == 'push' && true || false }}
 
       - name: Get report name
@@ -176,6 +178,7 @@ jobs:
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
           SKIP_WEBAPP_BUILD: true
           SKIP_SERVER_BUILD: true
+          SKIP_EMAIL_BUILD: true
           SKIP_INSTALL_E2E_DEPS: true
           E2E_TOTAL_JOBS: ${{matrix.total_jobs}}
           E2E_JOB_INDEX: ${{matrix.job_index}}
@@ -297,7 +300,7 @@ jobs:
         run: |
           ./gradlew server-app:bootRun --args='--spring.profiles.active=dev' &
           echo "Waiting for backend to start..."
-          timeout 120 bash -c 'until curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; do sleep 2; done'
+          timeout 180 bash -c 'until curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; do sleep 2; done'
           echo "Backend is ready"
         env:
           SKIP_SERVER_BUILD: true
@@ -424,12 +427,36 @@ jobs:
       - name: Run ktlint
         run: ./gradlew ktlintCheck
 
+  email-code-checks:
+    name: Email templates static check 🪲
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: 'false'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./email
+
+      - name: TypeScript
+        run: npm run tsc
+        working-directory: ./email
+
+      - name: ESLint
+        run: npm run eslint
+        working-directory: ./email
+
   everything-passed:
     name: Everything passed 🎉
     needs:
       - backend-build
       - backend-test
       - backend-code-checks
+      - email-code-checks
       - frontend-build
       - frontend-code-check
       - schema-check

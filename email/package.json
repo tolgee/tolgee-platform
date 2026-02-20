@@ -1,0 +1,48 @@
+{
+  "name": "@tolgee/email",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "tsc": "tsc --noEmit",
+    "dev": "email dev",
+    "build": "email build",
+    "export": "cross-env NODE_ENV=production email export --outDir out/html",
+    "prettier": "prettier --write ./emails ./components ./.config",
+    "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives ./emails ./components ./.config",
+    "tg:pull": "tolgee pull",
+    "tg:push": "tolgee push",
+    "tg:sync": "tolgee sync",
+    "dev:test": "email dev --dir emails/__tests__",
+    "build:test": "email build --dir emails/__tests__",
+    "export:test": "cross-env NODE_ENV=production email export --dir emails/__tests__ --outDir out/__tests__"
+  },
+  "devDependencies": {
+    "@formatjs/icu-messageformat-parser": "^2.11.2",
+    "@react-email/components": "0.1.0",
+    "@swc/core": "^1.12.1",
+    "@swc/helpers": "^0.5.17",
+    "@tolgee/cli": "^2.13.0",
+    "@types/html-to-text": "^9.0.4",
+    "@types/node": "^24.0.3",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@typescript-eslint/eslint-plugin": "^8.34.1",
+    "@typescript-eslint/parser": "^8.34.1",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.57.1",
+    "eslint-plugin-prettier": "^5.5.0",
+    "eslint-plugin-react": "^7.37.5",
+    "estree-walker": "^3.0.3",
+    "intl-messageformat": "^10.7.16",
+    "prettier": "^3.5.3",
+    "react": "19.1.0",
+    "react-dom": "^19.1.0",
+    "react-email": "4.0.16",
+    "typescript": "^5.8.3"
+  },
+  "exports": {
+    "./components/*.ts": "./components/*.ts",
+    "./components/*.tsx": "./components/*.tsx"
+  }
+}

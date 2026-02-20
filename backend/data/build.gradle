@@ -6,8 +6,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-    }
 }
 
 plugins {
@@ -53,10 +51,6 @@ apply plugin: "kotlin-kapt" // kapt still needed for Hibernate -- https://hibern
 apply plugin: 'kotlin'
 apply plugin: 'org.hibernate.orm'
 
-repositories {
-    mavenCentral()
-}
-
 idea {
     module {
         generatedSourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
@@ -73,12 +67,10 @@ allOpen {
     annotation("org.springframework.beans.factory.annotation.Configurable")
 }
 
+apply from: "$rootDir/gradle/email.gradle"
 apply from: "$rootDir/gradle/liquibase.gradle"
 
 configureLiquibase("public", "hibernate:spring:io.tolgee", 'src/main/resources/db/changelog/schema.xml')
-
-diff.dependsOn compileKotlin
-diffChangelog.dependsOn compileKotlin
 
 java {
     toolchain {
@@ -109,7 +101,14 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     implementation "org.springframework.boot:spring-boot-starter-batch"
     implementation "org.springframework.boot:spring-boot-starter-websocket"
-	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    implementation('com.github.transferwise:spring-icu:0.3.0') {
+        exclude group: 'org.springframework', module: 'spring-context'
+        exclude group: 'com.ibm.icu', module: 'icu4j'
+        exclude group: 'org.springframework', module: 'spring-beans'
+    }
 
     /**
      * DB
@@ -178,7 +177,11 @@ dependencies {
     implementation libs.jacksonModuleKotlin
     implementation 'net.datafaker:datafaker:2.4.4'
     implementation 'jaxen:jaxen:1.2.0'
-    implementation(libs.mailjet)
+    implementation(libs.mailjet) {
+        // (Formerly) not OSS, still unclear licensing status, conflicts with Vaadin used by Spring
+        exclude group: "org.json", module: "json"
+    }
+    implementation libs.vaadinJson
     implementation libs.hibernateTypes
     liquibaseRuntime libs.hibernateTypes
     implementation 'com.eatthepath:java-otp:0.4.0'
@@ -237,7 +240,7 @@ dependencies {
     implementation('com.github.jknack:handlebars:4.4.0')
 }
 
-test {
+tasks.named('test', Test) {
     useJUnitPlatform()
     maxHeapSize = "4096m"
 }
@@ -245,6 +248,9 @@ test {
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
+
+    main.resources.srcDirs += 'build/generated/resources/main'
+    test.resources.srcDirs += 'build/generated/resources/test'
 }
 
 dependencyManagement {
@@ -258,17 +264,19 @@ dependencyManagement {
     }
 }
 
-jar {
+tasks.named('jar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
 
-tasks.named('compileJava') {
-    inputs.files(tasks.named('processResources'))
+tasks.named('processResources') {
+    dependsOn 'copyEmailResources', 'copyEmailTemplates', 'copyEmailLocaleData'
+}
+
+tasks.named('processTestResources') {
+    dependsOn 'copyTestEmailTemplates'
 }
 
 ktlint {
-    debug = true
-    verbose = true
     filter {
         exclude("**/PluralData.kt")
     }
