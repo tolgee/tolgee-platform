@@ -16,6 +16,7 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.component.ProjectLastModifiedManager
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.TranslationHistoryView
@@ -41,6 +42,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
+import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureGuard
@@ -74,6 +76,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.WebRequest
+import java.time.Duration
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -107,6 +110,8 @@ class TranslationsController(
   private val translationSuggestionService: TranslationSuggestionService,
   private val projectLastModifiedManager: ProjectLastModifiedManager,
   private val projectFeatureGuard: ProjectFeatureGuard,
+  private val rateLimitService: RateLimitService,
+  private val tolgeeProperties: TolgeeProperties,
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @Operation(
@@ -167,6 +172,11 @@ When null, resulting file will be a flat key-value object.
   ): ResponseEntity<Map<String, Any>>? {
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     return projectLastModifiedManager.onlyWhenProjectDataChanged(request) {
+      rateLimitService.checkPerUserRateLimit(
+        "translations",
+        limit = tolgeeProperties.rateLimits.translationRequestLimit,
+        refillDuration = Duration.ofMillis(tolgeeProperties.rateLimits.translationRequestWindow),
+      )
       val permittedTags =
         securityService
           .filterViewPermissionByTag(projectId = projectHolder.project.id, languageTags = languages)
@@ -251,6 +261,11 @@ When null, resulting file will be a flat key-value object.
     params: GetTranslationsParams,
     @ParameterObject pageable: Pageable,
   ): KeysWithTranslationsPageModel {
+    rateLimitService.checkPerUserRateLimit(
+      "translations",
+      limit = tolgeeProperties.rateLimits.translationRequestLimit,
+      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimits.translationRequestWindow),
+    )
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, params.branch)
     val languages =
       languageService.getLanguagesForTranslationsView(

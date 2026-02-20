@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.ActivityService
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Feature
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.activity.ModifiedEntityModel
@@ -21,6 +22,7 @@ import io.tolgee.model.views.activity.ProjectActivityView
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.security.ratelimit.RateLimitService
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.project.ProjectFeatureGuard
 import org.springdoc.core.annotations.ParameterObject
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.Duration
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -48,6 +51,8 @@ class ProjectActivityController(
   private val modifiedEntityModelAssembler: ModifiedEntityModelAssembler,
   private val branchService: BranchService,
   private val projectFeatureGuard: ProjectFeatureGuard,
+  private val rateLimitService: RateLimitService,
+  private val tolgeeProperties: TolgeeProperties,
 ) {
   @Operation(summary = "Get project activity")
   @GetMapping("")
@@ -57,6 +62,11 @@ class ProjectActivityController(
     @ParameterObject pageable: Pageable,
     @RequestParam(required = false) branch: String? = null,
   ): PagedModel<ProjectActivityModel> {
+    rateLimitService.checkPerUserRateLimit(
+      "activity",
+      limit = tolgeeProperties.rateLimits.activityRequestLimit,
+      refillDuration = Duration.ofMillis(tolgeeProperties.rateLimits.activityRequestWindow),
+    )
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val views =
       activityService.findProjectActivity(
