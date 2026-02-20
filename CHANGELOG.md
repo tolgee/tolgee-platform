@@ -1,3 +1,17 @@
+# [3.163.0](https://github.com/tolgee/tolgee-platform/compare/v3.162.0...v3.163.0) (2026-02-20)
+
+
+### Bug Fixes
+
+* gh-982 - add tooltips ([#3417](https://github.com/tolgee/tolgee-platform/issues/3417)) ([52d5933](https://github.com/tolgee/tolgee-platform/commit/52d5933ff427570ac8883afa538a523921057c2f)), closes [#982](https://github.com/tolgee/tolgee-platform/issues/982)
+* Resilient Redis cache reads for rate limiting ([#3455](https://github.com/tolgee/tolgee-platform/issues/3455)) ([a33e1d0](https://github.com/tolgee/tolgee-platform/commit/a33e1d03175b4d5a8acf1122da7cd585d1051dc8))
+* sort export translations by key name (Sentry TOLGEE-BACKEND-3ED) ([#3470](https://github.com/tolgee/tolgee-platform/issues/3470)) ([320d87a](https://github.com/tolgee/tolgee-platform/commit/320d87a126d2286c7699e02ee8e03598816fe2a7)), closes [#3246](https://github.com/tolgee/tolgee-platform/issues/3246)
+
+
+### Features
+
+* rate limit translation and activity endpoints ([#3483](https://github.com/tolgee/tolgee-platform/issues/3483)) ([2f125da](https://github.com/tolgee/tolgee-platform/commit/2f125da10e5fb20747900e9c3c0979dacf44404c))
+
 # [3.162.0](https://github.com/tolgee/tolgee-platform/compare/v3.161.0...v3.162.0) (2026-02-19)
 
 
