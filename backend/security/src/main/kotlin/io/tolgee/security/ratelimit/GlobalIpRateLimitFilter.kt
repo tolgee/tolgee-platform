@@ -53,6 +53,7 @@ class GlobalIpRateLimitFilter(
   }
 
   override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-    return request.method == "OPTIONS"
+    val path = request.requestURI.removePrefix(request.contextPath)
+    return request.method == "OPTIONS" || path == "/actuator" || path.startsWith("/actuator/")
   }
 }
