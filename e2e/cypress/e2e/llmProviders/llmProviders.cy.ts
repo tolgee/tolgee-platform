@@ -100,6 +100,12 @@ describe('basic prompt', () => {
     }).should('have.text', 'OpenAI');
   });
 
+  it('does not show pricing info when billing is disabled', () => {
+    gcy('organization-llm-providers-tab').contains('Server').click();
+    gcy('llm-provider-item-name').should('contain', 'server-provider');
+    gcy('llm-provider-pricing-info').should('not.exist');
+  });
+
   function visitLlmProviders(organizationSlug: string) {
     cy.visit(`${HOST}/organizations/${organizationSlug}/llm-providers`);
   }

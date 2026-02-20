@@ -478,6 +478,7 @@ declare namespace DataCy {
         "llm-provider-item-type" |
         "llm-provider-menu-item-delete" |
         "llm-provider-menu-item-edit" |
+        "llm-provider-pricing-info" |
         "llm-providers-custom" |
         "llm-providers-server" |
         "login-button" |
