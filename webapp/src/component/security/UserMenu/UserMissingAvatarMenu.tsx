@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { IconButton, Popover, styled } from '@mui/material';
+import { IconButton, Popover, styled, Tooltip } from '@mui/material';
 
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 
 import { ThemeItem } from './ThemeItem';
 import { LanguageItem } from './LanguageItem';
 import { UserMenuItems } from './UserMenuItems';
+import { useTranslate } from '@tolgee/react';
 
 const StyledIconButton = styled(IconButton)`
   width: 40px;
@@ -28,6 +29,7 @@ const StyledDivider = styled('div')`
 `;
 
 export const UserMissingAvatarMenu: React.FC = () => {
+  const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -41,16 +43,23 @@ export const UserMissingAvatarMenu: React.FC = () => {
 
   return (
     <div>
-      <StyledIconButton
-        color="inherit"
-        data-cy="global-user-menu-button"
-        aria-controls="user-menu"
-        aria-haspopup="true"
-        onClick={handleOpen}
-        size="large"
+      <Tooltip
+        title={t('user_profile_title')}
+        placement="bottom-end"
+        classes={{ tooltip: 'tooltip' }}
+        disableInteractive
       >
-        <UserAvatar />
-      </StyledIconButton>
+        <StyledIconButton
+          color="inherit"
+          data-cy="global-user-menu-button"
+          aria-controls="user-menu"
+          aria-haspopup="true"
+          onClick={handleOpen}
+          size="large"
+        >
+          <UserAvatar />
+        </StyledIconButton>
+      </Tooltip>
       <StyledPopover
         id="user-menu"
         keepMounted

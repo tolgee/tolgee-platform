@@ -1,4 +1,4 @@
-import { Box, Button, styled } from '@mui/material';
+import { Box, Button, styled, Tooltip } from '@mui/material';
 import {
   useGlobalActions,
   useGlobalContext,
@@ -6,6 +6,7 @@ import {
 import { RocketFilled } from 'tg.component/CustomIcons';
 import { items } from './quickStartConfig';
 import { QuickStartProgress } from './QuickStartProgress';
+import { useTranslate } from '@tolgee/react';
 
 const StyledContainer = styled(Box)`
   position: relative;
@@ -17,6 +18,7 @@ const StyledButton = styled(Button)`
 `;
 
 export const QuickStartTopBarButton = () => {
+  const { t } = useTranslate();
   const guideEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
   const guideOpen = useGlobalContext((c) => c.quickStartGuide.open);
   const guideFloatingOpen = useGlobalContext(
@@ -41,12 +43,19 @@ export const QuickStartTopBarButton = () => {
     <>
       {guideEnabled && (
         <StyledContainer>
-          <StyledButton onClick={handleClick} color="inherit">
-            <Box display="flex" gap={1} alignItems="center">
-              <RocketFilled width={20} height={20} />
-              <QuickStartProgress percent={completedSteps / allSteps} />
-            </Box>
-          </StyledButton>
+          <Tooltip
+            title={t('guide_title')}
+            placement="bottom-end"
+            classes={{ tooltip: 'tooltip' }}
+            disableInteractive
+          >
+            <StyledButton onClick={handleClick} color="inherit">
+              <Box display="flex" gap={1} alignItems="center">
+                <RocketFilled width={20} height={20} />
+                <QuickStartProgress percent={completedSteps / allSteps} />
+              </Box>
+            </StyledButton>
+          </Tooltip>
         </StyledContainer>
       )}
     </>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IconButton, MenuItem, Popover, styled } from '@mui/material';
+import { IconButton, MenuItem, Popover, styled, Tooltip } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
@@ -91,16 +91,23 @@ export const UserPresentAvatarMenu: React.FC = () => {
 
   return (
     <div>
-      <StyledIconButton
-        color="inherit"
-        data-cy="global-user-menu-button"
-        aria-controls="user-menu"
-        aria-haspopup="true"
-        onClick={handleOpen}
-        size="large"
+      <Tooltip
+        title={t('user_profile_title')}
+        placement="bottom-end"
+        classes={{ tooltip: 'tooltip' }}
+        disableInteractive
       >
-        <UserAvatar />
-      </StyledIconButton>
+        <StyledIconButton
+          color="inherit"
+          data-cy="global-user-menu-button"
+          aria-controls="user-menu"
+          aria-haspopup="true"
+          onClick={handleOpen}
+          size="large"
+        >
+          <UserAvatar />
+        </StyledIconButton>
+      </Tooltip>
       <StyledPopover
         id="user-menu"
         keepMounted

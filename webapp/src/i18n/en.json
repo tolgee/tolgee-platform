@@ -837,6 +837,8 @@
   "create_project_name_label": "Name",
   "create_project_validation_language_repeated": "Cannot add language more than once",
   "create_project_view": "Create project",
+  "create_project_edit_prepared_languages": "Edit",
+  "create_project_remove_prepared_languages": "Remove",
   "create_task_empty_scope_dialog_explanation": "Each task needs to contain at least one key",
   "create_task_empty_scope_dialog_message": "Tasks for some languages have empty scopes",
   "create_task_empty_scope_dialog_message_language": "Task for {language} contains no keys",
