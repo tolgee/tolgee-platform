@@ -62,6 +62,20 @@ class RateLimitProperties(
   var exportRequestLimit: Int = 100,
   @DocProperty(description = "Size, in milliseconds, of the time window for export-based limiting.")
   var exportRequestWindow: Long = 5 * 60 * 1000,
+  @DocProperty(description = "Amount of translation requests a user can do in a single time window.")
+  var translationRequestLimit: Int = 100,
+  @DocProperty(
+    description = "Size, in milliseconds, of the time window for translation-based limiting.",
+    defaultExplanation = "= 5 minutes",
+  )
+  var translationRequestWindow: Long = 5 * 60 * 1000,
+  @DocProperty(description = "Amount of activity requests a user can do in a single time window.")
+  var activityRequestLimit: Int = 100,
+  @DocProperty(
+    description = "Size, in milliseconds, of the time window for activity-based limiting.",
+    defaultExplanation = "= 5 minutes",
+  )
+  var activityRequestWindow: Long = 5 * 60 * 1000,
   @DocProperty(
     description =
       "Number of rate limit violations before the server stops responding to the client.\n" +
