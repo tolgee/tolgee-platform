@@ -9,4 +9,6 @@ open class LlmProviderSimpleModel(
   var name: String,
   var source: String?,
   var type: LlmProviderType,
+  var tokenPriceInCreditsInput: Double?,
+  var tokenPriceInCreditsOutput: Double?,
 ) : RepresentationModel<LlmProviderModel>()
