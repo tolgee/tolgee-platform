@@ -8,8 +8,11 @@ import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.component.fileStorage.S3FileStorage
 import io.tolgee.component.fileStorage.S3FileStorageFactory
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigTestData
+import io.tolgee.exceptions.FileStoreException
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.node
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
@@ -21,6 +24,7 @@ import org.mockito.Mockito
 import org.mockito.invocation.Invocation
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -102,6 +106,21 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `returns specific error when prune fails`() {
+    tolgeeProperties.contentDelivery.storage.s3.bucketName = "my-bucket"
+    val mocked = mockS3FileStorage()
+    whenever(mocked.pruneDirectory(any())).thenThrow(
+      FileStoreException("Can not prune directory in s3 bucket!", "test-path"),
+    )
+    performProjectAuthPost(
+      "content-delivery-configs/${testData.defaultServerContentDeliveryConfig.self.id}",
+    ).andIsBadRequest.andAssertThatJson {
+      node("code").isEqualTo("cannot_prune_content_storage")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `publishes to azure`() {
     val mocked = mockAzureFileStorage()
     performProjectAuthPost("content-delivery-configs/${testData.azureContentDeliveryConfig.self.id}").andIsOk
@@ -162,6 +181,8 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     doAnswer {
       mockedFileStorage
     }.whenever(s3FileStorageFactory).create(any())
+    doNothing().whenever(mockedFileStorage).pruneDirectory(any())
+    doNothing().whenever(mockedFileStorage).storeFile(any(), any())
     return mockedFileStorage
   }
 
@@ -170,6 +191,8 @@ class ContentDeliveryConfigControllerTest : ProjectAuthControllerTest("/v2/proje
     doAnswer {
       mockedFileStorage
     }.whenever(azureFileStorageFactory).create(any())
+    doNothing().whenever(mockedFileStorage).pruneDirectory(any())
+    doNothing().whenever(mockedFileStorage).storeFile(any(), any())
     return mockedFileStorage
   }
 }

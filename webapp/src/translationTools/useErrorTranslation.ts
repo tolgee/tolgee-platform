@@ -111,6 +111,8 @@ export function useErrorTranslation() {
         return t('plan_has_subscribers');
       case 'cannot_store_file_to_content_storage':
         return t('cannot_store_file_to_content_storage');
+      case 'cannot_prune_content_storage':
+        return t('cannot_prune_content_storage');
       case 'unexpected_error_while_publishing_to_content_storage':
         return t('unexpected_error_while_publishing_to_content_storage');
       case 'webhook_responded_with_non_200_status':
