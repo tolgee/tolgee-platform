@@ -125,6 +125,84 @@ class KeySoftDeleteBranchingTest : AbstractSpringTest() {
     trashedKeys.assert.hasSize(1)
   }
 
+  @Test
+  fun `soft-delete key on branch, merge, key is deleted on target`() {
+    // Create a test branch from main (copies key1, key2, key3)
+    val testBranch =
+      branchService.createBranch(
+        testData.project.id,
+        "test",
+        testData.mainBranch.id,
+        testData.user,
+      )
+
+    // Soft-delete key1 on the test branch
+    val testBranchKey1 = keyService.find(testData.project.id, "key1", null, "test")!!
+    keyService.softDeleteMultiple(listOf(testBranchKey1.id))
+
+    // Merge test branch into main
+    val merge = dryRunMerge(testBranch)
+    applyMerge(merge)
+
+    // Assert: key1 is deleted on main (soft-delete on branch treated as hard-delete for merge)
+    keyService.find(testData.project.id, "key1", null, "main").assert.isNull()
+    keyService.find(testData.project.id, "key2", null, "main").assert.isNotNull
+    keyService.find(testData.project.id, "key3", null, "main").assert.isNotNull
+  }
+
+  @Test
+  fun `soft-delete key on main, create branch, key should not be copied`() {
+    // Soft-delete key1 on main
+    keyService.softDeleteMultiple(listOf(testData.key1.id))
+
+    // Create test branch from main
+    val testBranch =
+      branchService.createBranch(
+        testData.project.id,
+        "test",
+        testData.mainBranch.id,
+        testData.user,
+      )
+
+    // Assert: test branch has key2 and key3 but NOT key1
+    keyService.find(testData.project.id, "key1", null, "test").assert.isNull()
+    keyService.find(testData.project.id, "key2", null, "test").assert.isNotNull
+    keyService.find(testData.project.id, "key3", null, "test").assert.isNotNull
+  }
+
+  @Test
+  fun `soft-delete key on both branches, merge, soft-deleted keys preserved correctly`() {
+    // Create test branch from main (copies key1, key2, key3)
+    val testBranch =
+      branchService.createBranch(
+        testData.project.id,
+        "test",
+        testData.mainBranch.id,
+        testData.user,
+      )
+
+    // Soft-delete key1 on main
+    keyService.softDeleteMultiple(listOf(testData.key1.id))
+
+    // Soft-delete key2 on test branch
+    val testBranchKey2 = keyService.find(testData.project.id, "key2", null, "test")!!
+    keyService.softDeleteMultiple(listOf(testBranchKey2.id))
+
+    // Merge test branch into main
+    val merge = dryRunMerge(testBranch)
+    applyMerge(merge)
+
+    // key1 is still soft-deleted on main (not affected by merge — it's a target key)
+    val trashedKeys = keyService.findSoftDeletedByIdsAndProjectId(listOf(testData.key1.id), testData.project.id)
+    trashedKeys.assert.hasSize(1)
+
+    // key2 soft-deleted on test branch → treated as delete → key2 deleted from main
+    keyService.find(testData.project.id, "key2", null, "main").assert.isNull()
+
+    // key3 still active on main
+    keyService.find(testData.project.id, "key3", null, "main").assert.isNotNull
+  }
+
   private fun dryRunMerge(testBranch: Branch): BranchMerge {
     return branchService.dryRunMerge(
       testBranch.refresh()!!,

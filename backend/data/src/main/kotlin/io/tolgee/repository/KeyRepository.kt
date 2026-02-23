@@ -48,7 +48,6 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
     select k.id from Key k
     where k.project.id = :projectId and k.branch.id = :branchId
-      and k.deletedAt is null
     """,
   )
   fun findIdsByProjectAndBranch(
