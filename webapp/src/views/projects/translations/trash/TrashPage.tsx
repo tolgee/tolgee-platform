@@ -1,6 +1,13 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useTranslate, T } from '@tolgee/react';
-import { Box, styled, Typography, Pagination } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  styled,
+  Tooltip,
+  Typography,
+  Pagination,
+} from '@mui/material';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
@@ -12,6 +19,7 @@ import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { BaseProjectView } from '../../BaseProjectView';
 import { TrashBanner } from './TrashBanner';
+import { TrashBatchBar } from './TrashBatchBar';
 import { TrashRow } from './TrashRow';
 import { CellLanguage } from '../TranslationsTable/CellLanguage';
 import { useColumns } from '../useColumns';
@@ -40,8 +48,15 @@ const StyledSearchField = styled(HeaderSearchField)`
   width: 200px;
 `;
 
+const StyledResultCount = styled('div')`
+  display: flex;
+  align-items: center;
+  padding: 0px 6px;
+  margin-bottom: 2px;
+`;
+
 const StyledCount = styled(Typography)`
-  padding: 8px 12px;
+  padding: 8px 6px;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
@@ -205,12 +220,35 @@ export const TrashPage = () => {
     );
   }, []);
 
+  const pageKeyIds = useMemo(
+    () => trashedKeys.map((k: any) => k.id as number),
+    [trashedKeys]
+  );
+
+  const allPageSelected =
+    pageKeyIds.length > 0 && pageKeyIds.every((id: number) => selectedKeys.includes(id));
+  const somePageSelected =
+    pageKeyIds.some((id: number) => selectedKeys.includes(id)) && !allPageSelected;
+
+  const handleSelectAll = useCallback(() => {
+    if (allPageSelected) {
+      setSelectedKeys([]);
+    } else {
+      setSelectedKeys(pageKeyIds);
+    }
+  }, [allPageSelected, pageKeyIds]);
+
   const handleRestore = useCallback(() => {
     setSelectedKeys([]);
     trashLoadable.refetch();
   }, [trashLoadable.refetch]);
 
   const handleDelete = useCallback(() => {
+    setSelectedKeys([]);
+    trashLoadable.refetch();
+  }, [trashLoadable.refetch]);
+
+  const handleBatchFinished = useCallback(() => {
     setSelectedKeys([]);
     trashLoadable.refetch();
   }, [trashLoadable.refetch]);
@@ -260,9 +298,27 @@ export const TrashPage = () => {
       </StyledControls>
 
       {totalElements > 0 && (
-        <StyledCount variant="body2">
-          <T keyName="trash_key_count" params={{ count: totalElements }} />
-        </StyledCount>
+        <StyledResultCount>
+          <Tooltip
+            title={
+              allPageSelected
+                ? t('translations_clear_selection')
+                : t('translations_select_all')
+            }
+            disableInteractive
+          >
+            <Checkbox
+              data-cy="trash-select-all-header"
+              size="small"
+              checked={allPageSelected}
+              indeterminate={somePageSelected}
+              onChange={handleSelectAll}
+            />
+          </Tooltip>
+          <StyledCount variant="body2">
+            <T keyName="trash_key_count" params={{ count: totalElements }} />
+          </StyledCount>
+        </StyledResultCount>
       )}
 
       {trashedKeys.length > 0 ? (
@@ -332,12 +388,24 @@ export const TrashPage = () => {
               />
             </StyledPagination>
           )}
+
         </StyledTableContainer>
       ) : (
         <EmptyListMessage loading={trashLoadable.isLoading}>
           <T keyName="trash_empty" />
         </EmptyListMessage>
       )}
+
+      <TrashBatchBar
+        selectedKeys={selectedKeys}
+        totalCount={totalElements}
+        allPageSelected={allPageSelected}
+        somePageSelected={somePageSelected}
+        onToggleSelectAll={handleSelectAll}
+        onFinished={handleBatchFinished}
+        canRestore={canRestore}
+        canDelete={canDelete}
+      />
     </BaseProjectView>
   );
 };

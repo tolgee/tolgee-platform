@@ -914,12 +914,17 @@ declare namespace DataCy {
         "translations-view-list-button" |
         "translations-view-table" |
         "translations-view-table-button" |
+        "trash-batch-bar" |
+        "trash-batch-select" |
+        "trash-batch-select-item" |
         "trash-key-description" |
         "trash-key-name" |
         "trash-permanent-delete-button" |
         "trash-restore-button" |
         "trash-row" |
         "trash-row-checkbox" |
+        "trash-select-all" |
+        "trash-select-all-header" |
         "trash-table" |
         "user-delete-organization-message-item" |
         "user-menu-language-switch" |

@@ -343,6 +343,21 @@ class KeyService(
   }
 
   @Transactional
+  fun restoreKeys(ids: Collection<Long>) {
+    val keys = keyRepository.findAllByIdIn(ids.toList())
+    keys.forEach { key ->
+      if (key.deletedAt == null) return@forEach
+      val branch = key.branch?.name
+      val existing = find(key.project.id, key.name, key.namespace?.name, branch)
+      if (existing != null) {
+        throw ValidationException(Message.KEY_EXISTS)
+      }
+      key.deletedAt = null
+      save(key)
+    }
+  }
+
+  @Transactional
   fun restoreKey(
     projectId: Long,
     keyId: Long,

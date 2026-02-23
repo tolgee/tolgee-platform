@@ -325,6 +325,13 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
+    select k.project.id from Key k where k.id in :keysIds and k.deletedAt is not null
+  """,
+  )
+  fun getSoftDeletedProjectIdsForKeyIds(keysIds: List<Long>): List<Long>
+
+  @Query(
+    """
     select k from Key k
     left join fetch k.namespace
     where k.id in :keyIds

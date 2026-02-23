@@ -9,9 +9,11 @@ import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.ClearTranslationsChunkProcessor
 import io.tolgee.batch.processors.CopyTranslationsChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
+import io.tolgee.batch.processors.HardDeleteKeysChunkProcessor
 import io.tolgee.batch.processors.MachineTranslationChunkProcessor
 import io.tolgee.batch.processors.NoOpChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
+import io.tolgee.batch.processors.RestoreKeysChunkProcessor
 import io.tolgee.batch.processors.SetKeysNamespaceChunkProcessor
 import io.tolgee.batch.processors.SetTranslationsStateChunkProcessor
 import io.tolgee.batch.processors.TagKeysChunkProcessor
@@ -58,6 +60,16 @@ enum class BatchJobType(
     activityType = ActivityType.KEY_SOFT_DELETE,
     maxRetries = 3,
     processor = DeleteKeysChunkProcessor::class,
+  ),
+  RESTORE_KEYS(
+    activityType = ActivityType.BATCH_KEY_RESTORE,
+    maxRetries = 3,
+    processor = RestoreKeysChunkProcessor::class,
+  ),
+  HARD_DELETE_KEYS(
+    activityType = ActivityType.BATCH_KEY_HARD_DELETE,
+    maxRetries = 3,
+    processor = HardDeleteKeysChunkProcessor::class,
   ),
   SET_TRANSLATIONS_STATE(
     activityType = ActivityType.BATCH_SET_TRANSLATION_STATE,
