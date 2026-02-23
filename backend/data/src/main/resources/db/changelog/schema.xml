@@ -5078,4 +5078,14 @@
             </addColumn>
         </rollback>
     </changeSet>
+    <changeSet author="danielkrizan" id="1771846650000-1" runInTransaction="false">
+        <sql>
+            create index concurrently if not exists idx_key_project_name_namespace
+            on public.key (project_id, name, namespace_id);
+        </sql>
+        <sql>analyze public.key;</sql>
+        <rollback>
+            <sql>drop index concurrently if exists idx_key_project_name_namespace;</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
