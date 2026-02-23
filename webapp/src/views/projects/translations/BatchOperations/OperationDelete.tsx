@@ -21,11 +21,9 @@ export const OperationDelete = ({ disabled, onStart }: Props) => {
   function handleSubmit() {
     confirmation({
       title: t('translations_delete_selected'),
-      message: t(
-        'translations_key_soft_delete_confirmation',
-        '{count, plural, one {# key} other {# keys}} will be moved to Trash. You can restore them for 7 days.',
-        { count: String(selection.length) }
-      ),
+      message: t('translations_key_soft_delete_confirmation', {
+        count: String(selection.length),
+      }),
       onConfirm() {
         batchLoadable.mutate(
           {

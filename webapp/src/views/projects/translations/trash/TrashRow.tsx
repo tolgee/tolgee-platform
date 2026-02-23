@@ -183,11 +183,8 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
 
   const handlePermanentDelete = () => {
     confirmation({
-      title: t('trash_permanent_delete_title', 'Permanently delete'),
-      message: t(
-        'trash_permanent_delete_confirmation',
-        'This key will be permanently deleted and cannot be recovered.'
-      ),
+      title: t('trash_permanent_delete_title'),
+      message: t('trash_permanent_delete_confirmation'),
       onConfirm() {
         deleteMutation.mutate(
           {
@@ -216,14 +213,8 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
 
   const deletedTimeText =
     daysAgo === 0
-      ? t('trash_deleted_today', 'today')
-      : t(
-          'trash_deleted_ago',
-          '{days, plural, one {# day ago} other {# days ago}}',
-          {
-            days: daysAgo,
-          }
-        );
+      ? t('trash_deleted_today')
+      : t('trash_deleted_ago', { days: daysAgo });
 
   const translations = data.translations ?? {};
   const tags = data.tags ?? [];
@@ -282,11 +273,7 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
         <StyledTrashedTime>{deletedTimeText}</StyledTrashedTime>
         <StyledDeletesIn>
           <Trash01 width={14} height={14} />
-          <T
-            keyName="trash_deletes_in"
-            defaultValue="Deletes in {days, plural, one {# day} other {# days}}"
-            params={{ days: daysUntilDelete }}
-          />
+          <T keyName="trash_deletes_in" params={{ days: daysUntilDelete }} />
         </StyledDeletesIn>
         <StyledActions>
           {canRestore && (
@@ -298,12 +285,12 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
               disabled={restoreMutation.isLoading}
               data-cy="trash-restore-button"
             >
-              <T keyName="trash_restore_button" defaultValue="Restore" />
+              <T keyName="trash_restore_button" />
             </Button>
           )}
           {canDelete && (
             <Tooltip
-              title={t('trash_permanent_delete_tooltip', 'Permanently delete')}
+              title={t('trash_permanent_delete_tooltip')}
             >
               <IconButton
                 size="small"

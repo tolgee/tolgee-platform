@@ -261,11 +261,7 @@ export const TrashPage = () => {
 
       {totalElements > 0 && (
         <StyledCount variant="body2">
-          <T
-            keyName="trash_key_count"
-            defaultValue="{count, plural, one {# key in trash} other {# keys in trash}}"
-            params={{ count: totalElements }}
-          />
+          <T keyName="trash_key_count" params={{ count: totalElements }} />
         </StyledCount>
       )}
 
@@ -279,10 +275,10 @@ export const TrashPage = () => {
                 }}
               >
                 <StyledHeaderCell className="keyCell">
-                  <T keyName="trash_header_key" defaultValue="Key" />
+                  <T keyName="trash_header_key" />
                 </StyledHeaderCell>
                 <StyledHeaderCell className="trashedCell">
-                  <T keyName="trash_header_trashed" defaultValue="Trashed" />
+                  <T keyName="trash_header_trashed" />
                 </StyledHeaderCell>
                 {languageCols.map((language, i) => (
                   <StyledHeaderCell key={language.tag}>
@@ -339,7 +335,7 @@ export const TrashPage = () => {
         </StyledTableContainer>
       ) : (
         <EmptyListMessage loading={trashLoadable.isLoading}>
-          <T keyName="trash_empty" defaultValue="Trash is empty" />
+          <T keyName="trash_empty" />
         </EmptyListMessage>
       )}
     </BaseProjectView>

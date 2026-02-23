@@ -43,15 +43,12 @@ export const TrashBanner = () => {
       <StyledIconWrapper>
         <Trash01 width={20} height={20} />
         <Typography variant="subtitle2" color="error">
-          <T keyName="trash_view_title" defaultValue="Trash" />
+          <T keyName="trash_view_title" />
         </Typography>
       </StyledIconWrapper>
 
       <Typography variant="body2" color="textSecondary">
-        <T
-          keyName="trash_banner_message"
-          defaultValue="Keys are permanently deleted 7 days after being trashed."
-        />
+        <T keyName="trash_banner_message" />
       </Typography>
 
       <IconButton size="small" onClick={handleClose}>
