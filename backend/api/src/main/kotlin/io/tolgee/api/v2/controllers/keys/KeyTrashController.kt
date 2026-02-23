@@ -9,14 +9,18 @@ import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.key.KeyModel
 import io.tolgee.hateoas.key.KeyModelAssembler
-import io.tolgee.hateoas.key.trash.TrashedKeyModel
 import io.tolgee.hateoas.key.trash.TrashedKeyModelAssembler
+import io.tolgee.hateoas.key.trash.TrashedKeyWithTranslationsModelAssembler
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.key.Key
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.TagService
+import io.tolgee.service.language.LanguageService
+import io.tolgee.service.translation.TranslationService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -45,9 +49,14 @@ class KeyTrashController(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
   private val trashedKeyModelAssembler: TrashedKeyModelAssembler,
+  private val trashedKeyWithTranslationsModelAssembler: TrashedKeyWithTranslationsModelAssembler,
   private val keyModelAssembler: KeyModelAssembler,
+  private val translationService: TranslationService,
+  private val languageService: LanguageService,
+  private val authenticationFacade: AuthenticationFacade,
+  private val tagService: TagService,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private val pagedResourcesAssembler: PagedResourcesAssembler<Key>,
+  private val pagedResourcesAssembler: PagedResourcesAssembler<KeySearchResultView>,
 ) : IController {
   @GetMapping("")
   @Transactional
@@ -60,8 +69,40 @@ class KeyTrashController(
     pageable: Pageable,
     @RequestParam
     branch: String? = null,
-  ): PagedModel<TrashedKeyModel> {
-    val data = keyService.getSoftDeletedKeys(projectHolder.project.id, branch, pageable)
+    @RequestParam
+    search: String? = null,
+    @RequestParam
+    languages: Set<String>? = null,
+  ): PagedModel<*> {
+    val data =
+      if (!search.isNullOrBlank()) {
+        keyService.searchKeys(search, null, projectHolder.project.id, branch, trashed = true, pageable)
+      } else {
+        keyService.getSoftDeletedKeys(projectHolder.project.id, branch, pageable)
+      }
+
+    if (languages != null) {
+      val languageDtos =
+        languageService.getLanguagesForTranslationsView(
+          languages,
+          projectHolder.project.id,
+          authenticationFacade.authenticatedUser.id,
+        )
+      val languageIds = languageDtos.map { it.id }
+      val keyIds = data.content.map { it.id }
+      val translations =
+        if (keyIds.isNotEmpty() && languageIds.isNotEmpty()) {
+          translationService.getTranslations(keyIds, languageIds)
+        } else {
+          emptyList()
+        }
+      trashedKeyWithTranslationsModelAssembler.translationsByKeyId =
+        translations.groupBy { it.key.id }
+      trashedKeyWithTranslationsModelAssembler.tagsByKeyId =
+        tagService.getTagsForKeyIds(keyIds)
+      return pagedResourcesAssembler.toModel(data, trashedKeyWithTranslationsModelAssembler)
+    }
+
     return pagedResourcesAssembler.toModel(data, trashedKeyModelAssembler)
   }
 

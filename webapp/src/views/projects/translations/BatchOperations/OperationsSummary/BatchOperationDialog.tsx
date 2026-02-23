@@ -8,7 +8,9 @@ import {
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectContext } from 'tg.hooks/ProjectContext';
@@ -40,8 +42,11 @@ export const BatchOperationDialog = ({
 }: Props) => {
   const { t } = useTranslate();
   const project = useProject();
+  const history = useHistory();
   const { incrementPlanLimitErrors, incrementSpendingLimitErrors } =
     useGlobalActions();
+
+  const isDeleteJob = operation.type === 'DELETE_KEYS';
 
   const liveBatch = useProjectContext((c) =>
     c.batchOperations?.find((o) => o.id === operation.id)
@@ -146,6 +151,23 @@ export const BatchOperationDialog = ({
           >
             {t('batch_operations_dialog_cancel_job')}
           </LoadingButton>
+        ) : isFinished && isDeleteJob ? (
+          <Button
+            onClick={() => {
+              onClose();
+              history.push(
+                LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+                  [PARAMS.PROJECT_ID]: project.id,
+                })
+              );
+            }}
+            data-cy="batch-operation-dialog-view-trash"
+          >
+            <T
+              keyName="batch_operations_dialog_view_trash"
+              defaultValue="View Trash"
+            />
+          </Button>
         ) : (
           <div />
         )}

@@ -174,6 +174,7 @@ declare namespace DataCy {
         "batch-operation-dialog-end-status" |
         "batch-operation-dialog-minimize" |
         "batch-operation-dialog-ok" |
+        "batch-operation-dialog-view-trash" |
         "batch-operations-section" |
         "batch-operations-select" |
         "batch-operations-submit-button" |
@@ -908,10 +909,18 @@ declare namespace DataCy {
         "translations-task-indicator" |
         "translations-toolbar-counter" |
         "translations-toolbar-to-top" |
+        "translations-trash-button" |
         "translations-view-list" |
         "translations-view-list-button" |
         "translations-view-table" |
         "translations-view-table-button" |
+        "trash-key-description" |
+        "trash-key-name" |
+        "trash-permanent-delete-button" |
+        "trash-restore-button" |
+        "trash-row" |
+        "trash-row-checkbox" |
+        "trash-table" |
         "user-delete-organization-message-item" |
         "user-menu-language-switch" |
         "user-menu-logout" |

@@ -1,4 +1,9 @@
-import { LayoutGrid02, LayoutLeft, Plus } from '@untitled-ui/icons-react';
+import {
+  LayoutGrid02,
+  LayoutLeft,
+  Plus,
+  Trash01,
+} from '@untitled-ui/icons-react';
 import {
   Badge,
   Button,
@@ -22,7 +27,10 @@ import {
 import { Sort } from 'tg.component/CustomIcons';
 import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
 import { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useProject } from 'tg.hooks/useProject';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useTrashCount } from '../trash/useTrashCount';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -51,6 +59,7 @@ type Props = {
 export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const { satisfiesPermissionWithBranching } = useProjectPermissions();
   const project = useProject();
+  const history = useHistory();
   const canCreateKeys = satisfiesPermissionWithBranching('keys.create');
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
@@ -58,6 +67,7 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const [anchorSortEl, setAnchorSortEl] = useState<HTMLButtonElement | null>(
     null
   );
+  const trashCount = useTrashCount(project.id);
 
   const { setSearch, selectLanguages, changeView, setOrder } =
     useTranslationsActions();
@@ -113,6 +123,23 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
           onChange={setOrder}
           value={order}
         />
+
+        {trashCount > 0 && (
+          <Tooltip title={t('translation_controls_trash_tooltip')}>
+            <IconButton
+              onClick={() =>
+                history.push(
+                  LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+                    [PARAMS.PROJECT_ID]: project.id,
+                  })
+                )
+              }
+              data-cy="translations-trash-button"
+            >
+              <Trash01 />
+            </IconButton>
+          </Tooltip>
+        )}
       </StyledSpaced>
 
       <StyledSpaced>

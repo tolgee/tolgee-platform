@@ -179,7 +179,8 @@ interface KeyRepository : JpaRepository<Key, Long> {
   @Query(
     """
     select k.id as id, ns.name as namespace, km.description as description,
-        k.name as name, bt.text as baseTranslation, t.text as translation
+        k.name as name, bt.text as baseTranslation, t.text as translation,
+        k.deleted_at as deletedAt
         from key k
        join project p on p.id = k.project_id and p.id = :projectId
        left join branch br on k.branch_id = br.id
@@ -198,7 +199,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
             (br.name = :branch and br.deleted_at is null)
             or (:branch is null and (br.id is null or br.is_default))
           )
-          and k.deleted_at is null
+          and ((:trashed = true and k.deleted_at is not null) or (:trashed = false and k.deleted_at is null))
        order by
        (
        3 * (ns.name <-> searchUnaccent) +
@@ -229,7 +230,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
             (br.name = :branch and br.deleted_at is null)
             or (:branch is null and (br.id is null or br.is_default))
           )
-          and k.deleted_at is null
+          and ((:trashed = true and k.deleted_at is not null) or (:trashed = false and k.deleted_at is null))
       """,
   )
   fun searchKeys(
@@ -237,6 +238,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     projectId: Long,
     languageTag: String?,
     branch: String?,
+    trashed: Boolean = false,
     pageable: Pageable,
   ): Page<KeySearchResultView>
 
@@ -474,27 +476,34 @@ interface KeyRepository : JpaRepository<Key, Long> {
   // --- Trash queries ---
 
   @Query(
-    """
-    from Key k
-    left join fetch k.namespace ns
-    left join k.branch br
-    where k.project.id = :projectId
-      and k.deletedAt is not null
-      and ((br.name = :branch and br.deletedAt is null) or (:branch is null and (br is null or br.isDefault)))
+    value = """
+      select k.id as id, ns.name as namespace, k.name as name,
+             km.description as description, k.deleted_at as deletedAt,
+             null as baseTranslation, null as translation
+      from key k
+      left join namespace ns on k.namespace_id = ns.id
+      left join branch br on k.branch_id = br.id
+      left join key_meta km on k.id = km.key_id
+      where k.project_id = :projectId
+        and k.deleted_at is not null
+        and ((br.name = :branch and br.deleted_at is null)
+             or (:branch is null and (br.id is null or br.is_default)))
     """,
     countQuery = """
-      select count(k) from Key k
-      left join k.branch br
-      where k.project.id = :projectId
-        and k.deletedAt is not null
-        and ((br.name = :branch and br.deletedAt is null) or (:branch is null and (br is null or br.isDefault)))
+      select count(k.id) from key k
+      left join branch br on k.branch_id = br.id
+      where k.project_id = :projectId
+        and k.deleted_at is not null
+        and ((br.name = :branch and br.deleted_at is null)
+             or (:branch is null and (br.id is null or br.is_default)))
     """,
+    nativeQuery = true,
   )
   fun findSoftDeletedByProjectId(
     projectId: Long,
     branch: String?,
     pageable: Pageable,
-  ): Page<Key>
+  ): Page<KeySearchResultView>
 
   @Query("from Key k where k.deletedAt is not null and k.deletedAt < :before")
   fun findAllSoftDeletedBefore(before: Date): List<Key>

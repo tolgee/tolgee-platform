@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   Plus,
   XClose,
@@ -7,6 +8,7 @@ import {
   LayoutGrid02,
   LayoutLeft,
   Globe02,
+  Trash01,
 } from '@untitled-ui/icons-react';
 import {
   Badge,
@@ -27,6 +29,8 @@ import { TranslationFiltersPopup } from 'tg.views/projects/translations/Translat
 import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
 import { Sort } from 'tg.component/CustomIcons';
 import { useProject } from 'tg.hooks/useProject';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useTrashCount } from '../trash/useTrashCount';
 import { countFilters } from 'tg.views/projects/translations/TranslationFilters/summary';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
@@ -107,6 +111,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
     `@media(max-width: ${rightPanelWidth + 600}px)`
   );
   const projectPermissions = useProjectPermissions();
+  const history = useHistory();
   const [searchOpen, setSearchOpen] = useState(false);
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
@@ -129,6 +134,7 @@ export const TranslationControlsCompact: React.FC<Props> = ({
   );
   const anchorFilters = useRef<HTMLButtonElement>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const trashCount = useTrashCount(project.id);
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -228,6 +234,24 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               onChange={setOrder}
               value={order}
             />
+
+            {trashCount > 0 && (
+              <Tooltip title={t('translation_controls_trash_tooltip')}>
+                <StyledIconButton
+                  size="small"
+                  onClick={() =>
+                    history.push(
+                      LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+                        [PARAMS.PROJECT_ID]: project.id,
+                      })
+                    )
+                  }
+                  data-cy="translations-trash-button"
+                >
+                  <Trash01 />
+                </StyledIconButton>
+              </Tooltip>
+            )}
           </StyledSpaced>
 
           <StyledSpaced>

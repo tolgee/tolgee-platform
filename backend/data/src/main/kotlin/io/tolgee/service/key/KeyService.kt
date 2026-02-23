@@ -397,7 +397,7 @@ class KeyService(
     projectId: Long,
     branch: String?,
     pageable: Pageable,
-  ): Page<Key> {
+  ): Page<KeySearchResultView> {
     return keyRepository.findSoftDeletedByProjectId(projectId, branch, pageable)
   }
 
@@ -454,8 +454,20 @@ class KeyService(
     pageable: Pageable,
   ): Page<KeySearchResultView> {
     branchService.getActiveOrDefault(project.id, branch)
+    return searchKeys(search, languageTag, project.id, branch, trashed = false, pageable)
+  }
+
+  @Transactional
+  fun searchKeys(
+    search: String,
+    languageTag: String?,
+    projectId: Long,
+    branch: String?,
+    trashed: Boolean = false,
+    pageable: Pageable,
+  ): Page<KeySearchResultView> {
     entityManager.setSimilarityLimit(0.00001)
-    return keyRepository.searchKeys(search, project.id, languageTag, branch, pageable)
+    return keyRepository.searchKeys(search, projectId, languageTag, branch, trashed, pageable)
   }
 
   @Transactional
