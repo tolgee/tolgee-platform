@@ -237,19 +237,21 @@ export const TranslationControlsCompact: React.FC<Props> = ({
 
             {trashCount > 0 && (
               <Tooltip title={t('translation_controls_trash_tooltip')}>
-                <StyledIconButton
-                  size="small"
-                  onClick={() =>
-                    history.push(
-                      LINKS.PROJECT_TRANSLATIONS_TRASH.build({
-                        [PARAMS.PROJECT_ID]: project.id,
-                      })
-                    )
-                  }
-                  data-cy="translations-trash-button"
-                >
-                  <Trash01 />
-                </StyledIconButton>
+                <Badge color="error" variant="dot" overlap="circular">
+                  <StyledIconButton
+                    size="small"
+                    onClick={() =>
+                      history.push(
+                        LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+                          [PARAMS.PROJECT_ID]: project.id,
+                        })
+                      )
+                    }
+                    data-cy="translations-trash-button"
+                  >
+                    <Trash01 />
+                  </StyledIconButton>
+                </Badge>
               </Tooltip>
             )}
           </StyledSpaced>
