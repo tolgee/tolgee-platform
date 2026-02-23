@@ -20,20 +20,14 @@ class OrganizationStatsService(
   }
 
   fun getProjectKeyCount(projectId: Long): Long {
-    return (
-      entityManager
-        .createNativeQuery(
-          """
-          select count(*) from (
-              select distinct k.name, k.namespace_id
-              from key k
-              join project p on p.id = k.project_id and p.deleted_at is null
-              where k.project_id = :projectId
-          ) sub
-          """.trimIndent(),
-        ).setParameter("projectId", projectId)
-        .singleResult as Number
-    ).toLong()
+    return entityManager
+      .createQuery(
+        """
+        select count(distinct k.name, k.namespace) from Key k
+        where k.project.id = :projectId and k.project.deletedAt is null
+        """.trimIndent(),
+      ).setParameter("projectId", projectId)
+      .singleResult as Long
   }
 
   fun getSeatCountToCountSeats(organizationId: Long): Long {
