@@ -19,6 +19,7 @@ const defaultBranchObject: BranchModel = {
   name: DEFAULT_BRANCH_NAME,
   isProtected: true,
   isDefault: true,
+  snapshotStatus: 'READY',
 };
 
 export const useBranchesService = ({
