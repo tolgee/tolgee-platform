@@ -179,7 +179,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
     select k.id as id, ns.name as namespace, km.description as description,
         k.name as name, bt.text as baseTranslation, t.text as translation,
-        k.deleted_at as deletedAt
+        k.deleted_at as deletedAt, k.is_plural as plural
         from key k
        join project p on p.id = k.project_id and p.id = :projectId
        left join branch br on k.branch_id = br.id
@@ -485,7 +485,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     value = """
       select k.id as id, ns.name as namespace, k.name as name,
              km.description as description, k.deleted_at as deletedAt,
-             null as baseTranslation, null as translation
+             null as baseTranslation, null as translation, k.is_plural as plural
       from key k
       left join namespace ns on k.namespace_id = ns.id
       left join branch br on k.branch_id = br.id

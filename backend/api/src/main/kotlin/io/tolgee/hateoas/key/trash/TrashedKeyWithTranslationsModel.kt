@@ -30,5 +30,7 @@ class TrashedKeyWithTranslationsModel(
   val translations: Map<String, TranslationViewModel>,
   @Schema(description = "Screenshots of the key")
   val screenshots: List<ScreenshotModel>,
+  @Schema(description = "Whether the key is plural")
+  val isPlural: Boolean,
 ) : RepresentationModel<TrashedKeyWithTranslationsModel>(),
   Serializable

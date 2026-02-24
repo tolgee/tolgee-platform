@@ -60,6 +60,7 @@ class TrashedKeyWithTranslationsModelAssembler(
       tags = tags,
       translations = translationsMap,
       screenshots = screenshots,
+      isPlural = entity.plural ?: false,
     )
   }
 

@@ -10,4 +10,5 @@ interface KeySearchResultView {
   val translation: String?
   val description: String?
   val deletedAt: Date?
+  val plural: Boolean?
 }
