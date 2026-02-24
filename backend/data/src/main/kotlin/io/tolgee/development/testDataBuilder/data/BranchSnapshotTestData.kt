@@ -59,15 +59,21 @@ class BranchSnapshotTestData : BaseTestData("branch_snapshot_user", "branch_snap
         addTag("ghi")
       }.self
 
-    // matching target key on feature branch
+    // matching target key on feature branch (mirrors main's state, as BranchCopyService would produce)
     addKey {
       name = "snapshot-key"
       branch = featureBranch
     }.build {
-      addTranslation {
-        language = englishLanguage
-        text = "Snapshot text"
-      }
+      val featureTranslationEn =
+        addTranslation {
+          language = englishLanguage
+          text = "Snapshot text"
+        }.self
+      featureTranslationEn.addLabel(label)
+      addScreenshot { }.self
+      addTag("abc")
+      addTag("def")
+      addTag("ghi")
     }
   }
 

@@ -20,6 +20,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
+import io.tolgee.model.enums.SnapshotStatus
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.AbstractBranchService
 import io.tolgee.service.branching.BranchCopyService
@@ -29,6 +30,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 
 @Primary
 @Service
@@ -38,6 +41,7 @@ class BranchServiceImpl(
   private val entityManager: EntityManager,
   private val branchCopyService: BranchCopyService,
   private val branchSnapshotService: BranchSnapshotService,
+  private val branchSnapshotWorker: BranchSnapshotWorker,
   private val taskService: TaskService,
   private val authenticationFacade: AuthenticationFacade,
   private val projectBranchingMigrationService: ProjectBranchingMigrationService,
@@ -120,14 +124,48 @@ class BranchServiceImpl(
       val branch =
         createBranch(projectId, name, author).also {
           it.originBranch = originBranch
-          it.pending = true
+          it.snapshotStatus = SnapshotStatus.PENDING
+          it.writeLocked = true
         }
       branchRepository.save(branch)
 
       branchCopyService.copy(projectId, originBranch, branch)
-      branchSnapshotService.createInitialSnapshot(projectId, originBranch, branch)
+
+      // Enqueue snapshot build after commit so the branch and its keys are visible to the worker.
+      TransactionSynchronizationManager.registerSynchronization(
+        object : TransactionSynchronization {
+          override fun afterCommit() {
+            branchSnapshotWorker.scheduleSnapshot(branch.id)
+          }
+        },
+      )
       branch
     }!!
+  }
+
+  @Transactional
+  override fun retrySnapshot(
+    projectId: Long,
+    branchId: Long,
+  ): Branch {
+    val branch =
+      branchRepository.findActiveByProjectIdAndId(projectId, branchId)
+        ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
+    if (branch.snapshotStatus != SnapshotStatus.FAILED) {
+      throw BadRequestException(Message.BRANCH_SNAPSHOT_RETRY_NOT_ALLOWED)
+    }
+    branch.snapshotStatus = SnapshotStatus.PENDING
+    branch.writeLocked = false
+    branch.snapshotErrorMessage = null
+    branchRepository.save(branch)
+    TransactionSynchronizationManager.registerSynchronization(
+      object : TransactionSynchronization {
+        override fun afterCommit() {
+          branchSnapshotWorker.scheduleSnapshot(branch.id)
+        }
+      },
+    )
+    return branch
   }
 
   private fun createBranch(
@@ -171,6 +209,9 @@ class BranchServiceImpl(
     request: DryRunMergeBranchRequest,
   ): BranchMerge {
     val sourceBranch = getActiveBranch(projectId, request.sourceBranchId)
+    if (sourceBranch.snapshotStatus != SnapshotStatus.READY) {
+      throw BadRequestException(Message.BRANCH_SNAPSHOT_NOT_READY)
+    }
     val origin = sourceBranch.originBranch ?: throw BadRequestException(Message.ORIGIN_BRANCH_NOT_FOUND)
     val targetBranch = getActiveBranch(projectId, origin.id)
     return dryRunMerge(sourceBranch, targetBranch)
@@ -193,6 +234,9 @@ class BranchServiceImpl(
     val merge =
       branchMergeService.findActiveMergeFull(projectId, mergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
+    if (merge.sourceBranch.snapshotStatus != SnapshotStatus.READY) {
+      throw BadRequestException(Message.BRANCH_SNAPSHOT_NOT_READY)
+    }
     if (!merge.isReadyToMerge) {
       if (!merge.isRevisionValid) {
         throw BadRequestException(Message.BRANCH_MERGE_REVISION_NOT_VALID)

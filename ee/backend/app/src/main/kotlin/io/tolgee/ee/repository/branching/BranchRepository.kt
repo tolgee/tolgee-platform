@@ -4,8 +4,11 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.repository.branching.BranchRepositoryOss
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import java.util.Date
 
 @Repository
 interface BranchRepository : BranchRepositoryOss {
@@ -60,4 +63,28 @@ interface BranchRepository : BranchRepositoryOss {
     """,
   )
   fun existsActiveByOriginBranchId(branchId: Long): Boolean
+
+  @Modifying
+  @Query(
+    """
+    UPDATE Branch b SET b.snapshotStatus = io.tolgee.model.enums.SnapshotStatus.RUNNING,
+      b.writeLocked = false, b.snapshotStartedAt = CURRENT_TIMESTAMP
+    WHERE b.id = :branchId AND b.snapshotStatus = io.tolgee.model.enums.SnapshotStatus.PENDING
+    """,
+  )
+  fun compareAndSetSnapshotRunning(
+    @Param("branchId") branchId: Long,
+  ): Int
+
+  @Query(
+    """
+    FROM Branch b WHERE b.deletedAt IS NULL AND (
+      (b.snapshotStatus = io.tolgee.model.enums.SnapshotStatus.RUNNING AND b.snapshotStartedAt < :cutoff)
+      OR (b.snapshotStatus = io.tolgee.model.enums.SnapshotStatus.PENDING AND b.createdAt < :cutoff)
+    )
+    """,
+  )
+  fun findStuckBranches(
+    @Param("cutoff") cutoff: Date,
+  ): List<Branch>
 }

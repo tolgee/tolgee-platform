@@ -71,7 +71,9 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     // Clear any existing subscription to avoid key limit issues from other tests
-    eeSubscriptionServiceImpl.delete()
+    executeInNewTransaction {
+      eeSubscriptionRepository.deleteAll()
+    }
     testData = BranchMergeTestData()
     testDataService.saveTestData(testData.root)
     branchSnapshotService.createInitialSnapshot(

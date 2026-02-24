@@ -309,6 +309,19 @@ class BranchController(
     branchService.deleteMerge(projectHolder.project.id, mergeId)
   }
 
+  @PostMapping(value = ["/{branchId}/snapshot/retry"])
+  @Operation(summary = "Retry snapshot creation for a branch")
+  @AllowApiAccess
+  @RequiresProjectPermissions([Scope.BRANCH_MANAGEMENT])
+  @OpenApiOrderExtension(13)
+  fun retrySnapshot(
+    @PathVariable branchId: Long,
+  ): BranchModel {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
+    val branch = branchService.retrySnapshot(projectHolder.project.id, branchId)
+    return branchModelAssembler.toModel(branch)
+  }
+
   @PostMapping(value = ["/merge/{mergeId}/apply"])
   @Operation(summary = "Merge source branch to target branch")
   @AllowApiAccess

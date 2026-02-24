@@ -2,6 +2,7 @@ package io.tolgee.ee.api.v2.hateoas.model.branching
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
+import io.tolgee.model.enums.SnapshotStatus
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -38,4 +39,12 @@ data class BranchModel(
   val merge: BranchMergeRefModel? = null,
   @Schema(description = "Name of the branch this branch was created from")
   val originBranchName: String? = null,
+  @Schema(
+    description =
+      "Status of snapshot creation. " +
+        "PENDING/RUNNING = branch is initializing (writes may be restricted), " +
+        "READY = branch is fully editable, " +
+        "FAILED = snapshot failed (use retry endpoint to rebuild)",
+  )
+  val snapshotStatus: SnapshotStatus = SnapshotStatus.READY,
 ) : RepresentationModel<BranchModel>()

@@ -5078,6 +5078,41 @@
             </addColumn>
         </rollback>
     </changeSet>
+    <changeSet id="1771600000000-1" author="danielkrizan">
+        <addColumn tableName="branch">
+            <column name="snapshot_status" type="VARCHAR(20)" defaultValue="READY">
+                <constraints nullable="false"/>
+            </column>
+            <column name="write_locked" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="snapshot_started_at" type="TIMESTAMP"/>
+            <column name="snapshot_finished_at" type="TIMESTAMP"/>
+            <column name="snapshot_error_message" type="VARCHAR(500)"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="branch" columnName="snapshot_status"/>
+            <dropColumn tableName="branch" columnName="write_locked"/>
+            <dropColumn tableName="branch" columnName="snapshot_started_at"/>
+            <dropColumn tableName="branch" columnName="snapshot_finished_at"/>
+            <dropColumn tableName="branch" columnName="snapshot_error_message"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="1771600000000-2" author="danielkrizan">
+        <sql>
+            UPDATE branch
+            SET snapshot_status = CASE WHEN pending = TRUE THEN 'PENDING' ELSE 'READY' END,
+                write_locked = CASE WHEN pending = TRUE THEN TRUE ELSE FALSE END
+            WHERE snapshot_status = 'READY'
+        </sql>
+        <rollback>
+            UPDATE branch SET snapshot_status = 'READY', write_locked = FALSE
+        </rollback>
+    </changeSet>
+    <changeSet id="1771600000000-3" author="danielkrizan" runInTransaction="false">
+        <sql>CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_branch_snapshot_status ON branch (snapshot_status) WHERE snapshot_status IN ('PENDING', 'RUNNING')</sql>
+        <rollback>DROP INDEX CONCURRENTLY IF EXISTS idx_branch_snapshot_status</rollback>
+    </changeSet>
     <changeSet author="danielkrizan" id="1771846650000-1" runInTransaction="false">
         <sql>
             create index concurrently if not exists idx_key_project_name_namespace
