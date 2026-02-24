@@ -35,6 +35,7 @@ enum class ActivityType(
   KEY_DELETE(true),
   KEY_SOFT_DELETE(true),
   KEY_RESTORE,
+  KEY_HARD_DELETE(true),
   BATCH_KEY_RESTORE(true),
   BATCH_KEY_HARD_DELETE(true),
   CREATE_KEY,

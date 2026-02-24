@@ -141,6 +141,7 @@ class KeyTrashController(
   @DeleteMapping("/{keyId}")
   @Transactional
   @Operation(summary = "Permanently delete a trashed key")
+  @RequestActivity(ActivityType.KEY_HARD_DELETE)
   @RequiresProjectPermissions([Scope.KEYS_DELETE])
   @AllowApiAccess
   fun permanentlyDelete(
