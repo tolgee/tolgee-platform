@@ -30,19 +30,12 @@ class GenericLimitCheckerTest {
   )
 
   @Test
-  fun `zero limit - no exception and provider not called`() {
-    var providerCalled = false
-    val checker =
-      checker(
-        zeroLimit(),
-        includedProvider = {
-          providerCalled = true
-          RuntimeException()
-        },
-      )
+  fun `zero limit - throws included exception (not treated as unlimited)`() {
+    val checker = checker(zeroLimit())
 
-    assertDoesNotThrow { checker.check { 999L } }
-    assertFalse(providerCalled)
+    val ex = assertThrows<RuntimeException> { checker.check { 999L } }
+
+    assert(ex.message == "included: 999")
   }
 
   @Test

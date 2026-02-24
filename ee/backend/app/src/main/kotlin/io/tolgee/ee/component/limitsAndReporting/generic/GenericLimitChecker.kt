@@ -17,7 +17,7 @@ open class GenericLimitChecker(
   fun check(required: Long?) = check { required }
 
   fun check(requiredProvider: () -> Long?) {
-    if (limit.limit <= 0) {
+    if (limit.limit < 0) {
       return
     }
 

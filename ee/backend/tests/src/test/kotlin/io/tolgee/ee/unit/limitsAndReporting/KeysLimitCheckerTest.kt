@@ -5,7 +5,6 @@ import io.tolgee.ee.component.limitsAndReporting.generic.KeysLimitChecker
 import io.tolgee.exceptions.limits.PlanLimitExceededKeysException
 import io.tolgee.exceptions.limits.PlanSpendingLimitExceededKeysException
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -25,9 +24,10 @@ class KeysLimitCheckerTest {
   )
 
   @Test
-  fun `zero keys limit - no exception (unlimited detection bug fix)`() {
+  fun `zero keys limit - throws PlanLimitExceededKeysException (zero is a real limit)`() {
     val checker = KeysLimitChecker(usageLimits(keys = UsageLimits.Limit(included = 0, limit = 0)))
-    assertDoesNotThrow { checker.check { 999L } }
+
+    assertThrows<PlanLimitExceededKeysException> { checker.check { 999L } }
   }
 
   @Test

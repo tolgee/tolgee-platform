@@ -5,7 +5,6 @@ import io.tolgee.ee.component.limitsAndReporting.generic.StringsLimitChecker
 import io.tolgee.exceptions.limits.PlanLimitExceededStringsException
 import io.tolgee.exceptions.limits.PlanSpendingLimitExceededStringsException
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -25,9 +24,10 @@ class StringsLimitCheckerTest {
   )
 
   @Test
-  fun `zero strings limit - no exception (unlimited detection bug fix)`() {
+  fun `zero strings limit - throws PlanLimitExceededStringsException (zero is a real limit)`() {
     val checker = StringsLimitChecker(usageLimits(strings = UsageLimits.Limit(included = 0, limit = 0)))
-    assertDoesNotThrow { checker.check { 999L } }
+
+    assertThrows<PlanLimitExceededStringsException> { checker.check { 999L } }
   }
 
   @Test
