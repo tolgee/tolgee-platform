@@ -124,9 +124,19 @@ class BatchJobConcurrentLauncher(
             return@repeatForever false
           }
 
+          // Snapshot locked projects to avoid polling items that will fail the lock check.
+          // The map is projectId -> lockedJobId; we want the project IDs that have an active lock.
+          val lockedProjectIds =
+            batchJobProjectLockingManager
+              .getMap()
+              .entries
+              .filter { (_, lockedJobId) -> lockedJobId != null && lockedJobId != 0L }
+              .map { it.key }
+              .toSet()
+
           val items =
             (1..jobsToLaunch)
-              .mapNotNull { batchJobChunkExecutionQueue.pollRoundRobin() }
+              .mapNotNull { batchJobChunkExecutionQueue.pollRoundRobin(lockedProjectIds) }
 
           logItemsPulled(items)
 

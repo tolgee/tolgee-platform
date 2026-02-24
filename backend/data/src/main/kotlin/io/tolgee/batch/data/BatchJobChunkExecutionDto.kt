@@ -14,4 +14,5 @@ class BatchJobChunkExecutionDto(
   val batchJobId: Long,
   var executeAfter: Date?,
   val jobCharacter: JobCharacter,
+  val projectId: Long? = null,
 )

@@ -94,7 +94,7 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
     """
     select j.id from BatchJob j
     join BatchJobChunkExecution bjce on bjce.batchJob.id = j.id
-    where j.id in :jobIds
+    where j.id in :jobIds and bjce.status = :runningStatus
     group by j.id
     having max(bjce.updatedAt) < :before
   """,
@@ -102,6 +102,8 @@ interface BatchJobRepository : JpaRepository<BatchJob, Long> {
   fun getStuckJobIds(
     jobIds: MutableSet<Long>,
     before: Date,
+    runningStatus: io.tolgee.model.batch.BatchJobChunkExecutionStatus =
+      io.tolgee.model.batch.BatchJobChunkExecutionStatus.RUNNING,
   ): List<Long>
 
   @Query(

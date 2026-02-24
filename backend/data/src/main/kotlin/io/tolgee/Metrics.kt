@@ -7,15 +7,14 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import org.springframework.stereotype.Component
 import java.time.Duration
-import java.util.concurrent.ConcurrentLinkedQueue
 
 @Component
 class Metrics(
   private val meterRegistry: MeterRegistry,
 ) {
-  fun registerJobQueue(queue: ConcurrentLinkedQueue<*>) {
+  fun registerJobQueue(sizeSupplier: () -> Int) {
     Gauge
-      .builder("tolgee.batch.job.execution.queue.size", queue) { it.size.toDouble() }
+      .builder("tolgee.batch.job.execution.queue.size") { sizeSupplier().toDouble() }
       .description("Size of the queue of batch job executions")
       .register(meterRegistry)
   }

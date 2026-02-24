@@ -7,5 +7,6 @@ data class ExecutionQueueItem(
   val jobId: Long,
   var executeAfter: Long?,
   val jobCharacter: JobCharacter,
+  val projectId: Long? = null,
   var managementErrorRetrials: Int = 0,
 )
