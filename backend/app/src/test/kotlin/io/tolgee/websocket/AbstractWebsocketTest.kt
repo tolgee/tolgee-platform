@@ -100,12 +100,13 @@ abstract class AbstractWebsocketTest : ProjectAuthControllerTest("/v2/projects/"
       assertThatJson(it.poll()).apply {
         node("data.keys[0]") {
           node("id").isValidId
-          node("modifications.name") {
-            node("old").isEqualTo("key")
-            node("new").isEqualTo(null)
+          node("modifications.deletedAt") {
+            node("old").isEqualTo(null)
+            node("new").isNotNull
           }
-          node("changeType").isEqualTo("DEL")
+          node("changeType").isEqualTo("MOD")
         }
+        node("sourceActivity").isEqualTo("KEY_SOFT_DELETE")
       }
     }
   }

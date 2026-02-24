@@ -85,6 +85,10 @@ class NamespaceController(
     if (isDefaultUsed) {
       namespaces.add(0, null to null)
     }
+    val defaultNamespace = projectHolder.projectEntity.defaultNamespace
+    if (defaultNamespace != null && namespaces.none { it.first == defaultNamespace.id }) {
+      namespaces.add(defaultNamespace.id as Long? to defaultNamespace.name as String?)
+    }
     return usedNamespaceModelAssembler.toCollectionModel(namespaces)
   }
 
