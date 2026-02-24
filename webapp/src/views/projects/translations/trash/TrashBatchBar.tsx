@@ -13,8 +13,9 @@ import {
 import { useTranslate } from '@tolgee/react';
 import { getTextWidth } from 'tg.fixtures/getTextWidth';
 
+import { useQueryClient } from 'react-query';
 import { useProject } from 'tg.hooks/useProject';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { invalidateUrlPrefix, useApiMutation } from 'tg.service/http/useQueryApi';
 import { confirmation } from 'tg.hooks/confirmation';
 import { BatchOperationDialog } from '../BatchOperations/OperationsSummary/BatchOperationDialog';
 import { BatchOperationsSubmit } from '../BatchOperations/components/BatchOperationsSubmit';
@@ -109,6 +110,7 @@ export const TrashBatchBar = ({
   const { t } = useTranslate();
   const theme = useTheme();
   const project = useProject();
+  const queryClient = useQueryClient();
   const [operationId, setOperationId] = useState<TrashAction | undefined>();
   const [runningOperation, setRunningOperation] =
     useState<BatchJobModel | undefined>();
@@ -178,6 +180,7 @@ export const TrashBatchBar = ({
   const handleFinished = () => {
     setRunningOperation(undefined);
     setOperationId(undefined);
+    invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/keys/trash');
     onFinished();
   };
 
