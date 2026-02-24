@@ -36,6 +36,10 @@ export function useBatchOperationTypeTranslate() {
         return t('batch_operation_type_assign_translation_label');
       case 'UNASSIGN_TRANSLATION_LABEL':
         return t('batch_operation_type_unassign_translation_label');
+      case 'RESTORE_KEYS' as any:
+        return t('batch_operation_type_restore_keys');
+      case 'HARD_DELETE_KEYS' as any:
+        return t('batch_operation_type_hard_delete_keys');
       default:
         return type;
     }

@@ -30,6 +30,10 @@ export function useBatchOperationActionPhrase() {
       case 'ASSIGN_TRANSLATION_LABEL':
       case 'UNASSIGN_TRANSLATION_LABEL':
         return t('batch_operation_action_updating_labels');
+      case 'RESTORE_KEYS' as any:
+        return t('batch_operation_action_restoring_keys');
+      case 'HARD_DELETE_KEYS' as any:
+        return t('batch_operation_action_deleting_keys_permanently');
       default:
         return t('batch_operation_action_processing');
     }
