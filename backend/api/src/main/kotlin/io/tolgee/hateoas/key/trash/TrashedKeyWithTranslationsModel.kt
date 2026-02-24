@@ -2,6 +2,7 @@ package io.tolgee.hateoas.key.trash
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.v2.hateoas.invitation.TagModel
+import io.tolgee.hateoas.screenshot.ScreenshotModel
 import io.tolgee.hateoas.translations.TranslationViewModel
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -27,5 +28,7 @@ class TrashedKeyWithTranslationsModel(
   val tags: List<TagModel>,
   @Schema(description = "Translations object keyed by language tag")
   val translations: Map<String, TranslationViewModel>,
+  @Schema(description = "Screenshots of the key")
+  val screenshots: List<ScreenshotModel>,
 ) : RepresentationModel<TrashedKeyWithTranslationsModel>(),
   Serializable

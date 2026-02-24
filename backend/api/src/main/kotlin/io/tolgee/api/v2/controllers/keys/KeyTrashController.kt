@@ -18,6 +18,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.key.ScreenshotService
 import io.tolgee.service.key.TagService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.TranslationService
@@ -55,6 +56,7 @@ class KeyTrashController(
   private val languageService: LanguageService,
   private val authenticationFacade: AuthenticationFacade,
   private val tagService: TagService,
+  private val screenshotService: ScreenshotService,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<KeySearchResultView>,
 ) : IController {
@@ -100,6 +102,8 @@ class KeyTrashController(
         translations.groupBy { it.key.id }
       trashedKeyWithTranslationsModelAssembler.tagsByKeyId =
         tagService.getTagsForKeyIds(keyIds)
+      trashedKeyWithTranslationsModelAssembler.screenshotsByKeyId =
+        if (keyIds.isNotEmpty()) screenshotService.getScreenshotsForKeys(keyIds) else emptyMap()
       return pagedResourcesAssembler.toModel(data, trashedKeyWithTranslationsModelAssembler)
     }
 

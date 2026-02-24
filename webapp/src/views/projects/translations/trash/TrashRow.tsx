@@ -31,15 +31,17 @@ const StyledRow = styled('div')`
 const StyledKeyCell = styled('div')`
   display: grid;
   grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-rows: auto auto auto auto 1fr;
   grid-template-areas:
     'checkbox  key          '
     '.         description  '
+    '.         screenshots  '
     '.         tags         '
     '.         .            ';
   position: relative;
   outline: 0;
   overflow: hidden;
+  min-width: 0;
 `;
 
 const StyledCheckbox = styled(Checkbox)`
@@ -64,6 +66,40 @@ const StyledDescription = styled('div')`
     theme.palette.mode === 'light'
       ? theme.palette.emphasis[300]
       : theme.palette.emphasis[500]};
+`;
+
+const StyledScreenshots = styled('div')`
+  grid-area: screenshots;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: 0px 12px 8px 12px;
+  overflow: hidden;
+`;
+
+const StyledScreenshotBox = styled('div')`
+  overflow: hidden;
+  position: relative;
+  border-radius: 4px;
+  background: ${({ theme }) => theme.palette.tokens.text._states.selected};
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    border-radius: 4px;
+    border: 1px solid ${({ theme }) => theme.palette.tokens.border.primary};
+    pointer-events: none;
+  }
+`;
+
+const StyledScreenshotImg = styled('img')`
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 `;
 
 const StyledTags = styled('div')`
@@ -259,6 +295,25 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
               </ReactMarkdown>
             </LimitedHeightText>
           </StyledDescription>
+        )}
+        {data.screenshots?.length > 0 && (
+          <StyledScreenshots>
+            {data.screenshots.map((sc: any) => {
+              const w = 100;
+              const h =
+                sc.width && sc.height
+                  ? Math.min(w / (sc.width / sc.height), 100)
+                  : 100;
+              return (
+                <StyledScreenshotBox
+                  key={sc.id}
+                  style={{ width: w, height: h }}
+                >
+                  <StyledScreenshotImg src={sc.thumbnailUrl} alt="" />
+                </StyledScreenshotBox>
+              );
+            })}
+          </StyledScreenshots>
         )}
         {tags.length > 0 && (
           <StyledTags>
