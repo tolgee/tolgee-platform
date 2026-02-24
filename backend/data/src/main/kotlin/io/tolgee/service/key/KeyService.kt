@@ -343,14 +343,16 @@ class KeyService(
   }
 
   @Transactional
-  fun restoreKeys(ids: Collection<Long>) {
-    val keys = keyRepository.findAllByIdIn(ids.toList())
+  fun restoreKeys(
+    ids: Collection<Long>,
+    projectId: Long,
+  ) {
+    val keys = keyRepository.findSoftDeletedByIdsAndProjectId(ids, projectId)
     keys.forEach { key ->
-      if (key.deletedAt == null) return@forEach
       val branch = key.branch?.name
-      val existing = find(key.project.id, key.name, key.namespace?.name, branch)
+      val existing = find(projectId, key.name, key.namespace?.name, branch)
       if (existing != null) {
-        throw ValidationException(Message.KEY_EXISTS)
+        throw ValidationException(Message.KEY_EXISTS, key.name)
       }
       key.deletedAt = null
       save(key)

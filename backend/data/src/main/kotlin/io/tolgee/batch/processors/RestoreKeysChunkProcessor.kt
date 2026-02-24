@@ -25,7 +25,7 @@ class RestoreKeysChunkProcessor(
     val subChunked = chunk.chunked(100)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
-      keyService.restoreKeys(subChunk)
+      keyService.restoreKeys(subChunk, job.projectId!!)
       entityManager.flush()
       progressManager.reportSingleChunkProgress(job.id, subChunk.size)
     }
