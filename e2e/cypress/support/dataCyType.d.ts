@@ -914,6 +914,7 @@ declare namespace DataCy {
         "translations-view-list-button" |
         "translations-view-table" |
         "translations-view-table-button" |
+        "trash-banner-close" |
         "trash-batch-bar" |
         "trash-batch-select" |
         "trash-batch-select-item" |

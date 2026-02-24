@@ -51,7 +51,12 @@ export const TrashBanner = () => {
         <T keyName="trash_banner_message" />
       </Typography>
 
-      <IconButton size="small" onClick={handleClose}>
+      <IconButton
+        size="small"
+        onClick={handleClose}
+        data-cy="trash-banner-close"
+        aria-label="Close banner"
+      >
         <X width={18} height={18} />
       </IconButton>
     </StyledBanner>
