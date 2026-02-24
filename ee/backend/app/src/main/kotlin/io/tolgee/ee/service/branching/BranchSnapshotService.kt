@@ -1,6 +1,5 @@
 package io.tolgee.ee.service.branching
 
-import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.snapshot.KeySnapshot
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service
 @Service
 class BranchSnapshotService(
   private val keySnapshotRepository: KeySnapshotRepository,
-  private val branchRepository: BranchRepository,
   private val entityManager: EntityManager,
 ) {
   @Transactional
@@ -24,8 +22,6 @@ class BranchSnapshotService(
     insertKeySnapshots(projectId, sourceBranch, targetBranch)
     insertTranslationSnapshots(targetBranch.id)
     insertKeyMetaSnapshots(targetBranch.id)
-    targetBranch.pending = false
-    branchRepository.save(targetBranch)
   }
 
   private fun getBranchFilter(

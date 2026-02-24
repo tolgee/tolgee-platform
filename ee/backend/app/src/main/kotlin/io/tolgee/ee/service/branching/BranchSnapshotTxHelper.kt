@@ -2,6 +2,7 @@ package io.tolgee.ee.service.branching
 
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.model.enums.SnapshotStatus
+import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
@@ -23,40 +24,61 @@ class BranchSnapshotTxHelper(
   private val branchRepository: BranchRepository,
   private val branchSnapshotService: BranchSnapshotService,
   private val applicationContext: ApplicationContext,
+  private val entityManager: EntityManager,
 ) {
   // Resolved at call-time via the context so there is no circular dependency at startup.
   private fun self() = applicationContext.getBean(BranchSnapshotTxHelper::class.java)
 
+  /**
+   * Builds the initial snapshot for a branch under REPEATABLE READ isolation.
+   *
+   * Returns true if the snapshot was built, false if the branch was not found or
+   * was no longer in PENDING state (idempotency guard).
+   *
+   * After this method returns the caller must invoke [markSnapshotReady] in a
+   * separate REQUIRES_NEW transaction to persist the READY status.
+   */
   @Transactional(isolation = Isolation.REPEATABLE_READ)
-  fun buildSnapshot(branchId: Long) {
+  fun buildSnapshot(branchId: Long): Boolean {
     // Reading the branch establishes the PostgreSQL REPEATABLE READ MVCC snapshot.
     // All subsequent reads in this transaction see the database as of this point in time.
-    val branch = branchRepository.findById(branchId).orElse(null) ?: return
-    if (branch.snapshotStatus != SnapshotStatus.PENDING) return
+    val branch = branchRepository.findById(branchId).orElse(null) ?: return false
+    if (branch.snapshotStatus != SnapshotStatus.PENDING) return false
 
-    val originBranch = branch.originBranch ?: return
+    val originBranch = branch.originBranch ?: return false
+
+    // Capture projectId while the entity is still managed (project may be lazily loaded).
+    val projectId = branch.project.id
 
     // Release the write lock in a separate transaction so users can start editing.
     // The outer REPEATABLE_READ transaction is unaffected — subsequent key reads still
     // see the creation-time MVCC snapshot, ignoring any edits committed after this point.
     self().releaseWriteLockAndMarkRunning(branchId)
 
-    // Sync the in-memory entity to reflect the REQUIRES_NEW commit.
-    // Without this, JPA's full UPDATE at the end of this transaction would overwrite
-    // writeLocked back to true (its T1 snapshot value), leaving the branch permanently locked.
-    branch.writeLocked = false
-    branch.snapshotStatus = SnapshotStatus.RUNNING
+    // Evict all managed entities from the persistence context.
+    // Under REPEATABLE_READ, PostgreSQL rejects writes to rows that were modified by a
+    // concurrent committed transaction (the REQUIRES_NEW above). Clearing the context
+    // prevents Hibernate's auto-flush from attempting to UPDATE the branch row, keeping
+    // this transaction purely read-and-insert.
+    entityManager.clear()
 
-    branchSnapshotService.createInitialSnapshot(branch.project.id, originBranch, branch)
+    branchSnapshotService.createInitialSnapshot(projectId, originBranch, branch)
 
-    branch.snapshotStatus = SnapshotStatus.READY
-    branch.snapshotFinishedAt = Date()
-    branchRepository.save(branch)
+    return true
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun releaseWriteLockAndMarkRunning(branchId: Long) {
     branchRepository.compareAndSetSnapshotRunning(branchId)
+  }
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun markSnapshotReady(branchId: Long) {
+    val branch = branchRepository.findById(branchId).orElse(null) ?: return
+    branch.snapshotStatus = SnapshotStatus.READY
+    branch.pending = false
+    branch.snapshotFinishedAt = Date()
+    branchRepository.save(branch)
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)

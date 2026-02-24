@@ -23,7 +23,10 @@ class BranchSnapshotWorker(
   @Async
   fun scheduleSnapshot(branchId: Long) {
     try {
-      txHelper.buildSnapshot(branchId)
+      val built = txHelper.buildSnapshot(branchId)
+      if (built) {
+        txHelper.markSnapshotReady(branchId)
+      }
     } catch (e: Exception) {
       log.error("Snapshot build failed for branch $branchId", e)
       txHelper.markSnapshotFailed(branchId, e.message?.take(500))
