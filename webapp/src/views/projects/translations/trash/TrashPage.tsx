@@ -190,7 +190,6 @@ export const TrashPage = () => {
     return [keySize, `${TRASHED_COLUMN_WIDTH}px`, ...langSizes];
   }, [resizablePercent]);
 
-  // @ts-ignore - trash endpoints will be typed after schema regeneration
   const trashLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/keys/trash',
     method: 'get',
@@ -203,9 +202,10 @@ export const TrashPage = () => {
     },
   });
 
-  const trashedKeys = (trashLoadable.data as any)?._embedded?.keys ?? [];
-  const totalElements = (trashLoadable.data as any)?.page?.totalElements ?? 0;
-  const totalPages = (trashLoadable.data as any)?.page?.totalPages ?? 0;
+  const trashedKeys =
+    (trashLoadable.data?._embedded as Record<string, any>)?.keys ?? [];
+  const totalElements = trashLoadable.data?.page?.totalElements ?? 0;
+  const totalPages = trashLoadable.data?.page?.totalPages ?? 0;
 
   const handlePageChange = useCallback((_: any, newPage: number) => {
     setPage(newPage - 1);

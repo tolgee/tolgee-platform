@@ -195,22 +195,22 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
   const project = useProject();
 
   const restoreMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/keys/trash/{keyId}/restore' as any,
-    method: 'put' as any,
-    invalidatePrefix: '/v2/projects/{projectId}/keys/trash' as any,
+    url: '/v2/projects/{projectId}/keys/trash/{keyId}/restore',
+    method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/keys/trash',
   });
 
   const deleteMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/keys/trash/{keyId}' as any,
-    method: 'delete' as any,
-    invalidatePrefix: '/v2/projects/{projectId}/keys/trash' as any,
+    url: '/v2/projects/{projectId}/keys/trash/{keyId}',
+    method: 'delete',
+    invalidatePrefix: '/v2/projects/{projectId}/keys/trash',
   });
 
   const handleRestore = () => {
     restoreMutation.mutate(
       {
         path: { projectId: project.id, keyId: data.id },
-      } as any,
+      },
       {
         onSuccess: onRestore,
       }
@@ -225,7 +225,7 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
         deleteMutation.mutate(
           {
             path: { projectId: project.id, keyId: data.id },
-          } as any,
+          },
           {
             onSuccess: onDelete,
           }

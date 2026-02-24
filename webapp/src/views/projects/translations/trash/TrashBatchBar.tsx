@@ -134,30 +134,28 @@ export const TrashBatchBar = ({
     return ops;
   }, [canRestore, canDelete, t]);
 
-  // @ts-ignore - batch endpoints not yet in generated schema
   const restoreMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/start-batch-job/restore-keys' as any,
-    method: 'post' as any,
+    url: '/v2/projects/{projectId}/start-batch-job/restore-keys',
+    method: 'post',
   });
 
-  // @ts-ignore - batch endpoints not yet in generated schema
   const hardDeleteMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/start-batch-job/hard-delete-keys' as any,
-    method: 'post' as any,
+    url: '/v2/projects/{projectId}/start-batch-job/hard-delete-keys',
+    method: 'post',
   });
 
   const mutateArgs = {
     path: { projectId: project.id },
     content: { 'application/json': { keyIds: selectedKeys } },
-  } as any;
+  };
 
   const handleSubmit = () => {
     if (!operationId) return;
 
     if (operationId === 'restore') {
       restoreMutation.mutate(mutateArgs, {
-        onSuccess(data: any) {
-          setRunningOperation(data as BatchJobModel);
+        onSuccess(data) {
+          setRunningOperation(data);
         },
       });
     } else if (operationId === 'hard_delete') {
@@ -168,8 +166,8 @@ export const TrashBatchBar = ({
         }),
         onConfirm() {
           hardDeleteMutation.mutate(mutateArgs, {
-            onSuccess(data: any) {
-              setRunningOperation(data as BatchJobModel);
+            onSuccess(data) {
+              setRunningOperation(data);
             },
           });
         },
