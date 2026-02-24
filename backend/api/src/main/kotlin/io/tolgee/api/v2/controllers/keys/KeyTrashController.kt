@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
+import io.tolgee.api.v2.hateoas.invitation.TagModelAssembler
 import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.exceptions.NotFoundException
@@ -11,6 +12,7 @@ import io.tolgee.hateoas.key.KeyModel
 import io.tolgee.hateoas.key.KeyModelAssembler
 import io.tolgee.hateoas.key.trash.TrashedKeyModelAssembler
 import io.tolgee.hateoas.key.trash.TrashedKeyWithTranslationsModelAssembler
+import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
@@ -50,13 +52,14 @@ class KeyTrashController(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
   private val trashedKeyModelAssembler: TrashedKeyModelAssembler,
-  private val trashedKeyWithTranslationsModelAssembler: TrashedKeyWithTranslationsModelAssembler,
   private val keyModelAssembler: KeyModelAssembler,
   private val translationService: TranslationService,
   private val languageService: LanguageService,
   private val authenticationFacade: AuthenticationFacade,
   private val tagService: TagService,
   private val screenshotService: ScreenshotService,
+  private val tagModelAssembler: TagModelAssembler,
+  private val screenshotModelAssembler: ScreenshotModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<KeySearchResultView>,
 ) : IController {
@@ -98,13 +101,16 @@ class KeyTrashController(
         } else {
           emptyList()
         }
-      trashedKeyWithTranslationsModelAssembler.translationsByKeyId =
-        translations.groupBy { it.key.id }
-      trashedKeyWithTranslationsModelAssembler.tagsByKeyId =
-        tagService.getTagsForKeyIds(keyIds)
-      trashedKeyWithTranslationsModelAssembler.screenshotsByKeyId =
-        if (keyIds.isNotEmpty()) screenshotService.getScreenshotsForKeys(keyIds) else emptyMap()
-      return pagedResourcesAssembler.toModel(data, trashedKeyWithTranslationsModelAssembler)
+      val assembler =
+        TrashedKeyWithTranslationsModelAssembler(
+          tagModelAssembler = tagModelAssembler,
+          screenshotModelAssembler = screenshotModelAssembler,
+          translationsByKeyId = translations.groupBy { it.key.id },
+          tagsByKeyId = tagService.getTagsForKeyIds(keyIds),
+          screenshotsByKeyId =
+            if (keyIds.isNotEmpty()) screenshotService.getScreenshotsForKeys(keyIds) else emptyMap(),
+        )
+      return pagedResourcesAssembler.toModel(data, assembler)
     }
 
     return pagedResourcesAssembler.toModel(data, trashedKeyModelAssembler)

@@ -2,7 +2,6 @@ package io.tolgee.hateoas.key.trash
 
 import io.tolgee.api.v2.controllers.keys.KeyTrashController
 import io.tolgee.api.v2.hateoas.invitation.TagModelAssembler
-import io.tolgee.hateoas.screenshot.ScreenshotModel
 import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.hateoas.translations.TranslationViewModel
 import io.tolgee.model.Screenshot
@@ -11,20 +10,17 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.util.addDays
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
-import org.springframework.stereotype.Component
 
-@Component
 class TrashedKeyWithTranslationsModelAssembler(
   private val tagModelAssembler: TagModelAssembler,
   private val screenshotModelAssembler: ScreenshotModelAssembler,
+  private val translationsByKeyId: Map<Long, List<Translation>>,
+  private val tagsByKeyId: Map<Long, List<Tag>>,
+  private val screenshotsByKeyId: Map<Long, List<Screenshot>>,
 ) : RepresentationModelAssemblerSupport<KeySearchResultView, TrashedKeyWithTranslationsModel>(
     KeyTrashController::class.java,
     TrashedKeyWithTranslationsModel::class.java,
   ) {
-  var translationsByKeyId: Map<Long, List<Translation>> = emptyMap()
-  var tagsByKeyId: Map<Long, List<Tag>> = emptyMap()
-  var screenshotsByKeyId: Map<Long, List<Screenshot>> = emptyMap()
-
   override fun toModel(entity: KeySearchResultView): TrashedKeyWithTranslationsModel {
     val deletedAt = entity.deletedAt!!
     val tags = tagsByKeyId[entity.id]?.map { tagModelAssembler.toModel(it) } ?: emptyList()
