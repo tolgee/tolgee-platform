@@ -226,9 +226,11 @@ export const TrashPage = () => {
   );
 
   const allPageSelected =
-    pageKeyIds.length > 0 && pageKeyIds.every((id: number) => selectedKeys.includes(id));
+    pageKeyIds.length > 0 &&
+    pageKeyIds.every((id: number) => selectedKeys.includes(id));
   const somePageSelected =
-    pageKeyIds.some((id: number) => selectedKeys.includes(id)) && !allPageSelected;
+    pageKeyIds.some((id: number) => selectedKeys.includes(id)) &&
+    !allPageSelected;
 
   const handleSelectAll = useCallback(() => {
     if (allPageSelected) {
@@ -388,7 +390,6 @@ export const TrashPage = () => {
               />
             </StyledPagination>
           )}
-
         </StyledTableContainer>
       ) : (
         <EmptyListMessage loading={trashLoadable.isLoading}>

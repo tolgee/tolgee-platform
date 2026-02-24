@@ -15,7 +15,10 @@ import { getTextWidth } from 'tg.fixtures/getTextWidth';
 
 import { useQueryClient } from 'react-query';
 import { useProject } from 'tg.hooks/useProject';
-import { invalidateUrlPrefix, useApiMutation } from 'tg.service/http/useQueryApi';
+import {
+  invalidateUrlPrefix,
+  useApiMutation,
+} from 'tg.service/http/useQueryApi';
 import { confirmation } from 'tg.hooks/confirmation';
 import { BatchOperationDialog } from '../BatchOperations/OperationsSummary/BatchOperationDialog';
 import { BatchOperationsSubmit } from '../BatchOperations/components/BatchOperationsSubmit';
@@ -112,8 +115,9 @@ export const TrashBatchBar = ({
   const project = useProject();
   const queryClient = useQueryClient();
   const [operationId, setOperationId] = useState<TrashAction | undefined>();
-  const [runningOperation, setRunningOperation] =
-    useState<BatchJobModel | undefined>();
+  const [runningOperation, setRunningOperation] = useState<
+    BatchJobModel | undefined
+  >();
 
   const operations = useMemo<TrashOperation[]>(() => {
     const ops: TrashOperation[] = [];

@@ -344,9 +344,7 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
             </Button>
           )}
           {canDelete && (
-            <Tooltip
-              title={t('trash_permanent_delete_tooltip')}
-            >
+            <Tooltip title={t('trash_permanent_delete_tooltip')}>
               <IconButton
                 size="small"
                 color="error"
