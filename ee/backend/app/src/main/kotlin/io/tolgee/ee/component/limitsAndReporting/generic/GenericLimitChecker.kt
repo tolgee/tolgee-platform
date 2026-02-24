@@ -2,33 +2,36 @@ package io.tolgee.ee.component.limitsAndReporting.generic
 
 import io.tolgee.dtos.UsageLimits
 
-class GenericLimitChecker(
-  private val required: Long,
+open class GenericLimitChecker(
   private val limit: UsageLimits.Limit,
   private val isPayAsYouGo: Boolean,
   /**
    * When plan is fixed (the opposite of pay-as-you-go), this exception will be thrown
    */
-  private val includedUsageExceededExceptionProvider: () -> Exception,
+  private val includedUsageExceededExceptionProvider: (Long) -> Exception,
   /**
    * When plan is pay-as-you-go, this exception will be thrown
    */
-  private val spendingLimitExceededExceptionProvider: () -> Exception,
+  private val spendingLimitExceededExceptionProvider: (Long) -> Exception,
 ) {
-  fun checkLimit() {
-    if (limit.limit < 0) {
+  fun check(required: Long?) = check { required }
+
+  fun check(requiredProvider: () -> Long?) {
+    if (limit.limit <= 0) {
       return
     }
 
+    val required = requiredProvider() ?: return
+
     if (!isPayAsYouGo) {
       if (required > limit.included) {
-        throw includedUsageExceededExceptionProvider()
+        throw includedUsageExceededExceptionProvider(required)
       }
       return
     }
 
     if (required > limit.limit) {
-      throw spendingLimitExceededExceptionProvider()
+      throw spendingLimitExceededExceptionProvider(required)
     }
   }
 }

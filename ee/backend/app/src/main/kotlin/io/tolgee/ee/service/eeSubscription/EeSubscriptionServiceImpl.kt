@@ -16,6 +16,7 @@ import io.tolgee.ee.model.EeSubscription
 import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.service.eeSubscription.cloudClient.TolgeeCloudLicencingClient
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.limits.PlanLimitExceededSeatsException
 import io.tolgee.hateoas.ee.PrepareSetEeLicenceKeyModel
 import io.tolgee.hateoas.ee.SelfHostedEeSubscriptionModel
 import io.tolgee.service.InstanceIdService
@@ -169,16 +170,16 @@ class EeSubscriptionServiceImpl(
       return
     }
 
-    object : SeatsLimitChecker(
-      required = seats,
-      limits = selfHostedLimitsProvider.getLimits(),
-    ) {
-      override fun getIncludedUsageExceededException(): BadRequestException {
-        self.findSubscriptionDto()
-          ?: return BadRequestException(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
-        return super.getIncludedUsageExceededException()
-      }
-    }.check()
+    val limits = selfHostedLimitsProvider.getLimits()
+    SeatsLimitChecker(
+      limits = limits,
+      includedUsageExceededExceptionProvider = { req ->
+        self
+          .findSubscriptionDto()
+          ?.let { PlanLimitExceededSeatsException(req, limit = limits.seats.limit) }
+          ?: BadRequestException(Message.FREE_SELF_HOSTED_SEAT_LIMIT_EXCEEDED)
+      },
+    ).check(seats)
   }
 
   @CacheEvict(Caches.Companion.EE_SUBSCRIPTION, key = "1")

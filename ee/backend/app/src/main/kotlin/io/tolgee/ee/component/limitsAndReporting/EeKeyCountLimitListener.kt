@@ -62,10 +62,7 @@ class EeKeyCountLimitListener(
       return
     }
 
-    KeysLimitChecker(
-      required = keyCount,
-      limits = limits,
-    ).check()
+    KeysLimitChecker(limits = limits).check(keyCount)
   }
 
   private val limits by lazy {

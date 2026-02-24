@@ -18,13 +18,11 @@ class SelfHostedKeysSeatsLimitsChecker(
   }
 
   private fun checkKeysLimits() {
-    keys ?: return
-    KeysLimitChecker(required = keys, limits = limits).check()
+    KeysLimitChecker(limits = limits).check(keys)
   }
 
   private fun checkSeatLimits() {
-    seats ?: return
-    SeatsLimitChecker(required = seats, limits = limits).check()
+    SeatsLimitChecker(limits = limits).check(seats)
   }
 
   private val limits by lazy {
