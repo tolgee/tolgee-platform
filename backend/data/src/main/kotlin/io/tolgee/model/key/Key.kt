@@ -149,7 +149,9 @@ class Key(
   override fun resolveKey(): Key? = this
 
   override fun isModified(oldState: Map<String, Any>): Boolean {
-    return oldState["isPlural"] != this.isPlural || oldState["pluralArgName"] != this.pluralArgName
+    return oldState["isPlural"] != this.isPlural ||
+      oldState["pluralArgName"] != this.pluralArgName ||
+      oldState["deletedAt"] != this.deletedAt
   }
 
   override fun hasChanged(snapshot: KeySnapshot): Boolean {

@@ -67,6 +67,13 @@ class BranchRevisionsTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `soft-deleting key increases branch revision`() {
+    keyService.softDeleteMultiple(listOf(testData.firstKey.id))
+    assertBranchMetadataChanged()
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `deleting translation increases branch revision`() {
     translationService.deleteByIdIn(listOf(testData.translation.id))
     assertBranchMetadataChanged()
