@@ -147,9 +147,10 @@ class KeyTrashController(
   fun permanentlyDelete(
     @PathVariable keyId: Long,
   ) {
-    val key =
-      keyService.findSoftDeletedByIdsAndProjectId(listOf(keyId), projectHolder.project.id).firstOrNull()
-        ?: throw NotFoundException(Message.KEY_NOT_FOUND)
-    keyService.hardDeleteMultiple(listOf(key.id))
+    val projectIds = keyService.getSoftDeletedProjectIdsForKeyIds(listOf(keyId))
+    if (projectIds.isEmpty() || projectIds.single() != projectHolder.project.id) {
+      throw NotFoundException(Message.KEY_NOT_FOUND)
+    }
+    keyService.hardDeleteMultiple(listOf(keyId))
   }
 }

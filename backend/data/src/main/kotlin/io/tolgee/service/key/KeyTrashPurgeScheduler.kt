@@ -10,6 +10,7 @@ import io.tolgee.util.logger
 import io.tolgee.util.runSentryCatching
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import java.time.Duration
@@ -38,21 +39,26 @@ class KeyTrashPurgeScheduler(
 
   private fun purgeExpiredKeys() {
     val cutoffDate = currentDateProvider.date.addDays(-RETENTION_DAYS)
-    val expiredKeys =
-      executeInNewTransaction(transactionManager) {
-        keyService.findAllSoftDeletedBefore(cutoffDate)
-      }
+    var totalPurged = 0
 
-    if (expiredKeys.isEmpty()) return
+    do {
+      val batch =
+        executeInNewTransaction(transactionManager) {
+          keyService.findSoftDeletedIdsBefore(cutoffDate, PageRequest.of(0, BATCH_SIZE))
+        }
 
-    expiredKeys.map { it.id }.chunked(BATCH_SIZE).forEach { batch ->
+      if (batch.isEmpty) break
+
       executeInNewTransaction(transactionManager) {
-        keyService.hardDeleteMultiple(batch)
+        keyService.hardDeleteMultiple(batch.content)
       }
-      logger.info("Purged {} expired trashed keys", batch.size)
+      totalPurged += batch.numberOfElements
+      logger.info("Purged {} expired trashed keys", batch.numberOfElements)
+    } while (batch.hasNext())
+
+    if (totalPurged > 0) {
+      logger.info("Total purged {} expired trashed keys older than {}", totalPurged, cutoffDate)
     }
-
-    logger.info("Total purged {} expired trashed keys older than {}", expiredKeys.size, cutoffDate)
   }
 
   companion object {

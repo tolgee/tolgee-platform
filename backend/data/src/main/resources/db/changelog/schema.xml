@@ -5152,4 +5152,16 @@
             <!-- Old indexes would need manual recreation if rolling back -->
         </rollback>
     </changeSet>
+
+    <!-- Key soft-delete: partial index for trash queries (deleted_at IS NOT NULL) -->
+    <changeSet author="dbocharov" id="1739900000000-5" runInTransaction="false">
+        <sql>
+            create index concurrently if not exists key_project_deleted_at_not_null
+                on public.key (project_id, deleted_at)
+                where deleted_at is not null;
+        </sql>
+        <rollback>
+            drop index concurrently if exists key_project_deleted_at_not_null;
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

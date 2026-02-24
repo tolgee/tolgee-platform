@@ -511,13 +511,17 @@ interface KeyRepository : JpaRepository<Key, Long> {
     pageable: Pageable,
   ): Page<KeySearchResultView>
 
-  @Query("from Key k where k.deletedAt is not null and k.deletedAt < :before")
-  fun findAllSoftDeletedBefore(before: Date): List<Key>
+  @Query("select k.id from Key k where k.deletedAt is not null and k.deletedAt < :before")
+  fun findSoftDeletedIdsBefore(
+    before: Date,
+    pageable: Pageable,
+  ): Page<Long>
 
   @Query(
     """
     from Key k
     left join fetch k.namespace
+    left join fetch k.branch
     where k.id in :ids and k.project.id = :projectId and k.deletedAt is not null
     """,
   )
