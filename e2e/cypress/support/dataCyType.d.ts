@@ -482,7 +482,15 @@ declare namespace DataCy {
         "llm-provider-item-type" |
         "llm-provider-menu-item-delete" |
         "llm-provider-menu-item-edit" |
+        "llm-provider-pricing-dialog" |
+        "llm-provider-pricing-estimate-context-and-screenshots" |
+        "llm-provider-pricing-estimate-context-no-screenshots" |
+        "llm-provider-pricing-estimate-no-context" |
+        "llm-provider-pricing-estimate-table" |
         "llm-provider-pricing-info" |
+        "llm-provider-pricing-input-row" |
+        "llm-provider-pricing-output-row" |
+        "llm-provider-pricing-token-table" |
         "llm-providers-custom" |
         "llm-providers-server" |
         "login-button" |

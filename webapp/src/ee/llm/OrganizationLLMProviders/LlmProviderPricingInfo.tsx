@@ -34,7 +34,7 @@ export const LlmProviderPricingInfo = ({
   return (
     <>
       <StyledAction data-cy="llm-provider-pricing-info">
-        <Tooltip title={t('llm_provider_pricing_dialog_title')}>
+        <Tooltip title={t('llm_provider_pricing_info_tooltip', 'Pricing info')}>
           <IconButton
             size="small"
             color="inherit"
