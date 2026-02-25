@@ -37,6 +37,7 @@ import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -491,7 +492,10 @@ class KeyService(
     pageable: Pageable,
   ): Page<KeySearchResultView> {
     entityManager.setSimilarityLimit(0.00001)
-    return keyRepository.searchKeys(search, projectId, languageTag, branch, trashed, pageable)
+    // The native query handles ORDER BY internally (relevance-based), so strip
+    // any sort from the pageable to avoid a duplicate ORDER BY clause.
+    val unsortedPageable = PageRequest.of(pageable.pageNumber, pageable.pageSize)
+    return keyRepository.searchKeys(search, projectId, languageTag, branch, trashed, unsortedPageable)
   }
 
   @Transactional
