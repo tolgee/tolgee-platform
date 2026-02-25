@@ -13,10 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import {
-  useMoneyFormatter,
-  useNumberFormatter,
-} from 'tg.hooks/useLocale';
+import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 
 type ProviderWithPricing = {
   name: string;
@@ -141,7 +138,9 @@ export const LlmProviderPricingDialog = ({
                         defaultValue="Input"
                       />
                     </TableCell>
-                    <TableCell align="right">{formatCredits(inputPrice!)}</TableCell>
+                    <TableCell align="right">
+                      {formatCredits(inputPrice!)}
+                    </TableCell>
                   </TableRow>
                   <TableRow data-cy="llm-provider-pricing-output-row">
                     <TableCell>
@@ -150,7 +149,9 @@ export const LlmProviderPricingDialog = ({
                         defaultValue="Output"
                       />
                     </TableCell>
-                    <TableCell align="right">{formatCredits(outputPrice!)}</TableCell>
+                    <TableCell align="right">
+                      {formatCredits(outputPrice!)}
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -273,17 +274,12 @@ export const LlmProviderPricingDialog = ({
                     </TableCell>
                     <TableCell align="right">
                       {'~'}
-                      {formatCredits(
-                        INPUT_TOKENS_NO_CONTEXT + OUTPUT_TOKENS
-                      )}
+                      {formatCredits(INPUT_TOKENS_NO_CONTEXT + OUTPUT_TOKENS)}
                     </TableCell>
                     <TableCell align="right">
                       {'~'}
                       {formatCredits(
-                        estimateCredits(
-                          INPUT_TOKENS_NO_CONTEXT,
-                          OUTPUT_TOKENS
-                        )!
+                        estimateCredits(INPUT_TOKENS_NO_CONTEXT, OUTPUT_TOKENS)!
                       )}
                     </TableCell>
                     {pricePerMtCredit != null && (
