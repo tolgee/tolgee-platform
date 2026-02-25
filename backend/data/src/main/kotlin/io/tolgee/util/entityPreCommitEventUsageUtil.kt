@@ -25,6 +25,8 @@ fun EntityPreCommitEvent.getUsageIncreaseAmount(): Long {
           val currentText = entity.text
           if (previousText.isNullOrEmpty() && !currentText.isNullOrEmpty()) {
             return 1
+          } else if (!previousText.isNullOrEmpty() && currentText.isNullOrEmpty()) {
+            return -1
           }
         }
       }
