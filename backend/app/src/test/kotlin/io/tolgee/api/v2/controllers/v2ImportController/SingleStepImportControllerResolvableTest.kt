@@ -228,6 +228,68 @@ class SingleStepImportControllerResolvableTest : ProjectAuthControllerTest("/v2/
     }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `imports key with same name as soft-deleted key`() {
+    // Get the existing key and soft-delete it
+    val existingKey =
+      executeInNewTransaction {
+        getKey("namespace-1", "key-1")!!
+      }
+    performProjectAuthDelete("keys/${existingKey.id}").andIsOk
+
+    // Import with the same key name - should succeed because soft-deleted key is ignored
+    val request =
+      SingleStepImportResolvableRequest(
+        keys =
+          listOf(
+            SingleStepImportResolvableItemRequest(
+              name = "key-1",
+              namespace = "namespace-1",
+              translations =
+                mapOf(
+                  "de" to
+                    SingleStepImportResolvableTranslationRequest(
+                      text = "newly imported",
+                      resolution = ResolvableTranslationResolution.EXPECT_NO_CONFLICT,
+                    ),
+                ),
+            ),
+          ),
+      )
+    performProjectAuthPost(
+      "single-step-import-resolvable",
+      request,
+    ).andIsOk
+
+    executeInNewTransaction {
+      // The newly imported key should have the new translation
+      val activeKey = getActiveKey("namespace-1", "key-1")
+      activeKey.assert.isNotNull
+      activeKey!!.id.assert.isNotEqualTo(existingKey.id)
+      activeKey.translations
+        .find { it.language.tag == "de" }
+        ?.text.assert
+        .isEqualTo("newly imported")
+
+      // The soft-deleted key should still exist in trash
+      val trashedKey = keyService.find(existingKey.id)
+      trashedKey.assert.isNotNull
+      trashedKey!!.deletedAt.assert.isNotNull
+    }
+  }
+
+  private fun getActiveKey(
+    namespace: String?,
+    keyName: String,
+  ): Key? {
+    return projectService.get(testData.projectBuilder.self.id).keys.find {
+      it.name == keyName &&
+        it.namespace?.name == namespace &&
+        it.deletedAt == null
+    }
+  }
+
   private fun getKey(
     namespace: String?,
     keyName: String,
