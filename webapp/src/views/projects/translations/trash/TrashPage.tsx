@@ -51,12 +51,12 @@ const StyledSearchField = styled(HeaderSearchField)`
 const StyledResultCount = styled('div')`
   display: flex;
   align-items: center;
-  padding: 0px 6px;
-  margin-bottom: 2px;
+  padding: 0px 0px 4px 0px;
+  margin-left: 3px;
 `;
 
 const StyledCount = styled(Typography)`
-  padding: 8px 6px;
+  margin-left: 8px;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
@@ -271,7 +271,7 @@ export const TrashPage = () => {
       ]}
       wrapperProps={{ style: { paddingBottom: 0, paddingTop: '3px' } }}
     >
-      <Box mb={2}>
+      <Box my={1} px={0.5}>
         <TrashBanner />
       </Box>
 
