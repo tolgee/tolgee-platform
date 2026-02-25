@@ -85,103 +85,106 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   };
 
   return (
-    <StyledContainer>
-      <StyledSpaced>
-        <StyledTranslationsSearchField
-          value={search || ''}
-          onSearchChange={setSearch}
-          label={null}
-          variant="outlined"
-          placeholder={t('standard_search_label')}
-        />
-        <TranslationFilters
-          projectId={project.id}
-          selectedLanguages={selectedLanguagesMapped}
-          value={filters}
-          actions={{ setFilters, removeFilter, addFilter }}
-        />
+    <>
+      <StyledContainer>
+        <StyledSpaced>
+          <StyledTranslationsSearchField
+            value={search || ''}
+            onSearchChange={setSearch}
+            label={null}
+            variant="outlined"
+            placeholder={t('standard_search_label')}
+          />
+          <TranslationFilters
+            projectId={project.id}
+            selectedLanguages={selectedLanguagesMapped}
+            value={filters}
+            actions={{ setFilters, removeFilter, addFilter }}
+          />
 
-        <Tooltip title={t('translation_controls_sort_tooltip')}>
-          <Badge
-            color="primary"
-            variant="dot"
-            badgeContent={order === 'keyName' ? 0 : 1}
-            overlap="circular"
-          >
-            <IconButton
-              onClick={(e) => setAnchorSortEl(e.currentTarget)}
-              data-cy="translation-controls-sort"
-            >
-              <Sort />
-            </IconButton>
-          </Badge>
-        </Tooltip>
-
-        <TranslationSortMenu
-          anchorEl={anchorSortEl}
-          onClose={() => setAnchorSortEl(null)}
-          onChange={setOrder}
-          value={order}
-        />
-
-        {trashCount > 0 && (
-          <Tooltip title={t('translation_controls_trash_tooltip')}>
-            <Badge color="error" variant="dot" overlap="circular">
-              <IconButton
-                onClick={() =>
-                  history.push(
-                    LINKS.PROJECT_TRANSLATIONS_TRASH.build({
-                      [PARAMS.PROJECT_ID]: project.id,
-                    })
-                  )
-                }
-                data-cy="translations-trash-button"
+          <div style={{ display: 'flex' }}>
+            <Tooltip title={t('translation_controls_sort_tooltip')}>
+              <Badge
+                color="primary"
+                variant="dot"
+                badgeContent={order === 'keyName' ? 0 : 1}
+                overlap="circular"
               >
-                <Trash01 />
-              </IconButton>
-            </Badge>
-          </Tooltip>
-        )}
-      </StyledSpaced>
+                <IconButton
+                  onClick={(e) => setAnchorSortEl(e.currentTarget)}
+                  data-cy="translation-controls-sort"
+                >
+                  <Sort />
+                </IconButton>
+              </Badge>
+            </Tooltip>
 
-      <StyledSpaced>
-        <LanguagesSelect
-          onChange={selectLanguages}
-          value={selectedLanguages || []}
-          languages={languages || []}
-          context="translations"
-        />
-        <ButtonGroup>
-          <StyledToggleButton
-            color={view === 'LIST' ? 'primary' : 'default'}
-            onClick={() => changeView('LIST')}
-            data-cy="translations-view-list-button"
-          >
-            <LayoutLeft />
-          </StyledToggleButton>
-          <StyledToggleButton
-            color={view === 'TABLE' ? 'primary' : 'default'}
-            onClick={() => changeView('TABLE')}
-            data-cy="translations-view-table-button"
-          >
-            <LayoutGrid02 />
-          </StyledToggleButton>
-        </ButtonGroup>
+            {trashCount > 0 && (
+              <Tooltip title={t('translation_controls_trash_tooltip')}>
+                <Badge color="error" variant="dot" overlap="circular">
+                  <IconButton
+                    onClick={() =>
+                      history.push(
+                        LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+                          [PARAMS.PROJECT_ID]: project.id,
+                        })
+                      )
+                    }
+                    data-cy="translations-trash-button"
+                  >
+                    <Trash01 />
+                  </IconButton>
+                </Badge>
+              </Tooltip>
+            )}
+          </div>
+        </StyledSpaced>
 
-        {canCreateKeys && (
-          <QuickStartHighlight itemKey="add_key">
-            <Button
-              startIcon={<Plus width={19} height={19} />}
-              color="primary"
-              variant="contained"
-              onClick={handleAddTranslation}
-              data-cy="translations-add-button"
+        <StyledSpaced>
+          <LanguagesSelect
+            onChange={selectLanguages}
+            value={selectedLanguages || []}
+            languages={languages || []}
+            context="translations"
+          />
+          <ButtonGroup>
+            <StyledToggleButton
+              color={view === 'LIST' ? 'primary' : 'default'}
+              onClick={() => changeView('LIST')}
+              data-cy="translations-view-list-button"
             >
-              <T keyName="key_add" />
-            </Button>
-          </QuickStartHighlight>
-        )}
-      </StyledSpaced>
-    </StyledContainer>
+              <LayoutLeft />
+            </StyledToggleButton>
+            <StyledToggleButton
+              color={view === 'TABLE' ? 'primary' : 'default'}
+              onClick={() => changeView('TABLE')}
+              data-cy="translations-view-table-button"
+            >
+              <LayoutGrid02 />
+            </StyledToggleButton>
+          </ButtonGroup>
+
+          {canCreateKeys && (
+            <QuickStartHighlight itemKey="add_key">
+              <Button
+                startIcon={<Plus width={19} height={19} />}
+                color="primary"
+                variant="contained"
+                onClick={handleAddTranslation}
+                data-cy="translations-add-button"
+              >
+                <T keyName="key_add" />
+              </Button>
+            </QuickStartHighlight>
+          )}
+        </StyledSpaced>
+      </StyledContainer>
+      <TranslationSortMenu
+        anchorEl={anchorSortEl}
+        onClose={() => setAnchorSortEl(null)}
+        onChange={setOrder}
+        value={order}
+      />
+    </>
   );
 };

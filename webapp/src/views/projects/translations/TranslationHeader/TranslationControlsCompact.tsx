@@ -155,166 +155,167 @@ export const TranslationControlsCompact: React.FC<Props> = ({
   };
 
   return (
-    <StyledContainer>
-      {searchOpen ? (
-        <StyledSearchSpaced>
-          <StyledSearch
-            value={search || ''}
-            onSearchChange={handleSearchChange}
-            label={null}
-            variant="outlined"
-            placeholder={t('standard_search_label')}
-            style={{
-              height: 35,
-              maxWidth: 'unset',
-              width: '100%',
-            }}
-            setSearchOpen={setSearchOpen}
-          />
-          <StyledIconButton size="small" onClick={() => setSearchOpen(false)}>
-            <XClose />
-          </StyledIconButton>
-        </StyledSearchSpaced>
-      ) : (
-        <>
-          <StyledSpaced>
-            <Badge color="primary" badgeContent={search.length} variant="dot">
-              <StyledButtonWrapper>
-                <StyledIconButton
-                  size="small"
-                  onClick={() => setSearchOpen(true)}
-                >
-                  <SearchSm />
-                </StyledIconButton>
-              </StyledButtonWrapper>
-            </Badge>
-
-            <Badge color="primary" badgeContent={countFilters(filters)}>
-              <StyledButtonWrapper>
-                <StyledIconButton
-                  size="small"
-                  onClick={() => setFiltersOpen(true)}
-                  ref={anchorFilters}
-                >
-                  <FilterLines />
-                </StyledIconButton>
-              </StyledButtonWrapper>
-            </Badge>
-            {filtersOpen && (
-              <TranslationFiltersPopup
-                value={filters}
-                anchorEl={anchorFilters.current!}
-                onClose={() => setFiltersOpen(false)}
-                actions={{ setFilters, removeFilter, addFilter }}
-                projectId={project.id}
-                selectedLanguages={selectedLanguagesMapped}
-                showClearButton
-              />
-            )}
-            <Tooltip title={t('translation_controls_sort_tooltip')}>
-              <Badge
-                color="primary"
-                variant="dot"
-                badgeContent={order === 'keyName' ? 0 : 1}
-                overlap="circular"
-              >
-                <StyledIconButton
-                  size="small"
-                  onClick={(e) => setAnchorSortEl(e.currentTarget)}
-                  data-cy="translation-controls-sort"
-                >
-                  <Sort />
-                </StyledIconButton>
-              </Badge>
-            </Tooltip>
-
-            <TranslationSortMenu
-              anchorEl={anchorSortEl}
-              onClose={() => setAnchorSortEl(null)}
-              onChange={setOrder}
-              value={order}
+    <>
+      <TranslationSortMenu
+        anchorEl={anchorSortEl}
+        onClose={() => setAnchorSortEl(null)}
+        onChange={setOrder}
+        value={order}
+      />
+      <StyledContainer>
+        {searchOpen ? (
+          <StyledSearchSpaced>
+            <StyledSearch
+              value={search || ''}
+              onSearchChange={handleSearchChange}
+              label={null}
+              variant="outlined"
+              placeholder={t('standard_search_label')}
+              style={{
+                height: 35,
+                maxWidth: 'unset',
+                width: '100%',
+              }}
+              setSearchOpen={setSearchOpen}
             />
-
-            {trashCount > 0 && (
-              <Tooltip title={t('translation_controls_trash_tooltip')}>
-                <Badge color="error" variant="dot" overlap="circular">
+            <StyledIconButton size="small" onClick={() => setSearchOpen(false)}>
+              <XClose />
+            </StyledIconButton>
+          </StyledSearchSpaced>
+        ) : (
+          <>
+            <StyledSpaced>
+              <Badge color="primary" badgeContent={search.length} variant="dot">
+                <StyledButtonWrapper>
                   <StyledIconButton
                     size="small"
-                    onClick={() =>
-                      history.push(
-                        LINKS.PROJECT_TRANSLATIONS_TRASH.build({
-                          [PARAMS.PROJECT_ID]: project.id,
-                        })
-                      )
-                    }
-                    data-cy="translations-trash-button"
+                    onClick={() => setSearchOpen(true)}
                   >
-                    <Trash01 />
+                    <SearchSm />
+                  </StyledIconButton>
+                </StyledButtonWrapper>
+              </Badge>
+
+              <Badge color="primary" badgeContent={countFilters(filters)}>
+                <StyledButtonWrapper>
+                  <StyledIconButton
+                    size="small"
+                    onClick={() => setFiltersOpen(true)}
+                    ref={anchorFilters}
+                  >
+                    <FilterLines />
+                  </StyledIconButton>
+                </StyledButtonWrapper>
+              </Badge>
+              {filtersOpen && (
+                <TranslationFiltersPopup
+                  value={filters}
+                  anchorEl={anchorFilters.current!}
+                  onClose={() => setFiltersOpen(false)}
+                  actions={{ setFilters, removeFilter, addFilter }}
+                  projectId={project.id}
+                  selectedLanguages={selectedLanguagesMapped}
+                  showClearButton
+                />
+              )}
+              <Tooltip title={t('translation_controls_sort_tooltip')}>
+                <Badge
+                  color="primary"
+                  variant="dot"
+                  badgeContent={order === 'keyName' ? 0 : 1}
+                  overlap="circular"
+                >
+                  <StyledIconButton
+                    size="small"
+                    onClick={(e) => setAnchorSortEl(e.currentTarget)}
+                    data-cy="translation-controls-sort"
+                  >
+                    <Sort />
                   </StyledIconButton>
                 </Badge>
               </Tooltip>
-            )}
-          </StyledSpaced>
 
-          <StyledSpaced>
-            {isSuperSmall ? (
-              <>
-                <StyledIconButton
-                  size="small"
-                  onClick={(e) => setAnchorLanguagesEl(e.currentTarget)}
-                >
-                  <Globe02 />
-                </StyledIconButton>
+              {trashCount > 0 && (
+                <Tooltip title={t('translation_controls_trash_tooltip')}>
+                  <Badge color="error" variant="dot" overlap="circular">
+                    <StyledIconButton
+                      size="small"
+                      onClick={() =>
+                        history.push(
+                          LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+                            [PARAMS.PROJECT_ID]: project.id,
+                          })
+                        )
+                      }
+                      data-cy="translations-trash-button"
+                    >
+                      <Trash01 />
+                    </StyledIconButton>
+                  </Badge>
+                </Tooltip>
+              )}
+            </StyledSpaced>
 
-                <LanguagesMenu
-                  anchorEl={anchorLanguagesEl}
-                  onClose={() => setAnchorLanguagesEl(null)}
-                  onChange={handleLanguageChange}
-                  value={selectedLanguages}
-                  languages={languages}
+            <StyledSpaced>
+              {isSuperSmall ? (
+                <>
+                  <StyledIconButton
+                    size="small"
+                    onClick={(e) => setAnchorLanguagesEl(e.currentTarget)}
+                  >
+                    <Globe02 />
+                  </StyledIconButton>
+
+                  <LanguagesMenu
+                    anchorEl={anchorLanguagesEl}
+                    onClose={() => setAnchorLanguagesEl(null)}
+                    onChange={handleLanguageChange}
+                    value={selectedLanguages}
+                    languages={languages}
+                  />
+                </>
+              ) : (
+                <StyledLanguagesSelect
+                  onChange={selectLanguages}
+                  value={selectedLanguages || []}
+                  languages={languages || []}
+                  context="translations"
                 />
-              </>
-            ) : (
-              <StyledLanguagesSelect
-                onChange={selectLanguages}
-                value={selectedLanguages || []}
-                languages={languages || []}
-                context="translations"
-              />
-            )}
+              )}
 
-            <ButtonGroup>
-              <StyledToggleButton
-                color={view === 'LIST' ? 'primary' : 'default'}
-                onClick={() => handleViewChange('LIST')}
-                data-cy="translations-view-list-button"
-              >
-                <LayoutLeft />
-              </StyledToggleButton>
-              <StyledToggleButton
-                color={view === 'TABLE' ? 'primary' : 'default'}
-                onClick={() => handleViewChange('TABLE')}
-                data-cy="translations-view-table-button"
-              >
-                <LayoutGrid02 />
-              </StyledToggleButton>
-            </ButtonGroup>
-
-            {projectPermissions.satisfiesPermission('keys.edit') && (
-              <QuickStartHighlight itemKey="add_key">
-                <StyledIconButton
-                  color="primary"
-                  size="small"
-                  onClick={handleAddTranslation}
-                  data-cy="translations-add-button"
+              <ButtonGroup>
+                <StyledToggleButton
+                  color={view === 'LIST' ? 'primary' : 'default'}
+                  onClick={() => handleViewChange('LIST')}
+                  data-cy="translations-view-list-button"
                 >
-                  <Plus />
-                </StyledIconButton>
-              </QuickStartHighlight>
-            )}
-          </StyledSpaced>
-        </>
-      )}
-    </StyledContainer>
+                  <LayoutLeft />
+                </StyledToggleButton>
+                <StyledToggleButton
+                  color={view === 'TABLE' ? 'primary' : 'default'}
+                  onClick={() => handleViewChange('TABLE')}
+                  data-cy="translations-view-table-button"
+                >
+                  <LayoutGrid02 />
+                </StyledToggleButton>
+              </ButtonGroup>
+
+              {projectPermissions.satisfiesPermission('keys.edit') && (
+                <QuickStartHighlight itemKey="add_key">
+                  <StyledIconButton
+                    color="primary"
+                    size="small"
+                    onClick={handleAddTranslation}
+                    data-cy="translations-add-button"
+                  >
+                    <Plus />
+                  </StyledIconButton>
+                </QuickStartHighlight>
+              )}
+            </StyledSpaced>
+          </>
+        )}
+      </StyledContainer>
+    </>
   );
 };
