@@ -12,6 +12,7 @@ import io.tolgee.events.OnKeyPreRemove
 import io.tolgee.model.Project
 import io.tolgee.model.SoftDeletable
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMergeableEntity
 import io.tolgee.model.branching.snapshot.KeyScreenshotReferenceView
@@ -107,6 +108,9 @@ class Key(
 
   @ActivityLoggedProp
   override var deletedAt: Date? = null
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  var deletedBy: UserAccount? = null
 
   constructor(
     name: String,

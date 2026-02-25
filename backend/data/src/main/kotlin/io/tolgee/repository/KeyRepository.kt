@@ -179,7 +179,10 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
     select k.id as id, ns.name as namespace, km.description as description,
         k.name as name, bt.text as baseTranslation, t.text as translation,
-        k.deleted_at as deletedAt, k.is_plural as plural
+        k.deleted_at as deletedAt, k.is_plural as plural,
+        dbu.id as deletedByUserId, dbu.username as deletedByUserUsername,
+        dbu.name as deletedByUserName, dbu.avatar_hash as deletedByUserAvatarHash,
+        case when dbu.deleted_at is not null then true else false end as deletedByUserDeleted
         from key k
        join project p on p.id = k.project_id and p.id = :projectId
        left join branch br on k.branch_id = br.id
@@ -187,7 +190,8 @@ interface KeyRepository : JpaRepository<Key, Long> {
        left join key_meta km on k.id = km.key_id
        left join language l on p.id = l.project_id and l.tag = :languageTag
        left join translation bt on bt.key_id = k.id and (bt.language_id = p.base_language_id)
-       left join translation t on t.key_id = k.id and (t.language_id = l.id),
+       left join translation t on t.key_id = k.id and (t.language_id = l.id)
+       left join user_account dbu on k.deleted_by_id = dbu.id,
     lower(f_unaccent(:search)) as searchUnaccent
     where (
           lower(f_unaccent(ns.name)) %> searchUnaccent
@@ -485,11 +489,15 @@ interface KeyRepository : JpaRepository<Key, Long> {
     value = """
       select k.id as id, ns.name as namespace, k.name as name,
              km.description as description, k.deleted_at as deletedAt,
-             null as baseTranslation, null as translation, k.is_plural as plural
+             null as baseTranslation, null as translation, k.is_plural as plural,
+             dbu.id as deletedByUserId, dbu.username as deletedByUserUsername,
+             dbu.name as deletedByUserName, dbu.avatar_hash as deletedByUserAvatarHash,
+             case when dbu.deleted_at is not null then true else false end as deletedByUserDeleted
       from key k
       left join namespace ns on k.namespace_id = ns.id
       left join branch br on k.branch_id = br.id
       left join key_meta km on k.id = km.key_id
+      left join user_account dbu on k.deleted_by_id = dbu.id
       where k.project_id = :projectId
         and k.deleted_at is not null
         and ((br.name = :branch and br.deleted_at is null)

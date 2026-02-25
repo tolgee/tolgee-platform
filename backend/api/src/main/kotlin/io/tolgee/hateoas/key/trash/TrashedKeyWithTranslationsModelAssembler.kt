@@ -4,9 +4,11 @@ import io.tolgee.api.v2.controllers.keys.KeyTrashController
 import io.tolgee.api.v2.hateoas.invitation.TagModelAssembler
 import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.hateoas.translations.TranslationViewModel
+import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Tag
 import io.tolgee.model.translation.Translation
+import io.tolgee.service.AvatarService
 import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.util.addDays
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
@@ -14,6 +16,7 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 class TrashedKeyWithTranslationsModelAssembler(
   private val tagModelAssembler: TagModelAssembler,
   private val screenshotModelAssembler: ScreenshotModelAssembler,
+  private val avatarService: AvatarService,
   private val translationsByKeyId: Map<Long, List<Translation>>,
   private val tagsByKeyId: Map<Long, List<Tag>>,
   private val screenshotsByKeyId: Map<Long, List<Screenshot>>,
@@ -57,7 +60,20 @@ class TrashedKeyWithTranslationsModelAssembler(
       translations = translationsMap,
       screenshots = screenshots,
       isPlural = entity.plural ?: false,
+      deletedBy = buildDeletedByModel(entity),
     )
+  }
+
+  private fun buildDeletedByModel(entity: KeySearchResultView): SimpleUserAccountModel? {
+    return entity.deletedByUserId?.let { userId ->
+      SimpleUserAccountModel(
+        id = userId,
+        username = entity.deletedByUserUsername ?: "",
+        name = entity.deletedByUserName,
+        avatar = avatarService.getAvatarLinks(entity.deletedByUserAvatarHash),
+        deleted = entity.deletedByUserDeleted ?: false,
+      )
+    }
   }
 
   companion object {

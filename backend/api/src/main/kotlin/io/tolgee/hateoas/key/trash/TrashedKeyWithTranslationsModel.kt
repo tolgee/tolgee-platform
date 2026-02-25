@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.v2.hateoas.invitation.TagModel
 import io.tolgee.hateoas.screenshot.ScreenshotModel
 import io.tolgee.hateoas.translations.TranslationViewModel
+import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
@@ -32,5 +33,7 @@ class TrashedKeyWithTranslationsModel(
   val screenshots: List<ScreenshotModel>,
   @Schema(description = "Whether the key is plural")
   val isPlural: Boolean,
+  @Schema(description = "User who deleted the key")
+  val deletedBy: SimpleUserAccountModel?,
 ) : RepresentationModel<TrashedKeyWithTranslationsModel>(),
   Serializable

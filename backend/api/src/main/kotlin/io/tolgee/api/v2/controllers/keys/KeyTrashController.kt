@@ -18,6 +18,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.AvatarService
 import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
@@ -60,6 +61,7 @@ class KeyTrashController(
   private val screenshotService: ScreenshotService,
   private val tagModelAssembler: TagModelAssembler,
   private val screenshotModelAssembler: ScreenshotModelAssembler,
+  private val avatarService: AvatarService,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<KeySearchResultView>,
 ) : IController {
@@ -105,6 +107,7 @@ class KeyTrashController(
         TrashedKeyWithTranslationsModelAssembler(
           tagModelAssembler = tagModelAssembler,
           screenshotModelAssembler = screenshotModelAssembler,
+          avatarService = avatarService,
           translationsByKeyId = translations.groupBy { it.key.id },
           tagsByKeyId = tagService.getTagsForKeyIds(keyIds),
           screenshotsByKeyId =

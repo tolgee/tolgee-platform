@@ -5164,4 +5164,14 @@
             drop index concurrently if exists key_project_deleted_at_not_null;
         </rollback>
     </changeSet>
+
+    <changeSet author="dbocharov" id="1739900000000-6">
+        <addColumn tableName="key">
+            <column name="deleted_by_id" type="BIGINT"/>
+        </addColumn>
+        <addForeignKeyConstraint
+            baseTableName="key" baseColumnNames="deleted_by_id"
+            referencedTableName="user_account" referencedColumnNames="id"
+            constraintName="fk_key_deleted_by_user_account"/>
+    </changeSet>
 </databaseChangeLog>

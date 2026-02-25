@@ -19,6 +19,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import ReactMarkdown from 'react-markdown';
 import { MarkdownLink } from 'tg.component/common/MarkdownLink';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
+import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -125,6 +126,9 @@ const StyledTrashedCell = styled('div')`
 `;
 
 const StyledTrashedTime = styled('div')`
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
@@ -325,7 +329,21 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
       </StyledKeyCell>
 
       <StyledTrashedCell>
-        <StyledTrashedTime>{deletedTimeText}</StyledTrashedTime>
+        <StyledTrashedTime>
+          {data.deletedBy && (
+            <AvatarImg
+              size={20}
+              owner={{
+                type: 'USER',
+                id: data.deletedBy.id,
+                name: data.deletedBy.name,
+                avatar: data.deletedBy.avatar,
+                deleted: data.deletedBy.deleted,
+              }}
+            />
+          )}
+          {deletedTimeText}
+        </StyledTrashedTime>
         <StyledDeletesIn>
           <Trash01 width={14} height={14} />
           <T keyName="trash_deletes_in" params={{ days: daysUntilDelete }} />

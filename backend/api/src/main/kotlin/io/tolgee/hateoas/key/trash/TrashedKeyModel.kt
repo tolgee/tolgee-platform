@@ -1,6 +1,7 @@
 package io.tolgee.hateoas.key.trash
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable
@@ -19,5 +20,7 @@ class TrashedKeyModel(
   val deletedAt: Date,
   @Schema(description = "When the key will be permanently deleted")
   val permanentDeleteAt: Date,
+  @Schema(description = "User who deleted the key")
+  val deletedBy: SimpleUserAccountModel?,
 ) : RepresentationModel<TrashedKeyModel>(),
   Serializable

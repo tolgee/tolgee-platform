@@ -11,4 +11,9 @@ interface KeySearchResultView {
   val description: String?
   val deletedAt: Date?
   val plural: Boolean?
+  val deletedByUserId: Long?
+  val deletedByUserUsername: String?
+  val deletedByUserName: String?
+  val deletedByUserAvatarHash: String?
+  val deletedByUserDeleted: Boolean?
 }

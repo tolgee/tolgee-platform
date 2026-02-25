@@ -18,11 +18,13 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.branching.BranchMergeService
@@ -68,6 +70,7 @@ class KeyService(
   @Lazy
   private val branchMergeService: BranchMergeService,
   private val currentDateProvider: CurrentDateProvider,
+  private val authenticationFacade: AuthenticationFacade,
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -336,10 +339,16 @@ class KeyService(
   }
 
   @Transactional
-  fun softDeleteMultiple(ids: Collection<Long>) {
+  fun softDeleteMultiple(
+    ids: Collection<Long>,
+    deletedBy: UserAccount? = authenticationFacade.authenticatedUserEntityOrNull,
+  ) {
     val keys = keyRepository.findAllByIdIn(ids.toList())
     val now = currentDateProvider.date
-    keys.forEach { it.deletedAt = now }
+    keys.forEach {
+      it.deletedAt = now
+      it.deletedBy = deletedBy
+    }
     keyRepository.saveAll(keys)
   }
 
@@ -356,6 +365,7 @@ class KeyService(
         throw ValidationException(Message.KEY_EXISTS, key.name)
       }
       key.deletedAt = null
+      key.deletedBy = null
       save(key)
     }
   }
@@ -377,6 +387,7 @@ class KeyService(
     }
 
     key.deletedAt = null
+    key.deletedBy = null
     return save(key)
   }
 
