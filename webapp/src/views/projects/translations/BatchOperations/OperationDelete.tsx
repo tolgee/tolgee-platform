@@ -20,7 +20,7 @@ export const OperationDelete = ({ disabled, onStart }: Props) => {
 
   function handleSubmit() {
     confirmation({
-      title: t('translations_delete_selected'),
+      title: t('translations_delete_selected_keys'),
       message: t('translations_key_soft_delete_confirmation', {
         count: String(selection.length),
       }),

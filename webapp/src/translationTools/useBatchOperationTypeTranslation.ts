@@ -9,7 +9,7 @@ export function useBatchOperationTypeTranslate() {
   return (type: BatchJobType) => {
     switch (type) {
       case 'DELETE_KEYS':
-        return t('batch_operation_type_delete_keys');
+        return t('batch_operation_type_moving_keys_to_trash');
       case 'MACHINE_TRANSLATE':
         return t('batch_operation_type_machine_translation');
       case 'AI_PLAYGROUND_TRANSLATE':

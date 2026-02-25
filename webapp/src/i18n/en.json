@@ -550,6 +550,7 @@
   "batch_operation_type_clear_translations": "Clear translations",
   "batch_operation_type_copy_translations": "Copy translations",
   "batch_operation_type_delete_keys": "Delete keys",
+  "batch_operation_type_moving_keys_to_trash": "Moving keys to trash...",
   "batch_operation_type_restore_keys": "Restore keys",
   "batch_operation_type_hard_delete_keys": "Permanently remove keys",
   "batch_operation_type_machine_pre_translate_by_tm": "Pre-translate by TM",
