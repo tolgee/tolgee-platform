@@ -119,8 +119,7 @@ const StyledTags = styled('div')`
 const StyledTrashedCell = styled('div')`
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 8px 12px;
+  padding: 12px 12px;
   gap: 6px;
   border-left: 1px solid ${({ theme }) => theme.palette.divider};
 `;
