@@ -41,7 +41,7 @@ class TranslationViewDataProvider(
     if (cursor == null) {
       query.firstResult = pageable.offset.toInt()
     }
-    val views = query.resultList.map { KeyWithTranslationsView.of(it, languages.toList()) }
+    val views = query.resultList.map { KeyWithTranslationsView.of(it, languages.toList(), trashed = params.trashed) }
 
     // reset the value
     em.createNativeQuery("SET join_collapse_limit TO DEFAULT").executeUpdate()

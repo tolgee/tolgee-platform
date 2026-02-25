@@ -1,77 +1,71 @@
 package io.tolgee.hateoas.key.trash
 
 import io.tolgee.api.v2.controllers.keys.KeyTrashController
-import io.tolgee.api.v2.hateoas.invitation.TagModelAssembler
+import io.tolgee.api.v2.hateoas.invitation.TagModel
+import io.tolgee.hateoas.screenshot.ScreenshotModel
 import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.hateoas.translations.TranslationViewModel
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.model.Screenshot
-import io.tolgee.model.key.Tag
-import io.tolgee.model.translation.Translation
+import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.service.AvatarService
-import io.tolgee.service.key.KeySearchResultView
 import io.tolgee.util.addDays
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 
 class TrashedKeyWithTranslationsModelAssembler(
-  private val tagModelAssembler: TagModelAssembler,
-  private val screenshotModelAssembler: ScreenshotModelAssembler,
   private val avatarService: AvatarService,
-  private val translationsByKeyId: Map<Long, List<Translation>>,
-  private val tagsByKeyId: Map<Long, List<Tag>>,
+  private val screenshotModelAssembler: ScreenshotModelAssembler,
   private val screenshotsByKeyId: Map<Long, List<Screenshot>>,
-) : RepresentationModelAssemblerSupport<KeySearchResultView, TrashedKeyWithTranslationsModel>(
+) : RepresentationModelAssemblerSupport<KeyWithTranslationsView, TrashedKeyWithTranslationsModel>(
     KeyTrashController::class.java,
     TrashedKeyWithTranslationsModel::class.java,
   ) {
-  override fun toModel(entity: KeySearchResultView): TrashedKeyWithTranslationsModel {
+  override fun toModel(entity: KeyWithTranslationsView): TrashedKeyWithTranslationsModel {
     val deletedAt = entity.deletedAt!!
-    val tags = tagsByKeyId[entity.id]?.map { tagModelAssembler.toModel(it) } ?: emptyList()
-    val translations = translationsByKeyId[entity.id] ?: emptyList()
+    val tags = entity.keyTags.map { TagModel(it.id, it.name) }
     val translationsMap =
-      translations.associate { translation ->
-        translation.language.tag to
-          TranslationViewModel(
-            id = translation.id,
-            text = translation.text,
-            state = translation.state,
-            auto = translation.auto,
-            outdated = translation.outdated,
-            mtProvider = translation.mtProvider,
-            commentCount = 0,
-            unresolvedCommentCount = 0,
-            labels = null,
-            activeSuggestionCount = 0,
-            totalSuggestionCount = 0,
-          )
+      entity.translations.mapValues { (_, tv) ->
+        TranslationViewModel(
+          id = tv.id,
+          text = tv.text,
+          state = tv.state,
+          auto = tv.auto,
+          outdated = tv.outdated,
+          mtProvider = tv.mtProvider,
+          commentCount = tv.commentCount,
+          unresolvedCommentCount = tv.unresolvedCommentCount,
+          labels = null,
+          activeSuggestionCount = tv.activeSuggestionCount,
+          totalSuggestionCount = tv.totalSuggestionCount,
+        )
       }
 
     val screenshots =
-      screenshotsByKeyId[entity.id]?.map { screenshotModelAssembler.toModel(it) } ?: emptyList()
+      screenshotsByKeyId[entity.keyId]?.map { screenshotModelAssembler.toModel(it) } ?: emptyList()
 
     return TrashedKeyWithTranslationsModel(
-      id = entity.id,
-      name = entity.name,
-      namespace = entity.namespace,
+      id = entity.keyId,
+      name = entity.keyName,
+      namespace = entity.keyNamespace,
       deletedAt = deletedAt,
       permanentDeleteAt = deletedAt.addDays(RETENTION_DAYS),
-      description = entity.description,
+      description = entity.keyDescription,
       tags = tags,
       translations = translationsMap,
       screenshots = screenshots,
-      isPlural = entity.plural ?: false,
+      isPlural = entity.keyIsPlural,
       deletedBy = buildDeletedByModel(entity),
     )
   }
 
-  private fun buildDeletedByModel(entity: KeySearchResultView): SimpleUserAccountModel? {
+  private fun buildDeletedByModel(entity: KeyWithTranslationsView): SimpleUserAccountModel? {
     return entity.deletedByUserId?.let { userId ->
       SimpleUserAccountModel(
         id = userId,
         username = entity.deletedByUserUsername ?: "",
         name = entity.deletedByUserName,
         avatar = avatarService.getAvatarLinks(entity.deletedByUserAvatarHash),
-        deleted = entity.deletedByUserDeleted ?: false,
+        deleted = entity.deletedByUserDeletedAt != null,
       )
     }
   }

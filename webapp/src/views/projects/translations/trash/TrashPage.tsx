@@ -25,6 +25,9 @@ import { CellLanguage } from '../TranslationsTable/CellLanguage';
 import { useColumns } from '../useColumns';
 import { ColumnResizer } from '../ColumnResizer';
 import { components } from 'tg.service/apiSchema.generated';
+import { TranslationFilters } from '../TranslationFilters/TranslationFilters';
+import { useTranslationFilters } from '../TranslationFilters/useTranslationFilters';
+import { FiltersInternal } from '../TranslationFilters/tools';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -121,6 +124,20 @@ export const TrashPage = () => {
   const [search, setSearch] = useUrlSearchState('search', {
     defaultVal: '',
   });
+  const [filtersJson, setFiltersJson] = useUrlSearchState('filters', {
+    defaultVal: '{}',
+  });
+  const parsedFilters: FiltersInternal = useMemo(
+    () => JSON.parse(filtersJson || '{}'),
+    [filtersJson]
+  );
+  const setFilters = useCallback(
+    (f: FiltersInternal) => {
+      setFiltersJson(JSON.stringify(f));
+      setPage(0);
+    },
+    [setFiltersJson]
+  );
   const [page, setPage] = useState(0);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<number[]>([]);
@@ -150,11 +167,22 @@ export const TrashPage = () => {
     [languagesLoadable.data]
   );
 
+  const baseLangTag = useMemo(
+    () => allLanguages.find((l) => l.base)?.tag,
+    [allLanguages]
+  );
+
   const effectiveLanguages = useMemo(() => {
     if (selectedLanguages.length > 0) return selectedLanguages;
-    const baseLang = allLanguages.find((l) => l.base);
-    return baseLang ? [baseLang.tag] : [];
-  }, [selectedLanguages, allLanguages]);
+    return baseLangTag ? [baseLangTag] : [];
+  }, [selectedLanguages, baseLangTag]);
+
+  const { addFilter, removeFilter, filtersQuery } = useTranslationFilters({
+    filters: parsedFilters,
+    setFilters,
+    selectedLanguages: effectiveLanguages,
+    baseLang: baseLangTag,
+  });
 
   const languageCols = useMemo(() => {
     return effectiveLanguages
@@ -199,7 +227,8 @@ export const TrashPage = () => {
       size: PAGE_SIZE,
       search: search || undefined,
       languages: effectiveLanguages.length > 0 ? effectiveLanguages : undefined,
-    },
+      ...filtersQuery,
+    } as any,
   });
 
   const trashedKeys =
@@ -286,6 +315,12 @@ export const TrashPage = () => {
             label={null}
             variant="outlined"
             placeholder={t('standard_search_label')}
+          />
+          <TranslationFilters
+            value={parsedFilters as any}
+            actions={{ addFilter, removeFilter, setFilters }}
+            selectedLanguages={languageCols}
+            projectId={project.id}
           />
         </StyledSpaced>
 
