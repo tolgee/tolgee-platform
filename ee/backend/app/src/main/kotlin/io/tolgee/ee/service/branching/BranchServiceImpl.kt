@@ -30,8 +30,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.TransactionSynchronization
-import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.Date
 
 @Primary
@@ -134,13 +132,7 @@ class BranchServiceImpl(
       branchCopyService.copy(projectId, originBranch, branch)
 
       // Enqueue snapshot build after commit so the branch and its keys are visible to the worker.
-      TransactionSynchronizationManager.registerSynchronization(
-        object : TransactionSynchronization {
-          override fun afterCommit() {
-            branchSnapshotWorker.scheduleSnapshot(branch.id)
-          }
-        },
-      )
+      branchSnapshotWorker.scheduleSnapshot(branch.id)
       branch
     }!!
   }
@@ -160,13 +152,7 @@ class BranchServiceImpl(
     branch.writeLocked = false
     branch.snapshotErrorMessage = null
     branchRepository.save(branch)
-    TransactionSynchronizationManager.registerSynchronization(
-      object : TransactionSynchronization {
-        override fun afterCommit() {
-          branchSnapshotWorker.scheduleSnapshot(branch.id)
-        }
-      },
-    )
+    branchSnapshotWorker.scheduleSnapshot(branch.id)
     return branch
   }
 

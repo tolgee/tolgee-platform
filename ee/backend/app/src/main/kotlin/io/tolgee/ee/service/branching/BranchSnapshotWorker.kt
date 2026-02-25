@@ -1,27 +1,46 @@
 package io.tolgee.ee.service.branching
 
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * Schedules snapshot builds on a background thread.
  *
- * All transactional work is delegated to [BranchSnapshotTxHelper] to avoid mixing
- * @Async proxy creation with self-injection, which causes circular bean dependency errors.
+ * [scheduleSnapshot] must be called within an active transaction. It hooks into
+ * the transaction lifecycle and dispatches [executeSnapshot] (@Async) after commit
+ * via [self] — a @Lazy self-reference that ensures the call goes through the Spring
+ * proxy so that @Async is intercepted correctly.
  *
- * Does NOT implement Logging — @Async creates a JDK dynamic proxy when the bean
- * implements any interface, which then fails type-checking on constructor injection.
- * A static logger avoids the interface and forces a CGLIB subclass proxy instead.
+ * All transactional work is delegated to [BranchSnapshotTxHelper] to keep the
+ * @Async proxy (CGLIB) from having to also be @Transactional.
  */
 @Service
 class BranchSnapshotWorker(
   private val txHelper: BranchSnapshotTxHelper,
+  @Lazy private val self: BranchSnapshotWorker,
 ) {
   private val log = LoggerFactory.getLogger(BranchSnapshotWorker::class.java)
 
-  @Async
+  /**
+   * Must be called within an active transaction.
+   * Schedules [executeSnapshot] to run on a background thread after the transaction commits.
+   */
   fun scheduleSnapshot(branchId: Long) {
+    TransactionSynchronizationManager.registerSynchronization(
+      object : TransactionSynchronization {
+        override fun afterCommit() {
+          self.executeSnapshot(branchId)
+        }
+      },
+    )
+  }
+
+  @Async
+  fun executeSnapshot(branchId: Long) {
     try {
       val built = txHelper.buildSnapshot(branchId)
       if (built) {
