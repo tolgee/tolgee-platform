@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.data.BranchTranslationsTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
+import io.tolgee.ee.service.branching.BranchCleanupWorker
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.key.Key
@@ -44,6 +45,9 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
+  @Autowired
+  lateinit var branchCleanupWorker: BranchCleanupWorker
 
   @Autowired
   lateinit var keySnapshotRepository: KeySnapshotRepository
@@ -111,7 +115,9 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
     performBranchDeletion(testData.toBeDeletedBranch.id).andIsOk
 
-    // All cleanup is synchronous — verify immediately
+    // Cleanup runs asynchronously after the HTTP response.
+    // Wait for it to complete, then verify all branch data was hard-deleted.
+    branchCleanupWorker.waitForPendingCleanups()
     keyRepository
       .countByProjectAndBranch(
         testData.project.id,

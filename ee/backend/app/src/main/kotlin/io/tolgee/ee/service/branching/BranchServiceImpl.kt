@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionSynchronization
 import org.springframework.transaction.support.TransactionSynchronizationManager
+import java.util.Date
 
 @Primary
 @Service
@@ -42,6 +43,7 @@ class BranchServiceImpl(
   private val branchCopyService: BranchCopyService,
   private val branchSnapshotService: BranchSnapshotService,
   private val branchSnapshotWorker: BranchSnapshotWorker,
+  private val branchCleanupWorker: BranchCleanupWorker,
   private val taskService: TaskService,
   private val authenticationFacade: AuthenticationFacade,
   private val projectBranchingMigrationService: ProjectBranchingMigrationService,
@@ -197,8 +199,13 @@ class BranchServiceImpl(
         if (branchRepository.existsActiveByOriginBranchId(branchId)) {
           throw BadRequestException(Message.CANNOT_DELETE_BRANCH_WITH_CHILDREN)
         }
+        // Record the activity log entry in this transaction (needs current user context).
         activityHolder.forceEntityRevisionType(branch, RevisionType.DEL)
-        branchCleanupService.cleanupBranch(projectId, branchId)
+        // Soft-delete so the branch disappears from the UI immediately.
+        // The heavy data cleanup runs on a background thread after commit.
+        branch.deletedAt = Date()
+        branchRepository.save(branch)
+        branchCleanupWorker.scheduleCleanup(projectId, branchId)
       },
     )
   }

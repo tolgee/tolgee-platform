@@ -351,6 +351,17 @@ class ScreenshotService(
     removeScreenshotReferences(all)
   }
 
+  /**
+   * Deletes storage files for screenshots that will become orphans after all
+   * key_screenshot_reference rows for [branchId]'s keys are removed.
+   * The actual DB rows are deleted by the caller via bulk SQL.
+   */
+  fun deleteFilesByBranch(branchId: Long) {
+    screenshotRepository.findOrphansByBranchId(branchId).forEach { screenshot ->
+      deleteFile(screenshot)
+    }
+  }
+
   private fun deleteFile(screenshot: Screenshot) {
     fileStorage.deleteFile(screenshot.getFilePath())
   }
