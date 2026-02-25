@@ -139,7 +139,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-properties-migrator"
 
     implementation libs.springDocOpenApiCommon
-    testApi libs.redissonSpringBootStarter
+    implementation libs.redissonSpringBootStarter
 
     /**
      * OPENTELEMETRY
