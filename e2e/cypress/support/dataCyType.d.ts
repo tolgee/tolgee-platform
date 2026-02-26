@@ -573,7 +573,6 @@ declare namespace DataCy {
         "organization-invitation-cancel-button" |
         "organization-invitation-copy-button" |
         "organization-invitation-item" |
-        "organization-llm-providers-tab" |
         "organization-member-item" |
         "organization-member-leave-button" |
         "organization-members-remove-user-button" |

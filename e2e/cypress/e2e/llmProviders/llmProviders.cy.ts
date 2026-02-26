@@ -92,7 +92,7 @@ describe('basic prompt', () => {
   });
 
   it('server providers visible', () => {
-    gcy('organization-llm-providers-tab').contains('Server').click();
+    gcy('llm-providers-server').click();
     gcy('llm-provider-item-name').should('contain', 'server-provider');
     gcyAdvanced({
       value: 'llm-provider-item-type',
@@ -101,7 +101,7 @@ describe('basic prompt', () => {
   });
 
   it('does not show pricing info when billing is disabled', () => {
-    gcy('organization-llm-providers-tab').contains('Server').click();
+    gcy('llm-providers-server').click();
     gcy('llm-provider-item-name').should('contain', 'server-provider');
     gcy('llm-provider-pricing-info').should('not.exist');
   });
