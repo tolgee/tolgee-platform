@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import {
   Table,
   TableBody,
@@ -25,43 +26,58 @@ type Props = {
 function estimateCredits(
   inputPrice: number,
   outputPrice: number,
-  inputTokensPerString: number,
-  outputTokensPerString: number
+  inputTokensPerString: number
 ): number {
   return (
-    (inputTokensPerString * inputPrice + outputTokensPerString * outputPrice) *
+    (inputTokensPerString * inputPrice + OUTPUT_TOKENS * outputPrice) *
     STRINGS_COUNT
   );
 }
 
-const ESTIMATE_ROWS = [
-  {
-    dataCy: 'llm-provider-pricing-estimate-context-and-screenshots',
-    keyName: 'llm_provider_pricing_context_and_screenshots',
-    defaultValue: 'Context + screenshots',
-    inputTokens: INPUT_TOKENS_CONTEXT_AND_SCREENSHOTS,
-  },
-  {
-    dataCy: 'llm-provider-pricing-estimate-context-no-screenshots',
-    keyName: 'llm_provider_pricing_context_no_screenshots',
-    defaultValue: 'Context, no screenshots',
-    inputTokens: INPUT_TOKENS_CONTEXT_NO_SCREENSHOTS,
-  },
-  {
-    dataCy: 'llm-provider-pricing-estimate-no-context',
-    keyName: 'llm_provider_pricing_no_context',
-    defaultValue: 'No context',
-    inputTokens: INPUT_TOKENS_NO_CONTEXT,
-  },
-] as const;
-
-export const EstimateCostTable = ({
+const EstimateRow = ({
+  dataCy,
+  label,
+  inputTokens,
   inputPrice,
   outputPrice,
   pricePerMtCredit,
   formatCredits,
   creditsToEur,
-}: Props) => {
+}: {
+  dataCy: string;
+  label: ReactNode;
+  inputTokens: number;
+  inputPrice: number;
+  outputPrice: number;
+  pricePerMtCredit: number | null;
+  formatCredits: (value: number) => string;
+  creditsToEur: (credits: number) => string | null;
+}) => {
+  const totalTokens = inputTokens + OUTPUT_TOKENS;
+  const credits = estimateCredits(inputPrice, outputPrice, inputTokens);
+  return (
+    <TableRow data-cy={dataCy}>
+      <TableCell>{label}</TableCell>
+      <TableCell align="right">
+        {'~'}
+        {formatCredits(totalTokens)}
+      </TableCell>
+      <TableCell align="right">
+        {'~'}
+        {formatCredits(credits)}
+      </TableCell>
+      {pricePerMtCredit != null && (
+        <TableCell align="right">
+          {'~'}
+          {creditsToEur(credits)}
+        </TableCell>
+      )}
+    </TableRow>
+  );
+};
+
+export const EstimateCostTable = (props: Props) => {
+  const { pricePerMtCredit, ...rowProps } = props;
   return (
     <>
       <Typography variant="subtitle2" gutterBottom>
@@ -100,36 +116,42 @@ export const EstimateCostTable = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {ESTIMATE_ROWS.map((row) => {
-            const totalTokens = row.inputTokens + OUTPUT_TOKENS;
-            const credits = estimateCredits(
-              inputPrice,
-              outputPrice,
-              row.inputTokens,
-              OUTPUT_TOKENS
-            );
-            return (
-              <TableRow key={row.dataCy} data-cy={row.dataCy}>
-                <TableCell>
-                  <T keyName={row.keyName} defaultValue={row.defaultValue} />
-                </TableCell>
-                <TableCell align="right">
-                  {'~'}
-                  {formatCredits(totalTokens)}
-                </TableCell>
-                <TableCell align="right">
-                  {'~'}
-                  {formatCredits(credits)}
-                </TableCell>
-                {pricePerMtCredit != null && (
-                  <TableCell align="right">
-                    {'~'}
-                    {creditsToEur(credits)}
-                  </TableCell>
-                )}
-              </TableRow>
-            );
-          })}
+          <EstimateRow
+            dataCy="llm-provider-pricing-estimate-context-and-screenshots"
+            inputTokens={INPUT_TOKENS_CONTEXT_AND_SCREENSHOTS}
+            pricePerMtCredit={pricePerMtCredit}
+            label={
+              <T
+                keyName="llm_provider_pricing_context_and_screenshots"
+                defaultValue="Context + screenshots"
+              />
+            }
+            {...rowProps}
+          />
+          <EstimateRow
+            dataCy="llm-provider-pricing-estimate-context-no-screenshots"
+            inputTokens={INPUT_TOKENS_CONTEXT_NO_SCREENSHOTS}
+            pricePerMtCredit={pricePerMtCredit}
+            label={
+              <T
+                keyName="llm_provider_pricing_context_no_screenshots"
+                defaultValue="Context, no screenshots"
+              />
+            }
+            {...rowProps}
+          />
+          <EstimateRow
+            dataCy="llm-provider-pricing-estimate-no-context"
+            inputTokens={INPUT_TOKENS_NO_CONTEXT}
+            pricePerMtCredit={pricePerMtCredit}
+            label={
+              <T
+                keyName="llm_provider_pricing_no_context"
+                defaultValue="No context"
+              />
+            }
+            {...rowProps}
+          />
         </TableBody>
       </Table>
     </>
