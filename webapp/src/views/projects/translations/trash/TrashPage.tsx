@@ -97,6 +97,7 @@ const StyledHeaderRow = styled('div')`
 
 const StyledHeaderCell = styled('div')`
   border-top: 1px solid ${({ theme }) => theme.palette.divider};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
   box-sizing: border-box;
   display: flex;
   flex-grow: 0;
@@ -104,7 +105,6 @@ const StyledHeaderCell = styled('div')`
   align-items: center;
   &.keyCell {
     padding-left: 13px;
-    padding-top: 8px;
   }
   &.trashedCell {
     padding: 8px 12px;
@@ -358,13 +358,16 @@ export const TrashPage = () => {
         </StyledResultCount>
       )}
 
+      <div ref={containerRef} />
+
       {trashedKeys.length > 0 ? (
-        <StyledTableContainer ref={containerRef} data-cy="trash-table">
+        <StyledTableContainer data-cy="trash-table">
           <StyledVerticalScroll>
             <StyledContent>
               <StyledHeaderRow
                 style={{
                   gridTemplateColumns: finalColumnSizes.join(' '),
+                  width: `calc(${finalColumnSizes.join(' + ')})`,
                 }}
               >
                 <StyledHeaderCell className="keyCell">
