@@ -4,12 +4,12 @@ import { useTranslate } from '@tolgee/react';
 import { Checkbox, styled, Tooltip, Box } from '@mui/material';
 import { Zap } from '@untitled-ui/icons-react';
 
-import { LimitedHeightText } from 'tg.component/LimitedHeightText';
 import { components } from 'tg.service/apiSchema.generated';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { wrapIf } from 'tg.fixtures/wrapIf';
 
 import { Tags } from './Tags/Tags';
+import { KeyCellContent } from './KeyCellContent';
 import {
   CELL_CLICKABLE,
   CELL_PLAIN,
@@ -30,8 +30,7 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import { ScreenshotDropzone } from './Screenshots/ScreenshotDropzone';
 import { useScreenshotUpload } from './Screenshots/useScreenshotUpload';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import ReactMarkdown from 'react-markdown';
-import { MarkdownLink } from 'tg.component/common/MarkdownLink';
+
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -72,23 +71,6 @@ const StyledCheckbox = styled(Checkbox)`
   width: 38px;
   height: 38px;
   margin: 3px -9px -9px 3px;
-`;
-
-const StyledKey = styled('div')`
-  grid-area: key;
-  margin: 12px 12px 8px 12px;
-  overflow: hidden;
-  position: relative;
-`;
-
-const StyledDescription = styled('div')`
-  grid-area: description;
-  padding: 0px 12px 8px 12px;
-  font-size: 13px;
-  color: ${({ theme }) =>
-    theme.palette.mode === 'light'
-      ? theme.palette.emphasis[300]
-      : theme.palette.emphasis[500]};
 `;
 
 const StyledTags = styled('div')`
@@ -234,28 +216,11 @@ export const CellKey: React.FC<Props> = ({
                 <div />
               </Tooltip>
             )}
-          <StyledKey data-cy="translations-key-name">
-            <LimitedHeightText
-              width={widthPercent}
-              maxLines={3}
-              wrap="break-all"
-            >
-              {data.keyName}
-            </LimitedHeightText>
-          </StyledKey>
-          {data.keyDescription && (
-            <StyledDescription data-cy="translations-key-cell-description">
-              <LimitedHeightText maxLines={5}>
-                <ReactMarkdown
-                  components={{
-                    a: MarkdownLink,
-                  }}
-                >
-                  {data.keyDescription}
-                </ReactMarkdown>
-              </LimitedHeightText>
-            </StyledDescription>
-          )}
+          <KeyCellContent
+            keyName={data.keyName}
+            description={data.keyDescription}
+            width={widthPercent}
+          />
           {data.screenshots && (
             <StyledScreenshots>
               <Screenshots

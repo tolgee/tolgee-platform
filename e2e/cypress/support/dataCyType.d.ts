@@ -918,8 +918,6 @@ declare namespace DataCy {
         "trash-batch-bar" |
         "trash-batch-select" |
         "trash-batch-select-item" |
-        "trash-key-description" |
-        "trash-key-name" |
         "trash-permanent-delete-button" |
         "trash-restore-button" |
         "trash-row" |

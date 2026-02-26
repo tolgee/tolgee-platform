@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Trash01 } from '@untitled-ui/icons-react';
 import {
   Button,
   Checkbox,
-  Chip,
   IconButton,
+  Menu,
+  MenuItem,
   styled,
   Tooltip,
 } from '@mui/material';
@@ -12,14 +13,12 @@ import { T, useTranslate } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { confirmation } from 'tg.hooks/confirmation';
-import { TRANSLATION_STATES } from 'tg.constants/translationStates';
-import { LimitedHeightText } from 'tg.component/LimitedHeightText';
+import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { Tag } from '../Tags/Tag';
 import { components } from 'tg.service/apiSchema.generated';
-import ReactMarkdown from 'react-markdown';
-import { MarkdownLink } from 'tg.component/common/MarkdownLink';
-import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { KeyCellContent } from '../KeyCellContent';
+import { TranslationCellReadOnly } from '../TranslationCellReadOnly';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -45,28 +44,48 @@ const StyledKeyCell = styled('div')`
   min-width: 0;
 `;
 
+const StyledNamespaceChip = styled('div')`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background: ${({ theme }) => theme.palette.background.default};
+  padding: ${({ theme }) => theme.spacing(0, 1.5, 0, 1.5)};
+  padding-bottom: 1px;
+  height: 24px;
+  position: absolute;
+  top: -12px;
+  left: 2px;
+  border-radius: 12px;
+  box-shadow: ${({ theme }) =>
+    theme.palette.mode === 'dark'
+      ? '0px 0px 7px -1px #000000'
+      : '0px 0px 7px -2px #00000097'};
+  z-index: 1;
+  max-width: 100%;
+  font-size: 14px;
+  &:hover {
+    background: ${({ theme }) => theme.palette.emphasis[50]};
+  }
+`;
+
+const StyledNamespaceContent = styled('div')`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const StyledMoreArrow = styled('div')`
+  display: flex;
+  align-items: center;
+  padding-left: 2px;
+  margin-right: ${({ theme }) => theme.spacing(-0.5)};
+`;
+
 const StyledCheckbox = styled(Checkbox)`
   grid-area: checkbox;
   width: 38px;
   height: 38px;
   margin: 3px -9px -9px 3px;
-`;
-
-const StyledKey = styled('div')`
-  grid-area: key;
-  margin: 12px 12px 8px 12px;
-  overflow: hidden;
-  position: relative;
-`;
-
-const StyledDescription = styled('div')`
-  grid-area: description;
-  padding: 0px 12px 8px 12px;
-  font-size: 13px;
-  color: ${({ theme }) =>
-    theme.palette.mode === 'light'
-      ? theme.palette.emphasis[300]
-      : theme.palette.emphasis[500]};
 `;
 
 const StyledScreenshots = styled('div')`
@@ -146,31 +165,6 @@ const StyledActions = styled('div')`
   gap: 4px;
 `;
 
-const StyledTranslationCell = styled('div')`
-  display: grid;
-  grid-template-columns: auto 1fr;
-  position: relative;
-  outline: 0;
-  overflow: hidden;
-`;
-
-const StyledStateBar = styled('div')`
-  height: 100%;
-  width: 4px;
-  filter: brightness(
-    ${({ theme }) => (theme.palette.mode === 'dark' ? 0.7 : 1)}
-  );
-`;
-
-const StyledTranslationContent = styled('div')`
-  display: grid;
-  grid-auto-rows: max-content;
-  min-height: 23px;
-  margin: 8px 12px 8px 12px;
-  position: relative;
-  align-content: start;
-`;
-
 type Props = {
   data: any;
   selected: boolean;
@@ -181,6 +175,8 @@ type Props = {
   canDelete: boolean;
   languages: LanguageModel[];
   columnSizes: string[];
+  showNamespace: boolean;
+  onFilterNamespace?: (namespace: string) => void;
 };
 
 export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
@@ -193,9 +189,12 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
   canDelete,
   languages,
   columnSizes,
+  showNamespace,
+  onFilterNamespace,
 }) {
   const { t } = useTranslate();
   const project = useProject();
+  const [nsMenuAnchor, setNsMenuAnchor] = useState<HTMLElement | null>(null);
 
   const restoreMutation = useApiMutation({
     url: '/v2/projects/{projectId}/keys/trash/{keyId}/restore',
@@ -266,39 +265,47 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
       }}
       data-cy="trash-row"
     >
-      <StyledKeyCell>
-        <StyledCheckbox
+      {showNamespace && (
+        <>
+          <StyledNamespaceChip
+            onClick={(e) => setNsMenuAnchor(e.currentTarget)}
+          >
+            <StyledNamespaceContent>
+              {data.namespace}
+            </StyledNamespaceContent>
+            <StyledMoreArrow>
+              <ArrowDropDown fontSize="small" />
+            </StyledMoreArrow>
+          </StyledNamespaceChip>
+          {nsMenuAnchor && (
+            <Menu
+              anchorEl={nsMenuAnchor}
+              open={Boolean(nsMenuAnchor)}
+              onClose={() => setNsMenuAnchor(null)}
+            >
+              <MenuItem
+                onClick={() => {
+                  onFilterNamespace?.(data.namespace);
+                  setNsMenuAnchor(null);
+                }}
+              >
+                {t('namespace_menu_filter', { namespace: data.namespace })}
+              </MenuItem>
+            </Menu>
+          )}
+        </>
+      )}
+      <StyledKeyCell style={showNamespace ? { paddingTop: 14 } : undefined}>
+          <StyledCheckbox
           size="small"
           checked={selected}
           onChange={onToggle}
           data-cy="trash-row-checkbox"
         />
-        <StyledKey data-cy="trash-key-name">
-          <LimitedHeightText maxLines={3} wrap="break-all">
-            {data.name}
-          </LimitedHeightText>
-          {data.namespace && (
-            <Chip
-              label={data.namespace}
-              size="small"
-              variant="outlined"
-              sx={{ ml: 1, verticalAlign: 'middle' }}
-            />
-          )}
-        </StyledKey>
-        {data.description && (
-          <StyledDescription data-cy="trash-key-description">
-            <LimitedHeightText maxLines={5}>
-              <ReactMarkdown
-                components={{
-                  a: MarkdownLink,
-                }}
-              >
-                {data.description}
-              </ReactMarkdown>
-            </LimitedHeightText>
-          </StyledDescription>
-        )}
+        <KeyCellContent
+          keyName={data.name}
+          description={data.description}
+        />
         {data.screenshots?.length > 0 && (
           <StyledScreenshots>
             {data.screenshots.map((sc: any) => {
@@ -378,24 +385,14 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
 
       {languages.map((language) => {
         const translation = translations[language.tag];
-        const state = translation?.state || 'UNTRANSLATED';
-        const stateColor =
-          TRANSLATION_STATES[state]?.color ||
-          TRANSLATION_STATES['UNTRANSLATED'].color;
-
         return (
-          <StyledTranslationCell key={language.tag}>
-            <StyledStateBar style={{ borderLeft: `4px solid ${stateColor}` }} />
-            <StyledTranslationContent>
-              {translation?.text ? (
-                <TranslationVisual
-                  text={translation.text}
-                  locale={language.tag}
-                  isPlural={data.isPlural ?? false}
-                />
-              ) : null}
-            </StyledTranslationContent>
-          </StyledTranslationCell>
+          <TranslationCellReadOnly
+            key={language.tag}
+            text={translation?.text}
+            state={translation?.state}
+            locale={language.tag}
+            isPlural={data.isPlural ?? false}
+          />
         );
       })}
     </StyledRow>

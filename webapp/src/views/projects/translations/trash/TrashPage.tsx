@@ -33,6 +33,8 @@ type LanguageModel = components['schemas']['LanguageModel'];
 
 const PAGE_SIZE = 20;
 const TRASHED_COLUMN_WIDTH = 200;
+const HEADER_HEIGHT = 39;
+const NAMESPACE_BANNER_SPACING = 14;
 
 const StyledControls = styled('div')`
   display: grid;
@@ -368,6 +370,9 @@ export const TrashPage = () => {
                 style={{
                   gridTemplateColumns: finalColumnSizes.join(' '),
                   width: `calc(${finalColumnSizes.join(' + ')})`,
+                  height:
+                    HEADER_HEIGHT +
+                    (trashedKeys[0]?.namespace ? NAMESPACE_BANNER_SPACING : 0),
                 }}
               >
                 <StyledHeaderCell className="keyCell">
@@ -401,20 +406,28 @@ export const TrashPage = () => {
                 );
               })}
 
-              {trashedKeys.map((key: any) => (
-                <TrashRow
-                  key={key.id}
-                  data={key}
-                  selected={selectedKeys.includes(key.id)}
-                  onToggle={() => handleToggleKey(key.id)}
-                  onRestore={handleRestore}
-                  onDelete={handleDelete}
-                  canRestore={canRestore}
-                  canDelete={canDelete}
-                  languages={languageCols}
-                  columnSizes={finalColumnSizes}
-                />
-              ))}
+              {trashedKeys.map((key: any, index: number) => {
+                const prevKey = index > 0 ? trashedKeys[index - 1] : null;
+                const showNamespace =
+                  key.namespace &&
+                  (index === 0 || prevKey?.namespace !== key.namespace);
+                return (
+                  <TrashRow
+                    key={key.id}
+                    data={key}
+                    selected={selectedKeys.includes(key.id)}
+                    onToggle={() => handleToggleKey(key.id)}
+                    onRestore={handleRestore}
+                    onDelete={handleDelete}
+                    canRestore={canRestore}
+                    canDelete={canDelete}
+                    languages={languageCols}
+                    columnSizes={finalColumnSizes}
+                    showNamespace={!!showNamespace}
+                    onFilterNamespace={(ns) => addFilter('filterNamespace', ns)}
+                  />
+                );
+              })}
             </StyledContent>
           </StyledVerticalScroll>
 
