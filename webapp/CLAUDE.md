@@ -13,7 +13,7 @@ Tolgee REST API — the running app will pick them up automatically.
 context upload, tagging) with the full details (key names, translations, tags, etc.). Ask the user for confirmation
 once, then execute all calls together.
 
-**Important:** Remember to upload the context (BigMeta) and Screenshots for each key.
+**Important:** Always upload screenshots for each key. Upload BigMeta context when at least 2 related keys are present.
 
 **Important:** Always provide `defaultValue` when using the `T` component or `t()` function. This ensures the UI
 displays meaningful text before translations are uploaded to Tolgee, which is needed for screenshots to show correct

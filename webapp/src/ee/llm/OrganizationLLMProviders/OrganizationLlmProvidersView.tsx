@@ -56,7 +56,7 @@ export const OrganizationLlmProvidersView = () => {
                   [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
                 })}
                 label={item.tab.label}
-                data-cy="organization-llm-providers-tab"
+                data-cy={item.tab.dataCy}
               />
             );
           })}
