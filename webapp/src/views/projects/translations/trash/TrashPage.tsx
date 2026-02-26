@@ -207,7 +207,7 @@ export const TrashPage = () => {
     addResizer,
   } = useColumns({
     width: availableWidth,
-    initialRatios: resizableColumns.map(() => 1),
+    initialRatios: resizableColumns.map((_, i) => (i === 0 ? 0.5 : 1)),
     minSize: 300,
   });
 
