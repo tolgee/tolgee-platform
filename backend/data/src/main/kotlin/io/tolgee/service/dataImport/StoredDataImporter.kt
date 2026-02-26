@@ -362,12 +362,17 @@ class StoredDataImporter(
     val language =
       this.language.existingLanguage
         ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
+    val key = existingKey
+    // Guard against duplicate INSERTs when multiple import files target the same (key, language)
+    // pair and resetCollisionsBetweenFiles did not deselect one of them.  If a Translation for
+    // this exact (key, language) pair was already queued by an earlier file, reuse that entity
+    // so only one row is written to the DB instead of two conflicting INSERTs.
     val translation =
-      this.conflict ?: Translation().apply {
-        this.language = language
-      }
+      this.conflict
+        ?: translationsToSave.firstOrNull { it.second.key === key && it.second.language === language }?.second
+        ?: Translation().apply { this.language = language }
 
-    translation.key = existingKey
+    translation.key = key
     if (language == language.project.baseLanguage && translation.text != this.text) {
       outdatedFlagKeys.add(translation.key.id)
     }

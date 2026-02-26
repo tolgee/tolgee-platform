@@ -497,6 +497,151 @@ class ImportTestData {
     }
   }
 
+  /**
+   * Sets up the scenario from production bug TOLGEE-BACKEND-3E9:
+   *
+   * Two import files both mapping to the same existing language, both containing the same key.
+   * File 1 has text different from DB → the Translation entity gets mutated in-memory by
+   * setTranslationTextNoSave during doImport(). File 2 has text equal to the *original* DB text,
+   * but after the mutation the existingTranslations cache shows the new text — so handleConflicts
+   * sees file 2's text as "different" and sets conflict instead of removing it, then if
+   * isSelectedToImport is still true a second Translation INSERT is attempted, causing:
+   *   PSQLException: duplicate key value violates unique constraint "translation_key_language"
+   *
+   * Both import translations are intentionally left with isSelectedToImport=true (the default) to
+   * simulate the state before resetCollisionsBetweenFiles is applied, or when it fails to catch
+   * the collision.
+   *
+   * @return the existing DB Translation that must NOT be duplicated
+   */
+  fun addTwoFilesWithSameExistingKey(): ExistingKeyScenario {
+    val existingKey = projectBuilder.addKey { name = "duplicate-candidate-key" }.self
+    val existingTranslation =
+      projectBuilder
+        .addTranslation {
+          this.key = existingKey
+          this.language = english
+          this.text = "Original DB text"
+        }.self
+
+    // File 1: same key, DIFFERENT text → will UPDATE the translation entity in-memory during doImport()
+    val file1ImportLang =
+      importBuilder
+        .addImportFile { name = "file1.json" }
+        .build {
+          addImportLanguage {
+            name = "en"
+            existingLanguage = english
+          }.build {
+            val importKey = addImportKey { name = "duplicate-candidate-key" }
+            addImportTranslation {
+              this.language = this@build.self
+              this.key = importKey.self
+              this.text = "Updated text from file 1"
+              // conflict intentionally NOT pre-set — handleConflicts() must detect it
+            }
+          }
+        }.data
+        .importLanguages[0]
+        .self
+
+    // File 2: same key, text equal to ORIGINAL DB text.
+    // After file 1's doImport() mutates the entity, handleConflicts() in file 2's prepareImport()
+    // will see "Updated text from file 1" in the entity and treat file 2's text as "different",
+    // causing it to set conflict=entity rather than removing it.  If isSelectedToImport stays true
+    // it will attempt a second INSERT → constraint violation.
+    val file2ImportLang =
+      importBuilder
+        .addImportFile { name = "file2.json" }
+        .build {
+          addImportLanguage {
+            name = "en"
+            existingLanguage = english
+          }.build {
+            val importKey = addImportKey { name = "duplicate-candidate-key" }
+            addImportTranslation {
+              this.language = this@build.self
+              this.key = importKey.self
+              this.text = "Original DB text"
+              // conflict intentionally NOT pre-set
+            }
+          }
+        }.data
+        .importLanguages[0]
+        .self
+
+    return ExistingKeyScenario(existingTranslation, file1ImportLang, file2ImportLang)
+  }
+
+  /**
+   * Sets up the scenario that directly triggers TOLGEE-BACKEND-3E9:
+   *
+   * Two import files both mapped to the same existing language, both containing the same
+   * BRAND-NEW key (not present in the DB). Since existingTranslations has no entry for
+   * this key, handleConflicts() leaves conflict=null on both ImportTranslations.
+   * When resetCollisionsBetweenFiles has not run (or failed to deselect one), both
+   * ImportTranslation.doImport() calls reach the `this.conflict ?: Translation()` branch
+   * and create two separate Translation entities for the same (key_id, language_id) pair.
+   * Saving both issues two INSERTs → PSQLException: duplicate key value violates unique
+   * constraint "translation_key_language".
+   *
+   * Both import translations are intentionally left with isSelectedToImport=true (default).
+   *
+   * @return the two import language handles (so tests can inspect them)
+   */
+  fun addTwoFilesWithSameNewKey(): NewKeyScenario {
+    val file1ImportLang =
+      importBuilder
+        .addImportFile { name = "new-f1.json" }
+        .build {
+          addImportLanguage {
+            name = "en"
+            existingLanguage = english
+          }.build {
+            val importKey = addImportKey { name = "brand-new-duplicate-key" }
+            addImportTranslation {
+              this.language = this@build.self
+              this.key = importKey.self
+              this.text = "Text from file 1"
+            }
+          }
+        }.data
+        .importLanguages[0]
+        .self
+
+    val file2ImportLang =
+      importBuilder
+        .addImportFile { name = "new-f2.json" }
+        .build {
+          addImportLanguage {
+            name = "en"
+            existingLanguage = english
+          }.build {
+            val importKey = addImportKey { name = "brand-new-duplicate-key" }
+            addImportTranslation {
+              this.language = this@build.self
+              this.key = importKey.self
+              this.text = "Text from file 2"
+            }
+          }
+        }.data
+        .importLanguages[0]
+        .self
+
+    return NewKeyScenario(file1ImportLang, file2ImportLang)
+  }
+
+  data class ExistingKeyScenario(
+    val existingTranslation: io.tolgee.model.translation.Translation,
+    val file1ImportLanguage: ImportLanguage,
+    val file2ImportLanguage: ImportLanguage,
+  )
+
+  data class NewKeyScenario(
+    val file1ImportLanguage: ImportLanguage,
+    val file2ImportLanguage: ImportLanguage,
+  )
+
   data class AddFilesWithNamespacesResult(
     val importFrenchInNs: ImportLanguage,
   )

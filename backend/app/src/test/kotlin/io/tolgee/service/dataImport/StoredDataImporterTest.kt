@@ -8,6 +8,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.security.authentication.TolgeeAuthentication
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -215,6 +216,77 @@ class StoredDataImporterTest : AbstractSpringTest() {
         .self.id
     val forceOverriddenTranslation = translationService.find(forceOverriddenTranslationId)!!
     assertThat(forceOverriddenTranslation.text).isEqualTo("Imported text")
+  }
+
+  /**
+   * Regression test for TOLGEE-BACKEND-3E9.
+   *
+   * Two import files both mapped to the same existing language contain the same key.
+   * File 1 has text that differs from the DB → its doImport() call mutates the shared Translation
+   * entity in-memory via setTranslationTextNoSave().  When file 2's prepareImport() then runs
+   * handleConflicts(true), it reads the already-mutated text from the existingTranslations cache
+   * (same object reference) and compares it with file 2's original-DB text — they now differ, so
+   * the translation is NOT removed from the import list.  If isSelectedToImport stays true, doImport()
+   * creates a brand-new Translation for the same (key, language) pair and attempts an INSERT,
+   * which violates the unique constraint "translation_key_language".
+   */
+  @Test
+  fun `does not throw constraint violation when two files import same key to same language`() {
+    val scenario = importTestData.addTwoFilesWithSameExistingKey()
+    // Leave isSelectedToImport=true on both import languages (default) to simulate
+    // the state before / when resetCollisionsBetweenFiles fails to mark one as deselected.
+
+    storedDataImporter =
+      StoredDataImporter(
+        applicationContext,
+        importTestData.import,
+        ForceMode.OVERRIDE,
+        importSettings = defaultImportSettings,
+      )
+
+    testDataService.saveTestData(importTestData.root)
+    login()
+
+    // Must not throw PSQLException / ConstraintViolationException
+    assertThatCode { storedDataImporter.doImport() }.doesNotThrowAnyException()
+
+    // The existing translation should exist exactly once and hold the last imported text
+    val saved = translationService.find(scenario.existingTranslation.id)
+    assertThat(saved).isNotNull
+  }
+
+  /**
+   * Regression test for TOLGEE-BACKEND-3E9 — direct reproduction.
+   *
+   * Two import files both mapped to the same existing language contain the same BRAND-NEW key
+   * (not present in the project DB). existingTranslations has no entry for the key, so
+   * handleConflicts() leaves conflict=null on both ImportTranslations. With both
+   * isSelectedToImport=true (resetCollisionsBetweenFiles not called), doImport() creates
+   * two separate Translation entities for the same (key_id, language_id) pair and attempts
+   * two INSERTs → PSQLException: duplicate key value violates unique constraint
+   * "translation_key_language".
+   */
+  @Test
+  fun `does not throw constraint violation when two files import same new key to same language`() {
+    importTestData.addTwoFilesWithSameNewKey()
+
+    storedDataImporter =
+      StoredDataImporter(
+        applicationContext,
+        importTestData.import,
+        ForceMode.OVERRIDE,
+        importSettings = defaultImportSettings,
+      )
+
+    testDataService.saveTestData(importTestData.root)
+    login()
+
+    // Must not throw PSQLException / ConstraintViolationException
+    assertThatCode { storedDataImporter.doImport() }.doesNotThrowAnyException()
+
+    // The key should have been imported exactly once
+    val importedKey = keyService.find(importTestData.project.id, "brand-new-duplicate-key", null)
+    assertThat(importedKey).isNotNull
   }
 
   @Test
