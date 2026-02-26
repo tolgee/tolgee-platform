@@ -341,13 +341,14 @@ class KeyService(
   @Transactional
   fun softDeleteMultiple(
     ids: Collection<Long>,
-    deletedBy: UserAccount? = authenticationFacade.authenticatedUserEntityOrNull,
+    deletedBy: UserAccount? = null,
   ) {
+    val actualDeletedBy = deletedBy ?: authenticationFacade.authenticatedUserEntityOrNull
     val keys = keyRepository.findAllByIdIn(ids.toList())
     val now = currentDateProvider.date
     keys.forEach {
       it.deletedAt = now
-      it.deletedBy = deletedBy
+      it.deletedBy = actualDeletedBy
     }
     keyRepository.saveAll(keys)
   }
