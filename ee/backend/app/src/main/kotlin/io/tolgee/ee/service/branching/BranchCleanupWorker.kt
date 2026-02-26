@@ -110,6 +110,5 @@ class BranchCleanupWorker(
   /**
    * Blocks until all in-flight cleanups have finished (success or failure).
    */
-  fun waitForPendingCleanups(timeoutMs: Long = 30_000) =
-    branchCleanupTracker.waitForPendingCleanups(timeoutMs)
+  fun waitForPendingCleanups(timeoutMs: Long = 30_000) = branchCleanupTracker.waitForPendingCleanups(timeoutMs)
 }

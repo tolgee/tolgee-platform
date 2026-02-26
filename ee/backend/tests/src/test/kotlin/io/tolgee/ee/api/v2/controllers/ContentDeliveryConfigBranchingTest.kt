@@ -13,6 +13,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.ee.service.branching.BranchCleanupWorker
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -36,6 +37,9 @@ class ContentDeliveryConfigBranchingTest : ProjectAuthControllerTest("/v2/projec
 
   @Autowired
   private lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher
+
+  @Autowired
+  private lateinit var branchCleanupWorker: BranchCleanupWorker
 
   @BeforeEach
   fun setup() {
@@ -129,6 +133,8 @@ class ContentDeliveryConfigBranchingTest : ProjectAuthControllerTest("/v2/projec
   @ProjectJWTAuthTestMethod
   fun `delete branch deletes CDN configs for that branch`() {
     performProjectAuthDelete("branches/${testData.featureBranch.id}").andIsOk
+
+    branchCleanupWorker.waitForPendingCleanups()
 
     executeInNewTransaction {
       contentDeliveryConfigService.find(testData.featureBranchCdnConfig.self.id).assert.isNull()
