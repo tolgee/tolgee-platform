@@ -171,6 +171,7 @@ subprojects {
             "compileJava",
             "compileKotlin",
             "kaptKotlin",
+            "kaptGenerateStubsKotlin",
             "bootBuildInfo",
             "bootJarMainClassName",
             "jar",
