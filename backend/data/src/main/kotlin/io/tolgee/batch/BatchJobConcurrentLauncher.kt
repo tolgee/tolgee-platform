@@ -3,6 +3,7 @@ package io.tolgee.batch
 import io.sentry.Sentry
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.ExecutionQueueItem
+import io.tolgee.batch.timing.BatchJobTimerProvider
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.fixtures.waitFor
@@ -31,6 +32,7 @@ class BatchJobConcurrentLauncher(
   private val progressManager: ProgressManager,
   private val batchJobActionService: BatchJobActionService,
   private val tracingContext: TolgeeTracingContext,
+  private val timerProvider: BatchJobTimerProvider?,
 ) : Logging {
   companion object {
     const val MIN_TIME_BETWEEN_OPERATIONS = 100
@@ -203,7 +205,11 @@ class BatchJobConcurrentLauncher(
     /**
      * Only single job can run in project at the same time
      */
-    if (!batchJobProjectLockingManager.canLockJobForProject(executionItem.jobId)) {
+    val canLock =
+      timed("LAUNCHER.projectLockCheck") {
+        batchJobProjectLockingManager.canLockJobForProject(executionItem.jobId)
+      }
+    if (!canLock) {
       logger.debug(
         "⚠️ Cannot run execution ${executionItem.chunkExecutionId}. " +
           "Other job from the project is currently running, skipping",
@@ -297,6 +303,13 @@ class BatchJobConcurrentLauncher(
     val runningCount = runningJobCharacterCounts[character]?.get() ?: 0
     val allowedCharacterCounts = ceil(character.maxConcurrencyRatio * batchProperties.concurrency)
     return runningCount < allowedCharacterCounts
+  }
+
+  private fun <T> timed(
+    operationName: String,
+    block: () -> T,
+  ): T {
+    return timerProvider?.measure(operationName, block) ?: block()
   }
 
   private fun ExecutionQueueItem.trySetRunningState(batchJobDto: BatchJobDto): Boolean {
