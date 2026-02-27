@@ -30,6 +30,7 @@ import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useProject } from 'tg.hooks/useProject';
 import { LINKS, PARAMS } from 'tg.constants/links';
+import { applyBranchToUrl } from 'tg.component/branching/branchingPath';
 import { useTrashCount } from '../trash/useTrashCount';
 
 const StyledContainer = styled('div')`
@@ -124,13 +125,16 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
               <Tooltip title={t('translation_controls_trash_tooltip')}>
                 <Badge color="error" variant="dot" overlap="circular">
                   <IconButton
-                    onClick={() =>
+                    onClick={() => {
+                      const trashUrl = LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+                        [PARAMS.PROJECT_ID]: project.id,
+                      });
                       history.push(
-                        LINKS.PROJECT_TRANSLATIONS_TRASH.build({
-                          [PARAMS.PROJECT_ID]: project.id,
-                        })
-                      )
-                    }
+                        selectedBranch?.name
+                          ? applyBranchToUrl(trashUrl, selectedBranch.name)
+                          : trashUrl
+                      );
+                    }}
                     data-cy="translations-trash-button"
                   >
                     <Trash01 />

@@ -31,6 +31,7 @@ import { Sort } from 'tg.component/CustomIcons';
 import { useProject } from 'tg.hooks/useProject';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useTrashCount } from '../trash/useTrashCount';
+import { applyBranchToUrl } from 'tg.component/branching/branchingPath';
 import { countFilters } from 'tg.views/projects/translations/TranslationFilters/summary';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
@@ -241,13 +242,17 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                   <Badge color="error" variant="dot" overlap="circular">
                     <StyledIconButton
                       size="small"
-                      onClick={() =>
-                        history.push(
+                      onClick={() => {
+                        const trashUrl =
                           LINKS.PROJECT_TRANSLATIONS_TRASH.build({
                             [PARAMS.PROJECT_ID]: project.id,
-                          })
-                        )
-                      }
+                          });
+                        history.push(
+                          selectedBranch?.name
+                            ? applyBranchToUrl(trashUrl, selectedBranch.name)
+                            : trashUrl
+                        );
+                      }}
                       data-cy="translations-trash-button"
                     >
                       <Trash01 />
