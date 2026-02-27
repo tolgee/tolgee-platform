@@ -52,6 +52,7 @@ enum class BatchJobType(
     activityType = ActivityType.AUTO_TRANSLATE,
     maxRetries = 3,
     processor = AutoTranslateChunkProcessor::class,
+    exclusive = false,
   ),
   DELETE_KEYS(
     activityType = ActivityType.KEY_DELETE,

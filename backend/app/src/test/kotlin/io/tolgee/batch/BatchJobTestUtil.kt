@@ -486,7 +486,7 @@ class BatchJobTestUtil(
   fun verifiedTriedToLockJob(jobId: Long) {
     waitForNotThrowing {
       verify(batchJobProjectLockingManager, atLeast(1))
-        .canLockJobForProject(ArgumentMatchers.eq(jobId))
+        .canLockJobForProject(ArgumentMatchers.eq(jobId), ArgumentMatchers.any())
     }
   }
 

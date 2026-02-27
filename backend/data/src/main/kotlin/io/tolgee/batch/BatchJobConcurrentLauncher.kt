@@ -187,6 +187,27 @@ class BatchJobConcurrentLauncher(
       return false
     }
 
+    /**
+     * Only single job can run in project at the same time.
+     * Check this BEFORE trySetRunningState to avoid mutating state for lock-rejected chunks,
+     * eliminating the need for rollbackSetToRunning on the hot path.
+     */
+    if (!batchJobProjectLockingManager.canLockJobForProject(executionItem.jobId, batchJobDto)) {
+      logger.debug(
+        "⚠️ Cannot run execution ${executionItem.chunkExecutionId}. " +
+          "Other job from the project is currently running, skipping",
+      )
+
+      batchJobChunkExecutionQueue.addItemsToLocalQueue(
+        listOf(
+          executionItem.also {
+            it.executeAfter = currentDateProvider.date.time + 1000
+          },
+        ),
+      )
+      return false
+    }
+
     if (!executionItem.trySetRunningState(batchJobDto)) {
       logger.trace(
         """Execution ${executionItem.chunkExecutionId} cannot run concurrent job
@@ -196,30 +217,11 @@ class BatchJobConcurrentLauncher(
       if (!batchJobDto.status.completed) {
         // e.g. job isn't canceled (check ProgressManager.trySetExecutionRunning returning false on competed job)
         addBackToQueue(executionItem)
+      } else {
+        // Job is completed but the project lock was already acquired above.
+        // Finalize to release the project lock, otherwise subsequent jobs for this project deadlock.
+        progressManager.finalizeIfCompleted(executionItem.jobId)
       }
-      return false
-    }
-
-    /**
-     * Only single job can run in project at the same time
-     */
-    if (!batchJobProjectLockingManager.canLockJobForProject(executionItem.jobId)) {
-      logger.debug(
-        "⚠️ Cannot run execution ${executionItem.chunkExecutionId}. " +
-          "Other job from the project is currently running, skipping",
-      )
-
-      // Rollback the state change made in trySetRunningState
-      progressManager.rollbackSetToRunning(executionItem.chunkExecutionId, executionItem.jobId)
-
-      // we haven't publish consuming, so we can add it only to the local queue
-      batchJobChunkExecutionQueue.addItemsToLocalQueue(
-        listOf(
-          executionItem.also {
-            it.executeAfter = currentDateProvider.date.time + 1000
-          },
-        ),
-      )
       return false
     }
 

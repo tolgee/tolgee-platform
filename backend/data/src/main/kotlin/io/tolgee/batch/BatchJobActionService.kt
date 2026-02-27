@@ -94,7 +94,7 @@ class BatchJobActionService(
 
             logger.debug("Job ${batchJobDto.id}: 🟡 Processing chunk ${lockedExecution.id}")
             val savepoint = savePointManager.setSavepoint()
-            val util = ChunkProcessingUtil(lockedExecution, applicationContext, coroutineContext)
+            val util = ChunkProcessingUtil(lockedExecution, applicationContext, coroutineContext, batchJobDto)
             util.processChunk()
 
             if (transactionStatus.isRollbackOnly) {

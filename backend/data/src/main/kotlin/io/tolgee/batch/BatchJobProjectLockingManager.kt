@@ -27,10 +27,28 @@ class BatchJobProjectLockingManager(
     private val localProjectLocks by lazy {
       ConcurrentHashMap<Long, Long?>()
     }
+
+    /**
+     * JVM-local cache of the project lock state. Under high contention (many chunks from
+     * competing jobs), the lock check is called thousands of times per second. Without
+     * caching, every check would be a Redis round-trip. This cache short-circuits the
+     * common "still locked by another job" case with a configurable TTL, and is eagerly
+     * invalidated on unlock so newly-eligible jobs can acquire the lock immediately.
+     */
+    private val localProjectLockCache = ConcurrentHashMap<Long, LockCacheEntry>()
+    private const val LOCK_CACHE_TTL_MS = 1000L
   }
 
-  fun canLockJobForProject(batchJobId: Long): Boolean {
-    val jobDto = batchJobService.getJobDto(batchJobId)
+  private data class LockCacheEntry(
+    val lockedJobId: Long,
+    val timestamp: Long,
+  )
+
+  fun canLockJobForProject(
+    batchJobId: Long,
+    batchJobDto: BatchJobDto? = null,
+  ): Boolean {
+    val jobDto = batchJobDto ?: batchJobService.getJobDto(batchJobId)
     if (!jobDto.type.exclusive) {
       return true
     }
@@ -51,6 +69,8 @@ class BatchJobProjectLockingManager(
     jobId: Long,
   ) {
     projectId ?: return
+    // Eagerly invalidate the local cache so other jobs can acquire the lock immediately
+    localProjectLockCache.remove(projectId)
     getMap().compute(projectId) { _, lockedJobId ->
       logger.debug("Unlocking job: $jobId for project $projectId")
       if (lockedJobId == jobId) {
@@ -71,10 +91,23 @@ class BatchJobProjectLockingManager(
 
   private fun tryLockWithRedisson(batchJobDto: BatchJobDto): Boolean {
     val projectId = batchJobDto.projectId ?: return true
+
+    // Check local cache first to avoid Redis round-trip for the common "still locked" case
+    val cached = localProjectLockCache[projectId]
+    if (cached != null &&
+      cached.lockedJobId != batchJobDto.id &&
+      cached.lockedJobId != 0L &&
+      System.currentTimeMillis() - cached.timestamp < LOCK_CACHE_TTL_MS
+    ) {
+      return false
+    }
+
     val computed =
       getRedissonProjectLocks().compute(projectId) { _, value ->
         computeFnBody(batchJobDto, value)
       }
+    // Update local cache with the result
+    localProjectLockCache[projectId] = LockCacheEntry(computed ?: 0L, System.currentTimeMillis())
     return computed == batchJobDto.id
   }
 

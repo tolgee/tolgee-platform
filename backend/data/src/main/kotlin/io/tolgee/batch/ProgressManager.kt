@@ -382,9 +382,10 @@ class ProgressManager(
   fun reportSingleChunkProgress(
     jobId: Long,
     delta: Int = 1,
+    batchJobDto: BatchJobDto? = null,
   ) {
     batchJobStateProvider.addSingleChunkProgressCount(jobId, delta.toLong())
-    val job = batchJobService.getJobDto(jobId)
+    val job = batchJobDto ?: batchJobService.getJobDto(jobId)
     val confirmedProgress = batchJobStateProvider.getProgressCount(jobId)
     val optimisticProgress = batchJobStateProvider.getSingleChunkProgressCount(jobId)
     eventPublisher.publishEvent(

@@ -6,6 +6,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.sentry.Sentry
 import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.exceptions.ExceptionWithMessage
 import io.tolgee.exceptions.LlmRateLimitedException
@@ -31,6 +32,7 @@ open class ChunkProcessingUtil(
   val execution: BatchJobChunkExecution,
   private val applicationContext: ApplicationContext,
   private val coroutineContext: CoroutineContext,
+  private val batchJobDto: BatchJobDto? = null,
 ) : Logging {
   @WithSpan
   open fun processChunk() {
@@ -66,14 +68,13 @@ open class ChunkProcessingUtil(
   private fun handleActivity() {
     val activityRevision = activityHolder.activityRevision
     activityRevision.batchJobChunkExecution = execution
-    val batchJobDto = batchJobService.getJobDto(job.id)
-    batchJobDto.projectId?.let {
+    job.projectId?.let {
       val project = projectService.getDto(it)
       activityRevision.projectId = project.id
       activityRevision.organizationId = project.organizationOwnerId
     }
-    activityHolder.activity = batchJobDto.type.activityType
-    activityRevision.authorId = batchJobDto.authorId
+    activityHolder.activity = job.type.activityType
+    activityRevision.authorId = job.authorId
   }
 
   private fun handleException(exception: Throwable) {
@@ -172,7 +173,7 @@ open class ChunkProcessingUtil(
   private fun getWaitTime(exception: RequeueWithDelayException) =
     exception.delayInMs * (exception.increaseFactor.toDouble().pow(errorKeyRetries.toDouble())).toInt()
 
-  private val job by lazy { batchJobService.getJobDto(execution.batchJob.id) }
+  private val job by lazy { batchJobDto ?: batchJobService.getJobDto(execution.batchJob.id) }
 
   private val activityHolder by lazy {
     applicationContext.getBean(ActivityHolder::class.java)
