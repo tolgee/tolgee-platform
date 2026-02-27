@@ -361,6 +361,11 @@ export class LINKS {
     'trash'
   );
 
+  static PROJECT_TRANSLATIONS_TRASH_BRANCHED = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS_TRASH,
+    'tree/' + p(PARAMS.BRANCH) + '*'
+  );
+
   static PROJECT_TRANSLATIONS_SINGLE = Link.ofParent(
     LINKS.PROJECT_TRANSLATIONS,
     'single'

@@ -13,6 +13,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
@@ -117,6 +118,7 @@ const StyledHeaderCell = styled('div')`
 export const TrashPage = () => {
   const { t } = useTranslate();
   const project = useProject();
+  const branchName = useBranchFromUrlPath();
   const { satisfiesPermission } = useProjectPermissions();
   const canDelete = satisfiesPermission('keys.delete');
   const canRestore = satisfiesPermission('keys.create');
@@ -229,6 +231,7 @@ export const TrashPage = () => {
       size: PAGE_SIZE,
       search: search || undefined,
       languages: effectiveLanguages.length > 0 ? effectiveLanguages : undefined,
+      branch: branchName || undefined,
       ...filtersQuery,
     } as any,
   });
@@ -301,6 +304,7 @@ export const TrashPage = () => {
         [t('trash_view_title'), trashLink],
       ]}
       wrapperProps={{ style: { paddingBottom: 0, paddingTop: '3px' } }}
+      branching
     >
       <Box my={1} px={0.5}>
         <TrashBanner />

@@ -120,6 +120,10 @@ export const ProjectRouter = () => {
         <Route exact path={BRANCH_ROUTES.export.branched}>
           <ExportView />
         </Route>
+
+        <Route exact path={LINKS.PROJECT_TRANSLATIONS_TRASH_BRANCHED.template}>
+          <TrashView />
+        </Route>
       </Switch>
       <routes.Project />
     </ProjectContext>
