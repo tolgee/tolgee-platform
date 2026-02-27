@@ -1,9 +1,12 @@
 package io.tolgee.batch.processors
 
 import io.tolgee.batch.ChunkProcessor
+import io.tolgee.batch.FailedDontRequeueException
 import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.RestoreKeysRequest
+import io.tolgee.constants.Message
+import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.service.key.KeyService
 import jakarta.persistence.EntityManager
 import kotlinx.coroutines.ensureActive
@@ -25,7 +28,11 @@ class RestoreKeysChunkProcessor(
     val subChunked = chunk.chunked(100)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
-      keyService.restoreKeys(subChunk, job.projectId!!)
+      try {
+        keyService.restoreKeys(subChunk, job.projectId!!)
+      } catch (e: ValidationException) {
+        throw FailedDontRequeueException(Message.KEY_EXISTS, listOf(), e)
+      }
       entityManager.flush()
       progressManager.reportSingleChunkProgress(job.id, subChunk.size)
     }
