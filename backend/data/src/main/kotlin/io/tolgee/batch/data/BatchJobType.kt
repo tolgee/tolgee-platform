@@ -115,4 +115,9 @@ enum class BatchJobType(
     processor = NoOpChunkProcessor::class,
     exclusive = false,
   ),
+  NO_OP_EXCLUSIVE(
+    activityType = null,
+    maxRetries = 0,
+    processor = NoOpChunkProcessor::class,
+  ),
 }
