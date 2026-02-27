@@ -67,7 +67,8 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const [anchorSortEl, setAnchorSortEl] = useState<HTMLButtonElement | null>(
     null
   );
-  const trashCount = useTrashCount(project.id);
+  const selectedBranch = useTranslationsSelector((c) => c.branches.selected);
+  const trashCount = useTrashCount(project.id, selectedBranch?.name);
 
   const { setSearch, selectLanguages, changeView, setOrder } =
     useTranslationsActions();

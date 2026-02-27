@@ -134,7 +134,8 @@ export const TranslationControlsCompact: React.FC<Props> = ({
   );
   const anchorFilters = useRef<HTMLButtonElement>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const trashCount = useTrashCount(project.id);
+  const selectedBranch = useTranslationsSelector((c) => c.branches.selected);
+  const trashCount = useTrashCount(project.id, selectedBranch?.name);
 
   const handleSearchChange = (value: string) => {
     setSearch(value);

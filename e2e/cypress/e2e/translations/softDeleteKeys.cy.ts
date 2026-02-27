@@ -1,0 +1,137 @@
+import { ProjectDTO } from '../../../../webapp/src/service/response.types';
+import {
+  createKey,
+  createProject,
+  deleteProject,
+  login,
+  v2apiFetch,
+} from '../../common/apiCalls/common';
+import {
+  selectLangsInLocalstorage,
+  visitTranslations,
+} from '../../common/translations';
+import { waitForGlobalLoading } from '../../common/loading';
+import { HOST } from '../../common/constants';
+
+describe('Soft delete keys', () => {
+  let project: ProjectDTO;
+  let key1Id: number;
+  let key2Id: number;
+
+  beforeEach(() => {
+    login().then(() => {
+      createProject({
+        name: 'Soft delete test',
+        languages: [{ tag: 'en', name: 'English', originalName: 'English' }],
+      }).then((r) => {
+        project = r.body as ProjectDTO;
+        selectLangsInLocalstorage(project.id, ['en']);
+        createKey(project.id, 'key1', { en: 'Key 1 translation' }).then(
+          (k) => (key1Id = k.id)
+        );
+        createKey(project.id, 'key2', { en: 'Key 2 translation' }).then(
+          (k) => (key2Id = k.id)
+        );
+      });
+    });
+  });
+
+  afterEach(() => {
+    if (project) {
+      deleteProject(project.id);
+    }
+  });
+
+  it('shows trash icon after soft-deleting a key', () => {
+    // Soft-delete key1 via API
+    v2apiFetch(`projects/${project.id}/keys/${key1Id}`, {
+      method: 'DELETE',
+    });
+
+    visitTranslations(project.id);
+    waitForGlobalLoading();
+
+    // key1 should not be visible in the translations view
+    cy.contains('key1').should('not.exist');
+    // key2 should still be visible
+    cy.contains('key2').should('be.visible');
+
+    // Trash icon should be visible
+    cy.gcy('translations-trash-button').should('be.visible');
+  });
+
+  it('trash icon is hidden when no keys are soft-deleted', () => {
+    visitTranslations(project.id);
+    waitForGlobalLoading();
+
+    cy.contains('key1').should('be.visible');
+    cy.contains('key2').should('be.visible');
+
+    // Trash icon should not exist
+    cy.gcy('translations-trash-button').should('not.exist');
+  });
+
+  it('shows trashed keys in trash page', () => {
+    // Soft-delete key1
+    v2apiFetch(`projects/${project.id}/keys/${key1Id}`, {
+      method: 'DELETE',
+    });
+
+    cy.visit(`${HOST}/projects/${project.id}/translations/trash`);
+    waitForGlobalLoading();
+
+    // key1 should be in trash
+    cy.gcy('trash-row').should('have.length', 1);
+    cy.gcy('trash-row').contains('key1').should('be.visible');
+  });
+
+  it('restores a key from trash', () => {
+    // Soft-delete key1
+    v2apiFetch(`projects/${project.id}/keys/${key1Id}`, {
+      method: 'DELETE',
+    });
+
+    cy.visit(`${HOST}/projects/${project.id}/translations/trash`);
+    waitForGlobalLoading();
+
+    // Click restore button
+    cy.gcy('trash-row').contains('key1').should('be.visible');
+    cy.gcy('trash-restore-button').click();
+    waitForGlobalLoading();
+
+    // Trash should be empty
+    cy.gcy('trash-row').should('not.exist');
+
+    // key1 should be back in translations
+    visitTranslations(project.id);
+    waitForGlobalLoading();
+    cy.contains('key1').should('be.visible');
+    cy.contains('key2').should('be.visible');
+  });
+
+  it('permanently deletes a key from trash', () => {
+    // Soft-delete key1
+    v2apiFetch(`projects/${project.id}/keys/${key1Id}`, {
+      method: 'DELETE',
+    });
+
+    cy.visit(`${HOST}/projects/${project.id}/translations/trash`);
+    waitForGlobalLoading();
+
+    // Click permanent delete button
+    cy.gcy('trash-row').contains('key1').should('be.visible');
+    cy.gcy('trash-permanent-delete-button').click();
+    // Confirm the dialog
+    cy.gcy('global-confirmation-confirm').click();
+    waitForGlobalLoading();
+
+    // Trash should be empty
+    cy.gcy('trash-row').should('not.exist');
+
+    // key1 should not be in translations either
+    visitTranslations(project.id);
+    waitForGlobalLoading();
+    cy.contains('key1').should('not.exist');
+    cy.contains('key2').should('be.visible');
+  });
+});

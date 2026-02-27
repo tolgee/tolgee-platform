@@ -1,6 +1,7 @@
 import { login } from '../../common/apiCalls/common';
 import { branchMergeTestData } from '../../common/apiCalls/testData/testData';
 import { waitForGlobalLoading } from '../../common/loading';
+import { HOST } from '../../common/constants';
 import { E2BranchesSection } from '../../compounds/branching/E2BranchesSection';
 import { E2BranchTranslationsView } from '../../compounds/branching/E2BranchTranslationsView';
 import { E2MergeSection } from '../../compounds/branching/E2MergeSection';
@@ -158,6 +159,44 @@ describe('Branch merging', () => {
     // 10. Verify correct resolution applied on main branch
     waitForGlobalLoading();
     translationsView.assertTranslationValue(conflictKey, 'en', featureValue);
+  });
+
+  it('re-adds key from source when target key was soft-deleted', () => {
+    const keyName = 'shared-update-key';
+    const updatedValue = 'Updated after soft-delete on main';
+
+    // 1. Soft-delete the key on main branch
+    translationsView.visitWithBranch(projectId, 'main');
+    waitForGlobalLoading();
+    translationsView.deleteKey(keyName);
+
+    // 2. Edit translation on feature branch
+    translationsView.visitWithBranch(projectId, 'feature');
+    waitForGlobalLoading();
+    translationsView.editTranslation(keyName, 'en', updatedValue);
+
+    // 3. Initiate merge from feature to main
+    branchesSection.visit(projectId);
+    mergeSection.initiateMergeFromBranches('feature');
+
+    // 4. Verify ADD tab shows the key (soft-deleted = missing from main)
+    mergeSection.assertStats({ additions: 1 });
+    mergeSection.selectTab('ADD');
+    mergeSection.assertKeyInTab(keyName);
+
+    // 5. Apply merge
+    mergeSection.applyMerge();
+
+    // 6. Verify key exists on main with updated value
+    translationsView.visitWithBranch(projectId, 'main');
+    waitForGlobalLoading();
+    translationsView.assertKeyExists(keyName);
+    translationsView.assertTranslationValue(keyName, 'en', updatedValue);
+
+    // 7. Verify soft-deleted key is still in trash
+    cy.visit(`${HOST}/projects/${projectId}/translations/trash`);
+    waitForGlobalLoading();
+    cy.gcy('trash-row').contains(keyName).should('be.visible');
   });
 
   it('deletes source branch after merge when option is selected', () => {
