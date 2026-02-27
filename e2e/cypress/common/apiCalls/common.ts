@@ -395,7 +395,7 @@ export const getAssignedEmailNotification = () =>
 export const getParsedEmailVerification = () =>
   getLatestEmail().then((r) => {
     return {
-      verifyEmailLink: r.HTML.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
+      verifyEmailLink: (r.HTML.match(/href="([^"]+)"/i) || ['', ''])[1],
       fromAddress: r.From.Address,
       toAddress: r.To[0].Address,
       content: r.HTML,
@@ -406,7 +406,7 @@ export const getParsedEmailVerificationByIndex = (index: number) => {
   if (index === 0) {
     return getLatestEmail().then((email) => {
       return {
-        verifyEmailLink: email.HTML.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
+        verifyEmailLink: (email.HTML.match(/href="([^"]+)"/i) || ['', ''])[1],
         fromAddress: email.From.Address,
         toAddress: email.To[0].Address,
         content: email.HTML,
@@ -563,7 +563,7 @@ export const deleteAllEmails = () =>
 export const getParsedResetPasswordEmail = () =>
   getLatestEmail().then((r) => {
     return {
-      resetLink: r.HTML.replace(/.*(http:\/\/[\w:/=]*).*/gs, '$1'),
+      resetLink: (r.HTML.match(/href="([^"]+)"/i) || ['', ''])[1],
       fromAddress: r.From.Address,
       toAddress: r.To[0].Address,
     };

@@ -70,7 +70,6 @@ class EmailService(
     sendEmail(recipient, subject, html, attachments, bcc, replyTo)
   }
 
-  @Async
   fun sendEmail(
     recipient: String,
     subject: String,
