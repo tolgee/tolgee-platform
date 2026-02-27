@@ -15,8 +15,10 @@ import io.tolgee.service.organization.OrganizationRoleService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
+import org.springframework.transaction.PlatformTransactionManager
 
 @Component
 class ProjectMcpTools(
@@ -28,6 +30,7 @@ class ProjectMcpTools(
   private val organizationRoleService: OrganizationRoleService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
+  private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
   private val listProjectsSpec = buildSpec(ProjectsController::getAll, "list_projects")
   private val createProjectSpec = buildSpec(ProjectsController::createProject, "create_project")
@@ -101,16 +104,18 @@ class ProjectMcpTools(
             baseLanguageTag = args.getString("baseLanguageTag"),
           )
 
-        organizationRoleService.checkUserCanCreateProject(dto.organizationId)
-        val project = projectCreationService.createProject(dto)
-        val result =
-          mapOf(
-            "id" to project.id,
-            "name" to project.name,
-            "slug" to project.slug,
-            "description" to project.description,
-          )
-        textResult(objectMapper.writeValueAsString(result))
+        executeInNewTransaction(transactionManager) {
+          organizationRoleService.checkUserCanCreateProject(dto.organizationId)
+          val project = projectCreationService.createProject(dto)
+          val result =
+            mapOf(
+              "id" to project.id,
+              "name" to project.name,
+              "slug" to project.slug,
+              "description" to project.description,
+            )
+          textResult(objectMapper.writeValueAsString(result))
+        }
       }
     }
 

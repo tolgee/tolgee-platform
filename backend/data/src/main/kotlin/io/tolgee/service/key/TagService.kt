@@ -65,6 +65,7 @@ class TagService(
   /**
    * @param map key entity to list of tags
    */
+  @Transactional
   fun tagKeys(map: Map<Key, List<String>>) {
     if (map.isEmpty()) {
       return
@@ -77,6 +78,7 @@ class TagService(
   /**
    * @param map keyId entity to list of tags
    */
+  @Transactional
   fun tagKeysById(
     projectId: Long,
     map: Map<Long, List<String>>,
@@ -129,6 +131,7 @@ class TagService(
       }.toMap()
   }
 
+  @Transactional
   fun untagKeys(
     projectId: Long,
     map: Map<Long, List<String>>,

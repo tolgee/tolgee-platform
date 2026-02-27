@@ -10,11 +10,13 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.project.ProjectFeatureGuard
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
+import org.springframework.transaction.PlatformTransactionManager
 
 @Component
 @ConditionalOnClass(name = ["io.tolgee.ee.service.branching.BranchServiceImpl"])
@@ -25,6 +27,7 @@ class BranchMcpTools(
   private val projectHolder: ProjectHolder,
   private val authenticationFacade: AuthenticationFacade,
   private val objectMapper: ObjectMapper,
+  private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
   companion object {
     private val branchControllerClass =
@@ -116,9 +119,11 @@ class BranchMcpTools(
       mcpRequestContext.executeAs(deleteBranchSpec, request.arguments.getProjectId()) {
         projectFeatureGuard.checkEnabled(Feature.BRANCHING)
         val branchName = request.arguments.requireString("branchName")
-        val branch = branchService.getActiveBranch(projectHolder.project.id, branchName)
-        branchService.deleteBranch(projectHolder.project.id, branch.id)
-        textResult(objectMapper.writeValueAsString(mapOf("deleted" to true)))
+        executeInNewTransaction(transactionManager) {
+          val branch = branchService.getActiveBranch(projectHolder.project.id, branchName)
+          branchService.deleteBranch(projectHolder.project.id, branch.id)
+          textResult(objectMapper.writeValueAsString(mapOf("deleted" to true)))
+        }
       }
     }
   }

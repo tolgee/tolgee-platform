@@ -10,7 +10,9 @@ import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.bigMeta.BigMetaService
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Component
+import org.springframework.transaction.PlatformTransactionManager
 
 @Component
 class BigMetaMcpTools(
@@ -18,6 +20,7 @@ class BigMetaMcpTools(
   private val bigMetaService: BigMetaService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
+  private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
   private val storeBigMetaSpec = buildSpec(BigMetaController::store, "store_big_meta")
 
@@ -51,8 +54,10 @@ class BigMetaMcpTools(
 
         val dto = BigMetaDto()
         dto.relatedKeysInOrder = relatedKeys
-        bigMetaService.store(dto, projectHolder.projectEntity)
-        textResult(objectMapper.writeValueAsString(mapOf("stored" to true, "keyCount" to relatedKeys.size)))
+        executeInNewTransaction(transactionManager) {
+          bigMetaService.store(dto, projectHolder.projectEntity)
+          textResult(objectMapper.writeValueAsString(mapOf("stored" to true, "keyCount" to relatedKeys.size)))
+        }
       }
     }
   }

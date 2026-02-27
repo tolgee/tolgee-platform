@@ -9,9 +9,11 @@ import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.TagService
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
+import org.springframework.transaction.PlatformTransactionManager
 
 @Component
 class TagMcpTools(
@@ -20,6 +22,7 @@ class TagMcpTools(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
+  private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
   private val listTagsSpec = buildSpec(TagsController::getAll, "list_tags")
   private val tagKeysSpec = buildSpec(TagsController::tagKey, "tag_keys")
@@ -71,21 +74,23 @@ class TagMcpTools(
         val namespace = request.arguments.getString("namespace")
         val branch = request.arguments.getString("branch")
 
-        val (keys, notFound) = keyService.resolveKeysByName(projectHolder.project.id, keyNames, namespace, branch)
-        if (notFound.isNotEmpty()) {
-          errorResult("Keys not found: ${notFound.joinToString(", ")}")
-        } else {
-          val keyIdToTags = keys.associate { key -> key.id to tags }
-          tagService.tagKeysById(projectHolder.project.id, keyIdToTags)
-          textResult(
-            objectMapper.writeValueAsString(
-              mapOf(
-                "tagged" to true,
-                "keyCount" to keyNames.size,
-                "tags" to tags,
+        executeInNewTransaction(transactionManager) {
+          val (keys, notFound) = keyService.resolveKeysByName(projectHolder.project.id, keyNames, namespace, branch)
+          if (notFound.isNotEmpty()) {
+            errorResult("Keys not found: ${notFound.joinToString(", ")}")
+          } else {
+            val keyIdToTags = keys.associate { key -> key.id to tags }
+            tagService.tagKeysById(projectHolder.project.id, keyIdToTags)
+            textResult(
+              objectMapper.writeValueAsString(
+                mapOf(
+                  "tagged" to true,
+                  "keyCount" to keyNames.size,
+                  "tags" to tags,
+                ),
               ),
-            ),
-          )
+            )
+          }
         }
       }
     }

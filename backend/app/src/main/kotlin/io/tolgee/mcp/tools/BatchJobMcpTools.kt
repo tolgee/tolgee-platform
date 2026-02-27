@@ -15,7 +15,9 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Component
+import org.springframework.transaction.PlatformTransactionManager
 
 @Component
 class BatchJobMcpTools(
@@ -27,6 +29,7 @@ class BatchJobMcpTools(
   private val projectHolder: ProjectHolder,
   private val authenticationFacade: AuthenticationFacade,
   private val objectMapper: ObjectMapper,
+  private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
   private val getBatchJobSpec = buildSpec(BatchJobManagementController::get, "get_batch_job_status")
   private val machineTranslateSpec = buildSpec(StartBatchJobController::machineTranslation, "machine_translate")
@@ -76,53 +79,55 @@ class BatchJobMcpTools(
         val namespace = request.arguments.getString("namespace")
         val branch = request.arguments.getString("branch")
 
-        // Resolve key names to IDs
-        val (resolvedKeys, notFoundKeys) =
-          keyService.resolveKeysByName(
-            projectHolder.project.id,
-            keyNames,
-            namespace,
-            branch,
-          )
-        if (notFoundKeys.isNotEmpty()) {
-          return@executeAs errorResult("Keys not found: ${notFoundKeys.joinToString(", ")}")
-        }
-        val keyIds = resolvedKeys.map { it.id }
-
-        // Resolve language tags to IDs
-        val resolvedLangs =
-          targetLanguageTags.map { tag ->
-            tag to languageService.findByTag(tag, projectHolder.project.id)
+        executeInNewTransaction(transactionManager) {
+          // Resolve key names to IDs
+          val (resolvedKeys, notFoundKeys) =
+            keyService.resolveKeysByName(
+              projectHolder.project.id,
+              keyNames,
+              namespace,
+              branch,
+            )
+          if (notFoundKeys.isNotEmpty()) {
+            return@executeInNewTransaction errorResult("Keys not found: ${notFoundKeys.joinToString(", ")}")
           }
-        val notFoundLangs = resolvedLangs.filter { it.second == null }.map { it.first }
-        if (notFoundLangs.isNotEmpty()) {
-          return@executeAs errorResult("Languages not found: ${notFoundLangs.joinToString(", ")}")
+          val keyIds = resolvedKeys.map { it.id }
+
+          // Resolve language tags to IDs
+          val resolvedLangs =
+            targetLanguageTags.map { tag ->
+              tag to languageService.findByTag(tag, projectHolder.project.id)
+            }
+          val notFoundLangs = resolvedLangs.filter { it.second == null }.map { it.first }
+          if (notFoundLangs.isNotEmpty()) {
+            return@executeInNewTransaction errorResult("Languages not found: ${notFoundLangs.joinToString(", ")}")
+          }
+          val targetLanguageIds = resolvedLangs.mapNotNull { it.second?.id }
+
+          securityService.checkLanguageTranslatePermission(projectHolder.project.id, targetLanguageIds)
+          securityService.checkKeyIdsExistAndIsFromProject(keyIds, projectHolder.project.id)
+
+          val data = MachineTranslationRequest()
+          data.keyIds = keyIds
+          data.targetLanguageIds = targetLanguageIds
+
+          val batchJob =
+            batchJobService.startJob(
+              data,
+              projectHolder.projectEntity,
+              authenticationFacade.authenticatedUserEntity,
+              BatchJobType.MACHINE_TRANSLATE,
+            )
+
+          val result =
+            mapOf(
+              "jobId" to batchJob.id,
+              "status" to batchJob.status.name,
+              "type" to batchJob.type.name,
+              "totalItems" to batchJob.totalItems,
+            )
+          textResult(objectMapper.writeValueAsString(result))
         }
-        val targetLanguageIds = resolvedLangs.mapNotNull { it.second?.id }
-
-        securityService.checkLanguageTranslatePermission(projectHolder.project.id, targetLanguageIds)
-        securityService.checkKeyIdsExistAndIsFromProject(keyIds, projectHolder.project.id)
-
-        val data = MachineTranslationRequest()
-        data.keyIds = keyIds
-        data.targetLanguageIds = targetLanguageIds
-
-        val batchJob =
-          batchJobService.startJob(
-            data,
-            projectHolder.projectEntity,
-            authenticationFacade.authenticatedUserEntity,
-            BatchJobType.MACHINE_TRANSLATE,
-          )
-
-        val result =
-          mapOf(
-            "jobId" to batchJob.id,
-            "status" to batchJob.status.name,
-            "type" to batchJob.type.name,
-            "totalItems" to batchJob.totalItems,
-          )
-        textResult(objectMapper.writeValueAsString(result))
       }
     }
   }

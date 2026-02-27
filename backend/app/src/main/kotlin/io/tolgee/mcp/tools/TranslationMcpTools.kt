@@ -10,7 +10,9 @@ import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Component
+import org.springframework.transaction.PlatformTransactionManager
 
 @Component
 class TranslationMcpTools(
@@ -19,6 +21,7 @@ class TranslationMcpTools(
   private val translationService: TranslationService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
+  private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
   private val getTranslationsSpec = buildSpec(TranslationsController::getAllTranslations, "get_translations")
   private val setTranslationsSpec = buildSpec(TranslationsController::setTranslations, "set_translation")
@@ -99,28 +102,31 @@ class TranslationMcpTools(
             translations = request.arguments.requireStringMap("translations"),
             branch = request.arguments.getString("branch"),
           )
-        val key =
-          keyService.find(
-            projectId = projectHolder.project.id,
-            name = dto.key,
-            namespace = dto.namespace,
-            branch = dto.branch,
-          )
 
-        if (key != null) {
-          val translations = translationService.setForKey(key, dto.translations)
-          val result =
-            mapOf(
-              "keyId" to key.id,
-              "keyName" to key.name,
-              "translations" to
-                translations.map { (tag, t) ->
-                  mapOf("languageTag" to tag, "text" to t.text, "state" to t.state.name)
-                },
+        executeInNewTransaction(transactionManager) {
+          val key =
+            keyService.find(
+              projectId = projectHolder.project.id,
+              name = dto.key,
+              namespace = dto.namespace,
+              branch = dto.branch,
             )
-          textResult(objectMapper.writeValueAsString(result))
-        } else {
-          errorResult("Key '${dto.key}' not found. Use create_keys to create it first.")
+
+          if (key != null) {
+            val translations = translationService.setForKey(key, dto.translations)
+            val result =
+              mapOf(
+                "keyId" to key.id,
+                "keyName" to key.name,
+                "translations" to
+                  translations.map { (tag, t) ->
+                    mapOf("languageTag" to tag, "text" to t.text, "state" to t.state.name)
+                  },
+              )
+            textResult(objectMapper.writeValueAsString(result))
+          } else {
+            errorResult("Key '${dto.key}' not found. Use create_keys to create it first.")
+          }
         }
       }
     }

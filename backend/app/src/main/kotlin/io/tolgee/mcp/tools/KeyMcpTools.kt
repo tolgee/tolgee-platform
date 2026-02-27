@@ -11,8 +11,10 @@ import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
+import org.springframework.transaction.PlatformTransactionManager
 
 @Component
 class KeyMcpTools(
@@ -20,6 +22,7 @@ class KeyMcpTools(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
+  private val transactionManager: PlatformTransactionManager,
 ) : McpToolsProvider {
   private val listKeysSpec = buildSpec(KeyController::getAll, "list_keys")
   private val searchKeysSpec = buildSpec(KeyController::searchForKey, "search_keys")
@@ -157,24 +160,26 @@ class KeyMcpTools(
       },
     ) { request ->
       mcpRequestContext.executeAs(getKeySpec, request.arguments.getProjectId()) {
-        val key =
-          keyService.find(
-            projectId = projectHolder.project.id,
-            name = request.arguments.requireString("keyName"),
-            namespace = request.arguments.getString("namespace"),
-            branch = request.arguments.getString("branch"),
-          )
-        if (key == null) {
-          errorResult("Key not found")
-        } else {
-          val result =
-            mapOf(
-              "keyId" to key.id,
-              "keyName" to key.name,
-              "namespace" to key.namespace?.name,
-              "description" to key.keyMeta?.description,
+        executeInNewTransaction(transactionManager) {
+          val key =
+            keyService.find(
+              projectId = projectHolder.project.id,
+              name = request.arguments.requireString("keyName"),
+              namespace = request.arguments.getString("namespace"),
+              branch = request.arguments.getString("branch"),
             )
-          textResult(objectMapper.writeValueAsString(result))
+          if (key == null) {
+            errorResult("Key not found")
+          } else {
+            val result =
+              mapOf(
+                "keyId" to key.id,
+                "keyName" to key.name,
+                "namespace" to key.namespace?.name,
+                "description" to key.keyMeta?.description,
+              )
+            textResult(objectMapper.writeValueAsString(result))
+          }
         }
       }
     }
@@ -193,30 +198,32 @@ class KeyMcpTools(
       },
     ) { request ->
       mcpRequestContext.executeAs(editKeySpec, request.arguments.getProjectId()) {
-        val key =
-          keyService.find(
-            projectId = projectHolder.project.id,
-            name = request.arguments.requireString("keyName"),
-            namespace = request.arguments.getString("keyNamespace"),
-            branch = request.arguments.getString("keyBranch"),
-          )
-        if (key == null) {
-          errorResult("Key not found")
-        } else {
-          val dto =
-            EditKeyDto(
-              name = request.arguments.requireString("newName"),
-              namespace = request.arguments.getString("newNamespace"),
-              description = request.arguments.getString("newDescription"),
+        executeInNewTransaction(transactionManager) {
+          val key =
+            keyService.find(
+              projectId = projectHolder.project.id,
+              name = request.arguments.requireString("keyName"),
+              namespace = request.arguments.getString("keyNamespace"),
+              branch = request.arguments.getString("keyBranch"),
             )
-          val updated = keyService.edit(key.id, dto)
-          val result =
-            mapOf(
-              "id" to updated.id,
-              "name" to updated.name,
-              "namespace" to updated.namespace?.name,
-            )
-          textResult(objectMapper.writeValueAsString(result))
+          if (key == null) {
+            errorResult("Key not found")
+          } else {
+            val dto =
+              EditKeyDto(
+                name = request.arguments.requireString("newName"),
+                namespace = request.arguments.getString("newNamespace"),
+                description = request.arguments.getString("newDescription"),
+              )
+            val updated = keyService.edit(key.id, dto)
+            val result =
+              mapOf(
+                "id" to updated.id,
+                "name" to updated.name,
+                "namespace" to updated.namespace?.name,
+              )
+            textResult(objectMapper.writeValueAsString(result))
+          }
         }
       }
     }
@@ -237,17 +244,19 @@ class KeyMcpTools(
         val namespace = request.arguments.getString("namespace")
         val branch = request.arguments.getString("branch")
 
-        val (keys, notFound) = keyService.resolveKeysByName(projectHolder.project.id, keyNames, namespace, branch)
-        if (notFound.isNotEmpty()) {
-          errorResult("Keys not found: ${notFound.joinToString(", ")}")
-        } else {
-          val ids = keys.map { it.id }.toSet()
-          keyService.deleteMultiple(ids)
-          textResult(
-            objectMapper.writeValueAsString(
-              mapOf("deleted" to true, "keyCount" to ids.size),
-            ),
-          )
+        executeInNewTransaction(transactionManager) {
+          val (keys, notFound) = keyService.resolveKeysByName(projectHolder.project.id, keyNames, namespace, branch)
+          if (notFound.isNotEmpty()) {
+            errorResult("Keys not found: ${notFound.joinToString(", ")}")
+          } else {
+            val ids = keys.map { it.id }.toSet()
+            keyService.deleteMultiple(ids)
+            textResult(
+              objectMapper.writeValueAsString(
+                mapOf("deleted" to true, "keyCount" to ids.size),
+              ),
+            )
+          }
         }
       }
     }

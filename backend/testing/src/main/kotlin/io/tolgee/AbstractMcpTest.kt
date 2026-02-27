@@ -14,10 +14,14 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.test.context.TestPropertySource
 import java.time.Duration
 
+// OSIV is disabled to replicate production MCP environment where tool handlers
+// run without an open Hibernate session spanning the request.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestPropertySource(properties = ["spring.jpa.open-in-view=false"])
 abstract class AbstractMcpTest : AbstractSpringTest() {
   @LocalServerPort
   protected val port: Int = 0
