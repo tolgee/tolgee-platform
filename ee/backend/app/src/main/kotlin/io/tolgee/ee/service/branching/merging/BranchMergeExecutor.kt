@@ -115,6 +115,20 @@ class BranchMergeExecutor(
       return
     }
     val sourceKey = change.sourceKey ?: return
+
+    // Hard-delete any soft-deleted key with the same name/namespace on the target branch
+    // to avoid unique constraint violations
+    val softDeletedKeys =
+      keyRepository.findSoftDeletedByNameAndBranch(
+        projectId = targetBranch.project.id,
+        name = sourceKey.name,
+        namespace = sourceKey.namespace?.name,
+        branchId = targetBranch.id,
+      )
+    if (softDeletedKeys.isNotEmpty()) {
+      keyService.hardDeleteMultiple(softDeletedKeys.map { it.id })
+    }
+
     val newKey =
       Key().apply {
         name = sourceKey.name

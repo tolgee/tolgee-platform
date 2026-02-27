@@ -537,4 +537,23 @@ interface KeyRepository : JpaRepository<Key, Long> {
     ids: Collection<Long>,
     projectId: Long,
   ): List<Key>
+
+  @Query(
+    """
+    from Key k
+    left join k.namespace ns
+    left join k.branch br
+    where k.project.id = :projectId
+      and k.name = :name
+      and (ns.name = :namespace or (ns is null and :namespace is null))
+      and (br.id = :branchId or (br is null and :branchId is null))
+      and k.deletedAt is not null
+    """,
+  )
+  fun findSoftDeletedByNameAndBranch(
+    projectId: Long,
+    name: String,
+    namespace: String?,
+    branchId: Long?,
+  ): List<Key>
 }
