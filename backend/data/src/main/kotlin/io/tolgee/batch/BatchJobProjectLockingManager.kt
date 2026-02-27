@@ -1,6 +1,7 @@
 package io.tolgee.batch
 
 import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.timing.BatchJobTimerProvider
 import io.tolgee.component.UsingRedisProvider
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
@@ -22,6 +23,7 @@ class BatchJobProjectLockingManager(
   @Lazy
   private val redissonClient: RedissonClient,
   private val usingRedisProvider: UsingRedisProvider,
+  private val timerProvider: BatchJobTimerProvider?,
 ) : Logging {
   companion object {
     private val localProjectLocks by lazy {
@@ -48,19 +50,21 @@ class BatchJobProjectLockingManager(
     batchJobId: Long,
     batchJobDto: BatchJobDto? = null,
   ): Boolean {
-    val jobDto = batchJobDto ?: batchJobService.getJobDto(batchJobId)
-    if (!jobDto.type.exclusive) {
-      return true
+    return timed("PROJECT_LOCK.canLock") {
+      val jobDto = batchJobDto ?: batchJobService.getJobDto(batchJobId)
+      if (!jobDto.type.exclusive) {
+        return@timed true
+      }
+      tryLockJobForProject(jobDto)
     }
-    return tryLockJobForProject(jobDto)
   }
 
   private fun tryLockJobForProject(jobDto: BatchJobDto): Boolean {
     logger.debug("Trying to lock job ${jobDto.id} for project ${jobDto.projectId}")
     return if (usingRedisProvider.areWeUsingRedis) {
-      tryLockWithRedisson(jobDto)
+      timed("PROJECT_LOCK.tryLockRedis") { tryLockWithRedisson(jobDto) }
     } else {
-      tryLockLocal(jobDto)
+      timed("PROJECT_LOCK.tryLockLocal") { tryLockLocal(jobDto) }
     }
   }
 
@@ -69,16 +73,18 @@ class BatchJobProjectLockingManager(
     jobId: Long,
   ) {
     projectId ?: return
-    // Eagerly invalidate the local cache so other jobs can acquire the lock immediately
-    localProjectLockCache.remove(projectId)
-    getMap().compute(projectId) { _, lockedJobId ->
-      logger.debug("Unlocking job: $jobId for project $projectId")
-      if (lockedJobId == jobId) {
+    timed("PROJECT_LOCK.unlock") {
+      // Eagerly invalidate the local cache so other jobs can acquire the lock immediately
+      localProjectLockCache.remove(projectId)
+      getMap().compute(projectId) { _, lockedJobId ->
         logger.debug("Unlocking job: $jobId for project $projectId")
-        return@compute 0L
+        if (lockedJobId == jobId) {
+          logger.debug("Unlocking job: $jobId for project $projectId")
+          return@compute 0L
+        }
+        logger.debug("Job: $jobId for project $projectId is not locked")
+        return@compute lockedJobId
       }
-      logger.debug("Job: $jobId for project $projectId is not locked")
-      return@compute lockedJobId
     }
   }
 
@@ -99,6 +105,7 @@ class BatchJobProjectLockingManager(
       cached.lockedJobId != 0L &&
       System.currentTimeMillis() - cached.timestamp < LOCK_CACHE_TTL_MS
     ) {
+      timed("PROJECT_LOCK.cacheHit") {}
       return false
     }
 
@@ -149,7 +156,7 @@ class BatchJobProjectLockingManager(
     if (currentValue == null) {
       logger.debug("Getting initial locked state from DB state")
       // we have to find out from database if there is any running job for the project
-      val initial = getInitialJobId(projectId)
+      val initial = timed("PROJECT_LOCK.getInitialJobId") { getInitialJobId(projectId) }
       logger.debug("Initial locked job $initial for project ${toLock.projectId}")
       if (initial == null) {
         logger.debug("No job found, locking ${toLock.id}")
@@ -203,5 +210,12 @@ class BatchJobProjectLockingManager(
 
   fun getLockedJobIds(): Set<Long> {
     return getMap().values.filterNotNull().toSet()
+  }
+
+  private fun <T> timed(
+    operationName: String,
+    block: () -> T,
+  ): T {
+    return timerProvider?.measure(operationName, block) ?: block()
   }
 }

@@ -6,6 +6,7 @@ import io.tolgee.batch.data.BatchJobChunkExecutionDto
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
+import io.tolgee.batch.timing.BatchJobTimerProvider
 import io.tolgee.component.UsingRedisProvider
 import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.model.batch.BatchJobChunkExecution
@@ -36,6 +37,7 @@ class BatchJobChunkExecutionQueue(
   @Lazy
   private val redisTemplate: StringRedisTemplate,
   private val metrics: Metrics,
+  private val timer: BatchJobTimerProvider?,
 ) : Logging,
   InitializingBean {
   companion object {
@@ -57,6 +59,11 @@ class BatchJobChunkExecutionQueue(
     private var lastServedJobId: Long? = null
   }
 
+  private fun <T> timed(
+    name: String,
+    block: () -> T,
+  ): T = timer?.measure(name, block) ?: block()
+
   private fun incrementCharacterCount(character: JobCharacter) {
     jobCharacterCounts.computeIfAbsent(character) { AtomicInteger(0) }.incrementAndGet()
   }
@@ -75,9 +82,11 @@ class BatchJobChunkExecutionQueue(
       QueueEventType.REMOVE -> {
         // Remove and decrement atomically per item to prevent double-decrement
         // if poll() removes an item between removeAll and forEach
-        event.items.forEach { item ->
-          if (queue.remove(item)) {
-            decrementCharacterCount(item.jobCharacter)
+        timed("QUEUE_INTERNAL.removeConsuming") {
+          event.items.forEach { item ->
+            if (queue.remove(item)) {
+              decrementCharacterCount(item.jobCharacter)
+            }
           }
         }
       }
@@ -117,7 +126,10 @@ class BatchJobChunkExecutionQueue(
   }
 
   fun addExecutionsToLocalQueue(data: List<BatchJobChunkExecutionDto>) {
-    val ids = queue.map { it.chunkExecutionId }.toSet()
+    val ids =
+      timed("QUEUE_INTERNAL.buildIdSet") {
+        queue.map { it.chunkExecutionId }.toSet()
+      }
     var count = 0
     data.forEach {
       if (!ids.contains(it.id)) {
@@ -133,7 +145,10 @@ class BatchJobChunkExecutionQueue(
 
   fun addItemsToLocalQueue(data: List<ExecutionQueueItem>) {
     // Use Set for O(1) lookup instead of O(n) queue.contains()
-    val existingIds = queue.mapTo(HashSet()) { it.chunkExecutionId }
+    val existingIds =
+      timed("QUEUE_INTERNAL.buildIdSet") {
+        queue.mapTo(HashSet()) { it.chunkExecutionId }
+      }
     val toAdd = mutableListOf<ExecutionQueueItem>()
     var filteredOutCount = 0
 
@@ -188,12 +203,14 @@ class BatchJobChunkExecutionQueue(
 
   fun removeJobExecutions(jobId: Long) {
     logger.debug("Removing job $jobId from queue, queue size: ${queue.size}")
-    val iterator = queue.iterator()
-    while (iterator.hasNext()) {
-      val item = iterator.next()
-      if (item.jobId == jobId) {
-        iterator.remove()
-        decrementCharacterCount(item.jobCharacter)
+    timed("QUEUE_INTERNAL.removeJobExecutions") {
+      val iterator = queue.iterator()
+      while (iterator.hasNext()) {
+        val item = iterator.next()
+        if (item.jobId == jobId) {
+          iterator.remove()
+          decrementCharacterCount(item.jobCharacter)
+        }
       }
     }
     logger.debug("Removed job $jobId from queue, queue size: ${queue.size}")
@@ -237,8 +254,11 @@ class BatchJobChunkExecutionQueue(
       return null
     }
 
-    // Get distinct job IDs in queue order
-    val jobIds = queue.mapTo(LinkedHashSet()) { it.jobId }.toList()
+    // Get distinct job IDs in queue order — O(n) scan of entire queue
+    val jobIds =
+      timed("QUEUE_INTERNAL.collectJobIds") {
+        queue.mapTo(LinkedHashSet()) { it.jobId }.toList()
+      }
     if (jobIds.isEmpty()) {
       return null
     }
@@ -258,13 +278,22 @@ class BatchJobChunkExecutionQueue(
       val jobIndex = (startIndex + i) % jobIds.size
       val targetJobId = jobIds[jobIndex]
 
-      // Find first item for this job and try to remove it
-      val item = queue.firstOrNull { it.jobId == targetJobId }
-      if (item != null && queue.remove(item)) {
-        // Successfully removed - update state and return
-        decrementCharacterCount(item.jobCharacter)
-        lastServedJobId = targetJobId
-        return item
+      // Find first item for this job — O(n) scan to find matching item
+      val item =
+        timed("QUEUE_INTERNAL.findFirstForJob") {
+          queue.firstOrNull { it.jobId == targetJobId }
+        }
+      if (item != null) {
+        // Remove item — O(n) scan for ConcurrentLinkedQueue.remove()
+        val removed =
+          timed("QUEUE_INTERNAL.removeItem") {
+            queue.remove(item)
+          }
+        if (removed) {
+          decrementCharacterCount(item.jobCharacter)
+          lastServedJobId = targetJobId
+          return item
+        }
       }
       // Item was null or already removed by another thread, try next job
     }
@@ -298,7 +327,9 @@ class BatchJobChunkExecutionQueue(
   }
 
   fun getQueuedJobItems(jobId: Long): List<ExecutionQueueItem> {
-    return queue.filter { it.jobId == jobId }
+    return timed("QUEUE_INTERNAL.getQueuedJobItems") {
+      queue.filter { it.jobId == jobId }
+    }
   }
 
   fun getAllQueueItems(): List<ExecutionQueueItem> {
