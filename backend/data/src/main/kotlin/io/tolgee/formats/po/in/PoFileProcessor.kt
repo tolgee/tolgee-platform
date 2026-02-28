@@ -5,7 +5,9 @@ import io.tolgee.exceptions.PoParserException
 import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.MessageConvertorResult
 import io.tolgee.formats.importCommon.ImportFormat
+import io.tolgee.formats.po.PO_FILE_MSG_CTXT_CUSTOM_KEY
 import io.tolgee.formats.po.PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY
+import io.tolgee.formats.po.PO_MSGCTXT_SEPARATOR
 import io.tolgee.formats.po.`in`.data.PoParsedTranslation
 import io.tolgee.formats.po.`in`.data.PoParserResult
 import io.tolgee.model.dataImport.ImportLanguage
@@ -26,7 +28,7 @@ class PoFileProcessor(
       context.languages[languageId] = ImportLanguage(languageId, context.fileEntity)
 
       parsed.translations.forEachIndexed { idx, poTranslation ->
-        val keyName = poTranslation.msgid.toString()
+        val keyName = buildKeyName(poTranslation)
 
         if (poTranslation.msgidPlural.isNotEmpty()) {
           addPlural(poTranslation, idx)
@@ -43,6 +45,8 @@ class PoFileProcessor(
             rawData = poTranslation.msgstr.toString(),
             convertedBy = converted.second,
           )
+
+          storeMsgCtxt(poTranslation, keyName)
 
           poTranslation.meta.references.forEach { reference ->
             val split = reference.split(":")
@@ -72,10 +76,11 @@ class PoFileProcessor(
     val plurals = poTranslation.msgstrPlurals?.map { it.key to it.value.toString() }?.toMap()
     plurals?.let {
       val (converted, convertedBy) = getConvertedMessage(poTranslation, plurals)
-      val keyName = poTranslation.msgid.toString()
+      val keyName = buildKeyName(poTranslation)
       poTranslation.msgidPlural.toString().nullIfEmpty?.let {
         context.setCustom(keyName, PO_FILE_MSG_ID_PLURAL_CUSTOM_KEY, it)
       }
+      storeMsgCtxt(poTranslation, keyName)
       context.addTranslation(
         keyName,
         languageId,
@@ -85,6 +90,26 @@ class PoFileProcessor(
         rawData = plurals,
         convertedBy = convertedBy,
       )
+    }
+  }
+
+  private fun buildKeyName(poTranslation: PoParsedTranslation): String {
+    val msgctxt = poTranslation.msgctxt.toString()
+    val msgid = poTranslation.msgid.toString()
+    return if (msgctxt.isNotEmpty()) {
+      "$msgctxt$PO_MSGCTXT_SEPARATOR$msgid"
+    } else {
+      msgid
+    }
+  }
+
+  private fun storeMsgCtxt(
+    poTranslation: PoParsedTranslation,
+    keyName: String,
+  ) {
+    val msgctxt = poTranslation.msgctxt.toString()
+    if (msgctxt.isNotEmpty()) {
+      context.setCustom(keyName, PO_FILE_MSG_CTXT_CUSTOM_KEY, msgctxt)
     }
   }
 

@@ -30,4 +30,36 @@ class PoParserTest {
     assertThat(result.translations[10].msgstr.toString()).isEqualTo("This\nis\na\nmultiline\nstring")
     assertThat(result.translations[11].msgstr.toString()).isEqualTo("This\r\nis\r\na\r\nmultiline\r\nstring")
   }
+
+  @Test
+  fun `parses msgctxt correctly`() {
+    mockUtil = FileProcessorContextMockUtil()
+    mockUtil.mockIt("example.po", "src/test/resources/import/po/example_msgctxt.po")
+    val result = PoParser(mockUtil.fileProcessorContext)()
+    // header + 5 entries (menu/Open, menu/Close, Hello, dialog/Open, stats/%d file plural)
+    assertThat(result.translations).hasSize(6)
+
+    // msgctxt "menu", msgid "Open"
+    assertThat(result.translations[1].msgctxt.toString()).isEqualTo("menu")
+    assertThat(result.translations[1].msgid.toString()).isEqualTo("Open")
+    assertThat(result.translations[1].msgstr.toString()).isEqualTo("Öffnen")
+
+    // msgctxt "menu", msgid "Close"
+    assertThat(result.translations[2].msgctxt.toString()).isEqualTo("menu")
+    assertThat(result.translations[2].msgid.toString()).isEqualTo("Close")
+
+    // no msgctxt, msgid "Hello"
+    assertThat(result.translations[3].msgctxt.toString()).isEqualTo("")
+    assertThat(result.translations[3].msgid.toString()).isEqualTo("Hello")
+
+    // msgctxt "dialog", msgid "Open"
+    assertThat(result.translations[4].msgctxt.toString()).isEqualTo("dialog")
+    assertThat(result.translations[4].msgid.toString()).isEqualTo("Open")
+
+    // msgctxt "stats", plural entry
+    assertThat(result.translations[5].msgctxt.toString()).isEqualTo("stats")
+    assertThat(result.translations[5].msgid.toString()).isEqualTo("%d file")
+    assertThat(result.translations[5].msgidPlural.toString()).isEqualTo("%d files")
+    assertThat(result.translations[5].msgstrPlurals).hasSize(2)
+  }
 }
