@@ -3,7 +3,7 @@ import { T } from '@tolgee/react';
 import { GlobalError } from 'tg.error/GlobalError';
 import { TranslatedError } from 'tg.translationTools/TranslatedError';
 import * as Sentry from '@sentry/browser';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { parseErrorResponse } from 'tg.fixtures/errorFixtures';
 import { RequestOptions } from './ApiHttpService';
 import { globalContext } from 'tg.globalContext/globalActions';
 import { LINKS } from 'tg.constants/links';
