@@ -109,6 +109,35 @@ describe('Soft delete keys', () => {
     cy.contains('key2').should('be.visible');
   });
 
+  it('allows trashing a key with the same name as an already-trashed key', () => {
+    // Soft-delete key1 via API
+    v2apiFetch(`projects/${project.id}/keys/${key1Id}`, {
+      method: 'DELETE',
+    });
+
+    // Create a new key1 with the same name and soft-delete it too
+    createKey(project.id, 'key1', { en: 'New key 1 translation' }).then(
+      (newKey) => {
+        v2apiFetch(`projects/${project.id}/keys/${newKey.id}`, {
+          method: 'DELETE',
+        });
+      }
+    );
+
+    // Translations view should only show key2
+    visitTranslations(project.id);
+    waitForGlobalLoading();
+    cy.contains('key1').should('not.exist');
+    cy.contains('key2').should('be.visible');
+
+    // Trash should contain both trashed key1 entries
+    cy.visit(`${HOST}/projects/${project.id}/translations/trash`);
+    waitForGlobalLoading();
+
+    cy.gcy('trash-row').should('have.length', 2);
+    cy.gcy('trash-row').filter(':contains("key1")').should('have.length', 2);
+  });
+
   it('permanently deletes a key from trash', () => {
     // Soft-delete key1
     v2apiFetch(`projects/${project.id}/keys/${key1Id}`, {
