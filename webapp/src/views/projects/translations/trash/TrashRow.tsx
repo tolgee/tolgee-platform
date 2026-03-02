@@ -265,17 +265,31 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
   const hoursUntilDelete = msUntilDelete / (1000 * 60 * 60);
   const minutesUntilDelete = msUntilDelete / (1000 * 60);
 
-  let deletesInKey: string;
-  let deletesInValue: number;
+  let deletesInLabel: React.ReactNode;
   if (hoursUntilDelete >= 24) {
-    deletesInKey = 'trash_deletes_in';
-    deletesInValue = Math.ceil(hoursUntilDelete / 24);
+    const days = Math.ceil(hoursUntilDelete / 24);
+    deletesInLabel = (
+      <T
+        keyName="trash_deletes_in"
+        params={{ days, hours: days, minutes: days }}
+      />
+    );
   } else if (minutesUntilDelete >= 60) {
-    deletesInKey = 'trash_deletes_in_hours';
-    deletesInValue = Math.ceil(hoursUntilDelete);
+    const hours = Math.ceil(hoursUntilDelete);
+    deletesInLabel = (
+      <T
+        keyName="trash_deletes_in_hours"
+        params={{ days: hours, hours, minutes: hours }}
+      />
+    );
   } else {
-    deletesInKey = 'trash_deletes_in_minutes';
-    deletesInValue = Math.max(1, Math.ceil(minutesUntilDelete));
+    const minutes = Math.max(1, Math.ceil(minutesUntilDelete));
+    deletesInLabel = (
+      <T
+        keyName="trash_deletes_in_minutes"
+        params={{ days: minutes, hours: minutes, minutes }}
+      />
+    );
   }
 
   const deletedTimeText =
@@ -390,14 +404,7 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
         >
           <StyledDeletesIn>
             <Trash01 width={14} height={14} />
-            <T
-              keyName={deletesInKey}
-              params={{
-                days: deletesInValue,
-                hours: deletesInValue,
-                minutes: deletesInValue,
-              }}
-            />
+            {deletesInLabel}
           </StyledDeletesIn>
         </Tooltip>
         <StyledActions>
