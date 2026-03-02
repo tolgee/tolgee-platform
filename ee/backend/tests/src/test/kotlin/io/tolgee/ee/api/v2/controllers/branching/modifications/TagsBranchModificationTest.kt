@@ -1,8 +1,9 @@
-package io.tolgee.ee.api.v2.controllers.branching.protectedBranch
+package io.tolgee.ee.api.v2.controllers.branching.modifications
 
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.fixtures.ProtectedBranchModificationTestBase
+import io.tolgee.fixtures.BranchModificationTestBase
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-class TagsProtectedBranchModificationTest : ProtectedBranchModificationTestBase() {
+class TagsBranchModificationTest : BranchModificationTestBase() {
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
@@ -94,10 +95,17 @@ class TagsProtectedBranchModificationTest : ProtectedBranchModificationTestBase(
 
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_EDIT])
   @Test
-  fun `allow tagging key on protected branch when branching feature is disabled`() {
+  fun `forbid tagging key on non-default branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    tagKey(testData.protectedKey.id, "protected-tag").andIsBadRequest
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_EDIT])
+  @Test
+  fun `allow tagging key on default branch when branching feature is disabled`() {
     enabledFeaturesProvider.forceEnabled = emptySet()
     expectOk {
-      tagKey(testData.protectedKey.id, "protected-tag")
+      tagKey(testData.branchedKey.id, "main-tag")
     }
   }
 }

@@ -1,8 +1,9 @@
-package io.tolgee.ee.api.v2.controllers.branching.protectedBranch
+package io.tolgee.ee.api.v2.controllers.branching.modifications
 
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.fixtures.ProtectedBranchModificationTestBase
+import io.tolgee.fixtures.BranchModificationTestBase
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-class TranslationsProtectedBranchModificationTest : ProtectedBranchModificationTestBase() {
+class TranslationsBranchModificationTest : BranchModificationTestBase() {
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
@@ -146,6 +147,24 @@ class TranslationsProtectedBranchModificationTest : ProtectedBranchModificationT
     val translation = getTranslation(testData.branchedKey)
     expectOk {
       setOutdatedFlag(translation.id)
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_STATE_EDIT])
+  @Test
+  fun `forbid setting translation state on non-default branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    val translation = getTranslation(testData.protectedKey)
+    setTranslationStateToTranslated(translation.id).andIsBadRequest
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATIONS_STATE_EDIT])
+  @Test
+  fun `allow setting translation state on default branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    val translation = getTranslation(testData.branchedKey)
+    expectOk {
+      setTranslationStateToTranslated(translation.id)
     }
   }
 }

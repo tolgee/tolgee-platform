@@ -29,6 +29,16 @@ class ProjectFeatureGuard(
     }
   }
 
+  fun checkEnabled(
+    feature: Feature,
+    project: Project,
+  ) {
+    enabledFeaturesProvider.checkFeatureEnabled(project.organizationOwner.id, feature)
+    if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
+      throw ValidationException(Message.BRANCHING_NOT_ENABLED_FOR_PROJECT)
+    }
+  }
+
   fun isFeatureEnabled(
     feature: Feature,
     project: Project = projectHolder.projectEntity,

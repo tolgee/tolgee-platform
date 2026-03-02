@@ -536,25 +536,31 @@ class SecurityService(
     }
   }
 
-  fun checkProtectedBranchModify(
+  fun checkBranchModify(
     project: Project,
     branchName: String?,
   ) {
     if (projectFeatureGuard.isFeatureEnabled(Feature.BRANCHING, project)) {
       val branch = branchService.getActiveOrDefault(project.id, branchName)
-      checkProtectedBranchModify(branch, project.id)
+      checkBranchModify(branch, project.id)
     }
   }
 
-  fun checkProtectedBranchModify(entity: BranchMergeableEntity<*, *>) {
+  fun checkBranchModify(entity: BranchMergeableEntity<*, *>) {
     val key = entity.resolveKey() ?: return
-    if (projectFeatureGuard.isFeatureEnabled(Feature.BRANCHING, key.project)) {
-      val branch = key.branch ?: branchService.getDefaultBranch(key.project.id)
-      checkProtectedBranchModify(branch, key.project.id)
+    val branch = key.branch
+    if (branch != null && !branch.isDefault) {
+      // Entity is on a non-default branch; branching feature must be enabled
+      projectFeatureGuard.checkEnabled(Feature.BRANCHING, key.project)
+      checkBranchModify(branch, key.project.id)
+    } else if (projectFeatureGuard.isFeatureEnabled(Feature.BRANCHING, key.project)) {
+      // Entity is on default branch; only check protection when feature is enabled
+      val effectiveBranch = branch ?: branchService.getDefaultBranch(key.project.id)
+      checkBranchModify(effectiveBranch, key.project.id)
     }
   }
 
-  private fun checkProtectedBranchModify(
+  private fun checkBranchModify(
     branch: Branch?,
     projectId: Long,
   ) {

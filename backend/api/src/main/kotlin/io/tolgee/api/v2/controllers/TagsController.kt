@@ -107,7 +107,7 @@ class TagsController(
     @RequestParam(required = false) branch: String? = null,
   ) {
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
-    securityService.checkProtectedBranchModify(projectHolder.projectEntity, branch)
+    securityService.checkBranchModify(projectHolder.projectEntity, branch)
     tagService.complexTagOperation(projectHolder.project.id, req, branch)
   }
 

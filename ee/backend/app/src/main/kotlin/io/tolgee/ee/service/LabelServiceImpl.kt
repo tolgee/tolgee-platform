@@ -141,7 +141,7 @@ class LabelServiceImpl(
         projectId,
         translationId,
       ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
-    securityService.checkProtectedBranchModify(translation)
+    securityService.checkBranchModify(translation)
     val label = getByProjectIdAndId(projectId, labelId)
     translation.addLabel(label)
     translationRepository.save(translation)
@@ -155,7 +155,7 @@ class LabelServiceImpl(
     translation: Translation,
     labelId: Long,
   ): Label {
-    securityService.checkProtectedBranchModify(translation)
+    securityService.checkBranchModify(translation)
     val label = getByProjectIdAndId(projectId, labelId)
     translation.addLabel(label)
     translationRepository.save(translation)
@@ -174,7 +174,7 @@ class LabelServiceImpl(
         projectId,
         translationId,
       ) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
-    securityService.checkProtectedBranchModify(translation)
+    securityService.checkBranchModify(translation)
     val label = getByProjectIdAndId(projectId, labelId)
     translation.removeLabel(label)
     labelRepository.save(label)

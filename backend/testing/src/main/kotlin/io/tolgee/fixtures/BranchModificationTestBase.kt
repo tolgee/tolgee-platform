@@ -21,7 +21,7 @@ import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
 
-abstract class ProtectedBranchModificationTestBase : ProjectAuthControllerTest("/v2/projects/") {
+abstract class BranchModificationTestBase : ProjectAuthControllerTest("/v2/projects/") {
   protected lateinit var testData: BranchTranslationsTestData
 
   @Autowired

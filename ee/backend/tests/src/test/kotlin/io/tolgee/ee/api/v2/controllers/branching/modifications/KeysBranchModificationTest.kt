@@ -1,8 +1,9 @@
-package io.tolgee.ee.api.v2.controllers.branching.protectedBranch
+package io.tolgee.ee.api.v2.controllers.branching.modifications
 
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.fixtures.ProtectedBranchModificationTestBase
+import io.tolgee.fixtures.BranchModificationTestBase
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-class KeysProtectedBranchModificationTest : ProtectedBranchModificationTestBase() {
+class KeysBranchModificationTest : BranchModificationTestBase() {
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
@@ -138,5 +139,35 @@ class KeysProtectedBranchModificationTest : ProtectedBranchModificationTestBase(
     expectOk {
       setDisabledLanguages(testData.branchedKey.id, listOf(testData.de.id))
     }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_EDIT])
+  @Test
+  fun `forbid editing key on non-default branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    editKey(testData.protectedKey.id, "protected-key-renamed").andIsBadRequest
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_EDIT])
+  @Test
+  fun `allow editing key on default branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    expectOk {
+      editKey(testData.branchedKey.id, "branched-key-renamed")
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_DELETE])
+  @Test
+  fun `forbid deleting key on non-default non-protected branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    deleteKey(testData.unprotectedBranchedKey.id).andIsBadRequest
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_DELETE])
+  @Test
+  fun `forbid deleting key on non-default protected branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    deleteKey(testData.protectedKey.id).andIsBadRequest
   }
 }
