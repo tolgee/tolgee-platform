@@ -1011,6 +1011,12 @@ export interface paths {
   "/v2/projects/{projectId}/translations/{translationId}/qa-issues": {
     get: operations["getIssues"];
   };
+  "/v2/projects/{projectId}/translations/{translationId}/qa-issues/{issueId}/ignore": {
+    put: operations["ignoreIssue"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/qa-issues/{issueId}/unignore": {
+    put: operations["unignoreIssue"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/set-outdated-flag/{state}": {
     /** Set's "outdated" flag indicating the base translation was changed without updating current translation. */
     put: operations["setOutdated"];
@@ -5481,6 +5487,7 @@ export interface components {
       text: string;
     };
     QaCheckResultModel: {
+      ignored: boolean;
       /** @enum {string} */
       message:
         | "qa_empty_translation"
@@ -5499,6 +5506,8 @@ export interface components {
         | "qa_case_lowercase"
         | "qa_numbers_missing";
       params?: { [key: string]: string };
+      /** Format: int64 */
+      persistedIssueId?: number;
       /** Format: int32 */
       positionEnd: number;
       /** Format: int32 */
@@ -15699,6 +15708,8 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter keys with open QA issues in lang */
+        filterHasQaIssuesInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
         /** Filter keys with any suggestions in lang */
@@ -20291,6 +20302,8 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter keys with open QA issues in lang */
+        filterHasQaIssuesInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
         /** Filter keys with any suggestions in lang */
@@ -20596,6 +20609,8 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
+        /** Filter keys with open QA issues in lang */
+        filterHasQaIssuesInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
         /** Filter keys with any suggestions in lang */
@@ -21147,6 +21162,84 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["CollectionModelQaIssueModel"];
         };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  ignoreIssue: {
+    parameters: {
+      path: {
+        projectId: number;
+        translationId: number;
+        issueId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: never;
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  unignoreIssue: {
+    parameters: {
+      path: {
+        projectId: number;
+        translationId: number;
+        issueId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: never;
       };
       /** Bad Request */
       400: {

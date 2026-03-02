@@ -7,6 +7,8 @@ import {
 } from 'tg.views/projects/translations/ToolsPanel/common/types';
 import { TabMessage } from 'tg.views/projects/translations/ToolsPanel/common/TabMessage';
 import { useQaCheckPreview } from '../hooks/useQaCheckPreview';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useProject } from 'tg.hooks/useProject';
 import { QaCheckItem } from './QaCheckItem';
 
 const StyledContainer = styled('div')`
@@ -32,6 +34,19 @@ const useQaChecksForPanel = (data: PanelContentData) => {
 export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
   const issues = useQaChecksForPanel(data);
   const text = data.editingText ?? '';
+  const project = useProject();
+
+  const ignoreMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/{issueId}/ignore',
+    method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/qa-check/preview',
+  });
+
+  const unignoreMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/{issueId}/unignore',
+    method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/qa-check/preview',
+  });
 
   if (issues.length === 0) {
     return (
@@ -43,6 +58,23 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     );
   }
 
+  const handleIgnoreToggle = (issue: (typeof issues)[0]) => {
+    const persistedIssueId = issue.persistedIssueId;
+    if (persistedIssueId == null) return;
+
+    const translationId = data.keyData.translations[data.language.tag]?.id;
+    if (translationId == null) return;
+
+    const mutation = issue.ignored ? unignoreMutation : ignoreMutation;
+    mutation.mutate({
+      path: {
+        projectId: project!.id,
+        translationId,
+        issueId: persistedIssueId,
+      },
+    });
+  };
+
   return (
     <StyledContainer data-cy="qa-panel-container">
       {issues.map((issue, index) => (
@@ -53,7 +85,7 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
           text={text}
           slim={true}
           onCorrect={
-            issue.replacement != null
+            issue.replacement != null && !issue.ignored
               ? () => {
                   const corrected =
                     text.slice(0, issue.positionStart) +
@@ -61,6 +93,11 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
                     text.slice(issue.positionEnd);
                   data.setValue(corrected);
                 }
+              : undefined
+          }
+          onIgnore={
+            issue.persistedIssueId != null
+              ? () => handleIgnoreToggle(issue)
               : undefined
           }
         />

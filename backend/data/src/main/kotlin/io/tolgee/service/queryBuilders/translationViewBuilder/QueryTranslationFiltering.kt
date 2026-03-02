@@ -100,6 +100,15 @@ class QueryTranslationFiltering(
     }
   }
 
+  fun applyQaFilter(
+    language: LanguageDto,
+    qaIssueCountExpression: Expression<Long>,
+  ) {
+    if (params.filterHasQaIssuesInLang?.contains(language.tag) == true) {
+      queryBase.translationConditions.add(cb.greaterThan(qaIssueCountExpression, cb.literal(0L)))
+    }
+  }
+
   fun apply(
     language: LanguageDto,
     translation: ListJoin<Key, Translation>,

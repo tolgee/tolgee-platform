@@ -125,13 +125,15 @@ class QueryBase<T>(
       val unresolvedCommentsExpression = addUnresolvedComments(translation, language)
       val activeSuggestionsExpression = addActiveSuggestionsCount(language)
       addTotalSuggestionsCount(language)
-      addQaIssueCount(translation, language)
+      val qaIssueCountExpression = addQaIssueCount(translation, language)
 
       queryTranslationFiltering.apply(
         language,
         resolvedCommentsExpression,
         unresolvedCommentsExpression,
       )
+
+      queryTranslationFiltering.applyQaFilter(language, qaIssueCountExpression)
 
       queryTranslationFiltering.apply(
         language,

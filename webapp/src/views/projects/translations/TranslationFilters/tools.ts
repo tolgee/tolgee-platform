@@ -21,6 +21,7 @@ export type FiltersInternal = {
   filterHasNoScreenshot?: boolean;
   filterHasUnresolvedComments?: boolean;
   filterHasComments?: boolean;
+  filterHasQaIssues?: boolean;
   filterLabel?: string[];
   filterHasSuggestions?: boolean;
   filterHasNoSuggestions?: boolean;
@@ -47,6 +48,7 @@ export type AddParams =
   | ['filterHasNoScreenshot']
   | ['filterHasUnresolvedComments']
   | ['filterHasComments']
+  | ['filterHasQaIssues']
   | ['filterLabel', string]
   | ['filterHasSuggestions']
   | ['filterHasNoSuggestions']

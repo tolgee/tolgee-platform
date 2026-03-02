@@ -29,4 +29,18 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     projectId: Long,
     translationId: Long,
   ): List<TranslationQaIssue>
+
+  @Query(
+    """
+    select i from TranslationQaIssue i
+    join i.translation t
+    join t.key k
+    where k.project.id = :projectId
+    and i.id = :issueId
+    """,
+  )
+  fun findByProjectAndId(
+    projectId: Long,
+    issueId: Long,
+  ): TranslationQaIssue?
 }
