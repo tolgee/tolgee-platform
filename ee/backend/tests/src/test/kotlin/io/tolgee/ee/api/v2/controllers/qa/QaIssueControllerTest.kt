@@ -10,8 +10,10 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import net.javacrumbs.jsonunit.assertj.assertThatJson
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,6 +32,9 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var qaCheckRunnerService: QaCheckRunnerService
+
+  @Autowired
+  private lateinit var qaIssueRepository: TranslationQaIssueRepository
 
   lateinit var testData: BaseTestData
   lateinit var testKey: Key
@@ -149,5 +154,122 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
       node("_embedded.keys[0].translations.fr.qaIssueCount").isNumber.isGreaterThan(java.math.BigDecimal.ZERO)
       node("_embedded.keys[0].translations.en.qaIssueCount").isNumber.isEqualTo(java.math.BigDecimal.ZERO)
     }
+  }
+
+  @Test
+  fun `ignores a QA issue`() {
+    val params =
+      QaCheckParams(
+        baseText = "Hello world.",
+        text = "bonjour monde",
+        baseLanguageTag = "en",
+        languageTag = "fr",
+      )
+    val results = qaCheckRunnerService.runChecks(params)
+    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
+
+    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val issueToIgnore = issues.first()
+
+    performAuthPut(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/${issueToIgnore.id}/ignore",
+      null,
+    ).andIsOk
+
+    val updatedIssue = qaIssueRepository.findById(issueToIgnore.id).get()
+    assertThat(updatedIssue.state.name).isEqualTo("IGNORED")
+  }
+
+  @Test
+  fun `unignores a QA issue`() {
+    val params =
+      QaCheckParams(
+        baseText = "Hello world.",
+        text = "bonjour monde",
+        baseLanguageTag = "en",
+        languageTag = "fr",
+      )
+    val results = qaCheckRunnerService.runChecks(params)
+    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
+
+    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val issue = issues.first()
+
+    // First ignore it
+    performAuthPut(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/${issue.id}/ignore",
+      null,
+    ).andIsOk
+
+    // Then unignore it
+    performAuthPut(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/${issue.id}/unignore",
+      null,
+    ).andIsOk
+
+    val updatedIssue = qaIssueRepository.findById(issue.id).get()
+    assertThat(updatedIssue.state.name).isEqualTo("OPEN")
+  }
+
+  @Test
+  fun `ignored state is preserved when issues are re-persisted`() {
+    val params =
+      QaCheckParams(
+        baseText = "Hello world.",
+        text = "bonjour monde",
+        baseLanguageTag = "en",
+        languageTag = "fr",
+      )
+    val results = qaCheckRunnerService.runChecks(params)
+    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
+
+    // Ignore one issue
+    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val issueToIgnore = issues.first()
+    qaIssueService.ignoreIssue(testData.project.id, issueToIgnore.id)
+
+    // Re-persist with the same results (simulating a re-save)
+    val newResults = qaCheckRunnerService.runChecks(params)
+    qaIssueService.replaceIssuesForTranslation(frTranslation, newResults)
+
+    // The matching issue should still be IGNORED
+    val newIssues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val matchingIssue =
+      newIssues.find {
+        it.type == issueToIgnore.type &&
+          it.message == issueToIgnore.message &&
+          it.positionStart == issueToIgnore.positionStart &&
+          it.positionEnd == issueToIgnore.positionEnd
+      }
+    assertThat(matchingIssue).isNotNull
+    assertThat(matchingIssue!!.state.name).isEqualTo("IGNORED")
+  }
+
+  @Test
+  fun `ignored issues are not counted in qaIssueCount`() {
+    val params =
+      QaCheckParams(
+        baseText = "Hello world.",
+        text = "bonjour monde",
+        baseLanguageTag = "en",
+        languageTag = "fr",
+      )
+    val results = qaCheckRunnerService.runChecks(params)
+    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
+
+    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val totalIssues = issues.size
+
+    // Ignore all issues
+    issues.forEach { qaIssueService.ignoreIssue(testData.project.id, it.id) }
+
+    performAuthGet(
+      "/v2/projects/${testData.project.id}/translations?sort=id",
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.keys[0].translations.fr.qaIssueCount").isNumber.isEqualTo(java.math.BigDecimal.ZERO)
+    }
+
+    // Verify there are still persisted issues (just all ignored)
+    assertThat(totalIssues).isGreaterThan(0)
   }
 }

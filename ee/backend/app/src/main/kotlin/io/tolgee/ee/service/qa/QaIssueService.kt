@@ -2,6 +2,7 @@ package io.tolgee.ee.service.qa
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.qa.TranslationQaIssueRepository
@@ -18,10 +19,18 @@ class QaIssueService(
     translation: Translation,
     results: List<QaCheckResult>,
   ) {
+    val existingIssues = qaIssueRepository.findAllByTranslationId(translation.id)
     qaIssueRepository.deleteAllByTranslationId(translation.id)
     qaIssueRepository.flush()
     val entities =
       results.map { result ->
+        val matchingExisting =
+          existingIssues.find { existing ->
+            existing.type == result.type &&
+              existing.message == result.message &&
+              existing.positionStart == result.positionStart &&
+              existing.positionEnd == result.positionEnd
+          }
         TranslationQaIssue(
           type = result.type,
           message = result.message,
@@ -29,6 +38,7 @@ class QaIssueService(
           positionStart = result.positionStart,
           positionEnd = result.positionEnd,
           params = result.params?.let { objectMapper.writeValueAsString(it) },
+          state = matchingExisting?.state ?: QaIssueState.OPEN,
           translation = translation,
         )
       }
@@ -40,6 +50,34 @@ class QaIssueService(
     translationId: Long,
   ): List<TranslationQaIssue> {
     return qaIssueRepository.findAllByProjectAndTranslation(projectId, translationId)
+  }
+
+  @Transactional
+  fun ignoreIssue(
+    projectId: Long,
+    issueId: Long,
+  ) {
+    val issue = getIssueByProjectAndId(projectId, issueId)
+    issue.state = QaIssueState.IGNORED
+    qaIssueRepository.save(issue)
+  }
+
+  @Transactional
+  fun unignoreIssue(
+    projectId: Long,
+    issueId: Long,
+  ) {
+    val issue = getIssueByProjectAndId(projectId, issueId)
+    issue.state = QaIssueState.OPEN
+    qaIssueRepository.save(issue)
+  }
+
+  fun getIssueByProjectAndId(
+    projectId: Long,
+    issueId: Long,
+  ): TranslationQaIssue {
+    return qaIssueRepository.findByProjectAndId(projectId, issueId)
+      ?: throw io.tolgee.exceptions.NotFoundException()
   }
 
   fun deserializeParams(paramsJson: String?): Map<String, String>? {

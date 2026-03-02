@@ -91,6 +91,11 @@ export const useTranslationFilters = ({
           filterHasComments: true,
           filterHasUnresolvedComments: undefined,
         });
+      case 'filterHasQaIssues':
+        return setFilters({
+          ...filters,
+          filterHasQaIssues: true,
+        });
       case 'filterLabel':
         return setFilters({
           ...filters,
@@ -166,6 +171,11 @@ export const useTranslationFilters = ({
           ...filters,
           filterHasComments: undefined,
         });
+      case 'filterHasQaIssues':
+        return setFilters({
+          ...filters,
+          filterHasQaIssues: undefined,
+        });
       case 'filterLabel':
         return setFilters({
           ...filters,
@@ -213,6 +223,12 @@ export const useTranslationFilters = ({
       if (filters.filterHasComments) {
         filtersQuery.filterHasCommentsInLang = add(
           filtersQuery.filterHasCommentsInLang,
+          tag
+        );
+      }
+      if (filters.filterHasQaIssues) {
+        filtersQuery.filterHasQaIssuesInLang = add(
+          filtersQuery.filterHasQaIssuesInLang,
           tag
         );
       }

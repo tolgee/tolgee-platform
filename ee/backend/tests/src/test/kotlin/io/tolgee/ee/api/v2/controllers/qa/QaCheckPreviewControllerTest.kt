@@ -3,10 +3,15 @@ package io.tolgee.ee.api.v2.controllers.qa
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.ee.service.qa.QaCheckParams
+import io.tolgee.ee.service.qa.QaCheckRunnerService
+import io.tolgee.ee.service.qa.QaIssueService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
+import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.AfterEach
@@ -22,19 +27,32 @@ class QaCheckPreviewControllerTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
+  @Autowired
+  private lateinit var qaIssueService: QaIssueService
+
+  @Autowired
+  private lateinit var qaCheckRunnerService: QaCheckRunnerService
+
+  @Autowired
+  private lateinit var qaIssueRepository: TranslationQaIssueRepository
+
   lateinit var testData: BaseTestData
   lateinit var testKey: Key
+  var frTranslation: Translation? = null
 
   @BeforeEach
   fun setup() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.QA_CHECKS)
     testData = BaseTestData()
     testData.projectBuilder.build {
+      addFrench()
       testKey =
         addKey {
           name = "test-key"
         }.build {
           addTranslation("en", "Hello world.")
+          frTranslation =
+            addTranslation("fr", "bonjour monde").self
         }.self
     }
     testDataService.saveTestData(testData.root)
@@ -160,6 +178,64 @@ class QaCheckPreviewControllerTest : AuthorizedControllerTest() {
       // Both "Hello world." and "Bonjour monde." have no numbers, matching case, matching
       // punctuation — no issues at all
       node("_embedded").isAbsent()
+    }
+  }
+
+  @Test
+  fun `preview includes ignored status from persisted issues`() {
+    val translation = frTranslation!!
+
+    // Persist QA issues for the French translation
+    val params =
+      QaCheckParams(
+        baseText = "Hello world.",
+        text = "bonjour monde",
+        baseLanguageTag = "en",
+        languageTag = "fr",
+      )
+    val results = qaCheckRunnerService.runChecks(params)
+    qaIssueService.replaceIssuesForTranslation(translation, results)
+
+    // Ignore one issue
+    val issues = qaIssueRepository.findAllByTranslationId(translation.id)
+    val issueToIgnore = issues.first()
+    qaIssueService.ignoreIssue(testData.project.id, issueToIgnore.id)
+
+    // Preview the same text — should include ignored status
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/qa-check/preview",
+      mapOf(
+        "text" to "bonjour monde",
+        "languageTag" to "fr",
+        "keyId" to testKey.id,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.qaCheckResults").isArray.isNotEmpty
+      node("_embedded.qaCheckResults").isArray.anySatisfy {
+        assertThatJson(it).node("ignored").isEqualTo(true)
+        assertThatJson(it).node("persistedIssueId").isNotNull
+      }
+      node("_embedded.qaCheckResults").isArray.anySatisfy {
+        assertThatJson(it).node("ignored").isEqualTo(false)
+        assertThatJson(it).node("persistedIssueId").isNotNull
+      }
+    }
+  }
+
+  @Test
+  fun `preview without persisted issues has default ignored values`() {
+    // Preview for a language with no persisted translation
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/qa-check/preview",
+      mapOf(
+        "text" to "",
+        "languageTag" to "en",
+        "keyId" to 0,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("_embedded.qaCheckResults").isArray.hasSize(1)
+      node("_embedded.qaCheckResults[0].ignored").isEqualTo(false)
+      node("_embedded.qaCheckResults[0].persistedIssueId").isNull()
     }
   }
 }

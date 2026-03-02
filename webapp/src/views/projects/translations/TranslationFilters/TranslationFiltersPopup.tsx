@@ -13,6 +13,7 @@ import {
 import { SubfilterTranslations } from './SubfilterTranslations';
 import { SubfilterScreenshots } from './SubfilterScreenshots';
 import { SubfilterComments } from './SubfilterComments';
+import { SubfilterQaChecks } from './SubfilterQaChecks';
 import { SubfilterLabels } from 'tg.views/projects/translations/TranslationFilters/SubfilterLabels';
 import { SubfilterSuggestions } from './SubfilterSuggestions';
 import { SubfilterDeletedBy } from './SubfilterDeletedBy';
@@ -81,6 +82,11 @@ export const TranslationFiltersPopup = ({
               selectedLanguages={selectedLanguages}
             />
             <SubfilterComments
+              value={value}
+              actions={actions}
+              projectId={projectId}
+            />
+            <SubfilterQaChecks
               value={value}
               actions={actions}
               projectId={projectId}
