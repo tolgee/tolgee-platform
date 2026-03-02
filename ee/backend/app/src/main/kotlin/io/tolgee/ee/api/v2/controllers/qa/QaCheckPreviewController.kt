@@ -9,7 +9,9 @@ import io.tolgee.ee.data.qa.QaCheckPreviewRequest
 import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.QaCheckRunnerService
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
+import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.ReadOnlyOperation
@@ -34,6 +36,7 @@ class QaCheckPreviewController(
   private val modelAssembler: QaCheckResultModelAssembler,
   private val languageService: LanguageService,
   private val translationService: TranslationService,
+  private val qaIssueRepository: TranslationQaIssueRepository,
 ) {
   @PostMapping("/preview")
   @Operation(summary = "Runs QA checks for the provided text without storing them")
@@ -47,7 +50,17 @@ class QaCheckPreviewController(
   ): CollectionModel<QaCheckResultModel> {
     val params = buildQaCheckParams(dto)
     val results = qaCheckRunnerService.runChecks(params)
-    return modelAssembler.toCollectionModel(results)
+    val persistedIssues = fetchPersistedIssues(dto)
+    return modelAssembler.toCollectionModel(results, persistedIssues)
+  }
+
+  private fun fetchPersistedIssues(dto: QaCheckPreviewRequest): List<TranslationQaIssue> {
+    val keyId = dto.keyId ?: return emptyList()
+    val projectId = projectHolder.project.id
+    val language = languageService.findByTag(dto.languageTag, projectId) ?: return emptyList()
+    val translations = translationService.getTranslations(listOf(keyId), listOf(language.id))
+    val translation = translations.firstOrNull() ?: return emptyList()
+    return qaIssueRepository.findAllByTranslationId(translation.id)
   }
 
   private fun buildQaCheckParams(dto: QaCheckPreviewRequest): QaCheckParams {

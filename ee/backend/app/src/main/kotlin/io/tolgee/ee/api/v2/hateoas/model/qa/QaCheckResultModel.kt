@@ -13,4 +13,6 @@ class QaCheckResultModel(
   val positionStart: Int,
   val positionEnd: Int,
   val params: Map<String, String>? = null,
+  val ignored: Boolean = false,
+  val persistedIssueId: Long? = null,
 ) : RepresentationModel<QaCheckResultModel>()

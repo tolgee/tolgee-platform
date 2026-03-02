@@ -15,6 +15,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import org.springframework.hateoas.CollectionModel
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -38,5 +39,31 @@ class QaIssueController(
   ): CollectionModel<QaIssueModel> {
     val issues = qaIssueService.getIssuesForTranslation(projectId, translationId)
     return qaIssueModelAssembler.toCollectionModel(issues)
+  }
+
+  @PutMapping("/{issueId}/ignore")
+  @Operation(summary = "Ignore a QA issue")
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
+  @AllowApiAccess
+  @RequiresFeatures(Feature.QA_CHECKS)
+  fun ignoreIssue(
+    @PathVariable projectId: Long,
+    @PathVariable translationId: Long,
+    @PathVariable issueId: Long,
+  ) {
+    qaIssueService.ignoreIssue(projectId, issueId)
+  }
+
+  @PutMapping("/{issueId}/unignore")
+  @Operation(summary = "Unignore a QA issue")
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
+  @AllowApiAccess
+  @RequiresFeatures(Feature.QA_CHECKS)
+  fun unignoreIssue(
+    @PathVariable projectId: Long,
+    @PathVariable translationId: Long,
+    @PathVariable issueId: Long,
+  ) {
+    qaIssueService.unignoreIssue(projectId, issueId)
   }
 }

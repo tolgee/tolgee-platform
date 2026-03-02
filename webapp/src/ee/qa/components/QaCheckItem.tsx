@@ -21,6 +21,10 @@ const StyledItem = styled(Box)`
   margin: ${({ theme }) => theme.spacing(0.5)};
 `;
 
+const StyledIgnoredItem = styled(StyledItem)`
+  opacity: 0.5;
+`;
+
 const StyledHeader = styled(Box)`
   display: flex;
   align-items: center;
@@ -136,6 +140,7 @@ type Props = {
   text: string;
   slim?: boolean;
   onCorrect?: () => void;
+  onIgnore?: () => void;
 };
 
 export const QaCheckItem: React.FC<Props> = ({
@@ -144,13 +149,17 @@ export const QaCheckItem: React.FC<Props> = ({
   text,
   slim = false,
   onCorrect,
+  onIgnore,
 }) => {
   const typeLabel = useQaCheckTypeLabel(issue.type);
   const messageText = useQaIssueMessage(issue.message, issue.params);
   const hasReplacement = issue.replacement != null;
+  const ignored = issue.ignored;
+
+  const Container = ignored ? StyledIgnoredItem : StyledItem;
 
   return (
-    <StyledItem data-cy="qa-check-item">
+    <Container data-cy="qa-check-item">
       <StyledHeader>
         {index !== undefined ? (
           <StyledIndexCircle>{index}</StyledIndexCircle>
@@ -160,12 +169,23 @@ export const QaCheckItem: React.FC<Props> = ({
           </StyledIcon>
         )}
         <StyledContent>
-          <Typography variant="body2">{typeLabel}</Typography>
+          <Typography variant="body2">
+            {typeLabel}
+            {ignored && (
+              <Typography
+                component="span"
+                variant="caption"
+                sx={{ ml: 1, fontStyle: 'italic' }}
+              >
+                <T keyName="qa_check_ignored_label" />
+              </Typography>
+            )}
+          </Typography>
           <StyledMessage>{messageText}</StyledMessage>
         </StyledContent>
       </StyledHeader>
 
-      {hasReplacement && (
+      {hasReplacement && !ignored && (
         <StyledDiffCard elevation={0}>
           <StyledDiffText>
             {renderDiff(
@@ -180,15 +200,17 @@ export const QaCheckItem: React.FC<Props> = ({
               <IconButton size="small" color="primary" onClick={onCorrect}>
                 <Check width={20} height={20} />
               </IconButton>
-              <IconButton size="small">
-                <XClose width={20} height={20} />
-              </IconButton>
+              {onIgnore && (
+                <IconButton size="small" onClick={onIgnore}>
+                  <XClose width={20} height={20} />
+                </IconButton>
+              )}
             </StyledDiffActions>
           )}
         </StyledDiffCard>
       )}
 
-      {(!slim || !hasReplacement) && (
+      {(!slim || !hasReplacement) && !ignored && (
         <StyledNormalActions>
           {hasReplacement && (
             <Button
@@ -200,11 +222,31 @@ export const QaCheckItem: React.FC<Props> = ({
               <T keyName="qa_check_action_correct" />
             </Button>
           )}
-          <Button variant="text" color="inherit" size="small">
-            <T keyName="qa_check_action_ignore" />
+          {onIgnore && (
+            <Button
+              variant="text"
+              color="inherit"
+              size="small"
+              onClick={onIgnore}
+            >
+              <T keyName="qa_check_action_ignore" />
+            </Button>
+          )}
+        </StyledNormalActions>
+      )}
+
+      {ignored && onIgnore && (
+        <StyledNormalActions>
+          <Button
+            variant="text"
+            color="inherit"
+            size="small"
+            onClick={onIgnore}
+          >
+            <T keyName="qa_check_action_unignore" />
           </Button>
         </StyledNormalActions>
       )}
-    </StyledItem>
+    </Container>
   );
 };
