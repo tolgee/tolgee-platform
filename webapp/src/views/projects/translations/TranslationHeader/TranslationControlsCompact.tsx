@@ -243,10 +243,11 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                     <StyledIconButton
                       size="small"
                       onClick={() => {
-                        const trashUrl =
-                          LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+                        const trashUrl = LINKS.PROJECT_TRANSLATIONS_TRASH.build(
+                          {
                             [PARAMS.PROJECT_ID]: project.id,
-                          });
+                          }
+                        );
                         history.push(
                           selectedBranch?.name
                             ? applyBranchToUrl(trashUrl, selectedBranch.name)

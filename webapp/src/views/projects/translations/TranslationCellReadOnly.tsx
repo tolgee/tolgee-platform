@@ -52,11 +52,7 @@ export const TranslationCellReadOnly: React.FC<Props> = ({
       <StyledStateBar style={{ borderLeft: `4px solid ${stateColor}` }} />
       <StyledTranslationContent>
         {text ? (
-          <TranslationVisual
-            text={text}
-            locale={locale}
-            isPlural={isPlural}
-          />
+          <TranslationVisual text={text} locale={locale} isPlural={isPlural} />
         ) : null}
       </StyledTranslationContent>
     </StyledTranslationCell>

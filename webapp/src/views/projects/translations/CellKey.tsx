@@ -31,7 +31,6 @@ import { ScreenshotDropzone } from './Screenshots/ScreenshotDropzone';
 import { useScreenshotUpload } from './Screenshots/useScreenshotUpload';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 
-
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 

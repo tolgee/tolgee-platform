@@ -1,9 +1,6 @@
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
-export const useTrashCount = (
-  projectId: number,
-  branchName?: string
-) => {
+export const useTrashCount = (projectId: number, branchName?: string) => {
   const loadable = useApiQuery({
     url: '/v2/projects/{projectId}/keys/trash',
     method: 'get',

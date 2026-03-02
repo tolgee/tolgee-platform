@@ -243,14 +243,25 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
   const permanentDeleteAt = new Date(data.permanentDeleteAt);
   // Round up to the next whole hour for display
   const permanentDeleteAtRounded = new Date(permanentDeleteAt);
-  if (permanentDeleteAtRounded.getMinutes() > 0 || permanentDeleteAtRounded.getSeconds() > 0) {
-    permanentDeleteAtRounded.setHours(permanentDeleteAtRounded.getHours() + 1, 0, 0, 0);
+  if (
+    permanentDeleteAtRounded.getMinutes() > 0 ||
+    permanentDeleteAtRounded.getSeconds() > 0
+  ) {
+    permanentDeleteAtRounded.setHours(
+      permanentDeleteAtRounded.getHours() + 1,
+      0,
+      0,
+      0
+    );
   }
   const now = new Date();
   const daysAgo = Math.floor(
     (now.getTime() - deletedAt.getTime()) / (1000 * 60 * 60 * 24)
   );
-  const msUntilDelete = Math.max(0, permanentDeleteAt.getTime() - now.getTime());
+  const msUntilDelete = Math.max(
+    0,
+    permanentDeleteAt.getTime() - now.getTime()
+  );
   const hoursUntilDelete = msUntilDelete / (1000 * 60 * 60);
   const minutesUntilDelete = msUntilDelete / (1000 * 60);
 
@@ -288,9 +299,7 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
           <StyledNamespaceChip
             onClick={(e) => setNsMenuAnchor(e.currentTarget)}
           >
-            <StyledNamespaceContent>
-              {data.namespace}
-            </StyledNamespaceContent>
+            <StyledNamespaceContent>{data.namespace}</StyledNamespaceContent>
             <StyledMoreArrow>
               <ArrowDropDown fontSize="small" />
             </StyledMoreArrow>
@@ -314,16 +323,13 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
         </>
       )}
       <StyledKeyCell style={showNamespace ? { paddingTop: 14 } : undefined}>
-          <StyledCheckbox
+        <StyledCheckbox
           size="small"
           checked={selected}
           onChange={onToggle}
           data-cy="trash-row-checkbox"
         />
-        <KeyCellContent
-          keyName={data.name}
-          description={data.description}
-        />
+        <KeyCellContent keyName={data.name} description={data.description} />
         {data.screenshots?.length > 0 && (
           <StyledScreenshots>
             {data.screenshots.map((sc: any) => {
@@ -384,7 +390,14 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
         >
           <StyledDeletesIn>
             <Trash01 width={14} height={14} />
-            <T keyName={deletesInKey} params={{ days: deletesInValue, hours: deletesInValue, minutes: deletesInValue }} />
+            <T
+              keyName={deletesInKey}
+              params={{
+                days: deletesInValue,
+                hours: deletesInValue,
+                minutes: deletesInValue,
+              }}
+            />
           </StyledDeletesIn>
         </Tooltip>
         <StyledActions>
