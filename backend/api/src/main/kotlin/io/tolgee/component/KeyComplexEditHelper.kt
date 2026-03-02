@@ -288,8 +288,8 @@ class KeyComplexEditHelper(
 
   private fun prepareData() {
     key = keyService.get(keyId)
-    securityService.checkBranchModify(key)
     key.checkInProject()
+    securityService.checkBranchModify(key)
     prepareModifiedTranslations()
     prepareModifiedStates()
     newIsPlural = dto.isPlural ?: key.isPlural
