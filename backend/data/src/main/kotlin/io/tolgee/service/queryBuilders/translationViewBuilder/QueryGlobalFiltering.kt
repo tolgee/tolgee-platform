@@ -1,13 +1,13 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
 import io.tolgee.dtos.request.translation.TranslationFilters
+import io.tolgee.model.UserAccount_
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityDescribingEntity_
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityModifiedEntity_
 import io.tolgee.model.activity.ActivityRevision_
 import io.tolgee.model.branching.Branch_
-import io.tolgee.model.UserAccount_
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
