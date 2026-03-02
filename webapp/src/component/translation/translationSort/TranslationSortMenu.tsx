@@ -1,5 +1,5 @@
 import { Menu, MenuItem, MenuProps } from '@mui/material';
-import { useSortOptions } from './useSortOptions';
+import { SortOption, useSortOptions } from './useSortOptions';
 import { CompactListSubheader } from 'tg.component/ListComponents';
 import { useTranslate } from '@tolgee/react';
 
@@ -8,6 +8,7 @@ type Props = {
   onChange: (value: string) => void;
   anchorEl: MenuProps['anchorEl'];
   onClose: () => void;
+  options?: SortOption[];
 };
 
 export const TranslationSortMenu = ({
@@ -15,8 +16,10 @@ export const TranslationSortMenu = ({
   onChange,
   anchorEl,
   onClose,
+  options: customOptions,
 }: Props) => {
-  const options = useSortOptions();
+  const defaultOptions = useSortOptions();
+  const options = customOptions ?? defaultOptions;
   const { t } = useTranslate();
   return (
     <Menu

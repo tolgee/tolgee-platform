@@ -924,6 +924,7 @@ declare namespace DataCy {
         "trash-row-checkbox" |
         "trash-select-all" |
         "trash-select-all-header" |
+        "trash-sort-button" |
         "trash-table" |
         "user-delete-organization-message-item" |
         "user-menu-language-switch" |

@@ -1,8 +1,10 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useTranslate, T } from '@tolgee/react';
 import {
+  Badge,
   Box,
   Checkbox,
+  IconButton,
   styled,
   Tooltip,
   Typography,
@@ -18,6 +20,8 @@ import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { Sort } from 'tg.component/CustomIcons';
+import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
 import { BaseProjectView } from '../../BaseProjectView';
 import { TrashBanner } from './TrashBanner';
 import { TrashBatchBar } from './TrashBatchBar';
@@ -146,6 +150,31 @@ export const TrashPage = () => {
   const [page, setPage] = useState(0);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<number[]>([]);
+  const [order, setOrder] = useUrlSearchState('order', {
+    defaultVal: 'deletedAt',
+  });
+  const [anchorSortEl, setAnchorSortEl] = useState<HTMLElement | null>(null);
+
+  const TRASH_DEFAULT_ORDER = 'deletedAt';
+
+  const trashSortOptions = useMemo(
+    () => [
+      { value: 'keyName', label: t('translation_sort_item_key_name_a_to_z') },
+      {
+        value: 'keyName,desc',
+        label: t('translation_sort_item_key_name_z_to_a'),
+      },
+      {
+        value: 'deletedAt,desc',
+        label: t('trash_sort_item_last_deleted_on_top'),
+      },
+      {
+        value: 'deletedAt',
+        label: t('trash_sort_item_first_deleted_on_top'),
+      },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     const el = containerRef.current;
@@ -233,6 +262,7 @@ export const TrashPage = () => {
       search: search || undefined,
       languages: effectiveLanguages.length > 0 ? effectiveLanguages : undefined,
       branch: branchName || undefined,
+      sort: [order],
       ...filtersQuery,
     } as any,
   });
@@ -329,6 +359,31 @@ export const TrashPage = () => {
             selectedLanguages={languageCols}
             projectId={project.id}
             filterOptions={{ showDeletedBy: true }}
+          />
+          <Tooltip title={t('translation_controls_sort_tooltip')}>
+            <Badge
+              color="primary"
+              variant="dot"
+              badgeContent={order === TRASH_DEFAULT_ORDER ? 0 : 1}
+              overlap="circular"
+            >
+              <IconButton
+                onClick={(e) => setAnchorSortEl(e.currentTarget)}
+                data-cy="trash-sort-button"
+              >
+                <Sort />
+              </IconButton>
+            </Badge>
+          </Tooltip>
+          <TranslationSortMenu
+            value={order}
+            onChange={(value) => {
+              setOrder(value);
+              setPage(0);
+            }}
+            anchorEl={anchorSortEl}
+            onClose={() => setAnchorSortEl(null)}
+            options={trashSortOptions}
           />
         </StyledSpaced>
 
