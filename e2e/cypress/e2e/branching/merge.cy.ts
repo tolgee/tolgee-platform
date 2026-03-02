@@ -194,7 +194,9 @@ describe('Branch merging', () => {
     translationsView.assertTranslationValue(keyName, 'en', updatedValue);
 
     // 7. Verify soft-deleted key is still in trash
+    cy.intercept('GET', '**/keys/trash*').as('trashLoad');
     cy.visit(`${HOST}/projects/${projectId}/translations/trash`);
+    cy.wait('@trashLoad');
     waitForGlobalLoading();
     cy.gcy('trash-row').contains(keyName).should('be.visible');
   });
