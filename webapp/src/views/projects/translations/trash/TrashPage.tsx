@@ -264,7 +264,7 @@ export const TrashPage = () => {
       branch: branchName || undefined,
       sort: [order],
       ...filtersQuery,
-    } as any,
+    },
   });
 
   const trashedKeys =

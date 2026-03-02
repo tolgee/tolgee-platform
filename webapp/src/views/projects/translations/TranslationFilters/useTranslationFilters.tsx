@@ -191,9 +191,7 @@ export const useTranslationFilters = ({
     }
   }
 
-  const filtersQuery: Partial<FiltersType> & {
-    filterDeletedByUserId?: number[];
-  } = {
+  const filtersQuery: Partial<FiltersType> = {
     filterTag: filters.filterTag,
     filterNoTag: filters.filterNoTag,
     filterNamespace: filters.filterNamespace,
