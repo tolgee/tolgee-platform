@@ -16,7 +16,8 @@ import { HOST } from '../../common/constants';
 describe('Soft delete keys', () => {
   let project: ProjectDTO;
   let key1Id: number;
-  let _key2Id: number;
+  let key2Id: number;
+  let englishLanguageId: number;
 
   beforeEach(() => {
     login().then(() => {
@@ -26,11 +27,14 @@ describe('Soft delete keys', () => {
       }).then((r) => {
         project = r.body as ProjectDTO;
         selectLangsInLocalstorage(project.id, ['en']);
+        v2apiFetch(`projects/${project.id}/languages`).then((langRes) => {
+          englishLanguageId = langRes.body._embedded.languages[0].id;
+        });
         createKey(project.id, 'key1', { en: 'Key 1 translation' }).then(
           (k) => (key1Id = k.id)
         );
         createKey(project.id, 'key2', { en: 'Key 2 translation' }).then(
-          (k) => (_key2Id = k.id)
+          (k) => (key2Id = k.id)
         );
       });
     });
@@ -162,5 +166,59 @@ describe('Soft delete keys', () => {
     waitForGlobalLoading();
     cy.contains('key1').should('not.exist');
     cy.contains('key2').should('be.visible');
+  });
+
+  it('soft-deleted key is excluded from task and restored key reappears', () => {
+    // 1. Create a translate task with both keys
+    v2apiFetch(`projects/${project.id}/tasks`, {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Test translate task',
+        type: 'TRANSLATE',
+        languageId: englishLanguageId,
+        assignees: [],
+        keys: [key1Id, key2Id],
+      }),
+    });
+
+    // 2. Verify task shows 2 keys
+    cy.visit(`${HOST}/projects/${project.id}/tasks`);
+    waitForGlobalLoading();
+    cy.gcy('task-item')
+      .contains('Test translate task')
+      .closestDcy('task-item')
+      .findDcy('task-item-detail')
+      .click();
+    cy.gcy('task-detail-keys').should('contain', 2);
+
+    // 3. Soft-delete key1
+    v2apiFetch(`projects/${project.id}/keys/${key1Id}`, {
+      method: 'DELETE',
+    });
+
+    // 4. Revisit tasks — task should now show 1 key
+    cy.visit(`${HOST}/projects/${project.id}/tasks`);
+    waitForGlobalLoading();
+    cy.gcy('task-item')
+      .contains('Test translate task')
+      .closestDcy('task-item')
+      .findDcy('task-item-detail')
+      .click();
+    cy.gcy('task-detail-keys').should('contain', 1);
+
+    // 5. Restore key1 from trash
+    v2apiFetch(`projects/${project.id}/keys/trash/${key1Id}/restore`, {
+      method: 'PUT',
+    });
+
+    // 6. Revisit tasks — task should show 2 keys again
+    cy.visit(`${HOST}/projects/${project.id}/tasks`);
+    waitForGlobalLoading();
+    cy.gcy('task-item')
+      .contains('Test translate task')
+      .closestDcy('task-item')
+      .findDcy('task-item-detail')
+      .click();
+    cy.gcy('task-detail-keys').should('contain', 2);
   });
 });
