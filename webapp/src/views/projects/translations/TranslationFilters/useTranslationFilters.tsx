@@ -1,12 +1,12 @@
 import { exhaustiveMatchingGuard } from 'tg.fixtures/exhaustiveMatchingGuard';
 import { AddParams, FiltersInternal, FiltersType } from './tools';
 
-function remove<T extends string>(list: T[] | undefined, value: T) {
+function remove<T extends string | number>(list: T[] | undefined, value: T) {
   const result = list?.filter((i) => i !== value) || [];
   return result.length ? result : undefined;
 }
 
-function add<T extends string>(list: T[] | undefined, value: T) {
+function add<T extends string | number>(list: T[] | undefined, value: T) {
   return [...(remove(list, value) || []), value];
 }
 
@@ -108,6 +108,11 @@ export const useTranslationFilters = ({
           filterHasNoSuggestions: true,
           filterHasSuggestions: undefined,
         });
+      case 'filterDeletedByUserId':
+        return setFilters({
+          ...filters,
+          filterDeletedByUserId: add(filters.filterDeletedByUserId, value),
+        });
       default:
         exhaustiveMatchingGuard(type);
     }
@@ -176,18 +181,26 @@ export const useTranslationFilters = ({
           ...filters,
           filterHasNoSuggestions: undefined,
         });
+      case 'filterDeletedByUserId':
+        return setFilters({
+          ...filters,
+          filterDeletedByUserId: remove(filters.filterDeletedByUserId, value),
+        });
       default:
         exhaustiveMatchingGuard(type);
     }
   }
 
-  const filtersQuery: Partial<FiltersType> = {
+  const filtersQuery: Partial<FiltersType> & {
+    filterDeletedByUserId?: number[];
+  } = {
     filterTag: filters.filterTag,
     filterNoTag: filters.filterNoTag,
     filterNamespace: filters.filterNamespace,
     filterNoNamespace: filters.filterNoNamespace,
     filterHasScreenshot: filters.filterHasScreenshot,
     filterHasNoScreenshot: filters.filterHasNoScreenshot,
+    filterDeletedByUserId: filters.filterDeletedByUserId,
   };
 
   // filters dependant on selected languages

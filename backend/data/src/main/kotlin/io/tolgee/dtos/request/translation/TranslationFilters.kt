@@ -163,6 +163,9 @@ To filter default namespace, set to empty string.
   )
   var branch: String? = null
 
+  @field:Parameter(description = "Filter trashed keys by who deleted them (user IDs)")
+  var filterDeletedByUserId: List<Long>? = null
+
   @field:Parameter(description = "If true, return only soft-deleted keys", hidden = true)
   var trashed: Boolean = false
 }

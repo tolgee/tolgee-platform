@@ -7,6 +7,7 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityModifiedEntity_
 import io.tolgee.model.activity.ActivityRevision_
 import io.tolgee.model.branching.Branch_
+import io.tolgee.model.UserAccount_
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
@@ -45,6 +46,7 @@ class QueryGlobalFiltering(
     filterFailedTargets()
     filterTask()
     filterBranch()
+    filterDeletedByUserId()
   }
 
   private fun filterFailedTargets() {
@@ -285,6 +287,15 @@ class QueryGlobalFiltering(
           cb.equal(branchJoin.get(Branch_.name), cb.literal(params.branch)),
           cb.isNull(branchJoin.get(Branch_.deletedAt)),
         ),
+      )
+    }
+  }
+
+  private fun filterDeletedByUserId() {
+    if (!params.filterDeletedByUserId.isNullOrEmpty()) {
+      val deletedByJoin = queryBase.root.join(Key_.deletedBy, JoinType.LEFT)
+      queryBase.whereConditions.add(
+        deletedByJoin.get(UserAccount_.id).`in`(params.filterDeletedByUserId),
       )
     }
   }

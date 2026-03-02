@@ -17,6 +17,8 @@ import { ArrowDropDown } from 'tg.component/CustomIcons';
 import { Tag } from '../Tags/Tag';
 import { components } from 'tg.service/apiSchema.generated';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { UserName } from 'tg.component/common/UserName';
+import { useDateFormatter } from 'tg.hooks/useLocale';
 import { KeyCellContent } from '../KeyCellContent';
 import { TranslationCellReadOnly } from '../TranslationCellReadOnly';
 
@@ -194,6 +196,7 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
 }) {
   const { t } = useTranslate();
   const project = useProject();
+  const formatDate = useDateFormatter();
   const [nsMenuAnchor, setNsMenuAnchor] = useState<HTMLElement | null>(null);
 
   const restoreMutation = useApiMutation({
@@ -238,16 +241,31 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
 
   const deletedAt = new Date(data.deletedAt);
   const permanentDeleteAt = new Date(data.permanentDeleteAt);
+  // Round up to the next whole hour for display
+  const permanentDeleteAtRounded = new Date(permanentDeleteAt);
+  if (permanentDeleteAtRounded.getMinutes() > 0 || permanentDeleteAtRounded.getSeconds() > 0) {
+    permanentDeleteAtRounded.setHours(permanentDeleteAtRounded.getHours() + 1, 0, 0, 0);
+  }
   const now = new Date();
   const daysAgo = Math.floor(
     (now.getTime() - deletedAt.getTime()) / (1000 * 60 * 60 * 24)
   );
-  const daysUntilDelete = Math.max(
-    0,
-    Math.ceil(
-      (permanentDeleteAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-    )
-  );
+  const msUntilDelete = Math.max(0, permanentDeleteAt.getTime() - now.getTime());
+  const hoursUntilDelete = msUntilDelete / (1000 * 60 * 60);
+  const minutesUntilDelete = msUntilDelete / (1000 * 60);
+
+  let deletesInKey: string;
+  let deletesInValue: number;
+  if (hoursUntilDelete >= 24) {
+    deletesInKey = 'trash_deletes_in';
+    deletesInValue = Math.ceil(hoursUntilDelete / 24);
+  } else if (minutesUntilDelete >= 60) {
+    deletesInKey = 'trash_deletes_in_hours';
+    deletesInValue = Math.ceil(hoursUntilDelete);
+  } else {
+    deletesInKey = 'trash_deletes_in_minutes';
+    deletesInValue = Math.max(1, Math.ceil(minutesUntilDelete));
+  }
 
   const deletedTimeText =
     daysAgo === 0
@@ -337,23 +355,38 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
       <StyledTrashedCell>
         <StyledTrashedTime>
           {data.deletedBy && (
-            <AvatarImg
-              size={20}
-              owner={{
-                type: 'USER',
-                id: data.deletedBy.id,
-                name: data.deletedBy.name,
-                avatar: data.deletedBy.avatar,
-                deleted: data.deletedBy.deleted,
-              }}
-            />
+            <Tooltip
+              title={<UserName {...data.deletedBy} />}
+              disableInteractive
+            >
+              <div style={{ display: 'flex' }}>
+                <AvatarImg
+                  size={20}
+                  owner={{
+                    type: 'USER',
+                    id: data.deletedBy.id,
+                    name: data.deletedBy.name,
+                    avatar: data.deletedBy.avatar,
+                    deleted: data.deletedBy.deleted,
+                  }}
+                />
+              </div>
+            </Tooltip>
           )}
           {deletedTimeText}
         </StyledTrashedTime>
-        <StyledDeletesIn>
-          <Trash01 width={14} height={14} />
-          <T keyName="trash_deletes_in" params={{ days: daysUntilDelete }} />
-        </StyledDeletesIn>
+        <Tooltip
+          title={formatDate(permanentDeleteAtRounded, {
+            dateStyle: 'long',
+            timeStyle: 'short',
+          })}
+          disableInteractive
+        >
+          <StyledDeletesIn>
+            <Trash01 width={14} height={14} />
+            <T keyName={deletesInKey} params={{ days: deletesInValue, hours: deletesInValue, minutes: deletesInValue }} />
+          </StyledDeletesIn>
+        </Tooltip>
         <StyledActions>
           {canRestore && (
             <Button

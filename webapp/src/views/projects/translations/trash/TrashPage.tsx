@@ -77,6 +77,7 @@ const StyledTableContainer = styled('div')`
   display: grid;
   background: ${({ theme }) => theme.palette.background.default};
   flex-grow: 1;
+  padding-bottom: 100px;
 `;
 
 const StyledVerticalScroll = styled('div')`
@@ -327,6 +328,7 @@ export const TrashPage = () => {
             actions={{ addFilter, removeFilter, setFilters }}
             selectedLanguages={languageCols}
             projectId={project.id}
+            filterOptions={{ showDeletedBy: true }}
           />
         </StyledSpaced>
 
