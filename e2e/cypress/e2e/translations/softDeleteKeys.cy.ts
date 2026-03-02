@@ -16,7 +16,7 @@ import { HOST } from '../../common/constants';
 describe('Soft delete keys', () => {
   let project: ProjectDTO;
   let key1Id: number;
-  let key2Id: number;
+  let _key2Id: number;
 
   beforeEach(() => {
     login().then(() => {
@@ -30,7 +30,7 @@ describe('Soft delete keys', () => {
           (k) => (key1Id = k.id)
         );
         createKey(project.id, 'key2', { en: 'Key 2 translation' }).then(
-          (k) => (key2Id = k.id)
+          (k) => (_key2Id = k.id)
         );
       });
     });
