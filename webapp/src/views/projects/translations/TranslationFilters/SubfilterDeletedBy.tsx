@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { SubmenuItem } from 'tg.component/SubmenuItem';
-import { AssigneeSearchSelectPopover } from 'tg.ee.module/task/components/assigneeSelect/AssigneeSearchSelectPopover';
+import { UserSearchSelectPopover } from 'tg.component/UserSearchSelect/UserSearchSelectPopover';
 import { FiltersInternal, FilterActions } from './tools';
 
 type Props = {
@@ -27,7 +27,7 @@ export const SubfilterDeletedBy = ({ value, actions, projectId }: Props) => {
         open={open}
       />
       {open && (
-        <AssigneeSearchSelectPopover
+        <UserSearchSelectPopover
           open={open}
           onClose={() => setOpen(false)}
           anchorEl={anchorEl.current!}
