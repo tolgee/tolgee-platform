@@ -1,4 +1,4 @@
-package io.tolgee.ee.api.v2.controllers.branching
+package io.tolgee.ee.api.v2.controllers.branching.protectedBranch
 
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
@@ -32,7 +32,6 @@ class KeyScreenshotsProtectedBranchModificationTest : ProtectedBranchModificatio
   @AfterAll
   fun after() {
     tolgeeProperties.fileStorageUrl = initialScreenshotUrl
-//    (fileStorage as InMemoryFileStorage).clear()
   }
 
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.SCREENSHOTS_UPLOAD])
@@ -80,6 +79,15 @@ class KeyScreenshotsProtectedBranchModificationTest : ProtectedBranchModificatio
   fun `allow deleting screenshot on non-protected branch`() {
     expectOk {
       deleteScreenshots(testData.branchedKey.id, testData.branchedScreenshotReference.screenshot.id)
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.SCREENSHOTS_UPLOAD])
+  @Test
+  fun `allow uploading screenshot on protected branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    expectCreated {
+      uploadScreenshot(testData.protectedKey.id)
     }
   }
 }

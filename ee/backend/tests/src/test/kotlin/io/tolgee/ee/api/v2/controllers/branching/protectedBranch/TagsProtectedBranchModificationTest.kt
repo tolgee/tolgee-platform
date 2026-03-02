@@ -1,4 +1,4 @@
-package io.tolgee.ee.api.v2.controllers.branching
+package io.tolgee.ee.api.v2.controllers.branching.protectedBranch
 
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
@@ -89,6 +89,15 @@ class TagsProtectedBranchModificationTest : ProtectedBranchModificationTestBase(
   fun `allow complex tag operation on non-protected branch`() {
     expectOk {
       executeComplexTagOperation(testData.branchedKey.id, mainBranchName, "main-complex-tag")
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_EDIT])
+  @Test
+  fun `allow tagging key on protected branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    expectOk {
+      tagKey(testData.protectedKey.id, "protected-tag")
     }
   }
 }

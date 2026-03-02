@@ -6,7 +6,6 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
@@ -27,6 +26,7 @@ import io.tolgee.ee.api.v2.hateoas.model.branching.BranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.CreateBranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.RenameBranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.SetBranchProtectedModel
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.Scope
@@ -125,8 +125,9 @@ class BranchController(
     @RequestParam("name", required = false) name: String?,
   ): BranchModel {
     projectFeatureGuard.checkEnabled(Feature.BRANCHING)
-    val branch = branchService.getActiveOrDefault(projectHolder.project.id, name)
-      ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
+    val branch =
+      branchService.getActiveOrDefault(projectHolder.project.id, name)
+        ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
     return branchModelAssembler.toModel(branch)
   }
 

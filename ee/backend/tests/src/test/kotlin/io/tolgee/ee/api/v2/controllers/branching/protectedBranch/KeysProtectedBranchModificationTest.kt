@@ -1,4 +1,4 @@
-package io.tolgee.ee.api.v2.controllers.branching
+package io.tolgee.ee.api.v2.controllers.branching.protectedBranch
 
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider

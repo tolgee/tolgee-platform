@@ -330,7 +330,6 @@ class TagService(
     req: ComplexTagKeysRequest,
     branch: String?,
   ) {
-    securityService.checkProtectedBranchModify(projectId, branch)
     val provider =
       ComplexTagOperationKeyProvider(projectId, req, branch, applicationContext)
 

@@ -455,7 +455,8 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @ProjectApiKeyAuthTestMethod
   fun `find returns 404 for non-existent branch`() {
-    performProjectAuthGet("branches/find?name=non-existent").andIsNotFound
+    performProjectAuthGet("branches/find?name=non-existent")
+      .andIsNotFound
       .andHasErrorMessage(Message.BRANCH_NOT_FOUND)
   }
 

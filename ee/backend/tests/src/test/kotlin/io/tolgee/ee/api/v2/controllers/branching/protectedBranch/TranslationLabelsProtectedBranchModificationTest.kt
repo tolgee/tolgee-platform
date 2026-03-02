@@ -1,4 +1,4 @@
-package io.tolgee.ee.api.v2.controllers.branching
+package io.tolgee.ee.api.v2.controllers.branching.protectedBranch
 
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
@@ -95,6 +95,15 @@ class TranslationLabelsProtectedBranchModificationTest : ProtectedBranchModifica
     val translation = getTranslation(testData.branchedKey)
     expectOk {
       unassignLabel(translation.id, testData.firstLabel.id)
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATION_LABEL_ASSIGN])
+  @Test
+  fun `allow assigning label on protected branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_LABELS)
+    expectOk {
+      assignLabelByKeyAndLanguage(testData.protectedKey.id, testData.en.id, testData.thirdLabel.id)
     }
   }
 

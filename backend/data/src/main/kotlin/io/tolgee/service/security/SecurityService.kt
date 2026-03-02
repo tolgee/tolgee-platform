@@ -1,5 +1,6 @@
 package io.tolgee.service.security
 
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ComputedPermissionDto
 import io.tolgee.dtos.cacheable.ApiKeyDto
@@ -24,6 +25,8 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.project.ProjectFeatureGuard
+import io.tolgee.service.project.ProjectFeatureRegistry
 import io.tolgee.service.task.ITaskService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
@@ -52,6 +55,9 @@ class SecurityService(
 
   @Autowired
   private lateinit var labelService: LabelService
+
+  @Autowired
+  private lateinit var projectFeatureGuard: ProjectFeatureGuard
 
   fun checkAnyProjectPermission(projectId: Long) {
     if (
@@ -531,17 +537,21 @@ class SecurityService(
   }
 
   fun checkProtectedBranchModify(
-    projectId: Long,
+    project: Project,
     branchName: String?,
   ) {
-    val branch = branchService.getActiveOrDefault(projectId, branchName)
-    checkProtectedBranchModify(branch, projectId)
+    if (projectFeatureGuard.isFeatureEnabled(Feature.BRANCHING, project)) {
+      val branch = branchService.getActiveOrDefault(project.id, branchName)
+      checkProtectedBranchModify(branch, project.id)
+    }
   }
 
   fun checkProtectedBranchModify(entity: BranchMergeableEntity<*, *>) {
     val key = entity.resolveKey() ?: return
-    val branch = key.branch ?: branchService.getDefaultBranch(key.project.id)
-    checkProtectedBranchModify(branch, key.project.id)
+    if (projectFeatureGuard.isFeatureEnabled(Feature.BRANCHING, key.project)) {
+      val branch = key.branch ?: branchService.getDefaultBranch(key.project.id)
+      checkProtectedBranchModify(branch, key.project.id)
+    }
   }
 
   private fun checkProtectedBranchModify(
