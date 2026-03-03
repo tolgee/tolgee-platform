@@ -27,6 +27,9 @@ class BranchSnapshotTracker : BackgroundCleanupTracker {
     while (phaser.registeredParties > 1 && System.currentTimeMillis() < deadline) {
       Thread.sleep(50)
     }
+    check(phaser.registeredParties <= 1) {
+      "Timed out waiting for ${phaser.registeredParties - 1} pending branch snapshot(s) after ${timeoutMs}ms"
+    }
   }
 }
 
@@ -55,19 +58,24 @@ class BranchSnapshotWorker(
    */
   fun scheduleSnapshot(branchId: Long) {
     branchSnapshotTracker.register()
-    TransactionSynchronizationManager.registerSynchronization(
-      object : TransactionSynchronization {
-        override fun afterCommit() {
-          self.executeSnapshot(branchId)
-        }
-
-        override fun afterCompletion(status: Int) {
-          if (status != TransactionSynchronization.STATUS_COMMITTED) {
-            branchSnapshotTracker.deregister()
+    try {
+      TransactionSynchronizationManager.registerSynchronization(
+        object : TransactionSynchronization {
+          override fun afterCommit() {
+            self.executeSnapshot(branchId)
           }
-        }
-      },
-    )
+
+          override fun afterCompletion(status: Int) {
+            if (status != TransactionSynchronization.STATUS_COMMITTED) {
+              branchSnapshotTracker.deregister()
+            }
+          }
+        },
+      )
+    } catch (e: Exception) {
+      branchSnapshotTracker.deregister()
+      throw e
+    }
   }
 
   @Async

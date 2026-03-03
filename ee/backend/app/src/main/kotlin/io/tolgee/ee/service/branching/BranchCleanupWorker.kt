@@ -39,6 +39,9 @@ class BranchCleanupTracker : BackgroundCleanupTracker {
     while (phaser.registeredParties > 1 && System.currentTimeMillis() < deadline) {
       Thread.sleep(50)
     }
+    check(phaser.registeredParties <= 1) {
+      "Timed out waiting for ${phaser.registeredParties - 1} pending branch cleanup(s) after ${timeoutMs}ms"
+    }
   }
 }
 
@@ -78,19 +81,24 @@ class BranchCleanupWorker(
     branchId: Long,
   ) {
     branchCleanupTracker.register()
-    TransactionSynchronizationManager.registerSynchronization(
-      object : TransactionSynchronization {
-        override fun afterCommit() {
-          self.executeCleanup(projectId, branchId)
-        }
-
-        override fun afterCompletion(status: Int) {
-          if (status != TransactionSynchronization.STATUS_COMMITTED) {
-            branchCleanupTracker.deregister()
+    try {
+      TransactionSynchronizationManager.registerSynchronization(
+        object : TransactionSynchronization {
+          override fun afterCommit() {
+            self.executeCleanup(projectId, branchId)
           }
-        }
-      },
-    )
+
+          override fun afterCompletion(status: Int) {
+            if (status != TransactionSynchronization.STATUS_COMMITTED) {
+              branchCleanupTracker.deregister()
+            }
+          }
+        },
+      )
+    } catch (e: Exception) {
+      branchCleanupTracker.deregister()
+      throw e
+    }
   }
 
   @Async

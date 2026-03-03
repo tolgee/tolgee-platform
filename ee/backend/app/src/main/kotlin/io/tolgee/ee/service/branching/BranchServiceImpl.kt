@@ -149,7 +149,7 @@ class BranchServiceImpl(
       throw BadRequestException(Message.BRANCH_SNAPSHOT_RETRY_NOT_ALLOWED)
     }
     branch.snapshotStatus = SnapshotStatus.PENDING
-    branch.writeLocked = false
+    branch.writeLocked = true
     branch.snapshotErrorMessage = null
     branchRepository.save(branch)
     branchSnapshotWorker.scheduleSnapshot(branch.id)

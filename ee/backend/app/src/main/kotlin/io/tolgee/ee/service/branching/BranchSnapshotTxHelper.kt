@@ -69,7 +69,10 @@ class BranchSnapshotTxHelper(
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun releaseWriteLockAndMarkRunning(branchId: Long) {
-    branchRepository.compareAndSetSnapshotRunning(branchId)
+    val updated = branchRepository.compareAndSetSnapshotRunning(branchId)
+    check(updated > 0) {
+      "Branch $branchId is no longer in PENDING state — snapshot may have been claimed by another worker"
+    }
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -89,6 +92,7 @@ class BranchSnapshotTxHelper(
     val branch = branchRepository.findById(branchId).orElse(null) ?: return
     branch.snapshotStatus = SnapshotStatus.FAILED
     branch.writeLocked = false
+    branch.pending = false
     branch.snapshotErrorMessage = errorMessage
     branch.snapshotFinishedAt = Date()
     branchRepository.save(branch)

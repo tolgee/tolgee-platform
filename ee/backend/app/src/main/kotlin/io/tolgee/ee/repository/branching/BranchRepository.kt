@@ -80,7 +80,7 @@ interface BranchRepository : BranchRepositoryOss {
     """
     FROM Branch b WHERE b.deletedAt IS NULL AND (
       (b.snapshotStatus = io.tolgee.model.enums.SnapshotStatus.RUNNING AND b.snapshotStartedAt < :cutoff)
-      OR (b.snapshotStatus = io.tolgee.model.enums.SnapshotStatus.PENDING AND b.createdAt < :cutoff)
+      OR (b.snapshotStatus = io.tolgee.model.enums.SnapshotStatus.PENDING AND b.updatedAt < :cutoff)
     )
     """,
   )
