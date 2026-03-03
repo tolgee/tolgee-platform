@@ -4,6 +4,7 @@ import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
+import io.tolgee.model.Project
 import io.tolgee.security.ProjectHolder
 import org.springframework.stereotype.Service
 
@@ -26,6 +27,29 @@ class ProjectFeatureGuard(
     if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
       throw ValidationException(Message.BRANCHING_NOT_ENABLED_FOR_PROJECT)
     }
+  }
+
+  fun checkEnabled(
+    feature: Feature,
+    project: Project,
+  ) {
+    enabledFeaturesProvider.checkFeatureEnabled(project.organizationOwner.id, feature)
+    if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
+      throw ValidationException(Message.BRANCHING_NOT_ENABLED_FOR_PROJECT)
+    }
+  }
+
+  fun isFeatureEnabled(
+    feature: Feature,
+    project: Project = projectHolder.projectEntity,
+  ): Boolean {
+    if (!enabledFeaturesProvider.isFeatureEnabled(project.organizationOwner.id, feature)) {
+      return false
+    }
+    if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
+      return false
+    }
+    return true
   }
 
   private fun isValueUsed(value: Any?): Boolean {

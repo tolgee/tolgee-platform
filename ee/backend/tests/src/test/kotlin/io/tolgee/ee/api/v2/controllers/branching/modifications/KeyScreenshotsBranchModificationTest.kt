@@ -1,8 +1,9 @@
-package io.tolgee.ee.api.v2.controllers.branching
+package io.tolgee.ee.api.v2.controllers.branching.modifications
 
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.fixtures.ProtectedBranchModificationTestBase
+import io.tolgee.fixtures.BranchModificationTestBase
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import org.junit.jupiter.api.AfterAll
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-class KeyScreenshotsProtectedBranchModificationTest : ProtectedBranchModificationTestBase() {
+class KeyScreenshotsBranchModificationTest : BranchModificationTestBase() {
   lateinit var initialScreenshotUrl: String
 
   @Autowired
@@ -32,7 +33,6 @@ class KeyScreenshotsProtectedBranchModificationTest : ProtectedBranchModificatio
   @AfterAll
   fun after() {
     tolgeeProperties.fileStorageUrl = initialScreenshotUrl
-//    (fileStorage as InMemoryFileStorage).clear()
   }
 
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.SCREENSHOTS_UPLOAD])
@@ -80,6 +80,22 @@ class KeyScreenshotsProtectedBranchModificationTest : ProtectedBranchModificatio
   fun `allow deleting screenshot on non-protected branch`() {
     expectOk {
       deleteScreenshots(testData.branchedKey.id, testData.branchedScreenshotReference.screenshot.id)
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.SCREENSHOTS_UPLOAD])
+  @Test
+  fun `forbid uploading screenshot on non-default branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    uploadScreenshot(testData.protectedKey.id).andIsBadRequest
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.SCREENSHOTS_UPLOAD])
+  @Test
+  fun `allow uploading screenshot on default branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    expectCreated {
+      uploadScreenshot(testData.branchedKey.id)
     }
   }
 }

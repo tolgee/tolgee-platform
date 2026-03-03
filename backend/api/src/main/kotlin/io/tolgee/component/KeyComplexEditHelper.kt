@@ -166,7 +166,7 @@ class KeyComplexEditHelper(
     if (dtoTags !== null && areTagsModified) {
       activityHolder.businessEventData["usesTags"] = "true"
       key.project.checkKeysEditPermission()
-      securityService.checkProtectedBranchModify(key)
+      securityService.checkBranchModify(key)
       tagService.updateTags(key, dtoTags)
     }
   }
@@ -288,8 +288,8 @@ class KeyComplexEditHelper(
 
   private fun prepareData() {
     key = keyService.get(keyId)
-    securityService.checkProtectedBranchModify(key)
     key.checkInProject()
+    securityService.checkBranchModify(key)
     prepareModifiedTranslations()
     prepareModifiedStates()
     newIsPlural = dto.isPlural ?: key.isPlural

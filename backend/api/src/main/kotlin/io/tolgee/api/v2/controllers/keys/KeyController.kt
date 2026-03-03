@@ -122,7 +122,7 @@ class KeyController(
     checkStateChangePermission(dto)
     checkNamespaceFeature(dto.namespace)
     projectFeatureGuard.checkIfUsed(Feature.BRANCHING, dto.branch)
-    securityService.checkProtectedBranchModify(projectHolder.projectEntity.id, dto.branch)
+    securityService.checkBranchModify(projectHolder.projectEntity, dto.branch)
     val key = keyService.create(projectHolder.projectEntity, dto)
     return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
   }
@@ -381,7 +381,7 @@ class KeyController(
   }
 
   private fun Key.checkBranchPermission() {
-    securityService.checkProtectedBranchModify(this)
+    securityService.checkBranchModify(this)
   }
 
   private fun Project.checkScreenshotsUploadPermission() {

@@ -430,6 +430,9 @@ export interface paths {
     get: operations["all"];
     post: operations["create_11"];
   };
+  "/v2/projects/{projectId}/branches/find": {
+    get: operations["find"];
+  };
   "/v2/projects/{projectId}/branches/merge": {
     get: operations["getBranchMerges"];
   };
@@ -12574,6 +12577,48 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["CreateBranchModel"];
+      };
+    };
+  };
+  find: {
+    parameters: {
+      query: {
+        name?: string;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BranchModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
       };
     };
   };

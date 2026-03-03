@@ -42,6 +42,7 @@ class KeyControllerDeleteManyKeysTest : ProjectAuthControllerTest("/v2/projects/
             "ids" to
               testData.root.data.projects[0]
                 .data.keys
+                .filter { it.self.branch == null }
                 .map { it.self.id },
           ),
         ).andIsOk

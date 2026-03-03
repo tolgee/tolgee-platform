@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
+import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.branching.BranchMergeChangeView
 import io.tolgee.dtos.queryResults.branching.BranchMergeConflictView
 import io.tolgee.dtos.queryResults.branching.BranchMergeView
@@ -25,6 +26,7 @@ import io.tolgee.ee.api.v2.hateoas.model.branching.BranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.CreateBranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.RenameBranchModel
 import io.tolgee.ee.api.v2.hateoas.model.branching.SetBranchProtectedModel
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.model.enums.Scope
@@ -112,6 +114,21 @@ class BranchController(
     projectFeatureGuard.checkEnabled(Feature.BRANCHING)
     val branches = branchService.getBranches(projectHolder.project.id, pageable, search)
     return pagedBranchResourceAssembler.toModel(branches, branchModelAssembler)
+  }
+
+  @GetMapping(value = ["/find"])
+  @Operation(summary = "Get branch by name, or the default branch if name is not provided")
+  @AllowApiAccess
+  @UseDefaultPermissions
+  @OpenApiOrderExtension(2)
+  fun find(
+    @RequestParam("name", required = false) name: String?,
+  ): BranchModel {
+    projectFeatureGuard.checkEnabled(Feature.BRANCHING)
+    val branch =
+      branchService.getActiveOrDefault(projectHolder.project.id, name)
+        ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
+    return branchModelAssembler.toModel(branch)
   }
 
   @DeleteMapping(value = ["/{branchId}"])

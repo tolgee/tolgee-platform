@@ -76,8 +76,8 @@ class KeyScreenshotController(
       throw ValidationException(Message.FILE_NOT_IMAGE)
     }
     val keyEntity = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
-    securityService.checkProtectedBranchModify(keyEntity)
     keyEntity.checkInProject()
+    securityService.checkBranchModify(keyEntity)
     val screenShotEntity = screenshotService.store(screenshot, keyEntity, info)
     return ResponseEntity(screenShotEntity.model, HttpStatus.CREATED)
   }
@@ -108,8 +108,8 @@ class KeyScreenshotController(
       it.checkInProject()
     }
     val key = keyService.get(keyId)
-    securityService.checkProtectedBranchModify(key)
     key.checkInProject()
+    securityService.checkBranchModify(key)
     screenshotService.removeScreenshotReferences(key, screenshots)
   }
 

@@ -1,8 +1,9 @@
-package io.tolgee.ee.api.v2.controllers.branching
+package io.tolgee.ee.api.v2.controllers.branching.modifications
 
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.fixtures.ProtectedBranchModificationTestBase
+import io.tolgee.fixtures.BranchModificationTestBase
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.model.enums.Scope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-class TranslationLabelsProtectedBranchModificationTest : ProtectedBranchModificationTestBase() {
+class TranslationLabelsBranchModificationTest : BranchModificationTestBase() {
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
@@ -95,6 +96,22 @@ class TranslationLabelsProtectedBranchModificationTest : ProtectedBranchModifica
     val translation = getTranslation(testData.branchedKey)
     expectOk {
       unassignLabel(translation.id, testData.firstLabel.id)
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATION_LABEL_ASSIGN])
+  @Test
+  fun `forbid assigning label on non-default branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_LABELS)
+    assignLabelByKeyAndLanguage(testData.protectedKey.id, testData.en.id, testData.thirdLabel.id).andIsBadRequest
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.TRANSLATION_LABEL_ASSIGN])
+  @Test
+  fun `allow assigning label on default branch when branching feature is disabled`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.TRANSLATION_LABELS)
+    expectOk {
+      assignLabelByKeyAndLanguage(testData.branchedKey.id, testData.en.id, testData.thirdLabel.id)
     }
   }
 

@@ -333,7 +333,6 @@ class TagService(
     req: ComplexTagKeysRequest,
     branch: String?,
   ) {
-    securityService.checkProtectedBranchModify(projectId, branch)
     val provider =
       ComplexTagOperationKeyProvider(projectId, req, branch, applicationContext)
 
@@ -392,7 +391,7 @@ class TagService(
     tagName: String,
   ): Tag {
     val key = keyService.getKeysWithTagsById(projectId, listOf(keyId)).singleOrNull() ?: throw NotFoundException()
-    securityService.checkProtectedBranchModify(key)
+    securityService.checkBranchModify(key)
     return tagKeys(listOf(key), mapOf(key.id to listOf(tagName))).values.singleOrNull()?.singleOrNull()
       ?: throw IllegalStateException("No single tag found in result.")
   }
@@ -404,7 +403,7 @@ class TagService(
     tagId: Long,
   ) {
     val key = keyService.getKeysWithTagsById(projectId, listOf(keyId)).singleOrNull() ?: throw NotFoundException()
-    securityService.checkProtectedBranchModify(key)
+    securityService.checkBranchModify(key)
     removeKeyTag(key, tagId)
   }
 

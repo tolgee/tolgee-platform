@@ -433,6 +433,34 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  @ProjectApiKeyAuthTestMethod
+  fun `finds branch by name`() {
+    performProjectAuthGet("branches/find?name=feature-branch").andIsOk.andAssertThatJson {
+      node("name").isEqualTo("feature-branch")
+      node("isProtected").isEqualTo(false)
+      node("isDefault").isEqualTo(false)
+    }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod
+  fun `find returns default branch when name not provided`() {
+    performProjectAuthGet("branches/find").andIsOk.andAssertThatJson {
+      node("name").isEqualTo("main")
+      node("isDefault").isEqualTo(true)
+      node("isProtected").isEqualTo(true)
+    }
+  }
+
+  @Test
+  @ProjectApiKeyAuthTestMethod
+  fun `find returns 404 for non-existent branch`() {
+    performProjectAuthGet("branches/find?name=non-existent")
+      .andIsNotFound
+      .andHasErrorMessage(Message.BRANCH_NOT_FOUND)
+  }
+
+  @Test
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.BRANCH_MANAGEMENT])
   fun `accepts valid branch names`() {
     val validNames =

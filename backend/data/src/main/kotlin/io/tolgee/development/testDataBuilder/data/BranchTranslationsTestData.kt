@@ -26,8 +26,10 @@ class BranchTranslationsTestData {
   lateinit var firstTag: Tag
   lateinit var secondTag: Tag
   lateinit var protectedBranch: Branch
+  lateinit var unprotectedBranch: Branch
   lateinit var protectedKey: Key
   lateinit var branchedKey: Key
+  lateinit var unprotectedBranchedKey: Key
   lateinit var branchedScreenshotReference: KeyScreenshotReference
   lateinit var protectedScreenshotReference: KeyScreenshotReference
 
@@ -96,6 +98,19 @@ class BranchTranslationsTestData {
             (1..50).forEach {
               this@project.addBranchKey(it, "branched key", this@build.self)
             }
+          }.self
+        unprotectedBranch =
+          addBranch {
+            name = "feature"
+            project = this@project.self
+            isDefault = false
+            isProtected = false
+          }.build {
+            unprotectedBranchedKey =
+              addKey {
+                name = "unprotected-branched-key"
+                branch = this@build.self
+              }.self
           }.self
         protectedBranch =
           addBranch {

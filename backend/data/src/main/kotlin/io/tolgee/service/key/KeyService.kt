@@ -246,7 +246,7 @@ class KeyService(
     dto: EditKeyDto,
   ): Key {
     val key = findOptional(keyId).orElseThrow { NotFoundException() }
-    securityService.checkProtectedBranchModify(key)
+    securityService.checkBranchModify(key)
     keyMetaService.getOrCreateForKey(key).apply {
       description = dto.description
     }
@@ -497,7 +497,7 @@ class KeyService(
     languageIds: List<Long>,
   ): List<Language> {
     val key = keyRepository.findByProjectIdAndId(projectId, keyId) ?: throw NotFoundException()
-    securityService.checkProtectedBranchModify(key)
+    securityService.checkBranchModify(key)
     enableRestOfLanguages(projectId, languageIds, key)
     return disableLanguages(projectId, languageIds, key)
   }

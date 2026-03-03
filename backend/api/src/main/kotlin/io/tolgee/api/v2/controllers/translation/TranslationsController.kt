@@ -236,7 +236,7 @@ When null, resulting file will be a flat key-value object.
     val translation = translationService.get(translationId)
     translation.checkFromProject()
     securityService.checkStateChangePermission(translation)
-    securityService.checkProtectedBranchModify(translation)
+    securityService.checkBranchModify(translation)
     return translationModelAssembler.toModel(translationService.setStateBatch(translation, state.translationState))
   }
 
@@ -351,7 +351,7 @@ When null, resulting file will be a flat key-value object.
     val translation = translationService.get(translationId)
     translation.checkFromProject()
     securityService.checkStateChangePermission(translation)
-    securityService.checkProtectedBranchModify(translation)
+    securityService.checkBranchModify(translation)
     translationService.dismissAutoTranslated(translation)
     return translationModelAssembler.toModel(translation)
   }
@@ -372,7 +372,7 @@ When null, resulting file will be a flat key-value object.
   ): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
-    securityService.checkProtectedBranchModify(translation)
+    securityService.checkBranchModify(translation)
     translationService.setOutdated(translation, state)
     return translationModelAssembler.toModel(translation)
   }
