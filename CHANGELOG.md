@@ -1,3 +1,10 @@
+# [3.164.0](https://github.com/tolgee/tolgee-platform/compare/v3.163.5...v3.164.0) (2026-03-03)
+
+
+### Features
+
+* branching SDK support ([#3499](https://github.com/tolgee/tolgee-platform/issues/3499)) ([7042f65](https://github.com/tolgee/tolgee-platform/commit/7042f6529b8819810b43e01af54d8fc35e712122))
+
 ## [3.163.5](https://github.com/tolgee/tolgee-platform/compare/v3.163.4...v3.163.5) (2026-03-01)
 
 
