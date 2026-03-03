@@ -1,15 +1,12 @@
 package io.tolgee.api.v2.controllers.v2KeyController
 
 import io.tolgee.ProjectAuthControllerTest
-import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
-import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -24,9 +21,6 @@ class KeyControllerDeleteManyKeysTest : ProjectAuthControllerTest("/v2/projects/
 
   lateinit var testData: TranslationsTestData
 
-  @Autowired
-  lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
-
   @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
@@ -39,7 +33,6 @@ class KeyControllerDeleteManyKeysTest : ProjectAuthControllerTest("/v2/projects/
   @ProjectJWTAuthTestMethod
   @Test
   fun `deletes multiple keys via post fast enough`() {
-    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
     projectSupplier = { testData.project }
     val time =
       measureTimeMillis {
@@ -49,6 +42,7 @@ class KeyControllerDeleteManyKeysTest : ProjectAuthControllerTest("/v2/projects/
             "ids" to
               testData.root.data.projects[0]
                 .data.keys
+                .filter { it.self.branch == null }
                 .map { it.self.id },
           ),
         ).andIsOk
