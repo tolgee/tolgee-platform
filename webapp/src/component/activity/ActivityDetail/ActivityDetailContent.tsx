@@ -52,6 +52,7 @@ export const ActivityDetailContent = ({
   const filteredActivity = useMemo(() => buildActivity(data, true), [data]);
 
   const isBatch = !data?.modifiedEntities;
+  const isSoftDelete = data.type === 'KEY_SOFT_DELETE';
 
   return (
     <>
@@ -60,7 +61,21 @@ export const ActivityDetailContent = ({
           <ActivityTitle activity={filteredActivity} />
         </Box>
         <Box display="flex" marginLeft={2}>
-          {isBatch && (
+          {isSoftDelete && (
+            <Button
+              color="primary"
+              size="medium"
+              href={LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              })}
+              endIcon={<Share03 width={18} />}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <T keyName="activity_detail_trash_view_link" />
+            </Button>
+          )}
+          {isBatch && !isSoftDelete && (
             <Button
               color="primary"
               size="medium"

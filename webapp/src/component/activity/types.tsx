@@ -106,6 +106,7 @@ export type KeyReferenceData = {
   languages?: LanguageReferenceType[];
   id?: number;
   exists?: boolean;
+  activityType?: ActivityTypeEnum;
 };
 
 export type LanguageReferenceData = {
