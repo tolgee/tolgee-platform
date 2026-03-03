@@ -1,9 +1,11 @@
 import React from 'react';
-import type {
+import {
   BillingMenuItemsProps,
   GlossaryTermHighlightModel,
   GlossaryTermHighlightsProps,
   GlossaryTermPreviewProps,
+  QaBadgeProps,
+  SubfilterQaChecksProps,
 } from './EeModuleType';
 
 const NotIncludedInOss = (name: string): ((props?: any) => any) => {
@@ -32,6 +34,8 @@ export const OrderTranslationsDialog = Empty;
 export const TaskItem = Empty;
 export const TaskFilterPopover = Empty;
 export const TaskAllDonePlaceholder = Empty;
+export const QaBadge: React.VFC<QaBadgeProps> = Empty;
+export const SubfilterQaChecks: React.VFC<SubfilterQaChecksProps> = Empty;
 
 export const routes = {
   Root: Empty,

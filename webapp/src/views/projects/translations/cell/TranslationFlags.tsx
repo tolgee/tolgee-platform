@@ -1,4 +1,4 @@
-import { Box, styled, Tooltip } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { Flag02 } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
 
@@ -7,7 +7,6 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { AutoTranslationIcon } from 'tg.component/AutoTranslationIcon';
 import { TranslationFlagIcon } from 'tg.component/TranslationFlagIcon';
-import { QaCheck } from 'tg.component/CustomIcons';
 
 import { useTranslationsActions } from '../context/TranslationsContext';
 import { TranslationTaskIndicator } from 'tg.ee';
@@ -24,19 +23,6 @@ const StyledWrapper = styled('div')`
 
 const ActiveFlagCircle = styled(Flag02)`
   color: ${({ theme }) => theme.palette.primary.main};
-`;
-
-const StyledQaIcon = styled(QaCheck)`
-  color: ${({ theme }) => theme.palette.warning.main};
-`;
-
-const StyledQaBadge = styled(Box)`
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 11px;
-  font-weight: 600;
-  color: ${({ theme }) => theme.palette.warning.main};
 `;
 
 export const StyledTranslationFlagsContainer = styled(Box)`
@@ -171,16 +157,6 @@ export const TranslationFlags: React.FC<Props> = ({
             />
           </StyledTranslationFlagsContainer>
         </CloseButton>
-      )}
-      {!!translation?.qaIssueCount && translation.qaIssueCount > 0 && (
-        <Tooltip title={t('translations_cell_qa_issues')}>
-          <StyledTranslationFlagsContainer data-cy="translations-qa-issues-indicator">
-            <StyledQaBadge>
-              <StyledQaIcon sx={{ width: 16, height: 16 }} />
-              {translation.qaIssueCount}
-            </StyledQaBadge>
-          </StyledTranslationFlagsContainer>
-        </Tooltip>
       )}
     </StyledWrapper>
   );
