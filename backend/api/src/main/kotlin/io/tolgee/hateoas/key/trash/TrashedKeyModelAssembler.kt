@@ -16,7 +16,9 @@ class TrashedKeyModelAssembler(
     TrashedKeyModel::class.java,
   ) {
   override fun toModel(entity: KeySearchResultView): TrashedKeyModel {
-    val deletedAt = entity.deletedAt!!
+    val deletedAt =
+      entity.deletedAt
+        ?: throw IllegalStateException("Cannot assemble TrashedKeyModel: deletedAt is null for key ${entity.id}")
     return TrashedKeyModel(
       id = entity.id,
       name = entity.name,

@@ -195,18 +195,18 @@ export const UserSearchSelectPopover: React.FC<Props> = ({
             PopperComponent={PopperComponent}
             PaperComponent={PaperComponent}
             renderOption={(props, option) => {
-              const selected = Boolean(
+              const isSelected = Boolean(
                 selection.find((u) => u.id === option.id)
               );
               return (
                 <React.Fragment key={option.id}>
                   <MenuItem
                     {...props}
-                    selected={selected}
+                    selected={isSelected}
                     data-cy="user-switch-item"
                   >
                     <Checkbox
-                      checked={selected}
+                      checked={isSelected}
                       size="small"
                       edge="start"
                       disableRipple

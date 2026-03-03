@@ -136,10 +136,13 @@ export const TrashPage = () => {
   const [filtersJson, setFiltersJson] = useUrlSearchState('filters', {
     defaultVal: '{}',
   });
-  const parsedFilters: FiltersInternal = useMemo(
-    () => JSON.parse(filtersJson || '{}'),
-    [filtersJson]
-  );
+  const parsedFilters: FiltersInternal = useMemo(() => {
+    try {
+      return JSON.parse(filtersJson || '{}');
+    } catch {
+      return {};
+    }
+  }, [filtersJson]);
   const setFilters = useCallback(
     (f: FiltersInternal) => {
       setFiltersJson(JSON.stringify(f));
