@@ -11,6 +11,7 @@ import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.security.ProjectHolder
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.util.executeInNewTransaction
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.opentest4j.AssertionFailedError
@@ -31,6 +32,11 @@ class LanguageStatsBranchingTest : AbstractSpringTest() {
     testData = BranchTranslationsTestData()
     testDataService.saveTestData(testData.root)
     enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+  }
+
+  @AfterEach
+  fun tearDown() {
+    enabledFeaturesProvider.forceEnabled = null
   }
 
   @Test
