@@ -112,27 +112,31 @@ class BranchCleanupService(
     // Collect IDs of screenshots exclusively referenced by keys in this branch —
     // they will become fully orphaned once we delete the references below.
     @Suppress("UNCHECKED_CAST")
-    val orphanScreenshotIds = entityManager.createNativeQuery(
-      """
-      SELECT DISTINCT ksr.screenshot_id
-      FROM key_screenshot_reference ksr
-      JOIN key k ON k.id = ksr.key_id
-      WHERE k.branch_id = :branchId
-        AND NOT EXISTS (
-          SELECT 1 FROM key_screenshot_reference other
-          JOIN key ok ON ok.id = other.key_id
-          WHERE other.screenshot_id = ksr.screenshot_id
-            AND ok.branch_id != :branchId
-        )
-      """.trimIndent(),
-    ).setParameter("branchId", branchId).resultList as List<Long>
+    val orphanScreenshotIds =
+      entityManager
+        .createNativeQuery(
+          """
+          SELECT DISTINCT ksr.screenshot_id
+          FROM key_screenshot_reference ksr
+          JOIN key k ON k.id = ksr.key_id
+          WHERE k.branch_id = :branchId
+            AND NOT EXISTS (
+              SELECT 1 FROM key_screenshot_reference other
+              JOIN key ok ON ok.id = other.key_id
+              WHERE other.screenshot_id = ksr.screenshot_id
+                AND ok.branch_id != :branchId
+            )
+          """.trimIndent(),
+        ).setParameter("branchId", branchId)
+        .resultList as List<Long>
 
     exec(
       "DELETE FROM key_screenshot_reference WHERE key_id IN (SELECT id FROM key WHERE branch_id = :branchId)",
       "branchId" to branchId,
     )
     if (orphanScreenshotIds.isNotEmpty()) {
-      entityManager.createNativeQuery("DELETE FROM screenshot WHERE id IN (:ids)")
+      entityManager
+        .createNativeQuery("DELETE FROM screenshot WHERE id IN (:ids)")
         .setParameter("ids", orphanScreenshotIds)
         .executeUpdate()
     }
