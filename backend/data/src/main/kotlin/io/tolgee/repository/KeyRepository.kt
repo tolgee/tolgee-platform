@@ -502,6 +502,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
         and k.deleted_at is not null
         and ((br.name = :branch and br.deleted_at is null)
              or (:branch is null and (br.id is null or br.is_default)))
+      order by k.deleted_at desc, k.id asc
     """,
     countQuery = """
       select count(k.id) from key k
