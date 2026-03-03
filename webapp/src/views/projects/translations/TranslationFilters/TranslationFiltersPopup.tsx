@@ -13,10 +13,10 @@ import {
 import { SubfilterTranslations } from './SubfilterTranslations';
 import { SubfilterScreenshots } from './SubfilterScreenshots';
 import { SubfilterComments } from './SubfilterComments';
-import { SubfilterQaChecks } from './SubfilterQaChecks';
 import { SubfilterLabels } from 'tg.views/projects/translations/TranslationFilters/SubfilterLabels';
 import { SubfilterSuggestions } from './SubfilterSuggestions';
 import { SubfilterDeletedBy } from './SubfilterDeletedBy';
+import { SubfilterQaChecks } from 'tg.ee';
 
 type Props = {
   value: FiltersType;

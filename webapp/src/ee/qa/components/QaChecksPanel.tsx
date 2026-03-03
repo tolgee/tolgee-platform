@@ -58,6 +58,15 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     );
   }
 
+  const handleCorrect = (issue: (typeof issues)[0]) => {
+    if (issue.replacement == null) return;
+    const corrected =
+      text.slice(0, issue.positionStart) +
+      issue.replacement +
+      text.slice(issue.positionEnd);
+    data.setValue(corrected);
+  };
+
   const handleIgnoreToggle = (issue: (typeof issues)[0]) => {
     const persistedIssueId = issue.persistedIssueId;
     if (persistedIssueId == null) return;
@@ -86,13 +95,7 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
           slim={true}
           onCorrect={
             issue.replacement != null && !issue.ignored
-              ? () => {
-                  const corrected =
-                    text.slice(0, issue.positionStart) +
-                    issue.replacement +
-                    text.slice(issue.positionEnd);
-                  data.setValue(corrected);
-                }
+              ? () => handleCorrect(issue)
               : undefined
           }
           onIgnore={

@@ -8,6 +8,7 @@ import { TranslationFlags } from '../cell/TranslationFlags';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
+import { QaBadge } from 'tg.ee';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -160,6 +161,8 @@ export const TranslationRead: React.FC<Props> = ({
           onTaskStateChange={setAssignedTaskState}
         />
       )}
+      {/*TODO: fix position of badge*/}
+      <QaBadge count={translation?.qaIssueCount} />
     </StyledContainer>
   );
 };
