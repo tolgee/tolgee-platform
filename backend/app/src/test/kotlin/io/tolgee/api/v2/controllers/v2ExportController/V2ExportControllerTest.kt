@@ -347,6 +347,37 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `it excludes soft-deleted keys from export`() {
+    retryingOnCommonIssues {
+      executeInNewTransaction {
+        initBaseData()
+      }
+
+      // Soft-delete "A key" which has a German translation
+      executeInNewTransaction {
+        keyService.softDeleteMultiple(listOf(testData!!.aKey.id), deletedBy = testData!!.user)
+      }
+
+      val parsed = performExport()
+
+      // "Z key" should still be exported (not deleted)
+      assertThatJson(parsed["en.json"]!!) {
+        node("Z key").isEqualTo("A translation")
+      }
+
+      // "A key" was soft-deleted and should not appear in the German export
+      val deJson = parsed["de.json"]
+      if (deJson != null) {
+        assertThatJson(deJson) {
+          isObject.doesNotContainKey("A key")
+        }
+      }
+    }
+  }
+
   private fun initBaseData() {
     testData = TranslationsTestData()
     testDataService.saveTestData(testData!!.root)

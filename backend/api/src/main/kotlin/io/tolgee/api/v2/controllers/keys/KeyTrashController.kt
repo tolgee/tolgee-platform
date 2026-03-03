@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(
   value = [
     "/v2/projects/{projectId:[0-9]+}/keys/trash",
+    "/v2/projects/keys/trash",
   ],
 )
 @KeysDocsTag
