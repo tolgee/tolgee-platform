@@ -28,10 +28,7 @@ import {
   getDeletedByFiltersLength,
   getDeletedByFiltersName,
 } from './SubfilterDeletedBy';
-import {
-  getQaChecksFiltersLength,
-  getQaChecksFiltersName,
-} from './SubfilterQaChecks';
+import { getQaChecksFiltersLength, getQaChecksFiltersName } from 'tg.ee';
 import { components } from 'tg.service/apiSchema.generated';
 
 type LabelModel = components['schemas']['LabelModel'];

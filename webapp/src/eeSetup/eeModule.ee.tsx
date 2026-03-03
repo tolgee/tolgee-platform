@@ -51,17 +51,12 @@ import { addProjectMenuItems } from '../views/projects/projectMenu/ProjectMenu';
 import { addAdministrationMenuItems } from '../views/administration/components/BaseAdministrationView';
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
-import {
-  BillingMenuItemsProps,
-  GlossaryTermHighlightModel,
-  GlossaryTermHighlightsProps,
-  GlossaryTermPreviewProps,
-} from './EeModuleType';
+import { BillingMenuItemsProps } from './EeModuleType';
 import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
 import { OrganizationLlmProvidersView } from '../ee/llm/OrganizationLLMProviders/OrganizationLlmProvidersView';
 import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
-import { useGlossaryTermHighlights as useGlossaryTermHighlightsInternal } from '../ee/glossary/hooks/useGlossaryTermHighlights';
-import { GlossaryTermPreview as GlossaryTermPreviewInternal } from '../ee/glossary/components/GlossaryTermPreview';
+export { useGlossaryTermHighlights } from '../ee/glossary/hooks/useGlossaryTermHighlights';
+export { GlossaryTermPreview } from '../ee/glossary/components/GlossaryTermPreview';
 import {
   GlossariesPanel,
   useGlossariesCount,
@@ -70,6 +65,12 @@ import {
   QaChecksPanel,
   useQaChecksCount,
 } from '../ee/qa/components/QaChecksPanel';
+export { QaBadge } from '../ee/qa/components/QaBadge';
+export {
+  SubfilterQaChecks,
+  getQaChecksFiltersLength,
+  getQaChecksFiltersName,
+} from '../ee/qa/components/SubfilterQaChecks';
 import { GlossaryRouter } from '../ee/glossary/views/GlossaryRouter';
 import { createAdder } from '../fixtures/pluginAdder';
 import { ProjectSettingsTab } from '../views/projects/project/ProjectSettingsView';
@@ -517,10 +518,3 @@ export const useAddProjectSettingsTabs = (projectId: number) => {
     }
   );
 };
-
-export const useGlossaryTermHighlights = (
-  props: GlossaryTermHighlightsProps
-): GlossaryTermHighlightModel[] => useGlossaryTermHighlightsInternal(props);
-
-export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
-  GlossaryTermPreviewInternal;

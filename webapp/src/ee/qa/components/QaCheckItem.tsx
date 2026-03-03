@@ -154,9 +154,8 @@ export const QaCheckItem: React.FC<Props> = ({
   const typeLabel = useQaCheckTypeLabel(issue.type);
   const messageText = useQaIssueMessage(issue.message, issue.params);
   const hasReplacement = issue.replacement != null;
-  const ignored = issue.ignored;
 
-  const Container = ignored ? StyledIgnoredItem : StyledItem;
+  const Container = issue.ignored ? StyledIgnoredItem : StyledItem;
 
   return (
     <Container data-cy="qa-check-item">
@@ -169,23 +168,12 @@ export const QaCheckItem: React.FC<Props> = ({
           </StyledIcon>
         )}
         <StyledContent>
-          <Typography variant="body2">
-            {typeLabel}
-            {ignored && (
-              <Typography
-                component="span"
-                variant="caption"
-                sx={{ ml: 1, fontStyle: 'italic' }}
-              >
-                <T keyName="qa_check_ignored_label" />
-              </Typography>
-            )}
-          </Typography>
+          <Typography variant="body2">{typeLabel}</Typography>
           <StyledMessage>{messageText}</StyledMessage>
         </StyledContent>
       </StyledHeader>
 
-      {hasReplacement && !ignored && (
+      {hasReplacement && !issue.ignored && (
         <StyledDiffCard elevation={0}>
           <StyledDiffText>
             {renderDiff(
@@ -210,9 +198,9 @@ export const QaCheckItem: React.FC<Props> = ({
         </StyledDiffCard>
       )}
 
-      {(!slim || !hasReplacement) && !ignored && (
+      {(!slim || !hasReplacement) && !issue.ignored && (
         <StyledNormalActions>
-          {hasReplacement && (
+          {hasReplacement && onCorrect && (
             <Button
               variant="outlined"
               color="primary"
@@ -235,7 +223,7 @@ export const QaCheckItem: React.FC<Props> = ({
         </StyledNormalActions>
       )}
 
-      {ignored && onIgnore && (
+      {issue.ignored && onIgnore && (
         <StyledNormalActions>
           <Button
             variant="text"

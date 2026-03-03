@@ -3,16 +3,14 @@ import { T, useTranslate } from '@tolgee/react';
 import { Menu } from '@mui/material';
 
 import { SubmenuItem } from 'tg.component/SubmenuItem';
-import { FiltersInternal, FilterActions } from './tools';
-import { FilterItem } from './FilterItem';
+import { FiltersInternal } from 'tg.views/projects/translations/TranslationFilters/tools';
+import { FilterItem } from 'tg.views/projects/translations/TranslationFilters/FilterItem';
+import { SubfilterQaChecksProps } from '../../../eeSetup/EeModuleType';
 
-type Props = {
-  projectId: number;
-  value: FiltersInternal;
-  actions: FilterActions;
-};
-
-export const SubfilterQaChecks = ({ value, actions }: Props) => {
+export const SubfilterQaChecks = ({
+  value,
+  actions,
+}: SubfilterQaChecksProps) => {
   const { t } = useTranslate();
   const [open, setOpen] = useState(false);
   const anchorEl = useRef<HTMLElement>(null);
