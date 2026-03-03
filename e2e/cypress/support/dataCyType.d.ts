@@ -936,8 +936,6 @@ declare namespace DataCy {
         "user-menu-theme-switch" |
         "user-menu-user-settings" |
         "user-profile" |
-        "user-search-select" |
-        "user-search-select-popover" |
         "user-switch-item" |
         "user-switch-search" |
         "webhook-form-cancel" |

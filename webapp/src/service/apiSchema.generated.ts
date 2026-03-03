@@ -671,6 +671,9 @@ export interface paths {
   "/v2/projects/{projectId}/keys/trash": {
     get: operations["list_5"];
   };
+  "/v2/projects/{projectId}/keys/trash/deleters": {
+    get: operations["listDeleters"];
+  };
   "/v2/projects/{projectId}/keys/trash/{keyId}": {
     delete: operations["permanentlyDelete"];
   };
@@ -1845,6 +1848,11 @@ export interface components {
     CollectionModelSimpleProjectModel: {
       _embedded?: {
         projects?: components["schemas"]["SimpleProjectModel"][];
+      };
+    };
+    CollectionModelSimpleUserAccountModel: {
+      _embedded?: {
+        users?: components["schemas"]["SimpleUserAccountModel"][];
       };
     };
     CollectionModelUsedNamespaceModel: {
@@ -15669,6 +15677,48 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PagedModelObject"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  listDeleters: {
+    parameters: {
+      query: {
+        branch?: string;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelSimpleUserAccountModel"];
         };
       };
       /** Bad Request */

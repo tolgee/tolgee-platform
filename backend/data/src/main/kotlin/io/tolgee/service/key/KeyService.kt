@@ -449,6 +449,13 @@ class KeyService(
     return keyRepository.getSoftDeletedProjectIdsForKeyIds(keyIds)
   }
 
+  fun findDistinctDeleters(
+    projectId: Long,
+    branch: String?,
+  ): List<UserAccount> {
+    return keyRepository.findDistinctDeleters(projectId, branch)
+  }
+
   @Transactional
   fun deleteAllByProject(projectId: Long) {
     keyMetaService.deleteAllByProject(projectId)

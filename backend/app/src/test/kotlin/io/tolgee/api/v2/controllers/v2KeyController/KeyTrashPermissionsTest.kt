@@ -2,6 +2,7 @@ package io.tolgee.api.v2.controllers.v2KeyController
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeySearchTestData
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.enums.Scope
@@ -87,6 +88,33 @@ class KeyTrashPermissionsTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthDelete("keys/${key.id}").andIsOk
 
     performProjectAuthDelete("keys/trash/${key.id}").andIsOk
+  }
+
+  // -- LIST DELETERS (GET /keys/trash/deleters) requires KEYS_VIEW --
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `list deleters returns users who deleted keys`() {
+    val key = keyService.get(testData.projectBuilder.self.id, "this-is-key", null)
+    performProjectAuthDelete("keys/${key.id}").andIsOk
+
+    performProjectAuthGet("keys/trash/deleters").andIsOk.andAssertThatJson {
+      node("_embedded.users").isArray.isNotEmpty
+      node("_embedded.users[0].id").isEqualTo(testData.user.id)
+      node("_embedded.users[0].username").isEqualTo(testData.user.username)
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_VIEW])
+  @Test
+  fun `list deleters allowed with KEYS_VIEW scope`() {
+    performProjectAuthGet("keys/trash/deleters").andIsOk
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [Scope.ACTIVITY_VIEW])
+  @Test
+  fun `list deleters forbidden without KEYS_VIEW scope`() {
+    performProjectAuthGet("keys/trash/deleters").andIsForbidden
   }
 
   @ProjectApiKeyAuthTestMethod(scopes = [Scope.KEYS_VIEW, Scope.KEYS_CREATE])

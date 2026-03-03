@@ -12,6 +12,8 @@ import io.tolgee.hateoas.key.KeyModel
 import io.tolgee.hateoas.key.KeyModelAssembler
 import io.tolgee.hateoas.key.trash.TrashedKeyWithTranslationsModelAssembler
 import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
+import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
+import io.tolgee.hateoas.userAccount.SimpleUserAccountModelAssembler
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.security.ProjectHolder
@@ -27,6 +29,7 @@ import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
+import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -36,6 +39,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @Suppress("MVCPathVariableInspection")
@@ -58,6 +62,7 @@ class KeyTrashController(
   private val screenshotModelAssembler: ScreenshotModelAssembler,
   private val avatarService: AvatarService,
   private val translationViewDataProvider: TranslationViewDataProvider,
+  private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<KeyWithTranslationsView>,
 ) : IController {
@@ -98,6 +103,17 @@ class KeyTrashController(
         screenshotsByKeyId = screenshotsByKeyId,
       )
     return pagedResourcesAssembler.toModel(data, assembler)
+  }
+
+  @GetMapping("/deleters")
+  @Operation(summary = "List users who deleted keys")
+  @RequiresProjectPermissions([Scope.KEYS_VIEW])
+  @AllowApiAccess
+  fun listDeleters(
+    @RequestParam(required = false) branch: String?,
+  ): CollectionModel<SimpleUserAccountModel> {
+    val users = keyService.findDistinctDeleters(projectHolder.project.id, branch)
+    return simpleUserAccountModelAssembler.toCollectionModel(users)
   }
 
   @PutMapping("/{keyId}/restore")

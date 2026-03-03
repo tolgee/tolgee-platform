@@ -3,6 +3,7 @@ package io.tolgee.repository
 import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.dtos.queryResults.keyDisabledLanguages.KeyDisabledLanguagesQueryResultView
 import io.tolgee.model.Language
+import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.KeySearchResultView
 import org.springframework.context.annotation.Lazy
@@ -482,6 +483,23 @@ interface KeyRepository : JpaRepository<Key, Long> {
     branchId: Long,
     includeOrphanDefault: Boolean,
   ): List<Key>
+
+  @Query(
+    """
+    select distinct ua from Key k
+    join k.deletedBy ua
+    left join k.branch br
+    where k.project.id = :projectId
+      and k.deletedAt is not null
+      and ((br.name = :branch and br.deletedAt is null)
+           or (:branch is null and (br is null or br.isDefault)))
+    order by ua.name, ua.id
+    """,
+  )
+  fun findDistinctDeleters(
+    projectId: Long,
+    branch: String?,
+  ): List<UserAccount>
 
   // --- Trash queries ---
 

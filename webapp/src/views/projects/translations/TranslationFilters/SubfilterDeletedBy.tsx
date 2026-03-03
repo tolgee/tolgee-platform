@@ -1,8 +1,11 @@
 import { useRef, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
+import { Menu } from '@mui/material';
 import { SubmenuItem } from 'tg.component/SubmenuItem';
-import { UserSearchSelectPopover } from 'tg.component/UserSearchSelect/UserSearchSelectPopover';
+import { UserAccount } from 'tg.component/UserAccount';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { FiltersInternal, FilterActions } from './tools';
+import { FilterItem } from './FilterItem';
 
 type Props = {
   projectId: number;
@@ -17,6 +20,31 @@ export const SubfilterDeletedBy = ({ value, actions, projectId }: Props) => {
 
   const selectedIds = value.filterDeletedByUserId ?? [];
 
+  const deletersLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/keys/trash/deleters',
+    method: 'get',
+    path: { projectId },
+    query: {},
+    options: {
+      enabled: open,
+      keepPreviousData: true,
+    },
+  });
+
+  const users = deletersLoadable.data?._embedded?.users ?? [];
+
+  const handleToggle = (userId: number) => {
+    const isSelected = selectedIds.includes(userId);
+    const newIds = isSelected
+      ? selectedIds.filter((id) => id !== userId)
+      : [...selectedIds, userId];
+
+    actions.setFilters({
+      ...value,
+      filterDeletedByUserId: newIds.length ? newIds : undefined,
+    });
+  };
+
   return (
     <>
       <SubmenuItem
@@ -27,24 +55,9 @@ export const SubfilterDeletedBy = ({ value, actions, projectId }: Props) => {
         open={open}
       />
       {open && (
-        <UserSearchSelectPopover
+        <Menu
           open={open}
-          onClose={() => setOpen(false)}
           anchorEl={anchorEl.current!}
-          selected={selectedIds.map((id) => ({
-            id,
-            name: '',
-            username: '',
-          }))}
-          onSelectImmediate={(users) =>
-            actions.setFilters({
-              ...value,
-              filterDeletedByUserId: users.length
-                ? users.map((u) => u.id)
-                : undefined,
-            })
-          }
-          projectId={projectId}
           anchorOrigin={{
             vertical: 'top',
             horizontal: 'right',
@@ -53,7 +66,17 @@ export const SubfilterDeletedBy = ({ value, actions, projectId }: Props) => {
             vertical: 'top',
             horizontal: 'left',
           }}
-        />
+          onClose={() => setOpen(false)}
+        >
+          {users.map((user) => (
+            <FilterItem
+              key={user.id}
+              label={<UserAccount user={user} />}
+              selected={selectedIds.includes(user.id)}
+              onClick={() => handleToggle(user.id)}
+            />
+          ))}
+        </Menu>
       )}
     </>
   );
