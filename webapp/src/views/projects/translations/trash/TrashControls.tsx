@@ -13,7 +13,7 @@ import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/Langua
 import { HeaderSearchField } from 'tg.component/layout/HeaderSearchField';
 import { TranslationSortMenu } from 'tg.component/translation/translationSort/TranslationSortMenu';
 import { TranslationFilters } from '../TranslationFilters/TranslationFilters';
-import { FiltersType } from '../TranslationFilters/tools';
+import { FilterActions, FiltersType } from '../TranslationFilters/tools';
 import { components } from 'tg.service/apiSchema.generated';
 
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -51,11 +51,7 @@ type Props = {
   search: string;
   onSearchChange: (val: string) => void;
   filters: FiltersType;
-  filterActions: {
-    addFilter: (key: string, value: any) => void;
-    removeFilter: (key: string) => void;
-    setFilters: (f: any) => void;
-  };
+  filterActions: FilterActions;
   languages: LanguageModel[];
   selectedLanguages: string[];
   onLanguagesChange: (langs: string[]) => void;
@@ -93,7 +89,9 @@ export const TrashControls: React.FC<Props> = ({
     null
   );
 
-  const languageCols = languages.filter((l) => selectedLanguages.includes(l.tag));
+  const languageCols = languages.filter((l) =>
+    selectedLanguages.includes(l.tag)
+  );
 
   return (
     <>

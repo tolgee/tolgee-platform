@@ -146,7 +146,8 @@ export const authProviderChange = generateTestDataObject(
 
 export const labelsTestData = generateTestDataObject('label');
 
-export const softDeleteKeysTestData = generateTestDataObject('soft-delete-keys');
+export const softDeleteKeysTestData =
+  generateTestDataObject('soft-delete-keys');
 
 export const suggestionsTestData = {
   ...generateTestDataObject('suggestions'),

@@ -161,10 +161,7 @@ export const TrashTrashedCell: React.FC<Props> = ({
     <StyledTrashedCell>
       <StyledTrashedTime>
         {data.deletedBy && (
-          <Tooltip
-            title={<UserName {...data.deletedBy} />}
-            disableInteractive
-          >
+          <Tooltip title={<UserName {...data.deletedBy} />} disableInteractive>
             <div style={{ display: 'flex' }}>
               <AvatarImg
                 size={20}
