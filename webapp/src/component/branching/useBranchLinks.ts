@@ -30,7 +30,7 @@ export const useBranchLinks = (selectedBranch?: string) => {
     const url = link.build(params);
     const branchParam = branchName || branch;
 
-    if (!branchParam || !BRANCHING_LINKS.has(link)) {
+    if (!isBranchingEnabled || !branchParam || !BRANCHING_LINKS.has(link)) {
       return url;
     }
 
