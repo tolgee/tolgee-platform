@@ -10,6 +10,7 @@ import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.key.KeyModel
 import io.tolgee.hateoas.key.KeyModelAssembler
+import io.tolgee.hateoas.key.trash.TrashedKeyWithTranslationsModel
 import io.tolgee.hateoas.key.trash.TrashedKeyWithTranslationsModelAssembler
 import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
@@ -78,7 +79,7 @@ class KeyTrashController(
     @ParameterObject
     @ModelAttribute
     params: TranslationFilters,
-  ): PagedModel<*> {
+  ): PagedModel<TrashedKeyWithTranslationsModel> {
     params.trashed = true
     val languages =
       languageService.getLanguagesForTranslationsView(
