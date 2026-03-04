@@ -1,14 +1,10 @@
-import { ProjectDTO } from '../../../../webapp/src/service/response.types';
-import {
-  createProject,
-  deleteProject,
-  login,
-} from '../../common/apiCalls/common';
+import { login } from '../../common/apiCalls/common';
 import {
   deleteSelected,
   selectAll,
   selectOperation,
 } from '../../common/batchOperations';
+import { softDeleteKeysTestData } from '../../common/apiCalls/testData/testData';
 import { selectLangsInLocalstorage } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
 import { assertMessage, dismissMenu } from '../../common/shared';
@@ -17,39 +13,30 @@ import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 import { E2TasksView } from '../../compounds/tasks/E2TasksView';
 
 describe('Soft delete keys', () => {
-  let project: ProjectDTO;
+  let projectId: number;
 
   const trash = new E2TrashSection();
   const translations = new E2TranslationsView();
   const tasks = new E2TasksView();
 
   beforeEach(() => {
-    login().then(() => {
-      createProject({
-        name: 'Soft delete test',
-        languages: [
-          { tag: 'en', name: 'English', originalName: 'English' },
-          { tag: 'cs', name: 'Czech', originalName: 'Czech' },
-        ],
-      }).then((r) => {
-        project = r.body as ProjectDTO;
-        selectLangsInLocalstorage(project.id, ['en']);
+    softDeleteKeysTestData.clean({ failOnStatusCode: false });
+    softDeleteKeysTestData
+      .generateStandard()
+      .then((r) => r.body)
+      .then(({ users, projects }) => {
+        login(users[0].username);
+        projectId = projects[0].id;
+        selectLangsInLocalstorage(projectId, ['en']);
       });
-    });
   });
 
   afterEach(() => {
-    if (project) {
-      deleteProject(project.id);
-    }
+    softDeleteKeysTestData.clean();
   });
 
-  function createTwoKeys() {
-    translations.visit(project.id);
-    waitForGlobalLoading();
-    translations.createKey({ key: 'key1', translation: 'Key 1 translation' });
-    waitForGlobalLoading();
-    translations.createKey({ key: 'key2', translation: 'Key 2 translation' });
+  function visitTranslationsPage() {
+    translations.visit(projectId);
     waitForGlobalLoading();
   }
 
@@ -61,7 +48,7 @@ describe('Soft delete keys', () => {
   }
 
   it('shows trash icon after soft-deleting a key', () => {
-    createTwoKeys();
+    visitTranslationsPage();
 
     // Soft-delete key1 via UI
     softDeleteKey('key1');
@@ -76,7 +63,7 @@ describe('Soft delete keys', () => {
   });
 
   it('trash icon is hidden when no keys are soft-deleted', () => {
-    createTwoKeys();
+    visitTranslationsPage();
 
     cy.contains('key1').should('be.visible');
     cy.contains('key2').should('be.visible');
@@ -86,12 +73,12 @@ describe('Soft delete keys', () => {
   });
 
   it('shows trashed keys in trash page', () => {
-    createTwoKeys();
+    visitTranslationsPage();
 
     // Soft-delete key1
     softDeleteKey('key1');
 
-    trash.visit(project.id);
+    trash.visit(projectId);
 
     // key1 should be in trash
     trash.assertTrashRowCount(1);
@@ -99,12 +86,12 @@ describe('Soft delete keys', () => {
   });
 
   it('restores a key from trash', () => {
-    createTwoKeys();
+    visitTranslationsPage();
 
     // Soft-delete key1
     softDeleteKey('key1');
 
-    trash.visit(project.id);
+    trash.visit(projectId);
 
     // Restore key1
     trash.restoreKey('key1');
@@ -113,14 +100,13 @@ describe('Soft delete keys', () => {
     trash.assertTrashEmpty();
 
     // key1 should be back in translations
-    translations.visit(project.id);
-    waitForGlobalLoading();
+    visitTranslationsPage();
     cy.contains('key1').should('be.visible');
     cy.contains('key2').should('be.visible');
   });
 
   it('allows trashing a key with the same name as an already-trashed key', () => {
-    createTwoKeys();
+    visitTranslationsPage();
 
     // Soft-delete key1
     softDeleteKey('key1');
@@ -140,19 +126,19 @@ describe('Soft delete keys', () => {
     cy.contains('key2').should('be.visible');
 
     // Trash should contain both trashed key1 entries
-    trash.visit(project.id);
+    trash.visit(projectId);
 
     trash.assertTrashRowCount(2);
     trash.getTrashRows().filter(':contains("key1")').should('have.length', 2);
   });
 
   it('permanently deletes a key from trash', () => {
-    createTwoKeys();
+    visitTranslationsPage();
 
     // Soft-delete key1
     softDeleteKey('key1');
 
-    trash.visit(project.id);
+    trash.visit(projectId);
 
     // Permanently delete key1
     trash.permanentlyDeleteKey('key1');
@@ -161,14 +147,13 @@ describe('Soft delete keys', () => {
     trash.assertTrashEmpty();
 
     // key1 should not be in translations either
-    translations.visit(project.id);
-    waitForGlobalLoading();
+    visitTranslationsPage();
     cy.contains('key1').should('not.exist');
     cy.contains('key2').should('be.visible');
   });
 
   it('soft-deleted key is excluded from task and restored key reappears', () => {
-    createTwoKeys();
+    visitTranslationsPage();
 
     // 1. Create a translate task with both keys via UI
     selectAll();
@@ -182,7 +167,7 @@ describe('Soft delete keys', () => {
     waitForGlobalLoading();
 
     // 2. Verify task shows 2 keys
-    tasks.visit(project.id);
+    tasks.visit(projectId);
     waitForGlobalLoading();
     cy.gcy('task-item')
       .contains('Test translate task')
@@ -192,12 +177,11 @@ describe('Soft delete keys', () => {
     cy.gcy('task-detail-keys').should('contain', 2);
 
     // 3. Soft-delete key1 via UI
-    translations.visit(project.id);
-    waitForGlobalLoading();
+    visitTranslationsPage();
     softDeleteKey('key1');
 
     // 4. Revisit tasks — task should now show 1 key
-    tasks.visit(project.id);
+    tasks.visit(projectId);
     waitForGlobalLoading();
     cy.gcy('task-item')
       .contains('Test translate task')
@@ -207,11 +191,11 @@ describe('Soft delete keys', () => {
     cy.gcy('task-detail-keys').should('contain', 1);
 
     // 5. Restore key1 from trash via UI
-    trash.visit(project.id);
+    trash.visit(projectId);
     trash.restoreKey('key1');
 
     // 6. Revisit tasks — task should show 2 keys again
-    tasks.visit(project.id);
+    tasks.visit(projectId);
     waitForGlobalLoading();
     cy.gcy('task-item')
       .contains('Test translate task')
