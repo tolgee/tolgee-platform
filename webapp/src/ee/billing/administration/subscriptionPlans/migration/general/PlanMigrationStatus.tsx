@@ -12,8 +12,9 @@ type Props = {
   date?: number;
 };
 
-const colors = {
+const colors: Record<string, 'success' | 'warning' | 'default' | 'info'> = {
   COMPLETED: 'success',
+  SCHEDULED: 'warning',
   SKIPPED: 'default',
   TO_BE_SCHEDULED: 'info',
 };

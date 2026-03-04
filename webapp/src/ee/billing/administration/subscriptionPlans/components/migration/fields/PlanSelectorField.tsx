@@ -17,7 +17,10 @@ export const PlanSelectorField = ({
   name: string;
   type?: PlanType;
   filterHasMigration?: boolean;
-} & Omit<GenericPlanSelector<any>, 'onChange'>) => {
+} & Omit<GenericPlanSelector<any>, 'onChange' | 'loading' | 'plans'> & {
+  plans?: any[];
+  loading?: boolean;
+}) => {
   const { setFieldValue, values } = useFormikContext<
     PlanMigrationFormData | CreatePlanMigrationFormData
   >();
