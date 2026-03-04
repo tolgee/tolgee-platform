@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useQueryClient } from 'react-query';
 import { useTranslate, T } from '@tolgee/react';
 import {
   Badge,
@@ -17,7 +18,7 @@ import clsx from 'clsx';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
@@ -208,6 +209,7 @@ const StyledHeaderCell = styled('div')`
 export const TrashPage = () => {
   const { t } = useTranslate();
   const project = useProject();
+  const queryClient = useQueryClient();
   const branchName = useBranchFromUrlPath();
   const { satisfiesPermission } = useProjectPermissions();
   const canDelete = satisfiesPermission('keys.delete');
@@ -388,8 +390,7 @@ export const TrashPage = () => {
   });
 
   const trashedKeys: TrashedKeyModel[] =
-    (trashLoadable.data?._embedded as { keys?: TrashedKeyModel[] })?.keys ??
-    [];
+    (trashLoadable.data?._embedded as { keys?: TrashedKeyModel[] })?.keys ?? [];
   const totalElements = trashLoadable.data?.page?.totalElements ?? 0;
   const totalPages = trashLoadable.data?.page?.totalPages ?? 0;
 
@@ -406,10 +407,7 @@ export const TrashPage = () => {
     );
   }, []);
 
-  const pageKeyIds = useMemo(
-    () => trashedKeys.map((k) => k.id),
-    [trashedKeys]
-  );
+  const pageKeyIds = useMemo(() => trashedKeys.map((k) => k.id), [trashedKeys]);
 
   const allPageSelected =
     pageKeyIds.length > 0 &&
@@ -428,18 +426,18 @@ export const TrashPage = () => {
 
   const handleRestore = useCallback(() => {
     setSelectedKeys([]);
-    trashLoadable.refetch();
-  }, [trashLoadable.refetch]);
+    invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/keys/trash');
+  }, [queryClient]);
 
   const handleDelete = useCallback(() => {
     setSelectedKeys([]);
-    trashLoadable.refetch();
-  }, [trashLoadable.refetch]);
+    invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/keys/trash');
+  }, [queryClient]);
 
-  const handleBatchFinished = useCallback(() => {
+  const handleBatchFinished = () => {
     setSelectedKeys([]);
-    trashLoadable.refetch();
-  }, [trashLoadable.refetch]);
+    invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/keys/trash');
+  };
 
   const translationsLink = LINKS.PROJECT_TRANSLATIONS.build({
     [PARAMS.PROJECT_ID]: project.id,
