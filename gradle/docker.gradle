@@ -69,7 +69,9 @@ task dockerPublish {
 }
 
 tasks.register('cleanDocker') {
-    delete(dockerPath)
+    doLast {
+        delete(dockerPath)
+    }
 }
 
 tasks.register('copyDockerIgnore', Copy) {
