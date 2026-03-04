@@ -62,8 +62,8 @@ class KeyTrashPurgeScheduler(
   }
 
   companion object {
+    const val RETENTION_DAYS = 7
     private const val PURGE_LOCK_NAME = "key_trash_purge_lock"
-    private const val RETENTION_DAYS = 7
     private const val BATCH_SIZE = 100
     private val PURGE_PERIOD = Duration.ofHours(1)
     private val PURGE_LOCK_LEASE_TIME = Duration.ofMinutes(10)

@@ -4,6 +4,7 @@ import io.tolgee.api.v2.controllers.keys.KeyTrashController
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.service.AvatarService
 import io.tolgee.service.key.KeySearchResultView
+import io.tolgee.service.key.KeyTrashPurgeScheduler
 import io.tolgee.util.addDays
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
@@ -24,7 +25,7 @@ class TrashedKeyModelAssembler(
       name = entity.name,
       namespace = entity.namespace,
       deletedAt = deletedAt,
-      permanentDeleteAt = deletedAt.addDays(RETENTION_DAYS),
+      permanentDeleteAt = deletedAt.addDays(KeyTrashPurgeScheduler.RETENTION_DAYS),
       deletedBy = buildDeletedByModel(entity),
     )
   }
@@ -39,9 +40,5 @@ class TrashedKeyModelAssembler(
         deleted = entity.deletedByUserDeleted ?: false,
       )
     }
-  }
-
-  companion object {
-    private const val RETENTION_DAYS = 7
   }
 }

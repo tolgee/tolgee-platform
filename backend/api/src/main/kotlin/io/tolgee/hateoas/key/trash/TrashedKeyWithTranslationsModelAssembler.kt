@@ -9,6 +9,7 @@ import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.model.Screenshot
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.service.AvatarService
+import io.tolgee.service.key.KeyTrashPurgeScheduler
 import io.tolgee.util.addDays
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 
@@ -48,7 +49,7 @@ class TrashedKeyWithTranslationsModelAssembler(
       name = entity.keyName,
       namespace = entity.keyNamespace,
       deletedAt = deletedAt,
-      permanentDeleteAt = deletedAt.addDays(RETENTION_DAYS),
+      permanentDeleteAt = deletedAt.addDays(KeyTrashPurgeScheduler.RETENTION_DAYS),
       description = entity.keyDescription,
       tags = tags,
       translations = translationsMap,
@@ -68,9 +69,5 @@ class TrashedKeyWithTranslationsModelAssembler(
         deleted = entity.deletedByUserDeletedAt != null,
       )
     }
-  }
-
-  companion object {
-    private const val RETENTION_DAYS = 7
   }
 }
