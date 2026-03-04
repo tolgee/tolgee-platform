@@ -4,10 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
-import io.tolgee.constants.Message
 import io.tolgee.dtos.queryResults.KeyView
 import io.tolgee.dtos.request.translation.TranslationFilters
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.key.KeyModel
 import io.tolgee.hateoas.key.KeyModelAssembler
 import io.tolgee.hateoas.key.trash.TrashedKeyWithTranslationsModel
@@ -124,10 +122,6 @@ class KeyTrashController(
   fun permanentlyDelete(
     @PathVariable keyId: Long,
   ) {
-    val projectIds = keyService.getSoftDeletedProjectIdsForKeyIds(listOf(keyId))
-    if (projectIds.isEmpty() || projectIds.single() != projectHolder.project.id) {
-      throw NotFoundException(Message.KEY_NOT_FOUND)
-    }
-    keyService.hardDeleteMultiple(listOf(keyId))
+    keyService.hardDeleteSingleTrashedKey(projectHolder.project.id, keyId)
   }
 }

@@ -449,6 +449,18 @@ class KeyService(
     return keyRepository.getSoftDeletedProjectIdsForKeyIds(keyIds)
   }
 
+  @Transactional
+  fun hardDeleteSingleTrashedKey(
+    projectId: Long,
+    keyId: Long,
+  ) {
+    val projectIds = getSoftDeletedProjectIdsForKeyIds(listOf(keyId))
+    if (projectIds.isEmpty() || projectIds.single() != projectId) {
+      throw NotFoundException(Message.KEY_NOT_FROM_PROJECT)
+    }
+    hardDeleteMultiple(listOf(keyId))
+  }
+
   fun findDistinctDeleters(
     projectId: Long,
     branch: String?,
