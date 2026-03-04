@@ -293,7 +293,9 @@ class QueryGlobalFiltering(
 
   private fun filterDeletedByUserId() {
     if (!params.filterDeletedByUserId.isNullOrEmpty()) {
-      val deletedByJoin = queryBase.root.join(Key_.deletedBy, JoinType.LEFT)
+      val deletedByJoin =
+        queryBase.deletedByJoin
+          ?: queryBase.root.join(Key_.deletedBy, JoinType.LEFT).also { queryBase.deletedByJoin = it }
       queryBase.whereConditions.add(
         deletedByJoin.get(UserAccount_.id).`in`(params.filterDeletedByUserId),
       )

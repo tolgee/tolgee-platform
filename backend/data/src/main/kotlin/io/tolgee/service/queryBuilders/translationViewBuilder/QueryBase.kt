@@ -32,6 +32,7 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.CriteriaQuery
 import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.ListJoin
 import jakarta.persistence.criteria.Path
@@ -62,6 +63,7 @@ class QueryBase<T>(
   lateinit var namespaceNameExpression: Path<String>
   var translationsTextFields: MutableSet<Expression<String>> = HashSet()
   lateinit var screenshotCountExpression: Expression<Long>
+  var deletedByJoin: Join<Key, UserAccount>? = null
   val groupByExpressions: MutableSet<Expression<*>> = mutableSetOf()
   private val queryGlobalFiltering = QueryGlobalFiltering(params, this, cb, entityManager)
   var queryTranslationFiltering = QueryTranslationFiltering(params, this, cb)
@@ -328,6 +330,7 @@ class QueryBase<T>(
 
   private fun addDeletedBySelection() {
     val deletedByJoin = root.join(Key_.deletedBy, JoinType.LEFT)
+    this.deletedByJoin = deletedByJoin
     querySelection[KeyWithTranslationsView::deletedByUserId.name] = deletedByJoin.get(UserAccount_.id)
     querySelection[KeyWithTranslationsView::deletedByUserName.name] = deletedByJoin.get(UserAccount_.name)
     querySelection[KeyWithTranslationsView::deletedByUserUsername.name] = deletedByJoin.get(UserAccount_.username)
