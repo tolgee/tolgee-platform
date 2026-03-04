@@ -109,7 +109,7 @@ export const TrashControls: React.FC<Props> = ({
             actions={filterActions}
             selectedLanguages={languageCols}
             projectId={projectId}
-            filterOptions={{ showDeletedBy: true }}
+            filterOptions={{ keyRelatedOnly: true, showDeletedBy: true }}
           />
           <Tooltip title={t('translation_controls_sort_tooltip')}>
             <Badge

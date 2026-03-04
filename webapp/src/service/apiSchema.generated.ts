@@ -4400,12 +4400,6 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    PagedModelObject: {
-      _embedded?: {
-        objectList?: unknown[];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
     PagedModelOrganizationLanguageModel: {
       _embedded?: {
         languages?: components["schemas"]["OrganizationLanguageModel"][];
@@ -4517,6 +4511,12 @@ export interface components {
     PagedModelTranslationSuggestionModel: {
       _embedded?: {
         suggestions?: components["schemas"]["TranslationSuggestionModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTrashedKeyWithTranslationsModel: {
+      _embedded?: {
+        keys?: components["schemas"]["TrashedKeyWithTranslationsModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -6675,6 +6675,47 @@ export interface components {
     TranslationWithCommentModel: {
       comment: components["schemas"]["TranslationCommentModel"];
       translation: components["schemas"]["TranslationModel"];
+    };
+    TrashedKeyWithTranslationsModel: {
+      /**
+       * Format: date-time
+       * @description When the key was deleted
+       */
+      deletedAt: string;
+      /** @description User who deleted the key */
+      deletedBy?: components["schemas"]["SimpleUserAccountModel"];
+      /** @description Description of the key */
+      description?: string;
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
+      id: number;
+      /** @description Whether the key is plural */
+      isPlural: boolean;
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
+      name: string;
+      /**
+       * @description Namespace of key
+       * @example homepage
+       */
+      namespace?: string;
+      /**
+       * Format: date-time
+       * @description When the key will be permanently deleted
+       */
+      permanentDeleteAt: string;
+      /** @description Screenshots of the key */
+      screenshots: components["schemas"]["ScreenshotModel"][];
+      /** @description Tags of key */
+      tags: components["schemas"]["TagModel"][];
+      /** @description Translations object keyed by language tag */
+      translations: {
+        [key: string]: components["schemas"]["TranslationViewModel"];
+      };
     };
     UntagKeysRequest: {
       keyIds: number[];
@@ -15676,7 +15717,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["PagedModelObject"];
+          "application/json": components["schemas"]["PagedModelTrashedKeyWithTranslationsModel"];
         };
       };
       /** Bad Request */

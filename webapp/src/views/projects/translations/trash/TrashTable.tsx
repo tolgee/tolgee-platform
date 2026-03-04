@@ -158,7 +158,7 @@ type Props = {
   columnSizes: number[];
   startResize: (index: number) => void;
   resizeColumn: (index: number, size: number) => void;
-  addResizer: (index: number, callback: any) => void;
+  addResizer: (index: number, callback: () => void) => void;
   onFilterNamespace: (ns: string) => void;
   totalPages: number;
   page: number;

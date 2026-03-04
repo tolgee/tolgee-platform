@@ -6,24 +6,9 @@ import { TrashKeyCell } from './TrashKeyCell';
 import { TrashTrashedCell } from './TrashTrashedCell';
 
 type LanguageModel = components['schemas']['LanguageModel'];
-type ScreenshotModel = components['schemas']['ScreenshotModel'];
-type TagModel = components['schemas']['TagModel'];
-type TranslationViewModel = components['schemas']['TranslationViewModel'];
-type SimpleUserAccountModel = components['schemas']['SimpleUserAccountModel'];
 
-export type TrashedKeyModel = {
-  id: number;
-  name: string;
-  namespace?: string;
-  deletedAt: string;
-  permanentDeleteAt: string;
-  description?: string;
-  tags: TagModel[];
-  translations: Record<string, TranslationViewModel>;
-  screenshots: ScreenshotModel[];
-  isPlural: boolean;
-  deletedBy?: SimpleUserAccountModel;
-};
+export type TrashedKeyModel =
+  components['schemas']['TrashedKeyWithTranslationsModel'];
 
 const StyledRow = styled('div')`
   display: grid;

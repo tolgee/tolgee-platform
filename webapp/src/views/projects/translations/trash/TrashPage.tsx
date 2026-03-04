@@ -19,7 +19,6 @@ import { useColumns } from '../useColumns';
 import { components } from 'tg.service/apiSchema.generated';
 import { useTranslationFilters } from '../TranslationFilters/useTranslationFilters';
 import { FiltersInternal, FiltersType } from '../TranslationFilters/tools';
-import { TrashedKeyModel } from './TrashRow';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -175,8 +174,7 @@ export const TrashPage = () => {
     },
   });
 
-  const trashedKeys: TrashedKeyModel[] =
-    (trashLoadable.data?._embedded as { keys?: TrashedKeyModel[] })?.keys ?? [];
+  const trashedKeys = trashLoadable.data?._embedded?.keys ?? [];
   const totalElements = trashLoadable.data?.page?.totalElements ?? 0;
   const totalPages = trashLoadable.data?.page?.totalPages ?? 0;
 
