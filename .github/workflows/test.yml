@@ -511,6 +511,10 @@ jobs:
             failed_jobs+=("e2e-install-deps")
           fi
 
+          if [[ "${{ needs.email-code-checks.result }}" != "success" ]]; then
+            failed_jobs+=("email-code-checks")
+          fi
+
           if [[ "${#failed_jobs[@]}" -gt 0 ]]; then
             echo "The following jobs failed: ${failed_jobs[*]}"
             exit 1

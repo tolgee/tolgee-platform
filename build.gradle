@@ -146,7 +146,7 @@ project(':server-app').afterEvaluate {
     }
 
     subprojects.forEach {
-        tasks.matching { name == 'diffChangelog' }.configureEach {
+        it.tasks.matching { task -> task.name == 'diffChangelog' }.configureEach {
             mustRunAfter ':server-app:bootRun'
         }
     }
