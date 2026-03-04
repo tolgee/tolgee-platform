@@ -79,6 +79,21 @@ interface KeyRepository : JpaRepository<Key, Long> {
 
   @Query(
     """
+    from Key k
+      left join fetch k.namespace
+      left join k.branch b
+    where k.project.id = :projectId
+      and k.name in :names
+      and k.deletedAt is null
+  """,
+  )
+  fun findActiveByProjectIdAndNames(
+    projectId: Long,
+    names: Collection<String>,
+  ): List<Key>
+
+  @Query(
+    """
       from Key k left join fetch k.namespace left join fetch k.keyMeta where k.project.id = :projectId and k.deletedAt is null
     """,
   )

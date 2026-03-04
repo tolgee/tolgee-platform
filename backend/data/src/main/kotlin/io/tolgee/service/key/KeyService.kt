@@ -359,16 +359,22 @@ class KeyService(
     projectId: Long,
   ) {
     val keys = keyRepository.findSoftDeletedByIdsAndProjectId(ids, projectId)
+    if (keys.isEmpty()) return
+
+    val names = keys.map { it.name }.toSet()
+    val activeKeysWithSameNames = keyRepository.findActiveByProjectIdAndNames(projectId, names)
+    val activeKeyIdentifiers =
+      activeKeysWithSameNames.map { Triple(it.name, it.namespace?.name, it.branch?.name) }.toSet()
+
     keys.forEach { key ->
-      val branch = key.branch?.name
-      val existing = find(projectId, key.name, key.namespace?.name, branch)
-      if (existing != null) {
+      val identifier = Triple(key.name, key.namespace?.name, key.branch?.name)
+      if (identifier in activeKeyIdentifiers) {
         throw ValidationException(Message.KEY_EXISTS, key.name)
       }
       key.deletedAt = null
       key.deletedBy = null
-      save(key)
     }
+    keyRepository.saveAll(keys)
   }
 
   @Transactional
