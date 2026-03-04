@@ -23,6 +23,24 @@ import { KeyCellContent } from '../KeyCellContent';
 import { TranslationCellReadOnly } from '../TranslationCellReadOnly';
 
 type LanguageModel = components['schemas']['LanguageModel'];
+type ScreenshotModel = components['schemas']['ScreenshotModel'];
+type TagModel = components['schemas']['TagModel'];
+type TranslationViewModel = components['schemas']['TranslationViewModel'];
+type SimpleUserAccountModel = components['schemas']['SimpleUserAccountModel'];
+
+export type TrashedKeyModel = {
+  id: number;
+  name: string;
+  namespace?: string;
+  deletedAt: string;
+  permanentDeleteAt: string;
+  description?: string;
+  tags: TagModel[];
+  translations: Record<string, TranslationViewModel>;
+  screenshots: ScreenshotModel[];
+  isPlural: boolean;
+  deletedBy?: SimpleUserAccountModel;
+};
 
 const StyledRow = styled('div')`
   display: grid;
@@ -168,7 +186,7 @@ const StyledActions = styled('div')`
 `;
 
 type Props = {
-  data: any;
+  data: TrashedKeyModel;
   selected: boolean;
   onToggle: () => void;
   onRestore: () => void;
@@ -326,7 +344,7 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
             >
               <MenuItem
                 onClick={() => {
-                  onFilterNamespace?.(data.namespace);
+                  onFilterNamespace?.(data.namespace!);
                   setNsMenuAnchor(null);
                 }}
               >
@@ -346,7 +364,7 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
         <KeyCellContent keyName={data.name} description={data.description} />
         {data.screenshots?.length > 0 && (
           <StyledScreenshots>
-            {data.screenshots.map((sc: any) => {
+            {data.screenshots.map((sc) => {
               const w = 100;
               const h =
                 sc.width && sc.height
@@ -365,7 +383,7 @@ export const TrashRow: React.FC<Props> = React.memo(function TrashRow({
         )}
         {tags.length > 0 && (
           <StyledTags>
-            {tags.map((tag: any) => (
+            {tags.map((tag) => (
               <Tag key={tag.id} name={tag.name} />
             ))}
           </StyledTags>

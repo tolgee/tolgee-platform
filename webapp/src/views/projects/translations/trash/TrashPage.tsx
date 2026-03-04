@@ -37,7 +37,8 @@ import { ColumnResizer } from '../ColumnResizer';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationFilters } from '../TranslationFilters/TranslationFilters';
 import { useTranslationFilters } from '../TranslationFilters/useTranslationFilters';
-import { FiltersInternal } from '../TranslationFilters/tools';
+import { FiltersInternal, FiltersType } from '../TranslationFilters/tools';
+import { TrashedKeyModel } from './TrashRow';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -386,12 +387,13 @@ export const TrashPage = () => {
     },
   });
 
-  const trashedKeys =
-    (trashLoadable.data?._embedded as Record<string, any>)?.keys ?? [];
+  const trashedKeys: TrashedKeyModel[] =
+    (trashLoadable.data?._embedded as { keys?: TrashedKeyModel[] })?.keys ??
+    [];
   const totalElements = trashLoadable.data?.page?.totalElements ?? 0;
   const totalPages = trashLoadable.data?.page?.totalPages ?? 0;
 
-  const handlePageChange = useCallback((_: any, newPage: number) => {
+  const handlePageChange = useCallback((_: unknown, newPage: number) => {
     setPage(newPage - 1);
     setSelectedKeys([]);
   }, []);
@@ -405,7 +407,7 @@ export const TrashPage = () => {
   }, []);
 
   const pageKeyIds = useMemo(
-    () => trashedKeys.map((k: any) => k.id as number),
+    () => trashedKeys.map((k) => k.id),
     [trashedKeys]
   );
 
@@ -473,7 +475,7 @@ export const TrashPage = () => {
             placeholder={t('standard_search_label')}
           />
           <TranslationFilters
-            value={parsedFilters as any}
+            value={parsedFilters as FiltersType}
             actions={{ addFilter, removeFilter, setFilters }}
             selectedLanguages={languageCols}
             projectId={project.id}
@@ -608,7 +610,7 @@ export const TrashPage = () => {
                 );
               })}
 
-              {trashedKeys.map((key: any, index: number) => {
+              {trashedKeys.map((key, index) => {
                 const prevKey = index > 0 ? trashedKeys[index - 1] : null;
                 const showNamespace =
                   key.namespace &&
