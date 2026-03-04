@@ -19,6 +19,26 @@ export interface paths {
     get: operations["getPlans_1"];
     post: operations["create_2"];
   };
+  "/v2/administration/billing/cloud-plans/migration": {
+    post: operations["createPlanMigration_1"];
+  };
+  "/v2/administration/billing/cloud-plans/migration/email-preview": {
+    post: operations["sendPlanMigrationPreview_1"];
+  };
+  "/v2/administration/billing/cloud-plans/migration/{migrationId}": {
+    get: operations["getPlanMigration_1"];
+    put: operations["updatePlanMigration_1"];
+    delete: operations["deletePlanMigration_1"];
+  };
+  "/v2/administration/billing/cloud-plans/migration/{migrationId}/subscriptions": {
+    get: operations["getPlanMigrationSubscriptions_1"];
+  };
+  "/v2/administration/billing/cloud-plans/migration/{migrationId}/upcoming-subscriptions": {
+    get: operations["getPlanMigrationUpcomingSubscriptions_1"];
+  };
+  "/v2/administration/billing/cloud-plans/migration/{migrationId}/upcoming-subscriptions/{subscriptionId}/skip": {
+    put: operations["setUpcomingSubscriptionSkipped_1"];
+  };
   "/v2/administration/billing/cloud-plans/{planId}": {
     get: operations["getPlan_1"];
     put: operations["updatePlan_1"];
@@ -43,9 +63,32 @@ export interface paths {
   "/v2/administration/billing/organizations": {
     get: operations["getOrganizations"];
   };
+  "/v2/administration/billing/plan-migration/email-template": {
+    get: operations["getPlanMigrationEmailTemplate"];
+  };
   "/v2/administration/billing/self-hosted-ee-plans": {
     get: operations["getPlans"];
     post: operations["create_1"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/migration": {
+    post: operations["createPlanMigration"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/migration/email-preview": {
+    post: operations["sendPlanMigrationPreview"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}": {
+    get: operations["getPlanMigration"];
+    put: operations["updatePlanMigration"];
+    delete: operations["deletePlanMigration"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}/subscriptions": {
+    get: operations["getPlanMigrationSubscriptions"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}/upcoming-subscriptions": {
+    get: operations["getPlanMigrationUpcomingSubscriptions"];
+  };
+  "/v2/administration/billing/self-hosted-ee-plans/migration/{migrationId}/upcoming-subscriptions/{subscriptionId}/skip": {
+    put: operations["setUpcomingSubscriptionSkipped"];
   };
   "/v2/administration/billing/self-hosted-ee-plans/{planId}": {
     get: operations["getPlan"];
@@ -245,6 +288,7 @@ export interface components {
         | "UNKNOWN";
     };
     AdministrationCloudPlanModel: {
+      activeMigration?: boolean;
       /** Format: date-time */
       archivedAt?: string;
       canEditPrices: boolean;
@@ -269,6 +313,7 @@ export interface components {
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
+        | "BRANCHING"
       )[];
       /**
        * Format: int64
@@ -283,6 +328,8 @@ export interface components {
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       /** @enum {string} */
       metricType: "KEYS_SEATS" | "STRINGS";
+      /** Format: int64 */
+      migrationId?: number;
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -321,6 +368,20 @@ export interface components {
       stripeSubscriptionId?: string;
       /** Format: int64 */
       trialEnd?: number;
+    };
+    AdministrationSelfHostedEePlanMigrationModel: {
+      customEmailBody?: string;
+      enabled: boolean;
+      /** Format: int64 */
+      id: number;
+      /** Format: int32 */
+      monthlyOffsetDays: number;
+      sourcePlan: components["schemas"]["SelfHostedEePlanModel"];
+      /** Format: int32 */
+      subscriptionsCount?: number;
+      targetPlan: components["schemas"]["SelfHostedEePlanModel"];
+      /** Format: int32 */
+      yearlyOffsetDays: number;
     };
     AssignCloudPlanRequest: {
       customPlan?: components["schemas"]["CloudPlanRequest"];
@@ -370,6 +431,20 @@ export interface components {
     CancelLocalSubscriptionsRequest: {
       ids: components["schemas"]["SubscriptionId"][];
     };
+    CloudPlanMigrationModel: {
+      customEmailBody?: string;
+      enabled: boolean;
+      /** Format: int64 */
+      id: number;
+      /** Format: int32 */
+      monthlyOffsetDays: number;
+      sourcePlan: components["schemas"]["CloudPlanModel"];
+      /** Format: int32 */
+      subscriptionsCount?: number;
+      targetPlan: components["schemas"]["CloudPlanModel"];
+      /** Format: int32 */
+      yearlyOffsetDays: number;
+    };
     CloudPlanModel: {
       /** Format: date-time */
       archivedAt?: string;
@@ -394,6 +469,7 @@ export interface components {
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
+        | "BRANCHING"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -434,6 +510,7 @@ export interface components {
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
+        | "BRANCHING"
       )[];
       forOrganizationIds: number[];
       free: boolean;
@@ -497,9 +574,9 @@ export interface components {
       finalizedAt?: number;
       originPlanName: string;
       /** Format: int64 */
-      scheduledAt: number;
+      scheduledAt?: number;
       /** @enum {string} */
-      status: "COMPLETED" | "SCHEDULED";
+      status: "COMPLETED" | "SCHEDULED" | "SKIPPED";
       targetPlanName: string;
     };
     CollectionModelAdministrationCloudPlanModel: {
@@ -542,8 +619,22 @@ export interface components {
         stripeProducts?: components["schemas"]["StripeProductModel"][];
       };
     };
+    CreatePlanMigrationRequest: {
+      customEmailBody?: string;
+      enabled: boolean;
+      /** Format: int32 */
+      monthlyOffsetDays: number;
+      /** Format: int64 */
+      sourcePlanId: number;
+      /** Format: int64 */
+      targetPlanId: number;
+      /** Format: int32 */
+      yearlyOffsetDays: number;
+    };
     CreateTaskRequest: {
       assignees: number[];
+      /** @description Branch name. If empty or null, default branch is used. */
+      branch?: string;
       description: string;
       /**
        * Format: int64
@@ -591,6 +682,15 @@ export interface components {
       keys: components["schemas"]["CurrentUsageItemModel"];
       seats: components["schemas"]["CurrentUsageItemModel"];
       strings: components["schemas"]["CurrentUsageItemModel"];
+    };
+    EmailPlaceholderModel: {
+      description: string;
+      exampleValue: string;
+      placeholder: string;
+    };
+    EmailTemplateModel: {
+      body: string;
+      placeholders: components["schemas"]["EmailPlaceholderModel"][];
     };
     ErrorResponseBody: {
       code: string;
@@ -670,6 +770,7 @@ export interface components {
         | "translation_not_from_project"
         | "can_edit_only_own_comment"
         | "request_parse_error"
+        | "request_validation_error"
         | "filter_by_value_state_not_valid"
         | "import_has_expired"
         | "tag_not_from_project"
@@ -904,15 +1005,22 @@ export interface components {
         | "already_impersonating_user"
         | "operation_not_permitted_in_read_only_mode"
         | "file_processing_failed"
+        | "multiple_items_in_chunk_failed"
         | "branch_not_found"
         | "cannot_delete_default_branch"
+        | "cannot_delete_branch_with_children"
         | "branch_already_exists"
         | "origin_branch_not_found"
         | "branch_merge_not_found"
         | "branch_merge_change_not_found"
         | "branch_merge_revision_not_valid"
         | "branch_merge_conflicts_not_resolved"
-        | "branch_merge_already_merged";
+        | "branch_merge_already_merged"
+        | "branching_not_enabled_for_project"
+        | "export_key_plural_suffix_collision"
+        | "plan_migration_not_found"
+        | "plan_has_migrations"
+        | "source_and_target_plan_must_be_different";
       params?: unknown[];
     };
     ExampleItem: {
@@ -963,7 +1071,6 @@ export interface components {
       /** @description The Total amount with tax */
       total: number;
     };
-    JsonNode: unknown;
     LegacyTolgeeTranslateRequest: {
       /** @enum {string} */
       formality?: "FORMAL" | "INFORMAL" | "DEFAULT";
@@ -1023,7 +1130,7 @@ export interface components {
       /** Format: int32 */
       price: number;
       translated?: string;
-      usage?: components["schemas"]["PromptResponseUsageDto"];
+      usage?: components["schemas"]["Usage"];
     };
     OrganizationWithSubscriptionsModel: {
       cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
@@ -1055,6 +1162,18 @@ export interface components {
     PagedModelOrganizationWithSubscriptionsModel: {
       _embedded?: {
         organizations?: components["schemas"]["OrganizationWithSubscriptionsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelPlanMigrationRecordModel: {
+      _embedded?: {
+        planMigrationRecordModelList?: components["schemas"]["PlanMigrationRecordModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelPlanMigrationUpcomingSubscriptionModel: {
+      _embedded?: {
+        planMigrationUpcomingSubscriptionModelList?: components["schemas"]["PlanMigrationUpcomingSubscriptionModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -1130,6 +1249,8 @@ export interface components {
         | "translation-labels.manage"
         | "translation-labels.assign"
         | "all.view"
+        | "branch.management"
+        | "branch.protected-modify"
       )[];
       /**
        * @description List of languages user can change state to. If null, changing state of all language values is permitted.
@@ -1189,6 +1310,56 @@ export interface components {
       /** Format: int64 */
       translations: number;
     };
+    PlanMigrationEmailPreviewRequest: {
+      customEmailBody?: string;
+      /** Format: int64 */
+      sourcePlanId: number;
+      /** Format: int64 */
+      targetPlanId: number;
+    };
+    PlanMigrationRecordModel: {
+      /** Format: int64 */
+      finalizedAt?: number;
+      organizationName: string;
+      organizationSlug: string;
+      originPlan: string;
+      plan: string;
+      /** Format: int64 */
+      scheduledAt: number;
+      /** @enum {string} */
+      status: "COMPLETED" | "SCHEDULED" | "SKIPPED";
+      /** Format: int64 */
+      transferAt: number;
+    };
+    PlanMigrationRequest: {
+      customEmailBody?: string;
+      enabled: boolean;
+      /** Format: int32 */
+      monthlyOffsetDays: number;
+      /** Format: int64 */
+      targetPlanId: number;
+      /** Format: int32 */
+      yearlyOffsetDays: number;
+    };
+    PlanMigrationSkipRequest: {
+      skipped: boolean;
+    };
+    PlanMigrationUpcomingSubscriptionModel: {
+      /** Format: int64 */
+      currentPeriodEnd: number;
+      expectedUsage: components["schemas"]["UsageModel"];
+      /** Format: int64 */
+      firstPaymentDate?: number;
+      organizationName: string;
+      organizationSlug: string;
+      originPlan: string;
+      /** Format: int64 */
+      scheduleAt: number;
+      skipped: boolean;
+      /** Format: int64 */
+      subscriptionId: number;
+      targetPlan: string;
+    };
     PlanPricesModel: {
       perSeat: number;
       perThousandKeys: number;
@@ -1220,20 +1391,11 @@ export interface components {
       /** Format: int64 */
       seats: number;
     };
-    PromptResponseUsageDto: {
-      /** Format: int64 */
-      cachedTokens?: number;
-      /** Format: int64 */
-      inputTokens?: number;
-      /** Format: int64 */
-      outputTokens?: number;
-    };
     PromptResult: {
-      parsedJson?: components["schemas"]["JsonNode"];
       /** Format: int32 */
       price: number;
       response: string;
-      usage?: components["schemas"]["PromptResponseUsageDto"];
+      usage?: components["schemas"]["Usage"];
     };
     ReleaseKeyDto: {
       licenseKey: string;
@@ -1263,6 +1425,7 @@ export interface components {
       planId: number;
     };
     SelfHostedEePlanAdministrationModel: {
+      activeMigration?: boolean;
       /** Format: date-time */
       archivedAt?: string;
       canEditPrices: boolean;
@@ -1287,6 +1450,7 @@ export interface components {
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
+        | "BRANCHING"
       )[];
       /**
        * Format: int64
@@ -1300,6 +1464,8 @@ export interface components {
       id: number;
       includedUsage: components["schemas"]["PlanIncludedUsageModel"];
       isPayAsYouGo: boolean;
+      /** Format: int64 */
+      migrationId?: number;
       name: string;
       nonCommercial: boolean;
       prices: components["schemas"]["PlanPricesModel"];
@@ -1332,6 +1498,7 @@ export interface components {
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
+        | "BRANCHING"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -1369,6 +1536,7 @@ export interface components {
         | "ORDER_TRANSLATION"
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
+        | "BRANCHING"
       )[];
       forOrganizationIds: number[];
       free: boolean;
@@ -1573,6 +1741,14 @@ export interface components {
       /** Format: int64 */
       trialEnd: number;
     };
+    Usage: {
+      /** Format: int64 */
+      cachedTokens?: number;
+      /** Format: int64 */
+      inputTokens?: number;
+      /** Format: int64 */
+      outputTokens?: number;
+    };
     UsageModel: {
       /** @description Relevant for invoices only. When there are applied stripe credits, we need to reduce the total price by this amount. */
       appliedStripeCredits?: number;
@@ -1707,6 +1883,7 @@ export interface operations {
         filterAssignableToOrganization?: number;
         filterPlanIds?: number[];
         filterPublic?: boolean;
+        filterHasMigration?: boolean;
       };
     };
     responses: {
@@ -1778,6 +1955,333 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["CloudPlanRequest"];
+      };
+    };
+  };
+  createPlanMigration_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CloudPlanMigrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreatePlanMigrationRequest"];
+      };
+    };
+  };
+  sendPlanMigrationPreview_1: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationEmailPreviewRequest"];
+      };
+    };
+  };
+  getPlanMigration_1: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CloudPlanMigrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  updatePlanMigration_1: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CloudPlanMigrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationRequest"];
+      };
+    };
+  };
+  deletePlanMigration_1: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getPlanMigrationSubscriptions_1: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelPlanMigrationRecordModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getPlanMigrationUpcomingSubscriptions_1: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelPlanMigrationUpcomingSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  setUpcomingSubscriptionSkipped_1: {
+    parameters: {
+      path: {
+        migrationId: number;
+        subscriptionId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationSkipRequest"];
       };
     };
   };
@@ -2059,6 +2563,7 @@ export interface operations {
             | "ORDER_TRANSLATION"
             | "GLOSSARY"
             | "TRANSLATION_LABELS"
+            | "BRANCHING"
           )[];
         };
       };
@@ -2170,6 +2675,40 @@ export interface operations {
       };
     };
   };
+  getPlanMigrationEmailTemplate: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["EmailTemplateModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   getPlans: {
     parameters: {
       query: {
@@ -2183,6 +2722,7 @@ export interface operations {
         filterAssignableToOrganization?: number;
         filterPlanIds?: number[];
         filterPublic?: boolean;
+        filterHasMigration?: boolean;
       };
     };
     responses: {
@@ -2254,6 +2794,333 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SelfHostedEePlanRequest"];
+      };
+    };
+  };
+  createPlanMigration: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AdministrationSelfHostedEePlanMigrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreatePlanMigrationRequest"];
+      };
+    };
+  };
+  sendPlanMigrationPreview: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationEmailPreviewRequest"];
+      };
+    };
+  };
+  getPlanMigration: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AdministrationSelfHostedEePlanMigrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  updatePlanMigration: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AdministrationSelfHostedEePlanMigrationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationRequest"];
+      };
+    };
+  };
+  deletePlanMigration: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getPlanMigrationSubscriptions: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelPlanMigrationRecordModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getPlanMigrationUpcomingSubscriptions: {
+    parameters: {
+      path: {
+        migrationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelPlanMigrationUpcomingSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  setUpcomingSubscriptionSkipped: {
+    parameters: {
+      path: {
+        migrationId: number;
+        subscriptionId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PlanMigrationSkipRequest"];
       };
     };
   };
