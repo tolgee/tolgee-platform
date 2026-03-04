@@ -1,3 +1,10 @@
+## [3.164.1](https://github.com/tolgee/tolgee-platform/compare/v3.164.0...v3.164.1) (2026-03-04)
+
+
+### Bug Fixes
+
+* hide branching UI elements in tasks when branching is disabled ([#3502](https://github.com/tolgee/tolgee-platform/issues/3502)) ([6a5fa0a](https://github.com/tolgee/tolgee-platform/commit/6a5fa0a620f02951842fbeb7e159430933a41afe))
+
 # [3.164.0](https://github.com/tolgee/tolgee-platform/compare/v3.163.5...v3.164.0) (2026-03-03)
 
 
