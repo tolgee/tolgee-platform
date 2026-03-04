@@ -31,17 +31,17 @@ const getPeriodDuration = (subscription: CloudSubscriptionModel) => {
 };
 
 const getPlanMigrationAlertData = (
-  subscription: CloudSubscriptionModel
+  subscription: CloudSubscriptionModel,
+  currentDate: Date
 ): PlanMigrationAlertData | undefined => {
   const migration = subscription.planMigration;
-  const date = useCurrentDate();
 
   if (!migration) {
     return undefined;
   }
 
   const targetPlanName = migration.targetPlanName || subscription.plan.name;
-  const now = date.getTime();
+  const now = currentDate.getTime();
 
   if (
     migration.status === 'SCHEDULED' &&
@@ -82,7 +82,8 @@ type Props = {
 
 export const PlanMigrationAlert: FC<Props> = ({ subscription }) => {
   const formatDate = useDateFormatter();
-  const migrationAlert = getPlanMigrationAlertData(subscription);
+  const currentDate = useCurrentDate();
+  const migrationAlert = getPlanMigrationAlertData(subscription, currentDate);
 
   if (!migrationAlert) {
     return null;
