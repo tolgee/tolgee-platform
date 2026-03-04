@@ -81,7 +81,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
     """
     from Key k
       left join fetch k.namespace
-      left join k.branch b
+      left join fetch k.branch b
     where k.project.id = :projectId
       and k.name in :names
       and k.deletedAt is null

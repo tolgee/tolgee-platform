@@ -10,6 +10,7 @@ import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.TranslationSuggestion_
 import io.tolgee.model.UserAccount
 import io.tolgee.model.UserAccount_
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.Branch_
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
@@ -63,6 +64,7 @@ class QueryBase<T>(
   lateinit var namespaceNameExpression: Path<String>
   var translationsTextFields: MutableSet<Expression<String>> = HashSet()
   lateinit var screenshotCountExpression: Expression<Long>
+  var branchJoin: Join<Key, Branch>? = null
   var deletedByJoin: Join<Key, UserAccount>? = null
   val groupByExpressions: MutableSet<Expression<*>> = mutableSetOf()
   private val queryGlobalFiltering = QueryGlobalFiltering(params, this, cb, entityManager)
@@ -285,6 +287,7 @@ class QueryBase<T>(
 
   private fun addBranch() {
     val branch = this.root.join(Key_.branch, JoinType.LEFT)
+    this.branchJoin = branch
     val branchName = branch.get(Branch_.name)
     this.querySelection[KeyWithTranslationsView::branch.name] = branchName
     groupByExpressions.add(branchName)

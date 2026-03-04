@@ -270,7 +270,9 @@ class QueryGlobalFiltering(
   }
 
   private fun filterBranch() {
-    val branchJoin = queryBase.root.join(Key_.branch, JoinType.LEFT)
+    val branchJoin =
+      queryBase.branchJoin
+        ?: queryBase.root.join(Key_.branch, JoinType.LEFT).also { queryBase.branchJoin = it }
     if (params.filterKeyId?.isNotEmpty() == true) {
       return
     }
