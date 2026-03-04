@@ -22,6 +22,7 @@ import { TASK_ACTIVE_STATES } from 'tg.component/task/taskActiveStates';
 import { QUERY } from 'tg.constants/links';
 import { PrefilterTaskHideDoneSwitch } from './PrefilterTaskHideDoneSwitch';
 import { BranchNameChip } from 'tg.component/branching/BranchNameChip';
+import { useIsBranchingEnabled } from 'tg.component/branching/useIsBranchingEnabled';
 
 const StyledWarning = styled('div')`
   display: flex;
@@ -41,6 +42,7 @@ const StyledTaskId = styled('span')`
 
 export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
   const project = useProject();
+  const isBranchingEnabled = useIsBranchingEnabled();
   const { t } = useTranslate();
   const currentUser = useUser();
 
@@ -115,7 +117,7 @@ export const PrefilterTask = ({ taskNumber }: PrefilterTaskProps) => {
             pr={2}
           >
             <TaskLabel task={data} />
-            {data.branchName && (
+            {isBranchingEnabled && data.branchName && (
               <BranchNameChip name={data.branchName!} size={'small'} />
             )}
             <Tooltip title={t('task_detail_tooltip')} disableInteractive>
