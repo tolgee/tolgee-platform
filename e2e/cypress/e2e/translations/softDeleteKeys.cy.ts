@@ -14,6 +14,7 @@ import { E2TasksView } from '../../compounds/tasks/E2TasksView';
 
 describe('Soft delete keys', () => {
   let projectId: number;
+  let users: { username: string; name: string; id: number }[];
 
   const trash = new E2TrashSection();
   const translations = new E2TranslationsView();
@@ -24,9 +25,10 @@ describe('Soft delete keys', () => {
     softDeleteKeysTestData
       .generateStandard()
       .then((r) => r.body)
-      .then(({ users, projects }) => {
+      .then((data) => {
+        users = data.users;
         login(users[0].username);
-        projectId = projects[0].id;
+        projectId = data.projects[0].id;
         selectLangsInLocalstorage(projectId, ['en']);
       });
   });
@@ -166,7 +168,7 @@ describe('Soft delete keys', () => {
     assertMessage('1 task created');
     waitForGlobalLoading();
 
-    // 2. Verify task shows 2 keys
+    // 2. Verify task shows 4 keys
     tasks.visit(projectId);
     waitForGlobalLoading();
     cy.gcy('task-item')
@@ -174,13 +176,13 @@ describe('Soft delete keys', () => {
       .closestDcy('task-item')
       .findDcy('task-item-detail')
       .click();
-    cy.gcy('task-detail-keys').should('contain', 2);
+    cy.gcy('task-detail-keys').should('contain', 4);
 
     // 3. Soft-delete key1 via UI
     visitTranslationsPage();
     softDeleteKey('key1');
 
-    // 4. Revisit tasks — task should now show 1 key
+    // 4. Revisit tasks — task should now show 3 keys
     tasks.visit(projectId);
     waitForGlobalLoading();
     cy.gcy('task-item')
@@ -188,13 +190,13 @@ describe('Soft delete keys', () => {
       .closestDcy('task-item')
       .findDcy('task-item-detail')
       .click();
-    cy.gcy('task-detail-keys').should('contain', 1);
+    cy.gcy('task-detail-keys').should('contain', 3);
 
     // 5. Restore key1 from trash via UI
     trash.visit(projectId);
     trash.restoreKey('key1');
 
-    // 6. Revisit tasks — task should show 2 keys again
+    // 6. Revisit tasks — task should show 4 keys again
     tasks.visit(projectId);
     waitForGlobalLoading();
     cy.gcy('task-item')
@@ -202,6 +204,55 @@ describe('Soft delete keys', () => {
       .closestDcy('task-item')
       .findDcy('task-item-detail')
       .click();
-    cy.gcy('task-detail-keys').should('contain', 2);
+    cy.gcy('task-detail-keys').should('contain', 4);
+  });
+
+  it('filters trashed keys by user who deleted them', () => {
+    visitTranslationsPage();
+
+    // User 1 soft-deletes key1 and key2
+    softDeleteKey('key1');
+    softDeleteKey('key2');
+
+    // Login as user 2 and soft-delete key3
+    login(users[1].username);
+    visitTranslationsPage();
+    softDeleteKey('key3');
+
+    // Visit trash as user 2 — should see all 3 trashed keys
+    trash.visit(projectId);
+    trash.assertTrashRowCount(3);
+
+    // Open filter and select "Deleted by" > user 1
+    cy.gcy('translations-filter-select').click();
+    cy.gcy('submenu-item').contains('Deleted by').click();
+    cy.gcy('filter-item').contains(users[0].username).click();
+    cy.focused().type('{Esc}');
+    cy.focused().type('{Esc}');
+    waitForGlobalLoading();
+
+    // Only key1 and key2 (deleted by user 1) should be visible
+    trash.assertTrashRowCount(2);
+    trash.getTrashRows().contains('key1').should('be.visible');
+    trash.getTrashRows().contains('key2').should('be.visible');
+
+    // Clear filter
+    cy.gcy('translations-filter-select-clear').click();
+    waitForGlobalLoading();
+
+    // All 3 trashed keys should be visible again
+    trash.assertTrashRowCount(3);
+
+    // Filter by user 2
+    cy.gcy('translations-filter-select').click();
+    cy.gcy('submenu-item').contains('Deleted by').click();
+    cy.gcy('filter-item').contains('User Two').click();
+    cy.focused().type('{Esc}');
+    cy.focused().type('{Esc}');
+    waitForGlobalLoading();
+
+    // Only key3 (deleted by user 2) should be visible
+    trash.assertTrashRowCount(1);
+    trash.getTrashRows().contains('key3').should('be.visible');
   });
 });
