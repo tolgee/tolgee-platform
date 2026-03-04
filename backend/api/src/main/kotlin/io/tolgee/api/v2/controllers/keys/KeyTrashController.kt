@@ -12,7 +12,6 @@ import io.tolgee.hateoas.key.KeyModel
 import io.tolgee.hateoas.key.KeyModelAssembler
 import io.tolgee.hateoas.key.trash.TrashedKeyWithTranslationsModel
 import io.tolgee.hateoas.key.trash.TrashedKeyWithTranslationsModelAssembler
-import io.tolgee.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModel
 import io.tolgee.hateoas.userAccount.SimpleUserAccountModelAssembler
 import io.tolgee.model.enums.Scope
@@ -21,11 +20,8 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
-import io.tolgee.service.AvatarService
 import io.tolgee.service.key.KeyService
-import io.tolgee.service.key.ScreenshotService
-import io.tolgee.service.language.LanguageService
-import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
+import io.tolgee.service.key.KeyTrashService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -55,20 +51,16 @@ import org.springframework.web.bind.annotation.RestController
 @KeysDocsTag
 class KeyTrashController(
   private val keyService: KeyService,
+  private val keyTrashService: KeyTrashService,
   private val projectHolder: ProjectHolder,
   private val keyModelAssembler: KeyModelAssembler,
-  private val languageService: LanguageService,
   private val authenticationFacade: AuthenticationFacade,
-  private val screenshotService: ScreenshotService,
-  private val screenshotModelAssembler: ScreenshotModelAssembler,
-  private val avatarService: AvatarService,
-  private val translationViewDataProvider: TranslationViewDataProvider,
+  private val trashedKeyWithTranslationsModelAssembler: TrashedKeyWithTranslationsModelAssembler,
   private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<KeyWithTranslationsView>,
 ) : IController {
   @GetMapping("")
-  @Transactional
   @Operation(summary = "List trashed keys")
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
   @AllowApiAccess
@@ -80,30 +72,14 @@ class KeyTrashController(
     @ModelAttribute
     params: TranslationFilters,
   ): PagedModel<TrashedKeyWithTranslationsModel> {
-    params.trashed = true
-    val languages =
-      languageService.getLanguagesForTranslationsView(
-        params.languages,
-        projectHolder.project.id,
-        authenticationFacade.authenticatedUser.id,
-      )
     val data =
-      translationViewDataProvider.getData(
+      keyTrashService.getTrashedKeysWithTranslations(
         projectId = projectHolder.project.id,
-        languages = languages.toSet(),
+        userId = authenticationFacade.authenticatedUser.id,
         pageable = pageable,
         params = params,
       )
-    val keyIds = data.content.map { it.keyId }
-    val screenshotsByKeyId =
-      if (keyIds.isNotEmpty()) screenshotService.getScreenshotsForKeys(keyIds) else emptyMap()
-    val assembler =
-      TrashedKeyWithTranslationsModelAssembler(
-        avatarService = avatarService,
-        screenshotModelAssembler = screenshotModelAssembler,
-        screenshotsByKeyId = screenshotsByKeyId,
-      )
-    return pagedResourcesAssembler.toModel(data, assembler)
+    return pagedResourcesAssembler.toModel(data, trashedKeyWithTranslationsModelAssembler)
   }
 
   @GetMapping("/deleters")
