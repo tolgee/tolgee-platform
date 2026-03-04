@@ -23,7 +23,6 @@ export interface GenericPlanSelector<T extends GenericPlanType> {
   selectProps?: React.ComponentProps<typeof SearchSelect>[`SelectProps`];
   plans?: T[];
   loading: boolean;
-  hiddenPlans?: number[];
   planProps?: PlansProps;
   dataCy?: string;
 }
@@ -35,7 +34,6 @@ export const GenericPlanSelector = <T extends GenericPlanType>({
   onPlanChange,
   plans,
   loading,
-  hiddenPlans,
   planProps,
   dataCy = 'administration-plan-selector',
 }: GenericPlanSelector<T>) => {
