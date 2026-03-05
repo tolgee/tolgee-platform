@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaIssueModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.qa.QaIssueModel
+import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
 import io.tolgee.ee.service.qa.QaIssueService
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
@@ -12,10 +13,14 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -65,5 +70,36 @@ class QaIssueController(
     @PathVariable issueId: Long,
   ) {
     qaIssueService.unignoreIssue(projectId, issueId)
+  }
+
+  @PostMapping("/ignore")
+  @Operation(summary = "Ignore a QA issue by parameters")
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
+  @AllowApiAccess
+  @RequiresFeatures(Feature.QA_CHECKS)
+  fun ignoreIssueByParams(
+    @PathVariable projectId: Long,
+    @PathVariable translationId: Long,
+    @RequestBody @Valid request: QaCheckIssueIgnoreRequest,
+  ) {
+    qaIssueService.ignoreIssueByParams(projectId, translationId, request)
+  }
+
+  @PostMapping("/unignore")
+  @Operation(summary = "Unignore a QA issue by parameters")
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
+  @AllowApiAccess
+  @RequiresFeatures(Feature.QA_CHECKS)
+  fun unignoreIssueByParams(
+    @PathVariable projectId: Long,
+    @PathVariable translationId: Long,
+    @RequestBody @Valid request: QaCheckIssueIgnoreRequest,
+  ): ResponseEntity<Void> {
+    val changed = qaIssueService.unignoreIssueByParams(projectId, translationId, request)
+    return if (changed) {
+      ResponseEntity.ok().build()
+    } else {
+      ResponseEntity.noContent().build()
+    }
   }
 }

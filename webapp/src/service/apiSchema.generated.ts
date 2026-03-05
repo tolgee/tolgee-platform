@@ -1011,6 +1011,12 @@ export interface paths {
   "/v2/projects/{projectId}/translations/{translationId}/qa-issues": {
     get: operations["getIssues"];
   };
+  "/v2/projects/{projectId}/translations/{translationId}/qa-issues/ignore": {
+    post: operations["ignoreIssueByParams"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/qa-issues/unignore": {
+    post: operations["unignoreIssueByParams"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/qa-issues/{issueId}/ignore": {
     put: operations["ignoreIssue"];
   };
@@ -5476,18 +5482,7 @@ export interface components {
        */
       usedMtCredits: number;
     };
-    QaCheckPreviewRequest: {
-      /** Format: int64 */
-      keyId?: number;
-      /**
-       * @description Language tag according to BCP 47 definition
-       * @example cs-CZ
-       */
-      languageTag: string;
-      text: string;
-    };
-    QaCheckResultModel: {
-      ignored: boolean;
+    QaCheckIssueIgnoreRequest: {
       /** @enum {string} */
       message:
         | "qa_empty_translation"
@@ -5506,13 +5501,65 @@ export interface components {
         | "qa_case_lowercase"
         | "qa_numbers_missing";
       params?: { [key: string]: string };
-      /** Format: int64 */
-      persistedIssueId?: number;
       /** Format: int32 */
       positionEnd: number;
       /** Format: int32 */
       positionStart: number;
       replacement?: string;
+      /** @enum {string} */
+      type:
+        | "EMPTY_TRANSLATION"
+        | "SPACES_MISMATCH"
+        | "UNMATCHED_NEWLINES"
+        | "CHARACTER_CASE_MISMATCH"
+        | "MISSING_NUMBERS"
+        | "PUNCTUATION_MISMATCH"
+        | "BRACKETS_MISMATCH"
+        | "SPECIAL_CHARACTER_MISMATCH"
+        | "DIFFERENT_URLS"
+        | "INCONSISTENT_PLACEHOLDERS"
+        | "INCONSISTENT_HTML"
+        | "ICU_SYNTAX"
+        | "REPEATED_WORDS"
+        | "SPELLING"
+        | "UNRESOLVED_COMMENTS";
+    };
+    QaCheckPreviewRequest: {
+      /** Format: int64 */
+      keyId?: number;
+      /**
+       * @description Language tag according to BCP 47 definition
+       * @example cs-CZ
+       */
+      languageTag: string;
+      text: string;
+    };
+    QaCheckResultModel: {
+      /** @enum {string} */
+      message:
+        | "qa_empty_translation"
+        | "qa_check_failed"
+        | "qa_spaces_leading_added"
+        | "qa_spaces_leading_removed"
+        | "qa_spaces_trailing_added"
+        | "qa_spaces_trailing_removed"
+        | "qa_spaces_doubled"
+        | "qa_spaces_non_breaking_added"
+        | "qa_spaces_non_breaking_removed"
+        | "qa_punctuation_add"
+        | "qa_punctuation_remove"
+        | "qa_punctuation_replace"
+        | "qa_case_capitalize"
+        | "qa_case_lowercase"
+        | "qa_numbers_missing";
+      params?: { [key: string]: string };
+      /** Format: int32 */
+      positionEnd: number;
+      /** Format: int32 */
+      positionStart: number;
+      replacement?: string;
+      /** @enum {string} */
+      state: "OPEN" | "IGNORED";
       /** @enum {string} */
       type:
         | "EMPTY_TRANSLATION"
@@ -15708,10 +15755,10 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
-        /** Filter keys with open QA issues in lang */
-        filterHasQaIssuesInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
+        /** Filter keys with open QA issues in lang */
+        filterHasQaIssuesInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -20302,10 +20349,10 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
-        /** Filter keys with open QA issues in lang */
-        filterHasQaIssuesInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
+        /** Filter keys with open QA issues in lang */
+        filterHasQaIssuesInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -20609,10 +20656,10 @@ export interface operations {
         filterHasUnresolvedCommentsInLang?: string[];
         /** Filter keys with any comments in lang */
         filterHasCommentsInLang?: string[];
-        /** Filter keys with open QA issues in lang */
-        filterHasQaIssuesInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
+        /** Filter keys with open QA issues in lang */
+        filterHasQaIssuesInLang?: string[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -21189,6 +21236,88 @@ export interface operations {
       };
     };
   };
+  ignoreIssueByParams: {
+    parameters: {
+      path: {
+        projectId: number;
+        translationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaCheckIssueIgnoreRequest"];
+      };
+    };
+  };
+  unignoreIssueByParams: {
+    parameters: {
+      path: {
+        projectId: number;
+        translationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaCheckIssueIgnoreRequest"];
+      };
+    };
+  };
   ignoreIssue: {
     parameters: {
       path: {
@@ -21199,9 +21328,7 @@ export interface operations {
     };
     responses: {
       /** OK */
-      200: {
-        content: never;
-      };
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -21238,9 +21365,7 @@ export interface operations {
     };
     responses: {
       /** OK */
-      200: {
-        content: never;
-      };
+      200: unknown;
       /** Bad Request */
       400: {
         content: {

@@ -3,11 +3,15 @@ package io.tolgee.ee.api.v2.controllers.qa
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
 import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.QaCheckRunnerService
 import io.tolgee.ee.service.qa.QaIssueService
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsNoContent
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.qa.TranslationQaIssueRepository
@@ -271,5 +275,119 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
     // Verify there are still persisted issues (just all ignored)
     assertThat(totalIssues).isGreaterThan(0)
+  }
+
+  @Test
+  fun `ignores existing issue by params`() {
+    val params =
+      QaCheckParams(
+        baseText = "Hello world.",
+        text = "bonjour monde",
+        baseLanguageTag = "en",
+        languageTag = "fr",
+      )
+    val results = qaCheckRunnerService.runChecks(params)
+    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
+
+    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val issue = issues.first()
+
+    val request =
+      QaCheckIssueIgnoreRequest(
+        type = issue.type,
+        message = issue.message,
+        replacement = issue.replacement,
+        positionStart = issue.positionStart,
+        positionEnd = issue.positionEnd,
+      )
+
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/ignore",
+      request,
+    ).andIsOk
+
+    val updatedIssue = qaIssueRepository.findById(issue.id).get()
+    assertThat(updatedIssue.state.name).isEqualTo("IGNORED")
+  }
+
+  @Test
+  fun `ignores non-existing issue by params - creates new ignored issue`() {
+    val request =
+      QaCheckIssueIgnoreRequest(
+        type = QaCheckType.CHARACTER_CASE_MISMATCH,
+        message = QaIssueMessage.QA_CASE_CAPITALIZE,
+        replacement = null,
+        positionStart = 0,
+        positionEnd = 5,
+      )
+
+    val issuesBefore = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    assertThat(issuesBefore).isEmpty()
+
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/ignore",
+      request,
+    ).andIsOk
+
+    val issuesAfter = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    assertThat(issuesAfter).hasSize(1)
+    assertThat(issuesAfter.first().state.name).isEqualTo("IGNORED")
+    assertThat(issuesAfter.first().type).isEqualTo(QaCheckType.CHARACTER_CASE_MISMATCH)
+  }
+
+  @Test
+  fun `unignores existing issue by params`() {
+    val params =
+      QaCheckParams(
+        baseText = "Hello world.",
+        text = "bonjour monde",
+        baseLanguageTag = "en",
+        languageTag = "fr",
+      )
+    val results = qaCheckRunnerService.runChecks(params)
+    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
+
+    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val issue = issues.first()
+
+    // First ignore it
+    qaIssueService.ignoreIssue(testData.project.id, issue.id)
+
+    val request =
+      QaCheckIssueIgnoreRequest(
+        type = issue.type,
+        message = issue.message,
+        replacement = issue.replacement,
+        positionStart = issue.positionStart,
+        positionEnd = issue.positionEnd,
+      )
+
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/unignore",
+      request,
+    ).andIsOk
+
+    val updatedIssue = qaIssueRepository.findById(issue.id).get()
+    assertThat(updatedIssue.state.name).isEqualTo("OPEN")
+  }
+
+  @Test
+  fun `unignores non-existing issue by params - returns 204`() {
+    val request =
+      QaCheckIssueIgnoreRequest(
+        type = QaCheckType.CHARACTER_CASE_MISMATCH,
+        message = QaIssueMessage.QA_CASE_CAPITALIZE,
+        replacement = null,
+        positionStart = 0,
+        positionEnd = 5,
+      )
+
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/unignore",
+      request,
+    ).andIsNoContent
+
+    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    assertThat(issues).isEmpty()
   }
 }

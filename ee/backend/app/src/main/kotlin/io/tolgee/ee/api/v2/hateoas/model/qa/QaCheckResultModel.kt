@@ -2,6 +2,7 @@ package io.tolgee.ee.api.v2.hateoas.model.qa
 
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
+import io.tolgee.model.enums.qa.QaIssueState
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -13,6 +14,5 @@ class QaCheckResultModel(
   val positionStart: Int,
   val positionEnd: Int,
   val params: Map<String, String>? = null,
-  val ignored: Boolean = false,
-  val persistedIssueId: Long? = null,
+  val state: QaIssueState = QaIssueState.OPEN,
 ) : RepresentationModel<QaCheckResultModel>()
