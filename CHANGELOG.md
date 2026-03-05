@@ -1,3 +1,10 @@
+# [3.165.0](https://github.com/tolgee/tolgee-platform/compare/v3.164.1...v3.165.0) (2026-03-05)
+
+
+### Features
+
+* key archiving ([#3486](https://github.com/tolgee/tolgee-platform/issues/3486)) ([ccae72e](https://github.com/tolgee/tolgee-platform/commit/ccae72e7cdf16856a0a6f4bce7a3c36b675c243b))
+
 ## [3.164.1](https://github.com/tolgee/tolgee-platform/compare/v3.164.0...v3.164.1) (2026-03-04)
 
 
