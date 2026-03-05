@@ -1,3 +1,10 @@
+# [3.166.0](https://github.com/tolgee/tolgee-platform/compare/v3.165.0...v3.166.0) (2026-03-05)
+
+
+### Features
+
+* branch creation/deletion performance improvement ([#3487](https://github.com/tolgee/tolgee-platform/issues/3487)) ([2fd41a0](https://github.com/tolgee/tolgee-platform/commit/2fd41a06c0869e3fe9f82eb06f2335f5cb459311))
+
 # [3.165.0](https://github.com/tolgee/tolgee-platform/compare/v3.164.1...v3.165.0) (2026-03-05)
 
 
