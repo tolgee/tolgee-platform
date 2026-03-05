@@ -148,8 +148,10 @@ export const TranslationRead: React.FC<Props> = ({
         <ControlsTranslation
           onEdit={() => handleOpen()}
           onComments={() => handleOpen('comments')}
+          onQaIssues={() => handleOpen('qa_checks')}
           commentsCount={translation?.commentCount}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
+          qaIssueCount={translation?.qaIssueCount}
           stateChangeEnabled={canChangeState}
           editEnabled={cellClickable}
           state={state}
@@ -161,8 +163,6 @@ export const TranslationRead: React.FC<Props> = ({
           onTaskStateChange={setAssignedTaskState}
         />
       )}
-      {/*TODO: fix position of badge*/}
-      <QaBadge count={translation?.qaIssueCount} />
     </StyledContainer>
   );
 };

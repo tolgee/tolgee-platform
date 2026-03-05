@@ -1,46 +1,59 @@
-import { Box, styled, Typography } from '@mui/material';
+import { Badge, Box, styled, Typography } from '@mui/material';
 import React from 'react';
 
 import { QaBadgeProps } from '../../../eeSetup/EeModuleType';
 import { QaCheck } from 'tg.component/CustomIcons';
+import { Check } from '@untitled-ui/icons-react';
 
-const StyledQaBadge = styled(Box)`
-  display: inline-flex;
-  align-items: start;
-  margin: ${({ theme }) => theme.spacing(1)};
+const StyledBadge = styled(Badge)`
+  display: flex;
+
+  & .unresolved {
+    font-size: 10px;
+    height: unset;
+    padding: 3px 3px;
+  }
+  & .resolved {
+    background: ${({ theme }) => theme.palette.emphasis[600]};
+    padding: 0px;
+    height: 16px;
+    width: 18px;
+    min-width: unset;
+    align-items: center;
+    justify-content: center;
+  }
 `;
 
-const StyledQaBadgeText = styled(Typography)`
-  margin-top: -8px;
-  margin-left: -10px;
-  border-radius: 10px;
-  min-height: 20px;
-  min-width: 20px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 500;
-  background-color: ${({ theme }) => theme.palette.primary.main};
-  color: ${({ theme }) => theme.palette.primary.contrastText};
+const StyledCheckIcon = styled(Check)`
+  color: ${({ theme }) => theme.palette.emphasis[100]};
+  width: 14px !important;
+  height: 14px !important;
+  margin: -5px;
 `;
 
-const StyledQaIcon = styled(QaCheck)`
-  width: 24px;
-  height: 24px;
-  color: ${({ theme }) => theme.palette.text.primary};
-`;
+export const QaBadge = ({ count }: QaBadgeProps) => {
+  // TODO: "loading" version when count is undefined
 
-export const QaBadge = ({
-  count,
-  ...props
-}: QaBadgeProps) => {
   if (!count || count === 0) {
-    return null;
+    return (
+      <StyledBadge
+        badgeContent={<StyledCheckIcon />}
+        classes={{
+          badge: 'resolved',
+        }}
+      >
+        <QaCheck />
+      </StyledBadge>
+    );
   }
 
   return (
-    <StyledQaBadge {...props}>
-      <StyledQaIcon />
-      <StyledQaBadgeText>{count > 9 ? '9+' : count}</StyledQaBadgeText>
-    </StyledQaBadge>
+    <StyledBadge
+      badgeContent={count}
+      color="primary"
+      classes={{ badge: 'unresolved' }}
+    >
+      <QaCheck />
+    </StyledBadge>
   );
 };
