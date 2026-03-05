@@ -61,7 +61,7 @@ export interface paths {
     get: operations["getInconsistentSubscriptions"];
   };
   "/v2/administration/billing/organizations": {
-    get: operations["getOrganizations"];
+    get: operations["getOrganizations_1"];
   };
   "/v2/administration/billing/plan-migration/email-template": {
     get: operations["getPlanMigrationEmailTemplate"];
@@ -233,7 +233,23 @@ export interface paths {
     get: operations["getMtCreditPrices"];
   };
   "/v2/public/billing/plans": {
+    get: operations["getPlans_3"];
+  };
+  "/v2/public/billing/stats/organizations": {
+    /** Returns paginated list of organizations with their subscription status, plan, billing type (cloud/self-hosted), and MRR. Results are ordered by lastChange ascending. Supports compound cursor pagination: use the lastChange and organizationId values of the last item as the changedAfter and afterId parameters of the next request to fetch the next page. Use changedBefore to pin a snapshot time and create a bounded sync window. */
+    get: operations["getOrganizations"];
+  };
+  "/v2/public/billing/stats/plans": {
+    /** Returns paginated list of all subscription plans (both cloud and self-hosted) with pricing and feature details. Results are ordered by lastChange ascending. Supports compound cursor pagination: use the lastChange and planId values of the last item as the changedAfter and afterId parameters of the next request to fetch the next page. Use changedBefore to pin a snapshot time and create a bounded sync window. */
     get: operations["getPlans_2"];
+  };
+  "/v2/public/billing/stats/user-organizations": {
+    /** Returns paginated list of user-to-organization memberships with roles. Results are ordered by lastChange ascending. Supports compound cursor pagination: use the lastChange and id values of the last item as the changedAfter and afterId parameters of the next request to fetch the next page. Use changedBefore to pin a snapshot time and create a bounded sync window. */
+    get: operations["getUserOrganizations"];
+  };
+  "/v2/public/billing/stats/users": {
+    /** Returns paginated list of users with their last interaction time and the organization with highest MRR. Results are ordered by lastChange ascending. Supports compound cursor pagination: use the lastChange and tolgeeId values of the last item as the changedAfter and afterId parameters of the next request to fetch the next page. Use changedBefore to pin a snapshot time and create a bounded sync window. */
+    get: operations["getUsers"];
   };
   "/v2/public/licensing/current-subscription-usage": {
     post: operations["getSubscriptionUsage"];
@@ -1183,6 +1199,30 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelStatsOrganizationModel: {
+      _embedded?: {
+        organizations?: components["schemas"]["StatsOrganizationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelStatsPlanModel: {
+      _embedded?: {
+        plans?: components["schemas"]["StatsPlanModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelStatsUserModel: {
+      _embedded?: {
+        users?: components["schemas"]["StatsUserModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelStatsUserOrganizationModel: {
+      _embedded?: {
+        userOrganizations?: components["schemas"]["StatsUserOrganizationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelTranslationAgencyModel: {
       _embedded?: {
         translationAgencies?: components["schemas"]["TranslationAgencyModel"][];
@@ -1645,6 +1685,85 @@ export interface components {
       name: string;
       /** @example btforg */
       slug: string;
+    };
+    StatsOrganizationModel: {
+      billingType?: string;
+      /** Format: date-time */
+      createdAtInTolgee: string;
+      /** Format: int64 */
+      keysInUse: number;
+      /** Format: date-time */
+      lastActivityAt?: string;
+      /** Format: date-time */
+      lastChange?: string;
+      mrr: number;
+      name: string;
+      /** Format: int64 */
+      organizationId: number;
+      plan?: string;
+      /** Format: int64 */
+      seatsInUse: number;
+      slug: string;
+      status?: string;
+      totalInvoiced: number;
+    };
+    StatsPlanModel: {
+      /** Format: date-time */
+      archivedAt?: string;
+      /** Format: date-time */
+      createdAtInTolgee: string;
+      enabledFeatures?: string;
+      /** Format: int64 */
+      includedKeys: number;
+      /** Format: int64 */
+      includedMtCredits: number;
+      /** Format: int64 */
+      includedSeats: number;
+      /** Format: int64 */
+      includedStrings: number;
+      /** Format: date-time */
+      lastChange?: string;
+      monthlyPrice: number;
+      name: string;
+      nonCommercial: boolean;
+      /** Format: int64 */
+      planId: number;
+      planType: string;
+      pricePerSeat: number;
+      pricePerThousandKeys: number;
+      pricePerThousandMtCredits: number;
+      pricePerThousandStrings: number;
+      public: boolean;
+      stripeProductId?: string;
+      type: string;
+      yearlyPrice: number;
+    };
+    StatsUserModel: {
+      /** Format: date-time */
+      createdAtInTolgee: string;
+      email: string;
+      /** Format: date-time */
+      lastChange?: string;
+      /** Format: date-time */
+      lastInteraction?: string;
+      maxMrr: number;
+      name?: string;
+      /** Format: int64 */
+      organizationId?: number;
+      organizationName?: string;
+      /** Format: int64 */
+      tolgeeId: number;
+    };
+    StatsUserOrganizationModel: {
+      /** Format: int64 */
+      id: number;
+      /** Format: date-time */
+      lastChange?: string;
+      /** Format: int64 */
+      organizationId: number;
+      role: string;
+      /** Format: int64 */
+      userId: number;
     };
     StripeProductModel: {
       /** Format: int64 */
@@ -2628,7 +2747,7 @@ export interface operations {
       };
     };
   };
-  getOrganizations: {
+  getOrganizations_1: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -5102,12 +5221,216 @@ export interface operations {
       };
     };
   };
-  getPlans_2: {
+  getPlans_3: {
     responses: {
       /** OK */
       200: {
         content: {
           "application/json": components["schemas"]["CollectionModelCloudPlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns paginated list of organizations with their subscription status, plan, billing type (cloud/self-hosted), and MRR. Results are ordered by lastChange ascending. Supports compound cursor pagination: use the lastChange and organizationId values of the last item as the changedAfter and afterId parameters of the next request to fetch the next page. Use changedBefore to pin a snapshot time and create a bounded sync window. */
+  getOrganizations: {
+    parameters: {
+      query: {
+        /** Unix timestamp in milliseconds. Only return organizations changed after this time. For cursor pagination, use the lastChange value of the last item from the previous page. */
+        changedAfter?: number;
+        /** ID of the last item from the previous page. Used together with changedAfter for compound cursor pagination to disambiguate items with the same lastChange timestamp. */
+        afterId?: number;
+        /** Unix timestamp in milliseconds. Only return organizations changed at or before this time. Use together with changedAfter to create a bounded sync window that guarantees termination. */
+        changedBefore?: number;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelStatsOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns paginated list of all subscription plans (both cloud and self-hosted) with pricing and feature details. Results are ordered by lastChange ascending. Supports compound cursor pagination: use the lastChange and planId values of the last item as the changedAfter and afterId parameters of the next request to fetch the next page. Use changedBefore to pin a snapshot time and create a bounded sync window. */
+  getPlans_2: {
+    parameters: {
+      query: {
+        /** Unix timestamp in milliseconds. Only return plans changed after this time. For cursor pagination, use the lastChange value of the last item from the previous page. */
+        changedAfter?: number;
+        /** ID of the last item from the previous page. Used together with changedAfter for compound cursor pagination to disambiguate items with the same lastChange timestamp. */
+        afterId?: number;
+        /** Unix timestamp in milliseconds. Only return plans changed at or before this time. Use together with changedAfter to create a bounded sync window that guarantees termination. */
+        changedBefore?: number;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelStatsPlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns paginated list of user-to-organization memberships with roles. Results are ordered by lastChange ascending. Supports compound cursor pagination: use the lastChange and id values of the last item as the changedAfter and afterId parameters of the next request to fetch the next page. Use changedBefore to pin a snapshot time and create a bounded sync window. */
+  getUserOrganizations: {
+    parameters: {
+      query: {
+        /** Unix timestamp in milliseconds. Only return memberships changed after this time. For cursor pagination, use the lastChange value of the last item from the previous page. */
+        changedAfter?: number;
+        /** ID of the last item from the previous page. Used together with changedAfter for compound cursor pagination to disambiguate items with the same lastChange timestamp. */
+        afterId?: number;
+        /** Unix timestamp in milliseconds. Only return memberships changed at or before this time. Use together with changedAfter to create a bounded sync window that guarantees termination. */
+        changedBefore?: number;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelStatsUserOrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  /** Returns paginated list of users with their last interaction time and the organization with highest MRR. Results are ordered by lastChange ascending. Supports compound cursor pagination: use the lastChange and tolgeeId values of the last item as the changedAfter and afterId parameters of the next request to fetch the next page. Use changedBefore to pin a snapshot time and create a bounded sync window. */
+  getUsers: {
+    parameters: {
+      query: {
+        /** Unix timestamp in milliseconds. Only return users changed after this time. For cursor pagination, use the lastChange value of the last item from the previous page. */
+        changedAfter?: number;
+        /** ID of the last item from the previous page. Used together with changedAfter for compound cursor pagination to disambiguate items with the same lastChange timestamp. */
+        afterId?: number;
+        /** Unix timestamp in milliseconds. Only return users changed at or before this time. Use together with changedAfter to create a bounded sync window that guarantees termination. */
+        changedBefore?: number;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelStatsUserModel"];
         };
       };
       /** Bad Request */
