@@ -127,10 +127,12 @@ export const TranslationRead: React.FC<Props> = ({
         <ControlsTranslation
           onEdit={() => handleOpen()}
           onComments={() => handleOpen('comments')}
+          onQaIssues={() => handleOpen('qa_checks')}
           commentsCount={translation?.commentCount}
           tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
           onTaskStateChange={setAssignedTaskState}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
+          qaIssueCount={translation?.qaIssueCount}
           stateChangeEnabled={canChangeState}
           editEnabled={cellClickable}
           state={state}
@@ -168,8 +170,6 @@ export const TranslationRead: React.FC<Props> = ({
           />
         )}
       </StyledTranslation>
-      {/*TODO: fix position of badge*/}
-      <QaBadge count={translation?.qaIssueCount} />
     </StyledContainer>
   );
 };

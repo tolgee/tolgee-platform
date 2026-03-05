@@ -71,7 +71,7 @@ export type BranchReferenceData = {
 
 export type QaBadgeProps = {
   count?: number;
-} & BoxProps;
+};
 
 export type SubfilterQaChecksProps = {
   projectId: number;

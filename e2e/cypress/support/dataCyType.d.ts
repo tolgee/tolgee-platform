@@ -890,6 +890,7 @@ declare namespace DataCy {
         "translations-cell-main-action-button" |
         "translations-cell-menu-item" |
         "translations-cell-menu-open-button" |
+        "translations-cell-qa-issues-button" |
         "translations-cell-screenshots-button" |
         "translations-cell-switch-mode" |
         "translations-cell-task-button" |
