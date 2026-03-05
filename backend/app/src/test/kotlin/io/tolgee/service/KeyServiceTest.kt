@@ -18,6 +18,6 @@ class KeyServiceTest : AbstractSpringTest() {
   fun `deletes language with ai results`() {
     val testData = PromptTestData()
     testDataService.saveTestData(testData.root)
-    keyService.delete(testData.keys[0].self.id)
+    keyService.hardDelete(testData.keys[0].self.id)
   }
 }

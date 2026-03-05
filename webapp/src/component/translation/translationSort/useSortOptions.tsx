@@ -1,6 +1,8 @@
 import { useTranslate } from '@tolgee/react';
 
-export const useSortOptions = () => {
+export type SortOption = { value: string; label: string };
+
+export const useSortOptions = (): SortOption[] => {
   const { t } = useTranslate();
   return [
     { value: 'keyName', label: t('translation_sort_item_key_name_a_to_z') },

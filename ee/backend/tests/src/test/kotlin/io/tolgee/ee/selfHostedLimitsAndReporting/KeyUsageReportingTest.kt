@@ -59,7 +59,7 @@ class KeyUsageReportingTest : AbstractSpringTest() {
 
       // we need to move time, because the reporting is deferred
       currentDateProvider.move(Duration.ofDays(1))
-      keyService.delete(key.id)
+      keyService.hardDelete(key.id)
       captor.assertKeys(0)
     }
   }

@@ -8,6 +8,9 @@ import io.tolgee.model.Screenshot
 import io.tolgee.model.Screenshot_
 import io.tolgee.model.TranslationSuggestion
 import io.tolgee.model.TranslationSuggestion_
+import io.tolgee.model.UserAccount
+import io.tolgee.model.UserAccount_
+import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.Branch_
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
@@ -30,6 +33,7 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.CriteriaQuery
 import jakarta.persistence.criteria.Expression
+import jakarta.persistence.criteria.Join
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.ListJoin
 import jakarta.persistence.criteria.Path
@@ -43,7 +47,7 @@ class QueryBase<T>(
   private val projectId: Long,
   val query: CriteriaQuery<T>,
   private val languages: Set<LanguageDto>,
-  params: TranslationFilters,
+  private val params: TranslationFilters,
   private val entityManager: EntityManager,
   private val authenticationFacade: AuthenticationFacade,
 ) {
@@ -60,6 +64,8 @@ class QueryBase<T>(
   lateinit var namespaceNameExpression: Path<String>
   var translationsTextFields: MutableSet<Expression<String>> = HashSet()
   lateinit var screenshotCountExpression: Expression<Long>
+  var branchJoin: Join<Key, Branch>? = null
+  var deletedByJoin: Join<Key, UserAccount>? = null
   val groupByExpressions: MutableSet<Expression<*>> = mutableSetOf()
   private val queryGlobalFiltering = QueryGlobalFiltering(params, this, cb, entityManager)
   var queryTranslationFiltering = QueryTranslationFiltering(params, this, cb)
@@ -71,6 +77,11 @@ class QueryBase<T>(
     querySelection[KeyWithTranslationsView::keyIsPlural.name] = keyIsPluralExpression
     querySelection[KeyWithTranslationsView::keyPluralArgName.name] = keyArgNameExpression
     whereConditions.add(cb.equal(root.get<Any>(Key_.PROJECT).get<Any>(Project_.ID), this.projectId))
+    if (params.trashed) {
+      whereConditions.add(cb.isNotNull(root.get(Key_.deletedAt)))
+    } else {
+      whereConditions.add(cb.isNull(root.get(Key_.deletedAt)))
+    }
     fullTextFields.add(root.get(Key_.name))
     addLeftJoinedColumns()
     queryGlobalFiltering.apply()
@@ -82,6 +93,10 @@ class QueryBase<T>(
     addDescription()
     addScreenshotCounts()
     addContextCounts()
+    if (params.trashed) {
+      addDeletedAtSelection()
+      addDeletedBySelection()
+    }
     addLanguageSpecificFields()
   }
 
@@ -272,6 +287,7 @@ class QueryBase<T>(
 
   private fun addBranch() {
     val branch = this.root.join(Key_.branch, JoinType.LEFT)
+    this.branchJoin = branch
     val branchName = branch.get(Branch_.name)
     this.querySelection[KeyWithTranslationsView::branch.name] = branchName
     groupByExpressions.add(branchName)
@@ -308,6 +324,30 @@ class QueryBase<T>(
       ),
     )
     this.querySelection[KeyWithTranslationsView::contextPresent.name] = cb.exists(contextSubquery)
+  }
+
+  private fun addDeletedAtSelection() {
+    querySelection[KeyWithTranslationsView::deletedAt.name] = root.get(Key_.deletedAt)
+    groupByExpressions.add(root.get(Key_.deletedAt))
+  }
+
+  private fun addDeletedBySelection() {
+    val deletedByJoin = root.join(Key_.deletedBy, JoinType.LEFT)
+    this.deletedByJoin = deletedByJoin
+    querySelection[KeyWithTranslationsView::deletedByUserId.name] = deletedByJoin.get(UserAccount_.id)
+    querySelection[KeyWithTranslationsView::deletedByUserName.name] = deletedByJoin.get(UserAccount_.name)
+    querySelection[KeyWithTranslationsView::deletedByUserUsername.name] = deletedByJoin.get(UserAccount_.username)
+    querySelection[KeyWithTranslationsView::deletedByUserAvatarHash.name] = deletedByJoin.get(UserAccount_.avatarHash)
+    querySelection[KeyWithTranslationsView::deletedByUserDeletedAt.name] = deletedByJoin.get(UserAccount_.deletedAt)
+    groupByExpressions.addAll(
+      listOf(
+        deletedByJoin.get(UserAccount_.id),
+        deletedByJoin.get(UserAccount_.name),
+        deletedByJoin.get(UserAccount_.username),
+        deletedByJoin.get(UserAccount_.avatarHash),
+        deletedByJoin.get(UserAccount_.deletedAt),
+      ),
+    )
   }
 
   val Expression<String>.isNotNullOrBlank: Predicate

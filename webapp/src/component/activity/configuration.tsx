@@ -43,6 +43,38 @@ export const actionsConfiguration: Partial<
     entities: { Key: [] },
     titleReferences: [],
   },
+  KEY_SOFT_DELETE: {
+    label(params) {
+      return <T keyName="activity_key_soft_delete" params={params} />;
+    },
+    entities: { Key: [] },
+    titleReferences: [],
+  },
+  KEY_RESTORE: {
+    label(params) {
+      return <T keyName="activity_key_restore" params={params} />;
+    },
+    entities: { Key: [] },
+  },
+  KEY_HARD_DELETE: {
+    label(params) {
+      return <T keyName="activity_key_hard_delete" params={params} />;
+    },
+    entities: { Key: [] },
+    titleReferences: [],
+  },
+  BATCH_KEY_RESTORE: {
+    label(params) {
+      return <T keyName="activity_batch_key_restore" params={params} />;
+    },
+    entities: { Params: true },
+  },
+  BATCH_KEY_HARD_DELETE: {
+    label(params) {
+      return <T keyName="activity_batch_key_hard_delete" params={params} />;
+    },
+    entities: { Params: true },
+  },
   KEY_NAME_EDIT: {
     label(params) {
       return <T keyName="activity_key_name_edit" params={params} />;

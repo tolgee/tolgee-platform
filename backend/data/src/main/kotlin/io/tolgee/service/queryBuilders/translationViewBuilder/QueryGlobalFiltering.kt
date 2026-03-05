@@ -1,6 +1,7 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
 import io.tolgee.dtos.request.translation.TranslationFilters
+import io.tolgee.model.UserAccount_
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityDescribingEntity_
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -45,6 +46,7 @@ class QueryGlobalFiltering(
     filterFailedTargets()
     filterTask()
     filterBranch()
+    filterDeletedByUserId()
   }
 
   private fun filterFailedTargets() {
@@ -268,7 +270,9 @@ class QueryGlobalFiltering(
   }
 
   private fun filterBranch() {
-    val branchJoin = queryBase.root.join(Key_.branch, JoinType.LEFT)
+    val branchJoin =
+      queryBase.branchJoin
+        ?: queryBase.root.join(Key_.branch, JoinType.LEFT).also { queryBase.branchJoin = it }
     if (params.filterKeyId?.isNotEmpty() == true) {
       return
     }
@@ -285,6 +289,17 @@ class QueryGlobalFiltering(
           cb.equal(branchJoin.get(Branch_.name), cb.literal(params.branch)),
           cb.isNull(branchJoin.get(Branch_.deletedAt)),
         ),
+      )
+    }
+  }
+
+  private fun filterDeletedByUserId() {
+    if (!params.filterDeletedByUserId.isNullOrEmpty()) {
+      val deletedByJoin =
+        queryBase.deletedByJoin
+          ?: queryBase.root.join(Key_.deletedBy, JoinType.LEFT).also { queryBase.deletedByJoin = it }
+      queryBase.whereConditions.add(
+        deletedByJoin.get(UserAccount_.id).`in`(params.filterDeletedByUserId),
       )
     }
   }

@@ -1,6 +1,7 @@
 package io.tolgee.service.key
 
 import io.tolgee.activity.ActivityHolder
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.KeyImportResolvableResult
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -17,11 +18,13 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.AiPlaygroundResultService
 import io.tolgee.service.bigMeta.BigMetaService
 import io.tolgee.service.branching.BranchMergeService
@@ -36,10 +39,12 @@ import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.Date
 import java.util.Optional
 
 @Service
@@ -64,6 +69,8 @@ class KeyService(
   private val securityService: SecurityService,
   @Lazy
   private val branchMergeService: BranchMergeService,
+  private val currentDateProvider: CurrentDateProvider,
+  private val authenticationFacade: AuthenticationFacade,
 ) : Logging {
   fun getAll(projectId: Long): Set<Key> {
     return keyRepository.getAllByProjectId(projectId)
@@ -320,7 +327,7 @@ class KeyService(
   }
 
   @Transactional
-  fun delete(id: Long) {
+  fun hardDelete(id: Long) {
     val key = findOptional(id).orElseThrow { NotFoundException() }
     translationService.deleteAllByKey(id)
     keyMetaService.deleteAllByKeyId(id)
@@ -332,16 +339,76 @@ class KeyService(
   }
 
   @Transactional
-  fun deleteMultiple(ids: Collection<Long>) {
-    traceLogMeasureTime("delete multiple keys: delete translations") {
+  fun softDeleteMultiple(
+    ids: Collection<Long>,
+    deletedBy: UserAccount? = null,
+  ) {
+    val actualDeletedBy = deletedBy ?: authenticationFacade.authenticatedUserEntityOrNull
+    val keys = keyRepository.findAllByIdIn(ids.toList())
+    val now = currentDateProvider.date
+    keys.forEach {
+      it.deletedAt = now
+      it.deletedBy = actualDeletedBy
+    }
+    keyRepository.saveAll(keys)
+  }
+
+  @Transactional
+  fun restoreKeys(
+    ids: Collection<Long>,
+    projectId: Long,
+  ) {
+    val keys = keyRepository.findSoftDeletedByIdsAndProjectId(ids, projectId)
+    if (keys.isEmpty()) return
+
+    val names = keys.map { it.name }.toSet()
+    val activeKeysWithSameNames = keyRepository.findActiveByProjectIdAndNames(projectId, names)
+    val activeKeyIdentifiers =
+      activeKeysWithSameNames.map { Triple(it.name, it.namespace?.name, it.branch?.name) }.toSet()
+
+    keys.forEach { key ->
+      val identifier = Triple(key.name, key.namespace?.name, key.branch?.name)
+      if (identifier in activeKeyIdentifiers) {
+        throw ValidationException(Message.KEY_EXISTS, key.name)
+      }
+      key.deletedAt = null
+      key.deletedBy = null
+    }
+    keyRepository.saveAll(keys)
+  }
+
+  @Transactional
+  fun restoreKey(
+    projectId: Long,
+    keyId: Long,
+  ): Key {
+    val key =
+      keyRepository.findSoftDeletedByIdsAndProjectId(listOf(keyId), projectId).firstOrNull()
+        ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+
+    // Check that no active key with the same name+namespace+branch exists
+    val branch = key.branch?.name
+    val existing = find(projectId, key.name, key.namespace?.name, branch)
+    if (existing != null) {
+      throw BadRequestException(Message.KEY_EXISTS)
+    }
+
+    key.deletedAt = null
+    key.deletedBy = null
+    return save(key)
+  }
+
+  @Transactional
+  fun hardDeleteMultiple(ids: Collection<Long>) {
+    traceLogMeasureTime("hard delete multiple keys: delete translations") {
       translationService.deleteAllByKeys(ids)
     }
 
-    traceLogMeasureTime("delete multiple keys: delete key metas") {
+    traceLogMeasureTime("hard delete multiple keys: delete key metas") {
       keyMetaService.deleteAllByKeyIdIn(ids)
     }
 
-    traceLogMeasureTime("delete multiple keys: delete screenshots") {
+    traceLogMeasureTime("hard delete multiple keys: delete screenshots") {
       screenshotService.deleteAllByKeyId(ids)
     }
     aiPlaygroundResultService.deleteResultsByKeys(ids)
@@ -349,17 +416,62 @@ class KeyService(
     branchMergeService.deleteChangesByKeyIds(ids)
 
     val keys =
-      traceLogMeasureTime("delete multiple keys: fetch keys") {
+      traceLogMeasureTime("hard delete multiple keys: fetch keys") {
         keyRepository.findAllByIdInForDelete(ids)
       }
 
     val namespaces = keys.map { it.namespace }
 
-    traceLogMeasureTime("delete multiple keys: delete the keys") {
+    traceLogMeasureTime("hard delete multiple keys: delete the keys") {
       keyRepository.deleteAll(keys)
     }
 
     namespaceService.deleteUnusedNamespaces(namespaces)
+  }
+
+  fun getSoftDeletedKeys(
+    projectId: Long,
+    branch: String?,
+    pageable: Pageable,
+  ): Page<KeySearchResultView> {
+    return keyRepository.findSoftDeletedByProjectId(projectId, branch, pageable)
+  }
+
+  fun findSoftDeletedIdsBefore(
+    before: Date,
+    pageable: Pageable,
+  ): Page<Long> {
+    return keyRepository.findSoftDeletedIdsBefore(before, pageable)
+  }
+
+  fun findSoftDeletedByIdsAndProjectId(
+    ids: Collection<Long>,
+    projectId: Long,
+  ): List<Key> {
+    return keyRepository.findSoftDeletedByIdsAndProjectId(ids, projectId)
+  }
+
+  fun getSoftDeletedProjectIdsForKeyIds(keyIds: List<Long>): List<Long> {
+    return keyRepository.getSoftDeletedProjectIdsForKeyIds(keyIds)
+  }
+
+  @Transactional
+  fun hardDeleteSingleTrashedKey(
+    projectId: Long,
+    keyId: Long,
+  ) {
+    val projectIds = getSoftDeletedProjectIdsForKeyIds(listOf(keyId))
+    if (projectIds.isEmpty() || projectIds.single() != projectId) {
+      throw NotFoundException(Message.KEY_NOT_FROM_PROJECT)
+    }
+    hardDeleteMultiple(listOf(keyId))
+  }
+
+  fun findDistinctDeleters(
+    projectId: Long,
+    branch: String?,
+  ): List<UserAccount> {
+    return keyRepository.findDistinctDeleters(projectId, branch)
   }
 
   @Transactional
@@ -404,8 +516,23 @@ class KeyService(
     pageable: Pageable,
   ): Page<KeySearchResultView> {
     branchService.getActiveOrDefault(project.id, branch)
+    return searchKeys(search, languageTag, project.id, branch, trashed = false, pageable)
+  }
+
+  @Transactional
+  fun searchKeys(
+    search: String,
+    languageTag: String?,
+    projectId: Long,
+    branch: String?,
+    trashed: Boolean = false,
+    pageable: Pageable,
+  ): Page<KeySearchResultView> {
     entityManager.setSimilarityLimit(0.00001)
-    return keyRepository.searchKeys(search, project.id, languageTag, branch, pageable)
+    // The native query handles ORDER BY internally (relevance-based), so strip
+    // any sort from the pageable to avoid a duplicate ORDER BY clause.
+    val unsortedPageable = PageRequest.of(pageable.pageNumber, pageable.pageSize)
+    return keyRepository.searchKeys(search, projectId, languageTag, branch, trashed, unsortedPageable)
   }
 
   @Transactional

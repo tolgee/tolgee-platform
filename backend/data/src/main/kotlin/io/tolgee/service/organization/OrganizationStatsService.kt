@@ -24,7 +24,7 @@ class OrganizationStatsService(
       .createQuery(
         """
         select count(distinct k.name, k.namespace) from Key k
-        where k.project.id = :projectId and k.project.deletedAt is null
+        where k.project.id = :projectId and k.project.deletedAt is null and k.deletedAt is null
         """.trimIndent(),
       ).setParameter("projectId", projectId)
       .singleResult as Long
@@ -53,6 +53,7 @@ class OrganizationStatsService(
             where p.organization_owner_id = :organizationId
               and p.deleted_at is null
           )
+          and k.deleted_at is null
           and exists (
             select 1 from language l
             where l.id = t.language_id
@@ -77,6 +78,7 @@ class OrganizationStatsService(
               from key k
               join project p on p.id = k.project_id and p.deleted_at is null
               where p.organization_owner_id = :organizationId
+                and k.deleted_at is null
           ) sub
           """.trimIndent(),
         ).setParameter("organizationId", organizationId)

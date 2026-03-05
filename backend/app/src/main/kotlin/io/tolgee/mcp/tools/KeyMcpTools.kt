@@ -250,7 +250,7 @@ class KeyMcpTools(
             errorResult("Keys not found: ${notFound.joinToString(", ")}")
           } else {
             val ids = keys.map { it.id }.toSet()
-            keyService.deleteMultiple(ids)
+            keyService.hardDeleteMultiple(ids)
             textResult(
               objectMapper.writeValueAsString(
                 mapOf("deleted" to true, "keyCount" to ids.size),

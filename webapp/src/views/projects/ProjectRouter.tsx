@@ -13,6 +13,7 @@ import { ImportView } from './import/ImportView';
 import { ProjectMembersView } from './members/ProjectMembersView';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
 import { TranslationsView } from './translations/TranslationsView';
+import { TrashView } from './translations/trash/TrashView';
 import { SingleKeyView } from './translations/SingleKeyView';
 import { DashboardView } from './dashboard/DashboardView';
 import { WebsocketPreview } from './WebsocketPreview';
@@ -38,6 +39,10 @@ export const ProjectRouter = () => {
       <Switch>
         <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
           <SingleKeyView />
+        </Route>
+
+        <Route exact path={LINKS.PROJECT_TRANSLATIONS_TRASH.template}>
+          <TrashView />
         </Route>
 
         <Route exact path={LINKS.PROJECT_TRANSLATIONS.template}>
@@ -114,6 +119,10 @@ export const ProjectRouter = () => {
 
         <Route exact path={BRANCH_ROUTES.export.branched}>
           <ExportView />
+        </Route>
+
+        <Route exact path={LINKS.PROJECT_TRANSLATIONS_TRASH_BRANCHED.template}>
+          <TrashView />
         </Route>
       </Switch>
       <routes.Project />

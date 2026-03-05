@@ -21,7 +21,12 @@ export type ActivityTypeEnum =
   | ActionType
   | 'TRANSLATION_HISTORY_ADD'
   | 'TRANSLATION_HISTORY_MODIFY'
-  | 'TRANSLATION_HISTORY_DELETE';
+  | 'TRANSLATION_HISTORY_DELETE'
+  | 'KEY_SOFT_DELETE'
+  | 'KEY_RESTORE'
+  | 'KEY_HARD_DELETE'
+  | 'BATCH_KEY_RESTORE'
+  | 'BATCH_KEY_HARD_DELETE';
 
 export type ChangeTypeOfKeys<
   T extends Record<string, unknown>,
@@ -101,6 +106,7 @@ export type KeyReferenceData = {
   languages?: LanguageReferenceType[];
   id?: number;
   exists?: boolean;
+  activityType?: ActivityTypeEnum;
 };
 
 export type LanguageReferenceData = {

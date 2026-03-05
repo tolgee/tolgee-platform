@@ -168,9 +168,9 @@ class BranchCopyServiceSql(
     sourceIsDefault: Boolean,
   ): String {
     return if (sourceIsDefault) {
-      "($keyAlias.branch_id = :sourceBranchId OR $keyAlias.branch_id IS NULL)"
+      "($keyAlias.branch_id = :sourceBranchId OR $keyAlias.branch_id IS NULL) AND $keyAlias.deleted_at IS NULL"
     } else {
-      "$keyAlias.branch_id = :sourceBranchId"
+      "$keyAlias.branch_id = :sourceBranchId AND $keyAlias.deleted_at IS NULL"
     }
   }
 

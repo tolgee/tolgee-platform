@@ -21,6 +21,12 @@ data class KeyWithTranslationsView(
   val screenshotCount: Long,
   val contextPresent: Boolean,
   val translations: MutableMap<String, TranslationView> = mutableMapOf(),
+  val deletedAt: Timestamp? = null,
+  val deletedByUserId: Long? = null,
+  val deletedByUserName: String? = null,
+  val deletedByUserUsername: String? = null,
+  val deletedByUserAvatarHash: String? = null,
+  val deletedByUserDeletedAt: Timestamp? = null,
 ) : Cursorable {
   lateinit var keyTags: List<Tag>
   var screenshots: Collection<Screenshot>? = null
@@ -28,10 +34,13 @@ data class KeyWithTranslationsView(
 
   companion object {
     val LANGUAGES_FIELD_COUNT = 10
+    private val BASE_FIELD_COUNT = 11
+    private val TRASH_FIELD_COUNT = 5
 
     fun of(
       queryData: Array<Any?>,
       languages: List<LanguageDto>,
+      trashed: Boolean = false,
     ): KeyWithTranslationsView {
       val data = mutableListOf(*queryData)
       val result =
@@ -47,6 +56,12 @@ data class KeyWithTranslationsView(
           keyDescription = data.removeFirst() as String?,
           screenshotCount = data.removeFirst() as Long,
           contextPresent = data.removeFirst() as Boolean,
+          deletedAt = if (trashed) data.removeFirst() as Timestamp? else null,
+          deletedByUserId = if (trashed) data.removeFirst() as Long? else null,
+          deletedByUserName = if (trashed) data.removeFirst() as String? else null,
+          deletedByUserUsername = if (trashed) data.removeFirst() as String? else null,
+          deletedByUserAvatarHash = if (trashed) data.removeFirst() as String? else null,
+          deletedByUserDeletedAt = if (trashed) data.removeFirst() as Timestamp? else null,
         )
 
       (0 until data.size step LANGUAGES_FIELD_COUNT).forEach { i ->

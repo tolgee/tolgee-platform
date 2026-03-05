@@ -10,7 +10,9 @@ import io.tolgee.dtos.SimpleKeyResult
 import io.tolgee.events.OnKeyPrePersist
 import io.tolgee.events.OnKeyPreRemove
 import io.tolgee.model.Project
+import io.tolgee.model.SoftDeletable
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMergeableEntity
 import io.tolgee.model.branching.snapshot.KeyScreenshotReferenceView
@@ -68,7 +70,8 @@ class Key(
   var name: String = "",
 ) : StandardAuditModel(),
   WithKeyMeta,
-  BranchMergeableEntity<Key, KeySnapshot> {
+  BranchMergeableEntity<Key, KeySnapshot>,
+  SoftDeletable {
   @field:NotNull
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var project: Project
@@ -102,6 +105,12 @@ class Key(
 
   @ActivityLoggedProp
   var pluralArgName: String? = null
+
+  @ActivityLoggedProp
+  override var deletedAt: Date? = null
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  var deletedBy: UserAccount? = null
 
   constructor(
     name: String,
@@ -144,7 +153,9 @@ class Key(
   override fun resolveKey(): Key? = this
 
   override fun isModified(oldState: Map<String, Any>): Boolean {
-    return oldState["isPlural"] != this.isPlural || oldState["pluralArgName"] != this.pluralArgName
+    return oldState["isPlural"] != this.isPlural ||
+      oldState["pluralArgName"] != this.pluralArgName ||
+      oldState["deletedAt"] != this.deletedAt
   }
 
   override fun hasChanged(snapshot: KeySnapshot): Boolean {

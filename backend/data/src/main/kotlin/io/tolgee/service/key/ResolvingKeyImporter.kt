@@ -340,7 +340,9 @@ class ResolvingKeyImporter(
 
     val projectIdPath = root.get(Key_.project).get(Project_.id)
 
-    query.where(cb.and(cb.equal(projectIdPath, projectId), cb.or(*predicates)))
+    query.where(
+      cb.and(cb.equal(projectIdPath, projectId), cb.isNull(root.get(Key_.deletedAt)), cb.or(*predicates)),
+    )
 
     return this.entityManager.createQuery(query).resultList
   }

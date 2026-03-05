@@ -5,6 +5,7 @@ import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.request.DeleteKeysRequest
 import io.tolgee.service.key.KeyService
+import io.tolgee.service.security.UserAccountService
 import jakarta.persistence.EntityManager
 import kotlinx.coroutines.ensureActive
 import org.springframework.stereotype.Component
@@ -15,6 +16,7 @@ class DeleteKeysChunkProcessor(
   private val keyService: KeyService,
   private val entityManager: EntityManager,
   private val progressManager: ProgressManager,
+  private val userAccountService: UserAccountService,
 ) : ChunkProcessor<DeleteKeysRequest, Any?, Long> {
   override fun process(
     job: BatchJobDto,
@@ -22,11 +24,12 @@ class DeleteKeysChunkProcessor(
     coroutineContext: CoroutineContext,
   ) {
     coroutineContext.ensureActive()
+    val author = job.authorId?.let { userAccountService.findActive(it) }
     val subChunked = chunk.chunked(100)
     subChunked.forEach { subChunk ->
       coroutineContext.ensureActive()
       @Suppress("UNCHECKED_CAST")
-      keyService.deleteMultiple(subChunk)
+      keyService.softDeleteMultiple(subChunk, deletedBy = author)
       entityManager.flush()
       progressManager.reportSingleChunkProgress(job.id, subChunk.size)
     }

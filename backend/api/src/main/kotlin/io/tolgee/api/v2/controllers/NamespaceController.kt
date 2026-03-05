@@ -78,12 +78,16 @@ class NamespaceController(
   fun getUsedNamespaces(): CollectionModel<UsedNamespaceModel> {
     val namespaces =
       namespaceService
-        .getAllInProject(projectHolder.project.id)
+        .getAllWithActiveKeysInProject(projectHolder.project.id)
         .map { it.id as Long? to it.name as String? }
         .toMutableList()
     val isDefaultUsed = namespaceService.isDefaultUsed(projectHolder.project.id)
     if (isDefaultUsed) {
       namespaces.add(0, null to null)
+    }
+    val defaultNamespace = projectHolder.projectEntity.defaultNamespace
+    if (defaultNamespace != null && namespaces.none { it.first == defaultNamespace.id }) {
+      namespaces.add(defaultNamespace.id as Long? to defaultNamespace.name as String?)
     }
     return usedNamespaceModelAssembler.toCollectionModel(namespaces)
   }

@@ -5088,4 +5088,90 @@
             <sql>drop index concurrently if exists idx_key_project_name_namespace;</sql>
         </rollback>
     </changeSet>
+
+    <!-- Key soft-delete: add deleted_at column -->
+    <changeSet author="dbocharov" id="1739900000000-1">
+        <addColumn tableName="key">
+            <column name="deleted_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Key soft-delete: partial index for fast active-key queries -->
+    <changeSet author="dbocharov" id="1739900000000-2" runInTransaction="false">
+        <sql>
+            create index concurrently if not exists key_deleted_at_null on public.key((deleted_at is null)) where deleted_at is null;
+        </sql>
+        <rollback>
+            drop index concurrently if exists key_deleted_at_null;
+        </rollback>
+    </changeSet>
+
+    <!-- Key soft-delete: create new unique indexes with deleted_at IS NULL filter (before dropping old ones for zero-downtime) -->
+    <changeSet author="dbocharov" id="1739900000000-3" runInTransaction="false">
+        <sql>
+            create unique index concurrently if not exists key_project_branch_name_no_ns
+                on public.key (project_id, coalesce(branch_id, -1), "name")
+                where namespace_id is null and deleted_at is null;
+        </sql>
+        <sql>
+            create unique index concurrently if not exists key_project_branch_name_ns
+                on public.key (project_id, coalesce(branch_id, -1), "name", namespace_id)
+                where namespace_id is not null and deleted_at is null;
+        </sql>
+        <rollback>
+            drop index concurrently if exists key_project_branch_name_no_ns;
+            drop index concurrently if exists key_project_branch_name_ns;
+        </rollback>
+    </changeSet>
+
+    <!-- Key soft-delete: drop old unique indexes (now safe since new ones are already live) -->
+    <changeSet author="dbocharov" id="1739900000000-4" runInTransaction="false">
+        <!--
+            Drop the auto-named unique indexes created in changeset 1758202102054-2.
+            PostgreSQL auto-generates names like: key_project_id_coalesce_name_idx / key_project_id_coalesce_name_namespace_id_idx
+            We use a DO block to find and drop them dynamically.
+        -->
+        <sql splitStatements="false">
+            do $$
+            declare
+                idx_name text;
+            begin
+                for idx_name in
+                    select i.relname from pg_class i
+                    join pg_index ix on ix.indexrelid = i.oid
+                    join pg_class t on t.oid = ix.indrelid
+                    where t.relname = 'key' and ix.indisunique
+                      and pg_get_indexdef(i.oid) like '%coalesce%name%'
+                      and pg_get_indexdef(i.oid) not like '%deleted_at%'
+                loop
+                    execute format('drop index if exists %I', idx_name);
+                end loop;
+            end $$;
+        </sql>
+        <rollback>
+            <!-- Old indexes would need manual recreation if rolling back -->
+        </rollback>
+    </changeSet>
+
+    <!-- Key soft-delete: partial index for trash queries (deleted_at IS NOT NULL) -->
+    <changeSet author="dbocharov" id="1739900000000-5" runInTransaction="false">
+        <sql>
+            create index concurrently if not exists key_project_deleted_at_not_null
+                on public.key (project_id, deleted_at)
+                where deleted_at is not null;
+        </sql>
+        <rollback>
+            drop index concurrently if exists key_project_deleted_at_not_null;
+        </rollback>
+    </changeSet>
+
+    <changeSet author="dbocharov" id="1739900000000-6">
+        <addColumn tableName="key">
+            <column name="deleted_by_id" type="BIGINT"/>
+        </addColumn>
+        <addForeignKeyConstraint
+            baseTableName="key" baseColumnNames="deleted_by_id"
+            referencedTableName="user_account" referencedColumnNames="id"
+            constraintName="fk_key_deleted_by_user_account"/>
+    </changeSet>
 </databaseChangeLog>

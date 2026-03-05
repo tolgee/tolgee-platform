@@ -75,7 +75,7 @@ class BranchCleanupService(
 
   /**
    * Deletes all keys associated with the branch in batches.
-   * KeyService.deleteMultiple handles cascading deletion of translations, metadata, etc.
+   * KeyService.hardDeleteMultiple handles cascading deletion of translations, metadata, etc.
    * Always queries page 0 since deletion shifts remaining keys.
    */
   private fun cleanupBranchKeys(
@@ -98,7 +98,7 @@ class BranchCleanupService(
       val ids = idsPage.content
       if (ids.isEmpty()) break
 
-      keyService.deleteMultiple(ids)
+      keyService.hardDeleteMultiple(ids)
       totalDeleted += ids.size
       batchCount++
       metrics.branchCleanupBatchesCounter.increment()

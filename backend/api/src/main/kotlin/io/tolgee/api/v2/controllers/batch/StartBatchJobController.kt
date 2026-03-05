@@ -7,8 +7,10 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.ClearTranslationsRequest
 import io.tolgee.batch.request.CopyTranslationRequest
 import io.tolgee.batch.request.DeleteKeysRequest
+import io.tolgee.batch.request.HardDeleteKeysRequest
 import io.tolgee.batch.request.MachineTranslationRequest
 import io.tolgee.batch.request.PreTranslationByTmRequest
+import io.tolgee.batch.request.RestoreKeysRequest
 import io.tolgee.batch.request.SetKeysNamespaceRequest
 import io.tolgee.batch.request.SetTranslationsStateStateRequest
 import io.tolgee.batch.request.TagKeysRequest
@@ -253,6 +255,42 @@ class StartBatchJobController(
         projectHolder.projectEntity,
         authenticationFacade.authenticatedUserEntity,
         BatchJobType.SET_KEYS_NAMESPACE,
+      ).model
+  }
+
+  @PostMapping(value = ["/restore-keys"])
+  @Operation(summary = "Restore soft-deleted keys")
+  @RequiresProjectPermissions([Scope.KEYS_CREATE])
+  @AllowApiAccess
+  fun restoreKeys(
+    @Valid @RequestBody
+    data: RestoreKeysRequest,
+  ): BatchJobModel {
+    securityService.checkSoftDeletedKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.RESTORE_KEYS,
+      ).model
+  }
+
+  @PostMapping(value = ["/hard-delete-keys"])
+  @Operation(summary = "Permanently delete soft-deleted keys")
+  @RequiresProjectPermissions([Scope.KEYS_DELETE])
+  @AllowApiAccess
+  fun hardDeleteKeys(
+    @Valid @RequestBody
+    data: HardDeleteKeysRequest,
+  ): BatchJobModel {
+    securityService.checkSoftDeletedKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    return batchJobService
+      .startJob(
+        data,
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.HARD_DELETE_KEYS,
       ).model
   }
 

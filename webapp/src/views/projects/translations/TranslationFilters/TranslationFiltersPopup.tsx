@@ -15,6 +15,7 @@ import { SubfilterScreenshots } from './SubfilterScreenshots';
 import { SubfilterComments } from './SubfilterComments';
 import { SubfilterLabels } from 'tg.views/projects/translations/TranslationFilters/SubfilterLabels';
 import { SubfilterSuggestions } from './SubfilterSuggestions';
+import { SubfilterDeletedBy } from './SubfilterDeletedBy';
 
 type Props = {
   value: FiltersType;
@@ -92,6 +93,13 @@ export const TranslationFiltersPopup = ({
             actions={actions}
             projectId={projectId}
             selectedLanguages={selectedLanguages}
+          />
+        )}
+        {filterOptions?.showDeletedBy && (
+          <SubfilterDeletedBy
+            value={value}
+            actions={actions}
+            projectId={projectId}
           />
         )}
         {showClearButton && Boolean(countFilters(value)) && (

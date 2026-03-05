@@ -668,6 +668,18 @@ export interface paths {
     /** Returns all key IDs for specified filter values. This way, you can apply the same filter as in the translation view and get the resulting key IDs for future use. */
     get: operations["selectKeys_2"];
   };
+  "/v2/projects/{projectId}/keys/trash": {
+    get: operations["list_5"];
+  };
+  "/v2/projects/{projectId}/keys/trash/deleters": {
+    get: operations["listDeleters"];
+  };
+  "/v2/projects/{projectId}/keys/trash/{keyId}": {
+    delete: operations["permanentlyDelete"];
+  };
+  "/v2/projects/{projectId}/keys/trash/{keyId}/restore": {
+    put: operations["restore"];
+  };
   "/v2/projects/{projectId}/keys/{ids}": {
     delete: operations["delete_15"];
   };
@@ -833,6 +845,9 @@ export interface paths {
   "/v2/projects/{projectId}/start-batch-job/delete-keys": {
     post: operations["deleteKeys"];
   };
+  "/v2/projects/{projectId}/start-batch-job/hard-delete-keys": {
+    post: operations["hardDeleteKeys"];
+  };
   "/v2/projects/{projectId}/start-batch-job/machine-translate": {
     /** Translate provided keys to provided languages through primary MT provider. */
     post: operations["machineTranslation"];
@@ -840,6 +855,9 @@ export interface paths {
   "/v2/projects/{projectId}/start-batch-job/pre-translate-by-tm": {
     /** Pre-translate provided keys to provided languages by TM. */
     post: operations["translate"];
+  };
+  "/v2/projects/{projectId}/start-batch-job/restore-keys": {
+    post: operations["restoreKeys"];
   };
   "/v2/projects/{projectId}/start-batch-job/set-keys-namespace": {
     post: operations["setKeysNamespace"];
@@ -1463,6 +1481,8 @@ export interface components {
         | "MACHINE_TRANSLATE"
         | "AUTO_TRANSLATE"
         | "DELETE_KEYS"
+        | "RESTORE_KEYS"
+        | "HARD_DELETE_KEYS"
         | "SET_TRANSLATIONS_STATE"
         | "CLEAR_TRANSLATIONS"
         | "COPY_TRANSLATIONS"
@@ -1828,6 +1848,11 @@ export interface components {
     CollectionModelSimpleProjectModel: {
       _embedded?: {
         projects?: components["schemas"]["SimpleProjectModel"][];
+      };
+    };
+    CollectionModelSimpleUserAccountModel: {
+      _embedded?: {
+        users?: components["schemas"]["SimpleUserAccountModel"][];
       };
     };
     CollectionModelUsedNamespaceModel: {
@@ -3124,6 +3149,9 @@ export interface components {
       languageTag: string;
       text: string;
     };
+    HardDeleteKeysRequest: {
+      keyIds: number[];
+    };
     HierarchyItem: {
       requires: components["schemas"]["HierarchyItem"][];
       /** @enum {string} */
@@ -3456,6 +3484,8 @@ export interface components {
         | "MACHINE_TRANSLATE"
         | "AUTO_TRANSLATE"
         | "DELETE_KEYS"
+        | "RESTORE_KEYS"
+        | "HARD_DELETE_KEYS"
         | "SET_TRANSLATIONS_STATE"
         | "CLEAR_TRANSLATIONS"
         | "COPY_TRANSLATIONS"
@@ -3584,20 +3614,38 @@ export interface components {
     };
     KeySearchResultView: {
       baseTranslation?: string;
+      /** Format: date-time */
+      deletedAt?: string;
+      deletedByUserAvatarHash?: string;
+      deletedByUserDeleted?: boolean;
+      /** Format: int64 */
+      deletedByUserId?: number;
+      deletedByUserName?: string;
+      deletedByUserUsername?: string;
       description?: string;
       /** Format: int64 */
       id: number;
       name: string;
       namespace?: string;
+      plural?: boolean;
       translation?: string;
     };
     KeySearchSearchResultModel: {
       baseTranslation?: string;
+      /** Format: date-time */
+      deletedAt?: string;
+      deletedByUserAvatarHash?: string;
+      deletedByUserDeleted?: boolean;
+      /** Format: int64 */
+      deletedByUserId?: number;
+      deletedByUserName?: string;
+      deletedByUserUsername?: string;
       description?: string;
       /** Format: int64 */
       id: number;
       name: string;
       namespace?: string;
+      plural?: boolean;
       translation?: string;
       view?: components["schemas"]["KeySearchResultView"];
     };
@@ -4466,6 +4514,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelTrashedKeyWithTranslationsModel: {
+      _embedded?: {
+        keys?: components["schemas"]["TrashedKeyWithTranslationsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     PagedModelUserAccountInProjectModel: {
       _embedded?: {
         users?: components["schemas"]["UserAccountInProjectModel"][];
@@ -4865,6 +4919,11 @@ export interface components {
         | "KEY_TAGS_EDIT"
         | "KEY_NAME_EDIT"
         | "KEY_DELETE"
+        | "KEY_SOFT_DELETE"
+        | "KEY_RESTORE"
+        | "KEY_HARD_DELETE"
+        | "BATCH_KEY_RESTORE"
+        | "BATCH_KEY_HARD_DELETE"
         | "CREATE_KEY"
         | "COMPLEX_EDIT"
         | "IMPORT"
@@ -5458,6 +5517,9 @@ export interface components {
        * @enum {string}
        */
       resolve: "SOURCE" | "TARGET";
+    };
+    RestoreKeysRequest: {
+      keyIds: number[];
     };
     RevealedApiKeyModel: {
       description: string;
@@ -6613,6 +6675,47 @@ export interface components {
     TranslationWithCommentModel: {
       comment: components["schemas"]["TranslationCommentModel"];
       translation: components["schemas"]["TranslationModel"];
+    };
+    TrashedKeyWithTranslationsModel: {
+      /**
+       * Format: date-time
+       * @description When the key was deleted
+       */
+      deletedAt: string;
+      /** @description User who deleted the key */
+      deletedBy?: components["schemas"]["SimpleUserAccountModel"];
+      /** @description Description of the key */
+      description?: string;
+      /**
+       * Format: int64
+       * @description Id of key record
+       */
+      id: number;
+      /** @description Whether the key is plural */
+      isPlural: boolean;
+      /**
+       * @description Name of key
+       * @example this_is_super_key
+       */
+      name: string;
+      /**
+       * @description Namespace of key
+       * @example homepage
+       */
+      namespace?: string;
+      /**
+       * Format: date-time
+       * @description When the key will be permanently deleted
+       */
+      permanentDeleteAt: string;
+      /** @description Screenshots of the key */
+      screenshots: components["schemas"]["ScreenshotModel"][];
+      /** @description Tags of key */
+      tags: components["schemas"]["TagModel"][];
+      /** @description Translations object keyed by language tag */
+      translations: {
+        [key: string]: components["schemas"]["TranslationViewModel"];
+      };
     };
     UntagKeysRequest: {
       keyIds: number[];
@@ -15478,6 +15581,8 @@ export interface operations {
         filterHasNoSuggestionsInLang?: string[];
         /** Selects only keys from specified branch */
         branch?: string;
+        /** Filter trashed keys by who deleted them (user IDs) */
+        filterDeletedByUserId?: number[];
       };
       path: {
         projectId: number;
@@ -15488,6 +15593,249 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["SelectAllResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  list_5: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        /**
+         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
+         *
+         * When used with multiple states for same language it is applied with logical OR.
+         *
+         * When used with multiple languages, it is applied with logical AND.
+         */
+        filterState?: string[];
+        /**
+         * Languages to be contained in response.
+         *
+         * To add multiple languages, repeat this param (eg. ?languages=en&languages=de)
+         */
+        languages?: string[];
+        /** String to search in key name or translation text */
+        search?: string;
+        /** Selects key with provided names. Use this param multiple times to fetch more keys. */
+        filterKeyName?: string[];
+        /** Selects key with provided ID. Use this param multiple times to fetch more keys. */
+        filterKeyId?: number[];
+        /** Selects only keys for which the translation is missing in any returned language. It only filters for translations included in returned languages. */
+        filterUntranslatedAny?: boolean;
+        /** Selects only keys, where translation is provided in any language */
+        filterTranslatedAny?: boolean;
+        /** Selects only keys where the translation is missing for the specified language. The specified language must be included in the returned languages. Otherwise, this filter doesn't apply. */
+        filterUntranslatedInLang?: string;
+        /** Selects only keys, where translation is provided in specified language */
+        filterTranslatedInLang?: string;
+        /** Selects only keys, where translation was auto translated for specified languages. */
+        filterAutoTranslatedInLang?: string[];
+        /** Selects only keys with screenshots */
+        filterHasScreenshot?: boolean;
+        /** Selects only keys without screenshots */
+        filterHasNoScreenshot?: boolean;
+        /**
+         * Selects only keys with provided namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNamespace?: string[];
+        /**
+         * Selects only keys without provided namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNoNamespace?: string[];
+        /** Selects only keys with provided tag */
+        filterTag?: string[];
+        /** Selects only keys without provided tag */
+        filterNoTag?: string[];
+        /** Selects only keys, where translation in provided langs is in outdated state */
+        filterOutdatedLanguage?: string[];
+        /** Selects only keys, where translation in provided langs is not in outdated state */
+        filterNotOutdatedLanguage?: string[];
+        /** Selects only key affected by activity with specidfied revision ID */
+        filterRevisionId?: number[];
+        /** Select only keys which were not successfully translated by batch job with provided id */
+        filterFailedKeysOfJob?: number;
+        /** Select only keys which are in specified task */
+        filterTaskNumber?: number[];
+        /** Filter task keys which are `not done` */
+        filterTaskKeysNotDone?: boolean;
+        /** Filter task keys which are `done` */
+        filterTaskKeysDone?: boolean;
+        /** Filter keys with unresolved comments in lang */
+        filterHasUnresolvedCommentsInLang?: string[];
+        /** Filter keys with any comments in lang */
+        filterHasCommentsInLang?: string[];
+        /** Filter key translations with labels */
+        filterLabel?: string[];
+        /** Filter keys with any suggestions in lang */
+        filterHasSuggestionsInLang?: string[];
+        /** Filter keys with no suggestions in lang */
+        filterHasNoSuggestionsInLang?: string[];
+        /** Selects only keys from specified branch */
+        branch?: string;
+        /** Filter trashed keys by who deleted them (user IDs) */
+        filterDeletedByUserId?: number[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelTrashedKeyWithTranslationsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  listDeleters: {
+    parameters: {
+      query: {
+        branch?: string;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelSimpleUserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  permanentlyDelete: {
+    parameters: {
+      path: {
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  restore: {
+    parameters: {
+      path: {
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["KeyModel"];
         };
       };
       /** Bad Request */
@@ -18005,6 +18353,50 @@ export interface operations {
       };
     };
   };
+  hardDeleteKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["HardDeleteKeysRequest"];
+      };
+    };
+  };
   /** Translate provided keys to provided languages through primary MT provider. */
   machineTranslation: {
     parameters: {
@@ -18092,6 +18484,50 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["PreTranslationByTmRequest"];
+      };
+    };
+  };
+  restoreKeys: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["BatchJobModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RestoreKeysRequest"];
       };
     };
   };
@@ -19574,6 +20010,8 @@ export interface operations {
         filterHasNoSuggestionsInLang?: string[];
         /** Selects only keys from specified branch */
         branch?: string;
+        /** Filter trashed keys by who deleted them (user IDs) */
+        filterDeletedByUserId?: number[];
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -19877,6 +20315,8 @@ export interface operations {
         filterHasNoSuggestionsInLang?: string[];
         /** Selects only keys from specified branch */
         branch?: string;
+        /** Filter trashed keys by who deleted them (user IDs) */
+        filterDeletedByUserId?: number[];
       };
       path: {
         projectId: number;

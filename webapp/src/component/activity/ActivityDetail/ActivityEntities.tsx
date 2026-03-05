@@ -47,7 +47,7 @@ export const ActivityEntities: React.FC<Props> = ({
   return (
     <StyledFields>
       {activity.entities.map((entity, i) => {
-        if (!entity?.fields.length) {
+        if (!entity?.fields.length && !entity?.references.length) {
           return null;
         }
         return (

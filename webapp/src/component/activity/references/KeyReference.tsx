@@ -17,13 +17,20 @@ export const KeyReference: React.FC<Props> = ({ data }) => {
   const project = useProject();
 
   const href = data.exists
-    ? LINKS.PROJECT_TRANSLATIONS_SINGLE.build({
-        [PARAMS.PROJECT_ID]: project.id,
-      }) +
-      queryEncode({
-        id: data.id,
-        languages: data.languages?.map((l) => l.tag),
-      })
+    ? data.activityType === 'KEY_SOFT_DELETE'
+      ? LINKS.PROJECT_TRANSLATIONS_TRASH.build({
+          [PARAMS.PROJECT_ID]: project.id,
+        }) +
+        queryEncode({
+          search: data.keyName,
+        })
+      : LINKS.PROJECT_TRANSLATIONS_SINGLE.build({
+          [PARAMS.PROJECT_ID]: project.id,
+        }) +
+        queryEncode({
+          id: data.id,
+          languages: data.languages?.map((l) => l.tag),
+        })
     : undefined;
 
   const includedLanguages = new Set();

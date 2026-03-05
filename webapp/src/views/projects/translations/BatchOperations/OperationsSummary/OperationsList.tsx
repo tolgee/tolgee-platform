@@ -93,18 +93,20 @@ export const OperationsList = ({ data }: Props) => {
               <Box color={theme.palette.error.main}>
                 <TranslatedError code={o.errorMessage} />
               </Box>
-              <div>
-                (
-                <StyledLink
-                  component={Link}
-                  to={`${LINKS.PROJECT_TRANSLATIONS.build({
-                    [PARAMS.PROJECT_ID]: project.id,
-                  })}?${QUERY.TRANSLATIONS_PREFILTERS_FAILED_JOB}=${o.id}`}
-                >
-                  {t('batch_operation_show_failed_keys')}
-                </StyledLink>
-                )
-              </div>
+              {o.type !== 'RESTORE_KEYS' && (
+                <div>
+                  (
+                  <StyledLink
+                    component={Link}
+                    to={`${LINKS.PROJECT_TRANSLATIONS.build({
+                      [PARAMS.PROJECT_ID]: project.id,
+                    })}?${QUERY.TRANSLATIONS_PREFILTERS_FAILED_JOB}=${o.id}`}
+                  >
+                    {t('batch_operation_show_failed_keys')}
+                  </StyledLink>
+                  )
+                </div>
+              )}
             </StyledCell>
           )}
         </React.Fragment>

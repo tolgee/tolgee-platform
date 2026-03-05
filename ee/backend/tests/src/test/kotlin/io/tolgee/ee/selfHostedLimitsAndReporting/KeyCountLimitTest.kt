@@ -76,7 +76,7 @@ class KeyCountLimitTest : AbstractSpringTest() {
       testData.projectBuilder.data.keys
         .first()
         .self
-    keyService.delete(keyToDelete.id)
+    keyService.hardDelete(keyToDelete.id)
   }
 
   @Test
@@ -101,6 +101,56 @@ class KeyCountLimitTest : AbstractSpringTest() {
     assertThrows<PlanSpendingLimitExceededKeysException> {
       createKey(testData)
     }
+  }
+
+  @Test
+  fun `soft-deleted keys are excluded from limit count`() {
+    saveSubscription {
+      includedKeys = 2
+      keysLimit = 2
+    }
+    val testData = saveTestData(2)
+
+    // At limit — creating another key should fail
+    assertThrows<PlanLimitExceededKeysException> {
+      createKey(testData)
+    }
+
+    // Soft-delete one key — should free up a slot
+    val keyToSoftDelete =
+      testData.projectBuilder.data.keys
+        .first()
+        .self
+    keyService.softDeleteMultiple(listOf(keyToSoftDelete.id), deletedBy = testData.user)
+
+    // Now creating a key should succeed (only 1 active key counted)
+    createKey(testData)
+  }
+
+  @Test
+  fun `restoring a soft-deleted key counts against the limit again`() {
+    saveSubscription {
+      includedKeys = 2
+      keysLimit = 2
+    }
+    val testData = saveTestData(2)
+
+    // Soft-delete one key
+    val keyToSoftDelete =
+      testData.projectBuilder.data.keys
+        .first()
+        .self
+    keyService.softDeleteMultiple(listOf(keyToSoftDelete.id), deletedBy = testData.user)
+
+    // Create a replacement key (now at limit again: 1 original + 1 new)
+    createKey(testData)
+
+    // Restoring the soft-deleted key should push over the limit
+    // The exception is thrown during transaction commit, so it's wrapped
+    org.assertj.core.api.Assertions
+      .assertThatThrownBy {
+        keyService.restoreKey(testData.project.id, keyToSoftDelete.id)
+      }.hasRootCauseInstanceOf(PlanLimitExceededKeysException::class.java)
   }
 
   // TODO: Test cannot create key when status subscription status is ERROR

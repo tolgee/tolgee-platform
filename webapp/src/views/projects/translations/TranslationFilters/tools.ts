@@ -24,6 +24,7 @@ export type FiltersInternal = {
   filterLabel?: string[];
   filterHasSuggestions?: boolean;
   filterHasNoSuggestions?: boolean;
+  filterDeletedByUserId?: number[];
 
   /*
    * Specifies which languages will be considered when filtering by translation state
@@ -48,7 +49,8 @@ export type AddParams =
   | ['filterHasComments']
   | ['filterLabel', string]
   | ['filterHasSuggestions']
-  | ['filterHasNoSuggestions'];
+  | ['filterHasNoSuggestions']
+  | ['filterDeletedByUserId', number];
 
 export type FilterActions = {
   addFilter: (...params: AddParams) => void;
@@ -58,4 +60,5 @@ export type FilterActions = {
 
 export type FilterOptions = {
   keyRelatedOnly?: boolean;
+  showDeletedBy?: boolean;
 };

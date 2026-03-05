@@ -92,8 +92,10 @@ class BranchSnapshotService(
                    AND tk.branch_id = :targetBranchId
                    AND tk.name = sk.name
                    AND coalesce(tk.namespace_id, -1) = coalesce(sk.namespace_id, -1)
+                   AND tk.deleted_at IS NULL
         WHERE sk.project_id = :projectId
           AND ${getBranchFilter("sk", sourceBranch.isDefault, "sourceBranchId")}
+          AND sk.deleted_at IS NULL
         RETURNING id, original_key_id
       )
       INSERT INTO temp_snapshot_mapping (source_key_id, snapshot_id)
@@ -205,8 +207,10 @@ class BranchSnapshotService(
                    AND ${getBranchFilter("tk", targetBranch.isDefault, "targetBranchId")}
                    AND tk.name = sk.name
                    AND coalesce(tk.namespace_id, -1) = coalesce(sk.namespace_id, -1)
+                   AND tk.deleted_at IS NULL
         WHERE sk.project_id = :projectId
           AND ${getBranchFilter("sk", sourceBranch.isDefault, "sourceBranchId")}
+          AND sk.deleted_at IS NULL
         RETURNING id, branch_key_id
       )
       INSERT INTO temp_snapshot_mapping (source_key_id, snapshot_id)

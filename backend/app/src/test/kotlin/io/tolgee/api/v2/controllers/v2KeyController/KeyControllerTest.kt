@@ -174,7 +174,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
 
     performProjectAuthDelete("keys/${testData.firstKey.id}", null).andIsOk
-    assertThat(keyService.findOptional(testData.firstKey.id)).isEmpty
+    assertThat(keyService.findOptional(testData.firstKey.id)).isPresent
+    assertThat(keyService.findOptional(testData.firstKey.id).get().deletedAt).isNotNull()
   }
 
   @ProjectJWTAuthTestMethod
@@ -183,7 +184,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
 
     performProjectAuthDelete("keys/${testData.keyWithReferences.id}", null).andIsOk
-    assertThat(keyService.findOptional(testData.keyWithReferences.id)).isEmpty
+    assertThat(keyService.findOptional(testData.keyWithReferences.id)).isPresent
+    assertThat(keyService.findOptional(testData.keyWithReferences.id).get().deletedAt).isNotNull()
   }
 
   @ProjectJWTAuthTestMethod
@@ -201,7 +203,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     saveTestDataAndPrepare()
 
     performProjectAuthDelete("keys/${testData.keyWithReferences.id},${testData.keyWithReferences.id}", null).andIsOk
-    assertThat(keyService.findOptional(testData.keyWithReferences.id)).isEmpty
+    assertThat(keyService.findOptional(testData.keyWithReferences.id)).isPresent
+    assertThat(keyService.findOptional(testData.keyWithReferences.id).get().deletedAt).isNotNull()
   }
 
   @ProjectJWTAuthTestMethod
@@ -224,8 +227,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     projectSupplier = { testData.project }
     performProjectAuthDelete("keys/${testData.firstKey.id},${testData.secondKey.id}", null).andIsOk
-    assertThat(keyService.findOptional(testData.firstKey.id)).isEmpty
-    assertThat(keyService.findOptional(testData.secondKey.id)).isEmpty
+    assertThat(keyService.findOptional(testData.firstKey.id).get().deletedAt).isNotNull()
+    assertThat(keyService.findOptional(testData.secondKey.id).get().deletedAt).isNotNull()
   }
 
   @ProjectJWTAuthTestMethod
@@ -238,8 +241,8 @@ class KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       "keys",
       mapOf("ids" to listOf(testData.firstKey.id, testData.secondKey.id)),
     ).andIsOk
-    assertThat(keyService.findOptional(testData.firstKey.id)).isEmpty
-    assertThat(keyService.findOptional(testData.secondKey.id)).isEmpty
+    assertThat(keyService.findOptional(testData.firstKey.id).get().deletedAt).isNotNull()
+    assertThat(keyService.findOptional(testData.secondKey.id).get().deletedAt).isNotNull()
   }
 
   @ProjectJWTAuthTestMethod

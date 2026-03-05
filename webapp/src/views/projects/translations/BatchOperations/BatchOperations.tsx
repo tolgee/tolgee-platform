@@ -1,6 +1,8 @@
 import { Box, styled } from '@mui/material';
 import { useState } from 'react';
+import { useQueryClient } from 'react-query';
 import { useProjectActions } from 'tg.hooks/ProjectContext';
+import { invalidateUrlPrefix } from 'tg.service/http/useQueryApi';
 
 import {
   useTranslationsActions,
@@ -70,6 +72,7 @@ export const BatchOperations = ({ open, onClose }: Props) => {
   const { selectionClear, refetchTranslations } = useTranslationsActions();
   const { refetchBatchJobs } = useProjectActions();
 
+  const queryClient = useQueryClient();
   const [operationId, setOperationId] = useState<BatchActions>();
   const [runningOperation, setRunningOperation] = useState<BatchJobModel>();
 
@@ -85,6 +88,7 @@ export const BatchOperations = ({ open, onClose }: Props) => {
     refetchTranslations();
     selectionClear();
     setOperationId(undefined);
+    invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/keys/trash');
     onClose();
   }
 

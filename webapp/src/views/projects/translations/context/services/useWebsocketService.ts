@@ -32,7 +32,8 @@ export const useWebsocketService = (
     const keyUpdates = event.data?.keys?.map((key) => ({
       keyId: key.id,
       value:
-        key.changeType == 'DEL'
+        key.changeType === 'DEL' ||
+        (key.modifications as Record<string, any>)?.deletedAt?.new != null
           ? { deleted: true }
           : {
               ...getModifyingObject(key.modifications, {

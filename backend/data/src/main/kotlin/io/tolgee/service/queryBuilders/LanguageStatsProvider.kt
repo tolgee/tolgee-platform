@@ -108,7 +108,10 @@ open class LanguageStatsProvider(
   ) {
     val branchJoin = join.join(Key_.branch, JoinType.LEFT)
     subquery.where(
-      branchPredicate(branchJoin, join.get(Key_.branch)),
+      cb.and(
+        branchPredicate(branchJoin, join.get(Key_.branch)),
+        cb.isNull(join.get(Key_.deletedAt)),
+      ),
     )
   }
 
