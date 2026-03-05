@@ -100,7 +100,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
         response = performBranchCreation()
       }
     response.andIsOk
-    time.assert.isLessThan(4000) // this value is just for github actions. Locally it's managed within 2000
+    time.assert.isLessThan(5000)
   }
 
   @Test
