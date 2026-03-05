@@ -43,9 +43,6 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   lateinit var branchSnapshotService: BranchSnapshotService
 
   @Autowired
-  lateinit var branchCleanupService: BranchCleanupService
-
-  @Autowired
   lateinit var branchRepository: BranchRepository
 
   @Autowired
@@ -250,7 +247,10 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   fun `apply merge - moves finished and cancels unfinished tasks when deleting branch`() {
     val merge = prepareMergeScenario()
     branchService.applyMerge(testData.project.id, merge.id, true)
-    branchCleanupService.waitForPendingCleanups()
+
+    waitForNotThrowing(timeout = 10000, pollTime = 100) {
+      branchRepository.findByIdOrNull(testData.featureBranch.id).assert.isNull()
+    }
 
     testData.featureOpenTask
       .refresh()

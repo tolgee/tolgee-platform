@@ -7,7 +7,6 @@ import io.tolgee.development.testDataBuilder.data.BranchTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
-import io.tolgee.ee.service.branching.BranchCleanupService
 import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.ee.service.branching.DefaultBranchCreator
 import io.tolgee.fixtures.andAssertThatJson
@@ -19,6 +18,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.Scope
@@ -54,9 +54,6 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
-
-  @Autowired
-  lateinit var branchCleanupService: BranchCleanupService
 
   @BeforeEach
   fun setup() {
@@ -224,11 +221,12 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   )
   fun `deletes branch`() {
     performProjectAuthDelete("branches/${testData.mergeBranch.id}").andIsOk
-    branchCleanupService.waitForPendingCleanups()
-    testData.mergeBranch
-      .refresh()
-      .assert
-      .isNull()
+    waitForNotThrowing(timeout = 10000, pollTime = 100) {
+      testData.mergeBranch
+        .refresh()
+        .assert
+        .isNull()
+    }
   }
 
   @Test

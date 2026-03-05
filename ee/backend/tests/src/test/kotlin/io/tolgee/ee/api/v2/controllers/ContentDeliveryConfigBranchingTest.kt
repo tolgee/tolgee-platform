@@ -7,13 +7,13 @@ import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.ContentDeliveryConfigBranchingTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchRepository
-import io.tolgee.ee.service.branching.BranchCleanupService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -37,9 +37,6 @@ class ContentDeliveryConfigBranchingTest : ProjectAuthControllerTest("/v2/projec
 
   @Autowired
   private lateinit var batchJobConcurrentLauncher: BatchJobConcurrentLauncher
-
-  @Autowired
-  lateinit var branchCleanupService: BranchCleanupService
 
   @BeforeEach
   fun setup() {
@@ -133,12 +130,13 @@ class ContentDeliveryConfigBranchingTest : ProjectAuthControllerTest("/v2/projec
   @ProjectJWTAuthTestMethod
   fun `delete branch deletes CDN configs for that branch`() {
     performProjectAuthDelete("branches/${testData.featureBranch.id}").andIsOk
-    branchCleanupService.waitForPendingCleanups()
 
-    executeInNewTransaction {
-      contentDeliveryConfigService.find(testData.featureBranchCdnConfig.self.id).assert.isNull()
-      // main branch configs are unaffected
-      contentDeliveryConfigService.find(testData.mainBranchCdnConfig.self.id).assert.isNotNull()
+    waitForNotThrowing(timeout = 10000, pollTime = 100) {
+      executeInNewTransaction {
+        contentDeliveryConfigService.find(testData.featureBranchCdnConfig.self.id).assert.isNull()
+        // main branch configs are unaffected
+        contentDeliveryConfigService.find(testData.mainBranchCdnConfig.self.id).assert.isNotNull()
+      }
     }
   }
 

@@ -165,7 +165,6 @@ class BranchServiceImpl(
         activityHolder.forceEntityRevisionType(branch, RevisionType.DEL)
         branch.deletedAt = Date()
         branchRepository.save(branch)
-        branchCleanupService.trackCleanup()
         applicationEventPublisher.publishEvent(OnBranchSoftDeleted(projectId, branchId))
       },
     )

@@ -18,7 +18,6 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
-import java.util.concurrent.atomic.AtomicInteger
 
 @Suppress("SelfReferenceConstructorParameter")
 @Service
@@ -41,31 +40,10 @@ class BranchCleanupService(
     LoggerFactory.getLogger(javaClass)
   }
 
-  private val pendingCleanups = AtomicInteger(0)
-
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   @Async
   fun onBranchSoftDeleted(event: OnBranchSoftDeleted) {
-    try {
-      self.cleanupBranch(event.projectId, event.branchId)
-    } finally {
-      pendingCleanups.decrementAndGet()
-    }
-  }
-
-  fun trackCleanup() {
-    pendingCleanups.incrementAndGet()
-  }
-
-  /**
-   * Waits for all pending async cleanups to complete.
-   * Intended for use in tests only.
-   */
-  fun waitForPendingCleanups(timeoutMs: Long = 30000) {
-    val deadline = System.currentTimeMillis() + timeoutMs
-    while (pendingCleanups.get() > 0 && System.currentTimeMillis() < deadline) {
-      Thread.sleep(100)
-    }
+    self.cleanupBranch(event.projectId, event.branchId)
   }
 
   /**

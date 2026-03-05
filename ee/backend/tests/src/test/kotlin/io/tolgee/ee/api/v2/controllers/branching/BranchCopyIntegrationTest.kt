@@ -6,9 +6,9 @@ import io.tolgee.development.testDataBuilder.data.BranchTranslationsTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
-import io.tolgee.ee.service.branching.BranchCleanupService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyMetaRepository
 import io.tolgee.repository.KeyRepository
@@ -48,9 +48,6 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var keySnapshotRepository: KeySnapshotRepository
-
-  @Autowired
-  lateinit var branchCleanupService: BranchCleanupService
 
   @BeforeEach
   fun setup() {
@@ -114,16 +111,17 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.user
 
     performBranchDeletion(testData.toBeDeletedBranch.id).andIsOk
-    branchCleanupService.waitForPendingCleanups()
 
-    keyRepository
-      .countByProjectAndBranch(
-        testData.project.id,
-        testData.toBeDeletedBranch.id,
-      ).assert
-      .isEqualTo(0)
-    keySnapshotRepository.findAllByBranchId(testData.toBeDeletedBranch.id).assert.isEmpty()
-    branchRepository.findByIdOrNull(testData.toBeDeletedBranch.id).assert.isNull()
+    waitForNotThrowing(timeout = 10000, pollTime = 100) {
+      keyRepository
+        .countByProjectAndBranch(
+          testData.project.id,
+          testData.toBeDeletedBranch.id,
+        ).assert
+        .isEqualTo(0)
+      keySnapshotRepository.findAllByBranchId(testData.toBeDeletedBranch.id).assert.isEmpty()
+      branchRepository.findByIdOrNull(testData.toBeDeletedBranch.id).assert.isNull()
+    }
   }
 
   private fun performBranchCreation(): ResultActions {
