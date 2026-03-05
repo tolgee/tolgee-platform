@@ -54,4 +54,14 @@ class BatchProperties {
     defaultExplanation = "30 seconds",
   )
   var cancellationTimeoutMs: Long = 30000
+
+  @DocProperty(
+    description =
+      "Maximum number of concurrently running non-exclusive jobs per project per instance. " +
+        "This prevents a single project with many non-exclusive jobs (e.g. AUTO_TRANSLATE) " +
+        "from monopolizing all worker coroutines and starving other projects. " +
+        "The limit is enforced locally on each Tolgee instance, not globally across the cluster.",
+    defaultExplanation = "2",
+  )
+  var maxNonExclusiveJobsPerProject: Int = 2
 }
