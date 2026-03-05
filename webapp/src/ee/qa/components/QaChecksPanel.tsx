@@ -37,14 +37,14 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
   const project = useProject();
 
   const ignoreMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/{issueId}/ignore',
-    method: 'put',
+    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/ignore',
+    method: 'post',
     invalidatePrefix: '/v2/projects/{projectId}/qa-check/preview',
   });
 
   const unignoreMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/{issueId}/unignore',
-    method: 'put',
+    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/unignore',
+    method: 'post',
     invalidatePrefix: '/v2/projects/{projectId}/qa-check/preview',
   });
 
@@ -68,18 +68,18 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
   };
 
   const handleIgnoreToggle = (issue: (typeof issues)[0]) => {
-    const persistedIssueId = issue.persistedIssueId;
-    if (persistedIssueId == null) return;
-
     const translationId = data.keyData.translations[data.language.tag]?.id;
     if (translationId == null) return;
 
-    const mutation = issue.ignored ? unignoreMutation : ignoreMutation;
+    const mutation =
+      issue.state === 'IGNORED' ? unignoreMutation : ignoreMutation;
     mutation.mutate({
       path: {
         projectId: project!.id,
         translationId,
-        issueId: persistedIssueId,
+      },
+      content: {
+        'application/json': issue,
       },
     });
   };
@@ -94,15 +94,11 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
           text={text}
           slim={true}
           onCorrect={
-            issue.replacement != null && !issue.ignored
+            issue.replacement != null && issue.state === 'OPEN'
               ? () => handleCorrect(issue)
               : undefined
           }
-          onIgnore={
-            issue.persistedIssueId != null
-              ? () => handleIgnoreToggle(issue)
-              : undefined
-          }
+          onIgnore={() => handleIgnoreToggle(issue)}
         />
       ))}
     </StyledContainer>

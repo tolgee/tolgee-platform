@@ -1,19 +1,13 @@
 package io.tolgee.ee.data.qa
 
-import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Pattern
-import jakarta.validation.constraints.Size
+import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.model.enums.qa.QaIssueMessage
 
-class QaCheckPreviewRequest {
-  @field:Size(max = 65536)
-  val text: String = ""
-
-  @Schema(example = "cs-CZ", description = "Language tag according to BCP 47 definition")
-  @field:NotBlank
-  @field:Size(max = 20)
-  @field:Pattern(regexp = "^[^,]*$", message = "can not contain coma")
-  val languageTag: String = ""
-
-  val keyId: Long? = null
-}
+data class QaCheckIssueIgnoreRequest(
+  val type: QaCheckType,
+  val message: QaIssueMessage,
+  val replacement: String?,
+  val positionStart: Int,
+  val positionEnd: Int,
+  val params: Map<String, String>? = null,
+)

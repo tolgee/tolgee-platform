@@ -120,7 +120,12 @@ class QueryBase<T>(
       outdatedFieldMap[language.tag] = outdatedField
 
       val autoTranslatedField = addAutoTranslatedField(translation, language)
-      queryTranslationFiltering.apply(language, translationTextField, translationStateField, autoTranslatedField)
+      queryTranslationFiltering.applyStateFilter(
+        language,
+        translationTextField,
+        translationStateField,
+        autoTranslatedField,
+      )
 
       this.querySelection[language to TranslationView::mtProvider] = translation.get(Translation_.mtProvider)
       val resolvedCommentsExpression = addComments(translation, language)
@@ -129,7 +134,7 @@ class QueryBase<T>(
       addTotalSuggestionsCount(language)
       val qaIssueCountExpression = addQaIssueCount(translation, language)
 
-      queryTranslationFiltering.apply(
+      queryTranslationFiltering.applyCommentsFilter(
         language,
         resolvedCommentsExpression,
         unresolvedCommentsExpression,
@@ -137,14 +142,14 @@ class QueryBase<T>(
 
       queryTranslationFiltering.applyQaFilter(language, qaIssueCountExpression)
 
-      queryTranslationFiltering.apply(
+      queryTranslationFiltering.applyLabelFilter(
         language,
         translation,
       )
-      queryTranslationFiltering.apply(language, activeSuggestionsExpression)
+      queryTranslationFiltering.applySuggestionsFilter(language, activeSuggestionsExpression)
     }
 
-    queryTranslationFiltering.apply(outdatedFieldMap)
+    queryTranslationFiltering.applyOutdatedFilter(outdatedFieldMap)
   }
 
   private fun addTranslationOutdatedField(
