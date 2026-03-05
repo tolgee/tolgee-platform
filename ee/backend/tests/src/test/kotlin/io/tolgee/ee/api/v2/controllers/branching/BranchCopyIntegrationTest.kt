@@ -6,7 +6,7 @@ import io.tolgee.development.testDataBuilder.data.BranchTranslationsTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
-import io.tolgee.ee.service.branching.BranchCleanupWorker
+import io.tolgee.ee.service.branching.BranchCleanupService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.key.Key
@@ -47,10 +47,10 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @Autowired
-  lateinit var branchCleanupWorker: BranchCleanupWorker
+  lateinit var keySnapshotRepository: KeySnapshotRepository
 
   @Autowired
-  lateinit var keySnapshotRepository: KeySnapshotRepository
+  lateinit var branchCleanupService: BranchCleanupService
 
   @BeforeEach
   fun setup() {
@@ -103,7 +103,7 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
         response = performBranchCreation()
       }
     response.andIsOk
-    time.assert.isLessThan(6000) // this value is just for github actions. Locally it's managed within 2000
+    time.assert.isLessThan(4000) // this value is just for github actions. Locally it's managed within 2000
   }
 
   @Test
@@ -114,10 +114,8 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     userAccount = testData.user
 
     performBranchDeletion(testData.toBeDeletedBranch.id).andIsOk
+    branchCleanupService.waitForPendingCleanups()
 
-    // Cleanup runs asynchronously after the HTTP response.
-    // Wait for it to complete, then verify all branch data was hard-deleted.
-    branchCleanupWorker.waitForPendingCleanups()
     keyRepository
       .countByProjectAndBranch(
         testData.project.id,

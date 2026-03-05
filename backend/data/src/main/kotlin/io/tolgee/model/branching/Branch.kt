@@ -7,11 +7,8 @@ import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.SnapshotStatus
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.Index
 import jakarta.persistence.JoinColumn
@@ -93,23 +90,6 @@ class Branch(
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "origin_branch_id")
   var originBranch: Branch? = null
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "snapshot_status", length = 20)
-  var snapshotStatus: SnapshotStatus = SnapshotStatus.READY
-
-  @Column(name = "write_locked")
-  @ColumnDefault("false")
-  var writeLocked: Boolean = false
-
-  @Column(name = "snapshot_started_at")
-  var snapshotStartedAt: Date? = null
-
-  @Column(name = "snapshot_finished_at")
-  var snapshotFinishedAt: Date? = null
-
-  @Column(name = "snapshot_error_message", length = 500)
-  var snapshotErrorMessage: String? = null
 
   val lastMerge: BranchMerge?
     get() = merges.firstOrNull()

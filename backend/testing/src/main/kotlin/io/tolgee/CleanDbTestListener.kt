@@ -2,7 +2,6 @@ package io.tolgee
 
 import io.tolgee.batch.BatchJobChunkExecutionQueue
 import io.tolgee.batch.BatchJobConcurrentLauncher
-import io.tolgee.component.BackgroundCleanupTracker
 import kotlinx.coroutines.TimeoutCancellationException
 import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
@@ -36,13 +35,6 @@ class CleanDbTestListener : TestExecutionListener {
     val appContext: ApplicationContext = testContext.applicationContext
     val batchJobConcurrentLauncher = appContext.getBean(BatchJobConcurrentLauncher::class.java)
     val batchJobQueue = appContext.getBean(BatchJobChunkExecutionQueue::class.java)
-
-    // Wait for any background cleanup workers (e.g. BranchCleanupWorker) to finish
-    // before truncating tables.  Without this, their long-running transactions hold
-    // row-level locks that deadlock with ALTER TABLE … DISABLE TRIGGER ALL below.
-    appContext.getBeansOfType(BackgroundCleanupTracker::class.java).values.forEach {
-      it.waitForPendingCleanups()
-    }
 
     batchJobConcurrentLauncher.pause = true
     batchJobQueue.clear()

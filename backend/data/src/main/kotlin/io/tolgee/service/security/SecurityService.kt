@@ -585,9 +585,6 @@ class SecurityService(
     branch: Branch?,
     projectId: Long,
   ) {
-    if (branch?.writeLocked == true) {
-      throw io.tolgee.exceptions.BranchWriteLockedException(Message.BRANCH_WRITE_LOCKED)
-    }
     if (branch?.isProtected == true) {
       checkProjectPermission(projectId, Scope.BRANCH_PROTECTED_MODIFY)
     }

@@ -1,6 +1,7 @@
 package io.tolgee.ee.service.branching
 
 import io.tolgee.Metrics
+import io.tolgee.events.OnBranchSoftDeleted
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.service.key.ScreenshotService
 import jakarta.persistence.EntityManager
@@ -8,8 +9,13 @@ import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Lazy
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.event.TransactionPhase
+import org.springframework.transaction.event.TransactionalEventListener
+import java.util.concurrent.atomic.AtomicInteger
 
+@Suppress("SelfReferenceConstructorParameter")
 @Service
 class BranchCleanupService(
   private val branchSnapshotService: BranchSnapshotService,
@@ -18,18 +24,44 @@ class BranchCleanupService(
   private val metrics: Metrics,
   @Lazy
   private val contentDeliveryConfigService: ContentDeliveryConfigService,
+  @Lazy
+  private val self: BranchCleanupService,
 ) {
   val logger: Logger by lazy {
     LoggerFactory.getLogger(javaClass)
   }
 
+  private val pendingCleanups = AtomicInteger(0)
+
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  @Async
+  fun onBranchSoftDeleted(event: OnBranchSoftDeleted) {
+    try {
+      self.cleanupBranch(event.projectId, event.branchId)
+    } finally {
+      pendingCleanups.decrementAndGet()
+    }
+  }
+
+  fun trackCleanup() {
+    pendingCleanups.incrementAndGet()
+  }
+
+  /**
+   * Waits for all pending async cleanups to complete.
+   * Intended for use in tests only.
+   */
+  fun waitForPendingCleanups(timeoutMs: Long = 30000) {
+    val deadline = System.currentTimeMillis() + timeoutMs
+    while (pendingCleanups.get() > 0 && System.currentTimeMillis() < deadline) {
+      Thread.sleep(100)
+    }
+  }
+
   /**
    * Deletes all data associated with a branch and hard-deletes the branch row.
    *
-   * The branch has already been soft-deleted (deletedAt set) by the HTTP request,
-   * so it is invisible to users. This method runs on a background thread via
-   * [BranchCleanupWorker] and uses bulk SQL DELETE statements to avoid the
-   * N×1000-batch ORM approach.
+   * Uses bulk SQL DELETE statements for performance.
    *
    * Deletion order respects FK constraints:
    *   translation children → translations → key_meta children → key_metas
@@ -148,6 +180,15 @@ class BranchCleanupService(
     )
 
     // --- task_key must be deleted before both tasks and keys ---
+    // Delete task_key rows referencing keys on this branch (from tasks on ANY branch).
+    exec(
+      """
+      DELETE FROM task_key
+      WHERE key_id IN (SELECT id FROM key WHERE branch_id = :branchId)
+      """,
+      "branchId" to branchId,
+    )
+    // Delete task_key rows belonging to tasks on this branch.
     exec(
       """
       DELETE FROM task_key

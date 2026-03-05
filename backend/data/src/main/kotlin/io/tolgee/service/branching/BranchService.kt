@@ -128,9 +128,4 @@ interface BranchService {
   fun deleteAllByProjectId(projectId: Long)
 
   fun deleteBranchMergeChangesByKeyIds(keyIds: Set<Long>)
-
-  fun retrySnapshot(
-    projectId: Long,
-    branchId: Long,
-  ): Branch
 }

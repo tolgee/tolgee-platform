@@ -12,6 +12,7 @@ import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.TaskService
+import io.tolgee.events.OnBranchSoftDeleted
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -20,11 +21,11 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.enums.BranchKeyMergeChangeType
-import io.tolgee.model.enums.SnapshotStatus
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.AbstractBranchService
 import io.tolgee.service.branching.BranchCopyService
 import jakarta.persistence.EntityManager
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -40,13 +41,12 @@ class BranchServiceImpl(
   private val entityManager: EntityManager,
   private val branchCopyService: BranchCopyService,
   private val branchSnapshotService: BranchSnapshotService,
-  private val branchSnapshotWorker: BranchSnapshotWorker,
-  private val branchCleanupWorker: BranchCleanupWorker,
   private val taskService: TaskService,
   private val authenticationFacade: AuthenticationFacade,
   private val projectBranchingMigrationService: ProjectBranchingMigrationService,
   private val activityHolder: ActivityHolder,
   private val branchCleanupService: BranchCleanupService,
+  private val applicationEventPublisher: ApplicationEventPublisher,
   private val metrics: Metrics,
 ) : AbstractBranchService(branchRepository, branchMergeService) {
   override fun getBranches(
@@ -124,36 +124,13 @@ class BranchServiceImpl(
       val branch =
         createBranch(projectId, name, author).also {
           it.originBranch = originBranch
-          it.snapshotStatus = SnapshotStatus.PENDING
-          it.writeLocked = true
         }
       branchRepository.save(branch)
 
       branchCopyService.copy(projectId, originBranch, branch)
-
-      // Enqueue snapshot build after commit so the branch and its keys are visible to the worker.
-      branchSnapshotWorker.scheduleSnapshot(branch.id)
+      branchSnapshotService.createInitialSnapshot(projectId, originBranch, branch)
       branch
     }!!
-  }
-
-  @Transactional
-  override fun retrySnapshot(
-    projectId: Long,
-    branchId: Long,
-  ): Branch {
-    val branch =
-      branchRepository.findActiveByProjectIdAndId(projectId, branchId)
-        ?: throw NotFoundException(Message.BRANCH_NOT_FOUND)
-    if (branch.snapshotStatus != SnapshotStatus.FAILED) {
-      throw BadRequestException(Message.BRANCH_SNAPSHOT_RETRY_NOT_ALLOWED)
-    }
-    branch.snapshotStatus = SnapshotStatus.PENDING
-    branch.writeLocked = true
-    branch.snapshotErrorMessage = null
-    branchRepository.save(branch)
-    branchSnapshotWorker.scheduleSnapshot(branch.id)
-    return branch
   }
 
   private fun createBranch(
@@ -185,13 +162,11 @@ class BranchServiceImpl(
         if (branchRepository.existsActiveByOriginBranchId(branchId)) {
           throw BadRequestException(Message.CANNOT_DELETE_BRANCH_WITH_CHILDREN)
         }
-        // Record the activity log entry in this transaction (needs current user context).
         activityHolder.forceEntityRevisionType(branch, RevisionType.DEL)
-        // Soft-delete so the branch disappears from the UI immediately.
-        // The heavy data cleanup runs on a background thread after commit.
         branch.deletedAt = Date()
         branchRepository.save(branch)
-        branchCleanupWorker.scheduleCleanup(projectId, branchId)
+        branchCleanupService.trackCleanup()
+        applicationEventPublisher.publishEvent(OnBranchSoftDeleted(projectId, branchId))
       },
     )
   }
@@ -202,9 +177,6 @@ class BranchServiceImpl(
     request: DryRunMergeBranchRequest,
   ): BranchMerge {
     val sourceBranch = getActiveBranch(projectId, request.sourceBranchId)
-    if (sourceBranch.snapshotStatus != SnapshotStatus.READY) {
-      throw BadRequestException(Message.BRANCH_SNAPSHOT_NOT_READY)
-    }
     val origin = sourceBranch.originBranch ?: throw BadRequestException(Message.ORIGIN_BRANCH_NOT_FOUND)
     val targetBranch = getActiveBranch(projectId, origin.id)
     return dryRunMerge(sourceBranch, targetBranch)
@@ -227,9 +199,6 @@ class BranchServiceImpl(
     val merge =
       branchMergeService.findActiveMergeFull(projectId, mergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
-    if (merge.sourceBranch.snapshotStatus != SnapshotStatus.READY) {
-      throw BadRequestException(Message.BRANCH_SNAPSHOT_NOT_READY)
-    }
     if (!merge.isReadyToMerge) {
       if (!merge.isRevisionValid) {
         throw BadRequestException(Message.BRANCH_MERGE_REVISION_NOT_VALID)

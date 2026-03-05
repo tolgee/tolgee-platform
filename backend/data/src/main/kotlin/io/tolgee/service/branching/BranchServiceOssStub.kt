@@ -147,11 +147,4 @@ class BranchServiceOssStub(
   override fun enableBranchingOnProject(projectId: Long) {
     throw UnsupportedOperationException()
   }
-
-  override fun retrySnapshot(
-    projectId: Long,
-    branchId: Long,
-  ): Branch {
-    throw UnsupportedOperationException()
-  }
 }

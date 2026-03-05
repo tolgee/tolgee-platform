@@ -473,9 +473,6 @@ export interface paths {
   "/v2/projects/{projectId}/branches/{branchId}/protected": {
     post: operations["setProtected"];
   };
-  "/v2/projects/{projectId}/branches/{branchId}/snapshot/retry": {
-    post: operations["retrySnapshot"];
-  };
   "/v2/projects/{projectId}/content-delivery-configs": {
     get: operations["list_2"];
     post: operations["create_10"];
@@ -1696,11 +1693,6 @@ export interface components {
       name: string;
       /** @description Name of the branch this branch was created from */
       originBranchName?: string;
-      /**
-       * @description Status of snapshot creation. PENDING/RUNNING = branch is initializing (writes may be restricted), READY = branch is fully editable, FAILED = snapshot failed (use retry endpoint to rebuild)
-       * @enum {string}
-       */
-      snapshotStatus: "PENDING" | "RUNNING" | "READY" | "FAILED";
     };
     BusinessEventReportRequest: {
       anonymousUserId?: string;
@@ -2933,10 +2925,7 @@ export interface components {
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
         | "branching_not_enabled_for_project"
-        | "export_key_plural_suffix_collision"
-        | "branch_write_locked"
-        | "branch_snapshot_not_ready"
-        | "branch_snapshot_retry_not_allowed";
+        | "export_key_plural_suffix_collision";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -6350,10 +6339,7 @@ export interface components {
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
         | "branching_not_enabled_for_project"
-        | "export_key_plural_suffix_collision"
-        | "branch_write_locked"
-        | "branch_snapshot_not_ready"
-        | "branch_snapshot_retry_not_allowed";
+        | "export_key_plural_suffix_collision";
       params?: unknown[];
       success: boolean;
     };
@@ -13330,46 +13316,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetBranchProtectedModel"];
-      };
-    };
-  };
-  retrySnapshot: {
-    parameters: {
-      path: {
-        branchId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["BranchModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json": string;
-        };
       };
     };
   };

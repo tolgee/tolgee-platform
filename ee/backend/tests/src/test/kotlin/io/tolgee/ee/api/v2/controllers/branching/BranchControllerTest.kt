@@ -7,7 +7,7 @@ import io.tolgee.development.testDataBuilder.data.BranchTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.repository.branching.BranchMergeRepository
 import io.tolgee.ee.repository.branching.BranchRepository
-import io.tolgee.ee.service.branching.BranchCleanupWorker
+import io.tolgee.ee.service.branching.BranchCleanupService
 import io.tolgee.ee.service.branching.BranchSnapshotService
 import io.tolgee.ee.service.branching.DefaultBranchCreator
 import io.tolgee.fixtures.andAssertThatJson
@@ -44,9 +44,6 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var branchMergeRepository: BranchMergeRepository
 
   @Autowired
-  lateinit var branchCleanupWorker: BranchCleanupWorker
-
-  @Autowired
   lateinit var branchSnapshotService: BranchSnapshotService
 
   @Autowired
@@ -57,6 +54,9 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @Autowired
   lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
+  @Autowired
+  lateinit var branchCleanupService: BranchCleanupService
 
   @BeforeEach
   fun setup() {
@@ -224,9 +224,7 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   )
   fun `deletes branch`() {
     performProjectAuthDelete("branches/${testData.mergeBranch.id}").andIsOk
-    // Cleanup runs asynchronously after the HTTP response.
-    // Wait for it to complete, then verify the branch row was hard-deleted.
-    branchCleanupWorker.waitForPendingCleanups()
+    branchCleanupService.waitForPendingCleanups()
     testData.mergeBranch
       .refresh()
       .assert

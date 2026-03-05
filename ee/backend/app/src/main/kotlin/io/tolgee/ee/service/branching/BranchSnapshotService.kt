@@ -41,8 +41,7 @@ class BranchSnapshotService(
     sourceBranch: Branch,
     targetBranch: Branch,
   ) {
-    // Read data from targetBranch (protected by write-lock / REPEATABLE READ) so that
-    // edits made to origin after write-lock is released are not included in the snapshot.
+    // Read data from targetBranch (just copied from sourceBranch within the same transaction).
     // Read original_key_id from sourceBranch for merge-analyzer correlation.
     val sql =
       """
