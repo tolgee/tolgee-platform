@@ -159,6 +159,8 @@ class BranchCleanupService(
     }
 
     // --- Other key children (bulk SQL) ---
+    execByBranch("DELETE FROM task_key WHERE key_id IN ($keySub)", branchId)
+    execByBranch("DELETE FROM translation_suggestion WHERE key_id IN ($keySub)", branchId)
     execByBranch("DELETE FROM ai_playground_result WHERE key_id IN ($keySub)", branchId)
 
     // --- Collect namespaces before deleting keys ---
