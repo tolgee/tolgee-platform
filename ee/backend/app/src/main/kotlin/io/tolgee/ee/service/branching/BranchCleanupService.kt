@@ -1,8 +1,13 @@
 package io.tolgee.ee.service.branching
 
 import io.tolgee.Metrics
+import io.tolgee.ee.repository.branching.BranchMergeRepository
+import io.tolgee.ee.repository.branching.BranchRepository
+import io.tolgee.ee.service.TaskService
 import io.tolgee.events.OnBranchSoftDeleted
+import io.tolgee.repository.LanguageStatsRepository
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
+import io.tolgee.service.key.NamespaceService
 import io.tolgee.service.key.ScreenshotService
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
@@ -18,8 +23,13 @@ import java.util.concurrent.atomic.AtomicInteger
 @Suppress("SelfReferenceConstructorParameter")
 @Service
 class BranchCleanupService(
+  private val branchRepository: BranchRepository,
+  private val branchMergeRepository: BranchMergeRepository,
+  private val taskService: TaskService,
   private val branchSnapshotService: BranchSnapshotService,
   private val screenshotService: ScreenshotService,
+  private val namespaceService: NamespaceService,
+  private val languageStatsRepository: LanguageStatsRepository,
   private val entityManager: EntityManager,
   private val metrics: Metrics,
   @Lazy
@@ -59,15 +69,10 @@ class BranchCleanupService(
   }
 
   /**
-   * Deletes all data associated with a branch and hard-deletes the branch row.
+   * Deletes all branch-related data and hard-deletes the branch row.
    *
-   * Uses bulk SQL DELETE statements for performance.
-   *
-   * Deletion order respects FK constraints:
-   *   translation children → translations → key_meta children → key_metas
-   *   → screenshots → other key children → task children → tasks
-   *   → branch_merge children → branch_merges → snapshots → keys
-   *   → namespaces (unused) → branch
+   * Uses bulk SQL for high-volume tables (translations, key metadata, keys)
+   * and delegates to services for business logic (screenshots, namespaces, tasks).
    */
   @Transactional
   fun cleanupBranch(
@@ -76,216 +81,150 @@ class BranchCleanupService(
   ) {
     logger.info("Starting cleanup for branch $branchId")
 
-    // Content delivery configs have automations with complex cascades — keep existing logic.
-    // In practice branches have at most a handful of configs so this is not a bottleneck.
     contentDeliveryConfigService.deleteAllByBranchId(projectId, branchId)
-
-    // Delete screenshot files before removing the DB rows (files have no FK constraints).
-    screenshotService.deleteFilesByBranch(branchId)
-
-  /**
-   * Deletes all keys associated with the branch in batches.
-   * KeyService.deleteMultiple handles cascading deletion of translations, metadata, etc.
-   * Always queries page 0 since deletion shifts remaining keys.
-   */
-  private fun cleanupBranchKeys(
-    projectId: Long,
-    branchId: Long,
-  ) {
-    var totalDeleted = 0
-    var batchCount = 0
-
-    // --- Translations ---
-    exec(
-      "DELETE FROM translation WHERE key_id IN (SELECT id FROM key WHERE branch_id = :branchId)",
-      "branchId" to branchId,
-    )
-
-    // --- Key-meta children ---
-    exec(
-      """
-      DELETE FROM key_comment
-      WHERE key_meta_id IN (
-        SELECT id FROM key_meta WHERE key_id IN (
-          SELECT id FROM key WHERE branch_id = :branchId
-        )
-      )
-      """,
-      "branchId" to branchId,
-    )
-    exec(
-      """
-      DELETE FROM key_code_reference
-      WHERE key_meta_id IN (
-        SELECT id FROM key_meta WHERE key_id IN (
-          SELECT id FROM key WHERE branch_id = :branchId
-        )
-      )
-      """,
-      "branchId" to branchId,
-    )
-    exec(
-      """
-      DELETE FROM key_meta_tags
-      WHERE key_metas_id IN (
-        SELECT id FROM key_meta WHERE key_id IN (
-          SELECT id FROM key WHERE branch_id = :branchId
-        )
-      )
-      """,
-      "branchId" to branchId,
-    )
-    exec(
-      "DELETE FROM key_meta WHERE key_id IN (SELECT id FROM key WHERE branch_id = :branchId)",
-      "branchId" to branchId,
-    )
-
-    // --- Screenshots ---
-    // Collect IDs of screenshots exclusively referenced by keys in this branch —
-    // they will become fully orphaned once we delete the references below.
-    @Suppress("UNCHECKED_CAST")
-    val orphanScreenshotIds =
-      entityManager
-        .createNativeQuery(
-          """
-          SELECT DISTINCT ksr.screenshot_id
-          FROM key_screenshot_reference ksr
-          JOIN key k ON k.id = ksr.key_id
-          WHERE k.branch_id = :branchId
-            AND NOT EXISTS (
-              SELECT 1 FROM key_screenshot_reference other
-              JOIN key ok ON ok.id = other.key_id
-              WHERE other.screenshot_id = ksr.screenshot_id
-                AND ok.branch_id != :branchId
-            )
-          """.trimIndent(),
-        ).setParameter("branchId", branchId)
-        .resultList as List<Long>
-
-    exec(
-      "DELETE FROM key_screenshot_reference WHERE key_id IN (SELECT id FROM key WHERE branch_id = :branchId)",
-      "branchId" to branchId,
-    )
-    if (orphanScreenshotIds.isNotEmpty()) {
-      entityManager
-        .createNativeQuery("DELETE FROM screenshot WHERE id IN (:ids)")
-        .setParameter("ids", orphanScreenshotIds)
-        .executeUpdate()
-    }
-
-    // --- Other key children ---
-    exec(
-      "DELETE FROM ai_playground_result WHERE key_id IN (SELECT id FROM key WHERE branch_id = :branchId)",
-      "branchId" to branchId,
-    )
-
-    // --- task_key must be deleted before both tasks and keys ---
-    // Delete task_key rows referencing keys on this branch (from tasks on ANY branch).
-    exec(
-      """
-      DELETE FROM task_key
-      WHERE key_id IN (SELECT id FROM key WHERE branch_id = :branchId)
-      """,
-      "branchId" to branchId,
-    )
-    // Delete task_key rows belonging to tasks on this branch.
-    exec(
-      """
-      DELETE FROM task_key
-      WHERE task_id IN (
-        SELECT id FROM task WHERE project_id = :projectId AND branch_id = :branchId
-      )
-      """,
-      "projectId" to projectId,
-      "branchId" to branchId,
-    )
-    exec(
-      """
-      DELETE FROM task_assignees
-      WHERE tasks_id IN (
-        SELECT id FROM task WHERE project_id = :projectId AND branch_id = :branchId
-      )
-      """,
-      "projectId" to projectId,
-      "branchId" to branchId,
-    )
-    exec(
-      "DELETE FROM task WHERE project_id = :projectId AND branch_id = :branchId",
-      "projectId" to projectId,
-      "branchId" to branchId,
-    )
-
-    // --- Branch merge changes & merges ---
-    // Delete changes belonging to this branch's merges.
-    exec(
-      """
-      DELETE FROM branch_merge_change
-      WHERE branch_merge_id IN (
-        SELECT id FROM branch_merge
-        WHERE source_branch_id = :branchId OR target_branch_id = :branchId
-      )
-      """,
-      "branchId" to branchId,
-    )
-    // Also delete any remaining changes referencing keys on this branch
-    // (e.g. from merges between other branches that referenced these keys).
-    exec(
-      """
-      DELETE FROM branch_merge_change
-      WHERE source_key_id IN (SELECT id FROM key WHERE branch_id = :branchId)
-         OR target_key_id IN (SELECT id FROM key WHERE branch_id = :branchId)
-      """,
-      "branchId" to branchId,
-    )
-    exec(
-      "DELETE FROM branch_merge WHERE source_branch_id = :branchId OR target_branch_id = :branchId",
-      "branchId" to branchId,
-    )
-
-    // --- Snapshots (already bulk SQL inside deleteSnapshots) ---
+    taskService.deleteTasksForBranch(projectId, branchId)
+    cleanupBranchMerges(branchId)
+    cleanupBranchKeys(projectId, branchId)
+    languageStatsRepository.deleteAllByBranchId(branchId)
     branchSnapshotService.deleteSnapshots(branchId)
-
-    // --- Language stats ---
-    exec(
-      "DELETE FROM language_stats WHERE branch_id = :branchId",
-      "branchId" to branchId,
-    )
-
-    // --- Keys ---
-    exec(
-      "DELETE FROM key WHERE branch_id = :branchId",
-      "branchId" to branchId,
-    )
-
-    // --- Namespaces no longer referenced by any key in the project ---
-    exec(
-      """
-      DELETE FROM namespace
-      WHERE project_id = :projectId
-        AND id NOT IN (
-          SELECT namespace_id FROM key
-          WHERE project_id = :projectId AND namespace_id IS NOT NULL
-        )
-      """,
-      "projectId" to projectId,
-    )
-
-    // --- Hard-delete the branch row ---
-    exec(
-      "DELETE FROM branch WHERE id = :branchId",
-      "branchId" to branchId,
-    )
+    deleteBranch(branchId)
 
     logger.info("Completed cleanup for branch $branchId")
     metrics.branchCleanupBatchesCounter.increment()
   }
 
-  private fun exec(
-    sql: String,
-    vararg params: Pair<String, Any>,
+  /**
+   * Deletes all keys and their children for the given branch.
+   *
+   * Uses bulk SQL for high-volume simple cascades (translations, key metadata, keys)
+   * to avoid ORM overhead and the 65K parameter limit.
+   * Delegates to services for screenshots (file storage + orphan detection)
+   * and namespaces (soft-delete aware cleanup).
+   */
+  private fun cleanupBranchKeys(
+    projectId: Long,
+    branchId: Long,
   ) {
-    val query = entityManager.createNativeQuery(sql.trimIndent())
-    params.forEach { (name, value) -> query.setParameter(name, value) }
-    query.executeUpdate()
+    val keySub = "SELECT id FROM key WHERE branch_id = :branchId"
+
+    // --- Translation children + translations (bulk SQL) ---
+    execByBranch(
+      """
+      DELETE FROM translation_comment
+      WHERE translation_id IN (SELECT id FROM translation WHERE key_id IN ($keySub))
+      """,
+      branchId,
+    )
+    execByBranch(
+      """
+      DELETE FROM translation_label
+      WHERE translation_id IN (SELECT id FROM translation WHERE key_id IN ($keySub))
+      """,
+      branchId,
+    )
+    execByBranch(
+      """
+      UPDATE import_translation SET conflict_id = NULL
+      WHERE conflict_id IN (SELECT id FROM translation WHERE key_id IN ($keySub))
+      """,
+      branchId,
+    )
+    execByBranch(
+      "DELETE FROM translation WHERE key_id IN ($keySub)",
+      branchId,
+    )
+
+    // --- Key-meta children + key_meta (bulk SQL) ---
+    execByBranch(
+      "DELETE FROM key_comment WHERE key_meta_id IN (SELECT id FROM key_meta WHERE key_id IN ($keySub))",
+      branchId,
+    )
+    execByBranch(
+      "DELETE FROM key_code_reference WHERE key_meta_id IN (SELECT id FROM key_meta WHERE key_id IN ($keySub))",
+      branchId,
+    )
+    execByBranch(
+      "DELETE FROM key_meta_tags WHERE key_metas_id IN (SELECT id FROM key_meta WHERE key_id IN ($keySub))",
+      branchId,
+    )
+    execByBranch(
+      "DELETE FROM key_meta WHERE key_id IN ($keySub)",
+      branchId,
+    )
+
+    // --- Screenshots: service deletes files from storage before we remove DB rows ---
+    screenshotService.deleteFilesByBranch(branchId)
+    // Collect orphan screenshot IDs (only referenced by this branch's keys) before deleting refs.
+    @Suppress("UNCHECKED_CAST")
+    val orphanScreenshotIds =
+      entityManager
+        .createNativeQuery(
+          """
+          SELECT DISTINCT ksr.screenshot_id FROM key_screenshot_reference ksr
+          JOIN key k ON k.id = ksr.key_id
+          WHERE k.branch_id = :branchId
+            AND NOT EXISTS (
+              SELECT 1 FROM key_screenshot_reference other
+              JOIN key ok ON ok.id = other.key_id
+              WHERE other.screenshot_id = ksr.screenshot_id AND ok.branch_id != :branchId
+            )
+          """.trimIndent(),
+        ).setParameter("branchId", branchId)
+        .resultList as List<Number>
+
+    execByBranch("DELETE FROM key_screenshot_reference WHERE key_id IN ($keySub)", branchId)
+    if (orphanScreenshotIds.isNotEmpty()) {
+      entityManager
+        .createNativeQuery("DELETE FROM screenshot WHERE id IN (:ids)")
+        .setParameter("ids", orphanScreenshotIds.map { it.toLong() })
+        .executeUpdate()
+    }
+
+    // --- Other key children (bulk SQL) ---
+    execByBranch("DELETE FROM ai_playground_result WHERE key_id IN ($keySub)", branchId)
+
+    // --- Collect namespaces before deleting keys ---
+    @Suppress("UNCHECKED_CAST")
+    val namespaceIds =
+      entityManager
+        .createNativeQuery(
+          "SELECT DISTINCT namespace_id FROM key WHERE branch_id = :branchId AND namespace_id IS NOT NULL",
+        ).setParameter("branchId", branchId)
+        .resultList as List<Number>
+
+    // --- Keys (bulk SQL) ---
+    execByBranch("DELETE FROM key WHERE branch_id = :branchId", branchId)
+
+    // --- Namespaces: service handles soft-delete aware cleanup ---
+    if (namespaceIds.isNotEmpty()) {
+      val namespaces =
+        namespaceIds.mapNotNull { id ->
+          entityManager.find(io.tolgee.model.key.Namespace::class.java, id.toLong())
+        }
+      namespaceService.deleteUnusedNamespaces(namespaces)
+    }
+  }
+
+  private fun cleanupBranchMerges(branchId: Long) {
+    val merges =
+      branchMergeRepository
+        .findAllBySourceBranchIdOrTargetBranchId(branchId, branchId)
+
+    if (merges.isNotEmpty()) {
+      branchMergeRepository.deleteAll(merges)
+      logger.debug("Deleted ${merges.size} merges for branch $branchId")
+    }
+  }
+
+  private fun deleteBranch(branchId: Long) {
+    val branch = branchRepository.findById(branchId).orElse(null) ?: return
+    branchRepository.delete(branch)
+  }
+
+  private fun execByBranch(
+    sql: String,
+    branchId: Long,
+  ) {
+    entityManager.createNativeQuery(sql.trimIndent()).setParameter("branchId", branchId).executeUpdate()
   }
 }
