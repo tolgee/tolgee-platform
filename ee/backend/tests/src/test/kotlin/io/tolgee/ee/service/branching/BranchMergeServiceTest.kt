@@ -325,8 +325,17 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     val mainTranslation = getTranslation(testData.mainKeyToUpdate, testData.englishLanguage)
     val featureTranslation = getTranslation(testData.featureKeyToUpdate, testData.englishLanguage)
 
+    val mainRevisionBefore = testData.mainBranch.refresh()!!.revision
+    val featureRevisionBefore = testData.featureBranch.refresh()!!.revision
+
     setLabels(mainTranslation, testData.label2, testData.label3)
     setLabels(featureTranslation, testData.label1, testData.label3, testData.label4)
+
+    // Wait for async branch revision updates to complete
+    waitForNotThrowing(timeout = 10000, pollTime = 100) {
+      testData.mainBranch.refresh()!!.revision.assert.isGreaterThan(mainRevisionBefore)
+      testData.featureBranch.refresh()!!.revision.assert.isGreaterThan(featureRevisionBefore)
+    }
 
     dryRunAndMergeFeatureBranch()
 
