@@ -123,7 +123,12 @@ export type Edit = CellPosition & {
   activeVariant: string;
 };
 
-export type EditMode = 'general' | 'advanced' | 'context' | 'comments';
+export type EditMode =
+  | 'general'
+  | 'advanced'
+  | 'context'
+  | 'comments'
+  | 'qa_checks';
 
 export type ValueUpdate<Data, Update = Data> =
   | Update
