@@ -155,7 +155,7 @@ export const QaCheckItem: React.FC<Props> = ({
   const messageText = useQaIssueMessage(issue.message, issue.params);
   const hasReplacement = issue.replacement != null;
 
-  const Container = issue.ignored ? StyledIgnoredItem : StyledItem;
+  const Container = issue.state === 'IGNORED' ? StyledIgnoredItem : StyledItem;
 
   return (
     <Container data-cy="qa-check-item">
@@ -173,7 +173,7 @@ export const QaCheckItem: React.FC<Props> = ({
         </StyledContent>
       </StyledHeader>
 
-      {hasReplacement && !issue.ignored && (
+      {hasReplacement && issue.state === 'OPEN' && (
         <StyledDiffCard elevation={0}>
           <StyledDiffText>
             {renderDiff(
@@ -198,7 +198,7 @@ export const QaCheckItem: React.FC<Props> = ({
         </StyledDiffCard>
       )}
 
-      {(!slim || !hasReplacement) && !issue.ignored && (
+      {(!slim || !hasReplacement) && issue.state === 'OPEN' && (
         <StyledNormalActions>
           {hasReplacement && onCorrect && (
             <Button
@@ -223,7 +223,7 @@ export const QaCheckItem: React.FC<Props> = ({
         </StyledNormalActions>
       )}
 
-      {issue.ignored && onIgnore && (
+      {issue.state === 'IGNORED' && onIgnore && (
         <StyledNormalActions>
           <Button
             variant="text"

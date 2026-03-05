@@ -213,11 +213,9 @@ class QaCheckPreviewControllerTest : AuthorizedControllerTest() {
       node("_embedded.qaCheckResults").isArray.isNotEmpty
       node("_embedded.qaCheckResults").isArray.anySatisfy {
         assertThatJson(it).node("ignored").isEqualTo(true)
-        assertThatJson(it).node("persistedIssueId").isNotNull
       }
       node("_embedded.qaCheckResults").isArray.anySatisfy {
         assertThatJson(it).node("ignored").isEqualTo(false)
-        assertThatJson(it).node("persistedIssueId").isNotNull
       }
     }
   }
@@ -235,7 +233,6 @@ class QaCheckPreviewControllerTest : AuthorizedControllerTest() {
     ).andIsOk.andAssertThatJson {
       node("_embedded.qaCheckResults").isArray.hasSize(1)
       node("_embedded.qaCheckResults[0].ignored").isEqualTo(false)
-      node("_embedded.qaCheckResults[0].persistedIssueId").isNull()
     }
   }
 }

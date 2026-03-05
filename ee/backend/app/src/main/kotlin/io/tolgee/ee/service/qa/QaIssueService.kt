@@ -2,10 +2,12 @@ package io.tolgee.ee.service.qa
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
 import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.qa.TranslationQaIssueRepository
+import io.tolgee.service.translation.TranslationService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 class QaIssueService(
   private val qaIssueRepository: TranslationQaIssueRepository,
   private val objectMapper: ObjectMapper,
+  private val translationService: TranslationService,
 ) {
   @Transactional
   fun replaceIssuesForTranslation(
@@ -49,7 +52,7 @@ class QaIssueService(
     projectId: Long,
     translationId: Long,
   ): List<TranslationQaIssue> {
-    return qaIssueRepository.findAllByProjectAndTranslation(projectId, translationId)
+    return qaIssueRepository.findAllByProjectIdAndTranslationId(projectId, translationId)
   }
 
   @Transactional
@@ -68,6 +71,11 @@ class QaIssueService(
     issueId: Long,
   ) {
     val issue = getIssueByProjectAndId(projectId, issueId)
+//    TODO: check if issue was created by user "ignoring" issue in preview UI (corresponds to not-yet-saved text)
+//    if (issue.isVirtual) {
+//      qaIssueRepository.delete(issue)
+//      return
+//    }
     issue.state = QaIssueState.OPEN
     qaIssueRepository.save(issue)
   }
@@ -76,8 +84,64 @@ class QaIssueService(
     projectId: Long,
     issueId: Long,
   ): TranslationQaIssue {
-    return qaIssueRepository.findByProjectAndId(projectId, issueId)
+    return qaIssueRepository.findByProjectIdAndId(projectId, issueId)
       ?: throw io.tolgee.exceptions.NotFoundException()
+  }
+
+  @Transactional
+  fun ignoreIssueByParams(
+    projectId: Long,
+    translationId: Long,
+    request: QaCheckIssueIgnoreRequest,
+  ) {
+    val issue = findMatchingIssue(projectId, translationId, request)
+    if (issue != null) {
+      issue.state = QaIssueState.IGNORED
+      qaIssueRepository.save(issue)
+      return
+    }
+
+    val translation = translationService.get(projectId, translationId)
+    val newIssue =
+      TranslationQaIssue(
+        type = request.type,
+        message = request.message,
+        replacement = request.replacement,
+        positionStart = request.positionStart,
+        positionEnd = request.positionEnd,
+        params = request.params?.let { objectMapper.writeValueAsString(it) },
+        state = QaIssueState.IGNORED,
+        translation = translation,
+      )
+    qaIssueRepository.save(newIssue)
+  }
+
+  @Transactional
+  fun unignoreIssueByParams(
+    projectId: Long,
+    translationId: Long,
+    request: QaCheckIssueIgnoreRequest,
+  ): Boolean {
+    val issue = findMatchingIssue(projectId, translationId, request) ?: return false
+    issue.state = QaIssueState.OPEN
+    qaIssueRepository.save(issue)
+    return true
+  }
+
+  private fun findMatchingIssue(
+    projectId: Long,
+    translationId: Long,
+    request: QaCheckIssueIgnoreRequest,
+  ): TranslationQaIssue? {
+    return qaIssueRepository.findByProjectIdAndTranslationIdAndIssueParams(
+      projectId,
+      translationId,
+      request.type,
+      request.message,
+      request.replacement,
+      request.positionStart,
+      request.positionEnd,
+    )
   }
 
   fun deserializeParams(paramsJson: String?): Map<String, String>? {

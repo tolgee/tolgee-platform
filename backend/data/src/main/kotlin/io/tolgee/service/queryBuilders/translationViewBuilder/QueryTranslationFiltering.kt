@@ -21,7 +21,7 @@ class QueryTranslationFiltering(
   private val queryBase: QueryBase<*>,
   private val cb: CriteriaBuilder,
 ) {
-  fun apply(
+  fun applyStateFilter(
     language: LanguageDto,
     translationTextField: Path<String>,
     translationStateField: Path<TranslationState>,
@@ -52,7 +52,7 @@ class QueryTranslationFiltering(
     }
   }
 
-  fun apply(
+  fun applyCommentsFilter(
     language: LanguageDto,
     commentsExpression: Expression<Long>,
     unresolvedCommentsExpression: Expression<Long>,
@@ -66,7 +66,7 @@ class QueryTranslationFiltering(
     }
   }
 
-  fun apply(
+  fun applySuggestionsFilter(
     language: LanguageDto,
     commentsExpression: Expression<Long>,
   ) {
@@ -79,7 +79,7 @@ class QueryTranslationFiltering(
     }
   }
 
-  fun apply(languageSourceChangeMap: MutableMap<String, Expression<Boolean>>) {
+  fun applyOutdatedFilter(languageSourceChangeMap: MutableMap<String, Expression<Boolean>>) {
     val conditions =
       (
         params.filterOutdatedLanguage
@@ -109,7 +109,7 @@ class QueryTranslationFiltering(
     }
   }
 
-  fun apply(
+  fun applyLabelFilter(
     language: LanguageDto,
     translation: ListJoin<Key, Translation>,
   ) {

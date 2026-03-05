@@ -27,6 +27,7 @@ class QaCheckResultModelAssembler :
       persistedIssues.find { issue ->
         issue.type == entity.type &&
           issue.message == entity.message &&
+          issue.replacement == entity.replacement &&
           issue.positionStart == entity.positionStart &&
           issue.positionEnd == entity.positionEnd
       }
@@ -37,8 +38,7 @@ class QaCheckResultModelAssembler :
       positionStart = entity.positionStart,
       positionEnd = entity.positionEnd,
       params = entity.params,
-      ignored = matchingIssue?.state == QaIssueState.IGNORED,
-      persistedIssueId = matchingIssue?.id,
+      state = matchingIssue?.state ?: QaIssueState.OPEN,
     )
   }
 
