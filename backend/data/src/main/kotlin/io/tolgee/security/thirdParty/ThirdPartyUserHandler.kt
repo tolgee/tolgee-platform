@@ -116,7 +116,10 @@ class ThirdPartyUserHandler(
   }
 
   private fun createUser(data: ThirdPartyUserDetails): UserAccount {
-    userAccountService.findActive(data.username)?.let {
+    userAccountService.findActiveOrDisabled(data.username)?.let {
+      if (it.disabledAt != null) {
+        throw AuthenticationException(Message.USER_ACCOUNT_DISABLED)
+      }
       throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
     }
 
