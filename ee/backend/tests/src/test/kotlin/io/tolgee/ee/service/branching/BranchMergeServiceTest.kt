@@ -333,8 +333,14 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
     // Wait for async branch revision updates to complete
     waitForNotThrowing(timeout = 10000, pollTime = 100) {
-      testData.mainBranch.refresh()!!.revision.assert.isGreaterThan(mainRevisionBefore)
-      testData.featureBranch.refresh()!!.revision.assert.isGreaterThan(featureRevisionBefore)
+      testData.mainBranch
+        .refresh()!!
+        .revision.assert
+        .isGreaterThan(mainRevisionBefore)
+      testData.featureBranch
+        .refresh()!!
+        .revision.assert
+        .isGreaterThan(featureRevisionBefore)
     }
 
     dryRunAndMergeFeatureBranch()
