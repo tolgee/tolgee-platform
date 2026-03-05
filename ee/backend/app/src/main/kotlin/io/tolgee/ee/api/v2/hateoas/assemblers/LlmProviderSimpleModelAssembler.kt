@@ -18,6 +18,8 @@ class LlmProviderSimpleModelAssembler :
       entity.name,
       if (entity is LlmProvider) "organization" else "server",
       entity.type,
+      entity.tokenPriceInCreditsInput,
+      entity.tokenPriceInCreditsOutput,
     )
   }
 }

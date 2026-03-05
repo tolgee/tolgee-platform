@@ -4030,6 +4030,10 @@ export interface components {
     LlmProviderSimpleModel: {
       name: string;
       source?: string;
+      /** Format: double */
+      tokenPriceInCreditsInput?: number;
+      /** Format: double */
+      tokenPriceInCreditsOutput?: number;
       /** @enum {string} */
       type: "OPENAI" | "OPENAI_AZURE" | "TOLGEE" | "ANTHROPIC" | "GOOGLE_AI";
     };

@@ -23,8 +23,11 @@ class LlmProperties : MachineTranslationServiceProperties {
 
   @DocProperty(
     description = """
-    List of LLM providers. Example:
-    
+    List of LLM providers. When `provider-defaults` is also set, list entries are merged with the
+    matching map entry (by name). List values override map defaults only when explicitly set
+    (non-null for nullable fields, non-default for `type` / `maxTokens`).
+    `enabled` is always taken from the list entry.
+
     ``` yaml
     providers:
       - name: openai-gpt-4o-mini
@@ -34,9 +37,9 @@ class LlmProperties : MachineTranslationServiceProperties {
         model: gpt-4o-mini
         format: "json_schema"
     ```
-    
+
     or using environment variables:
-    
+
     ```
     TOLGEE_LLM_PROVIDERS_0_NAME=MySuperDuperAI
     TOLGEE_LLM_PROVIDERS_0_TYPE=OPENAI
@@ -45,11 +48,44 @@ class LlmProperties : MachineTranslationServiceProperties {
     TOLGEE_LLM_PROVIDERS_0_MODEL=gpt-4o-mini
     TOLGEE_LLM_PROVIDERS_0_FORMAT=json_schema
     ```
-    
+
     Check [llm providers documentation](/platform/projects_and_organizations/llm-providers#self-hosted-server-configuration) for more information.
   """,
   )
   var providers: MutableList<LlmProvider> = mutableListOf()
+
+  @DocProperty(
+    description = """
+    Map of provider defaults keyed by provider name. Use this to separate non-secret configuration
+    (model, prices, type) from secrets (API keys) in Kubernetes deployments.
+
+    ``` yaml
+    provider-defaults:
+      gpt-5-mini:
+        type: OPENAI
+        model: gpt-5-mini
+        token-price-in-credits-input: 2.0
+        token-price-in-credits-output: 1.5
+    ```
+
+    or using environment variables (in a ConfigMap):
+
+    ```
+    TOLGEE_LLM_PROVIDER_DEFAULTS_GPT_5_MINI_TYPE=OPENAI
+    TOLGEE_LLM_PROVIDER_DEFAULTS_GPT_5_MINI_MODEL=gpt-5-mini
+    TOLGEE_LLM_PROVIDER_DEFAULTS_GPT_5_MINI_TOKEN_PRICE_IN_CREDITS_INPUT=2.0
+    TOLGEE_LLM_PROVIDER_DEFAULTS_GPT_5_MINI_TOKEN_PRICE_IN_CREDITS_OUTPUT=1.5
+    ```
+
+    Then supply only the API key via the `providers` list (in a Secret):
+
+    ```
+    TOLGEE_LLM_PROVIDERS_0_NAME=gpt-5-mini
+    TOLGEE_LLM_PROVIDERS_0_API_KEY=sk-proj-...
+    ```
+  """,
+  )
+  var providerDefaults: MutableMap<String, LlmProviderDefaults> = mutableMapOf()
 
   @DocProperty(
     description = """
@@ -131,6 +167,63 @@ class LlmProperties : MachineTranslationServiceProperties {
 
     companion object {
       const val MAX_TOKENS_DEFAULT: Long = 2000
+    }
+  }
+
+  class LlmProviderDefaults(
+    @DocProperty(description = "Enable/disable provider")
+    var enabled: Boolean = true,
+    @DocProperty(description = "Provider type, an API type")
+    var type: LlmProviderType = LlmProviderType.OPENAI,
+    @DocProperty(description = "Provider API Key (optional for some providers)")
+    var apiKey: String? = null,
+    @DocProperty(description = "Provider API Url")
+    var apiUrl: String? = null,
+    @DocProperty(description = "Provider model (optional for some providers)")
+    var model: String? = null,
+    @DocProperty(description = "Provider deployment (optional for some providers)")
+    var deployment: String? = null,
+    @DocProperty(
+      description = """Maximum number of tokens to generate.
+      `max_completion_tokens` option for OpenAI API.
+      `max_tokens` for Anthropic API.""",
+    )
+    var maxTokens: Long? = null,
+    @DocProperty(description = "ChatGPT reasoning effort")
+    var reasoningEffort: String? = null,
+    @DocProperty(description = "Set to `json_schema` if the API supports JSON Schema")
+    var format: String? = null,
+    @DocProperty(
+      description = "Load-balancing instruction HIGH = used for suggestions, LOW = used for batch operations",
+    )
+    var priority: LlmProviderPriority? = null,
+    @DocProperty(
+      description =
+        "Specify attempts timeout(s) (Example: [30, 30] - Tolgee will make two attempts, each with timeout of 30s)",
+    )
+    var attempts: List<Int>? = null,
+    @DocProperty(hidden = true)
+    var tokenPriceInCreditsInput: Double? = null,
+    @DocProperty(hidden = true)
+    var tokenPriceInCreditsOutput: Double? = null,
+  ) {
+    fun toLlmProvider(name: String): LlmProvider {
+      return LlmProvider(
+        enabled = enabled,
+        name = name,
+        type = type,
+        apiKey = apiKey,
+        apiUrl = apiUrl,
+        model = model,
+        deployment = deployment,
+        maxTokens = maxTokens ?: LlmProvider.MAX_TOKENS_DEFAULT,
+        reasoningEffort = reasoningEffort,
+        format = format,
+        priority = priority,
+        attempts = attempts,
+        tokenPriceInCreditsInput = tokenPriceInCreditsInput,
+        tokenPriceInCreditsOutput = tokenPriceInCreditsOutput,
+      )
     }
   }
 }
