@@ -34,7 +34,12 @@ export const useBranchesService = ({
       selected: null,
       default: null,
       selectedName: branchName || undefined,
-      loadable: { isLoading: false, isFetched: true, data: [] },
+      loadable: {
+        isLoading: false,
+        isFetching: false,
+        isFetched: true,
+        data: [],
+      },
     };
   }
   const loadableBranches = useApiQuery({

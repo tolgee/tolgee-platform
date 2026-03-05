@@ -6,6 +6,7 @@ import io.tolgee.model.key.screenshotReference.KeyScreenshotReference
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -75,4 +76,29 @@ interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
   """,
   )
   fun getAllKeyScreenshotReferences(key: Key): List<KeyScreenshotReference>
+
+  /**
+   * Returns screenshots that will become orphans after all key_screenshot_reference
+   * rows for [branchId]'s keys are deleted — i.e., screenshots referenced ONLY by branch keys
+   * and by no key on any other branch.
+   *
+   * Uses JPQL (not nativeQuery) because Screenshot.filename is a Kotlin computed property,
+   * not a DB column — so it cannot be selected in native SQL.
+   */
+  @Query(
+    """
+    SELECT s FROM Screenshot s
+    WHERE s.id IN (
+      SELECT ksr.screenshot.id FROM KeyScreenshotReference ksr
+      WHERE ksr.key.id IN (SELECT k.id FROM Key k WHERE k.branch.id = :branchId)
+    )
+    AND s.id NOT IN (
+      SELECT ksr.screenshot.id FROM KeyScreenshotReference ksr
+      WHERE ksr.key.id NOT IN (SELECT k.id FROM Key k WHERE k.branch.id = :branchId)
+    )
+    """,
+  )
+  fun findOrphansByBranchId(
+    @Param("branchId") branchId: Long,
+  ): List<Screenshot>
 }

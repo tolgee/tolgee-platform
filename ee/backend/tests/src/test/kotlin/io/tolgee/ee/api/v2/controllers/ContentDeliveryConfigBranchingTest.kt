@@ -13,6 +13,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.service.contentDelivery.ContentDeliveryConfigService
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assert
@@ -130,10 +131,12 @@ class ContentDeliveryConfigBranchingTest : ProjectAuthControllerTest("/v2/projec
   fun `delete branch deletes CDN configs for that branch`() {
     performProjectAuthDelete("branches/${testData.featureBranch.id}").andIsOk
 
-    executeInNewTransaction {
-      contentDeliveryConfigService.find(testData.featureBranchCdnConfig.self.id).assert.isNull()
-      // main branch configs are unaffected
-      contentDeliveryConfigService.find(testData.mainBranchCdnConfig.self.id).assert.isNotNull()
+    waitForNotThrowing(timeout = 10000, pollTime = 100) {
+      executeInNewTransaction {
+        contentDeliveryConfigService.find(testData.featureBranchCdnConfig.self.id).assert.isNull()
+        // main branch configs are unaffected
+        contentDeliveryConfigService.find(testData.mainBranchCdnConfig.self.id).assert.isNotNull()
+      }
     }
   }
 

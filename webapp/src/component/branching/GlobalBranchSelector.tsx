@@ -34,7 +34,7 @@ export const GlobalBranchSelector = () => {
     branchName: branchInUrl,
   });
 
-  if (!loadable.isLoading && !selected) {
+  if (!loadable.isFetching && !selected) {
     history.replace(applyBranchToLocation(location, defaultBranch?.name));
     setCachedBranch(
       project.id,

@@ -54,7 +54,9 @@ class CleanDbTestListener : TestExecutionListener {
                 }
               }
 
-              else -> throw e
+              else -> {
+                throw e
+              }
             }
             logger.info(
               "Failed to clean DB, retrying in 1s. Attempt ${i + 1}, " +

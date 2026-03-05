@@ -1,6 +1,5 @@
 package io.tolgee.ee.service.branching
 
-import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.repository.branching.KeySnapshotRepository
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.snapshot.KeySnapshot
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service
 @Service
 class BranchSnapshotService(
   private val keySnapshotRepository: KeySnapshotRepository,
-  private val branchRepository: BranchRepository,
   private val entityManager: EntityManager,
 ) {
   @Transactional
@@ -21,12 +19,9 @@ class BranchSnapshotService(
     targetBranch: Branch,
   ) {
     deleteSnapshots(targetBranch.id)
-    createSnapshotMappingTable()
     insertKeySnapshots(projectId, sourceBranch, targetBranch)
-    insertTranslationSnapshots()
-    insertKeyMetaSnapshots()
-    targetBranch.pending = false
-    branchRepository.save(targetBranch)
+    insertTranslationSnapshots(targetBranch.id)
+    insertKeyMetaSnapshots(targetBranch.id)
   }
 
   private fun getBranchFilter(
@@ -41,65 +36,47 @@ class BranchSnapshotService(
     }
   }
 
-  private fun createSnapshotMappingTable() {
-    entityManager
-      .createNativeQuery("DROP TABLE IF EXISTS temp_snapshot_mapping")
-      .executeUpdate()
-    entityManager
-      .createNativeQuery(
-        """
-        CREATE TEMPORARY TABLE temp_snapshot_mapping (
-          source_key_id BIGINT NOT NULL PRIMARY KEY,
-          snapshot_id BIGINT NOT NULL
-        ) ON COMMIT DROP
-        """.trimIndent(),
-      ).executeUpdate()
-  }
-
   private fun insertKeySnapshots(
     projectId: Long,
     sourceBranch: Branch,
     targetBranch: Branch,
   ) {
+    // Read data from targetBranch (just copied from sourceBranch within the same transaction).
+    // Read original_key_id from sourceBranch for merge-analyzer correlation.
     val sql =
       """
-      WITH inserted AS (
-        INSERT INTO branch_key_snapshot (
-          id, name, namespace, is_plural, plural_arg_name,
-          original_key_id, branch_key_id, branch_id, project_id,
-          screenshot_references, created_at, updated_at
-        )
-        SELECT
-          nextval('hibernate_sequence'),
-          sk.name,
-          ns.name,
-          sk.is_plural,
-          sk.plural_arg_name,
-          sk.id,
-          tk.id,
-          :targetBranchId,
-          :projectId,
-          (SELECT coalesce(jsonb_agg(jsonb_build_object(
-              'screenshotId', ksr.screenshot_id,
-              'positions', ksr.positions,
-              'originalText', ksr.original_text
-          )), '[]'::jsonb)
-          FROM key_screenshot_reference ksr WHERE ksr.key_id = sk.id),
-          now(), now()
-        FROM key sk
-        LEFT JOIN namespace ns ON ns.id = sk.namespace_id
-        JOIN key tk ON tk.project_id = :projectId
-                   AND tk.branch_id = :targetBranchId
-                   AND tk.name = sk.name
-                   AND coalesce(tk.namespace_id, -1) = coalesce(sk.namespace_id, -1)
-                   AND tk.deleted_at IS NULL
-        WHERE sk.project_id = :projectId
-          AND ${getBranchFilter("sk", sourceBranch.isDefault, "sourceBranchId")}
-          AND sk.deleted_at IS NULL
-        RETURNING id, original_key_id
+      INSERT INTO branch_key_snapshot (
+        id, name, namespace, is_plural, plural_arg_name,
+        original_key_id, branch_key_id, branch_id, project_id,
+        screenshot_references, created_at, updated_at
       )
-      INSERT INTO temp_snapshot_mapping (source_key_id, snapshot_id)
-      SELECT original_key_id, id FROM inserted
+      SELECT
+        nextval('hibernate_sequence'),
+        tk.name,
+        ns.name,
+        tk.is_plural,
+        tk.plural_arg_name,
+        sk.id,
+        tk.id,
+        :targetBranchId,
+        :projectId,
+        (SELECT coalesce(jsonb_agg(jsonb_build_object(
+            'screenshotId', ksr.screenshot_id,
+            'positions', ksr.positions,
+            'originalText', ksr.original_text
+        )), '[]'::jsonb)
+        FROM key_screenshot_reference ksr WHERE ksr.key_id = tk.id),
+        now(), now()
+      FROM key tk
+      LEFT JOIN namespace ns ON ns.id = tk.namespace_id
+      JOIN key sk ON sk.project_id = :projectId
+                 AND ${getBranchFilter("sk", sourceBranch.isDefault, "sourceBranchId")}
+                 AND sk.name = tk.name
+                 AND coalesce(sk.namespace_id, -1) = coalesce(tk.namespace_id, -1)
+                 AND tk.deleted_at IS NULL
+      WHERE tk.project_id = :projectId
+        AND tk.branch_id = :targetBranchId
+        AND tk.deleted_at IS NULL
       """.trimIndent()
 
     entityManager
@@ -110,7 +87,11 @@ class BranchSnapshotService(
       .executeUpdate()
   }
 
-  private fun insertTranslationSnapshots() {
+  /**
+   * Inserts translation snapshots by joining directly to the already-committed
+   * branch_key_snapshot rows for the given branch, avoiding a temporary table.
+   */
+  private fun insertTranslationSnapshots(branchId: Long) {
     val sql =
       """
       INSERT INTO branch_translation_snapshot (
@@ -125,17 +106,21 @@ class BranchSnapshotService(
          FROM translation_label tl
          JOIN label l ON l.id = tl.label_id
          WHERE tl.translation_id = t.id),
-        m.snapshot_id,
+        ks.id,
         now(), now()
       FROM translation t
       JOIN language lang ON lang.id = t.language_id
-      JOIN temp_snapshot_mapping m ON m.source_key_id = t.key_id
+      JOIN branch_key_snapshot ks ON ks.branch_key_id = t.key_id AND ks.branch_id = :branchId
       """.trimIndent()
 
-    entityManager.createNativeQuery(sql).executeUpdate()
+    entityManager.createNativeQuery(sql).setParameter("branchId", branchId).executeUpdate()
   }
 
-  private fun insertKeyMetaSnapshots() {
+  /**
+   * Inserts key meta snapshots by joining directly to the already-committed
+   * branch_key_snapshot rows for the given branch, avoiding a temporary table.
+   */
+  private fun insertKeyMetaSnapshots(branchId: Long) {
     val sql =
       """
       INSERT INTO branch_key_meta_snapshot (
@@ -149,13 +134,13 @@ class BranchSnapshotService(
          FROM key_meta_tags kmt
          JOIN tag t ON t.id = kmt.tags_id
          WHERE kmt.key_metas_id = km.id),
-        m.snapshot_id,
+        ks.id,
         now(), now()
       FROM key_meta km
-      JOIN temp_snapshot_mapping m ON m.source_key_id = km.key_id
+      JOIN branch_key_snapshot ks ON ks.branch_key_id = km.key_id AND ks.branch_id = :branchId
       """.trimIndent()
 
-    entityManager.createNativeQuery(sql).executeUpdate()
+    entityManager.createNativeQuery(sql).setParameter("branchId", branchId).executeUpdate()
   }
 
   @Transactional
@@ -165,10 +150,9 @@ class BranchSnapshotService(
     targetBranch: Branch,
   ) {
     deleteSnapshots(sourceBranch.id)
-    createSnapshotMappingTable()
     insertKeySnapshotsForRebuild(projectId, sourceBranch, targetBranch)
-    insertTranslationSnapshots()
-    insertKeyMetaSnapshots()
+    insertTranslationSnapshots(sourceBranch.id)
+    insertKeyMetaSnapshots(sourceBranch.id)
   }
 
   private fun insertKeySnapshotsForRebuild(
@@ -178,43 +162,38 @@ class BranchSnapshotService(
   ) {
     val sql =
       """
-      WITH inserted AS (
-        INSERT INTO branch_key_snapshot (
-          id, name, namespace, is_plural, plural_arg_name,
-          original_key_id, branch_key_id, branch_id, project_id,
-          screenshot_references, created_at, updated_at
-        )
-        SELECT
-          nextval('hibernate_sequence'),
-          sk.name,
-          ns.name,
-          sk.is_plural,
-          sk.plural_arg_name,
-          tk.id,
-          sk.id,
-          :sourceBranchId,
-          :projectId,
-          (SELECT coalesce(jsonb_agg(jsonb_build_object(
-              'screenshotId', ksr.screenshot_id,
-              'positions', ksr.positions,
-              'originalText', ksr.original_text
-          )), '[]'::jsonb)
-          FROM key_screenshot_reference ksr WHERE ksr.key_id = sk.id),
-          now(), now()
-        FROM key sk
-        LEFT JOIN namespace ns ON ns.id = sk.namespace_id
-        JOIN key tk ON tk.project_id = :projectId
-                   AND ${getBranchFilter("tk", targetBranch.isDefault, "targetBranchId")}
-                   AND tk.name = sk.name
-                   AND coalesce(tk.namespace_id, -1) = coalesce(sk.namespace_id, -1)
-                   AND tk.deleted_at IS NULL
-        WHERE sk.project_id = :projectId
-          AND ${getBranchFilter("sk", sourceBranch.isDefault, "sourceBranchId")}
-          AND sk.deleted_at IS NULL
-        RETURNING id, branch_key_id
+      INSERT INTO branch_key_snapshot (
+        id, name, namespace, is_plural, plural_arg_name,
+        original_key_id, branch_key_id, branch_id, project_id,
+        screenshot_references, created_at, updated_at
       )
-      INSERT INTO temp_snapshot_mapping (source_key_id, snapshot_id)
-      SELECT branch_key_id, id FROM inserted
+      SELECT
+        nextval('hibernate_sequence'),
+        sk.name,
+        ns.name,
+        sk.is_plural,
+        sk.plural_arg_name,
+        tk.id,
+        sk.id,
+        :sourceBranchId,
+        :projectId,
+        (SELECT coalesce(jsonb_agg(jsonb_build_object(
+            'screenshotId', ksr.screenshot_id,
+            'positions', ksr.positions,
+            'originalText', ksr.original_text
+        )), '[]'::jsonb)
+        FROM key_screenshot_reference ksr WHERE ksr.key_id = sk.id),
+        now(), now()
+      FROM key sk
+      LEFT JOIN namespace ns ON ns.id = sk.namespace_id
+      JOIN key tk ON tk.project_id = :projectId
+                 AND ${getBranchFilter("tk", targetBranch.isDefault, "targetBranchId")}
+                 AND tk.name = sk.name
+                 AND coalesce(tk.namespace_id, -1) = coalesce(sk.namespace_id, -1)
+                 AND tk.deleted_at IS NULL
+      WHERE sk.project_id = :projectId
+        AND ${getBranchFilter("sk", sourceBranch.isDefault, "sourceBranchId")}
+        AND sk.deleted_at IS NULL
       """.trimIndent()
 
     entityManager

@@ -4,6 +4,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.BranchMergeTestData
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.ee.repository.EeSubscriptionRepository
 import io.tolgee.ee.repository.TaskRepository
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.LabelServiceImpl
@@ -62,6 +63,9 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   @Autowired
   lateinit var eeSubscriptionServiceImpl: EeSubscriptionServiceImpl
 
+  @Autowired
+  lateinit var eeSubscriptionRepository: EeSubscriptionRepository
+
   private lateinit var testData: BranchMergeTestData
 
   private val additionKeyName = "feature-only-key"
@@ -71,7 +75,9 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   @BeforeEach
   fun setup() {
     // Clear any existing subscription to avoid key limit issues from other tests
-    eeSubscriptionServiceImpl.delete()
+    executeInNewTransaction {
+      eeSubscriptionRepository.deleteAll()
+    }
     testData = BranchMergeTestData()
     testDataService.saveTestData(testData.root)
     branchSnapshotService.createInitialSnapshot(
@@ -242,6 +248,10 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     val merge = prepareMergeScenario()
     branchService.applyMerge(testData.project.id, merge.id, true)
 
+    waitForNotThrowing(timeout = 10000, pollTime = 100) {
+      branchRepository.findByIdOrNull(testData.featureBranch.id).assert.isNull()
+    }
+
     testData.featureOpenTask
       .refresh()
       .let { task ->
@@ -319,8 +329,23 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     val mainTranslation = getTranslation(testData.mainKeyToUpdate, testData.englishLanguage)
     val featureTranslation = getTranslation(testData.featureKeyToUpdate, testData.englishLanguage)
 
+    val mainRevisionBefore = testData.mainBranch.refresh()!!.revision
+    val featureRevisionBefore = testData.featureBranch.refresh()!!.revision
+
     setLabels(mainTranslation, testData.label2, testData.label3)
     setLabels(featureTranslation, testData.label1, testData.label3, testData.label4)
+
+    // Wait for async branch revision updates to complete
+    waitForNotThrowing(timeout = 10000, pollTime = 100) {
+      testData.mainBranch
+        .refresh()!!
+        .revision.assert
+        .isGreaterThan(mainRevisionBefore)
+      testData.featureBranch
+        .refresh()!!
+        .revision.assert
+        .isGreaterThan(featureRevisionBefore)
+    }
 
     dryRunAndMergeFeatureBranch()
 

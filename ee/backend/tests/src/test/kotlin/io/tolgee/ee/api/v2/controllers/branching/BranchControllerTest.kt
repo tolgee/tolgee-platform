@@ -18,6 +18,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Project
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.enums.Scope
@@ -220,10 +221,12 @@ class BranchControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   )
   fun `deletes branch`() {
     performProjectAuthDelete("branches/${testData.mergeBranch.id}").andIsOk
-    testData.mergeBranch
-      .refresh()
-      .assert
-      .isNull()
+    waitForNotThrowing(timeout = 10000, pollTime = 100) {
+      testData.mergeBranch
+        .refresh()
+        .assert
+        .isNull()
+    }
   }
 
   @Test

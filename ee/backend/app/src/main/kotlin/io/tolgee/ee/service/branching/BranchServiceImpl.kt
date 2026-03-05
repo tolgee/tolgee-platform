@@ -12,6 +12,7 @@ import io.tolgee.dtos.request.branching.ResolveAllBranchMergeConflictsRequest
 import io.tolgee.dtos.request.branching.ResolveBranchMergeConflictRequest
 import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.TaskService
+import io.tolgee.events.OnBranchSoftDeleted
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -24,11 +25,13 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.AbstractBranchService
 import io.tolgee.service.branching.BranchCopyService
 import jakarta.persistence.EntityManager
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Primary
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.Date
 
 @Primary
 @Service
@@ -43,6 +46,7 @@ class BranchServiceImpl(
   private val projectBranchingMigrationService: ProjectBranchingMigrationService,
   private val activityHolder: ActivityHolder,
   private val branchCleanupService: BranchCleanupService,
+  private val applicationEventPublisher: ApplicationEventPublisher,
   private val metrics: Metrics,
 ) : AbstractBranchService(branchRepository, branchMergeService) {
   override fun getBranches(
@@ -120,7 +124,6 @@ class BranchServiceImpl(
       val branch =
         createBranch(projectId, name, author).also {
           it.originBranch = originBranch
-          it.pending = true
         }
       branchRepository.save(branch)
 
@@ -160,7 +163,9 @@ class BranchServiceImpl(
           throw BadRequestException(Message.CANNOT_DELETE_BRANCH_WITH_CHILDREN)
         }
         activityHolder.forceEntityRevisionType(branch, RevisionType.DEL)
-        branchCleanupService.cleanupBranch(projectId, branchId)
+        branch.deletedAt = Date()
+        branchRepository.save(branch)
+        applicationEventPublisher.publishEvent(OnBranchSoftDeleted(projectId, branchId))
       },
     )
   }
