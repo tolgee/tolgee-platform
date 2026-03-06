@@ -2925,7 +2925,10 @@ export interface components {
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
         | "branching_not_enabled_for_project"
-        | "export_key_plural_suffix_collision";
+        | "export_key_plural_suffix_collision"
+        | "plan_migration_not_found"
+        | "plan_has_migrations"
+        | "source_and_target_plan_must_be_different";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -6339,7 +6342,10 @@ export interface components {
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
         | "branching_not_enabled_for_project"
-        | "export_key_plural_suffix_collision";
+        | "export_key_plural_suffix_collision"
+        | "plan_migration_not_found"
+        | "plan_has_migrations"
+        | "source_and_target_plan_must_be_different";
       params?: unknown[];
       success: boolean;
     };
