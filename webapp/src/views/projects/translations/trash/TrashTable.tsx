@@ -1,9 +1,17 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Pagination, Portal, styled, useMediaQuery } from '@mui/material';
-import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
-import { T } from '@tolgee/react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
+import {
+  IconButton,
+  Portal,
+  styled,
+  Tooltip,
+  useMediaQuery,
+} from '@mui/material';
+import { ChevronLeft, ChevronRight, ChevronUp } from '@untitled-ui/icons-react';
+import { T, useTranslate } from '@tolgee/react';
 import clsx from 'clsx';
+import { useDebouncedCallback } from 'use-debounce';
 import { useScrollStatus } from 'tg.component/common/useScrollStatus';
+import { ReactList } from 'tg.component/reactList/ReactList';
 import { CellLanguage } from '../TranslationsTable/CellLanguage';
 import { ColumnResizer } from '../ColumnResizer';
 import { TrashRow } from './TrashRow';
@@ -139,10 +147,51 @@ const StyledHeaderCell = styled('div')`
   }
 `;
 
-const StyledPagination = styled('div')`
+const StyledCounterContainer = styled('div')`
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
+  z-index: ${({ theme }) => theme.zIndex.drawer};
   display: flex;
+  background: ${({ theme }) => theme.palette.background.paper};
+  align-items: stretch;
+  transition: opacity 0.3s ease-in-out;
+  border-radius: 6px;
+  -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
+  margin: ${({ theme }) => theme.spacing(2, 3, 2, 0)};
+  white-space: nowrap;
+  pointer-events: all;
+
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+`;
+
+const StyledDivider = styled('div')`
+  border-right: 1px solid ${({ theme }) => theme.palette.divider};
+`;
+
+const StyledIndex = styled('div')`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   justify-content: center;
-  padding: 16px 0;
+  margin-right: ${({ theme }) => theme.spacing(2)};
+  margin-left: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledStretcher = styled('div')`
+  font-family: monospace;
+  height: 0px;
+  overflow: hidden;
+`;
+
+const StyledIconButton = styled(IconButton)`
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
 `;
 
 type Props = {
@@ -160,9 +209,10 @@ type Props = {
   resizeColumn: (index: number, size: number) => void;
   addResizer: (index: number, callback: () => void) => void;
   onFilterNamespace: (ns: string) => void;
-  totalPages: number;
-  page: number;
-  onPageChange: (event: unknown, newPage: number) => void;
+  totalCount: number;
+  isFetchingNextPage: boolean;
+  hasNextPage: boolean;
+  fetchNextPage: () => void;
   containerWidth: number;
 };
 
@@ -181,13 +231,18 @@ export const TrashTable: React.FC<Props> = ({
   resizeColumn,
   addResizer,
   onFilterNamespace,
-  totalPages,
-  page,
-  onPageChange,
+  totalCount,
+  isFetchingNextPage,
+  hasNextPage,
+  fetchNextPage,
   containerWidth,
 }) => {
+  const { t } = useTranslate();
   const tableRef = useRef<HTMLDivElement>(null);
   const verticalScrollRef = useRef<HTMLDivElement>(null);
+  const reactListRef = useRef<ReactList>(null);
+  const [scrollIndex, setScrollIndex] = useState(1);
+  const [toolbarVisible, setToolbarVisible] = useState(false);
 
   const fullWidth = columnSizes.reduce((a, b) => a + b, 0);
 
@@ -209,7 +264,7 @@ export const TrashTable: React.FC<Props> = ({
 
   const hasMinimalHeight = useMediaQuery('(min-height: 400px)');
 
-  function handleScroll(direction: 'left' | 'right') {
+  function handleHorizontalScroll(direction: 'left' | 'right') {
     const element = verticalScrollRef.current;
     if (element) {
       const position = element.scrollLeft;
@@ -218,6 +273,44 @@ export const TrashTable: React.FC<Props> = ({
       });
     }
   }
+
+  const getVisibleRange = reactListRef.current?.getVisibleRange.bind(
+    reactListRef.current
+  );
+
+  // Track scroll position for counter using ReactList's getVisibleRange
+  const onScroll = useDebouncedCallback(
+    () => {
+      const [start, end] = getVisibleRange?.() || [0, 0];
+      const fromBeginning = start;
+      const toEnd = totalCount - 1 - end;
+      const total = fromBeginning + toEnd || 1;
+      const progress = (total - toEnd) / total;
+      const newIndex = Math.round(progress * (totalCount - 1) + 1);
+      setScrollIndex(newIndex);
+      setToolbarVisible(start > 0 && newIndex > 1);
+    },
+    100,
+    { maxWait: 200 }
+  );
+
+  useEffect(() => {
+    onScroll();
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [getVisibleRange]);
+
+  const handleFetchMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handleScrollUp = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const counterContent = `${scrollIndex} / ${totalCount}`;
 
   return (
     <StyledTableContainer
@@ -230,14 +323,14 @@ export const TrashTable: React.FC<Props> = ({
           <StyledScrollArrow
             className={clsx('right', { scrollRight })}
             style={{ right: tablePosition.right }}
-            onClick={() => handleScroll('right')}
+            onClick={() => handleHorizontalScroll('right')}
           >
             <ChevronRight width={20} height={20} />
           </StyledScrollArrow>
           <StyledScrollArrow
             className={clsx('left', { scrollLeft })}
             style={{ left: tablePosition.left }}
-            onClick={() => handleScroll('left')}
+            onClick={() => handleHorizontalScroll('left')}
           >
             <ChevronLeft width={20} height={20} />
           </StyledScrollArrow>
@@ -285,41 +378,69 @@ export const TrashTable: React.FC<Props> = ({
             );
           })}
 
-          {trashedKeys.map((key, index) => {
-            const prevKey = index > 0 ? trashedKeys[index - 1] : null;
-            const showNamespace =
-              key.namespace &&
-              (index === 0 || prevKey?.namespace !== key.namespace);
-            return (
-              <TrashRow
-                key={key.id}
-                data={key}
-                selected={selectedKeys.includes(key.id)}
-                onToggle={() => onToggleKey(key.id)}
-                onRestore={onRestore}
-                onDelete={onDelete}
-                canRestore={canRestore}
-                canDelete={canDelete}
-                languages={languages}
-                columnSizes={finalColumnSizes}
-                showNamespace={!!showNamespace}
-                onFilterNamespace={onFilterNamespace}
-              />
-            );
-          })}
+          <ReactList
+            ref={reactListRef}
+            threshold={800}
+            type="variable"
+            itemSizeEstimator={(index, cache) => {
+              return cache[index] || 84;
+            }}
+            // @ts-ignore
+            scrollParentGetter={() => window}
+            length={trashedKeys.length}
+            useTranslate3d
+            itemRenderer={(index) => {
+              const key = trashedKeys[index];
+              const isLast = index === trashedKeys.length - 1;
+              if (isLast && !isFetchingNextPage && hasNextPage) {
+                handleFetchMore();
+              }
+
+              const prevKey = index > 0 ? trashedKeys[index - 1] : null;
+              const showNamespace =
+                key.namespace &&
+                (index === 0 || prevKey?.namespace !== key.namespace);
+
+              return (
+                <TrashRow
+                  key={key.id}
+                  data={key}
+                  selected={selectedKeys.includes(key.id)}
+                  onToggle={() => onToggleKey(key.id)}
+                  onRestore={onRestore}
+                  onDelete={onDelete}
+                  canRestore={canRestore}
+                  canDelete={canDelete}
+                  languages={languages}
+                  columnSizes={finalColumnSizes}
+                  showNamespace={!!showNamespace}
+                  onFilterNamespace={onFilterNamespace}
+                />
+              );
+            }}
+          />
         </StyledContent>
       </StyledVerticalScroll>
 
-      {totalPages > 1 && (
-        <StyledPagination>
-          <Pagination
-            count={totalPages}
-            page={page + 1}
-            onChange={onPageChange}
-            color="primary"
-          />
-        </StyledPagination>
-      )}
+      <Portal>
+        <StyledCounterContainer className={clsx({ hidden: !toolbarVisible })}>
+          <StyledIndex>
+            <span data-cy="trash-toolbar-counter">{counterContent}</span>
+            <StyledStretcher>{counterContent}</StyledStretcher>
+          </StyledIndex>
+          <StyledDivider />
+          <Tooltip title={t('translations_toolbar_to_top')} disableInteractive>
+            <StyledIconButton
+              data-cy="trash-toolbar-to-top"
+              onClick={handleScrollUp}
+              size="small"
+              aria-label={t('translations_toolbar_to_top')}
+            >
+              <ChevronUp width={20} height={20} />
+            </StyledIconButton>
+          </Tooltip>
+        </StyledCounterContainer>
+      </Portal>
     </StyledTableContainer>
   );
 };

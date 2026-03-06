@@ -5,7 +5,12 @@ import { Box } from '@mui/material';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
-import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
+import {
+  invalidateUrlPrefix,
+  useApiInfiniteQuery,
+  useApiMutation,
+  useApiQuery,
+} from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useBranchFromUrlPath } from 'tg.component/branching/useBranchFromUrlPath';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
@@ -21,8 +26,10 @@ import { useTranslationFilters } from '../TranslationFilters/useTranslationFilte
 import { FiltersInternal, FiltersType } from '../TranslationFilters/tools';
 
 type LanguageModel = components['schemas']['LanguageModel'];
+type TrashedKeyWithTranslationsModel =
+  components['schemas']['TrashedKeyWithTranslationsModel'];
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 60;
 const TRASHED_COLUMN_WIDTH = 200;
 
 export const TrashPage = () => {
@@ -52,11 +59,9 @@ export const TrashPage = () => {
   const setFilters = useCallback(
     (f: FiltersInternal) => {
       setFiltersJson(JSON.stringify(f));
-      setPage(0);
     },
     [setFiltersJson]
   );
-  const [page, setPage] = useState(0);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<number[]>([]);
   const [order, setOrder] = useUrlSearchState('order', {
@@ -159,29 +164,60 @@ export const TrashPage = () => {
     return [keySize, `${TRASHED_COLUMN_WIDTH}px`, ...langSizes];
   }, [resizablePercent]);
 
-  const trashLoadable = useApiQuery({
-    url: '/v2/projects/{projectId}/keys/trash',
-    method: 'get',
-    path: { projectId: project.id },
-    query: {
-      page,
+  const requestQuery = useMemo(
+    () => ({
       size: PAGE_SIZE,
       search: search || undefined,
       languages: effectiveLanguages.length > 0 ? effectiveLanguages : undefined,
       branch: branchName || undefined,
       sort: [order],
       ...filtersQuery,
+    }),
+    [search, effectiveLanguages, branchName, order, filtersQuery]
+  );
+
+  const trashLoadable = useApiInfiniteQuery({
+    url: '/v2/projects/{projectId}/keys/trash',
+    method: 'get',
+    path: { projectId: project.id },
+    query: requestQuery,
+    options: {
+      cacheTime: 0,
+      keepPreviousData: true,
+      getNextPageParam: (lastPage) => {
+        const pageInfo = lastPage.page;
+        if (
+          pageInfo &&
+          pageInfo.number !== undefined &&
+          pageInfo.totalPages !== undefined &&
+          pageInfo.number < pageInfo.totalPages - 1
+        ) {
+          return {
+            path: { projectId: project.id },
+            query: {
+              ...requestQuery,
+              page: pageInfo.number + 1,
+            },
+          };
+        }
+      },
     },
   });
 
-  const trashedKeys = trashLoadable.data?._embedded?.keys ?? [];
-  const totalElements = trashLoadable.data?.page?.totalElements ?? 0;
-  const totalPages = trashLoadable.data?.page?.totalPages ?? 0;
+  const trashedKeys = useMemo(
+    () =>
+      trashLoadable.data?.pages
+        .filter(Boolean)
+        .flatMap((p) => p._embedded?.keys || []) ?? [],
+    [trashLoadable.data]
+  ) as TrashedKeyWithTranslationsModel[];
 
-  const handlePageChange = useCallback((_: unknown, newPage: number) => {
-    setPage(newPage - 1);
-    setSelectedKeys([]);
-  }, []);
+  const totalElements = trashLoadable.data?.pages[0]?.page?.totalElements ?? 0;
+
+  const selectAllMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/keys/trash/select-all',
+    method: 'get',
+  });
 
   const handleToggleKey = useCallback((keyId: number) => {
     setSelectedKeys((prev) =>
@@ -191,22 +227,34 @@ export const TrashPage = () => {
     );
   }, []);
 
-  const pageKeyIds = useMemo(() => trashedKeys.map((k) => k.id), [trashedKeys]);
+  const allSelected =
+    totalElements > 0 && selectedKeys.length === totalElements;
+  const someSelected = !allSelected && selectedKeys.length > 0;
 
-  const allPageSelected =
-    pageKeyIds.length > 0 &&
-    pageKeyIds.every((id: number) => selectedKeys.includes(id));
-  const somePageSelected =
-    pageKeyIds.some((id: number) => selectedKeys.includes(id)) &&
-    !allPageSelected;
-
-  const handleSelectAll = useCallback(() => {
-    if (allPageSelected) {
+  const handleSelectAll = useCallback(async () => {
+    if (allSelected) {
       setSelectedKeys([]);
     } else {
-      setSelectedKeys(pageKeyIds);
+      const result = await selectAllMutation.mutateAsync({
+        path: { projectId: project.id },
+        query: {
+          search: search || undefined,
+          languages:
+            effectiveLanguages.length > 0 ? effectiveLanguages : undefined,
+          branch: branchName || undefined,
+          ...filtersQuery,
+        },
+      });
+      setSelectedKeys(result.ids);
     }
-  }, [allPageSelected, pageKeyIds]);
+  }, [
+    allSelected,
+    project.id,
+    search,
+    effectiveLanguages,
+    branchName,
+    filtersQuery,
+  ]);
 
   const handleRestore = useCallback(() => {
     setSelectedKeys([]);
@@ -248,7 +296,6 @@ export const TrashPage = () => {
         search={search || ''}
         onSearchChange={(val) => {
           setSearch(val);
-          setPage(0);
         }}
         filters={parsedFilters as FiltersType}
         filterActions={{ addFilter, removeFilter, setFilters }}
@@ -258,13 +305,12 @@ export const TrashPage = () => {
         order={order}
         onOrderChange={(value) => {
           setOrder(value);
-          setPage(0);
         }}
         defaultOrder={TRASH_DEFAULT_ORDER}
         sortOptions={trashSortOptions}
         totalElements={totalElements}
-        allPageSelected={allPageSelected}
-        somePageSelected={somePageSelected}
+        allSelected={allSelected}
+        someSelected={someSelected}
         onSelectAll={handleSelectAll}
         projectId={project.id}
       />
@@ -287,9 +333,10 @@ export const TrashPage = () => {
           resizeColumn={resizeColumn}
           addResizer={addResizer}
           onFilterNamespace={(ns) => addFilter('filterNamespace', ns)}
-          totalPages={totalPages}
-          page={page}
-          onPageChange={handlePageChange}
+          totalCount={totalElements}
+          isFetchingNextPage={trashLoadable.isFetchingNextPage}
+          hasNextPage={!!trashLoadable.hasNextPage}
+          fetchNextPage={trashLoadable.fetchNextPage}
           containerWidth={containerWidth}
         />
       ) : (
@@ -301,8 +348,8 @@ export const TrashPage = () => {
       <TrashBatchBar
         selectedKeys={selectedKeys}
         totalCount={totalElements}
-        allPageSelected={allPageSelected}
-        somePageSelected={somePageSelected}
+        allSelected={allSelected}
+        someSelected={someSelected}
         onToggleSelectAll={handleSelectAll}
         onFinished={handleBatchFinished}
         canRestore={canRestore}

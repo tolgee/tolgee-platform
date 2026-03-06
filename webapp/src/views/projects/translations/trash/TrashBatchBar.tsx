@@ -92,8 +92,8 @@ const StyledToggleAllButton = styled(Box)`
 type Props = {
   selectedKeys: number[];
   totalCount: number;
-  allPageSelected: boolean;
-  somePageSelected: boolean;
+  allSelected: boolean;
+  someSelected: boolean;
   onToggleSelectAll: () => void;
   onFinished: () => void;
   canRestore: boolean;
@@ -103,8 +103,8 @@ type Props = {
 export const TrashBatchBar = ({
   selectedKeys,
   totalCount,
-  allPageSelected,
-  somePageSelected,
+  allSelected,
+  someSelected,
   onToggleSelectAll,
   onFinished,
   canRestore,
@@ -215,7 +215,7 @@ export const TrashBatchBar = ({
               <StyledItem>
                 <Tooltip
                   title={
-                    allPageSelected
+                    allSelected
                       ? t('translations_clear_selection')
                       : t('translations_select_all')
                   }
@@ -227,7 +227,7 @@ export const TrashBatchBar = ({
                       onClick={onToggleSelectAll}
                       size="small"
                       checked={selectedKeys.length > 0}
-                      indeterminate={somePageSelected}
+                      indeterminate={someSelected}
                     />
                   </StyledToggleAllButton>
                 </Tooltip>
