@@ -907,8 +907,6 @@ declare namespace DataCy {
         "translations-tag-input" |
         "translations-tags-add" |
         "translations-task-indicator" |
-        "translations-toolbar-counter" |
-        "translations-toolbar-to-top" |
         "translations-trash-button" |
         "translations-view-list" |
         "translations-view-list-button" |
@@ -926,8 +924,6 @@ declare namespace DataCy {
         "trash-select-all-header" |
         "trash-sort-button" |
         "trash-table" |
-        "trash-toolbar-counter" |
-        "trash-toolbar-to-top" |
         "user-delete-organization-message-item" |
         "user-menu-language-switch" |
         "user-menu-logout" |
