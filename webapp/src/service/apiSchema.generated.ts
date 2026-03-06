@@ -674,6 +674,9 @@ export interface paths {
   "/v2/projects/{projectId}/keys/trash/deleters": {
     get: operations["listDeleters"];
   };
+  "/v2/projects/{projectId}/keys/trash/select-all": {
+    get: operations["selectAll"];
+  };
   "/v2/projects/{projectId}/keys/trash/{keyId}": {
     delete: operations["permanentlyDelete"];
   };
@@ -15760,6 +15763,125 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["CollectionModelSimpleUserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  selectAll: {
+    parameters: {
+      query: {
+        /**
+         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
+         *
+         * When used with multiple states for same language it is applied with logical OR.
+         *
+         * When used with multiple languages, it is applied with logical AND.
+         */
+        filterState?: string[];
+        /**
+         * Languages to be contained in response.
+         *
+         * To add multiple languages, repeat this param (eg. ?languages=en&languages=de)
+         */
+        languages?: string[];
+        /** String to search in key name or translation text */
+        search?: string;
+        /** Selects key with provided names. Use this param multiple times to fetch more keys. */
+        filterKeyName?: string[];
+        /** Selects key with provided ID. Use this param multiple times to fetch more keys. */
+        filterKeyId?: number[];
+        /** Selects only keys for which the translation is missing in any returned language. It only filters for translations included in returned languages. */
+        filterUntranslatedAny?: boolean;
+        /** Selects only keys, where translation is provided in any language */
+        filterTranslatedAny?: boolean;
+        /** Selects only keys where the translation is missing for the specified language. The specified language must be included in the returned languages. Otherwise, this filter doesn't apply. */
+        filterUntranslatedInLang?: string;
+        /** Selects only keys, where translation is provided in specified language */
+        filterTranslatedInLang?: string;
+        /** Selects only keys, where translation was auto translated for specified languages. */
+        filterAutoTranslatedInLang?: string[];
+        /** Selects only keys with screenshots */
+        filterHasScreenshot?: boolean;
+        /** Selects only keys without screenshots */
+        filterHasNoScreenshot?: boolean;
+        /**
+         * Selects only keys with provided namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNamespace?: string[];
+        /**
+         * Selects only keys without provided namespaces.
+         *
+         * To filter default namespace, set to empty string.
+         */
+        filterNoNamespace?: string[];
+        /** Selects only keys with provided tag */
+        filterTag?: string[];
+        /** Selects only keys without provided tag */
+        filterNoTag?: string[];
+        /** Selects only keys, where translation in provided langs is in outdated state */
+        filterOutdatedLanguage?: string[];
+        /** Selects only keys, where translation in provided langs is not in outdated state */
+        filterNotOutdatedLanguage?: string[];
+        /** Selects only key affected by activity with specidfied revision ID */
+        filterRevisionId?: number[];
+        /** Select only keys which were not successfully translated by batch job with provided id */
+        filterFailedKeysOfJob?: number;
+        /** Select only keys which are in specified task */
+        filterTaskNumber?: number[];
+        /** Filter task keys which are `not done` */
+        filterTaskKeysNotDone?: boolean;
+        /** Filter task keys which are `done` */
+        filterTaskKeysDone?: boolean;
+        /** Filter keys with unresolved comments in lang */
+        filterHasUnresolvedCommentsInLang?: string[];
+        /** Filter keys with any comments in lang */
+        filterHasCommentsInLang?: string[];
+        /** Filter key translations with labels */
+        filterLabel?: string[];
+        /** Filter keys with any suggestions in lang */
+        filterHasSuggestionsInLang?: string[];
+        /** Filter keys with no suggestions in lang */
+        filterHasNoSuggestionsInLang?: string[];
+        /** Selects only keys from specified branch */
+        branch?: string;
+        /** Filter trashed keys by who deleted them (user IDs) */
+        filterDeletedByUserId?: number[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SelectAllResponse"];
         };
       };
       /** Bad Request */

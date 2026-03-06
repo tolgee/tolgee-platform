@@ -1,112 +1,28 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Pagination, Portal, styled, useMediaQuery } from '@mui/material';
-import { ChevronLeft, ChevronRight } from '@untitled-ui/icons-react';
+import React, { useCallback, useRef } from 'react';
+import { Portal, styled } from '@mui/material';
 import { T } from '@tolgee/react';
-import clsx from 'clsx';
-import { useScrollStatus } from 'tg.component/common/useScrollStatus';
+import { ReactList } from 'tg.component/reactList/ReactList';
 import { CellLanguage } from '../TranslationsTable/CellLanguage';
 import { ColumnResizer } from '../ColumnResizer';
 import { TrashRow } from './TrashRow';
 import { TrashedKeyModel } from './TrashRow';
 import { components } from 'tg.service/apiSchema.generated';
+import { useHorizontalScroll } from '../useHorizontalScroll';
+import { ScrollableTableContainer } from '../ScrollableTableContainer';
+import { useScrollCounter } from '../useScrollCounter';
+import { FloatingScrollCounter } from '../FloatingScrollCounter';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
 const HEADER_HEIGHT = 39;
 const NAMESPACE_BANNER_SPACING = 14;
-const ARROW_SIZE = 50;
 const TRASHED_COLUMN_WIDTH = 200;
 
-const StyledTableContainer = styled('div')`
-  position: relative;
-  display: grid;
-  background: ${({ theme }) => theme.palette.background.default};
-  flex-grow: 1;
-  padding-bottom: 100px;
-
-  &::before {
-    content: '';
-    height: 100%;
-    position: absolute;
-    width: 6px;
-    background-image: linear-gradient(90deg, #0000002c, transparent);
-    top: 0px;
-    left: 0px;
-    z-index: 10;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 100ms ease-in-out;
-  }
-
-  &::after {
-    content: '';
-    height: 100%;
-    position: absolute;
-    width: 6px;
-    background-image: linear-gradient(-90deg, #0000002c, transparent);
-    top: 0px;
-    right: 0px;
-    z-index: 10;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 100ms ease-in-out;
-  }
-
-  &.scrollLeft {
-    &::before {
-      opacity: 1;
-    }
-  }
-
-  &.scrollRight {
-    &::after {
-      opacity: 1;
-    }
-  }
-`;
-
-const StyledVerticalScroll = styled('div')`
-  overflow-x: auto;
-  scrollbar-width: none;
-  overflow-y: hidden;
-  scroll-behavior: smooth;
-`;
-
-const StyledScrollArrow = styled('div')`
+const StyledFixedCounter = styled('div')`
   position: fixed;
-  top: 50vh;
-  width: ${ARROW_SIZE / 2}px;
-  height: ${ARROW_SIZE}px;
-  z-index: 5;
-  cursor: pointer;
-  border: 1px solid ${({ theme }) => theme.palette.divider1};
-  background: ${({ theme }) => theme.palette.background.default};
-  opacity: 0;
-  transition: opacity 150ms ease-in-out;
-  pointer-events: none;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &.right {
-    border-radius: ${ARROW_SIZE}px 0px 0px ${ARROW_SIZE}px;
-    padding-left: 4px;
-    border-right: none;
-  }
-  &.left {
-    border-radius: 0px ${ARROW_SIZE}px ${ARROW_SIZE}px 0px;
-    padding-right: 4px;
-    border-left: none;
-  }
-  &.scrollLeft {
-    opacity: 1;
-    pointer-events: all;
-  }
-  &.scrollRight {
-    opacity: 1;
-    pointer-events: all;
-  }
+  bottom: 0px;
+  right: 0px;
+  z-index: ${({ theme }) => theme.zIndex.drawer};
 `;
 
 const StyledContent = styled('div')`
@@ -139,12 +55,6 @@ const StyledHeaderCell = styled('div')`
   }
 `;
 
-const StyledPagination = styled('div')`
-  display: flex;
-  justify-content: center;
-  padding: 16px 0;
-`;
-
 type Props = {
   trashedKeys: TrashedKeyModel[];
   selectedKeys: number[];
@@ -160,9 +70,10 @@ type Props = {
   resizeColumn: (index: number, size: number) => void;
   addResizer: (index: number, callback: () => void) => void;
   onFilterNamespace: (ns: string) => void;
-  totalPages: number;
-  page: number;
-  onPageChange: (event: unknown, newPage: number) => void;
+  totalCount: number;
+  isFetchingNextPage: boolean;
+  hasNextPage: boolean;
+  fetchNextPage: () => void;
   containerWidth: number;
 };
 
@@ -181,69 +92,33 @@ export const TrashTable: React.FC<Props> = ({
   resizeColumn,
   addResizer,
   onFilterNamespace,
-  totalPages,
-  page,
-  onPageChange,
+  totalCount,
+  isFetchingNextPage,
+  hasNextPage,
+  fetchNextPage,
   containerWidth,
 }) => {
-  const tableRef = useRef<HTMLDivElement>(null);
-  const verticalScrollRef = useRef<HTMLDivElement>(null);
+  const reactListRef = useRef<ReactList>(null);
 
-  const fullWidth = columnSizes.reduce((a, b) => a + b, 0);
+  const horizontalScroll = useHorizontalScroll(columnSizes, containerWidth);
+  const { scrollIndex, toolbarVisible, handleScrollUp } = useScrollCounter(
+    reactListRef,
+    totalCount
+  );
 
-  const [scrollLeft, scrollRight] = useScrollStatus(verticalScrollRef, [
-    fullWidth,
-    containerWidth,
-  ]);
-
-  const [tablePosition, setTablePosition] = useState({ left: 0, right: 0 });
-
-  useEffect(() => {
-    const position = tableRef.current?.getBoundingClientRect();
-    if (position) {
-      const left = position.left;
-      const right = document.body.offsetWidth - position.right;
-      setTablePosition({ left, right });
+  const handleFetchMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  }, [tableRef.current, containerWidth]);
-
-  const hasMinimalHeight = useMediaQuery('(min-height: 400px)');
-
-  function handleScroll(direction: 'left' | 'right') {
-    const element = verticalScrollRef.current;
-    if (element) {
-      const position = element.scrollLeft;
-      element.scrollTo({
-        left: position + (direction === 'left' ? -350 : +350),
-      });
-    }
-  }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
-    <StyledTableContainer
-      data-cy="trash-table"
-      className={clsx({ scrollLeft, scrollRight })}
-      ref={tableRef}
-    >
-      {hasMinimalHeight && (
-        <Portal>
-          <StyledScrollArrow
-            className={clsx('right', { scrollRight })}
-            style={{ right: tablePosition.right }}
-            onClick={() => handleScroll('right')}
-          >
-            <ChevronRight width={20} height={20} />
-          </StyledScrollArrow>
-          <StyledScrollArrow
-            className={clsx('left', { scrollLeft })}
-            style={{ left: tablePosition.left }}
-            onClick={() => handleScroll('left')}
-          >
-            <ChevronLeft width={20} height={20} />
-          </StyledScrollArrow>
-        </Portal>
-      )}
-      <StyledVerticalScroll ref={verticalScrollRef}>
+    <>
+      <ScrollableTableContainer
+        data-cy="trash-table"
+        className="trash-table-container"
+        {...horizontalScroll}
+      >
         <StyledContent>
           <StyledHeaderRow
             style={{
@@ -285,41 +160,61 @@ export const TrashTable: React.FC<Props> = ({
             );
           })}
 
-          {trashedKeys.map((key, index) => {
-            const prevKey = index > 0 ? trashedKeys[index - 1] : null;
-            const showNamespace =
-              key.namespace &&
-              (index === 0 || prevKey?.namespace !== key.namespace);
-            return (
-              <TrashRow
-                key={key.id}
-                data={key}
-                selected={selectedKeys.includes(key.id)}
-                onToggle={() => onToggleKey(key.id)}
-                onRestore={onRestore}
-                onDelete={onDelete}
-                canRestore={canRestore}
-                canDelete={canDelete}
-                languages={languages}
-                columnSizes={finalColumnSizes}
-                showNamespace={!!showNamespace}
-                onFilterNamespace={onFilterNamespace}
-              />
-            );
-          })}
-        </StyledContent>
-      </StyledVerticalScroll>
+          <ReactList
+            ref={reactListRef}
+            threshold={800}
+            type="variable"
+            itemSizeEstimator={(index, cache) => {
+              return cache[index] || 84;
+            }}
+            // @ts-ignore
+            scrollParentGetter={() => window}
+            length={trashedKeys.length}
+            useTranslate3d
+            itemRenderer={(index) => {
+              const key = trashedKeys[index];
+              const isLast = index === trashedKeys.length - 1;
+              if (isLast && !isFetchingNextPage && hasNextPage) {
+                handleFetchMore();
+              }
 
-      {totalPages > 1 && (
-        <StyledPagination>
-          <Pagination
-            count={totalPages}
-            page={page + 1}
-            onChange={onPageChange}
-            color="primary"
+              const prevKey = index > 0 ? trashedKeys[index - 1] : null;
+              const showNamespace =
+                key.namespace &&
+                (index === 0 || prevKey?.namespace !== key.namespace);
+
+              return (
+                <TrashRow
+                  key={key.id}
+                  data={key}
+                  selected={selectedKeys.includes(key.id)}
+                  onToggle={() => onToggleKey(key.id)}
+                  onRestore={onRestore}
+                  onDelete={onDelete}
+                  canRestore={canRestore}
+                  canDelete={canDelete}
+                  languages={languages}
+                  columnSizes={finalColumnSizes}
+                  showNamespace={!!showNamespace}
+                  onFilterNamespace={onFilterNamespace}
+                />
+              );
+            }}
           />
-        </StyledPagination>
-      )}
-    </StyledTableContainer>
+        </StyledContent>
+      </ScrollableTableContainer>
+
+      <Portal>
+        <StyledFixedCounter>
+          <FloatingScrollCounter
+            scrollIndex={scrollIndex}
+            totalCount={totalCount}
+            visible={toolbarVisible}
+            onScrollUp={handleScrollUp}
+            dataCyPrefix="trash"
+          />
+        </StyledFixedCounter>
+      </Portal>
+    </>
   );
 };

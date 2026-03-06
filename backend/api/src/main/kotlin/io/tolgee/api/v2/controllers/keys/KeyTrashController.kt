@@ -5,6 +5,7 @@ import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.controllers.IController
 import io.tolgee.dtos.queryResults.KeyView
+import io.tolgee.dtos.request.translation.SelectAllResponse
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.hateoas.key.KeyModel
 import io.tolgee.hateoas.key.KeyModelAssembler
@@ -20,6 +21,8 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.KeyTrashService
+import io.tolgee.service.language.LanguageService
+import io.tolgee.service.translation.TranslationService
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -55,6 +58,8 @@ class KeyTrashController(
   private val authenticationFacade: AuthenticationFacade,
   private val trashedKeyWithTranslationsModelAssembler: TrashedKeyWithTranslationsModelAssembler,
   private val simpleUserAccountModelAssembler: SimpleUserAccountModelAssembler,
+  private val translationService: TranslationService,
+  private val languageService: LanguageService,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedResourcesAssembler: PagedResourcesAssembler<KeyWithTranslationsView>,
 ) : IController {
@@ -80,6 +85,31 @@ class KeyTrashController(
     return pagedResourcesAssembler.toModel(data, trashedKeyWithTranslationsModelAssembler)
   }
 
+  @GetMapping("/select-all")
+  @Operation(summary = "Select all trashed key IDs matching the filter")
+  @RequiresProjectPermissions([Scope.KEYS_VIEW])
+  @AllowApiAccess
+  fun selectAll(
+    @ParameterObject
+    @ModelAttribute
+    params: TranslationFilters,
+  ): SelectAllResponse {
+    params.trashed = true
+    val languages =
+      languageService.getLanguagesForTranslationsView(
+        params.languages,
+        projectHolder.project.id,
+        authenticationFacade.authenticatedUser.id,
+      )
+    return SelectAllResponse(
+      translationService.getSelectAllKeys(
+        projectId = projectHolder.project.id,
+        params = params,
+        languages = languages,
+      ),
+    )
+  }
+
   @GetMapping("/deleters")
   @Operation(summary = "List users who deleted keys")
   @RequiresProjectPermissions([Scope.KEYS_VIEW])
@@ -91,7 +121,7 @@ class KeyTrashController(
     return simpleUserAccountModelAssembler.toCollectionModel(users)
   }
 
-  @PutMapping("/{keyId}/restore")
+  @PutMapping("/{keyId:[0-9]+}/restore")
   @Transactional
   @Operation(summary = "Restore a trashed key")
   @RequestActivity(ActivityType.KEY_RESTORE)
@@ -113,7 +143,7 @@ class KeyTrashController(
     return keyModelAssembler.toModel(view)
   }
 
-  @DeleteMapping("/{keyId}")
+  @DeleteMapping("/{keyId:[0-9]+}")
   @Transactional
   @Operation(summary = "Permanently delete a trashed key")
   @RequestActivity(ActivityType.KEY_HARD_DELETE)
