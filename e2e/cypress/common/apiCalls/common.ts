@@ -392,26 +392,19 @@ export const getAssignedEmailNotification = () =>
     };
   });
 
+const parseEmailVerification = (email: EmailSummary) => ({
+  verifyEmailLink: (email.HTML.match(/href="([^"]+)"/i) || ['', ''])[1],
+  fromAddress: email.From.Address,
+  toAddress: email.To[0].Address,
+  content: email.HTML,
+});
+
 export const getParsedEmailVerification = () =>
-  getLatestEmail().then((r) => {
-    return {
-      verifyEmailLink: (r.HTML.match(/href="([^"]+)"/i) || ['', ''])[1],
-      fromAddress: r.From.Address,
-      toAddress: r.To[0].Address,
-      content: r.HTML,
-    };
-  });
+  getLatestEmail().then(parseEmailVerification);
 
 export const getParsedEmailVerificationByIndex = (index: number) => {
   if (index === 0) {
-    return getLatestEmail().then((email) => {
-      return {
-        verifyEmailLink: (email.HTML.match(/href="([^"]+)"/i) || ['', ''])[1],
-        fromAddress: email.From.Address,
-        toAddress: email.To[0].Address,
-        content: email.HTML,
-      };
-    });
+    return getLatestEmail().then(parseEmailVerification);
   } else {
     return getAllEmails().then((emails) => {
       if (!emails || index < 0 || index >= emails.length) {
@@ -419,14 +412,7 @@ export const getParsedEmailVerificationByIndex = (index: number) => {
           `Email at index ${index} not found. Total: ${emails?.length ?? 0}`
         );
       }
-      return getEmail(emails[index].ID).then((email) => {
-        return {
-          verifyEmailLink: (email.HTML.match(/href="([^"]+)"/i) || ['', ''])[1],
-          fromAddress: email.From.Address,
-          toAddress: email.To[0].Address,
-          content: email.HTML,
-        };
-      });
+      return getEmail(emails[index].ID).then(parseEmailVerification);
     });
   }
 };

@@ -23,7 +23,7 @@ You'll see below how to deal with variables, and how to have test data to see ho
 to manual testing within Tolgee itself.
 
 To build emails, simply run `npm run build`. This will output [Thymeleaf](https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html)
-templates in the `out` folder that the backend will be able to consume and render.
+templates in the `email/out` folder (specifically `email/.react-email/src/commands/testing/out` during development) that the backend will be able to consume and render.
 
 The resources used by emails stored in `resources` must be served by the backend at `/static/emails`. Filenames must
 be preserved.

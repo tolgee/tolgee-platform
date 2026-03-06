@@ -17,14 +17,12 @@
 package io.tolgee.email
 
 import com.transferwise.icu.ICUReloadableResourceBundleMessageSource
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.thymeleaf.messageresolver.IMessageResolver
 import org.thymeleaf.spring6.messageresolver.SpringMessageResolver
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
-import org.thymeleaf.templateresolver.ITemplateResolver
 import org.thymeleaf.templateresolver.StringTemplateResolver
 import java.util.Locale
 
@@ -49,28 +47,24 @@ class EmailTemplateConfig {
   }
 
   @Bean("emailMessageResolver")
-  fun messageResolver(
-    @Qualifier("emailIcuMessageSource") messageSource: MessageSource,
-    @Qualifier("emailTemplateEngine") templateEngine: EmailTemplateEngine,
-  ): IMessageResolver {
+  fun messageResolver(): IMessageResolver {
     val messageResolver = SpringMessageResolver()
-    messageResolver.messageSource = messageSource
+    messageResolver.messageSource = messageSource()
 
+    val templateEngine = templateEngine()
     val resolver = EmailMessageResolver(messageResolver, templateEngine)
     templateEngine.emailMessageResolver = resolver
     return resolver
   }
 
   @Bean("emailTemplateEngine")
-  fun templateEngine(
-    @Qualifier("emailTemplateResolver") templateResolver: ITemplateResolver,
-  ): EmailTemplateEngine {
+  fun templateEngine(): EmailTemplateEngine {
     val stringTemplateResolver = StringTemplateResolver()
     stringTemplateResolver.resolvablePatternSpec.addPattern("<!--@frag-->*")
 
     val templateEngine = EmailTemplateEngine()
     templateEngine.enableSpringELCompiler = true
-    templateEngine.templateResolvers = setOf(stringTemplateResolver, templateResolver)
+    templateEngine.templateResolvers = setOf(stringTemplateResolver, templateResolver())
     return templateEngine
   }
 }
