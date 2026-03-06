@@ -1,3 +1,10 @@
+## [3.166.1](https://github.com/tolgee/tolgee-platform/compare/v3.166.0...v3.166.1) (2026-03-06)
+
+
+### Bug Fixes
+
+* keys trash infinite scroll + select all ([#3504](https://github.com/tolgee/tolgee-platform/issues/3504)) ([5661be2](https://github.com/tolgee/tolgee-platform/commit/5661be2b173e1a1f255955bfd5f62a109d71ada4))
+
 # [3.166.0](https://github.com/tolgee/tolgee-platform/compare/v3.165.0...v3.166.0) (2026-03-05)
 
 
