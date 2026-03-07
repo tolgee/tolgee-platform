@@ -2,8 +2,8 @@ name: Upload backend build
 description: Compress and upload backend build result to GitHub artifacts
 
 inputs:
-  source-directory:
-    description: Directory where the backend is. Defaults to current working directory.
+  base-directory:
+    description: Base directory for the backend build. Defaults to current working directory.
     default: .
 
 runs:
@@ -12,19 +12,19 @@ runs:
     - name: Compress build results
       shell: bash
       env:
-        SRC_DIR: ${{ inputs.source-directory }}
+        BASE_DIR: ${{ inputs.base-directory }}
       run: |
-        tar --zstd -cf ~/backend-api.tar.zst $SRC_DIR/backend/api/build
-        tar --zstd -cf ~/backend-app.tar.zst $SRC_DIR/backend/app/build
-        tar --zstd -cf ~/backend-data.tar.zst $SRC_DIR/backend/data/build
-        tar --zstd -cf ~/backend-misc.tar.zst $SRC_DIR/backend/misc/build
-        tar --zstd -cf ~/backend-security.tar.zst $SRC_DIR/backend/security/build
-        tar --zstd -cf ~/backend-testing.tar.zst $SRC_DIR/backend/testing/build
-        tar --zstd -cf ~/backend-ktlint.tar.zst $SRC_DIR/backend/ktlint/build
-        tar --zstd -cf ~/backend-development.tar.zst $SRC_DIR/backend/development/build
-        tar --zstd -cf ~/ee-backend-app.tar.zst $SRC_DIR/ee/backend/app/build
-        tar --zstd -cf ~/ee-backend-tests.tar.zst $SRC_DIR/ee/backend/tests/build
-        tar --zstd -cf ~/backend-email.tar.zst $SRC_DIR/email/out
+        tar --zstd -cf ~/backend-api.tar.zst $BASE_DIR/backend/api/build
+        tar --zstd -cf ~/backend-app.tar.zst $BASE_DIR/backend/app/build
+        tar --zstd -cf ~/backend-data.tar.zst $BASE_DIR/backend/data/build
+        tar --zstd -cf ~/backend-misc.tar.zst $BASE_DIR/backend/misc/build
+        tar --zstd -cf ~/backend-security.tar.zst $BASE_DIR/backend/security/build
+        tar --zstd -cf ~/backend-testing.tar.zst $BASE_DIR/backend/testing/build
+        tar --zstd -cf ~/backend-ktlint.tar.zst $BASE_DIR/backend/ktlint/build
+        tar --zstd -cf ~/backend-development.tar.zst $BASE_DIR/backend/development/build
+        tar --zstd -cf ~/ee-backend-app.tar.zst $BASE_DIR/ee/backend/app/build
+        tar --zstd -cf ~/ee-backend-tests.tar.zst $BASE_DIR/ee/backend/tests/build
+        tar --zstd -cf ~/backend-email.tar.zst $BASE_DIR/email/out
 
     - name: Upload backend build result
       uses: actions/upload-artifact@v4
