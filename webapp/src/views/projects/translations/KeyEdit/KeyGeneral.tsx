@@ -1,4 +1,4 @@
-import { styled, useTheme } from '@mui/material';
+import { styled, TextField, useTheme } from '@mui/material';
 import { useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
 
@@ -158,6 +158,25 @@ export const KeyGeneral = () => {
         pluralParameterName="pluralParameter"
         isPluralName="isPlural"
       />
+
+      <StyledSection>
+        <FieldLabel>{t('translation_single_label_max_char_limit')}</FieldLabel>
+        <TextField
+          data-cy="key-edit-char-limit-input"
+          type="number"
+          size="small"
+          value={values.maxCharLimit ?? ''}
+          onChange={(e) => {
+            const val = e.target.value;
+            setFieldValue(
+              'maxCharLimit',
+              val === '' ? undefined : Math.max(1, parseInt(val, 10))
+            );
+          }}
+          inputProps={{ min: 1 }}
+          sx={{ width: 200 }}
+        />
+      </StyledSection>
     </>
   );
 };

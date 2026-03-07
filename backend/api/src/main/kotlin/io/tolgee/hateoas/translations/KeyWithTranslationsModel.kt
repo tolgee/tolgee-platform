@@ -27,6 +27,8 @@ open class KeyWithTranslationsModel(
   val keyNamespace: String?,
   @Schema(description = "The namespace of the key", example = "homepage")
   val keyDescription: String?,
+  @Schema(description = "Maximum character limit for translations of this key")
+  val keyMaxCharLimit: Int?,
   @Schema(description = "Tags of key")
   val keyTags: List<TagModel>,
   @Schema(description = "Count of screenshots provided for the key", example = "1")

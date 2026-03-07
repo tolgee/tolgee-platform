@@ -24,6 +24,9 @@ data class EditKeyDto(
     description = "Description of the key",
     example = "This key is used on homepage. It's a label of sign up button.",
   ) val description: String? = null,
+  @Schema(description = "Maximum character limit for translations of this key. Null means no limit.")
+  @field:jakarta.validation.constraints.Min(1)
+  val maxCharLimit: Int? = null,
 ) {
   @JsonSetter("namespace")
   fun setJsonNamespace(namespace: String?) {

@@ -27,6 +27,8 @@ import { PluralEditor } from '../translationVisual/PluralEditor';
 import type { ValuesCreateType } from './KeyCreateForm';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
+import { CharacterCounter } from '../cell/CharacterCounter';
+import { TextField } from '@mui/material';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -82,6 +84,13 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
   const isPlural = form.values.isPlural;
 
   const [mode, setMode] = useState<'placeholders' | 'syntax'>('placeholders');
+
+  const maxCharLimit = form.values.maxCharLimit;
+  const isBaseOverCharLimit =
+    maxCharLimit != null &&
+    Object.values(form.values.baseValue.variants ?? {}).some(
+      (v) => (v?.length ?? 0) > maxCharLimit
+    );
 
   const actualParameter = isPlural
     ? form.values.pluralParameter || 'value'
@@ -228,6 +237,31 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
           pluralParameterName="pluralParameter"
         />
 
+        <FastField name="maxCharLimit">
+          {({ field, form }: FieldProps<any>) => (
+            <div>
+              <FieldLabel>
+                <T keyName="translation_single_label_max_char_limit" />
+              </FieldLabel>
+              <TextField
+                data-cy="translation-create-char-limit-input"
+                type="number"
+                size="small"
+                value={field.value ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  form.setFieldValue(
+                    field.name,
+                    val === '' ? undefined : Math.max(1, parseInt(val, 10))
+                  );
+                }}
+                inputProps={{ min: 1 }}
+                sx={{ width: 200 }}
+              />
+            </div>
+          )}
+        </FastField>
+
         <Field key={baseLang.tag} name="baseValue">
           {({ field, meta }) => (
             <div data-cy="translation-create-translation-input">
@@ -263,6 +297,14 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                   ],
                 }}
               />
+              {form.values.maxCharLimit != null && (
+                <Box mt={0.5}>
+                  <CharacterCounter
+                    currentCount={field.value?.variants?.other?.length ?? 0}
+                    maxLimit={form.values.maxCharLimit}
+                  />
+                </Box>
+              )}
               <FieldError error={meta.touched && meta.error} />
             </div>
           )}
@@ -281,7 +323,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
             loading={form.isSubmitting}
             color="primary"
             variant="contained"
-            disabled={!form.isValid}
+            disabled={!form.isValid || isBaseOverCharLimit}
             type="submit"
             onClick={() => form.handleSubmit()}
           >

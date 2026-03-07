@@ -7,4 +7,5 @@ data class KeyView(
   val description: String?,
   val custom: Any?,
   val branch: String?,
+  val maxCharLimit: Int? = null,
 )

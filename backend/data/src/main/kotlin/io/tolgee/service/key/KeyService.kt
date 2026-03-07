@@ -158,6 +158,7 @@ class KeyService(
     if (key.isPlural) {
       key.pluralArgName = dto.pluralArgName
     }
+    key.maxCharLimit = dto.maxCharLimit
 
     val created = createTranslationsOnKeyCreate(dto, key)
 
@@ -257,6 +258,7 @@ class KeyService(
     keyMetaService.getOrCreateForKey(key).apply {
       description = dto.description
     }
+    dto.maxCharLimit?.let { key.maxCharLimit = if (it <= 0) null else it }
     return edit(key, dto.name, dto.namespace, dto.branch)
   }
 

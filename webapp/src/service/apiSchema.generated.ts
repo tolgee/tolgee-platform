@@ -1877,6 +1877,11 @@ export interface components {
       description?: string;
       /** @description If key is pluralized. If it will be reflected in the editor. If null, value won't be modified. */
       isPlural?: boolean;
+      /**
+       * Format: int32
+       * @description Maximum character limit. Null = don't modify. 0 = remove limit.
+       */
+      maxCharLimit?: number;
       /** @description Name of the key */
       name: string;
       namespace?: string;
@@ -2377,6 +2382,11 @@ export interface components {
       description?: string;
       /** @description If key is pluralized. If it will be reflected in the editor */
       isPlural: boolean;
+      /**
+       * Format: int32
+       * @description Maximum character limit for translations of this key. Null means no limit.
+       */
+      maxCharLimit?: number;
       /** @description Name of the key */
       name: string;
       namespace?: string;
@@ -2525,6 +2535,11 @@ export interface components {
        * @example This key is used on homepage. It's a label of sign up button.
        */
       description?: string;
+      /**
+       * Format: int32
+       * @description Maximum character limit for translations of this key. Null means no limit.
+       */
+      maxCharLimit?: number;
       name: string;
       namespace?: string;
     };
@@ -3596,6 +3611,11 @@ export interface components {
        */
       id: number;
       /**
+       * Format: int32
+       * @description Maximum character limit for translations of this key
+       */
+      maxCharLimit?: number;
+      /**
        * @description Name of key
        * @example this_is_super_key
        */
@@ -3703,6 +3723,11 @@ export interface components {
       /** @description If key is pluralized. If it will be reflected in the editor */
       isPlural: boolean;
       /**
+       * Format: int32
+       * @description Maximum character limit for translations of this key
+       */
+      maxCharLimit?: number;
+      /**
        * @description Name of key
        * @example this_is_super_key
        */
@@ -3759,6 +3784,11 @@ export interface components {
        * @example true
        */
       keyIsPlural: boolean;
+      /**
+       * Format: int32
+       * @description Maximum character limit for translations of this key
+       */
+      keyMaxCharLimit?: number;
       /**
        * @description Name of key
        * @example this_is_super_key

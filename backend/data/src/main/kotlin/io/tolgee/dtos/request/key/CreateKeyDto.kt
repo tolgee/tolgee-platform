@@ -48,6 +48,9 @@ class CreateKeyDto(
         "If null, value will be guessed from the values provided in translations.",
   )
   val pluralArgName: String? = null,
+  @Schema(description = "Maximum character limit for translations of this key. Null means no limit.")
+  @field:jakarta.validation.constraints.Min(1)
+  val maxCharLimit: Int? = null,
   val branch: String? = null,
 ) : WithRelatedKeysInOrder {
   @JsonSetter("namespace")

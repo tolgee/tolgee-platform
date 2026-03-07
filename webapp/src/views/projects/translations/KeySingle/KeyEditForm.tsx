@@ -1,4 +1,4 @@
-import { Box, Button, styled } from '@mui/material';
+import { Box, Button, TextField, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -16,6 +16,7 @@ import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import { CellTranslation } from '../TranslationsList/CellTranslation';
 import { FieldLabel } from 'tg.component/FormField';
+import { LabelHint } from 'tg.component/common/LabelHint';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
@@ -106,11 +107,45 @@ export const KeyEditForm: React.FC = () => {
     method: 'put',
   });
 
+  const updateKeyComplex = useApiMutation({
+    url: '/v2/projects/{projectId}/keys/{id}/complex-update',
+    method: 'put',
+  });
+
   const cacheUpdateNs = (namespace: string) => {
     updateKey({
       keyId: keyData!.keyId,
       value: { keyNamespace: namespace },
     });
+  };
+
+  const handleCharLimitChange = (value: string) => {
+    const newLimit = value === '' ? 0 : Math.max(1, parseInt(value, 10));
+    const previousLimit = keyData!.keyMaxCharLimit;
+    updateKey({
+      keyId: keyData!.keyId,
+      value: { keyMaxCharLimit: newLimit || undefined },
+    });
+    updateKeyComplex.mutate(
+      {
+        path: { projectId: project.id, id: keyData!.keyId },
+        content: {
+          'application/json': {
+            name: keyData!.keyName,
+            namespace: keyData!.keyNamespace ?? undefined,
+            maxCharLimit: newLimit,
+          },
+        },
+      },
+      {
+        onError() {
+          updateKey({
+            keyId: keyData!.keyId,
+            value: { keyMaxCharLimit: previousLimit },
+          });
+        },
+      }
+    );
   };
 
   const handleNamespaceChange = (namespace: string | undefined = '') => {
@@ -217,6 +252,23 @@ export const KeyEditForm: React.FC = () => {
             )}
           </StyledTags>
         </div>
+
+        {editEnabled && (
+          <div>
+            <FieldLabel>
+              <T keyName="translation_single_label_max_char_limit" />
+            </FieldLabel>
+            <TextField
+              data-cy="translation-edit-char-limit-input"
+              type="number"
+              size="small"
+              value={keyData.keyMaxCharLimit ?? ''}
+              onChange={(e) => handleCharLimitChange(e.target.value)}
+              inputProps={{ min: 1 }}
+              sx={{ width: 200 }}
+            />
+          </div>
+        )}
 
         <div>
           <FieldLabel>

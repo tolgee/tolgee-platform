@@ -13,6 +13,7 @@ import { useTranslationCell } from '../useTranslationCell';
 import { TranslationLanguage } from './TranslationLanguage';
 import { TranslationEditor } from '../TranslationEditor';
 import { MissingPlaceholders } from '../cell/MissingPlaceholders';
+
 import { useMissingPlaceholders } from '../cell/useMissingPlaceholders';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
@@ -122,6 +123,12 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     keyData.keyIsPlural
   );
 
+  const isOverCharLimit =
+    keyData.keyMaxCharLimit != null &&
+    Object.values(editVal.value.variants).some(
+      (v) => (v?.length ?? 0) > keyData.keyMaxCharLimit!
+    );
+
   const missingPlaceholders = useMissingPlaceholders({
     baseTranslation,
     currentTranslation: value,
@@ -184,7 +191,12 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
       />
       <Box onMouseDown={(e) => e.preventDefault()} className="editor">
         {editEnabled ? (
-          <TranslationEditor tools={tools} editorRef={editorRef} mode={mode} />
+          <TranslationEditor
+            tools={tools}
+            editorRef={editorRef}
+            mode={mode}
+            maxCharLimit={keyData.keyMaxCharLimit}
+          />
         ) : (
           <TranslationVisual
             text={translation?.text || ''}
@@ -228,6 +240,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
                 translation={translation}
                 languageId={language.id}
                 value={editVal.value}
+                overCharLimit={isOverCharLimit}
               />
             </StyledControls>
           </>

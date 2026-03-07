@@ -37,6 +37,7 @@ class KeyWithDataModelAssembler(
       isPlural = entity.isPlural,
       pluralArgName = entity.pluralArgName,
       custom = entity.keyMeta?.custom ?: mapOf(),
+      maxCharLimit = entity.maxCharLimit,
       branch = entity.branch?.name,
     )
 }

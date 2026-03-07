@@ -97,7 +97,7 @@ export const actionsConfiguration: Partial<
     },
     entities: {
       Translation: true,
-      Key: ['name', 'namespace'],
+      Key: ['name', 'namespace', 'maxCharLimit'],
       Screenshot: true,
     },
   },
