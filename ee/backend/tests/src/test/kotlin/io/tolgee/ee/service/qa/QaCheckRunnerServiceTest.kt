@@ -1,9 +1,14 @@
 package io.tolgee.ee.service.qa
 
+import io.tolgee.model.enums.qa.QaCheckSeverity
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
+import io.tolgee.model.qa.ProjectQaConfig
+import io.tolgee.repository.qa.ProjectQaConfigRepository
+import io.tolgee.service.project.ProjectService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 
 class QaCheckRunnerServiceTest {
   private val params =
@@ -13,6 +18,17 @@ class QaCheckRunnerServiceTest {
       baseLanguageTag = null,
       languageTag = "en",
     )
+
+  private fun allEnabledConfigService(): ProjectQaConfigService {
+    val repo = Mockito.mock(ProjectQaConfigRepository::class.java)
+    val projectService = Mockito.mock(ProjectService::class.java)
+    val allWarnings =
+      QaCheckType.entries.associateWith { QaCheckSeverity.WARNING }.toMutableMap()
+    val config = Mockito.mock(ProjectQaConfig::class.java)
+    Mockito.`when`(config.settings).thenReturn(allWarnings)
+    Mockito.`when`(repo.findByProjectId(Mockito.anyLong())).thenReturn(config)
+    return ProjectQaConfigService(repo, projectService)
+  }
 
   @Test
   fun `returns fallback issue when check throws exception`() {
@@ -24,9 +40,9 @@ class QaCheckRunnerServiceTest {
           throw RuntimeException("Intentional test failure")
         }
       }
-    val service = QaCheckRunnerService(listOf(failingCheck))
+    val service = QaCheckRunnerService(listOf(failingCheck), allEnabledConfigService())
 
-    val results = service.runChecks(params)
+    val results = service.runChecks(1L, params)
 
     assertThat(results).hasSize(1)
     assertThat(results[0].type).isEqualTo(QaCheckType.EMPTY_TRANSLATION)
@@ -60,9 +76,9 @@ class QaCheckRunnerServiceTest {
           throw RuntimeException("Intentional test failure")
         }
       }
-    val service = QaCheckRunnerService(listOf(successfulCheck, failingCheck))
+    val service = QaCheckRunnerService(listOf(successfulCheck, failingCheck), allEnabledConfigService())
 
-    val results = service.runChecks(params)
+    val results = service.runChecks(1L, params)
 
     assertThat(results).hasSize(2)
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_EMPTY_TRANSLATION)

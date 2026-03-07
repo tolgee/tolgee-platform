@@ -77,6 +77,7 @@ import { ProjectSettingsTab } from '../views/projects/project/ProjectSettingsVie
 import { OperationAssignTranslationLabel } from '../ee/batchOperations/OperationAssignTranslationLabel';
 import { OperationUnassignTranslationLabel } from '../ee/batchOperations/OperationUnassignTranslationLabel';
 import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
+import { ProjectSettingsQa } from '../ee/qa/components/ProjectSettingsQa';
 import { BranchesView } from '../ee/branching/BranchesView';
 import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
@@ -495,26 +496,57 @@ export const useAddAdministrationMenuItems = () => {
 
 export const useAddProjectSettingsTabs = (projectId: number) => {
   const { t } = useTranslate();
-  const tabs: ProjectSettingsTab[] = [];
-
-  tabs.push({
-    value: 'labels',
-    label: t('project_settings_menu_labels'),
-    link: LINKS.PROJECT_EDIT_LABELS.build({
-      [PARAMS.PROJECT_ID]: projectId,
-    }),
-    dataCy: 'project-settings-menu-labels',
-    component: ProjectSettingsLabels,
-    enabled: true,
-    routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_LABELS.template),
+  const { isEnabled } = useEnabledFeatures();
+  const tabsAdder = createAdder<ProjectSettingsTab>({
+    referencingProperty: 'value',
   });
 
-  return createAdder<ProjectSettingsTab>({ referencingProperty: 'value' })(
-    tabs,
-    {
-      position: 'after',
-      value: 'advanced',
-      fallbackPosition: 'start',
+  return (originalTabs: ProjectSettingsTab[]) => {
+    let tabs = originalTabs;
+    if (isEnabled('QA_CHECKS')) {
+      tabs = tabsAdder(
+        [
+          {
+            value: 'qa',
+            label: t('project_settings_menu_qa_checks'),
+            link: LINKS.PROJECT_EDIT_QA.build({
+              [PARAMS.PROJECT_ID]: projectId,
+            }),
+            dataCy: 'project-settings-menu-qa',
+            component: ProjectSettingsQa,
+            enabled: true,
+            routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_QA.template),
+          },
+        ],
+        {
+          position: 'before',
+          value: 'advanced',
+          fallbackPosition: 'start',
+        }
+      )(tabs);
     }
-  );
+
+    tabs = tabsAdder(
+      [
+        {
+          value: 'labels',
+          label: t('project_settings_menu_labels'),
+          link: LINKS.PROJECT_EDIT_LABELS.build({
+            [PARAMS.PROJECT_ID]: projectId,
+          }),
+          dataCy: 'project-settings-menu-labels',
+          component: ProjectSettingsLabels,
+          enabled: true,
+          routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_LABELS.template),
+        },
+      ],
+      {
+        position: 'after',
+        value: 'advanced',
+        fallbackPosition: 'start',
+      }
+    )(tabs);
+
+    return tabs;
+  };
 };

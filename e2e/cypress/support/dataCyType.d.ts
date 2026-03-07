@@ -687,6 +687,7 @@ declare namespace DataCy {
         "project-settings-menu-advanced" |
         "project-settings-menu-general" |
         "project-settings-menu-labels" |
+        "project-settings-menu-qa" |
         "project-settings-name" |
         "project-settings-suggestions-mode-switch" |
         "project-settings-transfer-button" |
@@ -709,6 +710,8 @@ declare namespace DataCy {
         "qa-check-item" |
         "qa-panel-container" |
         "qa-panel-container-empty" |
+        "qa-settings-row" |
+        "qa-settings-select" |
         "quick-start-action" |
         "quick-start-dialog" |
         "quick-start-finish-action" |

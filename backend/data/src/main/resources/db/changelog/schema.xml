@@ -5218,4 +5218,25 @@
     <changeSet author="anty (generated)" id="1771511337241-5">
         <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="translation_qa_issue" constraintName="FKn7e25ywkkivr4mwn1vqe1lowb" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="translation" validate="true"/>
     </changeSet>
+    <changeSet author="anty (generated)" id="1771511337241-6">
+        <createTable tableName="project_qa_config">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="project_qa_configPK"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="settings" type="JSONB"/>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1771511337241-7">
+        <createIndex indexName="IDX_project_qa_config_project_id" tableName="project_qa_config" unique="true">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="anty (generated)" id="1771511337241-8">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="project_qa_config" constraintName="FK_project_qa_config_project" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
 </databaseChangeLog>
