@@ -49,23 +49,21 @@ class QaCheckPreviewController(
     dto: QaCheckPreviewRequest,
   ): CollectionModel<QaCheckResultModel> {
     val params = buildQaCheckParams(dto)
-    val results = qaCheckRunnerService.runChecks(params)
+    val results = qaCheckRunnerService.runChecks(projectHolder.project.id, params)
     val persistedIssues = fetchPersistedIssues(dto)
     return modelAssembler.toCollectionModel(results, persistedIssues)
   }
 
   private fun fetchPersistedIssues(dto: QaCheckPreviewRequest): List<TranslationQaIssue> {
     val keyId = dto.keyId ?: return emptyList()
-    val projectId = projectHolder.project.id
-    val language = languageService.findByTag(dto.languageTag, projectId) ?: return emptyList()
+    val language = languageService.findByTag(dto.languageTag, projectHolder.project.id) ?: return emptyList()
     val translations = translationService.getTranslations(listOf(keyId), listOf(language.id))
     val translation = translations.firstOrNull() ?: return emptyList()
     return qaIssueRepository.findAllByTranslationId(translation.id)
   }
 
   private fun buildQaCheckParams(dto: QaCheckPreviewRequest): QaCheckParams {
-    val projectId = projectHolder.project.id
-    val baseLanguage = languageService.getProjectBaseLanguage(projectId)
+    val baseLanguage = languageService.getProjectBaseLanguage(projectHolder.project.id)
 
     var baseTag: String? = baseLanguage.tag
     if (dto.languageTag == baseTag) {

@@ -3,12 +3,15 @@ package io.tolgee.ee.api.v2.controllers.qa
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
+import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.QaCheckRunnerService
 import io.tolgee.ee.service.qa.QaIssueService
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.enums.qa.QaCheckSeverity
+import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.qa.TranslationQaIssueRepository
@@ -36,6 +39,9 @@ class QaCheckPreviewControllerTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var qaIssueRepository: TranslationQaIssueRepository
 
+  @Autowired
+  private lateinit var projectQaConfigService: ProjectQaConfigService
+
   lateinit var testData: BaseTestData
   lateinit var testKey: Key
   var frTranslation: Translation? = null
@@ -56,6 +62,10 @@ class QaCheckPreviewControllerTest : AuthorizedControllerTest() {
         }.self
     }
     testDataService.saveTestData(testData.root)
+    projectQaConfigService.updateSettings(
+      testData.project.id,
+      QaCheckType.entries.associateWith { QaCheckSeverity.WARNING },
+    )
     userAccount = testData.user
   }
 
@@ -193,7 +203,7 @@ class QaCheckPreviewControllerTest : AuthorizedControllerTest() {
         baseLanguageTag = "en",
         languageTag = "fr",
       )
-    val results = qaCheckRunnerService.runChecks(params)
+    val results = qaCheckRunnerService.runChecks(testData.project.id, params)
     qaIssueService.replaceIssuesForTranslation(translation, results)
 
     // Ignore one issue

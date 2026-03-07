@@ -10,9 +10,11 @@ import {
 import { Check, XClose } from '@untitled-ui/icons-react';
 import { T } from '@tolgee/react';
 import { QaCheck } from 'tg.component/CustomIcons';
-import type { QaCheckResultItem } from '../hooks/useQaCheckPreview';
 import { useQaIssueMessage } from '../hooks/useQaIssueMessage';
 import { useQaCheckTypeLabel } from '../hooks/useQaCheckTypeLabel';
+import { components } from 'tg.service/apiSchema.generated';
+
+type QaCheckResultItem = components['schemas']['QaCheckResultModel'];
 
 const StyledItem = styled(Box)`
   display: flex;

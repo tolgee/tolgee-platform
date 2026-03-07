@@ -827,6 +827,10 @@ export interface paths {
   "/v2/projects/{projectId}/qa-check/preview": {
     post: operations["preview"];
   };
+  "/v2/projects/{projectId}/qa-settings": {
+    get: operations["getSettings"];
+    put: operations["updateSettings"];
+  };
   "/v2/projects/{projectId}/single-step-import": {
     /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
     post: operations["singleStepFromFiles"];
@@ -5623,6 +5627,9 @@ export interface components {
         | "REPEATED_WORDS"
         | "SPELLING"
         | "UNRESOLVED_COMMENTS";
+    };
+    QaSettingsRequest: {
+      settings: { [key: string]: "WARNING" | "OFF" };
     };
     QueueItemModel: {
       /** Format: int64 */
@@ -18383,6 +18390,89 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["QaCheckPreviewRequest"];
+      };
+    };
+  };
+  getSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": { [key: string]: "WARNING" | "OFF" };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  updateSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": { [key: string]: "WARNING" | "OFF" };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaSettingsRequest"];
       };
     };
   };
