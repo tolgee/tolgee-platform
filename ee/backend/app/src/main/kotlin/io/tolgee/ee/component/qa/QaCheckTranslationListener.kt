@@ -56,7 +56,7 @@ class QaCheckTranslationListener(
             languageTag = translation.language.tag,
           )
 
-        val results = qaCheckRunnerService.runChecks(params)
+        val results = qaCheckRunnerService.runChecks(projectId, params)
         qaIssueService.replaceIssuesForTranslation(translation, results)
       }
     } catch (e: Exception) {

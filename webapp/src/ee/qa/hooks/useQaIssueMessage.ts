@@ -1,5 +1,7 @@
 import { useTranslate } from '@tolgee/react';
-import type { QaCheckResultItem } from './useQaCheckPreview';
+import { components } from 'tg.service/apiSchema.generated';
+
+type QaCheckResultItem = components['schemas']['QaCheckResultModel'];
 
 export function useQaIssueMessage(
   message: QaCheckResultItem['message'],

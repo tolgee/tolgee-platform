@@ -3,7 +3,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
-export type QaCheckResultItem = components['schemas']['QaCheckResultModel'];
+type QaCheckResultItem = components['schemas']['QaCheckResultModel'];
 
 type QaCheckPreviewProps = {
   text: string | undefined | null;

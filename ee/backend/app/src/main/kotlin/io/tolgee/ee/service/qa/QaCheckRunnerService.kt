@@ -7,24 +7,31 @@ import org.springframework.stereotype.Service
 @Service
 class QaCheckRunnerService(
   private val checks: List<QaCheck>,
+  private val projectQaConfigService: ProjectQaConfigService,
 ) {
-  fun runChecks(params: QaCheckParams): List<QaCheckResult> {
-    return checks.flatMap { check ->
-      try {
-        check.check(params)
-      } catch (e: Exception) {
-        logger.error("QA check ${check.type} failed", e)
-        listOf(
-          QaCheckResult(
-            type = check.type,
-            message = QaIssueMessage.QA_CHECK_FAILED,
-            replacement = null,
-            positionStart = 0,
-            positionEnd = 0,
-          ),
-        )
+  fun runChecks(
+    projectId: Long,
+    params: QaCheckParams,
+  ): List<QaCheckResult> {
+    val enabledTypes = projectQaConfigService.getEnabledCheckTypes(projectId)
+    return checks
+      .filter { it.type in enabledTypes }
+      .flatMap { check ->
+        try {
+          check.check(params)
+        } catch (e: Exception) {
+          logger.error("QA check ${check.type} failed", e)
+          listOf(
+            QaCheckResult(
+              type = check.type,
+              message = QaIssueMessage.QA_CHECK_FAILED,
+              replacement = null,
+              positionStart = 0,
+              positionEnd = 0,
+            ),
+          )
+        }
       }
-    }
   }
 
   companion object {
