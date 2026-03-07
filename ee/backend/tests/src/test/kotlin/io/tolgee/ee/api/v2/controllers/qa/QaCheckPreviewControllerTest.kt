@@ -182,7 +182,7 @@ class QaCheckPreviewControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `preview includes ignored status from persisted issues`() {
+  fun `preview includes state from persisted issues`() {
     val translation = frTranslation!!
 
     // Persist QA issues for the French translation
@@ -201,7 +201,7 @@ class QaCheckPreviewControllerTest : AuthorizedControllerTest() {
     val issueToIgnore = issues.first()
     qaIssueService.ignoreIssue(testData.project.id, issueToIgnore.id)
 
-    // Preview the same text — should include ignored status
+    // Preview the same text — should include state status
     performAuthPost(
       "/v2/projects/${testData.project.id}/qa-check/preview",
       mapOf(
@@ -212,16 +212,16 @@ class QaCheckPreviewControllerTest : AuthorizedControllerTest() {
     ).andIsOk.andAssertThatJson {
       node("_embedded.qaCheckResults").isArray.isNotEmpty
       node("_embedded.qaCheckResults").isArray.anySatisfy {
-        assertThatJson(it).node("ignored").isEqualTo(true)
+        assertThatJson(it).node("state").isEqualTo("IGNORED")
       }
       node("_embedded.qaCheckResults").isArray.anySatisfy {
-        assertThatJson(it).node("ignored").isEqualTo(false)
+        assertThatJson(it).node("state").isEqualTo("OPEN")
       }
     }
   }
 
   @Test
-  fun `preview without persisted issues has default ignored values`() {
+  fun `preview without persisted issues has default state value`() {
     // Preview for a language with no persisted translation
     performAuthPost(
       "/v2/projects/${testData.project.id}/qa-check/preview",
@@ -232,7 +232,7 @@ class QaCheckPreviewControllerTest : AuthorizedControllerTest() {
       ),
     ).andIsOk.andAssertThatJson {
       node("_embedded.qaCheckResults").isArray.hasSize(1)
-      node("_embedded.qaCheckResults[0].ignored").isEqualTo(false)
+      node("_embedded.qaCheckResults[0].state").isEqualTo("OPEN")
     }
   }
 }
