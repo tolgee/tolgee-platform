@@ -18,6 +18,7 @@ type Props = {
   languageId: number;
   project: ProjectModel;
   value: TolgeeFormat | undefined;
+  overCharLimit?: boolean;
 };
 
 type TranslationAction = {
@@ -40,6 +41,7 @@ export function getEditorActions({
   translation,
   project,
   value,
+  overCharLimit,
 }: Props) {
   const editorEmpty = isEmpty(value);
   const editorUnchanged = isUnchanged(value, translation?.text);
@@ -76,6 +78,7 @@ export function getEditorActions({
       ) : (
         <T keyName="translations_cell_save" />
       ),
+      disabled: overCharLimit,
     });
 
     if (displayTaskControls) {

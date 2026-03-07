@@ -28,6 +28,8 @@ export const useFileIssueTranslation = () => {
         return t('multiple_values_for_key_and_language');
       case 'description_too_long':
         return t('file_issue_type_description_too_long');
+      case 'translation_exceeds_char_limit':
+        return t('file_issue_type_translation_exceeds_char_limit');
       default:
         return type;
     }

@@ -35,6 +35,8 @@ class DefaultPromptHelper(
 
         {{fragment.keyDescription}}
 
+        {{fragment.charLimit}}
+
         {{fragment.translationInfo}}
 
         {{fragment.translateJson}}

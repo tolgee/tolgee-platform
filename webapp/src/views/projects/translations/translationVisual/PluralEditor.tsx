@@ -6,6 +6,7 @@ import { getLanguageDirection } from 'tg.fixtures/getLanguageDirection';
 import { RefObject } from 'react';
 import { EditorView } from 'codemirror';
 import { useProject } from 'tg.hooks/useProject';
+import { CharacterCounter } from '../cell/CharacterCounter';
 
 type Props = {
   locale: string;
@@ -18,6 +19,7 @@ type Props = {
   activeEditorRef?: RefObject<EditorView | null>;
   mode: 'placeholders' | 'syntax';
   baseValue?: TolgeeFormat;
+  maxCharLimit?: number | null;
 };
 
 export const PluralEditor = ({
@@ -31,6 +33,7 @@ export const PluralEditor = ({
   editorProps,
   mode,
   baseValue,
+  maxCharLimit,
 }: Props) => {
   function handleChange(text: string, variant: string) {
     onChange?.({ ...value, variants: { ...value.variants, [variant]: text } });
@@ -62,24 +65,33 @@ export const PluralEditor = ({
       render={({ content, variant, exampleValue }) => {
         const variantOrOther = variant || 'other';
         return (
-          <EditorWrapper data-cy="translation-editor" data-cy-variant={variant}>
-            <Editor
-              mode={editorMode}
-              value={content || ''}
-              onChange={(value) => handleChange(value, variantOrOther)}
-              onFocus={() => onActiveVariantChange?.(variantOrOther)}
-              direction={getLanguageDirection(locale)}
-              autofocus={variantOrOther === activeVariant ? autofocus : false}
-              minHeight={value.parameter ? 'unset' : '100px'}
-              locale={locale}
-              editorRef={
-                variantOrOther === activeVariant ? activeEditorRef : undefined
-              }
-              examplePluralNum={exampleValue}
-              nested={Boolean(variant)}
-              {...editorProps}
+          <>
+            <EditorWrapper
+              data-cy="translation-editor"
+              data-cy-variant={variant}
+            >
+              <Editor
+                mode={editorMode}
+                value={content || ''}
+                onChange={(value) => handleChange(value, variantOrOther)}
+                onFocus={() => onActiveVariantChange?.(variantOrOther)}
+                direction={getLanguageDirection(locale)}
+                autofocus={variantOrOther === activeVariant ? autofocus : false}
+                minHeight={value.parameter ? 'unset' : '100px'}
+                locale={locale}
+                editorRef={
+                  variantOrOther === activeVariant ? activeEditorRef : undefined
+                }
+                examplePluralNum={exampleValue}
+                nested={Boolean(variant)}
+                {...editorProps}
+              />
+            </EditorWrapper>
+            <CharacterCounter
+              currentCount={content?.length ?? 0}
+              maxLimit={maxCharLimit}
             />
-          </EditorWrapper>
+          </>
         );
       }}
     />

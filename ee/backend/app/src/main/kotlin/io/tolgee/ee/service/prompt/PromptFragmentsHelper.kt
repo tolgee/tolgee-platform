@@ -176,6 +176,22 @@ class PromptFragmentsHelper {
 
     result.add(
       Variable(
+        "charLimit",
+        """
+        {{#if key.maxCharLimit}}
+        IMPORTANT: The translation MUST NOT exceed {{key.maxCharLimit}} characters.
+        Keep the translation concise to fit within this limit.
+        {{#if target.pluralFormExamples}}
+        This limit applies to each plural variant separately.
+        {{/if}}
+        {{/if}}
+        """.trimIndent(),
+        type = PromptVariableType.FRAGMENT,
+      ),
+    )
+
+    result.add(
+      Variable(
         "screenshot",
         """{{screenshots.first}}""",
         type = PromptVariableType.FRAGMENT,

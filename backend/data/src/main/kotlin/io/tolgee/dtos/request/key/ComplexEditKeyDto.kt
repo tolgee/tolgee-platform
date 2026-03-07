@@ -60,6 +60,8 @@ data class ComplexEditKeyDto(
   val warnOnDataLoss: Boolean? = false,
   @Schema(description = "Custom values of the key. If not provided, custom values won't be modified")
   val custom: Map<String, Any?>? = null,
+  @Schema(description = "Maximum character limit. Null = don't modify. 0 = remove limit.")
+  val maxCharLimit: Int? = null,
   @Schema(description = "Branch of the key. If not provided, default branch will be used")
   val branch: String? = null,
 ) : WithRelatedKeysInOrder {

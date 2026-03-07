@@ -19,6 +19,7 @@ class KeyModelAssembler :
       namespace = view.namespace,
       description = view.description,
       custom = view.custom as? Map<String, Any?>?,
+      maxCharLimit = view.maxCharLimit,
       branch = view.branch,
     )
 }
