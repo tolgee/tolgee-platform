@@ -39,7 +39,9 @@ export const QaBadge = (_props: QaBadgeProps) => Empty() as JSX.Element;
 export const SubfilterQaChecks = (_props: SubfilterQaChecksProps) =>
   Empty() as JSX.Element;
 export const getQaChecksFiltersLength = (_value: FiltersInternal) => 0;
-export const getQaChecksFiltersName = (_value: FiltersInternal) => undefined;
+export const getQaChecksFiltersName = (
+  _value: FiltersInternal
+): JSX.Element | undefined => undefined;
 
 export const routes = {
   Root: Empty,
