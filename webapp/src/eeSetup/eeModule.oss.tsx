@@ -7,6 +7,7 @@ import {
   QaBadgeProps,
   SubfilterQaChecksProps,
 } from './EeModuleType';
+import type { FiltersInternal } from 'tg.views/projects/translations/TranslationFilters/tools';
 
 const NotIncludedInOss = (name: string): ((props?: any) => any) => {
   function NotIncludedInOss(props: any, ref: any) {
@@ -34,10 +35,11 @@ export const OrderTranslationsDialog = Empty;
 export const TaskItem = Empty;
 export const TaskFilterPopover = Empty;
 export const TaskAllDonePlaceholder = Empty;
-export const QaBadge: React.VFC<QaBadgeProps> = Empty;
-export const SubfilterQaChecks: React.VFC<SubfilterQaChecksProps> = Empty;
-export const getQaChecksFiltersLength = () => 0;
-export const getQaChecksFiltersName = () => undefined;
+export const QaBadge = (_props: QaBadgeProps) => Empty() as JSX.Element;
+export const SubfilterQaChecks = (_props: SubfilterQaChecksProps) =>
+  Empty() as JSX.Element;
+export const getQaChecksFiltersLength = (_value: FiltersInternal) => 0;
+export const getQaChecksFiltersName = (_value: FiltersInternal) => undefined;
 
 export const routes = {
   Root: Empty,
