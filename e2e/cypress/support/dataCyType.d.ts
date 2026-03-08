@@ -910,8 +910,6 @@ declare namespace DataCy {
         "translations-trash-button" |
         "translations-view-list" |
         "translations-view-list-button" |
-        "translations-toolbar-counter" |
-        "translations-toolbar-to-top" |
         "translations-view-table" |
         "translations-view-table-button" |
         "trash-banner-close" |
