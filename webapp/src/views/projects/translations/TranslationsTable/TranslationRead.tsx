@@ -8,7 +8,6 @@ import { TranslationFlags } from '../cell/TranslationFlags';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
-import { QaBadge } from 'tg.ee';
 
 const StyledContainer = styled('div')`
   display: grid;
