@@ -36,6 +36,8 @@ export const TaskFilterPopover = Empty;
 export const TaskAllDonePlaceholder = Empty;
 export const QaBadge: React.VFC<QaBadgeProps> = Empty;
 export const SubfilterQaChecks: React.VFC<SubfilterQaChecksProps> = Empty;
+export const getQaChecksFiltersLength = () => 0;
+export const getQaChecksFiltersName = () => undefined;
 
 export const routes = {
   Root: Empty,
