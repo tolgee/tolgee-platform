@@ -211,8 +211,6 @@ export const TrashTable: React.FC<Props> = ({
             totalCount={totalCount}
             visible={toolbarVisible}
             onScrollUp={handleScrollUp}
-            counterDataCy="trash-toolbar-counter"
-            toTopDataCy="trash-toolbar-to-top"
           />
         </StyledFixedCounter>
       </Portal>
