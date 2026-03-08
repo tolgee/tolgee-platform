@@ -4,7 +4,6 @@ import {
   PermissionAdvancedState,
 } from 'tg.component/PermissionsSettings/types';
 import { components } from 'tg.service/apiSchema.generated';
-import { BoxProps } from '@mui/material';
 import {
   FilterActions,
   FiltersInternal,

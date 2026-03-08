@@ -1,4 +1,4 @@
-import { Badge, Box, styled, Typography } from '@mui/material';
+import { Badge, styled } from '@mui/material';
 import React from 'react';
 
 import { QaBadgeProps } from '../../../eeSetup/EeModuleType';
