@@ -33,6 +33,7 @@ open class AzureBlobFileStorage(
   override fun storeFile(
     storageFilePath: String,
     bytes: ByteArray,
+    metadata: Map<String, String>?,
   ) {
     try {
       val client = client.getBlobClient(storageFilePath)

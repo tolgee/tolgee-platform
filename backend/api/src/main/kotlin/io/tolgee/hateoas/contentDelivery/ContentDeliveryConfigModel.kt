@@ -28,6 +28,12 @@ class ContentDeliveryConfigModel(
     description = "Branch name this CDN config is associated with. Null means default branch or no branching.",
   )
   val branchName: String? = null,
+  @Schema(
+    description =
+      "Custom metadata to set on uploaded storage objects (e.g. {\"Cache-Control\": \"max-age=3600\"}). " +
+        "Currently supported for S3-compatible storages only.",
+  )
+  val customMetadata: Map<String, String>? = null,
 ) : RepresentationModel<ContentDeliveryConfigModel>(),
   Serializable,
   IExportParams {

@@ -34,7 +34,7 @@ class ContentDeliveryUploader(
 
     val withFullPaths = files.mapKeys { "${config.slug}/${it.key}" }
     pruneIfNeeded(config, storage)
-    storeToStorage(withFullPaths, storage)
+    storeToStorage(withFullPaths, storage, config.customMetadata)
     purgeCacheIfConfigured(config, files.keys)
 
     config.lastPublished = currentDateProvider.date
@@ -79,11 +79,13 @@ class ContentDeliveryUploader(
   private fun storeToStorage(
     withFullPaths: Map<String, InputStream>,
     storage: FileStorage,
+    metadata: Map<String, String>?,
   ) {
     withFullPaths.forEach {
       storage.storeFile(
         storageFilePath = it.key,
         bytes = it.value.readBytes(),
+        metadata = metadata,
       )
     }
   }

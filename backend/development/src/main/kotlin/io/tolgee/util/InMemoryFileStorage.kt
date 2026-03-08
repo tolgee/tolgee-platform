@@ -34,6 +34,7 @@ class InMemoryFileStorage : FileStorage {
   override fun storeFile(
     storageFilePath: String,
     bytes: ByteArray,
+    metadata: Map<String, String>?,
   ) {
     files[storageFilePath] = bytes
   }

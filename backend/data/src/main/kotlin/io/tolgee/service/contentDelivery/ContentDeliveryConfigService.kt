@@ -58,6 +58,7 @@ class ContentDeliveryConfigService(
     config.pruneBeforePublish = dto.pruneBeforePublish
     config.zip = dto.zip
     config.escapeHtml = dto.escapeHtml
+    config.customMetadata = dto.customMetadata
     contentDeliveryConfigRepository.save(config)
     if (dto.autoPublish) {
       automationService.createForContentDelivery(config)
@@ -145,6 +146,7 @@ class ContentDeliveryConfigService(
     config.name = dto.name
     config.pruneBeforePublish = dto.pruneBeforePublish
     config.zip = dto.zip
+    config.customMetadata = dto.customMetadata
     config.branch = branchService.getActiveOrDefault(projectId, dto.filterBranch)
     config.copyPropsFrom(dto)
     handleUpdateAutoPublish(dto, config)

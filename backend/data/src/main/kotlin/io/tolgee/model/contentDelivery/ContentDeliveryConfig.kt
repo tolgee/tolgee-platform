@@ -144,6 +144,11 @@ class ContentDeliveryConfig(
   @ActivityLoggedProp
   override var escapeHtml: Boolean? = false
 
+  @Type(JsonBinaryType::class)
+  @Column(columnDefinition = "jsonb")
+  @ActivityLoggedProp
+  var customMetadata: Map<String, String>? = null
+
   @get:Transient
   override var filterBranch: String?
     get() = branch?.name

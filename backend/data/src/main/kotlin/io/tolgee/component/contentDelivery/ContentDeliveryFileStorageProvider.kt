@@ -99,6 +99,7 @@ class ContentDeliveryFileStorageProvider(
         override fun storeFile(
           storageFilePath: String,
           bytes: ByteArray,
+          metadata: Map<String, String>?,
         ) {
         }
 
@@ -121,6 +122,7 @@ class ContentDeliveryFileStorageProvider(
         override fun storeFile(
           storageFilePath: String,
           bytes: ByteArray,
+          metadata: Map<String, String>?,
         ) {
           throw FileStoreException("Bypassed storage put exception", "test", IllegalStateException())
         }

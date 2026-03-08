@@ -29,6 +29,7 @@ class ContentDeliveryConfigModelAssembler(
       lastPublishedFiles = entity.lastPublishedFiles ?: listOf(),
       escapeHtml = entity.escapeHtml,
       branchName = entity.branch?.name,
+      customMetadata = entity.customMetadata,
     ).also {
       it.copyPropsFrom(entity)
     }

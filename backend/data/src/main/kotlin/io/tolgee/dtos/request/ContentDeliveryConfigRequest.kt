@@ -50,6 +50,13 @@ class ContentDeliveryConfigRequest : IExportParams {
   )
   var zip: Boolean = false
 
+  @Schema(
+    description =
+      "Custom metadata to set on uploaded storage objects (e.g. {\"Cache-Control\": \"max-age=3600\"}). " +
+        "Currently supported for S3-compatible storages only.",
+  )
+  var customMetadata: Map<String, String>? = null
+
   override var languages: Set<String>? = null
   override var format: ExportFormat = ExportFormat.JSON
   override var structureDelimiter: Char? = '.'

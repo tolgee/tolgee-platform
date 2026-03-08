@@ -10,6 +10,7 @@ interface FileStorage {
   fun storeFile(
     storageFilePath: String,
     bytes: ByteArray,
+    metadata: Map<String, String>? = null,
   )
 
   fun fileExists(storageFilePath: String): Boolean
