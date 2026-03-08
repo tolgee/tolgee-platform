@@ -46,7 +46,7 @@ export async function getFiles(dir) {
 
 export function processFile(content) {
   const matches = content.matchAll(
-    /["']?data-?[c|C]y["']?\s*[=:]\s*{?["'`]([A-Za-z0-9-_\s]+)["'`]?}?/g
+    /["']?data-?[cC]y["']?\s*[=:]\s*{?["'`]([A-Za-z0-9-_\s]+)["'`]?}?/g
   );
   const items = [];
   for (const match of matches) {
@@ -56,6 +56,9 @@ export function processFile(content) {
 }
 
 export function formatOutput(sortedItems) {
+  if (sortedItems.length === 0) {
+    return 'declare namespace DataCy {\n    export type Value = never\n}';
+  }
   let fileContent = 'declare namespace DataCy {\n';
   fileContent +=
     '    export type Value = \n        ' +
