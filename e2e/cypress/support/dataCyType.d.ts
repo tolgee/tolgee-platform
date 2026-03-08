@@ -935,8 +935,6 @@ declare namespace DataCy {
         "translations-tag-input" |
         "translations-tags-add" |
         "translations-task-indicator" |
-        "translations-toolbar-counter" |
-        "translations-toolbar-to-top" |
         "translations-trash-button" |
         "translations-view-list" |
         "translations-view-list-button" |
