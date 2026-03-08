@@ -2,7 +2,11 @@
 import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoView';
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { T, useTranslate } from '@tolgee/react';
-import { BookClosed, ClipboardCheck } from '@untitled-ui/icons-react';
+import {
+  AlertTriangle,
+  BookClosed,
+  ClipboardCheck,
+} from '@untitled-ui/icons-react';
 import { Link, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { Badge, Box, MenuItem } from '@mui/material';
 
@@ -47,27 +51,33 @@ import { addProjectMenuItems } from '../views/projects/projectMenu/ProjectMenu';
 import { addAdministrationMenuItems } from '../views/administration/components/BaseAdministrationView';
 import { SsoLoginView } from '../ee/security/Sso/SsoLoginView';
 import { OperationOrderTranslation } from '../views/projects/translations/BatchOperations/OperationOrderTranslation';
-import {
-  BillingMenuItemsProps,
-  GlossaryTermHighlightModel,
-  GlossaryTermHighlightsProps,
-  GlossaryTermPreviewProps,
-} from './EeModuleType';
+import { BillingMenuItemsProps } from './EeModuleType';
 import { AdministrationSubscriptionsView } from '../ee/billing/administration/subscriptions/AdministrationSubscriptionsView';
 import { OrganizationLlmProvidersView } from '../ee/llm/OrganizationLLMProviders/OrganizationLlmProvidersView';
 import { GlossariesListView } from '../ee/glossary/views/GlossariesListView';
-import { useGlossaryTermHighlights as useGlossaryTermHighlightsInternal } from '../ee/glossary/hooks/useGlossaryTermHighlights';
-import { GlossaryTermPreview as GlossaryTermPreviewInternal } from '../ee/glossary/components/GlossaryTermPreview';
+export { useGlossaryTermHighlights } from '../ee/glossary/hooks/useGlossaryTermHighlights';
+export { GlossaryTermPreview } from '../ee/glossary/components/GlossaryTermPreview';
 import {
   GlossariesPanel,
   useGlossariesCount,
 } from '../ee/glossary/components/GlossariesPanel';
+import {
+  QaChecksPanel,
+  useQaChecksCount,
+} from '../ee/qa/components/QaChecksPanel';
+export { QaBadge } from '../ee/qa/components/QaBadge';
+export {
+  SubfilterQaChecks,
+  getQaChecksFiltersLength,
+  getQaChecksFiltersName,
+} from '../ee/qa/components/SubfilterQaChecks';
 import { GlossaryRouter } from '../ee/glossary/views/GlossaryRouter';
 import { createAdder } from '../fixtures/pluginAdder';
 import { ProjectSettingsTab } from '../views/projects/project/ProjectSettingsView';
 import { OperationAssignTranslationLabel } from '../ee/batchOperations/OperationAssignTranslationLabel';
 import { OperationUnassignTranslationLabel } from '../ee/batchOperations/OperationUnassignTranslationLabel';
 import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
+import { ProjectSettingsQa } from '../ee/qa/components/ProjectSettingsQa';
 import { BranchesView } from '../ee/branching/BranchesView';
 import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
@@ -333,6 +343,19 @@ export const glossaryPanelAdder = addPanel(
   { position: 'after', value: 'translation_memory' }
 );
 
+export const qaChecksPanelAdder = addPanel(
+  [
+    {
+      id: 'qa_checks',
+      icon: <AlertTriangle />,
+      name: <T keyName="translation_tools_qa_checks" />,
+      component: QaChecksPanel,
+      itemsCountFunction: useQaChecksCount,
+    },
+  ],
+  { position: 'after', value: 'comments' }
+);
+
 export const useAddDeveloperViewItems = () => {
   const { t } = useTranslate();
   return addDeveloperViewItems(
@@ -473,33 +496,57 @@ export const useAddAdministrationMenuItems = () => {
 
 export const useAddProjectSettingsTabs = (projectId: number) => {
   const { t } = useTranslate();
-  const tabs: ProjectSettingsTab[] = [];
-
-  tabs.push({
-    value: 'labels',
-    label: t('project_settings_menu_labels'),
-    link: LINKS.PROJECT_EDIT_LABELS.build({
-      [PARAMS.PROJECT_ID]: projectId,
-    }),
-    dataCy: 'project-settings-menu-labels',
-    component: ProjectSettingsLabels,
-    enabled: true,
-    routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_LABELS.template),
+  const { isEnabled } = useEnabledFeatures();
+  const tabsAdder = createAdder<ProjectSettingsTab>({
+    referencingProperty: 'value',
   });
 
-  return createAdder<ProjectSettingsTab>({ referencingProperty: 'value' })(
-    tabs,
-    {
-      position: 'after',
-      value: 'advanced',
-      fallbackPosition: 'start',
+  return (originalTabs: ProjectSettingsTab[]) => {
+    let tabs = originalTabs;
+    if (isEnabled('QA_CHECKS')) {
+      tabs = tabsAdder(
+        [
+          {
+            value: 'qa',
+            label: t('project_settings_menu_qa_checks'),
+            link: LINKS.PROJECT_EDIT_QA.build({
+              [PARAMS.PROJECT_ID]: projectId,
+            }),
+            dataCy: 'project-settings-menu-qa',
+            component: ProjectSettingsQa,
+            enabled: true,
+            routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_QA.template),
+          },
+        ],
+        {
+          position: 'before',
+          value: 'advanced',
+          fallbackPosition: 'start',
+        }
+      )(tabs);
     }
-  );
+
+    tabs = tabsAdder(
+      [
+        {
+          value: 'labels',
+          label: t('project_settings_menu_labels'),
+          link: LINKS.PROJECT_EDIT_LABELS.build({
+            [PARAMS.PROJECT_ID]: projectId,
+          }),
+          dataCy: 'project-settings-menu-labels',
+          component: ProjectSettingsLabels,
+          enabled: true,
+          routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_LABELS.template),
+        },
+      ],
+      {
+        position: 'after',
+        value: 'advanced',
+        fallbackPosition: 'start',
+      }
+    )(tabs);
+
+    return tabs;
+  };
 };
-
-export const useGlossaryTermHighlights = (
-  props: GlossaryTermHighlightsProps
-): GlossaryTermHighlightModel[] => useGlossaryTermHighlightsInternal(props);
-
-export const GlossaryTermPreview: React.VFC<GlossaryTermPreviewProps> =
-  GlossaryTermPreviewInternal;

@@ -28,6 +28,7 @@ class TranslationViewModelAssembler(
       labels = view.labels.map { labelModelAssembler.toModel(it) },
       activeSuggestionCount = view.activeSuggestionCount,
       totalSuggestionCount = view.totalSuggestionCount,
+      qaIssueCount = view.qaIssueCount,
       suggestions = view.suggestions?.map { translationSuggestionSimpleModelAssembler.toModel(it) },
     )
   }

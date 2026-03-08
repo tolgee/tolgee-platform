@@ -8,6 +8,7 @@ import { TranslationFlags } from '../cell/TranslationFlags';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
+import { QaBadge } from 'tg.ee';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -147,8 +148,10 @@ export const TranslationRead: React.FC<Props> = ({
         <ControlsTranslation
           onEdit={() => handleOpen()}
           onComments={() => handleOpen('comments')}
+          onQaIssues={() => handleOpen('qa_checks')}
           commentsCount={translation?.commentCount}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
+          qaIssueCount={translation?.qaIssueCount}
           stateChangeEnabled={canChangeState}
           editEnabled={cellClickable}
           state={state}

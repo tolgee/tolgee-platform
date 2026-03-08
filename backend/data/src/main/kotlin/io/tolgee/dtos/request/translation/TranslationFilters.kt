@@ -149,6 +149,11 @@ To filter default namespace, set to empty string.
   var filterLabel: List<String>? = null
 
   @field:Parameter(
+    description = "Filter keys with open QA issues in lang",
+  )
+  var filterHasQaIssuesInLang: List<String>? = null
+
+  @field:Parameter(
     description = "Filter keys with any suggestions in lang",
   )
   var filterHasSuggestionsInLang: List<String>? = null

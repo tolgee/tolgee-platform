@@ -18,3 +18,4 @@ export { default as Sort } from '../svgs/icons/sort.svg?react';
 export { default as CopyBase } from '../svgs/icons/copy-base.svg?react';
 export { default as Branch } from '../svgs/icons/branch.svg?react';
 export { default as CheckDone } from '../svgs/icons/check-done.svg?react';
+export { default as QaCheck } from '../svgs/icons/qa-check.svg?react';

@@ -8,10 +8,11 @@ import { TranslationLanguage } from './TranslationLanguage';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
+import { QaBadge } from 'tg.ee';
 
 const StyledContainer = styled('div')`
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   grid-template-rows: auto 1fr auto;
   grid-template-areas:
     'language labels controls-t'
@@ -126,10 +127,12 @@ export const TranslationRead: React.FC<Props> = ({
         <ControlsTranslation
           onEdit={() => handleOpen()}
           onComments={() => handleOpen('comments')}
+          onQaIssues={() => handleOpen('qa_checks')}
           commentsCount={translation?.commentCount}
           tasks={keyData.tasks?.filter((t) => t.languageTag === language.tag)}
           onTaskStateChange={setAssignedTaskState}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
+          qaIssueCount={translation?.qaIssueCount}
           stateChangeEnabled={canChangeState}
           editEnabled={cellClickable}
           state={state}

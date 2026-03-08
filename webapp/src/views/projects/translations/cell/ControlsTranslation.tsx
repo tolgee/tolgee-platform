@@ -16,6 +16,7 @@ import { StateTransitionButtons } from './StateTransitionButtons';
 import { CELL_HIGHLIGHT_ON_HOVER, CELL_SHOW_ON_HOVER } from './styles';
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { useTaskTransitionTranslation } from 'tg.translationTools/useTaskTransitionTranslation';
+import { QaBadge } from 'tg.ee';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 type TaskModel = components['schemas']['KeyTaskViewModel'];
@@ -62,10 +63,12 @@ type ControlsProps = {
   onEdit?: () => void;
   onStateChange?: (state: StateInType) => void;
   onComments?: () => void;
+  onQaIssues?: () => void;
   commentsCount: number | undefined;
   tasks: TaskModel[] | undefined;
   onTaskStateChange: (done: boolean) => void;
   unresolvedCommentCount: number | undefined;
+  qaIssueCount: number | undefined;
   // render last focusable button
   lastFocusable: boolean;
   active?: boolean;
@@ -80,10 +83,12 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   onEdit,
   onStateChange,
   onComments,
+  onQaIssues,
   tasks,
   onTaskStateChange,
   commentsCount,
   unresolvedCommentCount,
+  qaIssueCount,
   lastFocusable,
   active,
   className,
@@ -97,6 +102,8 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || commentsPresent;
   const onlyResolved = commentsPresent && !unresolvedCommentCount;
+  const qaIssuesResolved = qaIssueCount === 0;
+  const displayQaIssues = onQaIssues && qaIssueCount !== 0;
   const prefilteredTask = useTranslationsSelector((c) => c.prefilter?.task);
   const task = tasks?.[0];
   const displayTaskButton =
@@ -111,6 +118,9 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   if (displayComments) {
     spots.push('comments');
   }
+  if (displayQaIssues) {
+    spots.push('qa');
+  }
   if (displayTaskButton) {
     spots.push('task');
   }
@@ -118,6 +128,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const inDomTransitionButtons = displayTransitionButtons && active;
   const inDomEdit = displayEdit && active;
   const inDomComments = displayComments || active || lastFocusable;
+  const inDomQaIssues = displayQaIssues;
   const inDomTask = displayTaskButton;
 
   const gridTemplateAreas = `'${spots.join(' ')}'`;
@@ -182,6 +193,20 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
               <MessageTextSquare02 />
             </StyledBadge>
           )}
+        </ControlsButton>
+      )}
+      {inDomQaIssues && (
+        <ControlsButton
+          style={{ gridArea: 'qa' }}
+          onClick={onQaIssues}
+          data-cy="translations-cell-qa-issues-button"
+          className={clsx({
+            [CELL_SHOW_ON_HOVER]: !qaIssueCount,
+            [CELL_HIGHLIGHT_ON_HOVER]: qaIssuesResolved,
+          })}
+          tooltip={t('translation_cell_qa_issues')}
+        >
+          <QaBadge count={qaIssueCount} />
         </ControlsButton>
       )}
       {inDomTask && (
