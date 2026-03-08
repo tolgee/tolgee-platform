@@ -356,6 +356,36 @@ jobs:
           fi
           echo "✅ Migration files are up to date"
 
+  data-cy-check:
+    name: DataCy Check 🏷️
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: "false"
+          npm-cache: "false"
+
+      - name: Generate dataCy types
+        run: node ./scripts/generate-data-cy.mjs
+        working-directory: ./webapp
+
+      - name: Check for uncommitted dataCy changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ dataCyType.d.ts is out of date! Please run 'npm run generate-data-cy' in webapp/ and commit the changes."
+            echo ""
+            echo "Changed files:"
+            git status --porcelain
+            echo ""
+            echo "Diff:"
+            git diff
+            exit 1
+          fi
+          echo "✅ dataCyType.d.ts is up to date"
+
   e2e-code-checks:
     name: E2E Static Check 🪲
     runs-on: ubuntu-24.04
@@ -434,6 +464,7 @@ jobs:
       - frontend-code-check
       - schema-check
       - migration-check
+      - data-cy-check
       - e2e
       - e2e-code-checks
       - e2e-install-deps
@@ -470,6 +501,10 @@ jobs:
 
           if [[ "${{ needs.migration-check.result }}" != "success" ]]; then
             failed_jobs+=("migration-check")
+          fi
+
+          if [[ "${{ needs.data-cy-check.result }}" != "success" ]]; then
+            failed_jobs+=("data-cy-check")
           fi
 
           if [[ "${{ needs.e2e.result }}" != "success" ]]; then
