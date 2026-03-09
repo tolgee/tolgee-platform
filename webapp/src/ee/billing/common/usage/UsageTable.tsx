@@ -8,6 +8,7 @@ import { ProportionalUsageItemRow } from './ProportionalUsageItemRow';
 import { SumUsageItemRow } from './SumUsageItemRow';
 import { TotalRow } from './TotalRow';
 import { AppliedStripeCreditsRow } from './AppliedStripeCreditsRow';
+import { CarryOverRow } from './CarryOverRow';
 
 export const UsageTable: FC<{
   usageData: components['schemas']['UsageModel'];
@@ -62,6 +63,10 @@ export const UsageTable: FC<{
         )}
         {(usageData?.appliedStripeCredits || 0) > 0 && (
           <AppliedStripeCreditsRow value={usageData.appliedStripeCredits!} />
+        )}
+
+        {(usageData?.carryOverTotal || 0) > 0 && (
+          <CarryOverRow value={usageData.carryOverTotal!} />
         )}
 
         <TotalRow
