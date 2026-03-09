@@ -71,6 +71,7 @@ class ProjectStatsController(
         it to language
       }
 
+    // TODO: we should add this to language stats, this might kill performance
     val qaIssueCounts =
       if (projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS)) {
         translationQaIssueService

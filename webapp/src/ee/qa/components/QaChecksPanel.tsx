@@ -48,6 +48,8 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     invalidatePrefix: '/v2/projects/{projectId}/qa-check/preview',
   });
 
+  // TODO: different message when QA feature is not enabled
+
   if (issues.length === 0) {
     return (
       <StyledContainer data-cy="qa-panel-container-empty">

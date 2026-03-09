@@ -196,6 +196,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
         </ControlsButton>
       )}
       {inDomQaIssues && (
+        // TODO: only show when QA feature is enabled
         <ControlsButton
           style={{ gridArea: 'qa' }}
           onClick={onQaIssues}
