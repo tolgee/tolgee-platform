@@ -441,6 +441,8 @@ declare namespace DataCy {
         "invitation-dialog-type-link-button" |
         "invite-generate-button" |
         "invoice-details-dialog" |
+        "key-char-limit-checkbox" |
+        "key-char-limit-expand" |
         "key-edit-char-limit-input" |
         "key-edit-tab-advanced" |
         "key-edit-tab-context" |
@@ -845,7 +847,6 @@ declare namespace DataCy {
         "translation-create-key-input" |
         "translation-create-namespace-input" |
         "translation-create-translation-input" |
-        "translation-edit-char-limit-input" |
         "translation-edit-delete-button" |
         "translation-edit-key-field" |
         "translation-edit-translation-field" |
