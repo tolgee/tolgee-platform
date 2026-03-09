@@ -23,6 +23,8 @@ const StyledContainer = styled('div')`
 const useQaChecksForPanel = (data: PanelContentData) => {
   const { keyData, language, editingText } = data;
   const text = editingText ?? '';
+  // TODO: When user is editing plural, either use full ICU form for the plural, or don't generate QA issues, or something like that
+  // if we go with no live QA for plurals, then the UI should say so.
 
   return useQaCheckPreview({
     text,
