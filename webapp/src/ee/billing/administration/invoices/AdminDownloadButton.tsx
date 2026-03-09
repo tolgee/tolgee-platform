@@ -38,7 +38,9 @@ export const AdminDownloadButton: FC<AdminDownloadButtonProps> = ({
             const a = document.createElement('a');
             try {
               a.href = url;
-              a.download = `${config.appName.toLowerCase()}-${invoice.number}.pdf`;
+              a.download = `${config.appName.toLowerCase()}-${
+                invoice.number
+              }.pdf`;
               a.click();
             } finally {
               a.remove();

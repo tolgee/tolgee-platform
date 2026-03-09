@@ -1,12 +1,7 @@
 import { FC } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { useTranslate } from '@tolgee/react';
-import {
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
+import { DialogContent, DialogTitle, IconButton, Tooltip } from '@mui/material';
 import { PieChart01 } from '@untitled-ui/icons-react';
 import Dialog from '@mui/material/Dialog';
 import { UsageTable } from './UsageTable';
