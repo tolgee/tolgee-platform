@@ -273,9 +273,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                       <Box display="inline-flex" alignItems="center" gap="4px">
                         {t('translation_single_label_max_char_limit')}
                         <Tooltip
-                          title={t(
-                            'translation_char_limit_placeholders_hint'
-                          )}
+                          title={t('translation_char_limit_placeholders_hint')}
                           disableInteractive
                         >
                           <Box component="span" display="inline-flex">
