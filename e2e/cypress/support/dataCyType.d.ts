@@ -1,3 +1,6 @@
+// This file was generated. DO NOT edit manually.
+// Use `npm run generate-data-cy` to update this file.
+
 declare namespace DataCy {
     export type Value = 
         "accept-auth-provider-change-accept" |
