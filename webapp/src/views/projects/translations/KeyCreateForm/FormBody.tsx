@@ -37,8 +37,6 @@ import type { ValuesCreateType } from './KeyCreateForm';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
 
-
-
 const StyledContainer = styled('div')`
   display: grid;
   row-gap: ${({ theme }) => theme.spacing(2)};
@@ -252,11 +250,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
             const hasLimit = field.value !== undefined;
             return (
               <Box display="grid">
-                <Box
-                  justifyContent="start"
-                  display="flex"
-                  alignItems="center"
-                >
+                <Box justifyContent="start" display="flex" alignItems="center">
                   <FormControlLabel
                     data-cy="key-char-limit-checkbox"
                     control={
