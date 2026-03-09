@@ -1,4 +1,4 @@
-package io.tolgee.ee.api.v2.hateoas.model.qa
+package io.tolgee.hateoas.qa
 
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage

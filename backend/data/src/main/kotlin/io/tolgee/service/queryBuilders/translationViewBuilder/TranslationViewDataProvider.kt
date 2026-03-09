@@ -3,6 +3,7 @@ package io.tolgee.service.queryBuilders.translationViewBuilder
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.views.KeyWithTranslationsView
+import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.TagService
 import io.tolgee.service.label.LabelService
@@ -20,6 +21,7 @@ class TranslationViewDataProvider(
   private val tagService: TagService,
   private val labelService: LabelService,
   private val authenticationFacade: AuthenticationFacade,
+  private val qaIssueRepository: TranslationQaIssueRepository,
 ) {
   fun getData(
     projectId: Long,
@@ -27,6 +29,7 @@ class TranslationViewDataProvider(
     pageable: Pageable,
     params: TranslationFilters = TranslationFilters(),
     cursor: String? = null,
+    includeQaIssues: Boolean = false,
   ): Page<KeyWithTranslationsView> {
     // otherwise it takes forever for postgres to plan the execution
     em.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
@@ -62,6 +65,18 @@ class TranslationViewDataProvider(
           translation.labels = labels[translation.id] ?: listOf()
         }
       }
+    }
+    if (includeQaIssues && translationIds.isNotEmpty()) {
+      qaIssueRepository
+        .findOpenByTranslationIds(translationIds)
+        .groupBy { it.translation.id }
+        .let { qaIssuesMap ->
+          views.forEach { view ->
+            view.translations.values.forEach { translation ->
+              translation.qaIssues = qaIssuesMap[translation.id] ?: emptyList()
+            }
+          }
+        }
     }
     return PageImpl(views, pageable, count)
   }

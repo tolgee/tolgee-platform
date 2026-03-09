@@ -12,6 +12,10 @@ import { useProject } from 'tg.hooks/useProject';
 import { useGlossaryTermHighlights } from 'tg.ee';
 import { GlossaryTermHighlightModel } from '../../../../eeSetup/EeModuleType';
 import { GlossaryHighlight } from 'tg.views/projects/translations/translationVisual/GlossaryHighlight';
+import { QaIssueHighlight } from './QaIssueHighlight';
+import { components } from 'tg.service/apiSchema.generated';
+
+type QaIssueModel = components['schemas']['QaIssueModel'];
 
 const StyledWrapper = styled('div')`
   white-space: pre-wrap;
@@ -24,21 +28,25 @@ type Props = {
   targetLocale?: string;
   nested: boolean;
   showHighlights?: boolean;
+  qaIssues?: QaIssueModel[];
+  translationId?: number;
 };
 
 type Modifier = {
   position: Position;
   placeholder?: Placeholder;
   highlight?: GlossaryTermHighlightModel;
+  qaIssue?: QaIssueModel;
 };
 
 function isOverlapping(a: Position, b: Position): boolean {
-  return a.start <= b.end && a.end >= b.start;
+  return a.start < b.end && a.end > b.start;
 }
 
 function sortModifiers(
   placeholders: Placeholder[],
-  highlights: GlossaryTermHighlightModel[]
+  highlights: GlossaryTermHighlightModel[],
+  qaIssues?: QaIssueModel[]
 ): Modifier[] {
   let modifiers: Modifier[] = placeholders.map((placeholder) => ({
     position: placeholder.position,
@@ -78,6 +86,26 @@ function sortModifiers(
     }
   });
 
+  // Add QA issue highlights (skip overlapping with existing modifiers and zero-length spans)
+  qaIssues?.forEach((issue) => {
+    if (issue.positionStart === issue.positionEnd) {
+      return;
+    }
+    const issuePosition: Position = {
+      start: issue.positionStart,
+      end: issue.positionEnd,
+    };
+    const hasOverlap = modifiers.some(({ position }) =>
+      isOverlapping(position, issuePosition)
+    );
+    if (!hasOverlap) {
+      modifiers.push({
+        position: issuePosition,
+        qaIssue: issue,
+      });
+    }
+  });
+
   return modifiers.sort((a, b) => a.position.start - b.position.start);
 }
 
@@ -88,6 +116,8 @@ export const TranslationWithPlaceholders = ({
   targetLocale,
   nested,
   showHighlights,
+  qaIssues,
+  translationId,
 }: Props) => {
   const project = useProject();
   const theme = useTheme();
@@ -105,7 +135,7 @@ export const TranslationWithPlaceholders = ({
     enabled: showHighlights ?? false,
   });
 
-  const modifiers = sortModifiers(placeholders, glossaryTerms);
+  const modifiers = sortModifiers(placeholders, glossaryTerms, qaIssues);
 
   const StyledPlaceholdersWrapper = useMemo(() => {
     return generatePlaceholdersStyle({
@@ -141,6 +171,19 @@ export const TranslationWithPlaceholders = ({
           term={modifier.highlight.value}
           languageTag={locale}
           targetLanguageTag={targetLocale}
+        />
+      );
+    } else if (modifier.qaIssue && translationId) {
+      const text =
+        content?.substring(modifier.position.start, modifier.position.end) ??
+        '';
+      chunks.push(
+        <QaIssueHighlight
+          key={index}
+          text={text}
+          translationText={content}
+          issue={modifier.qaIssue}
+          translationId={translationId}
         />
       );
     }
