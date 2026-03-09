@@ -1,151 +1,81 @@
 package io.tolgee.service.queryBuilders
 
-import io.tolgee.model.Language_
-import io.tolgee.model.Project
-import io.tolgee.model.Project_
-import io.tolgee.model.branching.Branch
-import io.tolgee.model.branching.Branch_
-import io.tolgee.model.enums.TranslationState
-import io.tolgee.model.key.Key
-import io.tolgee.model.key.Key_
-import io.tolgee.model.translation.Translation
-import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import jakarta.persistence.EntityManager
-import jakarta.persistence.criteria.CriteriaBuilder
-import jakarta.persistence.criteria.CriteriaQuery
-import jakarta.persistence.criteria.JoinType
-import jakarta.persistence.criteria.ListJoin
-import jakarta.persistence.criteria.Root
-import jakarta.persistence.criteria.Selection
-import jakarta.persistence.criteria.Subquery
 
-open class LanguageStatsProvider(
-  val entityManager: EntityManager,
+class LanguageStatsProvider(
+  private val entityManager: EntityManager,
   private val projectId: Long,
   private val branchId: Long?,
 ) {
-  private val cb: CriteriaBuilder = entityManager.criteriaBuilder
-  val query: CriteriaQuery<ProjectLanguageStatsResultView> = cb.createQuery(ProjectLanguageStatsResultView::class.java)
-
-  private var project: Root<Project> = query.from(Project::class.java)
-  private val languageJoin = project.join(Project_.languages)
-
-  fun getResultForSingleProject(): MutableList<ProjectLanguageStatsResultView> {
-    initQuery()
-    return entityManager.createQuery(query).resultList
-  }
-
-  private fun initQuery() {
-    val counts =
-      listOf(TranslationState.TRANSLATED, TranslationState.REVIEWED).map { state ->
-        selectWordCount(state) to selectKeyCount(state)
+  fun getResultForSingleProject(): List<ProjectLanguageStatsResultView> {
+    val branchCondition =
+      if (branchId == null) {
+        "(k.branch_id IS NULL OR b.is_default = true)"
+      } else {
+        "b.id = :branchId"
       }
 
-    val projectIdPath = project.get(Project_.id)
-    val languageId = languageJoin.get(Language_.id)
-    val selection =
-      mutableListOf<Selection<*>>(
-        projectIdPath,
-        languageId,
-        languageJoin.get(Language_.tag),
-        languageJoin.get(Language_.name),
-        languageJoin.get(Language_.originalName),
-        languageJoin.get(Language_.flagEmoji),
-      )
-
-    counts.forEach { (wordCount, keyCount) ->
-      selection.add(keyCount)
-      selection.add(wordCount)
-    }
-
-    query.multiselect(selection)
-
-    query.groupBy(languageId, projectIdPath)
-    query.where(projectIdPath.`in`(listOf(projectId)))
-  }
-
-  private fun selectKeyCount(state: TranslationState): Selection<Long> {
-    val sub = query.subquery(Long::class.java)
-    val subProject = sub.from(Project::class.java)
-    val keyJoin = subProject.join(Project_.keys)
-    joinBranch(sub, keyJoin)
-
-    joinTargetTranslations(keyJoin, state)
-
-    val countDistinctNames = cb.countDistinct(keyJoin.get(Key_.name))
-    val coalesceCount = cb.coalesce<Long>().value(countDistinctNames).value(0L)
-
-    return sub.select(coalesceCount)
-  }
-
-  private fun selectWordCount(state: TranslationState): Selection<Int> {
-    val sub = query.subquery(Int::class.java)
-    val project = sub.from(Project::class.java)
-    val keyJoin = project.join(Project_.keys)
-    joinBranch(sub, keyJoin)
-
-    joinTargetTranslations(keyJoin, state)
-
-    val baseTranslationJoin =
-      keyJoin.join(Key_.translations, JoinType.LEFT).also { translation ->
-        translation.on(
-          cb.equal(translation.get(Translation_.language), project.get(Project_.baseLanguage)),
-        )
-      }
-
-    val count = cb.sum(baseTranslationJoin.get(Translation_.wordCount))
-    val coalesceCount = cb.coalesce<Int>()
-    coalesceCount.value(count)
-    coalesceCount.value(0)
-
-    return sub.select(coalesceCount)
-  }
-
-  private fun joinBranch(
-    subquery: Subquery<*>,
-    join: ListJoin<Project, Key>,
-  ) {
-    val branchJoin = join.join(Key_.branch, JoinType.LEFT)
-    subquery.where(
-      cb.and(
-        branchPredicate(branchJoin, join.get(Key_.branch)),
-        cb.isNull(join.get(Key_.deletedAt)),
-      ),
-    )
-  }
-
-  private fun branchPredicate(
-    branchJoin: jakarta.persistence.criteria.Join<*, Branch>,
-    branchPath: jakarta.persistence.criteria.Path<Branch?>,
-  ) = when {
-    branchId == null -> {
-      cb.or(
-        cb.isNull(branchPath),
-        cb.isTrue(branchJoin.get(Branch_.isDefault)),
-      )
-    }
-
-    else -> {
-      cb.equal(branchJoin.get(Branch_.id), branchId)
-    }
-  }
-
-  private fun joinTargetTranslations(
-    keyJoin: ListJoin<Project, Key>,
-    state: TranslationState,
-  ): ListJoin<Key, Translation> {
-    return keyJoin.join(Key_.translations).also { translation ->
-      translation.on(
-        cb.and(
-          cb.equal(
-            translation.get(
-              Translation_.state,
-            ),
-            state,
-          ),
-          cb.equal(translation.get(Translation_.language), languageJoin),
+    val query =
+      entityManager
+        .createNativeQuery(
+          """
+        WITH key_base_words AS MATERIALIZED (
+          SELECT k.id AS key_id, t_base.word_count
+          FROM key k
+          LEFT JOIN branch b ON b.id = k.branch_id
+          LEFT JOIN translation t_base ON k.id = t_base.key_id
+            AND t_base.language_id = (SELECT base_language_id FROM project WHERE id = :projectId)
+          WHERE k.project_id = :projectId
+            AND $branchCondition
+            AND k.deleted_at IS NULL
         ),
+        lang_stats AS MATERIALIZED (
+          SELECT
+            t.language_id,
+            COUNT(CASE WHEN t.state = 1 THEN 1 END)                        AS translated_keys,
+            COALESCE(SUM(CASE WHEN t.state = 1 THEN kw.word_count END), 0) AS translated_words,
+            COUNT(CASE WHEN t.state = 2 THEN 1 END)                        AS reviewed_keys,
+            COALESCE(SUM(CASE WHEN t.state = 2 THEN kw.word_count END), 0) AS reviewed_words
+          FROM key_base_words kw
+          JOIN translation t ON kw.key_id = t.key_id AND t.state IN (1, 2)
+          JOIN language l ON t.language_id = l.id AND l.project_id = :projectId
+          GROUP BY t.language_id
+        )
+        SELECT
+          p.id,
+          l.id,
+          l.tag,
+          l.name,
+          l.original_name,
+          l.flag_emoji,
+          COALESCE(s.translated_keys, 0),
+          COALESCE(s.translated_words, 0),
+          COALESCE(s.reviewed_keys, 0),
+          COALESCE(s.reviewed_words, 0)
+        FROM project p
+        JOIN language l ON p.id = l.project_id
+        LEFT JOIN lang_stats s ON s.language_id = l.id
+        WHERE p.id = :projectId
+        """,
+        ).setParameter("projectId", projectId)
+
+    if (branchId != null) {
+      query.setParameter("branchId", branchId)
+    }
+
+    return (query.resultList as List<Array<Any?>>).map { row ->
+      ProjectLanguageStatsResultView(
+        projectId = (row[0] as Number).toLong(),
+        languageId = (row[1] as Number?)?.toLong(),
+        languageTag = row[2] as String?,
+        languageName = row[3] as String?,
+        languageOriginalName = row[4] as String?,
+        languageFlagEmoji = row[5] as String?,
+        translatedKeys = (row[6] as Number).toLong(),
+        translatedWords = (row[7] as Number).toLong(),
+        reviewedKeys = (row[8] as Number).toLong(),
+        reviewedWords = (row[9] as Number).toLong(),
       )
     }
   }
