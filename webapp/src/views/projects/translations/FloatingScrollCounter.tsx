@@ -51,7 +51,6 @@ type Props = {
   totalCount: number;
   visible: boolean;
   onScrollUp: () => void;
-  dataCyPrefix?: string;
 };
 
 export const FloatingScrollCounter: React.FC<Props> = ({
@@ -59,7 +58,6 @@ export const FloatingScrollCounter: React.FC<Props> = ({
   totalCount,
   visible,
   onScrollUp,
-  dataCyPrefix = 'translations',
 }) => {
   const { t } = useTranslate();
   const counterContent = `${scrollIndex} / ${totalCount}`;
@@ -67,15 +65,13 @@ export const FloatingScrollCounter: React.FC<Props> = ({
   return (
     <StyledCounterContainer className={clsx({ hidden: !visible })}>
       <StyledIndex>
-        <span data-cy={`${dataCyPrefix}-toolbar-counter`}>
-          {counterContent}
-        </span>
+        <span data-cy="translations-toolbar-counter">{counterContent}</span>
         <StyledStretcher>{counterContent}</StyledStretcher>
       </StyledIndex>
       <StyledDivider />
       <Tooltip title={t('translations_toolbar_to_top')} disableInteractive>
         <StyledIconButton
-          data-cy={`${dataCyPrefix}-toolbar-to-top`}
+          data-cy="translations-toolbar-to-top"
           onClick={onScrollUp}
           size="small"
           aria-label={t('translations_toolbar_to_top')}

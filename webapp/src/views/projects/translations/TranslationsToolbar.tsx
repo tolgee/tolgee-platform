@@ -89,7 +89,6 @@ export const TranslationsToolbar: React.FC = () => {
             totalCount={totalCount}
             visible={toolbarVisible}
             onScrollUp={handleScrollUp}
-            dataCyPrefix="translations"
           />
         </StyledCounterWrapper>
       </StyledContainer>
