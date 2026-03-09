@@ -56,10 +56,15 @@ export function processFile(content) {
 }
 
 export function formatOutput(sortedItems) {
+  let fileContent = '// This file was generated. DO NOT edit manually.\n';
+  fileContent += '// Use `npm run generate-data-cy` to update this file.\n\n';
+
   if (sortedItems.length === 0) {
-    return 'declare namespace DataCy {\n    export type Value = never\n}';
+    fileContent += 'declare namespace DataCy {\n    export type Value = never\n}';
+    return fileContent;
   }
-  let fileContent = 'declare namespace DataCy {\n';
+
+  fileContent += 'declare namespace DataCy {\n';
   fileContent +=
     '    export type Value = \n        ' +
     sortedItems.map((i) => `"${i}"`).join(' |\n        ') +
