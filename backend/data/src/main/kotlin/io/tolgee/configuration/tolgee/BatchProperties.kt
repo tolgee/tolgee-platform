@@ -1,9 +1,13 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.validation.annotation.Validated
 
 @ConfigurationProperties(prefix = "tolgee.batch")
+@Validated
 @DocProperty(description = "Configuration of batch operations.", displayName = "Batch operations")
 class BatchProperties {
   @DocProperty(description = "How many parallel jobs can be run at once on single Tolgee instance")
@@ -54,4 +58,14 @@ class BatchProperties {
     defaultExplanation = "30 seconds",
   )
   var cancellationTimeoutMs: Long = 30000
+
+  @DocProperty(
+    description =
+      "Maximum number of pending batch job chunk executions to load into the in-memory queue " +
+        "on each scheduled populate run. Limits CPU and memory usage when the queue grows large.",
+    defaultValue = "500",
+  )
+  @field:Min(10)
+  @field:Max(5000)
+  var queuePopulateLimit: Int = 500
 }

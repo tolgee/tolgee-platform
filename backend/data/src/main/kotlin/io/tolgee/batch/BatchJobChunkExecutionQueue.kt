@@ -109,7 +109,7 @@ class BatchJobChunkExecutionQueue(
         ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
         .setParameter("runningStatus", BatchJobStatus.RUNNING)
         // Limit to get pending batches faster
-        .setMaxResults(500)
+        .setMaxResults(batchProperties.queuePopulateLimit)
         .resultList
 
     if (data.size > 0) {
