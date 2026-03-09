@@ -13,7 +13,12 @@ import java.math.RoundingMode
 
 @Component
 class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> {
-  override fun toModel(data: UsageData): UsageModel {
+  override fun toModel(data: UsageData): UsageModel = toModel(data, minInvoiceAmount = null)
+
+  fun toModel(
+    data: UsageData,
+    minInvoiceAmount: BigDecimal? = null,
+  ): UsageModel {
     return UsageModel(
       subscriptionPrice = data.subscriptionPrice,
       seats = this.periodToModel(data.seatsUsage),
@@ -22,6 +27,7 @@ class UsageModelAssembler : RepresentationModelAssembler<UsageData, UsageModel> 
       credits = data.creditsUsage?.let { sumToModel(it) },
       total = data.total,
       appliedStripeCredits = data.appliedStripeCredits,
+      minInvoiceAmount = minInvoiceAmount,
     )
   }
 

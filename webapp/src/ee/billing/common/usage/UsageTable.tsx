@@ -13,7 +13,8 @@ export const UsageTable: FC<{
   usageData: components['schemas']['UsageModel'];
   invoiceId?: number;
   invoiceNumber?: string;
-}> = ({ usageData, invoiceId, invoiceNumber }) => {
+  organizationId?: number;
+}> = ({ usageData, invoiceId, invoiceNumber, organizationId }) => {
   const { t } = useTranslate();
 
   return (
@@ -27,6 +28,7 @@ export const UsageTable: FC<{
             type="SEATS"
             invoiceId={invoiceId}
             invoiceNumber={invoiceNumber}
+            organizationId={organizationId}
             item={usageData.seats}
           />
         )}
@@ -36,6 +38,7 @@ export const UsageTable: FC<{
             type="TRANSLATIONS"
             invoiceId={invoiceId}
             invoiceNumber={invoiceNumber}
+            organizationId={organizationId}
             item={usageData.translations}
           />
         )}
@@ -45,6 +48,7 @@ export const UsageTable: FC<{
             type="KEYS"
             invoiceId={invoiceId}
             invoiceNumber={invoiceNumber}
+            organizationId={organizationId}
             item={usageData.keys}
           />
         )}
@@ -63,6 +67,10 @@ export const UsageTable: FC<{
         <TotalRow
           total={usageData.total}
           appliedStripeCredits={usageData.appliedStripeCredits || 0}
+          minInvoiceAmount={usageData.minInvoiceAmount ?? undefined}
+          usageOnlyTotal={
+            usageData.total - (usageData.subscriptionPrice ?? 0)
+          }
         />
       </TableBody>
     </Table>
