@@ -130,6 +130,7 @@ class QueryBase<T>(
       val unresolvedCommentsExpression = addUnresolvedComments(translation, language)
       val activeSuggestionsExpression = addActiveSuggestionsCount(language)
       addTotalSuggestionsCount(language)
+      // TODO: only count qa issues if QA feature is enabled
       val qaIssueCountExpression = addQaIssueCount(translation, language)
 
       queryTranslationFiltering.applyCommentsFilter(
