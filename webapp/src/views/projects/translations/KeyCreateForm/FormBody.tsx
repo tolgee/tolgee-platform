@@ -5,10 +5,19 @@ import {
   FieldProps,
   useFormikContext,
 } from 'formik';
-import { Box, Button, styled } from '@mui/material';
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  styled,
+  TextField,
+} from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useState } from 'react';
 import clsx from 'clsx';
+import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
@@ -27,8 +36,8 @@ import { PluralEditor } from '../translationVisual/PluralEditor';
 import type { ValuesCreateType } from './KeyCreateForm';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
-import { CharacterCounter } from '../cell/CharacterCounter';
-import { TextField } from '@mui/material';
+
+
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -84,6 +93,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
   const isPlural = form.values.isPlural;
 
   const [mode, setMode] = useState<'placeholders' | 'syntax'>('placeholders');
+  const [charLimitExpanded, setCharLimitExpanded] = useState(true);
 
   const maxCharLimit = form.values.maxCharLimit;
   const isBaseOverCharLimit =
@@ -237,30 +247,69 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
           pluralParameterName="pluralParameter"
         />
 
-        <FastField name="maxCharLimit">
-          {({ field, form }: FieldProps<any>) => (
-            <div>
-              <FieldLabel>
-                <T keyName="translation_single_label_max_char_limit" />
-              </FieldLabel>
-              <TextField
-                data-cy="translation-create-char-limit-input"
-                type="number"
-                size="small"
-                value={field.value ?? ''}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  form.setFieldValue(
-                    field.name,
-                    val === '' ? undefined : Math.max(1, parseInt(val, 10))
-                  );
-                }}
-                inputProps={{ min: 1 }}
-                sx={{ width: 200 }}
-              />
-            </div>
-          )}
-        </FastField>
+        <Field name="maxCharLimit">
+          {({ field, form }: FieldProps<any>) => {
+            const hasLimit = field.value !== undefined;
+            return (
+              <Box display="grid">
+                <Box
+                  justifyContent="start"
+                  display="flex"
+                  alignItems="center"
+                >
+                  <FormControlLabel
+                    data-cy="key-char-limit-checkbox"
+                    control={
+                      <Checkbox
+                        checked={hasLimit}
+                        onChange={(e) => {
+                          form.setFieldValue(
+                            field.name,
+                            e.target.checked ? '' : undefined
+                          );
+                          if (e.target.checked) {
+                            setCharLimitExpanded(true);
+                          }
+                        }}
+                      />
+                    }
+                    label={t('translation_single_label_max_char_limit')}
+                    sx={{ mr: 0.5 }}
+                  />
+                  <IconButton
+                    size="small"
+                    disabled={!hasLimit}
+                    onClick={() => setCharLimitExpanded((v) => !v)}
+                    data-cy="key-char-limit-expand"
+                  >
+                    {hasLimit && charLimitExpanded ? (
+                      <ChevronUp />
+                    ) : (
+                      <ChevronDown />
+                    )}
+                  </IconButton>
+                </Box>
+                {hasLimit && charLimitExpanded && (
+                  <TextField
+                    data-cy="translation-create-char-limit-input"
+                    type="number"
+                    size="small"
+                    value={field.value ?? ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      form.setFieldValue(
+                        field.name,
+                        val === '' ? '' : Math.max(1, parseInt(val, 10))
+                      );
+                    }}
+                    inputProps={{ min: 1 }}
+                    sx={{ maxWidth: 300 }}
+                  />
+                )}
+              </Box>
+            );
+          }}
+        </Field>
 
         <Field key={baseLang.tag} name="baseValue">
           {({ field, meta }) => (
@@ -286,6 +335,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                 }}
                 locale={baseLang.tag}
                 mode={mode}
+                maxCharLimit={maxCharLimit}
                 editorProps={{
                   autoScrollIntoView: true,
                   scrollMargins: { bottom: 150 },
@@ -297,14 +347,6 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                   ],
                 }}
               />
-              {form.values.maxCharLimit != null && (
-                <Box mt={0.5}>
-                  <CharacterCounter
-                    currentCount={field.value?.variants?.other?.length ?? 0}
-                    maxLimit={form.values.maxCharLimit}
-                  />
-                </Box>
-              )}
               <FieldError error={meta.touched && meta.error} />
             </div>
           )}

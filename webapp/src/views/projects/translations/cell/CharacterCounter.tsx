@@ -30,7 +30,7 @@ export const CharacterCounter: React.FC<Props> = ({
 }) => {
   const { t } = useTranslate();
 
-  if (maxLimit == null) {
+  if (maxLimit == null || maxLimit <= 0) {
     return null;
   }
 
