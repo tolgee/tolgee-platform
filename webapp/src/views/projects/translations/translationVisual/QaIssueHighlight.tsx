@@ -29,6 +29,8 @@ export const QaIssueHighlight = ({
 }: Props) => {
   const project = useProject();
 
+  // TODO: implement handleCorrect - apply the fix and save the fixed translation
+
   const ignoreMutation = useApiMutation({
     url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/ignore',
     method: 'post',

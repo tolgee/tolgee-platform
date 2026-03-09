@@ -60,6 +60,8 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     );
   }
 
+  // TODO: note that some QA checks are not supported for plurals yes (when editing plural)
+
   const handleCorrect = (issue: (typeof issues)[0]) => {
     if (issue.replacement == null) return;
     const corrected =
