@@ -3240,7 +3240,8 @@ export interface components {
         | "KEY_IS_BLANK"
         | "TRANSLATION_DEFINED_IN_ANOTHER_FILE"
         | "INVALID_CUSTOM_VALUES"
-        | "DESCRIPTION_TOO_LONG";
+        | "DESCRIPTION_TOO_LONG"
+        | "TRANSLATION_EXCEEDS_CHAR_LIMIT";
     };
     ImportFileIssueParamModel: {
       /** @enum {string} */
