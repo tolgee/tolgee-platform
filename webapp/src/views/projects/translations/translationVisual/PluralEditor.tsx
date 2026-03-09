@@ -7,6 +7,7 @@ import { RefObject } from 'react';
 import { EditorView } from 'codemirror';
 import { useProject } from 'tg.hooks/useProject';
 import { CharacterCounter } from '../cell/CharacterCounter';
+import { getVisibleCharCount } from '../cell/getVisibleCharCount';
 
 type Props = {
   locale: string;
@@ -88,7 +89,7 @@ export const PluralEditor = ({
               />
             </EditorWrapper>
             <CharacterCounter
-              currentCount={content?.length ?? 0}
+              currentCount={getVisibleCharCount(content, Boolean(variant))}
               maxLimit={maxCharLimit}
             />
           </>

@@ -5,12 +5,13 @@ import {
   IconButton,
   styled,
   TextField,
+  Tooltip,
   useTheme,
 } from '@mui/material';
 import { useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
 import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
+import { ChevronDown, ChevronUp, HelpCircle } from '@untitled-ui/icons-react';
 
 import { Editor } from 'tg.component/editor/Editor';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
@@ -195,7 +196,19 @@ export const KeyGeneral = () => {
                 }}
               />
             }
-            label={t('translation_single_label_max_char_limit')}
+            label={
+              <Box display="inline-flex" alignItems="center" gap="4px">
+                {t('translation_single_label_max_char_limit')}
+                <Tooltip
+                  title={t('translation_char_limit_placeholders_hint')}
+                  disableInteractive
+                >
+                  <Box component="span" display="inline-flex">
+                    <HelpCircle style={{ width: 15, height: 15 }} />
+                  </Box>
+                </Tooltip>
+              </Box>
+            }
             sx={{ mr: 0.5 }}
           />
           <IconButton
