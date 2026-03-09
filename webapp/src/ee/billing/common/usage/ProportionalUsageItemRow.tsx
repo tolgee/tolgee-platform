@@ -2,7 +2,6 @@ import { components, operations } from 'tg.service/billingApiSchema.generated';
 import { ItemRow } from './ItemRow';
 import { useTranslate } from '@tolgee/react';
 import { useBillingApiMutation } from 'tg.service/http/useQueryApi';
-import { useOrganization } from 'tg.views/organizations/useOrganization';
 
 export type ProportionalUsageType =
   operations['getUsageDetail']['parameters']['path']['type'];
@@ -12,6 +11,7 @@ export const ProportionalUsageItemRow = (props: {
   invoiceId?: number;
   invoiceNumber?: string;
   type: ProportionalUsageType;
+  organizationId?: number;
 }) => {
   const downloadReport = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/usage/{type}.csv',
@@ -19,15 +19,14 @@ export const ProportionalUsageItemRow = (props: {
     fetchOptions: { rawResponse: true },
   });
 
-  const organization = useOrganization();
-
   const onDownload =
     (props.invoiceId !== undefined &&
+      props.organizationId !== undefined &&
       (() => {
         downloadReport.mutate(
           {
             path: {
-              organizationId: organization!.id,
+              organizationId: props.organizationId!,
               invoiceId: props.invoiceId!,
               type: props.type,
             },
