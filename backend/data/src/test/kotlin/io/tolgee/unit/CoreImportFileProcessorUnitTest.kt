@@ -21,6 +21,7 @@ import io.tolgee.service.dataImport.CoreImportFilesProcessor
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.key.KeyMetaService
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.translation.TranslationService
 import org.assertj.core.api.Assertions.assertThat
@@ -54,6 +55,7 @@ class CoreImportFileProcessorUnitTest {
   private lateinit var keyMetaServiceMock: KeyMetaService
   private lateinit var tolgeePropertiesMock: TolgeeProperties
   private lateinit var keyCustomValuesValidatorMock: KeyCustomValuesValidator
+  private lateinit var keyServiceMock: KeyService
 
   @BeforeEach
   fun setup() {
@@ -68,6 +70,7 @@ class CoreImportFileProcessorUnitTest {
     keyMetaServiceMock = mock()
     tolgeePropertiesMock = mock()
     keyCustomValuesValidatorMock = mock()
+    keyServiceMock = mock()
 
     importFile = ImportFile("lgn.json", importMock)
     importFileDto = ImportFileDto("lng.json", "".toByteArray())
@@ -97,6 +100,8 @@ class CoreImportFileProcessorUnitTest {
     whenever(applicationContextMock.getBean(TolgeeProperties::class.java)).thenReturn(tolgeePropertiesMock)
     whenever(applicationContextMock.getBean(KeyCustomValuesValidator::class.java))
       .thenReturn(keyCustomValuesValidatorMock)
+    whenever(applicationContextMock.getBean(KeyService::class.java)).thenReturn(keyServiceMock)
+    whenever(keyServiceMock.getAllByBranch(any(), anyOrNull())).thenReturn(emptySet())
     whenever(tolgeePropertiesMock.maxTranslationTextLength).then { 10000L }
 
     whenever(importFileProcessorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
