@@ -36,6 +36,7 @@ export const TaskItem = Empty;
 export const TaskFilterPopover = Empty;
 export const TaskAllDonePlaceholder = Empty;
 export const QaBadge = (_props: QaBadgeProps) => Empty() as JSX.Element;
+export const QaCheckItem = Empty;
 export const SubfilterQaChecks = (_props: SubfilterQaChecksProps) =>
   Empty() as JSX.Element;
 export const getQaChecksFiltersLength = (_value: FiltersInternal) => 0;

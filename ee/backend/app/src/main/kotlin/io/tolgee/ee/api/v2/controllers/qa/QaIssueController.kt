@@ -4,9 +4,9 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaIssueModelAssembler
-import io.tolgee.ee.api.v2.hateoas.model.qa.QaIssueModel
 import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
 import io.tolgee.ee.service.qa.QaIssueService
+import io.tolgee.hateoas.qa.QaIssueModel
 import io.tolgee.model.enums.Scope
 import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
 import io.tolgee.security.authentication.AllowApiAccess

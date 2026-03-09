@@ -708,6 +708,7 @@ declare namespace DataCy {
         "prompt-basic-option" |
         "prompt-basic-option-edit" |
         "qa-check-item" |
+        "qa-issue-highlight" |
         "qa-panel-container" |
         "qa-panel-container-empty" |
         "qa-settings-row" |

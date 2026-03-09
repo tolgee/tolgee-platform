@@ -66,6 +66,7 @@ import {
   useQaChecksCount,
 } from '../ee/qa/components/QaChecksPanel';
 export { QaBadge } from '../ee/qa/components/QaBadge';
+export { QaCheckItem } from '../ee/qa/components/QaCheckItem';
 export {
   SubfilterQaChecks,
   getQaChecksFiltersLength,

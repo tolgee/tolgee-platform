@@ -188,7 +188,14 @@ class TranslationService(
     params: GetTranslationsParams,
     languages: Set<LanguageDto>,
   ): Page<KeyWithTranslationsView> {
-    return translationViewDataProvider.getData(projectId, languages, pageable, params, params.cursor)
+    return translationViewDataProvider.getData(
+      projectId,
+      languages,
+      pageable,
+      params,
+      params.cursor,
+      includeQaIssues = params.includeQaIssues,
+    )
   }
 
   fun getSelectAllKeys(

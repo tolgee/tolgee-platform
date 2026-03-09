@@ -6843,6 +6843,8 @@ export interface components {
        * @description Number of open QA issues
        */
       qaIssueCount: number;
+      /** @description Detailed QA issues for inline highlighting (only when includeQaIssues=true) */
+      qaIssues?: components["schemas"]["QaIssueModel"][];
       /**
        * @description State of translation
        * @enum {string}
@@ -20457,6 +20459,8 @@ export interface operations {
         branch?: string;
         /** Filter trashed keys by who deleted them (user IDs) */
         filterDeletedByUserId?: number[];
+        /** Include detailed QA issues for inline highlighting */
+        includeQaIssues?: boolean;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */

@@ -28,6 +28,7 @@ export const GlossaryHighlight = ({
     <Tooltip
       placement="bottom-start"
       enterDelay={200}
+      leaveDelay={200}
       components={{ Tooltip: TooltipCard }}
       title={
         <GlossaryTermPreview
