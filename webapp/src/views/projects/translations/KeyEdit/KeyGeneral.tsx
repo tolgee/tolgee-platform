@@ -1,6 +1,16 @@
-import { styled, TextField, useTheme } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  styled,
+  TextField,
+  useTheme,
+} from '@mui/material';
 import { useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
+import { useState } from 'react';
+import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 
 import { Editor } from 'tg.component/editor/Editor';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
@@ -50,6 +60,8 @@ export const KeyGeneral = () => {
   const { values, setFieldValue, submitForm, errors } =
     useFormikContext<KeyFormType>();
   const theme = useTheme();
+  const hasCharLimit = values.maxCharLimit !== undefined;
+  const [charLimitExpanded, setCharLimitExpanded] = useState(hasCharLimit);
 
   return (
     <>
@@ -159,24 +171,58 @@ export const KeyGeneral = () => {
         isPluralName="isPlural"
       />
 
-      <StyledSection>
-        <FieldLabel>{t('translation_single_label_max_char_limit')}</FieldLabel>
-        <TextField
-          data-cy="key-edit-char-limit-input"
-          type="number"
-          size="small"
-          value={values.maxCharLimit ?? ''}
-          onChange={(e) => {
-            const val = e.target.value;
-            setFieldValue(
-              'maxCharLimit',
-              val === '' ? undefined : Math.max(1, parseInt(val, 10))
-            );
-          }}
-          inputProps={{ min: 1 }}
-          sx={{ width: 200 }}
-        />
-      </StyledSection>
+      <Box display="grid">
+        <Box justifyContent="start" display="flex" alignItems="center">
+          <FormControlLabel
+            data-cy="key-char-limit-checkbox"
+            control={
+              <Checkbox
+                checked={hasCharLimit}
+                onChange={(e) => {
+                  setFieldValue(
+                    'maxCharLimit',
+                    e.target.checked ? '' : undefined
+                  );
+                  if (e.target.checked) {
+                    setCharLimitExpanded(true);
+                  }
+                }}
+              />
+            }
+            label={t('translation_single_label_max_char_limit')}
+            sx={{ mr: 0.5 }}
+          />
+          <IconButton
+            size="small"
+            disabled={!hasCharLimit}
+            onClick={() => setCharLimitExpanded((v) => !v)}
+            data-cy="key-char-limit-expand"
+          >
+            {hasCharLimit && charLimitExpanded ? (
+              <ChevronUp />
+            ) : (
+              <ChevronDown />
+            )}
+          </IconButton>
+        </Box>
+        {hasCharLimit && charLimitExpanded && (
+          <TextField
+            data-cy="key-edit-char-limit-input"
+            type="number"
+            size="small"
+            value={values.maxCharLimit ?? ''}
+            onChange={(e) => {
+              const val = e.target.value;
+              setFieldValue(
+                'maxCharLimit',
+                val === '' ? '' : Math.max(1, parseInt(val, 10))
+              );
+            }}
+            inputProps={{ min: 1 }}
+            sx={{ maxWidth: 300 }}
+          />
+        )}
+      </Box>
     </>
   );
 };
