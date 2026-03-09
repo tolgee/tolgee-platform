@@ -238,6 +238,11 @@ export class LINKS {
     'subscriptions'
   );
 
+  static ADMINISTRATION_BILLING_INVOICES = Link.ofParent(
+    LINKS.ADMINISTRATION,
+    'invoices'
+  );
+
   static ADMINISTRATION_BILLING_EE_PLAN_EDIT = Link.ofParent(
     LINKS.ADMINISTRATION_BILLING_EE_PLANS,
     p(PARAMS.PLAN_ID)

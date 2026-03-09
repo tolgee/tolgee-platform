@@ -7135,6 +7135,7 @@ export interface components {
       appliedStripeCredits?: number;
       credits?: components["schemas"]["SumUsageItemModel"];
       keys: components["schemas"]["AverageProportionalUsageItemModel"];
+      minInvoiceAmount?: number;
       seats: components["schemas"]["AverageProportionalUsageItemModel"];
       subscriptionPrice?: number;
       total: number;
