@@ -3,22 +3,26 @@ import { useTranslate } from '@tolgee/react';
 import { useMoneyFormatter } from 'tg.hooks/useLocale';
 import { TableCell, TableRow } from '@mui/material';
 import { LabelHint } from 'tg.component/common/LabelHint';
+import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 
 export const TotalRow: FC<{
   total: number;
   appliedStripeCredits: number;
-  minInvoiceAmount?: number;
   usageOnlyTotal?: number;
-}> = ({ total, appliedStripeCredits, minInvoiceAmount, usageOnlyTotal }) => {
+}> = ({ total, appliedStripeCredits, usageOnlyTotal }) => {
   const { t } = useTranslate();
 
   const formatMoney = useMoneyFormatter();
 
+  const minUsageInvoiceAmount = useGlobalContext(
+    (c) => c.initialData.serverConfiguration.billing.minUsageInvoiceAmount
+  );
+
   const showHint = Boolean(
-    minInvoiceAmount &&
+    minUsageInvoiceAmount &&
       usageOnlyTotal &&
       usageOnlyTotal > 0 &&
-      usageOnlyTotal < minInvoiceAmount
+      usageOnlyTotal < minUsageInvoiceAmount
   );
 
   const totalFormatted = <b>{formatMoney(total - appliedStripeCredits)}</b>;
@@ -46,7 +50,7 @@ export const TotalRow: FC<{
               'Your current usage ({usageAmount}) is below the invoicing minimum of {threshold}. It will be carried over and billed once accumulated usage reaches the minimum.',
               {
                 usageAmount: formatMoney(usageOnlyTotal!),
-                threshold: formatMoney(minInvoiceAmount!),
+                threshold: formatMoney(minUsageInvoiceAmount!),
               }
             )}
           >
