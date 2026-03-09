@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
 
 import { Editor } from 'tg.component/editor/Editor';
@@ -62,6 +62,12 @@ export const KeyGeneral = () => {
   const theme = useTheme();
   const hasCharLimit = values.maxCharLimit !== undefined;
   const [charLimitExpanded, setCharLimitExpanded] = useState(hasCharLimit);
+
+  useEffect(() => {
+    if (hasCharLimit) {
+      setCharLimitExpanded(true);
+    }
+  }, [hasCharLimit]);
 
   return (
     <>
