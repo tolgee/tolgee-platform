@@ -67,6 +67,7 @@ class TranslationViewDataProvider(
       }
     }
     if (includeQaIssues && translationIds.isNotEmpty()) {
+      // TODO: only include QA issues when QA feature is enabled
       qaIssueRepository
         .findOpenByTranslationIds(translationIds)
         .groupBy { it.translation.id }
