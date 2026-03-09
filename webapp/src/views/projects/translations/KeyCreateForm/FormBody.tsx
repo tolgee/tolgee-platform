@@ -13,11 +13,12 @@ import {
   IconButton,
   styled,
   TextField,
+  Tooltip,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useState } from 'react';
 import clsx from 'clsx';
-import { ChevronDown, ChevronUp } from '@untitled-ui/icons-react';
+import { ChevronDown, ChevronUp, HelpCircle } from '@untitled-ui/icons-react';
 
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
@@ -36,6 +37,7 @@ import { PluralEditor } from '../translationVisual/PluralEditor';
 import type { ValuesCreateType } from './KeyCreateForm';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
+import { getVisibleCharCount } from '../cell/getVisibleCharCount';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -97,7 +99,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
   const isBaseOverCharLimit =
     maxCharLimit != null &&
     Object.values(form.values.baseValue.variants ?? {}).some(
-      (v) => (v?.length ?? 0) > maxCharLimit
+      (v) => getVisibleCharCount(v, isPlural) > maxCharLimit
     );
 
   const actualParameter = isPlural
@@ -267,7 +269,21 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                         }}
                       />
                     }
-                    label={t('translation_single_label_max_char_limit')}
+                    label={
+                      <Box display="inline-flex" alignItems="center" gap="4px">
+                        {t('translation_single_label_max_char_limit')}
+                        <Tooltip
+                          title={t(
+                            'translation_char_limit_placeholders_hint'
+                          )}
+                          disableInteractive
+                        >
+                          <Box component="span" display="inline-flex">
+                            <HelpCircle style={{ width: 15, height: 15 }} />
+                          </Box>
+                        </Tooltip>
+                      </Box>
+                    }
                     sx={{ mr: 0.5 }}
                   />
                   <IconButton

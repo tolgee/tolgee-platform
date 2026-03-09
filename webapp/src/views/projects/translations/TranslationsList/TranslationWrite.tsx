@@ -20,6 +20,7 @@ import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsList } from '../Suggestions/SuggestionsList';
+import { getVisibleCharCount } from '../cell/getVisibleCharCount';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -126,7 +127,9 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
   const isOverCharLimit =
     keyData.keyMaxCharLimit != null &&
     Object.values(editVal.value.variants).some(
-      (v) => (v?.length ?? 0) > keyData.keyMaxCharLimit!
+      (v) =>
+        getVisibleCharCount(v, Boolean(editVal.value.parameter)) >
+        keyData.keyMaxCharLimit!
     );
 
   const missingPlaceholders = useMissingPlaceholders({
