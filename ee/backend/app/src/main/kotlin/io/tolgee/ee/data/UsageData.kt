@@ -9,6 +9,7 @@ data class UsageData(
   val creditsUsage: SumUsageItem?,
   val subscriptionPrice: BigDecimal?,
   val appliedStripeCredits: BigDecimal?,
+  val carryOverTotal: BigDecimal? = null,
 ) {
   val total: BigDecimal
     get() =
@@ -16,5 +17,6 @@ data class UsageData(
         translationsUsage.sumOf { it.total } +
         keysUsage.sumOf { it.total } +
         (subscriptionPrice ?: 0.toBigDecimal()) +
-        (creditsUsage?.total ?: 0.toBigDecimal())
+        (creditsUsage?.total ?: 0.toBigDecimal()) +
+        (carryOverTotal ?: 0.toBigDecimal())
 }
