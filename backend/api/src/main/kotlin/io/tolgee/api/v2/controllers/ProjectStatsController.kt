@@ -20,6 +20,7 @@ import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.project.ProjectStatsService
+import io.tolgee.service.qa.TranslationQaIssueService
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -42,6 +43,7 @@ class ProjectStatsController(
   private val languageService: LanguageService,
   private val branchService: BranchService,
   private val projectFeatureGuard: ProjectFeatureGuard,
+  private val translationQaIssueService: TranslationQaIssueService,
 ) {
   @Operation(summary = "Get project stats")
   @GetMapping("", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -69,6 +71,14 @@ class ProjectStatsController(
         it to language
       }
 
+    val qaIssueCounts =
+      if (projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS)) {
+        translationQaIssueService
+          .getOpenIssueCountsByLanguageId(projectHolder.project.id)
+      } else {
+        emptyMap()
+      }
+
     return ProjectStatsModel(
       projectId = projectStats.id,
       languageCount = languageStats.size,
@@ -79,7 +89,7 @@ class ProjectStatsController(
       reviewedPercentage = totals.reviewedPercent,
       membersCount = projectStats.memberCount,
       tagCount = projectStats.tagCount,
-      languageStats = statsLanguagePairs.map { languageStatsModelAssembler.toModel(it) },
+      languageStats = statsLanguagePairs.map { languageStatsModelAssembler.toModel(it, qaIssueCounts) },
     )
   }
 

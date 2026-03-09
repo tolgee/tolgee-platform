@@ -9,9 +9,27 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
+interface LanguageQaIssueCount {
+  val languageId: Long
+  val count: Long
+}
+
 @Repository
 @Lazy
 interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long> {
+  @Query(
+    """
+    select t.language.id as languageId, count(i) as count
+    from TranslationQaIssue i
+    join i.translation t
+    join t.key k
+    where k.project.id = :projectId
+    and i.state = io.tolgee.model.enums.qa.QaIssueState.OPEN
+    group by t.language.id
+    """,
+  )
+  fun getOpenIssueCountsByLanguageId(projectId: Long): List<LanguageQaIssueCount>
+
   fun findAllByTranslationId(translationId: Long): List<TranslationQaIssue>
 
   @Modifying

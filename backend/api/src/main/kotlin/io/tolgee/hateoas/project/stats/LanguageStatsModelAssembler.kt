@@ -13,6 +13,13 @@ class LanguageStatsModelAssembler :
     LanguageStatsModel::class.java,
   ) {
   override fun toModel(it: Pair<ILanguageStats, LanguageDto>): LanguageStatsModel {
+    return toModel(it, qaIssueCounts = emptyMap())
+  }
+
+  fun toModel(
+    it: Pair<ILanguageStats, LanguageDto>,
+    qaIssueCounts: Map<Long, Long> = emptyMap(),
+  ): LanguageStatsModel {
     val language = it.second
     val stats = it.first
     return LanguageStatsModel(
@@ -31,6 +38,7 @@ class LanguageStatsModelAssembler :
       untranslatedWordCount = stats.untranslatedWords,
       untranslatedPercentage = stats.untranslatedPercentage,
       translationsUpdatedAt = stats.translationsUpdatedAt,
+      qaIssueCount = qaIssueCounts[language.id] ?: 0,
     )
   }
 }

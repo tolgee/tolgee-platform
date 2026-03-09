@@ -22,11 +22,12 @@ import { TranslationStatesBar } from '../../TranslationStatesBar';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { QaBadge } from 'tg.ee';
 import clsx from 'clsx';
 
 const StyledContainer = styled('div')`
   display: grid;
-  grid-template-columns: auto auto auto 10fr auto;
+  grid-template-columns: auto auto auto 10fr auto auto;
   margin: ${({ theme }) => theme.spacing(1, 0, 2, 0)};
 `;
 
@@ -69,8 +70,15 @@ const StyledStates = styled('div')`
   align-items: center;
 `;
 
-const StyledActions = styled('div')`
+const StyledQaBadge = styled('div')`
   grid-column: 5;
+  grid-row: span 2;
+  display: grid;
+  align-items: center;
+`;
+
+const StyledActions = styled('div')`
+  grid-column: 6;
   grid-row: span 2;
   display: grid;
   align-items: center;
@@ -207,6 +215,11 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
                   </Box>
                 </StyledTooltip>
               </StyledStates>
+              {item.qaIssueCount > 0 && (
+                <StyledQaBadge onClick={(e) => e.stopPropagation()}>
+                  <QaBadge count={item.qaIssueCount} />
+                </StyledQaBadge>
+              )}
               <StyledActions>
                 <LanguageMenu language={language!} />
               </StyledActions>
