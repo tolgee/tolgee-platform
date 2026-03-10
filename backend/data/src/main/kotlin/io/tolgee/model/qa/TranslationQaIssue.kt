@@ -18,7 +18,7 @@ import org.hibernate.annotations.ColumnDefault
 @Table(
   indexes = [
     Index(columnList = "translation_id"),
-    Index(columnList = "state"),
+    Index(columnList = "state"), // FIXME: I don't think this index is useful
   ],
 )
 class TranslationQaIssue(
