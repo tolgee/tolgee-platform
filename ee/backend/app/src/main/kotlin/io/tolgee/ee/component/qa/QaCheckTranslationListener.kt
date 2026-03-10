@@ -1,70 +1,32 @@
 package io.tolgee.ee.component.qa
 
-import io.tolgee.ee.service.qa.QaCheckParams
-import io.tolgee.ee.service.qa.QaCheckRunnerService
-import io.tolgee.ee.service.qa.QaIssueService
+import io.tolgee.batch.BatchJobService
+import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.events.OnTranslationsSet
-import io.tolgee.service.language.LanguageService
-import io.tolgee.service.translation.TranslationService
-import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Async
+import io.tolgee.model.Project
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
+import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
 class QaCheckTranslationListener(
-  private val qaCheckRunnerService: QaCheckRunnerService,
-  private val qaIssueService: QaIssueService,
-  private val translationService: TranslationService,
-  private val languageService: LanguageService,
+  private val batchJobService: BatchJobService,
+  private val entityManager: EntityManager,
 ) {
-  @TransactionalEventListener
-  @Async
+  @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
   fun onTranslationsSet(event: OnTranslationsSet) {
-    processTranslationsSet(event)
-  }
+    val translationIds = event.translations.map { it.id }
+    if (translationIds.isEmpty()) return
 
-  fun processTranslationsSet(event: OnTranslationsSet) {
-    try {
-      val projectId = event.key.project.id
-      val baseLanguage = languageService.getProjectBaseLanguage(projectId)
-
-      for (eventTranslation in event.translations) {
-        val translation = translationService.get(eventTranslation.id)
-        val text = translation.text ?: ""
-
-        var baseTag: String? = baseLanguage.tag
-        if (translation.language.tag == baseTag) {
-          baseTag = null
-        }
-
-        var baseText: String? = null
-        if (baseTag != null) {
-          val baseTranslations =
-            translationService.getTranslations(
-              listOf(event.key.id),
-              listOf(baseLanguage.id),
-            )
-          baseText = baseTranslations.firstOrNull()?.text
-        }
-
-        val params =
-          QaCheckParams(
-            baseText = baseText,
-            text = text,
-            baseLanguageTag = baseTag,
-            languageTag = translation.language.tag,
-          )
-
-        val results = qaCheckRunnerService.runChecks(projectId, params)
-        qaIssueService.replaceIssuesForTranslation(translation, results)
-      }
-    } catch (e: Exception) {
-      logger.error("Failed to run QA checks for key ${event.key.id}", e)
-    }
-  }
-
-  companion object {
-    private val logger = LoggerFactory.getLogger(QaCheckTranslationListener::class.java)
+    val projectId = event.key.project.id
+    batchJobService.startJob(
+      request = QaCheckRequest(translationIds = translationIds),
+      project = entityManager.getReference(Project::class.java, projectId),
+      author = null,
+      type = BatchJobType.QA_CHECK,
+      isHidden = true,
+    )
   }
 }

@@ -3,6 +3,7 @@ package io.tolgee.ee.service.qa
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
+import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.model.translation.Translation
@@ -21,10 +22,18 @@ class QaIssueService(
   fun replaceIssuesForTranslation(
     translation: Translation,
     results: List<QaCheckResult>,
+    checkTypes: List<QaCheckType>? = null,
   ) {
     val existingIssues = qaIssueRepository.findAllByTranslationId(translation.id)
-    qaIssueRepository.deleteAllByTranslationId(translation.id)
+
+    if (checkTypes == null) {
+      qaIssueRepository.deleteAllByTranslationId(translation.id)
+    } else {
+      val toDelete = existingIssues.filter { it.type in checkTypes }
+      if (toDelete.isNotEmpty()) qaIssueRepository.deleteAll(toDelete)
+    }
     qaIssueRepository.flush()
+
     val entities =
       results.map { result ->
         val matchingExisting =

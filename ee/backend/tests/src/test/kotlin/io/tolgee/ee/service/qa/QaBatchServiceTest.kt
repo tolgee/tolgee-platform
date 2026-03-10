@@ -1,12 +1,11 @@
-package io.tolgee.ee.component.qa
+package io.tolgee.ee.service.qa
 
 import io.tolgee.development.testDataBuilder.data.BaseTestData
-import io.tolgee.events.OnTranslationsSet
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,9 +16,9 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class QaCheckTranslationListenerTest : AuthorizedControllerTest() {
+class QaBatchServiceTest : AuthorizedControllerTest() {
   @Autowired
-  private lateinit var listener: QaCheckTranslationListener
+  private lateinit var qaCheckBatchService: QaCheckBatchServiceImpl
 
   @Autowired
   private lateinit var qaIssueRepository: TranslationQaIssueRepository
@@ -30,6 +29,7 @@ class QaCheckTranslationListenerTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
+    // TODO: custom QA test data instead of this; reusable across QA tests if possible
     testData = BaseTestData()
     testData.projectBuilder.build {
       addFrench()
@@ -62,20 +62,12 @@ class QaCheckTranslationListenerTest : AuthorizedControllerTest() {
   fun `creates QA issues when translation has problems`() {
     refetchEntities()
 
-    val event =
-      OnTranslationsSet(
-        source = this,
-        key = testKey,
-        oldValues = mapOf("fr" to null),
-        translations = listOf(frTranslation),
-      )
-
-    listener.processTranslationsSet(event)
+    qaCheckBatchService.runChecksAndPersist(testData.project.id, frTranslation.id)
     entityManager.flush()
 
     val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    assertThat(issues).isNotEmpty
-    assertThat(issues.map { it.type.name }).contains("CHARACTER_CASE_MISMATCH", "PUNCTUATION_MISMATCH")
+    Assertions.assertThat(issues).isNotEmpty
+    Assertions.assertThat(issues.map { it.type.name }).contains("CHARACTER_CASE_MISMATCH", "PUNCTUATION_MISMATCH")
   }
 
   @Test
@@ -86,19 +78,11 @@ class QaCheckTranslationListenerTest : AuthorizedControllerTest() {
     frTranslation.text = "Bonjour monde."
     entityManager.flush()
 
-    val event =
-      OnTranslationsSet(
-        source = this,
-        key = testKey,
-        oldValues = mapOf("fr" to "bonjour monde"),
-        translations = listOf(frTranslation),
-      )
-
-    listener.processTranslationsSet(event)
+    qaCheckBatchService.runChecksAndPersist(testData.project.id, frTranslation.id)
     entityManager.flush()
 
     val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    assertThat(issues).isEmpty()
+    Assertions.assertThat(issues).isEmpty()
   }
 
   @Test
@@ -106,34 +90,19 @@ class QaCheckTranslationListenerTest : AuthorizedControllerTest() {
   fun `replaces existing issues on re-check`() {
     refetchEntities()
 
-    val event =
-      OnTranslationsSet(
-        source = this,
-        key = testKey,
-        oldValues = mapOf("fr" to null),
-        translations = listOf(frTranslation),
-      )
-
-    listener.processTranslationsSet(event)
+    qaCheckBatchService.runChecksAndPersist(testData.project.id, frTranslation.id)
     entityManager.flush()
     val issuesBefore = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    assertThat(issuesBefore).isNotEmpty
+    Assertions.assertThat(issuesBefore).isNotEmpty
 
     // Update translation to be clean and re-check
     frTranslation.text = "Bonjour monde."
     entityManager.flush()
 
-    val event2 =
-      OnTranslationsSet(
-        source = this,
-        key = testKey,
-        oldValues = mapOf("fr" to "bonjour monde"),
-        translations = listOf(frTranslation),
-      )
-    listener.processTranslationsSet(event2)
+    qaCheckBatchService.runChecksAndPersist(testData.project.id, frTranslation.id)
     entityManager.flush()
 
     val issuesAfter = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    assertThat(issuesAfter).isEmpty()
+    Assertions.assertThat(issuesAfter).isEmpty()
   }
 }

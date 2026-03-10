@@ -31,6 +31,7 @@ class TranslationViewModelAssembler(
       activeSuggestionCount = view.activeSuggestionCount,
       totalSuggestionCount = view.totalSuggestionCount,
       qaIssueCount = view.qaIssueCount,
+      qaChecksStale = view.qaChecksStale,
       suggestions = view.suggestions?.map { translationSuggestionSimpleModelAssembler.toModel(it) },
       qaIssues = view.qaIssues.takeIf { it.isNotEmpty() }?.map { qaIssueModelAssembler.toModel(it) },
     )

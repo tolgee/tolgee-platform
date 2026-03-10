@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 class ProjectQaConfigService(
   private val projectQaConfigRepository: ProjectQaConfigRepository,
   private val projectService: ProjectService,
+  private val qaRecheckService: QaRecheckService,
 ) {
   @Transactional
   fun getOrCreateConfig(projectId: Long): ProjectQaConfig {
@@ -39,8 +40,14 @@ class ProjectQaConfigService(
     projectId: Long,
     settings: Map<QaCheckType, QaCheckSeverity>,
   ) {
+    val oldSettings = getSettings(projectId)
     val config = getOrCreateConfig(projectId)
     config.settings = settings.toMutableMap()
     projectQaConfigRepository.save(config)
+
+    val changedTypes = settings.filter { (type, severity) -> oldSettings[type] != severity }.keys
+    if (changedTypes.isNotEmpty()) {
+      qaRecheckService.recheckTranslations(projectId, checkTypes = changedTypes.toList())
+    }
   }
 }

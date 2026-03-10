@@ -13,6 +13,7 @@ import io.tolgee.batch.processors.HardDeleteKeysChunkProcessor
 import io.tolgee.batch.processors.MachineTranslationChunkProcessor
 import io.tolgee.batch.processors.NoOpChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
+import io.tolgee.batch.processors.QaCheckChunkProcessor
 import io.tolgee.batch.processors.RestoreKeysChunkProcessor
 import io.tolgee.batch.processors.SetKeysNamespaceChunkProcessor
 import io.tolgee.batch.processors.SetTranslationsStateChunkProcessor
@@ -123,6 +124,11 @@ enum class BatchJobType(
     activityType = ActivityType.BATCH_UNASSIGN_TRANSLATION_LABEL,
     maxRetries = 3,
     processor = UnassignTranslationLabelChunkProcessor::class,
+  ),
+  QA_CHECK(
+    maxRetries = 3,
+    processor = QaCheckChunkProcessor::class,
+    exclusive = false,
   ),
   NO_OP(
     activityType = null,
