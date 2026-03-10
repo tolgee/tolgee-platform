@@ -215,9 +215,12 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
                   </Box>
                 </StyledTooltip>
               </StyledStates>
-              {item.qaIssueCount > 0 && (
+              {(item.qaIssueCount > 0 || item.qaChecksStaleCount > 0) && (
                 <StyledQaBadge onClick={(e) => e.stopPropagation()}>
-                  <QaBadge count={item.qaIssueCount} />
+                  <QaBadge
+                    count={item.qaIssueCount}
+                    stale={item.qaChecksStaleCount > 0}
+                  />
                 </StyledQaBadge>
               )}
               <StyledActions>

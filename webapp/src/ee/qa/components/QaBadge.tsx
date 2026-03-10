@@ -1,5 +1,4 @@
-import { Badge, styled } from '@mui/material';
-import React from 'react';
+import { Badge, CircularProgress, styled } from '@mui/material';
 
 import { QaBadgeProps } from '../../../eeSetup/EeModuleType';
 import { QaCheck } from 'tg.component/CustomIcons';
@@ -22,6 +21,28 @@ const StyledBadge = styled(Badge)`
     align-items: center;
     justify-content: center;
   }
+  & .stale {
+    background: ${({ theme }) => theme.palette.emphasis[600]};
+    padding: 0px;
+    height: 16px;
+    width: 18px;
+    min-width: unset;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+`;
+
+const StyledSpinner = styled(CircularProgress)`
+  color: ${({ theme }) => theme.palette.emphasis[100]};
+  width: 10px !important;
+  height: 10px !important;
+  margin: -5px;
+
+  & svg {
+    width: 10px;
+    height: 10px;
+  }
 `;
 
 const StyledCheckIcon = styled(Check)`
@@ -31,16 +52,23 @@ const StyledCheckIcon = styled(Check)`
   margin: -5px;
 `;
 
-export const QaBadge = ({ count }: QaBadgeProps) => {
-  // TODO: "loading" version when count is undefined
+export const QaBadge = ({ count, stale }: QaBadgeProps) => {
+  if (stale) {
+    return (
+      <StyledBadge
+        badgeContent={<StyledSpinner size={10} thickness={5} />}
+        classes={{ badge: 'stale' }}
+      >
+        <QaCheck />
+      </StyledBadge>
+    );
+  }
 
   if (!count || count === 0) {
     return (
       <StyledBadge
         badgeContent={<StyledCheckIcon />}
-        classes={{
-          badge: 'resolved',
-        }}
+        classes={{ badge: 'resolved' }}
       >
         <QaCheck />
       </StyledBadge>

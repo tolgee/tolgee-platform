@@ -19,6 +19,7 @@ class LanguageStatsModelAssembler :
   fun toModel(
     it: Pair<ILanguageStats, LanguageDto>,
     qaIssueCounts: Map<Long, Long> = emptyMap(),
+    qaChecksStaleCounts: Map<Long, Long> = emptyMap(),
   ): LanguageStatsModel {
     val language = it.second
     val stats = it.first
@@ -39,6 +40,7 @@ class LanguageStatsModelAssembler :
       untranslatedPercentage = stats.untranslatedPercentage,
       translationsUpdatedAt = stats.translationsUpdatedAt,
       qaIssueCount = qaIssueCounts[language.id] ?: 0,
+      qaChecksStaleCount = qaChecksStaleCounts[language.id] ?: 0,
     )
   }
 }

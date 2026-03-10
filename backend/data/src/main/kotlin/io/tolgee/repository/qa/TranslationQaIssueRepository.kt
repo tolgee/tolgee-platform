@@ -32,6 +32,18 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
 
   @Query(
     """
+    select t.language.id as languageId, count(t) as count
+    from Translation t
+    join t.key k
+    where k.project.id = :projectId
+    and t.qaChecksStale = true
+    group by t.language.id
+    """,
+  )
+  fun getStaleCountsByLanguageId(projectId: Long): List<LanguageQaIssueCount>
+
+  @Query(
+    """
     select i from TranslationQaIssue i
     where i.translation.id in :translationIds
     and i.state = io.tolgee.model.enums.qa.QaIssueState.OPEN

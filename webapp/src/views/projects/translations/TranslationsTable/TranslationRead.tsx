@@ -153,6 +153,7 @@ export const TranslationRead: React.FC<Props> = ({
           commentsCount={translation?.commentCount}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
           qaIssueCount={translation?.qaIssueCount}
+          qaChecksStale={translation?.qaChecksStale}
           stateChangeEnabled={canChangeState}
           editEnabled={cellClickable}
           state={state}

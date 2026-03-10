@@ -20,4 +20,5 @@ open class LanguageStatsModel(
   val untranslatedPercentage: Double,
   val translationsUpdatedAt: Date?,
   val qaIssueCount: Long = 0,
+  val qaChecksStaleCount: Long = 0,
 ) : RepresentationModel<LanguageStatsModel>()

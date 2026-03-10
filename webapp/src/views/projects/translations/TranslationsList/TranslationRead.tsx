@@ -132,6 +132,7 @@ export const TranslationRead: React.FC<Props> = ({
           onTaskStateChange={setAssignedTaskState}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
           qaIssueCount={translation?.qaIssueCount}
+          qaChecksStale={translation?.qaChecksStale}
           stateChangeEnabled={canChangeState}
           editEnabled={cellClickable}
           state={state}

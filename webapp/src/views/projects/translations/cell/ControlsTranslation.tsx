@@ -69,6 +69,7 @@ type ControlsProps = {
   onTaskStateChange: (done: boolean) => void;
   unresolvedCommentCount: number | undefined;
   qaIssueCount: number | undefined;
+  qaChecksStale?: boolean;
   // render last focusable button
   lastFocusable: boolean;
   active?: boolean;
@@ -89,6 +90,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   commentsCount,
   unresolvedCommentCount,
   qaIssueCount,
+  qaChecksStale,
   lastFocusable,
   active,
   className,
@@ -103,7 +105,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const displayComments = onComments || commentsPresent;
   const onlyResolved = commentsPresent && !unresolvedCommentCount;
   const qaIssuesResolved = qaIssueCount === 0;
-  const displayQaIssues = onQaIssues && qaIssueCount !== 0;
+  const displayQaIssues = onQaIssues && (qaIssueCount !== 0 || qaChecksStale);
   const prefilteredTask = useTranslationsSelector((c) => c.prefilter?.task);
   const task = tasks?.[0];
   const displayTaskButton =
@@ -207,7 +209,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
           })}
           tooltip={t('translation_cell_qa_issues')}
         >
-          <QaBadge count={qaIssueCount} />
+          <QaBadge count={qaIssueCount} stale={qaChecksStale} />
         </ControlsButton>
       )}
       {inDomTask && (
