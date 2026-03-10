@@ -7,8 +7,10 @@ import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.formats.BaseIcuMessageConvertor
 import io.tolgee.formats.PluralForms
 import io.tolgee.formats.StringIsNotPluralException
+import io.tolgee.formats.VisibleTextIcuPlaceholderConvertor
 import io.tolgee.formats.convertToIcuPlural
 import io.tolgee.formats.getPluralForms
 import io.tolgee.formats.normalizePlurals
@@ -570,6 +572,39 @@ class TranslationService(
     if (keys.size > 1) {
       throw BadRequestException(Message.PLURAL_FORMS_DATA_LOSS, listOf(text))
     }
+  }
+
+  fun validateCharLimit(
+    key: Key,
+    translations: Map<*, String?>,
+  ) {
+    val maxCharLimit = key.maxCharLimit ?: return
+    if (maxCharLimit <= 0) return
+    translations.values.forEach { text ->
+      if (text != null && getMaxVisibleCharCount(text, key.isPlural) > maxCharLimit) {
+        throw BadRequestException(
+          Message.TRANSLATION_EXCEEDS_CHAR_LIMIT,
+          listOf(key.name, maxCharLimit),
+        )
+      }
+    }
+  }
+
+  private fun getMaxVisibleCharCount(
+    text: String,
+    isPlural: Boolean,
+  ): Int {
+    val result =
+      BaseIcuMessageConvertor(
+        message = text,
+        argumentConvertorFactory = { VisibleTextIcuPlaceholderConvertor() },
+        forceIsPlural = if (isPlural) true else null,
+      ).convert()
+
+    if (result.isPlural()) {
+      return result.formsResult!!.values.maxOfOrNull { it.length } ?: 0
+    }
+    return result.singleResult?.length ?: 0
   }
 
   @Transactional

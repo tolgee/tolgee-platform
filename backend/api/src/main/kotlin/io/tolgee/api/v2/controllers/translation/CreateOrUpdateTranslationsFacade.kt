@@ -48,6 +48,8 @@ class CreateOrUpdateTranslationsFacade(
       keyService.save(key)
     }
 
+    translationService.validateCharLimit(key, convertedToPlurals?.convertedStrings ?: dto.translations)
+
     val translations =
       translationService
         .setForKey(key, convertedToPlurals?.convertedStrings ?: dto.translations)
@@ -82,6 +84,8 @@ class CreateOrUpdateTranslationsFacade(
       projectHolder.project.id,
       keyNotNull.id,
     )
+
+    translationService.validateCharLimit(keyNotNull, dto.translations)
 
     val modifiedTranslations = translationService.setForKey(keyNotNull, dto.translations)
 
