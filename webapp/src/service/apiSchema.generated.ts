@@ -1518,6 +1518,7 @@ export interface components {
         | "BILLING_TRIAL_EXPIRATION_NOTICE"
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
+        | "QA_CHECK"
         | "NO_OP";
       /**
        * Format: int64
@@ -3532,6 +3533,7 @@ export interface components {
         | "BILLING_TRIAL_EXPIRATION_NOTICE"
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
+        | "QA_CHECK"
         | "NO_OP";
     };
     JsonNode: unknown;
@@ -6838,6 +6840,8 @@ export interface components {
       mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
       /** @description Whether base language translation was changed after this translation was updated */
       outdated: boolean;
+      /** @description Whether QA checks are stale and need re-running */
+      qaChecksStale: boolean;
       /**
        * Format: int64
        * @description Number of open QA issues
@@ -20379,6 +20383,8 @@ export interface operations {
       query: {
         /** Cursor to get next data */
         cursor?: string;
+        /** Include detailed QA issues for inline highlighting */
+        includeQaIssues: boolean;
         /**
          * Translation state in the format: languageTag,state. You can use this parameter multiple times.
          *
@@ -20459,8 +20465,6 @@ export interface operations {
         branch?: string;
         /** Filter trashed keys by who deleted them (user IDs) */
         filterDeletedByUserId?: number[];
-        /** Include detailed QA issues for inline highlighting */
-        includeQaIssues?: boolean;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
