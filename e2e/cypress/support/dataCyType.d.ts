@@ -887,6 +887,7 @@ declare namespace DataCy {
         "translations-key-edit-key-field" |
         "translations-key-name" |
         "translations-language-select-all" |
+        "translations-language-select-clear" |
         "translations-language-select-form-control" |
         "translations-language-select-item" |
         "translations-language-select-none" |
