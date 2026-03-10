@@ -189,6 +189,7 @@ class BranchServiceImpl(
     span.setAttribute("tolgee.branch.target.name", merge.targetBranch.name)
   }
 
+  @WithSpan
   @Transactional
   override fun deleteBranch(
     projectId: Long,
@@ -209,6 +210,7 @@ class BranchServiceImpl(
     )
   }
 
+  @WithSpan
   @Transactional
   override fun dryRunMerge(
     projectId: Long,
@@ -220,6 +222,7 @@ class BranchServiceImpl(
     return dryRunMerge(sourceBranch, targetBranch)
   }
 
+  @WithSpan
   @Transactional
   fun dryRunMerge(
     sourceBranch: Branch,
@@ -275,6 +278,7 @@ class BranchServiceImpl(
     return branchMergeService.getMergeView(projectId, mergeId)
   }
 
+  @WithSpan
   @Transactional
   override fun refreshMerge(
     projectId: Long,
@@ -328,6 +332,7 @@ class BranchServiceImpl(
     return branchMergeService.getChange(project, branchMergeId, changeId, user.id)
   }
 
+  @WithSpan
   @Transactional
   override fun resolveConflict(
     projectId: Long,
@@ -337,6 +342,7 @@ class BranchServiceImpl(
     branchMergeService.resolveConflict(projectId, mergeId, request.changeId, request.resolve)
   }
 
+  @WithSpan
   @Transactional
   override fun resolveAllConflicts(
     projectId: Long,

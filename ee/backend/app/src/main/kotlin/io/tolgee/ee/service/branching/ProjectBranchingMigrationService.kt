@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.branching
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.repository.ProjectRepository
 import jakarta.persistence.EntityManager
@@ -12,6 +13,7 @@ class ProjectBranchingMigrationService(
   private val entityManager: EntityManager,
   private val defaultBranchCreator: DefaultBranchCreator,
 ) {
+  @WithSpan
   @Transactional
   fun enableBranching(projectId: Long) {
     val project =

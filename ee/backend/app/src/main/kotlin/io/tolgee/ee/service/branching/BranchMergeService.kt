@@ -87,6 +87,7 @@ class BranchMergeService(
     }!!
   }
 
+  @WithSpan
   @Transactional
   fun refresh(branchMerge: BranchMerge) {
     val resolvedConflicts =
@@ -283,6 +284,7 @@ class BranchMergeService(
     }
   }
 
+  @WithSpan
   @Transactional
   fun resolveConflict(
     projectId: Long,
@@ -295,6 +297,7 @@ class BranchMergeService(
     metrics.branchMergeConflictCounter(resolution.name).increment()
   }
 
+  @WithSpan
   @Transactional
   fun resolveAllConflicts(
     projectId: Long,
