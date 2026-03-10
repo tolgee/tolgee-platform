@@ -8,6 +8,6 @@ class GetTranslationsParams(
   filterState: List<String>? = null,
   @field:Parameter(description = "Cursor to get next data")
   val cursor: String? = null,
-  @field:Parameter(description = "Include detailed QA issues for inline highlighting")
+  @field:Parameter(description = "Include detailed QA issues for inline highlighting", required = false)
   var includeQaIssues: Boolean = false,
 ) : TranslationFilters(filterState)
