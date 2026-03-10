@@ -132,6 +132,7 @@ class QueryBase<T>(
       addTotalSuggestionsCount(language)
       // TODO: only count qa issues if QA feature is enabled
       val qaIssueCountExpression = addQaIssueCount(translation, language)
+      this.querySelection[language to TranslationView::qaChecksStale] = translation.get(Translation_.qaChecksStale)
 
       queryTranslationFiltering.applyCommentsFilter(
         language,

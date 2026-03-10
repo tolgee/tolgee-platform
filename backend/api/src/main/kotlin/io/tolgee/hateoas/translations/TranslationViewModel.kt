@@ -36,6 +36,8 @@ open class TranslationViewModel(
   val totalSuggestionCount: Long,
   @Schema(description = "Number of open QA issues")
   val qaIssueCount: Long = 0,
+  @Schema(description = "Whether QA checks are stale and need re-running")
+  val qaChecksStale: Boolean = false,
   @get:Schema(description = "First suggestion")
   val suggestions: List<TranslationSuggestionSimpleModel>? = null,
   @Schema(description = "Detailed QA issues for inline highlighting (only when includeQaIssues=true)")

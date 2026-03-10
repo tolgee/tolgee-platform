@@ -5251,4 +5251,11 @@
     <changeSet author="anty (generated)" id="1772964680179-2">
         <addNotNullConstraint columnDataType="timestamp(6)" columnName="updated_at" tableName="project_qa_config" validate="true"/>
     </changeSet>
+    <changeSet author="anty" id="1773074656923-1">
+        <addColumn tableName="translation">
+            <column name="qa_checks_stale" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -27,7 +27,8 @@ class QaCheckRunnerServiceTest {
     val config = Mockito.mock(ProjectQaConfig::class.java)
     Mockito.`when`(config.settings).thenReturn(allWarnings)
     Mockito.`when`(repo.findByProjectId(Mockito.anyLong())).thenReturn(config)
-    return ProjectQaConfigService(repo, projectService)
+    val qaRecheckService = Mockito.mock(QaRecheckService::class.java)
+    return ProjectQaConfigService(repo, projectService, qaRecheckService)
   }
 
   @Test

@@ -33,7 +33,7 @@ data class KeyWithTranslationsView(
   var tasks: List<KeyTaskView>? = null
 
   companion object {
-    val LANGUAGES_FIELD_COUNT = 11
+    val LANGUAGES_FIELD_COUNT = 12
     private val BASE_FIELD_COUNT = 11
     private val TRASH_FIELD_COUNT = 5
 
@@ -89,6 +89,7 @@ data class KeyWithTranslationsView(
             activeSuggestionCount = (data[i + 8] ?: 0L) as Long,
             totalSuggestionCount = (data[i + 9] ?: 0L) as Long,
             qaIssueCount = (data[i + 10] ?: 0L) as Long,
+            qaChecksStale = (data[i + 11] ?: false) as Boolean,
           )
       }
 

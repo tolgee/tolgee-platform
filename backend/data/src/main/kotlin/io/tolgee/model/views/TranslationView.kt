@@ -18,6 +18,7 @@ data class TranslationView(
   val activeSuggestionCount: Long,
   val totalSuggestionCount: Long,
   val qaIssueCount: Long = 0,
+  val qaChecksStale: Boolean = false,
 ) {
   var suggestions: List<TranslationSuggestionView>? = null
   var qaIssues: List<TranslationQaIssue> = emptyList()

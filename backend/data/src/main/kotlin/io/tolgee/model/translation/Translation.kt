@@ -103,6 +103,9 @@ class Translation(
   @ColumnDefault("false")
   var outdated: Boolean = false
 
+  @ColumnDefault("false")
+  var qaChecksStale: Boolean = false
+
   @ManyToMany
   @JoinTable(
     name = "translation_label",

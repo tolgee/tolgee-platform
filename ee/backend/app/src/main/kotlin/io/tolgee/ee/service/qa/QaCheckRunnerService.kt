@@ -1,5 +1,6 @@
 package io.tolgee.ee.service.qa
 
+import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -12,10 +13,12 @@ class QaCheckRunnerService(
   fun runChecks(
     projectId: Long,
     params: QaCheckParams,
+    checkTypes: List<QaCheckType>? = null,
   ): List<QaCheckResult> {
     val enabledTypes = projectQaConfigService.getEnabledCheckTypes(projectId)
+    val typesToRun = if (checkTypes != null) enabledTypes.intersect(checkTypes.toSet()) else enabledTypes
     return checks
-      .filter { it.type in enabledTypes }
+      .filter { it.type in typesToRun }
       .flatMap { check ->
         try {
           check.check(params)
