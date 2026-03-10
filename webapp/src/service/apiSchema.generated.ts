@@ -20384,7 +20384,7 @@ export interface operations {
         /** Cursor to get next data */
         cursor?: string;
         /** Include detailed QA issues for inline highlighting */
-        includeQaIssues: boolean;
+        includeQaIssues?: boolean;
         /**
          * Translation state in the format: languageTag,state. You can use this parameter multiple times.
          *
