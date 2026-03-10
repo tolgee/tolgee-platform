@@ -214,6 +214,7 @@ class ResolvingKeyImporter(
         ).toMutableList()
 
     val referencesToDelete = mutableListOf<KeyScreenshotReference>()
+    val addedReferences = mutableSetOf<Pair<Long, Long>>()
 
     keysToImport.forEach {
       val key = getOrCreateKey(it)
@@ -222,6 +223,11 @@ class ResolvingKeyImporter(
           createdScreenshots[screenshot.uploadedImageId]
             ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
         val info = ScreenshotInfoDto(screenshot.text, screenshot.positions)
+
+        val referenceKey = key.first.id to screenshotResult.screenshot.id
+        if (!addedReferences.add(referenceKey)) {
+          return@forEach
+        }
 
         screenshotService.addReference(
           key = key.first,
