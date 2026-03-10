@@ -1,3 +1,10 @@
+## [3.166.2](https://github.com/tolgee/tolgee-platform/compare/v3.166.1...v3.166.2) (2026-03-10)
+
+
+### Bug Fixes
+
+* prevent NonUniqueObjectException on duplicate screenshot references ([#3520](https://github.com/tolgee/tolgee-platform/issues/3520)) ([5fdf1f3](https://github.com/tolgee/tolgee-platform/commit/5fdf1f364132772de75bf4ebe8974b9b2a58c9de))
+
 ## [3.166.1](https://github.com/tolgee/tolgee-platform/compare/v3.166.0...v3.166.1) (2026-03-06)
 
 
