@@ -250,6 +250,32 @@ class AutoTranslatingTest : MachineTranslationTest() {
     }
   }
 
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `auto translates even when result exceeds char limit`() {
+    saveTestData()
+    performProjectAuthPut(
+      "translations",
+      SetTranslationsWithKeyDto(
+        key = testData.keyWithCharLimit.name,
+        translations = mapOf("en" to "Hello"),
+      ),
+    ).andIsOk
+
+    waitForNotThrowing {
+      executeInNewTransaction {
+        val deTranslation =
+          keyService
+            .get(testData.project.id, testData.keyWithCharLimit.name, null)
+            .translations
+            .find { it.language == testData.germanLanguage }
+
+        assertThat(deTranslation).isNotNull
+        assertThat(deTranslation!!.text).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
+      }
+    }
+  }
+
   private fun testUsingMtWorks() {
     performCreateHalloKeyWithEnAndDeTranslations()
     waitForNotThrowing {
