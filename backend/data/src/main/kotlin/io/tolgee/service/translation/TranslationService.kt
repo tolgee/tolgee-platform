@@ -195,7 +195,7 @@ class TranslationService(
       pageable,
       params,
       params.cursor,
-      includeQaIssues = params.includeQaIssues,
+      includeQaIssues = params.includeQaIssues == true,
     )
   }
 
