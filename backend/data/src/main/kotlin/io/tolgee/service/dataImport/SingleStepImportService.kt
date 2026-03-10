@@ -19,7 +19,6 @@ import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.ScreenshotImporter.Companion.ScreenshotToImport
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
-import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
@@ -34,7 +33,6 @@ class SingleStepImportService(
   private val importService: ImportService,
   private val currentDateProvider: CurrentDateProvider,
   private val applicationContext: ApplicationContext,
-  private val entityManager: EntityManager,
   private val branchingService: BranchService,
 ) {
   @Transactional
@@ -81,8 +79,6 @@ class SingleStepImportService(
     if (fileProcessor.importDataManager.storedLanguages.isEmpty() && screenshots.isEmpty()) {
       throw BadRequestException(Message.NO_DATA_TO_IMPORT)
     }
-
-    entityManager.clear()
 
     val result =
       StoredDataImporter(
