@@ -4052,6 +4052,8 @@ export interface components {
       languageOriginalName?: string;
       languageTag?: string;
       /** Format: int64 */
+      qaChecksStaleCount: number;
+      /** Format: int64 */
       qaIssueCount: number;
       /** Format: int64 */
       reviewedKeyCount: number;

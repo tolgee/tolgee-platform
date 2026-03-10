@@ -12,4 +12,10 @@ class TranslationQaIssueService(
       .getOpenIssueCountsByLanguageId(projectId)
       .associate { it.languageId to it.count }
   }
+
+  fun getStaleCountsByLanguageId(projectId: Long): Map<Long, Long> {
+    return translationQaIssueRepository
+      .getStaleCountsByLanguageId(projectId)
+      .associate { it.languageId to it.count }
+  }
 }

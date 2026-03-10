@@ -80,6 +80,14 @@ class ProjectStatsController(
         emptyMap()
       }
 
+    val qaChecksStaleCounts =
+      if (projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS)) {
+        translationQaIssueService
+          .getStaleCountsByLanguageId(projectHolder.project.id)
+      } else {
+        emptyMap()
+      }
+
     return ProjectStatsModel(
       projectId = projectStats.id,
       languageCount = languageStats.size,
@@ -90,7 +98,10 @@ class ProjectStatsController(
       reviewedPercentage = totals.reviewedPercent,
       membersCount = projectStats.memberCount,
       tagCount = projectStats.tagCount,
-      languageStats = statsLanguagePairs.map { languageStatsModelAssembler.toModel(it, qaIssueCounts) },
+      languageStats =
+        statsLanguagePairs.map {
+          languageStatsModelAssembler.toModel(it, qaIssueCounts, qaChecksStaleCounts)
+        },
     )
   }
 

@@ -70,6 +70,7 @@ export type BranchReferenceData = {
 
 export type QaBadgeProps = {
   count?: number;
+  stale?: boolean;
 };
 
 export type SubfilterQaChecksProps = {
