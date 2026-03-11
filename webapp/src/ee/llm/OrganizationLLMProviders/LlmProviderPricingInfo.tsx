@@ -2,7 +2,10 @@ import { Box, IconButton, styled, Tooltip } from '@mui/material';
 import { useState } from 'react';
 import { InfoCircle } from '@untitled-ui/icons-react';
 import { useTranslate } from '@tolgee/react';
-import { LlmProviderPricingDialog } from './LlmProviderPricingDialog';
+import {
+  LlmProviderPricingDialog,
+  ProviderWithPricing,
+} from './LlmProviderPricingDialog';
 
 const StyledAction = styled(Box)`
   display: flex;
@@ -12,12 +15,6 @@ const StyledAction = styled(Box)`
   color: ${({ theme }) => theme.palette.text.secondary};
   padding-right: 8px;
 `;
-
-type ProviderWithPricing = {
-  name: string;
-  tokenPriceInCreditsInput?: number;
-  tokenPriceInCreditsOutput?: number;
-};
 
 type Props = {
   provider: ProviderWithPricing;

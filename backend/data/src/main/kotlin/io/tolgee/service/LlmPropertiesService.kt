@@ -89,8 +89,8 @@ class LlmPropertiesService(
     listEntry.attempts?.let { base.attempts = it }
     listEntry.tokenPriceInCreditsInput?.let { base.tokenPriceInCreditsInput = it }
     listEntry.tokenPriceInCreditsOutput?.let { base.tokenPriceInCreditsOutput = it }
-    // Non-nullable fields: override only if different from default
-    if (listEntry.type != LlmProviderType.OPENAI) {
+    // Non-nullable fields: override only if different from Spring default
+    if (listEntry.type != LlmProvider.TYPE_DEFAULT) {
       base.type = listEntry.type
     }
     if (listEntry.maxTokens != LlmProvider.MAX_TOKENS_DEFAULT) {

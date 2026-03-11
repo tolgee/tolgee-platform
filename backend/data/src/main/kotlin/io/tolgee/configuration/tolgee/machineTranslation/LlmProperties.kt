@@ -113,7 +113,7 @@ class LlmProperties : MachineTranslationServiceProperties {
     @DocProperty(description = "User visible provider name")
     override var name: String = "default",
     @DocProperty(description = "Provider type, an API type")
-    override var type: LlmProviderType = LlmProviderType.OPENAI,
+    override var type: LlmProviderType = TYPE_DEFAULT,
     @DocProperty(description = "Provider API Key (optional for some providers)")
     override var apiKey: String? = null,
     @DocProperty(description = "Provider API Url")
@@ -166,6 +166,7 @@ class LlmProperties : MachineTranslationServiceProperties {
     }
 
     companion object {
+      val TYPE_DEFAULT: LlmProviderType = LlmProviderType.OPENAI
       const val MAX_TOKENS_DEFAULT: Long = 2000
     }
   }

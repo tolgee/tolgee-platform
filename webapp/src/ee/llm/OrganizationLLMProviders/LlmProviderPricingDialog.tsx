@@ -12,7 +12,7 @@ import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 import { TokenPricesTable } from './TokenPricesTable';
 import { EstimateCostTable } from './EstimateCostTable';
 
-type ProviderWithPricing = {
+export type ProviderWithPricing = {
   name: string;
   tokenPriceInCreditsInput?: number | null;
   tokenPriceInCreditsOutput?: number | null;
