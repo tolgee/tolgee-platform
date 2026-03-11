@@ -83,7 +83,7 @@ export const useQaPreviewWebsocket = ({
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ text: t }));
     }
-  }, 300);
+  }, 200);
 
   useEffect(() => {
     if (text !== null && text !== undefined && enabled) {
