@@ -105,12 +105,7 @@ describe('Translation character limit', () => {
   });
 
   it('Import shows warning when translation exceeds char limit', () => {
-    createKey(
-      project.id,
-      'char-limit-key',
-      { en: 'OK' },
-      { maxCharLimit: 5 }
-    );
+    createKey(project.id, 'char-limit-key', { en: 'OK' }, { maxCharLimit: 5 });
     visitImport(project.id);
     waitForGlobalLoading();
     cy.gcy('import-file-input').attachFile('import/charLimit.json');
