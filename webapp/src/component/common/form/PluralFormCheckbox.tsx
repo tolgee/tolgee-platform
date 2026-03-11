@@ -6,10 +6,6 @@ import { FieldError, FieldLabel } from 'tg.component/FormField';
 
 import { LabelHint } from '../LabelHint';
 
-function isParameterDefault(value: string | undefined) {
-  return value === undefined || value === 'value';
-}
-
 type Props = {
   pluralParameterName: string;
   isPluralName: string;

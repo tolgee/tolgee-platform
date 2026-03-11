@@ -5,7 +5,7 @@ import {
   translationsBeforeEach,
   visitTranslations,
 } from '../../common/translations';
-import { createKey, deleteProject, login } from '../../common/apiCalls/common';
+import { createKey, deleteProject } from '../../common/apiCalls/common';
 import { waitForGlobalLoading } from '../../common/loading';
 import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 import { visitImport, getFileIssuesDialog } from '../../common/import';
