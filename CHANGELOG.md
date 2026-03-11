@@ -1,3 +1,10 @@
+## [3.166.3](https://github.com/tolgee/tolgee-platform/compare/v3.166.2...v3.166.3) (2026-03-11)
+
+
+### Bug Fixes
+
+* prevent XXE attacks in XML-based import processors ([7c71d5a](https://github.com/tolgee/tolgee-platform/commit/7c71d5a849c9984a8c5c55b121992417442a47a5))
+
 ## [3.166.2](https://github.com/tolgee/tolgee-platform/compare/v3.166.1...v3.166.2) (2026-03-10)
 
 
