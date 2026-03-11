@@ -1,11 +1,9 @@
 import { useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 
-type QaCheckResultItem = components['schemas']['QaCheckResultModel'];
+type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
-export function useQaCheckTypeTooltip(
-  type: QaCheckResultItem['type']
-): string | null {
+export function useQaCheckTypeTooltip(type: QaCheckType): string | null {
   const { t } = useTranslate();
   switch (type) {
     case 'SPACES_MISMATCH':

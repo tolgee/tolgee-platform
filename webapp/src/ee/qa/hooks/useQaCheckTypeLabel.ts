@@ -1,9 +1,9 @@
 import { useTranslate } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 
-type QaCheckResultItem = components['schemas']['QaCheckResultModel'];
+type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
-export function useQaCheckTypeLabel(type: QaCheckResultItem['type']): string {
+export function useQaCheckTypeLabel(type: QaCheckType): string {
   const { t } = useTranslate();
   switch (type) {
     case 'EMPTY_TRANSLATION':

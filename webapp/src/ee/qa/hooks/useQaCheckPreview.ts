@@ -1,9 +1,7 @@
-import { components } from 'tg.service/apiSchema.generated';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { useProject } from 'tg.hooks/useProject';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
-
-type QaCheckResultItem = components['schemas']['QaCheckResultModel'];
+import { useProject } from 'tg.hooks/useProject';
+import { useQaPreviewWebsocket } from './useQaPreviewWebsocket';
+import { QaPreviewIssue } from 'tg.ee.module/qa/models/QaPreviewWsModels';
 
 type QaCheckPreviewProps = {
   text: string | undefined | null;
@@ -12,40 +10,32 @@ type QaCheckPreviewProps = {
   enabled?: boolean;
 };
 
+type QaCheckPreviewResult = {
+  issues: QaPreviewIssue[];
+  isLoading: boolean;
+};
+
 export const useQaCheckPreview = ({
   text,
   languageTag,
   keyId,
   enabled = true,
-}: QaCheckPreviewProps): QaCheckResultItem[] => {
+}: QaCheckPreviewProps): QaCheckPreviewResult => {
   const { isEnabled } = useEnabledFeatures();
   const qaFeatureEnabled = isEnabled('QA_CHECKS');
   const project = useProject();
-  const hasText = text !== undefined && text !== null;
 
-  const results = useApiQuery({
-    url: '/v2/projects/{projectId}/qa-check/preview',
-    method: 'post',
-    path: {
-      projectId: project!.id,
-    },
-    content: {
-      'application/json': {
-        text: text ?? '',
-        languageTag,
-        keyId,
-      },
-    },
-    options: {
-      enabled: qaFeatureEnabled && hasText && enabled,
-      keepPreviousData: true,
-      noGlobalLoading: true,
-    },
+  const result = useQaPreviewWebsocket({
+    projectId: project!.id,
+    keyId,
+    languageTag,
+    text,
+    enabled: qaFeatureEnabled && enabled,
   });
 
-  if (!qaFeatureEnabled || !hasText || !enabled || !results.data) {
-    return [];
+  if (!qaFeatureEnabled || !enabled) {
+    return { issues: [], isLoading: false };
   }
 
-  return results.data._embedded?.qaCheckResults ?? [];
+  return result;
 };

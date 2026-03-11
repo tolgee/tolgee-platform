@@ -11,7 +11,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useTranslate } from '@tolgee/react';
 import { useQaCheckTypeLabel } from 'tg.ee.module/qa/hooks/useQaCheckTypeLabel';
 
-type QaCheckResultItem = components['schemas']['QaCheckResultModel'];
+type QaCheckResultItem = components['schemas']['QaIssueModel']['type']
 type QaSettings = components['schemas']['QaSettingsRequest'];
 type QaCheckSeverity = QaSettings['settings'][keyof QaSettings['settings']];
 
@@ -29,7 +29,7 @@ const StyledLabel = styled(Box)`
 `;
 
 type Props = {
-  type: QaCheckResultItem['type'];
+  type: QaCheckResultItem;
   value: QaCheckSeverity;
   onChange?: (type: string, severity: QaCheckSeverity) => void;
 };

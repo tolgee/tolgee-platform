@@ -43,7 +43,7 @@ class QaCheckRunnerServiceTest {
       }
     val service = QaCheckRunnerService(listOf(failingCheck), allEnabledConfigService())
 
-    val results = service.runChecks(1L, params)
+    val results = service.runEnabledChecks(1L, params)
 
     assertThat(results).hasSize(1)
     assertThat(results[0].type).isEqualTo(QaCheckType.EMPTY_TRANSLATION)
@@ -79,7 +79,7 @@ class QaCheckRunnerServiceTest {
       }
     val service = QaCheckRunnerService(listOf(successfulCheck, failingCheck), allEnabledConfigService())
 
-    val results = service.runChecks(1L, params)
+    val results = service.runEnabledChecks(1L, params)
 
     assertThat(results).hasSize(2)
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_EMPTY_TRANSLATION)

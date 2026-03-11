@@ -824,9 +824,6 @@ export interface paths {
     put: operations["updatePrompt"];
     delete: operations["deletePrompt"];
   };
-  "/v2/projects/{projectId}/qa-check/preview": {
-    post: operations["preview"];
-  };
   "/v2/projects/{projectId}/qa-settings": {
     get: operations["getSettings"];
     put: operations["updateSettings"];
@@ -1852,11 +1849,6 @@ export interface components {
     CollectionModelProjectTransferOptionModel: {
       _embedded?: {
         transferOptions?: components["schemas"]["ProjectTransferOptionModel"][];
-      };
-    };
-    CollectionModelQaCheckResultModel: {
-      _embedded?: {
-        qaCheckResults?: components["schemas"]["QaCheckResultModel"][];
       };
     };
     CollectionModelQaIssueModel: {
@@ -5557,60 +5549,6 @@ export interface components {
       /** Format: int32 */
       positionStart: number;
       replacement?: string;
-      /** @enum {string} */
-      type:
-        | "EMPTY_TRANSLATION"
-        | "SPACES_MISMATCH"
-        | "UNMATCHED_NEWLINES"
-        | "CHARACTER_CASE_MISMATCH"
-        | "MISSING_NUMBERS"
-        | "PUNCTUATION_MISMATCH"
-        | "BRACKETS_MISMATCH"
-        | "SPECIAL_CHARACTER_MISMATCH"
-        | "DIFFERENT_URLS"
-        | "INCONSISTENT_PLACEHOLDERS"
-        | "INCONSISTENT_HTML"
-        | "ICU_SYNTAX"
-        | "REPEATED_WORDS"
-        | "SPELLING"
-        | "UNRESOLVED_COMMENTS";
-    };
-    QaCheckPreviewRequest: {
-      /** Format: int64 */
-      keyId?: number;
-      /**
-       * @description Language tag according to BCP 47 definition
-       * @example cs-CZ
-       */
-      languageTag: string;
-      text: string;
-    };
-    QaCheckResultModel: {
-      /** @enum {string} */
-      message:
-        | "qa_empty_translation"
-        | "qa_check_failed"
-        | "qa_spaces_leading_added"
-        | "qa_spaces_leading_removed"
-        | "qa_spaces_trailing_added"
-        | "qa_spaces_trailing_removed"
-        | "qa_spaces_doubled"
-        | "qa_spaces_non_breaking_added"
-        | "qa_spaces_non_breaking_removed"
-        | "qa_punctuation_add"
-        | "qa_punctuation_remove"
-        | "qa_punctuation_replace"
-        | "qa_case_capitalize"
-        | "qa_case_lowercase"
-        | "qa_numbers_missing";
-      params?: { [key: string]: string };
-      /** Format: int32 */
-      positionEnd: number;
-      /** Format: int32 */
-      positionStart: number;
-      replacement?: string;
-      /** @enum {string} */
-      state: "OPEN" | "IGNORED";
       /** @enum {string} */
       type:
         | "EMPTY_TRANSLATION"
@@ -18408,50 +18346,6 @@ export interface operations {
         content: {
           "application/json": string;
         };
-      };
-    };
-  };
-  preview: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CollectionModelQaCheckResultModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["QaCheckPreviewRequest"];
       };
     };
   };

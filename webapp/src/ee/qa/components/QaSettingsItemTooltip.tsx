@@ -3,7 +3,7 @@ import { styled, Tooltip } from '@mui/material';
 import { InfoCircle } from '@untitled-ui/icons-react';
 import { components } from 'tg.service/apiSchema.generated';
 
-type QaCheckResultItem = components['schemas']['QaCheckResultModel'];
+type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
 const StyledInfoIcon = styled(InfoCircle)`
   width: 16px;
@@ -13,7 +13,7 @@ const StyledInfoIcon = styled(InfoCircle)`
 `;
 
 type Props = {
-  type: QaCheckResultItem['type'];
+  type: QaCheckType;
 };
 
 export const QaSettingsItemTooltip = ({ type }: Props) => {

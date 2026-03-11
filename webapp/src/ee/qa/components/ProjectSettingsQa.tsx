@@ -8,7 +8,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { QaSettingsItem } from 'tg.ee.module/qa/components/QaSettingsItem';
 
 type QaSettings = components['schemas']['QaSettingsRequest'];
-type QaCheckType = components['schemas']['QaCheckResultModel']['type'];
+type QaCheckType = components['schemas']['QaIssueModel']['type'];
 type QaCheckSeverity = QaSettings['settings'][keyof QaSettings['settings']];
 
 export const ProjectSettingsQa = () => {
