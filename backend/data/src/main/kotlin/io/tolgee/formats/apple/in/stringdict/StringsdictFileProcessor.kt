@@ -4,7 +4,7 @@ import io.tolgee.formats.apple.`in`.guessLanguageFromPath
 import io.tolgee.formats.apple.`in`.guessNamespaceFromPath
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import javax.xml.stream.XMLInputFactory
+import io.tolgee.util.XmlSecurity
 import javax.xml.stream.events.StartElement
 
 open class StringsdictFileProcessor(
@@ -23,7 +23,7 @@ open class StringsdictFileProcessor(
   var state = ParseState.Initial
   private var translationKey: String = ""
 
-  private val xmlInputFactory = XMLInputFactory.newInstance()
+  private val xmlInputFactory = XmlSecurity.newSecureXmlInputFactory()
   private val eventReader = xmlInputFactory.createXMLEventReader(context.file.data.inputStream())
   private var formatValueTypeKey = "li"
   private val forms = mutableMapOf<String, String>()

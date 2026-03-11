@@ -6,6 +6,7 @@ import io.tolgee.formats.paramConvertors.`in`.JavaToIcuPlaceholderConvertor
 import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
 import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.util.Logging
+import io.tolgee.util.XmlSecurity
 import io.tolgee.util.logger
 import org.w3c.dom.Document
 import org.w3c.dom.Node
@@ -14,7 +15,6 @@ import org.xml.sax.InputSource
 import java.io.StringReader
 import java.io.StringWriter
 import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.Transformer
 import javax.xml.transform.TransformerFactory
@@ -204,7 +204,7 @@ class TextToXmlResourcesConvertor(
   }
 
   companion object {
-    private val documentBuilderFactory: DocumentBuilderFactory by lazy { DocumentBuilderFactory.newInstance() }
+    private val documentBuilderFactory by lazy { XmlSecurity.newSecureDocumentBuilderFactory() }
 
     private val xmlTransformerFactory by lazy { TransformerFactory.newInstance() }
   }

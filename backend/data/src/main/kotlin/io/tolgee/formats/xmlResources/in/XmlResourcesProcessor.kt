@@ -13,8 +13,8 @@ import io.tolgee.formats.xmlResources.XML_RESOURCES_CDATA_CUSTOM_KEY
 import io.tolgee.formats.xmlResources.XmlResourcesParsingConstants
 import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.util.XmlSecurity
 import javax.xml.stream.XMLEventReader
-import javax.xml.stream.XMLInputFactory
 
 class XmlResourcesProcessor(
   override val context: FileProcessorContext,
@@ -137,7 +137,7 @@ class XmlResourcesProcessor(
   }
 
   private val xmlEventReader: XMLEventReader by lazy {
-    val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
+    val inputFactory = XmlSecurity.newSecureXmlInputFactory()
     inputFactory.createXMLEventReader(context.file.data.inputStream())
   }
 

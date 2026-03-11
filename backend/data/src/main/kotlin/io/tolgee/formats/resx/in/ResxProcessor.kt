@@ -5,8 +5,8 @@ import io.tolgee.formats.ImportFileProcessor
 import io.tolgee.formats.importCommon.ImportFormat
 import io.tolgee.formats.resx.ResxEntry
 import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.util.XmlSecurity
 import javax.xml.stream.XMLEventReader
-import javax.xml.stream.XMLInputFactory
 
 class ResxProcessor(
   override val context: FileProcessorContext,
@@ -46,7 +46,7 @@ class ResxProcessor(
   }
 
   private val xmlEventReader: XMLEventReader by lazy {
-    val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
+    val inputFactory = XmlSecurity.newSecureXmlInputFactory()
     inputFactory.createXMLEventReader(context.file.data.inputStream())
   }
 
