@@ -18,6 +18,7 @@ package io.tolgee.email
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.misc.EmailAttachment
+import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationContext
 import org.springframework.mail.javamail.JavaMailSender
@@ -37,6 +38,16 @@ class EmailService(
   private val emailGlobalVariablesProvider: EmailGlobalVariablesProvider,
   @Qualifier("emailTemplateEngine") private val templateEngine: TemplateEngine,
 ) {
+  @PostConstruct
+  fun validateSmtpConfiguration() {
+    if (tolgeeProperties.smtp.host != null && tolgeeProperties.smtp.from == null) {
+      throw IllegalStateException(
+        "SMTP host is configured but 'tolgee.smtp.from' is missing. " +
+          "See https://docs.tolgee.io/platform/self_hosting/configuration#smtp",
+      )
+    }
+  }
+
   private val smtpFrom
     get() =
       tolgeeProperties.smtp.from
