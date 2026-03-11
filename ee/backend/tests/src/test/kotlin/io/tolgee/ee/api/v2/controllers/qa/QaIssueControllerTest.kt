@@ -89,7 +89,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         baseLanguageTag = "en",
         languageTag = "fr",
       )
-    val results = qaCheckRunnerService.runChecks(testData.project.id, params)
+    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
     qaIssueService.replaceIssuesForTranslation(frTranslation, results)
 
     performAuthGet(
@@ -127,7 +127,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         baseLanguageTag = "en",
         languageTag = "fr",
       )
-    val results = qaCheckRunnerService.runChecks(testData.project.id, params)
+    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
     qaIssueService.replaceIssuesForTranslation(frTranslation, results)
 
     // Second run with no issues
@@ -138,7 +138,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         baseLanguageTag = "en",
         languageTag = "fr",
       )
-    val cleanResults = qaCheckRunnerService.runChecks(testData.project.id, cleanParams)
+    val cleanResults = qaCheckRunnerService.runEnabledChecks(testData.project.id, cleanParams)
     qaIssueService.replaceIssuesForTranslation(frTranslation, cleanResults)
 
     performAuthGet(
@@ -158,7 +158,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         baseLanguageTag = "en",
         languageTag = "fr",
       )
-    val results = qaCheckRunnerService.runChecks(testData.project.id, params)
+    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
     qaIssueService.replaceIssuesForTranslation(frTranslation, results)
 
     performAuthGet(
@@ -178,7 +178,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         baseLanguageTag = "en",
         languageTag = "fr",
       )
-    val results = qaCheckRunnerService.runChecks(testData.project.id, params)
+    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
     qaIssueService.replaceIssuesForTranslation(frTranslation, results)
 
     val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
@@ -202,7 +202,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         baseLanguageTag = "en",
         languageTag = "fr",
       )
-    val results = qaCheckRunnerService.runChecks(testData.project.id, params)
+    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
     qaIssueService.replaceIssuesForTranslation(frTranslation, results)
 
     val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
@@ -233,7 +233,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         baseLanguageTag = "en",
         languageTag = "fr",
       )
-    val results = qaCheckRunnerService.runChecks(testData.project.id, params)
+    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
     qaIssueService.replaceIssuesForTranslation(frTranslation, results)
 
     // Ignore one issue
@@ -242,7 +242,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
     qaIssueService.ignoreIssue(testData.project.id, issueToIgnore.id)
 
     // Re-persist with the same results (simulating a re-save)
-    val newResults = qaCheckRunnerService.runChecks(testData.project.id, params)
+    val newResults = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
     qaIssueService.replaceIssuesForTranslation(frTranslation, newResults)
 
     // The matching issue should still be IGNORED
@@ -267,7 +267,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         baseLanguageTag = "en",
         languageTag = "fr",
       )
-    val results = qaCheckRunnerService.runChecks(testData.project.id, params)
+    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
     qaIssueService.replaceIssuesForTranslation(frTranslation, results)
 
     val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
@@ -295,7 +295,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         baseLanguageTag = "en",
         languageTag = "fr",
       )
-    val results = qaCheckRunnerService.runChecks(testData.project.id, params)
+    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
     qaIssueService.replaceIssuesForTranslation(frTranslation, results)
 
     val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
@@ -353,7 +353,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         baseLanguageTag = "en",
         languageTag = "fr",
       )
-    val results = qaCheckRunnerService.runChecks(testData.project.id, params)
+    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
     qaIssueService.replaceIssuesForTranslation(frTranslation, results)
 
     val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)

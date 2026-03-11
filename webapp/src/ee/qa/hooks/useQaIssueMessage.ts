@@ -1,12 +1,10 @@
 import { useTranslate } from '@tolgee/react';
-import { components } from 'tg.service/apiSchema.generated';
-
-type QaCheckResultItem = components['schemas']['QaCheckResultModel'];
 
 export function useQaIssueMessage(
-  message: QaCheckResultItem['message'],
-  params?: QaCheckResultItem['params']
+  message: string,
+  params?: Record<string, string> | null | undefined
 ): string {
+  const normalizedParams = params ?? undefined;
   const { t } = useTranslate();
   switch (message) {
     case 'qa_empty_translation':
@@ -28,18 +26,18 @@ export function useQaIssueMessage(
     case 'qa_spaces_non_breaking_removed':
       return t('qa_issue_spaces_non_breaking_removed');
     case 'qa_punctuation_add':
-      return t('qa_issue_punctuation_add', params);
+      return t('qa_issue_punctuation_add', normalizedParams);
     case 'qa_punctuation_remove':
-      return t('qa_issue_punctuation_remove', params);
+      return t('qa_issue_punctuation_remove', normalizedParams);
     case 'qa_punctuation_replace':
-      return t('qa_issue_punctuation_replace', params);
+      return t('qa_issue_punctuation_replace', normalizedParams);
     case 'qa_case_capitalize':
       return t('qa_issue_case_capitalize');
     case 'qa_case_lowercase':
       return t('qa_issue_case_lowercase');
     case 'qa_numbers_missing':
-      return params?.number
-        ? t('qa_issue_numbers_missing', params)
+      return normalizedParams?.number
+        ? t('qa_issue_numbers_missing', normalizedParams)
         : t('qa_issue_numbers_missing_no_params');
     default:
       return message;

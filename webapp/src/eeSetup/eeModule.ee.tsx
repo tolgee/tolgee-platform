@@ -3,7 +3,6 @@ import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoV
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { T, useTranslate } from '@tolgee/react';
 import {
-  AlertTriangle,
   BookClosed,
   ClipboardCheck,
 } from '@untitled-ui/icons-react';
@@ -82,6 +81,7 @@ import { ProjectSettingsQa } from '../ee/qa/components/ProjectSettingsQa';
 import { BranchesView } from '../ee/branching/BranchesView';
 import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
+import { QaCheck } from '../component/CustomIcons';
 
 export { TaskReference } from '../ee/task/components/TaskReference';
 export { BranchReference } from '../ee/branching/components/BranchReference';
@@ -348,7 +348,7 @@ export const qaChecksPanelAdder = addPanel(
   [
     {
       id: 'qa_checks',
-      icon: <AlertTriangle />,
+      icon: <QaCheck />,
       name: <T keyName="translation_tools_qa_checks" />,
       component: QaChecksPanel,
       itemsCountFunction: useQaChecksCount,

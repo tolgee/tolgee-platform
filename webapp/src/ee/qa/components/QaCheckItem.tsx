@@ -12,9 +12,7 @@ import { T } from '@tolgee/react';
 import { QaCheck } from 'tg.component/CustomIcons';
 import { useQaIssueMessage } from '../hooks/useQaIssueMessage';
 import { useQaCheckTypeLabel } from '../hooks/useQaCheckTypeLabel';
-import { components } from 'tg.service/apiSchema.generated';
-
-type QaCheckResultItem = components['schemas']['QaCheckResultModel'];
+import { QaPreviewIssue } from 'tg.ee.module/qa/models/QaPreviewWsModels';
 
 const StyledItem = styled(Box)`
   display: flex;
@@ -137,7 +135,7 @@ function renderDiff(
 }
 
 type Props = {
-  issue: QaCheckResultItem;
+  issue: QaPreviewIssue;
   index?: number;
   text: string;
   slim?: boolean;
