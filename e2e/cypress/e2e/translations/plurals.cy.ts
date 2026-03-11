@@ -95,7 +95,6 @@ describe('Translations Base', () => {
     waitForGlobalLoading();
 
     getCell('Test key').click();
-    cy.gcy('key-plural-checkbox-expand').click();
     cy.gcy('key-plural-variable-name').clear().type('testVariable');
     cy.gcy('translations-cell-main-action-button').click();
     waitForGlobalLoading();

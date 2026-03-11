@@ -439,14 +439,12 @@ declare namespace DataCy {
         "invite-generate-button" |
         "invoice-details-dialog" |
         "key-char-limit-checkbox" |
-        "key-char-limit-expand" |
         "key-edit-char-limit-input" |
         "key-edit-tab-advanced" |
         "key-edit-tab-context" |
         "key-edit-tab-custom-properties" |
         "key-edit-tab-general" |
         "key-plural-checkbox" |
-        "key-plural-checkbox-expand" |
         "key-plural-variable-name" |
         "label-autocomplete-option" |
         "label-modal" |

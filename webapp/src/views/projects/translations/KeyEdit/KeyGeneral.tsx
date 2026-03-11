@@ -2,7 +2,6 @@ import {
   Box,
   Checkbox,
   FormControlLabel,
-  IconButton,
   styled,
   TextField,
   Tooltip,
@@ -10,8 +9,7 @@ import {
 } from '@mui/material';
 import { useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
-import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, HelpCircle } from '@untitled-ui/icons-react';
+import { HelpCircle } from '@untitled-ui/icons-react';
 
 import { Editor } from 'tg.component/editor/Editor';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
@@ -62,13 +60,6 @@ export const KeyGeneral = () => {
     useFormikContext<KeyFormType>();
   const theme = useTheme();
   const hasCharLimit = values.maxCharLimit !== undefined;
-  const [charLimitExpanded, setCharLimitExpanded] = useState(hasCharLimit);
-
-  useEffect(() => {
-    if (hasCharLimit) {
-      setCharLimitExpanded(true);
-    }
-  }, [hasCharLimit]);
 
   return (
     <>
@@ -173,74 +164,66 @@ export const KeyGeneral = () => {
         <FieldError error={errors.tags} />
       </StyledSection>
 
-      <PluralFormCheckbox
-        pluralParameterName="pluralParameter"
-        isPluralName="isPlural"
-      />
+      <Box display="flex" gap={4} alignItems="flex-start">
+        <PluralFormCheckbox
+          pluralParameterName="pluralParameter"
+          isPluralName="isPlural"
+        />
 
-      <Box display="grid">
-        <Box justifyContent="start" display="flex" alignItems="center">
-          <FormControlLabel
-            data-cy="key-char-limit-checkbox"
-            control={
-              <Checkbox
-                checked={hasCharLimit}
+        <Box display="grid">
+          <Box justifyContent="start" display="flex" alignItems="center">
+            <FormControlLabel
+              data-cy="key-char-limit-checkbox"
+              control={
+                <Checkbox
+                  checked={hasCharLimit}
+                  onChange={(e) => {
+                    setFieldValue(
+                      'maxCharLimit',
+                      e.target.checked ? '' : undefined
+                    );
+                  }}
+                />
+              }
+              label={
+                <Box display="inline-flex" alignItems="center" gap="4px">
+                  {t('translation_single_label_max_char_limit')}
+                  <Tooltip
+                    title={t('translation_single_max_char_limit_hint')}
+                    disableInteractive
+                  >
+                    <Box component="span" display="inline-flex">
+                      <HelpCircle style={{ width: 15, height: 15 }} />
+                    </Box>
+                  </Tooltip>
+                </Box>
+              }
+              sx={{ mr: 0.5 }}
+            />
+          </Box>
+          {hasCharLimit && (
+            <Box display="grid">
+              <FieldLabel>
+                {t('translation_single_label_char_limit_maximum')}
+              </FieldLabel>
+              <TextField
+                data-cy="key-edit-char-limit-input"
+                type="number"
+                size="small"
+                value={values.maxCharLimit ?? ''}
                 onChange={(e) => {
+                  const val = e.target.value;
                   setFieldValue(
                     'maxCharLimit',
-                    e.target.checked ? '' : undefined
+                    val === '' ? '' : Math.max(1, parseInt(val, 10))
                   );
-                  if (e.target.checked) {
-                    setCharLimitExpanded(true);
-                  }
                 }}
+                inputProps={{ min: 1 }}
+                sx={{ maxWidth: 300 }}
               />
-            }
-            label={
-              <Box display="inline-flex" alignItems="center" gap="4px">
-                {t('translation_single_label_max_char_limit')}
-                <Tooltip
-                  title={t('translation_char_limit_placeholders_hint')}
-                  disableInteractive
-                >
-                  <Box component="span" display="inline-flex">
-                    <HelpCircle style={{ width: 15, height: 15 }} />
-                  </Box>
-                </Tooltip>
-              </Box>
-            }
-            sx={{ mr: 0.5 }}
-          />
-          <IconButton
-            size="small"
-            disabled={!hasCharLimit}
-            onClick={() => setCharLimitExpanded((v) => !v)}
-            data-cy="key-char-limit-expand"
-          >
-            {hasCharLimit && charLimitExpanded ? (
-              <ChevronUp />
-            ) : (
-              <ChevronDown />
-            )}
-          </IconButton>
+            </Box>
+          )}
         </Box>
-        {hasCharLimit && charLimitExpanded && (
-          <TextField
-            data-cy="key-edit-char-limit-input"
-            type="number"
-            size="small"
-            value={values.maxCharLimit ?? ''}
-            onChange={(e) => {
-              const val = e.target.value;
-              setFieldValue(
-                'maxCharLimit',
-                val === '' ? '' : Math.max(1, parseInt(val, 10))
-              );
-            }}
-            inputProps={{ min: 1 }}
-            sx={{ maxWidth: 300 }}
-          />
-        )}
       </Box>
     </>
   );
