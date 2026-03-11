@@ -85,8 +85,7 @@ export class E2KeyCreateDialog {
 
     cy.gcy('key-plural-checkbox').click();
     if (plural.variableName) {
-      cy.gcy('key-plural-checkbox-expand').click();
-      cy.gcy('key-plural-variable-name').type(plural.variableName);
+      cy.gcy('key-plural-variable-name').clear().type(plural.variableName);
     }
     Object.entries(plural.formValues).forEach(([key, value]) => {
       gcyAdvanced({ value: 'translation-editor', variant: key })

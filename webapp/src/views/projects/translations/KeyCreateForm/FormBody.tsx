@@ -10,7 +10,6 @@ import {
   Button,
   Checkbox,
   FormControlLabel,
-  IconButton,
   styled,
   TextField,
   Tooltip,
@@ -18,7 +17,7 @@ import {
 import { T, useTranslate } from '@tolgee/react';
 import { useState } from 'react';
 import clsx from 'clsx';
-import { ChevronDown, ChevronUp, HelpCircle } from '@untitled-ui/icons-react';
+import { HelpCircle } from '@untitled-ui/icons-react';
 
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
@@ -93,7 +92,6 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
   const isPlural = form.values.isPlural;
 
   const [mode, setMode] = useState<'placeholders' | 'syntax'>('placeholders');
-  const [charLimitExpanded, setCharLimitExpanded] = useState(true);
 
   const maxCharLimit = form.values.maxCharLimit;
   const isBaseOverCharLimit =
@@ -242,82 +240,82 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
           )}
         />
 
-        <PluralFormCheckbox
-          isPluralName="isPlural"
-          pluralParameterName="pluralParameter"
-        />
+        <Box display="flex" gap={4} alignItems="flex-start">
+          <PluralFormCheckbox
+            isPluralName="isPlural"
+            pluralParameterName="pluralParameter"
+          />
 
-        <Field name="maxCharLimit">
-          {({ field, form }: FieldProps<any>) => {
-            const hasLimit = field.value !== undefined;
-            return (
-              <Box display="grid">
-                <Box justifyContent="start" display="flex" alignItems="center">
-                  <FormControlLabel
-                    data-cy="key-char-limit-checkbox"
-                    control={
-                      <Checkbox
-                        checked={hasLimit}
+          <Field name="maxCharLimit">
+            {({ field, form }: FieldProps<any>) => {
+              const hasLimit = field.value !== undefined;
+              return (
+                <Box display="grid">
+                  <Box
+                    justifyContent="start"
+                    display="flex"
+                    alignItems="center"
+                  >
+                    <FormControlLabel
+                      data-cy="key-char-limit-checkbox"
+                      control={
+                        <Checkbox
+                          checked={hasLimit}
+                          onChange={(e) => {
+                            form.setFieldValue(
+                              field.name,
+                              e.target.checked ? '' : undefined
+                            );
+                          }}
+                        />
+                      }
+                      label={
+                        <Box
+                          display="inline-flex"
+                          alignItems="center"
+                          gap="4px"
+                        >
+                          {t('translation_single_label_max_char_limit')}
+                          <Tooltip
+                            title={t('translation_single_max_char_limit_hint')}
+                            disableInteractive
+                          >
+                            <Box component="span" display="inline-flex">
+                              <HelpCircle style={{ width: 15, height: 15 }} />
+                            </Box>
+                          </Tooltip>
+                        </Box>
+                      }
+                      sx={{ mr: 0.5 }}
+                    />
+                  </Box>
+                  {hasLimit && (
+                    <Box display="grid">
+                      <FieldLabel>
+                        <T keyName="translation_single_label_char_limit_maximum" />
+                      </FieldLabel>
+                      <TextField
+                        data-cy="translation-create-char-limit-input"
+                        type="number"
+                        size="small"
+                        value={field.value ?? ''}
                         onChange={(e) => {
+                          const val = e.target.value;
                           form.setFieldValue(
                             field.name,
-                            e.target.checked ? '' : undefined
+                            val === '' ? '' : Math.max(1, parseInt(val, 10))
                           );
-                          if (e.target.checked) {
-                            setCharLimitExpanded(true);
-                          }
                         }}
+                        inputProps={{ min: 1 }}
+                        sx={{ maxWidth: 300 }}
                       />
-                    }
-                    label={
-                      <Box display="inline-flex" alignItems="center" gap="4px">
-                        {t('translation_single_label_max_char_limit')}
-                        <Tooltip
-                          title={t('translation_char_limit_placeholders_hint')}
-                          disableInteractive
-                        >
-                          <Box component="span" display="inline-flex">
-                            <HelpCircle style={{ width: 15, height: 15 }} />
-                          </Box>
-                        </Tooltip>
-                      </Box>
-                    }
-                    sx={{ mr: 0.5 }}
-                  />
-                  <IconButton
-                    size="small"
-                    disabled={!hasLimit}
-                    onClick={() => setCharLimitExpanded((v) => !v)}
-                    data-cy="key-char-limit-expand"
-                  >
-                    {hasLimit && charLimitExpanded ? (
-                      <ChevronUp />
-                    ) : (
-                      <ChevronDown />
-                    )}
-                  </IconButton>
+                    </Box>
+                  )}
                 </Box>
-                {hasLimit && charLimitExpanded && (
-                  <TextField
-                    data-cy="translation-create-char-limit-input"
-                    type="number"
-                    size="small"
-                    value={field.value ?? ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      form.setFieldValue(
-                        field.name,
-                        val === '' ? '' : Math.max(1, parseInt(val, 10))
-                      );
-                    }}
-                    inputProps={{ min: 1 }}
-                    sx={{ maxWidth: 300 }}
-                  />
-                )}
-              </Box>
-            );
-          }}
-        </Field>
+              );
+            }}
+          </Field>
+        </Box>
 
         <Field key={baseLang.tag} name="baseValue">
           {({ field, meta }) => (
