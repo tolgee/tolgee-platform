@@ -36,7 +36,7 @@ const StyledContainer = styled('div')`
 `;
 
 export const Translations = () => {
-  const { setQuickStartOpen, setQuickStartFloatingForced } = useGlobalActions();
+  const { setQuickStartFloatingForced } = useGlobalActions();
   const prefilter = useTranslationsSelector((c) => c.prefilter);
   const quickStartEnabled = useGlobalContext((c) => c.quickStartGuide.enabled);
   const { t } = useTranslate();
@@ -95,7 +95,6 @@ export const Translations = () => {
   useEffect(() => {
     if (sidePanelWidth && quickStartEnabled) {
       setQuickStartFloatingForced(true);
-      setQuickStartOpen(true);
       return () => {
         setQuickStartFloatingForced(false);
       };
