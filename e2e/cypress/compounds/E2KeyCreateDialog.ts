@@ -9,6 +9,7 @@ export class E2KeyCreateDialog {
     namespace,
     description,
     plural,
+    maxCharLimit,
   }: KeyDialogFillProps) {
     this.getKeyNameInput().type(key);
     if (namespace) {
@@ -20,9 +21,20 @@ export class E2KeyCreateDialog {
     if (tag) {
       this.addNewTag(tag);
     }
+    if (maxCharLimit !== undefined) {
+      this.setCharLimit(maxCharLimit);
+    }
 
     this.setSingularTranslation(translation);
     this.setPluralTranslation(plural);
+  }
+
+  setCharLimit(limit: number) {
+    cy.gcy('key-char-limit-checkbox').click();
+    cy.gcy('translation-create-char-limit-input')
+      .find('input')
+      .clear()
+      .type(limit.toString());
   }
 
   save() {
@@ -102,4 +114,5 @@ export type KeyDialogFillProps = {
   tag?: string;
   namespace?: string;
   description?: string;
+  maxCharLimit?: number;
 };
