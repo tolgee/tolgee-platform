@@ -39,13 +39,16 @@ export const CharacterCounter: React.FC<Props> = ({
   return (
     <StyledContainer>
       {overLimit && (
-        <StyledWarning>
+        <StyledWarning role="alert" aria-atomic="true">
           {t('translation_char_counter_over_limit', {
             count: String(currentCount - maxLimit),
           })}
         </StyledWarning>
       )}
-      <StyledCount overLimit={overLimit}>
+      <StyledCount
+        overLimit={overLimit}
+        aria-label={`${currentCount} of ${maxLimit} characters`}
+      >
         {currentCount}/{maxLimit}
       </StyledCount>
     </StyledContainer>

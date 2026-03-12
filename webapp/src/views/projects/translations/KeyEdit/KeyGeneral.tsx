@@ -221,6 +221,7 @@ export const KeyGeneral = () => {
                 inputProps={{ min: 1 }}
                 sx={{ maxWidth: 300 }}
               />
+              <FieldError error={errors.maxCharLimit} />
             </Box>
           )}
         </Box>

@@ -316,7 +316,9 @@ class KeyComplexEditHelper(
       dto.isPlural != null &&
       key.isPlural != dto.isPlural ||
       (dto.isPlural == true && key.pluralArgName != dto.pluralArgName)
-    isMaxCharLimitChanged = dto.maxCharLimit != null
+    isMaxCharLimitChanged =
+      dto.maxCharLimit != null &&
+      key.maxCharLimit != dto.maxCharLimit.let { if (it != null && it <= 0) null else it }
     isCustomDataChanged = dto.custom != null &&
       objectMapper.writeValueAsString(key.keyMeta?.custom) != objectMapper.writeValueAsString(dto.custom)
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
