@@ -2,6 +2,7 @@ package io.tolgee.service.export
 
 import com.ibm.icu.util.ULocale
 import io.tolgee.service.export.dataProvider.ExportTranslationView
+import io.tolgee.util.PathSecurity
 
 class ExportFilePathProvider(
   private val template: String,
@@ -31,7 +32,7 @@ class ExportFilePathProvider(
   private fun String.finalizePath(): String {
     return this
       .replaceMultipleSlashes()
-      .removeZipSlipString()
+      .let { PathSecurity.sanitizePath(it) }
       .removeLeadingSlash()
   }
 
@@ -93,12 +94,4 @@ class ExportFilePathProvider(
       "$language-r$country"
     }
   }
-}
-
-private fun String.removeZipSlipString(): String {
-  val normalized = java.nio.file.Paths.get(this).normalize().toString()
-  if (normalized.startsWith("..")) {
-    return normalized.removePrefix(".." + java.io.File.separator)
-  }
-  return normalized
 }

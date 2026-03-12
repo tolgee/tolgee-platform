@@ -17,6 +17,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.util.PathSecurity
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -507,7 +508,7 @@ class ImportService(
     fileName: String,
   ): String {
     val notBlankFilename = fileName.ifBlank { "blank_name" }
-    val sanitized = notBlankFilename.replace("..", "_").removePrefix("/")
+    val sanitized = PathSecurity.sanitizePath(notBlankFilename)
     return "${getFileStorageImportRoot(importId)}/$sanitized"
   }
 

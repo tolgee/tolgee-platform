@@ -2,6 +2,7 @@ package io.tolgee.service.dataImport.processors
 
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
+import io.tolgee.util.PathSecurity
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
@@ -40,7 +41,7 @@ class ZipTypeProcessor(
           continue
         }
 
-        val fileName = entry.name.replaceRootSlash().sanitizePath()
+        val fileName = PathSecurity.sanitizePath(entry.name.replaceRootSlash())
         if (files.contains(fileName)) {
           continue
         }
@@ -89,14 +90,6 @@ class ZipTypeProcessor(
   }
 
   private fun String.replaceRootSlash() = removePrefix("/")
-
-  private fun String.sanitizePath(): String {
-    val normalized = java.nio.file.Paths.get(this).normalize().toString()
-    if (normalized.startsWith("..")) {
-      return normalized.removePrefix(".." + java.io.File.separator)
-    }
-    return normalized
-  }
 
   class MaxSizeExceededException : Exception("Archive exceeds maximum allowed size")
 }
