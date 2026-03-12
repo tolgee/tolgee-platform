@@ -25,18 +25,18 @@ import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 
 @SpringJUnitConfig(EmailGlobalVariablesProvider::class)
 class EmailGlobalVariablesProviderTest {
-  @MockBean
+  @MockitoBean
   private lateinit var publicBillingConfProvider: PublicBillingConfProvider
 
-  @MockBean
+  @MockitoBean
   private lateinit var tolgeeProperties: TolgeeProperties
 
-  @MockBean
+  @MockitoBean
   private lateinit var frontendUrlProvider: FrontendUrlProvider
 
   @Autowired

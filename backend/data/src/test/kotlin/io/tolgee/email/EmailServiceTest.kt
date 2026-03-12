@@ -16,7 +16,6 @@
 
 package io.tolgee.email
 
-import io.tolgee.configuration.tolgee.SmtpProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assert
 import jakarta.mail.internet.MimeMessage
@@ -31,22 +30,22 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 import java.util.Locale
 
 @ExtendWith(MockitoExtension::class)
 @SpringJUnitConfig(EmailService::class, EmailTemplateConfig::class, EmailTemplateTestConfig::class)
 class EmailServiceTest {
-  @MockBean
+  @Autowired
   private lateinit var tolgeeProperties: TolgeeProperties
 
-  @MockBean
+  @MockitoBean
   private lateinit var mailSender: JavaMailSender
 
-  @MockBean
+  @MockitoBean
   private lateinit var emailGlobalVariablesProvider: EmailGlobalVariablesProvider
 
   @Autowired
@@ -58,9 +57,7 @@ class EmailServiceTest {
   @BeforeEach
   fun beforeEach() {
     val sender = JavaMailSenderImpl()
-    val smtp = SmtpProperties()
-    smtp.from = "Tolgee Test <robomouse+test@tolgee.test>"
-    whenever(tolgeeProperties.smtp).thenReturn(smtp)
+    tolgeeProperties.smtp.from = "Tolgee Test <robomouse+test@tolgee.test>"
     whenever(mailSender.createMimeMessage()).let {
       val msg = sender.createMimeMessage()
       it.thenReturn(msg)
