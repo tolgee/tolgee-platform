@@ -132,6 +132,10 @@ class ImageStorageController(
     request: HttpServletRequest,
     urlPathPrefix: String,
   ): String {
-    return request.requestURI.split(request.contextPath + "/$urlPathPrefix/")[1]
+    val fileName = request.requestURI.split(request.contextPath + "/$urlPathPrefix/")[1]
+    if (fileName.contains("..")) {
+      throw NotFoundException()
+    }
+    return fileName
   }
 }

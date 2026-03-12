@@ -507,7 +507,8 @@ class ImportService(
     fileName: String,
   ): String {
     val notBlankFilename = fileName.ifBlank { "blank_name" }
-    return "${getFileStorageImportRoot(importId)}/$notBlankFilename"
+    val sanitized = notBlankFilename.replace("..", "_").removePrefix("/")
+    return "${getFileStorageImportRoot(importId)}/$sanitized"
   }
 
   private fun getFileStorageImportRoot(importId: String) = "importFiles/$importId"

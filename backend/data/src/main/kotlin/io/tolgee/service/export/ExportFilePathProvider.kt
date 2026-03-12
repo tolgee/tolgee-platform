@@ -96,5 +96,9 @@ class ExportFilePathProvider(
 }
 
 private fun String.removeZipSlipString(): String {
-  return this.replace("../", "")
+  val normalized = java.nio.file.Paths.get(this).normalize().toString()
+  if (normalized.startsWith("..")) {
+    return normalized.removePrefix(".." + java.io.File.separator)
+  }
+  return normalized
 }
