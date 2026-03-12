@@ -108,6 +108,8 @@ class BatchJobChunkExecutionQueue(
           BatchJobChunkExecutionDto::class.java,
         ).setParameter("executionStatus", BatchJobChunkExecutionStatus.PENDING)
         .setParameter("runningStatus", BatchJobStatus.RUNNING)
+        // Limit to get pending batches faster
+        .setMaxResults(batchProperties.queuePopulateLimit)
         .resultList
 
     if (data.size > 0) {
