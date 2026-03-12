@@ -49,6 +49,7 @@ enum class BatchJobType(
     activityType = ActivityType.BATCH_MACHINE_TRANSLATE,
     maxRetries = 3,
     processor = MachineTranslationChunkProcessor::class,
+    exclusive = false
   ),
   AUTO_TRANSLATE(
     activityType = ActivityType.AUTO_TRANSLATE,
