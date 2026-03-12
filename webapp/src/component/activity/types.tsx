@@ -26,7 +26,8 @@ export type ActivityTypeEnum =
   | 'KEY_RESTORE'
   | 'KEY_HARD_DELETE'
   | 'BATCH_KEY_RESTORE'
-  | 'BATCH_KEY_HARD_DELETE';
+  | 'BATCH_KEY_HARD_DELETE'
+  | 'KEY_CHARACTER_LIMIT_EDIT';
 
 export type ChangeTypeOfKeys<
   T extends Record<string, unknown>,

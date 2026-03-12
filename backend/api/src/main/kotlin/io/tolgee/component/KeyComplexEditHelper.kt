@@ -289,6 +289,10 @@ class KeyComplexEditHelper(
       possibleOperations.add(ActivityType.SCREENSHOT_DELETE)
     }
 
+    if (isMaxCharLimitChanged) {
+      possibleOperations.add(ActivityType.KEY_CHARACTER_LIMIT_EDIT)
+    }
+
     return possibleOperations
   }
 

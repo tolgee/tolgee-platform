@@ -165,6 +165,12 @@ export const actionsConfiguration: Partial<
     },
     entities: { KeyMeta: true },
   },
+  KEY_CHARACTER_LIMIT_EDIT: {
+    label(params) {
+      return <T keyName="activity_key_character_limit_edit" params={params} />;
+    },
+    entities: { Key: ['maxCharLimit'] },
+  },
   TRANSLATION_HISTORY_ADD: {
     label(params) {
       return <T keyName="activity_translation_history_add" params={params} />;
