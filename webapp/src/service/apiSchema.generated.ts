@@ -4953,6 +4953,7 @@ export interface components {
         | "SCREENSHOT_ADD"
         | "KEY_TAGS_EDIT"
         | "KEY_NAME_EDIT"
+        | "KEY_CHARACTER_LIMIT_EDIT"
         | "KEY_DELETE"
         | "KEY_SOFT_DELETE"
         | "KEY_RESTORE"
