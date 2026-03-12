@@ -40,7 +40,7 @@ class ZipTypeProcessor(
           continue
         }
 
-        val fileName = entry.name.replaceRootSlash()
+        val fileName = entry.name.replaceRootSlash().sanitizePath()
         if (files.contains(fileName)) {
           continue
         }
@@ -89,6 +89,14 @@ class ZipTypeProcessor(
   }
 
   private fun String.replaceRootSlash() = removePrefix("/")
+
+  private fun String.sanitizePath(): String {
+    val normalized = java.nio.file.Paths.get(this).normalize().toString()
+    if (normalized.startsWith("..")) {
+      return normalized.removePrefix(".." + java.io.File.separator)
+    }
+    return normalized
+  }
 
   class MaxSizeExceededException : Exception("Archive exceeds maximum allowed size")
 }
