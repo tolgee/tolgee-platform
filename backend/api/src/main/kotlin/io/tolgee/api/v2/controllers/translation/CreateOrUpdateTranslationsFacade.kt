@@ -85,8 +85,6 @@ class CreateOrUpdateTranslationsFacade(
       keyNotNull.id,
     )
 
-    translationService.validateCharLimit(keyNotNull, dto.translations)
-
     val modifiedTranslations = translationService.setForKey(keyNotNull, dto.translations)
 
     val translations =

@@ -92,7 +92,7 @@ describe('Translation character limit', () => {
     cy.gcy('global-form-save-button').should('not.be.disabled');
   });
 
-  it('Translation editing - Save disabled when exceeding char limit', () => {
+  it('Translation editing - Save allowed even when exceeding char limit', () => {
     createKey(project.id, 'limited-key', { en: 'Hi' }, { maxCharLimit: 5 });
     visitTranslations(project.id);
     waitForGlobalLoading();
@@ -101,7 +101,7 @@ describe('Translation character limit', () => {
       .find('[contenteditable]')
       .clear()
       .type('Hello World');
-    cy.gcy('translations-cell-main-action-button').should('be.disabled');
+    cy.gcy('translations-cell-main-action-button').should('not.be.disabled');
   });
 
   it('Import shows warning when translation exceeds char limit', () => {
