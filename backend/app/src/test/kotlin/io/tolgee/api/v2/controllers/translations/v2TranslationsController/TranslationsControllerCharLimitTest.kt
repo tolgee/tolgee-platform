@@ -52,7 +52,7 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `creating key with translation exceeding char limit returns 400`() {
+  fun `creating new key via translations endpoint ignores other key's char limit`() {
     testData.aKey.maxCharLimit = 10
     saveTestData()
     // POST creates a new key — char limit validation applies on creation
