@@ -828,6 +828,17 @@ export interface paths {
     get: operations["getSettings"];
     put: operations["updateSettings"];
   };
+  "/v2/projects/{projectId}/qa-settings/languages": {
+    get: operations["getAllLanguageSettings"];
+  };
+  "/v2/projects/{projectId}/qa-settings/languages/{languageId}": {
+    get: operations["getLanguageSettings"];
+    put: operations["updateLanguageSettings"];
+    delete: operations["deleteLanguageSettings"];
+  };
+  "/v2/projects/{projectId}/qa-settings/languages/{languageId}/resolved": {
+    get: operations["getLanguageSettingsResolved"];
+  };
   "/v2/projects/{projectId}/single-step-import": {
     /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
     post: operations["singleStepFromFiles"];
@@ -4014,6 +4025,10 @@ export interface components {
        */
       tag: string;
     };
+    LanguageQaConfigModel: {
+      customSettings?: { [key: string]: "WARNING" | "OFF" };
+      language: components["schemas"]["LanguageModel"];
+    };
     LanguageRequest: {
       /**
        * @description Language flag emoji as UTF-8 emoji
@@ -5612,6 +5627,9 @@ export interface components {
         | "REPEATED_WORDS"
         | "SPELLING"
         | "UNRESOLVED_COMMENTS";
+    };
+    QaLanguageSettingsRequest: {
+      settings: { [key: string]: "WARNING" | "OFF" };
     };
     QaSettingsRequest: {
       settings: { [key: string]: "WARNING" | "OFF" };
@@ -18429,6 +18447,206 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["QaSettingsRequest"];
+      };
+    };
+  };
+  getAllLanguageSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LanguageQaConfigModel"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getLanguageSettings: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": { [key: string]: "WARNING" | "OFF" };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  updateLanguageSettings: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": { [key: string]: "WARNING" | "OFF" };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaLanguageSettingsRequest"];
+      };
+    };
+  };
+  deleteLanguageSettings: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getLanguageSettingsResolved: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": { [key: string]: "WARNING" | "OFF" };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
       };
     };
   };

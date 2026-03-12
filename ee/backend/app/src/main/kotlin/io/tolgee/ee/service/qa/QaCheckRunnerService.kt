@@ -15,8 +15,14 @@ class QaCheckRunnerService(
     projectId: Long,
     params: QaCheckParams,
     checkTypes: List<QaCheckType>? = null,
+    languageId: Long? = null,
   ): List<QaCheckResult> {
-    val enabledTypes = projectQaConfigService.getEnabledCheckTypes(projectId)
+    val enabledTypes =
+      if (languageId != null) {
+        projectQaConfigService.getEnabledCheckTypesForLanguage(projectId, languageId)
+      } else {
+        projectQaConfigService.getEnabledCheckTypesForProject(projectId)
+      }
     val typesToRun = if (checkTypes != null) enabledTypes.intersect(checkTypes.toSet()) else enabledTypes
     return checks
       .filter { it.type in typesToRun }

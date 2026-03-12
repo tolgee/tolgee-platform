@@ -153,16 +153,20 @@ class QaCheckPreviewWebSocketHandler(
       baseText = translations.firstOrNull()?.text
     }
 
+    val language = languageService.findByTag(languageTag, projectId)
+
     var translationId: Long? = null
-    if (keyId != null) {
-      val language = languageService.findByTag(languageTag, projectId)
-      if (language != null) {
-        val translations = translationService.getTranslations(listOf(keyId), listOf(language.id))
-        translationId = translations.firstOrNull()?.id
-      }
+    if (keyId != null && language != null) {
+      val translations = translationService.getTranslations(listOf(keyId), listOf(language.id))
+      translationId = translations.firstOrNull()?.id
     }
 
-    val enabledCheckTypes = projectQaConfigService.getEnabledCheckTypes(projectId)
+    val enabledCheckTypes =
+      if (language != null) {
+        projectQaConfigService.getEnabledCheckTypesForLanguage(projectId, language.id)
+      } else {
+        projectQaConfigService.getEnabledCheckTypesForProject(projectId)
+      }
 
     session.attributes["state"] =
       QaPreviewWsSessionState(

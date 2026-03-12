@@ -2,10 +2,7 @@
 import { OrganizationSsoView } from '../views/organizations/sso/OrganizationSsoView';
 import { RecaptchaProvider } from '../component/common/RecaptchaProvider';
 import { T, useTranslate } from '@tolgee/react';
-import {
-  BookClosed,
-  ClipboardCheck,
-} from '@untitled-ui/icons-react';
+import { BookClosed, ClipboardCheck } from '@untitled-ui/icons-react';
 import { Link, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { Badge, Box, MenuItem } from '@mui/material';
 

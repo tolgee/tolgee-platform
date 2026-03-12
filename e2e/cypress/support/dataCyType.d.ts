@@ -728,6 +728,10 @@ declare namespace DataCy {
         "prompt-basic-option-edit" |
         "qa-check-item" |
         "qa-issue-highlight" |
+        "qa-language-dialog-inherited-banner" |
+        "qa-language-dialog-reset-to-global" |
+        "qa-language-dialog-save" |
+        "qa-language-settings-button" |
         "qa-panel-container" |
         "qa-panel-container-empty" |
         "qa-settings-row" |
