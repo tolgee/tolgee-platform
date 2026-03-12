@@ -34,16 +34,10 @@ export const CharacterCounter: React.FC<Props> = ({
     return null;
   }
 
-  const atLimit = currentCount === maxLimit;
   const overLimit = currentCount > maxLimit;
 
   return (
     <StyledContainer>
-      {atLimit && (
-        <StyledWarning>
-          {t('translation_char_counter_limit_reached')}
-        </StyledWarning>
-      )}
       {overLimit && (
         <StyledWarning>
           {t('translation_char_counter_over_limit', {
@@ -51,7 +45,7 @@ export const CharacterCounter: React.FC<Props> = ({
           })}
         </StyledWarning>
       )}
-      <StyledCount overLimit={atLimit || overLimit}>
+      <StyledCount overLimit={overLimit}>
         {currentCount}/{maxLimit}
       </StyledCount>
     </StyledContainer>
