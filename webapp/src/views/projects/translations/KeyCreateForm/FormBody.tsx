@@ -100,6 +100,13 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
       (v) => getVisibleCharCount(v, isPlural) > maxCharLimit
     );
 
+  const handleEnterSubmit = () => {
+    if (!isBaseOverCharLimit) {
+      form.handleSubmit();
+    }
+    return true;
+  };
+
   const actualParameter = isPlural
     ? form.values.pluralParameter || 'value'
     : undefined;
@@ -135,7 +142,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                         shortcuts={[
                           {
                             key: 'Enter',
-                            run: () => (form.handleSubmit(), true),
+                            run: handleEnterSubmit,
                           },
                         ]}
                       />
@@ -191,7 +198,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                     shortcuts={[
                       {
                         key: 'Enter',
-                        run: () => (form.handleSubmit(), true),
+                        run: handleEnterSubmit,
                       },
                     ]}
                     onBlur={() => form.setFieldTouched(field.name, true)}
@@ -348,7 +355,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                   shortcuts: [
                     {
                       key: 'Enter',
-                      run: () => (form.handleSubmit(), true),
+                      run: handleEnterSubmit,
                     },
                   ],
                 }}

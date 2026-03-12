@@ -35,8 +35,6 @@ data class KeyWithTranslationsView(
 
   companion object {
     val LANGUAGES_FIELD_COUNT = 10
-    private val BASE_FIELD_COUNT = 11
-    private val TRASH_FIELD_COUNT = 5
 
     fun of(
       queryData: Array<Any?>,
