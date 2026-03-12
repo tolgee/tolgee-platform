@@ -1,3 +1,10 @@
+# [3.167.0](https://github.com/tolgee/tolgee-platform/compare/v3.166.3...v3.167.0) (2026-03-12)
+
+
+### Features
+
+* map-based LLM provider config with pricing dialog ([#3492](https://github.com/tolgee/tolgee-platform/issues/3492)) ([da858c0](https://github.com/tolgee/tolgee-platform/commit/da858c03742561d22e815d50866effcef70c5ac4))
+
 ## [3.166.3](https://github.com/tolgee/tolgee-platform/compare/v3.166.2...v3.166.3) (2026-03-11)
 
 
