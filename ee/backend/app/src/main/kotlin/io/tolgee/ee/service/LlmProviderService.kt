@@ -16,6 +16,7 @@ import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.ee.component.llm.TolgeeApiService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.FailedDependencyException
+import io.tolgee.util.UrlSecurity
 import io.tolgee.exceptions.InvalidStateException
 import io.tolgee.exceptions.LlmProviderNotFoundException
 import io.tolgee.exceptions.LlmRateLimitedException
@@ -91,6 +92,7 @@ class LlmProviderService(
     organizationId: Long,
     dto: LlmProviderRequest,
   ): LlmProviderDto {
+    validateApiUrl(dto.apiUrl)
     val provider =
       LlmProvider(
         name = dto.name,
@@ -116,6 +118,7 @@ class LlmProviderService(
     dto: LlmProviderRequest,
   ): LlmProviderDto {
     val provider = llmProviderRepository.findById(providerId).getOrNull() ?: throw NotFoundException()
+    validateApiUrl(dto.apiUrl)
     provider.name = dto.name
     provider.type = dto.type
     provider.priority = dto.priority
@@ -310,6 +313,10 @@ class LlmProviderService(
       response = json,
       usage = PromptResult.Usage(inputTokens = 42, outputTokens = 21, cachedTokens = 1),
     )
+  }
+
+  private fun validateApiUrl(apiUrl: String) {
+    UrlSecurity.validateUrl(apiUrl)
   }
 
   companion object {

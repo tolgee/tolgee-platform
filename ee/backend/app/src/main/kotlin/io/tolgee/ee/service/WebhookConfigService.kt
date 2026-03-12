@@ -6,6 +6,7 @@ import io.tolgee.component.automations.processors.WebhookExecutor
 import io.tolgee.component.automations.processors.WebhookRequest
 import io.tolgee.dtos.request.WebhookConfigRequest
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.util.UrlSecurity
 import io.tolgee.model.Project
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.repository.WebhookConfigRepository
@@ -44,6 +45,7 @@ class WebhookConfigService(
     project: Project,
     dto: WebhookConfigRequest,
   ): WebhookConfig {
+    UrlSecurity.validateUrl(dto.url)
     val webhookConfig = WebhookConfig(project)
     webhookConfig.url = dto.url
     webhookConfig.webhookSecret = generateRandomWebhookSecret()
@@ -75,6 +77,7 @@ class WebhookConfigService(
     dto: WebhookConfigRequest,
   ): WebhookConfig {
     val webhookConfig = get(projectId, id)
+    UrlSecurity.validateUrl(dto.url)
     webhookConfig.url = dto.url
     automationService.updateForWebhookConfig(webhookConfig)
     return webhookConfigRepository.save(webhookConfig)
