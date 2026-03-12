@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSetter
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.constants.ValidationConstants
 import io.tolgee.util.getSafeNamespace
+import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.hibernate.validator.constraints.Length
@@ -25,7 +26,7 @@ data class EditKeyDto(
     example = "This key is used on homepage. It's a label of sign up button.",
   ) val description: String? = null,
   @Schema(description = "Maximum character limit for translations of this key. Null means no limit.")
-  @field:jakarta.validation.constraints.Min(1)
+  @field:Min(1)
   val maxCharLimit: Int? = null,
 ) {
   @JsonSetter("namespace")
