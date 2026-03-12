@@ -7,6 +7,7 @@ import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.WithRelatedKeysInOrder
 import io.tolgee.model.enums.AssignableTranslationState
 import io.tolgee.util.getSafeNamespace
+import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.hibernate.validator.constraints.Length
@@ -49,7 +50,7 @@ class CreateKeyDto(
   )
   val pluralArgName: String? = null,
   @Schema(description = "Maximum character limit for translations of this key. Null means no limit.")
-  @field:jakarta.validation.constraints.Min(1)
+  @field:Min(1)
   val maxCharLimit: Int? = null,
   val branch: String? = null,
 ) : WithRelatedKeysInOrder {
