@@ -45,7 +45,13 @@ class QaCheckBatchServiceImpl(
         languageTag = translation.language.tag,
       )
 
-    val results = qaCheckRunnerService.runEnabledChecks(projectId, params, checkTypes)
+    val results =
+      qaCheckRunnerService.runEnabledChecks(
+        projectId,
+        params,
+        checkTypes,
+        languageId = translation.language.id,
+      )
     qaIssueService.replaceIssuesForTranslation(translation, results, checkTypes)
 
     translation.qaChecksStale = false

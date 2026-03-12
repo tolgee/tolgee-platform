@@ -6,6 +6,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { QaSettingsItem } from 'tg.ee.module/qa/components/QaSettingsItem';
+import { QaLanguageSettings } from './QaLanguageSettings';
 
 type QaSettings = components['schemas']['QaSettingsRequest'];
 type QaCheckType = components['schemas']['QaIssueModel']['type'];
@@ -23,10 +24,11 @@ export const ProjectSettingsQa = () => {
   const saveSettingsMutation = useApiMutation({
     url: '/v2/projects/{projectId}/qa-settings',
     method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/qa-settings',
   });
 
   const handleChange = useCallback(
-    (checkType: string, severity: QaCheckSeverity) => {
+    (checkType: QaCheckType, severity: QaCheckSeverity) => {
       saveSettingsMutation.mutate({
         path: { projectId: project.id },
         content: {
@@ -60,6 +62,14 @@ export const ProjectSettingsQa = () => {
           onChange={handleChange}
         />
       ))}
+
+      {settings.data && (
+        // TODO: this `as Record<QaCheckType, QaCheckSeverity>` shouldn't be needed
+        // especially after we wrap it with model
+        <QaLanguageSettings
+          globalSettings={settings.data as Record<QaCheckType, QaCheckSeverity>}
+        />
+      )}
     </Box>
   );
 };

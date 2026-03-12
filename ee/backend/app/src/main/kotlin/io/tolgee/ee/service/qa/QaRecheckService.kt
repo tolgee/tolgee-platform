@@ -25,6 +25,8 @@ class QaRecheckService(
     val translationIds = translationService.getTranslationIdsForRecheck(projectId, languageIds)
     if (translationIds.isEmpty()) return
 
+    if (checkTypes?.isEmpty() == true) return
+
     translationService.setQaChecksStale(translationIds)
 
     batchJobService.startJob(
