@@ -8,14 +8,14 @@ import org.springframework.stereotype.Repository
 @Repository
 @Lazy
 interface LanguageQaConfigRepository : JpaRepository<LanguageQaConfig, Long> {
-  fun findByProjectIdAndLanguageId(
+  fun findByLanguageProjectIdAndLanguageId(
     projectId: Long,
     languageId: Long,
   ): LanguageQaConfig?
 
-  fun findAllByProjectId(projectId: Long): List<LanguageQaConfig>
+  fun findAllByLanguageProjectId(projectId: Long): List<LanguageQaConfig>
 
-  fun deleteByProjectIdAndLanguageId(
+  fun deleteByLanguageProjectIdAndLanguageId(
     projectId: Long,
     languageId: Long,
   )
