@@ -210,8 +210,6 @@ class KeyComplexEditHelper(
       val modifiedTranslations = getModifiedTranslationsByTag()
       val normalizedPlurals = validateAndNormalizePlurals(modifiedTranslations)
 
-      translationService.validateCharLimit(key, normalizedPlurals.mapKeys { it.key.tag })
-
       val existingTranslationsByTag = getExistingTranslationsByTag()
       val oldTranslations =
         modifiedTranslations

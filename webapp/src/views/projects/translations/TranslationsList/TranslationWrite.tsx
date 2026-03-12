@@ -20,7 +20,6 @@ import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsList } from '../Suggestions/SuggestionsList';
-import { getVisibleCharCount } from '../cell/getVisibleCharCount';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -124,13 +123,6 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     keyData.keyIsPlural
   );
 
-  const isOverCharLimit =
-    keyData.keyMaxCharLimit != null &&
-    Object.values(editVal.value.variants).some(
-      (v) =>
-        getVisibleCharCount(v, Boolean(editVal.value.parameter)) >
-        keyData.keyMaxCharLimit!
-    );
 
   const missingPlaceholders = useMissingPlaceholders({
     baseTranslation,
@@ -243,7 +235,6 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
                 translation={translation}
                 languageId={language.id}
                 value={editVal.value}
-                overCharLimit={isOverCharLimit}
               />
             </StyledControls>
           </>

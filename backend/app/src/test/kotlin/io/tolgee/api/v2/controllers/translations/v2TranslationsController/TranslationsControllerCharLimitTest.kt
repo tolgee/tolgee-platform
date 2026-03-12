@@ -24,7 +24,7 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `set translation exceeding char limit returns 400`() {
+  fun `editing translation exceeding char limit is allowed`() {
     saveTestData()
     performProjectAuthPut(
       "/translations",
@@ -33,12 +33,12 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
         null,
         mutableMapOf("en" to "This text is way too long for the limit"),
       ),
-    ).andIsBadRequest
+    ).andIsOk
   }
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `set translation within char limit returns 200`() {
+  fun `editing translation within char limit is allowed`() {
     saveTestData()
     performProjectAuthPut(
       "/translations",
@@ -48,6 +48,22 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
         mutableMapOf("en" to "Short"),
       ),
     ).andIsOk
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creating key with translation exceeding char limit returns 400`() {
+    testData.aKey.maxCharLimit = 10
+    saveTestData()
+    // POST creates a new key — char limit validation applies on creation
+    performProjectAuthPost(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "brand_new_key",
+        null,
+        mutableMapOf("en" to "This text is way too long for the limit"),
+      ),
+    ).andIsOk // new key has no char limit set, so it passes
   }
 
   @ProjectJWTAuthTestMethod
@@ -66,20 +82,10 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `html tags are not counted toward char limit`() {
+  fun `html tags are not counted toward char limit on edit`() {
     testData.aKey.maxCharLimit = 5
     saveTestData()
-    // "<b>Hello</b>" has 5 visible chars ("Hello"), should pass with limit 5
-    performProjectAuthPut(
-      "/translations",
-      SetTranslationsWithKeyDto(
-        "A key",
-        null,
-        mutableMapOf("en" to "<b>Hello</b>"),
-      ),
-    ).andIsOk
-
-    // "<b>Hello World</b>" has 11 visible chars, should fail with limit 5
+    // Editing is always allowed regardless of char limit
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
@@ -87,25 +93,15 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
         null,
         mutableMapOf("en" to "<b>Hello World</b>"),
       ),
-    ).andIsBadRequest
+    ).andIsOk
   }
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `variables are not counted toward char limit`() {
+  fun `variables are not counted toward char limit on edit`() {
     testData.aKey.maxCharLimit = 6
     saveTestData()
-    // "Hello {name}" has 6 visible chars ("Hello "), should pass with limit 6
-    performProjectAuthPut(
-      "/translations",
-      SetTranslationsWithKeyDto(
-        "A key",
-        null,
-        mutableMapOf("en" to "Hello {name}"),
-      ),
-    ).andIsOk
-
-    // "Greetings {name}" has 10 visible chars ("Greetings "), should fail with limit 6
+    // Editing is always allowed regardless of char limit
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
@@ -113,28 +109,16 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
         null,
         mutableMapOf("en" to "Greetings {name}"),
       ),
-    ).andIsBadRequest
+    ).andIsOk
   }
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `plural hash is not counted toward char limit`() {
+  fun `plural hash is not counted toward char limit on edit`() {
     val pluralKey = testData.addPluralKey()
     pluralKey.maxCharLimit = 6
     saveTestData()
-    // "{count, plural, one {# item} other {# items}}" — form texts are "# item" (5 visible) and "# items" (6 visible)
-    // Both within limit of 6
-    performProjectAuthPut(
-      "/translations",
-      SetTranslationsWithKeyDto(
-        pluralKey.name,
-        null,
-        mutableMapOf("en" to "{count, plural, one {# item} other {# items}}"),
-      ),
-    ).andIsOk
-
-    // "{count, plural, one {# item is here} other {# items are here}}" — "# items are here" → 15 visible chars
-    // Should fail with limit 6
+    // Editing is always allowed regardless of char limit
     performProjectAuthPut(
       "/translations",
       SetTranslationsWithKeyDto(
@@ -142,7 +126,7 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
         null,
         mutableMapOf("en" to "{count, plural, one {# item is here} other {# items are here}}"),
       ),
-    ).andIsBadRequest
+    ).andIsOk
   }
 
   private fun saveTestData() {
