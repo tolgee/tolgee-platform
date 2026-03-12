@@ -2,7 +2,6 @@ package io.tolgee.model.qa
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import io.tolgee.model.Language
-import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.enums.qa.QaCheckSeverity
 import io.tolgee.model.enums.qa.QaCheckType
@@ -16,12 +15,10 @@ import org.hibernate.annotations.Type
 @Entity
 @Table(
   indexes = [
-    Index(columnList = "project_id, language_id", unique = true),
+    Index(columnList = "language_id", unique = true),
   ],
 )
 class LanguageQaConfig(
-  @ManyToOne
-  var project: Project,
   @ManyToOne
   var language: Language,
   @Type(JsonBinaryType::class)

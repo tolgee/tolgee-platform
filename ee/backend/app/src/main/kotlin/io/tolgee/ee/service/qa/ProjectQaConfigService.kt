@@ -1,7 +1,6 @@
 package io.tolgee.ee.service.qa
 
 import io.tolgee.model.Language
-import io.tolgee.model.Project
 import io.tolgee.model.enums.qa.QaCheckSeverity
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.qa.LanguageQaConfig
@@ -54,8 +53,7 @@ class ProjectQaConfigService(
     projectId: Long,
     languageId: Long,
   ): Map<QaCheckType, QaCheckSeverity>? {
-    val langConfig =
-      languageQaConfigRepository.findByProjectIdAndLanguageId(projectId, languageId)
+    val langConfig = languageQaConfigRepository.findByLanguageProjectIdAndLanguageId(projectId, languageId)
     return langConfig?.settings?.toMap()
   }
 
@@ -65,7 +63,7 @@ class ProjectQaConfigService(
   ): Map<QaCheckType, QaCheckSeverity> {
     val globalSettings = getSettings(projectId)
     val langConfig =
-      languageQaConfigRepository.findByProjectIdAndLanguageId(projectId, languageId)
+      languageQaConfigRepository.findByLanguageProjectIdAndLanguageId(projectId, languageId)
         ?: return globalSettings
     val languageSettings = langConfig.settings.toMutableMap()
     for (type in QaCheckType.entries) {
@@ -75,7 +73,7 @@ class ProjectQaConfigService(
   }
 
   fun getSettingsForAllLanguages(projectId: Long): List<LanguageQaConfig> {
-    return languageQaConfigRepository.findAllByProjectId(projectId)
+    return languageQaConfigRepository.findAllByLanguageProjectId(projectId)
   }
 
   @Transactional
@@ -106,9 +104,8 @@ class ProjectQaConfigService(
     settings: Map<QaCheckType, QaCheckSeverity?>,
   ) {
     val langConfig =
-      languageQaConfigRepository.findByProjectIdAndLanguageId(projectId, languageId)
+      languageQaConfigRepository.findByLanguageProjectIdAndLanguageId(projectId, languageId)
         ?: LanguageQaConfig(
-          project = entityManager.getReference(Project::class.java, projectId),
           language = entityManager.getReference(Language::class.java, languageId),
         )
 
@@ -136,7 +133,7 @@ class ProjectQaConfigService(
     projectId: Long,
     languageId: Long,
   ) {
-    val langConfig = languageQaConfigRepository.findByProjectIdAndLanguageId(projectId, languageId) ?: return
+    val langConfig = languageQaConfigRepository.findByLanguageProjectIdAndLanguageId(projectId, languageId) ?: return
     val changedTypes = langConfig.settings.keys
 
     languageQaConfigRepository.delete(langConfig)
