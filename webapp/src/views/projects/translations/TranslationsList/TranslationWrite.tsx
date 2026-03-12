@@ -126,7 +126,6 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     keyData.keyIsPlural
   );
 
-
   const missingPlaceholders = useMissingPlaceholders({
     baseTranslation,
     currentTranslation: value,
@@ -148,12 +147,8 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
   const handleSaveWithConfirmation = (props?: SaveProps) => {
     if (isOverCharLimit) {
       confirmation({
-        title: (
-          <T keyName="translation_char_limit_exceeded_title" />
-        ),
-        message: (
-          <T keyName="translation_char_limit_exceeded_confirmation" />
-        ),
+        title: <T keyName="translation_char_limit_exceeded_title" />,
+        message: <T keyName="translation_char_limit_exceeded_confirmation" />,
         confirmButtonText: <T keyName="translations_cell_save" />,
         onConfirm: () => handleSave(props),
       });
