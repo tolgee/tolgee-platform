@@ -142,6 +142,7 @@ export const assertMultiselect = (chainable: Chainable, values: string[]) => {
     getPopover()
       .get('li.MuiMenuItem-root')
       .each(($li) => {
+        if ($li.find('input').length === 0) return;
         const labelText = $li.find('.MuiListItemText-primary').text();
         const input = cy.wrap($li).find('input');
         if (values.includes(labelText)) {
