@@ -22,8 +22,8 @@ export const AdministrationInvoicesView = () => {
         windowTitle={t('administration_invoices', 'Invoices')}
         navigation={[
           [
-            t('administration_organizations'),
-            LINKS.ADMINISTRATION_ORGANIZATIONS.build(),
+            t('administration_invoices'),
+            LINKS.ADMINISTRATION_BILLING_INVOICES.build(),
           ],
         ]}
         allCentered
