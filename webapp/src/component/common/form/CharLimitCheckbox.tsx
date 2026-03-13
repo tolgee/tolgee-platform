@@ -24,7 +24,7 @@ export const CharLimitCheckbox = ({ fieldName }: Props) => {
             <Checkbox
               checked={hasCharLimit}
               onChange={(e) => {
-                setFieldValue(fieldName, e.target.checked ? '' : undefined);
+                setFieldValue(fieldName, e.target.checked ? 0 : undefined);
               }}
             />
           }
@@ -53,12 +53,12 @@ export const CharLimitCheckbox = ({ fieldName }: Props) => {
             data-cy="key-char-limit-input"
             type="number"
             size="small"
-            value={values[fieldName] ?? ''}
+            value={values[fieldName] || ''}
             onChange={(e) => {
               const val = e.target.value;
               setFieldValue(
                 fieldName,
-                val === '' ? '' : Math.max(1, parseInt(val, 10))
+                val === '' ? 0 : Math.max(1, parseInt(val, 10))
               );
             }}
             inputProps={{ min: 1 }}

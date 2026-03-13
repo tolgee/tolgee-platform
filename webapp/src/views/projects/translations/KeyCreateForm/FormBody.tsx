@@ -88,6 +88,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
   const maxCharLimit = form.values.maxCharLimit;
   const isBaseOverCharLimit =
     maxCharLimit != null &&
+    maxCharLimit > 0 &&
     Object.values(form.values.baseValue.variants ?? {}).some(
       (v) => getVisibleCharCount({ text: v, nested: isPlural }) > maxCharLimit
     );
