@@ -20,6 +20,10 @@ data class SingleStepImportResolvableRequest(
         "Unresolved conflicts are reported in the `params` of the error response",
   )
   val errorOnUnresolvedConflict: Boolean? = null,
+  @field:Schema(
+    description = "Branch to import keys into. If not specified, default branch is used.",
+  )
+  val branch: String? = null,
   @get:Schema(
     description = "List of keys to import",
   )

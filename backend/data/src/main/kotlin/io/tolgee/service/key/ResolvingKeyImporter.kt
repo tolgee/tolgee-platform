@@ -15,6 +15,8 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Project_
 import io.tolgee.model.Screenshot
+import io.tolgee.model.branching.Branch
+import io.tolgee.model.branching.Branch_
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
@@ -37,6 +39,7 @@ class ResolvingKeyImporter(
   val applicationContext: ApplicationContext,
   val keysToImport: List<ImportKeysResolvableItemDto>,
   val projectEntity: Project,
+  val branch: String? = null,
 ) {
   private val entityManager = applicationContext.getBean(EntityManager::class.java)
   private val keyService = applicationContext.getBean(KeyService::class.java)
@@ -317,7 +320,7 @@ class ResolvingKeyImporter(
           project = projectEntity,
           name = keyToImport.name,
           namespace = keyToImport.namespace,
-          branch = keyToImport.branch,
+          branch = branch ?: keyToImport.branch,
           isPlural = false,
         )
       }
@@ -335,6 +338,22 @@ class ResolvingKeyImporter(
     @Suppress("UNCHECKED_CAST")
     val namespaceJoin: Join<Key, Namespace> = root.fetch(Key_.namespace, JoinType.LEFT) as Join<Key, Namespace>
 
+    @Suppress("UNCHECKED_CAST")
+    val branchJoin: Join<Key, Branch> = root.fetch(Key_.branch, JoinType.LEFT) as Join<Key, Branch>
+
+    val branchPredicate =
+      if (branch.isNullOrEmpty()) {
+        cb.or(
+          branchJoin.get(Branch_.id).isNull,
+          cb.isTrue(branchJoin.get(Branch_.isDefault)),
+        )
+      } else {
+        cb.and(
+          cb.equal(branchJoin.get(Branch_.name), cb.literal(branch)),
+          cb.isNull(branchJoin.get(Branch_.deletedAt)),
+        )
+      }
+
     val predicates =
       keys
         .map { (namespace, name) ->
@@ -347,7 +366,12 @@ class ResolvingKeyImporter(
     val projectIdPath = root.get(Key_.project).get(Project_.id)
 
     query.where(
-      cb.and(cb.equal(projectIdPath, projectId), cb.isNull(root.get(Key_.deletedAt)), cb.or(*predicates)),
+      cb.and(
+        cb.equal(projectIdPath, projectId),
+        cb.isNull(root.get(Key_.deletedAt)),
+        branchPredicate,
+        cb.or(*predicates),
+      ),
     )
 
     return this.entityManager.createQuery(query).resultList

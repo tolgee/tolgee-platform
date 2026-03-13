@@ -539,12 +539,14 @@ class KeyService(
   fun importKeysResolvable(
     keys: List<ImportKeysResolvableItemDto>,
     projectEntity: Project,
+    branch: String? = null,
   ): KeyImportResolvableResult {
     val importer =
       ResolvingKeyImporter(
         applicationContext = applicationContext,
         keysToImport = keys,
         projectEntity = projectEntity,
+        branch = branch,
       )
     return importer()
   }
