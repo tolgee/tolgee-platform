@@ -1,15 +1,6 @@
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  styled,
-  TextField,
-  Tooltip,
-  useTheme,
-} from '@mui/material';
+import { Box, styled, useTheme } from '@mui/material';
 import { useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
-import { HelpCircle } from '@untitled-ui/icons-react';
 
 import { Editor } from 'tg.component/editor/Editor';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
@@ -21,6 +12,7 @@ import { Tag } from '../Tags/Tag';
 import { RequiredField } from 'tg.component/common/form/RequiredField';
 import { LabelHint } from 'tg.component/common/LabelHint';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
+import { CharLimitCheckbox } from 'tg.component/common/form/CharLimitCheckbox';
 import { useProject } from 'tg.hooks/useProject';
 import clsx from 'clsx';
 
@@ -59,7 +51,6 @@ export const KeyGeneral = () => {
   const { values, setFieldValue, submitForm, errors } =
     useFormikContext<KeyFormType>();
   const theme = useTheme();
-  const hasCharLimit = values.maxCharLimit !== undefined;
 
   return (
     <>
@@ -170,61 +161,7 @@ export const KeyGeneral = () => {
           isPluralName="isPlural"
         />
 
-        <Box display="grid">
-          <Box justifyContent="start" display="flex" alignItems="center">
-            <FormControlLabel
-              data-cy="key-char-limit-checkbox"
-              control={
-                <Checkbox
-                  checked={hasCharLimit}
-                  onChange={(e) => {
-                    setFieldValue(
-                      'maxCharLimit',
-                      e.target.checked ? '' : undefined
-                    );
-                  }}
-                />
-              }
-              label={
-                <Box display="inline-flex" alignItems="center" gap="4px">
-                  {t('translation_single_label_max_char_limit')}
-                  <Tooltip
-                    title={t('translation_single_max_char_limit_hint')}
-                    disableInteractive
-                  >
-                    <Box component="span" display="inline-flex">
-                      <HelpCircle style={{ width: 15, height: 15 }} />
-                    </Box>
-                  </Tooltip>
-                </Box>
-              }
-              sx={{ mr: 0.5 }}
-            />
-          </Box>
-          {hasCharLimit && (
-            <Box display="grid">
-              <FieldLabel>
-                {t('translation_single_label_char_limit_maximum')}
-              </FieldLabel>
-              <TextField
-                data-cy="key-edit-char-limit-input"
-                type="number"
-                size="small"
-                value={values.maxCharLimit ?? ''}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setFieldValue(
-                    'maxCharLimit',
-                    val === '' ? '' : Math.max(1, parseInt(val, 10))
-                  );
-                }}
-                inputProps={{ min: 1 }}
-                sx={{ maxWidth: 300 }}
-              />
-              <FieldError error={errors.maxCharLimit} />
-            </Box>
-          )}
-        </Box>
+        <CharLimitCheckbox fieldName="maxCharLimit" />
       </Box>
     </>
   );

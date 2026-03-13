@@ -5,19 +5,10 @@ import {
   FieldProps,
   useFormikContext,
 } from 'formik';
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  styled,
-  TextField,
-  Tooltip,
-} from '@mui/material';
+import { Box, Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useState } from 'react';
 import clsx from 'clsx';
-import { HelpCircle } from '@untitled-ui/icons-react';
 
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
 import { EditorWrapper } from 'tg.component/editor/EditorWrapper';
@@ -35,6 +26,7 @@ import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon'
 import { PluralEditor } from '../translationVisual/PluralEditor';
 import type { ValuesCreateType } from './KeyCreateForm';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
+import { CharLimitCheckbox } from 'tg.component/common/form/CharLimitCheckbox';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
 import { getVisibleCharCount } from '../cell/getVisibleCharCount';
 
@@ -97,7 +89,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
   const isBaseOverCharLimit =
     maxCharLimit != null &&
     Object.values(form.values.baseValue.variants ?? {}).some(
-      (v) => getVisibleCharCount(v, isPlural) > maxCharLimit
+      (v) => getVisibleCharCount({ text: v, nested: isPlural }) > maxCharLimit
     );
 
   const handleEnterSubmit = () => {
@@ -253,75 +245,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
             pluralParameterName="pluralParameter"
           />
 
-          <Field name="maxCharLimit">
-            {({ field, form }: FieldProps<any>) => {
-              const hasLimit = field.value !== undefined;
-              return (
-                <Box display="grid">
-                  <Box
-                    justifyContent="start"
-                    display="flex"
-                    alignItems="center"
-                  >
-                    <FormControlLabel
-                      data-cy="key-char-limit-checkbox"
-                      control={
-                        <Checkbox
-                          checked={hasLimit}
-                          onChange={(e) => {
-                            form.setFieldValue(
-                              field.name,
-                              e.target.checked ? '' : undefined
-                            );
-                          }}
-                        />
-                      }
-                      label={
-                        <Box
-                          display="inline-flex"
-                          alignItems="center"
-                          gap="4px"
-                        >
-                          {t('translation_single_label_max_char_limit')}
-                          <Tooltip
-                            title={t('translation_single_max_char_limit_hint')}
-                            disableInteractive
-                          >
-                            <Box component="span" display="inline-flex">
-                              <HelpCircle style={{ width: 15, height: 15 }} />
-                            </Box>
-                          </Tooltip>
-                        </Box>
-                      }
-                      sx={{ mr: 0.5 }}
-                    />
-                  </Box>
-                  {hasLimit && (
-                    <Box display="grid">
-                      <FieldLabel>
-                        <T keyName="translation_single_label_char_limit_maximum" />
-                      </FieldLabel>
-                      <TextField
-                        data-cy="translation-create-char-limit-input"
-                        type="number"
-                        size="small"
-                        value={field.value ?? ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          form.setFieldValue(
-                            field.name,
-                            val === '' ? '' : Math.max(1, parseInt(val, 10))
-                          );
-                        }}
-                        inputProps={{ min: 1 }}
-                        sx={{ maxWidth: 300 }}
-                      />
-                    </Box>
-                  )}
-                </Box>
-              );
-            }}
-          </Field>
+          <CharLimitCheckbox fieldName="maxCharLimit" />
         </Box>
 
         <Field key={baseLang.tag} name="baseValue">
