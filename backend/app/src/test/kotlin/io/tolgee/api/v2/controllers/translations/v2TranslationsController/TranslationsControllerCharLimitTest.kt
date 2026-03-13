@@ -2,8 +2,10 @@ package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
+import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
@@ -127,6 +129,62 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
         mutableMapOf("en" to "{count, plural, one {# item is here} other {# items are here}}"),
       ),
     ).andIsOk
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creating key with translation exceeding char limit is rejected`() {
+    saveTestData()
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "new_key_with_limit",
+        translations = mapOf("en" to "This text is way too long"),
+        maxCharLimit = 5,
+      ),
+    ).andIsBadRequest
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creating key with translation within char limit succeeds`() {
+    saveTestData()
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "new_key_with_limit",
+        translations = mapOf("en" to "Hello"),
+        maxCharLimit = 10,
+      ),
+    ).andIsCreated
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creating key excludes html tags from char count`() {
+    saveTestData()
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "html_key",
+        translations = mapOf("en" to "<b>Hello</b>"),
+        maxCharLimit = 5,
+      ),
+    ).andIsCreated
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creating key excludes variables from char count`() {
+    saveTestData()
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "var_key",
+        translations = mapOf("en" to "Hello {name}"),
+        maxCharLimit = 6,
+      ),
+    ).andIsCreated
   }
 
   private fun saveTestData() {

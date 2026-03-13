@@ -14,6 +14,7 @@ import io.tolgee.dtos.request.translation.ImportKeysItemDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableItemDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.service.translation.validateCharLimit
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -159,6 +160,10 @@ class KeyService(
       key.pluralArgName = dto.pluralArgName
     }
     key.maxCharLimit = dto.maxCharLimit
+
+    if (!dto.translations.isNullOrEmpty()) {
+      validateCharLimit(key, dto.translations!!)
+    }
 
     val created = createTranslationsOnKeyCreate(dto, key)
 
