@@ -83,6 +83,9 @@ declare namespace DataCy {
         "administration-plan-field-stripe-product" |
         "administration-plan-field-stripe-product-name" |
         "administration-plan-selector" |
+        "administration-plans-create-migration" |
+        "administration-plans-edit-migration" |
+        "administration-plans-item-is-migrating-badge" |
         "administration-subscriptions-active-self-hosted-ee-plan" |
         "administration-subscriptions-assign-plan-save-button" |
         "administration-subscriptions-cloud-plan-name" |
@@ -201,6 +204,7 @@ declare namespace DataCy {
         "billing-plan-included-keys" |
         "billing-plan-included-seats" |
         "billing-plan-included-strings" |
+        "billing-plan-migration-alert" |
         "billing-plan-monthly-price" |
         "billing-plan-price-extra-seat" |
         "billing-plan-price-extra-thousand-keys" |
@@ -274,6 +278,7 @@ declare namespace DataCy {
         "create-task-submit" |
         "dashboard-projects-list-item" |
         "default-namespace-select" |
+        "delete-plan-migration-button" |
         "delete-user-button" |
         "developer-menu-content-delivery" |
         "developer-menu-storage" |
@@ -377,6 +382,8 @@ declare namespace DataCy {
         "glossary-view-button" |
         "glossary-view-language-select" |
         "handlebars-editor" |
+        "html-template-editor" |
+        "html-template-editor-placeholder" |
         "import-conflict-resolution-dialog" |
         "import-conflicts-not-resolved-dialog" |
         "import-conflicts-not-resolved-dialog-cancel-button" |
@@ -609,6 +616,13 @@ declare namespace DataCy {
         "permissions-menu-save" |
         "plan-limit-dialog-close" |
         "plan-limit-exceeded-popover" |
+        "plan-migration-email-section" |
+        "plan-migration-subscription-skip" |
+        "plan-migration-tab-migrated" |
+        "plan-migration-tab-upcoming" |
+        "plan-migration-tooltip-detail" |
+        "plan-migration-upcoming-list" |
+        "plan-migration-upcoming-list-item" |
         "plan_seat_limit_exceeded_while_accepting_invitation_message" |
         "project-ai-prompt-dialog-description-input" |
         "project-ai-prompt-dialog-save" |
@@ -737,6 +751,7 @@ declare namespace DataCy {
         "seat_spending_limit_exceeded_while_accepting_invitation_message" |
         "self-hosted-ee-active-plan" |
         "self-hosted-ee-subscription-metrics" |
+        "send-preview-email" |
         "sensitive-dialog-otp-input" |
         "sensitive-dialog-password-input" |
         "sensitive-protection-dialog" |
@@ -745,6 +760,7 @@ declare namespace DataCy {
         "signup-error-free-seat-limit" |
         "signup-error-plan-seat-limit" |
         "signup-error-seats-spending-limit" |
+        "source-plan-selector" |
         "spending-limit-dialog-close" |
         "spending-limit-exceeded-popover" |
         "sso-migration-info-text" |
@@ -769,6 +785,8 @@ declare namespace DataCy {
         "storage-subtitle" |
         "submenu-item" |
         "subscribe-cancels-trial-plan-tooltip" |
+        "subscription-period-" |
+        "subscription-status-" |
         "subscriptions-cloud-popover-active-plan-name" |
         "subscriptions-trial-alert" |
         "subscriptions-trial-alert-reaching-the-limit" |
@@ -779,6 +797,7 @@ declare namespace DataCy {
         "switch-popover-search" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
+        "target-plan-selector" |
         "task-date-picker" |
         "task-detail" |
         "task-detail-author" |

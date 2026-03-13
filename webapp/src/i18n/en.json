@@ -1716,6 +1716,7 @@
   "plan_limit_dialog_go_to_billing": "Upgrade plan",
   "plan_limit_dialog_title": "Limit exceeded",
   "plan_migration_not_found": "Plan migration not found",
+  "source_and_target_plan_must_be_different": "Source and target plan must be different",
   "plan_seat_limit_exceeded": "This Tolgee instance has exceeded the seat limit. Please contact the system administrator from the managing company.",
   "plan_seat_limit_exceeded_while_accepting_invitation_message": "We cannot accept your invitation because the inviting organization has reached its seat limit. Please contact them to free up or purchase additional seats before you can join.",
   "plan_translation_limit_exceeded": "Plan translation limit exceeded",
