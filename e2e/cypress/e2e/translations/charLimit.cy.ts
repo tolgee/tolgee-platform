@@ -1,28 +1,34 @@
 import 'cypress-file-upload';
-import { ProjectDTO } from '../../../../webapp/src/service/response.types';
-import {
-  editCell,
-  translationsBeforeEach,
-  visitTranslations,
-} from '../../common/translations';
-import { createKey, deleteProject } from '../../common/apiCalls/common';
+import { login } from '../../common/apiCalls/common';
+import { charLimitTestData } from '../../common/apiCalls/testData/testData';
+import { editCell, visitTranslations } from '../../common/translations';
+import { selectLangsInLocalstorage } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
 import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 import { visitImport, getFileIssuesDialog } from '../../common/import';
 import { gcy, gcyAdvanced } from '../../common/shared';
 
 describe('Translation character limit', () => {
-  let project: ProjectDTO;
+  let projectId: number;
 
   beforeEach(() => {
-    translationsBeforeEach().then((p) => (project = p));
+    charLimitTestData.clean({ failOnStatusCode: false });
+    charLimitTestData
+      .generateStandard()
+      .then((r) => r.body)
+      .then((data) => {
+        login(data.users[0].username);
+        projectId = data.projects[0].id;
+        selectLangsInLocalstorage(projectId, ['en']);
+      });
   });
 
   afterEach(() => {
-    deleteProject(project.id);
+    charLimitTestData.clean();
   });
 
   it('Save button disabled when base translation exceeds char limit', () => {
+    visitTranslations(projectId);
     waitForGlobalLoading();
     const translationsView = new E2TranslationsView();
     const dialog = translationsView.openKeyCreateDialog();
@@ -33,6 +39,7 @@ describe('Translation character limit', () => {
   });
 
   it('Save button enabled and key created when within limit', () => {
+    visitTranslations(projectId);
     waitForGlobalLoading();
     const translationsView = new E2TranslationsView();
     const dialog = translationsView.openKeyCreateDialog();
@@ -45,6 +52,7 @@ describe('Translation character limit', () => {
   });
 
   it('HTML tags are not counted toward char limit', () => {
+    visitTranslations(projectId);
     waitForGlobalLoading();
     const translationsView = new E2TranslationsView();
     const dialog = translationsView.openKeyCreateDialog();
@@ -62,6 +70,7 @@ describe('Translation character limit', () => {
   });
 
   it('Variables are not counted toward char limit', () => {
+    visitTranslations(projectId);
     waitForGlobalLoading();
     const translationsView = new E2TranslationsView();
     const dialog = translationsView.openKeyCreateDialog();
@@ -79,6 +88,7 @@ describe('Translation character limit', () => {
   });
 
   it('Plural # is not counted toward char limit', () => {
+    visitTranslations(projectId);
     waitForGlobalLoading();
     const translationsView = new E2TranslationsView();
     const dialog = translationsView.openKeyCreateDialog();
@@ -93,8 +103,7 @@ describe('Translation character limit', () => {
   });
 
   it('Translation editing - shows confirmation when exceeding char limit', () => {
-    createKey(project.id, 'limited-key', { en: 'Hi' }, { maxCharLimit: 5 });
-    visitTranslations(project.id);
+    visitTranslations(projectId);
     waitForGlobalLoading();
     editCell('Hi', undefined, false);
     cy.gcy('global-editor')
@@ -109,8 +118,7 @@ describe('Translation character limit', () => {
   });
 
   it('Import shows warning when translation exceeds char limit', () => {
-    createKey(project.id, 'char-limit-key', { en: 'OK' }, { maxCharLimit: 5 });
-    visitImport(project.id);
+    visitImport(projectId);
     waitForGlobalLoading();
     cy.gcy('import-file-input').attachFile('import/charLimit.json');
     gcy('import-result-file-cell', { timeout: 30000 }).should('be.visible');
