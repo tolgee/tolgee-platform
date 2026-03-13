@@ -84,7 +84,7 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `html tags are not counted toward char limit on edit`() {
+  fun `editing translation with html tags exceeding limit is allowed`() {
     testData.aKey.maxCharLimit = 5
     saveTestData()
     // Editing is always allowed regardless of char limit
@@ -100,7 +100,7 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `variables are not counted toward char limit on edit`() {
+  fun `editing translation with variables exceeding limit is allowed`() {
     testData.aKey.maxCharLimit = 6
     saveTestData()
     // Editing is always allowed regardless of char limit
@@ -116,7 +116,7 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `plural hash is not counted toward char limit on edit`() {
+  fun `editing plural translation exceeding limit is allowed`() {
     val pluralKey = testData.addPluralKey()
     pluralKey.maxCharLimit = 6
     saveTestData()
@@ -182,6 +182,38 @@ class TranslationsControllerCharLimitTest : ProjectAuthControllerTest("/v2/proje
       CreateKeyDto(
         name = "var_key",
         translations = mapOf("en" to "Hello {name}"),
+        maxCharLimit = 6,
+      ),
+    ).andIsCreated
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creating plural key excludes hash from char count`() {
+    saveTestData()
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "plural_key",
+        translations = mapOf("en" to "{count, plural, one {# item} other {# items}}"),
+        isPlural = true,
+        maxCharLimit = 6,
+      ),
+    ).andIsCreated
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creating plural key excludes hash in other form from char count`() {
+    saveTestData()
+    // "# items" in other form: " items" = 6 visible chars (# excluded)
+    // Would be 7 chars if # was counted in "other", exceeding the limit
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = "plural_other_key",
+        translations = mapOf("en" to "{count, plural, one {item} other {# items}}"),
+        isPlural = true,
         maxCharLimit = 6,
       ),
     ).andIsCreated

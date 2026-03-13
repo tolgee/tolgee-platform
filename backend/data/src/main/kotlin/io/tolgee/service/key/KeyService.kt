@@ -14,7 +14,6 @@ import io.tolgee.dtos.request.translation.ImportKeysItemDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableItemDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.service.translation.validateCharLimit
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -34,6 +33,7 @@ import io.tolgee.service.key.utils.KeyInfoProvider
 import io.tolgee.service.key.utils.KeysImporter
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translation.validateCharLimit
 import io.tolgee.util.Logging
 import io.tolgee.util.setSimilarityLimit
 import jakarta.persistence.EntityManager

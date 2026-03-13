@@ -57,12 +57,14 @@ class CharLimitUtilTest {
   }
 
   @Test
-  fun `plural hash is not counted toward char limit`() {
-    val key = createKey("test-key", maxCharLimit = 15, isPlural = true)
+  fun `plural hash in other form is not counted toward char limit`() {
+    // "# items" in other form: " items" = 6 visible chars (# excluded)
+    // Would be 7 chars if # was counted, exceeding the limit
+    val key = createKey("test-key", maxCharLimit = 6, isPlural = true)
     assertDoesNotThrow {
       validateCharLimit(
         key,
-        mapOf("en" to "{count, plural, one {# item is here} other {# items are here}}"),
+        mapOf("en" to "{count, plural, one {# item} other {# items}}"),
       )
     }
   }
