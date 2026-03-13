@@ -144,6 +144,7 @@ class PromptTestData : BaseTestData() {
           ClassPathResource("development/testScreenshot.png", this::class.java.getClassLoader())
         addScreenshot(screenshotResource) {}
         setDescription("Key 1 description.")
+        self.maxCharLimit = 42
       }
       addKeysDistance(keys[0].self, keys[1].self) {
         distance = 2.0
