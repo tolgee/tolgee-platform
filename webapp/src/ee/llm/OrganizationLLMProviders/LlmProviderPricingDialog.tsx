@@ -37,7 +37,9 @@ export const LlmProviderPricingDialog = ({
   const outputPrice = provider.tokenPriceInCreditsOutput;
   const hasPricing = inputPrice != null && outputPrice != null;
   const pricePerMtCredit =
-    perThousandMtCredits != null ? perThousandMtCredits / 1000 : null;
+    perThousandMtCredits != null && perThousandMtCredits > 0
+      ? perThousandMtCredits / 1000
+      : null;
 
   function formatCredits(value: number): string {
     return formatNumber(value, {
@@ -50,7 +52,7 @@ export const LlmProviderPricingDialog = ({
     if (pricePerMtCredit == null) return null;
     return formatMoney(credits * pricePerMtCredit, {
       currency: 'EUR',
-      maximumFractionDigits: 4,
+      maximumFractionDigits: 2,
       minimumFractionDigits: 2,
     });
   }
