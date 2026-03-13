@@ -126,15 +126,27 @@ export const QaBadgePopover = ({
         .sort(([, a], [, b]) => b - a)
     : [];
 
+  const getLanguages = () => {
+    return languageTag === baseLanguage
+      ? [languageTag]
+      : ([baseLanguage, languageTag].filter(Boolean) as string[]);
+  };
+
   const navigateToTranslations = () => {
-    const langs =
-      languageTag === baseLanguage
-        ? [languageTag]
-        : [baseLanguage, languageTag].filter(Boolean);
     history.push(
       getProjectTranslationsUrl(project.id, {
-        languages: langs as string[],
+        languages: getLanguages(),
         filters: { filterHasQaIssues: true },
+      })
+    );
+    onClose();
+  };
+
+  const navigateToCheckType = (checkType: string) => {
+    history.push(
+      getProjectTranslationsUrl(project.id, {
+        languages: getLanguages(),
+        filters: { filterQaCheckTypes: [checkType] },
       })
     );
     onClose();
@@ -173,7 +185,7 @@ export const QaBadgePopover = ({
                 key={checkType}
                 checkType={checkType}
                 count={count}
-                onClick={navigateToTranslations}
+                onClick={() => navigateToCheckType(checkType)}
               />
             ))}
             {entries.length === 0 && (

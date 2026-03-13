@@ -824,6 +824,9 @@ export interface paths {
     put: operations["updatePrompt"];
     delete: operations["deletePrompt"];
   };
+  "/v2/projects/{projectId}/qa-check-types": {
+    get: operations["getCheckTypes"];
+  };
   "/v2/projects/{projectId}/qa-settings": {
     get: operations["getSettings"];
     put: operations["updateSettings"];
@@ -5501,6 +5504,27 @@ export interface components {
        * @description Currently used credits including credits used over the limit
        */
       usedMtCredits: number;
+    };
+    QaCheckCategoryModel: {
+      /** @enum {string} */
+      category: "COMPARISON" | "SYNTAX";
+      checkTypes: (
+        | "EMPTY_TRANSLATION"
+        | "SPACES_MISMATCH"
+        | "UNMATCHED_NEWLINES"
+        | "CHARACTER_CASE_MISMATCH"
+        | "MISSING_NUMBERS"
+        | "PUNCTUATION_MISMATCH"
+        | "BRACKETS_MISMATCH"
+        | "SPECIAL_CHARACTER_MISMATCH"
+        | "DIFFERENT_URLS"
+        | "INCONSISTENT_PLACEHOLDERS"
+        | "INCONSISTENT_HTML"
+        | "ICU_SYNTAX"
+        | "REPEATED_WORDS"
+        | "SPELLING"
+        | "UNRESOLVED_COMMENTS"
+      )[];
     };
     QaCheckIssueIgnoreRequest: {
       /** @enum {string} */
@@ -15735,6 +15759,24 @@ export interface operations {
         filterLabel?: string[];
         /** Filter keys with open QA issues in lang */
         filterHasQaIssuesInLang?: string[];
+        /** Filter keys with specific QA check type issues (OR logic). Applied to all returned languages. */
+        filterQaCheckType?: (
+          | "EMPTY_TRANSLATION"
+          | "SPACES_MISMATCH"
+          | "UNMATCHED_NEWLINES"
+          | "CHARACTER_CASE_MISMATCH"
+          | "MISSING_NUMBERS"
+          | "PUNCTUATION_MISMATCH"
+          | "BRACKETS_MISMATCH"
+          | "SPECIAL_CHARACTER_MISMATCH"
+          | "DIFFERENT_URLS"
+          | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "ICU_SYNTAX"
+          | "REPEATED_WORDS"
+          | "SPELLING"
+          | "UNRESOLVED_COMMENTS"
+        )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -15862,6 +15904,24 @@ export interface operations {
         filterLabel?: string[];
         /** Filter keys with open QA issues in lang */
         filterHasQaIssuesInLang?: string[];
+        /** Filter keys with specific QA check type issues (OR logic). Applied to all returned languages. */
+        filterQaCheckType?: (
+          | "EMPTY_TRANSLATION"
+          | "SPACES_MISMATCH"
+          | "UNMATCHED_NEWLINES"
+          | "CHARACTER_CASE_MISMATCH"
+          | "MISSING_NUMBERS"
+          | "PUNCTUATION_MISMATCH"
+          | "BRACKETS_MISMATCH"
+          | "SPECIAL_CHARACTER_MISMATCH"
+          | "DIFFERENT_URLS"
+          | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "ICU_SYNTAX"
+          | "REPEATED_WORDS"
+          | "SPELLING"
+          | "UNRESOLVED_COMMENTS"
+        )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -16025,6 +16085,24 @@ export interface operations {
         filterLabel?: string[];
         /** Filter keys with open QA issues in lang */
         filterHasQaIssuesInLang?: string[];
+        /** Filter keys with specific QA check type issues (OR logic). Applied to all returned languages. */
+        filterQaCheckType?: (
+          | "EMPTY_TRANSLATION"
+          | "SPACES_MISMATCH"
+          | "UNMATCHED_NEWLINES"
+          | "CHARACTER_CASE_MISMATCH"
+          | "MISSING_NUMBERS"
+          | "PUNCTUATION_MISMATCH"
+          | "BRACKETS_MISMATCH"
+          | "SPECIAL_CHARACTER_MISMATCH"
+          | "DIFFERENT_URLS"
+          | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "ICU_SYNTAX"
+          | "REPEATED_WORDS"
+          | "SPELLING"
+          | "UNRESOLVED_COMMENTS"
+        )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -18296,6 +18374,45 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getCheckTypes: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["QaCheckCategoryModel"][];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
@@ -20616,6 +20733,24 @@ export interface operations {
         filterLabel?: string[];
         /** Filter keys with open QA issues in lang */
         filterHasQaIssuesInLang?: string[];
+        /** Filter keys with specific QA check type issues (OR logic). Applied to all returned languages. */
+        filterQaCheckType?: (
+          | "EMPTY_TRANSLATION"
+          | "SPACES_MISMATCH"
+          | "UNMATCHED_NEWLINES"
+          | "CHARACTER_CASE_MISMATCH"
+          | "MISSING_NUMBERS"
+          | "PUNCTUATION_MISMATCH"
+          | "BRACKETS_MISMATCH"
+          | "SPECIAL_CHARACTER_MISMATCH"
+          | "DIFFERENT_URLS"
+          | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "ICU_SYNTAX"
+          | "REPEATED_WORDS"
+          | "SPELLING"
+          | "UNRESOLVED_COMMENTS"
+        )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -20923,6 +21058,24 @@ export interface operations {
         filterLabel?: string[];
         /** Filter keys with open QA issues in lang */
         filterHasQaIssuesInLang?: string[];
+        /** Filter keys with specific QA check type issues (OR logic). Applied to all returned languages. */
+        filterQaCheckType?: (
+          | "EMPTY_TRANSLATION"
+          | "SPACES_MISMATCH"
+          | "UNMATCHED_NEWLINES"
+          | "CHARACTER_CASE_MISMATCH"
+          | "MISSING_NUMBERS"
+          | "PUNCTUATION_MISMATCH"
+          | "BRACKETS_MISMATCH"
+          | "SPECIAL_CHARACTER_MISMATCH"
+          | "DIFFERENT_URLS"
+          | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "ICU_SYNTAX"
+          | "REPEATED_WORDS"
+          | "SPELLING"
+          | "UNRESOLVED_COMMENTS"
+        )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */

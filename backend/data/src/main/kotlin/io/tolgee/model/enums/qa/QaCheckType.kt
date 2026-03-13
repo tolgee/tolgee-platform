@@ -18,4 +18,32 @@ enum class QaCheckType(
   REPEATED_WORDS(QaCheckSeverity.WARNING),
   SPELLING(QaCheckSeverity.WARNING),
   UNRESOLVED_COMMENTS(QaCheckSeverity.WARNING),
+  ;
+
+  companion object {
+    val CATEGORIES: Map<QaCheckCategory, List<QaCheckType>> =
+      linkedMapOf(
+        QaCheckCategory.COMPARISON to
+          listOf(
+            EMPTY_TRANSLATION,
+            SPACES_MISMATCH,
+            UNMATCHED_NEWLINES,
+            CHARACTER_CASE_MISMATCH,
+            MISSING_NUMBERS,
+            SPELLING,
+            REPEATED_WORDS,
+            PUNCTUATION_MISMATCH,
+            BRACKETS_MISMATCH,
+            SPECIAL_CHARACTER_MISMATCH,
+            DIFFERENT_URLS,
+          ),
+        QaCheckCategory.SYNTAX to
+          listOf(
+            INCONSISTENT_PLACEHOLDERS,
+            INCONSISTENT_HTML,
+            ICU_SYNTAX,
+            UNRESOLVED_COMMENTS,
+          ),
+      )
+  }
 }

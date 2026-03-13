@@ -95,6 +95,13 @@ export const useTranslationFilters = ({
         return setFilters({
           ...filters,
           filterHasQaIssues: true,
+          filterQaCheckTypes: undefined,
+        });
+      case 'filterQaCheckTypes':
+        return setFilters({
+          ...filters,
+          filterQaCheckTypes: add(filters.filterQaCheckTypes, value),
+          filterHasQaIssues: undefined,
         });
       case 'filterLabel':
         return setFilters({
@@ -175,6 +182,12 @@ export const useTranslationFilters = ({
         return setFilters({
           ...filters,
           filterHasQaIssues: undefined,
+          filterQaCheckTypes: undefined,
+        });
+      case 'filterQaCheckTypes':
+        return setFilters({
+          ...filters,
+          filterQaCheckTypes: remove(filters.filterQaCheckTypes, value),
         });
       case 'filterLabel':
         return setFilters({
@@ -209,6 +222,7 @@ export const useTranslationFilters = ({
     filterHasScreenshot: filters.filterHasScreenshot,
     filterHasNoScreenshot: filters.filterHasNoScreenshot,
     filterDeletedByUserId: filters.filterDeletedByUserId,
+    filterQaCheckType: filters.filterQaCheckTypes,
   };
 
   // filters dependant on selected languages
