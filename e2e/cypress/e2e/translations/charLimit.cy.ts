@@ -35,7 +35,7 @@ describe('Translation character limit', () => {
     dialog.getKeyNameInput().type('test-key');
     dialog.setCharLimit(5);
     dialog.getTranslationInput().type('Hello World');
-    cy.gcy('global-form-save-button').should('be.disabled');
+    dialog.getSaveButton().should('be.disabled');
   });
 
   it('Save button enabled and key created when within limit', () => {
@@ -46,7 +46,7 @@ describe('Translation character limit', () => {
     dialog.getKeyNameInput().type('test-key');
     dialog.setCharLimit(20);
     dialog.getTranslationInput().type('Hello');
-    cy.gcy('global-form-save-button').should('not.be.disabled');
+    dialog.getSaveButton().should('not.be.disabled');
     dialog.save();
     cy.contains('Key created').should('be.visible');
   });
@@ -59,14 +59,10 @@ describe('Translation character limit', () => {
     dialog.getKeyNameInput().type('test-key');
     dialog.setCharLimit(5);
     // Switch to syntax mode to type raw HTML
-    cy.gcy('translations-cell-switch-mode').click();
-    cy.gcy('translation-editor')
-      .first()
-      .find('[contenteditable]')
-      .clear()
-      .type('<b>Hello</b>');
+    dialog.switchToSyntaxMode();
+    dialog.getTranslationContentEditable().clear().type('<b>Hello</b>');
     // 5 visible chars (Hello), tags excluded
-    cy.gcy('global-form-save-button').should('not.be.disabled');
+    dialog.getSaveButton().should('not.be.disabled');
   });
 
   it('Variables are not counted toward char limit', () => {
@@ -77,14 +73,13 @@ describe('Translation character limit', () => {
     dialog.getKeyNameInput().type('test-key');
     dialog.setCharLimit(6);
     // Switch to syntax mode to type raw ICU
-    cy.gcy('translations-cell-switch-mode').click();
-    cy.gcy('translation-editor')
-      .first()
-      .find('[contenteditable]')
+    dialog.switchToSyntaxMode();
+    dialog
+      .getTranslationContentEditable()
       .clear()
       .type('Hello {name}', { parseSpecialCharSequences: false });
     // 6 visible chars (Hello + space), variable {name} excluded
-    cy.gcy('global-form-save-button').should('not.be.disabled');
+    dialog.getSaveButton().should('not.be.disabled');
   });
 
   it('Plural # is not counted toward char limit', () => {
@@ -99,7 +94,7 @@ describe('Translation character limit', () => {
       .find('[contenteditable]')
       .type('# items');
     // "# items" = 6 visible chars, # is not counted -> " items" = 6 chars
-    cy.gcy('global-form-save-button').should('not.be.disabled');
+    dialog.getSaveButton().should('not.be.disabled');
   });
 
   it('Translation editing - shows confirmation when exceeding char limit', () => {

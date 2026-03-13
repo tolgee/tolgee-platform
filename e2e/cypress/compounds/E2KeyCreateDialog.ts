@@ -37,8 +37,12 @@ export class E2KeyCreateDialog {
       .type(limit.toString());
   }
 
+  getSaveButton() {
+    return cy.gcy('global-form-save-button');
+  }
+
   save() {
-    cy.gcy('global-form-save-button').click();
+    this.getSaveButton().click();
   }
 
   fillAndSave(props: KeyDialogFillProps) {
@@ -64,6 +68,14 @@ export class E2KeyCreateDialog {
 
   getTranslationInput() {
     return cy.gcy('translation-editor').first();
+  }
+
+  switchToSyntaxMode() {
+    cy.gcy('translations-cell-switch-mode').click();
+  }
+
+  getTranslationContentEditable() {
+    return cy.gcy('translation-editor').first().find('[contenteditable]');
   }
 
   setSingularTranslation(translation?: string) {
