@@ -142,7 +142,7 @@ class QueryBase<T>(
         unresolvedCommentsExpression,
       )
 
-      queryTranslationFiltering.applyQaFilter(language, qaIssueCountExpression)
+      queryTranslationFiltering.applyQaFilter(language, qaIssueCountExpression, translation)
 
       queryTranslationFiltering.applyLabelFilter(
         language,

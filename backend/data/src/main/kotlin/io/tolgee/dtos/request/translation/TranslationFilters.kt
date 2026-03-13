@@ -2,6 +2,7 @@ package io.tolgee.dtos.request.translation
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ExampleObject
+import io.tolgee.model.enums.qa.QaCheckType
 
 open class TranslationFilters(
   @field:Parameter(
@@ -152,6 +153,11 @@ To filter default namespace, set to empty string.
     description = "Filter keys with open QA issues in lang",
   )
   var filterHasQaIssuesInLang: List<String>? = null
+
+  @field:Parameter(
+    description = "Filter keys with specific QA check type issues",
+  )
+  var filterQaCheckType: List<QaCheckType>? = null
 
   @field:Parameter(
     description = "Filter keys with any suggestions in lang",

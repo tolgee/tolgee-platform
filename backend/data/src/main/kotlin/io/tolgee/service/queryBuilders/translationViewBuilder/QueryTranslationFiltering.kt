@@ -5,7 +5,10 @@ import io.tolgee.dtos.request.translation.TranslationFilterByLabel
 import io.tolgee.dtos.request.translation.TranslationFilterByState
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.enums.TranslationState
+import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.key.Key
+import io.tolgee.model.qa.TranslationQaIssue
+import io.tolgee.model.qa.TranslationQaIssue_
 import io.tolgee.model.translation.Label
 import io.tolgee.model.translation.Label_
 import io.tolgee.model.translation.Translation
@@ -103,9 +106,31 @@ class QueryTranslationFiltering(
   fun applyQaFilter(
     language: LanguageDto,
     qaIssueCountExpression: Expression<Long>,
+    translation: ListJoin<Key, Translation>,
   ) {
     if (params.filterHasQaIssuesInLang?.contains(language.tag) == true) {
       queryBase.translationConditions.add(cb.greaterThan(qaIssueCountExpression, cb.literal(0L)))
+    }
+
+    params.filterQaCheckType?.takeIf { it.isNotEmpty() }?.let { checkTypes ->
+      val subquery = queryBase.query.subquery(Long::class.java)
+      val subqueryRoot = subquery.from(TranslationQaIssue::class.java)
+      subquery.select(subqueryRoot.get(TranslationQaIssue_.id))
+      val typeConditions =
+        checkTypes.map { checkType ->
+          cb.equal(subqueryRoot.get(TranslationQaIssue_.type), checkType)
+        }
+      subquery.where(
+        cb.and(
+          cb.equal(
+            subqueryRoot.get(TranslationQaIssue_.translation).get(Translation_.id),
+            translation.get(Translation_.id),
+          ),
+          cb.equal(subqueryRoot.get(TranslationQaIssue_.state), QaIssueState.OPEN),
+          cb.or(*typeConditions.toTypedArray()),
+        ),
+      )
+      queryBase.translationConditions.add(cb.exists(subquery))
     }
   }
 
