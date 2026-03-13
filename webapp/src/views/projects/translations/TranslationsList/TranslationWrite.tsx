@@ -3,7 +3,6 @@ import { Box, IconButton, Tooltip, styled } from '@mui/material';
 import { Placeholder } from '@tginternal/editor';
 import { T, useTranslate } from '@tolgee/react';
 import { HelpCircle } from '@untitled-ui/icons-react';
-
 import { TaskInfoMessage } from 'tg.ee';
 import { ControlsEditorMain } from '../cell/editorMainActions/ControlsEditorMain';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
