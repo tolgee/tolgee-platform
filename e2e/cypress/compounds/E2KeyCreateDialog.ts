@@ -87,6 +87,16 @@ export class E2KeyCreateDialog {
     this.getTagAutocompleteOption().contains(`Add "${tag}"`).click();
   }
 
+  enablePlural() {
+    cy.gcy('key-plural-checkbox').click();
+  }
+
+  getVariantEditor(variant: string) {
+    return gcyAdvanced({ value: 'translation-editor', variant }).find(
+      '[contenteditable]'
+    );
+  }
+
   setPluralTranslation(plural?: KeyDialogFillProps['plural']) {
     if (!plural) {
       return;
