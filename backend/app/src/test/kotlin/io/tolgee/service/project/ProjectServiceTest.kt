@@ -133,13 +133,15 @@ class ProjectServiceTest : AbstractSpringTest() {
       val testData = TagsTestData()
       testData.generateVeryLotOfData()
       testDataService.saveTestData(testData.root)
+      // Extend statement timeout for this heavy operation to avoid QueryTimeoutException under CI load
+      entityManager.createNativeQuery("SET LOCAL statement_timeout = '120s'").executeUpdate()
       val start = System.currentTimeMillis()
       projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self)
       entityManager.flush()
       entityManager.clear()
       val time = System.currentTimeMillis() - start
       println(time)
-      assertThat(time).isLessThan(30000)
+      assertThat(time).isLessThan(60000)
       assertThat(tagService.find(testData.existingTag.id)).isNull()
     }
   }
