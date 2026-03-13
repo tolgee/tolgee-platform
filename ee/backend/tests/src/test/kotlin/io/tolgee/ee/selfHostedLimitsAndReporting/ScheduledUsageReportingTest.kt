@@ -119,31 +119,34 @@ class ScheduledUsageReportingTest : AbstractSpringTest() {
       }
 
       verify {
+        // Record baseline captor size to avoid race condition: the scheduler (100ms interval)
+        // may fire between mock setup and this point, producing extra captures.
+        val baseSize = captor.allValues.size
         usageToReportService.delete()
         waitForNotThrowing(timeout = 10_000, pollTime = 100) {
-          captor.allValues.assert.hasSize(1)
+          captor.allValues.assert.hasSize(baseSize + 1)
         }
 
         keyService.create(testData.project, "key1", null)
 
         // It doesn't report until we move time
         Thread.sleep(200)
-        captor.allValues.assert.hasSize(1)
+        captor.allValues.assert.hasSize(baseSize + 1)
 
         currentDateProvider.move(Duration.ofDays(1))
         waitForNotThrowing(timeout = 10_000, pollTime = 100) {
-          captor.allValues.assert.hasSize(2)
+          captor.allValues.assert.hasSize(baseSize + 2)
         }
 
         createUser(1)
 
         // It doesn't report until we move time
         Thread.sleep(200)
-        captor.allValues.assert.hasSize(2)
+        captor.allValues.assert.hasSize(baseSize + 2)
 
         currentDateProvider.move(Duration.ofDays(1))
         waitForNotThrowing(timeout = 10_000, pollTime = 100) {
-          captor.allValues.assert.hasSize(3)
+          captor.allValues.assert.hasSize(baseSize + 3)
         }
       }
     }
