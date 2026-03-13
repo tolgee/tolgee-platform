@@ -56,6 +56,7 @@ export const AdminInvoiceUsage: FC<{
                     usageData={usage.data}
                     invoiceId={invoice.id}
                     invoiceNumber={invoice.number}
+                    organizationId={invoice.organizationId}
                   />
                   <TotalTable
                     invoice={invoice}
