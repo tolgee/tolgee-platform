@@ -49,9 +49,11 @@ class OrganizationStatsService(
           from translation t
           join key k on k.id = t.key_id
           join project p on p.id = k.project_id and p.deleted_at is null
+          left join branch b on b.id = k.branch_id
           where p.organization_owner_id = :organizationId
             and k.deleted_at is null
-            and (p.use_branching = true or k.branch_id is null)
+            and (k.branch_id is null or b.deleted_at is null)
+            and (p.use_branching = true or k.branch_id is null or b.is_default = true)
             and exists (
               select 1 from language l
               where l.id = t.language_id
@@ -75,9 +77,11 @@ class OrganizationStatsService(
               select distinct k.project_id, k.name, k.namespace_id
               from key k
               join project p on p.id = k.project_id and p.deleted_at is null
+              left join branch b on b.id = k.branch_id
               where p.organization_owner_id = :organizationId
                 and k.deleted_at is null
-                and (p.use_branching = true or k.branch_id is null)
+                and (k.branch_id is null or b.deleted_at is null)
+                and (p.use_branching = true or k.branch_id is null or b.is_default = true)
           ) sub
           """.trimIndent(),
         ).setParameter("organizationId", organizationId)

@@ -246,9 +246,17 @@ class OrganizationStatsTestData : BaseTestData("org-stats", "Stats Project") {
           addTranslation("en", "NB Key 2 English on orphan branch")
         }
 
-        // Key on main branch without translation — should be counted as key but not translation
+        // Key explicitly on default branch (branch_id is set) — should still be counted
         addKey {
           name = "nb-key3"
+          branch = noBranchingMainBranch
+        }.build {
+          addTranslation("en", "NB Key 3 English on default branch")
+        }
+
+        // Key on main branch without translation — should be counted as key but not translation
+        addKey {
+          name = "nb-key4"
         }
       }.self
   }

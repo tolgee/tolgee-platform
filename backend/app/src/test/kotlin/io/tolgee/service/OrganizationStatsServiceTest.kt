@@ -49,10 +49,11 @@ class OrganizationStatsServiceTest : AbstractSpringTest() {
     // Organization total:
     // First project (branching enabled): 6 unique keys
     // Second project (branching enabled): 2 unique keys
-    // Third project (branching disabled): nb-key1 + nb-key3 = 2 keys (nb-key2 on orphan branch excluded)
-    // Total: 10 unique keys
+    // Third project (branching disabled): nb-key1 + nb-key3 (default branch) + nb-key4 = 3 keys
+    //   (nb-key2 on orphan branch excluded)
+    // Total: 11 unique keys
     val orgKeyCount = organizationStatsService.getKeyCount(testData.organization.id)
-    assertThat(orgKeyCount).isEqualTo(10)
+    assertThat(orgKeyCount).isEqualTo(11)
   }
 
   @Test
@@ -74,11 +75,12 @@ class OrganizationStatsServiceTest : AbstractSpringTest() {
     // Third project translations (branching disabled):
     // - nb-key1: EN = 1
     // - nb-key2 on orphan branch: excluded (branching disabled)
-    // Third project total: 1
+    // - nb-key3 (default branch): EN = 1
+    // Third project total: 2
     //
-    // Organization total: 9
+    // Organization total: 10
     val translationCount = organizationStatsService.getTranslationCount(testData.organization.id)
-    assertThat(translationCount).isEqualTo(9)
+    assertThat(translationCount).isEqualTo(10)
   }
 
   @Test
@@ -86,11 +88,12 @@ class OrganizationStatsServiceTest : AbstractSpringTest() {
     // The no-branching project has useBranching=false with:
     // - nb-key1 (no branch) = counted
     // - nb-key2 (orphan feature branch) = NOT counted (branching disabled)
-    // - nb-key3 (no branch) = counted
+    // - nb-key3 (default branch, branch_id set) = counted
+    // - nb-key4 (no branch) = counted
     // This is verified via the org-wide count which includes all three projects:
-    // First project: 6 + Second project: 2 + Third project: 2 = 10
+    // First project: 6 + Second project: 2 + Third project: 3 = 11
     val orgKeyCount = organizationStatsService.getKeyCount(testData.organization.id)
-    assertThat(orgKeyCount).isEqualTo(10)
+    assertThat(orgKeyCount).isEqualTo(11)
   }
 
   @Test
@@ -98,9 +101,10 @@ class OrganizationStatsServiceTest : AbstractSpringTest() {
     // The no-branching project has useBranching=false with:
     // - nb-key1 EN translation = counted
     // - nb-key2 EN translation on orphan branch = NOT counted (branching disabled)
+    // - nb-key3 EN translation on default branch = counted
     // This is verified via the org-wide count:
-    // First project: 5 + Second project: 3 + Third project: 1 = 9
+    // First project: 5 + Second project: 3 + Third project: 2 = 10
     val translationCount = organizationStatsService.getTranslationCount(testData.organization.id)
-    assertThat(translationCount).isEqualTo(9)
+    assertThat(translationCount).isEqualTo(10)
   }
 }
