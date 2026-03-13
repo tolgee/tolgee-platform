@@ -47,11 +47,13 @@ class OrganizationStatsServiceTest : AbstractSpringTest() {
   @Test
   fun `getKeyCount counts unique keys across all projects in organization`() {
     // Organization total:
-    // First project: 6 unique keys
-    // Second project: 2 unique keys
-    // Total: 8 unique keys
+    // First project (branching enabled): 6 unique keys
+    // Second project (branching enabled): 2 unique keys
+    // Third project (branching disabled): nb-key1 + nb-key3 (default branch) + nb-key4 = 3 keys
+    //   (nb-key2 on orphan branch excluded)
+    // Total: 11 unique keys
     val orgKeyCount = organizationStatsService.getKeyCount(testData.organization.id)
-    assertThat(orgKeyCount).isEqualTo(8)
+    assertThat(orgKeyCount).isEqualTo(11)
   }
 
   @Test
@@ -70,8 +72,39 @@ class OrganizationStatsServiceTest : AbstractSpringTest() {
     // - key5 (main): EN, DE = 2
     // Second project total: 3
     //
-    // Organization total: 8
+    // Third project translations (branching disabled):
+    // - nb-key1: EN = 1
+    // - nb-key2 on orphan branch: excluded (branching disabled)
+    // - nb-key3 (default branch): EN = 1
+    // Third project total: 2
+    //
+    // Organization total: 10
     val translationCount = organizationStatsService.getTranslationCount(testData.organization.id)
-    assertThat(translationCount).isEqualTo(8)
+    assertThat(translationCount).isEqualTo(10)
+  }
+
+  @Test
+  fun `getKeyCount excludes branch keys when project has branching disabled`() {
+    // The no-branching project has useBranching=false with:
+    // - nb-key1 (no branch) = counted
+    // - nb-key2 (orphan feature branch) = NOT counted (branching disabled)
+    // - nb-key3 (default branch, branch_id set) = counted
+    // - nb-key4 (no branch) = counted
+    // This is verified via the org-wide count which includes all three projects:
+    // First project: 6 + Second project: 2 + Third project: 3 = 11
+    val orgKeyCount = organizationStatsService.getKeyCount(testData.organization.id)
+    assertThat(orgKeyCount).isEqualTo(11)
+  }
+
+  @Test
+  fun `getTranslationCount excludes branch translations when project has branching disabled`() {
+    // The no-branching project has useBranching=false with:
+    // - nb-key1 EN translation = counted
+    // - nb-key2 EN translation on orphan branch = NOT counted (branching disabled)
+    // - nb-key3 EN translation on default branch = counted
+    // This is verified via the org-wide count:
+    // First project: 5 + Second project: 3 + Third project: 2 = 10
+    val translationCount = organizationStatsService.getTranslationCount(testData.organization.id)
+    assertThat(translationCount).isEqualTo(10)
   }
 }
