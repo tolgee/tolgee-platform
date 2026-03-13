@@ -1,12 +1,16 @@
 import 'cypress-file-upload';
 import { login } from '../../common/apiCalls/common';
 import { charLimitTestData } from '../../common/apiCalls/testData/testData';
-import { editCell, visitTranslations } from '../../common/translations';
-import { selectLangsInLocalstorage } from '../../common/translations';
+import {
+  editCell,
+  getCellSaveButton,
+  visitTranslations,
+  selectLangsInLocalstorage,
+} from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
 import { E2TranslationsView } from '../../compounds/E2TranslationsView';
 import { visitImport, getFileIssuesDialog } from '../../common/import';
-import { gcy, gcyAdvanced } from '../../common/shared';
+import { confirmStandard, gcy } from '../../common/shared';
 
 describe('Translation character limit', () => {
   let projectId: number;
@@ -89,10 +93,8 @@ describe('Translation character limit', () => {
     const dialog = translationsView.openKeyCreateDialog();
     dialog.getKeyNameInput().type('test-key');
     dialog.setCharLimit(6);
-    cy.gcy('key-plural-checkbox').click();
-    gcyAdvanced({ value: 'translation-editor', variant: 'other' })
-      .find('[contenteditable]')
-      .type('# items');
+    dialog.enablePlural();
+    dialog.getVariantEditor('other').type('# items');
     // "# items" = 6 visible chars, # is not counted -> " items" = 6 chars
     dialog.getSaveButton().should('not.be.disabled');
   });
@@ -105,10 +107,10 @@ describe('Translation character limit', () => {
       .find('[contenteditable]')
       .clear()
       .type('Hello World');
-    cy.gcy('translations-cell-main-action-button').should('not.be.disabled');
-    cy.gcy('translations-cell-main-action-button').click();
+    getCellSaveButton().should('not.be.disabled');
+    getCellSaveButton().click();
     cy.gcy('global-confirmation-dialog').should('be.visible');
-    cy.gcy('global-confirmation-confirm').click();
+    confirmStandard();
     cy.contains('Hello World').should('be.visible');
   });
 
