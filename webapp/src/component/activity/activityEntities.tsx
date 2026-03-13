@@ -108,6 +108,13 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
           return <T keyName="activity_entity_key.namespace" params={params} />;
         },
       },
+      maxCharLimit: {
+        label(params) {
+          return (
+            <T keyName="activity_entity_key.max_char_limit" params={params} />
+          );
+        },
+      },
     },
     references: ({
       modifications,

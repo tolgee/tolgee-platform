@@ -14,6 +14,7 @@ data class KeyWithTranslationsView(
   val keyName: String,
   val keyIsPlural: Boolean,
   val keyPluralArgName: String?,
+  val keyMaxCharLimit: Int?,
   val branch: String?,
   val keyNamespaceId: Long?,
   val keyNamespace: String?,
@@ -34,8 +35,6 @@ data class KeyWithTranslationsView(
 
   companion object {
     val LANGUAGES_FIELD_COUNT = 10
-    private val BASE_FIELD_COUNT = 11
-    private val TRASH_FIELD_COUNT = 5
 
     fun of(
       queryData: Array<Any?>,
@@ -50,6 +49,7 @@ data class KeyWithTranslationsView(
           keyName = data.removeFirst() as String,
           keyIsPlural = data.removeFirst() as Boolean,
           keyPluralArgName = data.removeFirst() as String?,
+          keyMaxCharLimit = data.removeFirst() as Int?,
           branch = data.removeFirst() as String?,
           keyNamespaceId = data.removeFirst() as Long?,
           keyNamespace = data.removeFirst() as String?,

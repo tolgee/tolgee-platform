@@ -438,6 +438,11 @@ export class Validation {
           (value) => checkParamNameIsValid(value ?? '')
         ),
       }),
+      maxCharLimit: Yup.mixed().test(
+        'positive-integer',
+        t('validation_positive_integer_required'),
+        (value) => value === undefined || (Number.isInteger(value) && value > 0)
+      ),
     });
 
   static readonly KEY_SETTINGS_FORM = (t: TranslateFunction) =>
@@ -446,6 +451,11 @@ export class Validation {
         'invalid-custom-values',
         t('validation_invalid_custom_values'),
         validateObject
+      ),
+      maxCharLimit: Yup.mixed().test(
+        'positive-integer',
+        t('validation_positive_integer_required'),
+        (value) => value === undefined || (Number.isInteger(value) && value > 0)
       ),
     });
 

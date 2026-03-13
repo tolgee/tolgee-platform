@@ -66,6 +66,7 @@ class KeyComplexEditHelper(
   private var isNamespaceChanged: Boolean = false
   private var isCustomDataChanged: Boolean = false
   private var isDescriptionChanged: Boolean = false
+  private var isMaxCharLimitChanged: Boolean = false
   private var isIsPluralChanged: Boolean = false
   private var newIsPlural by Delegates.notNull<Boolean>()
 
@@ -137,6 +138,11 @@ class KeyComplexEditHelper(
         dto.isPlural!!,
         throwOnDataLoss = dto.warnOnDataLoss ?: false,
       )
+      keyService.save(key)
+    }
+
+    if (isMaxCharLimitChanged) {
+      dto.maxCharLimit?.let { key.maxCharLimit = if (it <= 0) null else it }
       keyService.save(key)
     }
 
@@ -283,6 +289,10 @@ class KeyComplexEditHelper(
       possibleOperations.add(ActivityType.SCREENSHOT_DELETE)
     }
 
+    if (isMaxCharLimitChanged) {
+      possibleOperations.add(ActivityType.KEY_CHARACTER_LIMIT_EDIT)
+    }
+
     return possibleOperations
   }
 
@@ -306,6 +316,9 @@ class KeyComplexEditHelper(
       dto.isPlural != null &&
       key.isPlural != dto.isPlural ||
       (dto.isPlural == true && key.pluralArgName != dto.pluralArgName)
+    isMaxCharLimitChanged =
+      dto.maxCharLimit != null &&
+      key.maxCharLimit != dto.maxCharLimit.let { if (it != null && it <= 0) null else it }
     isCustomDataChanged = dto.custom != null &&
       objectMapper.writeValueAsString(key.keyMeta?.custom) != objectMapper.writeValueAsString(dto.custom)
     isScreenshotDeleted = !dto.screenshotIdsToDelete.isNullOrEmpty()
@@ -329,6 +342,7 @@ class KeyComplexEditHelper(
       isKeyNameModified ||
         isNamespaceChanged ||
         isDescriptionChanged ||
+        isMaxCharLimitChanged ||
         isIsPluralChanged ||
         isCustomDataChanged
 

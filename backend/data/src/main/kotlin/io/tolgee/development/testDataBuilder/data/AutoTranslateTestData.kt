@@ -10,6 +10,7 @@ class AutoTranslateTestData : BaseTestData() {
   lateinit var spanishLanguage: Language
   lateinit var baseTranslationNotExistKey: Key
   lateinit var baseTranslationUntranslated: Key
+  lateinit var keyWithCharLimit: Key
 
   init {
     root.apply {
@@ -84,6 +85,11 @@ class AutoTranslateTestData : BaseTestData() {
             state = TranslationState.TRANSLATED
             language = germanLanguage
           }
+        }
+        addKey {
+          name = "key-with-char-limit"
+          maxCharLimit = 5
+          keyWithCharLimit = this
         }
       }
     }

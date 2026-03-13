@@ -21,6 +21,8 @@ open class KeyModel(
   val description: String?,
   @Schema(description = "Custom values of the key")
   val custom: Map<String, Any?>?,
+  @Schema(description = "Maximum character limit for translations of this key")
+  val maxCharLimit: Int?,
   @Schema(description = "Branch of key", example = "dev")
   val branch: String?,
 ) : RepresentationModel<KeyModel>(),

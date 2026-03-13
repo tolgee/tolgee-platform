@@ -166,6 +166,7 @@ export function enableNamespaces(projectId: number) {
 type CreateKeyOptions = {
   isPlural?: boolean;
   branch?: string;
+  maxCharLimit?: number;
 };
 
 export const createKey = (

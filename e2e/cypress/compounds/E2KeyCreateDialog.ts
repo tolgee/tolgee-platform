@@ -9,6 +9,7 @@ export class E2KeyCreateDialog {
     namespace,
     description,
     plural,
+    maxCharLimit,
   }: KeyDialogFillProps) {
     this.getKeyNameInput().type(key);
     if (namespace) {
@@ -20,13 +21,25 @@ export class E2KeyCreateDialog {
     if (tag) {
       this.addNewTag(tag);
     }
+    if (maxCharLimit !== undefined) {
+      this.setCharLimit(maxCharLimit);
+    }
 
     this.setSingularTranslation(translation);
     this.setPluralTranslation(plural);
   }
 
+  setCharLimit(limit: number) {
+    cy.gcy('key-char-limit-checkbox').click();
+    cy.gcy('key-char-limit-input').find('input').clear().type(limit.toString());
+  }
+
+  getSaveButton() {
+    return cy.gcy('global-form-save-button');
+  }
+
   save() {
-    cy.gcy('global-form-save-button').click();
+    this.getSaveButton().click();
   }
 
   fillAndSave(props: KeyDialogFillProps) {
@@ -54,6 +67,14 @@ export class E2KeyCreateDialog {
     return cy.gcy('translation-editor').first();
   }
 
+  switchToSyntaxMode() {
+    cy.gcy('translations-cell-switch-mode').click();
+  }
+
+  getTranslationContentEditable() {
+    return cy.gcy('translation-editor').first().find('[contenteditable]');
+  }
+
   setSingularTranslation(translation?: string) {
     if (!translation) {
       return;
@@ -66,6 +87,16 @@ export class E2KeyCreateDialog {
     this.getTagAutocompleteOption().contains(`Add "${tag}"`).click();
   }
 
+  enablePlural() {
+    cy.gcy('key-plural-checkbox').click();
+  }
+
+  getVariantEditor(variant: string) {
+    return gcyAdvanced({ value: 'translation-editor', variant }).find(
+      '[contenteditable]'
+    );
+  }
+
   setPluralTranslation(plural?: KeyDialogFillProps['plural']) {
     if (!plural) {
       return;
@@ -73,8 +104,7 @@ export class E2KeyCreateDialog {
 
     cy.gcy('key-plural-checkbox').click();
     if (plural.variableName) {
-      cy.gcy('key-plural-checkbox-expand').click();
-      cy.gcy('key-plural-variable-name').type(plural.variableName);
+      cy.gcy('key-plural-variable-name').clear().type(plural.variableName);
     }
     Object.entries(plural.formValues).forEach(([key, value]) => {
       gcyAdvanced({ value: 'translation-editor', variant: key })
@@ -102,4 +132,5 @@ export type KeyDialogFillProps = {
   tag?: string;
   namespace?: string;
   description?: string;
+  maxCharLimit?: number;
 };

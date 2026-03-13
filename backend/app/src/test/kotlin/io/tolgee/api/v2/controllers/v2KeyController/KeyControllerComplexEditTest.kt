@@ -528,6 +528,34 @@ class KeyControllerComplexEditTest : ProjectAuthControllerTest("/v2/projects/") 
     )
   }
 
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `changing char limit succeeds even with longer existing translations`() {
+    // First, set a long translation on the key
+    performProjectAuthPut(
+      "keys/${testData.firstKey.id}/complex-update",
+      ComplexEditKeyDto(
+        name = testData.firstKey.name,
+        translations = mapOf("en" to "This is a very long translation that exceeds any small limit"),
+      ),
+    ).andIsOk
+
+    // Now change maxCharLimit to a small value without modifying translations
+    performProjectAuthPut(
+      "keys/${testData.firstKey.id}/complex-update",
+      ComplexEditKeyDto(
+        name = testData.firstKey.name,
+        maxCharLimit = 10,
+      ),
+    ).andIsOk
+
+    // Verify the limit was set
+    executeInNewTransaction {
+      val key = keyService.get(testData.firstKey.id)
+      assertThat(key.maxCharLimit).isEqualTo(10)
+    }
+  }
+
   private fun verifyKeysDistancesStoredAsynchronously(storeBigMeta: () -> ResultActions) {
     val synMetricBefore = metrics.bigMetaStoringTimer.count()
     val asynMetricBefore = metrics.bigMetaStoringAsyncTimer.count()

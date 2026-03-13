@@ -8,9 +8,15 @@ type Props = {
   mode: 'placeholders' | 'syntax';
   tools: ReturnType<typeof useTranslationCell>;
   editorRef: React.RefObject<EditorView>;
+  maxCharLimit?: number | null;
 };
 
-export const TranslationEditor = ({ mode, tools, editorRef }: Props) => {
+export const TranslationEditor = ({
+  mode,
+  tools,
+  editorRef,
+  maxCharLimit,
+}: Props) => {
   const {
     editVal,
     language,
@@ -49,6 +55,7 @@ export const TranslationEditor = ({ mode, tools, editorRef }: Props) => {
       activeEditorRef={editorRef}
       mode={mode}
       baseValue={baseValue}
+      maxCharLimit={maxCharLimit}
       editorProps={{
         shortcuts: [
           { key: 'Escape', run: () => (handleClose(true), true) },
