@@ -89,8 +89,10 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
   const isBaseOverCharLimit =
     maxCharLimit != null &&
     maxCharLimit > 0 &&
-    Object.values(form.values.baseValue.variants ?? {}).some(
-      (v) => getVisibleCharCount({ text: v, nested: isPlural }) > maxCharLimit
+    Object.entries(form.values.baseValue.variants ?? {}).some(
+      ([variant, v]) =>
+        getVisibleCharCount({ text: v, nested: variant !== 'other' }) >
+        maxCharLimit
     );
 
   const handleEnterSubmit = () => {
