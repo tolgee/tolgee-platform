@@ -15,6 +15,12 @@ export interface paths {
     /** Cancels a self-hosted subscription if its plan is free. If the plan is not free, it will throw a BadRequest exception. */
     put: operations["cancelSelfHostedSubscription"];
   };
+  "/v2/administration/billing/carry-overs": {
+    get: operations["getCarryOvers"];
+  };
+  "/v2/administration/billing/carry-overs/history": {
+    get: operations["getCarryOversHistory"];
+  };
   "/v2/administration/billing/cloud-plans": {
     get: operations["getPlans_1"];
     post: operations["create_2"];
@@ -36,6 +42,15 @@ export interface paths {
   "/v2/administration/billing/inconsistent-subscriptions": {
     /** Returns active cloud subscriptions, which have inconsistent state in Tolgee and Stripe */
     get: operations["getInconsistentSubscriptions"];
+  };
+  "/v2/administration/billing/invoices": {
+    get: operations["getAllInvoices"];
+  };
+  "/v2/administration/billing/invoices/{invoiceId}/pdf": {
+    get: operations["getInvoicePdf_1"];
+  };
+  "/v2/administration/billing/invoices/{invoiceId}/usage": {
+    get: operations["getInvoiceUsage"];
   };
   "/v2/administration/billing/organizations": {
     get: operations["getOrganizations_1"];
@@ -78,6 +93,9 @@ export interface paths {
   "/v2/administration/organizations/{organizationId}/billing/assign-self-hosted-plan": {
     /** Assigns a self-hosted plan to an organization. If plan is free, it's assigned as active plan.If the plan is not free, it will make it visible for the organization, so they can subscribe to it. */
     put: operations["assignSelfHostedPlan"];
+  };
+  "/v2/administration/organizations/{organizationId}/billing/invoices": {
+    get: operations["getInvoices_1"];
   };
   "/v2/administration/organizations/{organizationId}/billing/unassign-cloud-plan/{planId}": {
     /** Make plan invisible for organization when not subscribed to. Or unassign the plan if is free or trial. If plan is registered in stripe, you will have to cancel it via stripe and then unassign it when required. */
@@ -362,6 +380,29 @@ export interface components {
     CancelLocalSubscriptionsRequest: {
       ids: components["schemas"]["SubscriptionId"][];
     };
+    CarryOverModel: {
+      /** Format: date-time */
+      createdAt: string;
+      credits: number;
+      keys: number;
+      /** Format: int64 */
+      organizationId: number;
+      organizationName: string;
+      organizationSlug: string;
+      /** Format: date-time */
+      periodEnd: string;
+      /** Format: date-time */
+      periodStart: string;
+      /** Format: int64 */
+      resolvedByInvoiceId?: number;
+      resolvedByInvoiceNumber?: string;
+      seats: number;
+      /** Format: int64 */
+      selfHostedEeSubscriptionId?: number;
+      subscriptionType: string;
+      total: number;
+      translations: number;
+    };
     CloudPlanModel: {
       /** Format: date-time */
       archivedAt?: string;
@@ -488,6 +529,11 @@ export interface components {
     CollectionModelAdministrationCloudPlanModel: {
       _embedded?: {
         plans?: components["schemas"]["AdministrationCloudPlanModel"][];
+      };
+    };
+    CollectionModelCarryOverModel: {
+      _embedded?: {
+        carryOvers?: components["schemas"]["CarryOverModel"][];
       };
     };
     CollectionModelCloudPlanModel: {
@@ -947,6 +993,10 @@ export interface components {
       id: number;
       /** @description The number on the invoice */
       number: string;
+      /** Format: int64 */
+      organizationId: number;
+      organizationName?: string;
+      organizationSlug?: string;
       /** @description Whether pdf is ready to download. If not, wait around few minutes until it's generated. */
       pdfReady: boolean;
       taxRatePercentage?: number;
@@ -1542,6 +1592,7 @@ export interface components {
       /** Format: date-time */
       lastInteraction?: string;
       maxMrr: number;
+      name?: string;
       /** Format: int64 */
       organizationId?: number;
       organizationName?: string;
@@ -1759,6 +1810,74 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getCarryOvers: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelCarryOverModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getCarryOversHistory: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelCarryOverModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
@@ -2140,6 +2259,129 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["CollectionModelInconsistentSubscriptionModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getAllInvoices: {
+    parameters: {
+      query: {
+        organizationId?: number;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelInvoiceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getInvoicePdf_1: {
+    parameters: {
+      path: {
+        invoiceId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/pdf": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getInvoiceUsage: {
+    parameters: {
+      path: {
+        invoiceId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["UsageModel"];
         };
       };
       /** Bad Request */
@@ -2900,6 +3142,53 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["AssignSelfHostedPlanRequest"];
+      };
+    };
+  };
+  getInvoices_1: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PagedModelInvoiceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
       };
     };
   };
