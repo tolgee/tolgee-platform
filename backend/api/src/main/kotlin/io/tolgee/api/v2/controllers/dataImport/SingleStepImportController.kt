@@ -105,6 +105,7 @@ class SingleStepImportController(
   fun singleStepResolvableImport(
     @RequestBody @Valid params: SingleStepImportResolvableRequest,
   ): ImportResult {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, params.branch)
     return singleStepImportService.singleStepImportResolvable(
       project = projectHolder.projectEntity,
       userAccount = authenticationFacade.authenticatedUserEntity,
