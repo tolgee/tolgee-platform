@@ -119,6 +119,51 @@ class PromptControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  fun `includes character limit hint in prompt`() {
+    performAuthPost(
+      "/v2/projects/${testData.promptProject.self.id}/prompts/run",
+      PromptRunDto(
+        template =
+          """
+          {{fragment.charLimit}}
+          """.trimIndent(),
+        keyId =
+          testData.keys
+            .first()
+            .self.id,
+        targetLanguageId = testData.czech.self.id,
+        provider = "default",
+        basicPromptOptions = null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("prompt").isString.contains("MUST NOT exceed 42 characters")
+      node("prompt").isString.contains("Keep the translation concise")
+    }
+  }
+
+  @Test
+  fun `omits character limit hint when not set`() {
+    performAuthPost(
+      "/v2/projects/${testData.promptProject.self.id}/prompts/run",
+      PromptRunDto(
+        template =
+          """
+          {{fragment.charLimit}}
+          """.trimIndent(),
+        keyId =
+          testData.keys[1]
+            .self.id,
+        targetLanguageId = testData.czech.self.id,
+        provider = "default",
+        basicPromptOptions = null,
+      ),
+    ).andIsOk.andAssertThatJson {
+      node("prompt").isString.doesNotContain("MUST NOT exceed")
+      node("prompt").isString.doesNotContain("character")
+    }
+  }
+
+  @Test
   fun `runs prompt`() {
     performAuthPost(
       "/v2/projects/${testData.promptProject.self.id}/prompts/run",
