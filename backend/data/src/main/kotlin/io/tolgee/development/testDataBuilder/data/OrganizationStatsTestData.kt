@@ -16,6 +16,7 @@ class OrganizationStatsTestData : BaseTestData("org-stats", "Stats Project") {
   lateinit var secondProjectFeatureBranch: Branch
   lateinit var germanLanguage: Language
   lateinit var secondProjectGermanLanguage: Language
+  lateinit var noBranchingProject: Project
 
   init {
     root.apply {
@@ -28,6 +29,7 @@ class OrganizationStatsTestData : BaseTestData("org-stats", "Stats Project") {
       }
 
       addSecondProject()
+      addNoBranchingProject()
     }
   }
 
@@ -193,6 +195,60 @@ class OrganizationStatsTestData : BaseTestData("org-stats", "Stats Project") {
         }.build {
           addTranslation("en", "Key 5 English")
           addTranslation("de", "Key 5 German")
+        }
+      }.self
+  }
+
+  /**
+   * Third project with useBranching=false but containing orphan branch keys.
+   * These branch keys should NOT be counted in org stats.
+   */
+  private fun TestDataBuilder.addNoBranchingProject() {
+    noBranchingProject =
+      addProject {
+        name = "No Branching Project"
+        organizationOwner = this@OrganizationStatsTestData.organization
+        useBranching = false
+      }.build {
+        addLanguage {
+          name = "English"
+          tag = "en"
+          originalName = "English"
+          this@build.self.baseLanguage = this
+        }
+
+        val noBranchingMainBranch =
+          addBranch {
+            name = "main"
+            project = self
+            isDefault = true
+          }.build { self }.self
+
+        val noBranchingFeatureBranch =
+          addBranch {
+            name = "orphan-feature"
+            project = self
+            originBranch = noBranchingMainBranch
+          }.build { self }.self
+
+        // Key on main branch (branch_id is null for default) — should be counted
+        addKey {
+          name = "nb-key1"
+        }.build {
+          addTranslation("en", "NB Key 1 English")
+        }
+
+        // Key on orphan feature branch — should NOT be counted (branching disabled)
+        addKey {
+          name = "nb-key2"
+          branch = noBranchingFeatureBranch
+        }.build {
+          addTranslation("en", "NB Key 2 English on orphan branch")
+        }
+
+        // Key on main branch without translation — should be counted as key but not translation
+        addKey {
+          name = "nb-key3"
         }
       }.self
   }
