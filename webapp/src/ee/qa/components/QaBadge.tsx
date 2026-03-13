@@ -52,14 +52,21 @@ const StyledCheckIcon = styled(Check)`
   margin: -5px;
 `;
 
-export const QaBadge = ({ count, stale }: QaBadgeProps) => {
+export const QaBadge = ({
+  count,
+  stale,
+  darkWhenNoIssues = false,
+}: QaBadgeProps) => {
   if (stale) {
+    const hasIssues = count !== undefined && count > 0;
     return (
       <StyledBadge
         badgeContent={<StyledSpinner size={10} thickness={5} />}
         classes={{ badge: 'stale' }}
       >
-        <QaCheck />
+        <QaCheck
+          style={hasIssues || !darkWhenNoIssues ? undefined : { opacity: 0.5 }}
+        />
       </StyledBadge>
     );
   }
@@ -70,7 +77,7 @@ export const QaBadge = ({ count, stale }: QaBadgeProps) => {
         badgeContent={<StyledCheckIcon />}
         classes={{ badge: 'resolved' }}
       >
-        <QaCheck />
+        <QaCheck style={!darkWhenNoIssues ? undefined : { opacity: 0.5 }} />
       </StyledBadge>
     );
   }

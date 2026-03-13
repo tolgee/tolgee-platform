@@ -71,6 +71,14 @@ export type BranchReferenceData = {
 export type QaBadgeProps = {
   count?: number;
   stale?: boolean;
+  darkWhenNoIssues?: boolean;
+};
+
+export type QaBadgePopoverProps = {
+  anchorEl: HTMLElement | null;
+  onClose: () => void;
+  languageId: number;
+  languageTag: string;
 };
 
 export type SubfilterQaChecksProps = {
