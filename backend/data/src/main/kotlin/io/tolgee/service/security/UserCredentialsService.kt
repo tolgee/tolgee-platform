@@ -20,6 +20,9 @@ class UserCredentialsService(
   ): UserAccount {
     val userAccount = userAccountService.findActive(username)
     if (userAccount == null) {
+      userAccountService.findActiveOrDisabled(username)?.let {
+        throw AuthenticationException(Message.USER_ACCOUNT_DISABLED)
+      }
       throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
 
