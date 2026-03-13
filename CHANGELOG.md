@@ -1,3 +1,10 @@
+## [3.167.1](https://github.com/tolgee/tolgee-platform/compare/v3.167.0...v3.167.1) (2026-03-13)
+
+
+### Bug Fixes
+
+* hide EUR column for fixed plans, format EUR to 2 decimals ([#3530](https://github.com/tolgee/tolgee-platform/issues/3530)) ([47d2181](https://github.com/tolgee/tolgee-platform/commit/47d21811e11b111b228567a5882ca69e4e3e880f))
+
 # [3.167.0](https://github.com/tolgee/tolgee-platform/compare/v3.166.3...v3.167.0) (2026-03-12)
 
 
