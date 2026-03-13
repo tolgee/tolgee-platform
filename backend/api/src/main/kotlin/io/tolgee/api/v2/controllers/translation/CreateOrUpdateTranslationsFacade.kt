@@ -13,7 +13,6 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
-import io.tolgee.service.translation.validateCharLimit
 import jakarta.validation.Valid
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -48,8 +47,6 @@ class CreateOrUpdateTranslationsFacade(
       key.pluralArgName = convertedToPlurals.argName
       keyService.save(key)
     }
-
-    validateCharLimit(key, convertedToPlurals?.convertedStrings ?: dto.translations)
 
     val translations =
       translationService
