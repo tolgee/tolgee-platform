@@ -31,10 +31,7 @@ export class E2KeyCreateDialog {
 
   setCharLimit(limit: number) {
     cy.gcy('key-char-limit-checkbox').click();
-    cy.gcy('key-char-limit-input')
-      .find('input')
-      .clear()
-      .type(limit.toString());
+    cy.gcy('key-char-limit-input').find('input').clear().type(limit.toString());
   }
 
   getSaveButton() {

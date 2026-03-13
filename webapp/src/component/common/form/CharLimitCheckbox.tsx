@@ -1,4 +1,10 @@
-import { Box, Checkbox, FormControlLabel, TextField, Tooltip } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  TextField,
+  Tooltip,
+} from '@mui/material';
 import { useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
 import { HelpCircle } from '@untitled-ui/icons-react';
