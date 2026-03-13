@@ -1,3 +1,10 @@
+## [3.167.2](https://github.com/tolgee/tolgee-platform/compare/v3.167.1...v3.167.2) (2026-03-13)
+
+
+### Performance Improvements
+
+* memoize lazy variable evaluation in PromptLazyMap ([#3514](https://github.com/tolgee/tolgee-platform/issues/3514)) ([a25ef0d](https://github.com/tolgee/tolgee-platform/commit/a25ef0dae6b0b236528a6de9e416c8c2146511f9))
+
 ## [3.167.1](https://github.com/tolgee/tolgee-platform/compare/v3.167.0...v3.167.1) (2026-03-13)
 
 
