@@ -10,8 +10,10 @@ import io.tolgee.constants.Feature
 import io.tolgee.hateoas.project.stats.LanguageStatsModelAssembler
 import io.tolgee.hateoas.project.stats.ProjectStatsModel
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
 import io.tolgee.service.branching.BranchService
@@ -103,6 +105,18 @@ class ProjectStatsController(
           languageStatsModelAssembler.toModel(it, qaIssueCounts, qaChecksStaleCounts)
         },
     )
+  }
+
+  @Operation(summary = "Get QA issue counts grouped by check type for a language")
+  @GetMapping("/qa-issue-counts")
+  @UseDefaultPermissions
+  @AllowApiAccess
+  @RequiresFeatures(Feature.QA_CHECKS)
+  fun getQaIssueCountsByCheckType(
+    @RequestParam(name = "languageId") languageId: Long,
+  ): Map<QaCheckType, Long> {
+    return translationQaIssueService
+      .getOpenIssueCountsByCheckType(projectHolder.project.id, languageId)
   }
 
   @Operation(summary = "Get project daily amount of events")

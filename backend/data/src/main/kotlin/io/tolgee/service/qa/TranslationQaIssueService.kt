@@ -1,5 +1,6 @@
 package io.tolgee.service.qa
 
+import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import org.springframework.stereotype.Service
 
@@ -17,5 +18,14 @@ class TranslationQaIssueService(
     return translationQaIssueRepository
       .getStaleCountsByLanguageId(projectId)
       .associate { it.languageId to it.count }
+  }
+
+  fun getOpenIssueCountsByCheckType(
+    projectId: Long,
+    languageId: Long,
+  ): Map<QaCheckType, Long> {
+    return translationQaIssueRepository
+      .getOpenIssueCountsByCheckType(projectId, languageId)
+      .associate { it.checkType to it.count }
   }
 }

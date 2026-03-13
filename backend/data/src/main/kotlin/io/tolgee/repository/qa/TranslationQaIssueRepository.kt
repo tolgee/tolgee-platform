@@ -9,8 +9,15 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
+// TODO: move interface to separate file
 interface LanguageQaIssueCount {
   val languageId: Long
+  val count: Long
+}
+
+// TODO: move interface to separate file
+interface QaIssueCountByCheckType {
+  val checkType: QaCheckType
   val count: Long
 }
 
@@ -41,6 +48,23 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     """,
   )
   fun getStaleCountsByLanguageId(projectId: Long): List<LanguageQaIssueCount>
+
+  @Query(
+    """
+    select i.type as checkType, count(i) as count
+    from TranslationQaIssue i
+    join i.translation t
+    join t.key k
+    where k.project.id = :projectId
+    and t.language.id = :languageId
+    and i.state = io.tolgee.model.enums.qa.QaIssueState.OPEN
+    group by i.type
+    """,
+  )
+  fun getOpenIssueCountsByCheckType(
+    projectId: Long,
+    languageId: Long,
+  ): List<QaIssueCountByCheckType>
 
   @Query(
     """

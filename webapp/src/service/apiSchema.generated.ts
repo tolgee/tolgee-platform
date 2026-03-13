@@ -898,6 +898,9 @@ export interface paths {
   "/v2/projects/{projectId}/stats/daily-activity": {
     get: operations["getProjectDailyActivity"];
   };
+  "/v2/projects/{projectId}/stats/qa-issue-counts": {
+    get: operations["getQaIssueCountsByCheckType"];
+  };
   "/v2/projects/{projectId}/suggest/machine-translations": {
     /** Suggests machine translations from enabled services */
     post: operations["suggestMachineTranslations"];
@@ -19406,6 +19409,48 @@ export interface operations {
   };
   getProjectDailyActivity: {
     parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": { [key: string]: number };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getQaIssueCountsByCheckType: {
+    parameters: {
+      query: {
+        languageId: number;
+      };
       path: {
         projectId: number;
       };
