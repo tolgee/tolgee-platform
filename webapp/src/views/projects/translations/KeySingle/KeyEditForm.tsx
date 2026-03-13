@@ -16,7 +16,6 @@ import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import { CellTranslation } from '../TranslationsList/CellTranslation';
 import { FieldLabel } from 'tg.component/FormField';
-
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { NamespaceSelector } from 'tg.component/NamespaceSelector/NamespaceSelector';
