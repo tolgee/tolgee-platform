@@ -140,7 +140,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     if (!variants) return false;
     return Object.entries(variants).some(
       ([variant, text]) =>
-        getVisibleCharCount(text, variant !== 'other') > limit
+        getVisibleCharCount({ text, nested: variant !== 'other' }) > limit
     );
   }, [editVal?.value?.variants, keyData.keyMaxCharLimit]);
 

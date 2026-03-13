@@ -89,7 +89,10 @@ export const PluralEditor = ({
               />
             </EditorWrapper>
             <CharacterCounter
-              currentCount={getVisibleCharCount(content, Boolean(variant))}
+              currentCount={getVisibleCharCount({
+                text: content,
+                nested: Boolean(variant),
+              })}
               maxLimit={maxCharLimit}
             />
           </>
