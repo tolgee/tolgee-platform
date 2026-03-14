@@ -14,20 +14,24 @@ export const useQaPreviewWebsocket = ({
   languageTag,
   text,
   enabled = true,
+  initialIssues,
 }: QaPreviewProps): QaPreviewResult => {
   const [issuesByType, setIssuesByType] = useState<
     Map<string, QaPreviewIssue[]>
-  >(new Map());
+  >(() => groupIssuesByType(initialIssues));
   const [isLoading, setIsLoading] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const pendingTextUpdateRef = useRef(false);
   const jwtToken = useGlobalContext((c) => c.auth.jwtToken);
+  const initialIssuesRef = useRef(initialIssues);
+  initialIssuesRef.current = initialIssues;
 
   useEffect(() => {
-    if (!enabled || !jwtToken) return;
-
-    setIssuesByType(new Map());
+    // Re-seed from persisted issues when params change
+    setIssuesByType(groupIssuesByType(initialIssuesRef.current));
     setIsLoading(false);
+
+    if (!enabled || !jwtToken) return;
 
     // in format http(s)://host:port
     const url = new URL(
@@ -38,7 +42,9 @@ export const useQaPreviewWebsocket = ({
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
+    setIsLoading(true);
     ws.onopen = () => {
+      setIsLoading(false);
       // auth message
       ws.send(
         JSON.stringify({ token: jwtToken, projectId, keyId, languageTag })
@@ -46,6 +52,7 @@ export const useQaPreviewWebsocket = ({
       // initial text update message
       if (text !== null && text !== undefined) {
         ws.send(JSON.stringify({ text }));
+        setIsLoading(true);
       }
     };
 
@@ -104,4 +111,19 @@ export const useQaPreviewWebsocket = ({
   }, [issuesByType]);
 
   return { issues, isLoading };
+};
+
+const groupIssuesByType = (
+  issues: QaPreviewIssue[] | undefined
+): Map<string, QaPreviewIssue[]> => {
+  const map = new Map<string, QaPreviewIssue[]>();
+  for (const issue of issues ?? []) {
+    const existing = map.get(issue.type);
+    if (existing) {
+      existing.push(issue);
+    } else {
+      map.set(issue.type, [issue]);
+    }
+  }
+  return map;
 };

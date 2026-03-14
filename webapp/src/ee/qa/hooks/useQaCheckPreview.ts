@@ -8,6 +8,7 @@ type QaCheckPreviewProps = {
   languageTag: string;
   keyId: number;
   enabled?: boolean;
+  initialIssues?: QaPreviewIssue[];
 };
 
 type QaCheckPreviewResult = {
@@ -20,6 +21,7 @@ export const useQaCheckPreview = ({
   languageTag,
   keyId,
   enabled = true,
+  initialIssues,
 }: QaCheckPreviewProps): QaCheckPreviewResult => {
   const { isEnabled } = useEnabledFeatures();
   const qaFeatureEnabled = isEnabled('QA_CHECKS');
@@ -31,9 +33,10 @@ export const useQaCheckPreview = ({
     languageTag,
     text,
     enabled: qaFeatureEnabled && enabled,
+    initialIssues,
   });
 
-  if (!qaFeatureEnabled || !enabled) {
+  if (!qaFeatureEnabled) {
     return { issues: [], isLoading: false };
   }
 
