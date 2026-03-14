@@ -5174,16 +5174,4 @@
             referencedTableName="user_account" referencedColumnNames="id"
             constraintName="fk_key_deleted_by_user_account"/>
     </changeSet>
-
-    <!-- Partial index for org-wide key/translation count queries (fixes #3527) -->
-    <changeSet author="dkrizan" id="1741855200000-1" runInTransaction="false">
-        <sql>
-            create index concurrently if not exists key_project_name_ns_not_deleted
-                on public.key (project_id, name, namespace_id)
-                where deleted_at is null;
-        </sql>
-        <rollback>
-            drop index concurrently if exists key_project_name_ns_not_deleted;
-        </rollback>
-    </changeSet>
 </databaseChangeLog>
