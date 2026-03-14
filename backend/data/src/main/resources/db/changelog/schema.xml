@@ -5174,4 +5174,10 @@
             referencedTableName="user_account" referencedColumnNames="id"
             constraintName="fk_key_deleted_by_user_account"/>
     </changeSet>
+
+    <changeSet author="tolgee" id="202503080000000-1">
+        <addColumn tableName="content_delivery_config">
+            <column name="custom_metadata" type="jsonb"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

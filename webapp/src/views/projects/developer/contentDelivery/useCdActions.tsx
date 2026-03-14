@@ -57,6 +57,14 @@ export function useCdActions({ allNamespaces, onClose }: UseCdActionsProps) {
       zip: values.zip ?? false,
       escapeHtml: values.escapeHtml ?? false,
       filterBranch: values.filterBranch || undefined,
+      customMetadata:
+        values.customMetadata.length > 0
+          ? Object.fromEntries(
+              values.customMetadata
+                .filter((e) => e.key.trim() !== '')
+                .map((e) => [e.key, e.value])
+            )
+          : undefined,
     };
   }
 

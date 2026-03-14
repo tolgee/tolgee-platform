@@ -39,6 +39,12 @@ export function getCdEditInitialValues(
     filterBranch: (data?.branchName ?? data?.filterBranch ?? null) as
       | string
       | null,
+    customMetadata: data?.customMetadata
+      ? Object.entries(data.customMetadata).map(([key, value]) => ({
+          key,
+          value,
+        }))
+      : ([] as { key: string; value: string }[]),
   };
 }
 

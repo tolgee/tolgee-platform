@@ -38,17 +38,43 @@ open class S3FileStorage(
   override fun storeFile(
     storageFilePath: String,
     bytes: ByteArray,
+    metadata: Map<String, String>?,
   ) {
     val byteArrayInputStream = ByteArrayInputStream(bytes)
     try {
       s3.putObject(
-        { b -> b.bucket(bucketName).key("$canonicalPath$storageFilePath") },
+        { b ->
+          b.bucket(bucketName).key("$canonicalPath$storageFilePath")
+          if (!metadata.isNullOrEmpty()) {
+            applyMetadata(b, metadata)
+          }
+        },
         RequestBody.fromInputStream(byteArrayInputStream, bytes.size.toLong()),
       )
     } catch (e: Exception) {
       throw FileStoreException("Can not store file using s3 bucket!", storageFilePath, e)
     }
     return
+  }
+
+  private fun applyMetadata(
+    b: software.amazon.awssdk.services.s3.model.PutObjectRequest.Builder,
+    metadata: Map<String, String>,
+  ) {
+    val customMetadata = mutableMapOf<String, String>()
+    for ((key, value) in metadata) {
+      when (key.lowercase()) {
+        "cache-control" -> b.cacheControl(value)
+        "content-type" -> b.contentType(value)
+        "content-disposition" -> b.contentDisposition(value)
+        "content-encoding" -> b.contentEncoding(value)
+        "content-language" -> b.contentLanguage(value)
+        else -> customMetadata[key] = value
+      }
+    }
+    if (customMetadata.isNotEmpty()) {
+      b.metadata(customMetadata)
+    }
   }
 
   override fun fileExists(storageFilePath: String): Boolean {

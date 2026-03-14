@@ -2033,6 +2033,8 @@ export interface components {
       autoPublish: boolean;
       /** @description Branch name this CDN config is associated with. Null means default branch or no branching. */
       branchName?: string;
+      /** @description Custom metadata to set on uploaded storage objects (e.g. {"Cache-Control": "max-age=3600"}). Currently supported for S3-compatible storages only. */
+      customMetadata?: { [key: string]: string };
       /**
        * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *
@@ -2164,6 +2166,8 @@ export interface components {
        * @description Id of custom storage to use for content delivery. If null, default server storage is used. Tolgee Cloud provides default Content Storage.
        */
       contentStorageId?: number;
+      /** @description Custom metadata to set on uploaded storage objects (e.g. {"Cache-Control": "max-age=3600"}). Currently supported for S3-compatible storages only. */
+      customMetadata?: { [key: string]: string };
       /**
        * @description If true, HTML tags are escaped in the exported file. (Supported in the XLIFF format only).
        *

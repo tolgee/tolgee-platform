@@ -36,6 +36,7 @@ import { useCdActions } from './useCdActions';
 import { useExportHelper } from 'tg.hooks/useExportHelper';
 import { CdPruneBeforePublish } from './CdPruneBeforePublish';
 import { CdZipExport } from './CdZipExport';
+import { CdCustomMetadata } from './CdCustomMetadata';
 import { EscapeHtmlSelector } from 'tg.views/projects/export/components/EscapeHtmlSelector';
 import { BranchSelect } from 'tg.component/branching/BranchSelect';
 import { useIsBranchingEnabled } from 'tg.component/branching/useIsBranchingEnabled';
@@ -208,6 +209,9 @@ export const CdDialog = ({ onClose, data }: Props) => {
                       <EscapeHtmlSelector />
                     )}
                   </StyledOptions>
+                  <Box sx={{ gridColumn: '1 / span 2' }}>
+                    <CdCustomMetadata />
+                  </Box>
                 </StyledDialogContent>
                 <DialogActions sx={{ justifyContent: 'space-between' }}>
                   <div>
