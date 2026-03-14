@@ -4,14 +4,14 @@ import { QaCheckItem } from 'tg.ee';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
+import { stopBubble } from 'tg.fixtures/eventHandler';
+import { useTranslationsActions } from '../context/TranslationsContext';
 
 type QaIssueModel = components['schemas']['QaIssueModel'];
 
 const StyledHighlight = styled('span')`
   text-decoration: underline;
-  text-decoration-style: dashed;
   text-decoration-color: ${({ theme }) => theme.palette.error.main};
-  text-underline-offset: ${({ theme }) => theme.spacing(0.5)};
 `;
 
 type Props = {
@@ -28,8 +28,22 @@ export const QaIssueHighlight = ({
   translationId,
 }: Props) => {
   const project = useProject();
+  const { correctTranslation, canEditTranslation } = useTranslationsActions();
 
-  // TODO: implement handleCorrect - apply the fix and save the fixed translation
+  const handleCorrect =
+    issue.replacement != null && canEditTranslation(translationId)
+      ? () => {
+          correctTranslation({
+            translationId,
+            translationText,
+            issue: {
+              positionStart: issue.positionStart,
+              positionEnd: issue.positionEnd,
+              replacement: issue.replacement!,
+            },
+          });
+        }
+      : undefined;
 
   const ignoreMutation = useApiMutation({
     url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/ignore',
@@ -56,11 +70,14 @@ export const QaIssueHighlight = ({
       leaveDelay={200}
       components={{ Tooltip: TooltipCard }}
       title={
-        <QaCheckItem
-          issue={issue}
-          text={translationText}
-          onIgnore={handleIgnore}
-        />
+        <div onClick={stopBubble()}>
+          <QaCheckItem
+            issue={issue}
+            text={translationText}
+            onCorrect={handleCorrect}
+            onIgnore={handleIgnore}
+          />
+        </div>
       }
     >
       <StyledHighlight data-cy="qa-issue-highlight">{text}</StyledHighlight>

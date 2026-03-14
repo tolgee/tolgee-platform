@@ -20,7 +20,11 @@ import type { useTaskService } from './useTaskService';
 import { composeValue, taskEditControlsShouldBeVisible } from './utils';
 import type { usePositionService } from './usePositionService';
 import { TranslationViewModel } from '../../ToolsPanel/common/types';
+import { getTranslationPermissions } from '../../cell/editorMainActions/getEditorActions';
+import { applyQaReplacement, QaReplacementParams } from 'tg.fixtures/qaUtils';
+
 type LanguageModel = components['schemas']['LanguageModel'];
+type TranslationModel = components['schemas']['TranslationViewModel'];
 
 type Props = {
   positionService: ReturnType<typeof usePositionService>;
@@ -30,6 +34,38 @@ type Props = {
   branchName?: string;
   allLanguages: LanguageModel[];
 };
+
+export type CorrectTranslationParams = {
+  translationId: number;
+  translationText: string;
+  issue: QaReplacementParams;
+};
+
+function findTranslationInList(
+  translations:
+    | ReturnType<typeof useTranslationsService>['fixedTranslations']
+    | undefined,
+  translationId: number
+) {
+  for (const key of translations ?? []) {
+    for (const [langTag, translation] of Object.entries(key.translations) as [
+      string,
+      TranslationModel
+    ][]) {
+      if (translation.id === translationId) {
+        return {
+          keyId: key.keyId,
+          keyName: key.keyName,
+          keyNamespace: key.keyNamespace,
+          languageTag: langTag,
+          translation,
+          tasks: key.tasks,
+        };
+      }
+    }
+  }
+  return null;
+}
 
 export const useEditService = ({
   positionService,
@@ -68,46 +104,87 @@ export const useEditService = ({
     }
   };
 
-  const mutateTranslation = async (
-    payload: SetEdit,
-    languagesToReturn?: string[]
-  ) => {
-    const { language, value } = payload;
-    const { keyName, keyNamespace } = key!;
+  /**
+   * Saves a translation via the API and updates the local state.
+   * Marks QA checks as stale after save.
+   */
+  const saveTranslationValue = async (params: {
+    keyId: number;
+    keyName: string;
+    keyNamespace?: string;
+    language: string;
+    value: string;
+  }) => {
+    const result = await putTranslation.mutateAsync({
+      path: { projectId: project.id },
+      content: {
+        'application/json': {
+          key: params.keyName,
+          namespace: params.keyNamespace,
+          branch: branchName,
+          translations: {
+            [params.language]: params.value,
+          },
+          languagesToReturn: translationService.selectedLanguages,
+        },
+      },
+    });
 
-    const newVal =
-      payload.value !== getEditOldValue()
-        ? await putTranslation.mutateAsync({
-            path: { projectId: project.id },
-            content: {
-              'application/json': {
-                key: keyName,
-                namespace: keyNamespace,
-                branch: branchName,
-                translations: {
-                  [language!]: value,
-                },
-                languagesToReturn,
-              },
-            },
-          })
-        : null;
-    return newVal;
+    if (result?.translations) {
+      Object.entries(result.translations).forEach(([lang, translation]) =>
+        translationService.changeTranslations([
+          { keyId: params.keyId, language: lang, value: translation },
+        ])
+      );
+      // Mark QA checks as stale and clear old issues, since the translation was updated
+      translationService.changeTranslations([
+        {
+          keyId: params.keyId,
+          language: params.language,
+          value: { qaChecksStale: true, qaIssues: [] },
+        },
+      ]);
+    }
+
+    return result;
   };
 
-  const createSuggestion = async (payload: SetEdit) => {
-    const languageId = allLanguages.find((l) => l.tag === payload.language)?.id;
-    if (languageId !== undefined && payload.value !== getEditOldValue()) {
-      return await postSuggestion.mutateAsync({
-        path: {
-          projectId: project.id,
-          keyId: payload.keyId,
-          languageId: languageId,
+  /**
+   * Creates a translation suggestion via the API and updates the local state.
+   */
+  const suggestTranslationValue = async (params: {
+    keyId: number;
+    language: string;
+    value: string;
+  }) => {
+    const languageId = allLanguages.find((l) => l.tag === params.language)?.id;
+    if (languageId === undefined) return;
+
+    const result = await postSuggestion.mutateAsync({
+      path: {
+        projectId: project.id,
+        keyId: params.keyId,
+        languageId: languageId,
+      },
+      content: {
+        'application/json': {
+          translation: params.value,
         },
-        content: {
-          'application/json': {
-            translation: payload.value,
-          },
+      },
+    });
+
+    const lang = allLanguages.find((lang) => lang.id === result?.languageId);
+
+    if (result && lang) {
+      translationService.updateTranslation({
+        keyId: result.keyId,
+        lang: lang.tag,
+        data(value) {
+          return {
+            suggestions: [result],
+            activeSuggestionCount: (value.activeSuggestionCount ?? 0) + 1,
+            totalSuggestionCount: (value.totalSuggestionCount ?? 0) + 1,
+          } satisfies Partial<TranslationViewModel>;
         },
       });
     }
@@ -125,48 +202,18 @@ export const useEditService = ({
     }
 
     if (language && data.suggestionOnly) {
-      const result = await createSuggestion({
-        ...position,
-        value,
-      });
-
-      const lang = allLanguages.find((lang) => lang.id === result?.languageId);
-
-      if (result && lang) {
-        translationService.updateTranslation({
-          keyId: result.keyId,
-          lang: lang.tag,
-          data(value) {
-            return {
-              suggestions: [result],
-              activeSuggestionCount: (value.activeSuggestionCount ?? 0) + 1,
-              totalSuggestionCount: (value.totalSuggestionCount ?? 0) + 1,
-            } satisfies Partial<TranslationViewModel>;
-          },
-        });
+      if (value !== getEditOldValue()) {
+        await suggestTranslationValue({ keyId, language, value });
       }
     } else if (language) {
-      // update translation
-      const result = await mutateTranslation(
-        {
-          ...data,
-          value,
+      if (value !== getEditOldValue()) {
+        await saveTranslationValue({
           keyId,
+          keyName: key!.keyName,
+          keyNamespace: key!.keyNamespace,
           language,
-        },
-        translationService.selectedLanguages
-      );
-
-      if (result?.translations) {
-        Object.entries(result.translations).forEach(([lang, translation]) =>
-          translationService.changeTranslations([
-            { keyId, language: lang, value: translation },
-          ])
-        );
-        // Mark QA checks as stale and clear old issues, since the translation was updated
-        translationService.changeTranslations([
-          { keyId, language, value: { qaChecksStale: true, qaIssues: [] } },
-        ]);
+          value,
+        });
       }
     } else {
       // update key
@@ -198,6 +245,73 @@ export const useEditService = ({
 
     data.onSuccess?.();
     doAfterCommand(data.after);
+  };
+
+  /**
+   * Returns whether the user can save or suggest a given translation.
+   */
+  const canEditTranslation = (translationId: number) => {
+    const found = findTranslationInList(
+      translationService.fixedTranslations,
+      translationId
+    );
+    if (!found) return false;
+
+    const languageId = allLanguages.find(
+      (l) => l.tag === found.languageTag
+    )?.id;
+    if (!languageId) return false;
+
+    const { canSave, canSuggest } = getTranslationPermissions({
+      project,
+      languageId,
+      translationState: found.translation.state,
+      tasks: found.tasks,
+    });
+
+    return canSave || canSuggest;
+  };
+
+  /**
+   * Applies a QA correction and saves (or suggests) the translation directly,
+   * without opening the editor.
+   */
+  const correctTranslation = async (params: CorrectTranslationParams) => {
+    const found = findTranslationInList(
+      translationService.fixedTranslations,
+      params.translationId
+    );
+    if (!found) return;
+
+    const corrected = applyQaReplacement(params.translationText, params.issue);
+
+    const languageId = allLanguages.find(
+      (l) => l.tag === found.languageTag
+    )?.id;
+    if (!languageId) return;
+
+    const { canSave, canSuggest } = getTranslationPermissions({
+      project,
+      languageId,
+      translationState: found.translation.state,
+      tasks: found.tasks,
+    });
+
+    if (canSave) {
+      await saveTranslationValue({
+        keyId: found.keyId,
+        keyName: found.keyName,
+        keyNamespace: found.keyNamespace,
+        language: found.languageTag,
+        value: corrected,
+      });
+    } else if (canSuggest) {
+      await suggestTranslationValue({
+        keyId: found.keyId,
+        language: found.languageTag,
+        value: corrected,
+      });
+    }
   };
 
   const doAfterCommand = (command?: AfterCommand) => {
@@ -241,6 +355,8 @@ export const useEditService = ({
 
   return {
     changeField,
+    canEditTranslation,
+    correctTranslation,
     setEditValue,
     setEditValueString,
     appendEditValueString,
