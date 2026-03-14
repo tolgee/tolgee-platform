@@ -35,6 +35,7 @@ export const usePanelData = () => {
   const editingText = useTranslationsSelector(
     (c) => c.cursor?.value.variants[c.cursor?.activeVariant ?? 'other']
   );
+  const isModified = useTranslationsSelector((c) => c.cursor?.changed ?? false);
 
   const projectPermissions = useProjectPermissions();
   const canEditProtectedBranch = useBranchEditAccess();
@@ -46,6 +47,7 @@ export const usePanelData = () => {
     baseLanguage: baseLanguage!,
     activeVariant: keyData?.keyIsPlural ? activeVariant! : undefined,
     editingText,
+    isModified,
     setValue: setEditValueString,
     appendValue: appendEditValueString,
     editEnabled: language

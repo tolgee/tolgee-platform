@@ -27,6 +27,7 @@ export type QaPreviewProps = {
   languageTag: string;
   text: string | undefined | null;
   enabled?: boolean;
+  initialIssues?: QaPreviewIssue[];
 };
 
 export type QaPreviewResult = {

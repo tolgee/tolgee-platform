@@ -6,7 +6,7 @@ import {
   PanelContentProps,
 } from 'tg.views/projects/translations/ToolsPanel/common/types';
 import { TabMessage } from 'tg.views/projects/translations/ToolsPanel/common/TabMessage';
-import { useQaCheckPreview } from '../hooks/useQaCheckPreview';
+import { useQaChecksForPanel } from '../hooks/useQaChecksForPanel';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { QaCheckItem } from './QaCheckItem';
@@ -28,19 +28,6 @@ const StyledLinearProgress = styled(LinearProgress)`
   margin-bottom: -2px;
 `;
 
-const useQaChecksForPanel = (data: PanelContentData) => {
-  const { keyData, language, editingText } = data;
-  const text = editingText ?? '';
-  // TODO: When user is editing plural, either use full ICU form for the plural, or don't generate QA issues, or something like that
-  // if we go with no live QA for plurals, then the UI should say so.
-
-  return useQaCheckPreview({
-    text,
-    languageTag: language.tag,
-    keyId: keyData.keyId,
-  });
-};
-
 export const useQaChecksCount = (data: PanelContentData) => {
   const translation = data.keyData.translations[data.language.tag];
   return translation?.qaIssueCount ?? 0;
@@ -54,6 +41,7 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
   const [showProgress, setShowProgress] = useState(false);
 
   useEffect(() => {
+    // Debounce progress indicator
     setShowProgress(false);
     if (isLoading) {
       const timeout = setTimeout(() => {
