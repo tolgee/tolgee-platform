@@ -2,6 +2,7 @@ import { styled, Tooltip } from '@mui/material';
 import { TooltipCard } from 'tg.component/common/TooltipCard';
 import { GlossaryTermPreview } from 'tg.ee';
 import { components } from 'tg.service/apiSchema.generated';
+import { stopBubble } from 'tg.fixtures/eventHandler';
 
 type GlossaryTermModel = components['schemas']['GlossaryTermModel'];
 
@@ -31,12 +32,14 @@ export const GlossaryHighlight = ({
       leaveDelay={200}
       components={{ Tooltip: TooltipCard }}
       title={
-        <GlossaryTermPreview
-          term={term}
-          languageTag={languageTag}
-          targetLanguageTag={targetLanguageTag}
-          standalone
-        />
+        <div onClick={stopBubble()}>
+          <GlossaryTermPreview
+            term={term}
+            languageTag={languageTag}
+            targetLanguageTag={targetLanguageTag}
+            standalone
+          />
+        </div>
       }
     >
       <StyledHighlight data-cy="glossary-term-highlight">

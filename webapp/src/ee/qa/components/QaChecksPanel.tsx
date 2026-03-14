@@ -10,6 +10,7 @@ import { useQaChecksForPanel } from '../hooks/useQaChecksForPanel';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { QaCheckItem } from './QaCheckItem';
+import { applyQaReplacement } from 'tg.fixtures/qaUtils';
 
 const StyledWrapper = styled('div')`
   margin-top: 4px;
@@ -84,12 +85,7 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
   // TODO: add note that some QA checks are not supported for plurals yes (when editing plural)
 
   const handleCorrect = (issue: (typeof issues)[0]) => {
-    if (issue.replacement == null) return;
-    const corrected =
-      text.slice(0, issue.positionStart) +
-      issue.replacement +
-      text.slice(issue.positionEnd);
-    data.setValue(corrected);
+    data.setValue(applyQaReplacement(text, issue));
   };
 
   const handleIgnoreToggle = (issue: (typeof issues)[0]) => {

@@ -8,6 +8,7 @@ import { TranslationFlags } from '../cell/TranslationFlags';
 import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -85,6 +86,8 @@ export const TranslationRead: React.FC<Props> = ({
     removeLabel,
   } = tools;
 
+  const { isEnabled } = useEnabledFeatures();
+
   const toggleEdit = () => {
     if (isEditing) {
       handleClose();
@@ -114,7 +117,11 @@ export const TranslationRead: React.FC<Props> = ({
           disabled={disabled}
           showHighlights={isEditingRow && language.base}
           isPlural={keyData.keyIsPlural}
-          qaIssues={!keyData.keyIsPlural ? translation?.qaIssues : undefined}
+          qaIssues={
+            !keyData.keyIsPlural && isEnabled('QA_CHECKS')
+              ? translation?.qaIssues
+              : undefined
+          }
           translationId={translation?.id}
         />
         {Boolean(translation?.totalSuggestionCount) && (
