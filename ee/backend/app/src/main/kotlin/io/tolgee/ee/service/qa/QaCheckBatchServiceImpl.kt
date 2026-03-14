@@ -1,9 +1,15 @@
 package io.tolgee.ee.service.qa
 
+import io.tolgee.component.CurrentDateProvider
+import io.tolgee.hateoas.qa.QaIssueModelAssembler
 import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.qa.QaCheckBatchService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.websocket.WebsocketEvent
+import io.tolgee.websocket.WebsocketEventPublisher
+import io.tolgee.websocket.WebsocketEventType
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,6 +21,9 @@ class QaCheckBatchServiceImpl(
   private val qaIssueService: QaIssueService,
   private val translationService: TranslationService,
   private val languageService: LanguageService,
+  private val websocketEventPublisher: WebsocketEventPublisher,
+  private val currentDateProvider: CurrentDateProvider,
+  private val qaIssueModelAssembler: QaIssueModelAssembler,
 ) : QaCheckBatchService {
   @Transactional
   override fun runChecksAndPersist(
@@ -52,9 +61,26 @@ class QaCheckBatchServiceImpl(
         checkTypes,
         languageId = translation.language.id,
       )
-    qaIssueService.replaceIssuesForTranslation(translation, results, checkTypes)
+    val savedIssues = qaIssueService.replaceIssuesForTranslation(translation, results, checkTypes)
 
     translation.qaChecksStale = false
     translationService.save(translation)
+
+    val openIssues = savedIssues.filter { it.state == QaIssueState.OPEN }
+    websocketEventPublisher(
+      "/projects/$projectId/${WebsocketEventType.QA_CHECKS_COMPLETED.typeName}",
+      WebsocketEvent(
+        data =
+          mapOf(
+            "translationId" to translation.id,
+            "keyId" to translation.key.id,
+            "languageTag" to translation.language.tag,
+            "qaIssueCount" to openIssues.size,
+            "qaChecksStale" to false,
+            "qaIssues" to openIssues.map { qaIssueModelAssembler.toModel(it) },
+          ),
+        timestamp = currentDateProvider.date.time,
+      ),
+    )
   }
 }

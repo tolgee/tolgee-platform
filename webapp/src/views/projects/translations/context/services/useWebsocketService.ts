@@ -88,6 +88,27 @@ export const useWebsocketService = (
     }
   }, [project, client]);
 
+  useEffect(() => {
+    if (client) {
+      return client.subscribe(
+        `/projects/${project.id}/qa-checks-completed`,
+        (event) => {
+          translationService.changeTranslations([
+            {
+              keyId: event.data.keyId,
+              language: event.data.languageTag,
+              value: {
+                qaIssueCount: event.data.qaIssueCount,
+                qaChecksStale: event.data.qaChecksStale,
+                qaIssues: event.data.qaIssues,
+              },
+            },
+          ]);
+        }
+      );
+    }
+  }, [project, client]);
+
   return {
     setEventBlockers,
   };

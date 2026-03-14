@@ -163,7 +163,8 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
 
 export type EventTypeProject =
   | 'translation-data-modified'
-  | 'batch-job-progress';
+  | 'batch-job-progress'
+  | 'qa-checks-completed';
 export type ChannelProject = `/projects/${number}/${EventTypeProject}`;
 
 export type EventTypeUser = 'notifications-changed';
@@ -185,6 +186,15 @@ export type BatchJobProgress = WebsocketEvent<{
 export type NotificationsChanged = WebsocketEvent<{
   currentlyUnseenCount: number;
   newNotification?: components['schemas']['NotificationModel'];
+}>;
+
+export type QaChecksCompletedData = WebsocketEvent<{
+  translationId: number;
+  keyId: number;
+  languageTag: string;
+  qaIssueCount: number;
+  qaChecksStale: boolean;
+  qaIssues: components['schemas']['QaIssueModel'][];
 }>;
 
 export type EntityModification<T> = T extends keyof schemas
@@ -250,6 +260,8 @@ export type Data<T> = T extends `/projects/${number}/translation-data-modified`
   ? TranslationsModifiedData
   : T extends `/projects/${number}/batch-job-progress`
   ? BatchJobProgress
+  : T extends `/projects/${number}/qa-checks-completed`
+  ? QaChecksCompletedData
   : T extends `/users/${number}/notifications-changed`
   ? NotificationsChanged
   : never;

@@ -163,6 +163,10 @@ export const useEditService = ({
             { keyId, language: lang, value: translation },
           ])
         );
+        // Mark QA checks as stale and clear old issues, since the translation was updated
+        translationService.changeTranslations([
+          { keyId, language, value: { qaChecksStale: true, qaIssues: [] } },
+        ]);
       }
     } else {
       // update key

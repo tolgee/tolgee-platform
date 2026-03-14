@@ -23,7 +23,7 @@ class QaIssueService(
     translation: Translation,
     results: List<QaCheckResult>,
     checkTypes: List<QaCheckType>? = null,
-  ) {
+  ): List<TranslationQaIssue> {
     val existingIssues = qaIssueRepository.findAllByTranslationId(translation.id)
 
     if (checkTypes == null) {
@@ -55,6 +55,7 @@ class QaIssueService(
         )
       }
     qaIssueRepository.saveAll(entities)
+    return entities
   }
 
   fun getIssuesForTranslation(
