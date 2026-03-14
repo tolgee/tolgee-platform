@@ -158,7 +158,7 @@ export const OrgInvoicesSection: FC = () => {
             </Box>
             <Box
               sx={{
-                pl: 0,
+                pl: 0.5,
                 pr: 2,
                 py: 1.5,
                 display: 'flex',
