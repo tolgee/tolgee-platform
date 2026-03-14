@@ -17,6 +17,7 @@ import { CELL_HIGHLIGHT_ON_HOVER, CELL_SHOW_ON_HOVER } from './styles';
 import { useTranslationsSelector } from '../context/TranslationsContext';
 import { useTaskTransitionTranslation } from 'tg.translationTools/useTaskTransitionTranslation';
 import { QaBadge } from 'tg.ee';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 type TaskModel = components['schemas']['KeyTaskViewModel'];
@@ -99,13 +100,17 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const spots: string[] = [];
 
   const translateTransition = useTaskTransitionTranslation();
+  const { isEnabled } = useEnabledFeatures();
   const displayTransitionButtons = stateChangeEnabled && state;
   const displayEdit = editEnabled && onEdit;
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || commentsPresent;
   const onlyResolved = commentsPresent && !unresolvedCommentCount;
   const qaIssuesResolved = qaIssueCount === 0;
-  const displayQaIssues = onQaIssues && (qaIssueCount !== 0 || qaChecksStale);
+  const displayQaIssues =
+    isEnabled('QA_CHECKS') &&
+    onQaIssues &&
+    (qaIssueCount !== 0 || qaChecksStale);
   const prefilteredTask = useTranslationsSelector((c) => c.prefilter?.task);
   const task = tasks?.[0];
   const displayTaskButton =
@@ -198,7 +203,6 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
         </ControlsButton>
       )}
       {inDomQaIssues && (
-        // TODO: only show when QA feature is enabled
         <ControlsButton
           style={{ gridArea: 'qa' }}
           onClick={onQaIssues}

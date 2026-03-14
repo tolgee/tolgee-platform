@@ -23,6 +23,7 @@ import { getProjectTranslationsUrl, LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { QaBadge, QaBadgePopover } from 'tg.ee';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import clsx from 'clsx';
 
 const StyledContainer = styled('div')`
@@ -115,6 +116,7 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
   const allLangs = languages.map((l) => l.tag);
   const canViewLanguages = satisfiesPermission('translations.view');
   const canEditLanguages = satisfiesPermission('languages.edit');
+  const { isEnabled } = useEnabledFeatures();
   const [qaPopoverAnchor, setQaPopoverAnchor] = useState<HTMLElement | null>(
     null
   );
@@ -218,25 +220,26 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
                   </Box>
                 </StyledTooltip>
               </StyledStates>
-              {(item.qaIssueCount > 0 || item.qaChecksStaleCount > 0) && (
-                <StyledQaBadge
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setQaPopoverAnchor(e.currentTarget as HTMLElement);
-                    setQaPopoverLanguage({
-                      id: item.languageId!,
-                      tag: item.languageTag!,
-                    });
-                  }}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <QaBadge
-                    count={item.qaIssueCount}
-                    stale={item.qaChecksStaleCount > 0}
-                    darkWhenNoIssues
-                  />
-                </StyledQaBadge>
-              )}
+              {isEnabled('QA_CHECKS') &&
+                (item.qaIssueCount > 0 || item.qaChecksStaleCount > 0) && (
+                  <StyledQaBadge
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setQaPopoverAnchor(e.currentTarget as HTMLElement);
+                      setQaPopoverLanguage({
+                        id: item.languageId!,
+                        tag: item.languageTag!,
+                      });
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <QaBadge
+                      count={item.qaIssueCount}
+                      stale={item.qaChecksStaleCount > 0}
+                      darkWhenNoIssues
+                    />
+                  </StyledQaBadge>
+                )}
               <StyledActions>
                 <LanguageMenu language={language!} />
               </StyledActions>
