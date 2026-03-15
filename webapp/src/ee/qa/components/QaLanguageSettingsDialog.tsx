@@ -98,9 +98,8 @@ export const QaLanguageSettingsDialog = ({
           },
           content: {
             'application/json': {
-              // TODO: figure out why generated schema is wrong
-              // @ts-ignore: api schema is wrong, value can be null
-              settings: values.settings,
+              // Values can be null, but the schema doesn't capture this...
+              settings: values.settings as any,
             },
           },
         });

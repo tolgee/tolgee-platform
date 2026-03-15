@@ -4,13 +4,15 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.qa.LanguageQaConfigModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaLanguageSettingsModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaSettingsModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.qa.LanguageQaConfigModel
+import io.tolgee.ee.api.v2.hateoas.model.qa.QaLanguageSettingsModel
+import io.tolgee.ee.api.v2.hateoas.model.qa.QaSettingsModel
 import io.tolgee.ee.data.qa.QaLanguageSettingsRequest
 import io.tolgee.ee.data.qa.QaSettingsRequest
 import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.enums.qa.QaCheckSeverity
-import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
@@ -35,15 +37,18 @@ class QaSettingsController(
   private val projectQaConfigService: ProjectQaConfigService,
   private val languageService: LanguageService,
   private val languageQaConfigModelAssembler: LanguageQaConfigModelAssembler,
+  private val qaSettingsModelAssembler: QaSettingsModelAssembler,
+  private val qaLanguageSettingsModelAssembler: QaLanguageSettingsModelAssembler,
 ) {
   @GetMapping("")
   @Operation(summary = "Get QA check settings for the project")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)
-  fun getSettings(): Map<QaCheckType, QaCheckSeverity> {
-    // TODO: don't use map directly - wrap it in model
-    return projectQaConfigService.getSettings(projectHolder.project.id)
+  fun getSettings(): QaSettingsModel {
+    return qaSettingsModelAssembler.toModel(
+      projectQaConfigService.getSettings(projectHolder.project.id),
+    )
   }
 
   @PutMapping("")
@@ -54,9 +59,11 @@ class QaSettingsController(
   fun updateSettings(
     @RequestBody @Valid
     dto: QaSettingsRequest,
-  ): Map<QaCheckType, QaCheckSeverity> {
+  ): QaSettingsModel {
     projectQaConfigService.updateSettings(projectHolder.project.id, dto.settings)
-    return projectQaConfigService.getSettings(projectHolder.project.id)
+    return qaSettingsModelAssembler.toModel(
+      projectQaConfigService.getSettings(projectHolder.project.id),
+    )
   }
 
   @GetMapping("/languages")
@@ -82,8 +89,10 @@ class QaSettingsController(
   @RequiresFeatures(Feature.QA_CHECKS)
   fun getLanguageSettingsResolved(
     @PathVariable languageId: Long,
-  ): Map<QaCheckType, QaCheckSeverity> {
-    return projectQaConfigService.getResolvedSettingsForLanguage(projectHolder.project.id, languageId)
+  ): QaSettingsModel {
+    return qaSettingsModelAssembler.toModel(
+      projectQaConfigService.getResolvedSettingsForLanguage(projectHolder.project.id, languageId),
+    )
   }
 
   @GetMapping("/languages/{languageId:[0-9]+}")
@@ -93,8 +102,10 @@ class QaSettingsController(
   @RequiresFeatures(Feature.QA_CHECKS)
   fun getLanguageSettings(
     @PathVariable languageId: Long,
-  ): Map<QaCheckType, QaCheckSeverity>? {
-    return projectQaConfigService.getSettingsForLanguage(projectHolder.project.id, languageId)
+  ): QaLanguageSettingsModel {
+    return qaLanguageSettingsModelAssembler.toModel(
+      projectQaConfigService.getSettingsForLanguage(projectHolder.project.id, languageId),
+    )
   }
 
   @PutMapping("/languages/{languageId:[0-9]+}")
@@ -106,10 +117,12 @@ class QaSettingsController(
     @PathVariable languageId: Long,
     @RequestBody @Valid
     dto: QaLanguageSettingsRequest,
-  ): Map<QaCheckType, QaCheckSeverity>? {
+  ): QaLanguageSettingsModel {
     val projectId = projectHolder.project.id
     projectQaConfigService.updateLanguageSettings(projectId, languageId, dto.settings)
-    return projectQaConfigService.getSettingsForLanguage(projectId, languageId)
+    return qaLanguageSettingsModelAssembler.toModel(
+      projectQaConfigService.getSettingsForLanguage(projectId, languageId),
+    )
   }
 
   @DeleteMapping("/languages/{languageId:[0-9]+}")
