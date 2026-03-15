@@ -1,5 +1,7 @@
 package io.tolgee.repository.qa
 
+import io.tolgee.dtos.queryResults.qa.LanguageQaIssueCount
+import io.tolgee.dtos.queryResults.qa.QaIssueCountByCheckType
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.model.qa.TranslationQaIssue
@@ -8,18 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
-
-// TODO: move interface to separate file
-interface LanguageQaIssueCount {
-  val languageId: Long
-  val count: Long
-}
-
-// TODO: move interface to separate file
-interface QaIssueCountByCheckType {
-  val checkType: QaCheckType
-  val count: Long
-}
 
 @Repository
 @Lazy

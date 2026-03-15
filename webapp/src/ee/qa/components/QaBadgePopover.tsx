@@ -15,7 +15,10 @@ import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { getProjectTranslationsUrl, LINKS, PARAMS } from 'tg.constants/links';
 import { QaCheck } from 'tg.component/CustomIcons';
 import { QaBadgePopoverProps } from '../../../eeSetup/EeModuleType';
-import { useQaCheckTypeLabel } from 'tg.ee.module/qa/hooks/useQaCheckTypeLabel';
+import { IssueRow } from './IssueRow';
+import { components } from 'tg.service/apiSchema.generated';
+
+type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
 const StyledPopover = styled(Popover)`
   .MuiPaper-root {
@@ -40,63 +43,12 @@ const StyledHeader = styled(Box)`
   padding: 0 8px;
 `;
 
-const StyledRow = styled(Box)`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-
-  &:hover {
-    background: ${({ theme }) => theme.palette.tokens.text._states.hover};
-  }
-
-  & .show-link {
-    visibility: hidden;
-  }
-
-  &:hover .show-link {
-    visibility: visible;
-  }
-`;
-
 const StyledButtons = styled(Box)`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 8px;
 `;
-
-type IssueRowProps = {
-  label: string;
-  count: number;
-  onClick: () => void;
-};
-
-// TODO: move IssueRow to separate file
-function IssueRow({ label, count, onClick }: IssueRowProps) {
-  const { t } = useTranslate();
-  return (
-    <StyledRow onClick={onClick}>
-      <Typography variant="body2">
-        {label}: {count}
-      </Typography>
-      <Typography
-        className="show-link"
-        variant="button"
-        sx={{
-          // TODO: use `Styled*` component instead of this
-          fontSize: 13,
-          color: 'primary.main',
-          cursor: 'pointer',
-        }}
-      >
-        {t('qa_dashboard_popover_show')}
-      </Typography>
-    </StyledRow>
-  );
-}
 
 export const QaBadgePopover = ({
   anchorEl,
@@ -181,9 +133,9 @@ export const QaBadgePopover = ({
         ) : (
           <Box display="flex" flexDirection="column">
             {entries.map(([checkType, count]) => (
-              <PopoverIssueRow
+              <IssueRow
                 key={checkType}
-                checkType={checkType}
+                checkType={checkType as QaCheckType}
                 count={count}
                 onClick={() => navigateToCheckType(checkType)}
               />
@@ -228,17 +180,3 @@ export const QaBadgePopover = ({
     </StyledPopover>
   );
 };
-
-// TODO: merge into the IssueRow
-function PopoverIssueRow({
-  checkType,
-  count,
-  onClick,
-}: {
-  checkType: string;
-  count: number;
-  onClick: () => void;
-}) {
-  const label = useQaCheckTypeLabel(checkType as any);
-  return <IssueRow label={label} count={count} onClick={onClick} />;
-}
