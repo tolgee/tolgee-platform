@@ -65,6 +65,10 @@ class QaIssueService(
     return qaIssueRepository.findAllByProjectIdAndTranslationId(projectId, translationId)
   }
 
+  fun getOpenIssuesForTranslation(translationId: Long): List<TranslationQaIssue> {
+    return qaIssueRepository.findOpenByTranslationIds(listOf(translationId))
+  }
+
   @Transactional
   fun ignoreIssue(
     projectId: Long,
