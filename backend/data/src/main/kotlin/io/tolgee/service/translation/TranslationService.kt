@@ -36,6 +36,7 @@ import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDat
 import io.tolgee.service.translation.SetTranslationTextUtil.Companion.Options
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.Predicate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Lazy
@@ -188,7 +189,14 @@ class TranslationService(
     params: GetTranslationsParams,
     languages: Set<LanguageDto>,
   ): Page<KeyWithTranslationsView> {
-    return translationViewDataProvider.getData(projectId, languages, pageable, params, params.cursor)
+    return translationViewDataProvider.getData(
+      projectId,
+      languages,
+      pageable,
+      params,
+      params.cursor,
+      includeQaIssues = params.includeQaIssues == true,
+    )
   }
 
   fun getSelectAllKeys(
@@ -579,5 +587,40 @@ class TranslationService(
   ): List<Translation> {
     return translationRepository
       .getTranslationsWithLabels(keyIds, languageIds)
+  }
+
+  fun getTranslationIdsForRecheck(
+    projectId: Long,
+    languageIds: List<Long>? = null,
+  ): List<Long> {
+    val cb = entityManager.criteriaBuilder
+    val query = cb.createQuery(Long::class.java)
+    val root = query.from(Translation::class.java)
+
+    val predicates =
+      mutableListOf<Predicate>(
+        cb.equal(root.get(Translation_.key).get<Any>("project").get<Long>("id"), projectId),
+        cb.isNotNull(root.get(Translation_.text)),
+      )
+
+    if (!languageIds.isNullOrEmpty()) {
+      predicates.add(root.get(Translation_.language).get<Long>("id").`in`(languageIds))
+    }
+
+    query.select(root.get(Translation_.id))
+    query.where(*predicates.toTypedArray())
+
+    return entityManager.createQuery(query).resultList
+  }
+
+  @Transactional
+  fun setQaChecksStale(translationIds: List<Long>) {
+    translationIds.chunked(1000).forEach { chunk ->
+      entityManager
+        .createQuery(
+          "UPDATE Translation t SET t.qaChecksStale = true WHERE t.id IN :ids",
+        ).setParameter("ids", chunk)
+        .executeUpdate()
+    }
   }
 }

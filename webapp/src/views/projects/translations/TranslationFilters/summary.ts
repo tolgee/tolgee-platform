@@ -28,6 +28,7 @@ import {
   getDeletedByFiltersLength,
   getDeletedByFiltersName,
 } from './SubfilterDeletedBy';
+import { getQaChecksFiltersLength, getQaChecksFiltersName } from 'tg.ee';
 import { components } from 'tg.service/apiSchema.generated';
 
 type LabelModel = components['schemas']['LabelModel'];
@@ -41,7 +42,8 @@ export function countFilters(value: FiltersInternal) {
     getTranslationFiltersLength(value) +
     getLabelFiltersLength(value) +
     getSuggestionsFiltersLength(value) +
-    getDeletedByFiltersLength(value)
+    getDeletedByFiltersLength(value) +
+    getQaChecksFiltersLength(value)
   );
 }
 
@@ -54,6 +56,7 @@ export function getFilterName(value: FiltersInternal, labels?: LabelModel[]) {
     getTranslationFiltersName(value) ||
     getLabelFiltersName(value, labels) ||
     getSuggestionsFiltersName(value) ||
-    getDeletedByFiltersName(value)
+    getDeletedByFiltersName(value) ||
+    getQaChecksFiltersName(value)
   );
 }

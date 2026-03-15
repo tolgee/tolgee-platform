@@ -108,6 +108,7 @@ class SetTranslationTextUtil(
 
     if (hasTextChanged) {
       translation.resetFlags()
+      translation.qaChecksStale = true
     }
 
     translation.text = text

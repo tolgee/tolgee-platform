@@ -1,0 +1,142 @@
+import React, { useEffect, useState } from 'react';
+import { LinearProgress, styled } from '@mui/material';
+import { T } from '@tolgee/react';
+import {
+  PanelContentData,
+  PanelContentProps,
+} from 'tg.views/projects/translations/ToolsPanel/common/types';
+import { TabMessage } from 'tg.views/projects/translations/ToolsPanel/common/TabMessage';
+import { useQaChecksForPanel } from '../hooks/useQaChecksForPanel';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useProject } from 'tg.hooks/useProject';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { QaCheckItem } from './QaCheckItem';
+import { applyQaReplacement } from 'tg.fixtures/qaUtils';
+
+const StyledWrapper = styled('div')`
+  margin-top: 4px;
+`;
+
+const StyledContainer = styled('div')`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: ${({ theme }) => theme.spacing(1)};
+  padding: ${({ theme }) => theme.spacing(0, 0.5)};
+`;
+
+const StyledLinearProgress = styled(LinearProgress)`
+  height: 2px;
+  margin-bottom: -2px;
+`;
+
+export const useQaChecksCount = (data: PanelContentData) => {
+  const translation = data.keyData.translations[data.language.tag];
+  return translation?.qaIssueCount ?? 0;
+};
+
+export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
+  const { isEnabled } = useEnabledFeatures();
+  const { issues, isLoading } = useQaChecksForPanel(data);
+  const text = data.editingText ?? '';
+  const project = useProject();
+
+  const [showProgress, setShowProgress] = useState(false);
+
+  useEffect(() => {
+    // Debounce progress indicator
+    setShowProgress(false);
+    if (isLoading) {
+      const timeout = setTimeout(() => {
+        setShowProgress(true);
+      }, 400);
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoading, text]);
+
+  const openIssues = issues.filter((i) => i.state !== 'IGNORED');
+  useEffect(() => {
+    data.setItemsCount(openIssues.length);
+  }, [openIssues.length]);
+
+  const ignoreMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/ignore',
+    method: 'post',
+  });
+
+  const unignoreMutation = useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/unignore',
+    method: 'post',
+  });
+
+  if (!isEnabled('QA_CHECKS')) {
+    return (
+      <StyledWrapper>
+        <StyledContainer data-cy="qa-panel-container-disabled">
+          <TabMessage>
+            <T keyName="translation_tools_qa_not_available" />
+          </TabMessage>
+        </StyledContainer>
+      </StyledWrapper>
+    );
+  }
+
+  if (issues.length === 0) {
+    return (
+      <StyledWrapper>
+        {showProgress && <StyledLinearProgress />}
+        <StyledContainer data-cy="qa-panel-container-empty">
+          <TabMessage>
+            <T keyName="translation_tools_qa_no_issues" />
+          </TabMessage>
+        </StyledContainer>
+      </StyledWrapper>
+    );
+  }
+
+  // TODO: add note that some QA checks are not supported for plurals yes (when editing plural)
+
+  const handleCorrect = (issue: (typeof issues)[0]) => {
+    data.setValue(applyQaReplacement(text, issue));
+  };
+
+  const handleIgnoreToggle = (issue: (typeof issues)[0]) => {
+    const translationId = data.keyData.translations[data.language.tag]?.id;
+    if (translationId == null) return;
+
+    const mutation =
+      issue.state === 'IGNORED' ? unignoreMutation : ignoreMutation;
+    mutation.mutate({
+      path: {
+        projectId: project!.id,
+        translationId,
+      },
+      content: {
+        'application/json': issue as any,
+      },
+    });
+  };
+
+  return (
+    <StyledWrapper>
+      {showProgress && <StyledLinearProgress />}
+      <StyledContainer data-cy="qa-panel-container">
+        {issues.map((issue, index) => (
+          <QaCheckItem
+            key={`${issue.type}-${index}`}
+            issue={issue}
+            index={index + 1}
+            text={text}
+            slim={true}
+            onCorrect={
+              issue.replacement != null && issue.state === 'OPEN'
+                ? () => handleCorrect(issue)
+                : undefined
+            }
+            onIgnore={() => handleIgnoreToggle(issue)}
+          />
+        ))}
+      </StyledContainer>
+    </StyledWrapper>
+  );
+};

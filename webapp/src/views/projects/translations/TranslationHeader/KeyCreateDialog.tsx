@@ -43,6 +43,8 @@ export const KeyCreateDialog: React.FC<Props> = ({
         unresolvedCommentCount: 0,
         activeSuggestionCount: 0,
         totalSuggestionCount: 0,
+        qaIssueCount: 0,
+        qaChecksStale: false,
         fromTranslationMemory: false,
         labels: [],
       };

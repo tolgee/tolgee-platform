@@ -698,6 +698,7 @@ declare namespace DataCy {
         "project-settings-menu-advanced" |
         "project-settings-menu-general" |
         "project-settings-menu-labels" |
+        "project-settings-menu-qa" |
         "project-settings-name" |
         "project-settings-suggestions-mode-switch" |
         "project-settings-transfer-button" |
@@ -717,6 +718,17 @@ declare namespace DataCy {
         "project-transfer-dialog" |
         "prompt-basic-option" |
         "prompt-basic-option-edit" |
+        "qa-check-item" |
+        "qa-issue-highlight" |
+        "qa-language-dialog-inherited-banner" |
+        "qa-language-dialog-reset-to-global" |
+        "qa-language-dialog-save" |
+        "qa-language-settings-button" |
+        "qa-panel-container" |
+        "qa-panel-container-disabled" |
+        "qa-panel-container-empty" |
+        "qa-settings-row" |
+        "qa-settings-select" |
         "quick-start-action" |
         "quick-start-dialog" |
         "quick-start-finish-action" |
@@ -877,6 +889,7 @@ declare namespace DataCy {
         "translations-cell-main-action-button" |
         "translations-cell-menu-item" |
         "translations-cell-menu-open-button" |
+        "translations-cell-qa-issues-button" |
         "translations-cell-screenshots-button" |
         "translations-cell-switch-mode" |
         "translations-cell-task-button" |

@@ -1,10 +1,14 @@
 import React from 'react';
-import type {
+import {
   BillingMenuItemsProps,
   GlossaryTermHighlightModel,
   GlossaryTermHighlightsProps,
   GlossaryTermPreviewProps,
+  QaBadgePopoverProps,
+  QaBadgeProps,
+  SubfilterQaChecksProps,
 } from './EeModuleType';
+import type { FiltersInternal } from 'tg.views/projects/translations/TranslationFilters/tools';
 
 const NotIncludedInOss = (name: string): ((props?: any) => any) => {
   function NotIncludedInOss(props: any, ref: any) {
@@ -32,6 +36,16 @@ export const OrderTranslationsDialog = Empty;
 export const TaskItem = Empty;
 export const TaskFilterPopover = Empty;
 export const TaskAllDonePlaceholder = Empty;
+export const QaBadge = (_props: QaBadgeProps) => Empty() as JSX.Element;
+export const QaBadgePopover = (_props: QaBadgePopoverProps) =>
+  Empty() as JSX.Element;
+export const QaCheckItem = Empty;
+export const SubfilterQaChecks = (_props: SubfilterQaChecksProps) =>
+  Empty() as JSX.Element;
+export const getQaChecksFiltersLength = (_value: FiltersInternal) => 0;
+export const getQaChecksFiltersName = (
+  _value: FiltersInternal
+): JSX.Element | undefined => undefined;
 
 export const routes = {
   Root: Empty,
@@ -53,6 +67,7 @@ export const useAddDeveloperViewItems = () => (existingItems) => existingItems;
 export const useAddBatchOperations = () => (existingItems) => existingItems;
 export const translationPanelAdder = (existingItems) => existingItems;
 export const glossaryPanelAdder = (existingItems) => existingItems;
+export const qaChecksPanelAdder = (existingItems) => existingItems;
 export const useAddProjectMenuItems = () => (existingItems) => existingItems;
 export const useAddUserMenuItems = () => (existingItems) => existingItems;
 export const useAddAdministrationMenuItems = () => (existingItems) =>

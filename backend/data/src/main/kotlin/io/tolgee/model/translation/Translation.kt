@@ -15,6 +15,7 @@ import io.tolgee.model.branching.snapshot.TranslationSnapshot
 import io.tolgee.model.enums.BranchKeyMergeResolutionType
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.service.branching.chooseThreeWay
 import io.tolgee.service.branching.isConflictingThreeWay
 import io.tolgee.service.branching.mergeSetsWithBase
@@ -91,6 +92,9 @@ class Translation(
   @OneToMany(mappedBy = "translation", orphanRemoval = true)
   var comments: MutableSet<TranslationComment> = mutableSetOf()
 
+  @OneToMany(mappedBy = "translation", orphanRemoval = true)
+  var qaIssues: MutableSet<TranslationQaIssue> = mutableSetOf()
+
   var wordCount: Int? = null
 
   var characterCount: Int? = null
@@ -98,6 +102,9 @@ class Translation(
   @ActivityLoggedProp
   @ColumnDefault("false")
   var outdated: Boolean = false
+
+  @ColumnDefault("false")
+  var qaChecksStale: Boolean = false
 
   @ManyToMany
   @JoinTable(

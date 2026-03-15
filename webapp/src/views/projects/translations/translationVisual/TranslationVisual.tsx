@@ -8,6 +8,9 @@ import { T } from '@tolgee/react';
 import { styled } from '@mui/material';
 import { DirectionLocaleWrapper } from '../DirectionLocaleWrapper';
 import { useProject } from 'tg.hooks/useProject';
+import { components } from 'tg.service/apiSchema.generated';
+
+type QaIssueModel = components['schemas']['QaIssueModel'];
 
 const StyledDisabled = styled(DirectionLocaleWrapper)`
   color: ${({ theme }) => theme.palette.text.disabled};
@@ -24,6 +27,8 @@ type Props = {
   showHighlights?: boolean;
   isPlural: boolean;
   extraPadding?: boolean;
+  qaIssues?: QaIssueModel[];
+  translationId?: number;
 };
 
 export const TranslationVisual = ({
@@ -36,6 +41,8 @@ export const TranslationVisual = ({
   showHighlights,
   isPlural,
   extraPadding,
+  qaIssues,
+  translationId,
 }: Props) => {
   const project = useProject();
   const value = useMemo(() => {
@@ -72,6 +79,8 @@ export const TranslationVisual = ({
             targetLocale={targetLocale}
             nested={Boolean(variant)}
             showHighlights={showHighlights}
+            qaIssues={qaIssues}
+            translationId={translationId}
           />
         </LimitedHeightText>
       )}

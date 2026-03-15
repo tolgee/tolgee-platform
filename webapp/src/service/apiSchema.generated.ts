@@ -824,6 +824,24 @@ export interface paths {
     put: operations["updatePrompt"];
     delete: operations["deletePrompt"];
   };
+  "/v2/projects/{projectId}/qa-check-types": {
+    get: operations["getCheckTypes"];
+  };
+  "/v2/projects/{projectId}/qa-settings": {
+    get: operations["getSettings"];
+    put: operations["updateSettings"];
+  };
+  "/v2/projects/{projectId}/qa-settings/languages": {
+    get: operations["getAllLanguageSettings"];
+  };
+  "/v2/projects/{projectId}/qa-settings/languages/{languageId}": {
+    get: operations["getLanguageSettings"];
+    put: operations["updateLanguageSettings"];
+    delete: operations["deleteLanguageSettings"];
+  };
+  "/v2/projects/{projectId}/qa-settings/languages/{languageId}/resolved": {
+    get: operations["getLanguageSettingsResolved"];
+  };
   "/v2/projects/{projectId}/single-step-import": {
     /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
     post: operations["singleStepFromFiles"];
@@ -882,6 +900,9 @@ export interface paths {
   };
   "/v2/projects/{projectId}/stats/daily-activity": {
     get: operations["getProjectDailyActivity"];
+  };
+  "/v2/projects/{projectId}/stats/qa-issue-counts": {
+    get: operations["getQaIssueCountsByCheckType"];
   };
   "/v2/projects/{projectId}/suggest/machine-translations": {
     /** Suggests machine translations from enabled services */
@@ -1004,6 +1025,21 @@ export interface paths {
   "/v2/projects/{projectId}/translations/{translationId}/label/{labelId}": {
     put: operations["assignLabel"];
     delete: operations["unassignLabel"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/qa-issues": {
+    get: operations["getIssues"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/qa-issues/ignore": {
+    post: operations["ignoreIssueByParams"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/qa-issues/unignore": {
+    post: operations["unignoreIssueByParams"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/qa-issues/{issueId}/ignore": {
+    put: operations["ignoreIssue"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/qa-issues/{issueId}/unignore": {
+    put: operations["unignoreIssue"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/set-outdated-flag/{state}": {
     /** Set's "outdated" flag indicating the base translation was changed without updating current translation. */
@@ -1496,6 +1532,7 @@ export interface components {
         | "BILLING_TRIAL_EXPIRATION_NOTICE"
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
+        | "QA_CHECK"
         | "NO_OP";
       /**
        * Format: int64
@@ -1826,6 +1863,11 @@ export interface components {
     CollectionModelProjectTransferOptionModel: {
       _embedded?: {
         transferOptions?: components["schemas"]["ProjectTransferOptionModel"][];
+      };
+    };
+    CollectionModelQaIssueModel: {
+      _embedded?: {
+        qaIssues?: components["schemas"]["QaIssueModel"][];
       };
     };
     CollectionModelQueueItemModel: {
@@ -2579,6 +2621,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       isPayAsYouGo: boolean;
       /** Format: date-time */
@@ -3499,6 +3542,7 @@ export interface components {
         | "BILLING_TRIAL_EXPIRATION_NOTICE"
         | "ASSIGN_TRANSLATION_LABEL"
         | "UNASSIGN_TRANSLATION_LABEL"
+        | "QA_CHECK"
         | "NO_OP";
     };
     JsonNode: unknown;
@@ -3951,6 +3995,10 @@ export interface components {
        */
       tag: string;
     };
+    LanguageQaConfigModel: {
+      customSettings?: { [key: string]: "WARNING" | "OFF" };
+      language: components["schemas"]["LanguageModel"];
+    };
     LanguageRequest: {
       /**
        * @description Language flag emoji as UTF-8 emoji
@@ -3980,6 +4028,10 @@ export interface components {
       languageName?: string;
       languageOriginalName?: string;
       languageTag?: string;
+      /** Format: int64 */
+      qaChecksStaleCount: number;
+      /** Format: int64 */
+      qaIssueCount: number;
       /** Format: int64 */
       reviewedKeyCount: number;
       /** Format: double */
@@ -4856,6 +4908,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       /** Format: int64 */
       id: number;
@@ -5275,6 +5328,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       free: boolean;
       /** Format: int64 */
@@ -5454,6 +5508,128 @@ export interface components {
        * @description Currently used credits including credits used over the limit
        */
       usedMtCredits: number;
+    };
+    QaCheckCategoryModel: {
+      /** @enum {string} */
+      category: "COMPARISON" | "SYNTAX";
+      checkTypes: (
+        | "EMPTY_TRANSLATION"
+        | "SPACES_MISMATCH"
+        | "UNMATCHED_NEWLINES"
+        | "CHARACTER_CASE_MISMATCH"
+        | "MISSING_NUMBERS"
+        | "PUNCTUATION_MISMATCH"
+        | "BRACKETS_MISMATCH"
+        | "SPECIAL_CHARACTER_MISMATCH"
+        | "DIFFERENT_URLS"
+        | "INCONSISTENT_PLACEHOLDERS"
+        | "INCONSISTENT_HTML"
+        | "ICU_SYNTAX"
+        | "REPEATED_WORDS"
+        | "SPELLING"
+        | "UNRESOLVED_COMMENTS"
+      )[];
+    };
+    QaCheckIssueIgnoreRequest: {
+      /** @enum {string} */
+      message:
+        | "qa_empty_translation"
+        | "qa_check_failed"
+        | "qa_spaces_leading_added"
+        | "qa_spaces_leading_removed"
+        | "qa_spaces_trailing_added"
+        | "qa_spaces_trailing_removed"
+        | "qa_spaces_doubled"
+        | "qa_spaces_non_breaking_added"
+        | "qa_spaces_non_breaking_removed"
+        | "qa_punctuation_add"
+        | "qa_punctuation_remove"
+        | "qa_punctuation_replace"
+        | "qa_case_capitalize"
+        | "qa_case_lowercase"
+        | "qa_numbers_missing";
+      params?: { [key: string]: string };
+      /** Format: int32 */
+      positionEnd: number;
+      /** Format: int32 */
+      positionStart: number;
+      replacement?: string;
+      /** @enum {string} */
+      type:
+        | "EMPTY_TRANSLATION"
+        | "SPACES_MISMATCH"
+        | "UNMATCHED_NEWLINES"
+        | "CHARACTER_CASE_MISMATCH"
+        | "MISSING_NUMBERS"
+        | "PUNCTUATION_MISMATCH"
+        | "BRACKETS_MISMATCH"
+        | "SPECIAL_CHARACTER_MISMATCH"
+        | "DIFFERENT_URLS"
+        | "INCONSISTENT_PLACEHOLDERS"
+        | "INCONSISTENT_HTML"
+        | "ICU_SYNTAX"
+        | "REPEATED_WORDS"
+        | "SPELLING"
+        | "UNRESOLVED_COMMENTS";
+    };
+    QaIssueModel: {
+      /** Format: int64 */
+      id: number;
+      /** @enum {string} */
+      message:
+        | "qa_empty_translation"
+        | "qa_check_failed"
+        | "qa_spaces_leading_added"
+        | "qa_spaces_leading_removed"
+        | "qa_spaces_trailing_added"
+        | "qa_spaces_trailing_removed"
+        | "qa_spaces_doubled"
+        | "qa_spaces_non_breaking_added"
+        | "qa_spaces_non_breaking_removed"
+        | "qa_punctuation_add"
+        | "qa_punctuation_remove"
+        | "qa_punctuation_replace"
+        | "qa_case_capitalize"
+        | "qa_case_lowercase"
+        | "qa_numbers_missing";
+      params?: { [key: string]: string };
+      /** Format: int32 */
+      positionEnd: number;
+      /** Format: int32 */
+      positionStart: number;
+      replacement?: string;
+      /** @enum {string} */
+      state: "OPEN" | "IGNORED";
+      /** @enum {string} */
+      type:
+        | "EMPTY_TRANSLATION"
+        | "SPACES_MISMATCH"
+        | "UNMATCHED_NEWLINES"
+        | "CHARACTER_CASE_MISMATCH"
+        | "MISSING_NUMBERS"
+        | "PUNCTUATION_MISMATCH"
+        | "BRACKETS_MISMATCH"
+        | "SPECIAL_CHARACTER_MISMATCH"
+        | "DIFFERENT_URLS"
+        | "INCONSISTENT_PLACEHOLDERS"
+        | "INCONSISTENT_HTML"
+        | "ICU_SYNTAX"
+        | "REPEATED_WORDS"
+        | "SPELLING"
+        | "UNRESOLVED_COMMENTS";
+    };
+    QaLanguageSettingsModel: {
+      settings?: { [key: string]: "WARNING" | "OFF" };
+    };
+    QaLanguageSettingsRequest: {
+      /** @description Map of check types to their severity. Null values mean 'inherit from global settings'. */
+      settings: { [key: string]: "WARNING" | "OFF" };
+    };
+    QaSettingsModel: {
+      settings: { [key: string]: "WARNING" | "OFF" };
+    };
+    QaSettingsRequest: {
+      settings: { [key: string]: "WARNING" | "OFF" };
     };
     QueueItemModel: {
       /** Format: int64 */
@@ -5638,6 +5814,7 @@ export interface components {
         | "GLOSSARY"
         | "TRANSLATION_LABELS"
         | "BRANCHING"
+        | "QA_CHECKS"
       )[];
       free: boolean;
       hasYearlyPrice: boolean;
@@ -6659,6 +6836,15 @@ export interface components {
       mtProvider?: "GOOGLE" | "AWS" | "DEEPL" | "AZURE" | "BAIDU" | "PROMPT";
       /** @description Whether base language translation was changed after this translation was updated */
       outdated: boolean;
+      /** @description Whether QA checks are stale and need re-running */
+      qaChecksStale: boolean;
+      /**
+       * Format: int64
+       * @description Number of open QA issues
+       */
+      qaIssueCount: number;
+      /** @description Detailed QA issues for inline highlighting (only when includeQaIssues=true) */
+      qaIssues?: components["schemas"]["QaIssueModel"][];
       /**
        * @description State of translation
        * @enum {string}
@@ -15582,6 +15768,26 @@ export interface operations {
         filterHasCommentsInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
+        /** Filter keys with open QA issues in lang */
+        filterHasQaIssuesInLang?: string[];
+        /** Filter keys with specific QA check type issues */
+        filterQaCheckType?: (
+          | "EMPTY_TRANSLATION"
+          | "SPACES_MISMATCH"
+          | "UNMATCHED_NEWLINES"
+          | "CHARACTER_CASE_MISMATCH"
+          | "MISSING_NUMBERS"
+          | "PUNCTUATION_MISMATCH"
+          | "BRACKETS_MISMATCH"
+          | "SPECIAL_CHARACTER_MISMATCH"
+          | "DIFFERENT_URLS"
+          | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "ICU_SYNTAX"
+          | "REPEATED_WORDS"
+          | "SPELLING"
+          | "UNRESOLVED_COMMENTS"
+        )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -15707,6 +15913,26 @@ export interface operations {
         filterHasCommentsInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
+        /** Filter keys with open QA issues in lang */
+        filterHasQaIssuesInLang?: string[];
+        /** Filter keys with specific QA check type issues */
+        filterQaCheckType?: (
+          | "EMPTY_TRANSLATION"
+          | "SPACES_MISMATCH"
+          | "UNMATCHED_NEWLINES"
+          | "CHARACTER_CASE_MISMATCH"
+          | "MISSING_NUMBERS"
+          | "PUNCTUATION_MISMATCH"
+          | "BRACKETS_MISMATCH"
+          | "SPECIAL_CHARACTER_MISMATCH"
+          | "DIFFERENT_URLS"
+          | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "ICU_SYNTAX"
+          | "REPEATED_WORDS"
+          | "SPELLING"
+          | "UNRESOLVED_COMMENTS"
+        )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -15868,6 +16094,26 @@ export interface operations {
         filterHasCommentsInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
+        /** Filter keys with open QA issues in lang */
+        filterHasQaIssuesInLang?: string[];
+        /** Filter keys with specific QA check type issues */
+        filterQaCheckType?: (
+          | "EMPTY_TRANSLATION"
+          | "SPACES_MISMATCH"
+          | "UNMATCHED_NEWLINES"
+          | "CHARACTER_CASE_MISMATCH"
+          | "MISSING_NUMBERS"
+          | "PUNCTUATION_MISMATCH"
+          | "BRACKETS_MISMATCH"
+          | "SPECIAL_CHARACTER_MISMATCH"
+          | "DIFFERENT_URLS"
+          | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "ICU_SYNTAX"
+          | "REPEATED_WORDS"
+          | "SPELLING"
+          | "UNRESOLVED_COMMENTS"
+        )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -18165,6 +18411,328 @@ export interface operations {
       };
     };
   };
+  getCheckTypes: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["QaCheckCategoryModel"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["QaSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  updateSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["QaSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaSettingsRequest"];
+      };
+    };
+  };
+  getAllLanguageSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LanguageQaConfigModel"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getLanguageSettings: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["QaLanguageSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  updateLanguageSettings: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["QaLanguageSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaLanguageSettingsRequest"];
+      };
+    };
+  };
+  deleteLanguageSettings: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getLanguageSettingsResolved: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["QaSettingsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   /** Unlike the /v2/projects/{projectId}/import endpoint, imports the data in single request by provided files and parameters. This is useful for automated importing via API or CLI. */
   singleStepFromFiles: {
     parameters: {
@@ -18921,6 +19489,48 @@ export interface operations {
   };
   getProjectDailyActivity: {
     parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": { [key: string]: number };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getQaIssueCountsByCheckType: {
+    parameters: {
+      query: {
+        languageId: number;
+      };
       path: {
         projectId: number;
       };
@@ -20060,6 +20670,8 @@ export interface operations {
       query: {
         /** Cursor to get next data */
         cursor?: string;
+        /** Include detailed QA issues for inline highlighting */
+        includeQaIssues?: boolean;
         /**
          * Translation state in the format: languageTag,state. You can use this parameter multiple times.
          *
@@ -20130,6 +20742,26 @@ export interface operations {
         filterHasCommentsInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
+        /** Filter keys with open QA issues in lang */
+        filterHasQaIssuesInLang?: string[];
+        /** Filter keys with specific QA check type issues */
+        filterQaCheckType?: (
+          | "EMPTY_TRANSLATION"
+          | "SPACES_MISMATCH"
+          | "UNMATCHED_NEWLINES"
+          | "CHARACTER_CASE_MISMATCH"
+          | "MISSING_NUMBERS"
+          | "PUNCTUATION_MISMATCH"
+          | "BRACKETS_MISMATCH"
+          | "SPECIAL_CHARACTER_MISMATCH"
+          | "DIFFERENT_URLS"
+          | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "ICU_SYNTAX"
+          | "REPEATED_WORDS"
+          | "SPELLING"
+          | "UNRESOLVED_COMMENTS"
+        )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -20435,6 +21067,26 @@ export interface operations {
         filterHasCommentsInLang?: string[];
         /** Filter key translations with labels */
         filterLabel?: string[];
+        /** Filter keys with open QA issues in lang */
+        filterHasQaIssuesInLang?: string[];
+        /** Filter keys with specific QA check type issues */
+        filterQaCheckType?: (
+          | "EMPTY_TRANSLATION"
+          | "SPACES_MISMATCH"
+          | "UNMATCHED_NEWLINES"
+          | "CHARACTER_CASE_MISMATCH"
+          | "MISSING_NUMBERS"
+          | "PUNCTUATION_MISMATCH"
+          | "BRACKETS_MISMATCH"
+          | "SPECIAL_CHARACTER_MISMATCH"
+          | "DIFFERENT_URLS"
+          | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "ICU_SYNTAX"
+          | "REPEATED_WORDS"
+          | "SPELLING"
+          | "UNRESOLVED_COMMENTS"
+        )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
         /** Filter keys with no suggestions in lang */
@@ -20940,6 +21592,202 @@ export interface operations {
         translationId: number;
         labelId: number;
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  getIssues: {
+    parameters: {
+      path: {
+        projectId: number;
+        translationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CollectionModelQaIssueModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  ignoreIssueByParams: {
+    parameters: {
+      path: {
+        projectId: number;
+        translationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaCheckIssueIgnoreRequest"];
+      };
+    };
+  };
+  unignoreIssueByParams: {
+    parameters: {
+      path: {
+        projectId: number;
+        translationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaCheckIssueIgnoreRequest"];
+      };
+    };
+  };
+  ignoreIssue: {
+    parameters: {
+      path: {
+        projectId: number;
+        translationId: number;
+        issueId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  unignoreIssue: {
+    parameters: {
+      path: {
+        projectId: number;
+        translationId: number;
+        issueId: number;
       };
     };
     responses: {

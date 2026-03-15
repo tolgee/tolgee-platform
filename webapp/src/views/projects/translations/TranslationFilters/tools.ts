@@ -5,9 +5,7 @@ export type FiltersType = operations['getTranslations']['parameters']['query'];
 
 export type LanguageModel = components['schemas']['LanguageModel'];
 
-export const isFilterEmpty = (filter: FiltersType) => {
-  return Object.values(filter).filter(Boolean).length === 0;
-};
+type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
 export type TranslationStateType = StateType | 'OUTDATED' | 'AUTO_TRANSLATED';
 
@@ -21,6 +19,8 @@ export type FiltersInternal = {
   filterHasNoScreenshot?: boolean;
   filterHasUnresolvedComments?: boolean;
   filterHasComments?: boolean;
+  filterHasQaIssues?: boolean;
+  filterQaCheckTypes?: QaCheckType[];
   filterLabel?: string[];
   filterHasSuggestions?: boolean;
   filterHasNoSuggestions?: boolean;
@@ -47,6 +47,8 @@ export type AddParams =
   | ['filterHasNoScreenshot']
   | ['filterHasUnresolvedComments']
   | ['filterHasComments']
+  | ['filterHasQaIssues']
+  | ['filterQaCheckTypes', QaCheckType]
   | ['filterLabel', string]
   | ['filterHasSuggestions']
   | ['filterHasNoSuggestions']
