@@ -108,7 +108,7 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     and i.translation.id = :translationId
     and i.type = :type
     and i.message = :message
-    and i.replacement = :replacement
+    and (i.replacement = :replacement or (i.replacement is null and :replacement is null))
     and i.positionStart = :positionStart
     and i.positionEnd = :positionEnd
     """,

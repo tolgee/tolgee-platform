@@ -5286,4 +5286,11 @@
     <changeSet author="anty" id="1773800000000-1">
         <dropIndex indexName="IDXmsavtlerphpab06ckcqxn8o5e" tableName="translation_qa_issue"/>
     </changeSet>
+    <changeSet author="anty" id="1773900000000-1">
+        <addColumn tableName="translation_qa_issue">
+            <column defaultValueBoolean="false" name="virtual" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
