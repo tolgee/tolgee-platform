@@ -9,6 +9,7 @@ import { TabMessage } from 'tg.views/projects/translations/ToolsPanel/common/Tab
 import { useQaChecksForPanel } from '../hooks/useQaChecksForPanel';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
+import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { QaCheckItem } from './QaCheckItem';
 import { applyQaReplacement } from 'tg.fixtures/qaUtils';
 
@@ -35,6 +36,7 @@ export const useQaChecksCount = (data: PanelContentData) => {
 };
 
 export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
+  const { isEnabled } = useEnabledFeatures();
   const { issues, isLoading } = useQaChecksForPanel(data);
   const text = data.editingText ?? '';
   const project = useProject();
@@ -67,7 +69,17 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     method: 'post',
   });
 
-  // TODO: different message when QA feature is not enabled
+  if (!isEnabled('QA_CHECKS')) {
+    return (
+      <StyledWrapper>
+        <StyledContainer data-cy="qa-panel-container-disabled">
+          <TabMessage>
+            <T keyName="translation_tools_qa_not_available" />
+          </TabMessage>
+        </StyledContainer>
+      </StyledWrapper>
+    );
+  }
 
   if (issues.length === 0) {
     return (
