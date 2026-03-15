@@ -7,8 +7,9 @@ import { FiltersInternal } from 'tg.views/projects/translations/TranslationFilte
 import { FilterItem } from 'tg.views/projects/translations/TranslationFilters/FilterItem';
 import { SubfilterQaChecksProps } from '../../../eeSetup/EeModuleType';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { useQaCheckTypeLabel } from 'tg.ee.module/qa/hooks/useQaCheckTypeLabel';
 import { components } from 'tg.service/apiSchema.generated';
+import { CheckTypeFilterItem } from './CheckTypeFilterItem';
+import { CheckTypeFilterName } from 'tg.ee.module/qa/components/CheckTypeFilterName';
 
 type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
@@ -99,20 +100,6 @@ export const SubfilterQaChecks = ({
   );
 };
 
-// TODO: CheckTypeFilterItem to separate file
-function CheckTypeFilterItem({
-  checkType,
-  selected,
-  onClick,
-}: {
-  checkType: QaCheckType;
-  selected: boolean;
-  onClick: () => void;
-}) {
-  const label = useQaCheckTypeLabel(checkType as any);
-  return <FilterItem label={label} selected={selected} onClick={onClick} />;
-}
-
 export function getQaChecksFiltersLength(value: FiltersInternal) {
   return (
     Number(value.filterHasQaIssues !== undefined) +
@@ -127,10 +114,4 @@ export function getQaChecksFiltersName(value: FiltersInternal) {
   if (value.filterQaCheckTypes?.length) {
     return <CheckTypeFilterName checkType={value.filterQaCheckTypes[0]} />;
   }
-}
-
-// TODO: CheckTypeFilterName to separate file
-function CheckTypeFilterName({ checkType }: { checkType: QaCheckType }) {
-  const label = useQaCheckTypeLabel(checkType as any);
-  return <>{label}</>;
 }

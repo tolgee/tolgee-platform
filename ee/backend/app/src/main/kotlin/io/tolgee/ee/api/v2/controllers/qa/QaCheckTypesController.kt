@@ -3,8 +3,9 @@ package io.tolgee.ee.api.v2.controllers.qa
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Feature
+import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaCheckCategoryModelAssembler
+import io.tolgee.ee.api.v2.hateoas.model.qa.QaCheckCategoryModel
 import io.tolgee.model.enums.Scope
-import io.tolgee.model.enums.qa.QaCheckCategory
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
 import io.tolgee.security.authentication.AllowApiAccess
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/v2/projects/{projectId:[0-9]+}/qa-check-types")
 @OpenApiUnstableOperationExtension
 @Tag(name = "QA Check Types")
-class QaCheckTypesController {
+class QaCheckTypesController(
+  private val qaCheckCategoryModelAssembler: QaCheckCategoryModelAssembler,
+) {
   @GetMapping
   @Operation(summary = "Get QA check types grouped by category")
   @ReadOnlyOperation
@@ -28,13 +31,7 @@ class QaCheckTypesController {
   @RequiresFeatures(Feature.QA_CHECKS)
   fun getCheckTypes(): List<QaCheckCategoryModel> {
     return QaCheckType.CATEGORIES.map { (category, checkTypes) ->
-      QaCheckCategoryModel(category = category, checkTypes = checkTypes)
+      qaCheckCategoryModelAssembler.toModel(category, checkTypes)
     }
   }
 }
-
-// TODO: model must go to a separate file. Also we need to create an assembler for it.
-data class QaCheckCategoryModel(
-  val category: QaCheckCategory,
-  val checkTypes: List<QaCheckType>,
-)

@@ -15759,7 +15759,7 @@ export interface operations {
         filterLabel?: string[];
         /** Filter keys with open QA issues in lang */
         filterHasQaIssuesInLang?: string[];
-        /** Filter keys with specific QA check type issues (OR logic). Applied to all returned languages. */
+        /** Filter keys with specific QA check type issues */
         filterQaCheckType?: (
           | "EMPTY_TRANSLATION"
           | "SPACES_MISMATCH"
@@ -15904,7 +15904,7 @@ export interface operations {
         filterLabel?: string[];
         /** Filter keys with open QA issues in lang */
         filterHasQaIssuesInLang?: string[];
-        /** Filter keys with specific QA check type issues (OR logic). Applied to all returned languages. */
+        /** Filter keys with specific QA check type issues */
         filterQaCheckType?: (
           | "EMPTY_TRANSLATION"
           | "SPACES_MISMATCH"
@@ -16085,7 +16085,7 @@ export interface operations {
         filterLabel?: string[];
         /** Filter keys with open QA issues in lang */
         filterHasQaIssuesInLang?: string[];
-        /** Filter keys with specific QA check type issues (OR logic). Applied to all returned languages. */
+        /** Filter keys with specific QA check type issues */
         filterQaCheckType?: (
           | "EMPTY_TRANSLATION"
           | "SPACES_MISMATCH"
@@ -20733,7 +20733,7 @@ export interface operations {
         filterLabel?: string[];
         /** Filter keys with open QA issues in lang */
         filterHasQaIssuesInLang?: string[];
-        /** Filter keys with specific QA check type issues (OR logic). Applied to all returned languages. */
+        /** Filter keys with specific QA check type issues */
         filterQaCheckType?: (
           | "EMPTY_TRANSLATION"
           | "SPACES_MISMATCH"
@@ -21058,7 +21058,7 @@ export interface operations {
         filterLabel?: string[];
         /** Filter keys with open QA issues in lang */
         filterHasQaIssuesInLang?: string[];
-        /** Filter keys with specific QA check type issues (OR logic). Applied to all returned languages. */
+        /** Filter keys with specific QA check type issues */
         filterQaCheckType?: (
           | "EMPTY_TRANSLATION"
           | "SPACES_MISMATCH"
