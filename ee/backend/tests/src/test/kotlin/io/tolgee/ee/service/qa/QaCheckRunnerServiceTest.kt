@@ -4,8 +4,10 @@ import io.tolgee.model.enums.qa.QaCheckSeverity
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.model.qa.ProjectQaConfig
+import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.repository.qa.ProjectQaConfigRepository
 import io.tolgee.service.project.ProjectService
+import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -21,14 +23,16 @@ class QaCheckRunnerServiceTest {
 
   private fun allEnabledConfigService(): ProjectQaConfigService {
     val repo = Mockito.mock(ProjectQaConfigRepository::class.java)
+    val langRepo = Mockito.mock(LanguageQaConfigRepository::class.java)
     val projectService = Mockito.mock(ProjectService::class.java)
+    val entityManager = Mockito.mock(EntityManager::class.java)
     val allWarnings =
       QaCheckType.entries.associateWith { QaCheckSeverity.WARNING }.toMutableMap()
     val config = Mockito.mock(ProjectQaConfig::class.java)
     Mockito.`when`(config.settings).thenReturn(allWarnings)
     Mockito.`when`(repo.findByProjectId(Mockito.anyLong())).thenReturn(config)
     val qaRecheckService = Mockito.mock(QaRecheckService::class.java)
-    return ProjectQaConfigService(repo, projectService, qaRecheckService)
+    return ProjectQaConfigService(repo, langRepo, projectService, entityManager, qaRecheckService)
   }
 
   @Test

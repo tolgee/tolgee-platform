@@ -3,7 +3,6 @@ package io.tolgee.ee.service.qa
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.hateoas.qa.QaIssueModelAssembler
 import io.tolgee.model.enums.qa.QaCheckType
-import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.qa.QaCheckBatchService
 import io.tolgee.service.translation.TranslationService
@@ -61,12 +60,12 @@ class QaCheckBatchServiceImpl(
         checkTypes,
         languageId = translation.language.id,
       )
-    val savedIssues = qaIssueService.replaceIssuesForTranslation(translation, results, checkTypes)
+    qaIssueService.replaceIssuesForTranslation(translation, results, checkTypes)
 
     translation.qaChecksStale = false
     translationService.save(translation)
 
-    val openIssues = savedIssues.filter { it.state == QaIssueState.OPEN }
+    val allOpenIssues = qaIssueService.getOpenIssuesForTranslation(translation.id)
     websocketEventPublisher(
       "/projects/$projectId/${WebsocketEventType.QA_CHECKS_COMPLETED.typeName}",
       WebsocketEvent(
@@ -75,9 +74,9 @@ class QaCheckBatchServiceImpl(
             "translationId" to translation.id,
             "keyId" to translation.key.id,
             "languageTag" to translation.language.tag,
-            "qaIssueCount" to openIssues.size,
+            "qaIssueCount" to allOpenIssues.size,
             "qaChecksStale" to false,
-            "qaIssues" to openIssues.map { qaIssueModelAssembler.toModel(it) },
+            "qaIssues" to allOpenIssues.map { qaIssueModelAssembler.toModel(it) },
           ),
         timestamp = currentDateProvider.date.time,
       ),
