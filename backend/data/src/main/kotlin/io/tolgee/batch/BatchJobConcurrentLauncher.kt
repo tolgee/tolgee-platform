@@ -187,6 +187,21 @@ class BatchJobConcurrentLauncher(
       return false
     }
 
+    if (!canRunNonExclusiveJobForProject(batchJobDto)) {
+      logger.debug(
+        "Cannot run execution ${executionItem.chunkExecutionId}. " +
+          "Project ${batchJobDto.projectId} already has max non-exclusive jobs running, skipping",
+      )
+      batchJobChunkExecutionQueue.addItemsToLocalQueue(
+        listOf(
+          executionItem.also {
+            it.executeAfter = currentDateProvider.date.time + 1000
+          },
+        ),
+      )
+      return false
+    }
+
     /**
      * Only single job can run in project at the same time.
      * Check this BEFORE trySetRunningState to avoid mutating state for lock-rejected chunks,
@@ -288,6 +303,26 @@ class BatchJobConcurrentLauncher(
       logger.debug("Debouncing max wait time reached for job ${dto.id}")
     }
     return maxTimeReached
+  }
+
+  private fun canRunNonExclusiveJobForProject(batchJobDto: BatchJobDto): Boolean {
+    if (batchJobDto.type.exclusive) {
+      return true
+    }
+    val projectId = batchJobDto.projectId ?: return true
+    val maxNonExclusive = batchProperties.maxNonExclusiveJobsPerProject
+    if (maxNonExclusive <= 0) {
+      return true
+    }
+    val runningNonExclusiveJobIdsForProject =
+      runningJobs.values
+        .filter { !it.first.type.exclusive && it.first.projectId == projectId }
+        .mapTo(HashSet()) { it.first.id }
+    // Don't block additional chunks for a job that's already running
+    if (batchJobDto.id in runningNonExclusiveJobIdsForProject) {
+      return true
+    }
+    return runningNonExclusiveJobIdsForProject.size < maxNonExclusive
   }
 
   private fun canRunJobWithCharacter(character: JobCharacter): Boolean {

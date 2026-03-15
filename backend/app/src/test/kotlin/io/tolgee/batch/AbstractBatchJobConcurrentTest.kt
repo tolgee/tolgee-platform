@@ -5,6 +5,7 @@ import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.MachineTranslationChunkProcessor
+import io.tolgee.batch.processors.NoOpChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
 import io.tolgee.batch.request.AutomationBjRequest
 import io.tolgee.batch.request.DeleteKeysRequest
@@ -114,6 +115,10 @@ abstract class AbstractBatchJobConcurrentTest :
 
   @MockitoSpyBean
   @Autowired
+  lateinit var noOpChunkProcessor: NoOpChunkProcessor
+
+  @MockitoSpyBean
+  @Autowired
   lateinit var autoTranslationService: AutoTranslationService
 
   @BeforeEach
@@ -150,6 +155,7 @@ abstract class AbstractBatchJobConcurrentTest :
     Mockito.reset(deleteKeysChunkProcessor)
     Mockito.reset(machineTranslationChunkProcessor)
     Mockito.reset(automationChunkProcessor)
+    Mockito.reset(noOpChunkProcessor)
     Mockito.reset(autoTranslationService)
   }
 
