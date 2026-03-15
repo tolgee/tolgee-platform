@@ -24,6 +24,7 @@ class TranslationsViewQueryBuilder(
   private val cursor: Map<String, CursorValue>? = null,
   private val entityManager: EntityManager,
   private val authenticationFacade: AuthenticationFacade,
+  private val qaEnabled: Boolean,
 ) {
   private fun <T> getBaseQuery(query: CriteriaQuery<T>): QueryBase<T> {
     return QueryBase(
@@ -34,6 +35,7 @@ class TranslationsViewQueryBuilder(
       params = params,
       entityManager,
       authenticationFacade,
+      qaEnabled = qaEnabled,
     )
   }
 

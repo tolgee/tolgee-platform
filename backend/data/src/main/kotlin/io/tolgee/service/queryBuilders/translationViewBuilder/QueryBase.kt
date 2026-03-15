@@ -53,6 +53,7 @@ class QueryBase<T>(
   private val params: TranslationFilters,
   private val entityManager: EntityManager,
   private val authenticationFacade: AuthenticationFacade,
+  private val qaEnabled: Boolean,
 ) {
   val whereConditions: MutableSet<Predicate> = HashSet()
   val translationConditions: MutableSet<Predicate> = HashSet()
@@ -130,17 +131,20 @@ class QueryBase<T>(
       val unresolvedCommentsExpression = addUnresolvedComments(translation, language)
       val activeSuggestionsExpression = addActiveSuggestionsCount(language)
       addTotalSuggestionsCount(language)
-      // TODO: only count qa issues if QA feature is enabled
-      val qaIssueCountExpression = addQaIssueCount(translation, language)
-      this.querySelection[language to TranslationView::qaChecksStale] = translation.get(Translation_.qaChecksStale)
+      if (qaEnabled) {
+        val qaIssueCountExpression = addQaIssueCount(translation, language)
+        this.querySelection[language to TranslationView::qaChecksStale] = translation.get(Translation_.qaChecksStale)
+        queryTranslationFiltering.applyQaFilter(language, qaIssueCountExpression, translation)
+      } else {
+        this.querySelection[language to TranslationView::qaIssueCount] = cb.literal(0L)
+        this.querySelection[language to TranslationView::qaChecksStale] = cb.literal(false)
+      }
 
       queryTranslationFiltering.applyCommentsFilter(
         language,
         resolvedCommentsExpression,
         unresolvedCommentsExpression,
       )
-
-      queryTranslationFiltering.applyQaFilter(language, qaIssueCountExpression, translation)
 
       queryTranslationFiltering.applyLabelFilter(
         language,

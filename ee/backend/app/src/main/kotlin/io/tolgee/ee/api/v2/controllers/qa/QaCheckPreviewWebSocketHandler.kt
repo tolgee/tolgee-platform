@@ -2,6 +2,8 @@ package io.tolgee.ee.api.v2.controllers.qa
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.ee.data.qa.QaCheckPreviewDone
@@ -17,6 +19,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import kotlinx.coroutines.CancellationException
@@ -44,6 +47,8 @@ class QaCheckPreviewWebSocketHandler(
   private val qaCheckRunnerService: QaCheckRunnerService,
   private val jwtService: JwtService,
   private val securityService: SecurityService,
+  private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val projectService: ProjectService,
 ) : TextWebSocketHandler() {
   private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -111,6 +116,7 @@ class QaCheckPreviewWebSocketHandler(
           ?: throw IllegalArgumentException("Missing languageTag")
 
       checkAuth(token, projectId)
+      checkFeatureEnabled(projectId)
       initializeState(session, projectId, languageTag, keyId)
     } catch (e: Exception) {
       logger.debug("WebSocket init failed", e)
@@ -135,6 +141,14 @@ class QaCheckPreviewWebSocketHandler(
     )
 
     return user
+  }
+
+  private fun checkFeatureEnabled(projectId: Long) {
+    val project = projectService.get(projectId)
+    val orgId = if (project.isOrganizationOwnerInitialized()) project.organizationOwner.id else null
+    if (!enabledFeaturesProvider.isFeatureEnabled(orgId, Feature.QA_CHECKS)) {
+      throw IllegalStateException("QA Checks feature is not enabled")
+    }
   }
 
   private fun initializeState(

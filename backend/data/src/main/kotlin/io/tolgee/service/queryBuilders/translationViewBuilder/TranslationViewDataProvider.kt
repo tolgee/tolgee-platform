@@ -1,5 +1,6 @@
 package io.tolgee.service.queryBuilders.translationViewBuilder
 
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.views.KeyWithTranslationsView
@@ -7,6 +8,7 @@ import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.TagService
 import io.tolgee.service.label.LabelService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.queryBuilders.CursorUtil
 import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
@@ -22,6 +24,7 @@ class TranslationViewDataProvider(
   private val labelService: LabelService,
   private val authenticationFacade: AuthenticationFacade,
   private val qaIssueRepository: TranslationQaIssueRepository,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   fun getData(
     projectId: Long,
@@ -31,15 +34,19 @@ class TranslationViewDataProvider(
     cursor: String? = null,
     includeQaIssues: Boolean = false,
   ): Page<KeyWithTranslationsView> {
+    val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS)
+
     // otherwise it takes forever for postgres to plan the execution
     em.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
 
     createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
 
-    var translationsViewQueryBuilder = getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor)
+    var translationsViewQueryBuilder =
+      getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor, qaEnabled)
     val count = em.createQuery(translationsViewQueryBuilder.countQuery).singleResult
 
-    translationsViewQueryBuilder = getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor)
+    translationsViewQueryBuilder =
+      getTranslationsViewQueryBuilder(projectId, languages, params, pageable, cursor, qaEnabled)
     val query = em.createQuery(translationsViewQueryBuilder.dataQuery).setMaxResults(pageable.pageSize)
     if (cursor == null) {
       query.firstResult = pageable.offset.toInt()
@@ -66,8 +73,7 @@ class TranslationViewDataProvider(
         }
       }
     }
-    if (includeQaIssues && translationIds.isNotEmpty()) {
-      // TODO: only include QA issues when QA feature is enabled
+    if (includeQaIssues && qaEnabled && translationIds.isNotEmpty()) {
       qaIssueRepository
         .findOpenByTranslationIds(translationIds)
         .groupBy { it.translation.id }
@@ -122,6 +128,7 @@ class TranslationViewDataProvider(
     languages: Set<LanguageDto>,
     params: TranslationFilters = TranslationFilters(),
   ): MutableList<Long> {
+    val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS)
     createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
     val translationsViewQueryBuilder =
       TranslationsViewQueryBuilder(
@@ -132,6 +139,7 @@ class TranslationViewDataProvider(
         sort = Sort.by(Sort.Order.asc(KeyWithTranslationsView::keyId.name)),
         entityManager = em,
         authenticationFacade = authenticationFacade,
+        qaEnabled = qaEnabled,
       )
     val result = em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
     deleteFailedKeysInJobTempTable()
@@ -144,6 +152,7 @@ class TranslationViewDataProvider(
     params: TranslationFilters,
     pageable: Pageable,
     cursor: String?,
+    qaEnabled: Boolean,
   ) = TranslationsViewQueryBuilder(
     cb = em.criteriaBuilder,
     projectId = projectId,
@@ -153,5 +162,6 @@ class TranslationViewDataProvider(
     cursor = cursor?.let { CursorUtil.parseCursor(it) },
     entityManager = em,
     authenticationFacade = authenticationFacade,
+    qaEnabled = qaEnabled,
   )
 }

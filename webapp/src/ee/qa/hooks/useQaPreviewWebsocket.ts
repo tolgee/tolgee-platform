@@ -85,12 +85,16 @@ export const useQaPreviewWebsocket = ({
     };
   }, [projectId, keyId, languageTag, enabled, jwtToken]);
 
-  const sendText = useDebouncedCallback((t: string) => {
-    pendingTextUpdateRef.current = false;
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ text: t }));
-    }
-  }, 200);
+  const sendText = useDebouncedCallback(
+    (t: string) => {
+      pendingTextUpdateRef.current = false;
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ text: t }));
+      }
+    },
+    200,
+    { maxWait: 1000 }
+  );
 
   useEffect(() => {
     if (text !== null && text !== undefined && enabled) {

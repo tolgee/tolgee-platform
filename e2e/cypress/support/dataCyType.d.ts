@@ -714,6 +714,7 @@ declare namespace DataCy {
         "qa-language-dialog-save" |
         "qa-language-settings-button" |
         "qa-panel-container" |
+        "qa-panel-container-disabled" |
         "qa-panel-container-empty" |
         "qa-settings-row" |
         "qa-settings-select" |
