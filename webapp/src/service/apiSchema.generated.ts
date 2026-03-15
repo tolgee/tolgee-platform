@@ -5614,7 +5614,14 @@ export interface components {
         | "SPELLING"
         | "UNRESOLVED_COMMENTS";
     };
+    QaLanguageSettingsModel: {
+      settings?: { [key: string]: "WARNING" | "OFF" };
+    };
     QaLanguageSettingsRequest: {
+      /** @description Map of check types to their severity. Null values mean 'inherit from global settings'. */
+      settings: { [key: string]: "WARNING" | "OFF" };
+    };
+    QaSettingsModel: {
       settings: { [key: string]: "WARNING" | "OFF" };
     };
     QaSettingsRequest: {
@@ -18449,7 +18456,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": { [key: string]: "WARNING" | "OFF" };
+          "application/json": components["schemas"]["QaSettingsModel"];
         };
       };
       /** Bad Request */
@@ -18488,7 +18495,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": { [key: string]: "WARNING" | "OFF" };
+          "application/json": components["schemas"]["QaSettingsModel"];
         };
       };
       /** Bad Request */
@@ -18572,7 +18579,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": { [key: string]: "WARNING" | "OFF" };
+          "application/json": components["schemas"]["QaLanguageSettingsModel"];
         };
       };
       /** Bad Request */
@@ -18612,7 +18619,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": { [key: string]: "WARNING" | "OFF" };
+          "application/json": components["schemas"]["QaLanguageSettingsModel"];
         };
       };
       /** Bad Request */
@@ -18693,7 +18700,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": { [key: string]: "WARNING" | "OFF" };
+          "application/json": components["schemas"]["QaSettingsModel"];
         };
       };
       /** Bad Request */

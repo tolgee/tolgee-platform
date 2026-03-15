@@ -54,20 +54,20 @@ export const ProjectSettingsQa = () => {
         <T keyName="project_settings_qa_global_description" />
       </Typography>
 
-      {Object.keys(settings.data || {}).map((type) => (
+      {Object.keys(settings.data?.settings || {}).map((type) => (
         <QaSettingsItem
           key={type}
           type={type as QaCheckType}
-          value={settings.data?.[type as QaCheckType] || 'OFF'}
+          value={settings.data?.settings?.[type as QaCheckType] || 'OFF'}
           onChange={handleChange}
         />
       ))}
 
-      {settings.data && (
-        // TODO: this `as Record<QaCheckType, QaCheckSeverity>` shouldn't be needed
-        // especially after we wrap it with model
+      {settings.data?.settings && (
         <QaLanguageSettings
-          globalSettings={settings.data as Record<QaCheckType, QaCheckSeverity>}
+          globalSettings={
+            settings.data.settings as Record<QaCheckType, QaCheckSeverity>
+          }
         />
       )}
     </Box>
