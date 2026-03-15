@@ -342,6 +342,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
     assertThat(issuesAfter).hasSize(1)
     assertThat(issuesAfter.first().state.name).isEqualTo("IGNORED")
     assertThat(issuesAfter.first().type).isEqualTo(QaCheckType.CHARACTER_CASE_MISMATCH)
+    assertThat(issuesAfter.first().virtual).isTrue()
   }
 
   @Test
@@ -378,6 +379,110 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
     val updatedIssue = qaIssueRepository.findById(issue.id).get()
     assertThat(updatedIssue.state.name).isEqualTo("OPEN")
+  }
+
+  @Test
+  fun `unignoring a virtual issue by id deletes it`() {
+    val request =
+      QaCheckIssueIgnoreRequest(
+        type = QaCheckType.CHARACTER_CASE_MISMATCH,
+        message = QaIssueMessage.QA_CASE_CAPITALIZE,
+        replacement = null,
+        positionStart = 0,
+        positionEnd = 5,
+      )
+
+    // Create a virtual issue via ignore-by-params
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/ignore",
+      request,
+    ).andIsOk
+
+    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    assertThat(issues).hasSize(1)
+    val virtualIssue = issues.first()
+    assertThat(virtualIssue.virtual).isTrue()
+
+    // Unignore by id should delete the virtual issue
+    performAuthPut(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/${virtualIssue.id}/unignore",
+      null,
+    ).andIsOk
+
+    val issuesAfter = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    assertThat(issuesAfter).isEmpty()
+  }
+
+  @Test
+  fun `unignoring a virtual issue by params deletes it`() {
+    val request =
+      QaCheckIssueIgnoreRequest(
+        type = QaCheckType.CHARACTER_CASE_MISMATCH,
+        message = QaIssueMessage.QA_CASE_CAPITALIZE,
+        replacement = null,
+        positionStart = 0,
+        positionEnd = 5,
+      )
+
+    // Create a virtual issue via ignore-by-params
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/ignore",
+      request,
+    ).andIsOk
+
+    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    assertThat(issues).hasSize(1)
+    assertThat(issues.first().virtual).isTrue()
+
+    // Unignore by params should delete the virtual issue
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/unignore",
+      request,
+    ).andIsOk
+
+    val issuesAfter = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    assertThat(issuesAfter).isEmpty()
+  }
+
+  @Test
+  fun `virtual flag is not inherited during re-persistence`() {
+    val request =
+      QaCheckIssueIgnoreRequest(
+        type = QaCheckType.CHARACTER_CASE_MISMATCH,
+        message = QaIssueMessage.QA_CASE_CAPITALIZE,
+        replacement = "B",
+        positionStart = 0,
+        positionEnd = 1,
+      )
+
+    // Create a virtual ignored issue
+    performAuthPost(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/ignore",
+      request,
+    ).andIsOk
+
+    val virtualIssues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    assertThat(virtualIssues).hasSize(1)
+    assertThat(virtualIssues.first().virtual).isTrue()
+
+    // Run QA checks that produce the same issue
+    val params =
+      QaCheckParams(
+        baseText = "Hello world.",
+        text = "bonjour monde",
+        baseLanguageTag = "en",
+        languageTag = "fr",
+      )
+    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
+    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
+
+    // The re-persisted issue should NOT be virtual
+    val newIssues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val caseIssue = newIssues.find { it.type == QaCheckType.CHARACTER_CASE_MISMATCH }
+    assertThat(caseIssue).isNotNull
+    assertThat(caseIssue!!.virtual).isFalse()
+    // But ignored state SHOULD be inherited
+    assertThat(caseIssue.state.name).isEqualTo("IGNORED")
   }
 
   @Test

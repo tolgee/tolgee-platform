@@ -34,6 +34,8 @@ class TranslationQaIssue(
   var state: QaIssueState = QaIssueState.OPEN,
   @Column(columnDefinition = "text")
   var params: String? = null,
+  @ColumnDefault("false")
+  var virtual: Boolean = false,
   @ManyToOne
   var translation: Translation,
 ) : StandardAuditModel()

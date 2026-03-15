@@ -85,11 +85,10 @@ class QaIssueService(
     issueId: Long,
   ) {
     val issue = getIssueByProjectAndId(projectId, issueId)
-//    TODO: check if issue was created by user "ignoring" issue in preview UI (corresponds to not-yet-saved text)
-//    if (issue.isVirtual) {
-//      qaIssueRepository.delete(issue)
-//      return
-//    }
+    if (issue.virtual) {
+      qaIssueRepository.delete(issue)
+      return
+    }
     issue.state = QaIssueState.OPEN
     qaIssueRepository.save(issue)
   }
@@ -125,6 +124,7 @@ class QaIssueService(
         positionEnd = request.positionEnd,
         params = request.params?.let { objectMapper.writeValueAsString(it) },
         state = QaIssueState.IGNORED,
+        virtual = true,
         translation = translation,
       )
     qaIssueRepository.save(newIssue)
@@ -137,6 +137,10 @@ class QaIssueService(
     request: QaCheckIssueIgnoreRequest,
   ): Boolean {
     val issue = findMatchingIssue(projectId, translationId, request) ?: return false
+    if (issue.virtual) {
+      qaIssueRepository.delete(issue)
+      return true
+    }
     issue.state = QaIssueState.OPEN
     qaIssueRepository.save(issue)
     return true
