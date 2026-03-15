@@ -152,6 +152,101 @@ class EmailServiceTest {
       .contains("pwn[[\${7*7}]]")
   }
 
+  @Test
+  fun `default template renders with content and header`() {
+    emailService.sendEmailTemplate(
+      "test@tolgee.test",
+      "default",
+      Locale.ENGLISH,
+      mapOf(
+        "header" to "Important Update",
+        "content" to "<p>Your project has been updated.</p>",
+        "recipientName" to "Alice",
+      ),
+      subject = "Project Update",
+    )
+    verify(mailSender).send(emailCaptor.capture())
+
+    val email = emailCaptor.value
+    email.subject.assert.isEqualTo("Project Update")
+    email
+      .assertContents()
+      // Header is rendered
+      .contains("Important Update")
+      // Content is injected as HTML
+      .contains("<p>Your project has been updated.</p>")
+      // Personalized greeting branch is taken (recipientName is set)
+      // Note: the i18n key 'email-greetings' uses {username} as ICU param
+      .doesNotContain("Hello!")
+      // Signature
+      .contains("Kind Regards,")
+      // No unresolved Thymeleaf attributes
+      .doesNotContain(" th:")
+      .doesNotContain(" data-th")
+      .doesNotContain("[DEFAULT]")
+  }
+
+  @Test
+  fun `default template renders generic greeting without recipientName`() {
+    emailService.sendEmailTemplate(
+      "test@tolgee.test",
+      "default",
+      Locale.ENGLISH,
+      mapOf(
+        "content" to "Some notification text.",
+      ),
+      subject = "Notification",
+    )
+    verify(mailSender).send(emailCaptor.capture())
+
+    emailCaptor.value
+      .assertContents()
+      // Falls back to generic greeting
+      .contains("Hello!")
+      .doesNotContain("Hello Alice")
+      .doesNotContain(" th:")
+      .doesNotContain(" data-th")
+      .doesNotContain("[DEFAULT]")
+  }
+
+  @Test
+  fun `registration-confirm template renders for signup`() {
+    emailService.sendEmailTemplate(
+      "test@tolgee.test",
+      "registration-confirm",
+      Locale.ENGLISH,
+      mapOf(
+        "username" to "bob@example.com",
+        "confirmUrl" to "https://app.tolgee.io/verify/123/abc",
+        "isSignup" to true,
+      ),
+    )
+    verify(mailSender).send(emailCaptor.capture())
+
+    val email = emailCaptor.value
+    email.subject.assert.isEqualTo("Confirm your account")
+    email
+      .assertContents()
+      // Greeting with username
+      .contains("Hello bob@example.com")
+      // Welcome text shown for signup
+      .contains("Welcome and thank you for creating an account!")
+      // Confirm email text
+      .contains("To start using Tolgee, you need to confirm your email.")
+      // CTA button
+      .contains("Confirm my email")
+      // Confirmation URL in link
+      .contains("https://app.tolgee.io/verify/123/abc")
+      // Enjoy your stay
+      .contains("enjoy your experience")
+      // Signature
+      .contains("Kind Regards,")
+      // No unresolved Thymeleaf
+      .doesNotContain(" th:")
+      .doesNotContain(" data-th")
+      .doesNotContain("[DEFAULT]")
+  }
+
   private fun MimeMessage.assertContents(): AbstractStringAssert<*> {
     return this.content
       .let { it as MimeMultipart }
