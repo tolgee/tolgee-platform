@@ -1,3 +1,10 @@
+# [3.168.0](https://github.com/tolgee/tolgee-platform/compare/v3.167.3...v3.168.0) (2026-03-16)
+
+
+### Features
+
+* add character limit for translation keys ([#3284](https://github.com/tolgee/tolgee-platform/issues/3284)) ([#3509](https://github.com/tolgee/tolgee-platform/issues/3509)) ([a993a1b](https://github.com/tolgee/tolgee-platform/commit/a993a1b31402f234782904f82fcebf650334c5c8))
+
 ## [3.167.3](https://github.com/tolgee/tolgee-platform/compare/v3.167.2...v3.167.3) (2026-03-16)
 
 
