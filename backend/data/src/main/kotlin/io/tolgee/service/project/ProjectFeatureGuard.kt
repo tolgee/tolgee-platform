@@ -3,7 +3,7 @@ package io.tolgee.service.project
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.validators.exceptions.ValidationException
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Project
 import io.tolgee.security.ProjectHolder
 import org.springframework.stereotype.Service
@@ -25,7 +25,7 @@ class ProjectFeatureGuard(
     val project = projectHolder.projectEntity
     enabledFeaturesProvider.checkFeatureEnabled(project.organizationOwner.id, feature)
     if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
-      throw ValidationException(Message.BRANCHING_NOT_ENABLED_FOR_PROJECT)
+      throw BadRequestException(Message.FEATURE_NOT_ENABLED_FOR_PROJECT, listOf(feature.name))
     }
   }
 
@@ -35,7 +35,7 @@ class ProjectFeatureGuard(
   ) {
     enabledFeaturesProvider.checkFeatureEnabled(project.organizationOwner.id, feature)
     if (!ProjectFeatureRegistry.isEnabledOnProject(feature, project)) {
-      throw ValidationException(Message.BRANCHING_NOT_ENABLED_FOR_PROJECT)
+      throw BadRequestException(Message.FEATURE_NOT_ENABLED_FOR_PROJECT, listOf(feature.name))
     }
   }
 

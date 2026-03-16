@@ -213,6 +213,10 @@ export function useErrorTranslation() {
         return t('operation_not_permitted_in_read_only_mode');
       case 'cannot_delete_branch_with_children':
         return t('cannot_delete_branch_with_children');
+      case 'feature_not_enabled_for_project':
+        return t('feature_not_enabled_for_project', {
+          feature: params?.[0] || '',
+        });
       case 'export_key_plural_suffix_collision':
         return t('export_key_plural_suffix_collision', {
           pluralKey: params?.[0] || '',
