@@ -57,7 +57,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     language,
     canChangeState,
     setState,
-    handleSave,
+    handleSaveWithConfirmation,
     handleClose,
     handleInsertBase,
     editEnabled,
@@ -125,7 +125,12 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     <StyledContainer>
       <StyledEditor onMouseDown={(e) => e.preventDefault()}>
         {editEnabled ? (
-          <TranslationEditor tools={tools} editorRef={editorRef} mode={mode} />
+          <TranslationEditor
+            tools={tools}
+            editorRef={editorRef}
+            mode={mode}
+            maxCharLimit={keyData.keyMaxCharLimit}
+          />
         ) : (
           <TranslationVisual
             text={translation?.text || ''}
@@ -174,7 +179,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
             />
             {editEnabled ? (
               <ControlsEditorMain
-                onSave={handleSave}
+                onSave={handleSaveWithConfirmation}
                 onCancel={() => handleClose(true)}
                 tasks={translationTasks}
                 currentTask={prefilteredTask?.number}

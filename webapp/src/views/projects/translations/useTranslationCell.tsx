@@ -4,6 +4,9 @@ import { getTolgeeFormat } from '@tginternal/editor';
 import { TRANSLATION_STATES } from 'tg.constants/translationStates';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { components } from 'tg.service/apiSchema.generated';
+import { T } from '@tolgee/react';
+import { getVisibleCharCount } from './cell/getVisibleCharCount';
+import { confirmation } from 'tg.hooks/confirmation';
 
 import {
   useTranslationsActions,
@@ -249,12 +252,36 @@ export const useTranslationCell = ({
 
   const cellClickable = (editEnabled && !isEditing) || aiPlaygroundEnabled;
 
+  const isOverCharLimit = useMemo(() => {
+    const limit = keyData.keyMaxCharLimit;
+    if (!limit || limit <= 0) return false;
+    const variants = cursor?.value?.variants;
+    if (!variants) return false;
+    return Object.values(variants).some(
+      (text) => getVisibleCharCount({ text, nested: true }) > limit
+    );
+  }, [cursor?.value?.variants, keyData.keyMaxCharLimit]);
+
+  const handleSaveWithConfirmation = (props?: SaveProps) => {
+    if (isOverCharLimit) {
+      confirmation({
+        title: <T keyName="translation_char_limit_exceeded_title" />,
+        message: <T keyName="translation_char_limit_exceeded_confirmation" />,
+        confirmButtonText: <T keyName="translations_cell_save" />,
+        onConfirm: () => handleSave(props),
+      });
+    } else {
+      handleSave(props);
+    }
+  };
+
   return {
     keyId,
     language,
     handleOpen,
     handleClose,
     handleSave,
+    handleSaveWithConfirmation,
     handleInsertBase,
     setEditValue,
     setEditValueString,

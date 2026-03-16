@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Box, IconButton, Tooltip, styled } from '@mui/material';
 import { Placeholder } from '@tginternal/editor';
-import { T, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import { HelpCircle } from '@untitled-ui/icons-react';
 import { TaskInfoMessage } from 'tg.ee';
 import { ControlsEditorMain } from '../cell/editorMainActions/ControlsEditorMain';
@@ -19,9 +19,6 @@ import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
 import { useBaseTranslation } from '../useBaseTranslation';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsList } from '../Suggestions/SuggestionsList';
-import { getVisibleCharCount } from '../cell/getVisibleCharCount';
-import { confirmation } from 'tg.hooks/confirmation';
-import { SaveProps } from '../useTranslationCell';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -98,7 +95,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     language,
     canChangeState,
     setState,
-    handleSave,
+    handleSaveWithConfirmation,
     handleClose,
     handleInsertBase,
     editEnabled,
@@ -131,29 +128,6 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     nested,
     enabled: baseLanguage !== language.tag,
   });
-
-  const isOverCharLimit = useMemo(() => {
-    const limit = keyData.keyMaxCharLimit;
-    if (!limit || limit <= 0) return false;
-    const variants = editVal?.value?.variants;
-    if (!variants) return false;
-    return Object.values(variants).some(
-      (text) => getVisibleCharCount({ text, nested: true }) > limit
-    );
-  }, [editVal?.value?.variants, keyData.keyMaxCharLimit]);
-
-  const handleSaveWithConfirmation = (props?: SaveProps) => {
-    if (isOverCharLimit) {
-      confirmation({
-        title: <T keyName="translation_char_limit_exceeded_title" />,
-        message: <T keyName="translation_char_limit_exceeded_confirmation" />,
-        confirmButtonText: <T keyName="translations_cell_save" />,
-        onConfirm: () => handleSave(props),
-      });
-    } else {
-      handleSave(props);
-    }
-  };
 
   const handleModeToggle = () => {
     setMode((mode) => (mode === 'syntax' ? 'placeholders' : 'syntax'));
