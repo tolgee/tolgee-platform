@@ -28,7 +28,7 @@ type Props = {
   targetLocale?: string;
   nested: boolean;
   showHighlights?: boolean;
-  qaIssues?: QaIssueModel[];
+  qaIssues: QaIssueModel[];
   translationId?: number;
 };
 
@@ -46,7 +46,7 @@ function isOverlapping(a: Position, b: Position): boolean {
 function sortModifiers(
   placeholders: Placeholder[],
   highlights: GlossaryTermHighlightModel[],
-  qaIssues?: QaIssueModel[]
+  qaIssues: QaIssueModel[]
 ): Modifier[] {
   let modifiers: Modifier[] = placeholders.map((placeholder) => ({
     position: placeholder.position,
@@ -87,7 +87,7 @@ function sortModifiers(
   });
 
   // Add QA issue highlights (skip overlapping with existing modifiers and zero-length spans)
-  qaIssues?.forEach((issue) => {
+  qaIssues.forEach((issue) => {
     if (issue.positionStart === issue.positionEnd) {
       return;
     }

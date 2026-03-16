@@ -4,7 +4,7 @@ import { PanelContentData } from 'tg.views/projects/translations/ToolsPanel/comm
 import { useQaCheckPreview } from './useQaCheckPreview';
 import { QaPreviewIssue } from 'tg.ee.module/qa/models/QaPreviewWsModels';
 import { useProject } from 'tg.hooks/useProject';
-import { findVariantOffset } from 'tg.fixtures/qaUtils';
+import { adjustQaIssuesForVariant } from 'tg.fixtures/qaUtils';
 
 export const useQaChecksForPanel = (data: PanelContentData) => {
   const { keyData, language, editingText, activeVariant, isModified } = data;
@@ -19,6 +19,16 @@ export const useQaChecksForPanel = (data: PanelContentData) => {
     return editingText ?? '';
   }, [keyData.keyIsPlural, data.editingFullValue, editingText, raw]);
 
+  // Get the variant offset from the parsed format
+  const variantOffset = useMemo(() => {
+    if (!activeVariant || !data.editingFullValue?.variantOffsets) return 0;
+    return (
+      data.editingFullValue.variantOffsets[
+        activeVariant as Intl.LDMLPluralRule
+      ] ?? 0
+    );
+  }, [activeVariant, data.editingFullValue?.variantOffsets]);
+
   const translation = keyData.translations[language.tag];
   const allPersistedIssues: QaPreviewIssue[] = translation?.qaIssues ?? [];
 
@@ -26,7 +36,7 @@ export const useQaChecksForPanel = (data: PanelContentData) => {
   const persistedIssues = useMemo(() => {
     if (activeVariant) {
       return allPersistedIssues.filter(
-        (i) => (i as any).pluralVariant === activeVariant
+        (i) => i.pluralVariant === activeVariant
       );
     }
     return allPersistedIssues;
@@ -44,16 +54,10 @@ export const useQaChecksForPanel = (data: PanelContentData) => {
   });
 
   // Adjust positions from full-ICU to variant-relative for the panel
-  const adjustedIssues = useMemo(() => {
-    if (!activeVariant || !text) return result.issues;
-    const offset = findVariantOffset(text, activeVariant);
-    if (offset === 0) return result.issues;
-    return result.issues.map((issue) => ({
-      ...issue,
-      positionStart: issue.positionStart - offset,
-      positionEnd: issue.positionEnd - offset,
-    }));
-  }, [result.issues, activeVariant, text]);
+  const adjustedIssues = useMemo(
+    () => adjustQaIssuesForVariant(result.issues, activeVariant, variantOffset),
+    [result.issues, activeVariant, variantOffset]
+  );
 
   return { issues: adjustedIssues, isLoading: result.isLoading };
 };

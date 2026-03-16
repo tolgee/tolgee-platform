@@ -2,17 +2,17 @@ package io.tolgee.ee.service.qa
 
 object QaPluralCheckHelper {
   /**
-   * Runs a check function per plural variant with automatic position mapping.
+   * Runs a check function per plural variant with automatic position remapping.
    *
-   * For non-plural text (or when textVariants is null): passes through to checkFn with
-   * the full text/baseText and returns results as-is.
+   * For non-plural text (or when `textVariants` is null): passes through to `checkFn` with
+   * the full `text`/`baseText` and returns results as-is.
    *
    * For plural text: iterates over variants (or only [params.activeVariant] if specified),
-   * finds the best matching base variant, calls checkFn with per-variant text,
+   * finds the best matching base variant, calls `checkFn` with per-variant text,
    * and maps result positions from variant-relative to full-ICU-text-relative.
    *
    * @param params The QA check params containing text, variants, offsets, and activeVariant
-   * @param checkFn The per-variant check logic. Receives (variantText, baseVariantText)
+   * @param checkFn The per-variant check logic. Receives (`variantText`, `baseVariantText`)
    *                and returns issues with positions relative to the variant text.
    */
   fun runPerVariant(

@@ -19,39 +19,25 @@ export function applyQaReplacement(
   );
 }
 
-/**
- * Finds the character offset of a variant's content within an ICU plural string.
- * Searches for the pattern "variantKey {" and returns the position after "{".
- */
-export function findVariantOffset(icuText: string, variantKey: string): number {
-  const escaped = variantKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(`(?:^|[\\s,])${escaped}\\s*\\{`);
-  const match = pattern.exec(icuText);
-  if (!match) return 0;
-  return match.index + match[0].length;
-}
-
-type QaIssueWithVariant = {
+export type QaVariantIssue = {
   positionStart: number;
   positionEnd: number;
-  pluralVariant?: string | null;
+  pluralVariant?: string;
 };
 
-/**
- * Adjusts QA issue positions from full-ICU-text-relative to variant-relative.
- * Only adjusts issues whose pluralVariant matches the given variant.
- */
-export function adjustIssuePositionsForVariant<T extends QaIssueWithVariant>(
+export function adjustQaIssuesForVariant<T extends QaVariantIssue>(
   issues: T[],
-  icuText: string,
-  variant: string
+  variant: string | undefined,
+  variantOffset: number
 ): T[] {
-  const offset = findVariantOffset(icuText, variant);
+  if (!variant || variantOffset === 0) {
+    return issues;
+  }
   return issues
-    .filter((i) => i.pluralVariant === variant)
+    .filter((i) => i.pluralVariant === variant || !i.pluralVariant)
     .map((i) => ({
       ...i,
-      positionStart: i.positionStart - offset,
-      positionEnd: i.positionEnd - offset,
+      positionStart: i.positionStart - variantOffset,
+      positionEnd: i.positionEnd - variantOffset,
     }));
 }

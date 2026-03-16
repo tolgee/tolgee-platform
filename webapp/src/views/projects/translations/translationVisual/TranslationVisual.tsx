@@ -9,7 +9,7 @@ import { styled } from '@mui/material';
 import { DirectionLocaleWrapper } from '../DirectionLocaleWrapper';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
-import { adjustIssuePositionsForVariant } from 'tg.fixtures/qaUtils';
+import { adjustQaIssuesForVariant } from 'tg.fixtures/qaUtils';
 
 type QaIssueModel = components['schemas']['QaIssueModel'];
 
@@ -42,7 +42,7 @@ export const TranslationVisual = ({
   showHighlights,
   isPlural,
   extraPadding,
-  qaIssues,
+  qaIssues = [],
   translationId,
 }: Props) => {
   const project = useProject();
@@ -68,10 +68,14 @@ export const TranslationVisual = ({
       locale={locale}
       extraPadding={extraPadding}
       render={({ content, exampleValue, variant }) => {
-        const variantQaIssues =
-          variant && qaIssues && text
-            ? adjustIssuePositionsForVariant(qaIssues, text, variant)
-            : qaIssues;
+        // For plurals, filter QA issues to this variant and adjust positions
+        const offset =
+          value.variantOffsets?.[variant as Intl.LDMLPluralRule] ?? 0;
+        const variantQaIssues = adjustQaIssuesForVariant(
+          qaIssues,
+          variant,
+          offset
+        );
         return (
           <LimitedHeightText
             maxLines={maxLines === undefined ? 3 : maxLines!}
