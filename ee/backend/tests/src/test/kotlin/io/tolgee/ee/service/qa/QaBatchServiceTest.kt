@@ -1,6 +1,8 @@
 package io.tolgee.ee.service.qa
 
 import io.tolgee.development.testDataBuilder.data.BaseTestData
+import io.tolgee.model.enums.qa.QaCheckSeverity
+import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.qa.TranslationQaIssueRepository
@@ -23,6 +25,9 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var qaIssueRepository: TranslationQaIssueRepository
 
+  @Autowired
+  private lateinit var projectQaConfigService: ProjectQaConfigService
+
   lateinit var testData: BaseTestData
   lateinit var testKey: Key
   lateinit var frTranslation: Translation
@@ -43,6 +48,10 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
         }.self
     }
     testDataService.saveTestData(testData.root)
+    projectQaConfigService.updateSettings(
+      testData.project.id,
+      QaCheckType.entries.associateWith { QaCheckSeverity.WARNING },
+    )
     userAccount = testData.user
   }
 

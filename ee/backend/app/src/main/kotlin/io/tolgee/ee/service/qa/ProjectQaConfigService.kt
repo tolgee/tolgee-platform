@@ -28,11 +28,22 @@ class ProjectQaConfigService(
       ).also { projectQaConfigRepository.save(it) }
   }
 
+  @Transactional
+  fun initializeDefaultSettings(projectId: Long) {
+    if (projectQaConfigRepository.findByProjectId(projectId) != null) return
+    val config =
+      ProjectQaConfig(
+        project = projectService.get(projectId),
+        settings = QaCheckType.entries.associateWith { it.defaultSeverity }.toMutableMap(),
+      )
+    projectQaConfigRepository.save(config)
+  }
+
   fun getSettings(projectId: Long): Map<QaCheckType, QaCheckSeverity> {
     val config = projectQaConfigRepository.findByProjectId(projectId)
     val stored = config?.settings ?: emptyMap()
     return QaCheckType.entries.associateWith { type ->
-      stored[type] ?: type.defaultSeverity
+      stored[type] ?: QaCheckSeverity.OFF
     }
   }
 
@@ -67,9 +78,9 @@ class ProjectQaConfigService(
         ?: return globalSettings
     val languageSettings = langConfig.settings.toMutableMap()
     for (type in QaCheckType.entries) {
-      languageSettings[type] = languageSettings[type] ?: globalSettings[type] ?: type.defaultSeverity
+      languageSettings[type] = languageSettings[type] ?: globalSettings[type] ?: QaCheckSeverity.OFF
     }
-    return langConfig.settings.toMap()
+    return languageSettings.toMap()
   }
 
   fun getSettingsForAllLanguages(projectId: Long): List<LanguageQaConfig> {

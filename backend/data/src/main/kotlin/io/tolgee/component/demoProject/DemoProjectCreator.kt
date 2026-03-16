@@ -5,6 +5,7 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.ScreenshotInfoDto
+import io.tolgee.events.OnProjectCreated
 import io.tolgee.events.OnTranslationTextsModified
 import io.tolgee.model.Language
 import io.tolgee.model.Organization
@@ -50,6 +51,7 @@ class DemoProjectCreator(
     addComments()
     project.baseLanguage = languages["en"]
     projectService.save(project)
+    applicationContext.publishEvent(OnProjectCreated(project))
     return project
   }
 

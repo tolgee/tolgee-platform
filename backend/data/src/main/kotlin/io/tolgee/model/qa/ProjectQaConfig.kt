@@ -24,7 +24,4 @@ class ProjectQaConfig(
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
   var settings: MutableMap<QaCheckType, QaCheckSeverity> = mutableMapOf(),
-  // TODO: somehow make sure the existing project have QA checks disabled while new projects use default settings for QA checks
-  // this must be also extensible for new future QA checks - when we add new QA check it must be disable for all existing projects
-  // but enabled for new projects (if it's default is enabled)
 ) : StandardAuditModel()
