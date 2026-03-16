@@ -3,7 +3,6 @@ import { Box, IconButton, Tooltip, styled } from '@mui/material';
 import { Placeholder } from '@tginternal/editor';
 import { useTranslate } from '@tolgee/react';
 import { HelpCircle } from '@untitled-ui/icons-react';
-
 import { TaskInfoMessage } from 'tg.ee';
 import { ControlsEditorMain } from '../cell/editorMainActions/ControlsEditorMain';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
@@ -13,6 +12,7 @@ import { useTranslationCell } from '../useTranslationCell';
 import { TranslationLanguage } from './TranslationLanguage';
 import { TranslationEditor } from '../TranslationEditor';
 import { MissingPlaceholders } from '../cell/MissingPlaceholders';
+
 import { useMissingPlaceholders } from '../cell/useMissingPlaceholders';
 import { TranslationVisual } from '../translationVisual/TranslationVisual';
 import { ControlsEditorReadOnly } from '../cell/ControlsEditorReadOnly';
@@ -95,7 +95,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
     language,
     canChangeState,
     setState,
-    handleSave,
+    handleSaveWithConfirmation,
     handleClose,
     handleInsertBase,
     editEnabled,
@@ -184,7 +184,12 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
       />
       <Box onMouseDown={(e) => e.preventDefault()} className="editor">
         {editEnabled ? (
-          <TranslationEditor tools={tools} editorRef={editorRef} mode={mode} />
+          <TranslationEditor
+            tools={tools}
+            editorRef={editorRef}
+            mode={mode}
+            maxCharLimit={keyData.keyMaxCharLimit}
+          />
         ) : (
           <TranslationVisual
             text={translation?.text || ''}
@@ -221,7 +226,7 @@ export const TranslationWrite: React.FC<Props> = ({ tools }) => {
               </Box>
               <ControlsEditorMain
                 className="controls-main"
-                onSave={handleSave}
+                onSave={handleSaveWithConfirmation}
                 onCancel={() => handleClose(true)}
                 tasks={tasks}
                 currentTask={prefilteredTask?.number}

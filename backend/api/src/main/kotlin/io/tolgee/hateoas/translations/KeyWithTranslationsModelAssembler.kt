@@ -30,6 +30,7 @@ class KeyWithTranslationsModelAssembler(
       branch = view.branch,
       keyNamespace = view.keyNamespace,
       keyDescription = view.keyDescription,
+      keyMaxCharLimit = view.keyMaxCharLimit,
       keyTags = view.keyTags.map { tagModelAssembler.toModel(it) },
       contextPresent = view.contextPresent,
       translations =

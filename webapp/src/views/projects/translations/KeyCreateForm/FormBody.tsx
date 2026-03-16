@@ -26,7 +26,9 @@ import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon'
 import { PluralEditor } from '../translationVisual/PluralEditor';
 import type { ValuesCreateType } from './KeyCreateForm';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
+import { CharLimitCheckbox } from 'tg.component/common/form/CharLimitCheckbox';
 import { ControlsEditorSmall } from '../cell/ControlsEditorSmall';
+import { getVisibleCharCount } from '../cell/getVisibleCharCount';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -83,6 +85,21 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
 
   const [mode, setMode] = useState<'placeholders' | 'syntax'>('placeholders');
 
+  const maxCharLimit = form.values.maxCharLimit;
+  const isBaseOverCharLimit =
+    maxCharLimit != null &&
+    maxCharLimit > 0 &&
+    Object.values(form.values.baseValue.variants ?? {}).some(
+      (v) => getVisibleCharCount({ text: v, nested: isPlural }) > maxCharLimit
+    );
+
+  const handleEnterSubmit = () => {
+    if (!isBaseOverCharLimit) {
+      form.handleSubmit();
+    }
+    return true;
+  };
+
   const actualParameter = isPlural
     ? form.values.pluralParameter || 'value'
     : undefined;
@@ -118,7 +135,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                         shortcuts={[
                           {
                             key: 'Enter',
-                            run: () => (form.handleSubmit(), true),
+                            run: handleEnterSubmit,
                           },
                         ]}
                       />
@@ -174,7 +191,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                     shortcuts={[
                       {
                         key: 'Enter',
-                        run: () => (form.handleSubmit(), true),
+                        run: handleEnterSubmit,
                       },
                     ]}
                     onBlur={() => form.setFieldTouched(field.name, true)}
@@ -223,10 +240,14 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
           )}
         />
 
-        <PluralFormCheckbox
-          isPluralName="isPlural"
-          pluralParameterName="pluralParameter"
-        />
+        <Box display="flex" gap={4} alignItems="flex-start">
+          <PluralFormCheckbox
+            isPluralName="isPlural"
+            pluralParameterName="pluralParameter"
+          />
+
+          <CharLimitCheckbox fieldName="maxCharLimit" />
+        </Box>
 
         <Field key={baseLang.tag} name="baseValue">
           {({ field, meta }) => (
@@ -252,13 +273,14 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
                 }}
                 locale={baseLang.tag}
                 mode={mode}
+                maxCharLimit={maxCharLimit}
                 editorProps={{
                   autoScrollIntoView: true,
                   scrollMargins: { bottom: 150 },
                   shortcuts: [
                     {
                       key: 'Enter',
-                      run: () => (form.handleSubmit(), true),
+                      run: handleEnterSubmit,
                     },
                   ],
                 }}
@@ -281,7 +303,7 @@ export const FormBody: React.FC<Props> = ({ onCancel, autofocus }) => {
             loading={form.isSubmitting}
             color="primary"
             variant="contained"
-            disabled={!form.isValid}
+            disabled={!form.isValid || isBaseOverCharLimit}
             type="submit"
             onClick={() => form.handleSubmit()}
           >

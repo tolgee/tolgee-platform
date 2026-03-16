@@ -58,6 +58,7 @@ class QueryBase<T>(
   val keyCreatedAtExpression: Path<Date> = root.get(Key_.createdAt)
   val keyIsPluralExpression: Path<Boolean> = root.get(Key_.isPlural)
   val keyArgNameExpression: Path<String?> = root.get(Key_.pluralArgName)
+  val keyMaxCharLimitExpression: Path<Int?> = root.get(Key_.maxCharLimit)
   val keyIdExpression: Path<Long> = root.get(Key_.id)
   val querySelection = QuerySelection()
   val fullTextFields: MutableSet<Expression<String>> = HashSet()
@@ -76,6 +77,7 @@ class QueryBase<T>(
     querySelection[KeyWithTranslationsView::keyName.name] = keyNameExpression
     querySelection[KeyWithTranslationsView::keyIsPlural.name] = keyIsPluralExpression
     querySelection[KeyWithTranslationsView::keyPluralArgName.name] = keyArgNameExpression
+    querySelection[KeyWithTranslationsView::keyMaxCharLimit.name] = keyMaxCharLimitExpression
     whereConditions.add(cb.equal(root.get<Any>(Key_.PROJECT).get<Any>(Project_.ID), this.projectId))
     if (params.trashed) {
       whereConditions.add(cb.isNotNull(root.get(Key_.deletedAt)))

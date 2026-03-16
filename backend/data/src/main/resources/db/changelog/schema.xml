@@ -5186,4 +5186,14 @@
             drop index concurrently if exists key_project_name_ns_not_deleted;
         </rollback>
     </changeSet>
+    <changeSet author="dbocharov" id="1741100000000-1">
+        <addColumn tableName="key">
+            <column name="max_char_limit" type="INTEGER"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dbocharov" id="1741100000000-2">
+        <addColumn tableName="branch_key_snapshot">
+            <column name="max_char_limit" type="INTEGER"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

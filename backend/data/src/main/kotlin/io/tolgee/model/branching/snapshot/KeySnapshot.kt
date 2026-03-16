@@ -36,6 +36,7 @@ class KeySnapshot(
   var namespace: String? = null,
   var isPlural: Boolean = false,
   var pluralArgName: String? = null,
+  var maxCharLimit: Int? = null,
   /**
    * Reference to the original key from which this snapshot was created.
    * Used to match BASE → FEATURE → MAIN.

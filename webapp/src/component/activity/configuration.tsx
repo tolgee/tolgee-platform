@@ -97,7 +97,7 @@ export const actionsConfiguration: Partial<
     },
     entities: {
       Translation: true,
-      Key: ['name', 'namespace'],
+      Key: ['name', 'namespace', 'maxCharLimit'],
       Screenshot: true,
     },
   },
@@ -164,6 +164,12 @@ export const actionsConfiguration: Partial<
       return <T keyName="activity_key_tags_edit" params={params} />;
     },
     entities: { KeyMeta: true },
+  },
+  KEY_CHARACTER_LIMIT_EDIT: {
+    label(params) {
+      return <T keyName="activity_key_character_limit_edit" params={params} />;
+    },
+    entities: { Key: ['maxCharLimit'] },
   },
   TRANSLATION_HISTORY_ADD: {
     label(params) {

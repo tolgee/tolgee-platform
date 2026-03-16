@@ -360,6 +360,14 @@ class CoreImportFilesProcessor(
       fileEntity.addIssues(otherFilesCollisions)
       newTranslation.isSelectedToImport = false
     }
+    val existingKey = importDataManager.existingKeys[this.getNamespaceToPreselect() to keyEntity.name]
+    val maxCharLimit = existingKey?.maxCharLimit
+    if (maxCharLimit != null && newTranslation.text != null && newTranslation.text!!.length > maxCharLimit) {
+      fileEntity.addIssue(
+        FileIssueType.TRANSLATION_EXCEEDS_CHAR_LIMIT,
+        mapOf(FileIssueParamType.KEY_NAME to keyEntity.name),
+      )
+    }
     this@CoreImportFilesProcessor.addToStoredTranslations(newTranslation)
   }
 

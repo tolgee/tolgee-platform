@@ -107,6 +107,9 @@ class Key(
   var pluralArgName: String? = null
 
   @ActivityLoggedProp
+  var maxCharLimit: Int? = null
+
+  @ActivityLoggedProp
   override var deletedAt: Date? = null
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -155,6 +158,7 @@ class Key(
   override fun isModified(oldState: Map<String, Any>): Boolean {
     return oldState["isPlural"] != this.isPlural ||
       oldState["pluralArgName"] != this.pluralArgName ||
+      oldState["maxCharLimit"] != this.maxCharLimit ||
       oldState["deletedAt"] != this.deletedAt
   }
 
@@ -163,7 +167,8 @@ class Key(
       this.name != snapshot.name ||
         this.namespace?.name != snapshot.namespace ||
         this.isPlural != snapshot.isPlural ||
-        this.pluralArgName != snapshot.pluralArgName
+        this.pluralArgName != snapshot.pluralArgName ||
+        this.maxCharLimit != snapshot.maxCharLimit
     if (changed) {
       return true
     }
@@ -203,6 +208,9 @@ class Key(
       return true
     }
     if (isConflictingThreeWay(source.pluralArgName, this.pluralArgName, snapshot.pluralArgName)) {
+      return true
+    }
+    if (isConflictingThreeWay(source.maxCharLimit, this.maxCharLimit, snapshot.maxCharLimit)) {
       return true
     }
 
@@ -246,6 +254,7 @@ class Key(
   ) {
     this.isPlural = chooseThreeWay(source.isPlural, this.isPlural, snapshot?.isPlural, resolution) ?: false
     this.pluralArgName = chooseThreeWay(source.pluralArgName, this.pluralArgName, snapshot?.pluralArgName, resolution)
+    this.maxCharLimit = chooseThreeWay(source.maxCharLimit, this.maxCharLimit, snapshot?.maxCharLimit, resolution)
 
     val snapshotTranslations = snapshot?.translations?.associateBy { it.language } ?: emptyMap()
     val targetTranslations = this.translations.associateBy { it.language.tag }

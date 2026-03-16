@@ -1,4 +1,4 @@
-import { styled, useTheme } from '@mui/material';
+import { Box, styled, useTheme } from '@mui/material';
 import { useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
 
@@ -12,6 +12,7 @@ import { Tag } from '../Tags/Tag';
 import { RequiredField } from 'tg.component/common/form/RequiredField';
 import { LabelHint } from 'tg.component/common/LabelHint';
 import { PluralFormCheckbox } from 'tg.component/common/form/PluralFormCheckbox';
+import { CharLimitCheckbox } from 'tg.component/common/form/CharLimitCheckbox';
 import { useProject } from 'tg.hooks/useProject';
 import clsx from 'clsx';
 
@@ -154,10 +155,14 @@ export const KeyGeneral = () => {
         <FieldError error={errors.tags} />
       </StyledSection>
 
-      <PluralFormCheckbox
-        pluralParameterName="pluralParameter"
-        isPluralName="isPlural"
-      />
+      <Box display="flex" gap={4} alignItems="flex-start">
+        <PluralFormCheckbox
+          pluralParameterName="pluralParameter"
+          isPluralName="isPlural"
+        />
+
+        <CharLimitCheckbox fieldName="maxCharLimit" />
+      </Box>
     </>
   );
 };

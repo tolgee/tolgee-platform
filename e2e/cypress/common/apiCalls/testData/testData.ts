@@ -149,6 +149,8 @@ export const labelsTestData = generateTestDataObject('label');
 export const softDeleteKeysTestData =
   generateTestDataObject('soft-delete-keys');
 
+export const charLimitTestData = generateTestDataObject('char-limit');
+
 export const suggestionsTestData = {
   ...generateTestDataObject('suggestions'),
   generate: (props?: {

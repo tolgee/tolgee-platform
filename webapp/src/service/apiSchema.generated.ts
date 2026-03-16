@@ -1877,6 +1877,11 @@ export interface components {
       description?: string;
       /** @description If key is pluralized. If it will be reflected in the editor. If null, value won't be modified. */
       isPlural?: boolean;
+      /**
+       * Format: int32
+       * @description Maximum character limit. Null = don't modify. 0 = remove limit.
+       */
+      maxCharLimit?: number;
       /** @description Name of the key */
       name: string;
       namespace?: string;
@@ -2377,6 +2382,11 @@ export interface components {
       description?: string;
       /** @description If key is pluralized. If it will be reflected in the editor */
       isPlural: boolean;
+      /**
+       * Format: int32
+       * @description Maximum character limit for translations of this key. Null means no limit.
+       */
+      maxCharLimit?: number;
       /** @description Name of the key */
       name: string;
       namespace?: string;
@@ -2525,6 +2535,11 @@ export interface components {
        * @example This key is used on homepage. It's a label of sign up button.
        */
       description?: string;
+      /**
+       * Format: int32
+       * @description Maximum character limit for translations of this key. Null means no limit.
+       */
+      maxCharLimit?: number;
       name: string;
       namespace?: string;
     };
@@ -2928,7 +2943,8 @@ export interface components {
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
         | "branching_not_enabled_for_project"
-        | "export_key_plural_suffix_collision";
+        | "export_key_plural_suffix_collision"
+        | "translation_exceeds_char_limit";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -3225,7 +3241,8 @@ export interface components {
         | "KEY_IS_BLANK"
         | "TRANSLATION_DEFINED_IN_ANOTHER_FILE"
         | "INVALID_CUSTOM_VALUES"
-        | "DESCRIPTION_TOO_LONG";
+        | "DESCRIPTION_TOO_LONG"
+        | "TRANSLATION_EXCEEDS_CHAR_LIMIT";
     };
     ImportFileIssueParamModel: {
       /** @enum {string} */
@@ -3596,6 +3613,11 @@ export interface components {
        */
       id: number;
       /**
+       * Format: int32
+       * @description Maximum character limit for translations of this key
+       */
+      maxCharLimit?: number;
+      /**
        * @description Name of key
        * @example this_is_super_key
        */
@@ -3703,6 +3725,11 @@ export interface components {
       /** @description If key is pluralized. If it will be reflected in the editor */
       isPlural: boolean;
       /**
+       * Format: int32
+       * @description Maximum character limit for translations of this key
+       */
+      maxCharLimit?: number;
+      /**
        * @description Name of key
        * @example this_is_super_key
        */
@@ -3759,6 +3786,11 @@ export interface components {
        * @example true
        */
       keyIsPlural: boolean;
+      /**
+       * Format: int32
+       * @description Maximum character limit for translations of this key
+       */
+      keyMaxCharLimit?: number;
       /**
        * @description Name of key
        * @example this_is_super_key
@@ -4925,6 +4957,7 @@ export interface components {
         | "SCREENSHOT_ADD"
         | "KEY_TAGS_EDIT"
         | "KEY_NAME_EDIT"
+        | "KEY_CHARACTER_LIMIT_EDIT"
         | "KEY_DELETE"
         | "KEY_SOFT_DELETE"
         | "KEY_RESTORE"
@@ -6346,7 +6379,8 @@ export interface components {
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
         | "branching_not_enabled_for_project"
-        | "export_key_plural_suffix_collision";
+        | "export_key_plural_suffix_collision"
+        | "translation_exceeds_char_limit";
       params?: unknown[];
       success: boolean;
     };

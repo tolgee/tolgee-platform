@@ -360,6 +360,7 @@ class PromptVariablesHelper(
     val keyVar = Variable("key")
     keyVar.props.add(Variable("name", key?.name))
     keyVar.props.add(Variable("description", key?.keyMeta?.description ?: ""))
+    keyVar.props.add(Variable("maxCharLimit", key?.maxCharLimit))
     variables.add(keyVar)
 
     variables.add(getRelatedKeysVar(projectId, tLanguage, key, sLanguage, sTranslation))
