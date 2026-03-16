@@ -824,12 +824,12 @@ export interface paths {
     put: operations["updatePrompt"];
     delete: operations["deletePrompt"];
   };
-  "/v2/projects/{projectId}/qa-check-types": {
-    get: operations["getCheckTypes"];
-  };
   "/v2/projects/{projectId}/qa-settings": {
     get: operations["getSettings"];
     put: operations["updateSettings"];
+  };
+  "/v2/projects/{projectId}/qa-settings/check-types": {
+    get: operations["getCheckTypes"];
   };
   "/v2/projects/{projectId}/qa-settings/languages": {
     get: operations["getAllLanguageSettings"];
@@ -1032,11 +1032,9 @@ export interface paths {
   "/v2/projects/{projectId}/translations/{translationId}/qa-issues": {
     get: operations["getIssues"];
   };
-  "/v2/projects/{projectId}/translations/{translationId}/qa-issues/ignore": {
-    post: operations["ignoreIssueByParams"];
-  };
-  "/v2/projects/{projectId}/translations/{translationId}/qa-issues/unignore": {
-    post: operations["unignoreIssueByParams"];
+  "/v2/projects/{projectId}/translations/{translationId}/qa-issues/suppressions": {
+    post: operations["createSuppression"];
+    delete: operations["removeSuppression"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/qa-issues/{issueId}/ignore": {
     put: operations["ignoreIssue"];
@@ -18406,45 +18404,6 @@ export interface operations {
       };
     };
   };
-  getCheckTypes: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": components["schemas"]["QaCheckCategoryModel"][];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Unauthorized */
-      401: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Forbidden */
-      403: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-  };
   getSettings: {
     parameters: {
       path: {
@@ -18525,6 +18484,45 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["QaSettingsRequest"];
+      };
+    };
+  };
+  getCheckTypes: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["QaCheckCategoryModel"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
       };
     };
   };
@@ -21682,7 +21680,7 @@ export interface operations {
       };
     };
   };
-  ignoreIssueByParams: {
+  createSuppression: {
     parameters: {
       path: {
         projectId: number;
@@ -21723,7 +21721,7 @@ export interface operations {
       };
     };
   };
-  unignoreIssueByParams: {
+  removeSuppression: {
     parameters: {
       path: {
         projectId: number;

@@ -23,7 +23,7 @@ export const SubfilterQaChecks = ({
   const anchorEl = useRef<HTMLElement>(null);
 
   const { data: qaCheckCategories } = useApiQuery({
-    url: '/v2/projects/{projectId}/qa-check-types',
+    url: '/v2/projects/{projectId}/qa-settings/check-types',
     method: 'get',
     path: { projectId },
     options: {

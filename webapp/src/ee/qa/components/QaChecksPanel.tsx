@@ -60,13 +60,13 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
   }, [openIssues.length]);
 
   const ignoreMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/ignore',
+    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/suppressions',
     method: 'post',
   });
 
   const unignoreMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/unignore',
-    method: 'post',
+    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/suppressions',
+    method: 'delete',
   });
 
   if (!isEnabled('QA_CHECKS')) {

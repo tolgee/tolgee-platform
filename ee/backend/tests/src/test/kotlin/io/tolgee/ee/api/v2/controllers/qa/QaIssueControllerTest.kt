@@ -311,7 +311,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
       )
 
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/ignore",
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -334,7 +334,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
     assertThat(issuesBefore).isEmpty()
 
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/ignore",
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -372,8 +372,8 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         positionEnd = issue.positionEnd,
       )
 
-    performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/unignore",
+    performAuthDelete(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -392,9 +392,9 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         positionEnd = 5,
       )
 
-    // Create a virtual issue via ignore-by-params
+    // Create a virtual issue via suppression
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/ignore",
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -414,7 +414,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `unignoring a virtual issue by params deletes it`() {
+  fun `removing a virtual issue suppression deletes it`() {
     val request =
       QaCheckIssueIgnoreRequest(
         type = QaCheckType.CHARACTER_CASE_MISMATCH,
@@ -424,9 +424,9 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         positionEnd = 5,
       )
 
-    // Create a virtual issue via ignore-by-params
+    // Create a virtual issue via suppression
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/ignore",
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -434,9 +434,9 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
     assertThat(issues).hasSize(1)
     assertThat(issues.first().virtual).isTrue()
 
-    // Unignore by params should delete the virtual issue
-    performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/unignore",
+    // Remove suppression should delete the virtual issue
+    performAuthDelete(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -455,9 +455,9 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         positionEnd = 1,
       )
 
-    // Create a virtual ignored issue
+    // Create a virtual ignored issue via suppression
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/ignore",
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -486,7 +486,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `unignores non-existing issue by params - returns 204`() {
+  fun `removing non-existing suppression returns 204`() {
     val request =
       QaCheckIssueIgnoreRequest(
         type = QaCheckType.CHARACTER_CASE_MISMATCH,
@@ -496,8 +496,8 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         positionEnd = 5,
       )
 
-    performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/unignore",
+    performAuthDelete(
+      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsNoContent
 

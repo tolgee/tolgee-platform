@@ -4,18 +4,22 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.qa.LanguageQaConfigModelAssembler
+import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaCheckCategoryModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaLanguageSettingsModelAssembler
 import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaSettingsModelAssembler
 import io.tolgee.ee.api.v2.hateoas.model.qa.LanguageQaConfigModel
+import io.tolgee.ee.api.v2.hateoas.model.qa.QaCheckCategoryModel
 import io.tolgee.ee.api.v2.hateoas.model.qa.QaLanguageSettingsModel
 import io.tolgee.ee.api.v2.hateoas.model.qa.QaSettingsModel
 import io.tolgee.ee.data.qa.QaLanguageSettingsRequest
 import io.tolgee.ee.data.qa.QaSettingsRequest
 import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.model.enums.Scope
+import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.openApiDocs.OpenApiUnstableOperationExtension
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.language.LanguageService
@@ -39,7 +43,20 @@ class QaSettingsController(
   private val languageQaConfigModelAssembler: LanguageQaConfigModelAssembler,
   private val qaSettingsModelAssembler: QaSettingsModelAssembler,
   private val qaLanguageSettingsModelAssembler: QaLanguageSettingsModelAssembler,
+  private val qaCheckCategoryModelAssembler: QaCheckCategoryModelAssembler,
 ) {
+  @GetMapping("/check-types")
+  @Operation(summary = "Get QA check types grouped by category")
+  @ReadOnlyOperation
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
+  @AllowApiAccess
+  @RequiresFeatures(Feature.QA_CHECKS)
+  fun getCheckTypes(): List<QaCheckCategoryModel> {
+    return QaCheckType.CATEGORIES.map { (category, checkTypes) ->
+      qaCheckCategoryModelAssembler.toModel(category, checkTypes)
+    }
+  }
+
   @GetMapping("")
   @Operation(summary = "Get QA check settings for the project")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])

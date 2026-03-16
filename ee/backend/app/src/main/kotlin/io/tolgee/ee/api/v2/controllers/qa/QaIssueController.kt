@@ -16,6 +16,7 @@ import io.tolgee.security.authorization.RequiresProjectPermissions
 import jakarta.validation.Valid
 import org.springframework.hateoas.CollectionModel
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -72,12 +73,12 @@ class QaIssueController(
     qaIssueService.unignoreIssue(projectId, issueId)
   }
 
-  @PostMapping("/ignore")
-  @Operation(summary = "Ignore a QA issue by parameters")
+  @PostMapping("/suppressions")
+  @Operation(summary = "Create a QA issue suppression by match parameters")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)
-  fun ignoreIssueByParams(
+  fun createSuppression(
     @PathVariable projectId: Long,
     @PathVariable translationId: Long,
     @RequestBody @Valid request: QaCheckIssueIgnoreRequest,
@@ -85,12 +86,12 @@ class QaIssueController(
     qaIssueService.ignoreIssueByParams(projectId, translationId, request)
   }
 
-  @PostMapping("/unignore")
-  @Operation(summary = "Unignore a QA issue by parameters")
+  @DeleteMapping("/suppressions")
+  @Operation(summary = "Remove a QA issue suppression by match parameters")
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)
-  fun unignoreIssueByParams(
+  fun removeSuppression(
     @PathVariable projectId: Long,
     @PathVariable translationId: Long,
     @RequestBody @Valid request: QaCheckIssueIgnoreRequest,

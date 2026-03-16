@@ -46,7 +46,7 @@ export const QaIssueHighlight = ({
       : undefined;
 
   const ignoreMutation = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/ignore',
+    url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/suppressions',
     method: 'post',
     invalidatePrefix: '/v2/projects/{projectId}/translations',
   });
