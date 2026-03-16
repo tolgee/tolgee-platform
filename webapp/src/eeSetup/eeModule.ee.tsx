@@ -352,7 +352,7 @@ export const qaChecksPanelAdder = addPanel(
       itemsCountFunction: useQaChecksCount,
     },
   ],
-  { position: 'after', value: 'comments' }
+  { position: 'before', value: 'comments' }
 );
 
 export const useAddDeveloperViewItems = () => {
