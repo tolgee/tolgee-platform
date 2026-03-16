@@ -35,6 +35,7 @@ export const usePanelData = () => {
   const editingText = useTranslationsSelector(
     (c) => c.cursor?.value.variants[c.cursor?.activeVariant ?? 'other']
   );
+  const editingFullValue = useTranslationsSelector((c) => c.cursor?.value);
   const isModified = useTranslationsSelector((c) => c.cursor?.changed ?? false);
 
   const projectPermissions = useProjectPermissions();
@@ -47,6 +48,7 @@ export const usePanelData = () => {
     baseLanguage: baseLanguage!,
     activeVariant: keyData?.keyIsPlural ? activeVariant! : undefined,
     editingText,
+    editingFullValue: keyData?.keyIsPlural ? editingFullValue : undefined,
     isModified,
     setValue: setEditValueString,
     appendValue: appendEditValueString,

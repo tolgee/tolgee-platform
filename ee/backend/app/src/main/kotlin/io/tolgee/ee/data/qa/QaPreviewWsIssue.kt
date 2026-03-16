@@ -14,6 +14,7 @@ data class QaPreviewWsIssue(
   val positionEnd: Int,
   val params: Map<String, String>?,
   val state: QaIssueState,
+  val pluralVariant: String? = null,
 ) {
   companion object {
     fun fromQaCheckResult(
@@ -26,7 +27,8 @@ data class QaPreviewWsIssue(
             issue.message == result.message &&
             issue.replacement == result.replacement &&
             issue.positionStart == result.positionStart &&
-            issue.positionEnd == result.positionEnd
+            issue.positionEnd == result.positionEnd &&
+            issue.pluralVariant == result.pluralVariant
         }
       return QaPreviewWsIssue(
         type = result.type,
@@ -36,6 +38,7 @@ data class QaPreviewWsIssue(
         positionEnd = result.positionEnd,
         params = result.params,
         state = matchingIssue?.state ?: QaIssueState.OPEN,
+        pluralVariant = result.pluralVariant,
       )
     }
   }

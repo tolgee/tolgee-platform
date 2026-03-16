@@ -19,6 +19,7 @@ class QaIssueModelAssembler(
       positionEnd = entity.positionEnd,
       state = entity.state,
       params = entity.params?.let { objectMapper.readValue<Map<String, String>>(it) },
+      pluralVariant = entity.pluralVariant,
     )
   }
 }

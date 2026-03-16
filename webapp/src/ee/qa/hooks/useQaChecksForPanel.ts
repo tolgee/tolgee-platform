@@ -1,22 +1,59 @@
+import { useMemo } from 'react';
+import { tolgeeFormatGenerateIcu } from '@tginternal/editor';
 import { PanelContentData } from 'tg.views/projects/translations/ToolsPanel/common/types';
 import { useQaCheckPreview } from './useQaCheckPreview';
 import { QaPreviewIssue } from 'tg.ee.module/qa/models/QaPreviewWsModels';
+import { useProject } from 'tg.hooks/useProject';
+import { findVariantOffset } from 'tg.fixtures/qaUtils';
 
 export const useQaChecksForPanel = (data: PanelContentData) => {
-  const { keyData, language, editingText, isModified } = data;
-  const text = editingText ?? '';
-  // TODO: When user is editing plural, either use full ICU form for the plural, or don't generate QA issues, or something like that
-  // if we go with no live QA for plurals, then the UI should say so.
+  const { keyData, language, editingText, activeVariant, isModified } = data;
+  const project = useProject();
+  const raw = !project.icuPlaceholders;
+
+  // For plurals, reconstruct the full ICU text from all variants
+  const text = useMemo(() => {
+    if (keyData.keyIsPlural && data.editingFullValue) {
+      return tolgeeFormatGenerateIcu(data.editingFullValue, raw);
+    }
+    return editingText ?? '';
+  }, [keyData.keyIsPlural, data.editingFullValue, editingText, raw]);
 
   const translation = keyData.translations[language.tag];
-  const persistedIssues: QaPreviewIssue[] = translation?.qaIssues ?? [];
+  const allPersistedIssues: QaPreviewIssue[] = translation?.qaIssues ?? [];
+
+  // For plurals, filter persisted issues to the active variant
+  const persistedIssues = useMemo(() => {
+    if (activeVariant) {
+      return allPersistedIssues.filter(
+        (i) => (i as any).pluralVariant === activeVariant
+      );
+    }
+    return allPersistedIssues;
+  }, [allPersistedIssues, activeVariant]);
+
   const qaChecksStale = translation?.qaChecksStale ?? false;
 
-  return useQaCheckPreview({
+  const result = useQaCheckPreview({
     text,
     languageTag: language.tag,
     keyId: keyData.keyId,
+    variant: activeVariant,
     enabled: isModified || qaChecksStale,
     initialIssues: persistedIssues,
   });
+
+  // Adjust positions from full-ICU to variant-relative for the panel
+  const adjustedIssues = useMemo(() => {
+    if (!activeVariant || !text) return result.issues;
+    const offset = findVariantOffset(text, activeVariant);
+    if (offset === 0) return result.issues;
+    return result.issues.map((issue) => ({
+      ...issue,
+      positionStart: issue.positionStart - offset,
+      positionEnd: issue.positionEnd - offset,
+    }));
+  }, [result.issues, activeVariant, text]);
+
+  return { issues: adjustedIssues, isLoading: result.isLoading };
 };

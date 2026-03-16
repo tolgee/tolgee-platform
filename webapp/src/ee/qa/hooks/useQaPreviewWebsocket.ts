@@ -13,6 +13,7 @@ export const useQaPreviewWebsocket = ({
   keyId,
   languageTag,
   text,
+  variant,
   enabled = true,
   initialIssues,
 }: QaPreviewProps): QaPreviewResult => {
@@ -51,7 +52,7 @@ export const useQaPreviewWebsocket = ({
       );
       // initial text update message
       if (text !== null && text !== undefined) {
-        ws.send(JSON.stringify({ text }));
+        ws.send(JSON.stringify({ text, variant }));
         setIsLoading(true);
       }
     };
@@ -85,11 +86,16 @@ export const useQaPreviewWebsocket = ({
     };
   }, [projectId, keyId, languageTag, enabled, jwtToken]);
 
+  const variantRef = useRef(variant);
+  variantRef.current = variant;
+
   const sendText = useDebouncedCallback(
     (t: string) => {
       pendingTextUpdateRef.current = false;
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({ text: t }));
+        wsRef.current.send(
+          JSON.stringify({ text: t, variant: variantRef.current })
+        );
       }
     },
     200,

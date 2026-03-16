@@ -111,6 +111,7 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     and (i.replacement = :replacement or (i.replacement is null and :replacement is null))
     and i.positionStart = :positionStart
     and i.positionEnd = :positionEnd
+    and (i.pluralVariant = :pluralVariant or (i.pluralVariant is null and :pluralVariant is null))
     """,
   )
   fun findByProjectIdAndTranslationIdAndIssueParams(
@@ -121,5 +122,6 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     replacement: String?,
     positionStart: Int,
     positionEnd: Int,
+    pluralVariant: String?,
   ): TranslationQaIssue?
 }

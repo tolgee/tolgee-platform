@@ -1,6 +1,7 @@
 package io.tolgee.ee.service.qa
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.formats.getPluralForms
 import io.tolgee.hateoas.qa.QaIssueModelAssembler
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.service.language.LanguageService
@@ -45,12 +46,21 @@ class QaCheckBatchServiceImpl(
         null
       }
 
+    val translationText = translation.text ?: ""
+    val isPlural = translation.key.isPlural
+    val textParsed = if (isPlural) getPluralForms(translationText) else null
+    val baseParsed = if (isPlural && baseText != null) getPluralForms(baseText) else null
+
     val params =
       QaCheckParams(
         baseText = baseText,
-        text = translation.text ?: "",
+        text = translationText,
         baseLanguageTag = if (translation.language.id != baseLanguage.id) baseLanguage.tag else null,
         languageTag = translation.language.tag,
+        isPlural = isPlural,
+        textVariants = textParsed?.forms,
+        textVariantOffsets = textParsed?.offsets,
+        baseTextVariants = baseParsed?.forms,
       )
 
     val results =

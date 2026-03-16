@@ -10,4 +10,5 @@ data class QaCheckIssueIgnoreRequest(
   val positionStart: Int,
   val positionEnd: Int,
   val params: Map<String, String>? = null,
+  val pluralVariant: String? = null,
 )

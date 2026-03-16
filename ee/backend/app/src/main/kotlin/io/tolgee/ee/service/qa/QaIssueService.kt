@@ -41,7 +41,8 @@ class QaIssueService(
             existing.type == result.type &&
               existing.message == result.message &&
               existing.positionStart == result.positionStart &&
-              existing.positionEnd == result.positionEnd
+              existing.positionEnd == result.positionEnd &&
+              existing.pluralVariant == result.pluralVariant
           }
         TranslationQaIssue(
           type = result.type,
@@ -51,6 +52,7 @@ class QaIssueService(
           positionEnd = result.positionEnd,
           params = result.params?.let { objectMapper.writeValueAsString(it) },
           state = matchingExisting?.state ?: QaIssueState.OPEN,
+          pluralVariant = result.pluralVariant,
           translation = translation,
         )
       }
@@ -125,6 +127,7 @@ class QaIssueService(
         params = request.params?.let { objectMapper.writeValueAsString(it) },
         state = QaIssueState.IGNORED,
         virtual = true,
+        pluralVariant = request.pluralVariant,
         translation = translation,
       )
     qaIssueRepository.save(newIssue)
@@ -159,6 +162,7 @@ class QaIssueService(
       request.replacement,
       request.positionStart,
       request.positionEnd,
+      request.pluralVariant,
     )
   }
 

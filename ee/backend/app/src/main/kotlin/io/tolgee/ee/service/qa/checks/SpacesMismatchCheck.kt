@@ -3,6 +3,7 @@ package io.tolgee.ee.service.qa.checks
 import io.tolgee.ee.service.qa.QaCheck
 import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.QaCheckResult
+import io.tolgee.ee.service.qa.QaPluralCheckHelper
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import org.springframework.stereotype.Component
@@ -12,9 +13,17 @@ class SpacesMismatchCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.SPACES_MISMATCH
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
-    val base = params.baseText ?: return emptyList()
+    return QaPluralCheckHelper.runPerVariant(params) { text, baseText ->
+      checkVariant(text, baseText)
+    }
+  }
+
+  private fun checkVariant(
+    text: String,
+    baseText: String?,
+  ): List<QaCheckResult> {
+    val base = baseText ?: return emptyList()
     if (base.isBlank()) return emptyList()
-    val text = params.text
     if (text.isBlank()) return emptyList()
 
     val results = mutableListOf<QaCheckResult>()

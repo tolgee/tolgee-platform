@@ -120,12 +120,14 @@ private fun getPluralFormsFromConversionResult(converted: PossiblePluralConversi
   return PluralForms(
     converted.formsResult ?: return null,
     converted.argName ?: throw IllegalStateException("Plural argument name not found"),
+    offsets = converted.variantOffsets,
   )
 }
 
 data class PluralForms(
   val forms: Map<String, String>,
   val argName: String,
+  val offsets: Map<String, Int>? = null,
 ) {
   val icuString: String
     get() = forms.toIcuPluralString(optimize = false, argName = argName)

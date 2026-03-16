@@ -15,9 +15,11 @@ import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.QaCheckRunnerService
 import io.tolgee.ee.service.qa.QaIssueService
+import io.tolgee.formats.getPluralForms
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.security.authentication.JwtService
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
@@ -49,6 +51,7 @@ class QaCheckPreviewWebSocketHandler(
   private val securityService: SecurityService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val projectService: ProjectService,
+  private val keyService: KeyService,
 ) : TextWebSocketHandler() {
   private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -56,9 +59,12 @@ class QaCheckPreviewWebSocketHandler(
     session: WebSocketSession,
     state: QaPreviewWsSessionState,
     text: String,
+    activeVariant: String? = null,
   ) {
     try {
       val persistedIssues = fetchPersistedIssues(state)
+
+      val textParsed = if (state.isPlural) getPluralForms(text) else null
 
       val params =
         QaCheckParams(
@@ -66,6 +72,11 @@ class QaCheckPreviewWebSocketHandler(
           text = text,
           baseLanguageTag = state.baseLanguageTag,
           languageTag = state.languageTag,
+          isPlural = state.isPlural,
+          textVariants = textParsed?.forms,
+          textVariantOffsets = textParsed?.offsets,
+          baseTextVariants = state.baseVariants,
+          activeVariant = activeVariant,
         )
 
       coroutineScope {
@@ -94,9 +105,10 @@ class QaCheckPreviewWebSocketHandler(
     json: JsonNode,
   ) {
     val text = json.get("text")?.asText() ?: ""
+    val variant = json.get("variant")?.asText()
 
     state.currentJob?.cancel()
-    state.currentJob = scope.launch { runChecks(session, state, text) }
+    state.currentJob = scope.launch { runChecks(session, state, text, activeVariant = variant) }
   }
 
   private fun handleInit(
@@ -182,6 +194,9 @@ class QaCheckPreviewWebSocketHandler(
         projectQaConfigService.getEnabledCheckTypesForProject(projectId)
       }
 
+    val isPlural = keyId?.let { keyService.get(it).isPlural } ?: false
+    val baseParsed = if (isPlural && baseText != null) getPluralForms(baseText) else null
+
     session.attributes["state"] =
       QaPreviewWsSessionState(
         projectId = projectId,
@@ -191,6 +206,8 @@ class QaCheckPreviewWebSocketHandler(
         keyId = keyId,
         translationId = translationId,
         enabledCheckTypes = enabledCheckTypes.toList(),
+        isPlural = isPlural,
+        baseVariants = baseParsed?.forms,
       )
   }
 

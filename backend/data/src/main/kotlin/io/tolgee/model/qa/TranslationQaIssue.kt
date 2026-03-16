@@ -36,6 +36,7 @@ class TranslationQaIssue(
   var params: String? = null,
   @ColumnDefault("false")
   var virtual: Boolean = false,
+  var pluralVariant: String? = null,
   @ManyToOne
   var translation: Translation,
 ) : StandardAuditModel()

@@ -26,6 +26,7 @@ export type QaPreviewProps = {
   keyId: number;
   languageTag: string;
   text: string | undefined | null;
+  variant?: string;
   enabled?: boolean;
   initialIssues?: QaPreviewIssue[];
 };

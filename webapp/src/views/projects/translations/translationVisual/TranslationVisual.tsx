@@ -9,6 +9,7 @@ import { styled } from '@mui/material';
 import { DirectionLocaleWrapper } from '../DirectionLocaleWrapper';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
+import { adjustIssuePositionsForVariant } from 'tg.fixtures/qaUtils';
 
 type QaIssueModel = components['schemas']['QaIssueModel'];
 
@@ -66,24 +67,30 @@ export const TranslationVisual = ({
       value={value}
       locale={locale}
       extraPadding={extraPadding}
-      render={({ content, exampleValue, variant }) => (
-        <LimitedHeightText
-          maxLines={maxLines === undefined ? 3 : maxLines!}
-          width={width}
-          lineHeight="1.3em"
-        >
-          <TranslationWithPlaceholders
-            content={content || ''}
-            pluralExampleValue={exampleValue}
-            locale={locale}
-            targetLocale={targetLocale}
-            nested={Boolean(variant)}
-            showHighlights={showHighlights}
-            qaIssues={qaIssues}
-            translationId={translationId}
-          />
-        </LimitedHeightText>
-      )}
+      render={({ content, exampleValue, variant }) => {
+        const variantQaIssues =
+          variant && qaIssues && text
+            ? adjustIssuePositionsForVariant(qaIssues, text, variant)
+            : qaIssues;
+        return (
+          <LimitedHeightText
+            maxLines={maxLines === undefined ? 3 : maxLines!}
+            width={width}
+            lineHeight="1.3em"
+          >
+            <TranslationWithPlaceholders
+              content={content || ''}
+              pluralExampleValue={exampleValue}
+              locale={locale}
+              targetLocale={targetLocale}
+              nested={Boolean(variant)}
+              showHighlights={showHighlights}
+              qaIssues={variantQaIssues}
+              translationId={translationId}
+            />
+          </LimitedHeightText>
+        );
+      }}
     />
   );
 };

@@ -94,8 +94,6 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     );
   }
 
-  // TODO: add note that some QA checks are not supported for plurals yes (when editing plural)
-
   const handleCorrect = (issue: (typeof issues)[0]) => {
     data.setValue(applyQaReplacement(text, issue));
   };
@@ -121,6 +119,11 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     <StyledWrapper>
       {showProgress && <StyledLinearProgress />}
       <StyledContainer data-cy="qa-panel-container">
+        {data.activeVariant && (
+          <TabMessage>
+            <T keyName="translation_tools_qa_plural_variant_note" />
+          </TabMessage>
+        )}
         {issues.map((issue, index) => (
           <QaCheckItem
             key={`${issue.type}-${index}`}

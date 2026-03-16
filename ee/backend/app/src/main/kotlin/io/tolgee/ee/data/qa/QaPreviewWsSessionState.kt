@@ -11,5 +11,7 @@ data class QaPreviewWsSessionState(
   val keyId: Long?,
   val translationId: Long?,
   val enabledCheckTypes: List<QaCheckType>,
+  val isPlural: Boolean = false,
+  val baseVariants: Map<String, String>? = null,
   var currentJob: Job? = null,
 )

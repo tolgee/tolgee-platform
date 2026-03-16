@@ -16,4 +16,5 @@ class QaIssueModel(
   val positionEnd: Int,
   val state: QaIssueState,
   val params: Map<String, String>? = null,
+  val pluralVariant: String? = null,
 ) : RepresentationModel<QaIssueModel>()

@@ -7,6 +7,7 @@ type QaCheckPreviewProps = {
   text: string | undefined | null;
   languageTag: string;
   keyId: number;
+  variant?: string;
   enabled?: boolean;
   initialIssues?: QaPreviewIssue[];
 };
@@ -20,6 +21,7 @@ export const useQaCheckPreview = ({
   text,
   languageTag,
   keyId,
+  variant,
   enabled = true,
   initialIssues,
 }: QaCheckPreviewProps): QaCheckPreviewResult => {
@@ -32,6 +34,7 @@ export const useQaCheckPreview = ({
     keyId,
     languageTag,
     text,
+    variant,
     enabled: qaFeatureEnabled && enabled,
     initialIssues,
   });

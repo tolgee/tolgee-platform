@@ -5329,4 +5329,9 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="anty" id="1774000000000-1">
+        <addColumn tableName="translation_qa_issue">
+            <column name="plural_variant" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

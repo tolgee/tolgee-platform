@@ -155,11 +155,7 @@ export const TranslationRead: React.FC<Props> = ({
           disabled={disabled}
           showHighlights={isEditingRow && language.base}
           isPlural={keyData.keyIsPlural}
-          qaIssues={
-            !keyData.keyIsPlural && isEnabled('QA_CHECKS')
-              ? translation?.qaIssues
-              : undefined
-          }
+          qaIssues={isEnabled('QA_CHECKS') ? translation?.qaIssues : undefined}
           translationId={translation?.id}
         />
         {Boolean(translation?.suggestions?.length) && (
