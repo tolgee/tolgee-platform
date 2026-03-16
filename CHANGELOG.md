@@ -1,3 +1,10 @@
+## [3.167.3](https://github.com/tolgee/tolgee-platform/compare/v3.167.2...v3.167.3) (2026-03-16)
+
+
+### Bug Fixes
+
+* optimize org stats count queries and fix branching bug ([#3531](https://github.com/tolgee/tolgee-platform/issues/3531)) ([70abc1b](https://github.com/tolgee/tolgee-platform/commit/70abc1b03588d9ad4f102b6f86f61f2002c1b283)), closes [#3527](https://github.com/tolgee/tolgee-platform/issues/3527)
+
 ## [3.167.2](https://github.com/tolgee/tolgee-platform/compare/v3.167.1...v3.167.2) (2026-03-13)
 
 
