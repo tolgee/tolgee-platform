@@ -9,6 +9,7 @@ import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.TagService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.project.ProjectFeatureGuard
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.queryBuilders.CursorUtil
 import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
@@ -25,6 +26,7 @@ class TranslationViewDataProvider(
   private val authenticationFacade: AuthenticationFacade,
   private val qaIssueRepository: TranslationQaIssueRepository,
   private val projectFeatureGuard: ProjectFeatureGuard,
+  private val projectService: ProjectService,
 ) {
   fun getData(
     projectId: Long,
@@ -34,7 +36,8 @@ class TranslationViewDataProvider(
     cursor: String? = null,
     includeQaIssues: Boolean = false,
   ): Page<KeyWithTranslationsView> {
-    val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS)
+    val project = projectService.get(projectId)
+    val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
 
     // otherwise it takes forever for postgres to plan the execution
     em.createNativeQuery("SET join_collapse_limit TO 1").executeUpdate()
@@ -128,7 +131,8 @@ class TranslationViewDataProvider(
     languages: Set<LanguageDto>,
     params: TranslationFilters = TranslationFilters(),
   ): MutableList<Long> {
-    val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS)
+    val project = projectService.get(projectId)
+    val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
     createFailedKeysInJobTempTable(params.filterFailedKeysOfJob)
     val translationsViewQueryBuilder =
       TranslationsViewQueryBuilder(
