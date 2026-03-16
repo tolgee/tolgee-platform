@@ -46,7 +46,8 @@ function isOverlapping(a: Position, b: Position): boolean {
 function sortModifiers(
   placeholders: Placeholder[],
   highlights: GlossaryTermHighlightModel[],
-  qaIssues: QaIssueModel[]
+  qaIssues: QaIssueModel[],
+  contentLength: number
 ): Modifier[] {
   let modifiers: Modifier[] = placeholders.map((placeholder) => ({
     position: placeholder.position,
@@ -106,7 +107,18 @@ function sortModifiers(
     }
   });
 
-  return modifiers.sort((a, b) => a.position.start - b.position.start);
+  return modifiers
+    .filter(
+      ({ position }) => position.start < contentLength && position.end > 0
+    )
+    .map((modifier) => ({
+      ...modifier,
+      position: {
+        start: Math.max(0, modifier.position.start),
+        end: Math.min(contentLength, modifier.position.end),
+      },
+    }))
+    .sort((a, b) => a.position.start - b.position.start);
 }
 
 export const TranslationWithPlaceholders = ({
@@ -135,7 +147,12 @@ export const TranslationWithPlaceholders = ({
     enabled: showHighlights ?? false,
   });
 
-  const modifiers = sortModifiers(placeholders, glossaryTerms, qaIssues);
+  const modifiers = sortModifiers(
+    placeholders,
+    glossaryTerms,
+    qaIssues,
+    (content || '').length
+  );
 
   const StyledPlaceholdersWrapper = useMemo(() => {
     return generatePlaceholdersStyle({
