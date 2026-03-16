@@ -595,6 +595,32 @@ class TranslationService(
       .getTranslationsWithLabels(keyIds, languageIds)
   }
 
+  fun getTranslationIdsByKeyIds(
+    keyIds: List<Long>,
+    languageIds: List<Long>? = null,
+  ): List<Long> {
+    if (keyIds.isEmpty()) return emptyList()
+    return keyIds.chunked(1000).flatMap { chunk ->
+      val cb = entityManager.criteriaBuilder
+      val query = cb.createQuery(Long::class.java)
+      val root = query.from(Translation::class.java)
+
+      val predicates =
+        mutableListOf<Predicate>(
+          root.get(Translation_.key).get<Long>("id").`in`(chunk),
+        )
+
+      if (!languageIds.isNullOrEmpty()) {
+        predicates.add(root.get(Translation_.language).get<Long>("id").`in`(languageIds))
+      }
+
+      query.select(root.get(Translation_.id))
+      query.where(*predicates.toTypedArray())
+
+      entityManager.createQuery(query).resultList
+    }
+  }
+
   fun getTranslationIdsForRecheck(
     projectId: Long,
     languageIds: List<Long>? = null,

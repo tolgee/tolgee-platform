@@ -76,6 +76,7 @@ import { OperationAssignTranslationLabel } from '../ee/batchOperations/Operation
 import { OperationUnassignTranslationLabel } from '../ee/batchOperations/OperationUnassignTranslationLabel';
 import { ProjectSettingsLabels } from '../ee/translationLabels/ProjectSettingsLabels';
 import { ProjectSettingsQa } from '../ee/qa/components/ProjectSettingsQa';
+import { OperationQaRecheck } from '../ee/qa/components/OperationQaRecheck';
 import { BranchesView } from '../ee/branching/BranchesView';
 import { BranchMergePage } from '../ee/branching/BranchMergePage';
 import { Branch } from '../component/CustomIcons';
@@ -246,13 +247,28 @@ export const useAddBatchOperations = () => {
 
   const { isEnabled } = useEnabledFeatures();
   const canEditTasks = satisfiesPermission('tasks.edit');
+  const canEditTranslations = satisfiesPermission('translations.edit');
   const canAssignLabels = satisfiesPermission('translation-labels.assign');
   const taskFeature = isEnabled('TASKS');
   const labelFeature = isEnabled('TRANSLATION_LABELS');
+  const qaChecksFeature = isEnabled('QA_CHECKS');
   const orderTranslationsFeature = isEnabled('ORDER_TRANSLATION');
   const { t } = useTranslate();
 
   return addOperations([
+    {
+      items: [
+        {
+          id: 'qa_recheck',
+          label: t('batch_operations_qa_recheck'),
+          divider: true,
+          enabled: canEditTranslations,
+          hidden: !qaChecksFeature,
+          component: OperationQaRecheck,
+        },
+      ],
+      placement: { position: 'after', value: 'clear_translations' },
+    },
     {
       items: [
         {

@@ -5,8 +5,12 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.LabelTranslationsRequest
+import io.tolgee.batch.request.QaCheckRequest
+import io.tolgee.batch.request.QaRecheckByKeysRequest
 import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.hateoas.batch.BatchJobModel
 import io.tolgee.hateoas.batch.BatchJobModelAssembler
 import io.tolgee.model.batch.BatchJob
@@ -16,6 +20,7 @@ import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.service.security.SecurityService
+import io.tolgee.service.translation.TranslationService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
@@ -35,6 +40,7 @@ class EeStartBatchJobController(
   private val authenticationFacade: AuthenticationFacade,
   private val batchJobModelAssembler: BatchJobModelAssembler,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val translationService: TranslationService,
 ) {
   @PostMapping(value = ["/assign-translation-label"])
   @Operation(
@@ -83,6 +89,36 @@ class EeStartBatchJobController(
         projectHolder.projectEntity,
         authenticationFacade.authenticatedUserEntity,
         BatchJobType.UNASSIGN_TRANSLATION_LABEL,
+      ).model
+  }
+
+  @PostMapping(value = ["/qa-check"])
+  @Operation(
+    summary = "Rerun QA checks for translations of selected keys",
+  )
+  @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
+  @AllowApiAccess
+  fun qaCheck(
+    @Valid @RequestBody
+    data: QaRecheckByKeysRequest,
+  ): BatchJobModel {
+    enabledFeaturesProvider.checkFeatureEnabled(
+      projectHolder.project.organizationOwnerId,
+      Feature.QA_CHECKS,
+    )
+    securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
+    val translationIds =
+      translationService.getTranslationIdsByKeyIds(data.keyIds, data.languageIds)
+    if (translationIds.isEmpty()) {
+      throw BadRequestException(Message.NO_TRANSLATIONS_TO_RECHECK)
+    }
+    translationService.setQaChecksStale(translationIds)
+    return batchJobService
+      .startJob(
+        QaCheckRequest(translationIds = translationIds),
+        projectHolder.projectEntity,
+        authenticationFacade.authenticatedUserEntity,
+        BatchJobType.QA_CHECK,
       ).model
   }
 
