@@ -1358,6 +1358,8 @@ export interface components {
       viewLanguageIds?: number[];
     };
     ApiKeyWithLanguagesModel: {
+      /** @description Whether branching is enabled and active on this project. */
+      branchingEnabled: boolean;
       description: string;
       /** Format: int64 */
       expiresAt?: number;
@@ -2942,7 +2944,7 @@ export interface components {
         | "branch_merge_revision_not_valid"
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
-        | "branching_not_enabled_for_project"
+        | "feature_not_enabled_for_project"
         | "export_key_plural_suffix_collision"
         | "translation_exceeds_char_limit";
       params?: unknown[];
@@ -6378,7 +6380,7 @@ export interface components {
         | "branch_merge_revision_not_valid"
         | "branch_merge_conflicts_not_resolved"
         | "branch_merge_already_merged"
-        | "branching_not_enabled_for_project"
+        | "feature_not_enabled_for_project"
         | "export_key_plural_suffix_collision"
         | "translation_exceeds_char_limit";
       params?: unknown[];
