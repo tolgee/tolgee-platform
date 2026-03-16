@@ -5,10 +5,11 @@ import {
   Card,
   IconButton,
   styled,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { Check, XClose } from '@untitled-ui/icons-react';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { QaCheck } from 'tg.component/CustomIcons';
 import { useQaIssueMessage } from '../hooks/useQaIssueMessage';
 import { useQaCheckTypeLabel } from '../hooks/useQaCheckTypeLabel';
@@ -151,6 +152,7 @@ export const QaCheckItem: React.FC<Props> = ({
   onCorrect,
   onIgnore,
 }) => {
+  const { t } = useTranslate();
   const typeLabel = useQaCheckTypeLabel(issue.type);
   const messageText = useQaIssueMessage(issue.message, issue.params);
   const hasReplacement = issue.replacement != null;
@@ -185,13 +187,17 @@ export const QaCheckItem: React.FC<Props> = ({
           </StyledDiffText>
           {slim && (
             <StyledDiffActions>
-              <IconButton size="small" color="primary" onClick={onCorrect}>
-                <Check width={20} height={20} />
-              </IconButton>
-              {onIgnore && (
-                <IconButton size="small" onClick={onIgnore}>
-                  <XClose width={20} height={20} />
+              <Tooltip title={t('qa_check_action_correct')}>
+                <IconButton size="small" color="primary" onClick={onCorrect}>
+                  <Check width={20} height={20} />
                 </IconButton>
+              </Tooltip>
+              {onIgnore && (
+                <Tooltip title={t('qa_check_action_ignore')}>
+                  <IconButton size="small" onClick={onIgnore}>
+                    <XClose width={20} height={20} />
+                  </IconButton>
+                </Tooltip>
               )}
             </StyledDiffActions>
           )}
