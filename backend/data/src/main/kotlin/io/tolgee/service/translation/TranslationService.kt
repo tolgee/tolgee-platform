@@ -5,6 +5,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.TranslationFilters
+import io.tolgee.events.OnTranslationTextsModified
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.formats.PluralForms
@@ -471,6 +472,7 @@ class TranslationService(
       it.clear()
     }
     saveAll(translations)
+    publishTextsModifiedEvent(translations)
   }
 
   fun copyBatch(
@@ -482,6 +484,7 @@ class TranslationService(
     val targetTranslations =
       getTargetTranslations(keyIds, targetLanguageIds).onEach {
         it.text = sourceTranslations[it.key.id]?.text
+        it.qaChecksStale = true
         if (!it.text.isNullOrEmpty()) {
           it.state = TranslationState.TRANSLATED
         }
@@ -490,6 +493,7 @@ class TranslationService(
         it.outdated = false
       }
     saveAll(targetTranslations)
+    publishTextsModifiedEvent(targetTranslations)
   }
 
   private fun getTargetTranslations(
@@ -538,6 +542,7 @@ class TranslationService(
         .getAllByKeyIdInExcluding(keyIdToArgNameMap.keys, ignoreTranslationsForMigration.nullIfEmpty())
     translations.forEach { handleIsPluralChanged(it, newIsPlural, keyIdToArgNameMap[it.key.id], throwOnDataLoss) }
     saveAll(translations)
+    publishTextsModifiedEvent(translations)
   }
 
   private fun handleIsPluralChanged(
@@ -547,6 +552,7 @@ class TranslationService(
     throwOnDataLoss: Boolean,
   ) {
     it.text = getNewText(it.text, newIsPlural, newPluralArgName, throwOnDataLoss)
+    it.qaChecksStale = true
   }
 
   /**
@@ -611,6 +617,18 @@ class TranslationService(
     query.where(*predicates.toTypedArray())
 
     return entityManager.createQuery(query).resultList
+  }
+
+  private fun publishTextsModifiedEvent(translations: Collection<Translation>) {
+    val ids = translations.filter { it.id != 0L }.map { it.id }
+    if (ids.isEmpty()) return
+    val projectId =
+      translations
+        .first()
+        .key.project.id
+    applicationContext.publishEvent(
+      OnTranslationTextsModified(source = this, translationIds = ids, projectId = projectId),
+    )
   }
 
   @Transactional

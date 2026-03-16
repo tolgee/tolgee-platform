@@ -7,6 +7,7 @@ import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportKeysResolvableItemDto
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslationResolution
 import io.tolgee.dtos.request.translation.importKeysResolvable.ImportTranslationResolvableDto
+import io.tolgee.events.OnTranslationTextsModified
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.formats.convertToIcuPlurals
@@ -124,6 +125,16 @@ class ResolvingKeyImporter(
 
     translationService.onKeyIsPluralChanged(isPluralChangedForKeys, true, updatedTranslationIds)
     translationService.setOutdatedBatch(outdatedKeys)
+
+    if (updatedTranslationIds.isNotEmpty()) {
+      applicationContext.publishEvent(
+        OnTranslationTextsModified(
+          source = this,
+          translationIds = updatedTranslationIds,
+          projectId = projectEntity.id,
+        ),
+      )
+    }
 
     return result
   }

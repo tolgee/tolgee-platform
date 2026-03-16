@@ -4,6 +4,7 @@ import io.tolgee.api.IImportSettings
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ImportResult
 import io.tolgee.dtos.dataImport.SimpleImportConflictResult
+import io.tolgee.events.OnTranslationTextsModified
 import io.tolgee.dtos.request.SingleStepImportRequest
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
@@ -33,7 +34,7 @@ import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
 
 class StoredDataImporter(
-  applicationContext: ApplicationContext,
+  private val applicationContext: ApplicationContext,
   private val import: Import,
   private val forceMode: ForceMode = ForceMode.NO_FORCE,
   private val reportStatus: ((ImportApplicationStatus) -> Unit) = {},
@@ -259,6 +260,16 @@ class StoredDataImporter(
   private fun saveTranslations() {
     checkTranslationPermissions()
     translationService.saveAll(translationsToSave.map { it.second })
+    val translationIds = translationsToSave.map { it.second.id }.filter { it != 0L }
+    if (translationIds.isNotEmpty()) {
+      applicationContext.publishEvent(
+        OnTranslationTextsModified(
+          source = this,
+          translationIds = translationIds,
+          projectId = import.project.id,
+        ),
+      )
+    }
   }
 
   private fun getUnresolvedConflicts(conflicts: List<ImportTranslation>): List<SimpleImportConflictResult> {

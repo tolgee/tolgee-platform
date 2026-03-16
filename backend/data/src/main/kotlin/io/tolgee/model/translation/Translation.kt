@@ -137,6 +137,7 @@ class Translation(
 
   fun clear() {
     this.state = TranslationState.UNTRANSLATED
+    this.qaChecksStale = true
     this.text = null
     this.resetFlags()
   }

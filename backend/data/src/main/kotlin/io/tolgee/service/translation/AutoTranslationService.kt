@@ -8,6 +8,7 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
+import io.tolgee.events.OnTranslationTextsModified
 import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -25,6 +26,7 @@ import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 
@@ -40,6 +42,7 @@ class AutoTranslationService(
   private val entityManager: EntityManager,
   private val transactionManager: PlatformTransactionManager,
   private val projectService: ProjectService,
+  private val applicationContext: ApplicationContext,
 ) {
   val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -117,6 +120,13 @@ class AutoTranslationService(
     text ?: return
 
     translation.setValueAndState(project, text, usedService, promptId)
+    applicationContext.publishEvent(
+      OnTranslationTextsModified(
+        source = this,
+        translationIds = listOf(translation.id),
+        projectId = projectId,
+      ),
+    )
   }
 
   private fun getAutoTranslatedValue(
@@ -201,7 +211,18 @@ class AutoTranslationService(
         .filter { it.first.usingPrimaryMtService && !translatedWithTm.contains(it.second) }
         .mapNotNull { it.second }
 
-    autoTranslateUsingMachineTranslation(toMtTranslate, key, isBatch)
+    val mtModifiedIds = autoTranslateUsingMachineTranslation(toMtTranslate, key, isBatch)
+
+    val modifiedTranslationIds = translatedWithTm.map { it.id } + mtModifiedIds
+    if (modifiedTranslationIds.isNotEmpty()) {
+      applicationContext.publishEvent(
+        OnTranslationTextsModified(
+          source = this,
+          translationIds = modifiedTranslationIds,
+          projectId = key.project.id,
+        ),
+      )
+    }
   }
 
   /**
@@ -258,7 +279,7 @@ class AutoTranslationService(
     translations: List<Translation>,
     key: Key,
     isBatch: Boolean,
-  ) {
+  ): List<Long> {
     val project = projectService.getDto(key.project.id)
     val languages = translations.map { it.language.id }
 
@@ -270,13 +291,16 @@ class AutoTranslationService(
           usePrimaryService = true
         }.associateBy { it.targetLanguageId }
 
+    val modifiedIds = mutableListOf<Long>()
     translations.forEach { translation ->
       result[translation.language.id]?.let {
         it.translatedText?.let { text ->
           translation.setValueAndState(project, text, it.service, it.promptId)
+          modifiedIds.add(translation.id)
         }
       }
     }
+    return modifiedIds
   }
 
   /**
@@ -311,6 +335,7 @@ class AutoTranslationService(
     }
     this.auto = true
     this.text = text
+    this.qaChecksStale = true
     this.mtProvider = usedService
     this.promptId = promptId
     translationService.save(this)
