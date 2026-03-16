@@ -606,7 +606,6 @@ class TranslationService(
     val predicates =
       mutableListOf<Predicate>(
         cb.equal(root.get(Translation_.key).get<Any>("project").get<Long>("id"), projectId),
-        cb.isNotNull(root.get(Translation_.text)),
       )
 
     if (!languageIds.isNullOrEmpty()) {
