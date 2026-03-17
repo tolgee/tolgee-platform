@@ -1,3 +1,10 @@
+# [3.170.0](https://github.com/tolgee/tolgee-platform/compare/v3.169.0...v3.170.0) (2026-03-17)
+
+
+### Features
+
+* add branching support to resolvable import endpoints ([#3532](https://github.com/tolgee/tolgee-platform/issues/3532)) ([e34155a](https://github.com/tolgee/tolgee-platform/commit/e34155ad6b4a91c229d5c5fa3fd3bb47f2ae3f36))
+
 # [3.169.0](https://github.com/tolgee/tolgee-platform/compare/v3.168.1...v3.169.0) (2026-03-17)
 
 
