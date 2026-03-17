@@ -60,10 +60,9 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     """
     select i from TranslationQaIssue i
     where i.translation.id in :translationIds
-    and i.state = io.tolgee.model.enums.qa.QaIssueState.OPEN
     """,
   )
-  fun findOpenByTranslationIds(translationIds: List<Long>): List<TranslationQaIssue>
+  fun findByTranslationIds(translationIds: List<Long>): List<TranslationQaIssue>
 
   fun findAllByTranslationId(translationId: Long): List<TranslationQaIssue>
 

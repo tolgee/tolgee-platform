@@ -74,9 +74,7 @@ export type QaBadgeProps = {
   darkWhenNoIssues?: boolean;
 };
 
-export type QaBadgePopoverProps = {
-  anchorEl: HTMLElement | null;
-  onClose: () => void;
+export type QaLanguageStatsProps = {
   languageId: number;
   languageTag: string;
 };

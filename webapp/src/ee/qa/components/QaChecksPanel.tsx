@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { LinearProgress, styled } from '@mui/material';
 import { T } from '@tolgee/react';
+import { Link } from 'react-router-dom';
 import {
   PanelContentData,
   PanelContentProps,
@@ -12,6 +13,11 @@ import { useProject } from 'tg.hooks/useProject';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { QaCheckItem } from './QaCheckItem';
 import { applyQaReplacement } from 'tg.fixtures/qaUtils';
+import { LINKS, PARAMS } from 'tg.constants/links';
+
+const StyledLink = styled(Link)`
+  color: ${({ theme }) => theme.palette.primary.main};
+`;
 
 const StyledWrapper = styled('div')`
   margin-top: 4px;
@@ -87,7 +93,18 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
         {showProgress && <StyledLinearProgress />}
         <StyledContainer data-cy="qa-panel-container-empty">
           <TabMessage>
-            <T keyName="translation_tools_qa_no_issues" />
+            <T
+              keyName="translation_tools_qa_no_issues_with_settings"
+              params={{
+                link: (
+                  <StyledLink
+                    to={LINKS.PROJECT_EDIT_QA.build({
+                      [PARAMS.PROJECT_ID]: project.id,
+                    })}
+                  />
+                ),
+              }}
+            />
           </TabMessage>
         </StyledContainer>
       </StyledWrapper>

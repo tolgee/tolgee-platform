@@ -4,7 +4,7 @@ import {
   GlossaryTermHighlightModel,
   GlossaryTermHighlightsProps,
   GlossaryTermPreviewProps,
-  QaBadgePopoverProps,
+  QaLanguageStatsProps,
   QaBadgeProps,
   SubfilterQaChecksProps,
 } from './EeModuleType';
@@ -37,7 +37,7 @@ export const TaskItem = Empty;
 export const TaskFilterPopover = Empty;
 export const TaskAllDonePlaceholder = Empty;
 export const QaBadge = (_props: QaBadgeProps) => Empty() as JSX.Element;
-export const QaBadgePopover = (_props: QaBadgePopoverProps) =>
+export const QaLanguageStats = (_props: QaLanguageStatsProps) =>
   Empty() as JSX.Element;
 export const QaCheckItem = Empty;
 export const SubfilterQaChecks = (_props: SubfilterQaChecksProps) =>

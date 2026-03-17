@@ -67,8 +67,8 @@ class QaIssueService(
     return qaIssueRepository.findAllByProjectIdAndTranslationId(projectId, translationId)
   }
 
-  fun getOpenIssuesForTranslation(translationId: Long): List<TranslationQaIssue> {
-    return qaIssueRepository.findOpenByTranslationIds(listOf(translationId))
+  fun getIssuesForTranslation(translationId: Long): List<TranslationQaIssue> {
+    return qaIssueRepository.findByTranslationIds(listOf(translationId))
   }
 
   @Transactional

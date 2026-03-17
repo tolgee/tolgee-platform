@@ -22,9 +22,11 @@ import { TranslationStatesBar } from '../../TranslationStatesBar';
 import { getProjectTranslationsUrl, LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { QaBadge, QaBadgePopover } from 'tg.ee';
+import { QaBadge, QaLanguageStats } from 'tg.ee';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import clsx from 'clsx';
+import { stopBubble } from 'tg.fixtures/eventHandler';
+import { TooltipCard } from 'tg.component/common/TooltipCard';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -117,13 +119,6 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
   const canViewLanguages = satisfiesPermission('translations.view');
   const canEditLanguages = satisfiesPermission('languages.edit');
   const { isEnabled } = useEnabledFeatures();
-  const [qaPopoverAnchor, setQaPopoverAnchor] = useState<HTMLElement | null>(
-    null
-  );
-  const [qaPopoverLanguage, setQaPopoverLanguage] = useState<{
-    id: number;
-    tag: string;
-  } | null>(null);
 
   const redirectToLanguage = (lang?: string) => {
     const langs = !lang
@@ -222,23 +217,26 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
               </StyledStates>
               {isEnabled('QA_CHECKS') &&
                 (item.qaIssueCount > 0 || item.qaChecksStaleCount > 0) && (
-                  <StyledQaBadge
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setQaPopoverAnchor(e.currentTarget as HTMLElement);
-                      setQaPopoverLanguage({
-                        id: item.languageId!,
-                        tag: item.languageTag!,
-                      });
-                    }}
-                    style={{ cursor: 'pointer' }}
+                  <Tooltip
+                    leaveDelay={150}
+                    components={{ Tooltip: TooltipCard }}
+                    title={
+                      <div onClick={stopBubble()}>
+                        <QaLanguageStats
+                          languageId={item.languageId!}
+                          languageTag={item.languageTag!}
+                        />
+                      </div>
+                    }
                   >
-                    <QaBadge
-                      count={item.qaIssueCount}
-                      stale={item.qaChecksStaleCount > 0}
-                      darkWhenNoIssues
-                    />
-                  </StyledQaBadge>
+                    <StyledQaBadge style={{ cursor: 'pointer' }}>
+                      <QaBadge
+                        count={item.qaIssueCount}
+                        stale={item.qaChecksStaleCount > 0}
+                        darkWhenNoIssues
+                      />
+                    </StyledQaBadge>
+                  </Tooltip>
                 )}
               <StyledActions>
                 <LanguageMenu language={language!} />
@@ -262,17 +260,6 @@ export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
             </Button>
           </StyledBottomButton>
         </>
-      )}
-      {qaPopoverLanguage && (
-        <QaBadgePopover
-          anchorEl={qaPopoverAnchor}
-          onClose={() => {
-            setQaPopoverAnchor(null);
-            setQaPopoverLanguage(null);
-          }}
-          languageId={qaPopoverLanguage.id}
-          languageTag={qaPopoverLanguage.tag}
-        />
       )}
     </StyledContainer>
   );

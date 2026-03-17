@@ -78,7 +78,7 @@ class TranslationViewDataProvider(
     }
     if (includeQaIssues && qaEnabled && translationIds.isNotEmpty()) {
       qaIssueRepository
-        .findOpenByTranslationIds(translationIds)
+        .findByTranslationIds(translationIds)
         .groupBy { it.translation.id }
         .let { qaIssuesMap ->
           views.forEach { view ->

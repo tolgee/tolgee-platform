@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Box,
   Button,
-  Card,
   IconButton,
   styled,
   Tooltip,
@@ -14,6 +13,7 @@ import { QaCheck } from 'tg.component/CustomIcons';
 import { useQaIssueMessage } from '../hooks/useQaIssueMessage';
 import { useQaCheckTypeLabel } from '../hooks/useQaCheckTypeLabel';
 import { QaPreviewIssue } from 'tg.ee.module/qa/models/QaPreviewWsModels';
+import { TextBlock } from 'tg.component/common/TextBlock';
 
 const StyledItem = styled(Box)`
   display: flex;
@@ -65,19 +65,10 @@ const StyledMessage = styled(Box)`
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
-const StyledDiffCard = styled(Card)`
-  display: flex;
-  align-items: center;
-  padding: ${({ theme }) => theme.spacing(1.5)};
-  background-color: ${({ theme }) => theme.palette.tokens.text._states.hover};
-`;
-
 const StyledDiffText = styled('span')`
-  flex: 1;
   font-size: 14px;
   overflow-wrap: break-word;
   white-space: pre-wrap;
-  min-width: 0;
 `;
 
 const StyledUnchanged = styled('span')`
@@ -95,14 +86,6 @@ const StyledAdded = styled('span')`
 
 const StyledAddedSpaces = styled('span')`
   background-color: ${({ theme }) => theme.palette.success.light};
-`;
-
-const StyledDiffActions = styled(Box)`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing(0.5)};
-  flex-shrink: 0;
-  margin-left: ${({ theme }) => theme.spacing(1)};
 `;
 
 const StyledNormalActions = styled(Box)`
@@ -159,6 +142,23 @@ export const QaCheckItem: React.FC<Props> = ({
 
   const Container = issue.state === 'IGNORED' ? StyledIgnoredItem : StyledItem;
 
+  const actions = slim ? (
+    <>
+      <Tooltip title={t('qa_check_action_correct')}>
+        <IconButton size="small" color="primary" onClick={onCorrect}>
+          <Check width={20} height={20} />
+        </IconButton>
+      </Tooltip>
+      {onIgnore && (
+        <Tooltip title={t('qa_check_action_ignore')}>
+          <IconButton size="small" onClick={onIgnore}>
+            <XClose width={20} height={20} />
+          </IconButton>
+        </Tooltip>
+      )}
+    </>
+  ) : undefined;
+
   return (
     <Container data-cy="qa-check-item">
       <StyledHeader>
@@ -176,7 +176,7 @@ export const QaCheckItem: React.FC<Props> = ({
       </StyledHeader>
 
       {hasReplacement && issue.state === 'OPEN' && (
-        <StyledDiffCard elevation={0}>
+        <TextBlock actions={actions}>
           <StyledDiffText>
             {renderDiff(
               text,
@@ -185,28 +185,12 @@ export const QaCheckItem: React.FC<Props> = ({
               issue.replacement!
             )}
           </StyledDiffText>
-          {slim && (
-            <StyledDiffActions>
-              <Tooltip title={t('qa_check_action_correct')}>
-                <IconButton size="small" color="primary" onClick={onCorrect}>
-                  <Check width={20} height={20} />
-                </IconButton>
-              </Tooltip>
-              {onIgnore && (
-                <Tooltip title={t('qa_check_action_ignore')}>
-                  <IconButton size="small" onClick={onIgnore}>
-                    <XClose width={20} height={20} />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </StyledDiffActions>
-          )}
-        </StyledDiffCard>
+        </TextBlock>
       )}
 
       {(!slim || !hasReplacement) && issue.state === 'OPEN' && (
         <StyledNormalActions>
-          {hasReplacement && onCorrect && (
+          {onCorrect && (
             <Button
               variant="outlined"
               color="primary"

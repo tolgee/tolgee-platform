@@ -62,7 +62,7 @@ import {
   useQaChecksCount,
 } from '../ee/qa/components/QaChecksPanel';
 export { QaBadge } from '../ee/qa/components/QaBadge';
-export { QaBadgePopover } from '../ee/qa/components/QaBadgePopover';
+export { QaLanguageStats } from '../ee/qa/components/QaLanguageStats';
 export { QaCheckItem } from '../ee/qa/components/QaCheckItem';
 export {
   SubfilterQaChecks,
@@ -511,35 +511,32 @@ export const useAddAdministrationMenuItems = () => {
 
 export const useAddProjectSettingsTabs = (projectId: number) => {
   const { t } = useTranslate();
-  const { isEnabled } = useEnabledFeatures();
   const tabsAdder = createAdder<ProjectSettingsTab>({
     referencingProperty: 'value',
   });
 
   return (originalTabs: ProjectSettingsTab[]) => {
     let tabs = originalTabs;
-    if (isEnabled('QA_CHECKS')) {
-      tabs = tabsAdder(
-        [
-          {
-            value: 'qa',
-            label: t('project_settings_menu_qa_checks'),
-            link: LINKS.PROJECT_EDIT_QA.build({
-              [PARAMS.PROJECT_ID]: projectId,
-            }),
-            dataCy: 'project-settings-menu-qa',
-            component: ProjectSettingsQa,
-            enabled: true,
-            routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_QA.template),
-          },
-        ],
+    tabs = tabsAdder(
+      [
         {
-          position: 'before',
-          value: 'advanced',
-          fallbackPosition: 'start',
-        }
-      )(tabs);
-    }
+          value: 'qa',
+          label: t('project_settings_menu_qa_checks'),
+          link: LINKS.PROJECT_EDIT_QA.build({
+            [PARAMS.PROJECT_ID]: projectId,
+          }),
+          dataCy: 'project-settings-menu-qa',
+          component: ProjectSettingsQa,
+          enabled: true,
+          routeMatch: useRouteMatch(LINKS.PROJECT_EDIT_QA.template),
+        },
+      ],
+      {
+        position: 'before',
+        value: 'advanced',
+        fallbackPosition: 'start',
+      }
+    )(tabs);
 
     tabs = tabsAdder(
       [

@@ -75,7 +75,7 @@ class QaCheckBatchServiceImpl(
     translation.qaChecksStale = false
     translationService.save(translation)
 
-    val allOpenIssues = qaIssueService.getOpenIssuesForTranslation(translation.id)
+    val allIssues = qaIssueService.getIssuesForTranslation(translation.id)
     websocketEventPublisher(
       "/projects/$projectId/${WebsocketEventType.QA_CHECKS_COMPLETED.typeName}",
       WebsocketEvent(
@@ -84,9 +84,9 @@ class QaCheckBatchServiceImpl(
             "translationId" to translation.id,
             "keyId" to translation.key.id,
             "languageTag" to translation.language.tag,
-            "qaIssueCount" to allOpenIssues.size,
+            "qaIssueCount" to allIssues.count { it.state == io.tolgee.model.enums.qa.QaIssueState.OPEN },
             "qaChecksStale" to false,
-            "qaIssues" to allOpenIssues.map { qaIssueModelAssembler.toModel(it) },
+            "qaIssues" to allIssues.map { qaIssueModelAssembler.toModel(it) },
           ),
         timestamp = currentDateProvider.date.time,
       ),
