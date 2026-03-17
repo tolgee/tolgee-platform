@@ -1,3 +1,10 @@
+# [3.169.0](https://github.com/tolgee/tolgee-platform/compare/v3.168.1...v3.169.0) (2026-03-17)
+
+
+### Features
+
+* add branchingEnabled to API key endpoint (chrome-extension) ([#3536](https://github.com/tolgee/tolgee-platform/issues/3536)) ([2533a0a](https://github.com/tolgee/tolgee-platform/commit/2533a0a5e498c22ec0db088125dc88326d6e3b06))
+
 ## [3.168.1](https://github.com/tolgee/tolgee-platform/compare/v3.168.0...v3.168.1) (2026-03-17)
 
 
