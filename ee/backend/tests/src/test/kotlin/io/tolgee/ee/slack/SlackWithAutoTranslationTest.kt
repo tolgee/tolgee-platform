@@ -1,7 +1,7 @@
 package io.tolgee.ee.slack
 
 import com.slack.api.Slack
-import com.slack.api.methods.request.chat.ChatPostMessageRequest
+import com.slack.api.model.Attachment
 import com.slack.api.model.block.SectionBlock
 import io.tolgee.development.testDataBuilder.data.SlackTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
@@ -55,10 +55,9 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
 
     performCreateKey("new key", mapOf(BASE_LANGUAGE_TAG to BASE_LANGUAGE_TRANSLATION)).andIsCreated
-    waitForNotThrowing(timeout = 3_000) {
-      mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
-      val request = mockedSlackClient.chatPostMessageRequests.first()
-      assertThatActualTranslationsEqualToExpected(request)
+    waitForNotThrowing(timeout = 10_000) {
+      assertThat(mockedSlackClient.chatPostMessageRequests).isNotEmpty()
+      assertThatLatestSlackStateHasExpectedTranslations(mockedSlackClient)
     }
   }
 
@@ -69,16 +68,28 @@ class SlackWithAutoTranslationTest : MachineTranslationTest() {
     val mockedSlackClient = MockedSlackClient.mockSlackClient(slackClient)
 
     performSetBaseTranslation(testData.baseTranslationNotExistKey.name)
-    waitForNotThrowing(timeout = 3_000) {
-      mockedSlackClient.chatPostMessageRequests.assert.hasSize(1)
-      val request = mockedSlackClient.chatPostMessageRequests.first()
-      assertThatActualTranslationsEqualToExpected(request)
+    waitForNotThrowing(timeout = 10_000) {
+      assertThat(mockedSlackClient.chatPostMessageRequests).isNotEmpty()
+      assertThatLatestSlackStateHasExpectedTranslations(mockedSlackClient)
     }
   }
 
-  private fun assertThatActualTranslationsEqualToExpected(request: ChatPostMessageRequest) {
+  private fun assertThatLatestSlackStateHasExpectedTranslations(mockedSlackClient: MockedSlackClient) {
+    // The auto-translated content may arrive via chatUpdate if the AUTOMATION batch job
+    // sent the initial message before the AUTO_TRANSLATE batch job completed (both are
+    // non-exclusive and can run concurrently with no ordering guarantee).
+    val attachments =
+      if (mockedSlackClient.chatUpdateRequests.isNotEmpty()) {
+        mockedSlackClient.chatUpdateRequests.last().attachments
+      } else {
+        mockedSlackClient.chatPostMessageRequests.first().attachments
+      }
+    assertThatAttachmentsHaveExpectedTranslations(attachments)
+  }
+
+  private fun assertThatAttachmentsHaveExpectedTranslations(attachments: List<Attachment>) {
     val actualMap =
-      request.attachments
+      attachments
         .dropLast(1)
         .associate {
           val keyLanguage = ((it.blocks[0] as SectionBlock).text.text).removePrefix("null ").trim()
