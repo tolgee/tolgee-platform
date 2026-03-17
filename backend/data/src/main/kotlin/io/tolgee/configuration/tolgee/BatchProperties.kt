@@ -65,7 +65,7 @@ class BatchProperties {
   var cancellationTimeoutMs: Long = 30000
 
   fun isExclusive(type: BatchJobType): Boolean {
-    return jobTypeOverrides[type]?.exclusive ?: type.exclusive
+    return jobTypeOverrides[type]?.exclusive ?: type.defaultExclusive
   }
 }
 
