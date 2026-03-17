@@ -1,5 +1,7 @@
 package io.tolgee.batch
 
+import io.tolgee.batch.data.BatchJobType
+import io.tolgee.configuration.tolgee.BatchJobTypeOverrideProperties
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.util.logger
 import org.junit.jupiter.api.Test
@@ -60,6 +62,40 @@ class BatchJobProjectLockingTest : AbstractBatchJobConcurrentTest() {
     assertJobSuccess(exclusiveJob)
 
     logger.info("Non-exclusive job completed while exclusive job was running - bypass verified")
+  }
+
+  @Test
+  fun `job type override makes exclusive type bypass project locking`() {
+    val savedOverrides = batchProperties.jobTypeOverrides
+    try {
+      batchProperties.jobTypeOverrides =
+        mapOf(
+          BatchJobType.MACHINE_TRANSLATE to
+            BatchJobTypeOverrideProperties().apply {
+              exclusive = false
+            },
+        )
+
+      makeMtProcessorPassWithDelay(200)
+      makeDeleteKeysProcessorPassWithDelay(50)
+
+      // Start an exclusive job to lock the project
+      val exclusiveJob = runDeleteKeysJob(testData.projectA, testData.getProjectAKeyIds().take(20))
+      waitForExclusiveJobToStart()
+
+      // MT job should bypass the lock because override sets exclusive=false
+      val mtJob = runMtJob(testData.projectA, testData.getProjectAKeyIds().take(10), testData.projectACzech.id)
+
+      waitForJobComplete(mtJob, timeoutMs = 15_000)
+      assertJobSuccess(mtJob)
+
+      waitForJobComplete(exclusiveJob, timeoutMs = 15_000)
+      assertJobSuccess(exclusiveJob)
+
+      logger.info("MT job bypassed project lock via job-type override - verified")
+    } finally {
+      batchProperties.jobTypeOverrides = savedOverrides
+    }
   }
 
   private fun waitForExclusiveJobToStart() {
