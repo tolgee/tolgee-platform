@@ -1,3 +1,10 @@
+## [3.168.1](https://github.com/tolgee/tolgee-platform/compare/v3.168.0...v3.168.1) (2026-03-17)
+
+
+### Performance Improvements
+
+* replace Criteria API with native CTE query in LanguageStatsProvider ([#3516](https://github.com/tolgee/tolgee-platform/issues/3516)) ([bd7b63d](https://github.com/tolgee/tolgee-platform/commit/bd7b63da89822441a5d326aa8bf433664682feca))
+
 # [3.168.0](https://github.com/tolgee/tolgee-platform/compare/v3.167.3...v3.168.0) (2026-03-16)
 
 
