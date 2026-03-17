@@ -22,7 +22,8 @@ export const TotalRow: FC<{
     minUsageInvoiceAmount &&
       usageOnlyTotal &&
       usageOnlyTotal > 0 &&
-      usageOnlyTotal < minUsageInvoiceAmount
+      usageOnlyTotal < minUsageInvoiceAmount &&
+      total < minUsageInvoiceAmount
   );
 
   const totalFormatted = <b>{formatMoney(total - appliedStripeCredits)}</b>;
