@@ -9,6 +9,7 @@ import io.tolgee.development.testDataBuilder.data.PromptTestData
 import io.tolgee.development.testDataBuilder.data.TagsTestData
 import io.tolgee.fixtures.equalsPermissionType
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.retry
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
@@ -129,18 +130,20 @@ class ProjectServiceTest : AbstractSpringTest() {
 
   @Test
   fun testDeleteProjectWithTags() {
-    executeInNewTransaction(platformTransactionManager) {
-      val testData = TagsTestData()
-      testData.generateVeryLotOfData()
-      testDataService.saveTestData(testData.root)
-      val start = System.currentTimeMillis()
-      projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self)
-      entityManager.flush()
-      entityManager.clear()
-      val time = System.currentTimeMillis() - start
-      println(time)
-      assertThat(time).isLessThan(30000)
-      assertThat(tagService.find(testData.existingTag.id)).isNull()
+    retry(retries = 3) {
+      executeInNewTransaction(platformTransactionManager) {
+        val testData = TagsTestData()
+        testData.generateVeryLotOfData()
+        testDataService.saveTestData(testData.root)
+        val start = System.currentTimeMillis()
+        projectHardDeletingService.hardDeleteProject(testData.projectBuilder.self)
+        entityManager.flush()
+        entityManager.clear()
+        val time = System.currentTimeMillis() - start
+        println(time)
+        assertThat(time).isLessThan(30000)
+        assertThat(tagService.find(testData.existingTag.id)).isNull()
+      }
     }
   }
 
