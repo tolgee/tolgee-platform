@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.constants.Feature
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.isAdmin
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
@@ -31,6 +32,7 @@ import io.tolgee.security.authentication.AuthTokenType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authentication.RequiresSuperAuthentication
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.ApiKeyService
 import io.tolgee.service.security.PermissionService
@@ -67,6 +69,7 @@ class ApiKeyController(
   private val pagedResourcesAssembler: PagedResourcesAssembler<ApiKey>,
   private val permissionService: PermissionService,
   private val simpleProjectModelAssembler: SimpleProjectModelAssembler,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @PostMapping(path = ["/api-keys"])
   @Operation(summary = "Create API key", description = "Creates new API key with provided scopes")
@@ -133,6 +136,7 @@ class ApiKeyController(
     return ApiKeyWithLanguagesModel(
       apiKeyModelAssembler.toModel(apiKey),
       permittedLanguageIds = translateLanguageIds,
+      branchingEnabled = projectFeatureGuard.isFeatureEnabled(Feature.BRANCHING, apiKey.project),
     )
   }
 
