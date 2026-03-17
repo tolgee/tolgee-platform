@@ -31,8 +31,11 @@ enum class BatchJobType(
   val processor: KClass<out ChunkProcessor<*, *, *>>,
   val defaultRetryWaitTimeInMs: Int = 2000,
   /**
-   * Whether run of this job type should be exclusive for a project
-   * So only one job can run at a time for a project
+   * Default value for whether this job type should be exclusive for a project
+   * (only one job can run at a time for a project).
+   *
+   * This value can be overridden via `tolgee.batch.job-type-overrides.<TYPE>.exclusive`.
+   * Do not read this property directly — use [io.tolgee.configuration.tolgee.BatchProperties.isExclusive] instead.
    */
   val exclusive: Boolean = true,
 ) {
