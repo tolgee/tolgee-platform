@@ -8,8 +8,8 @@ import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 export const TotalRow: FC<{
   total: number;
   appliedStripeCredits: number;
-  usageOnlyTotal?: number;
-}> = ({ total, appliedStripeCredits, usageOnlyTotal }) => {
+  subscriptionPrice?: number;
+}> = ({ total, appliedStripeCredits, subscriptionPrice }) => {
   const { t } = useTranslate();
 
   const formatMoney = useMoneyFormatter();
@@ -18,9 +18,12 @@ export const TotalRow: FC<{
     (c) => c.initialData.serverConfiguration.billing.minUsageInvoiceAmount
   );
 
+  const usageOnlyTotal = total - (subscriptionPrice ?? 0);
+
   const showHint = Boolean(
     minUsageInvoiceAmount &&
       usageOnlyTotal &&
+      !subscriptionPrice &&
       usageOnlyTotal > 0 &&
       usageOnlyTotal < minUsageInvoiceAmount &&
       total < minUsageInvoiceAmount

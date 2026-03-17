@@ -72,7 +72,7 @@ export const UsageTable: FC<{
         <TotalRow
           total={usageData.total}
           appliedStripeCredits={usageData.appliedStripeCredits || 0}
-          usageOnlyTotal={usageData.total - (usageData.subscriptionPrice ?? 0)}
+          subscriptionPrice={usageData.subscriptionPrice}
         />
       </TableBody>
     </Table>
