@@ -250,4 +250,68 @@ class KeyControllerBranchingTest : ProjectAuthControllerTest("/v2/projects/") {
       ),
     ).andPrettyPrint.andIsBadRequest.andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
   }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `import-resolvable imports keys to branch`() {
+    enabledFeaturesProvider.forceEnabled = setOf(Feature.BRANCHING)
+    performProjectAuthPost(
+      "keys/import-resolvable?branch=dev",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "new_resolvable_key",
+              "translations" to
+                mapOf(
+                  "en" to
+                    mapOf(
+                      "text" to "hello resolvable",
+                      "resolution" to "NEW",
+                    ),
+                ),
+            ),
+          ),
+      ),
+    ).andIsOk
+
+    executeInNewTransaction {
+      val project = projectService.get(testData.project.id)
+      val key =
+        project.keys.find {
+          it.name == "new_resolvable_key" && it.branch?.name == "dev"
+        }
+      key.assert.isNotNull
+      key!!
+        .translations
+        .find { it.language.tag == "en" }!!
+        .text.assert
+        .isEqualTo("hello resolvable")
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `import-resolvable fails when branch specified but feature not enabled`() {
+    enabledFeaturesProvider.forceEnabled = emptySet()
+    performProjectAuthPost(
+      "keys/import-resolvable?branch=feature",
+      mapOf(
+        "keys" to
+          listOf(
+            mapOf(
+              "name" to "some_key",
+              "translations" to
+                mapOf(
+                  "en" to
+                    mapOf(
+                      "text" to "hello",
+                      "resolution" to "NEW",
+                    ),
+                ),
+            ),
+          ),
+      ),
+    ).andIsBadRequest.andHasErrorMessage(Message.FEATURE_NOT_ENABLED)
+  }
 }

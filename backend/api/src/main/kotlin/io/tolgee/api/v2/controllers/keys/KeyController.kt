@@ -270,9 +270,11 @@ class KeyController(
   fun importKeys(
     @RequestBody @Valid
     dto: ImportKeysResolvableDto,
+    @RequestParam branch: String? = null,
   ): KeyImportResolvableResultModel {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branch)
     val uploadedImageToScreenshotMap =
-      keyService.importKeysResolvable(dto.keys, projectHolder.projectEntity)
+      keyService.importKeysResolvable(dto.keys, projectHolder.projectEntity, branch)
     val screenshots =
       uploadedImageToScreenshotMap.screenshots
         .map { (uploadedImageId, screenshot) ->

@@ -109,6 +109,7 @@ class SingleStepImportService(
     keysToFilesManager.processKeys(params.keys)
 
     val request = SingleStepImportRequest()
+    request.branch = params.branch
     request.overrideMode = params.overrideMode ?: OverrideMode.RECOMMENDED
     request.errorOnUnresolvedConflict = params.errorOnUnresolvedConflict
 

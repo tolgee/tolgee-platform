@@ -5979,6 +5979,8 @@ export interface components {
       };
     };
     SingleStepImportResolvableRequest: {
+      /** @description Branch to import keys into. If not specified, default branch is used. */
+      branch?: string;
       /**
        * @description If `false`, import will apply all `non-failed` overrides and reports `unresolvedConflict`
        * .If `true`, import will fail completely on unresolved conflict and won't apply any changes. Unresolved conflicts are reported in the `params` of the error response
@@ -15397,6 +15399,9 @@ export interface operations {
    */
   importKeys: {
     parameters: {
+      query: {
+        branch?: string;
+      };
       path: {
         projectId: number;
       };
