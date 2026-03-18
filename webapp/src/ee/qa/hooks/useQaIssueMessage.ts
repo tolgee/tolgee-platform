@@ -47,6 +47,18 @@ export function useQaIssueMessage(
       return t('qa_issue_newlines_too_many_sections', normalizedParams);
     case 'qa_newlines_too_few_sections':
       return t('qa_issue_newlines_too_few_sections', normalizedParams);
+    case 'qa_url_missing':
+      return normalizedParams?.url
+        ? t('qa_issue_url_missing', normalizedParams)
+        : t('qa_issue_url_missing_no_params');
+    case 'qa_url_extra':
+      return normalizedParams?.url
+        ? t('qa_issue_url_extra', normalizedParams)
+        : t('qa_issue_url_extra_no_params');
+    case 'qa_url_replace':
+      return normalizedParams?.url && normalizedParams?.expected
+        ? t('qa_issue_url_replace', normalizedParams)
+        : t('qa_issue_url_replace_no_params');
     default:
       return message;
   }

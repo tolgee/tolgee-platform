@@ -33,6 +33,11 @@ enum class QaIssueMessage {
   QA_NEWLINES_EXTRA,
   QA_NEWLINES_TOO_MANY_SECTIONS,
   QA_NEWLINES_TOO_FEW_SECTIONS,
+
+  // Different URLs
+  QA_URL_MISSING,
+  QA_URL_EXTRA,
+  QA_URL_REPLACE,
   ;
 
   @JsonValue

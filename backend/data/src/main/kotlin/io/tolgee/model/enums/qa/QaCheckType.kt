@@ -10,9 +10,10 @@ enum class QaCheckType(
   CHARACTER_CASE_MISMATCH(QaCheckSeverity.WARNING),
   MISSING_NUMBERS(QaCheckSeverity.WARNING),
   PUNCTUATION_MISMATCH(QaCheckSeverity.WARNING),
+
 //  BRACKETS_MISMATCH(QaCheckSeverity.WARNING),
 //  SPECIAL_CHARACTER_MISMATCH(QaCheckSeverity.OFF),
-//  DIFFERENT_URLS(QaCheckSeverity.WARNING),
+  DIFFERENT_URLS(QaCheckSeverity.WARNING),
 //  INCONSISTENT_PLACEHOLDERS(QaCheckSeverity.WARNING),
 //  INCONSISTENT_HTML(QaCheckSeverity.WARNING),
 //  ICU_SYNTAX(QaCheckSeverity.WARNING),
@@ -36,7 +37,7 @@ enum class QaCheckType(
             PUNCTUATION_MISMATCH,
 //            BRACKETS_MISMATCH,
 //            SPECIAL_CHARACTER_MISMATCH,
-//            DIFFERENT_URLS,
+            DIFFERENT_URLS,
           ),
 //        QaCheckCategory.SYNTAX to
 //          listOf(

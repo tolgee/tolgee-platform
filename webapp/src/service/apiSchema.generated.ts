@@ -5558,6 +5558,7 @@ export interface components {
         | "CHARACTER_CASE_MISMATCH"
         | "MISSING_NUMBERS"
         | "PUNCTUATION_MISMATCH"
+        | "DIFFERENT_URLS"
       )[];
     };
     QaCheckIssueIgnoreRequest: {
@@ -5581,7 +5582,10 @@ export interface components {
         | "qa_newlines_missing"
         | "qa_newlines_extra"
         | "qa_newlines_too_many_sections"
-        | "qa_newlines_too_few_sections";
+        | "qa_newlines_too_few_sections"
+        | "qa_url_missing"
+        | "qa_url_extra"
+        | "qa_url_replace";
       params?: { [key: string]: string };
       pluralVariant?: string;
       /** Format: int32 */
@@ -5596,7 +5600,8 @@ export interface components {
         | "UNMATCHED_NEWLINES"
         | "CHARACTER_CASE_MISMATCH"
         | "MISSING_NUMBERS"
-        | "PUNCTUATION_MISMATCH";
+        | "PUNCTUATION_MISMATCH"
+        | "DIFFERENT_URLS";
     };
     QaIssueModel: {
       /** Format: int64 */
@@ -5621,7 +5626,10 @@ export interface components {
         | "qa_newlines_missing"
         | "qa_newlines_extra"
         | "qa_newlines_too_many_sections"
-        | "qa_newlines_too_few_sections";
+        | "qa_newlines_too_few_sections"
+        | "qa_url_missing"
+        | "qa_url_extra"
+        | "qa_url_replace";
       params?: { [key: string]: string };
       pluralVariant?: string;
       /** Format: int32 */
@@ -5638,7 +5646,8 @@ export interface components {
         | "UNMATCHED_NEWLINES"
         | "CHARACTER_CASE_MISMATCH"
         | "MISSING_NUMBERS"
-        | "PUNCTUATION_MISMATCH";
+        | "PUNCTUATION_MISMATCH"
+        | "DIFFERENT_URLS";
     };
     QaLanguageSettingsModel: {
       settings?: { [key: string]: "WARNING" | "OFF" };
@@ -15812,6 +15821,7 @@ export interface operations {
           | "CHARACTER_CASE_MISMATCH"
           | "MISSING_NUMBERS"
           | "PUNCTUATION_MISMATCH"
+          | "DIFFERENT_URLS"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -15948,6 +15958,7 @@ export interface operations {
           | "CHARACTER_CASE_MISMATCH"
           | "MISSING_NUMBERS"
           | "PUNCTUATION_MISMATCH"
+          | "DIFFERENT_URLS"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -16120,6 +16131,7 @@ export interface operations {
           | "CHARACTER_CASE_MISMATCH"
           | "MISSING_NUMBERS"
           | "PUNCTUATION_MISMATCH"
+          | "DIFFERENT_URLS"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -20803,6 +20815,7 @@ export interface operations {
           | "CHARACTER_CASE_MISMATCH"
           | "MISSING_NUMBERS"
           | "PUNCTUATION_MISMATCH"
+          | "DIFFERENT_URLS"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -21119,6 +21132,7 @@ export interface operations {
           | "CHARACTER_CASE_MISMATCH"
           | "MISSING_NUMBERS"
           | "PUNCTUATION_MISMATCH"
+          | "DIFFERENT_URLS"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
