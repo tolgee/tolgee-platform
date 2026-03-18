@@ -23,8 +23,8 @@ import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
 import java.io.StringReader
+import io.tolgee.util.XmlSecurity
 import javax.xml.XMLConstants
-import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.Source
 import javax.xml.transform.stream.StreamSource
 import javax.xml.validation.SchemaFactory
@@ -230,7 +230,7 @@ class XliffFileExporterTest {
   }
 
   private fun String.parseToDocument(): Document {
-    val dbf = DocumentBuilderFactory.newInstance()
+    val dbf = XmlSecurity.newSecureDocumentBuilderFactory()
     val db = dbf.newDocumentBuilder()
     val input = InputSource()
     input.characterStream = StringReader(this)

@@ -8,7 +8,7 @@ import org.assertj.core.api.AbstractStringAssert
 import org.junit.jupiter.api.Test
 import org.w3c.dom.Document
 import org.w3c.dom.Node
-import javax.xml.parsers.DocumentBuilderFactory
+import io.tolgee.util.XmlSecurity
 
 class TextToAndroidXmlConvertorTest {
   @Test
@@ -190,7 +190,7 @@ class TextToAndroidXmlConvertorTest {
   }
 
   private val document: Document by lazy {
-    val factory = DocumentBuilderFactory.newInstance()
+    val factory = XmlSecurity.newSecureDocumentBuilderFactory()
     val builder = factory.newDocumentBuilder()
     builder.newDocument()
   }

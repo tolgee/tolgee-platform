@@ -8,8 +8,8 @@ import io.tolgee.formats.xmlResources.XmlResourcesStringsModel
 import io.tolgee.formats.xmlResources.`in`.XmlResourcesParser
 import io.tolgee.testing.assert
 import org.junit.jupiter.api.Test
+import io.tolgee.util.XmlSecurity
 import javax.xml.stream.XMLEventReader
-import javax.xml.stream.XMLInputFactory
 
 class AndroidStringsXmlParserTest {
   @Test
@@ -67,7 +67,7 @@ class AndroidStringsXmlParserTest {
   }
 
   private fun getReader(data: String): XMLEventReader {
-    val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
+    val inputFactory = XmlSecurity.newSecureXmlInputFactory()
     return inputFactory.createXMLEventReader(data.byteInputStream())
   }
 

@@ -10,8 +10,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 import java.io.InputStream
+import io.tolgee.util.XmlSecurity
 import javax.xml.stream.XMLEventReader
-import javax.xml.stream.XMLInputFactory
 
 class XliffImportFormatDetectorTest {
   lateinit var mockUtil: FileProcessorContextMockUtil
@@ -47,7 +47,7 @@ class XliffImportFormatDetectorTest {
   }
 
   private fun getXmlEventReader(inputStream: InputStream): XMLEventReader {
-    val inputFactory: XMLInputFactory = XMLInputFactory.newDefaultFactory()
+    val inputFactory = XmlSecurity.newSecureXmlInputFactory()
     return inputFactory.createXMLEventReader(inputStream)
   }
 
