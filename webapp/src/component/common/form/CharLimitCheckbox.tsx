@@ -9,7 +9,7 @@ import { useFormikContext } from 'formik';
 import { useTranslate } from '@tolgee/react';
 import { HelpCircle } from '@untitled-ui/icons-react';
 
-import { FieldError, FieldLabel } from 'tg.component/FormField';
+import { FieldLabel } from 'tg.component/FormField';
 
 type Props = {
   fieldName: string;
@@ -17,7 +17,7 @@ type Props = {
 
 export const CharLimitCheckbox = ({ fieldName }: Props) => {
   const { t } = useTranslate();
-  const { values, errors, setFieldValue } = useFormikContext<any>();
+  const { values, setFieldValue } = useFormikContext<any>();
 
   const hasCharLimit = values[fieldName] !== undefined;
 
@@ -70,7 +70,6 @@ export const CharLimitCheckbox = ({ fieldName }: Props) => {
             inputProps={{ min: 1 }}
             sx={{ maxWidth: 300 }}
           />
-          <FieldError error={errors[fieldName]} />
         </Box>
       )}
     </Box>
