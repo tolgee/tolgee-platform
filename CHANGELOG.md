@@ -1,3 +1,10 @@
+# [3.172.0](https://github.com/tolgee/tolgee-platform/compare/v3.171.0...v3.172.0) (2026-03-18)
+
+
+### Features
+
+* add configurable batch job type exclusivity overrides ([#3538](https://github.com/tolgee/tolgee-platform/issues/3538)) ([84e6ca2](https://github.com/tolgee/tolgee-platform/commit/84e6ca2c80dd3b91328cf0a8af16d3cbb7518eb9)), closes [#3482](https://github.com/tolgee/tolgee-platform/issues/3482)
+
 # [3.171.0](https://github.com/tolgee/tolgee-platform/compare/v3.170.0...v3.171.0) (2026-03-18)
 
 
