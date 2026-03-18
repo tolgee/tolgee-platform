@@ -6,11 +6,11 @@ import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.formats.xliff.model.XliffModel
 import io.tolgee.testing.assert
 import io.tolgee.util.FileProcessorContextMockUtil
+import io.tolgee.util.XmlSecurity
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 import java.io.InputStream
-import io.tolgee.util.XmlSecurity
 import javax.xml.stream.XMLEventReader
 
 class XliffImportFormatDetectorTest {

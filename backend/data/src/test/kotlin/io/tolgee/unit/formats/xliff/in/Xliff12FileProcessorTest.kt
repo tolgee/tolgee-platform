@@ -10,6 +10,7 @@ import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.testing.assert
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
+import io.tolgee.util.XmlSecurity
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
 import io.tolgee.util.assertSingle
@@ -20,7 +21,6 @@ import io.tolgee.util.description
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import io.tolgee.util.XmlSecurity
 import javax.xml.stream.XMLEventReader
 
 class Xliff12FileProcessorTest {

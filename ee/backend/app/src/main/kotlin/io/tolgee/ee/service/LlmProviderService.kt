@@ -16,7 +16,6 @@ import io.tolgee.ee.component.llm.OpenaiApiService
 import io.tolgee.ee.component.llm.TolgeeApiService
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.FailedDependencyException
-import io.tolgee.util.UrlSecurity
 import io.tolgee.exceptions.InvalidStateException
 import io.tolgee.exceptions.LlmProviderNotFoundException
 import io.tolgee.exceptions.LlmRateLimitedException
@@ -27,6 +26,7 @@ import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.repository.LlmProviderRepository
 import io.tolgee.service.LlmPropertiesService
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.util.UrlSecurity
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager

@@ -5,6 +5,7 @@ import io.tolgee.formats.xliff.`in`.parser.XliffParser
 import io.tolgee.testing.assert
 import io.tolgee.unit.formats.PlaceholderConversionTestHelper
 import io.tolgee.util.FileProcessorContextMockUtil
+import io.tolgee.util.XmlSecurity
 import io.tolgee.util.assertAllSame
 import io.tolgee.util.assertKey
 import io.tolgee.util.assertLanguagesCount
@@ -15,7 +16,6 @@ import io.tolgee.util.customEquals
 import io.tolgee.util.description
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import io.tolgee.util.XmlSecurity
 import javax.xml.stream.XMLEventReader
 
 class AppleXliffFormatProcessorTest {

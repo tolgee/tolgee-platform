@@ -6,11 +6,11 @@ import io.tolgee.component.automations.processors.WebhookExecutor
 import io.tolgee.component.automations.processors.WebhookRequest
 import io.tolgee.dtos.request.WebhookConfigRequest
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.util.UrlSecurity
 import io.tolgee.model.Project
 import io.tolgee.model.webhook.WebhookConfig
 import io.tolgee.repository.WebhookConfigRepository
 import io.tolgee.service.automations.AutomationService
+import io.tolgee.util.UrlSecurity
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

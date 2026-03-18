@@ -17,7 +17,6 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.util.PathSecurity
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -41,6 +40,7 @@ import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
+import io.tolgee.util.PathSecurity
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
