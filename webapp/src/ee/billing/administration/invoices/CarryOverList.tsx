@@ -1,7 +1,8 @@
-import { FC } from 'react';
-import { Paper, Typography } from '@mui/material';
+import { FC, useState } from 'react';
+import { Paper } from '@mui/material';
 
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { CarryOverRow } from './CarryOverRow';
 
 type CarryOverListProps = {
@@ -17,30 +18,34 @@ export const CarryOverList: FC<CarryOverListProps> = ({
   emptyMessage,
   showSettledBy,
 }) => {
+  const [page, setPage] = useState(0);
+
   const loadable = useBillingApiQuery({
     url,
     method: 'get',
+    query: {
+      page,
+      size: 20,
+    },
+    options: {
+      keepPreviousData: true,
+    },
   });
 
-  const items = loadable.data?._embedded?.carryOvers ?? [];
-
-  if (items.length === 0 && !loadable.isLoading) {
-    return (
-      <Typography variant="body2" color="text.secondary">
-        {emptyMessage}
-      </Typography>
-    );
-  }
-
   return (
-    <Paper variant="outlined">
-      {items.map((item) => (
+    <PaginatedHateoasList
+      onPageChange={setPage}
+      listComponent={Paper}
+      listComponentProps={{ variant: 'outlined' as const }}
+      emptyPlaceholder={emptyMessage}
+      renderItem={(item) => (
         <CarryOverRow
           key={`${item.organizationId}-${item.periodStart}`}
           item={item}
           showSettledBy={showSettledBy}
         />
-      ))}
-    </Paper>
+      )}
+      loadable={loadable}
+    />
   );
 };

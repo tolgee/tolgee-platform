@@ -531,11 +531,6 @@ export interface components {
         plans?: components["schemas"]["AdministrationCloudPlanModel"][];
       };
     };
-    CollectionModelCarryOverModel: {
-      _embedded?: {
-        carryOvers?: components["schemas"]["CarryOverModel"][];
-      };
-    };
     CollectionModelCloudPlanModel: {
       _embedded?: {
         plans?: components["schemas"]["CloudPlanModel"][];
@@ -1082,6 +1077,12 @@ export interface components {
       totalElements?: number;
       /** Format: int64 */
       totalPages?: number;
+    };
+    PagedModelCarryOverModel: {
+      _embedded?: {
+        carryOvers?: components["schemas"]["CarryOverModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     PagedModelInvoiceModel: {
       _embedded?: {
@@ -1841,11 +1842,21 @@ export interface operations {
     };
   };
   getCarryOvers: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["CollectionModelCarryOverModel"];
+          "application/json": components["schemas"]["PagedModelCarryOverModel"];
         };
       };
       /** Bad Request */
@@ -1875,11 +1886,21 @@ export interface operations {
     };
   };
   getCarryOversHistory: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/json": components["schemas"]["CollectionModelCarryOverModel"];
+          "application/json": components["schemas"]["PagedModelCarryOverModel"];
         };
       };
       /** Bad Request */
