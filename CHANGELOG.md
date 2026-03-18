@@ -1,3 +1,10 @@
+## [3.172.2](https://github.com/tolgee/tolgee-platform/compare/v3.172.1...v3.172.2) (2026-03-18)
+
+
+### Bug Fixes
+
+* remove useless warning and fix tag remove icon ([#3542](https://github.com/tolgee/tolgee-platform/issues/3542)) ([51d85bb](https://github.com/tolgee/tolgee-platform/commit/51d85bb5d22036ff8fe77463229bdc1a53a34070))
+
 ## [3.172.1](https://github.com/tolgee/tolgee-platform/compare/v3.172.0...v3.172.1) (2026-03-18)
 
 
