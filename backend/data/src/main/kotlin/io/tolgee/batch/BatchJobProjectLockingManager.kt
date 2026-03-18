@@ -2,6 +2,7 @@ package io.tolgee.batch
 
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.component.UsingRedisProvider
+import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.redisson.api.RMap
@@ -22,6 +23,7 @@ class BatchJobProjectLockingManager(
   @Lazy
   private val redissonClient: RedissonClient,
   private val usingRedisProvider: UsingRedisProvider,
+  private val batchProperties: BatchProperties,
 ) : Logging {
   companion object {
     private val localProjectLocks by lazy {
@@ -49,7 +51,7 @@ class BatchJobProjectLockingManager(
     batchJobDto: BatchJobDto? = null,
   ): Boolean {
     val jobDto = batchJobDto ?: batchJobService.getJobDto(batchJobId)
-    if (!jobDto.type.exclusive) {
+    if (!batchProperties.isExclusive(jobDto.type)) {
       return true
     }
     return tryLockJobForProject(jobDto)

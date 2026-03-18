@@ -1,11 +1,20 @@
 package io.tolgee.configuration.tolgee
 
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.configuration.annotations.DocProperty
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.batch")
 @DocProperty(description = "Configuration of batch operations.", displayName = "Batch operations")
 class BatchProperties {
+  @DocProperty(
+    description =
+      "Per-job-type overrides. Keys are batch job type names (e.g. MACHINE_TRANSLATE), " +
+        "values are settings objects. Currently supports 'exclusive' (boolean) to override " +
+        "whether a job type requires project-level exclusive locking.",
+  )
+  var jobTypeOverrides: Map<BatchJobType, BatchJobTypeOverrideProperties> = emptyMap()
+
   @DocProperty(description = "How many parallel jobs can be run at once on single Tolgee instance")
   var concurrency: Int = 1
 
@@ -54,4 +63,17 @@ class BatchProperties {
     defaultExplanation = "30 seconds",
   )
   var cancellationTimeoutMs: Long = 30000
+
+  fun isExclusive(type: BatchJobType): Boolean {
+    return jobTypeOverrides[type]?.exclusive ?: type.defaultExclusive
+  }
+}
+
+class BatchJobTypeOverrideProperties {
+  @DocProperty(
+    description =
+      "Whether this job type requires project-level exclusive locking. " +
+        "When false, multiple jobs of this type can run concurrently for the same project.",
+  )
+  var exclusive: Boolean? = null
 }
