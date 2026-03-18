@@ -128,7 +128,7 @@ enum class BatchJobType(
   QA_CHECK(
     maxRetries = 3,
     processor = QaCheckChunkProcessor::class,
-    exclusive = false,
+    defaultExclusive = false,
   ),
   NO_OP(
     activityType = null,
