@@ -1,6 +1,5 @@
 package io.tolgee.ee.service.branching
 
-import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.tolgee.Metrics
 import io.tolgee.constants.Message
@@ -26,7 +25,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.repository.KeyRepository
 import io.tolgee.service.branching.AbstractBranchMergeService
 import io.tolgee.service.language.LanguageService
-import io.tolgee.tracing.TolgeeTracingContext
+import io.tolgee.tracing.BranchTracing
 import io.tolgee.util.Logging
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
@@ -48,7 +47,7 @@ class BranchMergeService(
   @Lazy
   private val languageService: LanguageService,
   private val metrics: Metrics,
-  private val tracingContext: TolgeeTracingContext,
+  private val branchTracing: BranchTracing,
 ) : AbstractBranchMergeService(branchMergeChangeRepository),
   Logging {
   @Transactional
@@ -66,7 +65,7 @@ class BranchMergeService(
     sourceBranch: Branch,
     targetBranch: Branch,
   ): BranchMerge {
-    setDryRunTracingAttributes(sourceBranch, targetBranch)
+    branchTracing.traceDryRunMerge(sourceBranch, targetBranch)
 
     return metrics.branchMergePreviewTimer.recordCallable {
       val branchMerge =
@@ -79,9 +78,7 @@ class BranchMergeService(
       dryRun(branchMerge)
       branchMergeRepository.save(branchMerge)
 
-      val span = Span.current()
-      span.setAttribute("tolgee.branch.merge.id", branchMerge.id)
-      span.setAttribute("tolgee.branch.merge.changesCount", branchMerge.changes.size.toLong())
+      branchTracing.traceDryRunMergeResult(branchMerge)
 
       branchMerge
     }!!
@@ -111,34 +108,9 @@ class BranchMergeService(
     val targetKeyId: Long?,
   )
 
-  private fun setDryRunTracingAttributes(
-    sourceBranch: Branch,
-    targetBranch: Branch,
-  ) {
-    tracingContext.setContext(sourceBranch.project.id, null)
-
-    val span = Span.current()
-    span.setAttribute("tolgee.branch.source.id", sourceBranch.id)
-    span.setAttribute("tolgee.branch.source.name", sourceBranch.name)
-    span.setAttribute("tolgee.branch.target.id", targetBranch.id)
-    span.setAttribute("tolgee.branch.target.name", targetBranch.name)
-  }
-
-  private fun setApplyMergeTracingAttributes(merge: BranchMerge) {
-    tracingContext.setContext(merge.sourceBranch.project.id, null)
-
-    val span = Span.current()
-    span.setAttribute("tolgee.branch.merge.id", merge.id)
-    span.setAttribute("tolgee.branch.source.id", merge.sourceBranch.id)
-    span.setAttribute("tolgee.branch.source.name", merge.sourceBranch.name)
-    span.setAttribute("tolgee.branch.target.id", merge.targetBranch.id)
-    span.setAttribute("tolgee.branch.target.name", merge.targetBranch.name)
-    span.setAttribute("tolgee.branch.merge.changesCount", merge.changes.size.toLong())
-  }
-
   @WithSpan
   fun applyMerge(merge: BranchMerge) {
-    setApplyMergeTracingAttributes(merge)
+    branchTracing.traceApplyMerge(merge)
 
     metrics.branchMergeApplyTimer.record(
       Runnable {

@@ -1,11 +1,10 @@
 package io.tolgee.ee.service.branching
 
-import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.tolgee.model.branching.Branch
 import io.tolgee.repository.KeyRepository
 import io.tolgee.service.branching.BranchCopyService
-import io.tolgee.tracing.TolgeeTracingContext
+import io.tolgee.tracing.BranchTracing
 import io.tolgee.util.Logging
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Service
 class BranchCopyServiceSql(
   private val entityManager: EntityManager,
   private val keyRepository: KeyRepository,
-  private val tracingContext: TolgeeTracingContext,
+  private val branchTracing: BranchTracing,
 ) : BranchCopyService,
   Logging {
   companion object {
@@ -46,14 +45,14 @@ class BranchCopyServiceSql(
   ) {
     require(sourceBranch.id != targetBranch.id) { "Source and target branch must differ" }
 
+    branchTracing.traceCopy(projectId, sourceBranch, targetBranch)
+
     val totalKeys =
       keyRepository.countByProjectAndBranchIncludingOrphan(
         projectId,
         sourceBranch.id,
         sourceBranch.isDefault,
       )
-
-    setTracingAttributes(projectId, sourceBranch, targetBranch, totalKeys)
 
     // Create empty temporary key mapping table once (reused across batches)
     traceLogMeasureTime("branchCopyService: createKeyMappingTable") {
@@ -108,23 +107,6 @@ class BranchCopyServiceSql(
         copyTranslationComments(targetBranch)
       }
     }
-  }
-
-  private fun setTracingAttributes(
-    projectId: Long,
-    sourceBranch: Branch,
-    targetBranch: Branch,
-    totalKeys: Long,
-  ) {
-    tracingContext.setContext(projectId, null)
-
-    val span = Span.current()
-    span.setAttribute("tolgee.branch.source.id", sourceBranch.id)
-    span.setAttribute("tolgee.branch.source.name", sourceBranch.name)
-    span.setAttribute("tolgee.branch.target.id", targetBranch.id)
-    span.setAttribute("tolgee.branch.target.name", targetBranch.name)
-    span.setAttribute("tolgee.branch.copy.totalKeys", totalKeys)
-    span.setAttribute("tolgee.branch.copy.batchSize", BATCH_SIZE.toLong())
   }
 
   /**
