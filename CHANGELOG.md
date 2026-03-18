@@ -1,3 +1,10 @@
+## [3.172.1](https://github.com/tolgee/tolgee-platform/compare/v3.172.0...v3.172.1) (2026-03-18)
+
+
+### Performance Improvements
+
+* optimize translation memory query for large datasets ([#3537](https://github.com/tolgee/tolgee-platform/issues/3537)) ([0d08a40](https://github.com/tolgee/tolgee-platform/commit/0d08a40db47c91c742a39cbd7d639bd3c438959b)), closes [#3517](https://github.com/tolgee/tolgee-platform/issues/3517)
+
 # [3.172.0](https://github.com/tolgee/tolgee-platform/compare/v3.171.0...v3.172.0) (2026-03-18)
 
 
