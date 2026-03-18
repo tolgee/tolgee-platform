@@ -154,10 +154,11 @@ class SpacesMismatchCheckTest {
     // base: nbsp + space + nbsp, translation: nbsp + space + space
     // only the last char differs — minimal edit should target just that char
     val results = check.check(params("\u00A0  Hello", "\u00A0 \u00A0Hello"))
-    val leading = results.filter {
-      it.message == QaIssueMessage.QA_SPACES_LEADING_ADDED ||
-        it.message == QaIssueMessage.QA_SPACES_LEADING_REMOVED
-    }
+    val leading =
+      results.filter {
+        it.message == QaIssueMessage.QA_SPACES_LEADING_ADDED ||
+          it.message == QaIssueMessage.QA_SPACES_LEADING_REMOVED
+      }
     assertThat(leading).hasSize(1)
     assertThat(leading[0].positionStart).isEqualTo(2)
     assertThat(leading[0].positionEnd).isEqualTo(3)
