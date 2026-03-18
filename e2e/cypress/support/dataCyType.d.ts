@@ -18,6 +18,17 @@ declare namespace DataCy {
         "activity-compact-detail-button" |
         "activity-detail" |
         "activity-detail-dialog" |
+        "admin-carry-over-item" |
+        "admin-carry-over-settled-by" |
+        "admin-carry-over-total" |
+        "admin-carry-overs-section" |
+        "admin-carry-overs-tab-active" |
+        "admin-carry-overs-tab-history" |
+        "admin-invoices-item" |
+        "admin-invoices-item-number" |
+        "admin-invoices-item-total" |
+        "admin-invoices-org-filter" |
+        "admin-invoices-org-section" |
         "admin-subscriptions-cloud-cancel-plan-button" |
         "admin-subscriptions-self-hosted-cancel-plan-button" |
         "administration-access-message" |
