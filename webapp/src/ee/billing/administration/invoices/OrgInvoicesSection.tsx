@@ -68,7 +68,7 @@ export const OrgInvoicesSection: FC = () => {
   const formatDate = useDateFormatter();
 
   return (
-    <Box>
+    <Box data-cy="admin-invoices-org-section">
       <Typography variant="h6" sx={{ mb: 2 }}>
         {t(
           'administration_invoices_org_invoices_title',
@@ -77,6 +77,7 @@ export const OrgInvoicesSection: FC = () => {
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
         <Autocomplete<OrgItem>
+          data-cy="admin-invoices-org-filter"
           options={orgItems}
           getOptionLabel={(o) => o.name}
           isOptionEqualToValue={(a, b) => a.id === b.id}
@@ -129,8 +130,10 @@ export const OrgInvoicesSection: FC = () => {
           </Typography>
         }
         renderItem={(item: InvoiceModel) => (
-          <ListItem sx={{ display: 'contents' }}>
-            <Box sx={{ px: 2, py: 1.5 }}>{item.number}</Box>
+          <ListItem data-cy="admin-invoices-item" sx={{ display: 'contents' }}>
+            <Box data-cy="admin-invoices-item-number" sx={{ px: 2, py: 1.5 }}>
+              {item.number}
+            </Box>
             <Box
               sx={{
                 px: 2,
@@ -153,7 +156,10 @@ export const OrgInvoicesSection: FC = () => {
               )}
             </Box>
             <Box />
-            <Box sx={{ pl: 1, pr: 0, py: 1.5, fontWeight: 500 }}>
+            <Box
+              data-cy="admin-invoices-item-total"
+              sx={{ pl: 1, pr: 0, py: 1.5, fontWeight: 500 }}
+            >
               {formatPrice(item.total)}
             </Box>
             <Box

@@ -9,7 +9,7 @@ export const CarryOversSection: FC = () => {
   const [tab, setTab] = useState<'active' | 'history'>('active');
 
   return (
-    <Box>
+    <Box data-cy="admin-carry-overs-section">
       <Typography variant="h6" sx={{ mb: 2 }}>
         {t(
           'administration_invoices_carry_overs_title',
@@ -19,10 +19,12 @@ export const CarryOversSection: FC = () => {
 
       <Tabs value={tab} onChange={(_, value) => setTab(value)} sx={{ mb: 2 }}>
         <Tab
+          data-cy="admin-carry-overs-tab-active"
           value="active"
           label={t('administration_carry_overs_tab_active', 'Active')}
         />
         <Tab
+          data-cy="admin-carry-overs-tab-history"
           value="history"
           label={t('administration_carry_overs_tab_history', 'History')}
         />

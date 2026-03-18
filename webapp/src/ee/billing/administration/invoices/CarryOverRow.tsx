@@ -24,7 +24,7 @@ export const CarryOverRow: FC<CarryOverRowProps> = ({
   const isCloud = item.subscriptionType === 'cloud';
 
   return (
-    <ListItem>
+    <ListItem data-cy="admin-carry-over-item">
       <Box
         display="flex"
         justifyContent="space-between"
@@ -66,6 +66,7 @@ export const CarryOverRow: FC<CarryOverRowProps> = ({
                 {t('administration_carry_overs_settled_by')}
               </Box>
               <Link
+                data-cy="admin-carry-over-settled-by"
                 href={LINKS.ORGANIZATION_INVOICES.build({
                   [PARAMS.ORGANIZATION_SLUG]: item.organizationSlug,
                 })}
@@ -91,7 +92,10 @@ export const CarryOverRow: FC<CarryOverRowProps> = ({
             label={t('administration_carry_overs_keys', 'Keys')}
             value={formatPrice(item.keys)}
           />
-          <Box sx={{ fontWeight: 600, minWidth: 64, textAlign: 'right' }}>
+          <Box
+            data-cy="admin-carry-over-total"
+            sx={{ fontWeight: 600, minWidth: 64, textAlign: 'right' }}
+          >
             {formatPrice(item.total)}
           </Box>
         </Box>
