@@ -16,6 +16,7 @@ import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -180,7 +181,9 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `sends invitation e-mail`() {
     val code = inviteWithUserWithNameAndEmail()
-    emailTestUtil.verifyEmailSent()
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      emailTestUtil.verifyEmailSent()
+    }
 
     val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).contains(code)
@@ -192,7 +195,9 @@ class ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projects
   @ProjectJWTAuthTestMethod
   fun `uses frontEnd url when possible`() {
     inviteWithUserWithNameAndEmail()
-    emailTestUtil.verifyEmailSent()
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      emailTestUtil.verifyEmailSent()
+    }
 
     val messageContent = emailTestUtil.messageContents.single()
     assertThat(messageContent).contains("https://dummy-url.com")

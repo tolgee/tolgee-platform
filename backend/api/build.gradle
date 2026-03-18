@@ -25,10 +25,6 @@ apply plugin: "org.jetbrains.kotlin.plugin.spring"
 apply plugin: "kotlin-allopen"
 apply plugin: 'io.spring.dependency-management'
 
-repositories {
-    mavenCentral()
-}
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -102,6 +98,6 @@ dependencyManagement {
     }
 }
 
-jar {
+tasks.named('jar', Jar) {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }

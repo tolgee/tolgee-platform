@@ -59,9 +59,9 @@ class EmailVerificationService(
       userAccountService.saveAndFlush(userAccount)
 
       if (newEmail != null) {
-        emailVerificationSender.sendEmailVerification(userAccount.id, newEmail, resultCallbackUrl, code, false)
+        emailVerificationSender.sendEmailVerification(userAccount, newEmail, resultCallbackUrl, code, false)
       } else {
-        emailVerificationSender.sendEmailVerification(userAccount.id, userAccount.username, resultCallbackUrl, code)
+        emailVerificationSender.sendEmailVerification(userAccount, userAccount.username, resultCallbackUrl, code)
       }
       return emailVerification
     }
