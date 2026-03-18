@@ -39,6 +39,14 @@ export function useQaIssueMessage(
       return normalizedParams?.number
         ? t('qa_issue_numbers_missing', normalizedParams)
         : t('qa_issue_numbers_missing_no_params');
+    case 'qa_newlines_missing':
+      return t('qa_issue_newlines_missing', normalizedParams);
+    case 'qa_newlines_extra':
+      return t('qa_issue_newlines_extra', normalizedParams);
+    case 'qa_newlines_too_many_sections':
+      return t('qa_issue_newlines_too_many_sections', normalizedParams);
+    case 'qa_newlines_too_few_sections':
+      return t('qa_issue_newlines_too_few_sections', normalizedParams);
     default:
       return message;
   }

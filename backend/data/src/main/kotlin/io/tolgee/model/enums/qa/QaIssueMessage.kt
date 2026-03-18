@@ -27,6 +27,12 @@ enum class QaIssueMessage {
 
   // Missing numbers
   QA_NUMBERS_MISSING,
+
+  // Unmatched newlines
+  QA_NEWLINES_MISSING,
+  QA_NEWLINES_EXTRA,
+  QA_NEWLINES_TOO_MANY_SECTIONS,
+  QA_NEWLINES_TOO_FEW_SECTIONS,
   ;
 
   @JsonValue
