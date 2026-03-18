@@ -50,8 +50,11 @@ export const CarryOverRow: FC<CarryOverRowProps> = ({
           <Chip
             label={
               isCloud
-                ? t('admin_organization_subscriptions_cloud')
-                : t('admin_organization_subscriptions_self_hosted')
+                ? t('admin_organization_subscriptions_cloud', 'Cloud')
+                : t(
+                    'admin_organization_subscriptions_self_hosted',
+                    'Self-hosted'
+                  )
             }
             size="small"
             color={isCloud ? 'primary' : 'default'}
@@ -63,7 +66,7 @@ export const CarryOverRow: FC<CarryOverRowProps> = ({
           {showSettledBy && item.resolvedByInvoiceNumber && (
             <Box sx={{ textAlign: 'right' }}>
               <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-                {t('administration_carry_overs_settled_by')}
+                {t('administration_carry_overs_settled_by', 'Settled by')}
               </Box>
               <Link
                 data-cy="admin-carry-over-settled-by"
