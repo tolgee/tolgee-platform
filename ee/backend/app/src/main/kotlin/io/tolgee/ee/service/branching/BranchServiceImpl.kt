@@ -1,6 +1,5 @@
 package io.tolgee.ee.service.branching
 
-import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.tolgee.Metrics
 import io.tolgee.activity.ActivityHolder
@@ -26,7 +25,7 @@ import io.tolgee.model.enums.BranchKeyMergeChangeType
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.branching.AbstractBranchService
 import io.tolgee.service.branching.BranchCopyService
-import io.tolgee.tracing.TolgeeTracingContext
+import io.tolgee.tracing.BranchTracing
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Primary
@@ -51,7 +50,7 @@ class BranchServiceImpl(
   private val branchCleanupService: BranchCleanupService,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val metrics: Metrics,
-  private val tracingContext: TolgeeTracingContext,
+  private val branchTracing: BranchTracing,
 ) : AbstractBranchService(branchRepository, branchMergeService) {
   override fun getBranches(
     projectId: Long,
@@ -126,7 +125,7 @@ class BranchServiceImpl(
           Message.ORIGIN_BRANCH_NOT_FOUND,
         )
 
-      setCreateBranchTracingAttributes(projectId, name, originBranch)
+      branchTracing.traceCreateBranch(projectId, name, originBranch)
 
       val branch =
         createBranch(projectId, name, author).also {
@@ -134,7 +133,7 @@ class BranchServiceImpl(
         }
       branchRepository.save(branch)
 
-      Span.current().setAttribute("tolgee.branch.id", branch.id)
+      branchTracing.traceCreateBranchResult(branch)
 
       branchCopyService.copy(projectId, originBranch, branch)
       branchSnapshotService.createInitialSnapshot(projectId, originBranch, branch)
@@ -157,36 +156,6 @@ class BranchServiceImpl(
       this.name = name
       this.author = author
     }
-  }
-
-  private fun setCreateBranchTracingAttributes(
-    projectId: Long,
-    name: String,
-    originBranch: Branch,
-  ) {
-    tracingContext.setContext(projectId, null)
-
-    val span = Span.current()
-    span.setAttribute("tolgee.branch.name", name)
-    span.setAttribute("tolgee.branch.origin.id", originBranch.id)
-    span.setAttribute("tolgee.branch.origin.name", originBranch.name)
-  }
-
-  private fun setApplyMergeTracingAttributes(
-    projectId: Long,
-    mergeId: Long,
-    deleteBranch: Boolean?,
-    merge: BranchMerge,
-  ) {
-    tracingContext.setContext(projectId, null)
-
-    val span = Span.current()
-    span.setAttribute("tolgee.branch.merge.id", mergeId)
-    span.setAttribute("tolgee.branch.merge.deleteBranch", deleteBranch ?: true)
-    span.setAttribute("tolgee.branch.source.id", merge.sourceBranch.id)
-    span.setAttribute("tolgee.branch.source.name", merge.sourceBranch.name)
-    span.setAttribute("tolgee.branch.target.id", merge.targetBranch.id)
-    span.setAttribute("tolgee.branch.target.name", merge.targetBranch.name)
   }
 
   @WithSpan
@@ -242,7 +211,7 @@ class BranchServiceImpl(
       branchMergeService.findActiveMergeFull(projectId, mergeId)
         ?: throw NotFoundException(Message.BRANCH_MERGE_NOT_FOUND)
 
-    setApplyMergeTracingAttributes(projectId, mergeId, deleteBranch, merge)
+    branchTracing.traceApplyMerge(projectId, mergeId, deleteBranch, merge)
 
     if (!merge.isReadyToMerge) {
       if (!merge.isRevisionValid) {
