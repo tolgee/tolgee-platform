@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -17,12 +18,17 @@ class TranslationMemoryService(
   private val entityManager: EntityManager,
 ) {
   /**
-   * Returns translation memory suggestions for the batch/MT path.
-   * Uses a simplified query without ORDER BY, relying on the trigram threshold (0.5)
-   * and LIMIT to return results quickly. The composite GiST index on
-   * (language_id, text gist_trgm_ops) allows early termination on large datasets.
+   * Returns translation memory suggestions for the batch/MT pipeline.
+   *
+   * Uses % (trigram threshold operator) without ORDER BY so the composite GiST index on
+   * (language_id, text gist_trgm_ops) can stop early as soon as LIMIT rows are found,
+   * avoiding a full scan of all matching rows.
+   *
+   * REQUIRES_NEW: isolates SET LOCAL PostgreSQL settings (statement_timeout,
+   * pg_trgm.similarity_threshold) so they don't leak into the caller's transaction.
+   * It also ensures a QueryTimeoutException does not mark the outer transaction rollback-only.
    */
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun getSuggestionsList(
     baseTranslationText: String,
     isPlural: Boolean,
@@ -31,6 +37,9 @@ class TranslationMemoryService(
     targetLanguage: LanguageDto,
     limit: Int = 5,
   ): List<TranslationMemoryItemView> {
+    // Protect against slow queries on large datasets. REQUIRES_NEW ensures this
+    // timeout does not leak into the caller's transaction.
+    entityManager.createNativeQuery("set local statement_timeout to '550ms'").executeUpdate()
     entityManager.createNativeQuery("set local pg_trgm.similarity_threshold to 0.5").executeUpdate()
     val queryResult =
       entityManager
@@ -82,7 +91,9 @@ class TranslationMemoryService(
     return translationsService.getTranslationMemoryValue(key, targetLanguage)
   }
 
-  @Transactional
+  // REQUIRES_NEW: isolates SET LOCAL settings (statement_timeout, pg_trgm.similarity_threshold)
+  // applied inside getSuggestionsData so they don't leak into the caller's transaction.
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun getSuggestions(
     key: Key,
     targetLanguage: LanguageDto,
@@ -101,7 +112,9 @@ class TranslationMemoryService(
     )
   }
 
-  @Transactional
+  // REQUIRES_NEW: isolates SET LOCAL settings (statement_timeout, pg_trgm.similarity_threshold)
+  // applied inside getSuggestionsData so they don't leak into the caller's transaction.
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun getSuggestions(
     baseTranslationText: String,
     isPlural: Boolean,
@@ -123,37 +136,32 @@ class TranslationMemoryService(
     offset: Long = 0,
     limit: Int = 5,
   ): Pair<Long, List<TranslationMemoryItemView>> {
+    // Protect against slow queries on large datasets. The surrounding REQUIRES_NEW
+    // transaction (from getSuggestions callers) ensures this timeout does not leak.
+    entityManager.createNativeQuery("set local statement_timeout to '550ms'").executeUpdate()
     entityManager.createNativeQuery("set local pg_trgm.similarity_threshold to 0.5").executeUpdate()
     val queryResult =
       entityManager
         .createNativeQuery(
           """
-        with base as (
-            select target.text as targetTranslationText, baseTranslation.text as baseTranslationText,
-              key.name as keyName, ns.name as keyNamespace, key.id as keyId, 
-            similarity(baseTranslation.text, :baseTranslationText) as similarity
-            from translation baseTranslation
-            join key on baseTranslation.key_id = key.id
-            left join namespace ns on key.namespace_id = ns.id
-            join project p on key.project_id = p.id
-            join translation target on
-                  target.key_id = key.id and 
-                  target.language_id = :targetLanguageId and
-                  target.text <> '' and
-                  target.text is not null
-            join key targetKey on target.key_id = targetKey.id    
-            """ +
-
-            // we use the case when syntax to force postgres to evaluate all the other conditions first,
-            // the similarity condition is slow even it uses index, and it tends to be evaluated first since
-            // huge underestimation
-            """
-            where case when (baseTranslation.language_id = p.base_language_id and
-              (cast(:key as bigint) is null or targetKey.id <> :key) and targetKey.is_plural = :isPlural)
-              then baseTranslation.text % :baseTranslationText end
-        ) select base.*, count(*) over() 
-        from base
-        order by base.similarity desc
+        select target.text as targetTranslationText, baseTranslation.text as baseTranslationText,
+               key.name as keyName, ns.name as keyNamespace, key.id as keyId,
+               similarity(baseTranslation.text, :baseTranslationText) as similarity,
+               count(*) over() as totalCount
+        from translation baseTranslation
+        join key on baseTranslation.key_id = key.id
+        left join namespace ns on key.namespace_id = ns.id
+        join project p on key.project_id = p.id
+        join translation target on
+              target.key_id = key.id and
+              target.language_id = :targetLanguageId and
+              target.text <> '' and
+              target.text is not null
+        where baseTranslation.language_id = p.base_language_id
+          and (cast(:key as bigint) is null or key.id <> :key)
+          and key.is_plural = :isPlural
+          and baseTranslation.text % :baseTranslationText
+        order by baseTranslation.text <-> :baseTranslationText
     """,
         ).setParameter("baseTranslationText", sourceTranslationText)
         .setParameter("isPlural", isPlural)
