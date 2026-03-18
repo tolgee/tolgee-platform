@@ -2946,7 +2946,8 @@ export interface components {
         | "branch_merge_already_merged"
         | "feature_not_enabled_for_project"
         | "export_key_plural_suffix_collision"
-        | "translation_exceeds_char_limit";
+        | "translation_exceeds_char_limit"
+        | "url_not_valid";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -6384,7 +6385,8 @@ export interface components {
         | "branch_merge_already_merged"
         | "feature_not_enabled_for_project"
         | "export_key_plural_suffix_collision"
-        | "translation_exceeds_char_limit";
+        | "translation_exceeds_char_limit"
+        | "url_not_valid";
       params?: unknown[];
       success: boolean;
     };
