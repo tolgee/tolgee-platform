@@ -55,32 +55,22 @@ tasks.register('installEmailDeps', Exec) {
     outputs.dir("${emailPath}/node_modules")
 }
 
-tasks.register('buildEmails', Exec) {
-    dependsOn 'installEmailDeps'
-    onlyIf { System.getenv("SKIP_EMAIL_BUILD") != "true" }
+def registerBuildEmailTask = { String taskName, String npmScript, String outputSubdir ->
+    tasks.register(taskName, Exec) {
+        dependsOn 'installEmailDeps'
+        onlyIf { System.getenv("SKIP_EMAIL_BUILD") != "true" }
 
-    workingDir = emailPath
-    commandLine npmCommandName, "run", "export"
+        workingDir = emailPath
+        commandLine npmCommandName, "run", npmScript
 
-    inputs.dir("${emailPath}/emails")
-    inputs.dir("${emailPath}/components")
-    inputs.file("${emailPath}/tailwind.config.ts")
-    inputs.file("${emailPath}/package.json")
-    inputs.file("${emailPath}/package-lock.json")
-    outputs.dir("${emailPath}/out/html")
+        inputs.dir("${emailPath}/emails")
+        inputs.dir("${emailPath}/components")
+        inputs.file("${emailPath}/tailwind.config.ts")
+        inputs.file("${emailPath}/package.json")
+        inputs.file("${emailPath}/package-lock.json")
+        outputs.dir("${emailPath}/out/${outputSubdir}")
+    }
 }
 
-tasks.register('buildTestEmails', Exec) {
-    dependsOn 'installEmailDeps'
-    onlyIf { System.getenv("SKIP_EMAIL_BUILD") != "true" }
-
-    workingDir = emailPath
-    commandLine npmCommandName, "run", "export:test"
-
-    inputs.dir("${emailPath}/emails")
-    inputs.dir("${emailPath}/components")
-    inputs.file("${emailPath}/tailwind.config.ts")
-    inputs.file("${emailPath}/package.json")
-    inputs.file("${emailPath}/package-lock.json")
-    outputs.dir("${emailPath}/out/__tests__")
-}
+registerBuildEmailTask('buildEmails', 'export', 'html')
+registerBuildEmailTask('buildTestEmails', 'export:test', '__tests__')
