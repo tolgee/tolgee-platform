@@ -44,6 +44,9 @@ export const LlmProvidersServer = () => {
   const perThousandMtCredits =
     subscriptionLoadable.data?.plan?.prices?.perThousandMtCredits ?? null;
 
+  const includedMtCredits =
+    subscriptionLoadable.data?.plan?.includedUsage?.mtCredits ?? null;
+
   return (
     <Box display="grid" gap={3} mt={3}>
       <Box>
@@ -57,6 +60,7 @@ export const LlmProvidersServer = () => {
               <LlmProviderPricingInfo
                 provider={p}
                 perThousandMtCredits={perThousandMtCredits}
+                includedMtCredits={includedMtCredits}
               />
             )}
           </Fragment>
