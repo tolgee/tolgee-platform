@@ -5196,4 +5196,18 @@
             <column name="max_char_limit" type="INTEGER"/>
         </addColumn>
     </changeSet>
+    <changeSet author="dbocharov" id="1742200000000-1" runInTransaction="false">
+        <comment>Add composite GiST index to speed up translation memory similarity queries on large datasets.
+            The index allows direct index scans filtering by language and trigram similarity,
+            which is critical for datasets with 1M+ translations per language.
+            A btree index on translation(language_id) already exists (IDX36jc7xjy9os6gpk6a1itnc4oc).</comment>
+        <sql dbms="postgresql">CREATE EXTENSION IF NOT EXISTS btree_gist;</sql>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS translation_lang_text_gist_trgm
+            ON translation USING GIST (language_id, text gist_trgm_ops);
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS translation_lang_text_gist_trgm;</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

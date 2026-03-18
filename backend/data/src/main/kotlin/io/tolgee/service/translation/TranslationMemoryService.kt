@@ -16,6 +16,64 @@ class TranslationMemoryService(
   private val translationsService: TranslationService,
   private val entityManager: EntityManager,
 ) {
+  /**
+   * Returns translation memory suggestions for the batch/MT path.
+   * Uses a simplified query without ORDER BY, relying on the trigram threshold (0.5)
+   * and LIMIT to return results quickly. The composite GiST index on
+   * (language_id, text gist_trgm_ops) allows early termination on large datasets.
+   */
+  @Transactional
+  fun getSuggestionsList(
+    baseTranslationText: String,
+    isPlural: Boolean,
+    keyId: Long? = null,
+    baseLanguageId: Long,
+    targetLanguage: LanguageDto,
+    limit: Int = 5,
+  ): List<TranslationMemoryItemView> {
+    entityManager.createNativeQuery("set local pg_trgm.similarity_threshold to 0.5").executeUpdate()
+    val queryResult =
+      entityManager
+        .createNativeQuery(
+          """
+        select target.text as targetTranslationText,
+               baseTranslation.text as baseTranslationText,
+               key.name as keyName, ns.name as keyNamespace, key.id as keyId,
+               similarity(baseTranslation.text, :baseTranslationText) as similarity
+        from translation baseTranslation
+        join key on baseTranslation.key_id = key.id
+        left join namespace ns on key.namespace_id = ns.id
+        join translation target on
+              target.key_id = key.id and
+              target.language_id = :targetLanguageId and
+              target.text <> '' and
+              target.text is not null
+        where baseTranslation.language_id = :baseLanguageId
+          and (cast(:key as bigint) is null or key.id <> :key)
+          and key.is_plural = :isPlural
+          and baseTranslation.text % :baseTranslationText
+    """,
+        ).setParameter("baseTranslationText", baseTranslationText)
+        .setParameter("isPlural", isPlural)
+        .setParameter("key", keyId)
+        .setParameter("baseLanguageId", baseLanguageId)
+        .setParameter("targetLanguageId", targetLanguage.id)
+        .setMaxResults(limit)
+        .resultList
+
+    return queryResult.map {
+      it as Array<*>
+      TranslationMemoryItemView(
+        targetTranslationText = it[0] as String,
+        baseTranslationText = it[1] as String,
+        keyName = it[2] as String,
+        keyNamespace = it[3] as String?,
+        keyId = it[4] as Long,
+        similarity = it[5] as Float,
+      )
+    }
+  }
+
   @Transactional
   fun getAutoTranslatedValue(
     key: Key,
@@ -65,7 +123,7 @@ class TranslationMemoryService(
     offset: Long = 0,
     limit: Int = 5,
   ): Pair<Long, List<TranslationMemoryItemView>> {
-    entityManager.createNativeQuery("set pg_trgm.similarity_threshold to 0.5").executeUpdate()
+    entityManager.createNativeQuery("set local pg_trgm.similarity_threshold to 0.5").executeUpdate()
     val queryResult =
       entityManager
         .createNativeQuery(
