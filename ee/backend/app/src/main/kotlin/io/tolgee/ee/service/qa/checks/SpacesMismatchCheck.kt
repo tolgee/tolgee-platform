@@ -28,91 +28,77 @@ class SpacesMismatchCheck : QaCheck {
 
     val results = mutableListOf<QaCheckResult>()
 
-    checkLeadingSpaces(base, text, results)
-    checkTrailingSpaces(base, text, results)
+    checkSegmentMatches(
+      base,
+      text,
+      results,
+      QaIssueMessage.QA_SPACES_LEADING_ADDED,
+      QaIssueMessage.QA_SPACES_LEADING_REMOVED,
+      ::extractLeadingWhitespace,
+    )
+    checkSegmentMatches(
+      base,
+      text,
+      results,
+      QaIssueMessage.QA_SPACES_TRAILING_ADDED,
+      QaIssueMessage.QA_SPACES_TRAILING_REMOVED,
+      ::extractTrailingWhitespace,
+    )
     checkDoubledSpaces(text, results)
-    checkNonBreakingSpaces(base, text, results)
 
     return results
   }
 
-  private fun checkLeadingSpaces(
+  private fun checkSegmentMatches(
     base: String,
     text: String,
     results: MutableList<QaCheckResult>,
+    addingTextMessage: QaIssueMessage,
+    removingTextMessage: QaIssueMessage,
+    extractSegment: (String) -> Pair<String, Int>,
   ) {
-    val baseLeading = base.length - base.trimStart(' ', '\t').length
-    val textLeading = text.length - text.trimStart(' ', '\t').length
+    val (baseSegment, _) = extractSegment(base)
+    val (textSegment, textOffset) = extractSegment(text)
 
-    if (textLeading > baseLeading) {
-      val extra = textLeading - baseLeading
-      results.add(
-        QaCheckResult(
-          type = QaCheckType.SPACES_MISMATCH,
-          message = QaIssueMessage.QA_SPACES_LEADING_ADDED,
-          replacement = "",
-          positionStart = 0,
-          positionEnd = extra,
-        ),
-      )
-    } else if (textLeading < baseLeading) {
-      val missing = base.substring(0, baseLeading)
-      results.add(
-        QaCheckResult(
-          type = QaCheckType.SPACES_MISMATCH,
-          message = QaIssueMessage.QA_SPACES_LEADING_REMOVED,
-          replacement = missing,
-          positionStart = 0,
-          positionEnd = 0,
-        ),
-      )
-    }
-  }
+    if (baseSegment == textSegment) return
 
-  private fun checkTrailingSpaces(
-    base: String,
-    text: String,
-    results: MutableList<QaCheckResult>,
-  ) {
-    val baseTrailing = base.length - base.trimEnd(' ', '\t').length
-    val textTrailing = text.length - text.trimEnd(' ', '\t').length
+    val commonPrefixLen = textSegment.commonPrefixWith(baseSegment).length
+    val textRemainder = textSegment.substring(commonPrefixLen)
+    val baseRemainder = baseSegment.substring(commonPrefixLen)
+    val commonSuffixLen = textRemainder.commonSuffixWith(baseRemainder).length
 
-    if (textTrailing > baseTrailing) {
-      val extra = textTrailing - baseTrailing
-      val start = text.length - extra
-      results.add(
-        QaCheckResult(
-          type = QaCheckType.SPACES_MISMATCH,
-          message = QaIssueMessage.QA_SPACES_TRAILING_ADDED,
-          replacement = "",
-          positionStart = start,
-          positionEnd = text.length,
-        ),
-      )
-    } else if (textTrailing < baseTrailing) {
-      val missing = base.substring(base.length - baseTrailing)
-      results.add(
-        QaCheckResult(
-          type = QaCheckType.SPACES_MISMATCH,
-          message = QaIssueMessage.QA_SPACES_TRAILING_REMOVED,
-          replacement = missing,
-          positionStart = text.length,
-          positionEnd = text.length,
-        ),
-      )
-    }
+    val editStart = textOffset + commonPrefixLen
+    val editEnd = textOffset + textSegment.length - commonSuffixLen
+    val replacement = baseSegment.substring(commonPrefixLen, baseSegment.length - commonSuffixLen)
+
+    val message =
+      if (replacement.length <= (editEnd - editStart)) {
+        addingTextMessage
+      } else {
+        removingTextMessage
+      }
+
+    results.add(
+      QaCheckResult(
+        type = QaCheckType.SPACES_MISMATCH,
+        message = message,
+        replacement = replacement,
+        positionStart = editStart,
+        positionEnd = editEnd,
+      ),
+    )
   }
 
   private fun checkDoubledSpaces(
     text: String,
     results: MutableList<QaCheckResult>,
   ) {
-    val interiorStart = text.length - text.trimStart(' ', '\t').length
-    val interiorEnd = text.trimEnd(' ', '\t').length
+    val interiorStart = text.length - text.trimStart(*WHITESPACE_CHARS).length
+    val interiorEnd = text.trimEnd(*WHITESPACE_CHARS).length
     if (interiorStart >= interiorEnd) return
 
     val interior = text.substring(interiorStart, interiorEnd)
-    val regex = Regex("[ ]{2,}")
+    val regex = Regex("[ \u00A0]{2,}")
     for (match in regex.findAll(interior)) {
       val absStart = interiorStart + match.range.first
       val absEnd = interiorStart + match.range.last + 1
@@ -128,39 +114,17 @@ class SpacesMismatchCheck : QaCheck {
     }
   }
 
-  private fun checkNonBreakingSpaces(
-    base: String,
-    text: String,
-    results: MutableList<QaCheckResult>,
-  ) {
-    val nbsp = '\u00A0'
-    val baseHasNbsp = nbsp in base
-    val textHasNbsp = nbsp in text
+  companion object {
+    private val WHITESPACE_CHARS = charArrayOf(' ', '\t', '\u00A0')
 
-    if (!baseHasNbsp && textHasNbsp) {
-      for (i in text.indices) {
-        if (text[i] == nbsp) {
-          results.add(
-            QaCheckResult(
-              type = QaCheckType.SPACES_MISMATCH,
-              message = QaIssueMessage.QA_SPACES_NON_BREAKING_ADDED,
-              replacement = " ",
-              positionStart = i,
-              positionEnd = i + 1,
-            ),
-          )
-        }
-      }
-    } else if (baseHasNbsp && !textHasNbsp) {
-      results.add(
-        QaCheckResult(
-          type = QaCheckType.SPACES_MISMATCH,
-          message = QaIssueMessage.QA_SPACES_NON_BREAKING_REMOVED,
-          replacement = null,
-          positionStart = 0,
-          positionEnd = 0,
-        ),
-      )
+    fun extractLeadingWhitespace(text: String): Pair<String, Int> {
+      val ws = text.takeWhile { it in WHITESPACE_CHARS }
+      return Pair(ws, 0)
+    }
+
+    fun extractTrailingWhitespace(text: String): Pair<String, Int> {
+      val ws = text.takeLastWhile { it in WHITESPACE_CHARS }
+      return Pair(ws, text.length - ws.length)
     }
   }
 }

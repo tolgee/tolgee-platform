@@ -92,21 +92,83 @@ class SpacesMismatchCheckTest {
   }
 
   @Test
-  fun `detects non-breaking space added`() {
-    val results = check.check(params("Hello\u00A0world", "Hello world"))
-    assertThat(results).hasSize(1)
-    assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_SPACES_NON_BREAKING_ADDED)
-    assertThat(results[0].positionStart).isEqualTo(5)
-    assertThat(results[0].positionEnd).isEqualTo(6)
-    assertThat(results[0].replacement).isEqualTo(" ")
+  fun `detects doubled non-breaking spaces`() {
+    val results = check.check(params("Hello\u00A0\u00A0world", "Hello world"))
+    val doubled = results.filter { it.message == QaIssueMessage.QA_SPACES_DOUBLED }
+    assertThat(doubled).hasSize(1)
   }
 
   @Test
-  fun `detects non-breaking space removed`() {
-    val results = check.check(params("Hello world", "Hello\u00A0world"))
+  fun `detects mixed regular and non-breaking doubled spaces`() {
+    val results = check.check(params("Hello \u00A0world", "Hello world"))
+    val doubled = results.filter { it.message == QaIssueMessage.QA_SPACES_DOUBLED }
+    assertThat(doubled).hasSize(1)
+  }
+
+  @Test
+  fun `detects leading nbsp structure mismatch`() {
+    // base has leading nbsp, translation has regular space — structural edit
+    val results = check.check(params(" Hello", "\u00A0Hello"))
     assertThat(results).hasSize(1)
-    assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_SPACES_NON_BREAKING_REMOVED)
-    assertThat(results[0].replacement).isNull()
+    assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_SPACES_LEADING_ADDED)
+    assertThat(results[0].positionStart).isEqualTo(0)
+    assertThat(results[0].positionEnd).isEqualTo(1)
+    assertThat(results[0].replacement).isEqualTo("\u00A0")
+  }
+
+  @Test
+  fun `detects trailing nbsp structure mismatch`() {
+    // base has trailing nbsp, translation has regular space
+    val results = check.check(params("Hello ", "Hello\u00A0"))
+    assertThat(results).hasSize(1)
+    assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_SPACES_TRAILING_ADDED)
+    assertThat(results[0].positionStart).isEqualTo(5)
+    assertThat(results[0].positionEnd).isEqualTo(6)
+    assertThat(results[0].replacement).isEqualTo("\u00A0")
+  }
+
+  @Test
+  fun `detects extra leading nbsp`() {
+    // base has no leading whitespace, translation has a leading nbsp
+    val results = check.check(params("\u00A0Hello", "Hello"))
+    assertThat(results).hasSize(1)
+    assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_SPACES_LEADING_ADDED)
+    assertThat(results[0].positionStart).isEqualTo(0)
+    assertThat(results[0].positionEnd).isEqualTo(1)
+    assertThat(results[0].replacement).isEqualTo("")
+  }
+
+  @Test
+  fun `detects missing leading nbsp`() {
+    // base has leading nbsp, translation has none
+    val results = check.check(params("Hello", "\u00A0Hello"))
+    assertThat(results).hasSize(1)
+    assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_SPACES_LEADING_REMOVED)
+    assertThat(results[0].positionStart).isEqualTo(0)
+    assertThat(results[0].positionEnd).isEqualTo(0)
+    assertThat(results[0].replacement).isEqualTo("\u00A0")
+  }
+
+  @Test
+  fun `minimal edit preserves common prefix and suffix`() {
+    // base: nbsp + space + nbsp, translation: nbsp + space + space
+    // only the last char differs — minimal edit should target just that char
+    val results = check.check(params("\u00A0  Hello", "\u00A0 \u00A0Hello"))
+    val leading = results.filter {
+      it.message == QaIssueMessage.QA_SPACES_LEADING_ADDED ||
+        it.message == QaIssueMessage.QA_SPACES_LEADING_REMOVED
+    }
+    assertThat(leading).hasSize(1)
+    assertThat(leading[0].positionStart).isEqualTo(2)
+    assertThat(leading[0].positionEnd).isEqualTo(3)
+    assertThat(leading[0].replacement).isEqualTo("\u00A0")
+  }
+
+  @Test
+  fun `no issue when mid-text nbsp differs but edges match`() {
+    // nbsp in the middle of text is no longer checked
+    val results = check.check(params("Hello\u00A0world", "Hello world"))
+    assertThat(results).isEmpty()
   }
 
   @Test
