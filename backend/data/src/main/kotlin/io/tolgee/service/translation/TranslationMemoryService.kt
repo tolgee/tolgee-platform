@@ -31,7 +31,7 @@ class TranslationMemoryService(
     targetLanguage: LanguageDto,
     limit: Int = 5,
   ): List<TranslationMemoryItemView> {
-    entityManager.createNativeQuery("set pg_trgm.similarity_threshold to 0.5").executeUpdate()
+    entityManager.createNativeQuery("set local pg_trgm.similarity_threshold to 0.5").executeUpdate()
     val queryResult =
       entityManager
         .createNativeQuery(
@@ -123,7 +123,7 @@ class TranslationMemoryService(
     offset: Long = 0,
     limit: Int = 5,
   ): Pair<Long, List<TranslationMemoryItemView>> {
-    entityManager.createNativeQuery("set pg_trgm.similarity_threshold to 0.5").executeUpdate()
+    entityManager.createNativeQuery("set local pg_trgm.similarity_threshold to 0.5").executeUpdate()
     val queryResult =
       entityManager
         .createNativeQuery(
