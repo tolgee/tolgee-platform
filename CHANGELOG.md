@@ -1,3 +1,10 @@
+# [3.171.0](https://github.com/tolgee/tolgee-platform/compare/v3.170.0...v3.171.0) (2026-03-18)
+
+
+### Features
+
+* well designed transactional e-mails ([#3375](https://github.com/tolgee/tolgee-platform/issues/3375)) ([7afd04c](https://github.com/tolgee/tolgee-platform/commit/7afd04c8989143fe38608997a9e479324fdb3253)), closes [#2710](https://github.com/tolgee/tolgee-platform/issues/2710) [#2707](https://github.com/tolgee/tolgee-platform/issues/2707)
+
 # [3.170.0](https://github.com/tolgee/tolgee-platform/compare/v3.169.0...v3.170.0) (2026-03-17)
 
 
