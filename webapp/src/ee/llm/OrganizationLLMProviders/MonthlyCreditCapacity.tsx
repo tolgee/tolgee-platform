@@ -86,7 +86,7 @@ export const MonthlyCreditCapacity = ({
       <Typography variant="body2" color="text.secondary" gutterBottom>
         <T
           keyName="llm_provider_pricing_monthly_capacity_description"
-          defaultValue="Estimated number of strings you can translate with your monthly {credits} MT credits."
+          defaultValue="Estimated number of strings you can translate to a single language with your monthly {credits} MT credits."
           params={{ credits: formatNumber(includedMtCredits) }}
         />
       </Typography>
@@ -99,8 +99,8 @@ export const MonthlyCreditCapacity = ({
             <TableCell />
             <TableCell align="right">
               <T
-                keyName="llm_provider_pricing_approx_strings"
-                defaultValue="Approx. strings"
+                keyName="llm_provider_pricing_strings"
+                defaultValue="Strings"
               />
             </TableCell>
           </TableRow>
