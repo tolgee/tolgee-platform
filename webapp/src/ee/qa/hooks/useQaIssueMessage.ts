@@ -87,6 +87,16 @@ export function useQaIssueMessage(
       return normalizedParams?.word
         ? t('qa_issue_repeated_word', normalizedParams)
         : t('qa_issue_repeated_word_no_params');
+    case 'qa_placeholders_missing':
+      return normalizedParams?.placeholder
+        ? t('qa_issue_placeholders_missing', normalizedParams)
+        : t('qa_issue_placeholders_missing_no_params');
+    case 'qa_placeholders_extra':
+      return normalizedParams?.placeholder
+        ? t('qa_issue_placeholders_extra', normalizedParams)
+        : t('qa_issue_placeholders_extra_no_params');
+    case 'qa_icu_syntax_error':
+      return t('qa_issue_icu_syntax_error');
     default:
       return message;
   }

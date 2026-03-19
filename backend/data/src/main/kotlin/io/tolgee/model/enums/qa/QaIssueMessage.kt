@@ -53,6 +53,13 @@ enum class QaIssueMessage {
 
   // Repeated words
   QA_REPEATED_WORD,
+
+  // Inconsistent placeholders
+  QA_PLACEHOLDERS_MISSING,
+  QA_PLACEHOLDERS_EXTRA,
+
+  // ICU syntax
+  QA_ICU_SYNTAX_ERROR,
   ;
 
   @JsonValue

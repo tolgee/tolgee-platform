@@ -16,9 +16,10 @@ enum class QaCheckType(
   SPECIAL_CHARACTER_MISMATCH(QaCheckSeverity.OFF),
   DIFFERENT_URLS(QaCheckSeverity.WARNING),
 
-//  INCONSISTENT_PLACEHOLDERS(QaCheckSeverity.WARNING),
+  INCONSISTENT_PLACEHOLDERS(QaCheckSeverity.WARNING),
+
 //  INCONSISTENT_HTML(QaCheckSeverity.WARNING),
-//  ICU_SYNTAX(QaCheckSeverity.WARNING),
+  ICU_SYNTAX(QaCheckSeverity.WARNING),
   REPEATED_WORDS(QaCheckSeverity.WARNING),
 //  SPELLING(QaCheckSeverity.WARNING),
   ;
@@ -41,12 +42,12 @@ enum class QaCheckType(
             SPECIAL_CHARACTER_MISMATCH,
             DIFFERENT_URLS,
           ),
-//        QaCheckCategory.SYNTAX to
-//          listOf(
-//            INCONSISTENT_PLACEHOLDERS,
+        QaCheckCategory.SYNTAX to
+          listOf(
+            INCONSISTENT_PLACEHOLDERS,
 //            INCONSISTENT_HTML,
-//            ICU_SYNTAX,
-//          ),
+            ICU_SYNTAX,
+          ),
       )
   }
 }
