@@ -90,10 +90,7 @@ export const MonthlyCreditCapacity = ({
           params={{ credits: formatNumber(includedMtCredits) }}
         />
       </Typography>
-      <Table
-        size="small"
-        data-cy="llm-provider-pricing-monthly-capacity-table"
-      >
+      <Table size="small" data-cy="llm-provider-pricing-monthly-capacity-table">
         <TableHead>
           <TableRow>
             <TableCell />
