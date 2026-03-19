@@ -4,6 +4,7 @@ ext {
 
 tasks.register('dockerPrepare') {
     doLast {
+        delete(dockerPath)
         copy {
             from(tasks.unpack.outputs, 'docker/app')
             into(dockerPath)
