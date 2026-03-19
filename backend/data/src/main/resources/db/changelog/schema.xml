@@ -5337,4 +5337,14 @@
     <changeSet author="anty (generated)" id="1774000000000-2">
         <addUniqueConstraint columnNames="language_id" constraintName="UKbmgxalyiosgmhivh4wg8qner" tableName="language_qa_config"/>
     </changeSet>
+    <changeSet author="anty" id="1774000000000-3">
+        <addColumn tableName="language_stats">
+            <column name="qa_issue_count" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="qa_checks_stale_count" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

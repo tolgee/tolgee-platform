@@ -73,23 +73,6 @@ class ProjectStatsController(
         it to language
       }
 
-    // TODO: we should add this to language stats, this might kill performance
-    val qaIssueCounts =
-      if (projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS)) {
-        translationQaIssueService
-          .getOpenIssueCountsByLanguageId(projectHolder.project.id)
-      } else {
-        emptyMap()
-      }
-
-    val qaChecksStaleCounts =
-      if (projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS)) {
-        translationQaIssueService
-          .getStaleCountsByLanguageId(projectHolder.project.id)
-      } else {
-        emptyMap()
-      }
-
     return ProjectStatsModel(
       projectId = projectStats.id,
       languageCount = languageStats.size,
@@ -102,7 +85,7 @@ class ProjectStatsController(
       tagCount = projectStats.tagCount,
       languageStats =
         statsLanguagePairs.map {
-          languageStatsModelAssembler.toModel(it, qaIssueCounts, qaChecksStaleCounts)
+          languageStatsModelAssembler.toModel(it)
         },
     )
   }

@@ -45,6 +45,10 @@ class LanguageStats(
   @Temporal(TemporalType.TIMESTAMP)
   override var translationsUpdatedAt: Date? = null
 
+  override var qaIssueCount: Long = 0
+
+  override var qaChecksStaleCount: Long = 0
+
   override val languageId: Long
     get() = language.id
 
@@ -62,6 +66,8 @@ class LanguageStats(
       translatedPercentage = translatedPercentage,
       reviewedPercentage = reviewedPercentage,
       translationsUpdatedAt = translationsUpdatedAt,
+      qaIssueCount = qaIssueCount,
+      qaChecksStaleCount = qaChecksStaleCount,
       isDefaultBranch = branch?.isDefault,
     )
 }

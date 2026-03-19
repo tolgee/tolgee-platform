@@ -9,6 +9,7 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
 import io.tolgee.repository.TranslationRepository
+import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.queryBuilders.LanguageStatsProvider
 import io.tolgee.util.Logging
@@ -31,6 +32,7 @@ class LanguageStatsService(
   private val projectService: ProjectService,
   private val lockingProvider: LockingProvider,
   private val platformTransactionManager: PlatformTransactionManager,
+  private val translationQaIssueRepository: TranslationQaIssueRepository,
 ) : Logging {
   fun refreshLanguageStats(
     projectId: Long,
@@ -53,6 +55,15 @@ class LanguageStatsService(
                 branchId,
               ).associateBy { it.language.id }
               .toMutableMap()
+
+          val qaIssueCounts =
+            translationQaIssueRepository
+              .getOpenIssueCountsByLanguageId(projectId)
+              .associate { it.languageId to it.count }
+          val qaChecksStaleCountMap =
+            translationQaIssueRepository
+              .getStaleCountsByLanguageId(projectId)
+              .associate { it.languageId to it.count }
 
           allRawLanguageStats
             .sortedBy { it.languageName }
@@ -84,6 +95,8 @@ class LanguageStatsService(
                 this.untranslatedWords = baseWords - translatedOrReviewedWords
                 untranslatedPercentage = untranslatedWords.toDouble() / baseWords * 100
                 translationsUpdatedAt = lastUpdatedAt
+                qaIssueCount = qaIssueCounts[language.id] ?: 0
+                qaChecksStaleCount = qaChecksStaleCountMap[language.id] ?: 0
               }
             }
 
