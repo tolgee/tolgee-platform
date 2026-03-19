@@ -1,7 +1,9 @@
 package io.tolgee.util
 
+import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
+import org.springframework.stereotype.Component
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.URI
@@ -10,13 +12,20 @@ import java.net.URI
  * Validates URLs to prevent Server-Side Request Forgery (SSRF) attacks.
  * Blocks requests to internal/private network addresses, loopback, and link-local ranges.
  */
-object UrlSecurity {
+@Component
+class UrlSecurity(
+  private val internalProperties: InternalProperties,
+) {
   /**
    * Validates that the given URL is a safe external URL.
    * Throws [BadRequestException] if the URL is malformed, uses a non-HTTP(S) scheme,
    * or the host is a known private/internal address.
+   *
+   * Skipped when internal controller is enabled (E2E tests use localhost URLs).
    */
   fun validateUrl(url: String) {
+    if (internalProperties.controllerEnabled) return
+
     val uri =
       try {
         URI(url)

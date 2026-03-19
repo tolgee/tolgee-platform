@@ -21,6 +21,7 @@ class WebhookConfigService(
   private val webhookConfigRepository: WebhookConfigRepository,
   private val webhookExecutor: WebhookExecutor,
   private val automationService: AutomationService,
+  private val urlSecurity: UrlSecurity,
 ) {
   fun get(
     projectId: Long,
@@ -45,7 +46,7 @@ class WebhookConfigService(
     project: Project,
     dto: WebhookConfigRequest,
   ): WebhookConfig {
-    UrlSecurity.validateUrl(dto.url)
+    urlSecurity.validateUrl(dto.url)
     val webhookConfig = WebhookConfig(project)
     webhookConfig.url = dto.url
     webhookConfig.webhookSecret = generateRandomWebhookSecret()
@@ -77,7 +78,7 @@ class WebhookConfigService(
     dto: WebhookConfigRequest,
   ): WebhookConfig {
     val webhookConfig = get(projectId, id)
-    UrlSecurity.validateUrl(dto.url)
+    urlSecurity.validateUrl(dto.url)
     webhookConfig.url = dto.url
     automationService.updateForWebhookConfig(webhookConfig)
     return webhookConfigRepository.save(webhookConfig)

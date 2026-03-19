@@ -55,6 +55,7 @@ class LlmProviderService(
   private val anthropicApiService: AnthropicApiService,
   private val googleAiApiService: GoogleAiApiService,
   private val llmProviderResolver: LlmProviderResolver,
+  private val urlSecurity: UrlSecurity,
 ) {
   private val cache: Cache by lazy { cacheManager.getCache(Caches.LLM_PROVIDERS) ?: throw InvalidStateException() }
   private var lastUsedMap: MutableMap<String, Long> = mutableMapOf()
@@ -317,7 +318,7 @@ class LlmProviderService(
 
   private fun validateApiUrl(apiUrl: String) {
     if (apiUrl.isNotBlank()) {
-      UrlSecurity.validateUrl(apiUrl)
+      urlSecurity.validateUrl(apiUrl)
     }
   }
 
