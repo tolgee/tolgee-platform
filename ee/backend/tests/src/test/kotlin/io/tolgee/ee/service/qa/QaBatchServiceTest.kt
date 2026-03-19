@@ -1,12 +1,9 @@
 package io.tolgee.ee.service.qa
 
-import io.tolgee.development.testDataBuilder.data.BaseTestData
-import io.tolgee.model.enums.qa.QaCheckSeverity
-import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.ee.development.QaTestData
+import io.tolgee.ee.utils.QaTestUtil
 import io.tolgee.model.key.Key
-import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.model.translation.Translation
-import io.tolgee.repository.qa.ProjectQaConfigRepository
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import org.assertj.core.api.Assertions
@@ -28,45 +25,16 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   private lateinit var qaIssueRepository: TranslationQaIssueRepository
 
   @Autowired
-  private lateinit var projectQaConfigRepository: ProjectQaConfigRepository
+  lateinit var qa: QaTestUtil
 
-  lateinit var testData: BaseTestData
-  lateinit var testKey: Key
-  lateinit var frTranslation: Translation
+  lateinit var testData: QaTestData
 
   @BeforeEach
   fun setup() {
-    // TODO: custom QA test data instead of this; reusable across QA tests if possible
-    testData = BaseTestData()
-    testData.projectBuilder.build {
-      addFrench()
-      testKey =
-        addKey {
-          name = "test-key"
-        }.build {
-          addTranslation("en", "Hello world.")
-          frTranslation =
-            addTranslation("fr", "bonjour monde").self
-        }.self
-    }
+    testData = QaTestData()
     testDataService.saveTestData(testData.root)
-    // Save config directly to avoid async batch recheck triggered by updateSettings
-    projectQaConfigRepository.save(
-      ProjectQaConfig(
-        project = testData.project,
-        settings =
-          QaCheckType.entries
-            .associateWith {
-              if (it == QaCheckType.SPELLING ||
-                it == QaCheckType.GRAMMAR
-              ) {
-                QaCheckSeverity.OFF
-              } else {
-                QaCheckSeverity.WARNING
-              }
-            }.toMutableMap(),
-      ),
-    )
+    qa.testData = testData
+    qa.saveDefaultQaConfig()
     userAccount = testData.user
   }
 
@@ -77,8 +45,8 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   }
 
   private fun refetchEntities() {
-    testKey = entityManager.find(Key::class.java, testKey.id)
-    frTranslation = entityManager.find(Translation::class.java, frTranslation.id)
+    testData.testKey = entityManager.find(Key::class.java, testData.testKey.id)
+    testData.frTranslation = entityManager.find(Translation::class.java, testData.frTranslation.id)
   }
 
   @Test
@@ -86,10 +54,10 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   fun `creates QA issues when translation has problems`() {
     refetchEntities()
 
-    qaCheckBatchService.runChecksAndPersist(testData.project.id, frTranslation.id)
+    qaCheckBatchService.runChecksAndPersist(testData.project.id, testData.frTranslation.id)
     entityManager.flush()
 
-    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val issues = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
     Assertions.assertThat(issues).isNotEmpty
     Assertions.assertThat(issues.map { it.type.name }).contains("CHARACTER_CASE_MISMATCH", "PUNCTUATION_MISMATCH")
   }
@@ -99,13 +67,13 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   fun `creates no issues when translation is clean`() {
     refetchEntities()
 
-    frTranslation.text = "Bonjour monde."
+    testData.frTranslation.text = "Bonjour monde."
     entityManager.flush()
 
-    qaCheckBatchService.runChecksAndPersist(testData.project.id, frTranslation.id)
+    qaCheckBatchService.runChecksAndPersist(testData.project.id, testData.frTranslation.id)
     entityManager.flush()
 
-    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val issues = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
     Assertions.assertThat(issues).isEmpty()
   }
 
@@ -114,19 +82,19 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   fun `replaces existing issues on re-check`() {
     refetchEntities()
 
-    qaCheckBatchService.runChecksAndPersist(testData.project.id, frTranslation.id)
+    qaCheckBatchService.runChecksAndPersist(testData.project.id, testData.frTranslation.id)
     entityManager.flush()
-    val issuesBefore = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val issuesBefore = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
     Assertions.assertThat(issuesBefore).isNotEmpty
 
     // Update translation to be clean and re-check
-    frTranslation.text = "Bonjour monde."
+    testData.frTranslation.text = "Bonjour monde."
     entityManager.flush()
 
-    qaCheckBatchService.runChecksAndPersist(testData.project.id, frTranslation.id)
+    qaCheckBatchService.runChecksAndPersist(testData.project.id, testData.frTranslation.id)
     entityManager.flush()
 
-    val issuesAfter = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val issuesAfter = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
     Assertions.assertThat(issuesAfter).isEmpty()
   }
 }

@@ -1,18 +1,9 @@
 package io.tolgee.ee.api.v2.controllers.qa
 
 import io.tolgee.constants.Feature
-import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.ee.service.qa.QaCheckParams
-import io.tolgee.ee.service.qa.QaCheckRunnerService
-import io.tolgee.ee.service.qa.QaIssueService
-import io.tolgee.model.enums.qa.QaCheckSeverity
-import io.tolgee.model.enums.qa.QaCheckType
-import io.tolgee.model.key.Key
-import io.tolgee.model.qa.ProjectQaConfig
-import io.tolgee.model.translation.Translation
-import io.tolgee.repository.qa.ProjectQaConfigRepository
-import io.tolgee.repository.qa.TranslationQaIssueRepository
+import io.tolgee.ee.development.QaTestData
+import io.tolgee.ee.utils.QaTestUtil
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.WebsocketTest
 import org.assertj.core.api.Assertions.assertThat
@@ -30,23 +21,12 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @Autowired
-  private lateinit var qaIssueService: QaIssueService
-
-  @Autowired
-  private lateinit var qaCheckRunnerService: QaCheckRunnerService
-
-  @Autowired
-  private lateinit var qaIssueRepository: TranslationQaIssueRepository
-
-  @Autowired
-  private lateinit var projectQaConfigRepository: ProjectQaConfigRepository
+  lateinit var qa: QaTestUtil
 
   @LocalServerPort
   private var port: Int = 0
 
-  lateinit var testData: BaseTestData
-  lateinit var testKey: Key
-  var frTranslation: Translation? = null
+  lateinit var testData: QaTestData
   lateinit var jwtToken: String
 
   private val wsHelpers = mutableListOf<QaPreviewWebSocketTestHelper>()
@@ -60,36 +40,10 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
   @BeforeEach
   fun setup() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.QA_CHECKS)
-    testData = BaseTestData()
-    testData.projectBuilder.build {
-      addFrench()
-      testKey =
-        addKey {
-          name = "test-key"
-        }.build {
-          addTranslation("en", "Hello world.")
-          frTranslation =
-            addTranslation("fr", "bonjour monde").self
-        }.self
-    }
+    testData = QaTestData()
     testDataService.saveTestData(testData.root)
-    // Save config directly to avoid async batch recheck triggered by updateSettings
-    projectQaConfigRepository.save(
-      ProjectQaConfig(
-        project = testData.project,
-        settings =
-          QaCheckType.entries
-            .associateWith {
-              if (it == QaCheckType.SPELLING ||
-                it == QaCheckType.GRAMMAR
-              ) {
-                QaCheckSeverity.OFF
-              } else {
-                QaCheckSeverity.WARNING
-              }
-            }.toMutableMap(),
-      ),
-    )
+    qa.testData = testData
+    qa.saveDefaultQaConfig()
     userAccount = testData.user
     jwtToken = jwtService.emitToken(testData.user.id)
   }
@@ -147,7 +101,7 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
   fun `returns comparison issues when base translation exists`() {
     val ws = createWs()
     ws.connect()
-    ws.sendInit(jwtToken, testData.project.id, testKey.id, "fr")
+    ws.sendInit(jwtToken, testData.project.id, testData.testKey.id, "fr")
     ws.sendText("bonjour monde")
     ws.waitForDone()
 
@@ -181,7 +135,7 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
   fun `returns params in result for punctuation check`() {
     val ws = createWs()
     ws.connect()
-    ws.sendInit(jwtToken, testData.project.id, testKey.id, "fr")
+    ws.sendInit(jwtToken, testData.project.id, testData.testKey.id, "fr")
     ws.sendText("Bonjour monde")
     ws.waitForDone()
 
@@ -197,7 +151,7 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
   fun `returns no missing numbers when neither text has numbers`() {
     val ws = createWs()
     ws.connect()
-    ws.sendInit(jwtToken, testData.project.id, testKey.id, "fr")
+    ws.sendInit(jwtToken, testData.project.id, testData.testKey.id, "fr")
     ws.sendText("Bonjour monde.")
     ws.waitForDone()
 
@@ -208,28 +162,17 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
 
   @Test
   fun `preview includes state from persisted issues`() {
-    val translation = frTranslation!!
-
     // Persist QA issues for the French translation
-    val params =
-      QaCheckParams(
-        baseText = "Hello world.",
-        text = "bonjour monde",
-        baseLanguageTag = "en",
-        languageTag = "fr",
-      )
-    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(translation, results)
+    qa.runChecksAndPersist(testData.frTranslation)
 
     // Ignore one issue
-    val persistedIssues = qaIssueRepository.findAllByTranslationId(translation.id)
-    val issueToIgnore = persistedIssues.first()
-    qaIssueService.ignoreIssue(testData.project.id, issueToIgnore.id)
+    val issueToIgnore = qa.getPersistedIssues(testData.frTranslation).first()
+    qa.ignoreIssue(issueToIgnore)
 
     // Preview the same text — should include state status
     val ws = createWs()
     ws.connect()
-    ws.sendInit(jwtToken, testData.project.id, testKey.id, "fr")
+    ws.sendInit(jwtToken, testData.project.id, testData.testKey.id, "fr")
     ws.sendText("bonjour monde")
     ws.waitForDone()
 
@@ -258,7 +201,7 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
   fun `sends results per check type`() {
     val ws = createWs()
     ws.connect()
-    ws.sendInit(jwtToken, testData.project.id, testKey.id, "fr")
+    ws.sendInit(jwtToken, testData.project.id, testData.testKey.id, "fr")
     ws.sendText("bonjour monde")
     ws.waitForDone()
 

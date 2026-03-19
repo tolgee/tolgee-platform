@@ -1,22 +1,15 @@
 package io.tolgee.ee.api.v2.controllers.qa
 
 import io.tolgee.constants.Feature
-import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
-import io.tolgee.ee.service.qa.QaCheckParams
-import io.tolgee.ee.service.qa.QaCheckRunnerService
-import io.tolgee.ee.service.qa.QaIssueService
+import io.tolgee.ee.development.QaTestData
+import io.tolgee.ee.utils.QaTestUtil
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNoContent
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.enums.qa.QaCheckSeverity
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
-import io.tolgee.model.key.Key
-import io.tolgee.model.qa.ProjectQaConfig
-import io.tolgee.model.translation.Translation
-import io.tolgee.repository.qa.ProjectQaConfigRepository
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import net.javacrumbs.jsonunit.assertj.assertThatJson
@@ -35,54 +28,20 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
   @Autowired
-  private lateinit var qaIssueService: QaIssueService
-
-  @Autowired
-  private lateinit var qaCheckRunnerService: QaCheckRunnerService
-
-  @Autowired
   private lateinit var qaIssueRepository: TranslationQaIssueRepository
 
   @Autowired
-  private lateinit var projectQaConfigRepository: ProjectQaConfigRepository
+  lateinit var qa: QaTestUtil
 
-  lateinit var testData: BaseTestData
-  lateinit var testKey: Key
-  lateinit var frTranslation: Translation
+  lateinit var testData: QaTestData
 
   @BeforeEach
   fun setup() {
     enabledFeaturesProvider.forceEnabled = setOf(Feature.QA_CHECKS)
-    testData = BaseTestData()
-    testData.projectBuilder.build {
-      addFrench()
-      testKey =
-        addKey {
-          name = "test-key"
-        }.build {
-          addTranslation("en", "Hello world.")
-          frTranslation =
-            addTranslation("fr", "bonjour monde").self
-        }.self
-    }
+    testData = QaTestData()
     testDataService.saveTestData(testData.root)
-    // Save config directly to avoid async batch recheck triggered by updateSettings
-    projectQaConfigRepository.save(
-      ProjectQaConfig(
-        project = testData.project,
-        settings =
-          QaCheckType.entries
-            .associateWith {
-              if (it == QaCheckType.SPELLING ||
-                it == QaCheckType.GRAMMAR
-              ) {
-                QaCheckSeverity.OFF
-              } else {
-                QaCheckSeverity.WARNING
-              }
-            }.toMutableMap(),
-      ),
-    )
+    qa.testData = testData
+    qa.saveDefaultQaConfig()
     userAccount = testData.user
   }
 
@@ -95,19 +54,10 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `returns persisted QA issues for a translation`() {
-    // Directly run checks and persist them
-    val params =
-      QaCheckParams(
-        baseText = "Hello world.",
-        text = "bonjour monde",
-        baseLanguageTag = "en",
-        languageTag = "fr",
-      )
-    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
+    qa.runChecksAndPersist(testData.frTranslation)
 
     performAuthGet(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues",
     ).andIsOk.andAssertThatJson {
       node("_embedded.qaIssues").isArray.isNotEmpty
       node("_embedded.qaIssues").isArray.anySatisfy {
@@ -125,7 +75,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
   @Test
   fun `returns empty when no QA issues exist`() {
     performAuthGet(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues",
     ).andIsOk.andAssertThatJson {
       node("_embedded").isAbsent()
     }
@@ -133,30 +83,13 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `replaces issues on re-run`() {
-    // First run with issues
-    val params =
-      QaCheckParams(
-        baseText = "Hello world.",
-        text = "bonjour monde",
-        baseLanguageTag = "en",
-        languageTag = "fr",
-      )
-    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
+    qa.runChecksAndPersist(testData.frTranslation)
 
-    // Second run with no issues
-    val cleanParams =
-      QaCheckParams(
-        baseText = "Hello world.",
-        text = "Bonjour monde.",
-        baseLanguageTag = "en",
-        languageTag = "fr",
-      )
-    val cleanResults = qaCheckRunnerService.runEnabledChecks(testData.project.id, cleanParams)
-    qaIssueService.replaceIssuesForTranslation(frTranslation, cleanResults)
+    // Re-run with clean text — no issues
+    qa.runChecksAndPersist(testData.frTranslation, text = "Bonjour monde.")
 
     performAuthGet(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues",
     ).andIsOk.andAssertThatJson {
       node("_embedded").isAbsent()
     }
@@ -164,16 +97,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `translation list includes qaIssueCount`() {
-    // Create QA issues for the French translation
-    val params =
-      QaCheckParams(
-        baseText = "Hello world.",
-        text = "bonjour monde",
-        baseLanguageTag = "en",
-        languageTag = "fr",
-      )
-    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
+    qa.runChecksAndPersist(testData.frTranslation)
 
     performAuthGet(
       "/v2/projects/${testData.project.id}/translations?sort=id",
@@ -185,52 +109,32 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `ignores a QA issue`() {
-    val params =
-      QaCheckParams(
-        baseText = "Hello world.",
-        text = "bonjour monde",
-        baseLanguageTag = "en",
-        languageTag = "fr",
-      )
-    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
-
-    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    val issueToIgnore = issues.first()
+    qa.runChecksAndPersist(testData.frTranslation)
+    val issue = qa.getPersistedIssues(testData.frTranslation).first()
 
     performAuthPut(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/${issueToIgnore.id}/ignore",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/${issue.id}/ignore",
       null,
     ).andIsOk
 
-    val updatedIssue = qaIssueRepository.findById(issueToIgnore.id).get()
+    val updatedIssue = qaIssueRepository.findById(issue.id).get()
     assertThat(updatedIssue.state.name).isEqualTo("IGNORED")
   }
 
   @Test
   fun `unignores a QA issue`() {
-    val params =
-      QaCheckParams(
-        baseText = "Hello world.",
-        text = "bonjour monde",
-        baseLanguageTag = "en",
-        languageTag = "fr",
-      )
-    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
-
-    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    val issue = issues.first()
+    qa.runChecksAndPersist(testData.frTranslation)
+    val issue = qa.getPersistedIssues(testData.frTranslation).first()
 
     // First ignore it
     performAuthPut(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/${issue.id}/ignore",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/${issue.id}/ignore",
       null,
     ).andIsOk
 
     // Then unignore it
     performAuthPut(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/${issue.id}/unignore",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/${issue.id}/unignore",
       null,
     ).andIsOk
 
@@ -240,29 +144,16 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `ignored state is preserved when issues are re-persisted`() {
-    val params =
-      QaCheckParams(
-        baseText = "Hello world.",
-        text = "bonjour monde",
-        baseLanguageTag = "en",
-        languageTag = "fr",
-      )
-    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
-
-    // Ignore one issue
-    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    val issueToIgnore = issues.first()
-    qaIssueService.ignoreIssue(testData.project.id, issueToIgnore.id)
+    qa.runChecksAndPersist(testData.frTranslation)
+    val issueToIgnore = qa.getPersistedIssues(testData.frTranslation).first()
+    qa.ignoreIssue(issueToIgnore)
 
     // Re-persist with the same results (simulating a re-save)
-    val newResults = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(frTranslation, newResults)
+    qa.runChecksAndPersist(testData.frTranslation)
 
     // The matching issue should still be IGNORED
-    val newIssues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
     val matchingIssue =
-      newIssues.find {
+      qa.getPersistedIssues(testData.frTranslation).find {
         it.type == issueToIgnore.type &&
           it.message == issueToIgnore.message &&
           it.positionStart == issueToIgnore.positionStart &&
@@ -274,21 +165,12 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `ignored issues are not counted in qaIssueCount`() {
-    val params =
-      QaCheckParams(
-        baseText = "Hello world.",
-        text = "bonjour monde",
-        baseLanguageTag = "en",
-        languageTag = "fr",
-      )
-    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
-
-    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    qa.runChecksAndPersist(testData.frTranslation)
+    val issues = qa.getPersistedIssues(testData.frTranslation)
     val totalIssues = issues.size
 
     // Ignore all issues
-    issues.forEach { qaIssueService.ignoreIssue(testData.project.id, it.id) }
+    issues.forEach { qa.ignoreIssue(it) }
 
     performAuthGet(
       "/v2/projects/${testData.project.id}/translations?sort=id",
@@ -302,18 +184,8 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `ignores existing issue by params`() {
-    val params =
-      QaCheckParams(
-        baseText = "Hello world.",
-        text = "bonjour monde",
-        baseLanguageTag = "en",
-        languageTag = "fr",
-      )
-    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
-
-    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    val issue = issues.first()
+    qa.runChecksAndPersist(testData.frTranslation)
+    val issue = qa.getPersistedIssues(testData.frTranslation).first()
 
     val request =
       QaCheckIssueIgnoreRequest(
@@ -325,7 +197,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
       )
 
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -344,15 +216,14 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
         positionEnd = 5,
       )
 
-    val issuesBefore = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    assertThat(issuesBefore).isEmpty()
+    assertThat(qa.getPersistedIssues(testData.frTranslation)).isEmpty()
 
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
-    val issuesAfter = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val issuesAfter = qa.getPersistedIssues(testData.frTranslation)
     assertThat(issuesAfter).hasSize(1)
     assertThat(issuesAfter.first().state.name).isEqualTo("IGNORED")
     assertThat(issuesAfter.first().type).isEqualTo(QaCheckType.CHARACTER_CASE_MISMATCH)
@@ -361,21 +232,11 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `unignores existing issue by params`() {
-    val params =
-      QaCheckParams(
-        baseText = "Hello world.",
-        text = "bonjour monde",
-        baseLanguageTag = "en",
-        languageTag = "fr",
-      )
-    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
-
-    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    val issue = issues.first()
+    qa.runChecksAndPersist(testData.frTranslation)
+    val issue = qa.getPersistedIssues(testData.frTranslation).first()
 
     // First ignore it
-    qaIssueService.ignoreIssue(testData.project.id, issue.id)
+    qa.ignoreIssue(issue)
 
     val request =
       QaCheckIssueIgnoreRequest(
@@ -387,7 +248,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
       )
 
     performAuthDelete(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -408,23 +269,22 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
     // Create a virtual issue via suppression
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
-    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val issues = qa.getPersistedIssues(testData.frTranslation)
     assertThat(issues).hasSize(1)
     val virtualIssue = issues.first()
     assertThat(virtualIssue.virtual).isTrue()
 
     // Unignore by id should delete the virtual issue
     performAuthPut(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/${virtualIssue.id}/unignore",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/${virtualIssue.id}/unignore",
       null,
     ).andIsOk
 
-    val issuesAfter = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    assertThat(issuesAfter).isEmpty()
+    assertThat(qa.getPersistedIssues(testData.frTranslation)).isEmpty()
   }
 
   @Test
@@ -440,21 +300,19 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
     // Create a virtual issue via suppression
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
-    val virtualIssues = qaIssueRepository.findAllByTranslationId(frTranslation.id).filter { it.virtual }
-    assertThat(virtualIssues).hasSize(1)
+    assertThat(qa.getPersistedIssues(testData.frTranslation).filter { it.virtual }).hasSize(1)
 
     // Remove suppression should delete the virtual issue
     performAuthDelete(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
-    val virtualIssuesAfter = qaIssueRepository.findAllByTranslationId(frTranslation.id).filter { it.virtual }
-    assertThat(virtualIssuesAfter).isEmpty()
+    assertThat(qa.getPersistedIssues(testData.frTranslation).filter { it.virtual }).isEmpty()
   }
 
   @Test
@@ -470,28 +328,19 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
     // Create a virtual ignored issue via suppression
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsOk
 
-    val virtualIssues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
+    val virtualIssues = qa.getPersistedIssues(testData.frTranslation)
     assertThat(virtualIssues).hasSize(1)
     assertThat(virtualIssues.first().virtual).isTrue()
 
     // Run QA checks that produce the same issue
-    val params =
-      QaCheckParams(
-        baseText = "Hello world.",
-        text = "bonjour monde",
-        baseLanguageTag = "en",
-        languageTag = "fr",
-      )
-    val results = qaCheckRunnerService.runEnabledChecks(testData.project.id, params)
-    qaIssueService.replaceIssuesForTranslation(frTranslation, results)
+    qa.runChecksAndPersist(testData.frTranslation)
 
     // The re-persisted issue should NOT be virtual
-    val newIssues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    val caseIssue = newIssues.find { it.type == QaCheckType.CHARACTER_CASE_MISMATCH }
+    val caseIssue = qa.getPersistedIssues(testData.frTranslation).find { it.type == QaCheckType.CHARACTER_CASE_MISMATCH }
     assertThat(caseIssue).isNotNull
     assertThat(caseIssue!!.virtual).isFalse()
     // But ignored state SHOULD be inherited
@@ -510,11 +359,10 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
       )
 
     performAuthDelete(
-      "/v2/projects/${testData.project.id}/translations/${frTranslation.id}/qa-issues/suppressions",
+      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
       request,
     ).andIsNoContent
 
-    val issues = qaIssueRepository.findAllByTranslationId(frTranslation.id)
-    assertThat(issues).isEmpty()
+    assertThat(qa.getPersistedIssues(testData.frTranslation)).isEmpty()
   }
 }
