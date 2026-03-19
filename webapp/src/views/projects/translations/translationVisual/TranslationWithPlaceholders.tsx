@@ -28,7 +28,7 @@ type Props = {
   targetLocale?: string;
   nested: boolean;
   showHighlights?: boolean;
-  qaIssues: QaIssueModel[];
+  qaIssues?: QaIssueModel[];
   translationId?: number;
 };
 
@@ -128,7 +128,7 @@ export const TranslationWithPlaceholders = ({
   targetLocale,
   nested,
   showHighlights,
-  qaIssues,
+  qaIssues = [],
   translationId,
 }: Props) => {
   const project = useProject();
