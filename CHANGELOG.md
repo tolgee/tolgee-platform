@@ -1,3 +1,11 @@
+## [3.172.3](https://github.com/tolgee/tolgee-platform/compare/v3.172.2...v3.172.3) (2026-03-19)
+
+
+### Bug Fixes
+
+* clean docker build dir before copying to prevent duplicate JARs ([#3547](https://github.com/tolgee/tolgee-platform/issues/3547)) ([a1fcba8](https://github.com/tolgee/tolgee-platform/commit/a1fcba8a4c3c2d167ee101c9e3a1862504f646e1))
+* use kebab-case input name in billing dispatch ([#3546](https://github.com/tolgee/tolgee-platform/issues/3546)) ([0470edc](https://github.com/tolgee/tolgee-platform/commit/0470edc9e58a3571662a5a0aeef81ce0623f4940))
+
 ## [3.172.2](https://github.com/tolgee/tolgee-platform/compare/v3.172.1...v3.172.2) (2026-03-18)
 
 
