@@ -15,6 +15,7 @@ import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.repository.LlmProviderRepository
 import io.tolgee.service.LlmPropertiesService
+import io.tolgee.util.UrlSecurity
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -83,6 +84,7 @@ class LlmProviderFallbackTest {
         anthropicApiService = mock<AnthropicApiService>(),
         googleAiApiService = mock<GoogleAiApiService>(),
         llmProviderResolver = resolver,
+        urlSecurity = mock<UrlSecurity>(),
       )
   }
 
