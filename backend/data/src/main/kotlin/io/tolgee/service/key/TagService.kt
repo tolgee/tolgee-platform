@@ -192,12 +192,15 @@ class TagService(
     tag: Tag,
   ) {
     key.keyMeta?.let { keyMeta ->
-      tag.keyMetas.remove(keyMeta)
+      // Check emptiness via query before modifying anything.
+      // Do NOT access tag.keyMetas — it lazy-loads the entire KeyMeta
+      // collection for the tag, which can be 10k+ objects for large projects.
+      val tagWouldBecomeEmpty =
+        tagRepository.findTagIdsThatWouldBecomeEmpty(listOf(tag.id), listOf(keyMeta.id)).isNotEmpty()
       keyMeta.tags.remove(tag)
-      tagRepository.save(tag)
       keyMetaService.save(keyMeta)
-      if (tag.keyMetas.size < 1) {
-        tagRepository.delete(tag)
+      if (tagWouldBecomeEmpty) {
+        tagRepository.deleteByIdIn(listOf(tag.id))
       }
     }
   }
@@ -281,27 +284,37 @@ class TagService(
   }
 
   private fun deleteAllTagsForKeys(keys: Iterable<WithKeyMeta>) {
-    val tagIds = keys.flatMap { it.keyMeta?.tags?.map { it.id } ?: listOf() }.toSet()
-    // get tags with fetched keyMetas
-    val tagKeyMetasMap =
-      traceLogMeasureTime("tagService: deleteAllTagsForKeys: getTagsWithKeyMetas") {
-        tagRepository.getTagsWithKeyMetas(tagIds).associate {
-          it.id to it.keyMetas
-        }
+    val keyMetas = keys.mapNotNull { it.keyMeta }
+    if (keyMetas.isEmpty()) return
+
+    val keyMetaIds = keyMetas.map { it.id }.toSet()
+    val tagIds = keyMetas.flatMap { km -> km.tags.map { it.id } }.toSet()
+    if (tagIds.isEmpty()) return
+
+    // Find which tags would become empty after removing these keyMetas,
+    // using a pure-ID existence query — no entity graph loaded.
+    val tagIdsToDelete =
+      traceLogMeasureTime("tagService: deleteAllTagsForKeys: findTagIdsThatWouldBecomeEmpty") {
+        tagRepository.findTagIdsThatWouldBecomeEmpty(tagIds, keyMetaIds)
       }
-    keys.forEach { key ->
-      key.keyMeta?.let { keyMeta ->
-        keyMeta.tags.forEach { tag ->
-          // remove from tagsKeyMetas to find out whether to delete the tag
-          val tagKeyMetas = tagKeyMetasMap[tag.id]
-          tagKeyMetas?.removeIf { it.id == keyMeta.id }
-          if (tagKeyMetas?.isEmpty() != false) {
-            tagRepository.delete(tag)
-          }
-        }
-        keyMeta.tags.clear()
-        keyMetaService.save(keyMeta)
-      }
+
+    // Clear tags from each keyMeta (owning side): removes join-table entries
+    // and triggers activity logging via @ActivityLoggedProp on KeyMeta.tags.
+    keyMetas.forEach { keyMeta ->
+      keyMeta.tags.clear()
+      keyMetaService.save(keyMeta)
+    }
+
+    // Delete tags that have no remaining keyMetas.
+    // flushAutomatically = true on deleteByIdIn is required here, not defensive:
+    // Hibernate AUTO flush mode only flushes before queries that might read
+    // data in tables already dirtied in the session. A DELETE FROM tag touches
+    // a different table than key_meta_tags (where the tags.clear() writes are
+    // pending), so Hibernate would NOT auto-flush — leaving the join-table FK
+    // entries intact and causing a constraint violation. The explicit flush
+    // ensures key_meta_tags is written before the tag rows are removed.
+    if (tagIdsToDelete.isNotEmpty()) {
+      tagRepository.deleteByIdIn(tagIdsToDelete)
     }
   }
 

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 @Repository
 @Lazy
@@ -62,14 +63,31 @@ interface TagRepository : JpaRepository<Tag, Long> {
   )
   fun getImportKeysWithTags(keyIds: Iterable<Long>): List<ImportKey>
 
+  /**
+   * Returns IDs of tags that would have no remaining keyMetas after removing [keyMetaIds].
+   * Uses a pure-ID projection to avoid loading any entity graph.
+   */
   @Query(
     """
-    from Tag t
-    join fetch t.keyMetas
+    select t.id from Tag t
     where t.id in :tagIds
+    and not exists (
+        select km from KeyMeta km
+        join km.tags tg
+        where tg.id = t.id
+        and km.id not in :keyMetaIds
+    )
     """,
   )
-  fun getTagsWithKeyMetas(tagIds: Iterable<Long>): List<Tag>
+  fun findTagIdsThatWouldBecomeEmpty(
+    tagIds: Collection<Long>,
+    keyMetaIds: Collection<Long>,
+  ): List<Long>
+
+  @Transactional
+  @Modifying(flushAutomatically = true)
+  @Query("delete from Tag t where t.id in :tagIds")
+  fun deleteByIdIn(tagIds: Collection<Long>)
 
   fun findAllByProjectId(projectId: Long): List<Tag>
 
