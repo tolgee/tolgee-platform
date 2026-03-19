@@ -18,7 +18,8 @@ enum class QaCheckType(
 
   INCONSISTENT_PLACEHOLDERS(QaCheckSeverity.WARNING),
 
-//  INCONSISTENT_HTML(QaCheckSeverity.WARNING),
+  INCONSISTENT_HTML(QaCheckSeverity.WARNING),
+  HTML_SYNTAX(QaCheckSeverity.WARNING),
   ICU_SYNTAX(QaCheckSeverity.WARNING),
   REPEATED_WORDS(QaCheckSeverity.WARNING),
 //  SPELLING(QaCheckSeverity.WARNING),
@@ -45,7 +46,8 @@ enum class QaCheckType(
         QaCheckCategory.SYNTAX to
           listOf(
             INCONSISTENT_PLACEHOLDERS,
-//            INCONSISTENT_HTML,
+            INCONSISTENT_HTML,
+            HTML_SYNTAX,
             ICU_SYNTAX,
           ),
       )

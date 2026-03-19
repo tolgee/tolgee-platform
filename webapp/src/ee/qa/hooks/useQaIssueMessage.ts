@@ -95,6 +95,22 @@ export function useQaIssueMessage(
       return normalizedParams?.placeholder
         ? t('qa_issue_placeholders_extra', normalizedParams)
         : t('qa_issue_placeholders_extra_no_params');
+    case 'qa_html_tag_missing':
+      return normalizedParams?.tag
+        ? t('qa_issue_html_tag_missing', normalizedParams)
+        : t('qa_issue_html_tag_missing_no_params');
+    case 'qa_html_tag_extra':
+      return normalizedParams?.tag
+        ? t('qa_issue_html_tag_extra', normalizedParams)
+        : t('qa_issue_html_tag_extra_no_params');
+    case 'qa_html_unclosed_tag':
+      return normalizedParams?.tag
+        ? t('qa_issue_html_unclosed_tag', normalizedParams)
+        : t('qa_issue_html_unclosed_tag_no_params');
+    case 'qa_html_unopened_tag':
+      return normalizedParams?.tag
+        ? t('qa_issue_html_unopened_tag', normalizedParams)
+        : t('qa_issue_html_unopened_tag_no_params');
     case 'qa_icu_syntax_error':
       return t('qa_issue_icu_syntax_error');
     default:

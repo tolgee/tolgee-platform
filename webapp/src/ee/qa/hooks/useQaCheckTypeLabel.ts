@@ -34,6 +34,8 @@ export function useQaCheckTypeLabel(type: QaCheckType): string {
       return t('qa_check_type_inconsistent_placeholders');
     case 'INCONSISTENT_HTML':
       return t('qa_check_type_inconsistent_html');
+    case 'HTML_SYNTAX':
+      return t('qa_check_type_html_syntax');
     case 'ICU_SYNTAX':
       return t('qa_check_type_icu_syntax');
     default:

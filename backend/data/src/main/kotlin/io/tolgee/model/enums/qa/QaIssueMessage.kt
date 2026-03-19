@@ -58,6 +58,14 @@ enum class QaIssueMessage {
   QA_PLACEHOLDERS_MISSING,
   QA_PLACEHOLDERS_EXTRA,
 
+  // Inconsistent HTML (comparison)
+  QA_HTML_TAG_MISSING,
+  QA_HTML_TAG_EXTRA,
+
+  // HTML syntax
+  QA_HTML_UNCLOSED_TAG,
+  QA_HTML_UNOPENED_TAG,
+
   // ICU syntax
   QA_ICU_SYNTAX_ERROR,
   ;

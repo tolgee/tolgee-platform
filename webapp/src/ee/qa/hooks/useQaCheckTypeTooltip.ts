@@ -32,6 +32,8 @@ export function useQaCheckTypeTooltip(type: QaCheckType): string | null {
       return t('qa_check_tooltip_inconsistent_placeholders');
     case 'INCONSISTENT_HTML':
       return t('qa_check_tooltip_inconsistent_html');
+    case 'HTML_SYNTAX':
+      return t('qa_check_tooltip_html_syntax');
     default:
       return null;
   }

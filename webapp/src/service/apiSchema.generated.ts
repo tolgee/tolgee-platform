@@ -5563,6 +5563,8 @@ export interface components {
         | "SPECIAL_CHARACTER_MISMATCH"
         | "DIFFERENT_URLS"
         | "INCONSISTENT_PLACEHOLDERS"
+        | "INCONSISTENT_HTML"
+        | "HTML_SYNTAX"
         | "ICU_SYNTAX"
         | "REPEATED_WORDS"
       )[];
@@ -5601,6 +5603,10 @@ export interface components {
         | "qa_repeated_word"
         | "qa_placeholders_missing"
         | "qa_placeholders_extra"
+        | "qa_html_tag_missing"
+        | "qa_html_tag_extra"
+        | "qa_html_unclosed_tag"
+        | "qa_html_unopened_tag"
         | "qa_icu_syntax_error";
       params?: { [key: string]: string };
       pluralVariant?: string;
@@ -5622,6 +5628,8 @@ export interface components {
         | "SPECIAL_CHARACTER_MISMATCH"
         | "DIFFERENT_URLS"
         | "INCONSISTENT_PLACEHOLDERS"
+        | "INCONSISTENT_HTML"
+        | "HTML_SYNTAX"
         | "ICU_SYNTAX"
         | "REPEATED_WORDS";
     };
@@ -5661,6 +5669,10 @@ export interface components {
         | "qa_repeated_word"
         | "qa_placeholders_missing"
         | "qa_placeholders_extra"
+        | "qa_html_tag_missing"
+        | "qa_html_tag_extra"
+        | "qa_html_unclosed_tag"
+        | "qa_html_unopened_tag"
         | "qa_icu_syntax_error";
       params?: { [key: string]: string };
       pluralVariant?: string;
@@ -5684,6 +5696,8 @@ export interface components {
         | "SPECIAL_CHARACTER_MISMATCH"
         | "DIFFERENT_URLS"
         | "INCONSISTENT_PLACEHOLDERS"
+        | "INCONSISTENT_HTML"
+        | "HTML_SYNTAX"
         | "ICU_SYNTAX"
         | "REPEATED_WORDS";
     };
@@ -15864,6 +15878,8 @@ export interface operations {
           | "SPECIAL_CHARACTER_MISMATCH"
           | "DIFFERENT_URLS"
           | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "HTML_SYNTAX"
           | "ICU_SYNTAX"
           | "REPEATED_WORDS"
         )[];
@@ -16007,6 +16023,8 @@ export interface operations {
           | "SPECIAL_CHARACTER_MISMATCH"
           | "DIFFERENT_URLS"
           | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "HTML_SYNTAX"
           | "ICU_SYNTAX"
           | "REPEATED_WORDS"
         )[];
@@ -16186,6 +16204,8 @@ export interface operations {
           | "SPECIAL_CHARACTER_MISMATCH"
           | "DIFFERENT_URLS"
           | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "HTML_SYNTAX"
           | "ICU_SYNTAX"
           | "REPEATED_WORDS"
         )[];
@@ -20876,6 +20896,8 @@ export interface operations {
           | "SPECIAL_CHARACTER_MISMATCH"
           | "DIFFERENT_URLS"
           | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "HTML_SYNTAX"
           | "ICU_SYNTAX"
           | "REPEATED_WORDS"
         )[];
@@ -21199,6 +21221,8 @@ export interface operations {
           | "SPECIAL_CHARACTER_MISMATCH"
           | "DIFFERENT_URLS"
           | "INCONSISTENT_PLACEHOLDERS"
+          | "INCONSISTENT_HTML"
+          | "HTML_SYNTAX"
           | "ICU_SYNTAX"
           | "REPEATED_WORDS"
         )[];
