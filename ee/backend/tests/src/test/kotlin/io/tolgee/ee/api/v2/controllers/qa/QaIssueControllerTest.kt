@@ -340,7 +340,11 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
     qa.runChecksAndPersist(testData.frTranslation)
 
     // The re-persisted issue should NOT be virtual
-    val caseIssue = qa.getPersistedIssues(testData.frTranslation).find { it.type == QaCheckType.CHARACTER_CASE_MISMATCH }
+    val caseIssue =
+      qa
+        .getPersistedIssues(
+          testData.frTranslation,
+        ).find { it.type == QaCheckType.CHARACTER_CASE_MISMATCH }
     assertThat(caseIssue).isNotNull
     assertThat(caseIssue!!.virtual).isFalse()
     // But ignored state SHOULD be inherited
