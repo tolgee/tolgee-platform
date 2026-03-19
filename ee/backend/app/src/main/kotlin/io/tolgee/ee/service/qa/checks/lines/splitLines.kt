@@ -1,4 +1,4 @@
-package io.tolgee.ee.service.qa.checks.unmatchedNewlines
+package io.tolgee.ee.service.qa.checks.lines
 
 /**
  * Splits text into lines by CRLF, LF, or CR. Considers CRLF/CR/LF as separators NOT delimiters (e.g.

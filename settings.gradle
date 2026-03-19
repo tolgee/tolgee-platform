@@ -88,6 +88,8 @@ dependencyResolutionManagement {
             library('opentelemetryApi', 'io.opentelemetry', 'opentelemetry-api').version(opentelemetryApiVersion)
             library('opentelemetryContext', 'io.opentelemetry', 'opentelemetry-context').version(opentelemetryApiVersion)
             library('opentelemetryExtensionKotlin', 'io.opentelemetry', 'opentelemetry-extension-kotlin').version(opentelemetryApiVersion)
+            library('languageToolAll', 'org.languagetool', 'language-all').version(languageToolVersion)
+            library('languageToolCore', 'org.languagetool', 'languagetool-core').version(languageToolVersion)
             library('vaadinJson', "com.vaadin.external.google:android-json:0.0.20131108.vaadin1")
         }
     }

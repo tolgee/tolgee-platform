@@ -1,4 +1,4 @@
-package io.tolgee.ee.service.qa.checks.unmatchedNewlines
+package io.tolgee.ee.service.qa.checks.lines
 
 /**
  * Detects the separator type (CRLF, LF, or CR) from the given lines.

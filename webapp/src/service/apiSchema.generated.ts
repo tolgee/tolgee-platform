@@ -5567,6 +5567,8 @@ export interface components {
         | "HTML_SYNTAX"
         | "ICU_SYNTAX"
         | "REPEATED_WORDS"
+        | "SPELLING"
+        | "GRAMMAR"
       )[];
     };
     QaCheckIssueIgnoreRequest: {
@@ -5607,7 +5609,9 @@ export interface components {
         | "qa_html_tag_extra"
         | "qa_html_unclosed_tag"
         | "qa_html_unopened_tag"
-        | "qa_icu_syntax_error";
+        | "qa_icu_syntax_error"
+        | "qa_spelling_error"
+        | "qa_grammar_error";
       params?: { [key: string]: string };
       pluralVariant?: string;
       /** Format: int32 */
@@ -5631,7 +5635,9 @@ export interface components {
         | "INCONSISTENT_HTML"
         | "HTML_SYNTAX"
         | "ICU_SYNTAX"
-        | "REPEATED_WORDS";
+        | "REPEATED_WORDS"
+        | "SPELLING"
+        | "GRAMMAR";
     };
     QaIssueModel: {
       /** Format: int64 */
@@ -5673,7 +5679,9 @@ export interface components {
         | "qa_html_tag_extra"
         | "qa_html_unclosed_tag"
         | "qa_html_unopened_tag"
-        | "qa_icu_syntax_error";
+        | "qa_icu_syntax_error"
+        | "qa_spelling_error"
+        | "qa_grammar_error";
       params?: { [key: string]: string };
       pluralVariant?: string;
       /** Format: int32 */
@@ -5699,7 +5707,9 @@ export interface components {
         | "INCONSISTENT_HTML"
         | "HTML_SYNTAX"
         | "ICU_SYNTAX"
-        | "REPEATED_WORDS";
+        | "REPEATED_WORDS"
+        | "SPELLING"
+        | "GRAMMAR";
     };
     QaLanguageSettingsModel: {
       settings?: { [key: string]: "WARNING" | "OFF" };
@@ -15882,6 +15892,8 @@ export interface operations {
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
           | "REPEATED_WORDS"
+          | "SPELLING"
+          | "GRAMMAR"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -16027,6 +16039,8 @@ export interface operations {
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
           | "REPEATED_WORDS"
+          | "SPELLING"
+          | "GRAMMAR"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -16208,6 +16222,8 @@ export interface operations {
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
           | "REPEATED_WORDS"
+          | "SPELLING"
+          | "GRAMMAR"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -20900,6 +20916,8 @@ export interface operations {
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
           | "REPEATED_WORDS"
+          | "SPELLING"
+          | "GRAMMAR"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -21225,6 +21243,8 @@ export interface operations {
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
           | "REPEATED_WORDS"
+          | "SPELLING"
+          | "GRAMMAR"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];

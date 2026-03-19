@@ -113,6 +113,14 @@ export function useQaIssueMessage(
         : t('qa_issue_html_unopened_tag_no_params');
     case 'qa_icu_syntax_error':
       return t('qa_issue_icu_syntax_error');
+    case 'qa_spelling_error':
+      return normalizedParams?.word
+        ? t('qa_issue_spelling_error', normalizedParams)
+        : t('qa_issue_spelling_error_no_params');
+    case 'qa_grammar_error':
+      return normalizedParams?.message
+        ? t('qa_issue_grammar_error', normalizedParams)
+        : t('qa_issue_grammar_error_no_params');
     default:
       return message;
   }

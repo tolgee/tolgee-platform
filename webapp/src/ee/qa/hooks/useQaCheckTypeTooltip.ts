@@ -16,6 +16,8 @@ export function useQaCheckTypeTooltip(type: QaCheckType): string | null {
       return t('qa_check_tooltip_missing_numbers');
     case 'SPELLING':
       return t('qa_check_tooltip_spelling');
+    case 'GRAMMAR':
+      return t('qa_check_tooltip_grammar');
     case 'REPEATED_WORDS':
       return t('qa_check_tooltip_repeated_words');
     case 'PUNCTUATION_MISMATCH':

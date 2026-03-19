@@ -99,6 +99,12 @@ dependencies {
     implementation 'org.apache.commons:commons-collections4:4.4'
 
     /**
+     * LanguageTool — spelling and grammar checks
+     */
+    implementation libs.languageToolAll
+    implementation("com.github.ben-manes.caffeine:caffeine")
+
+    /**
      * HANDLEBARS
      */
     implementation('com.github.jknack:handlebars:4.4.0')

@@ -1,4 +1,4 @@
-package io.tolgee.ee.service.qa.checks.unmatchedNewlines
+package io.tolgee.ee.service.qa.checks.lines
 
 import io.tolgee.ee.service.qa.QaCheck
 import io.tolgee.ee.service.qa.QaCheckParams

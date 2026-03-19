@@ -4,7 +4,9 @@ import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.model.enums.qa.QaCheckSeverity
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.key.Key
+import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.model.translation.Translation
+import io.tolgee.repository.qa.ProjectQaConfigRepository
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import org.assertj.core.api.Assertions
@@ -26,7 +28,7 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   private lateinit var qaIssueRepository: TranslationQaIssueRepository
 
   @Autowired
-  private lateinit var projectQaConfigService: ProjectQaConfigService
+  private lateinit var projectQaConfigRepository: ProjectQaConfigRepository
 
   lateinit var testData: BaseTestData
   lateinit var testKey: Key
@@ -48,9 +50,22 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
         }.self
     }
     testDataService.saveTestData(testData.root)
-    projectQaConfigService.updateSettings(
-      testData.project.id,
-      QaCheckType.entries.associateWith { QaCheckSeverity.WARNING },
+    // Save config directly to avoid async batch recheck triggered by updateSettings
+    projectQaConfigRepository.save(
+      ProjectQaConfig(
+        project = testData.project,
+        settings =
+          QaCheckType.entries
+            .associateWith {
+              if (it == QaCheckType.SPELLING ||
+                it == QaCheckType.GRAMMAR
+              ) {
+                QaCheckSeverity.OFF
+              } else {
+                QaCheckSeverity.WARNING
+              }
+            }.toMutableMap(),
+      ),
     )
     userAccount = testData.user
   }

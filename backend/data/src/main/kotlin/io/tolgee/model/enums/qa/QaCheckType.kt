@@ -22,7 +22,8 @@ enum class QaCheckType(
   HTML_SYNTAX(QaCheckSeverity.WARNING),
   ICU_SYNTAX(QaCheckSeverity.WARNING),
   REPEATED_WORDS(QaCheckSeverity.WARNING),
-//  SPELLING(QaCheckSeverity.WARNING),
+  SPELLING(QaCheckSeverity.WARNING),
+  GRAMMAR(QaCheckSeverity.WARNING),
   ;
 
   companion object {
@@ -35,7 +36,8 @@ enum class QaCheckType(
             UNMATCHED_NEWLINES,
             CHARACTER_CASE_MISMATCH,
             MISSING_NUMBERS,
-//            SPELLING,
+            SPELLING,
+            GRAMMAR,
             REPEATED_WORDS,
             PUNCTUATION_MISMATCH,
             BRACKETS_MISMATCH,

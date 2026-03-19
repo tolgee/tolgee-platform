@@ -3,14 +3,15 @@ package io.tolgee.ee.api.v2.controllers.qa
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
-import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.QaCheckRunnerService
 import io.tolgee.ee.service.qa.QaIssueService
 import io.tolgee.model.enums.qa.QaCheckSeverity
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.key.Key
+import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.model.translation.Translation
+import io.tolgee.repository.qa.ProjectQaConfigRepository
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.WebsocketTest
@@ -38,7 +39,7 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
   private lateinit var qaIssueRepository: TranslationQaIssueRepository
 
   @Autowired
-  private lateinit var projectQaConfigService: ProjectQaConfigService
+  private lateinit var projectQaConfigRepository: ProjectQaConfigRepository
 
   @LocalServerPort
   private var port: Int = 0
@@ -72,9 +73,22 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
         }.self
     }
     testDataService.saveTestData(testData.root)
-    projectQaConfigService.updateSettings(
-      testData.project.id,
-      QaCheckType.entries.associateWith { QaCheckSeverity.WARNING },
+    // Save config directly to avoid async batch recheck triggered by updateSettings
+    projectQaConfigRepository.save(
+      ProjectQaConfig(
+        project = testData.project,
+        settings =
+          QaCheckType.entries
+            .associateWith {
+              if (it == QaCheckType.SPELLING ||
+                it == QaCheckType.GRAMMAR
+              ) {
+                QaCheckSeverity.OFF
+              } else {
+                QaCheckSeverity.WARNING
+              }
+            }.toMutableMap(),
+      ),
     )
     userAccount = testData.user
     jwtToken = jwtService.emitToken(testData.user.id)

@@ -1,10 +1,10 @@
 package io.tolgee.ee.service.qa.checks
 
 import io.tolgee.ee.service.qa.QaCheckParams
-import io.tolgee.ee.service.qa.checks.unmatchedNewlines.SeparatorType
-import io.tolgee.ee.service.qa.checks.unmatchedNewlines.UnmatchedNewlinesCheck
-import io.tolgee.ee.service.qa.checks.unmatchedNewlines.extractStructure
-import io.tolgee.ee.service.qa.checks.unmatchedNewlines.splitLines
+import io.tolgee.ee.service.qa.checks.lines.SeparatorType
+import io.tolgee.ee.service.qa.checks.lines.UnmatchedNewlinesCheck
+import io.tolgee.ee.service.qa.checks.lines.extractStructure
+import io.tolgee.ee.service.qa.checks.lines.splitLines
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import org.assertj.core.api.Assertions.assertThat

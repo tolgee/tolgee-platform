@@ -68,6 +68,12 @@ enum class QaIssueMessage {
 
   // ICU syntax
   QA_ICU_SYNTAX_ERROR,
+
+  // Spelling
+  QA_SPELLING_ERROR,
+
+  // Grammar
+  QA_GRAMMAR_ERROR,
   ;
 
   @JsonValue

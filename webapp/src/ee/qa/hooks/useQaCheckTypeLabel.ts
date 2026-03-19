@@ -18,6 +18,8 @@ export function useQaCheckTypeLabel(type: QaCheckType): string {
       return t('qa_check_type_missing_numbers');
     case 'SPELLING':
       return t('qa_check_type_spelling');
+    case 'GRAMMAR':
+      return t('qa_check_type_grammar');
     case 'REPEATED_WORDS':
       return t('qa_check_type_repeated_words');
     case 'PUNCTUATION_MISMATCH':

@@ -1,4 +1,4 @@
-package io.tolgee.ee.service.qa.checks.unmatchedNewlines
+package io.tolgee.ee.service.qa.checks.lines
 
 /**
  * Extracts the structure from text based on empty lines.
