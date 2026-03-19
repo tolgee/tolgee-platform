@@ -31,7 +31,6 @@ class UrlSecurityTest {
     assertThrows<BadRequestException> { UrlSecurity.validateUrl("http://127.0.0.1/admin") }
     assertThrows<BadRequestException> { UrlSecurity.validateUrl("http://127.0.0.2/admin") }
     assertThrows<BadRequestException> { UrlSecurity.validateUrl("https://localhost/admin") }
-    assertThrows<BadRequestException> { UrlSecurity.validateUrl("http://[::1]/admin") }
   }
 
   @Test

@@ -76,7 +76,7 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
   fun `adds llm provider`() {
     performAuthPost(
       "/v2/organizations/${testData.organization.self.id}/llm-providers",
-      LlmProviderRequest(name = "custom-provider", type = LlmProviderType.OPENAI, apiUrl = "mock"),
+      LlmProviderRequest(name = "custom-provider", type = LlmProviderType.OPENAI, apiUrl = "https://api.example.com"),
     ).andIsOk
   }
 
@@ -85,7 +85,7 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
     this.userAccount = testData.organizationMember.self
     performAuthPost(
       "/v2/organizations/${testData.organization.self.id}/llm-providers",
-      LlmProviderRequest(name = "custom-provider", type = LlmProviderType.OPENAI, apiUrl = "mock"),
+      LlmProviderRequest(name = "custom-provider", type = LlmProviderType.OPENAI, apiUrl = "https://api.example.com"),
     ).andIsForbidden.andAssertThatJson {
       node("code").isEqualTo("operation_not_permitted")
     }
@@ -110,11 +110,15 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
   fun `updates llm provider`() {
     performAuthPut(
       "/v2/organizations/${testData.organization.self.id}/llm-providers/${testData.llmProvider.self.id}",
-      LlmProviderRequest(name = "updated-provider", type = LlmProviderType.OPENAI_AZURE, apiUrl = "different-url"),
+      LlmProviderRequest(
+        name = "updated-provider",
+        type = LlmProviderType.OPENAI_AZURE,
+        apiUrl = "https://updated.example.com",
+      ),
     ).andIsOk.andAssertThatJson {
       node("name").isEqualTo("updated-provider")
       node("type").isEqualTo("OPENAI_AZURE")
-      node("apiUrl").isEqualTo("different-url")
+      node("apiUrl").isEqualTo("https://updated.example.com")
     }
   }
 
@@ -123,7 +127,11 @@ class LlmProviderControllerTest : AuthorizedControllerTest() {
     this.userAccount = testData.organizationMember.self
     performAuthPut(
       "/v2/organizations/${testData.organization.self.id}/llm-providers/${testData.llmProvider.self.id}",
-      LlmProviderRequest(name = "updated-provider", type = LlmProviderType.OPENAI_AZURE, apiUrl = "different-url"),
+      LlmProviderRequest(
+        name = "updated-provider",
+        type = LlmProviderType.OPENAI_AZURE,
+        apiUrl = "https://updated.example.com",
+      ),
     ).andIsForbidden
   }
 }

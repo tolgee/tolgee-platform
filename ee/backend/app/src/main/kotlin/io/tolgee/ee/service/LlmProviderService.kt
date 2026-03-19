@@ -316,7 +316,9 @@ class LlmProviderService(
   }
 
   private fun validateApiUrl(apiUrl: String) {
-    UrlSecurity.validateUrl(apiUrl)
+    if (apiUrl.isNotBlank()) {
+      UrlSecurity.validateUrl(apiUrl)
+    }
   }
 
   companion object {

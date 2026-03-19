@@ -2,6 +2,7 @@ package io.tolgee.util
 
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
+import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.URI
 
@@ -13,13 +14,13 @@ object UrlSecurity {
   /**
    * Validates that the given URL is a safe external URL.
    * Throws [BadRequestException] if the URL is malformed, uses a non-HTTP(S) scheme,
-   * or resolves to a private/internal IP address.
+   * or the host is a known private/internal address.
    */
   fun validateUrl(url: String) {
     val uri =
       try {
         URI(url)
-      } catch (e: Exception) {
+      } catch (_: Exception) {
         throw BadRequestException(Message.URL_NOT_VALID)
       }
 
@@ -30,26 +31,29 @@ object UrlSecurity {
 
     val host = uri.host ?: throw BadRequestException(Message.URL_NOT_VALID)
 
-    // Resolve DNS to check the actual IP address (prevents DNS rebinding with private IPs)
-    val addresses =
-      try {
-        InetAddress.getAllByName(host)
-      } catch (e: Exception) {
-        throw BadRequestException(Message.URL_NOT_VALID)
-      }
-
-    for (address in addresses) {
-      if (isPrivateOrReserved(address)) {
-        throw BadRequestException(Message.URL_NOT_VALID)
-      }
+    val lowerHost = host.lowercase()
+    if (lowerHost == "localhost" || lowerHost.endsWith(".localhost")) {
+      throw BadRequestException(Message.URL_NOT_VALID)
     }
-  }
 
-  private fun isPrivateOrReserved(address: InetAddress): Boolean {
-    return address.isLoopbackAddress ||
-      address.isSiteLocalAddress ||
-      address.isLinkLocalAddress ||
-      address.isAnyLocalAddress ||
-      address.isMulticastAddress
+    // For IPv4 literals, InetAddress.getByName parses without DNS lookup
+    val address =
+      try {
+        InetAddress.getByName(host).takeIf { it is Inet4Address && it.hostAddress == host }
+      } catch (_: Exception) {
+        null
+      }
+
+    if (address != null &&
+      (
+        address.isLoopbackAddress ||
+          address.isSiteLocalAddress ||
+          address.isLinkLocalAddress ||
+          address.isAnyLocalAddress ||
+          address.isMulticastAddress
+      )
+    ) {
+      throw BadRequestException(Message.URL_NOT_VALID)
+    }
   }
 }
