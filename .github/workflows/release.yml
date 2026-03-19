@@ -110,4 +110,4 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.TOLGEE_MACHINE_PAT }}" \
             https://api.github.com/repos/tolgee/billing/actions/workflows/test.yml/dispatches \
-            -d '{"ref":"main","inputs":{"releaseVersion":"${{ steps.version.outputs.VERSION }}"}}'
+            -d '{"ref":"main","inputs":{"release-version":"${{ steps.version.outputs.VERSION }}"}}'
