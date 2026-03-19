@@ -123,11 +123,12 @@ export const toggleInMultiselect = (
 
     // unselect necessary
     getPopover()
-      .get('.MuiListItemText-primary')
-      .each(($label) => {
-        const labelText = $label.text();
+      .get('li.MuiMenuItem-root')
+      .each(($li) => {
+        if ($li.find('input').length === 0) return;
+        const labelText = $li.find('.MuiListItemText-primary').text();
         if (!renderedValues.includes(labelText)) {
-          cy.wrap($label).click();
+          cy.wrap($li).find('.MuiListItemText-primary').click();
         }
       });
   });

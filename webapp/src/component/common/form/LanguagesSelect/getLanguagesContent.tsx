@@ -90,16 +90,16 @@ export const getLanguagesContent = ({
 
   if (isTranslations) {
     return [
+      ...languageItems,
+      <Divider key="divider" />,
       <MenuItem
         key="clear"
         onClick={handleClear}
         disabled={isOnlyBaseSelected}
         data-cy="translations-language-select-clear"
       >
-        <ListItemText primary={t('languages_select_clear')} />
+        <ListItemText primary={t('languages_select_clear', 'Clear')} />
       </MenuItem>,
-      <Divider key="divider" />,
-      ...languageItems,
     ];
   }
 
