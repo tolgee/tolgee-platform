@@ -41,14 +41,14 @@ fun populateForms(
 
 fun orderPluralForms(pluralForms: Map<String, String>): Map<String, String> {
   return pluralForms.entries
-    .sortedBy {
-      val formIndex = formKeywords.indexOf(it.key)
-      if (formIndex == -1) {
-        "A_$it"
-      } else {
-        formIndex.toString()
-      }
-    }.associate { it.key to it.value }
+    .sortedWith(
+      compareBy(
+        // Exact-match selectors (=0, =1, =2, …) sort first, in ascending numeric order
+        { if (it.key.startsWith("=")) it.key.substring(1).toLongOrNull() ?: Long.MAX_VALUE else Long.MAX_VALUE },
+        // Standard ICU keyword selectors sort after exact-match, in canonical order
+        { val i = formKeywords.indexOf(it.key); if (i == -1) Int.MAX_VALUE else i },
+      ),
+    ).associate { it.key to it.value }
 }
 
 val formKeywords = listOf("zero", "one", "two", "few", "many", "other")
