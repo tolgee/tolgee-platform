@@ -50,6 +50,9 @@ enum class QaIssueMessage {
   QA_URL_MISSING,
   QA_URL_EXTRA,
   QA_URL_REPLACE,
+
+  // Repeated words
+  QA_REPEATED_WORD,
   ;
 
   @JsonValue

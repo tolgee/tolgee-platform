@@ -83,6 +83,10 @@ export function useQaIssueMessage(
       return normalizedParams?.bracket
         ? t('qa_issue_brackets_unmatched_close', normalizedParams)
         : t('qa_issue_brackets_unmatched_close_no_params');
+    case 'qa_repeated_word':
+      return normalizedParams?.word
+        ? t('qa_issue_repeated_word', normalizedParams)
+        : t('qa_issue_repeated_word_no_params');
     default:
       return message;
   }

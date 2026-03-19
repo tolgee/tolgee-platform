@@ -36,8 +36,6 @@ export function useQaCheckTypeLabel(type: QaCheckType): string {
       return t('qa_check_type_inconsistent_html');
     case 'ICU_SYNTAX':
       return t('qa_check_type_icu_syntax');
-    case 'UNRESOLVED_COMMENTS':
-      return t('qa_check_type_unresolved_comments');
     default:
       return type;
   }

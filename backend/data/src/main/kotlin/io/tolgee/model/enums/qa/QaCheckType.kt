@@ -15,12 +15,12 @@ enum class QaCheckType(
   BRACKETS_UNBALANCED(QaCheckSeverity.WARNING),
   SPECIAL_CHARACTER_MISMATCH(QaCheckSeverity.OFF),
   DIFFERENT_URLS(QaCheckSeverity.WARNING),
+
 //  INCONSISTENT_PLACEHOLDERS(QaCheckSeverity.WARNING),
 //  INCONSISTENT_HTML(QaCheckSeverity.WARNING),
 //  ICU_SYNTAX(QaCheckSeverity.WARNING),
-//  REPEATED_WORDS(QaCheckSeverity.WARNING),
+  REPEATED_WORDS(QaCheckSeverity.WARNING),
 //  SPELLING(QaCheckSeverity.WARNING),
-//  UNRESOLVED_COMMENTS(QaCheckSeverity.WARNING),
   ;
 
   companion object {
@@ -34,7 +34,7 @@ enum class QaCheckType(
             CHARACTER_CASE_MISMATCH,
             MISSING_NUMBERS,
 //            SPELLING,
-//            REPEATED_WORDS,
+            REPEATED_WORDS,
             PUNCTUATION_MISMATCH,
             BRACKETS_MISMATCH,
             BRACKETS_UNBALANCED,
@@ -46,7 +46,6 @@ enum class QaCheckType(
 //            INCONSISTENT_PLACEHOLDERS,
 //            INCONSISTENT_HTML,
 //            ICU_SYNTAX,
-//            UNRESOLVED_COMMENTS,
 //          ),
       )
   }
