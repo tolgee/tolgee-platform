@@ -12,7 +12,7 @@ enum class QaCheckType(
   PUNCTUATION_MISMATCH(QaCheckSeverity.WARNING),
 
 //  BRACKETS_MISMATCH(QaCheckSeverity.WARNING),
-//  SPECIAL_CHARACTER_MISMATCH(QaCheckSeverity.OFF),
+  SPECIAL_CHARACTER_MISMATCH(QaCheckSeverity.OFF),
   DIFFERENT_URLS(QaCheckSeverity.WARNING),
 //  INCONSISTENT_PLACEHOLDERS(QaCheckSeverity.WARNING),
 //  INCONSISTENT_HTML(QaCheckSeverity.WARNING),
@@ -36,7 +36,7 @@ enum class QaCheckType(
 //            REPEATED_WORDS,
             PUNCTUATION_MISMATCH,
 //            BRACKETS_MISMATCH,
-//            SPECIAL_CHARACTER_MISMATCH,
+            SPECIAL_CHARACTER_MISMATCH,
             DIFFERENT_URLS,
           ),
 //        QaCheckCategory.SYNTAX to

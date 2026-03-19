@@ -1,0 +1,110 @@
+package io.tolgee.ee.service.qa.checks
+
+import io.tolgee.ee.service.qa.QaCheck
+import io.tolgee.ee.service.qa.QaCheckParams
+import io.tolgee.ee.service.qa.QaCheckResult
+import io.tolgee.ee.service.qa.QaPluralCheckHelper
+import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.model.enums.qa.QaIssueMessage
+import org.springframework.stereotype.Component
+
+@Component
+class SpecialCharacterMismatchCheck : QaCheck {
+  override val type: QaCheckType = QaCheckType.SPECIAL_CHARACTER_MISMATCH
+
+  override fun check(params: QaCheckParams): List<QaCheckResult> {
+    return QaPluralCheckHelper.runPerVariant(params) { text, baseText ->
+      checkVariant(text, baseText)
+    }
+  }
+
+  private fun checkVariant(
+    text: String,
+    baseText: String?,
+  ): List<QaCheckResult> {
+    val base = baseText ?: return emptyList()
+    if (base.isBlank()) return emptyList()
+    if (text.isBlank()) return emptyList()
+
+    val baseChars = extractSpecialChars(base)
+    val textChars = extractSpecialChars(text)
+
+    val results = mutableListOf<QaCheckResult>()
+
+    // Characters in base but missing from translation
+    val missingChars = subtractMultiset(baseChars, textChars)
+    for (char in missingChars) {
+      results.add(
+        QaCheckResult(
+          type = QaCheckType.SPECIAL_CHARACTER_MISMATCH,
+          message = QaIssueMessage.QA_SPECIAL_CHAR_MISSING,
+          replacement = null,
+          positionStart = 0,
+          positionEnd = 0,
+          params = mapOf("character" to char.toString()),
+        ),
+      )
+    }
+
+    // Characters in translation but not in base
+    val addedChars = subtractMultiset(textChars, baseChars)
+    for (char in addedChars.toSet()) {
+      val count = addedChars.count { it == char }
+      val positions = findAllOccurrences(text, char)
+      // Report the last N occurrences as the "extra" ones
+      positions.takeLast(count).forEach { index ->
+        results.add(
+          QaCheckResult(
+            type = QaCheckType.SPECIAL_CHARACTER_MISMATCH,
+            message = QaIssueMessage.QA_SPECIAL_CHAR_ADDED,
+            replacement = "",
+            positionStart = index,
+            positionEnd = index + 1,
+            params = mapOf("character" to char.toString()),
+          ),
+        )
+      }
+    }
+
+    return results
+  }
+
+  companion object {
+    val SPECIAL_CHARS =
+      setOf(
+        '$',
+        '€',
+        '£',
+        '¥',
+        '@',
+        '#',
+        '&',
+        '©',
+        '®',
+        '™',
+        '°',
+      )
+
+    fun extractSpecialChars(text: String): List<Char> {
+      return text.filter { it in SPECIAL_CHARS }.toList()
+    }
+
+    private fun subtractMultiset(
+      a: List<Char>,
+      b: List<Char>,
+    ): List<Char> {
+      val remaining = a.toMutableList()
+      for (ch in b) {
+        remaining.remove(ch)
+      }
+      return remaining
+    }
+
+    private fun findAllOccurrences(
+      text: String,
+      char: Char,
+    ): List<Int> {
+      return text.indices.filter { text[it] == char }
+    }
+  }
+}

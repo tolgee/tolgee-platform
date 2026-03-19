@@ -47,6 +47,14 @@ export function useQaIssueMessage(
       return t('qa_issue_newlines_too_many_sections', normalizedParams);
     case 'qa_newlines_too_few_sections':
       return t('qa_issue_newlines_too_few_sections', normalizedParams);
+    case 'qa_special_char_missing':
+      return normalizedParams?.character
+        ? t('qa_issue_special_char_missing', normalizedParams)
+        : t('qa_issue_special_char_missing_no_params');
+    case 'qa_special_char_added':
+      return normalizedParams?.character
+        ? t('qa_issue_special_char_added', normalizedParams)
+        : t('qa_issue_special_char_added_no_params');
     case 'qa_url_missing':
       return normalizedParams?.url
         ? t('qa_issue_url_missing', normalizedParams)

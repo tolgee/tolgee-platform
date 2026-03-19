@@ -34,6 +34,10 @@ enum class QaIssueMessage {
   QA_NEWLINES_TOO_MANY_SECTIONS,
   QA_NEWLINES_TOO_FEW_SECTIONS,
 
+  // Special character mismatch
+  QA_SPECIAL_CHAR_MISSING,
+  QA_SPECIAL_CHAR_ADDED,
+
   // Different URLs
   QA_URL_MISSING,
   QA_URL_EXTRA,
