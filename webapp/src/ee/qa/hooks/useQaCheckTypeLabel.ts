@@ -24,6 +24,8 @@ export function useQaCheckTypeLabel(type: QaCheckType): string {
       return t('qa_check_type_punctuation_mismatch');
     case 'BRACKETS_MISMATCH':
       return t('qa_check_type_brackets_mismatch');
+    case 'BRACKETS_UNBALANCED':
+      return t('qa_check_type_brackets_unbalanced');
     case 'SPECIAL_CHARACTER_MISMATCH':
       return t('qa_check_type_special_character_mismatch');
     case 'DIFFERENT_URLS':

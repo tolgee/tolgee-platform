@@ -67,6 +67,22 @@ export function useQaIssueMessage(
       return normalizedParams?.url && normalizedParams?.expected
         ? t('qa_issue_url_replace', normalizedParams)
         : t('qa_issue_url_replace_no_params');
+    case 'qa_brackets_missing':
+      return normalizedParams?.bracket
+        ? t('qa_issue_brackets_missing', normalizedParams)
+        : t('qa_issue_brackets_missing_no_params');
+    case 'qa_brackets_extra':
+      return normalizedParams?.bracket
+        ? t('qa_issue_brackets_extra', normalizedParams)
+        : t('qa_issue_brackets_extra_no_params');
+    case 'qa_brackets_unclosed':
+      return normalizedParams?.bracket
+        ? t('qa_issue_brackets_unclosed', normalizedParams)
+        : t('qa_issue_brackets_unclosed_no_params');
+    case 'qa_brackets_unmatched_close':
+      return normalizedParams?.bracket
+        ? t('qa_issue_brackets_unmatched_close', normalizedParams)
+        : t('qa_issue_brackets_unmatched_close_no_params');
     default:
       return message;
   }

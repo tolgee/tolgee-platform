@@ -22,6 +22,8 @@ export function useQaCheckTypeTooltip(type: QaCheckType): string | null {
       return t('qa_check_tooltip_punctuation_mismatch');
     case 'BRACKETS_MISMATCH':
       return t('qa_check_tooltip_brackets_mismatch');
+    case 'BRACKETS_UNBALANCED':
+      return t('qa_check_tooltip_brackets_unbalanced');
     case 'SPECIAL_CHARACTER_MISMATCH':
       return t('qa_check_tooltip_special_character_mismatch');
     case 'DIFFERENT_URLS':

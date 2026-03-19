@@ -34,6 +34,14 @@ enum class QaIssueMessage {
   QA_NEWLINES_TOO_MANY_SECTIONS,
   QA_NEWLINES_TOO_FEW_SECTIONS,
 
+  // Brackets mismatch (comparison)
+  QA_BRACKETS_MISSING,
+  QA_BRACKETS_EXTRA,
+
+  // Brackets unbalanced (self-check)
+  QA_BRACKETS_UNCLOSED,
+  QA_BRACKETS_UNMATCHED_CLOSE,
+
   // Special character mismatch
   QA_SPECIAL_CHAR_MISSING,
   QA_SPECIAL_CHAR_ADDED,
