@@ -1,0 +1,137 @@
+name: Backend Tests
+
+on:
+  workflow_call:
+    inputs:
+      event-name:
+        description: The original trigger event name
+        required: true
+        type: string
+      run-reporters:
+        description: Whether to run test reporters (false for fork PRs)
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  test:
+    name: BT ‍🔎 (${{ matrix.command }}${{ matrix.shard_total != '' && format(' shard {0}/{1}', matrix.shard_index, matrix.shard_total) || '' }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        command:
+          [
+            "server-app:runContextRecreatingTests",
+            "server-app:runStandardTests",
+            "server-app:runWebsocketTests",
+            "server-app:runWithoutEeTests",
+            "ee-test:test",
+            "data:test",
+            "security:test",
+            "ktlint:test",
+          ]
+        shard_index: [""]
+        shard_total: [""]
+        include:
+          - command: "server-app:runStandardTests"
+            shard_index: "0"
+            shard_total: "2"
+          - command: "server-app:runStandardTests"
+            shard_index: "1"
+            shard_total: "2"
+        exclude:
+          - command: "server-app:runStandardTests"
+            shard_index: ""
+            shard_total: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check source cache
+        id: source-cache
+        uses: ./.github/actions/check-source-cache
+        with:
+          cache-key-prefix: test-passed-${{ matrix.command }}
+          extra-ignores: ":!webapp/ :!e2e/ :!library/ :!package.json :!package-lock.json"
+          event-name: ${{ inputs.event-name }}
+
+      - name: Setup environment
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/setup-env
+        with:
+          node: "false"
+
+      - name: Download backend build result
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/download-backend-build
+
+      - name: Remove ee
+        if: steps.source-cache.outputs.cache-hit != 'true' && matrix.command == 'server-app:runWithoutEeTests'
+        run: rm -rf ./ee
+
+      - name: Run backend tests
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 30
+          max_attempts: ${{ inputs.event-name == 'push' && 5 || 1 }}
+          command: ./gradlew ${{ matrix.command }}
+        env:
+          SKIP_SERVER_BUILD: true
+          SKIP_EMAIL_BUILD: true
+          CI_RELEASE: ${{ inputs.event-name == 'push' && true || false }}
+          SHARD_INDEX: ${{ matrix.shard_index }}
+          SHARD_TOTAL: ${{ matrix.shard_total }}
+
+      - name: Get report name
+        id: reportName
+        if: always() && steps.source-cache.outputs.cache-hit != 'true'
+        run: |
+          reportName=${{ matrix.command }}
+          suffix=${{ matrix.shard_total != '' && format('_shard{0}', matrix.shard_index) || '' }}
+          echo "reportName=${reportName//\:/_}${suffix}" >> $GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.source-cache.outputs.cache-hit != 'true'
+        with:
+          name: backend_test_reports_${{ steps.reportName.outputs.reportName }}
+          path: ./**/build/reports/**/*
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: ${{ always() && steps.source-cache.outputs.cache-hit != 'true' && inputs.run-reporters }}
+        with:
+          name: Test report for ${{ matrix.command }}
+          path: "**/build/test-results/**/TEST-*.xml"
+          fail-on-error: false
+          reporter: java-junit
+
+      - name: Setup Node
+        if: ${{ always() && steps.source-cache.outputs.cache-hit != 'true' && inputs.run-reporters }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Convert JUnit to CTRF
+        if: ${{ always() && steps.source-cache.outputs.cache-hit != 'true' && inputs.run-reporters }}
+        continue-on-error: true
+        run: npx --yes junit-to-ctrf "**/build/test-results/**/TEST-*.xml" --output "ctrf/ctrf-report.json"
+
+      - name: Flaky tests report (CTRF)
+        if: ${{ always() && steps.source-cache.outputs.cache-hit != 'true' && inputs.run-reporters }}
+        uses: ctrf-io/github-test-reporter@v1
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          title: CTRF Test report for ${{ matrix.command }}
+          report-path: ctrf/ctrf-report.json
+          github-report: true
+          flaky-report: true
+          flaky-rate-report: true
+
+      - name: Save source cache
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/save-source-cache
+        with:
+          cache-key: ${{ steps.source-cache.outputs.cache-key }}
