@@ -57,6 +57,7 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
             const parsed = JSON.parse(message.body) as Message;
             subscription.callback(parsed as any);
           } catch (e: any) {
+            // eslint-disable-next-line no-console
             console.error(`WebSocket: error parsing message: ${e.message}`);
           }
         }
