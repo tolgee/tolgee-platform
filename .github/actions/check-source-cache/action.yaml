@@ -12,6 +12,10 @@ inputs:
   event-name:
     description: The trigger event name for cache key scoping
     required: true
+  extra-hash:
+    description: Additional string to include in the hash (e.g. another repo's commit SHA)
+    required: false
+    default: ''
 
 outputs:
   cache-hit:
@@ -28,7 +32,7 @@ runs:
       id: hash
       shell: bash
       run: |
-        HASH=$(git ls-files -s -- . \
+        FILE_HASH=$(git ls-files -s -- . \
           ':!docs/' ':!storybook-tolgee-addon/' ':!docker/' \
           ':!*.md' ':!LICENSE' ':!*.gif' \
           ':!.husky/' ':!.editorconfig' ':!.gitpod.yml' \
@@ -37,6 +41,7 @@ runs:
           ':!.github/ISSUE_TEMPLATE/' ':!.github/FUNDING.yml' \
           ${{ inputs.extra-ignores }} \
           | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
+        HASH=$(echo "${FILE_HASH}${{ inputs.extra-hash }}" | sha256sum | cut -d' ' -f1)
         echo "hash=$HASH" >> $GITHUB_OUTPUT
 
     - name: Build cache key
