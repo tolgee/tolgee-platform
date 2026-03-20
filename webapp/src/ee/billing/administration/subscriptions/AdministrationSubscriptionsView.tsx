@@ -70,9 +70,10 @@ export const AdministrationSubscriptionsView = () => {
               control={
                 <Switch
                   checked={showDeleted === 'true'}
-                  onChange={(_, checked) =>
-                    setShowDeleted(checked ? 'true' : '')
-                  }
+                  onChange={(_, checked) => {
+                    setPage(0);
+                    setShowDeleted(checked ? 'true' : '');
+                  }}
                   size="small"
                 />
               }
@@ -87,7 +88,10 @@ export const AdministrationSubscriptionsView = () => {
                 data-cy="global-list-search"
                 fullWidth
                 initial={search}
-                onSearch={setSearch}
+                onSearch={(value) => {
+                  setPage(0);
+                  setSearch(value);
+                }}
                 variant="outlined"
                 size="small"
               />
