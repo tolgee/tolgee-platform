@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Box,
   Button,
@@ -56,14 +55,13 @@ const StyledIcon = styled(Box)`
 const StyledContent = styled(Box)`
   display: flex;
   flex-direction: column;
-  gap: 0;
   min-width: 0;
   flex: 1;
 `;
 
 const StyledMessage = styled(Box)`
   font-size: 12px;
-  color: ${({ theme }) => theme.palette.text.secondary};
+  color: ${({ theme }) => theme.palette.text.primary};
 `;
 
 const StyledDiffText = styled('span')`
@@ -128,14 +126,14 @@ type Props = {
   onIgnore?: () => void;
 };
 
-export const QaCheckItem: React.FC<Props> = ({
+export const QaCheckItem = ({
   issue,
   index,
   text,
   slim = false,
   onCorrect,
   onIgnore,
-}) => {
+}: Props) => {
   const { t } = useTranslate();
   const typeLabel = useQaCheckTypeLabel(issue.type);
   const messageText = useQaIssueMessage(issue.message, issue.params);
@@ -209,7 +207,7 @@ export const QaCheckItem: React.FC<Props> = ({
               text,
               issue.positionStart,
               issue.positionEnd,
-              issue.replacement!
+              issue.replacement ?? ''
             )}
           </StyledDiffText>
         </TextBlock>
