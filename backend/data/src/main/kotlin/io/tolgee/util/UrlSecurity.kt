@@ -45,27 +45,31 @@ class UrlSecurity(
       throw BadRequestException(Message.URL_NOT_VALID)
     }
 
-    // Parse IP literals (IPv4 and IPv6) without DNS lookup
+    // Resolve all addresses (IP literals are parsed without DNS lookup)
     val rawHost = host.removeSurrounding("[", "]")
-    val address =
+    val addresses =
       try {
-        val parsed = InetAddress.getByName(rawHost)
-        // Only accept if it's a real IP literal, not a DNS-resolved hostname
-        parsed.takeIf { it is Inet4Address && it.hostAddress == rawHost || rawHost.contains(':') }
+        InetAddress.getAllByName(rawHost)
       } catch (_: Exception) {
-        null
+        throw BadRequestException(Message.URL_NOT_VALID)
       }
 
-    if (address != null &&
-      (
-        address.isLoopbackAddress ||
-          address.isSiteLocalAddress ||
-          address.isLinkLocalAddress ||
-          address.isAnyLocalAddress ||
-          address.isMulticastAddress
-      )
-    ) {
-      throw BadRequestException(Message.URL_NOT_VALID)
+    for (address in addresses) {
+      if (address.isLoopbackAddress ||
+        address.isSiteLocalAddress ||
+        address.isLinkLocalAddress ||
+        address.isAnyLocalAddress ||
+        address.isMulticastAddress ||
+        isIpv6UniqueLocal(address)
+      ) {
+        throw BadRequestException(Message.URL_NOT_VALID)
+      }
     }
+  }
+
+  // IPv6 Unique Local Addresses (fc00::/7) are not covered by isSiteLocalAddress
+  private fun isIpv6UniqueLocal(address: InetAddress): Boolean {
+    val bytes = address.address
+    return bytes.size == 16 && (bytes[0].toInt() and 0xFE) == 0xFC
   }
 }
