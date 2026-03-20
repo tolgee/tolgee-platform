@@ -13,10 +13,14 @@ object PathSecurity {
    * Safe to use on zip entry names, export paths, and imported file names.
    */
   fun sanitizePath(path: String): String {
-    val normalized = Paths.get(path).normalize().toString()
-    if (normalized.startsWith("..")) {
-      return normalized.removePrefix(".." + java.io.File.separator)
+    var result = Paths.get(path).normalize().toString()
+    val dotDotSep = ".." + java.io.File.separator
+    while (result.startsWith(dotDotSep)) {
+      result = result.removePrefix(dotDotSep)
     }
-    return normalized
+    if (result == "..") {
+      return ""
+    }
+    return result
   }
 }
