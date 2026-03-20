@@ -1,3 +1,10 @@
+# [3.173.0](https://github.com/tolgee/tolgee-platform/compare/v3.172.3...v3.173.0) (2026-03-20)
+
+
+### Features
+
+* improve LLM provider pricing dialog ([#3543](https://github.com/tolgee/tolgee-platform/issues/3543)) ([eae5f1a](https://github.com/tolgee/tolgee-platform/commit/eae5f1a8059b56c36e90a18783fbe1b25ecc5857))
+
 ## [3.172.3](https://github.com/tolgee/tolgee-platform/compare/v3.172.2...v3.172.3) (2026-03-19)
 
 
