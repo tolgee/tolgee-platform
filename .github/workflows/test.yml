@@ -29,281 +29,6 @@ jobs:
       - name: Upload backend build result
         uses: ./.github/actions/upload-backend-build
 
-  backend-test:
-    name: BT ‍🔎 (${{ matrix.command }}${{ matrix.shard_total != '' && format(' shard {0}/{1}', matrix.shard_index, matrix.shard_total) || '' }})
-    needs: [backend-build]
-    runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        command:
-          [
-            "server-app:runContextRecreatingTests",
-            "server-app:runStandardTests",
-            "server-app:runWebsocketTests",
-            "server-app:runWithoutEeTests",
-            "ee-test:test",
-            "data:test",
-            "security:test",
-            "ktlint:test",
-          ]
-        shard_index: [""]
-        shard_total: [""]
-        include:
-          - command: "server-app:runStandardTests"
-            shard_index: "0"
-            shard_total: "2"
-          - command: "server-app:runStandardTests"
-            shard_index: "1"
-            shard_total: "2"
-        exclude:
-          - command: "server-app:runStandardTests"
-            shard_index: ""
-            shard_total: ""
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Compute backend source hash
-        id: hash
-        run: |
-          HASH=$(git ls-files -s -- . \
-            ':!docs/' ':!webapp/' ':!e2e/' ':!library/' \
-            ':!storybook-tolgee-addon/' ':!docker/' \
-            ':!*.md' ':!LICENSE' ':!*.gif' \
-            ':!.husky/' ':!.editorconfig' ':!.gitpod.yml' \
-            ':!.gitattributes' ':!.git-blame-ignore-revs' ':!.gitmodules' \
-            ':!ngrok.template.yml' ':!.coderabbit.yaml' \
-            ':!.github/ISSUE_TEMPLATE/' ':!.github/FUNDING.yml' \
-            ':!package.json' ':!package-lock.json' \
-            | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
-          echo "hash=$HASH" >> $GITHUB_OUTPUT
-
-      - name: Check if already passed
-        id: cache
-        continue-on-error: true
-        uses: actions/cache/restore@v4
-        with:
-          path: .test-passed
-          key: test-passed-${{ matrix.command }}-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
-          lookup-only: true
-
-      - name: Skip notice
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: echo "### ⏭️ Skipped — tests already passed for this source state" >> $GITHUB_STEP_SUMMARY
-
-      - name: Setup environment
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/setup-env
-        with:
-          node: "false"
-
-      - name: Download backend build result
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/download-backend-build
-
-      - name: Remove ee
-        if: steps.cache.outputs.cache-hit != 'true' && matrix.command == 'server-app:runWithoutEeTests'
-        run: |
-          rm -rf ./ee
-
-      - name: Run backend tests
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: nick-fields/retry@v2
-        with:
-          timeout_minutes: 30
-          max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
-          command: ./gradlew ${{ matrix.command }}
-        env:
-          SKIP_SERVER_BUILD: true
-          SKIP_EMAIL_BUILD: true
-          CI_RELEASE: ${{ github.event_name == 'push' && true || false }}
-          SHARD_INDEX: ${{ matrix.shard_index }}
-          SHARD_TOTAL: ${{ matrix.shard_total }}
-
-      - name: Get report name
-        id: reportName
-        if: always() && steps.cache.outputs.cache-hit != 'true'
-        run: |
-          reportName=${{ matrix.command }}
-          suffix=${{ matrix.shard_total != '' && format('_shard{0}', matrix.shard_index) || '' }}
-          echo "reportName=${reportName//\:/_}${suffix}" >> $GITHUB_OUTPUT
-
-      - uses: actions/upload-artifact@v4
-        if: always() && steps.cache.outputs.cache-hit != 'true'
-        with:
-          name: backend_test_reports_${{ steps.reportName.outputs.reportName }}
-          path: |
-            ./**/build/reports/**/*
-
-      - name: Test Report
-        uses: dorny/test-reporter@v1
-        if: ${{ always() && steps.cache.outputs.cache-hit != 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
-        with:
-          name: Test report for ${{ matrix.command }}
-          path: "**/build/test-results/**/TEST-*.xml"
-          fail-on-error: false
-          reporter: java-junit
-
-      - name: Setup Node
-        if: ${{ always() && steps.cache.outputs.cache-hit != 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Convert JUnit to CTRF
-        if: ${{ always() && steps.cache.outputs.cache-hit != 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
-        continue-on-error: true
-        run: npx --yes junit-to-ctrf "**/build/test-results/**/TEST-*.xml" --output "ctrf/ctrf-report.json"
-
-      - name: Flaky tests report (CTRF)
-        if: ${{ always() && steps.cache.outputs.cache-hit != 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
-        uses: ctrf-io/github-test-reporter@v1
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          title: CTRF Test report for ${{ matrix.command }}
-          report-path: |
-            ctrf/ctrf-report.json
-          github-report: true
-          flaky-report: true
-          flaky-rate-report: true
-
-      - name: Mark as passed
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: echo "passed" > .test-passed
-
-      - name: Save success marker
-        if: steps.cache.outputs.cache-hit != 'true'
-        continue-on-error: true
-        uses: actions/cache/save@v4
-        with:
-          path: .test-passed
-          key: test-passed-${{ matrix.command }}-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
-
-  e2e:
-    needs: [frontend-build, backend-build, e2e-install-deps]
-    runs-on: ubuntu-24.04
-    name: E2E testing ‍🔎
-    strategy:
-      fail-fast: false
-      matrix:
-        total_jobs: [15]
-        job_index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Compute e2e source hash
-        id: hash
-        run: |
-          HASH=$(git ls-files -s -- . \
-            ':!docs/' ':!storybook-tolgee-addon/' ':!docker/' \
-            ':!*.md' ':!LICENSE' ':!*.gif' \
-            ':!.husky/' ':!.editorconfig' ':!.gitpod.yml' \
-            ':!.gitattributes' ':!.git-blame-ignore-revs' ':!.gitmodules' \
-            ':!ngrok.template.yml' ':!.coderabbit.yaml' \
-            ':!.github/ISSUE_TEMPLATE/' ':!.github/FUNDING.yml' \
-            | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
-          echo "hash=$HASH" >> $GITHUB_OUTPUT
-
-      - name: Check if already passed
-        id: cache
-        continue-on-error: true
-        uses: actions/cache/restore@v4
-        with:
-          path: .test-passed
-          key: test-passed-e2e-${{ matrix.job_index }}-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
-          lookup-only: true
-
-      - name: Skip notice
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: echo "### ⏭️ Skipped — tests already passed for this source state" >> $GITHUB_STEP_SUMMARY
-
-      - name: Setup environment
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/setup-env
-
-      - name: Download backend build result
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/download-backend-build
-
-      - name: Download frontend build result
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/download-artifact@v4
-        with:
-          name: webapp
-          path: ./webapp/dist
-
-      - name: Download dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/download-artifact@v4
-        with:
-          name: e2e_deps
-          path: ~/
-
-      - name: Untar node modules
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          tar --zstd -xf ~/node_modules.tar.zst ./e2e/node_modules
-
-      - name: Create cache directory
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ~/.cache
-
-      - name: Untar Cypress cache
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          tar --zstd -xf ~/cypress_cache.tar.zst
-        working-directory: /home/runner/.cache/
-
-      - name: Run e2e test
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: nick-fields/retry@v2
-        with:
-          timeout_minutes: 30
-          max_attempts: ${{ github.event_name == 'push' && 5 || 1 }}
-          command: |
-            ./gradlew runE2e -x bootJar -x buildWebapp
-        env:
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-          SKIP_WEBAPP_BUILD: true
-          SKIP_SERVER_BUILD: true
-          SKIP_EMAIL_BUILD: true
-          SKIP_INSTALL_E2E_DEPS: true
-          E2E_TOTAL_JOBS: ${{matrix.total_jobs}}
-          E2E_JOB_INDEX: ${{matrix.job_index}}
-          CI_RELEASE: ${{ github.event_name == 'push' && true || false }}
-
-      - uses: actions/upload-artifact@v4
-        if: failure() && steps.cache.outputs.cache-hit != 'true'
-        with:
-          name: e2e_${{ matrix.job_index }}
-          path: |
-            ./e2e/cypress/videos/**/*
-            ./e2e/cypress/screenshots/**/*
-            ./e2e/server
-
-      - uses: actions/upload-artifact@v4
-        if: failure() && steps.cache.outputs.cache-hit != 'true'
-        with:
-          name: e2e_server_log_${{ matrix.job_index }}
-          path: |
-            ./e2e/server.log
-
-      - name: Mark as passed
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: echo "passed" > .test-passed
-
-      - name: Save success marker
-        if: steps.cache.outputs.cache-hit != 'true'
-        continue-on-error: true
-        uses: actions/cache/save@v4
-        with:
-          path: .test-passed
-          key: test-passed-e2e-${{ matrix.job_index }}-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
-
   frontend-build:
     name: Build frontend 🏗️
     runs-on: ubuntu-24.04
@@ -325,91 +50,116 @@ jobs:
           name: webapp
           path: webapp/dist
 
+  e2e-install-deps:
+    name: Install E2E dependencies ⬇️
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: "false"
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./e2e
+
+      - name: Tar node modules
+        run: tar --zstd -cf ~/node_modules.tar.zst ./e2e/node_modules
+
+      - name: Tar Cypress cache
+        run: tar --zstd -cf ~/cypress_cache.tar.zst ./Cypress
+        working-directory: /home/runner/.cache/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: e2e_deps
+          path: |
+            ~/node_modules.tar.zst
+            ~/cypress_cache.tar.zst
+
+  backend-tests:
+    needs: [backend-build]
+    uses: ./.github/workflows/_backend-tests.yml
+    secrets: inherit
+    with:
+      event-name: ${{ github.event_name }}
+      run-reporters: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+
+  e2e-tests:
+    needs: [frontend-build, backend-build, e2e-install-deps]
+    uses: ./.github/workflows/_e2e-tests.yml
+    secrets: inherit
+    with:
+      event-name: ${{ github.event_name }}
+
   frontend-code-check:
     name: Frontend static check 🪲
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Compute frontend source hash
-        id: hash
-        run: |
-          HASH=$(git ls-files -s -- . \
-            ':!docs/' ':!storybook-tolgee-addon/' ':!docker/' \
-            ':!*.md' ':!LICENSE' ':!*.gif' \
-            ':!.husky/' ':!.editorconfig' ':!.gitpod.yml' \
-            ':!.gitattributes' ':!.git-blame-ignore-revs' ':!.gitmodules' \
-            ':!ngrok.template.yml' ':!.coderabbit.yaml' \
-            ':!.github/ISSUE_TEMPLATE/' ':!.github/FUNDING.yml' \
-            ':!backend/' ':!ee/' ':!e2e/' \
-            | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
-          echo "hash=$HASH" >> $GITHUB_OUTPUT
-
-      - name: Check if already passed
-        id: cache
-        continue-on-error: true
-        uses: actions/cache/restore@v4
+      - name: Check source cache
+        id: source-cache
+        uses: ./.github/actions/check-source-cache
         with:
-          path: .test-passed
-          key: test-passed-frontend-code-check-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
-          lookup-only: true
-
-      - name: Skip notice
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: echo "### ⏭️ Skipped — checks already passed for this source state" >> $GITHUB_STEP_SUMMARY
+          cache-key-prefix: test-passed-frontend-code-check
+          extra-ignores: ":!backend/ :!ee/ :!e2e/"
+          event-name: ${{ github.event_name }}
 
       - name: Setup environment
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-env
         with:
           java: "false"
 
       - name: Install library dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: ./library
 
       - name: Lint library
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: npm run lint
         working-directory: ./library
 
       - name: Install webapp dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: ./webapp
 
       - name: Typescript on webapp
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: npm run tsc
         working-directory: ./webapp
 
       - name: Eslint on webapp
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: npm run eslint
         working-directory: ./webapp
 
       - name: Keys extraction check
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: npm run check-translations
         working-directory: ./webapp
 
       - name: Load newest translations
-        if: ${{ steps.cache.outputs.cache-hit != 'true' && env.TOLGEE_API_KEY != '' }}
+        if: ${{ steps.source-cache.outputs.cache-hit != 'true' && env.TOLGEE_API_KEY != '' }}
         run: npm run load-translations
         working-directory: ./webapp
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
       - name: Check missing translation keys
-        if: ${{ steps.cache.outputs.cache-hit != 'true' && env.TOLGEE_API_KEY != '' }}
+        if: ${{ steps.source-cache.outputs.cache-hit != 'true' && env.TOLGEE_API_KEY != '' }}
         run: npm run tsc:prod
         working-directory: ./webapp
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
       - name: Check it builds without ee directory
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: |
           rm -rf ./src/ee
           npm --prefix ../library install
@@ -418,17 +168,11 @@ jobs:
           npm run build
         working-directory: ./webapp
 
-      - name: Mark as passed
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: echo "passed" > .test-passed
-
-      - name: Save success marker
-        if: steps.cache.outputs.cache-hit != 'true'
-        continue-on-error: true
-        uses: actions/cache/save@v4
+      - name: Save source cache
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/save-source-cache
         with:
-          path: .test-passed
-          key: test-passed-frontend-code-check-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
+          cache-key: ${{ steps.source-cache.outputs.cache-key }}
 
   schema-check:
     name: Schema Check 📋
@@ -437,47 +181,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Compute source hash
-        id: hash
-        run: |
-          HASH=$(git ls-files -s -- . \
-            ':!docs/' ':!storybook-tolgee-addon/' ':!docker/' \
-            ':!*.md' ':!LICENSE' ':!*.gif' \
-            ':!.husky/' ':!.editorconfig' ':!.gitpod.yml' \
-            ':!.gitattributes' ':!.git-blame-ignore-revs' ':!.gitmodules' \
-            ':!ngrok.template.yml' ':!.coderabbit.yaml' \
-            ':!.github/ISSUE_TEMPLATE/' ':!.github/FUNDING.yml' \
-            | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
-          echo "hash=$HASH" >> $GITHUB_OUTPUT
-
-      - name: Check if already passed
-        id: cache
-        continue-on-error: true
-        uses: actions/cache/restore@v4
+      - name: Check source cache
+        id: source-cache
+        uses: ./.github/actions/check-source-cache
         with:
-          path: .test-passed
-          key: test-passed-schema-check-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
-          lookup-only: true
-
-      - name: Skip notice
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: echo "### ⏭️ Skipped — check already passed for this source state" >> $GITHUB_STEP_SUMMARY
+          cache-key-prefix: test-passed-schema-check
+          event-name: ${{ github.event_name }}
 
       - name: Setup environment
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-env
 
       - name: Download backend build result
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/download-backend-build
 
       - name: Install webapp dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: ./webapp
 
       - name: Start backend
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: |
           ./gradlew server-app:bootRun --args='--spring.profiles.active=dev' &
           echo "Waiting for backend to start..."
@@ -487,14 +212,14 @@ jobs:
           SKIP_SERVER_BUILD: true
 
       - name: Generate schema
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: npm run schema
         working-directory: ./webapp
         env:
           VITE_APP_API_URL: http://localhost:8080
 
       - name: Check for uncommitted schema changes
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "❌ Schema files have changed! Please run 'npm run schema' locally and commit the changes."
@@ -508,17 +233,11 @@ jobs:
           fi
           echo "✅ Schema files are up to date"
 
-      - name: Mark as passed
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: echo "passed" > .test-passed
-
-      - name: Save success marker
-        if: steps.cache.outputs.cache-hit != 'true'
-        continue-on-error: true
-        uses: actions/cache/save@v4
+      - name: Save source cache
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/save-source-cache
         with:
-          path: .test-passed
-          key: test-passed-schema-check-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
+          cache-key: ${{ steps.source-cache.outputs.cache-key }}
 
   migration-check:
     name: Migration Check 🗃️
@@ -527,52 +246,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Compute backend source hash
-        id: hash
-        run: |
-          HASH=$(git ls-files -s -- . \
-            ':!docs/' ':!webapp/' ':!e2e/' ':!library/' \
-            ':!storybook-tolgee-addon/' ':!docker/' \
-            ':!*.md' ':!LICENSE' ':!*.gif' \
-            ':!.husky/' ':!.editorconfig' ':!.gitpod.yml' \
-            ':!.gitattributes' ':!.git-blame-ignore-revs' ':!.gitmodules' \
-            ':!ngrok.template.yml' ':!.coderabbit.yaml' \
-            ':!.github/ISSUE_TEMPLATE/' ':!.github/FUNDING.yml' \
-            ':!package.json' ':!package-lock.json' \
-            | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
-          echo "hash=$HASH" >> $GITHUB_OUTPUT
-
-      - name: Check if already passed
-        id: cache
-        continue-on-error: true
-        uses: actions/cache/restore@v4
+      - name: Check source cache
+        id: source-cache
+        uses: ./.github/actions/check-source-cache
         with:
-          path: .test-passed
-          key: test-passed-migration-check-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
-          lookup-only: true
-
-      - name: Skip notice
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: echo "### ⏭️ Skipped — check already passed for this source state" >> $GITHUB_STEP_SUMMARY
+          cache-key-prefix: test-passed-migration-check
+          extra-ignores: ":!webapp/ :!e2e/ :!library/ :!package.json :!package-lock.json"
+          event-name: ${{ github.event_name }}
 
       - name: Setup environment
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-env
         with:
           node: "false"
 
       - name: Download backend build result
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/download-backend-build
 
       - name: Generate migration diff
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: ./gradlew diffChangeLog
         env:
           SKIP_SERVER_BUILD: true
 
       - name: Check for uncommitted migration changes
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.source-cache.outputs.cache-hit != 'true'
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "❌ Migration files are out of date! Please run './gradlew diffChangeLog' locally and commit the changes."
@@ -586,17 +285,25 @@ jobs:
           fi
           echo "✅ Migration files are up to date"
 
-      - name: Mark as passed
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: echo "passed" > .test-passed
-
-      - name: Save success marker
-        if: steps.cache.outputs.cache-hit != 'true'
-        continue-on-error: true
-        uses: actions/cache/save@v4
+      - name: Save source cache
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/save-source-cache
         with:
-          path: .test-passed
-          key: test-passed-migration-check-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
+          cache-key: ${{ steps.source-cache.outputs.cache-key }}
+
+  backend-code-checks:
+    name: Ktlint 🪲
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          node: "false"
+
+      - name: Run ktlint
+        run: ./gradlew ktlintCheck
 
   data-cy-check:
     name: DataCy Check 🏷️
@@ -651,51 +358,6 @@ jobs:
         run: npm run tsc
         working-directory: ./e2e
 
-  e2e-install-deps:
-    name: Install E2E dependencies ⬇️
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup environment
-        uses: ./.github/actions/setup-env
-        with:
-          java: "false"
-
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ./e2e
-
-      - name: Tar node modules
-        run: |
-          tar --zstd -cf ~/node_modules.tar.zst ./e2e/node_modules
-
-      - name: Tar Cypress cache
-        run: |
-          tar --zstd -cf ~/cypress_cache.tar.zst ./Cypress
-        working-directory: /home/runner/.cache/
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: e2e_deps
-          path: |
-            ~/node_modules.tar.zst
-            ~/cypress_cache.tar.zst
-
-  backend-code-checks:
-    name: Ktlint 🪲
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup environment
-        uses: ./.github/actions/setup-env
-        with:
-          node: "false"
-
-      - name: Run ktlint
-        run: ./gradlew ktlintCheck
-
   email-code-checks:
     name: Email templates static check 🪲
     runs-on: ubuntu-24.04
@@ -723,7 +385,7 @@ jobs:
     name: Everything passed 🎉
     needs:
       - backend-build
-      - backend-test
+      - backend-tests
       - backend-code-checks
       - email-code-checks
       - frontend-build
@@ -731,7 +393,7 @@ jobs:
       - schema-check
       - migration-check
       - data-cy-check
-      - e2e
+      - e2e-tests
       - e2e-code-checks
       - e2e-install-deps
     runs-on: ubuntu-24.04
@@ -745,8 +407,8 @@ jobs:
             failed_jobs+=("backend-build")
           fi
 
-          if [[ "${{ needs.backend-test.result }}" != "success" ]]; then
-            failed_jobs+=("backend-test")
+          if [[ "${{ needs.backend-tests.result }}" != "success" ]]; then
+            failed_jobs+=("backend-tests")
           fi
 
           if [[ "${{ needs.backend-code-checks.result }}" != "success" ]]; then
@@ -773,8 +435,8 @@ jobs:
             failed_jobs+=("data-cy-check")
           fi
 
-          if [[ "${{ needs.e2e.result }}" != "success" ]]; then
-            failed_jobs+=("e2e")
+          if [[ "${{ needs.e2e-tests.result }}" != "success" ]]; then
+            failed_jobs+=("e2e-tests")
           fi
 
           if [[ "${{ needs.e2e-code-checks.result }}" != "success" ]]; then

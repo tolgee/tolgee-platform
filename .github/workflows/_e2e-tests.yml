@@ -1,0 +1,102 @@
+name: E2E Tests
+
+on:
+  workflow_call:
+    inputs:
+      event-name:
+        description: The original trigger event name
+        required: true
+        type: string
+
+jobs:
+  test:
+    name: E2E testing ‍🔎
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        total_jobs: [15]
+        job_index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check source cache
+        id: source-cache
+        uses: ./.github/actions/check-source-cache
+        with:
+          cache-key-prefix: test-passed-e2e-${{ matrix.job_index }}
+          event-name: ${{ inputs.event-name }}
+
+      - name: Setup environment
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/setup-env
+
+      - name: Download backend build result
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/download-backend-build
+
+      - name: Download frontend build result
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp
+          path: ./webapp/dist
+
+      - name: Download dependencies
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e_deps
+          path: ~/
+
+      - name: Untar node modules
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        run: tar --zstd -xf ~/node_modules.tar.zst ./e2e/node_modules
+
+      - name: Create cache directory
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        run: mkdir -p ~/.cache
+
+      - name: Untar Cypress cache
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        run: tar --zstd -xf ~/cypress_cache.tar.zst
+        working-directory: /home/runner/.cache/
+
+      - name: Run e2e test
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 30
+          max_attempts: ${{ inputs.event-name == 'push' && 5 || 1 }}
+          command: ./gradlew runE2e -x bootJar -x buildWebapp
+        env:
+          TOLGEE_API_KEY: ${{ secrets.TOLGEE_API_KEY }}
+          TOLGEE_API_URL: ${{ secrets.TOLGEE_API_URL }}
+          SKIP_WEBAPP_BUILD: true
+          SKIP_SERVER_BUILD: true
+          SKIP_EMAIL_BUILD: true
+          SKIP_INSTALL_E2E_DEPS: true
+          E2E_TOTAL_JOBS: ${{ matrix.total_jobs }}
+          E2E_JOB_INDEX: ${{ matrix.job_index }}
+          CI_RELEASE: ${{ inputs.event-name == 'push' && true || false }}
+
+      - uses: actions/upload-artifact@v4
+        if: failure() && steps.source-cache.outputs.cache-hit != 'true'
+        with:
+          name: e2e_${{ matrix.job_index }}
+          path: |
+            ./e2e/cypress/videos/**/*
+            ./e2e/cypress/screenshots/**/*
+            ./e2e/server
+
+      - uses: actions/upload-artifact@v4
+        if: failure() && steps.source-cache.outputs.cache-hit != 'true'
+        with:
+          name: e2e_server_log_${{ matrix.job_index }}
+          path: ./e2e/server.log
+
+      - name: Save source cache
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/save-source-cache
+        with:
+          cache-key: ${{ steps.source-cache.outputs.cache-key }}
