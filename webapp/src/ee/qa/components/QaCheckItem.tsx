@@ -58,6 +58,7 @@ const StyledContent = styled(Box)`
   flex-direction: column;
   gap: 0;
   min-width: 0;
+  flex: 1;
 `;
 
 const StyledMessage = styled(Box)`
@@ -140,22 +141,47 @@ export const QaCheckItem: React.FC<Props> = ({
   const messageText = useQaIssueMessage(issue.message, issue.params);
   const hasReplacement = issue.replacement != null;
 
+  const showDiff = hasReplacement && issue.state === 'OPEN';
+  const showButtonRow = !slim;
+
   const Container = issue.state === 'IGNORED' ? StyledIgnoredItem : StyledItem;
 
-  const actions = slim ? (
-    <>
-      <Tooltip title={t('qa_check_action_correct')}>
-        <IconButton size="small" color="primary" onClick={onCorrect}>
-          <Check width={20} height={20} />
-        </IconButton>
-      </Tooltip>
-      {onIgnore && (
-        <Tooltip title={t('qa_check_action_ignore')}>
-          <IconButton size="small" onClick={onIgnore}>
-            <XClose width={20} height={20} />
-          </IconButton>
-        </Tooltip>
+  const buttonCorrectSmall = onCorrect && (
+    <Tooltip title={t('qa_check_action_correct')}>
+      <IconButton size="small" color="primary" onClick={onCorrect}>
+        <Check width={20} height={20} />
+      </IconButton>
+    </Tooltip>
+  );
+
+  const buttonIgnoreSmall = onIgnore && (
+    <Tooltip title={t('qa_check_action_ignore')}>
+      <IconButton size="small" onClick={onIgnore}>
+        <XClose width={20} height={20} />
+      </IconButton>
+    </Tooltip>
+  );
+
+  const buttonCorrectBig = onCorrect && (
+    <Button variant="outlined" color="primary" size="small" onClick={onCorrect}>
+      <T keyName="qa_check_action_correct" />
+    </Button>
+  );
+
+  const buttonIgnoreBig = onIgnore && (
+    <Button variant="text" color="inherit" size="small" onClick={onIgnore}>
+      {issue.state === 'IGNORED' ? (
+        <T keyName="qa_check_action_unignore" />
+      ) : (
+        <T keyName="qa_check_action_ignore" />
       )}
+    </Button>
+  );
+
+  const textActions = !showButtonRow ? (
+    <>
+      {buttonCorrectSmall}
+      {buttonIgnoreSmall}
     </>
   ) : undefined;
 
@@ -173,10 +199,11 @@ export const QaCheckItem: React.FC<Props> = ({
           <Typography variant="body2">{typeLabel}</Typography>
           <StyledMessage>{messageText}</StyledMessage>
         </StyledContent>
+        {!showButtonRow && !showDiff && buttonIgnoreBig}
       </StyledHeader>
 
-      {hasReplacement && issue.state === 'OPEN' && (
-        <TextBlock actions={actions}>
+      {showDiff && (
+        <TextBlock actions={textActions}>
           <StyledDiffText>
             {renderDiff(
               text,
@@ -188,41 +215,10 @@ export const QaCheckItem: React.FC<Props> = ({
         </TextBlock>
       )}
 
-      {(!slim || !hasReplacement) && issue.state === 'OPEN' && (
+      {showButtonRow && (
         <StyledNormalActions>
-          {onCorrect && (
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              onClick={onCorrect}
-            >
-              <T keyName="qa_check_action_correct" />
-            </Button>
-          )}
-          {onIgnore && (
-            <Button
-              variant="text"
-              color="inherit"
-              size="small"
-              onClick={onIgnore}
-            >
-              <T keyName="qa_check_action_ignore" />
-            </Button>
-          )}
-        </StyledNormalActions>
-      )}
-
-      {issue.state === 'IGNORED' && onIgnore && (
-        <StyledNormalActions>
-          <Button
-            variant="text"
-            color="inherit"
-            size="small"
-            onClick={onIgnore}
-          >
-            <T keyName="qa_check_action_unignore" />
-          </Button>
+          {issue.state === 'OPEN' && buttonCorrectBig}
+          {buttonIgnoreBig}
         </StyledNormalActions>
       )}
     </Container>
