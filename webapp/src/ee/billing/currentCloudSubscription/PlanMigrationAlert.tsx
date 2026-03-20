@@ -14,7 +14,7 @@ type PlanMigrationAlertData = {
   variant: 'scheduled' | 'completed';
   from: string;
   to: string;
-  date: number;
+  date?: number;
 };
 
 const getPeriodDuration = (subscription: CloudSubscriptionModel) => {
@@ -53,7 +53,7 @@ const getPlanMigrationAlertData = (
       variant: 'scheduled',
       from: migration.originPlanName,
       to: targetPlanName,
-      date: migration.scheduledAt,
+      date: subscription.currentPeriodEnd ?? undefined,
     };
   }
 
@@ -89,20 +89,45 @@ export const PlanMigrationAlert: FC<Props> = ({ subscription }) => {
     return null;
   }
 
-  const params = {
+  const baseParams = {
     from: migrationAlert.from,
     to: migrationAlert.to,
-    date: formatDate(migrationAlert.date, { dateStyle: 'long' }),
     b: <b />,
+  };
+
+  const getScheduledContent = () => {
+    if (migrationAlert.date) {
+      return (
+        <T
+          keyName="billing_plan_migration_alert_scheduled"
+          params={{
+            ...baseParams,
+            date: formatDate(migrationAlert.date, { dateStyle: 'long' }),
+          }}
+        />
+      );
+    }
+    return (
+      <T
+        keyName="billing_plan_migration_alert_scheduled_no_date"
+        params={baseParams}
+      />
+    );
   };
 
   return (
     <Box display="flex" mb={1}>
       <Alert severity="info" data-cy="billing-plan-migration-alert">
         {migrationAlert.variant === 'scheduled' ? (
-          <T keyName="billing_plan_migration_alert_scheduled" params={params} />
+          getScheduledContent()
         ) : (
-          <T keyName="billing_plan_migration_alert_completed" params={params} />
+          <T
+            keyName="billing_plan_migration_alert_completed"
+            params={{
+              ...baseParams,
+              date: formatDate(migrationAlert.date!, { dateStyle: 'long' }),
+            }}
+          />
         )}
       </Alert>
     </Box>
