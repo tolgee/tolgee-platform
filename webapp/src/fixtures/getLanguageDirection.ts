@@ -10,6 +10,7 @@ export const getLanguageDirection = (languageTag?: string): Direction => {
     'ks',
     'ku',
     'ps',
+    'ug',
     'ur',
     'yi',
   ];
