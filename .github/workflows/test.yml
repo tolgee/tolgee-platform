@@ -66,7 +66,7 @@ jobs:
       - name: Compute backend source hash
         id: hash
         run: |
-          HASH=$(git ls-files -- . \
+          HASH=$(git ls-files -s -- . \
             ':!docs/' ':!webapp/' ':!e2e/' ':!library/' \
             ':!storybook-tolgee-addon/' ':!docker/' \
             ':!*.md' ':!LICENSE' ':!*.gif' \
@@ -75,15 +75,16 @@ jobs:
             ':!ngrok.template.yml' ':!.coderabbit.yaml' \
             ':!.github/ISSUE_TEMPLATE/' ':!.github/FUNDING.yml' \
             ':!package.json' ':!package-lock.json' \
-            | sort | git hash-object --stdin-paths | sha256sum | cut -d' ' -f1)
+            | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
           echo "hash=$HASH" >> $GITHUB_OUTPUT
 
       - name: Check if already passed
         id: cache
+        continue-on-error: true
         uses: actions/cache/restore@v4
         with:
           path: .test-passed
-          key: test-passed-${{ matrix.command }}-${{ steps.hash.outputs.hash }}
+          key: test-passed-${{ matrix.command }}-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
           lookup-only: true
 
       - name: Skip notice
@@ -174,10 +175,11 @@ jobs:
 
       - name: Save success marker
         if: steps.cache.outputs.cache-hit != 'true'
+        continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: .test-passed
-          key: test-passed-${{ matrix.command }}-${{ steps.hash.outputs.hash }}
+          key: test-passed-${{ matrix.command }}-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
 
   e2e:
     needs: [frontend-build, backend-build, e2e-install-deps]
@@ -194,22 +196,23 @@ jobs:
       - name: Compute e2e source hash
         id: hash
         run: |
-          HASH=$(git ls-files -- . \
+          HASH=$(git ls-files -s -- . \
             ':!docs/' ':!storybook-tolgee-addon/' ':!docker/' \
             ':!*.md' ':!LICENSE' ':!*.gif' \
             ':!.husky/' ':!.editorconfig' ':!.gitpod.yml' \
             ':!.gitattributes' ':!.git-blame-ignore-revs' ':!.gitmodules' \
             ':!ngrok.template.yml' ':!.coderabbit.yaml' \
             ':!.github/ISSUE_TEMPLATE/' ':!.github/FUNDING.yml' \
-            | sort | git hash-object --stdin-paths | sha256sum | cut -d' ' -f1)
+            | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
           echo "hash=$HASH" >> $GITHUB_OUTPUT
 
       - name: Check if already passed
         id: cache
+        continue-on-error: true
         uses: actions/cache/restore@v4
         with:
           path: .test-passed
-          key: test-passed-e2e-${{ matrix.job_index }}-${{ steps.hash.outputs.hash }}
+          key: test-passed-e2e-${{ matrix.job_index }}-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
           lookup-only: true
 
       - name: Skip notice
@@ -295,10 +298,11 @@ jobs:
 
       - name: Save success marker
         if: steps.cache.outputs.cache-hit != 'true'
+        continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: .test-passed
-          key: test-passed-e2e-${{ matrix.job_index }}-${{ steps.hash.outputs.hash }}
+          key: test-passed-e2e-${{ matrix.job_index }}-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
 
   frontend-build:
     name: Build frontend 🏗️
