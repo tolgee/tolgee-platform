@@ -8,80 +8,18 @@ on:
 
 jobs:
   backend-build:
-    name: Build backend 🏗️
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup environment
-        uses: ./.github/actions/setup-env
-
-      # Don't build test classes here; they'll only be used once during the test run anyway.
-      # This amortizes the cost of compilation across each test job, rather than paying it upfront.
-      # Test emails are built nonetheless, as they may be used by multiple subprojects...
-      #
-      # Note: seems like running in parallel has the weird side effect of causing Spring dependency management to hang
-      # It's very occasional, and doesn't seem to occur locally, but parallel being the issue is possible
-      # See: https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/370
-      - name: Build backend
-        run: ./gradlew classes jar bootJar buildTestEmails
-
-      - name: Upload backend build result
-        uses: ./.github/actions/upload-backend-build
+    uses: ./.github/workflows/test/build-backend.yml
 
   frontend-build:
-    name: Build frontend 🏗️
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup environment
-        uses: ./.github/actions/setup-env
-
-      - name: Build webapp
-        run: ./gradlew buildWebapp
-        env:
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-
-      - name: Upload built webapp
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapp
-          path: webapp/dist
+    uses: ./.github/workflows/test/build-frontend.yml
+    secrets: inherit
 
   e2e-install-deps:
-    name: Install E2E dependencies ⬇️
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup environment
-        uses: ./.github/actions/setup-env
-        with:
-          java: "false"
-
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ./e2e
-
-      - name: Tar node modules
-        run: tar --zstd -cf ~/node_modules.tar.zst ./e2e/node_modules
-
-      - name: Tar Cypress cache
-        run: tar --zstd -cf ~/cypress_cache.tar.zst ./Cypress
-        working-directory: /home/runner/.cache/
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: e2e_deps
-          path: |
-            ~/node_modules.tar.zst
-            ~/cypress_cache.tar.zst
+    uses: ./.github/workflows/test/e2e-install-deps.yml
 
   backend-tests:
     needs: [backend-build]
-    uses: ./.github/workflows/_backend-tests.yml
+    uses: ./.github/workflows/test/backend-tests.yml
     secrets: inherit
     with:
       event-name: ${{ github.event_name }}
@@ -89,20 +27,20 @@ jobs:
 
   e2e-tests:
     needs: [frontend-build, backend-build, e2e-install-deps]
-    uses: ./.github/workflows/_e2e-tests.yml
+    uses: ./.github/workflows/test/e2e-tests.yml
     secrets: inherit
     with:
       event-name: ${{ github.event_name }}
 
   frontend-and-static-checks:
-    uses: ./.github/workflows/_frontend-and-static-checks.yml
+    uses: ./.github/workflows/test/frontend-and-static-checks.yml
     secrets: inherit
     with:
       event-name: ${{ github.event_name }}
 
   backend-checks:
     needs: [backend-build]
-    uses: ./.github/workflows/_backend-checks.yml
+    uses: ./.github/workflows/test/backend-checks.yml
     secrets: inherit
     with:
       event-name: ${{ github.event_name }}
