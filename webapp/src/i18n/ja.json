@@ -608,6 +608,7 @@
   "billing_plan_contact_us": "お問い合わせ",
   "billing_plan_migration_alert_completed": "{date} にプランが <b>{from}</b> から <b>{to}</b> にアップグレードされました",
   "billing_plan_migration_alert_scheduled": "あなたのプランは {date} に <b>{from}</b> から <b>{to}</b> へ移行予定です。",
+  "billing_plan_migration_alert_scheduled_no_date": "あなたのプランは次回の更新時に <b>{from}</b> から <b>{to}</b> へ移行予定です。",
   "billing-plan-monthly-price": "{price, number, ::precision-integer currency/EUR}/月",
   "billing_plan_non_commercial_hint": "このプランは非商用目的にのみご利用いただけます",
   "billing_plan_non_commercial_label": "非営利",

@@ -1,3 +1,10 @@
+## [3.173.1](https://github.com/tolgee/tolgee-platform/compare/v3.173.0...v3.173.1) (2026-03-20)
+
+
+### Bug Fixes
+
+* preserve websocket subscriptions on disconnect ([#3550](https://github.com/tolgee/tolgee-platform/issues/3550)) ([cd3147b](https://github.com/tolgee/tolgee-platform/commit/cd3147bf906d41a984485a3be741aa7ce9839370)), closes [#3329](https://github.com/tolgee/tolgee-platform/issues/3329)
+
 # [3.173.0](https://github.com/tolgee/tolgee-platform/compare/v3.172.3...v3.173.0) (2026-03-20)
 
 
