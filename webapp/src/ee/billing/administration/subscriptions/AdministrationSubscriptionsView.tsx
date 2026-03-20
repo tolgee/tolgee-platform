@@ -69,6 +69,7 @@ export const AdministrationSubscriptionsView = () => {
             mb={1}
           >
             <FormControlLabel
+              data-cy="administration-subscriptions-trialing-filter"
               control={
                 <Checkbox
                   checked={trialing === 'true'}

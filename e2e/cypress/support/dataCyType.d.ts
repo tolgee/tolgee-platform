@@ -89,6 +89,7 @@ declare namespace DataCy {
         "administration-subscriptions-current-plan-info" |
         "administration-subscriptions-custom-plans-item" |
         "administration-subscriptions-plan-popover" |
+        "administration-subscriptions-trialing-filter" |
         "administration-trial-end-date-field" |
         "administration-user-debug-account" |
         "administration-user-delete-user" |
