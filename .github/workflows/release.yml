@@ -8,109 +8,12 @@ on:
       - completed
 
 jobs:
-  main:
+  release:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          token: "${{ secrets.TOLGEE_MACHINE_PAT }}"
-
-      - uses: actions/setup-java@v3
-        with:
-          java-version: 21
-          distribution: adopt
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "22.x"
-
-      - name: Install node modules
-        run: npm ci
-
-      - name: Run get new version
-        run: npm run release-dry
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GIT_AUTHOR_NAME: Tolgee Machine
-          GIT_COMMITTER_NAME: Tolgee Machine
-          GIT_AUTHOR_EMAIL: machine@tolgee.io
-          GIT_COMMITTER_EMAIL: machine@tolgee.io
-
-      - name: Set version property
-        id: version
-        run: echo "VERSION=$(test -e .VERSION && echo v$(cat .VERSION))" >> $GITHUB_OUTPUT
-
-      - name: BootJar with version
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        run: ./gradlew bootJar
-        env:
-          VERSION: ${{ steps.version.outputs.VERSION }}
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
-
-      - name: Login to docker
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
-
-      - name: Create docker image
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        run: |
-          docker buildx create --use
-          ./gradlew dockerPublish
-          VERSION=latest ./gradlew dockerPublish
-        env:
-          VERSION: ${{ steps.version.outputs.VERSION }}
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-          DOCKER_CACHE_FROM: type=registry,ref=tolgee/tolgee:latest
-          DOCKER_CACHE_TO: type=inline
-
-      - name: Pack with webapp
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        run: ./gradlew packResources
-        env:
-          VERSION: ${{ steps.version.outputs.VERSION }}
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-
-      - name: Run npm release
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        run: npm run release
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOLGEE_MACHINE_PAT }}
-          VERSION: ${{ steps.version.outputs.VERSION }}
-          GIT_AUTHOR_NAME: Tolgee Machine
-          GIT_COMMITTER_NAME: Tolgee Machine
-          GIT_AUTHOR_EMAIL: machine@tolgee.io
-          GIT_COMMITTER_EMAIL: machine@tolgee.io
-
-      - name: Tag production and deprecated keys in platform
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        run: "npm run tag-keys"
-        env:
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-        working-directory: ./webapp
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test
-          path: |
-            ./e2e/cypress/videos/**/*
-            ./e2e/cypress/screenshots/**/*
-            ./build/reports/**/*
-
-      - name: Trigger Billing repo tests & testing deploy
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        run: |
-          curl \
-            -X POST \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${{ secrets.TOLGEE_MACHINE_PAT }}" \
-            https://api.github.com/repos/tolgee/billing/actions/workflows/test.yml/dispatches \
-            -d '{"ref":"main","inputs":{"release-version":"${{ steps.version.outputs.VERSION }}"}}'
+    uses: ./.github/workflows/release--publish.yml
+    secrets: inherit
+    with:
+      use-machine-pat: true
+      docker-publish-method: gradle
+      trigger-billing: true
+      tag-keys: true
