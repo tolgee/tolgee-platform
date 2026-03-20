@@ -11,6 +11,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { useMoneyFormatter, useNumberFormatter } from 'tg.hooks/useLocale';
 import { TokenPricesTable } from './TokenPricesTable';
 import { EstimateCostTable } from './EstimateCostTable';
+import { MonthlyCreditCapacity } from './MonthlyCreditCapacity';
 
 export type ProviderWithPricing = {
   name: string;
@@ -21,12 +22,14 @@ export type ProviderWithPricing = {
 type Props = {
   provider: ProviderWithPricing;
   perThousandMtCredits: number | null;
+  includedMtCredits: number | null;
   onClose: () => void;
 };
 
 export const LlmProviderPricingDialog = ({
   provider,
   perThousandMtCredits,
+  includedMtCredits,
   onClose,
 }: Props) => {
   const { t } = useTranslate();
@@ -98,6 +101,15 @@ export const LlmProviderPricingDialog = ({
                 creditsToEur={creditsToEur}
               />
             </Box>
+            {includedMtCredits != null && includedMtCredits > 0 && (
+              <Box>
+                <MonthlyCreditCapacity
+                  inputPrice={inputPrice!}
+                  outputPrice={outputPrice!}
+                  includedMtCredits={includedMtCredits}
+                />
+              </Box>
+            )}
             <Typography variant="body2" color="text.secondary">
               <T
                 keyName="llm_provider_pricing_plan_note"
