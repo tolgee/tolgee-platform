@@ -109,6 +109,8 @@ jobs:
 
   everything-passed:
     name: Everything passed 🎉
+    # List all top-level jobs so this runs last. The actual check uses the API
+    # to verify ALL jobs in the run, so forgetting an entry here is caught.
     needs:
       - backend-build
       - backend-tests
@@ -121,9 +123,10 @@ jobs:
     if: always()
     steps:
       - env:
-          NEEDS_JSON: ${{ toJSON(needs) }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          failed=$(echo "$NEEDS_JSON" | jq -r 'to_entries[] | select(.value.result != "success") | .key')
+          failed=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs" \
+            --paginate --jq '.jobs[] | select(.name != "Everything passed 🎉" and .conclusion != "success" and .conclusion != "skipped") | .name')
           if [ -n "$failed" ]; then
             echo "The following jobs failed:"
             echo "$failed"
