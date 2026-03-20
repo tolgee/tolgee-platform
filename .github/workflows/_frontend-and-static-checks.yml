@@ -1,0 +1,166 @@
+name: Frontend & Static Checks
+
+on:
+  workflow_call:
+    inputs:
+      event-name:
+        required: true
+        type: string
+
+jobs:
+  frontend-code-check:
+    name: Frontend static check 🪲
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check source cache
+        id: source-cache
+        uses: ./.github/actions/check-source-cache
+        with:
+          cache-key-prefix: test-passed-frontend-code-check
+          extra-ignores: ":!backend/ :!ee/ :!e2e/"
+          event-name: ${{ inputs.event-name }}
+
+      - name: Setup environment
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/setup-env
+        with:
+          java: "false"
+
+      - name: Install library dependencies
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        run: npm ci
+        working-directory: ./library
+
+      - name: Lint library
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        run: npm run lint
+        working-directory: ./library
+
+      - name: Install webapp dependencies
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        run: npm ci
+        working-directory: ./webapp
+
+      - name: Typescript on webapp
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        run: npm run tsc
+        working-directory: ./webapp
+
+      - name: Eslint on webapp
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        run: npm run eslint
+        working-directory: ./webapp
+
+      - name: Keys extraction check
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        run: npm run check-translations
+        working-directory: ./webapp
+
+      - name: Load newest translations
+        if: ${{ steps.source-cache.outputs.cache-hit != 'true' && env.TOLGEE_API_KEY != '' }}
+        run: npm run load-translations
+        working-directory: ./webapp
+        env:
+          TOLGEE_API_KEY: ${{ secrets.TOLGEE_API_KEY }}
+
+      - name: Check missing translation keys
+        if: ${{ steps.source-cache.outputs.cache-hit != 'true' && env.TOLGEE_API_KEY != '' }}
+        run: npm run tsc:prod
+        working-directory: ./webapp
+        env:
+          TOLGEE_API_KEY: ${{ secrets.TOLGEE_API_KEY }}
+
+      - name: Check it builds without ee directory
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        run: |
+          rm -rf ./src/ee
+          npm --prefix ../library install
+          npm install
+          npm run tsc
+          npm run build
+        working-directory: ./webapp
+
+      - name: Save source cache
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/save-source-cache
+        with:
+          cache-key: ${{ steps.source-cache.outputs.cache-key }}
+
+  backend-code-checks:
+    name: Ktlint 🪲
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          node: "false"
+      - name: Run ktlint
+        run: ./gradlew ktlintCheck
+
+  data-cy-check:
+    name: DataCy Check 🏷️
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: "false"
+          npm-cache: "false"
+      - name: Generate dataCy types
+        run: node ./scripts/generate-data-cy.mjs
+        working-directory: ./webapp
+      - name: Check for uncommitted dataCy changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ dataCyType.d.ts is out of date! Please run 'npm run generate-data-cy' in webapp/ and commit the changes."
+            echo ""
+            echo "Changed files:"
+            git status --porcelain
+            echo ""
+            echo "Diff:"
+            git diff
+            exit 1
+          fi
+          echo "✅ dataCyType.d.ts is up to date"
+
+  e2e-code-checks:
+    name: E2E Static Check 🪲
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: "false"
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./e2e
+      - name: Eslint
+        run: npm run eslint
+        working-directory: ./e2e
+      - name: Typecheck
+        run: npm run tsc
+        working-directory: ./e2e
+
+  email-code-checks:
+    name: Email templates static check 🪲
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: 'false'
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./email
+      - name: TypeScript
+        run: npm run tsc
+        working-directory: ./email
+      - name: ESLint
+        run: npm run eslint
+        working-directory: ./email
