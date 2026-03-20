@@ -45,10 +45,13 @@ class UrlSecurity(
       throw BadRequestException(Message.URL_NOT_VALID)
     }
 
-    // For IPv4 literals, InetAddress.getByName parses without DNS lookup
+    // Parse IP literals (IPv4 and IPv6) without DNS lookup
+    val rawHost = host.removeSurrounding("[", "]")
     val address =
       try {
-        InetAddress.getByName(host).takeIf { it is Inet4Address && it.hostAddress == host }
+        val parsed = InetAddress.getByName(rawHost)
+        // Only accept if it's a real IP literal, not a DNS-resolved hostname
+        parsed.takeIf { it is Inet4Address && it.hostAddress == rawHost || rawHost.contains(':') }
       } catch (_: Exception) {
         null
       }

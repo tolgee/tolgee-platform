@@ -34,6 +34,7 @@ class UrlSecurityTest {
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://127.0.0.1/admin") }
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://127.0.0.2/admin") }
     assertThrows<BadRequestException> { urlSecurity.validateUrl("https://localhost/admin") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[::1]/admin") }
   }
 
   @Test
@@ -46,6 +47,7 @@ class UrlSecurityTest {
   @Test
   fun `blocks link-local addresses`() {
     assertThrows<BadRequestException> { urlSecurity.validateUrl("http://169.254.169.254/latest/meta-data/") }
+    assertThrows<BadRequestException> { urlSecurity.validateUrl("http://[fe80::1]/internal") }
   }
 
   @Test
