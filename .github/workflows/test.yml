@@ -331,50 +331,85 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Compute frontend source hash
+        id: hash
+        run: |
+          HASH=$(git ls-files -s -- . \
+            ':!docs/' ':!storybook-tolgee-addon/' ':!docker/' \
+            ':!*.md' ':!LICENSE' ':!*.gif' \
+            ':!.husky/' ':!.editorconfig' ':!.gitpod.yml' \
+            ':!.gitattributes' ':!.git-blame-ignore-revs' ':!.gitmodules' \
+            ':!ngrok.template.yml' ':!.coderabbit.yaml' \
+            ':!.github/ISSUE_TEMPLATE/' ':!.github/FUNDING.yml' \
+            ':!backend/' ':!ee/' ':!e2e/' \
+            | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
+          echo "hash=$HASH" >> $GITHUB_OUTPUT
+
+      - name: Check if already passed
+        id: cache
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: .test-passed
+          key: test-passed-frontend-code-check-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
+          lookup-only: true
+
+      - name: Skip notice
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: echo "### ⏭️ Skipped — checks already passed for this source state" >> $GITHUB_STEP_SUMMARY
+
       - name: Setup environment
+        if: steps.cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-env
         with:
           java: "false"
 
       - name: Install library dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: ./library
 
       - name: Lint library
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm run lint
         working-directory: ./library
 
       - name: Install webapp dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: ./webapp
 
       - name: Typescript on webapp
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm run tsc
         working-directory: ./webapp
 
       - name: Eslint on webapp
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm run eslint
         working-directory: ./webapp
 
       - name: Keys extraction check
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm run check-translations
         working-directory: ./webapp
 
       - name: Load newest translations
+        if: ${{ steps.cache.outputs.cache-hit != 'true' && env.TOLGEE_API_KEY != '' }}
         run: npm run load-translations
         working-directory: ./webapp
-        if: ${{ env.TOLGEE_API_KEY != '' }}
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
       - name: Check missing translation keys
+        if: ${{ steps.cache.outputs.cache-hit != 'true' && env.TOLGEE_API_KEY != '' }}
         run: npm run tsc:prod
         working-directory: ./webapp
-        if: ${{ env.TOLGEE_API_KEY != '' }}
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
 
       - name: Check it builds without ee directory
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           rm -rf ./src/ee
           npm --prefix ../library install
@@ -383,6 +418,18 @@ jobs:
           npm run build
         working-directory: ./webapp
 
+      - name: Mark as passed
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: echo "passed" > .test-passed
+
+      - name: Save success marker
+        if: steps.cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: .test-passed
+          key: test-passed-frontend-code-check-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
+
   schema-check:
     name: Schema Check 📋
     needs: [backend-build]
@@ -390,17 +437,47 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Compute source hash
+        id: hash
+        run: |
+          HASH=$(git ls-files -s -- . \
+            ':!docs/' ':!storybook-tolgee-addon/' ':!docker/' \
+            ':!*.md' ':!LICENSE' ':!*.gif' \
+            ':!.husky/' ':!.editorconfig' ':!.gitpod.yml' \
+            ':!.gitattributes' ':!.git-blame-ignore-revs' ':!.gitmodules' \
+            ':!ngrok.template.yml' ':!.coderabbit.yaml' \
+            ':!.github/ISSUE_TEMPLATE/' ':!.github/FUNDING.yml' \
+            | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
+          echo "hash=$HASH" >> $GITHUB_OUTPUT
+
+      - name: Check if already passed
+        id: cache
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: .test-passed
+          key: test-passed-schema-check-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
+          lookup-only: true
+
+      - name: Skip notice
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: echo "### ⏭️ Skipped — check already passed for this source state" >> $GITHUB_STEP_SUMMARY
+
       - name: Setup environment
+        if: steps.cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-env
 
       - name: Download backend build result
+        if: steps.cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/download-backend-build
 
       - name: Install webapp dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: ./webapp
 
       - name: Start backend
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           ./gradlew server-app:bootRun --args='--spring.profiles.active=dev' &
           echo "Waiting for backend to start..."
@@ -410,12 +487,14 @@ jobs:
           SKIP_SERVER_BUILD: true
 
       - name: Generate schema
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm run schema
         working-directory: ./webapp
         env:
           VITE_APP_API_URL: http://localhost:8080
 
       - name: Check for uncommitted schema changes
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "❌ Schema files have changed! Please run 'npm run schema' locally and commit the changes."
@@ -429,6 +508,18 @@ jobs:
           fi
           echo "✅ Schema files are up to date"
 
+      - name: Mark as passed
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: echo "passed" > .test-passed
+
+      - name: Save success marker
+        if: steps.cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: .test-passed
+          key: test-passed-schema-check-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
+
   migration-check:
     name: Migration Check 🗃️
     needs: [backend-build]
@@ -436,20 +527,52 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Compute backend source hash
+        id: hash
+        run: |
+          HASH=$(git ls-files -s -- . \
+            ':!docs/' ':!webapp/' ':!e2e/' ':!library/' \
+            ':!storybook-tolgee-addon/' ':!docker/' \
+            ':!*.md' ':!LICENSE' ':!*.gif' \
+            ':!.husky/' ':!.editorconfig' ':!.gitpod.yml' \
+            ':!.gitattributes' ':!.git-blame-ignore-revs' ':!.gitmodules' \
+            ':!ngrok.template.yml' ':!.coderabbit.yaml' \
+            ':!.github/ISSUE_TEMPLATE/' ':!.github/FUNDING.yml' \
+            ':!package.json' ':!package-lock.json' \
+            | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
+          echo "hash=$HASH" >> $GITHUB_OUTPUT
+
+      - name: Check if already passed
+        id: cache
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: .test-passed
+          key: test-passed-migration-check-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
+          lookup-only: true
+
+      - name: Skip notice
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: echo "### ⏭️ Skipped — check already passed for this source state" >> $GITHUB_STEP_SUMMARY
+
       - name: Setup environment
+        if: steps.cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-env
         with:
           node: "false"
 
       - name: Download backend build result
+        if: steps.cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/download-backend-build
 
       - name: Generate migration diff
+        if: steps.cache.outputs.cache-hit != 'true'
         run: ./gradlew diffChangeLog
         env:
           SKIP_SERVER_BUILD: true
 
       - name: Check for uncommitted migration changes
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "❌ Migration files are out of date! Please run './gradlew diffChangeLog' locally and commit the changes."
@@ -462,6 +585,18 @@ jobs:
             exit 1
           fi
           echo "✅ Migration files are up to date"
+
+      - name: Mark as passed
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: echo "passed" > .test-passed
+
+      - name: Save success marker
+        if: steps.cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: .test-passed
+          key: test-passed-migration-check-${{ github.event_name }}-${{ steps.hash.outputs.hash }}
 
   data-cy-check:
     name: DataCy Check 🏷️
