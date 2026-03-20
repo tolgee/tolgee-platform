@@ -30,17 +30,18 @@ type Subscription<T extends string> = {
 export const WebsocketClient = (options: WebsocketClientOptions) => {
   options.serverUrl = options.serverUrl || window.origin;
 
-  let _client: CompatClient | undefined;
-  let _deactivated = false;
+  let client: CompatClient | undefined;
+  let deactivated = false;
   let connected = false;
+  let connecting = false;
   let subscriptions: Subscription<any>[] = [];
 
   const resubscribe = () => {
-    if (_deactivated) {
+    if (deactivated) {
       return;
     }
 
-    if (_client) {
+    if (client) {
       subscriptions.forEach((subscription) => {
         subscribeToStompChannel(subscription);
       });
@@ -48,12 +49,16 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
   };
 
   const subscribeToStompChannel = (subscription: Subscription<any>) => {
-    if (connected) {
-      const stompSubscription = _client!.subscribe(
+    if (connected && client) {
+      const stompSubscription = client.subscribe(
         subscription.channel,
         function (message) {
-          const parsed = JSON.parse(message.body) as Message;
-          subscription.callback(parsed as any);
+          try {
+            const parsed = JSON.parse(message.body) as Message;
+            subscription.callback(parsed as any);
+          } catch (e: any) {
+            console.error(`WebSocket: error parsing message: ${e.message}`);
+          }
         }
       );
       subscription.unsubscribe = stompSubscription.unsubscribe;
@@ -62,37 +67,37 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
   };
 
   function initClient() {
-    _client = Stomp.over(() => new SockJS(`${options.serverUrl}/websocket`));
-    _client.configure({
+    client = Stomp.over(() => new SockJS(`${options.serverUrl}/websocket`));
+    client.configure({
       reconnectDelay: 3000,
       debug: (msg) => {},
     });
   }
 
   function connectIfNotAlready() {
-    if (_deactivated) {
+    if (deactivated || connected || connecting) {
       return;
     }
 
-    const client = getClient();
+    connecting = true;
+
+    const stompClient = getClient();
 
     const onConnected = function () {
       connected = true;
+      connecting = false;
       resubscribe();
       options.onConnected?.();
     };
 
     const onDisconnect = function () {
       connected = false;
-      subscriptions.forEach((s) => {
-        s.unsubscribe = undefined;
-        s.id = undefined;
-        removeSubscription(s);
-      });
+      connecting = false;
       options.onConnectionClose?.();
     };
 
     const onError = () => {
+      connecting = false;
       options.onError?.();
     };
 
@@ -101,15 +106,15 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
       Authorization: `Bearer ${options.authentication.jwtToken}`,
     };
 
-    client.connect(headers, onConnected, onError, onDisconnect);
+    stompClient.connect(headers, onConnected, onError, onDisconnect);
   }
 
   const getClient = () => {
-    if (_client !== undefined) {
-      return _client;
+    if (client !== undefined) {
+      return client;
     }
     initClient();
-    return _client!;
+    return client!;
   };
 
   /**
@@ -122,7 +127,7 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
     channel: T,
     callback: (data: Data<T>) => void
   ): () => void {
-    if (_deactivated) {
+    if (deactivated) {
       return () => {};
     }
 
@@ -138,13 +143,13 @@ export const WebsocketClient = (options: WebsocketClientOptions) => {
   }
 
   function disconnect() {
-    if (_client) {
-      _client.disconnect();
+    if (client) {
+      client.disconnect();
     }
   }
 
   function deactivate() {
-    _deactivated = true;
+    deactivated = true;
     disconnect();
   }
 
