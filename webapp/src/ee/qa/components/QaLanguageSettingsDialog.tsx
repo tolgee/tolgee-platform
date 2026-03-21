@@ -106,64 +106,68 @@ export const QaLanguageSettingsDialog = ({
         onClose();
       }}
     >
-      {({ handleSubmit, values, setFieldValue, isSubmitting, dirty }) => (
-        <Dialog open={true} onClose={onClose}>
-          {isInherited && (
-            <StyledBanner data-cy="qa-language-dialog-inherited-banner">
-              {t('project_settings_qa_language_dialog_inherited_banner')}
-            </StyledBanner>
-          )}
-          <DialogTitle>
-            <div>{t('project_settings_qa_language_dialog_title')}</div>
-            <Box sx={{ fontSize: 14, fontWeight: 'normal' }}>
-              <LanguageItem language={languageConfig.language} />
-            </Box>
-          </DialogTitle>
-          <DialogContent sx={{ width: '90vw', maxWidth: 600 }}>
-            {Object.keys(globalSettings).map((type) => (
-              <QaSettingsItem
-                key={type}
-                showDefault
-                type={type as QaCheckType}
-                value={values.settings[type as QaCheckType] ?? null}
-                onChange={(checkType, severity) => {
-                  setFieldValue(`settings.${checkType}`, severity);
-                }}
-              />
-            ))}
-          </DialogContent>
-          <Box display="flex" justifyContent="space-between">
-            <DialogActions>
-              {!isInherited && (
+      {({ handleSubmit, values, setFieldValue, isSubmitting, dirty }) => {
+        const isBusy = resetting || isSubmitting;
+        return (
+          <Dialog open={true} onClose={onClose}>
+            {isInherited && (
+              <StyledBanner data-cy="qa-language-dialog-inherited-banner">
+                {t('project_settings_qa_language_dialog_inherited_banner')}
+              </StyledBanner>
+            )}
+            <DialogTitle>
+              <div>{t('project_settings_qa_language_dialog_title')}</div>
+              <Box sx={{ fontSize: 14, fontWeight: 'normal' }}>
+                <LanguageItem language={languageConfig.language} />
+              </Box>
+            </DialogTitle>
+            <DialogContent sx={{ width: '90vw', maxWidth: 600 }}>
+              {(Object.keys(globalSettings) as QaCheckType[]).map((type) => (
+                <QaSettingsItem
+                  key={type}
+                  showDefault
+                  type={type}
+                  value={values.settings[type] ?? null}
+                  globalDefault={globalSettings[type]}
+                  onChange={(checkType, severity) => {
+                    setFieldValue(`settings.${checkType}`, severity);
+                  }}
+                />
+              ))}
+            </DialogContent>
+            <Box display="flex" justifyContent="space-between">
+              <DialogActions>
+                {!isInherited && (
+                  <LoadingButton
+                    data-cy="qa-language-dialog-reset-to-global"
+                    variant="outlined"
+                    color="secondary"
+                    loading={isBusy}
+                    onClick={handleResetToGlobal}
+                  >
+                    {t('project_settings_qa_language_dialog_reset_to_global')}
+                  </LoadingButton>
+                )}
+              </DialogActions>
+              <DialogActions>
+                <Button onClick={onClose}>
+                  {t('project_mt_dialog_cancel_button')}
+                </Button>
                 <LoadingButton
-                  data-cy="qa-language-dialog-reset-to-global"
-                  variant="outlined"
-                  color="secondary"
-                  loading={resetting || isSubmitting}
-                  onClick={handleResetToGlobal}
+                  disabled={!dirty}
+                  onClick={() => handleSubmit()}
+                  variant="contained"
+                  color="primary"
+                  loading={isBusy}
+                  data-cy="qa-language-dialog-save"
                 >
-                  {t('project_settings_qa_language_dialog_reset_to_global')}
+                  {t('project_mt_dialog_save_button')}
                 </LoadingButton>
-              )}
-            </DialogActions>
-            <DialogActions>
-              <Button onClick={onClose}>
-                {t('project_mt_dialog_cancel_button')}
-              </Button>
-              <LoadingButton
-                disabled={!dirty}
-                onClick={() => handleSubmit()}
-                variant="contained"
-                color="primary"
-                loading={resetting || isSubmitting}
-                data-cy="qa-language-dialog-save"
-              >
-                {t('project_mt_dialog_save_button')}
-              </LoadingButton>
-            </DialogActions>
-          </Box>
-        </Dialog>
-      )}
+              </DialogActions>
+            </Box>
+          </Dialog>
+        );
+      }}
     </Formik>
   );
 };
