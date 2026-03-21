@@ -55,6 +55,7 @@ tolgee:
     fake-mt-providers: true
     verify-sso-account-available-bypass: true
     fake-llm-providers: true
+    disable-url-ssrf-protection: true
   smtp:
     host: localhost
     port: ${TOLGEE_E2E_SMTP_PORT:21025}

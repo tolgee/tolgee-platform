@@ -21,10 +21,10 @@ class UrlSecurity(
    * Throws [BadRequestException] if the URL is malformed, uses a non-HTTP(S) scheme,
    * or the host is a known private/internal address.
    *
-   * Skipped when internal controller is enabled (E2E tests use localhost URLs).
+   * Skipped when tolgee.internal.disable-url-ssrf-protection is true (E2E tests use localhost URLs).
    */
   fun validateUrl(url: String) {
-    if (internalProperties.controllerEnabled) return
+    if (internalProperties.disableUrlSsrfProtection) return
 
     val uri =
       try {
