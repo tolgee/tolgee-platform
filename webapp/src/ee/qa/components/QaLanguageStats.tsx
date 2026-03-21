@@ -23,7 +23,6 @@ const StyledContent = styled(Box)`
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 20px 16px;
 `;
 
 const StyledHeader = styled(Box)`
@@ -63,26 +62,18 @@ export const QaLanguageStats = ({
         .sort(([, a], [, b]) => b - a)
     : [];
 
-  const getLanguages = () => {
-    return languageTag === baseLanguage
+  const targetLanguages =
+    languageTag === baseLanguage
       ? [languageTag]
       : ([baseLanguage, languageTag].filter(Boolean) as string[]);
-  };
 
-  const navigateToTranslations = () => {
+  const navigateToTranslations = (
+    filters: Record<string, unknown> = {}
+  ) => {
     history.push(
       getProjectTranslationsUrl(project.id, {
-        languages: getLanguages(),
-        filters: { filterHasQaIssues: true },
-      })
-    );
-  };
-
-  const navigateToCheckType = (checkType: string) => {
-    history.push(
-      getProjectTranslationsUrl(project.id, {
-        languages: getLanguages(),
-        filters: { filterQaCheckTypes: [checkType] },
+        languages: targetLanguages,
+        filters,
       })
     );
   };
@@ -107,7 +98,9 @@ export const QaLanguageStats = ({
               key={checkType}
               checkType={checkType as QaCheckType}
               count={count}
-              onClick={() => navigateToCheckType(checkType)}
+              onClick={() =>
+                navigateToTranslations({ filterQaCheckTypes: [checkType] })
+              }
             />
           ))}
           {entries.length === 0 && (
@@ -140,7 +133,7 @@ export const QaLanguageStats = ({
           variant="outlined"
           color="primary"
           size="small"
-          onClick={navigateToTranslations}
+          onClick={() => navigateToTranslations({ filterHasQaIssues: true })}
         >
           {t('qa_dashboard_popover_show_all')}
         </Button>
