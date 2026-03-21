@@ -42,7 +42,7 @@ export const TranslationVariantVisual = ({
   );
   return (
     <LimitedHeightText
-      maxLines={maxLines === undefined ? 3 : maxLines!}
+      maxLines={maxLines ?? 3}
       width={width}
       lineHeight="1.3em"
     >

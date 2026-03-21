@@ -1,4 +1,4 @@
-import { styled, Tooltip } from '@mui/material';
+import { alpha, styled, Tooltip } from '@mui/material';
 import { TooltipCard } from 'tg.component/common/TooltipCard';
 import { QaCheckItem } from 'tg.ee';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -12,6 +12,14 @@ type QaIssueModel = components['schemas']['QaIssueModel'];
 const StyledHighlight = styled('span')`
   text-decoration: underline;
   text-decoration-color: ${({ theme }) => theme.palette.error.main};
+  border-radius: 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background-color 0.1s ease-out;
+  &:hover {
+    background-color: ${({ theme }) => alpha(theme.palette.error.main, 0.12)};
+    transition: background-color 0.1s ease-in;
+  }
 `;
 
 type Props = {
@@ -30,8 +38,9 @@ export const QaIssueHighlight = ({
   const project = useProject();
   const { correctTranslation, canEditTranslation } = useTranslationsActions();
 
+  const replacement = issue.replacement;
   const handleCorrect =
-    issue.replacement != null && canEditTranslation(translationId)
+    replacement != null && canEditTranslation(translationId)
       ? () => {
           correctTranslation({
             translationId,
@@ -39,7 +48,7 @@ export const QaIssueHighlight = ({
             issue: {
               positionStart: issue.positionStart,
               positionEnd: issue.positionEnd,
-              replacement: issue.replacement!,
+              replacement,
             },
           });
         }

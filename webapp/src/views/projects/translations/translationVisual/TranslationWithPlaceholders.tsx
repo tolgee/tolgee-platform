@@ -134,15 +134,16 @@ export const TranslationWithPlaceholders = ({
   const project = useProject();
   const theme = useTheme();
   const direction = getLanguageDirection(locale);
+  const text = content || '';
   const placeholders = useMemo(() => {
     if (!project.icuPlaceholders) {
       return [];
     }
-    return getPlaceholders(content || '', nested) || [];
+    return getPlaceholders(text, nested) || [];
   }, [content, nested]);
 
   const glossaryTerms = useGlossaryTermHighlights({
-    text: content || '',
+    text,
     languageTag: locale,
     enabled: showHighlights ?? false,
   });
@@ -151,7 +152,7 @@ export const TranslationWithPlaceholders = ({
     placeholders,
     glossaryTerms,
     qaIssues,
-    (content || '').length
+    text.length
   );
 
   const StyledPlaceholdersWrapper = useMemo(() => {
@@ -166,9 +167,13 @@ export const TranslationWithPlaceholders = ({
   let index = 0;
   for (const modifier of modifiers) {
     if (modifier.position.start !== index) {
-      chunks.push(content?.substring(index, modifier.position.start) ?? '');
+      chunks.push(text.substring(index, modifier.position.start));
     }
     index = modifier.position.end;
+    const segmentText = text.substring(
+      modifier.position.start,
+      modifier.position.end
+    );
     if (modifier.placeholder) {
       chunks.push(
         placeholderToElement({
@@ -178,27 +183,21 @@ export const TranslationWithPlaceholders = ({
         })
       );
     } else if (modifier.highlight) {
-      const text =
-        content?.substring(modifier.position.start, modifier.position.end) ??
-        '';
       chunks.push(
         <GlossaryHighlight
           key={index}
-          text={text}
+          text={segmentText}
           term={modifier.highlight.value}
           languageTag={locale}
           targetLanguageTag={targetLocale}
         />
       );
     } else if (modifier.qaIssue && translationId) {
-      const text =
-        content?.substring(modifier.position.start, modifier.position.end) ??
-        '';
       chunks.push(
         <QaIssueHighlight
           key={index}
-          text={text}
-          translationText={content}
+          text={segmentText}
+          translationText={text}
           issue={modifier.qaIssue}
           translationId={translationId}
         />
@@ -206,8 +205,8 @@ export const TranslationWithPlaceholders = ({
     }
   }
 
-  if (index < (content || '').length) {
-    chunks.push(content.substring(index));
+  if (index < text.length) {
+    chunks.push(text.substring(index));
   }
 
   return (
