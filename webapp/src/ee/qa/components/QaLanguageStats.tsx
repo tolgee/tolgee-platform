@@ -67,9 +67,7 @@ export const QaLanguageStats = ({
       ? [languageTag]
       : ([baseLanguage, languageTag].filter(Boolean) as string[]);
 
-  const navigateToTranslations = (
-    filters: Record<string, unknown> = {}
-  ) => {
+  const navigateToTranslations = (filters: Record<string, unknown> = {}) => {
     history.push(
       getProjectTranslationsUrl(project.id, {
         languages: targetLanguages,
