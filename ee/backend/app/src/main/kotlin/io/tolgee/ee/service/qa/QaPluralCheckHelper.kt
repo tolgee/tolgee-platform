@@ -44,8 +44,8 @@ object QaPluralCheckHelper {
       results.addAll(
         variantResults.map { result ->
           result.copy(
-            positionStart = result.positionStart + offset,
-            positionEnd = result.positionEnd + offset,
+            positionStart = result.positionStart?.let { it + offset },
+            positionEnd = result.positionEnd?.let { it + offset },
             pluralVariant = variantKey,
           )
         },

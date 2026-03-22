@@ -80,8 +80,8 @@ class DifferentUrlsCheckTest {
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_URL_MISSING)
     assertThat(results[0].params).containsEntry("url", "https://example.com")
     assertThat(results[0].replacement).isNull()
-    assertThat(results[0].positionStart).isEqualTo(0)
-    assertThat(results[0].positionEnd).isEqualTo(0)
+    assertThat(results[0].positionStart).isNull()
+    assertThat(results[0].positionEnd).isNull()
   }
 
   @Test

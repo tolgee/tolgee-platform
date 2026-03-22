@@ -1,6 +1,6 @@
 export type QaReplacementParams = {
-  positionStart: number;
-  positionEnd: number;
+  positionStart?: number;
+  positionEnd?: number;
   replacement?: string;
 };
 
@@ -12,6 +12,9 @@ export function applyQaReplacement(
   text: string,
   issue: QaReplacementParams
 ): string {
+  if (issue.positionStart == null || issue.positionEnd == null) {
+    return text;
+  }
   return (
     text.slice(0, issue.positionStart) +
     (issue.replacement ?? '') +
@@ -20,8 +23,8 @@ export function applyQaReplacement(
 }
 
 export type QaVariantIssue = {
-  positionStart: number;
-  positionEnd: number;
+  positionStart?: number;
+  positionEnd?: number;
   pluralVariant?: string;
 };
 
@@ -37,7 +40,11 @@ export function adjustQaIssuesForVariant<T extends QaVariantIssue>(
     .filter((i) => i.pluralVariant === variant || !i.pluralVariant)
     .map((i) => ({
       ...i,
-      positionStart: i.positionStart - variantOffset,
-      positionEnd: i.positionEnd - variantOffset,
+      positionStart:
+        i.positionStart != null
+          ? i.positionStart - variantOffset
+          : i.positionStart,
+      positionEnd:
+        i.positionEnd != null ? i.positionEnd - variantOffset : i.positionEnd,
     }));
 }

@@ -76,8 +76,8 @@ class DifferentUrlsCheck : QaCheck {
           type = QaCheckType.DIFFERENT_URLS,
           message = QaIssueMessage.QA_URL_MISSING,
           replacement = null,
-          positionStart = 0,
-          positionEnd = 0,
+          positionStart = null,
+          positionEnd = null,
           params = mapOf("url" to missingUrls[i]),
         ),
       )

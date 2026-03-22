@@ -22,6 +22,16 @@ const StyledHighlight = styled('span')`
   }
 `;
 
+const StyledMarker = styled('span')`
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background-color: ${({ theme }) => theme.palette.error.main};
+  vertical-align: text-bottom;
+  border-radius: 1px;
+  cursor: pointer;
+`;
+
 type Props = {
   text: string;
   translationText: string;
@@ -39,15 +49,21 @@ export const QaIssueHighlight = ({
   const { correctTranslation, canEditTranslation } = useTranslationsActions();
 
   const replacement = issue.replacement;
+  const positionStart = issue.positionStart;
+  const positionEnd = issue.positionEnd;
+
   const handleCorrect =
-    replacement != null && canEditTranslation(translationId)
+    replacement != null &&
+    positionStart != null &&
+    positionEnd != null &&
+    canEditTranslation(translationId)
       ? () => {
           correctTranslation({
             translationId,
             translationText,
             issue: {
-              positionStart: issue.positionStart,
-              positionEnd: issue.positionEnd,
+              positionStart,
+              positionEnd,
               replacement,
             },
           });
@@ -89,7 +105,11 @@ export const QaIssueHighlight = ({
         </div>
       }
     >
-      <StyledHighlight data-cy="qa-issue-highlight">{text}</StyledHighlight>
+      {text ? (
+        <StyledHighlight data-cy="qa-issue-highlight">{text}</StyledHighlight>
+      ) : (
+        <StyledMarker data-cy="qa-issue-marker" />
+      )}
     </Tooltip>
   );
 };

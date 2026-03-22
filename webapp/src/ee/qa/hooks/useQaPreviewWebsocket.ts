@@ -114,8 +114,8 @@ export const useQaPreviewWebsocket = ({
     const all = Array.from(issuesByType.values()).flat();
     return all.sort(
       (a, b) =>
-        a.positionStart - b.positionStart ||
-        a.positionEnd - b.positionEnd ||
+        (a.positionStart ?? Infinity) - (b.positionStart ?? Infinity) ||
+        (a.positionEnd ?? Infinity) - (b.positionEnd ?? Infinity) ||
         a.type.localeCompare(b.type)
     );
   }, [issuesByType]);

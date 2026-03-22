@@ -64,8 +64,8 @@ class QaCheckRunnerService(
           type = check.type,
           message = QaIssueMessage.QA_CHECK_FAILED,
           replacement = null,
-          positionStart = 0,
-          positionEnd = 0,
+          positionStart = null,
+          positionEnd = null,
         ),
       )
     }

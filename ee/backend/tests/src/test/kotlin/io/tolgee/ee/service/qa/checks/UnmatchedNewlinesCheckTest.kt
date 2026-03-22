@@ -166,8 +166,8 @@ class UnmatchedNewlinesCheckTest {
     assertThat(results).hasSize(1)
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_NEWLINES_TOO_FEW_SECTIONS)
     assertThat(results[0].replacement).isNull()
-    assertThat(results[0].positionStart).isEqualTo(0)
-    assertThat(results[0].positionEnd).isEqualTo(0)
+    assertThat(results[0].positionStart).isNull()
+    assertThat(results[0].positionEnd).isNull()
     assertThat(results[0].params).containsEntry("expected", "2")
     assertThat(results[0].params).containsEntry("actual", "1")
   }
@@ -179,8 +179,8 @@ class UnmatchedNewlinesCheckTest {
     assertThat(results).hasSize(1)
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_NEWLINES_TOO_MANY_SECTIONS)
     assertThat(results[0].replacement).isNull()
-    assertThat(results[0].positionStart).isEqualTo(0)
-    assertThat(results[0].positionEnd).isEqualTo(0)
+    assertThat(results[0].positionStart).isNull()
+    assertThat(results[0].positionEnd).isNull()
     assertThat(results[0].params).containsEntry("expected", "1")
     assertThat(results[0].params).containsEntry("actual", "2")
   }

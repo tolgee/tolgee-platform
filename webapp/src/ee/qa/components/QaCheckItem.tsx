@@ -137,7 +137,10 @@ export const QaCheckItem = ({
   const { t } = useTranslate();
   const typeLabel = useQaCheckTypeLabel(issue.type);
   const messageText = useQaIssueMessage(issue.message, issue.params);
-  const hasReplacement = issue.replacement != null;
+  const hasReplacement =
+    issue.replacement != null &&
+    issue.positionStart != null &&
+    issue.positionEnd != null;
 
   const showDiff = hasReplacement && issue.state === 'OPEN';
   const showButtonRow = !slim;
@@ -205,8 +208,8 @@ export const QaCheckItem = ({
           <StyledDiffText>
             {renderDiff(
               text,
-              issue.positionStart,
-              issue.positionEnd,
+              issue.positionStart ?? 0,
+              issue.positionEnd ?? 0,
               issue.replacement ?? ''
             )}
           </StyledDiffText>

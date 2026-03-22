@@ -108,8 +108,8 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     and i.type = :type
     and i.message = :message
     and (i.replacement = :replacement or (i.replacement is null and :replacement is null))
-    and i.positionStart = :positionStart
-    and i.positionEnd = :positionEnd
+    and (i.positionStart = :positionStart or (i.positionStart is null and :positionStart is null))
+    and (i.positionEnd = :positionEnd or (i.positionEnd is null and :positionEnd is null))
     and (i.pluralVariant = :pluralVariant or (i.pluralVariant is null and :pluralVariant is null))
     """,
   )
@@ -119,8 +119,8 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     type: QaCheckType,
     message: QaIssueMessage,
     replacement: String?,
-    positionStart: Int,
-    positionEnd: Int,
+    positionStart: Int?,
+    positionEnd: Int?,
     pluralVariant: String?,
   ): TranslationQaIssue?
 }

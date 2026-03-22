@@ -5615,9 +5615,9 @@ export interface components {
       params?: { [key: string]: string };
       pluralVariant?: string;
       /** Format: int32 */
-      positionEnd: number;
+      positionEnd?: number;
       /** Format: int32 */
-      positionStart: number;
+      positionStart?: number;
       replacement?: string;
       /** @enum {string} */
       type:
@@ -5685,9 +5685,9 @@ export interface components {
       params?: { [key: string]: string };
       pluralVariant?: string;
       /** Format: int32 */
-      positionEnd: number;
+      positionEnd?: number;
       /** Format: int32 */
-      positionStart: number;
+      positionStart?: number;
       replacement?: string;
       /** @enum {string} */
       state: "OPEN" | "IGNORED";

@@ -53,8 +53,8 @@ class QaCheckRunnerServiceTest {
     assertThat(results[0].type).isEqualTo(QaCheckType.EMPTY_TRANSLATION)
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_CHECK_FAILED)
     assertThat(results[0].replacement).isNull()
-    assertThat(results[0].positionStart).isEqualTo(0)
-    assertThat(results[0].positionEnd).isEqualTo(0)
+    assertThat(results[0].positionStart).isNull()
+    assertThat(results[0].positionEnd).isNull()
   }
 
   @Test
@@ -64,8 +64,8 @@ class QaCheckRunnerServiceTest {
         type = QaCheckType.EMPTY_TRANSLATION,
         message = QaIssueMessage.QA_EMPTY_TRANSLATION,
         replacement = null,
-        positionStart = 0,
-        positionEnd = 0,
+        positionStart = null,
+        positionEnd = null,
       )
     val successfulCheck =
       object : QaCheck {

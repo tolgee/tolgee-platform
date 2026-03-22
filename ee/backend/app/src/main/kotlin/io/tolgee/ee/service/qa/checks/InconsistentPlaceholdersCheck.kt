@@ -42,8 +42,8 @@ class InconsistentPlaceholdersCheck : QaCheck {
           type = QaCheckType.INCONSISTENT_PLACEHOLDERS,
           message = QaIssueMessage.QA_PLACEHOLDERS_MISSING,
           replacement = null,
-          positionStart = 0,
-          positionEnd = 0,
+          positionStart = null,
+          positionEnd = null,
           params = mapOf("placeholder" to name),
         ),
       )
@@ -51,7 +51,7 @@ class InconsistentPlaceholdersCheck : QaCheck {
 
     val extraNames = textNames - baseNames
     for (arg in textArgs.filter { it.name in extraNames }) {
-      val hasPosition = arg.positionEnd > arg.positionStart
+      val hasPosition = arg.positionStart != null && arg.positionEnd != null
       results.add(
         QaCheckResult(
           type = QaCheckType.INCONSISTENT_PLACEHOLDERS,
@@ -69,8 +69,8 @@ class InconsistentPlaceholdersCheck : QaCheck {
 
   data class ArgInfo(
     val name: String,
-    val positionStart: Int,
-    val positionEnd: Int,
+    val positionStart: Int? = null,
+    val positionEnd: Int? = null,
   )
 
   companion object {
@@ -88,7 +88,7 @@ class InconsistentPlaceholdersCheck : QaCheck {
     /**
      * Collects arg names with positions by accumulating patternString lengths.
      * Top-level args get accurate positions. Args nested inside complex styles
-     * (select/plural/choice) are collected with position 0,0 (name only) since
+     * (select/plural/choice) are collected with position null,null (name only) since
      * QaPluralCheckHelper handles per-variant splitting for plural messages.
      */
     private fun collectArgsWithPositions(
@@ -119,7 +119,7 @@ class InconsistentPlaceholdersCheck : QaCheck {
       for (content in node.contents) {
         if (content is MessagePatternUtil.ArgNode) {
           content.name?.let { name ->
-            args.add(ArgInfo(name, 0, 0))
+            args.add(ArgInfo(name))
           }
           content.complexStyle?.variants?.forEach { variant ->
             variant.message?.let { collectNamesOnly(it, args) }

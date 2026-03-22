@@ -56,8 +56,8 @@ class SpecialCharacterMismatchCheckTest {
     assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_SPECIAL_CHAR_MISSING)
     assertThat(results[0].params).containsEntry("character", "\$")
     assertThat(results[0].replacement).isNull()
-    assertThat(results[0].positionStart).isEqualTo(0)
-    assertThat(results[0].positionEnd).isEqualTo(0)
+    assertThat(results[0].positionStart).isNull()
+    assertThat(results[0].positionEnd).isNull()
   }
 
   @Test

@@ -18,8 +18,8 @@ class EmptyTranslationCheck : QaCheck {
           type = QaCheckType.EMPTY_TRANSLATION,
           message = QaIssueMessage.QA_EMPTY_TRANSLATION,
           replacement = null,
-          positionStart = 0,
-          positionEnd = 0,
+          positionStart = null,
+          positionEnd = null,
         ),
       )
     }

@@ -114,7 +114,7 @@ class RepeatedWordsCheckTest {
   fun `applying replacement fixes the text`() {
     val text = "the the dog"
     val result = check.check(params(text))[0]
-    val fixed = text.substring(0, result.positionStart) + result.replacement + text.substring(result.positionEnd)
+    val fixed = text.substring(0, result.positionStart!!) + result.replacement + text.substring(result.positionEnd!!)
     assertThat(fixed).isEqualTo("the dog")
   }
 

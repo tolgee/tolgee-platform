@@ -86,8 +86,8 @@ class InconsistentPlaceholdersCheckTest {
 
     val missingResult = results.first { it.message == QaIssueMessage.QA_PLACEHOLDERS_MISSING }
     assertThat(missingResult.params).containsEntry("placeholder", "name")
-    assertThat(missingResult.positionStart).isEqualTo(0)
-    assertThat(missingResult.positionEnd).isEqualTo(0)
+    assertThat(missingResult.positionStart).isNull()
+    assertThat(missingResult.positionEnd).isNull()
     assertThat(missingResult.replacement).isNull()
 
     val extraResult = results.first { it.message == QaIssueMessage.QA_PLACEHOLDERS_EXTRA }

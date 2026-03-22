@@ -63,7 +63,7 @@ class InconsistentHtmlCheckTest {
     assertThat(results).allMatch { it.type == QaCheckType.INCONSISTENT_HTML }
     assertThat(results).allMatch { it.message == QaIssueMessage.QA_HTML_TAG_MISSING }
     assertThat(results).allMatch { it.replacement == null }
-    assertThat(results).allMatch { it.positionStart == 0 && it.positionEnd == 0 }
+    assertThat(results).allMatch { it.positionStart == null && it.positionEnd == null }
     assertThat(results.map { it.params?.get("tag") }).containsExactlyInAnyOrder("<b>", "</b>")
   }
 

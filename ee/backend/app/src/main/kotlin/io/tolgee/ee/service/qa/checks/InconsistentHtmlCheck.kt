@@ -60,8 +60,8 @@ class InconsistentHtmlCheck : QaCheck {
             type = QaCheckType.INCONSISTENT_HTML,
             message = QaIssueMessage.QA_HTML_TAG_MISSING,
             replacement = null,
-            positionStart = 0,
-            positionEnd = 0,
+            positionStart = null,
+            positionEnd = null,
             params = mapOf("tag" to tag.raw),
           ),
         )

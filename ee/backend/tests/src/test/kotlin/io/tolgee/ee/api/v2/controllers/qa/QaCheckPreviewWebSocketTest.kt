@@ -69,8 +69,8 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
     assertThat(issues).hasSize(1)
     assertThat(issues[0]["type"]).isEqualTo("EMPTY_TRANSLATION")
     assertThat(issues[0]["message"]).isEqualTo("qa_empty_translation")
-    assertThat(issues[0]["positionStart"]).isEqualTo(0)
-    assertThat(issues[0]["positionEnd"]).isEqualTo(0)
+    assertThat(issues[0]["positionStart"]).isNull()
+    assertThat(issues[0]["positionEnd"]).isNull()
   }
 
   @Test

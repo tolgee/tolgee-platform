@@ -27,8 +27,8 @@ class TranslationQaIssue(
   var message: QaIssueMessage = QaIssueMessage.QA_EMPTY_TRANSLATION,
   @Column(columnDefinition = "text")
   var replacement: String? = null,
-  var positionStart: Int = 0,
-  var positionEnd: Int = 0,
+  var positionStart: Int? = null,
+  var positionEnd: Int? = null,
   @Enumerated(EnumType.STRING)
   @ColumnDefault("'OPEN'")
   var state: QaIssueState = QaIssueState.OPEN,

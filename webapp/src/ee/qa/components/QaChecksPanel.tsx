@@ -123,7 +123,7 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
       issue.state === 'IGNORED' ? unignoreMutation : ignoreMutation;
     mutation.mutate({
       path: {
-        projectId: project!.id,
+        projectId: project.id,
         translationId,
       },
       content: {
@@ -149,7 +149,10 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
             text={text}
             slim={true}
             onCorrect={
-              issue.replacement != null && issue.state === 'OPEN'
+              issue.replacement != null &&
+              issue.positionStart != null &&
+              issue.positionEnd != null &&
+              issue.state === 'OPEN'
                 ? () => handleCorrect(issue)
                 : undefined
             }

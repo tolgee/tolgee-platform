@@ -39,8 +39,8 @@ class SpecialCharacterMismatchCheck : QaCheck {
           type = QaCheckType.SPECIAL_CHARACTER_MISMATCH,
           message = QaIssueMessage.QA_SPECIAL_CHAR_MISSING,
           replacement = null,
-          positionStart = 0,
-          positionEnd = 0,
+          positionStart = null,
+          positionEnd = null,
           params = mapOf("character" to char.toString()),
         ),
       )

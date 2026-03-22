@@ -87,9 +87,9 @@ function sortModifiers(
     }
   });
 
-  // Add QA issue highlights (skip overlapping with existing modifiers and zero-length spans)
+  // Add QA issue highlights (skip issues with no position)
   qaIssues.forEach((issue) => {
-    if (issue.positionStart === issue.positionEnd) {
+    if (issue.positionStart == null || issue.positionEnd == null) {
       return;
     }
     const issuePosition: Position = {
@@ -109,7 +109,7 @@ function sortModifiers(
 
   return modifiers
     .filter(
-      ({ position }) => position.start < contentLength && position.end > 0
+      ({ position }) => position.start <= contentLength && position.end >= 0
     )
     .map((modifier) => ({
       ...modifier,
@@ -185,7 +185,7 @@ export const TranslationWithPlaceholders = ({
     } else if (modifier.highlight) {
       chunks.push(
         <GlossaryHighlight
-          key={index}
+          key={`glossary-${modifier.position.start}-${modifier.highlight.value}`}
           text={segmentText}
           term={modifier.highlight.value}
           languageTag={locale}
@@ -195,7 +195,7 @@ export const TranslationWithPlaceholders = ({
     } else if (modifier.qaIssue && translationId) {
       chunks.push(
         <QaIssueHighlight
-          key={index}
+          key={`qa-${modifier.position.start}-${modifier.qaIssue.type}`}
           text={segmentText}
           translationText={text}
           issue={modifier.qaIssue}

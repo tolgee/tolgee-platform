@@ -60,8 +60,8 @@ class BracketsMismatchCheck : QaCheck {
               type = QaCheckType.BRACKETS_MISMATCH,
               message = QaIssueMessage.QA_BRACKETS_MISSING,
               replacement = null,
-              positionStart = 0,
-              positionEnd = 0,
+              positionStart = null,
+              positionEnd = null,
               params = mapOf("bracket" to bracket.toString()),
             ),
           )

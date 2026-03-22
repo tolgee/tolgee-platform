@@ -66,8 +66,8 @@ class UnmatchedNewlinesCheck : QaCheck {
       type = QaCheckType.UNMATCHED_NEWLINES,
       message = message,
       replacement = null,
-      positionStart = 0,
-      positionEnd = 0,
+      positionStart = null,
+      positionEnd = null,
       params = mapOf("expected" to baseBlocks.toString(), "actual" to textBlocks.toString()),
     )
   }

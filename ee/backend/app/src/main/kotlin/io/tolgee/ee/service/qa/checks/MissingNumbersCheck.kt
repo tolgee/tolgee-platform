@@ -36,8 +36,8 @@ class MissingNumbersCheck : QaCheck {
         type = QaCheckType.MISSING_NUMBERS,
         message = QaIssueMessage.QA_NUMBERS_MISSING,
         replacement = null,
-        positionStart = 0,
-        positionEnd = 0,
+        positionStart = null,
+        positionEnd = null,
         params = mapOf("number" to number),
       )
     }

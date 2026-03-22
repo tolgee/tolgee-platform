@@ -5347,4 +5347,15 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="anty" id="1774018205000-1">
+        <dropNotNullConstraint tableName="translation_qa_issue" columnName="position_start" columnDataType="INTEGER"/>
+        <dropNotNullConstraint tableName="translation_qa_issue" columnName="position_end" columnDataType="INTEGER"/>
+    </changeSet>
+    <changeSet author="anty" id="1774018205000-2">
+        <update tableName="translation_qa_issue">
+            <column name="position_start" valueNumeric="NULL"/>
+            <column name="position_end" valueNumeric="NULL"/>
+            <where>position_start = 0 AND position_end = 0</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
