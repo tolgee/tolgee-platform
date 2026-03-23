@@ -28,42 +28,42 @@ jobs:
           event-name: ${{ inputs.event-name }}
 
       - name: Setup environment
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-env
 
       - name: Download backend build result
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/download-backend-build
 
       - name: Download frontend build result
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v4
         with:
           name: webapp
           path: ./webapp/dist
 
       - name: Download dependencies
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v4
         with:
           name: e2e_deps
           path: ~/
 
       - name: Untar node modules
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: tar --zstd -xf ~/node_modules.tar.zst ./e2e/node_modules
 
       - name: Create cache directory
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: mkdir -p ~/.cache
 
       - name: Untar Cypress cache
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: tar --zstd -xf ~/cypress_cache.tar.zst
         working-directory: /home/runner/.cache/
 
       - name: Run e2e test
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 30
@@ -96,7 +96,7 @@ jobs:
           path: ./e2e/server.log
 
       - name: Save source cache
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/save-source-cache
         with:
           cache-key: ${{ steps.source-cache.outputs.cache-key }}
