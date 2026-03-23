@@ -2,6 +2,7 @@ package io.tolgee.service.dataImport.processors
 
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.exceptions.ImportCannotParseFileException
+import io.tolgee.util.PathSecurity
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
@@ -40,7 +41,7 @@ class ZipTypeProcessor(
           continue
         }
 
-        val fileName = entry.name.replaceRootSlash()
+        val fileName = PathSecurity.sanitizePath(entry.name.replaceRootSlash())
         if (files.contains(fileName)) {
           continue
         }

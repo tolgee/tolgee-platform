@@ -4,11 +4,11 @@ import io.tolgee.formats.ExportFormat
 import io.tolgee.formats.xmlResources.XmlResourcesStringValue
 import io.tolgee.formats.xmlResources.out.TextToXmlResourcesConvertor
 import io.tolgee.testing.assert
+import io.tolgee.util.XmlSecurity
 import org.assertj.core.api.AbstractStringAssert
 import org.junit.jupiter.api.Test
 import org.w3c.dom.Document
 import org.w3c.dom.Node
-import javax.xml.parsers.DocumentBuilderFactory
 
 class TextToComposeXmlConvertorTest {
   @Test
@@ -185,7 +185,7 @@ class TextToComposeXmlConvertorTest {
   }
 
   private val document: Document by lazy {
-    val factory = DocumentBuilderFactory.newInstance()
+    val factory = XmlSecurity.newSecureDocumentBuilderFactory()
     val builder = factory.newDocumentBuilder()
     builder.newDocument()
   }

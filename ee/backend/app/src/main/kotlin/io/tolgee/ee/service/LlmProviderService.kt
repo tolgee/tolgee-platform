@@ -26,6 +26,7 @@ import io.tolgee.model.enums.LlmProviderType
 import io.tolgee.repository.LlmProviderRepository
 import io.tolgee.service.LlmPropertiesService
 import io.tolgee.service.organization.OrganizationService
+import io.tolgee.util.UrlSecurity
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
@@ -54,6 +55,7 @@ class LlmProviderService(
   private val anthropicApiService: AnthropicApiService,
   private val googleAiApiService: GoogleAiApiService,
   private val llmProviderResolver: LlmProviderResolver,
+  private val urlSecurity: UrlSecurity,
 ) {
   private val cache: Cache by lazy { cacheManager.getCache(Caches.LLM_PROVIDERS) ?: throw InvalidStateException() }
   private var lastUsedMap: MutableMap<String, Long> = mutableMapOf()
@@ -91,6 +93,7 @@ class LlmProviderService(
     organizationId: Long,
     dto: LlmProviderRequest,
   ): LlmProviderDto {
+    validateApiUrl(dto.apiUrl)
     val provider =
       LlmProvider(
         name = dto.name,
@@ -116,6 +119,7 @@ class LlmProviderService(
     dto: LlmProviderRequest,
   ): LlmProviderDto {
     val provider = llmProviderRepository.findById(providerId).getOrNull() ?: throw NotFoundException()
+    validateApiUrl(dto.apiUrl)
     provider.name = dto.name
     provider.type = dto.type
     provider.priority = dto.priority
@@ -310,6 +314,12 @@ class LlmProviderService(
       response = json,
       usage = PromptResult.Usage(inputTokens = 42, outputTokens = 21, cachedTokens = 1),
     )
+  }
+
+  private fun validateApiUrl(apiUrl: String) {
+    if (apiUrl.isNotBlank()) {
+      urlSecurity.validateUrl(apiUrl)
+    }
   }
 
   companion object {

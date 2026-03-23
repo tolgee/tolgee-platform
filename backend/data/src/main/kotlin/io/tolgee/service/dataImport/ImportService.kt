@@ -40,6 +40,7 @@ import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.service.branching.BranchService
 import io.tolgee.service.dataImport.status.ImportApplicationStatus
+import io.tolgee.util.PathSecurity
 import io.tolgee.util.getSafeNamespace
 import jakarta.persistence.EntityManager
 import org.springframework.context.ApplicationContext
@@ -507,7 +508,8 @@ class ImportService(
     fileName: String,
   ): String {
     val notBlankFilename = fileName.ifBlank { "blank_name" }
-    return "${getFileStorageImportRoot(importId)}/$notBlankFilename"
+    val sanitized = PathSecurity.sanitizePath(notBlankFilename)
+    return "${getFileStorageImportRoot(importId)}/$sanitized"
   }
 
   private fun getFileStorageImportRoot(importId: String) = "importFiles/$importId"

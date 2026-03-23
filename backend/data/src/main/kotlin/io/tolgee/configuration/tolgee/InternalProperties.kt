@@ -40,4 +40,10 @@ class InternalProperties {
   var useInMemoryFileStorage: Boolean = false
 
   var clearLiquibaseChecksums: Boolean = false
+
+  /**
+   * When true, SSRF URL validation is skipped.
+   * Only enable for E2E tests that use localhost URLs for webhooks/LLM providers.
+   */
+  var disableUrlSsrfProtection: Boolean = false
 }
