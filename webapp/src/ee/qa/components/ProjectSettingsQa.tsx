@@ -87,16 +87,8 @@ export const ProjectSettingsQa = () => {
   return (
     <Box sx={{ mt: 3 }}>
       <SwitchWithDescription
-        title={
-          <T
-            keyName="project_settings_qa_enabled_toggle"
-          />
-        }
-        description={
-          <T
-            keyName="project_settings_qa_enabled_description"
-          />
-        }
+        title={<T keyName="project_settings_qa_enabled_toggle" />}
+        description={<T keyName="project_settings_qa_enabled_description" />}
         checked={qaProjectEnabled}
         onSwitch={handleToggle}
         disabled={toggleQaMutation.isLoading}
