@@ -6,6 +6,7 @@ import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.repository.qa.ProjectQaConfigRepository
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
@@ -32,20 +33,13 @@ class QaCheckRunnerServiceTest {
     Mockito.`when`(config.settings).thenReturn(allWarnings)
     Mockito.`when`(repo.findByProjectId(Mockito.anyLong())).thenReturn(config)
     val qaRecheckService = Mockito.mock(QaRecheckService::class.java)
-    val languageStatsService = Mockito.mock(io.tolgee.service.project.LanguageStatsService::class.java)
+    val languageStatsService = Mockito.mock(LanguageStatsService::class.java)
     return ProjectQaConfigService(repo, langRepo, projectService, entityManager, qaRecheckService, languageStatsService)
   }
 
   @Test
   fun `returns fallback issue when check throws exception`() {
-    val failingCheck =
-      object : QaCheck {
-        override val type = QaCheckType.EMPTY_TRANSLATION
-
-        override fun check(params: QaCheckParams): List<QaCheckResult> {
-          throw RuntimeException("Intentional test failure")
-        }
-      }
+    val failingCheck = failingCheck(QaCheckType.EMPTY_TRANSLATION)
     val service = QaCheckRunnerService(listOf(failingCheck), allEnabledConfigService())
 
     val results = service.runEnabledChecks(1L, params)
@@ -74,14 +68,7 @@ class QaCheckRunnerServiceTest {
 
         override fun check(params: QaCheckParams): List<QaCheckResult> = listOf(successResult)
       }
-    val failingCheck =
-      object : QaCheck {
-        override val type = QaCheckType.SPACES_MISMATCH
-
-        override fun check(params: QaCheckParams): List<QaCheckResult> {
-          throw RuntimeException("Intentional test failure")
-        }
-      }
+    val failingCheck = failingCheck(QaCheckType.SPACES_MISMATCH)
     val service = QaCheckRunnerService(listOf(successfulCheck, failingCheck), allEnabledConfigService())
 
     val results = service.runEnabledChecks(1L, params)
@@ -91,4 +78,13 @@ class QaCheckRunnerServiceTest {
     assertThat(results[1].type).isEqualTo(QaCheckType.SPACES_MISMATCH)
     assertThat(results[1].message).isEqualTo(QaIssueMessage.QA_CHECK_FAILED)
   }
+
+  private fun failingCheck(type: QaCheckType): QaCheck =
+    object : QaCheck {
+      override val type = type
+
+      override fun check(params: QaCheckParams): List<QaCheckResult> {
+        throw RuntimeException("Intentional test failure")
+      }
+    }
 }

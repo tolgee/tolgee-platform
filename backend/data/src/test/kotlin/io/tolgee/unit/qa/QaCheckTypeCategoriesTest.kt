@@ -9,12 +9,8 @@ class QaCheckTypeCategoriesTest {
   fun `CATEGORIES contains every QaCheckType exactly once`() {
     val allTypesInCategories = QaCheckType.CATEGORIES.values.flatten()
 
-    assertThat(allTypesInCategories.toSet())
-      .`as`("CATEGORIES must contain every QaCheckType value")
-      .isEqualTo(QaCheckType.entries.toSet())
-
     assertThat(allTypesInCategories)
-      .`as`("CATEGORIES must not contain duplicate QaCheckType values")
-      .hasSize(allTypesInCategories.toSet().size)
+      .`as`("CATEGORIES must contain every QaCheckType exactly once")
+      .containsExactlyInAnyOrderElementsOf(QaCheckType.entries)
   }
 }
