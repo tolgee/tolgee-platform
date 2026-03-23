@@ -23,38 +23,38 @@ jobs:
           event-name: ${{ inputs.event-name }}
 
       - name: Setup environment
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-env
         with:
           java: "false"
 
       - name: Install library dependencies
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: ./library
 
       - name: Lint library
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: npm run lint
         working-directory: ./library
 
       - name: Install webapp dependencies
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: ./webapp
 
       - name: Typescript on webapp
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: npm run tsc
         working-directory: ./webapp
 
       - name: Eslint on webapp
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: npm run eslint
         working-directory: ./webapp
 
       - name: Keys extraction check
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: npm run check-translations
         working-directory: ./webapp
 
@@ -73,7 +73,7 @@ jobs:
           TOLGEE_API_KEY: ${{ secrets.TOLGEE_API_KEY }}
 
       - name: Check it builds without ee directory
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: |
           rm -rf ./src/ee
           npm --prefix ../library install
@@ -83,7 +83,7 @@ jobs:
         working-directory: ./webapp
 
       - name: Save source cache
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/save-source-cache
         with:
           cache-key: ${{ steps.source-cache.outputs.cache-key }}

@@ -22,20 +22,20 @@ jobs:
           event-name: ${{ inputs.event-name }}
 
       - name: Setup environment
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-env
 
       - name: Download backend build result
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/download-backend-build
 
       - name: Install webapp dependencies
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: ./webapp
 
       - name: Start backend
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: |
           ./gradlew server-app:bootRun --args='--spring.profiles.active=dev' &
           echo "Waiting for backend to start..."
@@ -45,14 +45,14 @@ jobs:
           SKIP_SERVER_BUILD: true
 
       - name: Generate schema
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: npm run schema
         working-directory: ./webapp
         env:
           VITE_APP_API_URL: http://localhost:8080
 
       - name: Check for uncommitted schema changes
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "❌ Schema files have changed! Please run 'npm run schema' locally and commit the changes."
@@ -67,7 +67,7 @@ jobs:
           echo "✅ Schema files are up to date"
 
       - name: Save source cache
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/save-source-cache
         with:
           cache-key: ${{ steps.source-cache.outputs.cache-key }}
@@ -87,23 +87,23 @@ jobs:
           event-name: ${{ inputs.event-name }}
 
       - name: Setup environment
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-env
         with:
           node: "false"
 
       - name: Download backend build result
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/download-backend-build
 
       - name: Generate migration diff
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: ./gradlew diffChangeLog
         env:
           SKIP_SERVER_BUILD: true
 
       - name: Check for uncommitted migration changes
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "❌ Migration files are out of date! Please run './gradlew diffChangeLog' locally and commit the changes."
@@ -118,7 +118,7 @@ jobs:
           echo "✅ Migration files are up to date"
 
       - name: Save source cache
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/save-source-cache
         with:
           cache-key: ${{ steps.source-cache.outputs.cache-key }}

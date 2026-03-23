@@ -56,13 +56,13 @@ jobs:
           event-name: ${{ inputs.event-name }}
 
       - name: Setup environment
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup-env
         with:
           node: "false"
 
       - name: Download backend build result
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/download-backend-build
 
       - name: Remove ee
@@ -70,7 +70,7 @@ jobs:
         run: rm -rf ./ee
 
       - name: Run backend tests
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 30
@@ -131,7 +131,7 @@ jobs:
           flaky-rate-report: true
 
       - name: Save source cache
-        if: steps.source-cache.outputs.cache-hit != 'true'
+        if: success() && steps.source-cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/save-source-cache
         with:
           cache-key: ${{ steps.source-cache.outputs.cache-key }}
