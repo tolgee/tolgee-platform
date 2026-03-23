@@ -1,3 +1,10 @@
+## [3.173.2](https://github.com/tolgee/tolgee-platform/compare/v3.173.1...v3.173.2) (2026-03-23)
+
+
+### Bug Fixes
+
+* batch IN clause in LanguageStatsListener to avoid PostgreSQL parameter limit ([#3506](https://github.com/tolgee/tolgee-platform/issues/3506)) ([dc39f6a](https://github.com/tolgee/tolgee-platform/commit/dc39f6abbca00d57bd6aa0bfd04acb0af3da36bf))
+
 ## [3.173.1](https://github.com/tolgee/tolgee-platform/compare/v3.173.0...v3.173.1) (2026-03-20)
 
 
