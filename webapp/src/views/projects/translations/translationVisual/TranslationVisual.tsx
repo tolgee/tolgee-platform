@@ -26,7 +26,7 @@ type Props = {
   showHighlights?: boolean;
   isPlural: boolean;
   extraPadding?: boolean;
-  qaIssues?: QaIssueModel[];
+  qaIssues?: QaIssueModel[] | null;
   translationId?: number;
 };
 
@@ -40,7 +40,7 @@ export const TranslationVisual = ({
   showHighlights,
   isPlural,
   extraPadding,
-  qaIssues = [],
+  qaIssues,
   translationId,
 }: Props) => {
   const project = useProject();
@@ -48,7 +48,7 @@ export const TranslationVisual = ({
     return getTolgeeFormat(text || '', isPlural, !project.icuPlaceholders);
   }, [text, isPlural]);
   const openedQaIssues = useMemo(
-    () => qaIssues.filter((issue) => issue.state === 'OPEN'),
+    () => (qaIssues ?? []).filter((issue) => issue.state === 'OPEN'),
     [qaIssues]
   );
 

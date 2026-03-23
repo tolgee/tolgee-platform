@@ -5,7 +5,6 @@ import io.tolgee.constants.Feature
 import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.events.OnOrganizationFeaturesChanged
 import io.tolgee.service.project.ProjectService
-import io.tolgee.util.Logging
 import io.tolgee.util.logger
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
@@ -16,7 +15,9 @@ import org.springframework.transaction.event.TransactionalEventListener
 class QaFeatureAccessListener(
   private val projectService: ProjectService,
   private val projectQaConfigService: ProjectQaConfigService,
-) : Logging {
+) {
+  private val logger = logger()
+
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   @Async
   fun onOrganizationFeaturesChanged(event: OnOrganizationFeaturesChanged) {

@@ -44,7 +44,7 @@ class QaCheckChunkProcessor(
   override fun getChunkSize(
     request: QaCheckRequest,
     projectId: Long?,
-  ): Int = 100
+  ): Int = 10
 
-  override fun getJobCharacter(): JobCharacter = JobCharacter.FAST
+  override fun getJobCharacter(): JobCharacter = JobCharacter.SLOW
 }

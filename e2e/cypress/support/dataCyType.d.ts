@@ -727,7 +727,9 @@ declare namespace DataCy {
         "prompt-basic-option" |
         "prompt-basic-option-edit" |
         "qa-check-item" |
+        "qa-enabled-toggle" |
         "qa-issue-highlight" |
+        "qa-issue-marker" |
         "qa-language-dialog-inherited-banner" |
         "qa-language-dialog-reset-to-global" |
         "qa-language-dialog-save" |
@@ -735,6 +737,7 @@ declare namespace DataCy {
         "qa-panel-container" |
         "qa-panel-container-disabled" |
         "qa-panel-container-empty" |
+        "qa-panel-container-project-disabled" |
         "qa-settings-row" |
         "qa-settings-select" |
         "quick-start-action" |
