@@ -2,7 +2,6 @@ package io.tolgee.ee.api.v2.controllers.qa
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.dtos.cacheable.UserAccountDto
@@ -21,6 +20,7 @@ import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.security.authentication.JwtService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
@@ -49,7 +49,7 @@ class QaCheckPreviewWebSocketHandler(
   private val qaCheckRunnerService: QaCheckRunnerService,
   private val jwtService: JwtService,
   private val securityService: SecurityService,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val projectFeatureGuard: ProjectFeatureGuard,
   private val projectService: ProjectService,
   private val keyService: KeyService,
 ) : TextWebSocketHandler() {
@@ -157,8 +157,7 @@ class QaCheckPreviewWebSocketHandler(
 
   private fun checkFeatureEnabled(projectId: Long) {
     val project = projectService.get(projectId)
-    val orgId = if (project.isOrganizationOwnerInitialized()) project.organizationOwner.id else null
-    if (!enabledFeaturesProvider.isFeatureEnabled(orgId, Feature.QA_CHECKS)) {
+    if (!projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)) {
       throw IllegalStateException("QA Checks feature is not enabled")
     }
   }
@@ -170,8 +169,7 @@ class QaCheckPreviewWebSocketHandler(
     keyId: Long?,
   ) {
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
-    var baseTag: String? = baseLanguage.tag
-    if (languageTag == baseTag) baseTag = null
+    val baseTag: String? = baseLanguage.tag.takeIf { languageTag != it }
 
     var baseText: String? = null
     if (baseTag != null && keyId != null) {

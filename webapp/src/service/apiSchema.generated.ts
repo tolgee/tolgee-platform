@@ -831,6 +831,9 @@ export interface paths {
   "/v2/projects/{projectId}/qa-settings/check-types": {
     get: operations["getCheckTypes"];
   };
+  "/v2/projects/{projectId}/qa-settings/enabled": {
+    put: operations["setQaEnabled"];
+  };
   "/v2/projects/{projectId}/qa-settings/languages": {
     get: operations["getAllLanguageSettings"];
   };
@@ -5196,6 +5199,7 @@ export interface components {
       translationProtection: "NONE" | "PROTECT_REVIEWED";
       useBranching: boolean;
       useNamespaces: boolean;
+      useQaChecks: boolean;
     };
     ProjectStatistics: {
       /** Format: int64 */
@@ -5638,6 +5642,9 @@ export interface components {
         | "REPEATED_WORDS"
         | "SPELLING"
         | "GRAMMAR";
+    };
+    QaEnabledRequest: {
+      enabled: boolean;
     };
     QaIssueModel: {
       /** Format: int64 */
@@ -18641,6 +18648,46 @@ export interface operations {
         content: {
           "application/json": string;
         };
+      };
+    };
+  };
+  setQaEnabled: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Unauthorized */
+      401: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Forbidden */
+      403: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QaEnabledRequest"];
       };
     };
   };

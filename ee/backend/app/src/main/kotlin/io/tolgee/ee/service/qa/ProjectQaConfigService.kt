@@ -7,6 +7,7 @@ import io.tolgee.model.qa.LanguageQaConfig
 import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.repository.qa.ProjectQaConfigRepository
+import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
@@ -19,6 +20,7 @@ class ProjectQaConfigService(
   private val projectService: ProjectService,
   private val entityManager: EntityManager,
   private val qaRecheckService: QaRecheckService,
+  private val languageStatsService: LanguageStatsService,
 ) {
   @Transactional
   fun getOrCreateConfig(projectId: Long): ProjectQaConfig {
@@ -29,21 +31,27 @@ class ProjectQaConfigService(
   }
 
   @Transactional
-  fun initializeDefaultSettings(projectId: Long) {
-    if (projectQaConfigRepository.findByProjectId(projectId) != null) return
-    val config =
-      ProjectQaConfig(
-        project = projectService.get(projectId),
-        settings = QaCheckType.entries.associateWith { it.defaultSeverity }.toMutableMap(),
-      )
-    projectQaConfigRepository.save(config)
+  fun setQaEnabled(
+    projectId: Long,
+    enabled: Boolean,
+  ) {
+    val project = projectService.get(projectId)
+    if (project.useQaChecks == enabled) return
+    project.useQaChecks = enabled
+    projectService.save(project)
+
+    if (enabled) {
+      qaRecheckService.recheckTranslations(projectId, onlyStale = true)
+    } else {
+      languageStatsService.refreshLanguageStats(projectId)
+    }
   }
 
   fun getSettings(projectId: Long): Map<QaCheckType, QaCheckSeverity> {
     val config = projectQaConfigRepository.findByProjectId(projectId)
     val stored = config?.settings ?: emptyMap()
     return QaCheckType.entries.associateWith { type ->
-      stored[type] ?: QaCheckSeverity.OFF
+      stored[type] ?: type.defaultSeverity
     }
   }
 
@@ -78,7 +86,7 @@ class ProjectQaConfigService(
         ?: return globalSettings
     val languageSettings = langConfig.settings.toMutableMap()
     for (type in QaCheckType.entries) {
-      languageSettings[type] = languageSettings[type] ?: globalSettings[type] ?: QaCheckSeverity.OFF
+      languageSettings[type] = languageSettings[type] ?: globalSettings[type] ?: type.defaultSeverity
     }
     return languageSettings.toMap()
   }
@@ -105,7 +113,7 @@ class ProjectQaConfigService(
     projectQaConfigRepository.save(config)
 
     val changedTypes = settings.filter { (type, severity) -> oldSettings[type] != severity }.keys
-    qaRecheckService.recheckTranslations(projectId, checkTypes = changedTypes.toList())
+    recheckIfEnabled(projectId, changedTypes.toList())
   }
 
   @Transactional
@@ -132,11 +140,7 @@ class ProjectQaConfigService(
     }
     languageQaConfigRepository.save(langConfig)
 
-    qaRecheckService.recheckTranslations(
-      projectId,
-      checkTypes = changedTypes.toList(),
-      languageIds = listOf(languageId),
-    )
+    recheckIfEnabled(projectId, changedTypes.toList(), listOf(languageId))
   }
 
   @Transactional
@@ -149,10 +153,17 @@ class ProjectQaConfigService(
 
     languageQaConfigRepository.delete(langConfig)
 
-    qaRecheckService.recheckTranslations(
-      projectId,
-      checkTypes = changedTypes.toList(),
-      languageIds = listOf(languageId),
-    )
+    recheckIfEnabled(projectId, changedTypes.toList(), listOf(languageId))
+  }
+
+  private fun recheckIfEnabled(
+    projectId: Long,
+    checkTypes: List<QaCheckType>,
+    languageIds: List<Long>? = null,
+  ) {
+    val project = projectService.get(projectId)
+    if (project.useQaChecks) {
+      qaRecheckService.recheckTranslations(projectId, checkTypes = checkTypes, languageIds = languageIds)
+    }
   }
 }

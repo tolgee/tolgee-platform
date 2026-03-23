@@ -32,7 +32,8 @@ class QaCheckRunnerServiceTest {
     Mockito.`when`(config.settings).thenReturn(allWarnings)
     Mockito.`when`(repo.findByProjectId(Mockito.anyLong())).thenReturn(config)
     val qaRecheckService = Mockito.mock(QaRecheckService::class.java)
-    return ProjectQaConfigService(repo, langRepo, projectService, entityManager, qaRecheckService)
+    val languageStatsService = Mockito.mock(io.tolgee.service.project.LanguageStatsService::class.java)
+    return ProjectQaConfigService(repo, langRepo, projectService, entityManager, qaRecheckService, languageStatsService)
   }
 
   @Test

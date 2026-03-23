@@ -11,6 +11,7 @@ import io.tolgee.ee.api.v2.hateoas.model.qa.LanguageQaConfigModel
 import io.tolgee.ee.api.v2.hateoas.model.qa.QaCheckCategoryModel
 import io.tolgee.ee.api.v2.hateoas.model.qa.QaLanguageSettingsModel
 import io.tolgee.ee.api.v2.hateoas.model.qa.QaSettingsModel
+import io.tolgee.ee.data.qa.QaEnabledRequest
 import io.tolgee.ee.data.qa.QaLanguageSettingsRequest
 import io.tolgee.ee.data.qa.QaSettingsRequest
 import io.tolgee.ee.service.qa.ProjectQaConfigService
@@ -81,6 +82,18 @@ class QaSettingsController(
     return qaSettingsModelAssembler.toModel(
       projectQaConfigService.getSettings(projectHolder.project.id),
     )
+  }
+
+  @PutMapping("/enabled")
+  @Operation(summary = "Enable or disable QA checks for the project")
+  @RequiresProjectPermissions([Scope.PROJECT_EDIT])
+  @AllowApiAccess
+  @RequiresFeatures(Feature.QA_CHECKS)
+  fun setQaEnabled(
+    @RequestBody @Valid
+    dto: QaEnabledRequest,
+  ) {
+    projectQaConfigService.setQaEnabled(projectHolder.project.id, dto.enabled)
   }
 
   @GetMapping("/languages")

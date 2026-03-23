@@ -5358,4 +5358,11 @@
             <where>position_start = 0 AND position_end = 0</where>
         </update>
     </changeSet>
+    <changeSet author="anty" id="1774100000000-1">
+        <addColumn tableName="project">
+            <column name="use_qa_checks" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

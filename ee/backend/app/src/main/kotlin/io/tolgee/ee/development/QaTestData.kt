@@ -15,6 +15,7 @@ class QaTestData : BaseTestData() {
   lateinit var frTranslation: Translation
 
   init {
+    project.useQaChecks = true
     projectBuilder.build {
       frenchLanguage = addFrench().self
       testKey =

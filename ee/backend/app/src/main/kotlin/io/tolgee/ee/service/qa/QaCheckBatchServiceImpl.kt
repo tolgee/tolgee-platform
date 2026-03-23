@@ -1,10 +1,12 @@
 package io.tolgee.ee.service.qa
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Feature
 import io.tolgee.formats.getPluralForms
 import io.tolgee.hateoas.qa.QaIssueModelAssembler
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.project.ProjectFeatureRegistry
 import io.tolgee.service.qa.QaCheckBatchService
 import io.tolgee.service.translation.TranslationService
 import io.tolgee.websocket.WebsocketEvent
@@ -32,6 +34,11 @@ class QaCheckBatchServiceImpl(
     checkTypes: List<QaCheckType>?,
   ) {
     val translation = translationService.get(translationId)
+
+    if (!ProjectFeatureRegistry.isEnabledOnProject(Feature.QA_CHECKS, translation.key.project)) {
+      return
+    }
+
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
 
     val baseText =

@@ -1,6 +1,7 @@
 package io.tolgee.service.project
 
 import io.tolgee.component.LockingProvider
+import io.tolgee.constants.Feature
 import io.tolgee.dtos.queryResults.LanguageStatsDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
@@ -33,6 +34,7 @@ class LanguageStatsService(
   private val lockingProvider: LockingProvider,
   private val platformTransactionManager: PlatformTransactionManager,
   private val translationQaIssueRepository: TranslationQaIssueRepository,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) : Logging {
   fun refreshLanguageStats(
     projectId: Long,
@@ -56,14 +58,24 @@ class LanguageStatsService(
               ).associateBy { it.language.id }
               .toMutableMap()
 
+          val project = projectService.get(projectId)
+          val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
           val qaIssueCounts =
-            translationQaIssueRepository
-              .getOpenIssueCountsByLanguageId(projectId)
-              .associate { it.languageId to it.count }
+            if (qaEnabled) {
+              translationQaIssueRepository
+                .getOpenIssueCountsByLanguageId(projectId)
+                .associate { it.languageId to it.count }
+            } else {
+              emptyMap()
+            }
           val qaChecksStaleCountMap =
-            translationQaIssueRepository
-              .getStaleCountsByLanguageId(projectId)
-              .associate { it.languageId to it.count }
+            if (qaEnabled) {
+              translationQaIssueRepository
+                .getStaleCountsByLanguageId(projectId)
+                .associate { it.languageId to it.count }
+            } else {
+              emptyMap()
+            }
 
           allRawLanguageStats
             .sortedBy { it.languageName }

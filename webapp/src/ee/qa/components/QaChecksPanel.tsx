@@ -87,6 +87,29 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     );
   }
 
+  if (!project.useQaChecks) {
+    return (
+      <StyledWrapper>
+        <StyledContainer data-cy="qa-panel-container-project-disabled">
+          <TabMessage>
+            <T
+              keyName="translation_tools_qa_disabled_for_project"
+              params={{
+                link: (
+                  <StyledLink
+                    to={LINKS.PROJECT_EDIT_QA.build({
+                      [PARAMS.PROJECT_ID]: project.id,
+                    })}
+                  />
+                ),
+              }}
+            />
+          </TabMessage>
+        </StyledContainer>
+      </StyledWrapper>
+    );
+  }
+
   if (issues.length === 0) {
     return (
       <StyledWrapper>

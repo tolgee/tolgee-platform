@@ -24,7 +24,7 @@ data class QaCheckResult(
   val pluralVariant: String? = null,
 ) {
   init {
-    require((positionStart == null) xor (positionEnd == null)) {
+    require((positionStart == null) == (positionEnd == null)) {
       "positionStart and positionEnd must be both null or both non-null"
     }
     require(positionStart == null || positionEnd == null || positionStart <= positionEnd) {

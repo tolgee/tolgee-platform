@@ -56,6 +56,7 @@ class ProjectModelAssembler(
       baseLanguage = baseLanguage.let { languageModelAssembler.toModel(LanguageDto.fromEntity(it, it.id)) },
       useNamespaces = view.useNamespaces,
       useBranching = view.useBranching,
+      useQaChecks = view.useQaChecks,
       defaultNamespace = defaultNamespace,
       directPermission = view.directPermission?.let { permissionModelAssembler.toModel(it) },
       computedPermission = computedPermissionModelAssembler.toModel(computedPermissions),

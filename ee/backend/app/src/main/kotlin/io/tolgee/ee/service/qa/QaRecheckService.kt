@@ -21,8 +21,9 @@ class QaRecheckService(
     projectId: Long,
     checkTypes: List<QaCheckType>? = null,
     languageIds: List<Long>? = null,
+    onlyStale: Boolean = false,
   ) {
-    val translationIds = translationService.getTranslationIdsForRecheck(projectId, languageIds)
+    val translationIds = translationService.getTranslationIdsForRecheck(projectId, languageIds, onlyStale)
     if (translationIds.isEmpty()) return
 
     if (checkTypes?.isEmpty() == true) return

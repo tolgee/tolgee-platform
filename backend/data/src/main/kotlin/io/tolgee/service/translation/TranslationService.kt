@@ -624,6 +624,7 @@ class TranslationService(
   fun getTranslationIdsForRecheck(
     projectId: Long,
     languageIds: List<Long>? = null,
+    onlyStale: Boolean = false,
   ): List<Long> {
     val cb = entityManager.criteriaBuilder
     val query = cb.createQuery(Long::class.java)
@@ -636,6 +637,10 @@ class TranslationService(
 
     if (!languageIds.isNullOrEmpty()) {
       predicates.add(root.get(Translation_.language).get<Long>("id").`in`(languageIds))
+    }
+
+    if (onlyStale) {
+      predicates.add(cb.equal(root.get(Translation_.qaChecksStale), true))
     }
 
     query.select(root.get(Translation_.id))

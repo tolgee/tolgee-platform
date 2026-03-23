@@ -19,6 +19,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
 import jakarta.validation.Valid
@@ -41,6 +42,7 @@ class EeStartBatchJobController(
   private val batchJobModelAssembler: BatchJobModelAssembler,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val translationService: TranslationService,
+  private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @PostMapping(value = ["/assign-translation-label"])
   @Operation(
@@ -102,10 +104,7 @@ class EeStartBatchJobController(
     @Valid @RequestBody
     data: QaRecheckByKeysRequest,
   ): BatchJobModel {
-    enabledFeaturesProvider.checkFeatureEnabled(
-      projectHolder.project.organizationOwnerId,
-      Feature.QA_CHECKS,
-    )
+    projectFeatureGuard.checkEnabled(Feature.QA_CHECKS)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
     val translationIds =
       translationService.getTranslationIdsByKeyIds(data.keyIds, data.languageIds)

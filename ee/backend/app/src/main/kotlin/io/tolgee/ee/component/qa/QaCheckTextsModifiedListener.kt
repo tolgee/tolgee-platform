@@ -3,10 +3,10 @@ package io.tolgee.ee.component.qa
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.batch.request.QaCheckRequest
-import io.tolgee.component.enabledFeaturesProvider.EnabledFeaturesProvider
 import io.tolgee.constants.Feature
 import io.tolgee.events.OnTranslationTextsModified
 import io.tolgee.model.Project
+import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Component
@@ -17,7 +17,7 @@ import org.springframework.transaction.event.TransactionalEventListener
 class QaCheckTextsModifiedListener(
   private val batchJobService: BatchJobService,
   private val entityManager: EntityManager,
-  private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val projectFeatureGuard: ProjectFeatureGuard,
   private val projectService: ProjectService,
 ) {
   @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
@@ -25,7 +25,7 @@ class QaCheckTextsModifiedListener(
     if (event.translationIds.isEmpty()) return
 
     val project = projectService.getDto(event.projectId)
-    if (!enabledFeaturesProvider.isFeatureEnabled(project.organizationOwnerId, Feature.QA_CHECKS)) return
+    if (!projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)) return
 
     batchJobService.startJob(
       request = QaCheckRequest(translationIds = event.translationIds),
