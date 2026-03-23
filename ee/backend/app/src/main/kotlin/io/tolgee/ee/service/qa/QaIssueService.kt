@@ -2,13 +2,19 @@ package io.tolgee.ee.service.qa
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.hateoas.qa.QaIssueModelAssembler
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueState
 import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.websocket.WebsocketEvent
+import io.tolgee.websocket.WebsocketEventPublisher
+import io.tolgee.websocket.WebsocketEventType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -17,6 +23,9 @@ class QaIssueService(
   private val qaIssueRepository: TranslationQaIssueRepository,
   private val objectMapper: ObjectMapper,
   private val translationService: TranslationService,
+  private val websocketEventPublisher: WebsocketEventPublisher,
+  private val currentDateProvider: CurrentDateProvider,
+  private val qaIssueModelAssembler: QaIssueModelAssembler,
 ) {
   @Transactional
   fun replaceIssuesForTranslation(
@@ -79,6 +88,7 @@ class QaIssueService(
     val issue = getIssueByProjectAndId(projectId, issueId)
     issue.state = QaIssueState.IGNORED
     qaIssueRepository.save(issue)
+    publishQaIssuesUpdated(issue.translation)
   }
 
   @Transactional
@@ -87,12 +97,8 @@ class QaIssueService(
     issueId: Long,
   ) {
     val issue = getIssueByProjectAndId(projectId, issueId)
-    if (issue.virtual) {
-      qaIssueRepository.delete(issue)
-      return
-    }
-    issue.state = QaIssueState.OPEN
-    qaIssueRepository.save(issue)
+    reopenOrDeleteIssue(issue)
+    publishQaIssuesUpdated(issue.translation)
   }
 
   fun getIssueByProjectAndId(
@@ -100,7 +106,7 @@ class QaIssueService(
     issueId: Long,
   ): TranslationQaIssue {
     return qaIssueRepository.findByProjectIdAndId(projectId, issueId)
-      ?: throw io.tolgee.exceptions.NotFoundException()
+      ?: throw NotFoundException()
   }
 
   @Transactional
@@ -110,27 +116,29 @@ class QaIssueService(
     request: QaCheckIssueIgnoreRequest,
   ) {
     val issue = findMatchingIssue(projectId, translationId, request)
+    val translation: Translation
     if (issue != null) {
       issue.state = QaIssueState.IGNORED
       qaIssueRepository.save(issue)
-      return
+      translation = issue.translation
+    } else {
+      translation = translationService.get(projectId, translationId)
+      val newIssue =
+        TranslationQaIssue(
+          type = request.type,
+          message = request.message,
+          replacement = request.replacement,
+          positionStart = request.positionStart,
+          positionEnd = request.positionEnd,
+          params = request.params?.let { objectMapper.writeValueAsString(it) },
+          state = QaIssueState.IGNORED,
+          virtual = true,
+          pluralVariant = request.pluralVariant,
+          translation = translation,
+        )
+      qaIssueRepository.save(newIssue)
     }
-
-    val translation = translationService.get(projectId, translationId)
-    val newIssue =
-      TranslationQaIssue(
-        type = request.type,
-        message = request.message,
-        replacement = request.replacement,
-        positionStart = request.positionStart,
-        positionEnd = request.positionEnd,
-        params = request.params?.let { objectMapper.writeValueAsString(it) },
-        state = QaIssueState.IGNORED,
-        virtual = true,
-        pluralVariant = request.pluralVariant,
-        translation = translation,
-      )
-    qaIssueRepository.save(newIssue)
+    publishQaIssuesUpdated(translation)
   }
 
   @Transactional
@@ -140,13 +148,18 @@ class QaIssueService(
     request: QaCheckIssueIgnoreRequest,
   ): Boolean {
     val issue = findMatchingIssue(projectId, translationId, request) ?: return false
+    reopenOrDeleteIssue(issue)
+    publishQaIssuesUpdated(issue.translation)
+    return true
+  }
+
+  private fun reopenOrDeleteIssue(issue: TranslationQaIssue) {
     if (issue.virtual) {
       qaIssueRepository.delete(issue)
-      return true
+    } else {
+      issue.state = QaIssueState.OPEN
+      qaIssueRepository.save(issue)
     }
-    issue.state = QaIssueState.OPEN
-    qaIssueRepository.save(issue)
-    return true
   }
 
   private fun findMatchingIssue(
@@ -163,6 +176,27 @@ class QaIssueService(
       request.positionStart,
       request.positionEnd,
       request.pluralVariant,
+    )
+  }
+
+  fun publishQaIssuesUpdated(translation: Translation) {
+    val projectId = translation.key.project.id
+    qaIssueRepository.flush()
+    val allIssues = qaIssueRepository.findAllByTranslationId(translation.id)
+    websocketEventPublisher(
+      "/projects/$projectId/${WebsocketEventType.QA_CHECKS_COMPLETED.typeName}",
+      WebsocketEvent(
+        data =
+          mapOf(
+            "translationId" to translation.id,
+            "keyId" to translation.key.id,
+            "languageTag" to translation.language.tag,
+            "qaIssueCount" to allIssues.count { it.state == QaIssueState.OPEN },
+            "qaChecksStale" to translation.qaChecksStale,
+            "qaIssues" to allIssues.map { qaIssueModelAssembler.toModel(it) },
+          ),
+        timestamp = currentDateProvider.date.time,
+      ),
     )
   }
 

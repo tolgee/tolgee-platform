@@ -1,17 +1,12 @@
 package io.tolgee.ee.service.qa
 
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Feature
 import io.tolgee.formats.getPluralForms
-import io.tolgee.hateoas.qa.QaIssueModelAssembler
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureRegistry
 import io.tolgee.service.qa.QaCheckBatchService
 import io.tolgee.service.translation.TranslationService
-import io.tolgee.websocket.WebsocketEvent
-import io.tolgee.websocket.WebsocketEventPublisher
-import io.tolgee.websocket.WebsocketEventType
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,9 +18,6 @@ class QaCheckBatchServiceImpl(
   private val qaIssueService: QaIssueService,
   private val translationService: TranslationService,
   private val languageService: LanguageService,
-  private val websocketEventPublisher: WebsocketEventPublisher,
-  private val currentDateProvider: CurrentDateProvider,
-  private val qaIssueModelAssembler: QaIssueModelAssembler,
 ) : QaCheckBatchService {
   @Transactional
   override fun runChecksAndPersist(
@@ -40,9 +32,10 @@ class QaCheckBatchServiceImpl(
     }
 
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
+    val isBaseLanguage = translation.language.id == baseLanguage.id
 
     val baseText =
-      if (translation.language.id != baseLanguage.id) {
+      if (!isBaseLanguage) {
         translationService
           .getTranslations(
             listOf(translation.key.id),
@@ -62,7 +55,7 @@ class QaCheckBatchServiceImpl(
       QaCheckParams(
         baseText = baseText,
         text = translationText,
-        baseLanguageTag = if (translation.language.id != baseLanguage.id) baseLanguage.tag else null,
+        baseLanguageTag = if (!isBaseLanguage) baseLanguage.tag else null,
         languageTag = translation.language.tag,
         isPlural = isPlural,
         textVariants = textParsed?.forms,
@@ -82,21 +75,6 @@ class QaCheckBatchServiceImpl(
     translation.qaChecksStale = false
     translationService.save(translation)
 
-    val allIssues = qaIssueService.getIssuesForTranslation(translation.id)
-    websocketEventPublisher(
-      "/projects/$projectId/${WebsocketEventType.QA_CHECKS_COMPLETED.typeName}",
-      WebsocketEvent(
-        data =
-          mapOf(
-            "translationId" to translation.id,
-            "keyId" to translation.key.id,
-            "languageTag" to translation.language.tag,
-            "qaIssueCount" to allIssues.count { it.state == io.tolgee.model.enums.qa.QaIssueState.OPEN },
-            "qaChecksStale" to false,
-            "qaIssues" to allIssues.map { qaIssueModelAssembler.toModel(it) },
-          ),
-        timestamp = currentDateProvider.date.time,
-      ),
-    )
+    qaIssueService.publishQaIssuesUpdated(translation)
   }
 }

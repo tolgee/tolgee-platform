@@ -43,7 +43,7 @@ export const useQaChecksCount = (data: PanelContentData) => {
 
 export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
   const { isEnabled } = useEnabledFeatures();
-  const { issues, isLoading } = useQaChecksForPanel(data);
+  const { issues, isLoading, updateIssueState } = useQaChecksForPanel(data);
   const text = data.editingText ?? '';
   const project = useProject();
 
@@ -87,6 +87,14 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     );
   }
 
+  const qaSettingsLink = (
+    <StyledLink
+      to={LINKS.PROJECT_EDIT_QA.build({
+        [PARAMS.PROJECT_ID]: project.id,
+      })}
+    />
+  );
+
   if (!project.useQaChecks) {
     return (
       <StyledWrapper>
@@ -94,15 +102,7 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
           <TabMessage>
             <T
               keyName="translation_tools_qa_disabled_for_project"
-              params={{
-                link: (
-                  <StyledLink
-                    to={LINKS.PROJECT_EDIT_QA.build({
-                      [PARAMS.PROJECT_ID]: project.id,
-                    })}
-                  />
-                ),
-              }}
+              params={{ link: qaSettingsLink }}
             />
           </TabMessage>
         </StyledContainer>
@@ -118,21 +118,19 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
           <TabMessage>
             <T
               keyName="translation_tools_qa_no_issues_with_settings"
-              params={{
-                link: (
-                  <StyledLink
-                    to={LINKS.PROJECT_EDIT_QA.build({
-                      [PARAMS.PROJECT_ID]: project.id,
-                    })}
-                  />
-                ),
-              }}
+              params={{ link: qaSettingsLink }}
             />
           </TabMessage>
         </StyledContainer>
       </StyledWrapper>
     );
   }
+
+  const isCorrectable = (issue: (typeof issues)[0]) =>
+    issue.replacement != null &&
+    issue.positionStart != null &&
+    issue.positionEnd != null &&
+    issue.state === 'OPEN';
 
   const handleCorrect = (issue: (typeof issues)[0]) => {
     data.setValue(applyQaReplacement(text, issue));
@@ -142,17 +140,23 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     const translationId = data.keyData.translations[data.language.tag]?.id;
     if (translationId == null) return;
 
+    const newState = issue.state === 'IGNORED' ? 'OPEN' : 'IGNORED';
     const mutation =
       issue.state === 'IGNORED' ? unignoreMutation : ignoreMutation;
-    mutation.mutate({
-      path: {
-        projectId: project.id,
-        translationId,
+    mutation.mutate(
+      {
+        path: {
+          projectId: project.id,
+          translationId,
+        },
+        content: {
+          'application/json': issue as any,
+        },
       },
-      content: {
-        'application/json': issue as any,
-      },
-    });
+      {
+        onSuccess: () => updateIssueState(issue, newState),
+      }
+    );
   };
 
   return (
@@ -172,12 +176,7 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
             text={text}
             slim={true}
             onCorrect={
-              issue.replacement != null &&
-              issue.positionStart != null &&
-              issue.positionEnd != null &&
-              issue.state === 'OPEN'
-                ? () => handleCorrect(issue)
-                : undefined
+              isCorrectable(issue) ? () => handleCorrect(issue) : undefined
             }
             onIgnore={() => handleIgnoreToggle(issue)}
           />

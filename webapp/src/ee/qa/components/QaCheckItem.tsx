@@ -143,7 +143,6 @@ export const QaCheckItem = ({
     issue.positionEnd != null;
 
   const showDiff = hasReplacement && issue.state === 'OPEN';
-  const showButtonRow = !slim;
 
   const Container = issue.state === 'IGNORED' ? StyledIgnoredItem : StyledItem;
 
@@ -179,7 +178,7 @@ export const QaCheckItem = ({
     </Button>
   );
 
-  const textActions = !showButtonRow ? (
+  const textActions = slim ? (
     <>
       {buttonCorrectSmall}
       {buttonIgnoreSmall}
@@ -200,7 +199,7 @@ export const QaCheckItem = ({
           <Typography variant="body2">{typeLabel}</Typography>
           <StyledMessage>{messageText}</StyledMessage>
         </StyledContent>
-        {!showButtonRow && !showDiff && buttonIgnoreBig}
+        {slim && !showDiff && buttonIgnoreBig}
       </StyledHeader>
 
       {showDiff && (
@@ -216,7 +215,7 @@ export const QaCheckItem = ({
         </TextBlock>
       )}
 
-      {showButtonRow && (
+      {!slim && (
         <StyledNormalActions>
           {issue.state === 'OPEN' && buttonCorrectBig}
           {buttonIgnoreBig}

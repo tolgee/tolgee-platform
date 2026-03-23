@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { tolgeeFormatGenerateIcu } from '@tginternal/editor';
 import { PanelContentData } from 'tg.views/projects/translations/ToolsPanel/common/types';
 import { useQaCheckPreview } from './useQaCheckPreview';
@@ -30,7 +30,8 @@ export const useQaChecksForPanel = (data: PanelContentData) => {
   }, [activeVariant, data.editingFullValue?.variantOffsets]);
 
   const translation = keyData.translations[language.tag];
-  const allPersistedIssues: QaPreviewIssue[] = translation?.qaIssues ?? [];
+  const allPersistedIssues: QaPreviewIssue[] =
+    translation?.qaIssues ?? EMPTY_ISSUES;
 
   // For plurals, filter persisted issues to the active variant
   const persistedIssues = useMemo(() => {
@@ -59,5 +60,33 @@ export const useQaChecksForPanel = (data: PanelContentData) => {
     [result.issues, activeVariant, variantOffset]
   );
 
-  return { issues: adjustedIssues, isLoading: result.isLoading };
+  const updateIssueState = useCallback(
+    (adjustedIssue: QaPreviewIssue, newState: string) => {
+      // Reverse position adjustment
+      const originalIssue =
+        variantOffset === 0
+          ? adjustedIssue
+          : {
+              ...adjustedIssue,
+              positionStart:
+                adjustedIssue.positionStart != null
+                  ? adjustedIssue.positionStart + variantOffset
+                  : adjustedIssue.positionStart,
+              positionEnd:
+                adjustedIssue.positionEnd != null
+                  ? adjustedIssue.positionEnd + variantOffset
+                  : adjustedIssue.positionEnd,
+            };
+      result.updateIssueState(originalIssue, newState);
+    },
+    [result.updateIssueState, variantOffset]
+  );
+
+  return {
+    issues: adjustedIssues,
+    isLoading: result.isLoading,
+    updateIssueState,
+  };
 };
+
+const EMPTY_ISSUES: QaPreviewIssue[] = [];

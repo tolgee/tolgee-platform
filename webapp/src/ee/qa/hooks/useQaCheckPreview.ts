@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { useProject } from 'tg.hooks/useProject';
 import { useQaPreviewWebsocket } from './useQaPreviewWebsocket';
@@ -15,6 +16,7 @@ type QaCheckPreviewProps = {
 type QaCheckPreviewResult = {
   issues: QaPreviewIssue[];
   isLoading: boolean;
+  updateIssueState: (issue: QaPreviewIssue, newState: string) => void;
 };
 
 export const useQaCheckPreview = ({
@@ -39,8 +41,14 @@ export const useQaCheckPreview = ({
     initialIssues,
   });
 
+  const noopUpdateIssueState = useCallback(() => {}, []);
+
   if (!qaFeatureEnabled) {
-    return { issues: [], isLoading: false };
+    return {
+      issues: [],
+      isLoading: false,
+      updateIssueState: noopUpdateIssueState,
+    };
   }
 
   return result;

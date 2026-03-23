@@ -75,7 +75,6 @@ export const QaIssueHighlight = ({
   const ignoreMutation = useApiMutation({
     url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/suppressions',
     method: 'post',
-    invalidatePrefix: '/v2/projects/{projectId}/translations',
   });
 
   const hasVisibleContent = text.length > 0 && /[^\r\n]/.test(text);

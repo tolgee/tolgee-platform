@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { useGlobalContext } from 'tg.globalContext/GlobalContext';
 import {
@@ -51,7 +51,7 @@ export const useQaPreviewWebsocket = ({
         JSON.stringify({ token: jwtToken, projectId, keyId, languageTag })
       );
       // initial text update message
-      if (text !== null && text !== undefined) {
+      if (text != null) {
         ws.send(JSON.stringify({ text, variant }));
         setIsLoading(true);
       }
@@ -69,6 +69,10 @@ export const useQaPreviewWebsocket = ({
         if (!pendingTextUpdateRef.current) {
           setIsLoading(false);
         }
+      } else if (data.type === 'error') {
+        // eslint-disable-next-line no-console
+        console.error('QA preview websocket error:', data.message);
+        setIsLoading(false);
       }
     };
 
@@ -85,6 +89,13 @@ export const useQaPreviewWebsocket = ({
       wsRef.current = null;
     };
   }, [projectId, keyId, languageTag, enabled, jwtToken]);
+
+  // Sync from persisted issues when preview WS is not active
+  useEffect(() => {
+    if (!enabled) {
+      setIssuesByType(groupIssuesByType(initialIssues));
+    }
+  }, [initialIssues, enabled]);
 
   const variantRef = useRef(variant);
   variantRef.current = variant;
@@ -103,12 +114,38 @@ export const useQaPreviewWebsocket = ({
   );
 
   useEffect(() => {
-    if (text !== null && text !== undefined && enabled) {
+    if (text != null && enabled) {
       setIsLoading(true);
       pendingTextUpdateRef.current = true;
       sendText(text);
     }
   }, [text, enabled]);
+
+  const updateIssueState = useCallback(
+    (targetIssue: QaPreviewIssue, newState: string) => {
+      setIssuesByType((prev) => {
+        const next = new Map(prev);
+        const typeIssues = next.get(targetIssue.type);
+        if (typeIssues) {
+          next.set(
+            targetIssue.type,
+            typeIssues.map((i) =>
+              i.type === targetIssue.type &&
+              i.message === targetIssue.message &&
+              i.replacement === targetIssue.replacement &&
+              i.positionStart === targetIssue.positionStart &&
+              i.positionEnd === targetIssue.positionEnd &&
+              i.pluralVariant === targetIssue.pluralVariant
+                ? { ...i, state: newState as QaPreviewIssue['state'] }
+                : i
+            )
+          );
+        }
+        return next;
+      });
+    },
+    []
+  );
 
   const issues = useMemo(() => {
     const all = Array.from(issuesByType.values()).flat();
@@ -120,7 +157,7 @@ export const useQaPreviewWebsocket = ({
     );
   }, [issuesByType]);
 
-  return { issues, isLoading };
+  return { issues, isLoading, updateIssueState };
 };
 
 const groupIssuesByType = (
