@@ -1,3 +1,10 @@
+## [3.173.3](https://github.com/tolgee/tolgee-platform/compare/v3.173.2...v3.173.3) (2026-03-23)
+
+
+### Bug Fixes
+
+* preventive security improvements ([#3544](https://github.com/tolgee/tolgee-platform/issues/3544)) ([d7047f3](https://github.com/tolgee/tolgee-platform/commit/d7047f3e70817a2d3529fc4af75b6673be42e58a))
+
 ## [3.173.2](https://github.com/tolgee/tolgee-platform/compare/v3.173.1...v3.173.2) (2026-03-23)
 
 
