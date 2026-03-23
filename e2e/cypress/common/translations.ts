@@ -179,7 +179,7 @@ export function editTranslation({
 export function openTranslationEditorWithMt(
   projectId: number,
   key: string,
-  languageTag: string,
+  languageTag: string
 ) {
   selectLangsInLocalstorage(projectId, ['en', languageTag]);
   visitTranslations(projectId);
