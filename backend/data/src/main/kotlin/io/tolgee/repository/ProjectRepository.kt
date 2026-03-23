@@ -91,6 +91,10 @@ interface ProjectRepository : JpaRepository<Project, Long> {
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<Project>
 
+  fun findAllByOrganizationOwnerIdAndUseQaChecksTrue(organizationOwnerId: Long): List<Project>
+
+  fun findAllByUseQaChecksTrue(): List<Project>
+
   fun countAllBySlug(slug: String): Long
 
   @Suppress("SpringDataRepositoryMethodReturnTypeInspection")

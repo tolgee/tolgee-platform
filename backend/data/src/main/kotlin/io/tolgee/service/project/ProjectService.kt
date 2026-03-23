@@ -243,6 +243,14 @@ class ProjectService(
     return this.projectRepository.findAllByOrganizationOwnerId(organizationId)
   }
 
+  fun findAllWithQaEnabledInOrganization(organizationId: Long): List<Project> {
+    return projectRepository.findAllByOrganizationOwnerIdAndUseQaChecksTrue(organizationId)
+  }
+
+  fun findAllWithQaEnabled(): List<Project> {
+    return projectRepository.findAllByUseQaChecksTrue()
+  }
+
   private fun addPermittedLanguagesToProjects(
     projectsPage: Page<ProjectView>,
     userId: Long,
