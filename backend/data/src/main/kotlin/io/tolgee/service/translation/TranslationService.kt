@@ -671,4 +671,43 @@ class TranslationService(
         .executeUpdate()
     }
   }
+
+  fun getSiblingIdsForBaseLanguageChanges(
+    translationIds: Collection<Long>,
+    baseLanguageId: Long,
+  ): List<Long> {
+    if (translationIds.isEmpty()) return emptyList()
+
+    val translationIdSet = translationIds.toSet()
+
+    // if a translation is a base translation, get its key
+    val keyIds =
+      translationIds.chunked(1000).flatMap { chunk ->
+        entityManager
+          .createQuery(
+            "SELECT t.key.id FROM Translation t WHERE t.id IN :ids AND t.language.id = :baseLanguageId",
+            Long::class.java,
+          ).setParameter("ids", chunk)
+          .setParameter("baseLanguageId", baseLanguageId)
+          .resultList
+      }
+
+    if (keyIds.isEmpty()) return emptyList()
+
+    return keyIds
+      .chunked(1000)
+      .flatMap { keyChunk ->
+        entityManager
+          .createQuery(
+            """
+            SELECT t.id FROM Translation t
+            WHERE t.key.id IN :keyIds
+              AND t.language.id != :baseLanguageId
+            """.trimIndent(),
+            Long::class.java,
+          ).setParameter("keyIds", keyChunk)
+          .setParameter("baseLanguageId", baseLanguageId)
+          .resultList
+      }.filter { it !in translationIdSet }
+  }
 }
