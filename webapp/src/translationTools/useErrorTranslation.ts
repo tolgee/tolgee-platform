@@ -223,6 +223,11 @@ export function useErrorTranslation() {
           collidingKey: params?.[1] || '',
           suffix: params?.[2] || '',
         });
+      case 'admin_access_org_has_custom_llm_provider':
+        return t(
+          'admin_access_org_has_custom_llm_provider',
+          'Translation blocked — this organization uses custom LLM providers.'
+        );
       default:
         return code;
     }
