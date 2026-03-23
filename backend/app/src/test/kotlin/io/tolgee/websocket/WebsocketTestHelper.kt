@@ -122,6 +122,15 @@ class WebsocketTestHelper(
     ) {
       super.handleTransportError(session, exception)
       logger.warn("Stomp Transport Error:", exception)
+      // When the server rejects invalid credentials, it sends an "Unauthenticated"
+      // frame and closes the connection. Under load, the connection close can arrive
+      // before handleFrame processes the frame, so we never see the header. Treat a
+      // connection loss (before any successful auth) as unauthenticated.
+      if (authenticationStatus == null &&
+        exception is org.springframework.messaging.simp.stomp.ConnectionLostException
+      ) {
+        authenticationStatus = AuthenticationStatus.UNAUTHENTICATED
+      }
     }
 
     override fun getPayloadType(headers: StompHeaders): Type {
