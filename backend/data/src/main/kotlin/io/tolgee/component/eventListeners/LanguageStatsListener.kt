@@ -80,8 +80,8 @@ class LanguageStatsListener(
     val keyIds = event.modifiedEntities[Key::class]?.keys.orEmpty()
     if (keyIds.isEmpty()) return
 
-    keyRepository.getBranchIdsByIds(keyIds).forEach { branchId ->
-      branchIds.add(branchId)
+    keyIds.chunked(IN_CLAUSE_BATCH_SIZE).forEach { chunk ->
+      branchIds.addAll(keyRepository.getBranchIdsByIds(chunk))
     }
   }
 
@@ -92,8 +92,12 @@ class LanguageStatsListener(
     val translationIds = event.modifiedEntities[Translation::class]?.keys.orEmpty()
     if (translationIds.isEmpty()) return
 
-    translationRepository.getBranchIdsByIds(translationIds).forEach { branchId ->
-      branchIds.add(branchId)
+    translationIds.chunked(IN_CLAUSE_BATCH_SIZE).forEach { chunk ->
+      branchIds.addAll(translationRepository.getBranchIdsByIds(chunk))
     }
+  }
+
+  companion object {
+    private const val IN_CLAUSE_BATCH_SIZE = 30_000
   }
 }
