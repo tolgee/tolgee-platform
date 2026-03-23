@@ -1,9 +1,12 @@
 package io.tolgee.ee.service.qa.checks
 
 import io.tolgee.ee.service.qa.QaCheckParams
+import io.tolgee.ee.service.qa.assertAllHaveType
+import io.tolgee.ee.service.qa.assertIssues
+import io.tolgee.ee.service.qa.assertNoIssues
+import io.tolgee.ee.service.qa.assertSingleIssue
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class InconsistentHtmlCheckTest {
@@ -21,114 +24,149 @@ class InconsistentHtmlCheckTest {
 
   @Test
   fun `returns empty when base is null`() {
-    assertThat(check.check(params("<b>Hello</b>"))).isEmpty()
+    check.check(params("<b>Hello</b>")).assertNoIssues()
   }
 
   @Test
   fun `returns empty when base is blank`() {
-    assertThat(check.check(params("<b>Hallo</b>", "  "))).isEmpty()
+    check.check(params("<b>Hallo</b>", "  ")).assertNoIssues()
   }
 
   @Test
   fun `returns empty when text is blank`() {
-    assertThat(check.check(params("  ", "<b>Hello</b>"))).isEmpty()
+    check.check(params("  ", "<b>Hello</b>")).assertNoIssues()
   }
 
   @Test
   fun `returns empty when tags match`() {
-    assertThat(check.check(params("<b>Hallo</b>", "<b>Hello</b>"))).isEmpty()
+    check.check(params("<b>Hallo</b>", "<b>Hello</b>")).assertNoIssues()
   }
 
   @Test
   fun `returns empty when neither has tags`() {
-    assertThat(check.check(params("Hallo", "Hello"))).isEmpty()
+    check.check(params("Hallo", "Hello")).assertNoIssues()
   }
 
   @Test
   fun `returns empty when attributes differ but tag names match`() {
-    val results =
-      check.check(
+    check
+      .check(
         params(
           """<a href="/de/hilfe">Hilfe</a>""",
           """<a href="/en/help">Help</a>""",
         ),
-      )
-    assertThat(results).isEmpty()
+      ).assertNoIssues()
   }
 
   @Test
   fun `detects missing tags`() {
-    val results = check.check(params("Hallo", "<b>Hello</b>"))
-    assertThat(results).hasSize(2)
-    assertThat(results).allMatch { it.type == QaCheckType.INCONSISTENT_HTML }
-    assertThat(results).allMatch { it.message == QaIssueMessage.QA_HTML_TAG_MISSING }
-    assertThat(results).allMatch { it.replacement == null }
-    assertThat(results).allMatch { it.positionStart == null && it.positionEnd == null }
-    assertThat(results.map { it.params?.get("tag") }).containsExactlyInAnyOrder("<b>", "</b>")
+    check.check(params("Hallo", "<b>Hello</b>")).assertIssues {
+      issue {
+        message(QaIssueMessage.QA_HTML_TAG_MISSING)
+        noReplacement()
+        noPosition()
+        param("tag", "<b>")
+      }
+      issue {
+        message(QaIssueMessage.QA_HTML_TAG_MISSING)
+        noReplacement()
+        noPosition()
+        param("tag", "</b>")
+      }
+    }
   }
 
   @Test
   fun `detects extra tags`() {
-    val results = check.check(params("<b>Hallo</b>", "Hello"))
-    assertThat(results).hasSize(2)
-    assertThat(results).allMatch { it.message == QaIssueMessage.QA_HTML_TAG_EXTRA }
-    assertThat(results).allMatch { it.replacement == "" }
-    assertThat(results[0].positionStart).isEqualTo(0)
-    assertThat(results[0].positionEnd).isEqualTo(3)
-    assertThat(results[1].positionStart).isEqualTo(8)
-    assertThat(results[1].positionEnd).isEqualTo(12)
+    check.check(params("<b>Hallo</b>", "Hello")).assertIssues {
+      issue {
+        message(QaIssueMessage.QA_HTML_TAG_EXTRA)
+        replacement("")
+        position(0, 3)
+      }
+      issue {
+        message(QaIssueMessage.QA_HTML_TAG_EXTRA)
+        replacement("")
+        position(8, 12)
+      }
+    }
   }
 
   @Test
   fun `detects mixed - different tags`() {
-    val results = check.check(params("<i>Hallo</i>", "<b>Hello</b>"))
-    assertThat(results).hasSize(4)
-    val extra = results.filter { it.message == QaIssueMessage.QA_HTML_TAG_EXTRA }
-    val missing = results.filter { it.message == QaIssueMessage.QA_HTML_TAG_MISSING }
-    assertThat(extra).hasSize(2)
-    assertThat(missing).hasSize(2)
-    assertThat(extra.map { it.params?.get("tag") }).containsExactlyInAnyOrder("<i>", "</i>")
-    assertThat(missing.map { it.params?.get("tag") }).containsExactlyInAnyOrder("<b>", "</b>")
+    check.check(params("<i>Hallo</i>", "<b>Hello</b>")).assertIssues {
+      issue {
+        message(QaIssueMessage.QA_HTML_TAG_EXTRA)
+        param("tag", "<i>")
+      }
+      issue {
+        message(QaIssueMessage.QA_HTML_TAG_EXTRA)
+        param("tag", "</i>")
+      }
+      issue {
+        message(QaIssueMessage.QA_HTML_TAG_MISSING)
+        param("tag", "<b>")
+      }
+      issue {
+        message(QaIssueMessage.QA_HTML_TAG_MISSING)
+        param("tag", "</b>")
+      }
+    }
   }
 
   @Test
   fun `handles self-closing tags`() {
-    val results = check.check(params("Line1 Line2", "Line1<br/>Line2"))
-    assertThat(results).hasSize(1)
-    assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_HTML_TAG_MISSING)
-    assertThat(results[0].params?.get("tag")).isEqualTo("<br/>")
+    check.check(params("Line1 Line2", "Line1<br/>Line2")).assertSingleIssue {
+      message(QaIssueMessage.QA_HTML_TAG_MISSING)
+      param("tag", "<br/>")
+    }
   }
 
   @Test
   fun `handles duplicate tags`() {
-    val results = check.check(params("<b>Hallo</b>", "<b><b>Hello</b></b>"))
-    assertThat(results).hasSize(2)
-    assertThat(results).allMatch { it.message == QaIssueMessage.QA_HTML_TAG_MISSING }
+    check.check(params("<b>Hallo</b>", "<b><b>Hello</b></b>")).assertIssues {
+      issue { message(QaIssueMessage.QA_HTML_TAG_MISSING) }
+      issue { message(QaIssueMessage.QA_HTML_TAG_MISSING) }
+    }
   }
 
   @Test
   fun `handles void elements without slash`() {
-    val results = check.check(params("text", "<br>text"))
-    assertThat(results).hasSize(1)
-    assertThat(results[0].message).isEqualTo(QaIssueMessage.QA_HTML_TAG_MISSING)
-    assertThat(results[0].params?.get("tag")).isEqualTo("<br>")
+    check.check(params("text", "<br>text")).assertSingleIssue {
+      message(QaIssueMessage.QA_HTML_TAG_MISSING)
+      param("tag", "<br>")
+    }
   }
 
   @Test
   fun `custom tag names`() {
-    val results = check.check(params("<link>klicken</link>", "<link>click</link>"))
-    assertThat(results).isEmpty()
+    check.check(params("<link>klicken</link>", "<link>click</link>")).assertNoIssues()
   }
 
   @Test
   fun `custom tag name mismatch`() {
-    val results = check.check(params("<bold>Hallo</bold>", "<link>click</link>"))
-    assertThat(results).hasSize(4)
+    check.check(params("<bold>Hallo</bold>", "<link>click</link>")).assertIssues {
+      issue {
+        message(QaIssueMessage.QA_HTML_TAG_EXTRA)
+        param("tag", "<bold>")
+      }
+      issue {
+        message(QaIssueMessage.QA_HTML_TAG_EXTRA)
+        param("tag", "</bold>")
+      }
+      issue {
+        message(QaIssueMessage.QA_HTML_TAG_MISSING)
+        param("tag", "<link>")
+      }
+      issue {
+        message(QaIssueMessage.QA_HTML_TAG_MISSING)
+        param("tag", "</link>")
+      }
+    }
   }
 
   @Test
   fun `all types are INCONSISTENT_HTML`() {
-    val results = check.check(params("<i>Hallo</i>", "<b>Hello</b>"))
-    assertThat(results).allMatch { it.type == QaCheckType.INCONSISTENT_HTML }
+    check.check(params("<i>Hallo</i>", "<b>Hello</b>")).assertAllHaveType(QaCheckType.INCONSISTENT_HTML)
   }
 }

@@ -27,7 +27,7 @@ data class QaCheckResult(
     require((positionStart == null) == (positionEnd == null)) {
       "positionStart and positionEnd must be both null or both non-null"
     }
-    require(positionStart == null || positionEnd == null || positionStart <= positionEnd) {
+    require(positionStart == null || positionStart <= positionEnd!!) {
       "positionStart must be less than or equal to positionEnd"
     }
     require(replacement == null || positionStart != null) {

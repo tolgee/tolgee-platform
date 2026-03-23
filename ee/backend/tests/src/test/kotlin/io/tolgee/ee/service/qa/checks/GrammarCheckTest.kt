@@ -2,6 +2,8 @@ package io.tolgee.ee.service.qa.checks
 
 import io.tolgee.ee.service.qa.LanguageToolService
 import io.tolgee.ee.service.qa.QaCheckParams
+import io.tolgee.ee.service.qa.assertAllHaveType
+import io.tolgee.ee.service.qa.assertNoIssues
 import io.tolgee.ee.service.qa.checks.language.GrammarCheck
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
@@ -24,22 +26,19 @@ class GrammarCheckTest {
 
   @Test
   fun `returns empty for correct text`() {
-    val results = check.check(params("This is a correct sentence."))
-    assertThat(results).isEmpty()
+    check.check(params("This is a correct sentence.")).assertNoIssues()
   }
 
   @Test
   fun `returns empty for blank text`() {
-    val results = check.check(params("   "))
-    assertThat(results).isEmpty()
+    check.check(params("   ")).assertNoIssues()
   }
 
   @Test
   fun `detects grammar error`() {
-    // "He go to school" — subject-verb agreement error
     val results = check.check(params("He go to school."))
     assertThat(results).isNotEmpty
-    assertThat(results).allMatch { it.type == QaCheckType.GRAMMAR }
+    results.assertAllHaveType(QaCheckType.GRAMMAR)
     assertThat(results).allMatch { it.message == QaIssueMessage.QA_GRAMMAR_ERROR }
   }
 
@@ -54,32 +53,25 @@ class GrammarCheckTest {
 
   @Test
   fun `returns empty for unsupported language`() {
-    val results = check.check(params("He go to school.", languageTag = "xx-unknown"))
-    assertThat(results).isEmpty()
+    check.check(params("He go to school.", languageTag = "xx-unknown")).assertNoIssues()
   }
 
   @Test
   fun `does not include spelling issues`() {
-    // "Helo world" has spelling errors but "Helo" is not a grammar issue
+    // Results may be empty — assertThat.allMatch is vacuously true on empty lists
     val results = check.check(params("Helo world"))
     assertThat(results).allMatch { it.type == QaCheckType.GRAMMAR }
-    // None of the grammar results should flag "Helo" as a grammar issue
-    val grammarPositions = results.map { it.positionStart to it.positionEnd }
-    // Spelling issue would be at (0, 4) for "Helo"
-    // Grammar check should not include it
   }
 
   @Test
   fun `all results have GRAMMAR type`() {
-    val results = check.check(params("He go to school and she go too."))
-    assertThat(results).allMatch { it.type == QaCheckType.GRAMMAR }
+    check.check(params("He go to school and she go too.")).assertAllHaveType(QaCheckType.GRAMMAR)
   }
 
   @Test
   fun `provides suggestion as replacement`() {
     val results = check.check(params("He go to school."))
     assertThat(results).isNotEmpty
-    val first = results.first()
-    assertThat(first.replacement).isNotNull()
+    assertThat(results.first().replacement).isNotNull()
   }
 }
