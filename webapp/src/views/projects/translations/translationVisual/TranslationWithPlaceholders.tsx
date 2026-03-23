@@ -70,21 +70,23 @@ function sortModifiers(
 
     // If there is an overlap with only shorter highlights, replace them with the longer one
     const highlightLength = highlight.position.end - highlight.position.start;
-    const areAllOverlapsOnlyShorterHighlights = overlappingModifiers.every(
+    const canReplaceShorterHighlights = overlappingModifiers.every(
       (modifier) =>
         modifier.highlight &&
         modifier.position.end - modifier.position.start < highlightLength
     );
 
-    if (areAllOverlapsOnlyShorterHighlights) {
-      modifiers = modifiers.filter(
-        ({ position }) => !isOverlapping(position, highlight.position)
-      );
-      modifiers.push({
-        position: highlight.position,
-        highlight: highlight,
-      });
+    if (!canReplaceShorterHighlights) {
+      return;
     }
+
+    modifiers = modifiers.filter(
+      ({ position }) => !isOverlapping(position, highlight.position)
+    );
+    modifiers.push({
+      position: highlight.position,
+      highlight: highlight,
+    });
   });
 
   // Add QA issue highlights (skip issues with no position)
@@ -192,7 +194,7 @@ export const TranslationWithPlaceholders = ({
           targetLanguageTag={targetLocale}
         />
       );
-    } else if (modifier.qaIssue && translationId) {
+    } else if (modifier.qaIssue && translationId != null) {
       chunks.push(
         <QaIssueHighlight
           key={`qa-${modifier.position.start}-${modifier.qaIssue.type}`}

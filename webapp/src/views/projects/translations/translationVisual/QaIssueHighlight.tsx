@@ -52,29 +52,33 @@ export const QaIssueHighlight = ({
   const positionStart = issue.positionStart;
   const positionEnd = issue.positionEnd;
 
-  const handleCorrect =
+  const isCorrectable =
     replacement != null &&
     positionStart != null &&
     positionEnd != null &&
-    canEditTranslation(translationId)
-      ? () => {
-          correctTranslation({
-            translationId,
-            translationText,
-            issue: {
-              positionStart,
-              positionEnd,
-              replacement,
-            },
-          });
-        }
-      : undefined;
+    canEditTranslation(translationId);
+
+  const handleCorrect = isCorrectable
+    ? () => {
+        correctTranslation({
+          translationId,
+          translationText,
+          issue: {
+            positionStart,
+            positionEnd,
+            replacement,
+          },
+        });
+      }
+    : undefined;
 
   const ignoreMutation = useApiMutation({
     url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/suppressions',
     method: 'post',
     invalidatePrefix: '/v2/projects/{projectId}/translations',
   });
+
+  const hasVisibleContent = text.length > 0 && /[^\r\n]/.test(text);
 
   const handleIgnore = () => {
     ignoreMutation.mutate({
@@ -105,10 +109,13 @@ export const QaIssueHighlight = ({
         </div>
       }
     >
-      {text ? (
+      {hasVisibleContent ? (
         <StyledHighlight data-cy="qa-issue-highlight">{text}</StyledHighlight>
       ) : (
-        <StyledMarker data-cy="qa-issue-marker" />
+        <span>
+          {text}
+          <StyledMarker data-cy="qa-issue-marker" />
+        </span>
       )}
     </Tooltip>
   );
