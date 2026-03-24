@@ -90,6 +90,7 @@ class WebsocketTestHelper(
   ) : StompSessionHandlerAdapter(),
     Logging {
     var subscription: StompSession.Subscription? = null
+
     @Volatile
     var authenticationStatus: AuthenticationStatus? = null
 
@@ -124,9 +125,13 @@ class WebsocketTestHelper(
       super.handleTransportError(session, exception)
       logger.warn("Stomp Transport Error:", exception)
       // When the server rejects invalid credentials, it sends an "Unauthenticated"
-      // frame and closes the connection. Under load, the connection close can arrive
-      // before handleFrame processes the frame, so we never see the header. Treat a
-      // connection loss (before any successful auth) as unauthenticated.
+      // frame and closes the connection. Under CI load, the ConnectionLostException
+      // can arrive before handleFrame processes the rejection frame, so
+      // authenticationStatus is never set and waitForUnauthenticated() times out.
+      // Treating any connection loss (when authenticationStatus is still null) as
+      // UNAUTHENTICATED may mask non-auth disconnects, but this is acceptable:
+      // tests that expect a specific status (e.g. FORBIDDEN) will have already set
+      // authenticationStatus via handleFrame before the close arrives.
       if (authenticationStatus == null &&
         exception is org.springframework.messaging.simp.stomp.ConnectionLostException
       ) {
