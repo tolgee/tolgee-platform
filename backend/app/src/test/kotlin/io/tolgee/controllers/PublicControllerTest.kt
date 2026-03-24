@@ -19,7 +19,6 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 import kotlin.properties.Delegates
 
 @AutoConfigureMockMvc
@@ -40,7 +39,6 @@ class PublicControllerTest : AbstractControllerTest() {
     tolgeeProperties.authentication.registrationsAllowed = registrationsAllowed
   }
 
-  @MockitoBean
   @Autowired
   lateinit var postHog: PostHog
 

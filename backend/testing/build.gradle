@@ -107,6 +107,7 @@ dependencies {
      * DATA MODULE
      */
     implementation project(':data')
+    implementation libs.postHog
 
     /**
      * MCP SDK (for AbstractMcpTest)

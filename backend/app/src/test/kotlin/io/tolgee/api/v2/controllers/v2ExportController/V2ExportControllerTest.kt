@@ -32,7 +32,6 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.dao.DataIntegrityViolationException
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
@@ -50,7 +49,6 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   var namespacesTestData: NamespacesTestData? = null
   var languagePermissionsTestData: LanguagePermissionsTestData? = null
 
-  @MockitoBean
   @Autowired
   lateinit var postHog: PostHog
 
