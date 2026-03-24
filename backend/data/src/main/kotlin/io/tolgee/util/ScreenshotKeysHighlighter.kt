@@ -40,7 +40,7 @@ class ScreenshotKeysHighlighter(
       }
 
       g.dispose()
-      return writeImage(newImage, 1f)
+      return writeImage(newImage, 0.8f)
     } catch (e: Exception) {
       throw RuntimeException("Error processing image: ${e.message}")
     }
