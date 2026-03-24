@@ -54,18 +54,19 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
         )
 
       performAuthPut("/v2/user/mfa/totp", requestDto).andIsOk
-      val fromDb = userAccountService.findActive(initialUsername)
-      Assertions.assertThat(fromDb!!.totpKey).isEqualTo(encodedKey)
-
-      notificationUtil.newestInAppNotification().also {
-        assertThat(it.type).isEqualTo(MFA_ENABLED)
-        assertThat(it.user.id).isEqualTo(userAccount?.id)
-        assertThat(it.originatingUser?.id).isEqualTo(userAccount?.id)
-      }
-      assertThat(
-        notificationUtil.newestEmailNotification(),
-      ).contains("Multi-factor authentication has been enabled for your account")
     }
+
+    val fromDb = userAccountService.findActive(initialUsername)
+    Assertions.assertThat(fromDb!!.totpKey).isEqualTo(encodedKey)
+
+    notificationUtil.newestInAppNotification().also {
+      assertThat(it.type).isEqualTo(MFA_ENABLED)
+      assertThat(it.user.id).isEqualTo(userAccount?.id)
+      assertThat(it.originatingUser?.id).isEqualTo(userAccount?.id)
+    }
+    assertThat(
+      notificationUtil.newestEmailNotification(),
+    ).contains("Multi-factor authentication has been enabled for your account")
   }
 
   @Test
