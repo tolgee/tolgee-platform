@@ -1,6 +1,7 @@
 package io.tolgee.service.key.utils
 
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
+import io.tolgee.events.OnTranslationTextsModified
 import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
@@ -18,7 +19,7 @@ import io.tolgee.util.getSafeNamespace
 import org.springframework.context.ApplicationContext
 
 class KeysImporter(
-  applicationContext: ApplicationContext,
+  private val applicationContext: ApplicationContext,
   val keys: List<ImportKeysItemDto>,
   val project: Project,
   val branch: String?,
@@ -40,7 +41,7 @@ class KeysImporter(
     val existing =
       keyService
         .getAllByBranch(project.id, branch)
-        .associateBy { ((it.namespace?.name to it.name)) }
+        .associateBy { it.namespace?.name to it.name }
         .toMutableMap()
     val namespaces = mutableMapOf<String, Namespace>()
     namespaceService.getAllInProject(project.id).associateByTo(namespaces) { it.name }
@@ -48,18 +49,20 @@ class KeysImporter(
 
     val toTag = mutableMapOf<Key, List<String>>()
     val keyMetasToSave = mutableListOf<KeyMeta>()
+    val updatedTranslationIds = mutableListOf<Long>()
 
     keys.forEach { keyDto ->
       val safeNamespace = getSafeNamespace(keyDto.namespace)
-      if (!existing.containsKey(safeNamespace to keyDto.name)) {
+      val namespaceKeyPair = safeNamespace to keyDto.name
+      val isNewKey = !existing.containsKey(namespaceKeyPair)
+      if (isNewKey) {
         val key =
           Key(
             name = keyDto.name,
             project = project,
           ).apply {
-            if (safeNamespace != null && !namespaces.containsKey(safeNamespace)) {
-              val ns = namespaceService.create(safeNamespace, project.id)
-              if (ns != null) {
+            if (safeNamespace != null && safeNamespace !in namespaces) {
+              namespaceService.create(safeNamespace, project.id)?.let { ns ->
                 namespaces[safeNamespace] = ns
               }
             }
@@ -74,15 +77,14 @@ class KeysImporter(
         val translations = convertedToPlurals ?: keyDto.translations
         translations.entries.forEach { (languageTag, value) ->
           languages[languageTag]?.let { language ->
-            translationService.setTranslationText(key, language, value)
+            val translation = translationService.setTranslationText(key, language, value)
+            updatedTranslationIds.add(translation.id)
           }
         }
-        existing[safeNamespace to keyDto.name] = key
+        existing[namespaceKeyPair] = key
 
         if (!keyDto.tags.isNullOrEmpty()) {
-          existing[safeNamespace to keyDto.name]?.let { key ->
-            toTag[key] = keyDto.tags
-          }
+          toTag[key] = keyDto.tags
         }
         if (keyDto.description != key.keyMeta?.description) {
           val keyMeta = key.keyMeta ?: KeyMeta(key = key)
@@ -95,5 +97,16 @@ class KeysImporter(
 
     tagService.tagKeys(toTag)
     keyMetaService.saveAll(keyMetasToSave)
+
+    val validTranslationIds = updatedTranslationIds.filter { it != 0L }
+    if (validTranslationIds.isNotEmpty()) {
+      applicationContext.publishEvent(
+        OnTranslationTextsModified(
+          source = this,
+          translationIds = validTranslationIds,
+          projectId = project.id,
+        ),
+      )
+    }
   }
 }
