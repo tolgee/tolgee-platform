@@ -32,19 +32,23 @@ export const useWebsocketService = (
       translationService.changeTranslations(translationUpdates);
     }
 
-    const keyUpdates = event.data?.keys?.map((key) => ({
-      keyId: key.id,
-      value:
+    const keyUpdates = event.data?.keys?.map((key) => {
+      const isDeleted =
         key.changeType === 'DEL' ||
         (key.modifications as Record<string, Modification<unknown>>)?.deletedAt
-          ?.new != null
+          ?.new != null;
+
+      return {
+        keyId: key.id,
+        value: isDeleted
           ? { deleted: true }
           : {
               ...getModifyingObject(key.modifications, {
                 name: 'keyName',
               }),
             },
-    }));
+      };
+    });
 
     if (keyUpdates) {
       translationService.updateTranslationKeys(keyUpdates);
@@ -95,7 +99,7 @@ export const useWebsocketService = (
   useEffect(() => {
     if (client && qaChecksEnabled) {
       return client.subscribe(
-        `/projects/${project.id}/qa-checks-completed`,
+        `/projects/${project.id}/qa-issues-updated`,
         (event) => {
           translationService.changeTranslations([
             {

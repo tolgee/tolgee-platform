@@ -92,7 +92,7 @@ class QaIssueService(
     issue.state = QaIssueState.IGNORED
     qaIssueRepository.save(issue)
     publishQaIssuesUpdated(issue.translation)
-    publishQaIssueIgnored(projectId, issue.type, issue.virtual)
+    publishQaIssueStateChange("QA_ISSUE_IGNORED", projectId, issue.type, issue.virtual)
   }
 
   @Transactional
@@ -103,7 +103,7 @@ class QaIssueService(
     val issue = getIssueByProjectAndId(projectId, issueId)
     reopenOrDeleteIssue(issue)
     publishQaIssuesUpdated(issue.translation)
-    publishQaIssueUnignored(projectId, issue.type, issue.virtual)
+    publishQaIssueStateChange("QA_ISSUE_UNIGNORED", projectId, issue.type, issue.virtual)
   }
 
   fun getIssueByProjectAndId(
@@ -145,7 +145,7 @@ class QaIssueService(
     }
     publishQaIssuesUpdated(translation)
     val isVirtual = issue == null
-    publishQaIssueIgnored(projectId, request.type, isVirtual)
+    publishQaIssueStateChange("QA_ISSUE_IGNORED", projectId, request.type, isVirtual)
   }
 
   @Transactional
@@ -157,7 +157,7 @@ class QaIssueService(
     val issue = findMatchingIssue(projectId, translationId, request) ?: return false
     reopenOrDeleteIssue(issue)
     publishQaIssuesUpdated(issue.translation)
-    publishQaIssueUnignored(projectId, request.type, issue.virtual)
+    publishQaIssueStateChange("QA_ISSUE_UNIGNORED", projectId, request.type, issue.virtual)
     return true
   }
 
@@ -192,7 +192,7 @@ class QaIssueService(
     qaIssueRepository.flush()
     val allIssues = qaIssueRepository.findAllByTranslationId(translation.id)
     websocketEventPublisher(
-      "/projects/$projectId/${WebsocketEventType.QA_CHECKS_COMPLETED.typeName}",
+      "/projects/$projectId/${WebsocketEventType.QA_ISSUES_UPDATED.typeName}",
       WebsocketEvent(
         data =
           mapOf(
@@ -208,32 +208,15 @@ class QaIssueService(
     )
   }
 
-  private fun publishQaIssueIgnored(
+  private fun publishQaIssueStateChange(
+    eventName: String,
     projectId: Long,
     checkType: QaCheckType,
     virtual: Boolean,
   ) {
     businessEventPublisher.publish(
       OnBusinessEventToCaptureEvent(
-        eventName = "QA_ISSUE_IGNORED",
-        projectId = projectId,
-        data =
-          mapOf(
-            "checkType" to checkType.name,
-            "virtual" to virtual,
-          ),
-      ),
-    )
-  }
-
-  private fun publishQaIssueUnignored(
-    projectId: Long,
-    checkType: QaCheckType,
-    virtual: Boolean,
-  ) {
-    businessEventPublisher.publish(
-      OnBusinessEventToCaptureEvent(
-        eventName = "QA_ISSUE_UNIGNORED",
+        eventName = eventName,
         projectId = projectId,
         data =
           mapOf(
