@@ -56,7 +56,11 @@ class QaBaseChangeRecheckTest : AuthorizedControllerTest() {
     refetchEntities()
 
     // Initial check: FR "bonjour monde" vs EN "Hello world." has case + punctuation issues
-    qaCheckBatchService.runChecksAndPersist(testData.project.id, testData.frTranslation.id)
+    qaCheckBatchService.runChecksAndPersist(
+      testData.project.id,
+      testData.testKey.id,
+      testData.frTranslation.language.id,
+    )
     entityManager.flush()
     val issuesBefore = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
     assertThat(issuesBefore.map { it.type.name }).contains("CHARACTER_CASE_MISMATCH", "PUNCTUATION_MISMATCH")
@@ -66,7 +70,11 @@ class QaBaseChangeRecheckTest : AuthorizedControllerTest() {
     entityManager.flush()
 
     // Recheck FR against new base — issues should be gone
-    qaCheckBatchService.runChecksAndPersist(testData.project.id, testData.frTranslation.id)
+    qaCheckBatchService.runChecksAndPersist(
+      testData.project.id,
+      testData.testKey.id,
+      testData.frTranslation.language.id,
+    )
     entityManager.flush()
     val issuesAfter = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
     assertThat(issuesAfter.map { it.type.name }).doesNotContain("CHARACTER_CASE_MISMATCH", "PUNCTUATION_MISMATCH")

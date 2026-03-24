@@ -23,7 +23,7 @@ class QaCheckRunnerService(
       } else {
         projectQaConfigService.getEnabledCheckTypesForProject(projectId)
       }
-    val typesToRun = if (checkTypes != null) enabledTypes.intersect(checkTypes.toSet()) else enabledTypes
+    val typesToRun = filterByCheckTypes(enabledTypes, checkTypes)
     return checks
       .filter { it.type in typesToRun }
       .flatMap { check -> runCheck(check, params) }
@@ -69,6 +69,14 @@ class QaCheckRunnerService(
         ),
       )
     }
+  }
+
+  private fun filterByCheckTypes(
+    enabledTypes: Set<QaCheckType>,
+    checkTypes: List<QaCheckType>?,
+  ): Set<QaCheckType> {
+    if (checkTypes == null) return enabledTypes
+    return enabledTypes.intersect(checkTypes.toSet())
   }
 
   private fun findCheck(type: QaCheckType): QaCheck {

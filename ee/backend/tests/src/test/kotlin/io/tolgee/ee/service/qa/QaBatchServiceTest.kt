@@ -61,7 +61,11 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   fun `creates QA issues when translation has problems`() {
     refetchEntities()
 
-    qaCheckBatchService.runChecksAndPersist(testData.project.id, testData.frTranslation.id)
+    qaCheckBatchService.runChecksAndPersist(
+      testData.project.id,
+      testData.testKey.id,
+      testData.frTranslation.language.id,
+    )
     entityManager.flush()
 
     val issues = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
@@ -77,7 +81,11 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
     testData.frTranslation.text = "Bonjour monde."
     entityManager.flush()
 
-    qaCheckBatchService.runChecksAndPersist(testData.project.id, testData.frTranslation.id)
+    qaCheckBatchService.runChecksAndPersist(
+      testData.project.id,
+      testData.testKey.id,
+      testData.frTranslation.language.id,
+    )
     entityManager.flush()
 
     val issues = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
@@ -89,7 +97,11 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   fun `replaces existing issues on re-check`() {
     refetchEntities()
 
-    qaCheckBatchService.runChecksAndPersist(testData.project.id, testData.frTranslation.id)
+    qaCheckBatchService.runChecksAndPersist(
+      testData.project.id,
+      testData.testKey.id,
+      testData.frTranslation.language.id,
+    )
     entityManager.flush()
     val issuesBefore = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
     Assertions.assertThat(issuesBefore).isNotEmpty
@@ -98,7 +110,11 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
     testData.frTranslation.text = "Bonjour monde."
     entityManager.flush()
 
-    qaCheckBatchService.runChecksAndPersist(testData.project.id, testData.frTranslation.id)
+    qaCheckBatchService.runChecksAndPersist(
+      testData.project.id,
+      testData.testKey.id,
+      testData.frTranslation.language.id,
+    )
     entityManager.flush()
 
     val issuesAfter = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
@@ -110,7 +126,11 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   fun `reports QA_CHECK_RUN event`() {
     refetchEntities()
 
-    qaCheckBatchService.runChecksAndPersist(testData.project.id, testData.frTranslation.id)
+    qaCheckBatchService.runChecksAndPersist(
+      testData.project.id,
+      testData.testKey.id,
+      testData.frTranslation.language.id,
+    )
     entityManager.flush()
 
     assertPostHogEventReported(postHog, "QA_CHECK_RUN")

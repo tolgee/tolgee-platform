@@ -3,6 +3,7 @@ package io.tolgee.service.translation
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.LanguageDto
+import io.tolgee.dtos.queryResults.qa.KeyLanguagePairView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.events.OnTranslationTextsModified
@@ -22,6 +23,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.Key_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
@@ -37,6 +39,7 @@ import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDat
 import io.tolgee.service.translation.SetTranslationTextUtil.Companion.Options
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
+import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -629,10 +632,9 @@ class TranslationService(
     }
   }
 
-  fun getTranslationIdsForRecheck(
+  fun getNotStaleTranslationIds(
     projectId: Long,
     languageIds: List<Long>? = null,
-    onlyStale: Boolean = false,
   ): List<Long> {
     val cb = entityManager.criteriaBuilder
     val query = cb.createQuery(Long::class.java)
@@ -647,9 +649,7 @@ class TranslationService(
       predicates.add(root.get(Translation_.language).get<Long>("id").`in`(languageIds))
     }
 
-    if (onlyStale) {
-      predicates.add(cb.equal(root.get(Translation_.qaChecksStale), true))
-    }
+    predicates.add(cb.equal(root.get(Translation_.qaChecksStale), false))
 
     query.select(root.get(Translation_.id))
     query.where(*predicates.toTypedArray())
@@ -680,6 +680,92 @@ class TranslationService(
     }
   }
 
+  fun getKeyLanguagePairsForRecheck(
+    projectId: Long,
+    languageIds: List<Long>? = null,
+    onlyStale: Boolean = false,
+  ): List<KeyLanguagePairView> {
+    val cb = entityManager.criteriaBuilder
+    val query = cb.createTupleQuery()
+
+    val keyRoot = query.from(Key::class.java)
+    val langRoot = query.from(Language::class.java)
+
+    val translationJoin =
+      keyRoot.join(Key_.translations, JoinType.LEFT)
+    translationJoin.on(
+      cb.equal(translationJoin.get(Translation_.language), langRoot),
+    )
+
+    val predicates =
+      mutableListOf(
+        cb.equal(keyRoot.get(Key_.project).get<Long>("id"), projectId),
+        cb.equal(langRoot.get(Language_.project).get<Long>("id"), projectId),
+      )
+
+    if (!languageIds.isNullOrEmpty()) {
+      predicates.add(langRoot.get(Language_.id).`in`(languageIds))
+    }
+
+    if (onlyStale) {
+      predicates.add(
+        cb.or(
+          cb.isNull(translationJoin.get(Translation_.id)),
+          cb.equal(translationJoin.get(Translation_.qaChecksStale), true),
+        ),
+      )
+    }
+
+    query.multiselect(keyRoot.get(Key_.id), langRoot.get(Language_.id))
+    query.where(*predicates.toTypedArray())
+
+    return entityManager.createQuery(query).resultList.map { tuple ->
+      KeyLanguagePairView(
+        keyId = tuple.get(0, Long::class.java),
+        languageId = tuple.get(1, Long::class.java),
+      )
+    }
+  }
+
+  fun getKeyLanguagePairsByTranslationIds(translationIds: Collection<Long>): List<KeyLanguagePairView> {
+    if (translationIds.isEmpty()) return emptyList()
+
+    val cb = entityManager.criteriaBuilder
+    val query = cb.createTupleQuery()
+    val root = query.from(Translation::class.java)
+
+    query.multiselect(
+      root.get(Translation_.key).get<Long>("id"),
+      root.get(Translation_.language).get<Long>("id"),
+    )
+
+    return translationIds.chunked(1000).flatMap { chunk ->
+      query.where(root.get(Translation_.id).`in`(chunk))
+      entityManager.createQuery(query).resultList.map { tuple ->
+        KeyLanguagePairView(
+          keyId = tuple.get(0, Long::class.java),
+          languageId = tuple.get(1, Long::class.java),
+        )
+      }
+    }
+  }
+
+  fun getBaseLanguageKeyIds(
+    translationIds: Collection<Long>,
+    baseLanguageId: Long,
+  ): List<Long> {
+    if (translationIds.isEmpty()) return emptyList()
+    return translationIds.chunked(1000).flatMap { chunk ->
+      entityManager
+        .createQuery(
+          "SELECT t.key.id FROM Translation t WHERE t.id IN :ids AND t.language.id = :baseLanguageId",
+          Long::class.java,
+        ).setParameter("ids", chunk)
+        .setParameter("baseLanguageId", baseLanguageId)
+        .resultList
+    }
+  }
+
   fun getSiblingIdsForBaseLanguageChanges(
     translationIds: Collection<Long>,
     baseLanguageId: Long,
@@ -688,17 +774,7 @@ class TranslationService(
 
     val translationIdSet = translationIds.toSet()
 
-    // if a translation is a base translation, get its key
-    val keyIds =
-      translationIds.chunked(1000).flatMap { chunk ->
-        entityManager
-          .createQuery(
-            "SELECT t.key.id FROM Translation t WHERE t.id IN :ids AND t.language.id = :baseLanguageId",
-            Long::class.java,
-          ).setParameter("ids", chunk)
-          .setParameter("baseLanguageId", baseLanguageId)
-          .resultList
-      }
+    val keyIds = getBaseLanguageKeyIds(translationIds, baseLanguageId)
 
     if (keyIds.isEmpty()) return emptyList()
 

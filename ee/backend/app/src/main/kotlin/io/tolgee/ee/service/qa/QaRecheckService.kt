@@ -2,6 +2,7 @@ package io.tolgee.ee.service.qa
 
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.model.Project
 import io.tolgee.model.enums.qa.QaCheckType
@@ -23,15 +24,23 @@ class QaRecheckService(
     languageIds: List<Long>? = null,
     onlyStale: Boolean = false,
   ) {
-    val translationIds = translationService.getTranslationIdsForRecheck(projectId, languageIds, onlyStale)
-    if (translationIds.isEmpty()) return
-
     if (checkTypes?.isEmpty() == true) return
 
-    translationService.setQaChecksStale(translationIds)
+    val pairs = translationService.getKeyLanguagePairsForRecheck(projectId, languageIds, onlyStale)
+    if (pairs.isEmpty()) return
+
+    if (!onlyStale) {
+      val existingTranslationIds =
+        translationService.getNotStaleTranslationIds(projectId, languageIds)
+      if (existingTranslationIds.isNotEmpty()) {
+        translationService.setQaChecksStale(existingTranslationIds)
+      }
+    }
+
+    val target = pairs.map { BatchTranslationTargetItem(keyId = it.keyId, languageId = it.languageId) }
 
     batchJobService.startJob(
-      request = QaCheckRequest(translationIds = translationIds, checkTypes = checkTypes),
+      request = QaCheckRequest(target = target, checkTypes = checkTypes),
       project = entityManager.getReference(Project::class.java, projectId),
       author = null,
       type = BatchJobType.QA_CHECK,

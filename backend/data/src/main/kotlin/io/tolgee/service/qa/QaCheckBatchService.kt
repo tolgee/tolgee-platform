@@ -5,7 +5,8 @@ import io.tolgee.model.enums.qa.QaCheckType
 interface QaCheckBatchService {
   fun runChecksAndPersist(
     projectId: Long,
-    translationId: Long,
+    keyId: Long,
+    languageId: Long,
     checkTypes: List<QaCheckType>? = null,
   )
 }

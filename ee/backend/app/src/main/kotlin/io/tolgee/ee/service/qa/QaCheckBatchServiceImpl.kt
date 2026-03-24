@@ -5,12 +5,17 @@ import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Feature
 import io.tolgee.formats.getPluralForms
 import io.tolgee.model.enums.qa.QaCheckType
+import io.tolgee.repository.TranslationRepository
+import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureRegistry
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.qa.QaCheckBatchService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.util.executeInNewRepeatableTransaction
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 
@@ -20,29 +25,38 @@ class QaCheckBatchServiceImpl(
   private val qaCheckRunnerService: QaCheckRunnerService,
   private val qaIssueService: QaIssueService,
   private val translationService: TranslationService,
+  private val translationRepository: TranslationRepository,
+  private val keyService: KeyService,
   private val languageService: LanguageService,
   private val businessEventPublisher: BusinessEventPublisher,
+  private val transactionManager: PlatformTransactionManager,
+  private val projectService: ProjectService,
 ) : QaCheckBatchService {
   @Transactional
   override fun runChecksAndPersist(
     projectId: Long,
-    translationId: Long,
+    keyId: Long,
+    languageId: Long,
     checkTypes: List<QaCheckType>?,
   ) {
-    val translation = translationService.get(translationId)
+    val project = projectService.getDto(projectId)
 
-    if (!ProjectFeatureRegistry.isEnabledOnProject(Feature.QA_CHECKS, translation.key.project)) {
+    if (!ProjectFeatureRegistry.isEnabledOnProject(Feature.QA_CHECKS, project)) {
       return
     }
 
+    val existingTranslation =
+      translationRepository.findOneByProjectIdAndKeyIdAndLanguageId(projectId, keyId, languageId)
+
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
-    val isBaseLanguage = translation.language.id == baseLanguage.id
+    val isBaseLanguage = languageId == baseLanguage.id
+    val language = if (isBaseLanguage) baseLanguage else languageService.getEntity(languageId, projectId)
 
     val baseText =
       if (!isBaseLanguage) {
         translationService
           .getTranslations(
-            listOf(translation.key.id),
+            listOf(keyId),
             listOf(baseLanguage.id),
           ).firstOrNull()
           ?.text
@@ -50,8 +64,9 @@ class QaCheckBatchServiceImpl(
         null
       }
 
-    val translationText = translation.text ?: ""
-    val isPlural = translation.key.isPlural
+    val translationText = existingTranslation?.text ?: ""
+    val key = keyService.get(keyId)
+    val isPlural = key.isPlural
     val textParsed = if (isPlural) getPluralForms(translationText) else null
     val baseParsed = if (isPlural && baseText != null) getPluralForms(baseText) else null
 
@@ -60,12 +75,12 @@ class QaCheckBatchServiceImpl(
         baseText = baseText,
         text = translationText,
         baseLanguageTag = if (!isBaseLanguage) baseLanguage.tag else null,
-        languageTag = translation.language.tag,
+        languageTag = language.tag,
         isPlural = isPlural,
         textVariants = textParsed?.forms,
         textVariantOffsets = textParsed?.offsets,
         baseTextVariants = baseParsed?.forms,
-        maxCharLimit = translation.key.maxCharLimit,
+        maxCharLimit = key.maxCharLimit,
       )
 
     val results =
@@ -73,14 +88,22 @@ class QaCheckBatchServiceImpl(
         projectId,
         params,
         checkTypes,
-        languageId = translation.language.id,
+        languageId = languageId,
       )
-    qaIssueService.replaceIssuesForTranslation(translation, results, checkTypes)
 
-    translation.qaChecksStale = false
-    translationService.save(translation)
+    if (results.isEmpty() && existingTranslation == null) return
 
-    qaIssueService.publishQaIssuesUpdated(translation)
+    executeInNewRepeatableTransaction(transactionManager) {
+      val translation = translationService.getOrCreate(projectId, keyId, languageId)
+      translationService.save(translation)
+
+      qaIssueService.replaceIssuesForTranslation(translation, results, checkTypes)
+
+      translation.qaChecksStale = false
+      translationService.save(translation)
+
+      qaIssueService.publishQaIssuesUpdated(translation)
+    }
 
     publishBusinessEvent(projectId)
   }

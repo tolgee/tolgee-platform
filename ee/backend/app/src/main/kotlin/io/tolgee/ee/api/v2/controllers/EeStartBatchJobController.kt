@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.LabelTranslationsRequest
 import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.batch.request.QaRecheckByKeysRequest
@@ -19,6 +20,7 @@ import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
 import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.security.authorization.RequiresProjectPermissions
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureGuard
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
@@ -42,6 +44,7 @@ class EeStartBatchJobController(
   private val batchJobModelAssembler: BatchJobModelAssembler,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
   private val translationService: TranslationService,
+  private val languageService: LanguageService,
   private val projectFeatureGuard: ProjectFeatureGuard,
 ) {
   @PostMapping(value = ["/assign-translation-label"])
@@ -106,15 +109,29 @@ class EeStartBatchJobController(
   ): BatchJobModel {
     projectFeatureGuard.checkEnabled(Feature.QA_CHECKS)
     securityService.checkKeyIdsExistAndIsFromProject(data.keyIds, projectHolder.project.id)
-    val translationIds =
-      translationService.getTranslationIdsByKeyIds(data.keyIds, data.languageIds)
-    if (translationIds.isEmpty()) {
+
+    val projectId = projectHolder.project.id
+    val languageIds =
+      data.languageIds
+        ?: languageService.getProjectLanguages(projectId).map { it.id }
+
+    val target =
+      data.keyIds.flatMap { keyId ->
+        languageIds.map { langId -> BatchTranslationTargetItem(keyId = keyId, languageId = langId) }
+      }
+    if (target.isEmpty()) {
       throw BadRequestException(Message.NO_TRANSLATIONS_TO_RECHECK)
     }
-    translationService.setQaChecksStale(translationIds)
+
+    // Mark all existing translations targeted by the job as stale
+    val existingTranslationIds = translationService.getTranslationIdsByKeyIds(data.keyIds, data.languageIds)
+    if (existingTranslationIds.isNotEmpty()) {
+      translationService.setQaChecksStale(existingTranslationIds)
+    }
+
     return batchJobService
       .startJob(
-        QaCheckRequest(translationIds = translationIds),
+        QaCheckRequest(target = target),
         projectHolder.projectEntity,
         authenticationFacade.authenticatedUserEntity,
         BatchJobType.QA_CHECK,

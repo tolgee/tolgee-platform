@@ -4,6 +4,7 @@ import io.tolgee.batch.ChunkProcessor
 import io.tolgee.batch.JobCharacter
 import io.tolgee.batch.ProgressManager
 import io.tolgee.batch.data.BatchJobDto
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.request.QaCheckRequest
 import io.tolgee.model.batch.params.QaCheckJobParams
 import io.tolgee.service.qa.QaCheckBatchService
@@ -15,22 +16,22 @@ import kotlin.coroutines.CoroutineContext
 class QaCheckChunkProcessor(
   private val qaCheckBatchService: QaCheckBatchService,
   private val progressManager: ProgressManager,
-) : ChunkProcessor<QaCheckRequest, QaCheckJobParams, Long> {
+) : ChunkProcessor<QaCheckRequest, QaCheckJobParams, BatchTranslationTargetItem> {
   override fun process(
     job: BatchJobDto,
-    chunk: List<Long>,
+    chunk: List<BatchTranslationTargetItem>,
     coroutineContext: CoroutineContext,
   ) {
     val params = getParams(job)
     val projectId = job.projectId ?: throw IllegalArgumentException("Project id is required")
-    chunk.forEach { translationId ->
+    chunk.forEach { (keyId, languageId) ->
       coroutineContext.ensureActive()
-      qaCheckBatchService.runChecksAndPersist(projectId, translationId, params.checkTypes)
+      qaCheckBatchService.runChecksAndPersist(projectId, keyId, languageId, params.checkTypes)
       progressManager.reportSingleChunkProgress(job.id)
     }
   }
 
-  override fun getTarget(data: QaCheckRequest): List<Long> = data.translationIds
+  override fun getTarget(data: QaCheckRequest): List<BatchTranslationTargetItem> = data.target
 
   override fun getParams(data: QaCheckRequest): QaCheckJobParams =
     QaCheckJobParams().apply {
@@ -39,7 +40,7 @@ class QaCheckChunkProcessor(
 
   override fun getParamsType(): Class<QaCheckJobParams> = QaCheckJobParams::class.java
 
-  override fun getTargetItemType(): Class<Long> = Long::class.java
+  override fun getTargetItemType(): Class<BatchTranslationTargetItem> = BatchTranslationTargetItem::class.java
 
   override fun getChunkSize(
     request: QaCheckRequest,

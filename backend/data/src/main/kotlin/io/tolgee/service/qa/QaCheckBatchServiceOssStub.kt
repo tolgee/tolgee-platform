@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service
 class QaCheckBatchServiceOssStub : QaCheckBatchService {
   override fun runChecksAndPersist(
     projectId: Long,
-    translationId: Long,
+    keyId: Long,
+    languageId: Long,
     checkTypes: List<QaCheckType>?,
   ) {
     // No-op: QA checks are an EE feature
