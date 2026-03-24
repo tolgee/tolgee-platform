@@ -1,3 +1,10 @@
+## [3.173.4](https://github.com/tolgee/tolgee-platform/compare/v3.173.3...v3.173.4) (2026-03-24)
+
+
+### Bug Fixes
+
+* use proper PNG compression in ScreenshotKeysHighlighter ([#3558](https://github.com/tolgee/tolgee-platform/issues/3558)) ([5058c8b](https://github.com/tolgee/tolgee-platform/commit/5058c8b01a39e10e3afcceda803fab02061970b0)), closes [#3534](https://github.com/tolgee/tolgee-platform/issues/3534)
+
 ## [3.173.3](https://github.com/tolgee/tolgee-platform/compare/v3.173.2...v3.173.3) (2026-03-23)
 
 
