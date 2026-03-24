@@ -36,7 +36,8 @@ export const useWebsocketService = (
       keyId: key.id,
       value:
         key.changeType === 'DEL' ||
-        (key.modifications as Record<string, any>)?.deletedAt?.new != null
+        (key.modifications as Record<string, Modification<unknown>>)?.deletedAt
+          ?.new != null
           ? { deleted: true }
           : {
               ...getModifyingObject(key.modifications, {
@@ -66,12 +67,12 @@ export const useWebsocketService = (
     handleQueue();
   }, [eventBlockers]);
 
-  const handerRef = useRef(handleQueue);
-  handerRef.current = handleQueue;
+  const handlerRef = useRef(handleQueue);
+  handlerRef.current = handleQueue;
 
   const handleQueueDelayed = useDebouncedCallback(
     () => {
-      handerRef.current();
+      handlerRef.current();
     },
     100,
     { maxWait: 100 }
@@ -101,6 +102,7 @@ export const useWebsocketService = (
               keyId: event.data.keyId,
               language: event.data.languageTag,
               value: {
+                id: event.data.translationId,
                 qaIssueCount: event.data.qaIssueCount,
                 qaChecksStale: event.data.qaChecksStale,
                 qaIssues: event.data.qaIssues,
@@ -121,9 +123,9 @@ const getModifyingObject = (
   value: Record<string, Modification<any>>,
   fieldMapping?: Record<string, string>
 ) => {
-  const result = {};
-  Object.entries(value).forEach(([field, modification]) => {
+  const result: Record<string, unknown> = {};
+  for (const [field, modification] of Object.entries(value)) {
     result[fieldMapping?.[field] || field] = modification.new;
-  });
+  }
   return result;
 };
