@@ -182,11 +182,11 @@ const DashboardProjectListItem = (p: ProjectWithStatsModel) => {
         <StyledControls>
           <Box width="100%" display="flex" justifyContent="flex-end">
             {showQaBadge ? (
-              <Tooltip title={t('project_list_qa_issues_button', 'QA issues')}>
+              <Tooltip title={t('project_list_qa_issues_button')}>
                 <IconButton
                   data-cy="project-list-qa-badge-button"
                   onClick={stopBubble()}
-                  aria-label={t('project_list_qa_issues_button', 'QA issues')}
+                  aria-label={t('project_list_qa_issues_button')}
                   component={Link}
                   to={getProjectTranslationsUrl(p.id, {
                     filters: { filterHasQaIssues: true },
