@@ -82,8 +82,7 @@ class ScreenshotKeysHighlighterTest {
     assertThat(outputBytes.size)
       .withFailMessage(
         "Re-encoded image (%d bytes) exceeds the 5 MB API limit even though " +
-          "nothing was highlighted. Stored image was only %d bytes (ratio: %.1fx). " +
-          "ScreenshotKeysHighlighter.highlightKeys() re-encodes with compressionQuality=1.0f.",
+          "nothing was highlighted. Stored image was only %d bytes (ratio: %.1fx).",
         outputBytes.size,
         storedBytes.size,
         outputBytes.size.toDouble() / storedBytes.size,
@@ -116,8 +115,7 @@ class ScreenshotKeysHighlighterTest {
     assertThat(highlightedBytes.size)
       .withFailMessage(
         "Highlighted image (%d bytes) exceeds the 5 MB API limit. " +
-          "Stored image was only %d bytes (ratio: %.1fx). " +
-          "ScreenshotKeysHighlighter.highlightKeys() re-encodes with compressionQuality=1.0f.",
+          "Stored image was only %d bytes (ratio: %.1fx).",
         highlightedBytes.size,
         storedBytes.size,
         highlightedBytes.size.toDouble() / storedBytes.size,
