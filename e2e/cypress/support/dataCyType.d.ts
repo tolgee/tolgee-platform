@@ -656,6 +656,7 @@ declare namespace DataCy {
         "project-leave-button" |
         "project-list-languages" |
         "project-list-more-button" |
+        "project-list-qa-badge-button" |
         "project-list-translations-button" |
         "project-member-item" |
         "project-member-revoke-button" |

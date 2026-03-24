@@ -5208,6 +5208,10 @@ export interface components {
       languageCount: number;
       /** Format: int64 */
       projectId: number;
+      /** Format: int64 */
+      qaChecksStaleCount: number;
+      /** Format: int64 */
+      qaIssueCount: number;
       translationStatePercentages: { [key: string]: number };
     };
     ProjectStatsModel: {
