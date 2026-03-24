@@ -253,9 +253,8 @@ class Translation(
     source: Translation,
     snapshot: TranslationSnapshot,
   ): Boolean {
-    if (isConflictingThreeWay(source.text.orEmpty(), this.text.orEmpty(), snapshot.value)) return true
-    if (isConflictingThreeWay(source.state, this.state, snapshot.state)) return true
-    return false
+    return isConflictingThreeWay(source.text.orEmpty(), this.text.orEmpty(), snapshot.value) ||
+      isConflictingThreeWay(source.state, this.state, snapshot.state)
   }
 
   override fun merge(
@@ -263,7 +262,11 @@ class Translation(
     snapshot: TranslationSnapshot?,
     resolution: BranchKeyMergeResolutionType,
   ) {
+    val oldText = this.text
     this.text = chooseThreeWay(source.text, this.text, snapshot?.value, resolution)
+    if (this.text != oldText) {
+      this.qaChecksStale = true
+    }
     this.state = chooseThreeWay(source.state, this.state, snapshot?.state, resolution) ?: this.state
     this.outdated = chooseThreeWay(source.outdated, this.outdated, null, resolution) ?: false
     this.auto = chooseThreeWay(source.auto, this.auto, null, resolution) ?: false

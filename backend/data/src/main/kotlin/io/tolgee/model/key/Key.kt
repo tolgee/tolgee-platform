@@ -191,10 +191,8 @@ class Key(
         return true
       }
     }
-    if (this.toScreenshotViews().toSet() != snapshot.screenshotReferences.toSet()) {
-      return true
-    }
-    return false
+    val screenshotsChanged = this.toScreenshotViews().toSet() != snapshot.screenshotReferences.toSet()
+    return screenshotsChanged
   }
 
   override fun isConflicting(
@@ -279,6 +277,7 @@ class Key(
               auto = sourceTranslation.auto
               outdated = sourceTranslation.outdated
               mtProvider = sourceTranslation.mtProvider
+              qaChecksStale = true
             }
           this.translations.add(newTranslation)
         }

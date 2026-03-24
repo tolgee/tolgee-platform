@@ -9,6 +9,7 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.OrganizationLanguageDto
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.language.LanguageFilters
+import io.tolgee.events.OnLanguageTagChanged
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Language.Companion.fromRequestDTO
@@ -131,9 +132,13 @@ class LanguageService(
     dto: LanguageRequest,
   ): Language {
     val language = getEntity(languageId, projectId)
+    val oldTag = language.tag
     language.updateByDTO(dto)
     entityManager.persist(language)
     evictCache(language)
+    if (oldTag != language.tag) {
+      applicationContext.publishEvent(OnLanguageTagChanged(projectId = projectId, languageId = languageId))
+    }
     return language
   }
 
