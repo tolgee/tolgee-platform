@@ -90,6 +90,7 @@ class WebsocketTestHelper(
   ) : StompSessionHandlerAdapter(),
     Logging {
     var subscription: StompSession.Subscription? = null
+    @Volatile
     var authenticationStatus: AuthenticationStatus? = null
 
     enum class AuthenticationStatus {
