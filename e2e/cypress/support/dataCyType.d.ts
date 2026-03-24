@@ -742,6 +742,8 @@ declare namespace DataCy {
         "seat_spending_limit_exceeded_while_accepting_invitation_message" |
         "self-hosted-ee-active-plan" |
         "self-hosted-ee-subscription-metrics" |
+        "self-hosted-plans-placeholder" |
+        "self-hosted-plans-placeholder-contact-us" |
         "sensitive-dialog-otp-input" |
         "sensitive-dialog-password-input" |
         "sensitive-protection-dialog" |
