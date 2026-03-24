@@ -183,6 +183,7 @@ export function openTranslationEditorWithMt(
 ) {
   selectLangsInLocalstorage(projectId, ['en', languageTag]);
   visitTranslations(projectId);
+  waitForGlobalLoading();
   getTranslationCell(key, languageTag).click();
   cy.gcy('global-editor').should('be.visible');
 }
