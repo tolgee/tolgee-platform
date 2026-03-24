@@ -1,5 +1,6 @@
 package io.tolgee.ee.api.v2.controllers.qa
 
+import com.posthog.server.PostHog
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
@@ -8,6 +9,7 @@ import io.tolgee.ee.utils.QaTestUtil
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsNoContent
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.repository.qa.TranslationQaIssueRepository
@@ -20,10 +22,15 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class QaIssueControllerTest : AuthorizedControllerTest() {
+  @MockitoBean
+  @Autowired
+  lateinit var postHog: PostHog
+
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
 
@@ -34,6 +41,9 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
   lateinit var qa: QaTestUtil
 
   lateinit var testData: QaTestData
+
+  private val translationUrl
+    get() = "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}"
 
   @BeforeEach
   fun setup() {
@@ -57,7 +67,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
     qa.runChecksAndPersist(testData.frTranslation)
 
     performAuthGet(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues",
+      "$translationUrl/qa-issues",
     ).andIsOk.andAssertThatJson {
       node("_embedded.qaIssues").isArray.isNotEmpty
       node("_embedded.qaIssues").isArray.anySatisfy {
@@ -75,7 +85,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
   @Test
   fun `returns empty when no QA issues exist`() {
     performAuthGet(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues",
+      "$translationUrl/qa-issues",
     ).andIsOk.andAssertThatJson {
       node("_embedded").isAbsent()
     }
@@ -89,7 +99,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
     qa.runChecksAndPersist(testData.frTranslation, text = "Bonjour monde.")
 
     performAuthGet(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues",
+      "$translationUrl/qa-issues",
     ).andIsOk.andAssertThatJson {
       node("_embedded").isAbsent()
     }
@@ -113,7 +123,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
     val issue = qa.getPersistedIssues(testData.frTranslation).first()
 
     performAuthPut(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/${issue.id}/ignore",
+      "$translationUrl/qa-issues/${issue.id}/ignore",
       null,
     ).andIsOk
 
@@ -128,13 +138,13 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
     // First ignore it
     performAuthPut(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/${issue.id}/ignore",
+      "$translationUrl/qa-issues/${issue.id}/ignore",
       null,
     ).andIsOk
 
     // Then unignore it
     performAuthPut(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/${issue.id}/unignore",
+      "$translationUrl/qa-issues/${issue.id}/unignore",
       null,
     ).andIsOk
 
@@ -197,7 +207,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
       )
 
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
+      "$translationUrl/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -219,7 +229,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
     assertThat(qa.getPersistedIssues(testData.frTranslation)).isEmpty()
 
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
+      "$translationUrl/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -248,7 +258,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
       )
 
     performAuthDelete(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
+      "$translationUrl/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -269,7 +279,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
     // Create a virtual issue via suppression
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
+      "$translationUrl/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -280,7 +290,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
     // Unignore by id should delete the virtual issue
     performAuthPut(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/${virtualIssue.id}/unignore",
+      "$translationUrl/qa-issues/${virtualIssue.id}/unignore",
       null,
     ).andIsOk
 
@@ -300,7 +310,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
     // Create a virtual issue via suppression
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
+      "$translationUrl/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -308,7 +318,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
     // Remove suppression should delete the virtual issue
     performAuthDelete(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
+      "$translationUrl/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -328,7 +338,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
     // Create a virtual ignored issue via suppression
     performAuthPost(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
+      "$translationUrl/qa-issues/suppressions",
       request,
     ).andIsOk
 
@@ -352,6 +362,69 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `reports QA_ISSUE_IGNORED event when ignoring by id`() {
+    qa.runChecksAndPersist(testData.frTranslation)
+    val issue = qa.getPersistedIssues(testData.frTranslation).first()
+
+    performAuthPut(
+      "$translationUrl/qa-issues/${issue.id}/ignore",
+      null,
+    ).andIsOk
+
+    assertPostHogEventReported(postHog, "QA_ISSUE_IGNORED") { data ->
+      assertThat(data["checkType"]).isEqualTo(issue.type.name)
+      assertThat(data["virtual"]).isEqualTo(false)
+    }
+  }
+
+  @Test
+  fun `reports QA_ISSUE_IGNORED event when ignoring by params (virtual)`() {
+    val request =
+      QaCheckIssueIgnoreRequest(
+        type = QaCheckType.CHARACTER_CASE_MISMATCH,
+        message = QaIssueMessage.QA_CASE_CAPITALIZE,
+        replacement = null,
+        positionStart = 0,
+        positionEnd = 5,
+      )
+
+    performAuthPost(
+      "$translationUrl/qa-issues/suppressions",
+      request,
+    ).andIsOk
+
+    assertPostHogEventReported(postHog, "QA_ISSUE_IGNORED") { data ->
+      assertThat(data["checkType"]).isEqualTo("CHARACTER_CASE_MISMATCH")
+      assertThat(data["virtual"]).isEqualTo(true)
+    }
+  }
+
+  @Test
+  fun `reports QA_ISSUE_IGNORED event when ignoring existing issue by params`() {
+    qa.runChecksAndPersist(testData.frTranslation)
+    val issue = qa.getPersistedIssues(testData.frTranslation).first()
+
+    val request =
+      QaCheckIssueIgnoreRequest(
+        type = issue.type,
+        message = issue.message,
+        replacement = issue.replacement,
+        positionStart = issue.positionStart,
+        positionEnd = issue.positionEnd,
+      )
+
+    performAuthPost(
+      "$translationUrl/qa-issues/suppressions",
+      request,
+    ).andIsOk
+
+    assertPostHogEventReported(postHog, "QA_ISSUE_IGNORED") { data ->
+      assertThat(data["checkType"]).isEqualTo(issue.type.name)
+      assertThat(data["virtual"]).isEqualTo(false)
+    }
+  }
+
+  @Test
   fun `removing non-existing suppression returns 204`() {
     val request =
       QaCheckIssueIgnoreRequest(
@@ -363,10 +436,53 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
       )
 
     performAuthDelete(
-      "/v2/projects/${testData.project.id}/translations/${testData.frTranslation.id}/qa-issues/suppressions",
+      "$translationUrl/qa-issues/suppressions",
       request,
     ).andIsNoContent
 
     assertThat(qa.getPersistedIssues(testData.frTranslation)).isEmpty()
+  }
+
+  @Test
+  fun `reports QA_ISSUE_UNIGNORED event when unignoring by id`() {
+    qa.runChecksAndPersist(testData.frTranslation)
+    val issue = qa.getPersistedIssues(testData.frTranslation).first()
+    qa.ignoreIssue(issue)
+
+    performAuthPut(
+      "$translationUrl/qa-issues/${issue.id}/unignore",
+      null,
+    ).andIsOk
+
+    assertPostHogEventReported(postHog, "QA_ISSUE_UNIGNORED") { data ->
+      assertThat(data["checkType"]).isEqualTo(issue.type.name)
+      assertThat(data["virtual"]).isEqualTo(false)
+    }
+  }
+
+  @Test
+  fun `reports QA_ISSUE_UNIGNORED event when unignoring by params`() {
+    qa.runChecksAndPersist(testData.frTranslation)
+    val issue = qa.getPersistedIssues(testData.frTranslation).first()
+    qa.ignoreIssue(issue)
+
+    val request =
+      QaCheckIssueIgnoreRequest(
+        type = issue.type,
+        message = issue.message,
+        replacement = issue.replacement,
+        positionStart = issue.positionStart,
+        positionEnd = issue.positionEnd,
+      )
+
+    performAuthDelete(
+      "$translationUrl/qa-issues/suppressions",
+      request,
+    ).andIsOk
+
+    assertPostHogEventReported(postHog, "QA_ISSUE_UNIGNORED") { data ->
+      assertThat(data["checkType"]).isEqualTo(issue.type.name)
+      assertThat(data["virtual"]).isEqualTo(false)
+    }
   }
 }

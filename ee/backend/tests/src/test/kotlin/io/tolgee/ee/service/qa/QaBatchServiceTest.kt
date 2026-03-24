@@ -1,7 +1,9 @@
 package io.tolgee.ee.service.qa
 
+import com.posthog.server.PostHog
 import io.tolgee.ee.development.QaTestData
 import io.tolgee.ee.utils.QaTestUtil
+import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.qa.TranslationQaIssueRepository
@@ -13,11 +15,16 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class QaBatchServiceTest : AuthorizedControllerTest() {
+  @MockitoBean
+  @Autowired
+  lateinit var postHog: PostHog
+
   @Autowired
   private lateinit var qaCheckBatchService: QaCheckBatchServiceImpl
 
@@ -96,5 +103,16 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
 
     val issuesAfter = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
     Assertions.assertThat(issuesAfter).isEmpty()
+  }
+
+  @Test
+  @Transactional
+  fun `reports QA_CHECK_RUN event`() {
+    refetchEntities()
+
+    qaCheckBatchService.runChecksAndPersist(testData.project.id, testData.frTranslation.id)
+    entityManager.flush()
+
+    assertPostHogEventReported(postHog, "QA_CHECK_RUN")
   }
 }

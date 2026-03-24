@@ -3,6 +3,8 @@ package io.tolgee.ee.service.qa
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.reporting.BusinessEventPublisher
+import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.hateoas.qa.QaIssueModelAssembler
@@ -26,6 +28,7 @@ class QaIssueService(
   private val websocketEventPublisher: WebsocketEventPublisher,
   private val currentDateProvider: CurrentDateProvider,
   private val qaIssueModelAssembler: QaIssueModelAssembler,
+  private val businessEventPublisher: BusinessEventPublisher,
 ) {
   @Transactional
   fun replaceIssuesForTranslation(
@@ -89,6 +92,7 @@ class QaIssueService(
     issue.state = QaIssueState.IGNORED
     qaIssueRepository.save(issue)
     publishQaIssuesUpdated(issue.translation)
+    publishQaIssueIgnored(projectId, issue.type, issue.virtual)
   }
 
   @Transactional
@@ -99,6 +103,7 @@ class QaIssueService(
     val issue = getIssueByProjectAndId(projectId, issueId)
     reopenOrDeleteIssue(issue)
     publishQaIssuesUpdated(issue.translation)
+    publishQaIssueUnignored(projectId, issue.type, issue.virtual)
   }
 
   fun getIssueByProjectAndId(
@@ -139,6 +144,8 @@ class QaIssueService(
       qaIssueRepository.save(newIssue)
     }
     publishQaIssuesUpdated(translation)
+    val isVirtual = issue == null
+    publishQaIssueIgnored(projectId, request.type, isVirtual)
   }
 
   @Transactional
@@ -150,6 +157,7 @@ class QaIssueService(
     val issue = findMatchingIssue(projectId, translationId, request) ?: return false
     reopenOrDeleteIssue(issue)
     publishQaIssuesUpdated(issue.translation)
+    publishQaIssueUnignored(projectId, request.type, issue.virtual)
     return true
   }
 
@@ -196,6 +204,42 @@ class QaIssueService(
             "qaIssues" to allIssues.map { qaIssueModelAssembler.toModel(it) },
           ),
         timestamp = currentDateProvider.date.time,
+      ),
+    )
+  }
+
+  private fun publishQaIssueIgnored(
+    projectId: Long,
+    checkType: QaCheckType,
+    virtual: Boolean,
+  ) {
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "QA_ISSUE_IGNORED",
+        projectId = projectId,
+        data =
+          mapOf(
+            "checkType" to checkType.name,
+            "virtual" to virtual,
+          ),
+      ),
+    )
+  }
+
+  private fun publishQaIssueUnignored(
+    projectId: Long,
+    checkType: QaCheckType,
+    virtual: Boolean,
+  ) {
+    businessEventPublisher.publish(
+      OnBusinessEventToCaptureEvent(
+        eventName = "QA_ISSUE_UNIGNORED",
+        projectId = projectId,
+        data =
+          mapOf(
+            "checkType" to checkType.name,
+            "virtual" to virtual,
+          ),
       ),
     )
   }

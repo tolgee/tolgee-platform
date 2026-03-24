@@ -5,6 +5,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { stopBubble } from 'tg.fixtures/eventHandler';
+import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { useTranslationsActions } from '../context/TranslationsContext';
 
 type QaIssueModel = components['schemas']['QaIssueModel'];
@@ -47,6 +48,7 @@ export const QaIssueHighlight = ({
 }: Props) => {
   const project = useProject();
   const { correctTranslation, canEditTranslation } = useTranslationsActions();
+  const reportEvent = useReportEvent();
 
   const replacement = issue.replacement;
   const positionStart = issue.positionStart;
@@ -68,6 +70,9 @@ export const QaIssueHighlight = ({
             positionEnd,
             replacement,
           },
+        });
+        reportEvent('QA_ISSUE_CORRECTED_HIGHLIGHT', {
+          checkType: issue.type,
         });
       }
     : undefined;

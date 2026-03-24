@@ -1,5 +1,7 @@
 package io.tolgee.ee.service.qa
 
+import io.tolgee.component.reporting.BusinessEventPublisher
+import io.tolgee.component.reporting.OnBusinessEventToCaptureEvent
 import io.tolgee.constants.Feature
 import io.tolgee.formats.getPluralForms
 import io.tolgee.model.enums.qa.QaCheckType
@@ -10,6 +12,7 @@ import io.tolgee.service.translation.TranslationService
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 
 @Primary
 @Service
@@ -18,6 +21,7 @@ class QaCheckBatchServiceImpl(
   private val qaIssueService: QaIssueService,
   private val translationService: TranslationService,
   private val languageService: LanguageService,
+  private val businessEventPublisher: BusinessEventPublisher,
 ) : QaCheckBatchService {
   @Transactional
   override fun runChecksAndPersist(
@@ -76,5 +80,19 @@ class QaCheckBatchServiceImpl(
     translationService.save(translation)
 
     qaIssueService.publishQaIssuesUpdated(translation)
+
+    publishBusinessEvent(projectId)
+  }
+
+  private fun publishBusinessEvent(projectId: Long) {
+    businessEventPublisher.publishOnceInTime(
+      OnBusinessEventToCaptureEvent(
+        eventName = "QA_CHECK_RUN",
+        projectId = projectId,
+      ),
+      Duration.ofDays(1),
+    ) {
+      "QA_CHECK_RUN_$projectId"
+    }
   }
 }
