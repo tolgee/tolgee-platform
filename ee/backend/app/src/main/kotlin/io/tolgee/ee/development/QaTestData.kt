@@ -29,30 +29,20 @@ class QaTestData : BaseTestData() {
   }
 
   /**
-   * Creates QA config with explicitly named checks.
-   * New check types added in the future won't be auto-included.
+   * Creates QA config with all check types enabled at WARNING, except SPELLING and GRAMMAR
+   * which are OFF (they depend on JLanguageTool which is non-deterministic in integration tests).
    */
   fun createDefaultQaConfig(): ProjectQaConfig {
     return ProjectQaConfig(
       project = project,
       settings =
-        mutableMapOf(
-          QaCheckType.EMPTY_TRANSLATION to QaCheckSeverity.WARNING,
-          QaCheckType.SPACES_MISMATCH to QaCheckSeverity.WARNING,
-          QaCheckType.UNMATCHED_NEWLINES to QaCheckSeverity.WARNING,
-          QaCheckType.CHARACTER_CASE_MISMATCH to QaCheckSeverity.WARNING,
-          QaCheckType.MISSING_NUMBERS to QaCheckSeverity.WARNING,
-          QaCheckType.PUNCTUATION_MISMATCH to QaCheckSeverity.WARNING,
-          QaCheckType.BRACKETS_MISMATCH to QaCheckSeverity.WARNING,
-          QaCheckType.BRACKETS_UNBALANCED to QaCheckSeverity.WARNING,
-          QaCheckType.SPECIAL_CHARACTER_MISMATCH to QaCheckSeverity.WARNING,
-          QaCheckType.DIFFERENT_URLS to QaCheckSeverity.WARNING,
-          QaCheckType.INCONSISTENT_PLACEHOLDERS to QaCheckSeverity.WARNING,
-          QaCheckType.INCONSISTENT_HTML to QaCheckSeverity.WARNING,
-          QaCheckType.HTML_SYNTAX to QaCheckSeverity.WARNING,
-          QaCheckType.ICU_SYNTAX to QaCheckSeverity.WARNING,
-          QaCheckType.REPEATED_WORDS to QaCheckSeverity.WARNING,
-        ),
+        QaCheckType.entries
+          .associateWith { type ->
+            when (type) {
+              QaCheckType.SPELLING, QaCheckType.GRAMMAR -> QaCheckSeverity.OFF
+              else -> QaCheckSeverity.WARNING
+            }
+          }.toMutableMap(),
     )
   }
 }
