@@ -40,6 +40,8 @@ export function useQaCheckTypeLabel(type: QaCheckType): string {
       return t('qa_check_type_html_syntax');
     case 'ICU_SYNTAX':
       return t('qa_check_type_icu_syntax');
+    case 'KEY_LENGTH_LIMIT':
+      return t('qa_check_type_key_length_limit');
     default:
       return type;
   }

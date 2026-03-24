@@ -24,6 +24,7 @@ enum class QaCheckType(
   REPEATED_WORDS(QaCheckSeverity.WARNING),
   SPELLING(QaCheckSeverity.WARNING),
   GRAMMAR(QaCheckSeverity.WARNING),
+  KEY_LENGTH_LIMIT(QaCheckSeverity.WARNING),
   ;
 
   companion object {
@@ -44,6 +45,7 @@ enum class QaCheckType(
             BRACKETS_UNBALANCED,
             SPECIAL_CHARACTER_MISMATCH,
             DIFFERENT_URLS,
+            KEY_LENGTH_LIMIT,
           ),
         QaCheckCategory.SYNTAX to
           listOf(

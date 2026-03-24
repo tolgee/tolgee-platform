@@ -23,6 +23,7 @@ import io.tolgee.service.key.TagService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.security.SecurityService
 import io.tolgee.service.translation.TranslationService
+import io.tolgee.service.translation.applyMaxCharLimit
 import io.tolgee.util.executeInNewRepeatableTransaction
 import org.springframework.context.ApplicationContext
 import org.springframework.transaction.PlatformTransactionManager
@@ -142,8 +143,9 @@ class KeyComplexEditHelper(
     }
 
     if (isMaxCharLimitChanged) {
-      dto.maxCharLimit?.let { key.maxCharLimit = if (it <= 0) null else it }
+      key.applyMaxCharLimit(dto.maxCharLimit)
       keyService.save(key)
+      translationService.onKeyMaxCharLimitChanged(key.id)
     }
 
     if (isCustomDataChanged) {

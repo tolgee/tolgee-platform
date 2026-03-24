@@ -121,6 +121,10 @@ export function useQaIssueMessage(
       return normalizedParams?.message
         ? t('qa_issue_grammar_error', normalizedParams)
         : t('qa_issue_grammar_error_no_params');
+    case 'qa_key_length_limit_exceeded':
+      return normalizedParams?.limit && normalizedParams?.count
+        ? t('qa_issue_key_length_limit_exceeded', normalizedParams)
+        : t('qa_issue_key_length_limit_exceeded_no_params');
     default:
       return message;
   }

@@ -65,6 +65,7 @@ class QaCheckBatchServiceImpl(
         textVariants = textParsed?.forms,
         textVariantOffsets = textParsed?.offsets,
         baseTextVariants = baseParsed?.forms,
+        maxCharLimit = translation.key.maxCharLimit,
       )
 
     val results =

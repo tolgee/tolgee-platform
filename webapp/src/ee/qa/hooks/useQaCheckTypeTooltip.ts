@@ -36,6 +36,8 @@ export function useQaCheckTypeTooltip(type: QaCheckType): string | null {
       return t('qa_check_tooltip_inconsistent_html');
     case 'HTML_SYNTAX':
       return t('qa_check_tooltip_html_syntax');
+    case 'KEY_LENGTH_LIMIT':
+      return t('qa_check_tooltip_key_length_limit');
     default:
       return null;
   }

@@ -77,6 +77,7 @@ class QaCheckPreviewWebSocketHandler(
           textVariantOffsets = textParsed?.offsets,
           baseTextVariants = state.baseVariants,
           activeVariant = activeVariant,
+          maxCharLimit = state.maxCharLimit,
         )
 
       coroutineScope {
@@ -171,19 +172,27 @@ class QaCheckPreviewWebSocketHandler(
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
     val baseTag: String? = baseLanguage.tag.takeIf { languageTag != it }
 
-    var baseText: String? = null
-    if (baseTag != null && keyId != null) {
-      val translations = translationService.getTranslations(listOf(keyId), listOf(baseLanguage.id))
-      baseText = translations.firstOrNull()?.text
-    }
+    val baseText: String? =
+      if (baseTag != null && keyId != null) {
+        translationService
+          .getTranslations(listOf(keyId), listOf(baseLanguage.id))
+          .firstOrNull()
+          ?.text
+      } else {
+        null
+      }
 
     val language = languageService.findByTag(languageTag, projectId)
 
-    var translationId: Long? = null
-    if (keyId != null && language != null) {
-      val translations = translationService.getTranslations(listOf(keyId), listOf(language.id))
-      translationId = translations.firstOrNull()?.id
-    }
+    val translationId: Long? =
+      if (keyId != null && language != null) {
+        translationService
+          .getTranslations(listOf(keyId), listOf(language.id))
+          .firstOrNull()
+          ?.id
+      } else {
+        null
+      }
 
     val enabledCheckTypes =
       if (language != null) {
@@ -192,7 +201,9 @@ class QaCheckPreviewWebSocketHandler(
         projectQaConfigService.getEnabledCheckTypesForProject(projectId)
       }
 
-    val isPlural = keyId?.let { keyService.get(it).isPlural } ?: false
+    val key = keyId?.let { keyService.get(it) }
+    val isPlural = key?.isPlural ?: false
+    val maxCharLimit = key?.maxCharLimit
     val baseParsed = if (isPlural && baseText != null) getPluralForms(baseText) else null
 
     session.attributes["state"] =
@@ -206,6 +217,7 @@ class QaCheckPreviewWebSocketHandler(
         enabledCheckTypes = enabledCheckTypes.toList(),
         isPlural = isPlural,
         baseVariants = baseParsed?.forms,
+        maxCharLimit = maxCharLimit,
       )
   }
 

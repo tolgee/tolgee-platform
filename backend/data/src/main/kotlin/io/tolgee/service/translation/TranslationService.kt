@@ -531,6 +531,14 @@ class TranslationService(
       .executeUpdate()
   }
 
+  fun onKeyMaxCharLimitChanged(keyId: Long) {
+    val translations = translationRepository.getAllByKeyIdIn(listOf(keyId))
+    if (translations.isEmpty()) return
+    translations.forEach { it.qaChecksStale = true }
+    saveAll(translations)
+    publishTextsModifiedEvent(translations)
+  }
+
   fun onKeyIsPluralChanged(
     keyIdToArgNameMap: Map<Long, String?>,
     newIsPlural: Boolean,

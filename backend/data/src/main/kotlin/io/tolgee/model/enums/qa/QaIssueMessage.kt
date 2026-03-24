@@ -74,6 +74,9 @@ enum class QaIssueMessage {
 
   // Grammar
   QA_GRAMMAR_ERROR,
+
+  // Key length limit
+  QA_KEY_LENGTH_LIMIT_EXCEEDED,
   ;
 
   @JsonValue

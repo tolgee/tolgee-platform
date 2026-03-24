@@ -5577,6 +5577,7 @@ export interface components {
         | "REPEATED_WORDS"
         | "SPELLING"
         | "GRAMMAR"
+        | "KEY_LENGTH_LIMIT"
       )[];
     };
     QaCheckIssueIgnoreRequest: {
@@ -5619,7 +5620,8 @@ export interface components {
         | "qa_html_unopened_tag"
         | "qa_icu_syntax_error"
         | "qa_spelling_error"
-        | "qa_grammar_error";
+        | "qa_grammar_error"
+        | "qa_key_length_limit_exceeded";
       params?: { [key: string]: string };
       pluralVariant?: string;
       /** Format: int32 */
@@ -5645,7 +5647,8 @@ export interface components {
         | "ICU_SYNTAX"
         | "REPEATED_WORDS"
         | "SPELLING"
-        | "GRAMMAR";
+        | "GRAMMAR"
+        | "KEY_LENGTH_LIMIT";
     };
     QaEnabledRequest: {
       enabled: boolean;
@@ -5692,7 +5695,8 @@ export interface components {
         | "qa_html_unopened_tag"
         | "qa_icu_syntax_error"
         | "qa_spelling_error"
-        | "qa_grammar_error";
+        | "qa_grammar_error"
+        | "qa_key_length_limit_exceeded";
       params?: { [key: string]: string };
       pluralVariant?: string;
       /** Format: int32 */
@@ -5720,7 +5724,8 @@ export interface components {
         | "ICU_SYNTAX"
         | "REPEATED_WORDS"
         | "SPELLING"
-        | "GRAMMAR";
+        | "GRAMMAR"
+        | "KEY_LENGTH_LIMIT";
     };
     QaLanguageSettingsModel: {
       settings?: { [key: string]: "WARNING" | "OFF" };
@@ -15905,6 +15910,7 @@ export interface operations {
           | "REPEATED_WORDS"
           | "SPELLING"
           | "GRAMMAR"
+          | "KEY_LENGTH_LIMIT"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -16052,6 +16058,7 @@ export interface operations {
           | "REPEATED_WORDS"
           | "SPELLING"
           | "GRAMMAR"
+          | "KEY_LENGTH_LIMIT"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -16235,6 +16242,7 @@ export interface operations {
           | "REPEATED_WORDS"
           | "SPELLING"
           | "GRAMMAR"
+          | "KEY_LENGTH_LIMIT"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -20969,6 +20977,7 @@ export interface operations {
           | "REPEATED_WORDS"
           | "SPELLING"
           | "GRAMMAR"
+          | "KEY_LENGTH_LIMIT"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -21296,6 +21305,7 @@ export interface operations {
           | "REPEATED_WORDS"
           | "SPELLING"
           | "GRAMMAR"
+          | "KEY_LENGTH_LIMIT"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
