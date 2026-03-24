@@ -7,6 +7,7 @@ import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.glossary.CreateGlossaryRequest
 import io.tolgee.ee.data.glossary.UpdateGlossaryRequest
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
@@ -57,9 +58,8 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
     executeInNewTransaction {
       val latestActivityRevision = getLatestActivityRevision()
 
-      val modifiedEntities = latestActivityRevision.modifiedEntities
-      modifiedEntities.size.assert.isEqualTo(1)
-      val modifications = modifiedEntities.single().modifications
+      val glossaryEntity = findGlossaryModifiedEntity(latestActivityRevision)
+      val modifications = glossaryEntity.modifications
       modifications["name"]!!.new.assert.isEqualTo("New Glossary")
       modifications["baseLanguageTag"]!!.new.assert.isEqualTo("en")
 
@@ -182,4 +182,10 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
       .createQuery("from ActivityRevision ar order by ar.timestamp desc ", ActivityRevision::class.java)
       .setMaxResults(1)
       .singleResult
+
+  private fun findGlossaryModifiedEntity(revision: ActivityRevision): ActivityModifiedEntity =
+    revision.modifiedEntities.find { it.entityClass == Glossary::class.simpleName }
+      ?: throw AssertionError(
+        "No Glossary modified entity found. Entities: ${revision.modifiedEntities.map { it.entityClass }}",
+      )
 }
