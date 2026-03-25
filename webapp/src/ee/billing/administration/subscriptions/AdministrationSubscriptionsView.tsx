@@ -79,7 +79,10 @@ export const AdministrationSubscriptionsView = () => {
                   }}
                 />
               }
-              label={t('administration_subscriptions_trialing_filter')}
+              label={t(
+                'administration_subscriptions_trialing_filter',
+                'Trialing'
+              )}
             />
             <FormControlLabel
               control={
