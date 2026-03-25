@@ -160,12 +160,15 @@ class BatchJobActionService(
             exec.status = BatchJobChunkExecutionStatus.CANCELLED
             entityManager.persist(exec)
             progressManager.handleProgress(exec)
-            exec
-          } else {
-            null
           }
+          exec
         }
       execution?.let {
+        // Always call handleChunkCompletedCommitted — if the coroutine was cancelled after the
+        // chunk's transaction committed but before handleChunkCompletedCommitted ran in the normal
+        // flow, the committed count would be permanently stuck and the job cache, project lock,
+        // and Redis state would never be cleaned up. The idempotency guard inside
+        // handleChunkCompletedCommitted prevents double-counting when it was already called.
         progressManager.handleChunkCompletedCommitted(it)
       }
     } catch (e: Exception) {
