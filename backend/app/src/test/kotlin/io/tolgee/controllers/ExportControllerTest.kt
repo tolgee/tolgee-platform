@@ -110,6 +110,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun `returns export with last modified header`() {
+    cacheManager.getCache(io.tolgee.constants.Caches.PROJECT_TRANSLATIONS_MODIFIED)?.clear()
     val now = Date()
     setForcedDate(now)
     val lastModified = performAndGetLastModified()
