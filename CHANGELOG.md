@@ -1,3 +1,10 @@
+# [3.174.0](https://github.com/tolgee/tolgee-platform/compare/v3.173.4...v3.174.0) (2026-03-25)
+
+
+### Features
+
+* add self-hosted plans placeholder ([#3560](https://github.com/tolgee/tolgee-platform/issues/3560)) ([7d1e31e](https://github.com/tolgee/tolgee-platform/commit/7d1e31e95f27518974bf153665d52f56b55b705c))
+
 ## [3.173.4](https://github.com/tolgee/tolgee-platform/compare/v3.173.3...v3.173.4) (2026-03-24)
 
 
