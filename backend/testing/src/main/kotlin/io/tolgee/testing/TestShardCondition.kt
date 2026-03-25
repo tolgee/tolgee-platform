@@ -17,24 +17,29 @@ import kotlin.math.absoluteValue
  */
 class TestShardCondition : ExecutionCondition {
   override fun evaluateExecutionCondition(context: ExtensionContext): ConditionEvaluationResult {
-    val shardTotal = System.getProperty("tolgee.test.shard.total")?.toIntOrNull()
-      ?: return ConditionEvaluationResult.enabled("No sharding configured")
-    val shardIndex = System.getProperty("tolgee.test.shard.index")?.toIntOrNull()
-      ?: return ConditionEvaluationResult.enabled("No shard index configured")
+    val shardTotal =
+      System.getProperty("tolgee.test.shard.total")?.toIntOrNull()
+        ?: return ConditionEvaluationResult.enabled("No sharding configured")
+    val shardIndex =
+      System.getProperty("tolgee.test.shard.index")?.toIntOrNull()
+        ?: return ConditionEvaluationResult.enabled("No shard index configured")
 
     if (shardTotal <= 1) {
       return ConditionEvaluationResult.enabled("Single shard")
     }
 
     // Only filter at class level — don't re-evaluate for each method
-    val testClass = context.testClass.orElse(null)
-      ?: return ConditionEvaluationResult.enabled("Not a class context")
+    val testClass =
+      context.testClass.orElse(null)
+        ?: return ConditionEvaluationResult.enabled("Not a class context")
 
     val hash = testClass.name.hashCode().absoluteValue % shardTotal
     return if (hash == shardIndex) {
       ConditionEvaluationResult.enabled("Class ${testClass.simpleName} assigned to shard $shardIndex")
     } else {
-      ConditionEvaluationResult.disabled("Class ${testClass.simpleName} assigned to shard $hash, skipping in shard $shardIndex")
+      ConditionEvaluationResult.disabled(
+        "Class ${testClass.simpleName} assigned to shard $hash, skipping in shard $shardIndex",
+      )
     }
   }
 }

@@ -30,7 +30,7 @@ jobs:
         uses: ./.github/actions/upload-backend-build
 
   backend-test:
-    name: BT ‍🔎${{ matrix.shard_total != '' && format(' shard {0}/{1}', matrix.shard_index, matrix.shard_total) || '' }}
+    name: BT ‍🔎 (${{ matrix.command }}${{ matrix.shard_total != '' && format(' shard {0}/{1}', matrix.shard_index, matrix.shard_total) || '' }})
     needs: [backend-build]
     runs-on: ubuntu-24.04
     strategy:
