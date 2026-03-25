@@ -30,7 +30,7 @@ jobs:
         uses: ./.github/actions/upload-backend-build
 
   backend-test:
-    name: BT ‍🔎
+    name: BT ‍🔎${{ matrix.shard_total != '' && format(' shard {0}/{1}', matrix.shard_index, matrix.shard_total) || '' }}
     needs: [backend-build]
     runs-on: ubuntu-24.04
     strategy:
@@ -47,6 +47,19 @@ jobs:
             "security:test",
             "ktlint:test",
           ]
+        shard_index: [""]
+        shard_total: [""]
+        include:
+          - command: "server-app:runStandardTests"
+            shard_index: "0"
+            shard_total: "2"
+          - command: "server-app:runStandardTests"
+            shard_index: "1"
+            shard_total: "2"
+        exclude:
+          - command: "server-app:runStandardTests"
+            shard_index: ""
+            shard_total: ""
     steps:
       - uses: actions/checkout@v4
 
@@ -74,13 +87,16 @@ jobs:
           SKIP_SERVER_BUILD: true
           SKIP_EMAIL_BUILD: true
           CI_RELEASE: ${{ github.event_name == 'push' && true || false }}
+          SHARD_INDEX: ${{ matrix.shard_index }}
+          SHARD_TOTAL: ${{ matrix.shard_total }}
 
       - name: Get report name
         id: reportName
         if: always()
         run: |
           reportName=${{ matrix.command }}
-          echo "reportName=${reportName//\:/_}" >> $GITHUB_OUTPUT
+          suffix=${{ matrix.shard_total != '' && format('_shard{0}', matrix.shard_index) || '' }}
+          echo "reportName=${reportName//\:/_}${suffix}" >> $GITHUB_OUTPUT
 
       - uses: actions/upload-artifact@v4
         if: always()
