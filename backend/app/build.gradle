@@ -19,6 +19,13 @@ plugins {
     id "org.gradle.test-retry"
 }
 
+sentry {
+    includeSourceContext = true
+    org = System.getenv("SENTRY_ORG")
+    projectName = System.getenv("SENTRY_PROJECT")
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
+}
+
 group = 'io.tolgee'
 
 if (System.getenv().containsKey("VERSION")) {

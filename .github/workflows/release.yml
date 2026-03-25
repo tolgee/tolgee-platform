@@ -49,6 +49,9 @@ jobs:
           VERSION: ${{ steps.version.outputs.VERSION }}
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
 
       - name: Login to docker
         if: ${{ steps.version.outputs.VERSION != '' }}
