@@ -39,7 +39,7 @@ class BatchJobConcurrentLauncher(
   /**
    * execution id -> Pair(BatchJobDto, Job)
    *
-   * Job is the result of launch method executing the execution in separate coroutine
+   * Job is the result of a launch method executing the execution in a separate coroutine
    */
   val runningJobs: ConcurrentHashMap<Long, Pair<BatchJobDto, Job>> = ConcurrentHashMap()
 
@@ -141,15 +141,15 @@ class BatchJobConcurrentLauncher(
 
   private fun logItemsPulled(items: List<ExecutionQueueItem>) {
     if (items.isNotEmpty()) {
-      logger.trace(
+      logger.trace {
         "Pulled ${items.size} items from queue: " +
-          items.joinToString(", ") { it.chunkExecutionId.toString() },
-      )
-      logger.trace(
+          items.joinToString(", ") { it.chunkExecutionId.toString() }
+      }
+      logger.trace {
         "${batchJobChunkExecutionQueue.size} is left in the queue " +
           "(${System.identityHashCode(batchJobChunkExecutionQueue)}): " +
-          batchJobChunkExecutionQueue.joinToString(", ") { it.chunkExecutionId.toString() },
-      )
+          batchJobChunkExecutionQueue.joinToString(", ") { it.chunkExecutionId.toString() }
+      }
     }
   }
 

@@ -25,12 +25,11 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.atomic.AtomicInteger
 
 @Component
 class BatchJobChunkExecutionQueue(
-  private val batchProperties: BatchProperties,
   private val entityManager: EntityManager,
   private val usingRedisProvider: UsingRedisProvider,
   @Lazy
@@ -40,21 +39,36 @@ class BatchJobChunkExecutionQueue(
   InitializingBean {
   companion object {
     /**
-     * It's static
+     * Per-job item queues. Key = jobId.
+     *
+     * All mutations go through ConcurrentHashMap.compute() which provides per-key
+     * atomicity, keeping roundRobinOrder and jobQueues in sync under concurrent access.
+     *
+     * Invariant: jobId is in roundRobinOrder ↔ jobQueues[jobId] is non-null and non-empty.
      */
-    private val queue = ConcurrentLinkedQueue<ExecutionQueueItem>()
+    private val jobQueues = ConcurrentHashMap<Long, ConcurrentLinkedDeque<ExecutionQueueItem>>()
 
     /**
-     * O(1) counter for job characters in queue - avoids O(n) iteration on every chunk
+     * Round-robin job order. Each jobId appears exactly once when its queue is non-empty.
+     * pollFirst() picks the next job to serve; addLast() re-queues it after serving one chunk.
+     * This gives O(1) fair scheduling without scanning all items.
+     */
+    private val roundRobinOrder = ConcurrentLinkedDeque<Long>()
+
+    /**
+     * O(1) duplicate detection — replaces the O(n) queue snapshot done on every add.
+     */
+    private val queuedExecutionIds = ConcurrentHashMap.newKeySet<Long>()
+
+    /**
+     * O(1) total item counter.
+     */
+    private val totalSize = AtomicInteger(0)
+
+    /**
+     * O(1) counter for job characters in queue.
      */
     private val jobCharacterCounts = ConcurrentHashMap<JobCharacter, AtomicInteger>()
-
-    /**
-     * Tracks the last job that was served a chunk for round-robin fairness.
-     * This ensures large jobs don't monopolize all worker coroutines.
-     */
-    @Volatile
-    private var lastServedJobId: Long? = null
   }
 
   private fun incrementCharacterCount(character: JobCharacter) {
@@ -65,19 +79,52 @@ class BatchJobChunkExecutionQueue(
     jobCharacterCounts[character]?.decrementAndGet()
   }
 
+  /**
+   * Adds a single item. Returns false if already queued (duplicate).
+   *
+   * Thread-safe: compute() serializes concurrent add/poll for the same jobId,
+   * ensuring roundRobinOrder.addLast() is called exactly once per new job.
+   */
+  private fun addSingleItem(item: ExecutionQueueItem): Boolean {
+    if (!queuedExecutionIds.add(item.chunkExecutionId)) return false
+
+    jobQueues.compute(item.jobId) { jobId, existing ->
+      val deque =
+        existing ?: ConcurrentLinkedDeque<ExecutionQueueItem>().also {
+          // Called atomically inside compute — only once per new job
+          roundRobinOrder.addLast(jobId)
+        }
+      deque.addLast(item)
+      deque
+    }
+
+    incrementCharacterCount(item.jobCharacter)
+    totalSize.incrementAndGet()
+    return true
+  }
+
   @EventListener
   fun onJobItemEvent(event: JobQueueItemsEvent) {
     when (event.type) {
-      QueueEventType.ADD -> {
-        this.addItemsToLocalQueue(event.items)
-      }
+      QueueEventType.ADD -> addItemsToLocalQueue(event.items)
 
       QueueEventType.REMOVE -> {
-        // Remove and decrement atomically per item to prevent double-decrement
-        // if poll() removes an item between removeAll and forEach
         event.items.forEach { item ->
-          if (queue.remove(item)) {
-            decrementCharacterCount(item.jobCharacter)
+          if (queuedExecutionIds.remove(item.chunkExecutionId)) {
+            jobQueues.compute(item.jobId) { _, deque ->
+              if (deque == null) return@compute null
+              val removed = deque.removeIf { it.chunkExecutionId == item.chunkExecutionId }
+              if (removed) {
+                decrementCharacterCount(item.jobCharacter)
+                totalSize.decrementAndGet()
+              }
+              if (deque.isEmpty()) {
+                roundRobinOrder.remove(item.jobId)
+                null
+              } else {
+                deque
+              }
+            }
           }
         }
       }
@@ -99,10 +146,10 @@ class BatchJobChunkExecutionQueue(
           from BatchJobChunkExecution bjce
           join bjce.batchJob bk
           where bjce.status = :executionStatus
-          order by 
+          order by
             case when bk.status = :runningStatus then 0 else 1 end,
-            bjce.createdAt asc, 
-            bjce.executeAfter asc, 
+            bjce.createdAt asc,
+            bjce.executeAfter asc,
             bjce.id asc
           """.trimIndent(),
           BatchJobChunkExecutionDto::class.java,
@@ -110,62 +157,41 @@ class BatchJobChunkExecutionQueue(
         .setParameter("runningStatus", BatchJobStatus.RUNNING)
         .resultList
 
-    if (data.size > 0) {
+    if (data.isNotEmpty()) {
       logger.debug("Attempt to add ${data.size} items to queue ${System.identityHashCode(this)}")
       addExecutionsToLocalQueue(data)
     }
   }
 
   fun addExecutionsToLocalQueue(data: List<BatchJobChunkExecutionDto>) {
-    val ids = queue.map { it.chunkExecutionId }.toSet()
-    var count = 0
-    data.forEach {
-      if (!ids.contains(it.id)) {
-        val item = it.toItem()
-        queue.add(item)
-        incrementCharacterCount(item.jobCharacter)
-        count++
-      }
+    var alreadyQueued = 0
+    data.forEach { dto ->
+      if (!addSingleItem(dto.toItem())) alreadyQueued++
     }
-    metrics.batchJobManagementItemAlreadyQueuedCounter.increment(data.size - count.toDouble())
-    logger.debug("Added $count new items to queue ${System.identityHashCode(this)}")
+    metrics.batchJobManagementItemAlreadyQueuedCounter.increment(alreadyQueued.toDouble())
+    logger.debug("Added ${data.size - alreadyQueued} new items to queue ${System.identityHashCode(this)}")
   }
 
   fun addItemsToLocalQueue(data: List<ExecutionQueueItem>) {
-    // Use Set for O(1) lookup instead of O(n) queue.contains()
-    val existingIds = queue.mapTo(HashSet()) { it.chunkExecutionId }
-    val toAdd = mutableListOf<ExecutionQueueItem>()
     var filteredOutCount = 0
-
-    data.forEach {
-      if (!existingIds.contains(it.chunkExecutionId)) {
-        toAdd.add(it)
-        existingIds.add(it.chunkExecutionId) // Prevent duplicates within the batch
-      } else {
-        filteredOutCount++
-      }
+    data.forEach { item ->
+      if (!addSingleItem(item)) filteredOutCount++
     }
     metrics.batchJobManagementItemAlreadyQueuedCounter.increment(filteredOutCount.toDouble())
     logger.trace {
-      val itemsString = toAdd.joinToString(", ") { it.chunkExecutionId.toString() }
-      "Adding ${toAdd.size} chunks to queue. Filtered out: $filteredOutCount"
+      "Adding ${data.size - filteredOutCount} chunks to queue. Filtered out: $filteredOutCount"
     }
-
-    queue.addAll(toAdd)
-    toAdd.forEach { incrementCharacterCount(it.jobCharacter) }
   }
 
   fun addToQueue(
     execution: BatchJobChunkExecution,
     jobCharacter: JobCharacter,
   ) {
-    val item = execution.toItem(jobCharacter)
-    addItemsToQueue(listOf(item))
+    addItemsToQueue(listOf(execution.toItem(jobCharacter)))
   }
 
   fun addToQueue(executions: List<BatchJobChunkExecution>) {
-    val items = executions.map { it.toItem() }
-    addItemsToQueue(items)
+    addItemsToQueue(executions.map { it.toItem() })
   }
 
   fun addItemsToQueue(items: List<ExecutionQueueItem>) {
@@ -183,20 +209,28 @@ class BatchJobChunkExecutionQueue(
       return
     }
 
-    this.addItemsToLocalQueue(items)
+    addItemsToLocalQueue(items)
   }
 
   fun removeJobExecutions(jobId: Long) {
-    logger.debug("Removing job $jobId from queue, queue size: ${queue.size}")
-    val iterator = queue.iterator()
-    while (iterator.hasNext()) {
-      val item = iterator.next()
-      if (item.jobId == jobId) {
-        iterator.remove()
-        decrementCharacterCount(item.jobCharacter)
+    logger.debug("Removing job $jobId from queue, queue size: ${totalSize.get()}")
+    var removedCount = 0
+    jobQueues.compute(jobId) { _, deque ->
+      if (deque != null) {
+        deque.forEach { item ->
+          queuedExecutionIds.remove(item.chunkExecutionId)
+          decrementCharacterCount(item.jobCharacter)
+        }
+        removedCount = deque.size
+        totalSize.addAndGet(-removedCount)
       }
+      null // remove entry from map
     }
-    logger.debug("Removed job $jobId from queue, queue size: ${queue.size}")
+    if (removedCount > 0) {
+      // O(n) on roundRobinOrder, but removeJobExecutions is only called on cancellation
+      roundRobinOrder.remove(jobId)
+    }
+    logger.debug("Removed job $jobId from queue ($removedCount items), queue size: ${totalSize.get()}")
   }
 
   private fun BatchJobChunkExecution.toItem(
@@ -204,104 +238,91 @@ class BatchJobChunkExecutionQueue(
     // However, we don't want to fetch it here, because it would be a waste of resources.
     // So we can provide the jobCharacter here.
     jobCharacter: JobCharacter? = null,
-  ) =
-    ExecutionQueueItem(id, batchJob.id, executeAfter?.time, jobCharacter ?: batchJob.jobCharacter)
+  ) = ExecutionQueueItem(id, batchJob.id, executeAfter?.time, jobCharacter ?: batchJob.jobCharacter)
 
   private fun BatchJobChunkExecutionDto.toItem(providedJobCharacter: JobCharacter? = null) =
     ExecutionQueueItem(id, batchJobId, executeAfter?.time, providedJobCharacter ?: jobCharacter)
 
-  val size get() = queue.size
+  val size get() = totalSize.get()
 
   fun joinToString(
     separator: String = ", ",
     transform: (item: ExecutionQueueItem) -> String,
-  ) = queue.joinToString(separator, transform = transform)
-
-  fun poll(): ExecutionQueueItem? {
-    val item = queue.poll()
-    item?.let { decrementCharacterCount(it.jobCharacter) }
-    return item
-  }
+  ) = getAllQueueItems().joinToString(separator, transform = transform)
 
   /**
-   * Polls using round-robin across jobs for fair distribution.
-   * Each job gets one chunk processed before any job gets a second chunk.
-   * This prevents large jobs from monopolizing all worker coroutines.
+   * O(1) poll — delegates to pollRoundRobin.
+   */
+  fun poll(): ExecutionQueueItem? = pollRoundRobin()
+
+  /**
+   * O(1) round-robin poll across jobs.
    *
-   * Thread-safety: This method handles concurrent modifications gracefully.
-   * If another thread removes an item between finding and removing it,
-   * we verify the removal succeeded and retry if needed.
+   * Rotates jobs fairly: each job gets one chunk served before any job gets a second.
+   * Uses pollFirst/addLast on roundRobinOrder — no full-queue scan required.
+   *
+   * Thread-safe: compute() serializes concurrent add/poll for the same jobId.
+   * If a job's deque turns out to be empty (concurrent drain), the job is skipped
+   * and the next one is tried. maxAttempts prevents infinite loops in edge cases.
    */
   fun pollRoundRobin(): ExecutionQueueItem? {
-    if (queue.isEmpty()) {
-      return null
-    }
+    if (isEmpty()) return null
 
-    // Get distinct job IDs in queue order
-    val jobIds = queue.mapTo(LinkedHashSet()) { it.jobId }.toList()
-    if (jobIds.isEmpty()) {
-      return null
-    }
+    // jobQueues.size is O(1) (ConcurrentHashMap maintains an internal counter).
+    // It bounds the loop to the number of distinct jobs: in the worst case we try every
+    // job once and find all deques empty (concurrent drain), then give up.
+    // Do NOT use roundRobinOrder.size() — ConcurrentLinkedDeque.size() is O(n).
+    val maxAttempts = jobQueues.size + 1
+    var attempts = 0
+    while (attempts++ <= maxAttempts) {
+      val jobId = roundRobinOrder.pollFirst() ?: return null
 
-    // Find next job in rotation
-    val lastJobId = lastServedJobId
-    val startIndex =
-      if (lastJobId == null) {
-        0
-      } else {
-        val idx = jobIds.indexOf(lastJobId)
-        if (idx == -1) 0 else (idx + 1) % jobIds.size
+      var item: ExecutionQueueItem? = null
+      var hasMoreItems = false
+
+      jobQueues.compute(jobId) { _, deque ->
+        if (deque.isNullOrEmpty()) return@compute null
+        item = deque.removeFirst()
+        hasMoreItems = deque.isNotEmpty()
+        if (hasMoreItems) deque else null
       }
 
-    // Try each job in round-robin order
-    for (i in jobIds.indices) {
-      val jobIndex = (startIndex + i) % jobIds.size
-      val targetJobId = jobIds[jobIndex]
-
-      // Find first item for this job and try to remove it
-      val item = queue.firstOrNull { it.jobId == targetJobId }
-      if (item != null && queue.remove(item)) {
-        // Successfully removed - update state and return
+      if (item != null) {
+        queuedExecutionIds.remove(item.chunkExecutionId)
         decrementCharacterCount(item.jobCharacter)
-        lastServedJobId = targetJobId
+        totalSize.decrementAndGet()
+        if (hasMoreItems) roundRobinOrder.addLast(jobId)
         return item
       }
-      // Item was null or already removed by another thread, try next job
+      // deque was null or empty (concurrent drain) — don't re-add, try next job
     }
-
-    // Fallback if all targeted items were concurrently removed
-    return poll()
+    return null
   }
 
   fun clear() {
     logger.debug("Clearing queue")
-    queue.clear()
+    jobQueues.clear()
+    roundRobinOrder.clear()
+    queuedExecutionIds.clear()
+    totalSize.set(0)
     jobCharacterCounts.clear()
   }
 
-  fun find(function: (ExecutionQueueItem) -> Boolean): ExecutionQueueItem? {
-    return queue.find(function)
-  }
+  fun find(function: (ExecutionQueueItem) -> Boolean): ExecutionQueueItem? = getAllQueueItems().find(function)
 
-  fun peek(): ExecutionQueueItem = queue.peek()
+  fun peek(): ExecutionQueueItem = getAllQueueItems().first()
 
-  fun contains(item: ExecutionQueueItem?): Boolean = queue.contains(item)
+  fun contains(item: ExecutionQueueItem?): Boolean = item != null && queuedExecutionIds.contains(item.chunkExecutionId)
 
-  fun isEmpty(): Boolean = queue.isEmpty()
+  fun isEmpty(): Boolean = totalSize.get() == 0
 
-  fun getJobCharacterCounts(): Map<JobCharacter, Int> {
-    return jobCharacterCounts.mapValues { it.value.get() }
-  }
+  fun getJobCharacterCounts(): Map<JobCharacter, Int> = jobCharacterCounts.mapValues { it.value.get() }
 
   override fun afterPropertiesSet() {
-    metrics.registerJobQueue(queue)
+    metrics.registerJobQueue { totalSize.get() }
   }
 
-  fun getQueuedJobItems(jobId: Long): List<ExecutionQueueItem> {
-    return queue.filter { it.jobId == jobId }
-  }
+  fun getQueuedJobItems(jobId: Long): List<ExecutionQueueItem> = jobQueues[jobId]?.toList() ?: emptyList()
 
-  fun getAllQueueItems(): List<ExecutionQueueItem> {
-    return queue.toList()
-  }
+  fun getAllQueueItems(): List<ExecutionQueueItem> = jobQueues.values.flatMap { it.toList() }
 }
