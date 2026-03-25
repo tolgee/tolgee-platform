@@ -1,6 +1,7 @@
 package io.tolgee.ee.service
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.adminMtServiceFilter.AdminMtServiceFilter
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.machineTranslation.LlmProviderInterface
 import io.tolgee.constants.Caches
@@ -56,6 +57,7 @@ class LlmProviderService(
   private val googleAiApiService: GoogleAiApiService,
   private val llmProviderResolver: LlmProviderResolver,
   private val urlSecurity: UrlSecurity,
+  private val adminMtServiceFilter: AdminMtServiceFilter,
 ) {
   private val cache: Cache by lazy { cacheManager.getCache(Caches.LLM_PROVIDERS) ?: throw InvalidStateException() }
   private var lastUsedMap: MutableMap<String, Long> = mutableMapOf()
@@ -207,7 +209,12 @@ class LlmProviderService(
     name: String,
     priority: LlmProviderPriority?,
   ): LlmProviderDto {
-    val customProviders = getAll(organizationId)
+    val customProviders =
+      if (adminMtServiceFilter.shouldSkipOrgLlmProviders(organizationId)) {
+        emptyList()
+      } else {
+        getAll(organizationId)
+      }
     val serverProviders = getAllServerProviders()
 
     val providersOfTheName =

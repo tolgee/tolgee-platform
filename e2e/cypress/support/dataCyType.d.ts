@@ -107,6 +107,7 @@ declare namespace DataCy {
         "ai-languages-description-edit" |
         "ai-menu-context-data" |
         "ai-menu-prompts" |
+        "ai-playground-admin-access-info" |
         "ai-playground-preview" |
         "ai-playground-usage-cached-tokens" |
         "ai-playground-usage-mt-credits" |

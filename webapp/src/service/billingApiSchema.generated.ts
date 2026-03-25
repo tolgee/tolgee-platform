@@ -904,8 +904,7 @@ export interface components {
         | "feature_not_enabled_for_project"
         | "export_key_plural_suffix_collision"
         | "translation_exceeds_char_limit"
-        | "url_not_valid"
-        | "admin_access_org_has_custom_llm_provider";
+        | "url_not_valid";
       params?: unknown[];
     };
     ExampleItem: {

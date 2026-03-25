@@ -1,18 +1,17 @@
-import { useEffect, useMemo } from 'react';
-import { Alert, Button, styled } from '@mui/material';
+import { useEffect } from 'react';
+import { Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { LoadingSkeletonFadingIn } from 'tg.component/LoadingSkeleton';
 import { GoToBilling } from 'tg.component/GoToBilling';
+import { AdminAccessAlert } from 'tg.component/common/AdminAccessAlert';
+import { useIsAdminAccess } from 'tg.hooks/useIsAdminAccess';
 import { stringHash } from 'tg.fixtures/stringHash';
 
 import { useMTStreamed } from './useMTStreamed';
 import { TabMessage } from '../../common/TabMessage';
 import { PanelContentProps } from '../../common/types';
 import { MachineTranslationItem } from './MachineTranslationItem';
-import {
-  useGlobalActions,
-  useGlobalContext,
-} from 'tg.globalContext/GlobalContext';
+import { useGlobalActions } from 'tg.globalContext/GlobalContext';
 import { MachineTranslationPromptWrapper } from './MachineTranslationPromptWrapper';
 
 const StyledContainer = styled('div')`
@@ -59,17 +58,7 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
   const { increaseCreditPlanLimitErrors, increaseCreditSpendingLimitErrors } =
     useGlobalActions();
 
-  const billingEnabled = useGlobalContext(
-    (c) => c.initialData.serverConfiguration.billing.enabled
-  );
-
-  const isAdminAccess = useMemo(
-    () =>
-      billingEnabled &&
-      (project.computedPermission?.origin === 'SERVER_ADMIN' ||
-        project.computedPermission?.origin === 'SERVER_SUPPORTER'),
-    [billingEnabled, project.computedPermission?.origin]
-  );
+  const isAdminAccess = useIsAdminAccess(project.computedPermission);
 
   const deps = {
     keyId: keyData.keyId,
@@ -144,12 +133,7 @@ export const MachineTranslation: React.FC<PanelContentProps> = ({
   return (
     <StyledContainer>
       {isAdminAccess && (
-        <Alert severity="info" sx={{ m: 1 }} data-cy="mt-admin-access-info">
-          <T
-            keyName="machine_translation_admin_access_info"
-            defaultValue="You are accessing this project as an admin. Credits will not be consumed."
-          />
-        </Alert>
+        <AdminAccessAlert sx={{ m: 1 }} data-cy="mt-admin-access-info" />
       )}
       {outOfPlanCredits ? (
         <OutOfCreditsWrapper>
