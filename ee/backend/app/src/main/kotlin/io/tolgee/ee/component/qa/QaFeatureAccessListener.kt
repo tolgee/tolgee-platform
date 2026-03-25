@@ -22,9 +22,10 @@ class QaFeatureAccessListener(
   @Async
   fun onOrganizationFeaturesChanged(event: OnOrganizationFeaturesChanged) {
     // Disable on both gain AND loss: gaining the feature would make stale QA flags visible
-    // without a recheck; this way we get to chances to disable QA checks for the project.
+    // without a recheck; this way we get two chances to disable QA checks for the project.
     // User must manually re-enable QA, which triggers a fresh recheck.
-    if (Feature.QA_CHECKS !in event.gainedFeatures && Feature.QA_CHECKS !in event.lostFeatures) return
+    val qaChecksAffected = Feature.QA_CHECKS in event.gainedFeatures || Feature.QA_CHECKS in event.lostFeatures
+    if (!qaChecksAffected) return
 
     val orgId = event.organizationId
     val projects =

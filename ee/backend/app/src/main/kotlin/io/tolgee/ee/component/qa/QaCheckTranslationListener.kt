@@ -28,10 +28,10 @@ class QaCheckTranslationListener(
     if (event.translations.isEmpty()) return
 
     val keyId = event.key.id
-    val directTargets =
-      event.translations.map { BatchTranslationTargetItem(keyId = keyId, languageId = it.language.id) }
+    val directLanguageIds = event.translations.map { it.language.id }.toSet()
+    val directTargets = directLanguageIds.map { BatchTranslationTargetItem(keyId = keyId, languageId = it) }
 
-    val siblingTargets = getSiblingTargetsForBaseTextChange(event, directTargets.map { it.languageId }.toSet())
+    val siblingTargets = getSiblingTargetsForBaseTextChange(event, directLanguageIds)
 
     val allTargets = (directTargets + siblingTargets).distinctBy { it.keyId to it.languageId }
 
@@ -49,27 +49,24 @@ class QaCheckTranslationListener(
     excludedLanguageIds: Set<Long>,
   ): List<BatchTranslationTargetItem> {
     val baseLanguage = event.key.project.baseLanguage ?: return emptyList()
+    val baseLanguageId = baseLanguage.id
 
     val oldBaseValue = event.oldValues[baseLanguage.tag]
-    val newBaseValue = event.translations.find { it.language.id == baseLanguage.id }?.text
-    val baseTextUnchanged = oldBaseValue == newBaseValue
-
-    if (baseTextUnchanged) return emptyList()
+    val newBaseValue = event.translations.find { it.language.id == baseLanguageId }?.text
+    if (oldBaseValue == newBaseValue) return emptyList()
 
     // We need to mark existing sibling translations as stale
     val existingSiblings =
       event.key.translations
-        .filter { it.language.id != baseLanguage.id && it.language.id !in excludedLanguageIds }
+        .filter { it.language.id != baseLanguageId && it.language.id !in excludedLanguageIds }
         .distinctBy { it.id }
-    existingSiblings.forEach {
-      it.qaChecksStale = true
-      translationService.save(it)
-    }
+    existingSiblings.forEach { it.qaChecksStale = true }
+    translationService.saveAll(existingSiblings)
 
     // Expand the targets to project languages - includes languages for which there is no translation yet
     val allLanguageIds = languageService.getProjectLanguages(event.key.project.id).map { it.id }
     return allLanguageIds
-      .filter { it != baseLanguage.id && it !in excludedLanguageIds }
+      .filter { it != baseLanguageId && it !in excludedLanguageIds }
       .map { BatchTranslationTargetItem(keyId = event.key.id, languageId = it) }
   }
 }
