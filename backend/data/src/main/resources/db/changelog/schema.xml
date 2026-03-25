@@ -5210,4 +5210,18 @@
             <sql>DROP INDEX CONCURRENTLY IF EXISTS translation_lang_text_gist_trgm;</sql>
         </rollback>
     </changeSet>
+    <changeSet author="dkrizan" id="1742900000000-1" runInTransaction="false">
+        <comment>Add composite btree index on translation(key_id, language_id) to speed up
+            translation view queries that LEFT JOIN translation by key and language.
+            Critical for projects with 50K+ keys where select-all and count queries
+            were taking minutes without this index.
+            A single-column btree index on translation(key_id) already exists (IDXkrh888rhj0c4mm455al08el84).</comment>
+        <sql dbms="postgresql">
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS translation_key_id_language_id
+            ON translation (key_id, language_id);
+        </sql>
+        <rollback>
+            <sql>DROP INDEX CONCURRENTLY IF EXISTS translation_key_id_language_id;</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
