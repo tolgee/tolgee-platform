@@ -26,6 +26,8 @@ class CleanDbTestListener : TestExecutionListener {
   companion object {
     @Volatile
     private var cachedTables: List<String>? = null
+
+    @Volatile
     private var nonEmptyCheckQuery: String? = null
   }
 

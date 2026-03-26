@@ -3,7 +3,6 @@ package io.tolgee.testing
 import org.junit.jupiter.api.extension.ConditionEvaluationResult
 import org.junit.jupiter.api.extension.ExecutionCondition
 import org.junit.jupiter.api.extension.ExtensionContext
-import kotlin.math.absoluteValue
 
 /**
  * JUnit 5 extension that enables test sharding by distributing test classes
@@ -33,7 +32,7 @@ class TestShardCondition : ExecutionCondition {
       context.testClass.orElse(null)
         ?: return ConditionEvaluationResult.enabled("Not a class context")
 
-    val hash = testClass.name.hashCode().absoluteValue % shardTotal
+    val hash = (testClass.name.hashCode() and Int.MAX_VALUE) % shardTotal
     return if (hash == shardIndex) {
       ConditionEvaluationResult.enabled("Class ${testClass.simpleName} assigned to shard $shardIndex")
     } else {
