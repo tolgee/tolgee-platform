@@ -1,3 +1,10 @@
+## [3.174.1](https://github.com/tolgee/tolgee-platform/compare/v3.174.0...v3.174.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* Add Uyghur (ug) to RTL language list ([#3556](https://github.com/tolgee/tolgee-platform/issues/3556)) ([77da564](https://github.com/tolgee/tolgee-platform/commit/77da564994d8b23f4c057ddd23ce061d00b06d0f)), closes [#3524](https://github.com/tolgee/tolgee-platform/issues/3524)
+
 # [3.174.0](https://github.com/tolgee/tolgee-platform/compare/v3.173.4...v3.174.0) (2026-03-25)
 
 
