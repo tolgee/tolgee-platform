@@ -6,6 +6,7 @@ import io.tolgee.ee.service.prompt.PromptVariablesHelper.Companion.ScreenshotSiz
 import io.tolgee.model.enums.LlmProviderPriority
 import io.tolgee.model.key.Key
 import io.tolgee.service.key.ScreenshotService
+import io.tolgee.util.ImageConverter
 import io.tolgee.util.ScreenshotKeysHighlighter
 import io.tolgee.util.regexSplitAndMatch
 import org.springframework.stereotype.Component
@@ -79,16 +80,16 @@ class PromptParamsHelper(
       screenshot.keyScreenshotReferences
         .any { it.key.id == key.id && !it.positions.isNullOrEmpty() }
 
+    val imageBytes = fileStorage.readFile(filePath)
+
     if (hasPositions) {
-      val highlighter =
-        ScreenshotKeysHighlighter(
-          ByteArrayInputStream(
-            fileStorage.readFile(filePath),
-          ),
-        )
+      val highlighter = ScreenshotKeysHighlighter(ByteArrayInputStream(imageBytes))
       return highlighter.highlightKeys(screenshot, listOf(key.id)).toByteArray()
     } else {
-      return fileStorage.readFile(filePath)
+      // Re-encode as PNG to guarantee the media type matches the hardcoded
+      // "image/png" in LLM API services. Legacy screenshots may be stored as JPEG.
+      val converter = ImageConverter(ByteArrayInputStream(imageBytes))
+      return converter.getImage().toByteArray()
     }
   }
 }
