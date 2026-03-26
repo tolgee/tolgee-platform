@@ -340,6 +340,7 @@ class BatchJobService(
   fun getProcessor(type: BatchJobType): ChunkProcessor<Any, Any, Any> =
     applicationContext.getBean(type.processor.java) as ChunkProcessor<Any, Any, Any>
 
+  @Transactional
   fun deleteAllByProjectId(projectId: Long) {
     // Use bulk JPQL queries with project.id to avoid loading millions of entities into memory
     // and to avoid Hibernate 6.6's CHECK_ON_FLUSH validation issues
