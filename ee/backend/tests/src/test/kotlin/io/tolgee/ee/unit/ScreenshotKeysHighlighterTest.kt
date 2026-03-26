@@ -70,7 +70,7 @@ class ScreenshotKeysHighlighterTest {
     screenshot.keyScreenshotReferences.add(reference)
 
     val highlighter = ScreenshotKeysHighlighter(ByteArrayInputStream(storedBytes))
-    val outputBytes = highlighter.highlightKeys(screenshot, listOf(key.id)).toByteArray()
+    val outputBytes = highlighter.highlightKey(screenshot, key.id).toByteArray()
 
     log.info(
       "No-positions test: stored={} bytes, re-encoded={} bytes, ratio={}x",
@@ -103,7 +103,7 @@ class ScreenshotKeysHighlighterTest {
     screenshot.keyScreenshotReferences.add(reference)
 
     val highlighter = ScreenshotKeysHighlighter(ByteArrayInputStream(storedBytes))
-    val highlightedBytes = highlighter.highlightKeys(screenshot, listOf(key.id)).toByteArray()
+    val highlightedBytes = highlighter.highlightKey(screenshot, key.id).toByteArray()
 
     log.info(
       "With-positions test: stored={} bytes, highlighted={} bytes, ratio={}x",
