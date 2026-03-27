@@ -9,9 +9,11 @@ import io.tolgee.dtos.request.translation.ImportKeysItemDto
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
+import io.tolgee.model.enums.Scope
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
+import io.tolgee.service.security.SecurityService
 import io.tolgee.util.executeInNewTransaction
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
@@ -22,6 +24,7 @@ class KeyMcpTools(
   private val mcpRequestContext: McpRequestContext,
   private val keyService: KeyService,
   private val screenshotService: ScreenshotService,
+  private val securityService: SecurityService,
   private val projectHolder: ProjectHolder,
   private val objectMapper: ObjectMapper,
   private val transactionManager: PlatformTransactionManager,
@@ -162,6 +165,7 @@ class KeyMcpTools(
         // Associate screenshots with keys (post-processing after key creation)
         val keysWithScreenshots = rawKeys.filter { it.getList("screenshots") != null }
         if (keysWithScreenshots.isNotEmpty()) {
+          securityService.checkProjectPermission(projectHolder.project.id, Scope.SCREENSHOTS_UPLOAD)
           executeInNewTransaction(transactionManager) {
             val keyScreenshotPairs =
               keysWithScreenshots.mapNotNull { rawKey ->

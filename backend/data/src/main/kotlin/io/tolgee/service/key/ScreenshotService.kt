@@ -244,6 +244,12 @@ class ScreenshotService(
     val allImageIds = keyScreenshots.flatMap { (_, screenshots) -> screenshots.map { it.uploadedImageId } }.distinct()
     val images = imageUploadService.find(allImageIds).associateBy { it.id }
 
+    // Fail fast if any image IDs are missing (before any mutations)
+    val missingIds = allImageIds.filter { it !in images }
+    if (missingIds.isNotEmpty()) {
+      throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
+    }
+
     images.values.forEach { image ->
       if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
         throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
@@ -261,6 +267,12 @@ class ScreenshotService(
     val addedReferences = mutableSetOf<Pair<Long, Long>>()
     for ((key, screenshots) in keyScreenshots) {
       for (screenshotDto in screenshots) {
+        if (getScreenshotsCountForKey(key) >= tolgeeProperties.maxScreenshotsPerKey) {
+          throw BadRequestException(
+            Message.MAX_SCREENSHOTS_EXCEEDED,
+            listOf(tolgeeProperties.maxScreenshotsPerKey),
+          )
+        }
         val result =
           createdScreenshots[screenshotDto.uploadedImageId]
             ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)

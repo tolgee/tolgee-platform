@@ -115,6 +115,7 @@ class ScreenshotMcpTools(
         val keyScreenshots = request.arguments.requireList("keyScreenshots")
 
         executeInNewTransaction(transactionManager) {
+          // Resolve all keys first — if any is missing, return error before mutations
           val keyScreenshotPairs =
             keyScreenshots.map { entry ->
               val keyName = entry.requireString("keyName")

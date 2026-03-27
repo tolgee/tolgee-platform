@@ -99,7 +99,7 @@ and Tolgee initialized before calling this. Filter the results to only include t
 
 1. Base64-encode the screenshot file:
    ```bash
-   base64 -i <screenshot-file>
+   base64 < <screenshot-file>
    ```
 2. Call the `upload_image` MCP tool with the base64 string — it returns an `imageId`.
 
