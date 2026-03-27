@@ -1,6 +1,9 @@
 package io.tolgee.component.eventListeners
 
+import io.tolgee.batch.OnBatchJobCompleted
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.events.OnBatchJobCancelled
+import io.tolgee.batch.events.OnBatchJobFailed
 import io.tolgee.batch.events.OnBatchJobSucceeded
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.Language
@@ -61,6 +64,22 @@ class LanguageStatsListener(
   @EventListener(OnBatchJobSucceeded::class)
   @Async
   fun onQaBatchJobSucceeded(event: OnBatchJobSucceeded) {
+    onQaBatchJobCompleted(event)
+  }
+
+  @EventListener(OnBatchJobFailed::class)
+  @Async
+  fun onQaBatchJobFailed(event: OnBatchJobFailed) {
+    onQaBatchJobCompleted(event)
+  }
+
+  @EventListener(OnBatchJobCancelled::class)
+  @Async
+  fun onQaBatchJobCancelled(event: OnBatchJobCancelled) {
+    onQaBatchJobCompleted(event)
+  }
+
+  private fun onQaBatchJobCompleted(event: OnBatchJobCompleted) {
     if (bypass) return
     if (event.job.type != BatchJobType.QA_CHECK) return
     val projectId = event.job.projectId ?: return
