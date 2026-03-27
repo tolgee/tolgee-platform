@@ -52,6 +52,7 @@ class QaIssueService(
           existingIssues.find { existing ->
             existing.type == result.type &&
               existing.message == result.message &&
+              existing.replacement == result.replacement &&
               existing.positionStart == result.positionStart &&
               existing.positionEnd == result.positionEnd &&
               existing.pluralVariant == result.pluralVariant
@@ -86,9 +87,10 @@ class QaIssueService(
   @Transactional
   fun ignoreIssue(
     projectId: Long,
+    translationId: Long,
     issueId: Long,
   ) {
-    val issue = getIssueByProjectAndId(projectId, issueId)
+    val issue = getIssueByProjectAndTranslationAndId(projectId, translationId, issueId)
     issue.state = QaIssueState.IGNORED
     qaIssueRepository.save(issue)
     publishQaIssuesUpdated(issue.translation)
@@ -98,19 +100,21 @@ class QaIssueService(
   @Transactional
   fun unignoreIssue(
     projectId: Long,
+    translationId: Long,
     issueId: Long,
   ) {
-    val issue = getIssueByProjectAndId(projectId, issueId)
+    val issue = getIssueByProjectAndTranslationAndId(projectId, translationId, issueId)
     reopenOrDeleteIssue(issue)
     publishQaIssuesUpdated(issue.translation)
     publishQaIssueStateChange("QA_ISSUE_UNIGNORED", projectId, issue.type, issue.virtual)
   }
 
-  fun getIssueByProjectAndId(
+  fun getIssueByProjectAndTranslationAndId(
     projectId: Long,
+    translationId: Long,
     issueId: Long,
   ): TranslationQaIssue {
-    return qaIssueRepository.findByProjectIdAndId(projectId, issueId)
+    return qaIssueRepository.findByProjectIdAndTranslationIdAndId(projectId, translationId, issueId)
       ?: throw NotFoundException()
   }
 

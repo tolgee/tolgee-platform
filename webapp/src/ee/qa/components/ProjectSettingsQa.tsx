@@ -80,7 +80,7 @@ export const ProjectSettingsQa = () => {
     );
   }
 
-  if (!settings) {
+  if (!settings.data) {
     return null;
   }
 

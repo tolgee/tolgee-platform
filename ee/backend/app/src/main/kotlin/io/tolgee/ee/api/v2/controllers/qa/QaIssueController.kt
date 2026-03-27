@@ -57,7 +57,7 @@ class QaIssueController(
     @PathVariable translationId: Long,
     @PathVariable issueId: Long,
   ) {
-    qaIssueService.ignoreIssue(projectId, issueId)
+    qaIssueService.ignoreIssue(projectId, translationId, issueId)
   }
 
   @PutMapping("/{issueId}/unignore")
@@ -70,7 +70,7 @@ class QaIssueController(
     @PathVariable translationId: Long,
     @PathVariable issueId: Long,
   ) {
-    qaIssueService.unignoreIssue(projectId, issueId)
+    qaIssueService.unignoreIssue(projectId, translationId, issueId)
   }
 
   @PostMapping("/suppressions")

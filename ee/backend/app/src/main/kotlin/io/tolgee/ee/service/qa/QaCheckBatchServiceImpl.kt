@@ -95,11 +95,12 @@ class QaCheckBatchServiceImpl(
 
     executeInNewRepeatableTransaction(transactionManager) {
       val translation = translationService.getOrCreate(projectId, keyId, languageId)
-      translationService.save(translation)
 
       qaIssueService.replaceIssuesForTranslation(translation, results, checkTypes)
 
-      translation.qaChecksStale = false
+      if (checkTypes == null) {
+        translation.qaChecksStale = false
+      }
       translationService.save(translation)
 
       qaIssueService.publishQaIssuesUpdated(translation)

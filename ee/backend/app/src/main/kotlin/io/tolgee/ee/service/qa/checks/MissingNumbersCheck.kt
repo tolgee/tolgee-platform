@@ -29,7 +29,13 @@ class MissingNumbersCheck : QaCheck {
     val baseNumbers = extractNumbers(base)
     val textNumbers = extractNumbers(text)
 
-    val missing = baseNumbers - textNumbers.toSet()
+    val baseMultiset = baseNumbers.groupingBy { it }.eachCount()
+    val textMultiset = textNumbers.groupingBy { it }.eachCount()
+    val missing = mutableListOf<String>()
+    for ((number, baseCount) in baseMultiset) {
+      val textCount = textMultiset[number] ?: 0
+      repeat(maxOf(0, baseCount - textCount)) { missing.add(number) }
+    }
 
     return missing.map { number ->
       QaCheckResult(

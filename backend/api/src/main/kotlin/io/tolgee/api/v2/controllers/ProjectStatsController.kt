@@ -13,6 +13,7 @@ import io.tolgee.model.enums.Scope
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.authentication.AllowApiAccess
+import io.tolgee.security.authentication.ReadOnlyOperation
 import io.tolgee.security.authorization.RequiresFeatures
 import io.tolgee.security.authorization.RequiresProjectPermissions
 import io.tolgee.security.authorization.UseDefaultPermissions
@@ -92,6 +93,7 @@ class ProjectStatsController(
 
   @Operation(summary = "Get QA issue counts grouped by check type for a language")
   @GetMapping("/qa-issue-counts")
+  @ReadOnlyOperation
   @UseDefaultPermissions
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)

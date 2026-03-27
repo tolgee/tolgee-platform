@@ -151,7 +151,7 @@ export const QaLanguageSettingsDialog = ({
               </DialogActions>
               <DialogActions>
                 <Button onClick={onClose}>
-                  {t('project_mt_dialog_cancel_button')}
+                  {t('project_settings_qa_language_dialog_cancel')}
                 </Button>
                 <LoadingButton
                   disabled={!dirty}
@@ -161,7 +161,7 @@ export const QaLanguageSettingsDialog = ({
                   loading={isBusy}
                   data-cy="qa-language-dialog-save"
                 >
-                  {t('project_mt_dialog_save_button')}
+                  {t('project_settings_qa_language_dialog_save')}
                 </LoadingButton>
               </DialogActions>
             </Box>

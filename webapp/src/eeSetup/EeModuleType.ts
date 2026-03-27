@@ -79,6 +79,13 @@ export type QaLanguageStatsProps = {
   languageTag: string;
 };
 
+export type QaIssueHighlightProps = {
+  text: string;
+  translationText: string;
+  issue: components['schemas']['QaIssueModel'];
+  translationId: number;
+};
+
 export type SubfilterQaChecksProps = {
   projectId: number;
   value: FiltersInternal;

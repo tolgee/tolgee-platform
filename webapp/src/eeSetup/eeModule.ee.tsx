@@ -64,6 +64,7 @@ import {
 export { QaBadge } from '../ee/qa/components/QaBadge';
 export { QaLanguageStats } from '../ee/qa/components/QaLanguageStats';
 export { QaCheckItem } from '../ee/qa/components/QaCheckItem';
+export { QaIssueHighlight } from '../ee/qa/components/QaIssueHighlight';
 export {
   SubfilterQaChecks,
   getQaChecksFiltersLength,

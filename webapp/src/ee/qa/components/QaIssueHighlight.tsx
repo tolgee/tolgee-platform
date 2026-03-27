@@ -6,7 +6,8 @@ import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
-import { useTranslationsActions } from '../context/TranslationsContext';
+import { useTranslationsActions } from 'tg.views/projects/translations/context/TranslationsContext';
+import { QaIssueHighlightProps } from '../../../eeSetup/EeModuleType';
 
 type QaIssueModel = components['schemas']['QaIssueModel'];
 
@@ -33,19 +34,12 @@ const StyledMarker = styled('span')`
   cursor: pointer;
 `;
 
-type Props = {
-  text: string;
-  translationText: string;
-  issue: QaIssueModel;
-  translationId: number;
-};
-
 export const QaIssueHighlight = ({
   text,
   translationText,
   issue,
   translationId,
-}: Props) => {
+}: QaIssueHighlightProps) => {
   const project = useProject();
   const { correctTranslation, canEditTranslation } = useTranslationsActions();
   const reportEvent = useReportEvent();

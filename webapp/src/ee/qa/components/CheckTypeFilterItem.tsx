@@ -13,6 +13,6 @@ export function CheckTypeFilterItem({
   selected: boolean;
   onClick: () => void;
 }) {
-  const label = useQaCheckTypeLabel(checkType as any);
+  const label = useQaCheckTypeLabel(checkType);
   return <FilterItem label={label} selected={selected} onClick={onClick} />;
 }

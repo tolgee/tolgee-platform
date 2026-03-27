@@ -12,7 +12,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { useGlossaryTermHighlights } from 'tg.ee';
 import { GlossaryTermHighlightModel } from '../../../../eeSetup/EeModuleType';
 import { GlossaryHighlight } from 'tg.views/projects/translations/translationVisual/GlossaryHighlight';
-import { QaIssueHighlight } from './QaIssueHighlight';
+import { QaIssueHighlight } from 'tg.ee';
 import { components } from 'tg.service/apiSchema.generated';
 
 type QaIssueModel = components['schemas']['QaIssueModel'];

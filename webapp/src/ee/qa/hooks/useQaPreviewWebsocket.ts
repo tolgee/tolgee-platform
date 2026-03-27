@@ -45,7 +45,6 @@ export const useQaPreviewWebsocket = ({
 
     setIsLoading(true);
     ws.onopen = () => {
-      setIsLoading(false);
       // auth message
       ws.send(
         JSON.stringify({ token: jwtToken, projectId, keyId, languageTag })
@@ -53,7 +52,8 @@ export const useQaPreviewWebsocket = ({
       // initial text update message
       if (text != null) {
         ws.send(JSON.stringify({ text, variant }));
-        setIsLoading(true);
+      } else {
+        setIsLoading(false);
       }
     };
 

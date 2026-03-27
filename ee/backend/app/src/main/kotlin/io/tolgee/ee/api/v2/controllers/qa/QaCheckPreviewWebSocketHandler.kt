@@ -131,9 +131,13 @@ class QaCheckPreviewWebSocketHandler(
       checkAuth(token, projectId)
       checkFeatureEnabled(projectId)
       initializeState(session, projectId, languageTag, keyId)
+    } catch (e: IllegalArgumentException) {
+      logger.debug("WebSocket init validation failed", e)
+      sendMessage(session, QaCheckPreviewError(message = e.message ?: "Invalid request"))
+      session.close(CloseStatus.POLICY_VIOLATION)
     } catch (e: Exception) {
-      logger.debug("WebSocket init failed", e)
-      sendMessage(session, QaCheckPreviewError(message = e.message ?: "Authentication failed"))
+      logger.warn("WebSocket init failed", e)
+      sendMessage(session, QaCheckPreviewError(message = "Authentication failed"))
       session.close(CloseStatus.POLICY_VIOLATION)
     }
   }

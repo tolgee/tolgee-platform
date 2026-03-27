@@ -46,7 +46,10 @@ export function IssueRow({ checkType, count, onClick }: IssueRowProps) {
   return (
     <StyledRow onClick={onClick}>
       <Typography variant="body2">
-        {label}: {count}
+        {t('qa_dashboard_popover_issue_row', {
+          label,
+          count,
+        })}
       </Typography>
       <StyledShowLink className="show-link" variant="button">
         {t('qa_dashboard_popover_show')}

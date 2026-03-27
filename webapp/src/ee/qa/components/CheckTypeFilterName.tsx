@@ -4,6 +4,6 @@ import { components } from 'tg.service/apiSchema.generated';
 type QaCheckType = components['schemas']['QaIssueModel']['type'];
 
 export function CheckTypeFilterName({ checkType }: { checkType: QaCheckType }) {
-  const label = useQaCheckTypeLabel(checkType as any);
+  const label = useQaCheckTypeLabel(checkType);
   return <>{label}</>;
 }

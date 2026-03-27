@@ -6,6 +6,7 @@ import {
   GlossaryTermPreviewProps,
   QaLanguageStatsProps,
   QaBadgeProps,
+  QaIssueHighlightProps,
   SubfilterQaChecksProps,
 } from './EeModuleType';
 import type { FiltersInternal } from 'tg.views/projects/translations/TranslationFilters/tools';
@@ -40,6 +41,8 @@ export const QaBadge = (_props: QaBadgeProps) => Empty() as JSX.Element;
 export const QaLanguageStats = (_props: QaLanguageStatsProps) =>
   Empty() as JSX.Element;
 export const QaCheckItem = Empty;
+export const QaIssueHighlight = ({ text }: QaIssueHighlightProps) =>
+  (<>{text}</>) as JSX.Element;
 export const SubfilterQaChecks = (_props: SubfilterQaChecksProps) =>
   Empty() as JSX.Element;
 export const getQaChecksFiltersLength = (_value: FiltersInternal) => 0;

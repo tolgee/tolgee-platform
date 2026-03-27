@@ -82,7 +82,7 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
   );
   useEffect(() => {
     data.setItemsCount(openIssueCount);
-  }, [openIssueCount]);
+  }, [openIssueCount, data.setItemsCount]);
 
   const ignoreMutation = useApiMutation({
     url: '/v2/projects/{projectId}/translations/{translationId}/qa-issues/suppressions',
@@ -157,6 +157,7 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     const newState = issue.state === 'IGNORED' ? 'OPEN' : 'IGNORED';
     const mutation =
       issue.state === 'IGNORED' ? unignoreMutation : ignoreMutation;
+    const { state: _, ...issueRequest } = issue;
     mutation.mutate(
       {
         path: {
@@ -164,7 +165,7 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
           translationId,
         },
         content: {
-          'application/json': issue as any,
+          'application/json': issueRequest,
         },
       },
       {
@@ -184,7 +185,9 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
         )}
         {issues.map((issue, index) => (
           <QaCheckItem
-            key={`${issue.type}-${index}`}
+            key={`${issue.type}-${issue.message}-${
+              issue.positionStart ?? 'x'
+            }-${issue.positionEnd ?? 'x'}-${issue.pluralVariant ?? ''}`}
             issue={issue}
             index={index + 1}
             text={text}

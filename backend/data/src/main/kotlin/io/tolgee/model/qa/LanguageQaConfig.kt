@@ -8,6 +8,7 @@ import io.tolgee.model.enums.qa.QaCheckType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.Type
@@ -15,11 +16,12 @@ import org.hibernate.annotations.Type
 @Entity
 @Table(
   indexes = [
-    Index(columnList = "language_id", unique = true),
+    Index(columnList = "language_id"),
   ],
 )
 class LanguageQaConfig(
   @ManyToOne
+  @JoinColumn(unique = true)
   var language: Language,
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")

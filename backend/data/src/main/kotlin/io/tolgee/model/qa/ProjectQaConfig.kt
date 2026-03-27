@@ -15,7 +15,7 @@ import org.hibernate.annotations.Type
 @Entity
 @Table(
   indexes = [
-    Index(columnList = "project_id", unique = true),
+    Index(columnList = "project_id"),
   ],
 )
 class ProjectQaConfig(

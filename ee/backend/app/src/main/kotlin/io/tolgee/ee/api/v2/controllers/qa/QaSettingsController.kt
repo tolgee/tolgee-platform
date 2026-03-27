@@ -60,6 +60,7 @@ class QaSettingsController(
 
   @GetMapping("")
   @Operation(summary = "Get QA check settings for the project")
+  @ReadOnlyOperation
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)
@@ -98,6 +99,7 @@ class QaSettingsController(
 
   @GetMapping("/languages")
   @Operation(summary = "Get per-language QA settings overrides for all project languages")
+  @ReadOnlyOperation
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)
@@ -114,6 +116,7 @@ class QaSettingsController(
 
   @GetMapping("/languages/{languageId:[0-9]+}/resolved")
   @Operation(summary = "Get resolved QA settings for a specific language")
+  @ReadOnlyOperation
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)
@@ -127,6 +130,7 @@ class QaSettingsController(
 
   @GetMapping("/languages/{languageId:[0-9]+}")
   @Operation(summary = "Get QA settings overrides for a specific language")
+  @ReadOnlyOperation
   @RequiresProjectPermissions([Scope.TRANSLATIONS_VIEW])
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)

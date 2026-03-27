@@ -90,11 +90,13 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     join i.translation t
     join t.key k
     where k.project.id = :projectId
+    and t.id = :translationId
     and i.id = :issueId
     """,
   )
-  fun findByProjectIdAndId(
+  fun findByProjectIdAndTranslationIdAndId(
     projectId: Long,
+    translationId: Long,
     issueId: Long,
   ): TranslationQaIssue?
 
