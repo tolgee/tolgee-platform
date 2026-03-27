@@ -5,93 +5,15 @@ import io.tolgee.AbstractMcpTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.Base64
 
 class McpScreenshotToolsTest : AbstractMcpTest() {
   lateinit var data: McpPakTestData
   lateinit var client: McpSyncClient
 
   companion object {
-    // Minimal valid 1x1 red PNG
-    private val MINIMAL_PNG_BYTES =
-      byteArrayOf(
-        // PNG signature
-        0x89.toByte(),
-        0x50,
-        0x4E,
-        0x47,
-        0x0D,
-        0x0A,
-        0x1A,
-        0x0A,
-        // IHDR chunk
-        0x00,
-        0x00,
-        0x00,
-        0x0D,
-        0x49,
-        0x48,
-        0x44,
-        0x52,
-        0x00,
-        0x00,
-        0x00,
-        0x01,
-        0x00,
-        0x00,
-        0x00,
-        0x01,
-        0x08,
-        0x02,
-        0x00,
-        0x00,
-        0x00,
-        0x90.toByte(),
-        0x77,
-        0x53,
-        0xDE.toByte(),
-        0x00,
-        // IDAT chunk
-        0x00,
-        0x00,
-        0x00,
-        0x0C,
-        0x49,
-        0x44,
-        0x41,
-        0x54,
-        0x08,
-        0xD7.toByte(),
-        0x63,
-        0xF8.toByte(),
-        0xCF.toByte(),
-        0xC0.toByte(),
-        0x00,
-        0x00,
-        0x00,
-        0x02,
-        0x00,
-        0x01,
-        0xE2.toByte(),
-        0x21,
-        0xBC.toByte(),
-        0x33,
-        // IEND chunk
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x49,
-        0x45,
-        0x4E,
-        0x44,
-        0xAE.toByte(),
-        0x42,
-        0x60,
-        0x82.toByte(),
-      )
-
-    val MINIMAL_PNG_BASE64: String = Base64.getEncoder().encodeToString(MINIMAL_PNG_BYTES)
+    // Valid 1x1 RGB PNG with zlib compression
+    const val MINIMAL_PNG_BASE64 =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
   }
 
   @BeforeEach
