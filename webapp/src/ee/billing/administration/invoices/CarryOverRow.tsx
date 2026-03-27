@@ -21,7 +21,7 @@ export const CarryOverRow: FC<CarryOverRowProps> = ({
   const formatPrice = useMoneyFormatter();
   const formatDate = useDateFormatter();
   const { t } = useTranslate();
-  const isCloud = item.subscriptionType === 'cloud';
+  const isCloud = item.subscriptionType === 'CLOUD';
 
   return (
     <ListItem data-cy="admin-carry-over-item">
