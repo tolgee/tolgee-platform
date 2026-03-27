@@ -23,6 +23,8 @@ import { AiResultUsage } from './AiResultUsage';
 import { AiRenderedPrompt } from './AiRenderedPrompt';
 import { TabBasic } from './TabBasic';
 import { PromptRename } from './PromptRename';
+import { AdminAccessAlert } from 'tg.component/common/AdminAccessAlert';
+import { useIsAdminAccess } from 'tg.hooks/useIsAdminAccess';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { usePromptState } from './usePromptState';
@@ -114,6 +116,7 @@ export const AiPrompt: React.FC<Props> = ({
   const { t } = useTranslate();
   const { refetchTranslations } = useTranslationsActions();
   const [renameOpen, setRenameOpen] = useState(false);
+  const isAdminAccess = useIsAdminAccess(project.computedPermission);
   const cellSelected = Boolean(keyData && language);
 
   const {
@@ -216,6 +219,9 @@ export const AiPrompt: React.FC<Props> = ({
               </MenuItem>
             ))}
           </Select>
+          {isAdminAccess && (
+            <AdminAccessAlert data-cy="ai-playground-admin-access-info" />
+          )}
           <StyledTabs value={tab} onChange={(_, value) => setTab(value)}>
             <StyledTab
               label={t('ai_prompt_tab_basic')}

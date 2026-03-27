@@ -107,6 +107,7 @@ declare namespace DataCy {
         "ai-languages-description-edit" |
         "ai-menu-context-data" |
         "ai-menu-prompts" |
+        "ai-playground-admin-access-info" |
         "ai-playground-preview" |
         "ai-playground-usage-cached-tokens" |
         "ai-playground-usage-mt-credits" |
@@ -538,6 +539,7 @@ declare namespace DataCy {
         "mfa-recovery-codes-dialog-content" |
         "mfa-recovery-codes-dialog-password-input" |
         "mfa-recovery-codes-dialog-title" |
+        "mt-admin-access-info" |
         "mt-language-dialog-auto-for-import" |
         "mt-language-dialog-auto-machine-translation" |
         "mt-language-dialog-auto-translation-memory" |
