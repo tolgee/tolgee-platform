@@ -76,6 +76,8 @@ fun Map<String, Any?>.requireString(key: String): String = getString(key) ?: mis
 
 fun Map<String, Any?>.getInt(key: String): Int? = (this[key] as? Number)?.toInt()
 
+fun Map<String, Any?>.requireInt(key: String): Int = getInt(key) ?: missingParam(key)
+
 @Suppress("UNCHECKED_CAST")
 fun Map<String, Any?>.getStringList(key: String): List<String>? = this[key] as? List<String>
 
