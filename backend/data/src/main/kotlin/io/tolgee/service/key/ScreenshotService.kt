@@ -119,17 +119,17 @@ class ScreenshotService(
         positions = positions ?: mutableListOf()
         positions!!.add(
           KeyInScreenshotPosition(
-            positionDto.x.adjustByRation(xRatio),
-            positionDto.y.adjustByRation(yRatio),
-            positionDto.width.adjustByRation(xRatio),
-            positionDto.height.adjustByRation(yRatio),
+            positionDto.x.adjustByRatio(xRatio),
+            positionDto.y.adjustByRatio(yRatio),
+            positionDto.width.adjustByRatio(xRatio),
+            positionDto.height.adjustByRatio(yRatio),
           ),
         )
       }
     }
   }
 
-  fun Int.adjustByRation(ratio: Double): Int {
+  fun Int.adjustByRatio(ratio: Double): Int {
     return (this * ratio).roundToInt()
   }
 
@@ -164,10 +164,7 @@ class ScreenshotService(
           throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
         }
 
-        val info =
-          screenshotInfo.let {
-            ScreenshotInfoDto(it.text, it.positions)
-          }
+        val info = ScreenshotInfoDto(screenshotInfo.text, screenshotInfo.positions)
 
         val (screenshot, originalDimension, targetDimension) = saveScreenshot(image)
 
@@ -282,9 +279,7 @@ class ScreenshotService(
 
   @Transactional
   fun delete(screenshots: Collection<Screenshot>) {
-    screenshots.forEach {
-      delete(it)
-    }
+    screenshots.forEach(::delete)
   }
 
   @Transactional
@@ -440,12 +435,11 @@ class ScreenshotService(
   fun getScreenshotsForKeys(keyIds: Collection<Long>): Map<Long, List<Screenshot>> {
     return this
       .getKeysWithScreenshots(keyIds)
-      .associate {
-        it.id to
-          it.keyScreenshotReferences
+      .associate { key ->
+        key.id to
+          key.keyScreenshotReferences
             .map { it.screenshot }
-            .toSet()
-            .toList()
+            .distinctBy { it.id }
       }
   }
 

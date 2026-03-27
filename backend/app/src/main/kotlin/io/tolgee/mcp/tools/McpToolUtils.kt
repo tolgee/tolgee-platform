@@ -44,7 +44,7 @@ fun McpSyncServer.addTool(
     McpServerFeatures.SyncToolSpecification(
       tool,
       null,
-    ) { exchange, request ->
+    ) { _, request ->
       handler(request)
     },
   )

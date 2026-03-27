@@ -3,12 +3,18 @@ package io.tolgee.mcp.tools
 import io.modelcontextprotocol.client.McpSyncClient
 import io.tolgee.AbstractMcpTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.executeInNewTransaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.PlatformTransactionManager
 
 class McpScreenshotToolsTest : AbstractMcpTest() {
   lateinit var data: McpPakTestData
   lateinit var client: McpSyncClient
+
+  @Autowired
+  lateinit var transactionManager: PlatformTransactionManager
 
   companion object {
     // Valid 1x1 RGB PNG with zlib compression
@@ -120,10 +126,19 @@ class McpScreenshotToolsTest : AbstractMcpTest() {
       ),
     )
 
-    val key = keyService.find(data.projectId, "positioned.key", null)
-    assertThat(key).isNotNull()
-    val screenshots = screenshotService.findAll(key!!)
-    assertThat(screenshots).isNotEmpty()
+    executeInNewTransaction(transactionManager) {
+      val key = keyService.find(data.projectId, "positioned.key", null)
+      assertThat(key).isNotNull()
+      val screenshots = screenshotService.findAll(key!!)
+      assertThat(screenshots).isNotEmpty()
+      val positions = key.keyScreenshotReferences.flatMap { it.positions ?: emptyList() }
+      assertThat(positions).isNotEmpty()
+      val pos = positions.first()
+      assertThat(pos.x).isGreaterThanOrEqualTo(0)
+      assertThat(pos.y).isGreaterThanOrEqualTo(0)
+      assertThat(pos.width).isGreaterThan(0)
+      assertThat(pos.height).isGreaterThan(0)
+    }
   }
 
   @Test
