@@ -74,7 +74,9 @@ abstract class AuthorizedControllerTest :
   protected fun setSecurityContext(userAccount: UserAccount) {
     val token = jwtService.emitToken(userAccount.id, isSuper = true)
     val auth = jwtService.validateToken(token)
-    SecurityContextHolder.getContext().authentication = auth
+    val context = SecurityContextHolder.createEmptyContext()
+    context.authentication = auth
+    SecurityContextHolder.setContext(context)
   }
 
   fun refreshUser() {
@@ -83,6 +85,7 @@ abstract class AuthorizedControllerTest :
 
   fun logout() {
     _userAccount = null
+    SecurityContextHolder.clearContext()
   }
 
   override fun perform(builder: MockHttpServletRequestBuilder): ResultActions {
