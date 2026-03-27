@@ -702,6 +702,7 @@
   "create_organization_title": "Створити організацію",
   "create_project_edit_prepared_languages": "Редагувати",
   "create_project_name_label": "Назва",
+  "create_project_remove_prepared_languages": "Видалити",
   "create_project_validation_language_repeated": "Не можна додати мову більше одного разу",
   "create_project_view": "Створити проєкт",
   "create_task_empty_scope_dialog_explanation": "Кожне завдання повинно містити принаймні один ключ",

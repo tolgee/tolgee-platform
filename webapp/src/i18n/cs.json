@@ -860,6 +860,7 @@
   "create_organization_title": "Vytvořit organizaci",
   "create_project_edit_prepared_languages": "Upravit",
   "create_project_name_label": "Název",
+  "create_project_remove_prepared_languages": "Odstranit",
   "create_project_validation_language_repeated": "Jazyky se nesmí opakovat",
   "create_project_view": "Vytvořit projekt",
   "create_task_empty_scope_dialog_explanation": "Každý úkol musí obsahovat alespoň jeden klíč",

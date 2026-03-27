@@ -856,6 +856,7 @@
   "create_organization_title": "Opprett organisasjon",
   "create_project_edit_prepared_languages": "Rediger",
   "create_project_name_label": "Navn",
+  "create_project_remove_prepared_languages": "Fjern",
   "create_project_validation_language_repeated": "Kan ikke legge til språk mer enn én gang",
   "create_project_view": "Opprett prosjekt",
   "create_task_empty_scope_dialog_explanation": "Hver oppgave må inneholde minst én nøkkel",

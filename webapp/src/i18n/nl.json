@@ -859,6 +859,7 @@
   "create_organization_title": "Organisatie aanmaken",
   "create_project_edit_prepared_languages": "Bewerken",
   "create_project_name_label": "Naam",
+  "create_project_remove_prepared_languages": "Verwijderen",
   "create_project_validation_language_repeated": "Taal kan niet meer dan eens worden toegevoegd",
   "create_project_view": "Project aanmaken",
   "create_task_empty_scope_dialog_explanation": "Elke taak moet ten minste één sleutel bevatten",

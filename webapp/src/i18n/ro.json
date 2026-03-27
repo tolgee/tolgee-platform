@@ -859,6 +859,7 @@
   "create_organization_title": "Creează organizație",
   "create_project_edit_prepared_languages": "Editare",
   "create_project_name_label": "Nume",
+  "create_project_remove_prepared_languages": "Elimină",
   "create_project_validation_language_repeated": "Nu se poate adăuga aceeași limbă de mai multe ori",
   "create_project_view": "Crează proiect",
   "create_task_empty_scope_dialog_explanation": "Fiecare sarcină trebuie să conțină cel puțin o cheie",

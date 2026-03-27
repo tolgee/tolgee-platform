@@ -858,6 +858,7 @@
   "create_organization_title": "Organisation erstellen",
   "create_project_edit_prepared_languages": "Bearbeiten",
   "create_project_name_label": "Name",
+  "create_project_remove_prepared_languages": "Entfernen",
   "create_project_validation_language_repeated": "Eine Sprache kann nur einmal hinzugefügt werden",
   "create_project_view": "Projekt erstellen",
   "create_task_empty_scope_dialog_explanation": "Jede Aufgabe muss mindestens einen Schlüssel enthalten",

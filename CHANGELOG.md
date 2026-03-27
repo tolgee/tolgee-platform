@@ -1,3 +1,10 @@
+# [3.175.0](https://github.com/tolgee/tolgee-platform/compare/v3.174.1...v3.175.0) (2026-03-27)
+
+
+### Features
+
+* skip credit consumption during admin access ([#3555](https://github.com/tolgee/tolgee-platform/issues/3555)) ([8a54b0e](https://github.com/tolgee/tolgee-platform/commit/8a54b0e2911fa6df3b6c59963ba28aa460221b22)), closes [#3523](https://github.com/tolgee/tolgee-platform/issues/3523)
+
 ## [3.174.1](https://github.com/tolgee/tolgee-platform/compare/v3.174.0...v3.174.1) (2026-03-26)
 
 

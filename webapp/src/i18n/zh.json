@@ -856,6 +856,7 @@
   "create_organization_title": "创建团队",
   "create_project_edit_prepared_languages": "编辑",
   "create_project_name_label": "名称",
+  "create_project_remove_prepared_languages": "移除",
   "create_project_validation_language_repeated": "无法多次添加同一语言",
   "create_project_view": "创建项目",
   "create_task_empty_scope_dialog_explanation": "每个任务至少需要包含一个词条",

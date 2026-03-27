@@ -860,6 +860,7 @@
   "create_organization_title": "組織を作成",
   "create_project_edit_prepared_languages": "編集",
   "create_project_name_label": "名前",
+  "create_project_remove_prepared_languages": "削除",
   "create_project_validation_language_repeated": "言語を複数回追加することはできません",
   "create_project_view": "プロジェクトの作成",
   "create_task_empty_scope_dialog_explanation": "各タスクには少なくとも 1 つのキーが含まれている必要があります",

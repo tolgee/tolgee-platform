@@ -856,6 +856,7 @@
   "create_organization_title": "Szervezet létrehozása",
   "create_project_edit_prepared_languages": "Szerkesztés",
   "create_project_name_label": "Név",
+  "create_project_remove_prepared_languages": "Eltávolítás",
   "create_project_validation_language_repeated": "Nem lehet ugyanazt a nyelvet többször hozzáadni",
   "create_project_view": "Projekt létrehozása",
   "create_task_empty_scope_dialog_explanation": "Minden feladatnak legalább egy kulcsot kell tartalmaznia",

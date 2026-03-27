@@ -701,6 +701,7 @@
   "create_organization_title": "Utwórz organizację",
   "create_project_edit_prepared_languages": "Edytuj",
   "create_project_name_label": "Nazwa",
+  "create_project_remove_prepared_languages": "Usuń",
   "create_project_validation_language_repeated": "Nie można dodać języka więcej niż raz",
   "create_project_view": "Utwórz projekt",
   "create_task_empty_scope_dialog_explanation": "Każde zadanie musi zawierać co najmniej jeden klucz",

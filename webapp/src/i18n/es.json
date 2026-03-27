@@ -856,6 +856,7 @@
   "create_organization_title": "Crear organización",
   "create_project_edit_prepared_languages": "Editar",
   "create_project_name_label": "Nombre",
+  "create_project_remove_prepared_languages": "Eliminar",
   "create_project_validation_language_repeated": "No se puede añadir un idioma más de una vez",
   "create_project_view": "Crear proyecto",
   "create_task_empty_scope_dialog_explanation": "Cada tarea debe contener al menos una clave",
