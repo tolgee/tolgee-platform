@@ -30,7 +30,7 @@ class LanguageToolService {
 
     val language = resolveLanguage(languageTag) ?: return emptyList()
 
-    val key = LanguageToolCacheKey(language.shortCode, text)
+    val key = LanguageToolCacheKey(language.shortCodeWithCountryAndVariant, text)
     return resultCache.get(key) {
       val lt = getOrCreateInstance(language)
       lt.check(text)
@@ -41,44 +41,42 @@ class LanguageToolService {
     return resolveLanguage(languageTag) != null
   }
 
-  private fun resolveLanguage(tag: String): Language? {
-    // Try exact match first (e.g., "en-US", "pt-BR")
-    val exact =
-      try {
-        Languages.getLanguageForShortCode(tag)
-      } catch (_: Exception) {
-        null
-      }
+  fun resolveLanguage(tag: String): Language? {
+    val exact = languageForShortCodeOrNull(tag)
     if (exact != null) {
-      // Prefer the default variant if the exact match is a base language
-      // (e.g., base "en" has no spelling rules, but "en-US" does)
-      return exact.defaultLanguageVariant ?: exact
+      return exact.withDefaultVariantIfBase()
     }
 
-    // Try base language code (e.g., "en-US" → "en")
+    // Try base language code for tags with separators (e.g., "en_US" → "en", "en-XX" → "en")
+    // LanguageTool only recognizes hyphens as separators, so underscore tags and
+    // unregistered regional variants fall back to the base code lookup.
     val base = tag.split("-", "_")[0]
-    if (base != tag) {
-      val baseLanguage =
-        try {
-          Languages.getLanguageForShortCode(base)
-        } catch (_: Exception) {
-          null
-        }
-      if (baseLanguage != null) {
-        return baseLanguage.defaultLanguageVariant ?: baseLanguage
-      }
-    }
-
-    // Find the first available variant matching the base code
-    return Languages.get().firstOrNull { lang ->
-      lang.shortCode.split("-", "_")[0] == base
-    }
+    if (base == tag) return null
+    val baseLanguage = languageForShortCodeOrNull(base) ?: return null
+    return baseLanguage.withDefaultVariantIfBase()
   }
+
+  /**
+   * If this is a base language (e.g., "en" without a country), return its default variant
+   * (e.g., "en-US") which has full spelling/grammar rules. If this is already a specific
+   * variant (e.g., "en-GB", "pt-BR"), return it as-is to preserve region-specific rules.
+   */
+  private fun Language.withDefaultVariantIfBase(): Language {
+    val isBase = shortCode == shortCodeWithCountryAndVariant
+    return if (isBase) defaultLanguageVariant else this
+  }
+
+  private fun languageForShortCodeOrNull(code: String): Language? =
+    try {
+      Languages.getLanguageForShortCode(code)
+    } catch (_: Exception) {
+      null
+    }
 
   private fun getOrCreateInstance(language: Language): JLanguageTool {
     val instances = threadLocalInstances.get()
-    return instances.getOrPut(language.shortCode) {
-      logger.debug("Creating JLanguageTool instance for language: ${language.shortCode}")
+    return instances.getOrPut(language.shortCodeWithCountryAndVariant) {
+      logger.debug("Creating JLanguageTool instance for language: ${language.shortCodeWithCountryAndVariant}")
       JLanguageTool(language)
     }
   }
