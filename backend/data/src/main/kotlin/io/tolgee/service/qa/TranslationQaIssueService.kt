@@ -28,4 +28,8 @@ class TranslationQaIssueService(
       .getOpenIssueCountsByCheckType(projectId, languageId)
       .associate { it.checkType to it.count }
   }
+
+  fun deleteAllByProjectId(projectId: Long) {
+    translationQaIssueRepository.deleteAllByProjectId(projectId)
+  }
 }

@@ -6,6 +6,7 @@ import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.events.OnProjectSoftDeleted
 import io.tolgee.model.Project
 import io.tolgee.repository.ProjectRepository
+import io.tolgee.repository.qa.ProjectQaConfigRepository
 import io.tolgee.security.ProjectHolder
 import io.tolgee.security.ProjectNotSelectedException
 import io.tolgee.service.AiPlaygroundResultService
@@ -58,6 +59,7 @@ class ProjectHardDeletingService(
   private val labelService: LabelService,
   private val branchService: BranchService,
   private val entityManager: EntityManager,
+  private val projectQaConfigRepository: ProjectQaConfigRepository,
 ) : Logging {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
@@ -133,6 +135,7 @@ class ProjectHardDeletingService(
 
       bigMetaService.deleteAllByProjectId(projectId)
       branchService.deleteAllByProjectId(projectId)
+      projectQaConfigRepository.deleteAllByProjectId(projectId)
 
       // Flush and clear the persistence context to ensure deletions are synchronized
       // and to prevent Hibernate 6.6's CHECK_ON_FLUSH from seeing stale relationships

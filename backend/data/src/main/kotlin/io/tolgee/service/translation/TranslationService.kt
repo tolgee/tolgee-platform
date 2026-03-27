@@ -35,6 +35,7 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.service.qa.TranslationQaIssueService
 import io.tolgee.service.queryBuilders.translationViewBuilder.TranslationViewDataProvider
 import io.tolgee.service.translation.SetTranslationTextUtil.Companion.Options
 import io.tolgee.util.nullIfEmpty
@@ -61,6 +62,7 @@ class TranslationService(
   private val translationViewDataProvider: TranslationViewDataProvider,
   private val entityManager: EntityManager,
   private val translationCommentService: TranslationCommentService,
+  private val translationQaIssueService: TranslationQaIssueService,
 ) {
   @Autowired
   private lateinit var projectHolder: ProjectHolder
@@ -338,9 +340,8 @@ class TranslationService(
   }
 
   fun findBaseTranslation(key: Key): Translation? {
-    projectService.getOrAssignBaseLanguage(key.project.id).let {
-      return find(key, it).orElse(null)
-    }
+    val baseLanguage = projectService.getOrAssignBaseLanguage(key.project.id)
+    return find(key, baseLanguage).orElse(null)
   }
 
   fun getTranslationMemoryValue(
@@ -524,6 +525,7 @@ class TranslationService(
 
   fun deleteAllByProject(projectId: Long) {
     translationCommentService.deleteAllByProject(projectId)
+    translationQaIssueService.deleteAllByProjectId(projectId)
     entityManager
       .createNativeQuery(
         "DELETE FROM translation " +

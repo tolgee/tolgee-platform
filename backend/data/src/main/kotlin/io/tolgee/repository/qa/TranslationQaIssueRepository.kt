@@ -70,6 +70,18 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
   @Query("delete from TranslationQaIssue i where i.translation.id = :translationId")
   fun deleteAllByTranslationId(translationId: Long)
 
+  @Modifying
+  @Query(
+    nativeQuery = true,
+    value =
+      "DELETE FROM translation_qa_issue WHERE translation_id IN (" +
+        "SELECT id FROM translation WHERE " +
+        "key_id IN (SELECT id FROM key WHERE project_id = :projectId) " +
+        "OR language_id IN (SELECT id FROM language WHERE project_id = :projectId)" +
+        ")",
+  )
+  fun deleteAllByProjectId(projectId: Long)
+
   @Query(
     """
     select i from TranslationQaIssue i
@@ -106,7 +118,7 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     join i.translation t
     join t.key k
     where k.project.id = :projectId
-    and i.translation.id = :translationId
+    and t.id = :translationId
     and i.type = :type
     and i.message = :message
     and (i.replacement = :replacement or (i.replacement is null and :replacement is null))
