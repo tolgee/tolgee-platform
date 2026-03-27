@@ -3,16 +3,12 @@ package io.tolgee.mcp.tools
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.modelcontextprotocol.server.McpSyncServer
 import io.tolgee.api.v2.controllers.keys.KeyController
-import io.tolgee.dtos.request.KeyInScreenshotPositionDto
-import io.tolgee.dtos.request.ScreenshotInfoDto
 import io.tolgee.dtos.request.key.EditKeyDto
-import io.tolgee.dtos.request.key.KeyScreenshotDto
 import io.tolgee.dtos.request.translation.ImportKeysDto
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
 import io.tolgee.mcp.McpRequestContext
 import io.tolgee.mcp.McpToolsProvider
 import io.tolgee.mcp.buildSpec
-import io.tolgee.model.Screenshot
 import io.tolgee.security.ProjectHolder
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.key.ScreenshotService
@@ -20,7 +16,6 @@ import io.tolgee.util.executeInNewTransaction
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
-import java.awt.Dimension
 
 @Component
 class KeyMcpTools(
@@ -165,54 +160,19 @@ class KeyMcpTools(
         keyService.importKeys(keys, projectHolder.projectEntity, branch)
 
         // Associate screenshots with keys (post-processing after key creation)
-        // Track already-processed uploaded images: saveUploadedImages deletes the
-        // uploaded image after converting it to a screenshot, so when the same
-        // uploadedImageId is referenced by multiple keys we must use addReference
-        // for subsequent keys instead of saveUploadedImages again.
         val keysWithScreenshots = rawKeys.filter { it.getList("screenshots") != null }
         if (keysWithScreenshots.isNotEmpty()) {
           executeInNewTransaction(transactionManager) {
-            val processedImages = mutableMapOf<Long, Pair<Screenshot, Pair<Dimension?, Dimension?>>>()
-            for (rawKey in keysWithScreenshots) {
-              val keyName = rawKey.requireString("name")
-              val keyNamespace = rawKey.getString("namespace") ?: defaultNamespace
-              val keyEntity =
-                keyService.find(projectHolder.project.id, keyName, keyNamespace, branch)
-                  ?: continue
-              for (s in rawKey.requireList("screenshots")) {
-                val imageId = s.requireLong("uploadedImageId")
-                val positions =
-                  s.getList("positions")?.map { p ->
-                    KeyInScreenshotPositionDto(
-                      x = p.requireInt("x"),
-                      y = p.requireInt("y"),
-                      width = p.requireInt("width"),
-                      height = p.requireInt("height"),
-                    )
-                  }
-                val existing = processedImages[imageId]
-                if (existing != null) {
-                  // Image already converted to screenshot — just add a reference
-                  val (screenshot, dims) = existing
-                  val info = ScreenshotInfoDto(positions = positions)
-                  screenshotService.addReference(keyEntity, screenshot, info, dims.first, dims.second)
-                } else {
-                  // First time seeing this image — convert and track it
-                  val dto =
-                    listOf(
-                      KeyScreenshotDto().apply {
-                        uploadedImageId = imageId
-                        this.positions = positions
-                      },
-                    )
-                  val result = screenshotService.saveUploadedImages(dto, keyEntity)
-                  val screenshot = result.values.first()
-                  processedImages[imageId] =
-                    screenshot to
-                    (Dimension(screenshot.width, screenshot.height) to Dimension(screenshot.width, screenshot.height))
-                }
+            val keyScreenshotPairs =
+              keysWithScreenshots.mapNotNull { rawKey ->
+                val keyName = rawKey.requireString("name")
+                val keyNamespace = rawKey.getString("namespace") ?: defaultNamespace
+                val keyEntity =
+                  keyService.find(projectHolder.project.id, keyName, keyNamespace, branch)
+                    ?: return@mapNotNull null
+                keyEntity to parseScreenshotDtos(rawKey.requireList("screenshots"))
               }
-            }
+            screenshotService.saveUploadedImagesForKeys(keyScreenshotPairs)
           }
         }
 

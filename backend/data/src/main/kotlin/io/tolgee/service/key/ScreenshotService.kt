@@ -236,6 +236,45 @@ class ScreenshotService(
     image?.let { fileStorage.storeFile(screenshot.getFilePath(), it) }
   }
 
+  /**
+   * Associates uploaded images with multiple keys. Handles the case where the same
+   * uploadedImageId is referenced by multiple keys: each image is converted to a
+   * screenshot once, then additional keys get references to the same screenshot.
+   */
+  @Transactional
+  fun saveUploadedImagesForKeys(keyScreenshots: List<Pair<Key, List<KeyScreenshotDto>>>) {
+    // Collect all image IDs and load them in one batch
+    val allImageIds = keyScreenshots.flatMap { (_, screenshots) -> screenshots.map { it.uploadedImageId } }.distinct()
+    val images = imageUploadService.find(allImageIds).associateBy { it.id }
+
+    images.values.forEach { image ->
+      if (authenticationFacade.authenticatedUser.id != image.userAccount.id) {
+        throw PermissionException(Message.CURRENT_USER_DOES_NOT_OWN_IMAGE)
+      }
+    }
+
+    // Convert each uploaded image to a screenshot exactly once
+    val createdScreenshots =
+      images
+        .map { (id, image) ->
+          id to saveScreenshot(image)
+        }.toMap()
+
+    // Add references for each key
+    val addedReferences = mutableSetOf<Pair<Long, Long>>()
+    for ((key, screenshots) in keyScreenshots) {
+      for (screenshotDto in screenshots) {
+        val result =
+          createdScreenshots[screenshotDto.uploadedImageId]
+            ?: throw NotFoundException(Message.ONE_OR_MORE_IMAGES_NOT_FOUND)
+        val referenceKey = key.id to result.screenshot.id
+        if (!addedReferences.add(referenceKey)) continue
+        val info = ScreenshotInfoDto(screenshotDto.text, screenshotDto.positions)
+        addReference(key, result.screenshot, info, result.originalDimension, result.targetDimension)
+      }
+    }
+  }
+
   @Transactional
   fun findAll(key: Key): List<Screenshot> {
     return screenshotRepository.findAllByKey(key)
