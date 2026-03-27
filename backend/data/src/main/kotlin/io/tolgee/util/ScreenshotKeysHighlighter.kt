@@ -9,11 +9,18 @@ import java.io.InputStream
 class ScreenshotKeysHighlighter(
   imageStream: InputStream,
 ) : ImageProcessor(imageStream) {
-  fun highlightKeys(
+  fun highlightKey(
     screenshot: Screenshot,
-    keyIds: List<Long>,
+    keyId: Long,
   ): ByteArrayOutputStream {
     try {
+      val hasPositions =
+        screenshot.keyScreenshotReferences
+          .any { it.key.id == keyId && !it.positions.isNullOrEmpty() }
+
+      if (!hasPositions) {
+        return writeImage(sourceBufferedImage, 0.8f)
+      }
       // Load the image
       val newImage = sourceBufferedImage
       val g = newImage.createGraphics()
@@ -27,7 +34,7 @@ class ScreenshotKeysHighlighter(
       }
 
       screenshot.keyScreenshotReferences.forEach { reference ->
-        if (keyIds.contains(reference.key.id)) {
+        if (reference.key.id == keyId) {
           reference.positions?.forEach {
             g.drawRect(
               (it.x * scaling).toInt(),
