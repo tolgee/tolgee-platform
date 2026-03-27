@@ -116,10 +116,6 @@ export const avatarTestData = generateTestDataObject('avatars');
 
 export const administrationTestData = generateTestDataObject('administration');
 
-export const billingAdminInvoicesTestData = generateTestDataObject(
-  'billing-admin-invoices'
-);
-
 export const translationWebsocketsTestData = generateTestDataObject(
   'websocket-translations'
 );
