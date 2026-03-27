@@ -195,10 +195,6 @@ class OrganizationService(
     return organizationRepository.find(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }
 
-  fun findAllByIds(ids: Collection<Long>): List<Organization> {
-    return organizationRepository.findAllById(ids)
-  }
-
   fun find(id: Long): Organization? {
     return organizationRepository.find(id)
   }
