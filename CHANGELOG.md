@@ -1,3 +1,11 @@
+## [3.175.1](https://github.com/tolgee/tolgee-platform/compare/v3.175.0...v3.175.1) (2026-03-27)
+
+
+### Bug Fixes
+
+* always convert screenshots to PNG before sending to LLM providers ([#3572](https://github.com/tolgee/tolgee-platform/issues/3572)) ([7ea752f](https://github.com/tolgee/tolgee-platform/commit/7ea752f1685040bb9327daa72ebfd6b30cb38e68))
+* update Spring Boot 3.5.9, Hibernate 6.6.5 ([#3413](https://github.com/tolgee/tolgee-platform/issues/3413)) ([8999659](https://github.com/tolgee/tolgee-platform/commit/89996591ac26585b0138301526b4e8adf95bc222))
+
 # [3.175.0](https://github.com/tolgee/tolgee-platform/compare/v3.174.1...v3.175.0) (2026-03-27)
 
 
