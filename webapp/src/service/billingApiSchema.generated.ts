@@ -399,7 +399,8 @@ export interface components {
       seats: number;
       /** Format: int64 */
       selfHostedEeSubscriptionId?: number;
-      subscriptionType: string;
+      /** @enum {string} */
+      subscriptionType: "CLOUD" | "SELF_HOSTED";
       total: number;
       translations: number;
     };
