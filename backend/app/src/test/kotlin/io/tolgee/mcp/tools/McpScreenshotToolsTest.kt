@@ -242,4 +242,77 @@ class McpScreenshotToolsTest : AbstractMcpTest() {
     assertThat(screenshotService.findAll(key1!!)).isNotEmpty()
     assertThat(screenshotService.findAll(key2!!)).isNotEmpty()
   }
+
+  @Test
+  fun `add_key_screenshots associates screenshot with existing key`() {
+    // Create a key first (without screenshots)
+    callTool(
+      client,
+      "create_keys",
+      mapOf(
+        "projectId" to data.projectId,
+        "keys" to listOf(mapOf("name" to "existing.key", "translations" to mapOf("en" to "Existing"))),
+      ),
+    )
+
+    // Upload an image
+    val uploadJson =
+      callToolAndGetJson(
+        client,
+        "upload_image",
+        mapOf("image" to MINIMAL_PNG_BASE64),
+      )
+    val imageId = uploadJson["imageId"].asLong()
+
+    // Add screenshot to the existing key
+    val json =
+      callToolAndGetJson(
+        client,
+        "add_key_screenshots",
+        mapOf(
+          "projectId" to data.projectId,
+          "keyScreenshots" to
+            listOf(
+              mapOf(
+                "keyName" to "existing.key",
+                "screenshots" to listOf(mapOf("uploadedImageId" to imageId)),
+              ),
+            ),
+        ),
+      )
+    assertThat(json["success"].asBoolean()).isTrue()
+    assertThat(json["keyCount"].asInt()).isEqualTo(1)
+
+    val key = keyService.find(data.projectId, "existing.key", null)
+    assertThat(key).isNotNull()
+    assertThat(screenshotService.findAll(key!!)).isNotEmpty()
+  }
+
+  @Test
+  fun `add_key_screenshots fails for non-existent key`() {
+    val uploadJson =
+      callToolAndGetJson(
+        client,
+        "upload_image",
+        mapOf("image" to MINIMAL_PNG_BASE64),
+      )
+    val imageId = uploadJson["imageId"].asLong()
+
+    val result =
+      callTool(
+        client,
+        "add_key_screenshots",
+        mapOf(
+          "projectId" to data.projectId,
+          "keyScreenshots" to
+            listOf(
+              mapOf(
+                "keyName" to "nonexistent.key",
+                "screenshots" to listOf(mapOf("uploadedImageId" to imageId)),
+              ),
+            ),
+        ),
+      )
+    assertThat(result.isError).isTrue()
+  }
 }

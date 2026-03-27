@@ -123,6 +123,8 @@ Use the `create_keys` MCP tool. For each key provide:
 Map `getVisibleKeys()` entries to the `positions` array. If a key appears multiple times on screen (e.g. repeated
 buttons), include multiple position entries. Only include positions for the new keys you are creating.
 
+To add screenshots to **existing** keys (without creating new ones), use the `add_key_screenshots` MCP tool instead.
+
 ### 5. Upload Context (Related Keys)
 
 Use the `store_big_meta` MCP tool when at least 2 related keys are present. This tells Tolgee which keys appear
