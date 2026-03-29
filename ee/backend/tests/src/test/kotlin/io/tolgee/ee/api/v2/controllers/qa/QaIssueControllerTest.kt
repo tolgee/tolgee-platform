@@ -217,14 +217,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `ignores non-existing issue by params - creates new ignored issue`() {
-    val request =
-      QaCheckIssueIgnoreRequest(
-        type = QaCheckType.CHARACTER_CASE_MISMATCH,
-        message = QaIssueMessage.QA_CASE_CAPITALIZE,
-        replacement = null,
-        positionStart = 0,
-        positionEnd = 5,
-      )
+    val request = virtualCaseMismatchRequest()
 
     assertThat(qa.getPersistedIssues(testData.frTranslation)).isEmpty()
 
@@ -268,14 +261,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `unignoring a virtual issue by id deletes it`() {
-    val request =
-      QaCheckIssueIgnoreRequest(
-        type = QaCheckType.CHARACTER_CASE_MISMATCH,
-        message = QaIssueMessage.QA_CASE_CAPITALIZE,
-        replacement = null,
-        positionStart = 0,
-        positionEnd = 5,
-      )
+    val request = virtualCaseMismatchRequest()
 
     // Create a virtual issue via suppression
     performAuthPost(
@@ -299,14 +285,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `removing a virtual issue suppression deletes it`() {
-    val request =
-      QaCheckIssueIgnoreRequest(
-        type = QaCheckType.CHARACTER_CASE_MISMATCH,
-        message = QaIssueMessage.QA_CASE_CAPITALIZE,
-        replacement = null,
-        positionStart = 0,
-        positionEnd = 5,
-      )
+    val request = virtualCaseMismatchRequest()
 
     // Create a virtual issue via suppression
     performAuthPost(
@@ -379,14 +358,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `reports QA_ISSUE_IGNORED event when ignoring by params (virtual)`() {
-    val request =
-      QaCheckIssueIgnoreRequest(
-        type = QaCheckType.CHARACTER_CASE_MISMATCH,
-        message = QaIssueMessage.QA_CASE_CAPITALIZE,
-        replacement = null,
-        positionStart = 0,
-        positionEnd = 5,
-      )
+    val request = virtualCaseMismatchRequest()
 
     performAuthPost(
       "$translationUrl/qa-issues/suppressions",
@@ -426,14 +398,7 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `removing non-existing suppression returns 204`() {
-    val request =
-      QaCheckIssueIgnoreRequest(
-        type = QaCheckType.CHARACTER_CASE_MISMATCH,
-        message = QaIssueMessage.QA_CASE_CAPITALIZE,
-        replacement = null,
-        positionStart = 0,
-        positionEnd = 5,
-      )
+    val request = virtualCaseMismatchRequest()
 
     performAuthDelete(
       "$translationUrl/qa-issues/suppressions",
@@ -485,4 +450,13 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
       assertThat(data["virtual"]).isEqualTo(false)
     }
   }
+
+  private fun virtualCaseMismatchRequest() =
+    QaCheckIssueIgnoreRequest(
+      type = QaCheckType.CHARACTER_CASE_MISMATCH,
+      message = QaIssueMessage.QA_CASE_CAPITALIZE,
+      replacement = null,
+      positionStart = 0,
+      positionEnd = 5,
+    )
 }

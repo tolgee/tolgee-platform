@@ -8,7 +8,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -69,8 +69,8 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
     entityManager.flush()
 
     val issues = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
-    Assertions.assertThat(issues).isNotEmpty
-    Assertions.assertThat(issues.map { it.type.name }).contains("CHARACTER_CASE_MISMATCH", "PUNCTUATION_MISMATCH")
+    assertThat(issues).isNotEmpty
+    assertThat(issues.map { it.type.name }).contains("CHARACTER_CASE_MISMATCH", "PUNCTUATION_MISMATCH")
   }
 
   @Test
@@ -89,7 +89,7 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
     entityManager.flush()
 
     val issues = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
-    Assertions.assertThat(issues).isEmpty()
+    assertThat(issues).isEmpty()
   }
 
   @Test
@@ -104,7 +104,7 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
     )
     entityManager.flush()
     val issuesBefore = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
-    Assertions.assertThat(issuesBefore).isNotEmpty
+    assertThat(issuesBefore).isNotEmpty
 
     // Update translation to be clean and re-check
     testData.frTranslation.text = "Bonjour monde."
@@ -118,7 +118,7 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
     entityManager.flush()
 
     val issuesAfter = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
-    Assertions.assertThat(issuesAfter).isEmpty()
+    assertThat(issuesAfter).isEmpty()
   }
 
   @Test

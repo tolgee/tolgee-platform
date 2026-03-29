@@ -33,11 +33,11 @@ export function adjustQaIssuesForVariant<T extends QaVariantIssue>(
   variant: string | undefined,
   variantOffset: number
 ): T[] {
-  if (!variant || variantOffset === 0) {
+  if (!variant && variantOffset === 0) {
     return issues;
   }
   return issues
-    .filter((i) => i.pluralVariant === variant || !i.pluralVariant)
+    .filter((i) => !variant || i.pluralVariant === variant || !i.pluralVariant)
     .map((i) => ({
       ...i,
       positionStart:

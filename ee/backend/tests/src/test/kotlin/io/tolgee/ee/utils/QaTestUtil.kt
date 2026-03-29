@@ -46,6 +46,6 @@ class QaTestUtil(
     qaIssueRepository.findAllByTranslationId(translation.id)
 
   fun ignoreIssue(issue: TranslationQaIssue) {
-    qaIssueService.ignoreIssue(testData.project.id, issue.id)
+    qaIssueService.ignoreIssue(testData.project.id, issue.translation.id, issue.id)
   }
 }
