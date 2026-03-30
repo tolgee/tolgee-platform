@@ -223,6 +223,21 @@ class QaCheckPreviewWebSocketTest : AuthorizedControllerTest() {
   }
 
   @Test
+  fun `rejects keyId from different project`() {
+    val ws = createWs()
+    ws.connect()
+    // Attempt to use a key from otherProject while authenticating against our project
+    ws.sendInit(jwtToken, testData.project.id, testData.otherProjectKey.id, "en")
+    ws.waitForClose()
+
+    val error = ws.getError()
+    assertThat(error).isNotNull
+    assertThat(error!!["type"]).isEqualTo("error")
+    assertThat(error["message"] as String).contains("not found")
+    assertThat(ws.closeStatus?.code).isEqualTo(1008)
+  }
+
+  @Test
   fun `handles multiple text updates on same connection`() {
     val ws = createWs()
     ws.connect()

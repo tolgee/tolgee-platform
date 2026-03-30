@@ -76,9 +76,7 @@ export const QaBadge = ({
           badgeContent={<StyledCheckIcon />}
           classes={{ badge: 'resolved' }}
         >
-          <QaCheck
-            style={!darkWhenNoIssues ? undefined : { opacity: 0.5 }}
-          />
+          <QaCheck style={!darkWhenNoIssues ? undefined : { opacity: 0.5 }} />
         </StyledBadge>
       </span>
     );

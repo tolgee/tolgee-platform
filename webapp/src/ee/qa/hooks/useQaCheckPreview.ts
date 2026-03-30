@@ -16,6 +16,7 @@ type QaCheckPreviewProps = {
 type QaCheckPreviewResult = {
   issues: QaPreviewIssue[];
   isLoading: boolean;
+  isDisconnected: boolean;
   updateIssueState: (issue: QaPreviewIssue, newState: string) => void;
 };
 
@@ -47,6 +48,7 @@ export const useQaCheckPreview = ({
     return {
       issues: [],
       isLoading: false,
+      isDisconnected: false,
       updateIssueState: noopUpdateIssueState,
     };
   }

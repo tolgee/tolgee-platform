@@ -34,5 +34,6 @@ export type QaPreviewProps = {
 export type QaPreviewResult = {
   issues: QaPreviewIssue[];
   isLoading: boolean;
+  isDisconnected: boolean;
   updateIssueState: (issue: QaPreviewIssue, newState: string) => void;
 };

@@ -37,14 +37,25 @@ class QaRecheckService(
       }
     }
 
-    val target = pairs.map { BatchTranslationTargetItem(keyId = it.keyId, languageId = it.languageId) }
+    val allTargetItems = pairs.map { BatchTranslationTargetItem(keyId = it.keyId, languageId = it.languageId) }
+    val project = entityManager.getReference(Project::class.java, projectId)
 
-    batchJobService.startJob(
-      request = QaCheckRequest(target = target, checkTypes = checkTypes),
-      project = entityManager.getReference(Project::class.java, projectId),
-      author = null,
-      type = BatchJobType.QA_CHECK,
-      isHidden = true,
-    )
+    for (targetChunk in allTargetItems.chunked(MAX_BATCH_JOB_TARGET_SIZE)) {
+      batchJobService.startJob(
+        request = QaCheckRequest(target = targetChunk, checkTypes = checkTypes),
+        project = project,
+        author = null,
+        type = BatchJobType.QA_CHECK,
+        isHidden = true,
+      )
+    }
+  }
+
+  companion object {
+    /**
+     * Maximum number of target items per batch job to prevent large JSONB payloads
+     * in the batch_job table and excessive memory usage during serialization.
+     */
+    const val MAX_BATCH_JOB_TARGET_SIZE = 10_000
   }
 }

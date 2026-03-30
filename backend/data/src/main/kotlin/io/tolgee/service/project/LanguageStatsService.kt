@@ -10,8 +10,8 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.repository.LanguageStatsRepository
 import io.tolgee.repository.TranslationRepository
-import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.service.language.LanguageService
+import io.tolgee.service.qa.TranslationQaIssueService
 import io.tolgee.service.queryBuilders.LanguageStatsProvider
 import io.tolgee.util.Logging
 import io.tolgee.util.debug
@@ -33,7 +33,7 @@ class LanguageStatsService(
   private val projectService: ProjectService,
   private val lockingProvider: LockingProvider,
   private val platformTransactionManager: PlatformTransactionManager,
-  private val translationQaIssueRepository: TranslationQaIssueRepository,
+  private val translationQaIssueService: TranslationQaIssueService,
   private val projectFeatureGuard: ProjectFeatureGuard,
 ) : Logging {
   fun refreshLanguageStats(
@@ -62,17 +62,13 @@ class LanguageStatsService(
           val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
           val qaIssueCounts =
             if (qaEnabled) {
-              translationQaIssueRepository
-                .getOpenIssueCountsByLanguageId(projectId)
-                .associate { it.languageId to it.count }
+              translationQaIssueService.getOpenIssueCountsByLanguageId(projectId)
             } else {
               emptyMap()
             }
           val qaChecksStaleCountMap =
             if (qaEnabled) {
-              translationQaIssueRepository
-                .getStaleCountsByLanguageId(projectId)
-                .associate { it.languageId to it.count }
+              translationQaIssueService.getStaleCountsByLanguageId(projectId)
             } else {
               emptyMap()
             }

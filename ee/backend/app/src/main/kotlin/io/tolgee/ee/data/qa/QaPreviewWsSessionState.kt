@@ -2,6 +2,7 @@ package io.tolgee.ee.data.qa
 
 import io.tolgee.model.enums.qa.QaCheckType
 import kotlinx.coroutines.Job
+import java.time.Instant
 
 data class QaPreviewWsSessionState(
   val projectId: Long,
@@ -15,4 +16,6 @@ data class QaPreviewWsSessionState(
   val baseVariants: Map<String, String>? = null,
   val maxCharLimit: Int? = null,
   var currentJob: Job? = null,
+  var lastMessageTime: Instant? = null,
+  var messageCount: Int = 0,
 )

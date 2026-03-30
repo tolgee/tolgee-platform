@@ -85,6 +85,7 @@ export const useQaChecksForPanel = (data: PanelContentData) => {
   return {
     issues: adjustedIssues,
     isLoading: result.isLoading,
+    isDisconnected: result.isDisconnected,
     updateIssueState,
   };
 };

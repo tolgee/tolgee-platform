@@ -58,7 +58,8 @@ function isCorrectable(issue: {
 
 export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
   const { isEnabled } = useEnabledFeatures();
-  const { issues, isLoading, updateIssueState } = useQaChecksForPanel(data);
+  const { issues, isLoading, isDisconnected, updateIssueState } =
+    useQaChecksForPanel(data);
   const text = data.editingText ?? '';
   const project = useProject();
   const reportEvent = useReportEvent();
@@ -178,6 +179,11 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     <StyledWrapper>
       {showProgress && <StyledLinearProgress />}
       <StyledContainer data-cy="qa-panel-container">
+        {isDisconnected && (
+          <TabMessage>
+            <T keyName="translation_tools_qa_connection_lost" />
+          </TabMessage>
+        )}
         {data.activeVariant && (
           <TabMessage>
             <T keyName="translation_tools_qa_plural_variant_note" />

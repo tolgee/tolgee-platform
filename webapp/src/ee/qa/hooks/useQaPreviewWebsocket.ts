@@ -21,6 +21,7 @@ export const useQaPreviewWebsocket = ({
     Map<string, QaPreviewIssue[]>
   >(() => groupIssuesByType(initialIssues));
   const [isLoading, setIsLoading] = useState(false);
+  const [isDisconnected, setIsDisconnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const pendingTextUpdateRef = useRef(false);
   const jwtToken = useGlobalContext((c) => c.auth.jwtToken);
@@ -31,6 +32,7 @@ export const useQaPreviewWebsocket = ({
     // Re-seed from persisted issues when params change
     setIssuesByType(groupIssuesByType(initialIssuesRef.current));
     setIsLoading(false);
+    setIsDisconnected(false);
 
     if (!enabled || !jwtToken) return;
 
@@ -58,21 +60,31 @@ export const useQaPreviewWebsocket = ({
     };
 
     ws.onmessage = (event) => {
-      const data: WsMessage = JSON.parse(event.data);
-      if (data.type === 'result') {
-        setIssuesByType((prev) => {
-          const next = new Map(prev);
-          next.set(data.checkType, data.issues);
-          return next;
-        });
-      } else if (data.type === 'done') {
-        if (!pendingTextUpdateRef.current) {
+      try {
+        const data: WsMessage = JSON.parse(event.data);
+        if (data.type === 'result') {
+          setIssuesByType((prev) => {
+            const next = new Map(prev);
+            next.set(data.checkType, data.issues);
+            return next;
+          });
+        } else if (data.type === 'done') {
+          if (!pendingTextUpdateRef.current) {
+            setIsLoading(false);
+          }
+        } else if (data.type === 'error') {
+          // eslint-disable-next-line no-console
+          console.error('QA preview websocket error:', data.message);
           setIsLoading(false);
         }
-      } else if (data.type === 'error') {
+      } catch (error) {
+        // Malformed message from server — ignore
         // eslint-disable-next-line no-console
-        console.error('QA preview websocket error:', data.message);
-        setIsLoading(false);
+        console.error(
+          'Malformed QA preview websocket message:',
+          event.data,
+          error
+        );
       }
     };
 
@@ -81,12 +93,18 @@ export const useQaPreviewWebsocket = ({
     };
 
     ws.onclose = () => {
-      wsRef.current = null;
+      if (wsRef.current === ws) {
+        setIsDisconnected(true);
+        wsRef.current = null;
+      }
     };
 
     return () => {
       ws.close();
-      wsRef.current = null;
+      wsRef.current?.close();
+      if (wsRef.current === ws) {
+        wsRef.current = null;
+      }
     };
   }, [projectId, keyId, languageTag, enabled, jwtToken]);
 
@@ -113,6 +131,8 @@ export const useQaPreviewWebsocket = ({
     { maxWait: 1000 }
   );
 
+  // variant is read from variantRef inside sendText, so it doesn't need to be
+  // a dependency — variant changes always accompany text changes for plurals.
   useEffect(() => {
     if (text != null && enabled) {
       setIsLoading(true);
@@ -130,7 +150,6 @@ export const useQaPreviewWebsocket = ({
           next.set(
             targetIssue.type,
             typeIssues.map((i) =>
-              i.type === targetIssue.type &&
               i.message === targetIssue.message &&
               i.replacement === targetIssue.replacement &&
               i.positionStart === targetIssue.positionStart &&
@@ -157,7 +176,7 @@ export const useQaPreviewWebsocket = ({
     );
   }, [issuesByType]);
 
-  return { issues, isLoading, updateIssueState };
+  return { issues, isLoading, isDisconnected, updateIssueState };
 };
 
 const groupIssuesByType = (

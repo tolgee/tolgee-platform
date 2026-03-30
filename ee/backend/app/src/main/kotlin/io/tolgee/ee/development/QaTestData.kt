@@ -14,6 +14,8 @@ class QaTestData : BaseTestData() {
   lateinit var enTranslation: Translation
   lateinit var frTranslation: Translation
 
+  lateinit var otherProjectKey: Key
+
   init {
     project.useQaChecks = true
     projectBuilder.build {
@@ -25,6 +27,37 @@ class QaTestData : BaseTestData() {
           enTranslation = addTranslation("en", "Hello world.").self
           frTranslation = addTranslation("fr", "bonjour monde").self
         }.self
+    }
+
+    root.apply {
+      val otherUser =
+        addUserAccount {
+          username = "other_user"
+        }
+      addProject {
+        name = "other_project"
+        organizationOwner = otherUser.defaultOrganizationBuilder.self
+      }.build {
+        val otherEnglish =
+          addLanguage {
+            name = "English"
+            tag = "en"
+            originalName = "English"
+            this@build.self.baseLanguage = this
+          }
+        self.baseLanguage = otherEnglish.self
+        addPermission {
+          project = this@build.self
+          user = otherUser.self
+          type = io.tolgee.model.enums.ProjectPermissionType.MANAGE
+        }
+        otherProjectKey =
+          addKey {
+            name = "secret-key"
+          }.build {
+            addTranslation("en", "Secret content.")
+          }.self
+      }
     }
   }
 

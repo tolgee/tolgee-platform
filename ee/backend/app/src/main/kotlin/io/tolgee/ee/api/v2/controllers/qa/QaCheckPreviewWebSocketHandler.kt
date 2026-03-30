@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.ApiKeyDto
-import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.ee.data.qa.QaCheckPreviewDone
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.ee.data.qa.QaCheckPreviewError
 import io.tolgee.ee.data.qa.QaCheckPreviewResult
 import io.tolgee.ee.data.qa.QaPreviewWsIssue
@@ -33,11 +33,14 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.DisposableBean
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
+import java.time.Duration
+import java.time.Instant
 
 @Component
 class QaCheckPreviewWebSocketHandler(
@@ -52,8 +55,14 @@ class QaCheckPreviewWebSocketHandler(
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val projectService: ProjectService,
   private val keyService: KeyService,
-) : TextWebSocketHandler() {
-  private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+) : TextWebSocketHandler(),
+  DisposableBean {
+  private val supervisorJob = SupervisorJob()
+  private val scope = CoroutineScope(Dispatchers.IO + supervisorJob)
+
+  override fun destroy() {
+    supervisorJob.cancel()
+  }
 
   suspend fun runChecks(
     session: WebSocketSession,
@@ -96,6 +105,7 @@ class QaCheckPreviewWebSocketHandler(
       throw e
     } catch (e: Exception) {
       logger.error("Error running QA checks", e)
+      sendMessage(session, QaCheckPreviewError(message = "Internal error running checks"))
       sendMessage(session, QaCheckPreviewDone())
     }
   }
@@ -105,6 +115,20 @@ class QaCheckPreviewWebSocketHandler(
     state: QaPreviewWsSessionState,
     json: JsonNode,
   ) {
+    val now = Instant.now()
+    val lastMessage = state.lastMessageTime
+
+    if (lastMessage != null && Duration.between(lastMessage, now).toMillis() < RATE_LIMIT_WINDOW_MS) {
+      if (state.messageCount >= MAX_MESSAGES_PER_WINDOW) {
+        logger.debug("Rate limit exceeded for session {}", session.id)
+        return
+      }
+      state.messageCount++
+    } else {
+      state.messageCount = 1
+    }
+    state.lastMessageTime = now
+
     val text = json.get("text")?.asText() ?: ""
     val variant = json.get("variant")?.asText()
 
@@ -135,6 +159,10 @@ class QaCheckPreviewWebSocketHandler(
       logger.debug("WebSocket init validation failed", e)
       sendMessage(session, QaCheckPreviewError(message = e.message ?: "Invalid request"))
       session.close(CloseStatus.POLICY_VIOLATION)
+    } catch (e: NotFoundException) {
+      logger.debug("WebSocket init resource not found", e)
+      sendMessage(session, QaCheckPreviewError(message = "Resource not found"))
+      session.close(CloseStatus.POLICY_VIOLATION)
     } catch (e: Exception) {
       logger.warn("WebSocket init failed", e)
       sendMessage(session, QaCheckPreviewError(message = "Authentication failed"))
@@ -145,19 +173,14 @@ class QaCheckPreviewWebSocketHandler(
   private fun checkAuth(
     token: String,
     projectId: Long,
-  ): UserAccountDto {
+  ) {
     val auth = jwtService.validateToken(token)
-    val user = auth.principal
-    val apiKey = auth.credentials as? ApiKeyDto
-
     securityService.checkProjectPermission(
       projectId = projectId,
       requiredPermission = Scope.TRANSLATIONS_VIEW,
-      user = user,
-      apiKey = apiKey,
+      user = auth.principal,
+      apiKey = auth.credentials as? ApiKeyDto,
     )
-
-    return user
   }
 
   private fun checkFeatureEnabled(projectId: Long) {
@@ -173,6 +196,8 @@ class QaCheckPreviewWebSocketHandler(
     languageTag: String,
     keyId: Long?,
   ) {
+    val key = keyId?.let { keyService.get(projectId, it) }
+
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
     val baseTag: String? = baseLanguage.tag.takeIf { languageTag != it }
 
@@ -205,7 +230,6 @@ class QaCheckPreviewWebSocketHandler(
         projectQaConfigService.getEnabledCheckTypesForProject(projectId)
       }
 
-    val key = keyId?.let { keyService.get(it) }
     val isPlural = key?.isPlural ?: false
     val maxCharLimit = key?.maxCharLimit
     val baseParsed = if (isPlural && baseText != null) getPluralForms(baseText) else null
@@ -264,5 +288,7 @@ class QaCheckPreviewWebSocketHandler(
 
   companion object {
     private val logger = LoggerFactory.getLogger(QaCheckPreviewWebSocketHandler::class.java)
+    private const val RATE_LIMIT_WINDOW_MS = 1000L
+    private const val MAX_MESSAGES_PER_WINDOW = 10
   }
 }

@@ -128,6 +128,17 @@ class KeyService(
     return keyRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
   }
 
+  fun get(
+    projectId: Long,
+    id: Long,
+  ): Key {
+    val key = get(id)
+    if (key.project.id != projectId) {
+      throw NotFoundException(Message.KEY_NOT_FOUND)
+    }
+    return key
+  }
+
   fun getView(
     projectId: Long,
     id: Long,
