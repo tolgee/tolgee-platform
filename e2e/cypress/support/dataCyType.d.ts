@@ -727,6 +727,7 @@ declare namespace DataCy {
         "project-transfer-dialog" |
         "prompt-basic-option" |
         "prompt-basic-option-edit" |
+        "qa-badge" |
         "qa-check-item" |
         "qa-enabled-toggle" |
         "qa-issue-highlight" |

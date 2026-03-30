@@ -12,7 +12,8 @@ const StyledBadge = styled(Badge)`
     height: unset;
     padding: 3px 3px;
   }
-  & .resolved {
+  & .resolved,
+  & .stale {
     background: ${({ theme }) => theme.palette.emphasis[600]};
     padding: 0px;
     height: 16px;
@@ -22,13 +23,6 @@ const StyledBadge = styled(Badge)`
     justify-content: center;
   }
   & .stale {
-    background: ${({ theme }) => theme.palette.emphasis[600]};
-    padding: 0px;
-    height: 16px;
-    width: 18px;
-    min-width: unset;
-    align-items: center;
-    justify-content: center;
     overflow: hidden;
   }
 `;
@@ -60,35 +54,45 @@ export const QaBadge = ({
   if (stale) {
     const hasIssues = count !== undefined && count > 0;
     return (
-      <StyledBadge
-        badgeContent={<StyledSpinner size={10} thickness={5} />}
-        classes={{ badge: 'stale' }}
-      >
-        <QaCheck
-          style={hasIssues || !darkWhenNoIssues ? undefined : { opacity: 0.5 }}
-        />
-      </StyledBadge>
+      <span data-cy="qa-badge">
+        <StyledBadge
+          badgeContent={<StyledSpinner size={10} thickness={5} />}
+          classes={{ badge: 'stale' }}
+        >
+          <QaCheck
+            style={
+              hasIssues || !darkWhenNoIssues ? undefined : { opacity: 0.5 }
+            }
+          />
+        </StyledBadge>
+      </span>
     );
   }
 
-  if (!count || count === 0) {
+  if (!count) {
     return (
-      <StyledBadge
-        badgeContent={<StyledCheckIcon />}
-        classes={{ badge: 'resolved' }}
-      >
-        <QaCheck style={!darkWhenNoIssues ? undefined : { opacity: 0.5 }} />
-      </StyledBadge>
+      <span data-cy="qa-badge">
+        <StyledBadge
+          badgeContent={<StyledCheckIcon />}
+          classes={{ badge: 'resolved' }}
+        >
+          <QaCheck
+            style={!darkWhenNoIssues ? undefined : { opacity: 0.5 }}
+          />
+        </StyledBadge>
+      </span>
     );
   }
 
   return (
-    <StyledBadge
-      badgeContent={count}
-      color="primary"
-      classes={{ badge: 'unresolved' }}
-    >
-      <QaCheck />
-    </StyledBadge>
+    <span data-cy="qa-badge">
+      <StyledBadge
+        badgeContent={count}
+        color="primary"
+        classes={{ badge: 'unresolved' }}
+      >
+        <QaCheck />
+      </StyledBadge>
+    </span>
   );
 };

@@ -58,4 +58,5 @@ before(() => {
   setFeature('GLOSSARY', true);
   setFeature('TRANSLATION_LABELS', true);
   setFeature('BRANCHING', true);
+  setFeature('QA_CHECKS', true);
 });
