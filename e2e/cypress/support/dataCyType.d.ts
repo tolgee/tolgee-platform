@@ -13,6 +13,7 @@ declare namespace DataCy {
         "account-security-provider-connect" |
         "account-security-provider-disconnect" |
         "account-security-set-password-instructions-sent" |
+        "active-plan-license-key-input" |
         "activity-compact" |
         "activity-compact-detail-button" |
         "activity-detail" |
@@ -43,6 +44,7 @@ declare namespace DataCy {
         "ai-languages-description-edit" |
         "ai-menu-context-data" |
         "ai-menu-prompts" |
+        "ai-playground-admin-access-info" |
         "ai-playground-preview" |
         "ai-playground-usage-cached-tokens" |
         "ai-playground-usage-mt-credits" |
@@ -119,6 +121,7 @@ declare namespace DataCy {
         "batch-operations-submit-button" |
         "batch-progress" |
         "batch-select-item" |
+        "billing-plan-subtitle" |
         "branch-default-chip" |
         "branch-name-input" |
         "branch-protected-icon" |
@@ -437,6 +440,7 @@ declare namespace DataCy {
         "mfa-recovery-codes-dialog-content" |
         "mfa-recovery-codes-dialog-password-input" |
         "mfa-recovery-codes-dialog-title" |
+        "mt-admin-access-info" |
         "mt-language-dialog-auto-for-import" |
         "mt-language-dialog-auto-machine-translation" |
         "mt-language-dialog-auto-translation-memory" |
@@ -638,6 +642,8 @@ declare namespace DataCy {
         "search-select-search" |
         "seat_spending_limit_exceeded_while_accepting_invitation_message" |
         "self-hosted-ee-active-plan" |
+        "self-hosted-plans-placeholder" |
+        "self-hosted-plans-placeholder-contact-us" |
         "sensitive-dialog-otp-input" |
         "sensitive-dialog-password-input" |
         "sensitive-protection-dialog" |
