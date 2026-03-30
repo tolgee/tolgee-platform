@@ -6,7 +6,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { RefreshButton } from './RefreshButton';
 import { ReleaseKeyButton } from './ReleaseKeyButton';
 import clsx from 'clsx';
-import { IncludedFeatures } from '../billing/component/Plan/IncludedFeatures';
+import { IncludedFeatures } from 'tg.ee.module/billing/component/Plan/IncludedFeatures';
 import {
   PlanContainer,
   PlanContent,

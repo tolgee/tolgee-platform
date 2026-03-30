@@ -76,7 +76,7 @@
     "schema": "node ./scripts/generate-schemas.js public",
     "billing-schema": "node ./scripts/generate-schemas.js billing",
     "prettier": "prettier --write ./src",
-    "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives .",
+    "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives --resolve-plugins-relative-to . . $([ -d ../../billing/frontend ] && echo ../../billing/frontend)",
     "tsc": "npm run --prefix ../library build:types && tsc",
     "unused-exports": "ts-unused-exports tsconfig.json --findCompletelyUnusedFiles --ignoreFiles=GoToDocsButton",
     "tsc:prod": "npm run --prefix ../library build:types && tsc --project tsconfig.prod.json",

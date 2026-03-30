@@ -21,7 +21,7 @@ const definitions = {
   },
   billing: {
     schema: 'V2%20Billing',
-    output: './src/service/billingApiSchema.generated.ts',
+    output: '../../billing/frontend/billingApiSchema.generated.ts',
   },
 };
 
