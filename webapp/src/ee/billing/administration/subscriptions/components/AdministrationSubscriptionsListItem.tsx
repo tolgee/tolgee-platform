@@ -1,4 +1,11 @@
-import { Chip, Link, TableCell, TableRow, Typography } from '@mui/material';
+import {
+  Chip,
+  Link,
+  TableCell,
+  TableRow,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { AdministrationSubscriptionsCloudPlan } from './cloudPlan/AdministrationSubscriptionsCloudPlan';
@@ -11,10 +18,14 @@ export const AdministrationSubscriptionsListItem: FC<{
 }> = ({ item }) => {
   const { t } = useTranslate();
 
+  const deletedAt = item.deletedAt
+    ? new Date(item.deletedAt).toLocaleDateString()
+    : undefined;
+
   return (
     <TableRow
       data-cy="administration-organizations-list-item"
-      sx={item.deleted ? { opacity: 0.6 } : undefined}
+      sx={item.deletedAt ? { opacity: 0.6 } : undefined}
     >
       <TableCell
         sx={{
@@ -23,7 +34,7 @@ export const AdministrationSubscriptionsListItem: FC<{
           whiteSpace: 'nowrap',
         }}
       >
-        {item.deleted ? (
+        {item.deletedAt ? (
           <Typography component="span" color="text.secondary">
             {item.organization.name}
           </Typography>
@@ -37,13 +48,15 @@ export const AdministrationSubscriptionsListItem: FC<{
           </Link>
         )}{' '}
         <Chip size="small" label={item.organization.id} />
-        {item.deleted && (
-          <Chip
-            size="small"
-            label={t('administration_subscriptions_deleted', 'Deleted')}
-            color="error"
-            sx={{ ml: 0.5 }}
-          />
+        {deletedAt && (
+          <Tooltip title={deletedAt}>
+            <Chip
+              size="small"
+              label={t('administration_subscriptions_deleted', 'Deleted')}
+              color="error"
+              sx={{ ml: 0.5 }}
+            />
+          </Tooltip>
         )}
       </TableCell>
       <TableCell>
