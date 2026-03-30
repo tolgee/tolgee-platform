@@ -9,11 +9,10 @@ import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { useTranslationsActions } from 'tg.views/projects/translations/context/TranslationsContext';
 import { QaIssueHighlightProps } from '../../../eeSetup/EeModuleType';
 
-type QaIssueModel = components['schemas']['QaIssueModel'];
-
 const StyledHighlight = styled('span')`
   text-decoration: underline;
   text-decoration-color: ${({ theme }) => theme.palette.error.main};
+  text-decoration-thickness: 2px;
   border-radius: 2px;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;

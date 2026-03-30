@@ -9,6 +9,7 @@ type GlossaryTermModel = components['schemas']['GlossaryTermModel'];
 const StyledHighlight = styled('span')`
   text-decoration: underline;
   text-decoration-style: dashed;
+  text-decoration-thickness: 2px;
   text-underline-offset: ${({ theme }) => theme.spacing(0.5)};
   border-radius: 2px;
   -webkit-box-decoration-break: clone;
