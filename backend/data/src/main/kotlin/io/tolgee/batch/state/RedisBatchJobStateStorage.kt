@@ -175,18 +175,16 @@ open class RedisBatchJobStateStorage(
     return if (redisHash.isEmpty()) null else redisHash.readAllMap().toMutableMap()
   }
 
-  override fun removeJobState(jobId: Long): MutableMap<Long, ExecutionState>? {
+  override fun removeJobState(jobId: Long) {
     logger.debug("Removing job state for job $jobId")
     removeAllCounters(jobId)
     val redisHash = getRedisHashForJob(jobId)
-    val state = if (redisHash.isEmpty()) null else redisHash.readAllMap().toMutableMap()
     redisHash.delete()
     // Also remove initialization and started markers
     redissonClient.getBucket<Boolean>("$REDIS_STATE_INITIALIZED_KEY_PREFIX$jobId").delete()
     redissonClient.getBucket<Boolean>("$REDIS_STARTED_KEY_PREFIX$jobId").delete()
     // Clear local initialization cache to allow re-initialization if jobId is reused
     localInitializedJobs.remove(jobId)
-    return state
   }
 
   override fun hasCachedJobState(jobId: Long): Boolean {
