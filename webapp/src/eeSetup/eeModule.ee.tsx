@@ -414,6 +414,7 @@ export const useAddProjectMenuItems = () => {
 export const useAddAdministrationMenuItems = () => {
   const { t } = useTranslate();
   const config = useConfig();
+  const billingMenuItems = billingModule.useAdministrationMenuItems();
 
   return addAdministrationMenuItems(
     [
@@ -423,9 +424,8 @@ export const useAddAdministrationMenuItems = () => {
         label: t('administration_ee_license'),
         condition: () => true,
       },
-      ...billingModule.administrationMenuItems.map((item) => ({
+      ...billingMenuItems.map((item) => ({
         ...item,
-        label: t(item.labelKey),
         condition: () => config.billing.enabled,
       })),
     ],
