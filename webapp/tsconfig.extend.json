@@ -8,14 +8,32 @@
       "tg.constants/*": ["constants/*"],
       "tg.fixtures/*": ["fixtures/*"],
       "tg.globalContext/*": ["globalContext/*"],
+      "tg.service/billingApiSchema.generated": ["../../../billing/frontend/billingApiSchema.generated"],
       "tg.service/*": ["service/*"],
       "tg.views/*": ["views/*"],
       "tg.error/*": ["error/*"],
       "tg.svgs/*": ["svgs/*"],
+      "tg.ee.module/billing/*": ["../../../billing/frontend/billing/*"],
       "tg.ee.module/*": ["ee/*"],
       "tg.ee": ["eeSetup/eeModule.current"],
       "tg.translationTools/*": ["translationTools/*"],
-      "tg.websocket-client/*": ["websocket-client/*"]
+      "tg.websocket-client/*": ["websocket-client/*"],
+      "eeSetup/*": ["eeSetup/*"],
+      "@mui/material": ["../node_modules/@mui/material"],
+      "@mui/material/*": ["../node_modules/@mui/material/*"],
+      "@mui/lab": ["../node_modules/@mui/lab"],
+      "@mui/lab/*": ["../node_modules/@mui/lab/*"],
+      "@tolgee/react": ["../node_modules/@tolgee/react"],
+      "@untitled-ui/icons-react": ["../node_modules/@untitled-ui/icons-react"],
+      "clsx": ["../node_modules/clsx"],
+      "formik": ["../node_modules/formik"],
+      "react-query": ["../node_modules/react-query"],
+      "react-router-dom": ["../node_modules/react-router-dom"],
+      "yup": ["../node_modules/yup"],
+      "@emotion/react/jsx-runtime": ["../node_modules/@emotion/react/types/jsx-runtime"],
+      "@emotion/react/jsx-dev-runtime": ["../node_modules/@emotion/react/types/jsx-dev-runtime"],
+      "react": ["../node_modules/@types/react"],
+      "react-dom": ["../node_modules/@types/react-dom"]
     }
   }
 }

@@ -1,1 +1,0 @@
-export const BILLING_CRITICAL_FRACTION = 0.75;
