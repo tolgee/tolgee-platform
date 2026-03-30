@@ -1018,7 +1018,8 @@ export interface components {
     };
     OrganizationWithSubscriptionsModel: {
       cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
-      deleted: boolean;
+      /** Format: date-time */
+      deletedAt?: string;
       organization: components["schemas"]["SimpleOrganizationModel"];
       selfHostedSubscriptions: components["schemas"]["SelfHostedEeSubscriptionAdministrationModel"][];
     };
