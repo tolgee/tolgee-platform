@@ -220,10 +220,8 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   @Test
   fun `apply merge - keeps branch and resets snapshot`() {
-    executeInNewTransaction {
-      val merge = prepareMergeScenario()
-      branchService.applyMerge(testData.project.id, merge.id, false)
-    }
+    val merge = prepareMergeScenario()
+    branchService.applyMerge(testData.project.id, merge.id, false)
 
     val refreshedBranch = testData.featureBranch.refresh()!!
     refreshedBranch.deletedAt.assert.isNull()
@@ -561,6 +559,12 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     createFeatureOnlyKey()
     deleteFeatureKey()
     updateFeatureKey()
+    waitForNotThrowing {
+      testData.featureBranch
+        .refresh()!!
+        .revision.assert
+        .isEqualTo(6)
+    }
     return dryRunFeatureBranchMerge()
   }
 
