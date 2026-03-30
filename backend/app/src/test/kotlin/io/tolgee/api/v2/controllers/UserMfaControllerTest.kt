@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.retry
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.notifications.NotificationType.MFA_DISABLED
 import io.tolgee.model.notifications.NotificationType.MFA_ENABLED
 import io.tolgee.testing.AuthorizedControllerTest
@@ -54,14 +55,17 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
         )
 
       performAuthPut("/v2/user/mfa/totp", requestDto).andIsOk
-      val fromDb = userAccountService.findActive(initialUsername)
-      Assertions.assertThat(fromDb!!.totpKey).isEqualTo(encodedKey)
+    }
 
-      notificationUtil.newestInAppNotification().also {
-        assertThat(it.type).isEqualTo(MFA_ENABLED)
-        assertThat(it.user.id).isEqualTo(userAccount?.id)
-        assertThat(it.originatingUser?.id).isEqualTo(userAccount?.id)
-      }
+    val fromDb = userAccountService.findActive(initialUsername)
+    Assertions.assertThat(fromDb!!.totpKey).isEqualTo(encodedKey)
+
+    notificationUtil.newestInAppNotification().also {
+      assertThat(it.type).isEqualTo(MFA_ENABLED)
+      assertThat(it.user.id).isEqualTo(userAccount?.id)
+      assertThat(it.originatingUser?.id).isEqualTo(userAccount?.id)
+    }
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
       assertThat(
         notificationUtil.newestEmailNotification(),
       ).contains("Multi-factor authentication has been enabled for your account")
@@ -84,9 +88,11 @@ class UserMfaControllerTest : AuthorizedControllerTest() {
       assertThat(it.user.id).isEqualTo(userAccount?.id)
       assertThat(it.originatingUser?.id).isEqualTo(userAccount?.id)
     }
-    assertThat(
-      notificationUtil.newestEmailNotification(),
-    ).contains("Multi-factor authentication has been disabled for your account")
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      assertThat(
+        notificationUtil.newestEmailNotification(),
+      ).contains("Multi-factor authentication has been disabled for your account")
+    }
   }
 
   @Test

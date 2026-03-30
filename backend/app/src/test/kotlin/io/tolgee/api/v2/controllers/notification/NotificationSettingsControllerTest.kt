@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.notification.NotificationSettingsRequest
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.node
+import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.notifications.Notification
 import io.tolgee.model.notifications.NotificationChannel
 import io.tolgee.model.notifications.NotificationType
@@ -73,9 +74,11 @@ class NotificationSettingsControllerTest : AuthorizedControllerTest() {
     val notification = dispatchNotification()
 
     assertThat(notificationTestUtil.newestInAppNotification().id).isEqualTo(notification.id)
-    assertThat(
-      notificationTestUtil.newestEmailNotification(),
-    ).contains("projects/${testData.project.id}/task?number=${testData.translateTask.self.number}")
+    waitForNotThrowing(timeout = 2000, pollTime = 25) {
+      assertThat(
+        notificationTestUtil.newestEmailNotification(),
+      ).contains("projects/${testData.project.id}/task?number=${testData.translateTask.self.number}")
+    }
   }
 
   @Test
