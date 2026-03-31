@@ -78,7 +78,7 @@ class TranslationMemoryService(
         keyName = it[2] as String,
         keyNamespace = it[3] as String?,
         keyId = it[4] as Long,
-        similarity = it[5] as Float,
+        similarity = (it[5] as Number).toFloat(),
       )
     }
   }
@@ -171,7 +171,7 @@ class TranslationMemoryService(
         .setFirstResult(offset.toInt())
         .resultList
 
-    val count = (queryResult.firstOrNull() as Array<*>?)?.get(6) as Long? ?: 0L
+    val count = ((queryResult.firstOrNull() as Array<*>?)?.get(6) as Number?)?.toLong() ?: 0L
     return count to
       queryResult.map {
         it as Array<*>
@@ -180,7 +180,7 @@ class TranslationMemoryService(
           baseTranslationText = it[1] as String,
           keyName = it[2] as String,
           keyNamespace = it[3] as String?,
-          similarity = it[5] as Float,
+          similarity = (it[5] as Number).toFloat(),
           keyId = it[4] as Long,
         )
       }
