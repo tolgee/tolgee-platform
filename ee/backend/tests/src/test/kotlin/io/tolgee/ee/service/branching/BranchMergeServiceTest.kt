@@ -207,33 +207,17 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   @Test
   fun `apply merge - propagates additions, updates and deletions`() {
     val merge = prepareMergeScenario()
-
-    val changes = merge.changes.map { "${it.change}(src=${it.sourceKey?.name}, tgt=${it.targetKey?.name})" }
-    val featureTranslationBeforeApply =
-      translationService
-        .find(
-          keyService.find(testData.featureKeyToUpdate.id)!!,
-          testData.englishLanguage,
-        ).orElse(null)
-        ?.text
-
     applyMerge(merge)
-
-    val actualTranslation = testData.mainKeyToUpdate.enTranslation()
-    if (actualTranslation != updatedValue) {
-      throw AssertionError(
-        "Expected '$updatedValue' but got '$actualTranslation'. " +
-          "Merge changes: $changes. " +
-          "Feature key translation before apply: '$featureTranslationBeforeApply'. " +
-          "Main key id: ${testData.mainKeyToUpdate.id}, " +
-          "Feature key id: ${testData.featureKeyToUpdate.id}",
-      )
-    }
 
     testData.mainBranch.findKey(additionKeyName).let {
       it.assert.isNotNull()
       it!!.enTranslation().assert.isEqualTo(additionValue)
     }
+
+    testData.mainKeyToUpdate
+      .enTranslation()
+      .assert
+      .isEqualTo(updatedValue)
 
     testData.mainBranch
       .findKey(testData.mainKeyToDelete.name)

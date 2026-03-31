@@ -175,7 +175,7 @@ class BranchMergeExecutor(
   }
 
   private fun persistAfterMerge(key: Key) {
-    key.translations.filter { it.id == 0L }.forEach { translationService.save(it) }
+    key.translations.forEach { translationService.save(it) }
   }
 
   private inline fun BranchMergeChange.withSnapshotKey(
