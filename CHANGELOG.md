@@ -1,3 +1,10 @@
+# [3.176.0](https://github.com/tolgee/tolgee-platform/compare/v3.175.2...v3.176.0) (2026-03-31)
+
+
+### Features
+
+* show deleted organizations in admin subscriptions view ([#3552](https://github.com/tolgee/tolgee-platform/issues/3552)) ([08a621d](https://github.com/tolgee/tolgee-platform/commit/08a621d55d46c4629b447ebe32960ba4e15f250a))
+
 ## [3.175.2](https://github.com/tolgee/tolgee-platform/compare/v3.175.1...v3.175.2) (2026-03-31)
 
 
