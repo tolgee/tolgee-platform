@@ -10,6 +10,7 @@ import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.ee.service.LabelServiceImpl
 import io.tolgee.ee.service.eeSubscription.EeSubscriptionServiceImpl
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.fixtures.waitFor
 import io.tolgee.fixtures.waitForNotThrowing
 import io.tolgee.model.Language
 import io.tolgee.model.Screenshot
@@ -80,6 +81,12 @@ class BranchMergeServiceTest : AbstractSpringTest() {
     }
     testData = BranchMergeTestData()
     testDataService.saveTestData(testData.root)
+
+    // Wait for all async BranchMetaUpdater.snapshot() calls triggered by saveTestData
+    // to complete. Without this, revisions may still be changing during tests, causing
+    // stale merge revisions and flaky failures.
+    waitForBranchRevisionsToSettle(testData.mainBranch, testData.featureBranch)
+
     branchSnapshotService.createInitialSnapshot(
       testData.project.id,
       testData.mainBranch,
@@ -558,22 +565,15 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   private fun prepareMergeScenario(): BranchMerge {
-    val featureRevisionBefore = testData.featureBranch.refresh()!!.revision
-
     createFeatureOnlyKey()
     deleteFeatureKey()
     updateFeatureKey()
 
-    // Wait for async BranchMetaUpdater.snapshot() calls to complete.
+    // Wait for all async BranchMetaUpdater.snapshot() calls to complete.
     // Each entity change triggers an @Async revision increment on the branch.
     // Without waiting, the dry-run may store a stale revision, causing
     // isRevisionValid to fail when applyMerge runs.
-    waitForNotThrowing(timeout = 10000, pollTime = 100) {
-      testData.featureBranch
-        .refresh()!!
-        .revision.assert
-        .isGreaterThan(featureRevisionBefore)
-    }
+    waitForBranchRevisionsToSettle(testData.featureBranch)
 
     return dryRunFeatureBranchMerge()
   }
@@ -718,6 +718,34 @@ class BranchMergeServiceTest : AbstractSpringTest() {
 
   private fun Branch.refresh(): Branch? {
     return branchRepository.findById(this.id).orElse(null)
+  }
+
+  /**
+   * Waits until the branch revision has stopped changing for at least [settleMs].
+   * BranchMetaUpdater.snapshot() runs @Async for each entity change, so multiple
+   * revision increments can arrive over a short window. This ensures ALL pending
+   * updates have been applied before proceeding.
+   */
+  private fun waitForBranchRevisionsToSettle(
+    vararg branches: Branch,
+    settleMs: Long = 500,
+  ) {
+    val lastRevisions = IntArray(branches.size) { -1 }
+    var lastChangeTime = System.currentTimeMillis()
+    waitFor(timeout = 10000, pollTime = 100) {
+      var changed = false
+      branches.forEachIndexed { i, branch ->
+        val current = branch.refresh()!!.revision
+        if (current != lastRevisions[i]) {
+          lastRevisions[i] = current
+          changed = true
+        }
+      }
+      if (changed) {
+        lastChangeTime = System.currentTimeMillis()
+      }
+      System.currentTimeMillis() - lastChangeTime >= settleMs
+    }
   }
 
   private fun Key.refresh(): Key {
