@@ -2,6 +2,7 @@ package io.tolgee.batch
 
 import io.tolgee.batch.data.BatchJobDto
 import io.tolgee.batch.data.BatchJobType
+import io.tolgee.batch.data.BatchTranslationTargetItem
 import io.tolgee.batch.processors.AutomationChunkProcessor
 import io.tolgee.batch.processors.DeleteKeysChunkProcessor
 import io.tolgee.batch.processors.PreTranslationByTmChunkProcessor
@@ -139,7 +140,7 @@ class BatchJobTestUtil(
       .whenever(preTranslationByTmChunkProcessor)
       .process(
         any(),
-        argThat { this.containsAll((1L..10).toList()) },
+        argThat { this.map { it.keyId }.containsAll((1L..10).toList()) },
         any(),
       )
   }
@@ -252,8 +253,6 @@ class BatchJobTestUtil(
   }
 
   fun makePreTranslateProcessorRepeatedlyThrowRequeueException() {
-    val throwingChunk = (1L..10).toList()
-
     doThrow(
       RequeueWithDelayException(
         message = Message.OUT_OF_CREDITS,
@@ -265,7 +264,7 @@ class BatchJobTestUtil(
       ),
     ).whenever(preTranslationByTmChunkProcessor).process(
       any(),
-      argThat { this.containsAll(throwingChunk) },
+      argThat { this.map { it.keyId }.containsAll((1L..10).toList()) },
       any(),
     )
   }
