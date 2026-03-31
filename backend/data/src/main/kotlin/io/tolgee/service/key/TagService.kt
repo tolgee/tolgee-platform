@@ -425,7 +425,8 @@ class TagService(
     key: Key,
     tagId: Long,
   ) {
-    val tag = getWithKeyMetasFetched(key.project.id, tagId)
+    val tag = find(tagId)?.takeIf { it.project.id == key.project.id }
+      ?: throw NotFoundException(Message.TAG_NOT_FOUND)
     remove(key, tag)
   }
 }
