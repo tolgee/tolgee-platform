@@ -2184,6 +2184,7 @@ export interface operations {
         withCloudPlanId?: number;
         hasSelfHostedSubscription?: boolean;
         filterDeleted?: boolean;
+        trialing?: boolean;
       };
     };
     responses: {
