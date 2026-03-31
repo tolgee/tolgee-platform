@@ -1018,6 +1018,8 @@ export interface components {
     };
     OrganizationWithSubscriptionsModel: {
       cloudSubscription?: components["schemas"]["AdministrationCloudSubscriptionModel"];
+      /** Format: date-time */
+      deletedAt?: string;
       organization: components["schemas"]["SimpleOrganizationModel"];
       selfHostedSubscriptions: components["schemas"]["SelfHostedEeSubscriptionAdministrationModel"][];
     };
@@ -2181,6 +2183,7 @@ export interface operations {
         search?: string;
         withCloudPlanId?: number;
         hasSelfHostedSubscription?: boolean;
+        filterDeleted?: boolean;
       };
     };
     responses: {
