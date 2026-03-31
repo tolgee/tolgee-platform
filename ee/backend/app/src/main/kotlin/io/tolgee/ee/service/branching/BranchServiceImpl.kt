@@ -207,6 +207,13 @@ class BranchServiceImpl(
       }
     }
     branchMergeService.applyMerge(merge)
+    // Flush merge changes (updated translations, new keys) to the database.
+    // BranchMergeExecutor modifies existing translations in-memory via Translation.merge()
+    // without an explicit save — relying on JPA dirty-checking. Without this flush,
+    // those changes may not be persisted before subsequent operations (branch deletion,
+    // snapshot rebuild) or async listeners like BranchMetaUpdater.snapshot() that run
+    // in separate transactions after commit.
+    entityManager.flush()
     if (!merge.sourceBranch.isDefault) {
       if (deleteBranch == true) {
         val defaultBranch =
@@ -215,7 +222,6 @@ class BranchServiceImpl(
         taskService.moveTasksAfterMerge(projectId, merge.sourceBranch, defaultBranch)
         deleteBranch(projectId, merge.sourceBranch.id)
       } else {
-        entityManager.flush()
         branchSnapshotService.rebuildSnapshotFromSource(
           projectId = projectId,
           sourceBranch = merge.sourceBranch,
