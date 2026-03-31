@@ -15,7 +15,9 @@ data class QaPreviewWsSessionState(
   val isPlural: Boolean = false,
   val baseVariants: Map<String, String>? = null,
   val maxCharLimit: Int? = null,
-  var currentJob: Job? = null,
-  var lastMessageTime: Instant? = null,
-  var messageCount: Int = 0,
-)
+  val icuPlaceholders: Boolean = true,
+) {
+  var currentJob: Job? = null
+  var lastMessageTime: Instant? = null
+  var messageCount: Int = 0
+}

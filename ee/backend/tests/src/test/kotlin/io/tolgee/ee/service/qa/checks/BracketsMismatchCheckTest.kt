@@ -14,11 +14,13 @@ class BracketsMismatchCheckTest {
   private fun params(
     text: String,
     base: String? = null,
+    icuPlaceholders: Boolean = true,
   ) = QaCheckParams(
     baseText = base,
     text = text,
     baseLanguageTag = "en",
     languageTag = "cs",
+    icuPlaceholders = icuPlaceholders,
   )
 
   @Test
@@ -110,8 +112,8 @@ class BracketsMismatchCheckTest {
   }
 
   @Test
-  fun `handles curly braces`() {
-    check.check(params("Ahoj svete", "Hello {world}")).assertIssues {
+  fun `handles curly braces when ICU is disabled`() {
+    check.check(params("Ahoj svete", "Hello {world}", icuPlaceholders = false)).assertIssues {
       issue { param("bracket", "{") }
       issue { param("bracket", "}") }
     }
@@ -120,5 +122,41 @@ class BracketsMismatchCheckTest {
   @Test
   fun `all results have BRACKETS_MISMATCH type`() {
     check.check(params("Ahoj svete", "Hello (world)")).assertAllHaveType(QaCheckType.BRACKETS_MISMATCH)
+  }
+
+  // ICU placeholder tests
+
+  @Test
+  fun `ignores curly braces when ICU is enabled`() {
+    check.check(params("{count} polozek", "{count} items")).assertNoIssues()
+  }
+
+  @Test
+  fun `ignores curly braces with different ICU args when ICU is enabled`() {
+    check.check(params("{name} ma {count} polozek", "{name} has {count, number} items")).assertNoIssues()
+  }
+
+  @Test
+  fun `still detects round bracket mismatch alongside ICU placeholders`() {
+    check.check(params("{count} (extra) polozek", "{count} items")).assertIssues {
+      issue { param("bracket", "(") }
+      issue { param("bracket", ")") }
+    }
+  }
+
+  @Test
+  fun `checks curly braces when ICU is disabled`() {
+    check.check(params("Ahoj {svete}", "Hello world", icuPlaceholders = false)).assertIssues {
+      issue { param("bracket", "{") }
+      issue { param("bracket", "}") }
+    }
+  }
+
+  @Test
+  fun `curly brace mismatch detected when ICU is disabled`() {
+    check.check(params("Ahoj svete", "Hello {world}", icuPlaceholders = false)).assertIssues {
+      issue { param("bracket", "{") }
+      issue { param("bracket", "}") }
+    }
   }
 }

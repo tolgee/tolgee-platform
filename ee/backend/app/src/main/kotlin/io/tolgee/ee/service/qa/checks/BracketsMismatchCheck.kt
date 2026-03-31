@@ -13,25 +13,27 @@ class BracketsMismatchCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.BRACKETS_MISMATCH
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
+    val bracketChars = getBracketChars(params.icuPlaceholders)
     return QaPluralCheckHelper.runPerVariant(params) { text, baseText ->
-      checkVariant(text, baseText)
+      checkVariant(text, baseText, bracketChars)
     }
   }
 
   private fun checkVariant(
     text: String,
     baseText: String?,
+    bracketChars: CharArray,
   ): List<QaCheckResult> {
     val base = baseText ?: return emptyList()
     if (base.isBlank()) return emptyList()
     if (text.isBlank()) return emptyList()
 
-    val baseCounts = countBrackets(base)
-    val textCounts = countBrackets(text)
+    val baseCounts = countBrackets(base, bracketChars)
+    val textCounts = countBrackets(text, bracketChars)
 
     val results = mutableListOf<QaCheckResult>()
 
-    for (bracket in BRACKET_CHARS) {
+    for (bracket in bracketChars) {
       val baseCount = baseCounts[bracket] ?: 0
       val textCount = textCounts[bracket] ?: 0
 
@@ -73,12 +75,19 @@ class BracketsMismatchCheck : QaCheck {
   }
 
   companion object {
-    val BRACKET_CHARS = charArrayOf('(', ')', '[', ']', '{', '}')
+    private val ALL_BRACKET_CHARS = charArrayOf('(', ')', '[', ']', '{', '}')
+    private val NON_ICU_BRACKET_CHARS = charArrayOf('(', ')', '[', ']')
 
-    private fun countBrackets(text: String): Map<Char, Int> {
+    fun getBracketChars(icuPlaceholders: Boolean): CharArray =
+      if (icuPlaceholders) NON_ICU_BRACKET_CHARS else ALL_BRACKET_CHARS
+
+    private fun countBrackets(
+      text: String,
+      bracketChars: CharArray,
+    ): Map<Char, Int> {
       val counts = mutableMapOf<Char, Int>()
       for (ch in text) {
-        if (ch in BRACKET_CHARS) {
+        if (ch in bracketChars) {
           counts[ch] = (counts[ch] ?: 0) + 1
         }
       }
@@ -89,13 +98,7 @@ class BracketsMismatchCheck : QaCheck {
       text: String,
       bracket: Char,
     ): List<Int> {
-      val positions = mutableListOf<Int>()
-      for (i in text.indices) {
-        if (text[i] == bracket) {
-          positions.add(i)
-        }
-      }
-      return positions
+      return text.indices.filter { text[it] == bracket }
     }
   }
 }

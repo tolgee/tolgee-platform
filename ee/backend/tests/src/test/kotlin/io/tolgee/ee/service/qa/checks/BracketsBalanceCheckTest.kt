@@ -15,11 +15,13 @@ class BracketsBalanceCheckTest {
   private fun params(
     text: String,
     base: String? = null,
+    icuPlaceholders: Boolean = true,
   ) = QaCheckParams(
     baseText = base,
     text = text,
     baseLanguageTag = "en",
     languageTag = "cs",
+    icuPlaceholders = icuPlaceholders,
   )
 
   @Test
@@ -103,19 +105,63 @@ class BracketsBalanceCheckTest {
   }
 
   @Test
-  fun `handles curly braces`() {
-    check.check(params("Hello {world}")).assertNoIssues()
+  fun `handles curly braces when ICU is disabled`() {
+    check.check(params("Hello {world}", icuPlaceholders = false)).assertNoIssues()
   }
 
   @Test
-  fun `detects unclosed curly brace`() {
-    check.check(params("Hello {world")).assertSingleIssue {
+  fun `detects unclosed curly brace when ICU is disabled`() {
+    check.check(params("Hello {world", icuPlaceholders = false)).assertSingleIssue {
       replacement("}")
     }
   }
 
   @Test
   fun `all results have BRACKETS_UNBALANCED type`() {
-    check.check(params("Hello (world] {test")).assertAllHaveType(QaCheckType.BRACKETS_UNBALANCED)
+    check
+      .check(
+        params("Hello (world] [test", icuPlaceholders = false),
+      ).assertAllHaveType(QaCheckType.BRACKETS_UNBALANCED)
+  }
+
+  // ICU placeholder tests
+
+  @Test
+  fun `ignores curly braces when ICU is enabled`() {
+    check.check(params("Hello {world}")).assertNoIssues()
+  }
+
+  @Test
+  fun `ignores unclosed curly brace when ICU is enabled`() {
+    check.check(params("Hello {world")).assertNoIssues()
+  }
+
+  @Test
+  fun `still detects unclosed round bracket alongside ICU text`() {
+    check.check(params("{count} items (extra")).assertSingleIssue {
+      message(QaIssueMessage.QA_BRACKETS_UNCLOSED)
+      param("bracket", "(")
+    }
+  }
+
+  @Test
+  fun `checks curly braces when ICU is disabled`() {
+    check.check(params("Hello {world", icuPlaceholders = false)).assertSingleIssue {
+      message(QaIssueMessage.QA_BRACKETS_UNCLOSED)
+      param("bracket", "{")
+    }
+  }
+
+  @Test
+  fun `ignores extra closing curly brace when ICU is enabled`() {
+    check.check(params("Hello world}")).assertNoIssues()
+  }
+
+  @Test
+  fun `detects extra closing curly brace when ICU is disabled`() {
+    check.check(params("Hello world}", icuPlaceholders = false)).assertSingleIssue {
+      message(QaIssueMessage.QA_BRACKETS_UNMATCHED_CLOSE)
+      param("bracket", "}")
+    }
   }
 }

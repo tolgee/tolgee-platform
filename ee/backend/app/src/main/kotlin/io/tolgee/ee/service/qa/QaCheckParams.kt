@@ -11,4 +11,5 @@ data class QaCheckParams(
   val baseTextVariants: Map<String, String>? = null,
   val activeVariant: String? = null,
   val maxCharLimit: Int? = null,
+  val icuPlaceholders: Boolean = true,
 )

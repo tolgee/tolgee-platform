@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.constants.Feature
 import io.tolgee.dtos.cacheable.ApiKeyDto
 import io.tolgee.ee.data.qa.QaCheckPreviewDone
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.ee.data.qa.QaCheckPreviewError
 import io.tolgee.ee.data.qa.QaCheckPreviewResult
 import io.tolgee.ee.data.qa.QaPreviewWsIssue
@@ -14,6 +13,7 @@ import io.tolgee.ee.service.qa.ProjectQaConfigService
 import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.QaCheckRunnerService
 import io.tolgee.ee.service.qa.QaIssueService
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.formats.getPluralForms
 import io.tolgee.model.enums.Scope
 import io.tolgee.model.qa.TranslationQaIssue
@@ -87,6 +87,7 @@ class QaCheckPreviewWebSocketHandler(
           baseTextVariants = state.baseVariants,
           activeVariant = activeVariant,
           maxCharLimit = state.maxCharLimit,
+          icuPlaceholders = state.icuPlaceholders,
         )
 
       coroutineScope {
@@ -233,6 +234,7 @@ class QaCheckPreviewWebSocketHandler(
     val isPlural = key?.isPlural ?: false
     val maxCharLimit = key?.maxCharLimit
     val baseParsed = if (isPlural && baseText != null) getPluralForms(baseText) else null
+    val project = projectService.get(projectId)
 
     session.attributes["state"] =
       QaPreviewWsSessionState(
@@ -246,6 +248,7 @@ class QaCheckPreviewWebSocketHandler(
         isPlural = isPlural,
         baseVariants = baseParsed?.forms,
         maxCharLimit = maxCharLimit,
+        icuPlaceholders = project.icuPlaceholders,
       )
   }
 

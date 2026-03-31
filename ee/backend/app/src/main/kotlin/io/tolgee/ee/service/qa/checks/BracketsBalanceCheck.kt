@@ -13,12 +13,16 @@ class BracketsBalanceCheck : QaCheck {
   override val type: QaCheckType = QaCheckType.BRACKETS_UNBALANCED
 
   override fun check(params: QaCheckParams): List<QaCheckResult> {
+    val bracketSets = getBracketSets(params.icuPlaceholders)
     return QaPluralCheckHelper.runPerVariant(params) { text, _ ->
-      checkVariant(text)
+      checkVariant(text, bracketSets)
     }
   }
 
-  private fun checkVariant(text: String): List<QaCheckResult> {
+  private fun checkVariant(
+    text: String,
+    bracketSets: BracketSets,
+  ): List<QaCheckResult> {
     if (text.isBlank()) return emptyList()
 
     val stack = ArrayDeque<BracketInfo>()
@@ -27,11 +31,11 @@ class BracketsBalanceCheck : QaCheck {
     for (i in text.indices) {
       val ch = text[i]
       when {
-        ch in OPENING_BRACKETS -> {
+        ch in bracketSets.opening -> {
           stack.addLast(BracketInfo(ch, i))
         }
-        ch in CLOSING_BRACKETS -> {
-          val expectedOpening = CLOSING_TO_OPENING[ch]
+        ch in bracketSets.closing -> {
+          val expectedOpening = bracketSets.closingToOpening[ch]
           if (stack.isNotEmpty() && stack.last().char == expectedOpening) {
             stack.removeLast()
           } else {
@@ -53,7 +57,7 @@ class BracketsBalanceCheck : QaCheck {
 
     // Any remaining opening brackets on the stack are unclosed
     for (info in stack) {
-      val closingBracket = OPENING_TO_CLOSING[info.char]!!
+      val closingBracket = bracketSets.openingToClosing[info.char]!!
       results.add(
         QaCheckResult(
           type = QaCheckType.BRACKETS_UNBALANCED,
@@ -74,22 +78,31 @@ class BracketsBalanceCheck : QaCheck {
     val position: Int,
   )
 
+  data class BracketSets(
+    val opening: Set<Char>,
+    val closing: Set<Char>,
+    val closingToOpening: Map<Char, Char>,
+    val openingToClosing: Map<Char, Char>,
+  )
+
   companion object {
-    private val OPENING_BRACKETS = setOf('(', '[', '{')
-    private val CLOSING_BRACKETS = setOf(')', ']', '}')
-
-    private val CLOSING_TO_OPENING =
-      mapOf(
-        ')' to '(',
-        ']' to '[',
-        '}' to '{',
+    private val ALL_BRACKET_SETS =
+      BracketSets(
+        opening = setOf('(', '[', '{'),
+        closing = setOf(')', ']', '}'),
+        closingToOpening = mapOf(')' to '(', ']' to '[', '}' to '{'),
+        openingToClosing = mapOf('(' to ')', '[' to ']', '{' to '}'),
       )
 
-    private val OPENING_TO_CLOSING =
-      mapOf(
-        '(' to ')',
-        '[' to ']',
-        '{' to '}',
+    private val NON_ICU_BRACKET_SETS =
+      BracketSets(
+        opening = setOf('(', '['),
+        closing = setOf(')', ']'),
+        closingToOpening = mapOf(')' to '(', ']' to '['),
+        openingToClosing = mapOf('(' to ')', '[' to ']'),
       )
+
+    fun getBracketSets(icuPlaceholders: Boolean): BracketSets =
+      if (icuPlaceholders) NON_ICU_BRACKET_SETS else ALL_BRACKET_SETS
   }
 }
