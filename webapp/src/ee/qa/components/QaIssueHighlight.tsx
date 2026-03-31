@@ -3,7 +3,6 @@ import { TooltipCard } from 'tg.component/common/TooltipCard';
 import { QaCheckItem } from 'tg.ee';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
-import { components } from 'tg.service/apiSchema.generated';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
 import { useTranslationsActions } from 'tg.views/projects/translations/context/TranslationsContext';
