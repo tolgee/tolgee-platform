@@ -558,9 +558,23 @@ class BranchMergeServiceTest : AbstractSpringTest() {
   }
 
   private fun prepareMergeScenario(): BranchMerge {
+    val featureRevisionBefore = testData.featureBranch.refresh()!!.revision
+
     createFeatureOnlyKey()
     deleteFeatureKey()
     updateFeatureKey()
+
+    // Wait for async BranchMetaUpdater.snapshot() calls to complete.
+    // Each entity change triggers an @Async revision increment on the branch.
+    // Without waiting, the dry-run may store a stale revision, causing
+    // isRevisionValid to fail when applyMerge runs.
+    waitForNotThrowing(timeout = 10000, pollTime = 100) {
+      testData.featureBranch
+        .refresh()!!
+        .revision.assert
+        .isGreaterThan(featureRevisionBefore)
+    }
+
     return dryRunFeatureBranchMerge()
   }
 
