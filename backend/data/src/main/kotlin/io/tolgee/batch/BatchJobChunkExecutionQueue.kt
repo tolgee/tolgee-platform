@@ -7,7 +7,6 @@ import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.component.UsingRedisProvider
-import io.tolgee.configuration.tolgee.BatchProperties
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
@@ -110,20 +109,19 @@ class BatchJobChunkExecutionQueue(
 
       QueueEventType.REMOVE -> {
         event.items.forEach { item ->
-          if (queuedExecutionIds.remove(item.chunkExecutionId)) {
-            jobQueues.compute(item.jobId) { _, deque ->
-              if (deque == null) return@compute null
-              val removed = deque.removeIf { it.chunkExecutionId == item.chunkExecutionId }
-              if (removed) {
-                decrementCharacterCount(item.jobCharacter)
-                totalSize.decrementAndGet()
-              }
-              if (deque.isEmpty()) {
-                roundRobinOrder.remove(item.jobId)
-                null
-              } else {
-                deque
-              }
+          jobQueues.compute(item.jobId) { _, deque ->
+            if (deque == null) return@compute null
+            val removed = deque.removeIf { it.chunkExecutionId == item.chunkExecutionId }
+            if (removed) {
+              queuedExecutionIds.remove(item.chunkExecutionId)
+              decrementCharacterCount(item.jobCharacter)
+              totalSize.decrementAndGet()
+            }
+            if (deque.isEmpty()) {
+              roundRobinOrder.remove(item.jobId)
+              null
+            } else {
+              deque
             }
           }
         }
@@ -223,12 +221,11 @@ class BatchJobChunkExecutionQueue(
         }
         removedCount = deque.size
         totalSize.addAndGet(-removedCount)
+        // Inside compute to prevent a concurrent addSingleItem from re-adding jobId
+        // to roundRobinOrder between the compute returning and the remove call.
+        roundRobinOrder.remove(jobId)
       }
       null // remove entry from map
-    }
-    if (removedCount > 0) {
-      // O(n) on roundRobinOrder, but removeJobExecutions is only called on cancellation
-      roundRobinOrder.remove(jobId)
     }
     logger.debug("Removed job $jobId from queue ($removedCount items), queue size: ${totalSize.get()}")
   }
@@ -278,22 +275,26 @@ class BatchJobChunkExecutionQueue(
       val jobId = roundRobinOrder.pollFirst() ?: return null
 
       var item: ExecutionQueueItem? = null
-      var hasMoreItems = false
 
+      // All side-effects (queuedExecutionIds, counters, roundRobinOrder re-queue) are done
+      // inside compute so they are atomic with the deque mutation, preventing races with
+      // concurrent addSingleItem or removeJobExecutions calls for the same jobId.
       jobQueues.compute(jobId) { _, deque ->
         if (deque.isNullOrEmpty()) return@compute null
         item = deque.removeFirst()
-        hasMoreItems = deque.isNotEmpty()
-        if (hasMoreItems) deque else null
+        val capturedItem = item!!
+        queuedExecutionIds.remove(capturedItem.chunkExecutionId)
+        decrementCharacterCount(capturedItem.jobCharacter)
+        totalSize.decrementAndGet()
+        if (deque.isNotEmpty()) {
+          roundRobinOrder.addLast(jobId)
+          deque
+        } else {
+          null
+        }
       }
 
-      if (item != null) {
-        queuedExecutionIds.remove(item.chunkExecutionId)
-        decrementCharacterCount(item.jobCharacter)
-        totalSize.decrementAndGet()
-        if (hasMoreItems) roundRobinOrder.addLast(jobId)
-        return item
-      }
+      if (item != null) return item
       // deque was null or empty (concurrent drain) — don't re-add, try next job
     }
     return null
@@ -310,7 +311,10 @@ class BatchJobChunkExecutionQueue(
 
   fun find(function: (ExecutionQueueItem) -> Boolean): ExecutionQueueItem? = getAllQueueItems().find(function)
 
-  fun peek(): ExecutionQueueItem = getAllQueueItems().first()
+  fun peek(): ExecutionQueueItem {
+    val jobId = roundRobinOrder.peekFirst() ?: throw NoSuchElementException("Queue is empty")
+    return jobQueues[jobId]?.peekFirst() ?: throw NoSuchElementException("Queue is empty")
+  }
 
   fun contains(item: ExecutionQueueItem?): Boolean = item != null && queuedExecutionIds.contains(item.chunkExecutionId)
 

@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.tolgee.Metrics
 import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.component.UsingRedisProvider
-import io.tolgee.configuration.tolgee.BatchProperties
 import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -12,8 +11,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Timeout
 import org.junit.jupiter.api.Timeout.ThreadMode.SEPARATE_THREAD
 import org.mockito.kotlin.mock
+import org.slf4j.LoggerFactory
 import org.springframework.data.redis.core.StringRedisTemplate
 import java.util.concurrent.TimeUnit
+import kotlin.time.measureTime
 
 /**
  * Performance regression tests for BatchJobChunkExecutionQueue.
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit
  * an O(n) scan was re-introduced in the hot path.
  */
 class BatchJobChunkExecutionQueuePerformanceTest {
+  private val logger = LoggerFactory.getLogger(BatchJobChunkExecutionQueuePerformanceTest::class.java)
   private lateinit var executionQueue: BatchJobChunkExecutionQueue
 
   @BeforeEach
@@ -62,11 +64,10 @@ class BatchJobChunkExecutionQueuePerformanceTest {
     executionQueue.addItemsToLocalQueue(items)
 
     val polls = 1_000
-    val start = System.currentTimeMillis()
-    repeat(polls) { executionQueue.pollRoundRobin() }
-    val elapsedMs = System.currentTimeMillis() - start
+    val elapsed = measureTime { repeat(polls) { executionQueue.pollRoundRobin() } }
+    val elapsedMs = elapsed.inWholeMilliseconds
 
-    println(
+    logger.info(
       "1 job × 110k items | $polls polls → ${elapsedMs}ms (~${"%.2f".format(elapsedMs.toDouble() / polls)}ms/poll)",
     )
 
@@ -86,11 +87,10 @@ class BatchJobChunkExecutionQueuePerformanceTest {
     executionQueue.addItemsToLocalQueue(items)
 
     val polls = 1_000
-    val start = System.currentTimeMillis()
-    repeat(polls) { executionQueue.pollRoundRobin() }
-    val elapsedMs = System.currentTimeMillis() - start
+    val elapsed = measureTime { repeat(polls) { executionQueue.pollRoundRobin() } }
+    val elapsedMs = elapsed.inWholeMilliseconds
 
-    println(
+    logger.info(
       "110k jobs × 1 item | $polls polls → ${elapsedMs}ms (~${"%.2f".format(elapsedMs.toDouble() / polls)}ms/poll)",
     )
 
@@ -114,13 +114,10 @@ class BatchJobChunkExecutionQueuePerformanceTest {
     val items = (1L..110_000L).map { makeItem(it, jobId = it % 100 + 1) }
     executionQueue.addItemsToLocalQueue(items)
 
-    val start = System.currentTimeMillis()
-    repeat(1_000) {
-      executionQueue.removeJobExecutions(1L)
-    }
-    val elapsedMs = System.currentTimeMillis() - start
+    val elapsed = measureTime { repeat(1_000) { executionQueue.removeJobExecutions(1L) } }
+    val elapsedMs = elapsed.inWholeMilliseconds
 
-    println("removeJobExecutions × 1000 with 110k-item queue → ${elapsedMs}ms")
+    logger.info("removeJobExecutions × 1000 with 110k-item queue → ${elapsedMs}ms")
 
     assertThat(elapsedMs)
       .withFailMessage("removeJobExecutions × 1000 took ${elapsedMs}ms — O(total) scan may have been re-introduced")
@@ -141,11 +138,10 @@ class BatchJobChunkExecutionQueuePerformanceTest {
     val target = items[55_000]
 
     val checks = 100_000
-    val start = System.currentTimeMillis()
-    repeat(checks) { executionQueue.contains(target) }
-    val elapsedMs = System.currentTimeMillis() - start
+    val elapsed = measureTime { repeat(checks) { executionQueue.contains(target) } }
+    val elapsedMs = elapsed.inWholeMilliseconds
 
-    println("contains × $checks with 110k-item queue → ${elapsedMs}ms")
+    logger.info("contains × $checks with 110k-item queue → ${elapsedMs}ms")
 
     assertThat(elapsedMs)
       .withFailMessage("contains × $checks took ${elapsedMs}ms — O(n) scan may have been re-introduced")
@@ -162,14 +158,16 @@ class BatchJobChunkExecutionQueuePerformanceTest {
     executionQueue.addItemsToLocalQueue(items)
 
     val checks = 1_000_000
-    val start = System.currentTimeMillis()
-    repeat(checks) {
-      executionQueue.isEmpty()
-      executionQueue.size
-    }
-    val elapsedMs = System.currentTimeMillis() - start
+    val elapsed =
+      measureTime {
+        repeat(checks) {
+          executionQueue.isEmpty()
+          executionQueue.size
+        }
+      }
+    val elapsedMs = elapsed.inWholeMilliseconds
 
-    println("isEmpty+size × $checks with 110k-item queue → ${elapsedMs}ms")
+    logger.info("isEmpty+size × $checks with 110k-item queue → ${elapsedMs}ms")
 
     assertThat(elapsedMs)
       .withFailMessage("isEmpty/size × $checks took ${elapsedMs}ms — O(n) traversal may have been re-introduced")
@@ -182,7 +180,7 @@ class BatchJobChunkExecutionQueuePerformanceTest {
 
   /**
    * Verifies that poll time does NOT scale with queue size (O(1) behaviour).
-   * The ratio between 110k and 1k should be small (< 5x), not ~110x as with O(n).
+   * The ratio between 110k and 1k should be small (< 3x), not ~110x as with O(n).
    */
   @Test
   fun `pollRoundRobin throughput does not degrade with queue size`() {
@@ -194,21 +192,18 @@ class BatchJobChunkExecutionQueuePerformanceTest {
       val items = (1L..queueSize.toLong()).map { makeItem(it, jobId = it % 50 + 1) }
       executionQueue.addItemsToLocalQueue(items)
 
-      val start = System.nanoTime()
-      repeat(pollsPerSize) { executionQueue.pollRoundRobin() }
-      val elapsedMs = (System.nanoTime() - start) / 1_000_000
-
-      results[queueSize] = elapsedMs
+      val elapsed = measureTime { repeat(pollsPerSize) { executionQueue.pollRoundRobin() } }
+      results[queueSize] = elapsed.inWholeMilliseconds
     }
 
     val baseline = maxOf(results[1_000]!!, 1L)
     val ratio110k = results[110_000]!! / baseline
 
-    println("Queue 1k:   ${results[1_000]}ms for $pollsPerSize polls")
-    println("Queue 10k:  ${results[10_000]}ms for $pollsPerSize polls")
-    println("Queue 110k: ${results[110_000]}ms for $pollsPerSize polls (${ratio110k}x vs 1k)")
+    logger.info("Queue 1k:   ${results[1_000]}ms for $pollsPerSize polls")
+    logger.info("Queue 10k:  ${results[10_000]}ms for $pollsPerSize polls")
+    logger.info("Queue 110k: ${results[110_000]}ms for $pollsPerSize polls (${ratio110k}x vs 1k)")
 
-    // With O(1) behaviour, 110k should be at most 5x slower than 1k (JIT warm-up noise)
+    // With O(1) behaviour, 110k should be at most 3x slower than 1k (JIT warm-up noise)
     // With the old O(n) scan, this ratio was ~110x
     assertThat(ratio110k)
       .withFailMessage("110k queue is ${ratio110k}x slower than 1k — O(n) scan may have been re-introduced")

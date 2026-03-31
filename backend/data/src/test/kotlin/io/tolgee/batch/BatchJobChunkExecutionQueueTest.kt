@@ -6,7 +6,6 @@ import io.tolgee.batch.data.ExecutionQueueItem
 import io.tolgee.batch.data.QueueEventType
 import io.tolgee.batch.events.JobQueueItemsEvent
 import io.tolgee.component.UsingRedisProvider
-import io.tolgee.configuration.tolgee.BatchProperties
 import jakarta.persistence.EntityManager
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
