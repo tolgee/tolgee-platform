@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
-import { exec } from 'node:child_process';
+import { basename, dirname, resolve } from 'node:path';
+import { execSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
 import process from 'node:process';
 import { config } from 'dotenv-flow';
 
@@ -27,19 +28,52 @@ const definitions = {
 
 const definition = definitions[process.argv[2]];
 if (!definition) {
-  throw new Error('Invalid definition');
+  throw new Error(
+    `Invalid definition '${process.argv[2] ?? ''}'. Valid options: ${Object.keys(definitions).join(', ')}`
+  );
 }
 
-const command = `openapi-typescript ${apiUrl}/v3/api-docs/${definition.schema} --output ${definition.output}`;
+const specUrl = `${apiUrl}/v3/api-docs/${definition.schema}`;
 
-exec(command, (error, stdout, stderr) => {
-  if (error) {
-    console.log(`error: ${error.message}`);
-    return;
+function generateSchema() {
+  const command = `openapi-typescript ${specUrl} --output ${definition.output}`;
+  console.log(`Running: ${command}`);
+  execSync(command, { stdio: 'inherit' });
+}
+
+async function generateSchemaTypes() {
+  const response = await fetch(specUrl);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch OpenAPI spec from ${specUrl}: ${response.status} ${response.statusText}`
+    );
   }
-  if (stderr) {
-    console.log(`stderr: ${stderr}`);
-    return;
-  }
-  console.log(`stdout: ${stdout}`);
-});
+  const spec = await response.json();
+  const schemaNames = Object.keys(spec.components.schemas).sort();
+
+  const schemaBasename = basename(definition.output, '.ts');
+  const typesOutput = definition.output.replace(
+    '.generated.ts',
+    'Types.generated.ts'
+  );
+
+  const lines = [
+    '/**',
+    ' * This file was auto-generated from the OpenAPI schema types.',
+    ' * Do not make direct changes to the file.',
+    ' */',
+    `import type { components } from './${schemaBasename}';`,
+    '',
+    ...schemaNames.map(
+      (name) => `export type ${name} = components['schemas']['${name}'];`
+    ),
+    '',
+  ];
+
+  writeFileSync(typesOutput, lines.join('\n'));
+  console.log(`Generated ${schemaNames.length} type aliases in ${typesOutput}`);
+}
+
+generateSchema();
+await generateSchemaTypes();
+console.log('Schema generation completed.');
