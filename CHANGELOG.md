@@ -1,3 +1,10 @@
+## [3.175.2](https://github.com/tolgee/tolgee-platform/compare/v3.175.1...v3.175.2) (2026-03-31)
+
+
+### Bug Fixes
+
+* correct pre-translate batch progress total items count ([#3575](https://github.com/tolgee/tolgee-platform/issues/3575)) ([e5e6d56](https://github.com/tolgee/tolgee-platform/commit/e5e6d5617e698be322c02304e2df9ec76fe80b3e)), closes [#3573](https://github.com/tolgee/tolgee-platform/issues/3573)
+
 ## [3.175.1](https://github.com/tolgee/tolgee-platform/compare/v3.175.0...v3.175.1) (2026-03-27)
 
 
