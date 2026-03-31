@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { LinearProgress, styled } from '@mui/material';
 import { T } from '@tolgee/react';
-import { Link } from 'react-router-dom';
 import {
   PanelContentData,
   PanelContentProps,
@@ -15,10 +14,7 @@ import { QaCheckItem } from './QaCheckItem';
 import { applyQaReplacement } from 'tg.fixtures/qaUtils';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useReportEvent } from 'tg.hooks/useReportEvent';
-
-const StyledLink = styled(Link)`
-  color: ${({ theme }) => theme.palette.primary.main};
-`;
+import { LinkExternal } from 'tg.component/LinkExternal';
 
 const StyledWrapper = styled('div')`
   margin-top: 4px;
@@ -56,7 +52,7 @@ function isCorrectable(issue: {
   );
 }
 
-export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
+export const QaChecksPanel: FC<PanelContentProps> = (data) => {
   const { isEnabled } = useEnabledFeatures();
   const { issues, isLoading, isDisconnected, updateIssueState } =
     useQaChecksForPanel(data);
@@ -81,6 +77,7 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
     () => issues.filter((i) => i.state !== 'IGNORED').length,
     [issues]
   );
+
   useEffect(() => {
     data.setItemsCount(openIssueCount);
   }, [openIssueCount, data.setItemsCount]);
@@ -108,8 +105,8 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
   }
 
   const qaSettingsLink = (
-    <StyledLink
-      to={LINKS.PROJECT_EDIT_QA.build({
+    <LinkExternal
+      href={LINKS.PROJECT_EDIT_QA.build({
         [PARAMS.PROJECT_ID]: project.id,
       })}
     />
@@ -197,7 +194,7 @@ export const QaChecksPanel: React.FC<PanelContentProps> = (data) => {
             issue={issue}
             index={index + 1}
             text={text}
-            slim={true}
+            slim
             onCorrect={
               isCorrectable(issue) ? () => handleCorrect(issue) : undefined
             }
