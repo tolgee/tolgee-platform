@@ -31,6 +31,7 @@ class GrammarCheck(
     val matches = languageToolService.check(text, languageTag)
     return matches
       .filter { !isSpellingRule(it) }
+      .filter { !isSentenceRule(it) }
       .map { match ->
         QaCheckResult(
           type = QaCheckType.GRAMMAR,

@@ -74,4 +74,31 @@ class GrammarCheckTest {
     assertThat(results).isNotEmpty
     assertThat(results.first().replacement).isNotNull()
   }
+
+  @Test
+  fun `does not flag casing for short lowercase label`() {
+    // "click here" is a button label, not a sentence — CASING rules should be suppressed
+    check.check(params("click here")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag casing for multi-word lowercase label`() {
+    // "add new item" is a UI label — CASING rules should be suppressed
+    check.check(params("add new item")).assertNoIssues()
+  }
+
+  @Test
+  fun `does not flag casing for long lowercase label`() {
+    // Long labels are still not sentences — CASING rules should be suppressed
+    check.check(params("select advanced export format options")).assertNoIssues()
+  }
+
+  @Test
+  fun `still detects grammar errors in lowercase sentence`() {
+    // "he go to school." has a real grammar error (HE_VERB_AGR), not just casing
+    val results = check.check(params("he go to school."))
+    assertThat(results).isNotEmpty
+    // Should contain grammar errors but NOT casing-only issues
+    assertThat(results).allMatch { it.type == QaCheckType.GRAMMAR }
+  }
 }
