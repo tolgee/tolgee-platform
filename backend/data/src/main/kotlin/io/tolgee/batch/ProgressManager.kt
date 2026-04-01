@@ -341,7 +341,7 @@ class ProgressManager(
       val durationMs = currentDateProvider.date.time - createdAt
       metrics.recordJobCompleted(job.type.name, finalStatus.name, durationMs)
     } else {
-      logger.debug { "Job ${job.id} has no createdAt timestamp, skipping duration metric" }
+      logger.debug { "Job ${job.id} has no createdAt timestamp, recording zero duration" }
       metrics.recordJobCompleted(job.type.name, finalStatus.name, 0)
     }
 
