@@ -1,3 +1,10 @@
+# [3.177.0](https://github.com/tolgee/tolgee-platform/compare/v3.176.0...v3.177.0) (2026-04-01)
+
+
+### Features
+
+* add trialing filter to admin subscriptions view ([#3553](https://github.com/tolgee/tolgee-platform/issues/3553)) ([d111f7a](https://github.com/tolgee/tolgee-platform/commit/d111f7a574c00835e7097f5ccc9a560138144a74))
+
 # [3.176.0](https://github.com/tolgee/tolgee-platform/compare/v3.175.2...v3.176.0) (2026-03-31)
 
 
