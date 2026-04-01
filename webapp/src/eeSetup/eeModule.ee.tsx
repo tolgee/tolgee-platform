@@ -6,7 +6,7 @@ import { BookClosed, ClipboardCheck } from '@untitled-ui/icons-react';
 import { Link, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { Badge, Box, MenuItem } from '@mui/material';
 
-import { billingModule } from 'tg.ee.module/billing/billingModule';
+import { billingModule } from 'tg.billing/billingModule';
 
 import { addUserMenuItems } from '../component/security/UserMenu/UserMenuItems';
 import { PublicOnlyRoute } from '../component/common/PublicOnlyRoute';

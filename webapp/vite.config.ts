@@ -58,7 +58,7 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@tginternal/library': resolve(__dirname, '../library/src'),
         ...(hasBilling && {
-          'tg.ee.module/billing': resolve(billingFrontendDir, 'billing'),
+          'tg.billing': resolve(billingFrontendDir, 'billing'),
           'tg.service/billingApiSchema.generated': resolve(
             billingFrontendDir,
             'billingApiSchema.generated'
