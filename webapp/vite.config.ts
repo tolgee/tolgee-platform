@@ -54,6 +54,11 @@ export default defineConfig(({ mode }) => {
         'date-fns',
         'react',
         'react-dom',
+        'react-router-dom',
+        'react-query',
+        'formik',
+        'yup',
+        'clsx',
       ],
       alias: {
         '@tginternal/library': resolve(__dirname, '../library/src'),
