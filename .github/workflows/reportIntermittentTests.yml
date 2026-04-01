@@ -216,7 +216,7 @@ jobs:
         if: failure()
         run: |
           find ./e2e/cypress/screenshots -name "*.png" 2>/dev/null \
-            | sed 's|.*/screenshots/||; s| (failed).*||; s| -- .*||' \
+            | sed 's|.*/screenshots/||; s| (failed)\.png$||; s| -- | > |' \
             | sort -u > failed-tests.txt || true
 
       - uses: actions/upload-artifact@v4
