@@ -280,13 +280,18 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_FLAKY_TESTS_WEBHOOK_URL }}
           FAILED_TESTS: ${{ steps.failures.outputs.list }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          message="🔴 Flaky tests detected in *${{ github.repository }}*"
-          if [ -n "$FAILED_TESTS" ]; then
-            message="$message\n\n${FAILED_TESTS}"
-          fi
-          message="$message\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View failed run>"
+          {
+            echo "🔴 Flaky tests detected in *${{ github.repository }}*"
+            if [ -n "$FAILED_TESTS" ]; then
+              echo ""
+              echo "$FAILED_TESTS"
+            fi
+            echo ""
+            echo "<${RUN_URL}|View failed run>"
+          } > /tmp/slack-message.txt
 
           curl -s -X POST -H 'Content-Type: application/json' \
-            -d "$(jq -n --arg text "$message" '{text: $text}')" \
+            -d "$(jq -n --rawfile text /tmp/slack-message.txt '{text: $text}')" \
             "$SLACK_WEBHOOK_URL"
