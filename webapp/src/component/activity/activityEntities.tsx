@@ -541,6 +541,25 @@ export const activityEntities: Record<EntityEnum, EntityOptions> = {
       return result;
     },
   },
+  TranslationQaIssue: {
+    label(params) {
+      return <T keyName="activity_entity_qa_issue" params={params} />;
+    },
+    fields: {
+      state: {
+        type: 'qa_issue_state',
+      },
+    },
+    references: ({ relations }) => {
+      const result: Reference[] = [];
+      const translationRelations = relations?.translation?.relations;
+      const keyRef = getKeyWithLanguages(translationRelations);
+      if (keyRef) {
+        result.push(keyRef);
+      }
+      return result;
+    },
+  },
   Branch: {
     label(params) {
       return <T keyName="activity_entity_branch" params={params} />;

@@ -58,6 +58,7 @@ export type EntityEnum =
   | 'Task'
   | 'Label'
   | 'TranslationSuggestion'
+  | 'TranslationQaIssue'
   | 'Branch';
 
 export type FieldTypeEnum =
@@ -83,6 +84,7 @@ export type FieldTypeEnum =
   | 'task_state'
   | 'task_type'
   | 'translation_labels'
+  | 'qa_issue_state'
   | 'branch_protected';
 
 export type FieldOptionsObj = {

@@ -2,6 +2,8 @@ package io.tolgee.ee.api.v2.controllers.qa
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.ee.api.v2.hateoas.assemblers.qa.QaIssueModelAssembler
 import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
@@ -49,6 +51,7 @@ class QaIssueController(
 
   @PutMapping("/{issueId}/ignore")
   @Operation(summary = "Ignore a QA issue")
+  @RequestActivity(ActivityType.QA_ISSUE_IGNORE)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)
@@ -62,6 +65,7 @@ class QaIssueController(
 
   @PutMapping("/{issueId}/unignore")
   @Operation(summary = "Unignore a QA issue")
+  @RequestActivity(ActivityType.QA_ISSUE_UNIGNORE)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)
@@ -75,6 +79,7 @@ class QaIssueController(
 
   @PostMapping("/suppressions")
   @Operation(summary = "Create a QA issue suppression by match parameters")
+  @RequestActivity(ActivityType.QA_ISSUE_IGNORE)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)
@@ -88,6 +93,7 @@ class QaIssueController(
 
   @DeleteMapping("/suppressions")
   @Operation(summary = "Remove a QA issue suppression by match parameters")
+  @RequestActivity(ActivityType.QA_ISSUE_UNIGNORE)
   @RequiresProjectPermissions([Scope.TRANSLATIONS_EDIT])
   @AllowApiAccess
   @RequiresFeatures(Feature.QA_CHECKS)

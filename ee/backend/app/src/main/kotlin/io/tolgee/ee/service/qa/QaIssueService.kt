@@ -42,21 +42,14 @@ class QaIssueService(
       qaIssueRepository.deleteAllByTranslationId(translation.id)
     } else {
       val toDelete = existingIssues.filter { it.type in checkTypes }
+      toDelete.forEach { it.disableActivityLogging = true }
       if (toDelete.isNotEmpty()) qaIssueRepository.deleteAll(toDelete)
     }
     qaIssueRepository.flush()
 
     val entities =
       results.map { result ->
-        val matchingExisting =
-          existingIssues.find { existing ->
-            existing.type == result.type &&
-              existing.message == result.message &&
-              existing.replacement == result.replacement &&
-              existing.positionStart == result.positionStart &&
-              existing.positionEnd == result.positionEnd &&
-              existing.pluralVariant == result.pluralVariant
-          }
+        val matchingExisting = existingIssues.find { existing -> result.matches(existing) }
         TranslationQaIssue(
           type = result.type,
           message = result.message,
@@ -67,12 +60,13 @@ class QaIssueService(
           state = matchingExisting?.state ?: QaIssueState.OPEN,
           pluralVariant = result.pluralVariant,
           translation = translation,
-        )
+        ).also { it.disableActivityLogging = true }
       }
     qaIssueRepository.saveAll(entities)
     return entities
   }
 
+  @Transactional(readOnly = true)
   fun getIssuesForTranslation(
     projectId: Long,
     translationId: Long,
@@ -80,6 +74,7 @@ class QaIssueService(
     return qaIssueRepository.findAllByProjectIdAndTranslationId(projectId, translationId)
   }
 
+  @Transactional(readOnly = true)
   fun getIssuesForTranslation(translationId: Long): List<TranslationQaIssue> {
     return qaIssueRepository.findByTranslationIds(listOf(translationId))
   }
@@ -148,7 +143,7 @@ class QaIssueService(
       qaIssueRepository.save(newIssue)
     }
     publishQaIssuesUpdated(translation)
-    val isVirtual = issue == null
+    val isVirtual = issue?.virtual ?: true
     publishQaIssueStateChange("QA_ISSUE_IGNORED", projectId, request.type, isVirtual)
   }
 

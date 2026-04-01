@@ -1,6 +1,8 @@
 package io.tolgee.ee.api.v2.controllers.qa
 
 import com.posthog.server.PostHog
+import io.tolgee.ActivityTestUtil
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.data.qa.QaCheckIssueIgnoreRequest
@@ -12,6 +14,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.assertPostHogEventReported
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
+import io.tolgee.model.qa.TranslationQaIssue
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
 import net.javacrumbs.jsonunit.assertj.assertThatJson
@@ -36,6 +39,9 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var qaIssueRepository: TranslationQaIssueRepository
+
+  @Autowired
+  private lateinit var activityUtil: ActivityTestUtil
 
   @Autowired
   lateinit var qa: QaTestUtil
@@ -448,6 +454,101 @@ class QaIssueControllerTest : AuthorizedControllerTest() {
     assertPostHogEventReported(postHog, "QA_ISSUE_UNIGNORED") { data ->
       assertThat(data["checkType"]).isEqualTo(issue.type.name)
       assertThat(data["virtual"]).isEqualTo(false)
+    }
+  }
+
+  @Test
+  fun `ignore by id creates activity log entry`() {
+    qa.runChecksAndPersist(testData.frTranslation)
+    val issue = qa.getPersistedIssues(testData.frTranslation).first()
+
+    performAuthPut(
+      "$translationUrl/qa-issues/${issue.id}/ignore",
+      null,
+    ).andIsOk
+
+    val revision = activityUtil.getLastRevision()
+    assertThat(revision).isNotNull
+    assertThat(revision!!.type).isEqualTo(ActivityType.QA_ISSUE_IGNORE)
+    val modifiedEntity =
+      revision.modifiedEntities.find { it.entityClass == TranslationQaIssue::class.simpleName }
+    assertThat(modifiedEntity).isNotNull
+    assertThat(modifiedEntity!!.modifications["state"]).isNotNull
+  }
+
+  @Test
+  fun `unignore by id creates activity log entry`() {
+    qa.runChecksAndPersist(testData.frTranslation)
+    val issue = qa.getPersistedIssues(testData.frTranslation).first()
+    qa.ignoreIssue(issue)
+
+    performAuthPut(
+      "$translationUrl/qa-issues/${issue.id}/unignore",
+      null,
+    ).andIsOk
+
+    val revision = activityUtil.getLastRevision()
+    assertThat(revision).isNotNull
+    assertThat(revision!!.type).isEqualTo(ActivityType.QA_ISSUE_UNIGNORE)
+    val modifiedEntity =
+      revision.modifiedEntities.find { it.entityClass == TranslationQaIssue::class.simpleName }
+    assertThat(modifiedEntity).isNotNull
+    assertThat(modifiedEntity!!.modifications["state"]).isNotNull
+  }
+
+  @Test
+  fun `suppress by params creates activity log entry`() {
+    val request = virtualCaseMismatchRequest()
+
+    performAuthPost(
+      "$translationUrl/qa-issues/suppressions",
+      request,
+    ).andIsOk
+
+    val revision = activityUtil.getLastRevision()
+    assertThat(revision).isNotNull
+    assertThat(revision!!.type).isEqualTo(ActivityType.QA_ISSUE_IGNORE)
+    val modifiedEntity =
+      revision.modifiedEntities.find { it.entityClass == TranslationQaIssue::class.simpleName }
+    assertThat(modifiedEntity).isNotNull
+  }
+
+  @Test
+  fun `unsuppress virtual issue creates activity log entry`() {
+    val request = virtualCaseMismatchRequest()
+
+    // Create virtual issue
+    performAuthPost(
+      "$translationUrl/qa-issues/suppressions",
+      request,
+    ).andIsOk
+
+    // Remove suppression
+    performAuthDelete(
+      "$translationUrl/qa-issues/suppressions",
+      request,
+    ).andIsOk
+
+    val revision = activityUtil.getLastRevision()
+    assertThat(revision).isNotNull
+    assertThat(revision!!.type).isEqualTo(ActivityType.QA_ISSUE_UNIGNORE)
+  }
+
+  @Test
+  fun `batch QA recalculation does not create visible activity`() {
+    qa.runChecksAndPersist(testData.frTranslation)
+
+    val revision = activityUtil.getLastRevision()
+    // The batch QA check has activityType = null, so either no revision exists
+    // or the latest revision is not a QA-related activity type
+    if (revision != null) {
+      assertThat(revision.type).isNotIn(
+        ActivityType.QA_ISSUE_IGNORE,
+        ActivityType.QA_ISSUE_UNIGNORE,
+      )
+      val modifiedEntity =
+        revision.modifiedEntities.find { it.entityClass == TranslationQaIssue::class.simpleName }
+      assertThat(modifiedEntity).isNull()
     }
   }
 

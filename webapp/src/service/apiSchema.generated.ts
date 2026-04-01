@@ -5093,7 +5093,9 @@ export interface components {
         | "BRANCH_RENAME"
         | "BRANCH_DELETE"
         | "BRANCH_PROTECTION_CHANGE"
-        | "BRANCH_MERGE";
+        | "BRANCH_MERGE"
+        | "QA_ISSUE_IGNORE"
+        | "QA_ISSUE_UNIGNORE";
     };
     ProjectAiPromptCustomizationModel: {
       /**

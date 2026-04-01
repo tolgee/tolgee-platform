@@ -2,6 +2,7 @@ package io.tolgee.ee.service.qa
 
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
+import io.tolgee.model.qa.TranslationQaIssue
 
 /**
  * Result from a single QA check run.
@@ -33,5 +34,14 @@ data class QaCheckResult(
     require(replacement == null || positionStart != null) {
       "replacement can only be set if position is non-null"
     }
+  }
+
+  fun matches(other: TranslationQaIssue): Boolean {
+    return type == other.type &&
+      message == other.message &&
+      replacement == other.replacement &&
+      positionStart == other.positionStart &&
+      positionEnd == other.positionEnd &&
+      pluralVariant == other.pluralVariant
   }
 }

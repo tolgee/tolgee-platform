@@ -547,6 +547,20 @@ export const actionsConfiguration: Partial<
         ?.translation as any as string;
     },
   },
+  QA_ISSUE_IGNORE: {
+    label(params) {
+      return <T keyName="activity_qa_issue_ignore" params={params} />;
+    },
+    entities: { TranslationQaIssue: ['state'] },
+    titleReferences: ['key'],
+  },
+  QA_ISSUE_UNIGNORE: {
+    label(params) {
+      return <T keyName="activity_qa_issue_unignore" params={params} />;
+    },
+    entities: { TranslationQaIssue: ['state'] },
+    titleReferences: ['key'],
+  },
   BRANCH_CREATE: {
     label(params) {
       return <T keyName="activity_branch_create" params={params} />;

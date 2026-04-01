@@ -1,5 +1,9 @@
 package io.tolgee.model.qa
 
+import io.tolgee.activity.annotation.ActivityDescribingProp
+import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
+import io.tolgee.activity.annotation.ActivityLoggedEntity
+import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
@@ -15,6 +19,8 @@ import jakarta.persistence.Table
 import org.hibernate.annotations.ColumnDefault
 
 @Entity
+@ActivityLoggedEntity
+@ActivityEntityDescribingPaths(paths = ["translation"])
 @Table(
   indexes = [
     Index(columnList = "translation_id"),
@@ -22,6 +28,7 @@ import org.hibernate.annotations.ColumnDefault
 )
 class TranslationQaIssue(
   @Enumerated(EnumType.STRING)
+  @ActivityDescribingProp
   var type: QaCheckType = QaCheckType.EMPTY_TRANSLATION,
   @Enumerated(EnumType.STRING)
   var message: QaIssueMessage = QaIssueMessage.QA_EMPTY_TRANSLATION,
@@ -31,6 +38,7 @@ class TranslationQaIssue(
   var positionEnd: Int? = null,
   @Enumerated(EnumType.STRING)
   @ColumnDefault("'OPEN'")
+  @ActivityLoggedProp
   var state: QaIssueState = QaIssueState.OPEN,
   @Column(columnDefinition = "text")
   var params: String? = null,

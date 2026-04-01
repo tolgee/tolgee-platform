@@ -21,15 +21,7 @@ data class QaPreviewWsIssue(
       result: QaCheckResult,
       persistedIssues: List<TranslationQaIssue>,
     ): QaPreviewWsIssue {
-      val matchingIssue =
-        persistedIssues.find { issue ->
-          issue.type == result.type &&
-            issue.message == result.message &&
-            issue.replacement == result.replacement &&
-            issue.positionStart == result.positionStart &&
-            issue.positionEnd == result.positionEnd &&
-            issue.pluralVariant == result.pluralVariant
-        }
+      val matchingIssue = persistedIssues.find { issue -> result.matches(issue) }
       return QaPreviewWsIssue(
         type = result.type,
         message = result.message,
