@@ -1,13 +1,13 @@
 package io.tolgee.ee.component.branching
 
-import io.tolgee.ee.repository.branching.BranchRepository
 import io.tolgee.events.OnProjectActivityEvent
+import jakarta.persistence.EntityManager
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 
 @Service
 class BranchRevisionListener(
-  private val branchRepository: BranchRepository,
+  private val entityManager: EntityManager,
 ) {
   @EventListener
   fun onActivity(event: OnProjectActivityEvent) {
@@ -17,9 +17,11 @@ class BranchRevisionListener(
         .mapNotNull { it.branchId }
         .toSet()
 
-    branchIds.forEach { branchId ->
-      val branch = branchRepository.findById(branchId).orElse(null) ?: return@forEach
-      branch.revision++
-    }
+    if (branchIds.isEmpty()) return
+
+    entityManager
+      .createQuery("update Branch b set b.revision = b.revision + 1 where b.id in :ids")
+      .setParameter("ids", branchIds)
+      .executeUpdate()
   }
 }
