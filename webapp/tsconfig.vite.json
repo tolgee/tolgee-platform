@@ -12,6 +12,7 @@
       "tg.views/*": ["views/*"],
       "tg.error/*": ["error/*"],
       "tg.svgs/*": ["svgs/*"],
+      "tg.billing/*": ["ee/billing/*"],
       "tg.ee.module/*": ["ee/*"],
       "tg.ee": ["eeSetup/eeModule.current"],
       "tg.translationTools/*": ["translationTools/*"],
