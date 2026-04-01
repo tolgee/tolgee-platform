@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { Box, FormControlLabel, styled, Switch } from '@mui/material';
+import { Box, FormControlLabel, Checkbox, styled, Switch } from '@mui/material';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
@@ -26,6 +26,7 @@ export const AdministrationSubscriptionsView = () => {
 
   const [search, setSearch] = useUrlSearchState('search');
   const [showDeleted, setShowDeleted] = useUrlSearchState('showDeleted');
+  const [trialing, setTrialing] = useUrlSearchState('trialing');
 
   const filterDeleted = showDeleted === 'true' ? undefined : (false as const);
 
@@ -36,6 +37,7 @@ export const AdministrationSubscriptionsView = () => {
       page,
       size: 20,
       search,
+      trialing: trialing === 'true' || undefined,
       sort: ['id,desc'],
       filterDeleted,
     },
@@ -66,6 +68,22 @@ export const AdministrationSubscriptionsView = () => {
             gap={2}
             mb={1}
           >
+            <FormControlLabel
+              data-cy="administration-subscriptions-trialing-filter"
+              control={
+                <Checkbox
+                  checked={trialing === 'true'}
+                  onChange={(e) => {
+                    setTrialing(e.target.checked ? 'true' : '');
+                    setPage(0);
+                  }}
+                />
+              }
+              label={t(
+                'administration_subscriptions_trialing_filter',
+                'Trialing'
+              )}
+            />
             <FormControlLabel
               control={
                 <Switch
