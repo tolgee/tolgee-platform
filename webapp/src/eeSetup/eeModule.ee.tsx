@@ -119,9 +119,11 @@ export const routes = {
   },
   Administration: () => (
     <>
-      <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_LICENSE.template}>
-        <AdministrationEeLicenseView />
-      </PrivateRoute>
+      <Switch>
+        <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_LICENSE.template}>
+          <AdministrationEeLicenseView />
+        </PrivateRoute>
+      </Switch>
       <billingModule.AdministrationRoutes />
     </>
   ),
