@@ -1,8 +1,12 @@
 import { useTranslate } from '@tolgee/react';
+import { components } from 'tg.service/apiSchema.generated';
+
+type QaCheckMessage = components['schemas']['QaIssueModel']['message'];
+type QaCheckMessageParams = components['schemas']['QaIssueModel']['params'];
 
 export function useQaIssueMessage(
-  message: string,
-  params?: Record<string, string> | null | undefined
+  message: QaCheckMessage,
+  params?: QaCheckMessageParams | null
 ): string {
   const normalizedParams = params ?? undefined;
   const { t } = useTranslate();
@@ -125,6 +129,14 @@ export function useQaIssueMessage(
       return normalizedParams?.limit && normalizedParams?.count
         ? t('qa_issue_key_length_limit_exceeded', normalizedParams)
         : t('qa_issue_key_length_limit_exceeded_no_params');
+    case 'qa_leading_spaces':
+      return t('qa_issue_leading_spaces');
+    case 'qa_trailing_spaces':
+      return t('qa_issue_trailing_spaces');
+    case 'qa_leading_newlines':
+      return t('qa_issue_leading_newlines');
+    case 'qa_trailing_newlines':
+      return t('qa_issue_trailing_newlines');
     default:
       return message;
   }

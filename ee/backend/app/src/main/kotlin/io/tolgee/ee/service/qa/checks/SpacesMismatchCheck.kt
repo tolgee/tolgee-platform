@@ -4,6 +4,9 @@ import io.tolgee.ee.service.qa.QaCheck
 import io.tolgee.ee.service.qa.QaCheckParams
 import io.tolgee.ee.service.qa.QaCheckResult
 import io.tolgee.ee.service.qa.QaPluralCheckHelper
+import io.tolgee.ee.service.qa.checks.whitespace.WHITESPACE_CHARS
+import io.tolgee.ee.service.qa.checks.whitespace.extractLeadingWhitespace
+import io.tolgee.ee.service.qa.checks.whitespace.extractTrailingWhitespace
 import io.tolgee.model.enums.qa.QaCheckType
 import io.tolgee.model.enums.qa.QaIssueMessage
 import org.springframework.stereotype.Component
@@ -98,8 +101,7 @@ class SpacesMismatchCheck : QaCheck {
     if (interiorStart >= interiorEnd) return
 
     val interior = text.substring(interiorStart, interiorEnd)
-    val regex = Regex("[ \u00A0]{2,}")
-    for (match in regex.findAll(interior)) {
+    for (match in DOUBLED_SPACES_REGEX.findAll(interior)) {
       val absStart = interiorStart + match.range.first
       val absEnd = interiorStart + match.range.last + 1
       results.add(
@@ -115,16 +117,6 @@ class SpacesMismatchCheck : QaCheck {
   }
 
   companion object {
-    private val WHITESPACE_CHARS = charArrayOf(' ', '\t', '\u00A0')
-
-    fun extractLeadingWhitespace(text: String): Pair<String, Int> {
-      val ws = text.takeWhile { it in WHITESPACE_CHARS }
-      return Pair(ws, 0)
-    }
-
-    fun extractTrailingWhitespace(text: String): Pair<String, Int> {
-      val ws = text.takeLastWhile { it in WHITESPACE_CHARS }
-      return Pair(ws, text.length - ws.length)
-    }
+    private val DOUBLED_SPACES_REGEX = Regex("[ \u00A0]{2,}")
   }
 }

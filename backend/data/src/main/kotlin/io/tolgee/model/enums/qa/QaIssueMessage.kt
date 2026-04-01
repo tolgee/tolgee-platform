@@ -28,6 +28,12 @@ enum class QaIssueMessage {
   // Missing numbers
   QA_NUMBERS_MISSING,
 
+  // Trailing/leading whitespace (base translation)
+  QA_LEADING_SPACES,
+  QA_TRAILING_SPACES,
+  QA_LEADING_NEWLINES,
+  QA_TRAILING_NEWLINES,
+
   // Unmatched newlines
   QA_NEWLINES_MISSING,
   QA_NEWLINES_EXTRA,

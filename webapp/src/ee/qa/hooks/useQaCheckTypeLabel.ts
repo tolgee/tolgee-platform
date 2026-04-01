@@ -42,6 +42,8 @@ export function useQaCheckTypeLabel(type: QaCheckType): string {
       return t('qa_check_type_icu_syntax');
     case 'KEY_LENGTH_LIMIT':
       return t('qa_check_type_key_length_limit');
+    case 'TRIM_CHECK':
+      return t('qa_check_type_trim_check');
     default:
       return type;
   }

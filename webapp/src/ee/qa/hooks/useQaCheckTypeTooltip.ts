@@ -38,6 +38,8 @@ export function useQaCheckTypeTooltip(type: QaCheckType): string | null {
       return t('qa_check_tooltip_html_syntax');
     case 'KEY_LENGTH_LIMIT':
       return t('qa_check_tooltip_key_length_limit');
+    case 'TRIM_CHECK':
+      return t('qa_check_tooltip_trim_check');
     default:
       return null;
   }

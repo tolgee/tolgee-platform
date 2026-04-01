@@ -7,6 +7,7 @@ enum class QaCheckType(
   SPACES_MISMATCH(QaCheckSeverity.WARNING),
 
   UNMATCHED_NEWLINES(QaCheckSeverity.WARNING),
+  TRIM_CHECK(QaCheckSeverity.WARNING),
   CHARACTER_CASE_MISMATCH(QaCheckSeverity.WARNING),
   MISSING_NUMBERS(QaCheckSeverity.WARNING),
   PUNCTUATION_MISMATCH(QaCheckSeverity.WARNING),
@@ -30,11 +31,12 @@ enum class QaCheckType(
   companion object {
     val CATEGORIES: Map<QaCheckCategory, List<QaCheckType>> =
       linkedMapOf(
-        QaCheckCategory.COMPARISON to
+        QaCheckCategory.NORMAL to
           listOf(
             EMPTY_TRANSLATION,
             SPACES_MISMATCH,
             UNMATCHED_NEWLINES,
+            TRIM_CHECK,
             CHARACTER_CASE_MISMATCH,
             MISSING_NUMBERS,
             SPELLING,
