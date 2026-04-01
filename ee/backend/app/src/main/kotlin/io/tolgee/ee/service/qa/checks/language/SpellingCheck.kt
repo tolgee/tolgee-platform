@@ -29,17 +29,19 @@ class SpellingCheck(
     if (text.isBlank()) return emptyList()
 
     val matches = languageToolService.check(text, languageTag)
-    return matches
-      .filter { isSpellingRule(it) }
-      .map { match ->
-        QaCheckResult(
-          type = QaCheckType.SPELLING,
-          message = QaIssueMessage.QA_SPELLING_ERROR,
-          replacement = match.suggestedReplacements.firstOrNull(),
-          positionStart = match.fromPos,
-          positionEnd = match.toPos,
-          params = mapOf("word" to text.substring(match.fromPos, match.toPos)),
-        )
-      }
+    val results =
+      matches
+        .filter { isSpellingRule(it) }
+        .map { match ->
+          QaCheckResult(
+            type = QaCheckType.SPELLING,
+            message = QaIssueMessage.QA_SPELLING_ERROR,
+            replacement = match.suggestedReplacements.firstOrNull(),
+            positionStart = match.fromPos,
+            positionEnd = match.toPos,
+            params = mapOf("word" to text.substring(match.fromPos, match.toPos)),
+          )
+        }
+    return filterLanguageToolFalsePositives(results, text)
   }
 }

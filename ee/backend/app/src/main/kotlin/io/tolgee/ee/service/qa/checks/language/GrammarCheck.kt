@@ -29,18 +29,20 @@ class GrammarCheck(
     if (text.isBlank()) return emptyList()
 
     val matches = languageToolService.check(text, languageTag)
-    return matches
-      .filter { !isSpellingRule(it) }
-      .filter { !isSentenceRule(it) }
-      .map { match ->
-        QaCheckResult(
-          type = QaCheckType.GRAMMAR,
-          message = QaIssueMessage.QA_GRAMMAR_ERROR,
-          replacement = match.suggestedReplacements.firstOrNull(),
-          positionStart = match.fromPos,
-          positionEnd = match.toPos,
-          params = mapOf("message" to match.message),
-        )
-      }
+    val results =
+      matches
+        .filter { !isSpellingRule(it) }
+        .filter { !isSentenceRule(it) }
+        .map { match ->
+          QaCheckResult(
+            type = QaCheckType.GRAMMAR,
+            message = QaIssueMessage.QA_GRAMMAR_ERROR,
+            replacement = match.suggestedReplacements.firstOrNull(),
+            positionStart = match.fromPos,
+            positionEnd = match.toPos,
+            params = mapOf("message" to match.message),
+          )
+        }
+    return filterLanguageToolFalsePositives(results, text)
   }
 }
