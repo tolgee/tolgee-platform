@@ -49,7 +49,13 @@ async function generateSchemaTypes() {
     );
   }
   const spec = await response.json();
-  const schemaNames = Object.keys(spec.components.schemas).sort();
+  const schemas = spec?.components?.schemas;
+  if (!schemas || typeof schemas !== 'object') {
+    throw new Error(
+      `OpenAPI spec from ${specUrl} is missing components.schemas`
+    );
+  }
+  const schemaNames = Object.keys(schemas).sort();
 
   const schemaBasename = basename(definition.output, '.ts');
   const typesOutput = definition.output.replace(
