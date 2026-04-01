@@ -3,29 +3,31 @@ package io.tolgee.model.enums.qa
 enum class QaCheckType(
   val defaultSeverity: QaCheckSeverity,
 ) {
-  EMPTY_TRANSLATION(QaCheckSeverity.OFF),
+  EMPTY_TRANSLATION(QaCheckSeverity.WARNING),
   SPACES_MISMATCH(QaCheckSeverity.WARNING),
-
   UNMATCHED_NEWLINES(QaCheckSeverity.WARNING),
   TRIM_CHECK(QaCheckSeverity.WARNING),
+
   CHARACTER_CASE_MISMATCH(QaCheckSeverity.WARNING),
   MISSING_NUMBERS(QaCheckSeverity.WARNING),
+  REPEATED_WORDS(QaCheckSeverity.WARNING),
   PUNCTUATION_MISMATCH(QaCheckSeverity.WARNING),
+
+  SPELLING(QaCheckSeverity.OFF),
+  GRAMMAR(QaCheckSeverity.OFF),
 
   BRACKETS_MISMATCH(QaCheckSeverity.WARNING),
   BRACKETS_UNBALANCED(QaCheckSeverity.WARNING),
-  SPECIAL_CHARACTER_MISMATCH(QaCheckSeverity.OFF),
+  SPECIAL_CHARACTER_MISMATCH(QaCheckSeverity.WARNING),
   DIFFERENT_URLS(QaCheckSeverity.WARNING),
 
-  INCONSISTENT_PLACEHOLDERS(QaCheckSeverity.WARNING),
+  KEY_LENGTH_LIMIT(QaCheckSeverity.WARNING),
 
+  INCONSISTENT_PLACEHOLDERS(QaCheckSeverity.WARNING),
   INCONSISTENT_HTML(QaCheckSeverity.WARNING),
+
   HTML_SYNTAX(QaCheckSeverity.WARNING),
   ICU_SYNTAX(QaCheckSeverity.WARNING),
-  REPEATED_WORDS(QaCheckSeverity.WARNING),
-  SPELLING(QaCheckSeverity.WARNING),
-  GRAMMAR(QaCheckSeverity.WARNING),
-  KEY_LENGTH_LIMIT(QaCheckSeverity.WARNING),
   ;
 
   companion object {
