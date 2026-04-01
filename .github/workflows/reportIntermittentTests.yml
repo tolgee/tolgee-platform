@@ -1,8 +1,9 @@
-name: Report intermittent E2E Tests
+name: Report intermittent tests
 
 on:
   schedule:
     - cron: "42 04 * * *"
+  workflow_dispatch:
 
 jobs:
   backend-build:
@@ -15,7 +16,7 @@ jobs:
         uses: ./.github/actions/setup-env
 
       - name: Build backend
-        run: ./gradlew classes jar bootJar
+        run: ./gradlew classes jar bootJar buildTestEmails
 
       - name: Upload backend build result
         uses: ./.github/actions/upload-backend-build
@@ -28,34 +29,35 @@ jobs:
       fail-fast: false
       matrix:
         command:
-          - run: "server-app:runContextRecreatingTests"
-            clean: "server-app:cleanRunContextRecreatingTests"
-          - run: "server-app:runStandardTests"
-            clean: "server-app:cleanRunStandardTests"
-          - run: "server-app:runWebsocketTests"
-            clean: "server-app:cleanRunWebsocketTests"
-          - run: "ee-test:test"
-            clean: "ee-test:cleanTest"
-          - run: "data:test"
-            clean: "data:cleanTest"
+          [
+            "server-app:runContextRecreatingTests",
+            "server-app:runStandardTests",
+            "server-app:runWebsocketTests",
+            "server-app:runWithoutEeTests",
+            "ee-test:test",
+            "data:test",
+            "security:test",
+            "ktlint:test",
+          ]
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup environment
         uses: ./.github/actions/setup-env
         with:
-          node: 'false'
+          node: "false"
 
       - name: Download backend build result
         uses: ./.github/actions/download-backend-build
 
-      - name: Run backend tests
+      - name: Remove ee
+        if: matrix.command == 'server-app:runWithoutEeTests'
         run: |
-          ./gradlew ${{ matrix.command.run }};
-          ./gradlew ${{ matrix.command.clean }};
-          ./gradlew ${{ matrix.command.run }};
-          ./gradlew ${{ matrix.command.clean }};
-          ./gradlew ${{ matrix.command.run }};
+          rm -rf ./ee
+
+      - name: Run backend tests
+        timeout-minutes: 30
+        run: ./gradlew ${{ matrix.command }}
         env:
           SKIP_SERVER_BUILD: true
           SKIP_EMAIL_BUILD: true
@@ -64,7 +66,7 @@ jobs:
         id: reportName
         if: always()
         run: |
-          reportName=${{ matrix.command.run }}
+          reportName=${{ matrix.command }}
           echo "reportName=${reportName//\:/_}" >> $GITHUB_OUTPUT
 
       - uses: actions/upload-artifact@v4
@@ -82,6 +84,58 @@ jobs:
           path: "**/build/test-results/**/TEST-*.xml"
           fail-on-error: false
           reporter: java-junit
+
+  frontend-build:
+    name: Build frontend 🏗️
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Build webapp
+        run: ./gradlew buildWebapp
+        env:
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+
+      - name: Upload built webapp
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp
+          path: webapp/dist
+
+  e2e-install-deps:
+    name: Install E2E dependencies ⬇️
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+        with:
+          java: "false"
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./e2e
+
+      - name: Tar node modules
+        run: |
+          tar --zstd -cf ~/node_modules.tar.zst ./e2e/node_modules
+
+      - name: Tar Cypress cache
+        run: |
+          tar --zstd -cf ~/cypress_cache.tar.zst ./Cypress
+        working-directory: /home/runner/.cache/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: e2e_deps
+          path: |
+            ~/node_modules.tar.zst
+            ~/cypress_cache.tar.zst
 
   e2e:
     needs: [frontend-build, backend-build, e2e-install-deps]
@@ -127,10 +181,8 @@ jobs:
         working-directory: /home/runner/.cache/
 
       - name: Run e2e test
-        run: |
-          ./gradlew runE2e && \
-          ./gradlew runE2e && \
-          ./gradlew runE2e
+        timeout-minutes: 30
+        run: ./gradlew runE2e -x bootJar -x buildWebapp
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
@@ -144,67 +196,22 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: e2e ${{ matrix.job_index }}
+          name: e2e_${{ matrix.job_index }}
           path: |
             ./e2e/cypress/videos/**/*
             ./e2e/cypress/screenshots/**/*
-
-  frontend-build:
-    name: Build frontend 🏗️
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup environment
-        uses: ./.github/actions/setup-env
-
-      - name: Build webapp
-        run: ./gradlew buildWebapp
-        env:
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-
-      - name: Upload built webapp
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapp
-          path: webapp/dist
-
-  e2e-install-deps:
-    name: Install E2E dependencies ⬇️
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup environment
-        uses: ./.github/actions/setup-env
-        with:
-          java: 'false'
-
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ./e2e
-
-      - name: Tar node modules
-        run: |
-          tar --zstd -cf ~/node_modules.tar.zst ./e2e/node_modules
-
-      - name: Tar Cypress cache
-        run: |
-          tar --zstd -cf ~/cypress_cache.tar.zst ./Cypress
-        working-directory: /home/runner/.cache/
+            ./e2e/server
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
-          name: e2e_deps
+          name: e2e_server_log_${{ matrix.job_index }}
           path: |
-            ~/node_modules.tar.zst
-            ~/cypress_cache.tar.zst
+            ./e2e/server.log
 
   cleanup:
     if: always()
-    needs: [e2e, frontend-build, backend-build, e2e-install-deps]
+    needs: [e2e, backend-test]
     name: Delete artifacts 🧹
     runs-on: ubuntu-24.04
     steps:
@@ -214,3 +221,18 @@ jobs:
             e2e_deps
             webapp
             backend
+
+  notify:
+    name: Notify Slack on failure 🔔
+    needs: [backend-test, e2e]
+    if: failure()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: slackapi/slack-github-action@v2.1.0
+        with:
+          webhook: ${{ secrets.SLACK_FLAKY_TESTS_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "🔴 Flaky tests detected in *${{ github.repository }}*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View failed run>"
+            }
