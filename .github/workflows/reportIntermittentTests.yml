@@ -85,6 +85,25 @@ jobs:
           fail-on-error: false
           reporter: java-junit
 
+      - name: Collect failed tests
+        if: failure()
+        run: |
+          python3 -c "
+          import xml.etree.ElementTree as ET
+          import glob
+          for f in glob.glob('**/build/test-results/**/TEST-*.xml', recursive=True):
+              tree = ET.parse(f)
+              for tc in tree.findall('.//testcase'):
+                  if tc.find('failure') is not None:
+                      print(f'{tc.get(\"classname\")}.{tc.get(\"name\")}')
+          " > failed-tests.txt || true
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: failed_tests_${{ steps.reportName.outputs.reportName }}
+          path: failed-tests.txt
+
   frontend-build:
     name: Build frontend 🏗️
     runs-on: ubuntu-24.04
@@ -193,6 +212,19 @@ jobs:
           E2E_TOTAL_JOBS: ${{matrix.total_jobs}}
           E2E_JOB_INDEX: ${{matrix.job_index}}
 
+      - name: Collect failed tests
+        if: failure()
+        run: |
+          find ./e2e/cypress/screenshots -name "*.png" 2>/dev/null \
+            | sed 's|.*/screenshots/||; s| (failed).*||; s| -- .*||' \
+            | sort -u > failed-tests.txt || true
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: failed_tests_e2e_${{ matrix.job_index }}
+          path: failed-tests.txt
+
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -228,11 +260,33 @@ jobs:
     if: failure()
     runs-on: ubuntu-24.04
     steps:
-      - uses: slackapi/slack-github-action@v2.1.0
+      - uses: actions/download-artifact@v4
         with:
-          webhook: ${{ secrets.SLACK_FLAKY_TESTS_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            {
-              "text": "🔴 Flaky tests detected in *${{ github.repository }}*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View failed run>"
-            }
+          pattern: failed_tests_*
+          merge-multiple: true
+          path: ./failures
+        continue-on-error: true
+
+      - name: Build failure list
+        id: failures
+        run: |
+          {
+            echo 'list<<EOF'
+            cat ./failures/failed-tests.txt 2>/dev/null | sort -u | head -30 | sed 's/^/• /'
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_FLAKY_TESTS_WEBHOOK_URL }}
+          FAILED_TESTS: ${{ steps.failures.outputs.list }}
+        run: |
+          message="🔴 Flaky tests detected in *${{ github.repository }}*"
+          if [ -n "$FAILED_TESTS" ]; then
+            message="$message\n\n${FAILED_TESTS}"
+          fi
+          message="$message\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View failed run>"
+
+          curl -s -X POST -H 'Content-Type: application/json' \
+            -d "$(jq -n --arg text "$message" '{text: $text}')" \
+            "$SLACK_WEBHOOK_URL"
