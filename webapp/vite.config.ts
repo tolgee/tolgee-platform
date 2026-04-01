@@ -13,7 +13,6 @@ import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 const billingFrontendDir = resolve(__dirname, '../../billing/frontend');
 const hasBilling = existsSync(billingFrontendDir);
-console.log(`[vite] billingFrontendDir: ${billingFrontendDir}, hasBilling: ${hasBilling}`);
 
 export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };

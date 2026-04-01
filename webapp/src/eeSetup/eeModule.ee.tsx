@@ -102,12 +102,12 @@ export const routes = {
     );
   },
   Administration: () => (
-    <Switch>
+    <>
       <PrivateRoute exact path={LINKS.ADMINISTRATION_EE_LICENSE.template}>
         <AdministrationEeLicenseView />
       </PrivateRoute>
       <billingModule.AdministrationRoutes />
-    </Switch>
+    </>
   ),
   Organization: () => {
     const config = useConfig();
