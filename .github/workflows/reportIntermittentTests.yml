@@ -94,7 +94,7 @@ jobs:
           for f in glob.glob('**/build/test-results/**/TEST-*.xml', recursive=True):
               tree = ET.parse(f)
               for tc in tree.findall('.//testcase'):
-                  if tc.find('failure') is not None:
+                  if tc.find('failure') is not None or tc.find('error') is not None:
                       print(f'{tc.get(\"classname\")}.{tc.get(\"name\")}')
           " > failed-tests.txt || true
 
