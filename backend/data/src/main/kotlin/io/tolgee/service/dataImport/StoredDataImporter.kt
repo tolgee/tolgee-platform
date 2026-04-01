@@ -288,8 +288,8 @@ class StoredDataImporter(
   }
 
   private fun checkTranslationPermissions() {
-    val langs = translationsToSave.map { it.second.language }.toSet().map { it.id }
-    securityService.checkLanguageTranslatePermission(import.project.id, langs)
+    val langIds = translationsToSave.mapTo(mutableSetOf()) { it.second.language.id }
+    securityService.checkLanguageTranslatePermission(import.project.id, langIds.toList())
   }
 
   private fun checkKeyPermissions() {
