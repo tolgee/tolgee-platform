@@ -243,6 +243,7 @@ class CoreImportFilesProcessor(
         importService.saveLanguages(this.languages.values)
       }
       importDataManager.populateStoredTranslations(entry.value)
+      importDataManager.buildTranslationsByKeyNameCache(entry.value)
     }
   }
 
@@ -335,6 +336,8 @@ class CoreImportFilesProcessor(
     if (saveData) {
       importDataManager.saveAllStoredTranslations()
     }
+    // Cache this file's languages for O(1) cross-file collision lookups by subsequent files
+    this.languages.values.forEach { importDataManager.buildTranslationsByKeyNameCache(it) }
   }
 
   private fun FileProcessorContext.shouldImportKey(keyName: String): Boolean {
