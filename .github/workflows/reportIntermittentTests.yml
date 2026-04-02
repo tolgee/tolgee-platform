@@ -96,13 +96,13 @@ jobs:
               for tc in tree.findall('.//testcase'):
                   if tc.find('failure') is not None or tc.find('error') is not None:
                       print(f'{tc.get(\"classname\")}.{tc.get(\"name\")}')
-          " > failed-tests.txt || true
+          " > failed-tests-${{ steps.reportName.outputs.reportName }}.txt || true
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: failed_tests_${{ steps.reportName.outputs.reportName }}
-          path: failed-tests.txt
+          path: failed-tests-${{ steps.reportName.outputs.reportName }}.txt
 
   frontend-build:
     name: Build frontend 🏗️
@@ -217,13 +217,13 @@ jobs:
         run: |
           find ./e2e/cypress/screenshots -name "*.png" 2>/dev/null \
             | sed 's|.*/screenshots/||; s| (failed)\.png$||; s| -- | > |' \
-            | sort -u > failed-tests.txt || true
+            | sort -u > failed-tests-e2e-${{ matrix.job_index }}.txt || true
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: failed_tests_e2e_${{ matrix.job_index }}
-          path: failed-tests.txt
+          path: failed-tests-e2e-${{ matrix.job_index }}.txt
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -272,7 +272,7 @@ jobs:
         run: |
           {
             echo 'list<<EOF'
-            cat ./failures/failed-tests.txt 2>/dev/null | sort -u | head -30 | sed 's/^/• /'
+            cat ./failures/failed-tests-*.txt 2>/dev/null | sort -u | head -30 | sed 's/^/• /'
             echo 'EOF'
           } >> $GITHUB_OUTPUT
 
