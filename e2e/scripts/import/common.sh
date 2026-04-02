@@ -108,7 +108,7 @@ start_tolgee() {
     #   prepareThreshold=0         — disable server-side prepared statements
     #   preparedStatementCacheQueries=0
     # Hikari pool settings also match production (maximum-pool-size=100, minimum-idle=10).
-    java -Xmx8g -jar "$JAR_FILE" \
+    java -Xmx12g -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="$SCRIPT_DIR/heapdump.hprof" -jar "$JAR_FILE" \
         --server.port=$PORT \
         --spring.datasource.url="jdbc:postgresql://localhost:$POSTGRES_PORT/postgres?reWriteBatchedInserts=true&prepareThreshold=0&preparedStatementCacheQueries=0" \
         --spring.datasource.username=postgres \
