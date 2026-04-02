@@ -148,7 +148,11 @@ class WebhookAutoDisableSchedulerTest : AbstractSpringTest() {
 
     webhookAutoDisableScheduler.checkAndDisable()
 
-    // Should still be notified, but no new email
+    // Wait for any async email processing, then verify no email was sent
+    Thread.sleep(1000)
+    emailTestUtil.messageArgumentCaptor.allValues.assert
+      .isEmpty()
+
     val config = webhookConfigService.get(testData.webhookConfig.self.id)
     config.autoDisableNotified.assert.isTrue
     config.enabled.assert.isTrue

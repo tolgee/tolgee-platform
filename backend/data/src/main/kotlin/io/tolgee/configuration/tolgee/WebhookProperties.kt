@@ -1,6 +1,7 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.configuration.annotations.DocProperty
+import jakarta.annotation.PostConstruct
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "tolgee.webhook")
@@ -30,4 +31,12 @@ class WebhookProperties {
     description = "Lease time (in milliseconds) for the distributed lock used by the auto-disable job.",
   )
   var autoDisableLockLeaseTimeMs: Long = 600_000
+
+  @PostConstruct
+  fun validate() {
+    require(autoDisableWarningAfterHours < autoDisableAfterDays * 24) {
+      "tolgee.webhook.auto-disable-warning-after-hours ($autoDisableWarningAfterHours) " +
+        "must be less than auto-disable-after-days ($autoDisableAfterDays) converted to hours (${autoDisableAfterDays * 24})"
+    }
+  }
 }

@@ -38,10 +38,11 @@ export default function WebhookDisabledEmail() {
       <Text>
         <LocalizedText
           keyName="webhook-disabled-body"
-          defaultValue="The webhook {webhookUrl} in project {projectName} has been automatically disabled after failing continuously for more than 3 days."
+          defaultValue="The webhook {webhookUrl} in project {projectName} has been automatically disabled after failing continuously for more than {autoDisableAfterDays} days."
           demoParams={{
             webhookUrl: 'https://example.com/webhook',
             projectName: 'My Project',
+            autoDisableAfterDays: '3',
           }}
         />
       </Text>

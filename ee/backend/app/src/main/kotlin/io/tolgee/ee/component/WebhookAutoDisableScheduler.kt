@@ -64,8 +64,8 @@ class WebhookAutoDisableScheduler(
       val webhooks = webhookConfigService.findWebhooksToWarn(warningCutoff)
 
       webhooks.forEach { webhook ->
-        webhookConfigService.markWarningNotified(webhook)
         sendEmails(webhook, "webhook-failing-warning")
+        webhookConfigService.markWarningNotified(webhook)
         logger.info(
           "Sent warning email for webhook {} (url: {}) in project {} after {} hours of failures",
           webhook.id,
