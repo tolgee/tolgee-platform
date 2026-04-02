@@ -1,3 +1,10 @@
+## [3.177.1](https://github.com/tolgee/tolgee-platform/compare/v3.177.0...v3.177.1) (2026-04-02)
+
+
+### Performance Improvements
+
+* drop project_id and organization_id from batch job metrics ([#3581](https://github.com/tolgee/tolgee-platform/issues/3581)) ([bddd62b](https://github.com/tolgee/tolgee-platform/commit/bddd62b711477bce375ec8745a1ea1715614381e))
+
 # [3.177.0](https://github.com/tolgee/tolgee-platform/compare/v3.176.0...v3.177.0) (2026-04-01)
 
 
