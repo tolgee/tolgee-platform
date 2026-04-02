@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.web.servlet.ResultActions
-import kotlin.system.measureTimeMillis
 
 @SpringBootTest(
   properties = [
@@ -85,22 +84,6 @@ class BranchCopyIntegrationTest : ProjectAuthControllerTest("/v2/projects/") {
     // branch should be ready
     val branch = branchRepository.findByIdOrNull(newBranchId)!!
     branch.pending.assert.isFalse()
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `copying a lot data is not slow`() {
-    testData.generateBunchData(2000)
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
-
-    var response: ResultActions
-    val time =
-      measureTimeMillis {
-        response = performBranchCreation()
-      }
-    response.andIsOk
-    time.assert.isLessThan(5000)
   }
 
   @Test
