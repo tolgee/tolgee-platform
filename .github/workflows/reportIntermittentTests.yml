@@ -247,12 +247,13 @@ jobs:
     name: Delete artifacts 🧹
     runs-on: ubuntu-24.04
     steps:
-      - uses: geekyeggo/delete-artifact@v1
+      - uses: geekyeggo/delete-artifact@v5
         with:
           name: |
             e2e_deps
             webapp
             backend
+          failOnError: false
 
   notify:
     name: Notify Slack on failure 🔔
