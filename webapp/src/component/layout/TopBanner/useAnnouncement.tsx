@@ -168,6 +168,19 @@ export function useAnnouncement() {
           />
         );
 
+      case 'FEATURE_BRANCHING':
+        return (
+          <Announcement
+            content={
+              <T
+                keyName="announcement_branching"
+                defaultValue="We've released Branching!"
+              />
+            }
+            link="https://docs.tolgee.io/platform/projects_and_organizations/branching"
+          />
+        );
+
       default:
         return assertUnreachableReturnNull(value);
     }
