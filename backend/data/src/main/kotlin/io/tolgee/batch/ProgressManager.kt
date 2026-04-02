@@ -15,13 +15,11 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.model.batch.BatchJobChunkExecution
 import io.tolgee.model.batch.BatchJobChunkExecutionStatus
 import io.tolgee.model.batch.BatchJobStatus
-import io.tolgee.service.project.ProjectService
 import io.tolgee.util.Logging
 import io.tolgee.util.debug
 import io.tolgee.util.executeInNewTransaction
 import io.tolgee.util.logger
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 
@@ -36,17 +34,7 @@ class ProgressManager(
   private val queue: BatchJobChunkExecutionQueue,
   private val metrics: Metrics,
   private val currentDateProvider: CurrentDateProvider,
-  @Lazy
-  private val projectService: ProjectService,
 ) : Logging {
-  /**
-   * Looks up organization ID for a given projectId.
-   * Returns null if projectId is null or project/organization is not found.
-   */
-  private fun getOrganizationId(projectId: Long?): Long? {
-    return projectId?.let { projectService.findDto(it)?.organizationOwnerId }
-  }
-
   /**
    * This method tries to set execution running in the state.
    * Lock-free O(1) implementation using atomic counter and single-execution operations.
@@ -100,9 +88,6 @@ class ProgressManager(
     if (batchJobStateProvider.tryMarkJobStarted(batchJobId)) {
       val jobDto = batchJobDto ?: batchJobService.getJobDto(batchJobId)
 
-      // Look up organization ID from project
-      val orgId = getOrganizationId(jobDto.projectId)
-
       // Record queue wait time (time from creation to first chunk starting)
       jobDto.createdAt?.let { createdAt ->
         val waitTimeMs = currentDateProvider.date.time - createdAt
@@ -110,7 +95,7 @@ class ProgressManager(
       }
 
       // Record job started metric
-      metrics.recordJobStarted(jobDto.type.name, jobDto.jobCharacter.name, jobDto.projectId, orgId)
+      metrics.recordJobStarted(jobDto.type.name, jobDto.jobCharacter.name)
 
       eventPublisher.publishEvent(OnBatchJobStarted(jobDto))
     }
@@ -350,15 +335,14 @@ class ProgressManager(
     finalStatus: BatchJobStatus,
     progress: Long,
   ) {
-    val orgId = getOrganizationId(job.projectId)
     val createdAt = job.createdAt
 
     if (createdAt != null) {
       val durationMs = currentDateProvider.date.time - createdAt
-      metrics.recordJobCompleted(job.type.name, finalStatus.name, job.projectId, orgId, durationMs)
+      metrics.recordJobCompleted(job.type.name, finalStatus.name, durationMs)
     } else {
-      logger.debug { "Job ${job.id} has no createdAt timestamp, skipping duration metric" }
-      metrics.recordJobCompleted(job.type.name, finalStatus.name, job.projectId, orgId, 0)
+      logger.debug { "Job ${job.id} has no createdAt timestamp, recording zero duration" }
+      metrics.recordJobCompleted(job.type.name, finalStatus.name, 0)
     }
 
     metrics.batchJobItemsProcessed.record(progress.toDouble())

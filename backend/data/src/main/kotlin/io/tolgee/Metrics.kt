@@ -107,33 +107,17 @@ class Metrics(
       .register(meterRegistry)
   }
 
-  /**
-   * Records job completion with duration and tags.
-   *
-   * Note on cardinality: project_id and organization_id are included intentionally to enable
-   * per-customer performance analysis during debugging. In production with many projects,
-   * consider using Prometheus recording rules to pre-aggregate if cardinality becomes an issue.
-   * organization_name is excluded to limit cardinality and avoid exposing customer data in metrics.
-   */
   fun recordJobCompleted(
     jobType: String,
     status: String,
-    projectId: Long?,
-    organizationId: Long?,
     durationMs: Long,
   ) {
-    val projectTag = projectId?.toString() ?: "unknown"
-    val orgIdTag = organizationId?.toString() ?: "unknown"
-
-    // Create a tagged timer for this specific combination
     Timer
       .builder("tolgee.batch.job.duration")
       .description("Total duration of batch jobs from creation to completion")
       .publishPercentileHistogram()
       .tag("job_type", jobType)
       .tag("status", status)
-      .tag("project_id", projectTag)
-      .tag("organization_id", orgIdTag)
       .register(meterRegistry)
       .record(Duration.ofMillis(durationMs.coerceAtLeast(0)))
 
@@ -141,29 +125,19 @@ class Metrics(
       .builder("tolgee.batch.job.completed")
       .tag("job_type", jobType)
       .tag("status", status)
-      .tag("project_id", projectTag)
-      .tag("organization_id", orgIdTag)
       .description("Total number of completed batch jobs")
       .register(meterRegistry)
       .increment()
   }
 
-  /**
-   * Records job started with tags.
-   * Note: organization_name intentionally excluded to limit cardinality and avoid exposing customer data in metrics.
-   */
   fun recordJobStarted(
     jobType: String,
     jobCharacter: String,
-    projectId: Long?,
-    organizationId: Long?,
   ) {
     Counter
       .builder("tolgee.batch.job.started")
       .tag("job_type", jobType)
       .tag("job_character", jobCharacter)
-      .tag("project_id", projectId?.toString() ?: "unknown")
-      .tag("organization_id", organizationId?.toString() ?: "unknown")
       .description("Total number of started batch jobs")
       .register(meterRegistry)
       .increment()
