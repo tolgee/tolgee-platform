@@ -8,10 +8,7 @@ import If from '../components/If';
 export default function WebhookFailingWarningEmail() {
   return (
     <ClassicLayout
-      subject={t.raw(
-        'webhook-failing-warning-subject',
-        'Webhook is failing'
-      )}
+      subject={t.raw('webhook-failing-warning-subject', 'Webhook is failing')}
       sendReason={t.raw(
         'webhook-disabled-send-reason',
         "You're receiving this email because you're an owner of the organization {organizationName} on {instanceQualifier}",
