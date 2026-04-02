@@ -20,6 +20,7 @@ import io.tolgee.model.ILanguage
 import io.tolgee.model.Language
 import io.tolgee.model.Language_
 import io.tolgee.model.Project
+import io.tolgee.model.Project_
 import io.tolgee.model.enums.TranslationProtection
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -691,22 +692,22 @@ class TranslationService(
     val query = cb.createTupleQuery()
 
     val keyRoot = query.from(Key::class.java)
-    val langRoot = query.from(Language::class.java)
+    val projectJoin = keyRoot.join(Key_.project)
+    val langJoin = projectJoin.join(Project_.languages)
 
     val translationJoin =
       keyRoot.join(Key_.translations, JoinType.LEFT)
     translationJoin.on(
-      cb.equal(translationJoin.get(Translation_.language), langRoot),
+      cb.equal(translationJoin.get(Translation_.language), langJoin),
     )
 
     val predicates =
       mutableListOf(
-        cb.equal(keyRoot.get(Key_.project).get<Long>("id"), projectId),
-        cb.equal(langRoot.get(Language_.project).get<Long>("id"), projectId),
+        cb.equal(projectJoin.get<Long>("id"), projectId),
       )
 
     if (!languageIds.isNullOrEmpty()) {
-      predicates.add(langRoot.get(Language_.id).`in`(languageIds))
+      predicates.add(langJoin.get(Language_.id).`in`(languageIds))
     }
 
     if (onlyStale) {
@@ -718,7 +719,7 @@ class TranslationService(
       )
     }
 
-    query.multiselect(keyRoot.get(Key_.id), langRoot.get(Language_.id))
+    query.multiselect(keyRoot.get(Key_.id), langJoin.get(Language_.id))
     query.where(*predicates.toTypedArray())
 
     return entityManager.createQuery(query).resultList.map { tuple ->

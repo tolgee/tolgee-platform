@@ -71,10 +71,10 @@ class QaStaleFlowTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun `qaChecksStale is false initially`() {
+  fun `qaChecksStale is true initially`() {
     executeInNewTransaction(platformTransactionManager) {
       val translation = translationService.find(testData.frTranslation.id)!!
-      assertThat(translation.qaChecksStale).isFalse()
+      assertThat(translation.qaChecksStale).isTrue()
     }
   }
 

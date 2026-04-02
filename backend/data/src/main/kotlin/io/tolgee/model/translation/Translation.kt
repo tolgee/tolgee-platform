@@ -103,8 +103,8 @@ class Translation(
   @ColumnDefault("false")
   var outdated: Boolean = false
 
-  @ColumnDefault("false")
-  var qaChecksStale: Boolean = false
+  @ColumnDefault("true")
+  var qaChecksStale: Boolean = true
 
   @ManyToMany
   @JoinTable(

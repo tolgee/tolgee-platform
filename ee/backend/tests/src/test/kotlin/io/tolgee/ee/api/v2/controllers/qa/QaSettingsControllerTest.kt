@@ -64,8 +64,9 @@ class QaSettingsControllerTest : AuthorizedControllerTest() {
     performAuthGet(settingsUrl).andIsOk.andAssertThatJson {
       node("settings").isObject
       // Should fall back to defaultSeverity for each check type
-      node("settings.EMPTY_TRANSLATION").isEqualTo("OFF")
-      node("settings.SPACES_MISMATCH").isEqualTo("WARNING")
+      node("settings.EMPTY_TRANSLATION").isEqualTo("WARNING")
+      node("settings.SPELLING").isEqualTo("OFF")
+      node("settings.GRAMMAR").isEqualTo("OFF")
       node("settings.CHARACTER_CASE_MISMATCH").isEqualTo("WARNING")
     }
   }

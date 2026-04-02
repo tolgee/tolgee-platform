@@ -41,6 +41,9 @@ class ProjectQaConfigService(
     projectService.save(project)
 
     if (enabled) {
+      // Only recheck translations that changed (became stale) while QA was off.
+      // The stale flag keeps working regardless of the QA-enabled toggle, so when
+      // the user flips QA back on we don't need a full recheck — just the diff.
       qaRecheckService.recheckTranslations(projectId, onlyStale = true)
     } else {
       languageStatsService.refreshLanguageStats(projectId)
