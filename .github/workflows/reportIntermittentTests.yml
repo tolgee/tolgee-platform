@@ -272,7 +272,7 @@ jobs:
         run: |
           {
             echo 'list<<EOF'
-            cat ./failures/failed-tests-*.txt 2>/dev/null | sort -u | head -30 | sed 's/^/• /'
+            cat ./failures/failed-tests-*.txt 2>/dev/null | sort -u | head -30 | sed 's/.*/• `&`/'
             echo 'EOF'
           } >> $GITHUB_OUTPUT
 
