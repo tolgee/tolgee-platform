@@ -48,10 +48,12 @@ type WithDefaultProps = BaseProps & {
   onChange?: (type: QaCheckType, severity: QaCheckSeverity | null) => void;
 };
 
-type Props = WithoutDefaultProps | WithDefaultProps;
+type Props = (WithoutDefaultProps | WithDefaultProps) & {
+  disabled?: boolean;
+};
 
 export const QaSettingsItem = (props: Props) => {
-  const { type, value, onChange, showDefault = false } = props;
+  const { type, value, onChange, showDefault = false, disabled } = props;
   const { t } = useTranslate();
   const label = useQaCheckTypeLabel(type);
   const globalDefault =
@@ -93,6 +95,7 @@ export const QaSettingsItem = (props: Props) => {
         <Select
           value={selectValue}
           onChange={handleOnChange}
+          disabled={disabled}
           data-cy="qa-settings-select"
           data-cy-type={type}
         >

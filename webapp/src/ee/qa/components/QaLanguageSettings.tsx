@@ -17,9 +17,10 @@ type QaCheckSeverity = QaSettings['settings'][keyof QaSettings['settings']];
 
 type Props = {
   globalSettings: Record<QaCheckType, QaCheckSeverity>;
+  disabled?: boolean;
 };
 
-export const QaLanguageSettings = ({ globalSettings }: Props) => {
+export const QaLanguageSettings = ({ globalSettings, disabled }: Props) => {
   const project = useProject();
   const { t } = useTranslate();
 
@@ -62,6 +63,7 @@ export const QaLanguageSettings = ({ globalSettings }: Props) => {
             key={langSetting.language.id}
             languageConfig={langSetting}
             globalSettings={globalSettings}
+            disabled={disabled}
           />
         ))}
       </StyledLanguageTable>

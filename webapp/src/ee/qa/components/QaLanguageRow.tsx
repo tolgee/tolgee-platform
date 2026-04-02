@@ -20,9 +20,14 @@ type LanguageQaConfigModel = components['schemas']['LanguageQaConfigModel'];
 type Props = {
   languageConfig: LanguageQaConfigModel;
   globalSettings: Record<QaCheckType, QaCheckSeverity>;
+  disabled?: boolean;
 };
 
-export const QaLanguageRow = ({ languageConfig, globalSettings }: Props) => {
+export const QaLanguageRow = ({
+  languageConfig,
+  globalSettings,
+  disabled,
+}: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const summaryText = useLanguageSettingsSummary(
     languageConfig,
@@ -47,6 +52,7 @@ export const QaLanguageRow = ({ languageConfig, globalSettings }: Props) => {
         <IconButton
           onClick={() => setDialogOpen(true)}
           size="small"
+          disabled={disabled}
           data-cy="qa-language-settings-button"
           data-cy-language={languageConfig.language.tag}
         >

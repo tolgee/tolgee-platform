@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { Box, Typography, styled } from '@mui/material';
+import React, { useCallback } from 'react';
+import { Box, Typography, Switch, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { useProject } from 'tg.hooks/useProject';
@@ -9,13 +9,28 @@ import { QaSettingsItem } from 'tg.ee.module/qa/components/QaSettingsItem';
 import { QaLanguageSettings } from './QaLanguageSettings';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
 import { DisabledFeatureBanner } from 'tg.component/common/DisabledFeatureBanner';
-import { SwitchWithDescription } from 'tg.views/projects/project/components/SwitchWithDescription';
 
 type QaSettings = components['schemas']['QaSettingsRequest'];
 type QaCheckType = components['schemas']['QaIssueModel']['type'];
 type QaCheckSeverity = QaSettings['settings'][keyof QaSettings['settings']];
 
-const StyledSettingsBody = styled('div')`
+const StyledContainer = styled(Box)`
+  margin-top: ${({ theme }) => theme.spacing(3)};
+`;
+
+const StyledTitleRow = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(1)};
+  margin-top: ${({ theme }) => theme.spacing(3)};
+  margin-bottom: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledDescription = styled(Typography)`
+  margin-bottom: ${({ theme }) => theme.spacing(3)};
+`;
+
+const StyledSettingsBody = styled(Box)`
   transition: opacity 0.2s;
 `;
 
@@ -72,11 +87,11 @@ export const ProjectSettingsQa = () => {
 
   if (!qaFeatureEnabled) {
     return (
-      <Box sx={{ mt: 3 }}>
+      <StyledContainer>
         <DisabledFeatureBanner
           customMessage={t('qa_checks_feature_description')}
         />
-      </Box>
+      </StyledContainer>
     );
   }
 
@@ -84,36 +99,33 @@ export const ProjectSettingsQa = () => {
     return null;
   }
 
-  return (
-    <Box sx={{ mt: 3 }}>
-      <SwitchWithDescription
-        title={<T keyName="project_settings_qa_enabled_toggle" />}
-        description={<T keyName="project_settings_qa_enabled_description" />}
-        checked={qaProjectEnabled}
-        onSwitch={handleToggle}
-        disabled={toggleQaMutation.isLoading}
-        data-cy="qa-enabled-toggle"
-      />
+  const disabled = !qaProjectEnabled;
 
-      <StyledSettingsBody
-        sx={{
-          opacity: qaProjectEnabled ? 1 : 0.5,
-          pointerEvents: qaProjectEnabled ? 'auto' : 'none',
-        }}
-      >
-        <Typography variant="h5" sx={{ mt: 3, mb: 1 }}>
+  return (
+    <StyledContainer>
+      <StyledTitleRow>
+        <Typography variant="h5">
           <T keyName="project_settings_qa_global_title" />
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          <T keyName="project_settings_qa_global_description" />
-        </Typography>
+        <Switch
+          checked={qaProjectEnabled}
+          onChange={toggleQaMutation.isLoading ? undefined : handleToggle}
+          size="small"
+          data-cy="qa-enabled-toggle"
+        />
+      </StyledTitleRow>
+      <StyledDescription variant="body2" color="text.secondary">
+        <T keyName="project_settings_qa_global_description" />
+      </StyledDescription>
 
+      <StyledSettingsBody sx={{ opacity: disabled ? 0.5 : 1 }}>
         {Object.keys(settings.data?.settings || {}).map((type) => (
           <QaSettingsItem
             key={type}
             type={type as QaCheckType}
             value={settings.data?.settings?.[type as QaCheckType] || 'OFF'}
             onChange={handleChange}
+            disabled={disabled}
           />
         ))}
 
@@ -122,9 +134,10 @@ export const ProjectSettingsQa = () => {
             globalSettings={
               settings.data.settings as Record<QaCheckType, QaCheckSeverity>
             }
+            disabled={disabled}
           />
         )}
       </StyledSettingsBody>
-    </Box>
+    </StyledContainer>
   );
 };
