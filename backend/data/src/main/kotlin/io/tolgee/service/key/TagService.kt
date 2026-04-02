@@ -405,8 +405,9 @@ class TagService(
     key: Key,
     tagId: Long,
   ) {
-    val tag = find(tagId)?.takeIf { it.project.id == key.project.id }
-      ?: throw NotFoundException(Message.TAG_NOT_FOUND)
+    val tag =
+      find(tagId)?.takeIf { it.project.id == key.project.id }
+        ?: throw NotFoundException(Message.TAG_NOT_FOUND)
     remove(key, tag)
   }
 }

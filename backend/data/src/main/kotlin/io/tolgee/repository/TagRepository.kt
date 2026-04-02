@@ -63,11 +63,6 @@ interface TagRepository : JpaRepository<Tag, Long> {
   )
   fun getImportKeysWithTags(keyIds: Iterable<Long>): List<ImportKey>
 
-@Transactional
-  @Modifying(flushAutomatically = true)
-  @Query("delete from Tag t where t.id in :tagIds")
-  fun deleteByIdIn(tagIds: Collection<Long>)
-
   /**
    * Deletes tags atomically: only removes a tag if it has no remaining keyMeta links at delete time.
    *
