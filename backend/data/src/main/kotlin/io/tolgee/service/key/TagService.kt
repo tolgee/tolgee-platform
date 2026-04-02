@@ -192,16 +192,9 @@ class TagService(
     tag: Tag,
   ) {
     key.keyMeta?.let { keyMeta ->
-      // Check emptiness via query before modifying anything.
-      // Do NOT access tag.keyMetas — it lazy-loads the entire KeyMeta
-      // collection for the tag, which can be 10k+ objects for large projects.
-      val tagWouldBecomeEmpty =
-        tagRepository.findTagIdsThatWouldBecomeEmpty(listOf(tag.id), listOf(keyMeta.id)).isNotEmpty()
       keyMeta.tags.remove(tag)
       keyMetaService.save(keyMeta)
-      if (tagWouldBecomeEmpty) {
-        tagRepository.deleteByIdIn(listOf(tag.id))
-      }
+      tagRepository.deleteUnusedByIdIn(listOf(tag.id))
     }
   }
 
@@ -287,16 +280,8 @@ class TagService(
     val keyMetas = keys.mapNotNull { it.keyMeta }
     if (keyMetas.isEmpty()) return
 
-    val keyMetaIds = keyMetas.map { it.id }.toSet()
     val tagIds = keyMetas.flatMap { km -> km.tags.map { it.id } }.toSet()
     if (tagIds.isEmpty()) return
-
-    // Find which tags would become empty after removing these keyMetas,
-    // using a pure-ID existence query — no entity graph loaded.
-    val tagIdsToDelete =
-      traceLogMeasureTime("tagService: deleteAllTagsForKeys: findTagIdsThatWouldBecomeEmpty") {
-        tagRepository.findTagIdsThatWouldBecomeEmpty(tagIds, keyMetaIds)
-      }
 
     // Clear tags from each keyMeta (owning side): removes join-table entries
     // and triggers activity logging via @ActivityLoggedProp on KeyMeta.tags.
@@ -305,17 +290,12 @@ class TagService(
       keyMetaService.save(keyMeta)
     }
 
-    // Delete tags that have no remaining keyMetas.
-    // flushAutomatically = true on deleteByIdIn is required here, not defensive:
-    // Hibernate AUTO flush mode only flushes before queries that might read
-    // data in tables already dirtied in the session. A DELETE FROM tag touches
-    // a different table than key_meta_tags (where the tags.clear() writes are
-    // pending), so Hibernate would NOT auto-flush — leaving the join-table FK
-    // entries intact and causing a constraint violation. The explicit flush
-    // ensures key_meta_tags is written before the tag rows are removed.
-    if (tagIdsToDelete.isNotEmpty()) {
-      tagRepository.deleteByIdIn(tagIdsToDelete)
-    }
+    // Delete tags that have no remaining keyMetas, atomically.
+    // deleteUnusedByIdIn re-checks NOT EXISTS at delete time, so two concurrent
+    // transactions cannot both skip the delete and leave orphaned tags.
+    // flushAutomatically = true ensures key_meta_tags removals are written
+    // before the DELETE FROM tag runs (Hibernate would not auto-flush across tables).
+    tagRepository.deleteUnusedByIdIn(tagIds)
   }
 
   /**
