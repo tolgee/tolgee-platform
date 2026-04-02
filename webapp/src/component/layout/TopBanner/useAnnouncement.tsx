@@ -177,7 +177,7 @@ export function useAnnouncement() {
                 defaultValue="We've released Branching!"
               />
             }
-            link="https://docs.tolgee.io/platform/projects_and_organizations/branching"
+            link="https://docs.tolgee.io/platform/branching/overview"
           />
         );
 
