@@ -38,6 +38,7 @@ import { OperationTaskAddKeys } from '../ee/batchOperations/OperationTaskAddKeys
 import { OperationTaskRemoveKeys } from '../ee/batchOperations/OperationTaskRemoveKeys';
 import { useTranslationsSelector } from '../views/projects/translations/context/TranslationsContext';
 import { useProjectPermissions } from '../hooks/useProjectPermissions';
+import { useProject } from '../hooks/useProject';
 import { addPanel } from '../views/projects/translations/ToolsPanel/panelsList';
 import { tasksCount, TasksPanel } from '../ee/task/components/TasksPanel';
 import { addDeveloperViewItems } from '../views/projects/developer/developerViewItems';
@@ -240,6 +241,7 @@ export function useUserTaskCount() {
 }
 
 export const useAddBatchOperations = () => {
+  const project = useProject();
   const { satisfiesPermission } = useProjectPermissions();
   const prefilteredTask = useTranslationsSelector(
     (c) => c.prefilter?.task !== undefined
@@ -264,7 +266,7 @@ export const useAddBatchOperations = () => {
           label: t('batch_operations_qa_recheck'),
           divider: true,
           enabled: canEditTranslations,
-          hidden: !qaChecksFeature,
+          hidden: !qaChecksFeature || !project.useQaChecks,
           component: OperationQaRecheck,
         },
       ],
