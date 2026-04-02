@@ -82,7 +82,9 @@ class BatchJobChunkExecutionQueue(
    * Adds a single item. Returns false if already queued (duplicate).
    *
    * Thread-safe: compute() serializes concurrent add/poll for the same jobId,
-   * ensuring roundRobinOrder.addLast() is called exactly once per new job.
+   * ensuring roundRobinOrder.addLast(), incrementCharacterCount(), and
+   * totalSize.incrementAndGet() are called exactly once per new item, atomically
+   * with the deque mutation.
    */
   private fun addSingleItem(item: ExecutionQueueItem): Boolean {
     if (!queuedExecutionIds.add(item.chunkExecutionId)) return false
@@ -94,11 +96,11 @@ class BatchJobChunkExecutionQueue(
           roundRobinOrder.addLast(jobId)
         }
       deque.addLast(item)
+      incrementCharacterCount(item.jobCharacter)
+      totalSize.incrementAndGet()
       deque
     }
 
-    incrementCharacterCount(item.jobCharacter)
-    totalSize.incrementAndGet()
     return true
   }
 
