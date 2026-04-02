@@ -48,11 +48,12 @@ class BatchJobChunkExecutionQueue(
     private val jobQueues = ConcurrentHashMap<Long, ConcurrentLinkedDeque<ExecutionQueueItem>>()
 
     /**
-     * Round-robin job order. Each jobId appears exactly once when its queue is non-empty.
+     * Round-robin job order. Each jobId appears at most once when its queue is non-empty.
      * pollFirst() picks the next job to serve; addLast() re-queues it after serving one chunk.
-     * This gives O(1) fair scheduling without scanning all items.
+     * Using [ConcurrentOrderedSet] instead of a plain deque ensures addLast() is idempotent,
+     * preventing duplicate jobId entries under concurrent poll/add races.
      */
-    private val roundRobinOrder = ConcurrentLinkedDeque<Long>()
+    private val roundRobinOrder = ConcurrentOrderedSet<Long>()
 
     /**
      * O(1) duplicate detection — replaces the O(n) queue snapshot done on every add.
@@ -261,6 +262,9 @@ class BatchJobChunkExecutionQueue(
    * Uses pollFirst/addLast on roundRobinOrder — no full-queue scan required.
    *
    * Thread-safe: compute() serializes concurrent add/poll for the same jobId.
+   * roundRobinOrder is a [ConcurrentOrderedSet] so addLast() is idempotent — if a
+   * concurrent addSingleItem re-added jobId between our pollFirst() and compute(),
+   * our own addLast() inside compute() is a safe no-op instead of creating a duplicate.
    * If a job's deque turns out to be empty (concurrent drain), the job is skipped
    * and the next one is tried. maxAttempts prevents infinite loops in edge cases.
    */
@@ -270,7 +274,6 @@ class BatchJobChunkExecutionQueue(
     // jobQueues.size is O(1) (ConcurrentHashMap maintains an internal counter).
     // It bounds the loop to the number of distinct jobs: in the worst case we try every
     // job once and find all deques empty (concurrent drain), then give up.
-    // Do NOT use roundRobinOrder.size() — ConcurrentLinkedDeque.size() is O(n).
     val maxAttempts = jobQueues.size + 1
     var attempts = 0
     while (attempts++ <= maxAttempts) {
