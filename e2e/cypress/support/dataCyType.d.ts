@@ -121,7 +121,6 @@ declare namespace DataCy {
         "batch-operations-submit-button": true;
         "batch-progress": true;
         "batch-select-item": true;
-        "billing-plan": true;
         "billing-plan-included-credits": true;
         "billing-plan-included-keys": true;
         "billing-plan-included-seats": true;
