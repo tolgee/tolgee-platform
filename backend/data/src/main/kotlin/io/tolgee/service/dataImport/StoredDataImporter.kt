@@ -30,6 +30,8 @@ import io.tolgee.util.flushAndClear
 import io.tolgee.util.getSafeNamespace
 import io.tolgee.util.nullIfEmpty
 import jakarta.persistence.EntityManager
+import java.util.IdentityHashMap
+import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 
 class StoredDataImporter(
@@ -46,6 +48,8 @@ class StoredDataImporter(
   private val screenshots: List<ScreenshotImporter.Companion.ScreenshotToImport> = emptyList(),
   private val resolveConflict: ((ImportTranslation) -> ForceMode?)? = null,
 ) {
+  private val logger = LoggerFactory.getLogger(StoredDataImporter::class.java)
+
   private val importDataManager by lazy {
     if (_importDataManager != null) {
       return@lazy _importDataManager
@@ -124,17 +128,22 @@ class StoredDataImporter(
   }
 
   fun doImport(): ImportResult {
+    val importStart = System.currentTimeMillis()
+    fun elapsed() = System.currentTimeMillis() - importStart
+
     reportStatus(ImportApplicationStatus.PREPARING_AND_VALIDATING)
 
     importDataManager.storedLanguages.forEach {
       it.prepareImport()
     }
+    logger.trace("Import phase: prepareImport completed in {}ms", elapsed())
 
     throwOnUnresolvedConflicts(unresolvedConflicts)
 
     addKeysAndCheckPermissions()
 
     handleKeyMetas()
+    logger.trace("Import phase: addKeys + handleKeyMetas completed in {}ms", elapsed())
 
     reportStatus(ImportApplicationStatus.STORING_KEYS)
 
@@ -142,19 +151,25 @@ class StoredDataImporter(
 
     addScreenshots()
 
-    val keyEntitiesToSave = saveKeys()
-
     handlePluralization()
-
-    saveKeyMetaData(keyEntitiesToSave)
+    logger.trace("Import phase: namespaces + screenshots + pluralization completed in {}ms", elapsed())
 
     reportStatus(ImportApplicationStatus.STORING_TRANSLATIONS)
 
-    saveTranslations()
+    checkTranslationPermissions()
+
+    // Release import entities (ImportKey, ImportTranslation) and existing entity
+    // references from importDataManager before the batch loop. At 1M keys × 3
+    // languages, these hold ~6M entities (~1.5 GB) that are no longer needed —
+    // all necessary data has been extracted into keysToSave/translationsToSave.
+    // The Hibernate session still references them, so we also flush and clear.
+    releaseImportData()
+    logger.trace("Import phase: releaseImportData completed in {}ms", elapsed())
+
+    saveKeysAndTranslationsInBatches()
+    logger.trace("Import phase: saveKeysAndTranslationsInBatches completed in {}ms", elapsed())
 
     reportStatus(ImportApplicationStatus.FINALIZING)
-
-    entityManager.flush()
 
     translationService.setOutdatedBatch(outdatedFlagKeys)
 
@@ -163,6 +178,7 @@ class StoredDataImporter(
     entityManager.flush()
 
     deleteOtherKeys()
+    logger.trace("Import phase: finalization completed in {}ms", elapsed())
 
     entityManager.flushAndClear()
 
@@ -230,6 +246,21 @@ class StoredDataImporter(
     saveKeys(handler.keysToSave)
   }
 
+  private fun saveKeyMetaDataForBatch(keyBatch: Collection<Key>) {
+    val batchKeySet = keyBatch.toSet()
+    val batchMetas = keyMetasToSave.filter { it.key in batchKeySet }
+    if (batchMetas.isEmpty()) return
+
+    val comments = keyBatch.flatMap { it.keyMeta?.comments ?: emptyList() }
+    val codeReferences = keyBatch.flatMap { it.keyMeta?.codeReferences ?: emptyList() }
+    keyMetaService.saveAll(batchMetas)
+    keyMetaService.saveAllComments(comments)
+    keyMetaService.saveAllCodeReferences(codeReferences)
+
+    comments.groupBy { it.keyMeta }.forEach { (keyMeta, c) -> keyMeta.comments = c.toMutableList() }
+    codeReferences.groupBy { it.keyMeta }.forEach { (keyMeta, c) -> keyMeta.codeReferences = c.toMutableList() }
+  }
+
   private fun saveKeyMetaData(keyEntitiesToSave: Collection<Key>) {
     // hibernate bug workaround:
     // saving key metas will cause them to be recreated by hibernate with empty values
@@ -271,6 +302,70 @@ class StoredDataImporter(
         isOverridable = ConflictType.isOverridable(it.conflictType),
       )
     }
+  }
+
+  /**
+   * Releases import entities from [importDataManager] and clears the Hibernate session.
+   *
+   * At 1M keys × 3 languages, [ImportDataManager] holds ~3M [ImportKey], ~3M [ImportTranslation],
+   * plus existing keys/translations loaded for conflict resolution — totalling ~1.5 GB of heap.
+   * By the time we reach [saveKeysAndTranslationsInBatches], all data has been extracted into
+   * [keysToSave] and [translationsToSave], so the import entities are no longer needed.
+   *
+   * Clearing the collections AND flushing the Hibernate session lets the GC reclaim both
+   * the Java objects and the Hibernate persistence context entries that track them (~2 GB
+   * of [MutableEntityEntry], [EntityKey], [LazyAttributeLoadingInterceptor] etc.).
+   */
+  private fun releaseImportData() {
+    importDataManager.storedKeys.clear()
+    importDataManager.storedTranslations.clear()
+    importDataManager.translationsToUpdateDueToCollisions.clear()
+    entityManager.flushAndClear()
+  }
+
+  /**
+   * Saves keys, their metadata, and translations in batches with flushAndClear
+   * after each batch. This prevents the Hibernate session from holding all entities
+   * simultaneously, which would cause OOM at large scale (100k+ keys).
+   *
+   * Keys and their translations are saved in the same batch so key references
+   * remain managed — no getReference() proxies needed.
+   */
+  private fun saveKeysAndTranslationsInBatches() {
+    // Group by key identity (reference), not by equals/hashCode which is slow for entities
+    val translationsByKey = IdentityHashMap<Key, MutableList<Translation>>()
+    translationsToSave.forEach { (_, translation) ->
+      translationsByKey.getOrPut(translation.key) { mutableListOf() }.add(translation)
+    }
+
+    val allKeys = keysToSave.values.toList()
+    val totalBatches = (allKeys.size + FLUSH_BATCH_SIZE - 1) / FLUSH_BATCH_SIZE
+    var savedTranslations = 0
+
+    allKeys.chunked(FLUSH_BATCH_SIZE).forEachIndexed { index, keyBatch ->
+      // Save keys and their metadata
+      keyService.saveAll(keyBatch)
+      saveKeyMetaDataForBatch(keyBatch)
+
+      // Save translations for these keys
+      val batchTranslations = keyBatch.flatMap { key ->
+        translationsByKey[key] ?: emptyList()
+      }
+      translationService.saveAll(batchTranslations)
+      savedTranslations += batchTranslations.size
+
+      entityManager.flushAndClear()
+      logger.info(
+        "Batch {}/{}: {} keys, {} translations (total: {}/{})",
+        index + 1, totalBatches, keyBatch.size, batchTranslations.size,
+        savedTranslations, translationsToSave.size,
+      )
+    }
+
+  }
+
+  companion object {
+    private const val FLUSH_BATCH_SIZE = 5000
   }
 
   private fun saveKeys(): Collection<Key> {
