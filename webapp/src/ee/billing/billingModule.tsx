@@ -15,11 +15,6 @@ export type BillingAdministrationMenuItem = {
 };
 
 export const billingModule = {
-  GlobalLimitPopover: Empty,
-  CriticalUsageCircle: Empty as React.FC<{ sx?: any }>,
-  TrialAnnouncement: Empty,
-  TrialChip: Empty,
-
   billingMenuItems: [] as React.FC<BillingMenuItemsProps>[],
 
   AdministrationRoutes: Empty,

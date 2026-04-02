@@ -76,11 +76,10 @@ export { AiPrompt } from '../ee/llm/AiPrompt/AiPrompt';
 export { AiContextData } from '../ee/llm/AiContextData/AiContextData';
 export { AiPromptsList } from '../ee/llm/AiPromptsList/AiPromptsList';
 
-// Billing — delegated to billingModule
-export const GlobalLimitPopover = billingModule.GlobalLimitPopover;
-export const CriticalUsageCircle = billingModule.CriticalUsageCircle;
-export const TrialAnnouncement = billingModule.TrialAnnouncement;
-export const TrialChip = billingModule.TrialChip;
+export { GlobalLimitPopover } from '../ee/billing/limitPopover/GlobalLimitPopover';
+export { CriticalUsageCircle } from '../ee/billing/component/CriticalUsageCircle';
+export { TrialAnnouncement } from '../ee/billing/component/topBar/TrialAnnouncement';
+export { TrialChip } from '../ee/billing/component/topBar/TrialChip';
 
 export const billingMenuItems =
   billingModule.billingMenuItems as React.FC<BillingMenuItemsProps>[];
