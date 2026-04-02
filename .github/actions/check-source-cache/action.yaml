@@ -16,6 +16,10 @@ inputs:
     description: Additional string to include in the hash (e.g. another repo's commit SHA)
     required: false
     default: ''
+  working-directory:
+    description: Directory to run git ls-files in (defaults to workspace root)
+    required: false
+    default: '.'
 
 outputs:
   cache-hit:
@@ -31,6 +35,7 @@ runs:
     - name: Compute source hash
       id: hash
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: |
         FILE_HASH=$(git ls-files -s -- . \
           ':!docs/' ':!storybook-tolgee-addon/' ':!docker/' \
