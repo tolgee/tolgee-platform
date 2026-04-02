@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogTitle,
   styled,
+  Switch,
   Tooltip,
   useTheme,
 } from '@mui/material';
@@ -62,6 +63,12 @@ export const WebhookItem = ({ data }: Props) => {
     method: 'post',
   });
 
+  const toggleWebhook = useApiMutation({
+    url: '/v2/projects/{projectId}/webhook-configs/{id}',
+    method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/webhook-configs',
+  });
+
   function handleTest() {
     testLoadable.mutate(
       {
@@ -79,9 +86,45 @@ export const WebhookItem = ({ data }: Props) => {
     );
   }
 
+  function handleToggle() {
+    toggleWebhook.mutate({
+      path: { projectId: project.id, id: data.id },
+      content: {
+        'application/json': {
+          url: data.url,
+          enabled: !data.enabled,
+        },
+      },
+    });
+  }
+
+  const isAutoDisabled = !data.enabled && data.firstFailed;
+
+  const toggleTooltip = isAutoDisabled
+    ? t(
+        'webhook_auto_disabled_hint',
+        'Automatically disabled due to persistent failures'
+      )
+    : data.enabled
+    ? t('webhook_toggle_disable_hint', 'Disable webhook')
+    : t('webhook_toggle_enable_hint', 'Enable webhook');
+
   return (
-    <StyledContainer data-cy="webhooks-list-item" data-cy-url={data.url}>
+    <StyledContainer
+      data-cy="webhooks-list-item"
+      data-cy-url={data.url}
+      sx={{ opacity: data.enabled ? 1 : 0.6 }}
+    >
       <Box display="flex" gap={2} alignItems="center">
+        <Tooltip title={toggleTooltip}>
+          <Switch
+            size="small"
+            checked={data.enabled}
+            onChange={handleToggle}
+            disabled={toggleWebhook.isLoading}
+            data-cy="webhook-item-toggle"
+          />
+        </Tooltip>
         <Box>{data.url}</Box>
         {Boolean(data.lastExecuted) && (
           <Tooltip title={t('webhooks_last_run_hint')}>

@@ -7233,6 +7233,8 @@ export interface components {
       data: components["schemas"]["PromptVariableDto"][];
     };
     WebhookConfigModel: {
+      /** @description Whether the webhook is enabled. Disabled webhooks are not executed. */
+      enabled: boolean;
       /**
        * Format: int64
        * @description Date of the first failed webhook request. If the last webhook request is successful, this value is set to null.
@@ -7249,6 +7251,7 @@ export interface components {
       webhookSecret: string;
     };
     WebhookConfigRequest: {
+      enabled?: boolean;
       url: string;
     };
     WebhookTestResponse: {

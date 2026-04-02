@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import java.util.Date
 
 @Repository
 @Lazy
@@ -33,4 +34,25 @@ interface WebhookConfigRepository : JpaRepository<WebhookConfig, Long> {
     projectId: Long,
     pageable: Pageable,
   ): Page<WebhookConfig>
+
+  @Query(
+    """
+    from WebhookConfig wc
+    where wc.enabled = true
+      and wc.firstFailed is not null
+      and wc.firstFailed <= :cutoffDate
+  """,
+  )
+  fun findEnabledFailingSince(cutoffDate: Date): List<WebhookConfig>
+
+  @Query(
+    """
+    from WebhookConfig wc
+    where wc.enabled = true
+      and wc.firstFailed is not null
+      and wc.firstFailed <= :cutoffDate
+      and wc.autoDisableNotified = false
+  """,
+  )
+  fun findEnabledFailingNotNotified(cutoffDate: Date): List<WebhookConfig>
 }

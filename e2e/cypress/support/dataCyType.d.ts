@@ -984,6 +984,7 @@ declare namespace DataCy {
         "webhook-form-delete" |
         "webhook-form-save" |
         "webhook-form-url" |
+        "webhook-item-toggle" |
         "webhooks-add-item-button" |
         "webhooks-item-edit" |
         "webhooks-item-show-secret" |

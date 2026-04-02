@@ -29,6 +29,7 @@ class WebhookProcessor(
     val view = activityService.findProjectActivity(activityRevisionId) ?: return
     val activityModel = activityModelAssembler.toModel(view)
     val config = action.webhookConfig ?: return
+    if (!config.enabled) return
 
     val data =
       WebhookRequest(
@@ -62,7 +63,14 @@ class WebhookProcessor(
     webhookConfig: WebhookConfig,
     failing: Boolean,
   ) {
-    webhookConfig.firstFailed = if (failing) currentDateProvider.date else null
+    if (failing) {
+      if (webhookConfig.firstFailed == null) {
+        webhookConfig.firstFailed = currentDateProvider.date
+      }
+    } else {
+      webhookConfig.firstFailed = null
+      webhookConfig.autoDisableNotified = false
+    }
     webhookConfig.lastExecuted = currentDateProvider.date
     entityManager.persist(webhookConfig)
   }

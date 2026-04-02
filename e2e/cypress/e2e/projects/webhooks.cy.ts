@@ -113,6 +113,48 @@ describe('Content delivery', () => {
     cy.gcy('webhooks-add-item-button').should('be.disabled');
   });
 
+  it('toggles webhook disabled and enabled', () => {
+    createWebhook();
+    const item = gcyAdvanced({ value: 'webhooks-list-item', url: testUrl });
+
+    // Disable the webhook
+    item.findDcy('webhook-item-toggle').find('input').click();
+    waitForGlobalLoading();
+
+    // Verify the row is dimmed (disabled state)
+    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl }).should(
+      'have.css',
+      'opacity',
+      '0.6'
+    );
+
+    // Toggle should be unchecked
+    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
+      .findDcy('webhook-item-toggle')
+      .find('input')
+      .should('not.be.checked');
+
+    // Re-enable the webhook
+    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
+      .findDcy('webhook-item-toggle')
+      .find('input')
+      .click();
+    waitForGlobalLoading();
+
+    // Verify full opacity (enabled state)
+    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl }).should(
+      'have.css',
+      'opacity',
+      '1'
+    );
+
+    // Toggle should be checked
+    gcyAdvanced({ value: 'webhooks-list-item', url: testUrl })
+      .findDcy('webhook-item-toggle')
+      .find('input')
+      .should('be.checked');
+  });
+
   function createWebhook(url: string = testUrl) {
     cy.gcy('webhooks-add-item-button').click();
     cy.gcy('webhook-form-url').find('input').type(url);

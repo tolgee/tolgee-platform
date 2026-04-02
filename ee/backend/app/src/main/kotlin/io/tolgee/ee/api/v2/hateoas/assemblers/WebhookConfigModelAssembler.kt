@@ -16,9 +16,10 @@ class WebhookConfigModelAssembler :
     return WebhookConfigModel(
       id = entity.id,
       url = entity.url,
-      entity.webhookSecret,
-      entity.firstFailed?.time,
-      entity.lastExecuted?.time,
+      webhookSecret = entity.webhookSecret,
+      enabled = entity.enabled,
+      firstFailed = entity.firstFailed?.time,
+      lastExecuted = entity.lastExecuted?.time,
     )
   }
 }
