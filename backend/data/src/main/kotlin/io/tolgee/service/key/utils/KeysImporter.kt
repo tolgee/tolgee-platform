@@ -1,7 +1,6 @@
 package io.tolgee.service.key.utils
 
 import io.tolgee.dtos.request.translation.ImportKeysItemDto
-import io.tolgee.events.OnTranslationTextsModified
 import io.tolgee.formats.convertToPluralIfAnyIsPlural
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
@@ -97,16 +96,5 @@ class KeysImporter(
 
     tagService.tagKeys(toTag)
     keyMetaService.saveAll(keyMetasToSave)
-
-    val validTranslationIds = updatedTranslationIds.filter { it != 0L }
-    if (validTranslationIds.isNotEmpty()) {
-      applicationContext.publishEvent(
-        OnTranslationTextsModified(
-          source = this,
-          translationIds = validTranslationIds,
-          projectId = project.id,
-        ),
-      )
-    }
   }
 }

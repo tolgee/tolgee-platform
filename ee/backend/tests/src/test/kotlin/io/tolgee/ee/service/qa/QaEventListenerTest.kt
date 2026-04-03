@@ -4,6 +4,7 @@ import com.posthog.server.PostHog
 import io.tolgee.batch.BatchJobService
 import io.tolgee.batch.data.BatchJobType
 import io.tolgee.constants.Feature
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.LanguageRequest
 import io.tolgee.dtos.request.project.CreateProjectRequest
 import io.tolgee.dtos.request.project.EditProjectRequest
@@ -12,6 +13,7 @@ import io.tolgee.ee.development.QaTestData
 import io.tolgee.ee.utils.QaTestUtil
 import io.tolgee.events.OnOrganizationFeaturesChanged
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.security.ProjectHolder
 import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectHardDeletingService
 import io.tolgee.testing.AuthorizedControllerTest
@@ -51,6 +53,9 @@ class QaEventListenerTest : AuthorizedControllerTest() {
 
   @Autowired
   private lateinit var projectHardDeletingService: ProjectHardDeletingService
+
+  @Autowired
+  private lateinit var projectHolder: ProjectHolder
 
   lateinit var testData: QaTestData
 
@@ -201,6 +206,7 @@ class QaEventListenerTest : AuthorizedControllerTest() {
       }
 
     executeInNewTransaction(platformTransactionManager) {
+      projectHolder.project = ProjectDto.fromEntity(testData.project)
       projectService.editProject(
         testData.project.id,
         EditProjectRequest(
@@ -210,7 +216,7 @@ class QaEventListenerTest : AuthorizedControllerTest() {
       )
     }
 
-    // The BEFORE_COMMIT listener triggers recheckTranslations, which starts a batch job
+    // The activity listener triggers recheckTranslations, which starts a batch job
     waitForNotThrowing(timeout = 10_000, pollTime = 500) {
       executeInNewTransaction(platformTransactionManager) {
         val jobs = batchJobService.getAllByProjectId(testData.project.id)
@@ -223,6 +229,7 @@ class QaEventListenerTest : AuthorizedControllerTest() {
   @Test
   fun `triggers recheck when language tag changes`() {
     executeInNewTransaction(platformTransactionManager) {
+      projectHolder.project = ProjectDto.fromEntity(testData.project)
       languageService.editLanguage(
         languageId = testData.frenchLanguage.id,
         projectId = testData.project.id,
@@ -256,6 +263,7 @@ class QaEventListenerTest : AuthorizedControllerTest() {
 
     // Change language tag — should NOT trigger QA recheck since QA is disabled
     executeInNewTransaction(platformTransactionManager) {
+      projectHolder.project = ProjectDto.fromEntity(testData.project)
       languageService.editLanguage(
         languageId = testData.frenchLanguage.id,
         projectId = testData.project.id,

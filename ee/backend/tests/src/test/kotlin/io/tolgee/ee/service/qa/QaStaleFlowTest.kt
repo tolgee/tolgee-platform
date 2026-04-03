@@ -88,10 +88,10 @@ class QaStaleFlowTest : AuthorizedControllerTest() {
 
   @Test
   fun `full cycle - save sets stale, batch clears stale and persists issues`() {
-    // Save translation to trigger QA checks
+    // Save translation with DIFFERENT text to trigger QA checks via activity system
     performAuthPut(
       translationsUrl,
-      mapOf("key" to "test-key", "translations" to mapOf("fr" to "bonjour monde")),
+      mapOf("key" to "test-key", "translations" to mapOf("fr" to "bonjour le monde")),
     ).andIsOk
 
     // Verify stale is set to true immediately

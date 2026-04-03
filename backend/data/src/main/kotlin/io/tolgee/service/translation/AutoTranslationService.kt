@@ -8,7 +8,6 @@ import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
-import io.tolgee.events.OnTranslationTextsModified
 import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -26,7 +25,6 @@ import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import jakarta.persistence.EntityManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 
@@ -42,7 +40,6 @@ class AutoTranslationService(
   private val entityManager: EntityManager,
   private val transactionManager: PlatformTransactionManager,
   private val projectService: ProjectService,
-  private val applicationContext: ApplicationContext,
 ) {
   val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -120,13 +117,6 @@ class AutoTranslationService(
     text ?: return
 
     translation.setValueAndState(project, text, usedService, promptId)
-    applicationContext.publishEvent(
-      OnTranslationTextsModified(
-        source = this,
-        translationIds = listOf(translation.id),
-        projectId = projectId,
-      ),
-    )
   }
 
   private fun getAutoTranslatedValue(
@@ -211,18 +201,7 @@ class AutoTranslationService(
         .filter { it.first.usingPrimaryMtService && !translatedWithTm.contains(it.second) }
         .mapNotNull { it.second }
 
-    val mtModifiedIds = autoTranslateUsingMachineTranslation(toMtTranslate, key, isBatch)
-
-    val modifiedTranslationIds = translatedWithTm.map { it.id } + mtModifiedIds
-    if (modifiedTranslationIds.isNotEmpty()) {
-      applicationContext.publishEvent(
-        OnTranslationTextsModified(
-          source = this,
-          translationIds = modifiedTranslationIds,
-          projectId = key.project.id,
-        ),
-      )
-    }
+    autoTranslateUsingMachineTranslation(toMtTranslate, key, isBatch)
   }
 
   /**
@@ -410,9 +389,9 @@ class AutoTranslationService(
     val configs = autoTranslationConfigRepository.findByProjectAndTargetLanguageIdIn(project, targetLanguageIds)
     val default =
       autoTranslationConfigRepository.findDefaultForProject(project)
-        ?: autoTranslationConfigRepository.findDefaultForProject(project) ?: AutoTranslationConfig().also {
-        it.project = project
-      }
+        ?: AutoTranslationConfig().also {
+          it.project = project
+        }
 
     return targetLanguageIds.associateWith { languageId ->
       (configs.find { it.targetLanguage?.id == languageId } ?: default)

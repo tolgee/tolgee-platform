@@ -6,7 +6,6 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.queryResults.qa.KeyLanguagePairView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.TranslationFilters
-import io.tolgee.events.OnTranslationTextsModified
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.formats.PluralForms
@@ -477,7 +476,6 @@ class TranslationService(
       it.clear()
     }
     saveAll(translations)
-    publishTextsModifiedEvent(translations)
   }
 
   fun copyBatch(
@@ -498,7 +496,6 @@ class TranslationService(
         it.outdated = false
       }
     saveAll(targetTranslations)
-    publishTextsModifiedEvent(targetTranslations)
   }
 
   private fun getTargetTranslations(
@@ -542,7 +539,6 @@ class TranslationService(
     if (translations.isEmpty()) return
     translations.forEach { it.qaChecksStale = true }
     saveAll(translations)
-    publishTextsModifiedEvent(translations)
   }
 
   fun onKeyIsPluralChanged(
@@ -556,7 +552,6 @@ class TranslationService(
         .getAllByKeyIdInExcluding(keyIdToArgNameMap.keys, ignoreTranslationsForMigration.nullIfEmpty())
     translations.forEach { handleIsPluralChanged(it, newIsPlural, keyIdToArgNameMap[it.key.id], throwOnDataLoss) }
     saveAll(translations)
-    publishTextsModifiedEvent(translations)
   }
 
   private fun handleIsPluralChanged(
@@ -658,18 +653,6 @@ class TranslationService(
     query.where(*predicates.toTypedArray())
 
     return entityManager.createQuery(query).resultList
-  }
-
-  private fun publishTextsModifiedEvent(translations: Collection<Translation>) {
-    val ids = translations.filter { it.id != 0L }.map { it.id }
-    if (ids.isEmpty()) return
-    val projectId =
-      translations
-        .first()
-        .key.project.id
-    applicationContext.publishEvent(
-      OnTranslationTextsModified(source = this, translationIds = ids, projectId = projectId),
-    )
   }
 
   @Transactional

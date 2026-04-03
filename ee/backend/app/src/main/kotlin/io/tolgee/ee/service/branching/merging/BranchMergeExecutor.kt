@@ -3,7 +3,6 @@ package io.tolgee.ee.service.branching.merging
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.ee.exceptions.BranchMergeConflictNotResolvedException
 import io.tolgee.ee.service.branching.BranchSnapshotService
-import io.tolgee.events.OnTranslationTextsModified
 import io.tolgee.model.branching.Branch
 import io.tolgee.model.branching.BranchMerge
 import io.tolgee.model.branching.BranchMergeChange
@@ -17,7 +16,6 @@ import io.tolgee.repository.KeyRepository
 import io.tolgee.service.key.KeyMetaService
 import io.tolgee.service.key.KeyService
 import io.tolgee.service.translation.TranslationService
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.LinkedHashMap
@@ -30,7 +28,6 @@ class BranchMergeExecutor(
   private val translationService: TranslationService,
   private val currentDateProvider: CurrentDateProvider,
   private val branchSnapshotService: BranchSnapshotService,
-  private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
   @Transactional
   fun execute(merge: BranchMerge) {
@@ -38,16 +35,15 @@ class BranchMergeExecutor(
     val snapshotKeys by lazy {
       branchSnapshotService.getSnapshotKeys(merge.sourceBranch.id).associateBy { it.originalKeyId }
     }
-    val mergedTranslationIds = mutableListOf<Long>()
     merge.changes.forEach { change ->
       when (change.change) {
         BranchKeyMergeChangeType.ADD -> {
-          applyAddition(change, merge.targetBranch, mergedTranslationIds)
+          applyAddition(change, merge.targetBranch)
         }
 
         BranchKeyMergeChangeType.UPDATE -> {
           change.withSnapshotKey(snapshotKeys) { snapshotKey ->
-            applyUpdate(change, snapshotKey, mergedTranslationIds)
+            applyUpdate(change, snapshotKey)
           }
         }
 
@@ -57,16 +53,10 @@ class BranchMergeExecutor(
 
         BranchKeyMergeChangeType.CONFLICT -> {
           change.withSnapshotKey(snapshotKeys) { snapshotKey ->
-            applyConflict(change, snapshotKey, mergedTranslationIds)
+            applyConflict(change, snapshotKey)
           }
         }
       }
-    }
-
-    if (mergedTranslationIds.isNotEmpty()) {
-      applicationEventPublisher.publishEvent(
-        OnTranslationTextsModified(this, mergedTranslationIds, merge.targetBranch.project.id),
-      )
     }
 
     merge.changes.clear()
@@ -95,32 +85,29 @@ class BranchMergeExecutor(
   private fun applyConflict(
     change: BranchMergeChange,
     keySnapshot: KeySnapshot,
-    mergedTranslationIds: MutableList<Long>,
   ) {
     change.resolution ?: throw BranchMergeConflictNotResolvedException()
-    applyUpdate(change, keySnapshot, mergedTranslationIds)
+    applyUpdate(change, keySnapshot)
   }
 
   private fun applyUpdate(
     change: BranchMergeChange,
     snapshotKey: KeySnapshot,
-    mergedTranslationIds: MutableList<Long>,
   ) {
     val resolution = change.resolution ?: BranchKeyMergeResolutionType.SOURCE
     val sourceKey = change.sourceKey ?: return
     val targetKey =
       change.targetKey ?: run {
-        applyAddition(change, change.branchMerge.targetBranch, mergedTranslationIds)
+        applyAddition(change, change.branchMerge.targetBranch)
         return
       }
     targetKey.merge(sourceKey, snapshotKey, resolution)
-    persistAfterMerge(targetKey, mergedTranslationIds)
+    persistAfterMerge(targetKey)
   }
 
   private fun applyAddition(
     change: BranchMergeChange,
     targetBranch: Branch,
-    mergedTranslationIds: MutableList<Long>,
   ) {
     if (change.resolution != BranchKeyMergeResolutionType.SOURCE) {
       return
@@ -161,7 +148,6 @@ class BranchMergeExecutor(
         }
       sourceTranslation.labels.forEach(translation::addLabel)
       translationService.save(translation)
-      mergedTranslationIds.add(translation.id)
     }
 
     sourceKey.keyScreenshotReferences.forEach { reference ->
@@ -185,16 +171,10 @@ class BranchMergeExecutor(
     keyService.hardDelete(targetKey.id)
   }
 
-  private fun persistAfterMerge(
-    key: Key,
-    mergedTranslationIds: MutableList<Long>,
-  ) {
+  private fun persistAfterMerge(key: Key) {
     key.translations.forEach {
       if (it.id == 0L) {
         translationService.save(it)
-      }
-      if (it.qaChecksStale) {
-        mergedTranslationIds.add(it.id)
       }
     }
   }

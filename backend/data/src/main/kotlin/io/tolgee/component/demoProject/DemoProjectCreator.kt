@@ -5,8 +5,6 @@ import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.RelatedKeyDto
 import io.tolgee.dtos.request.KeyInScreenshotPositionDto
 import io.tolgee.dtos.request.ScreenshotInfoDto
-import io.tolgee.events.OnProjectCreated
-import io.tolgee.events.OnTranslationTextsModified
 import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
@@ -43,7 +41,6 @@ class DemoProjectCreator(
     activityHolder.activity = ActivityType.CREATE_PROJECT
     activityHolder.activityRevision.projectId = project.id
     setStates()
-    publishQaRecheckEvent()
     addBigMeta()
     addScreenshots()
     tagKeys()
@@ -51,17 +48,7 @@ class DemoProjectCreator(
     addComments()
     project.baseLanguage = languages["en"]
     projectService.save(project)
-    applicationContext.publishEvent(OnProjectCreated(project))
     return project
-  }
-
-  private fun publishQaRecheckEvent() {
-    val translationIds = translations.values.map { it.id }
-    if (translationIds.isNotEmpty()) {
-      applicationContext.publishEvent(
-        OnTranslationTextsModified(source = this, translationIds = translationIds, projectId = project.id),
-      )
-    }
   }
 
   private fun addComments() {
@@ -219,7 +206,7 @@ class DemoProjectCreator(
   }
 
   private fun getOrCreateKeyMeta(key: Key): KeyMeta {
-    return key.keyMeta ?: let {
+    return key.keyMeta ?: run {
       val keyMeta = KeyMeta()
       keyMeta.key = key
       key.keyMeta = keyMeta

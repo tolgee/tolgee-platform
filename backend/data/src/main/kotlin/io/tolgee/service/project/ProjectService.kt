@@ -12,7 +12,6 @@ import io.tolgee.dtos.request.project.ProjectFilters
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
-import io.tolgee.events.OnProjectBaseLanguageChanged
 import io.tolgee.events.OnProjectSoftDeleted
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -196,12 +195,8 @@ class ProjectService(
       val language =
         project.languages.find { it.id == dto.baseLanguageId }
           ?: throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
-      val oldBaseLanguageId = project.baseLanguage?.id
       project.baseLanguage = language
       languageService.evictCacheForProject(project.id)
-      if (oldBaseLanguageId != null && oldBaseLanguageId != language.id) {
-        applicationContext.publishEvent(OnProjectBaseLanguageChanged(project.id))
-      }
     }
 
     val newSlug = dto.slug

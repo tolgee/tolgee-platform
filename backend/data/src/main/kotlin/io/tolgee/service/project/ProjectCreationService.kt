@@ -3,7 +3,6 @@ package io.tolgee.service.project
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.project.CreateProjectRequest
-import io.tolgee.events.OnProjectCreated
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -11,7 +10,6 @@ import io.tolgee.model.branching.Branch
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.organization.OrganizationService
 import org.springframework.cache.annotation.CacheEvict
-import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,7 +18,6 @@ class ProjectCreationService(
   private val organizationService: OrganizationService,
   private val languageService: LanguageService,
   private val projectService: ProjectService,
-  private val applicationContext: ApplicationContext,
 ) {
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
@@ -39,8 +36,6 @@ class ProjectCreationService(
 
     val createdLanguages = dto.languages!!.map { languageService.createLanguage(it, project) }
     project.baseLanguage = getOrAssignBaseLanguage(dto, createdLanguages)
-
-    applicationContext.publishEvent(OnProjectCreated(project))
 
     return project
   }
