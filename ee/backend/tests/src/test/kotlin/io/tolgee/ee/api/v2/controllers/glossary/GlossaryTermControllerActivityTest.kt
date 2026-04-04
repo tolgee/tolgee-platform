@@ -1,5 +1,6 @@
 package io.tolgee.ee.api.v2.controllers.glossary
 
+import io.tolgee.ActivityTestUtil
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.GlossaryTestData
@@ -8,7 +9,7 @@ import io.tolgee.ee.data.glossary.CreateGlossaryTermWithTranslationRequest
 import io.tolgee.ee.data.glossary.DeleteMultipleGlossaryTermsRequest
 import io.tolgee.ee.data.glossary.UpdateGlossaryTermWithTranslationRequest
 import io.tolgee.fixtures.andIsOk
-import io.tolgee.model.activity.ActivityRevision
+import io.tolgee.model.glossary.Glossary
 import io.tolgee.model.glossary.GlossaryTerm
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assert
@@ -24,6 +25,9 @@ import org.springframework.boot.test.context.SpringBootTest
 class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
+  @Autowired
+  private lateinit var activityTestUtil: ActivityTestUtil
 
   lateinit var testData: GlossaryTestData
 
@@ -55,10 +59,7 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
       .andIsOk
 
     executeInNewTransaction {
-      val latestActivityRevision = getLatestActivityRevision()
-
-      // Verify that activity was recorded
-      latestActivityRevision.assert.isNotNull()
+      val latestActivityRevision = activityTestUtil.getLastRevision()!!
 
       // Verify activity type
       latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_TERM_CREATE)
@@ -91,7 +92,7 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
 
       // Verify that we can find the glossary in the describingRelations
       val describingRelations = latestActivityRevision.describingRelations
-      val glossaryRelation = describingRelations.find { it.entityClass == "Glossary" }
+      val glossaryRelation = describingRelations.find { it.entityClass == Glossary::class.simpleName }
       glossaryRelation.assert.isNotNull()
       glossaryRelation!!.entityId.assert.isEqualTo(testData.glossary.id)
     }
@@ -112,10 +113,7 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
     ).andIsOk
 
     executeInNewTransaction {
-      val latestActivityRevision = getLatestActivityRevision()
-
-      // Verify that activity was recorded
-      latestActivityRevision.assert.isNotNull()
+      val latestActivityRevision = activityTestUtil.getLastRevision()!!
 
       // Verify activity type
       latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_TERM_UPDATE)
@@ -148,7 +146,7 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
 
       // Verify that we can find the glossary in the describingRelations
       val describingRelations = latestActivityRevision.describingRelations
-      val glossaryRelation = describingRelations.find { it.entityClass == "Glossary" }
+      val glossaryRelation = describingRelations.find { it.entityClass == Glossary::class.simpleName }
       glossaryRelation.assert.isNotNull()
       glossaryRelation!!.entityId.assert.isEqualTo(testData.glossary.id)
     }
@@ -161,7 +159,7 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
     ).andIsOk
 
     executeInNewTransaction {
-      val latestActivityRevision = getLatestActivityRevision()
+      val latestActivityRevision = activityTestUtil.getLastRevision()!!
 
       // Verify activity type
       latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_TERM_DELETE)
@@ -181,7 +179,7 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
       termRelation!!.entityId.assert.isEqualTo(testData.term.id)
 
       // Verify that we can find the glossary in the describingRelations
-      val glossaryRelation = describingRelations.find { it.entityClass == "Glossary" }
+      val glossaryRelation = describingRelations.find { it.entityClass == Glossary::class.simpleName }
       glossaryRelation.assert.isNotNull()
       glossaryRelation!!.entityId.assert.isEqualTo(testData.glossary.id)
 
@@ -209,7 +207,7 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
       .andIsOk
 
     executeInNewTransaction {
-      val latestActivityRevision = getLatestActivityRevision()
+      val latestActivityRevision = activityTestUtil.getLastRevision()!!
 
       // Verify activity type
       latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_TERM_DELETE)
@@ -224,7 +222,7 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
 
       // Verify that we can find the glossary in the describingRelations
       val describingRelations = latestActivityRevision.describingRelations
-      val glossaryRelation = describingRelations.find { it.entityClass == "Glossary" }
+      val glossaryRelation = describingRelations.find { it.entityClass == Glossary::class.simpleName }
       glossaryRelation.assert.isNotNull()
       glossaryRelation!!.entityId.assert.isEqualTo(testData.glossary.id)
 
@@ -241,10 +239,4 @@ class GlossaryTermControllerActivityTest : AuthorizedControllerTest() {
       }
     }
   }
-
-  private fun getLatestActivityRevision(): ActivityRevision =
-    entityManager
-      .createQuery("from ActivityRevision ar order by ar.timestamp desc ", ActivityRevision::class.java)
-      .setMaxResults(1)
-      .singleResult
 }

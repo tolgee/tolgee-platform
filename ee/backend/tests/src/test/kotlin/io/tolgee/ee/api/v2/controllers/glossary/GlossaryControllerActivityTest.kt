@@ -1,5 +1,6 @@
 package io.tolgee.ee.api.v2.controllers.glossary
 
+import io.tolgee.ActivityTestUtil
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.constants.Feature
 import io.tolgee.development.testDataBuilder.data.GlossaryTestData
@@ -26,6 +27,9 @@ import org.springframework.boot.test.context.SpringBootTest
 class GlossaryControllerActivityTest : AuthorizedControllerTest() {
   @Autowired
   private lateinit var enabledFeaturesProvider: PublicEnabledFeaturesProvider
+
+  @Autowired
+  private lateinit var activityTestUtil: ActivityTestUtil
 
   lateinit var testData: GlossaryTestData
 
@@ -56,7 +60,7 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
       .andIsOk
 
     executeInNewTransaction {
-      val latestActivityRevision = getLatestActivityRevision()
+      val latestActivityRevision = activityTestUtil.getLastRevision()!!
 
       val glossaryEntity = findGlossaryModifiedEntity(latestActivityRevision)
       val modifications = glossaryEntity.modifications
@@ -78,7 +82,7 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
       .andIsOk
 
     executeInNewTransaction {
-      val latestActivityRevision = getLatestActivityRevision()
+      val latestActivityRevision = activityTestUtil.getLastRevision()!!
       val modifiedEntities = latestActivityRevision.modifiedEntities
       modifiedEntities.size.assert.isEqualTo(1)
       val modifications = modifiedEntities.single().modifications
@@ -99,14 +103,14 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
       .andIsOk
 
     executeInNewTransaction {
-      val latestActivityRevision = getLatestActivityRevision()
+      val latestActivityRevision = activityTestUtil.getLastRevision()!!
       val modifiedEntities = latestActivityRevision.modifiedEntities
       modifiedEntities.size.assert.isEqualTo(11)
 
       // Verify activity type
       latestActivityRevision.type.assert.isEqualTo(ActivityType.GLOSSARY_DELETE)
 
-      val modifications = modifiedEntities.find { it.entityClass == Glossary::class.simpleName }!!.modifications
+      val modifications = findGlossaryModifiedEntity(latestActivityRevision).modifications
       modifications["name"]!!.old.assert.isEqualTo("Test Glossary")
       modifications["baseLanguageTag"]!!.old.assert.isEqualTo("en")
       latestActivityRevision.organizationId.assert.isEqualTo(testData.organization.id)
@@ -144,7 +148,7 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
 
     // Verify activity logging for assigned projects
     executeInNewTransaction {
-      val latestActivityRevision = getLatestActivityRevision()
+      val latestActivityRevision = activityTestUtil.getLastRevision()!!
       val modifiedEntities = latestActivityRevision.modifiedEntities
       modifiedEntities.size.assert.isEqualTo(1)
 
@@ -176,12 +180,6 @@ class GlossaryControllerActivityTest : AuthorizedControllerTest() {
       }
     }
   }
-
-  private fun getLatestActivityRevision(): ActivityRevision =
-    entityManager
-      .createQuery("from ActivityRevision ar order by ar.timestamp desc ", ActivityRevision::class.java)
-      .setMaxResults(1)
-      .singleResult
 
   private fun findGlossaryModifiedEntity(revision: ActivityRevision): ActivityModifiedEntity =
     revision.modifiedEntities.find { it.entityClass == Glossary::class.simpleName }
