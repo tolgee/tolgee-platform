@@ -27,12 +27,13 @@ import org.springframework.stereotype.Component
 
 /**
  * QA event listener that reacts to:
- * - [OnProjectActivityEvent]: entity modifications detected by Hibernate (translation text
+ * - [OnProjectActivityEvent]: entity modifications (translation text
  *   changes, project creation, language tag changes, base language changes)
  * - [OnBatchJobCompleted]: batch job completions for bulk translation text modifications
  *
- * Changes are detected via the activity Hibernate interceptor.
- * Batch job chunk activities are skipped — handled in bulk when the batch job completes.
+ * Stale marking (qaChecksStale = true) runs unconditionally — even when the QA feature is disabled.
+ * This is needed so translations have the correct stale state when QA is enabled later
+ * and when batch jobs complete.
  */
 @Component
 class QaActivityListener(
@@ -49,28 +50,23 @@ class QaActivityListener(
   fun onActivity(event: OnProjectActivityEvent) {
     runSentryCatching {
       val projectId = event.activityRevision.projectId ?: return
+      val isBatchChunk = event.activityRevision.batchJobChunkExecution != null
 
-      // Skip batch job chunk activities — handled by onBatchJobCompleted
-      if (event.activityRevision.batchJobChunkExecution != null) return
+      // Mark translations stale unconditionally - even when QA is disabled and even when processing batch chunks
+      markTranslationsStale(event, projectId)
 
-      val modifiedEntityClasses = event.modifiedEntities.keys.toSet()
+      // If this activity is part of a batch chunk, we'll handle it when a batch job completes
+      if (isBatchChunk) return
 
-      if (Project::class in modifiedEntityClasses) {
-        val isNewProject =
-          event.modifiedEntities[Project::class]?.values?.any {
-            it.revisionType == RevisionType.ADD
-          } == true
-        if (isNewProject) {
-          handleProjectCreated(projectId)
-        }
-      }
+      // Enable QA checks for new projects if the feature is available
+      handleProjectCreated(event, projectId)
 
       val project = projectService.findDto(projectId) ?: return
       if (!projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)) return
 
       handleLanguageTagChanged(event, projectId)
       handleBaseLanguageChanged(event, projectId)
-      handleTranslationTextChanges(event, projectId)
+      handleTranslationChanged(event, projectId)
     }
   }
 
@@ -89,7 +85,33 @@ class QaActivityListener(
     handleBatchJobCompleted(event)
   }
 
-  private fun handleTranslationTextChanges(
+  /**
+   * Marks translations as stale. Runs unconditionally — no feature guard, works during batch chunks.
+   * Marks both direct translations (where text changed) and siblings (other languages when base text changes).
+   */
+  private fun markTranslationsStale(
+    event: OnProjectActivityEvent,
+    projectId: Long,
+  ) {
+    val textChangedTranslationIds = getTextChangedTranslationIds(event)
+    if (textChangedTranslationIds.isEmpty()) return
+
+    // Mark direct translations as stale
+    translationService.setQaChecksStale(textChangedTranslationIds)
+
+    // Mark siblings of base language changes as stale
+    val baseLanguage = languageService.getProjectBaseLanguage(projectId)
+    val siblingIds =
+      translationService.getSiblingIdsForBaseLanguageChanges(
+        translationIds = textChangedTranslationIds,
+        baseLanguageId = baseLanguage.id,
+      )
+    if (siblingIds.isNotEmpty()) {
+      translationService.setQaChecksStale(siblingIds)
+    }
+  }
+
+  private fun handleTranslationChanged(
     event: OnProjectActivityEvent,
     projectId: Long,
   ) {
@@ -114,20 +136,8 @@ class QaActivityListener(
 
     if (directTargets.isEmpty()) return
 
-    // If base text changes, mark translations for all other languages as stale
+    // For base text changes, also include all project languages
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
-    val textChangedTranslationIds = textChangedEntities.keys.toList()
-
-    val siblingIds =
-      translationService.getSiblingIdsForBaseLanguageChanges(
-        translationIds = textChangedTranslationIds,
-        baseLanguageId = baseLanguage.id,
-      )
-    if (siblingIds.isNotEmpty()) {
-      translationService.setQaChecksStale(siblingIds)
-    }
-
-    // For base text changes, we also include all project languages
     val baseLanguageKeyIds =
       directTargets
         .filter { it.languageId == baseLanguage.id }
@@ -163,6 +173,16 @@ class QaActivityListener(
     }
   }
 
+  private fun getTextChangedTranslationIds(event: OnProjectActivityEvent): List<Long> {
+    val translationEntities = event.modifiedEntities[Translation::class] ?: return emptyList()
+    return translationEntities
+      .filter { (_, entity) ->
+        entity.revisionType != RevisionType.DEL &&
+          entity.modifications.containsKey("text")
+      }.keys
+      .toList()
+  }
+
   private fun handleLanguageTagChanged(
     event: OnProjectActivityEvent,
     projectId: Long,
@@ -196,7 +216,17 @@ class QaActivityListener(
     qaRecheckService.recheckTranslations(projectId = projectId)
   }
 
-  private fun handleProjectCreated(projectId: Long) {
+  /**
+   * Enables QA checks for new projects if the feature is available.
+   */
+  private fun handleProjectCreated(
+    event: OnProjectActivityEvent,
+    projectId: Long,
+  ) {
+    val modifiedProjects = event.modifiedEntities[Project::class] ?: return
+    val isNewProject = modifiedProjects.values.any { it.revisionType == RevisionType.ADD }
+    if (!isNewProject) return
+
     val project = entityManager.find(Project::class.java, projectId) ?: return
     val orgId = project.organizationOwner.id
     if (enabledFeaturesProvider.isFeatureEnabled(orgId, Feature.QA_CHECKS)) {

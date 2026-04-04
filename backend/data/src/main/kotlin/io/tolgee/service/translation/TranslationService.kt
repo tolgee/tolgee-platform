@@ -487,7 +487,6 @@ class TranslationService(
     val targetTranslations =
       getTargetTranslations(keyIds, targetLanguageIds).onEach {
         it.text = sourceTranslations[it.key.id]?.text
-        it.qaChecksStale = true
         if (!it.text.isNullOrEmpty()) {
           it.state = TranslationState.TRANSLATED
         }
@@ -561,7 +560,6 @@ class TranslationService(
     throwOnDataLoss: Boolean,
   ) {
     it.text = getNewText(it.text, newIsPlural, newPluralArgName, throwOnDataLoss)
-    it.qaChecksStale = true
   }
 
   /**

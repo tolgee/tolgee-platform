@@ -144,7 +144,6 @@ class BranchMergeExecutor(
           auto = sourceTranslation.auto
           mtProvider = sourceTranslation.mtProvider
           outdated = sourceTranslation.outdated
-          qaChecksStale = true
         }
       sourceTranslation.labels.forEach(translation::addLabel)
       translationService.save(translation)

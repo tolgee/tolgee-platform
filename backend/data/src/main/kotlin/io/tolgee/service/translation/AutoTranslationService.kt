@@ -74,7 +74,7 @@ class AutoTranslationService(
         target =
           languageIds.flatMap { languageId ->
             if (configs[languageId]?.usingTm == false && configs[languageId]?.usingPrimaryMtService == false) {
-              return@flatMap listOf()
+              return@flatMap emptyList()
             }
             keyIds.map { keyId ->
               BatchTranslationTargetItem(
@@ -314,7 +314,6 @@ class AutoTranslationService(
     }
     this.auto = true
     this.text = text
-    this.qaChecksStale = true
     this.mtProvider = usedService
     this.promptId = promptId
     translationService.save(this)

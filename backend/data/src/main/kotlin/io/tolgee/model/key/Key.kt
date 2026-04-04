@@ -277,7 +277,6 @@ class Key(
               auto = sourceTranslation.auto
               outdated = sourceTranslation.outdated
               mtProvider = sourceTranslation.mtProvider
-              qaChecksStale = true
             }
           this.translations.add(newTranslation)
         }

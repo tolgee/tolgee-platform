@@ -1,6 +1,8 @@
 package io.tolgee.ee.service.qa
 
 import com.posthog.server.PostHog
+import io.tolgee.batch.BatchJobService
+import io.tolgee.batch.data.BatchJobType
 import io.tolgee.constants.Feature
 import io.tolgee.ee.component.PublicEnabledFeaturesProvider
 import io.tolgee.ee.development.QaTestData
@@ -31,6 +33,9 @@ class QaStaleFlowTest : AuthorizedControllerTest() {
 
   @Autowired
   lateinit var qa: QaTestUtil
+
+  @Autowired
+  private lateinit var batchJobService: BatchJobService
 
   lateinit var testData: QaTestData
 
@@ -126,6 +131,104 @@ class QaStaleFlowTest : AuthorizedControllerTest() {
         val frTranslation = translationService.find(testData.frTranslation.id)!!
         assertThat(frTranslation.qaChecksStale).isTrue()
       }
+    }
+  }
+
+  @Test
+  fun `marks translation stale even when QA feature is disabled`() {
+    // Disable QA feature
+    enabledFeaturesProvider.forceEnabled = emptySet()
+
+    // Disable QA for the project
+    executeInNewTransaction(platformTransactionManager) {
+      val project = projectService.get(testData.project.id)
+      project.useQaChecks = false
+      entityManager.persist(project)
+    }
+
+    // Clear stale flag first so we can verify it gets set
+    executeInNewTransaction(platformTransactionManager) {
+      val translation = translationService.find(testData.frTranslation.id)!!
+      translation.qaChecksStale = false
+      entityManager.persist(translation)
+    }
+
+    // Save translation — should still mark stale even without QA feature
+    performAuthPut(
+      translationsUrl,
+      mapOf("key" to "test-key", "translations" to mapOf("fr" to "Bonjour tout le monde")),
+    ).andIsOk
+
+    waitForNotThrowing(timeout = 5_000, pollTime = 200) {
+      executeInNewTransaction(platformTransactionManager) {
+        val translation = translationService.find(testData.frTranslation.id)!!
+        assertThat(translation.qaChecksStale).isTrue()
+      }
+    }
+  }
+
+  @Test
+  fun `marks siblings stale even when QA feature is disabled`() {
+    // Disable QA feature
+    enabledFeaturesProvider.forceEnabled = emptySet()
+
+    // Disable QA for the project
+    executeInNewTransaction(platformTransactionManager) {
+      val project = projectService.get(testData.project.id)
+      project.useQaChecks = false
+      entityManager.persist(project)
+    }
+
+    // Clear stale flag on French translation
+    executeInNewTransaction(platformTransactionManager) {
+      val translation = translationService.find(testData.frTranslation.id)!!
+      translation.qaChecksStale = false
+      entityManager.persist(translation)
+    }
+
+    // Change base (English) translation — should mark French sibling as stale
+    performAuthPut(
+      translationsUrl,
+      mapOf("key" to "test-key", "translations" to mapOf("en" to "Hello World!")),
+    ).andIsOk
+
+    waitForNotThrowing(timeout = 10_000, pollTime = 500) {
+      executeInNewTransaction(platformTransactionManager) {
+        val frTranslation = translationService.find(testData.frTranslation.id)!!
+        assertThat(frTranslation.qaChecksStale).isTrue()
+      }
+    }
+  }
+
+  @Test
+  fun `does not create QA batch jobs when QA is disabled but still marks stale`() {
+    // Disable QA for the project
+    executeInNewTransaction(platformTransactionManager) {
+      val project = projectService.get(testData.project.id)
+      project.useQaChecks = false
+      entityManager.persist(project)
+    }
+
+    // Save translation
+    performAuthPut(
+      translationsUrl,
+      mapOf("key" to "test-key", "translations" to mapOf("fr" to "Bonjour tout le monde")),
+    ).andIsOk
+
+    // Translation should be stale
+    waitForNotThrowing(timeout = 5_000, pollTime = 200) {
+      executeInNewTransaction(platformTransactionManager) {
+        val translation = translationService.find(testData.frTranslation.id)!!
+        assertThat(translation.qaChecksStale).isTrue()
+      }
+    }
+
+    // But no QA batch jobs should have been created
+    Thread.sleep(1000)
+    executeInNewTransaction(platformTransactionManager) {
+      val jobs = batchJobService.getAllByProjectId(testData.project.id)
+      val qaJobs = jobs.filter { it.type == BatchJobType.QA_CHECK }
+      assertThat(qaJobs).isEmpty()
     }
   }
 }
