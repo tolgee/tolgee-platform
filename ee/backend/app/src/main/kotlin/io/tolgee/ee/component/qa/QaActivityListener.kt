@@ -15,6 +15,7 @@ import io.tolgee.ee.service.qa.QaRecheckService
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.Language
 import io.tolgee.model.Project
+import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.ProjectFeatureGuard
@@ -27,7 +28,7 @@ import org.springframework.stereotype.Component
 
 /**
  * QA event listener that reacts to:
- * - [OnProjectActivityEvent]: entity modifications (translation text
+ * - [OnProjectActivityEvent]: entity modifications (translation text changes, key maxCharLimit
  *   changes, project creation, language tag changes, base language changes)
  * - [OnBatchJobCompleted]: batch job completions for bulk translation text modifications
  *
@@ -54,6 +55,7 @@ class QaActivityListener(
 
       // Mark translations stale unconditionally - even when QA is disabled and even when processing batch chunks
       markTranslationsStale(event, projectId)
+      markMaxCharLimitTranslationsStale(event)
 
       // If this activity is part of a batch chunk, we'll handle it when a batch job completes
       if (isBatchChunk) return
@@ -67,6 +69,7 @@ class QaActivityListener(
       handleLanguageTagChanged(event, projectId)
       handleBaseLanguageChanged(event, projectId)
       handleTranslationChanged(event, projectId)
+      handleMaxCharLimitChanged(event, projectId)
     }
   }
 
@@ -83,6 +86,22 @@ class QaActivityListener(
   @EventListener(OnBatchJobCancelled::class)
   fun onBatchJobCancelled(event: OnBatchJobCancelled) {
     handleBatchJobCompleted(event)
+  }
+
+  private fun handleBatchJobCompleted(event: OnBatchJobCompleted) {
+    if (event.job.type !in TRANSLATION_MODIFYING_BATCH_TYPES) return
+
+    val projectId = event.job.projectId ?: return
+
+    runSentryCatching {
+      val project = projectService.findDto(projectId) ?: return@runSentryCatching
+      if (!projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)) return@runSentryCatching
+
+      qaRecheckService.recheckTranslations(
+        projectId = projectId,
+        onlyStale = true,
+      )
+    }
   }
 
   /**
@@ -159,28 +178,7 @@ class QaActivityListener(
       }
 
     val allTargets = (directTargets + siblingTargets).distinct()
-
-    // Chunk and start batch jobs
-    val project = entityManager.getReference(Project::class.java, projectId)
-    for (chunk in allTargets.chunked(QaRecheckService.MAX_BATCH_JOB_TARGET_SIZE)) {
-      batchJobService.startJob(
-        request = QaCheckRequest(target = chunk),
-        project = project,
-        author = null,
-        type = BatchJobType.QA_CHECK,
-        isHidden = true,
-      )
-    }
-  }
-
-  private fun getTextChangedTranslationIds(event: OnProjectActivityEvent): List<Long> {
-    val translationEntities = event.modifiedEntities[Translation::class] ?: return emptyList()
-    return translationEntities
-      .filter { (_, entity) ->
-        entity.revisionType != RevisionType.DEL &&
-          entity.modifications.containsKey("text")
-      }.keys
-      .toList()
+    startQaCheckBatchJob(projectId, allTargets)
   }
 
   private fun handleLanguageTagChanged(
@@ -234,18 +232,60 @@ class QaActivityListener(
     }
   }
 
-  private fun handleBatchJobCompleted(event: OnBatchJobCompleted) {
-    if (event.job.type !in TRANSLATION_MODIFYING_BATCH_TYPES) return
+  private fun markMaxCharLimitTranslationsStale(event: OnProjectActivityEvent) {
+    val keyIds = getMaxCharLimitChangedKeyIds(event)
+    if (keyIds.isEmpty()) return
+    translationService.setQaChecksStaleByKeyIds(keyIds)
+  }
 
-    val projectId = event.job.projectId ?: return
+  private fun handleMaxCharLimitChanged(
+    event: OnProjectActivityEvent,
+    projectId: Long,
+  ) {
+    val keyIds = getMaxCharLimitChangedKeyIds(event)
+    if (keyIds.isEmpty()) return
 
-    runSentryCatching {
-      val project = projectService.findDto(projectId) ?: return@runSentryCatching
-      if (!projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)) return@runSentryCatching
+    val allLanguageIds = languageService.getProjectLanguages(projectId).map { it.id }
+    val targets =
+      keyIds.flatMap { keyId ->
+        allLanguageIds.map { langId -> BatchTranslationTargetItem(keyId = keyId, languageId = langId) }
+      }
+    startQaCheckBatchJob(projectId, targets)
+  }
 
-      qaRecheckService.recheckTranslations(
-        projectId = projectId,
-        onlyStale = true,
+  private fun getMaxCharLimitChangedKeyIds(event: OnProjectActivityEvent): List<Long> {
+    val keyEntities = event.modifiedEntities[Key::class] ?: return emptyList()
+    return keyEntities
+      .filter { (_, entity) ->
+        entity.revisionType != RevisionType.DEL &&
+          entity.modifications.containsKey("maxCharLimit")
+      }.keys
+      .toList()
+  }
+
+  private fun getTextChangedTranslationIds(event: OnProjectActivityEvent): List<Long> {
+    val translationEntities = event.modifiedEntities[Translation::class] ?: return emptyList()
+    return translationEntities
+      .filter { (_, entity) ->
+        entity.revisionType != RevisionType.DEL &&
+          entity.modifications.containsKey("text")
+      }.keys
+      .toList()
+  }
+
+  private fun startQaCheckBatchJob(
+    projectId: Long,
+    targets: List<BatchTranslationTargetItem>,
+  ) {
+    if (targets.isEmpty()) return
+    val project = entityManager.getReference(Project::class.java, projectId)
+    for (chunk in targets.chunked(QaRecheckService.MAX_BATCH_JOB_TARGET_SIZE)) {
+      batchJobService.startJob(
+        request = QaCheckRequest(target = chunk),
+        project = project,
+        author = null,
+        type = BatchJobType.QA_CHECK,
+        isHidden = true,
       )
     }
   }

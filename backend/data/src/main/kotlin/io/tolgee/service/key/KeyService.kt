@@ -277,11 +277,7 @@ class KeyService(
     keyMetaService.getOrCreateForKey(key).apply {
       description = dto.description
     }
-    val oldMaxCharLimit = key.maxCharLimit
     key.applyMaxCharLimit(dto.maxCharLimit)
-    if (key.maxCharLimit != oldMaxCharLimit) {
-      translationService.onKeyMaxCharLimitChanged(key.id)
-    }
     return edit(key, dto.name, dto.namespace, dto.branch)
   }
 

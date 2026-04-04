@@ -145,7 +145,6 @@ class KeyComplexEditHelper(
     if (isMaxCharLimitChanged) {
       key.applyMaxCharLimit(dto.maxCharLimit)
       keyService.save(key)
-      translationService.onKeyMaxCharLimitChanged(key.id)
     }
 
     if (isCustomDataChanged) {
@@ -315,8 +314,7 @@ class KeyComplexEditHelper(
     isNamespaceChanged = key.namespace?.name != dto.namespace
     isDescriptionChanged = key.keyMeta?.description != dto.description
     isIsPluralChanged =
-      dto.isPlural != null &&
-      key.isPlural != dto.isPlural ||
+      (dto.isPlural != null && key.isPlural != dto.isPlural) ||
       (dto.isPlural == true && key.pluralArgName != dto.pluralArgName)
     isMaxCharLimitChanged =
       dto.maxCharLimit != null &&
@@ -428,10 +426,6 @@ class KeyComplexEditHelper(
 
   private fun Project.checkKeysEditPermission() {
     securityService.checkProjectPermission(this.id, Scope.KEYS_EDIT)
-  }
-
-  private fun Project.checkTranslationsEditPermission() {
-    securityService.checkProjectPermission(this.id, Scope.TRANSLATIONS_EDIT)
   }
 
   private fun Key.checkInProject() {

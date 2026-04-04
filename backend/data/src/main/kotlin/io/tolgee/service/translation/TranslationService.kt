@@ -533,13 +533,6 @@ class TranslationService(
       .executeUpdate()
   }
 
-  fun onKeyMaxCharLimitChanged(keyId: Long) {
-    val translations = translationRepository.getAllByKeyIdIn(listOf(keyId))
-    if (translations.isEmpty()) return
-    translations.forEach { it.qaChecksStale = true }
-    saveAll(translations)
-  }
-
   fun onKeyIsPluralChanged(
     keyIdToArgNameMap: Map<Long, String?>,
     newIsPlural: Boolean,
@@ -660,6 +653,17 @@ class TranslationService(
         .createQuery(
           "UPDATE Translation t SET t.qaChecksStale = true WHERE t.id IN :ids",
         ).setParameter("ids", chunk)
+        .executeUpdate()
+    }
+  }
+
+  @Transactional
+  fun setQaChecksStaleByKeyIds(keyIds: List<Long>) {
+    keyIds.chunked(1000).forEach { chunk ->
+      entityManager
+        .createQuery(
+          "UPDATE Translation t SET t.qaChecksStale = true WHERE t.key.id IN :keyIds",
+        ).setParameter("keyIds", chunk)
         .executeUpdate()
     }
   }
