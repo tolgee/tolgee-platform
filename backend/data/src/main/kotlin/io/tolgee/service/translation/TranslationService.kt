@@ -668,7 +668,7 @@ class TranslationService(
     }
   }
 
-  fun getKeyLanguagePairsForRecheck(
+  fun getKeyLanguagePairsForQaRecheck(
     projectId: Long,
     languageIds: List<Long>? = null,
     onlyStale: Boolean = false,
@@ -715,71 +715,33 @@ class TranslationService(
     }
   }
 
-  fun getKeyLanguagePairsByTranslationIds(translationIds: Collection<Long>): List<KeyLanguagePairView> {
-    if (translationIds.isEmpty()) return emptyList()
-
-    val cb = entityManager.criteriaBuilder
-    val query = cb.createTupleQuery()
-    val root = query.from(Translation::class.java)
-
-    query.multiselect(
-      root.get(Translation_.key).get<Long>("id"),
-      root.get(Translation_.language).get<Long>("id"),
-    )
-
-    return translationIds.chunked(1000).flatMap { chunk ->
-      query.where(root.get(Translation_.id).`in`(chunk))
-      entityManager.createQuery(query).resultList.map { tuple ->
-        KeyLanguagePairView(
-          keyId = tuple.get(0, Long::class.java),
-          languageId = tuple.get(1, Long::class.java),
-        )
-      }
-    }
-  }
-
-  fun getBaseLanguageKeyIds(
+  /**
+   * Marks quality assurance (QA) checks as stale for translations associated with specified base translations.
+   * This method identifies all translations in other languages that share the same keys
+   * as the given base translations and updates their QA check status.
+   *
+   * If the list contains any translations that are not base translations, they are ignored.
+   */
+  @Transactional
+  fun setQaChecksStaleForBaseTranslationKeys(
     translationIds: Collection<Long>,
     baseLanguageId: Long,
-  ): List<Long> {
-    if (translationIds.isEmpty()) return emptyList()
-    return translationIds.chunked(1000).flatMap { chunk ->
+  ) {
+    if (translationIds.isEmpty()) return
+    translationIds.chunked(1000).forEach { chunk ->
       entityManager
         .createQuery(
-          "SELECT t.key.id FROM Translation t WHERE t.id IN :ids AND t.language.id = :baseLanguageId",
-          Long::class.java,
-        ).setParameter("ids", chunk)
+          """
+          UPDATE Translation t SET t.qaChecksStale = true
+          WHERE t.key.id IN (
+            SELECT t2.key.id FROM Translation t2
+            WHERE t2.id IN :translationIds AND t2.language.id = :baseLanguageId
+          )
+          AND t.language.id != :baseLanguageId
+          """.trimIndent(),
+        ).setParameter("translationIds", chunk)
         .setParameter("baseLanguageId", baseLanguageId)
-        .resultList
+        .executeUpdate()
     }
-  }
-
-  fun getSiblingIdsForBaseLanguageChanges(
-    translationIds: Collection<Long>,
-    baseLanguageId: Long,
-  ): List<Long> {
-    if (translationIds.isEmpty()) return emptyList()
-
-    val translationIdSet = translationIds.toSet()
-
-    val keyIds = getBaseLanguageKeyIds(translationIds, baseLanguageId)
-
-    if (keyIds.isEmpty()) return emptyList()
-
-    return keyIds
-      .chunked(1000)
-      .flatMap { keyChunk ->
-        entityManager
-          .createQuery(
-            """
-            SELECT t.id FROM Translation t
-            WHERE t.key.id IN :keyIds
-              AND t.language.id != :baseLanguageId
-            """.trimIndent(),
-            Long::class.java,
-          ).setParameter("keyIds", keyChunk)
-          .setParameter("baseLanguageId", baseLanguageId)
-          .resultList
-      }.filter { it !in translationIdSet }
   }
 }

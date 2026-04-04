@@ -26,7 +26,7 @@ class QaRecheckService(
   ) {
     if (checkTypes?.isEmpty() == true) return
 
-    val pairs = translationService.getKeyLanguagePairsForRecheck(projectId, languageIds, onlyStale)
+    val pairs = translationService.getKeyLanguagePairsForQaRecheck(projectId, languageIds, onlyStale)
     if (pairs.isEmpty()) return
 
     if (!onlyStale) {

@@ -15,6 +15,7 @@ import io.tolgee.ee.service.qa.QaRecheckService
 import io.tolgee.events.OnProjectActivityEvent
 import io.tolgee.model.Language
 import io.tolgee.model.Project
+import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.language.LanguageService
@@ -112,7 +113,7 @@ class QaActivityListener(
     event: OnProjectActivityEvent,
     projectId: Long,
   ) {
-    val textChangedTranslationIds = getTextChangedTranslationIds(event)
+    val textChangedTranslationIds = getTextChangedTranslations(event).keys.toList()
     if (textChangedTranslationIds.isEmpty()) return
 
     // Mark direct translations as stale
@@ -120,29 +121,17 @@ class QaActivityListener(
 
     // Mark siblings of base language changes as stale
     val baseLanguage = languageService.getProjectBaseLanguage(projectId)
-    val siblingIds =
-      translationService.getSiblingIdsForBaseLanguageChanges(
-        translationIds = textChangedTranslationIds,
-        baseLanguageId = baseLanguage.id,
-      )
-    if (siblingIds.isNotEmpty()) {
-      translationService.setQaChecksStale(siblingIds)
-    }
+    translationService.setQaChecksStaleForBaseTranslationKeys(
+      translationIds = textChangedTranslationIds,
+      baseLanguageId = baseLanguage.id,
+    )
   }
 
   private fun handleTranslationChanged(
     event: OnProjectActivityEvent,
     projectId: Long,
   ) {
-    val translationEntities = event.modifiedEntities[Translation::class] ?: return
-
-    // Find translations where "text" was modified (both new and updated, excluding deletes)
-    val textChangedEntities =
-      translationEntities.filter { (_, entity) ->
-        entity.revisionType != RevisionType.DEL &&
-          entity.modifications.containsKey("text")
-      }
-
+    val textChangedEntities = getTextChangedTranslations(event)
     if (textChangedEntities.isEmpty()) return
 
     // Extract direct targets from describing relations
@@ -263,14 +252,12 @@ class QaActivityListener(
       .toList()
   }
 
-  private fun getTextChangedTranslationIds(event: OnProjectActivityEvent): List<Long> {
-    val translationEntities = event.modifiedEntities[Translation::class] ?: return emptyList()
-    return translationEntities
-      .filter { (_, entity) ->
-        entity.revisionType != RevisionType.DEL &&
-          entity.modifications.containsKey("text")
-      }.keys
-      .toList()
+  private fun getTextChangedTranslations(event: OnProjectActivityEvent): Map<Long, ActivityModifiedEntity> {
+    val translationEntities = event.modifiedEntities[Translation::class] ?: return emptyMap()
+    return translationEntities.filter { (_, entity) ->
+      entity.revisionType != RevisionType.DEL &&
+        entity.modifications.containsKey("text")
+    }
   }
 
   private fun startQaCheckBatchJob(

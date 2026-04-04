@@ -6,6 +6,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.util.flushAndClear
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -82,67 +83,64 @@ class QaBaseChangeRecheckTest : AuthorizedControllerTest() {
 
   @Test
   @Transactional
-  fun `getSiblingIdsForBaseLanguageChanges returns sibling IDs`() {
+  fun `setQaChecksStaleForBaseTranslationKeys marks siblings stale`() {
     refetchEntities()
 
-    val baseLanguage = languageService.getProjectBaseLanguage(testData.project.id)
-    val siblingIds =
-      translationService.getSiblingIdsForBaseLanguageChanges(
-        translationIds = listOf(testData.enTranslation.id),
-        baseLanguageId = baseLanguage.id,
-      )
-
-    assertThat(siblingIds).containsExactly(testData.frTranslation.id)
-  }
-
-  @Test
-  @Transactional
-  fun `getSiblingIdsForBaseLanguageChanges returns empty when no base translations in input`() {
-    refetchEntities()
-
-    val baseLanguage = languageService.getProjectBaseLanguage(testData.project.id)
-    val siblingIds =
-      translationService.getSiblingIdsForBaseLanguageChanges(
-        translationIds = listOf(testData.frTranslation.id),
-        baseLanguageId = baseLanguage.id,
-      )
-
-    assertThat(siblingIds).isEmpty()
-  }
-
-  @Test
-  @Transactional
-  fun `getSiblingIdsForBaseLanguageChanges excludes translations already in input`() {
-    refetchEntities()
-
-    val baseLanguage = languageService.getProjectBaseLanguage(testData.project.id)
-    // Include both EN (base) and FR in input — FR should not appear in siblings
-    val siblingIds =
-      translationService.getSiblingIdsForBaseLanguageChanges(
-        translationIds = listOf(testData.enTranslation.id, testData.frTranslation.id),
-        baseLanguageId = baseLanguage.id,
-      )
-
-    assertThat(siblingIds).isEmpty()
-  }
-
-  @Test
-  @Transactional
-  fun `getSiblingIdsForBaseLanguageChanges includes empty translations`() {
-    refetchEntities()
-
-    // Set FR translation to null (empty)
-    testData.frTranslation.text = null
+    // Clear stale flag first so we can verify it gets set
+    testData.frTranslation.qaChecksStale = false
     entityManager.flush()
 
     val baseLanguage = languageService.getProjectBaseLanguage(testData.project.id)
-    val siblingIds =
-      translationService.getSiblingIdsForBaseLanguageChanges(
-        translationIds = listOf(testData.enTranslation.id),
-        baseLanguageId = baseLanguage.id,
-      )
+    translationService.setQaChecksStaleForBaseTranslationKeys(
+      translationIds = listOf(testData.enTranslation.id),
+      baseLanguageId = baseLanguage.id,
+    )
+    entityManager.flushAndClear()
 
-    // Empty translations should still be included
-    assertThat(siblingIds).containsExactly(testData.frTranslation.id)
+    val frTranslation = entityManager.find(Translation::class.java, testData.frTranslation.id)
+    assertThat(frTranslation.qaChecksStale).isTrue()
+  }
+
+  @Test
+  @Transactional
+  fun `setQaChecksStaleForBaseTranslationKeys does nothing when no base translations in input`() {
+    refetchEntities()
+
+    // Clear stale flag first
+    testData.frTranslation.qaChecksStale = false
+    entityManager.flush()
+
+    val baseLanguage = languageService.getProjectBaseLanguage(testData.project.id)
+    // Only FR (non-base) in input — no siblings should be marked
+    translationService.setQaChecksStaleForBaseTranslationKeys(
+      translationIds = listOf(testData.frTranslation.id),
+      baseLanguageId = baseLanguage.id,
+    )
+    entityManager.flushAndClear()
+
+    val frTranslation = entityManager.find(Translation::class.java, testData.frTranslation.id)
+    assertThat(frTranslation.qaChecksStale).isFalse()
+  }
+
+  @Test
+  @Transactional
+  fun `setQaChecksStaleForBaseTranslationKeys includes empty translations`() {
+    refetchEntities()
+
+    // Set FR translation to null (empty) and clear stale flag
+    testData.frTranslation.text = null
+    testData.frTranslation.qaChecksStale = false
+    entityManager.flush()
+
+    val baseLanguage = languageService.getProjectBaseLanguage(testData.project.id)
+    translationService.setQaChecksStaleForBaseTranslationKeys(
+      translationIds = listOf(testData.enTranslation.id),
+      baseLanguageId = baseLanguage.id,
+    )
+    entityManager.flushAndClear()
+
+    // Empty translations should still be marked stale
+    val frTranslation = entityManager.find(Translation::class.java, testData.frTranslation.id)
+    assertThat(frTranslation.qaChecksStale).isTrue()
   }
 }
