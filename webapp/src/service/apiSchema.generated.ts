@@ -5568,25 +5568,26 @@ export interface components {
         | "TRIM_CHECK"
         | "CHARACTER_CASE_MISMATCH"
         | "MISSING_NUMBERS"
+        | "REPEATED_WORDS"
         | "PUNCTUATION_MISMATCH"
+        | "SPELLING"
+        | "GRAMMAR"
         | "BRACKETS_MISMATCH"
         | "BRACKETS_UNBALANCED"
         | "SPECIAL_CHARACTER_MISMATCH"
         | "DIFFERENT_URLS"
+        | "KEY_LENGTH_LIMIT"
         | "INCONSISTENT_PLACEHOLDERS"
         | "INCONSISTENT_HTML"
         | "HTML_SYNTAX"
         | "ICU_SYNTAX"
-        | "REPEATED_WORDS"
-        | "SPELLING"
-        | "GRAMMAR"
-        | "KEY_LENGTH_LIMIT"
       )[];
     };
     QaCheckIssueIgnoreRequest: {
       /** @enum {string} */
       message:
         | "qa_empty_translation"
+        | "qa_empty_plural_variant"
         | "qa_check_failed"
         | "qa_spaces_leading_added"
         | "qa_spaces_leading_removed"
@@ -5644,19 +5645,19 @@ export interface components {
         | "TRIM_CHECK"
         | "CHARACTER_CASE_MISMATCH"
         | "MISSING_NUMBERS"
+        | "REPEATED_WORDS"
         | "PUNCTUATION_MISMATCH"
+        | "SPELLING"
+        | "GRAMMAR"
         | "BRACKETS_MISMATCH"
         | "BRACKETS_UNBALANCED"
         | "SPECIAL_CHARACTER_MISMATCH"
         | "DIFFERENT_URLS"
+        | "KEY_LENGTH_LIMIT"
         | "INCONSISTENT_PLACEHOLDERS"
         | "INCONSISTENT_HTML"
         | "HTML_SYNTAX"
-        | "ICU_SYNTAX"
-        | "REPEATED_WORDS"
-        | "SPELLING"
-        | "GRAMMAR"
-        | "KEY_LENGTH_LIMIT";
+        | "ICU_SYNTAX";
     };
     QaEnabledRequest: {
       enabled: boolean;
@@ -5667,6 +5668,7 @@ export interface components {
       /** @enum {string} */
       message:
         | "qa_empty_translation"
+        | "qa_empty_plural_variant"
         | "qa_check_failed"
         | "qa_spaces_leading_added"
         | "qa_spaces_leading_removed"
@@ -5726,19 +5728,19 @@ export interface components {
         | "TRIM_CHECK"
         | "CHARACTER_CASE_MISMATCH"
         | "MISSING_NUMBERS"
+        | "REPEATED_WORDS"
         | "PUNCTUATION_MISMATCH"
+        | "SPELLING"
+        | "GRAMMAR"
         | "BRACKETS_MISMATCH"
         | "BRACKETS_UNBALANCED"
         | "SPECIAL_CHARACTER_MISMATCH"
         | "DIFFERENT_URLS"
+        | "KEY_LENGTH_LIMIT"
         | "INCONSISTENT_PLACEHOLDERS"
         | "INCONSISTENT_HTML"
         | "HTML_SYNTAX"
-        | "ICU_SYNTAX"
-        | "REPEATED_WORDS"
-        | "SPELLING"
-        | "GRAMMAR"
-        | "KEY_LENGTH_LIMIT";
+        | "ICU_SYNTAX";
     };
     QaLanguageSettingsModel: {
       settings?: { [key: string]: "WARNING" | "OFF" };
@@ -15912,19 +15914,19 @@ export interface operations {
           | "TRIM_CHECK"
           | "CHARACTER_CASE_MISMATCH"
           | "MISSING_NUMBERS"
+          | "REPEATED_WORDS"
           | "PUNCTUATION_MISMATCH"
+          | "SPELLING"
+          | "GRAMMAR"
           | "BRACKETS_MISMATCH"
           | "BRACKETS_UNBALANCED"
           | "SPECIAL_CHARACTER_MISMATCH"
           | "DIFFERENT_URLS"
+          | "KEY_LENGTH_LIMIT"
           | "INCONSISTENT_PLACEHOLDERS"
           | "INCONSISTENT_HTML"
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
-          | "REPEATED_WORDS"
-          | "SPELLING"
-          | "GRAMMAR"
-          | "KEY_LENGTH_LIMIT"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -16061,19 +16063,19 @@ export interface operations {
           | "TRIM_CHECK"
           | "CHARACTER_CASE_MISMATCH"
           | "MISSING_NUMBERS"
+          | "REPEATED_WORDS"
           | "PUNCTUATION_MISMATCH"
+          | "SPELLING"
+          | "GRAMMAR"
           | "BRACKETS_MISMATCH"
           | "BRACKETS_UNBALANCED"
           | "SPECIAL_CHARACTER_MISMATCH"
           | "DIFFERENT_URLS"
+          | "KEY_LENGTH_LIMIT"
           | "INCONSISTENT_PLACEHOLDERS"
           | "INCONSISTENT_HTML"
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
-          | "REPEATED_WORDS"
-          | "SPELLING"
-          | "GRAMMAR"
-          | "KEY_LENGTH_LIMIT"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -16246,19 +16248,19 @@ export interface operations {
           | "TRIM_CHECK"
           | "CHARACTER_CASE_MISMATCH"
           | "MISSING_NUMBERS"
+          | "REPEATED_WORDS"
           | "PUNCTUATION_MISMATCH"
+          | "SPELLING"
+          | "GRAMMAR"
           | "BRACKETS_MISMATCH"
           | "BRACKETS_UNBALANCED"
           | "SPECIAL_CHARACTER_MISMATCH"
           | "DIFFERENT_URLS"
+          | "KEY_LENGTH_LIMIT"
           | "INCONSISTENT_PLACEHOLDERS"
           | "INCONSISTENT_HTML"
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
-          | "REPEATED_WORDS"
-          | "SPELLING"
-          | "GRAMMAR"
-          | "KEY_LENGTH_LIMIT"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -20982,19 +20984,19 @@ export interface operations {
           | "TRIM_CHECK"
           | "CHARACTER_CASE_MISMATCH"
           | "MISSING_NUMBERS"
+          | "REPEATED_WORDS"
           | "PUNCTUATION_MISMATCH"
+          | "SPELLING"
+          | "GRAMMAR"
           | "BRACKETS_MISMATCH"
           | "BRACKETS_UNBALANCED"
           | "SPECIAL_CHARACTER_MISMATCH"
           | "DIFFERENT_URLS"
+          | "KEY_LENGTH_LIMIT"
           | "INCONSISTENT_PLACEHOLDERS"
           | "INCONSISTENT_HTML"
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
-          | "REPEATED_WORDS"
-          | "SPELLING"
-          | "GRAMMAR"
-          | "KEY_LENGTH_LIMIT"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
@@ -21311,19 +21313,19 @@ export interface operations {
           | "TRIM_CHECK"
           | "CHARACTER_CASE_MISMATCH"
           | "MISSING_NUMBERS"
+          | "REPEATED_WORDS"
           | "PUNCTUATION_MISMATCH"
+          | "SPELLING"
+          | "GRAMMAR"
           | "BRACKETS_MISMATCH"
           | "BRACKETS_UNBALANCED"
           | "SPECIAL_CHARACTER_MISMATCH"
           | "DIFFERENT_URLS"
+          | "KEY_LENGTH_LIMIT"
           | "INCONSISTENT_PLACEHOLDERS"
           | "INCONSISTENT_HTML"
           | "HTML_SYNTAX"
           | "ICU_SYNTAX"
-          | "REPEATED_WORDS"
-          | "SPELLING"
-          | "GRAMMAR"
-          | "KEY_LENGTH_LIMIT"
         )[];
         /** Filter keys with any suggestions in lang */
         filterHasSuggestionsInLang?: string[];
