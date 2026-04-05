@@ -92,7 +92,7 @@ class QaTranslationFilterTest : AuthorizedControllerTest() {
     performAuthGet(
       "$translationsUrl?filterHasQaIssuesInLang=fr",
     ).andIsOk.andAssertThatJson {
-      node("_embedded.keys").isArray.isEmpty()
+      node("_embedded.keys").isAbsent()
     }
   }
 

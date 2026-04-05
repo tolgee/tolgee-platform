@@ -305,6 +305,7 @@ class TranslationService(
   fun deleteByIdIn(ids: Collection<Long>) {
     importService.onExistingTranslationsRemoved(ids)
     translationCommentService.deleteByTranslationIdIn(ids)
+    translationQaIssueService.deleteAllByTranslationIdIn(ids)
     translationRepository.deleteByIdIn(ids)
   }
 
@@ -668,26 +669,15 @@ class TranslationService(
     }
   }
 
-  @Transactional
   fun setQaChecksStaleByProjectId(projectId: Long) {
-    entityManager
-      .createQuery(
-        "UPDATE Translation t SET t.qaChecksStale = true WHERE t.key.project.id = :projectId",
-      ).setParameter("projectId", projectId)
-      .executeUpdate()
+    translationRepository.setQaChecksStaleByProjectId(projectId)
   }
 
-  @Transactional
   fun setQaChecksStaleByProjectIdAndLanguageIds(
     projectId: Long,
     languageIds: List<Long>,
   ) {
-    entityManager
-      .createQuery(
-        "UPDATE Translation t SET t.qaChecksStale = true WHERE t.key.project.id = :projectId AND t.language.id IN :languageIds",
-      ).setParameter("projectId", projectId)
-      .setParameter("languageIds", languageIds)
-      .executeUpdate()
+    translationRepository.setQaChecksStaleByProjectIdAndLanguageIds(projectId, languageIds)
   }
 
   fun getKeyLanguagePairsForQaRecheck(

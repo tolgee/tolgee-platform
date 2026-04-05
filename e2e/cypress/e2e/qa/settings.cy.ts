@@ -60,10 +60,7 @@ describe('QA settings', () => {
     visitQaSettings();
 
     // Find first settings row and change its severity
-    gcy('qa-settings-row')
-      .first()
-      .findDcy('qa-settings-select')
-      .click();
+    gcy('qa-settings-row').first().findDcy('qa-settings-select').click();
 
     // Select "Off" option
     cy.get('[role="listbox"]').contains('Off').click();
@@ -100,10 +97,7 @@ describe('QA settings', () => {
     gcy('qa-language-settings-button').first().click();
 
     // Change a setting to create an override
-    gcy('qa-settings-row')
-      .first()
-      .findDcy('qa-settings-select')
-      .click();
+    gcy('qa-settings-row').first().findDcy('qa-settings-select').click();
     cy.get('[role="listbox"]').contains('Off').click();
 
     gcy('qa-language-dialog-save').click();

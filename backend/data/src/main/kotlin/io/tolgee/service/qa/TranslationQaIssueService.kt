@@ -32,4 +32,8 @@ class TranslationQaIssueService(
   fun deleteAllByProjectId(projectId: Long) {
     translationQaIssueRepository.deleteAllByProjectId(projectId)
   }
+
+  fun deleteAllByTranslationIdIn(translationIds: Collection<Long>) {
+    translationQaIssueRepository.deleteAllByTranslationIdIn(translationIds)
+  }
 }

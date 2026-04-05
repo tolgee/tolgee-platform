@@ -80,12 +80,17 @@ class QaEventListenerTest : AuthorizedControllerTest() {
 
   @AfterEach
   fun cleanup() {
-    demoProjectId?.let { id ->
-      executeInNewTransaction(platformTransactionManager) {
-        val project = projectService.get(id)
-        projectHardDeletingService.hardDeleteProject(project)
+    val demoProjId = demoProjectId
+    demoProjectId = null
+    demoProjId?.let { id ->
+      try {
+        executeInNewTransaction(platformTransactionManager) {
+          val project = projectService.get(id)
+          projectHardDeletingService.hardDeleteProject(project)
+        }
+      } catch (_: Exception) {
+        // Demo project may have already been cleaned up or failed to create
       }
-      demoProjectId = null
     }
     testDataService.cleanTestData(testData.root)
     userAccount = null

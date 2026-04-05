@@ -71,6 +71,10 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
   fun deleteAllByTranslationId(translationId: Long)
 
   @Modifying
+  @Query("delete from TranslationQaIssue i where i.translation.id in :translationIds")
+  fun deleteAllByTranslationIdIn(translationIds: Collection<Long>)
+
+  @Modifying
   @Query(
     nativeQuery = true,
     value =

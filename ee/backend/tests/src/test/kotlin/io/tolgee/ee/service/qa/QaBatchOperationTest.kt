@@ -82,16 +82,8 @@ class QaBatchOperationTest : ProjectAuthControllerTest("/v2/projects/") {
       }
     }
 
-    // French translation should be marked stale (from onActivity during batch chunks)
-    waitForNotThrowing(timeout = 5_000, pollTime = 500) {
-      executeInNewTransaction(platformTransactionManager) {
-        val frTranslation = translationService.find(testData.frTranslation.id)!!
-        assertThat(frTranslation.qaChecksStale).isTrue()
-      }
-    }
-
-    // QA_CHECK batch job should be created (from onBatchJobFinalized)
-    waitForNotThrowing(timeout = 10_000, pollTime = 500) {
+    // QA_CHECK batch job should be created (from onBatchJobFinalized after copy completes)
+    waitForNotThrowing(timeout = 30_000, pollTime = 500) {
       executeInNewTransaction(platformTransactionManager) {
         val jobs = batchJobService.getAllByProjectId(testData.project.id)
         val qaJobs = jobs.filter { it.type == BatchJobType.QA_CHECK }

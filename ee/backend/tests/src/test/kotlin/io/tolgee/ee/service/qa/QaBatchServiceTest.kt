@@ -8,6 +8,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.qa.TranslationQaIssueRepository
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.util.executeInNewTransaction
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -74,51 +75,58 @@ class QaBatchServiceTest : AuthorizedControllerTest() {
   }
 
   @Test
-  @Transactional
   fun `creates no issues when translation is clean`() {
-    refetchEntities()
-
-    testData.frTranslation.text = "Bonjour monde."
-    entityManager.flush()
+    // Update translation text in a separate transaction first to avoid deadlock:
+    // runChecksAndPersist opens its own transaction which would conflict with
+    // an outer @Transactional holding locks on the modified translation row
+    executeInNewTransaction(platformTransactionManager) {
+      val translation = entityManager.find(Translation::class.java, testData.frTranslation.id)
+      translation.text = "Bonjour monde."
+    }
 
     qaCheckBatchService.runChecksAndPersist(
       testData.project.id,
       testData.testKey.id,
       testData.frTranslation.language.id,
     )
-    entityManager.flush()
 
-    val issues = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
-    assertThat(issues).isEmpty()
+    executeInNewTransaction(platformTransactionManager) {
+      val issues = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
+      assertThat(issues).isEmpty()
+    }
   }
 
   @Test
-  @Transactional
   fun `replaces existing issues on re-check`() {
-    refetchEntities()
-
+    // First check — translation has problems
     qaCheckBatchService.runChecksAndPersist(
       testData.project.id,
       testData.testKey.id,
       testData.frTranslation.language.id,
     )
-    entityManager.flush()
-    val issuesBefore = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
-    assertThat(issuesBefore).isNotEmpty
 
-    // Update translation to be clean and re-check
-    testData.frTranslation.text = "Bonjour monde."
-    entityManager.flush()
+    executeInNewTransaction(platformTransactionManager) {
+      val issuesBefore = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
+      assertThat(issuesBefore).isNotEmpty
+    }
 
+    // Update translation to be clean in a separate transaction
+    executeInNewTransaction(platformTransactionManager) {
+      val translation = entityManager.find(Translation::class.java, testData.frTranslation.id)
+      translation.text = "Bonjour monde."
+    }
+
+    // Re-check — should find no issues
     qaCheckBatchService.runChecksAndPersist(
       testData.project.id,
       testData.testKey.id,
       testData.frTranslation.language.id,
     )
-    entityManager.flush()
 
-    val issuesAfter = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
-    assertThat(issuesAfter).isEmpty()
+    executeInNewTransaction(platformTransactionManager) {
+      val issuesAfter = qaIssueRepository.findAllByTranslationId(testData.frTranslation.id)
+      assertThat(issuesAfter).isEmpty()
+    }
   }
 
   @Test
