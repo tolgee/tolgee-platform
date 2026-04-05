@@ -29,11 +29,11 @@ class QaRecheckService(
     val pairs = translationService.getKeyLanguagePairsForQaRecheck(projectId, languageIds, onlyStale)
     if (pairs.isEmpty()) return
 
-    if (!onlyStale) {
-      val existingTranslationIds =
-        translationService.getNotStaleTranslationIds(projectId, languageIds)
-      if (existingTranslationIds.isNotEmpty()) {
-        translationService.setQaChecksStale(existingTranslationIds)
+    if (checkTypes == null && !onlyStale) {
+      if (languageIds == null) {
+        translationService.setQaChecksStaleByProjectId(projectId)
+      } else {
+        translationService.setQaChecksStaleByProjectIdAndLanguageIds(projectId, languageIds)
       }
     }
 
