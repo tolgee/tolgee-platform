@@ -13,7 +13,9 @@ import io.tolgee.ee.development.QaTestData
 import io.tolgee.ee.utils.QaTestUtil
 import io.tolgee.events.OnOrganizationFeaturesChanged
 import io.tolgee.fixtures.waitForNotThrowing
+import io.tolgee.repository.TranslationRepository
 import io.tolgee.security.ProjectHolder
+import io.tolgee.service.QuickStartService
 import io.tolgee.service.project.ProjectCreationService
 import io.tolgee.service.project.ProjectHardDeletingService
 import io.tolgee.testing.AuthorizedControllerTest
@@ -55,9 +57,16 @@ class QaEventListenerTest : AuthorizedControllerTest() {
   private lateinit var projectHardDeletingService: ProjectHardDeletingService
 
   @Autowired
+  private lateinit var quickStartService: QuickStartService
+
+  @Autowired
+  private lateinit var translationRepository: TranslationRepository
+
+  @Autowired
   private lateinit var projectHolder: ProjectHolder
 
   lateinit var testData: QaTestData
+  private var demoProjectId: Long? = null
 
   @BeforeEach
   fun setup() {
@@ -71,6 +80,13 @@ class QaEventListenerTest : AuthorizedControllerTest() {
 
   @AfterEach
   fun cleanup() {
+    demoProjectId?.let { id ->
+      executeInNewTransaction(platformTransactionManager) {
+        val project = projectService.get(id)
+        projectHardDeletingService.hardDeleteProject(project)
+      }
+      demoProjectId = null
+    }
     testDataService.cleanTestData(testData.root)
     userAccount = null
     enabledFeaturesProvider.forceEnabled = null
@@ -283,6 +299,34 @@ class QaEventListenerTest : AuthorizedControllerTest() {
       val jobs = batchJobService.getAllByProjectId(testData.project.id)
       val qaJobs = jobs.filter { it.type == BatchJobType.QA_CHECK }
       qaJobs.assert.isEmpty()
+    }
+  }
+
+  @Test
+  fun `demo project triggers activity and marks translations stale`() {
+    val userId = testData.user.id
+    val orgId = testData.userAccountBuilder.defaultOrganizationBuilder.self.id
+
+    demoProjectId =
+      executeInNewTransaction(platformTransactionManager) {
+        val user = entityManager.find(io.tolgee.model.UserAccount::class.java, userId)
+        val org = entityManager.find(io.tolgee.model.Organization::class.java, orgId)
+        quickStartService.create(user, org)
+        projectService.findAllInOrganization(orgId).first { it.name == "Demo project" }.id
+      }
+
+    // Demo project should have QA enabled (org has QA_CHECKS feature)
+    executeInNewTransaction(platformTransactionManager) {
+      val project = projectService.get(demoProjectId!!)
+      assertThat(project.useQaChecks).isTrue()
+    }
+
+    // Demo translations should be marked stale (activity system captured the modifications)
+    executeInNewTransaction(platformTransactionManager) {
+      val translations = translationRepository.getAllByProjectId(demoProjectId!!)
+      assertThat(translations).isNotEmpty
+      val staleTranslations = translations.filter { it.qaChecksStale }
+      assertThat(staleTranslations).isNotEmpty
     }
   }
 }
