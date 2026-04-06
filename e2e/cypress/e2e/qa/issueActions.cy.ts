@@ -38,11 +38,18 @@ describe('QA issue actions', () => {
     openQaPanel();
 
     // Click the ignore button
-    gcy('qa-check-item').first().contains('Ignore').click();
+    gcy('qa-check-item')
+      .first()
+      .findDcy('qa-action-ignore')
+      .should('have.attr', 'data-cy-state', 'OPEN')
+      .click();
     waitForGlobalLoading();
 
-    // Issue should show as ignored (with reduced opacity container)
-    gcy('qa-check-item').first().contains('Unignore').should('exist');
+    // Issue should show as ignored
+    gcy('qa-check-item')
+      .first()
+      .findDcy('qa-action-ignore')
+      .should('have.attr', 'data-cy-state', 'IGNORED');
   });
 
   it('unignores a previously ignored issue', () => {
@@ -53,12 +60,19 @@ describe('QA issue actions', () => {
     view.getTranslationCell('key_ignored_issue', 'fr').click();
     openQaPanel();
 
-    // The ignored issue should show unignore button
-    gcy('qa-check-item').first().contains('Unignore').click();
+    // The ignored issue should show the ignore button in ignored state
+    gcy('qa-check-item')
+      .first()
+      .findDcy('qa-action-ignore')
+      .should('have.attr', 'data-cy-state', 'IGNORED')
+      .click();
     waitForGlobalLoading();
 
-    // After unignoring, it should show the ignore button again
-    gcy('qa-check-item').first().contains('Ignore').should('exist');
+    // After unignoring, it should show the ignore button in open state
+    gcy('qa-check-item')
+      .first()
+      .findDcy('qa-action-ignore')
+      .should('have.attr', 'data-cy-state', 'OPEN');
   });
 
   it('corrects an issue with replacement text', () => {
@@ -70,7 +84,7 @@ describe('QA issue actions', () => {
     openQaPanel();
 
     // Click the correct button
-    gcy('qa-check-item').first().contains('Correct').click();
+    gcy('qa-check-item').first().findDcy('qa-action-correct').click();
 
     // The editor should now contain the corrected text
     gcy('global-editor').should('contain.text', 'Bienvenue!');

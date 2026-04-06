@@ -148,7 +148,12 @@ export const QaCheckItem = ({
 
   const buttonCorrectSmall = onCorrect && (
     <Tooltip title={t('qa_check_action_correct')}>
-      <IconButton size="small" color="primary" onClick={onCorrect}>
+      <IconButton
+        size="small"
+        color="primary"
+        onClick={onCorrect}
+        data-cy="qa-action-correct"
+      >
         <Check width={20} height={20} />
       </IconButton>
     </Tooltip>
@@ -156,20 +161,38 @@ export const QaCheckItem = ({
 
   const buttonIgnoreSmall = onIgnore && (
     <Tooltip title={t('qa_check_action_ignore')}>
-      <IconButton size="small" onClick={onIgnore}>
+      <IconButton
+        size="small"
+        onClick={onIgnore}
+        data-cy="qa-action-ignore"
+        data-cy-state={issue.state}
+      >
         <XClose width={20} height={20} />
       </IconButton>
     </Tooltip>
   );
 
   const buttonCorrectBig = onCorrect && (
-    <Button variant="outlined" color="primary" size="small" onClick={onCorrect}>
+    <Button
+      variant="outlined"
+      color="primary"
+      size="small"
+      onClick={onCorrect}
+      data-cy="qa-action-correct"
+    >
       <T keyName="qa_check_action_correct" />
     </Button>
   );
 
   const buttonIgnoreBig = onIgnore && (
-    <Button variant="text" color="inherit" size="small" onClick={onIgnore}>
+    <Button
+      variant="text"
+      color="inherit"
+      size="small"
+      onClick={onIgnore}
+      data-cy="qa-action-ignore"
+      data-cy-state={issue.state}
+    >
       {issue.state === 'IGNORED' ? (
         <T keyName="qa_check_action_unignore" />
       ) : (

@@ -173,6 +173,10 @@ class QaE2eTestData : BaseTestData() {
       }
     }
 
+    // Mark all translations as not stale — the seeded QA issues represent the final
+    // "after batch job" state.
+    projectBuilder.data.translations.forEach { it.self.qaChecksStale = false }
+
     // Create QA config: all checks enabled at WARNING except SPELLING/GRAMMAR
     qaConfig =
       ProjectQaConfig(

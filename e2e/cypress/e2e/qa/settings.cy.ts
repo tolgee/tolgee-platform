@@ -44,14 +44,17 @@ describe('QA settings', () => {
     gcy('qa-enabled-toggle').click();
     waitForGlobalLoading();
 
-    // Settings rows should not be visible when QA is off
-    gcy('qa-settings-row').should('not.exist');
+    // Settings rows should be disabled (grayed out) when QA is off
+    gcy('qa-settings-row')
+      .first()
+      .find('select, [role="combobox"]')
+      .should('be.disabled');
 
     // Toggle back on
     gcy('qa-enabled-toggle').click();
     waitForGlobalLoading();
 
-    // Settings rows should be visible again
+    // Settings rows should be enabled again
     gcy('qa-settings-row').should('have.length.gte', 1);
   });
 
