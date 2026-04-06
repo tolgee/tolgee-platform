@@ -105,18 +105,6 @@ class QaBranchMergeTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `branch merge triggers QA checks on modified translations`() {
     val keys = initConflicts()
 
-    // Wait for branch revisions to be ready
-    waitForNotThrowing(timeout = 10_000, pollTime = 250) {
-      testData.featureBranch
-        .refresh()
-        .revision.assert
-        .isGreaterThan(0)
-      testData.mainBranch
-        .refresh()
-        .revision.assert
-        .isGreaterThan(0)
-    }
-
     // Create merge with conflict resolved as SOURCE (feature branch wins)
     val change =
       createMergeWithConflict(
