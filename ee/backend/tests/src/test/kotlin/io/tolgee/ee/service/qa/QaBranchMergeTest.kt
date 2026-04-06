@@ -105,11 +105,17 @@ class QaBranchMergeTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `branch merge triggers QA checks on modified translations`() {
     val keys = initConflicts()
 
-    // Wait for branch revisions to stabilize — async QA batch jobs triggered by
-    // translation saves can bump revisions via BranchRevisionListener. We need to
-    // wait until revisions stop changing before creating the merge, otherwise the
-    // stored revision won't match the current revision at apply time.
-    waitForRevisionsToStabilize()
+    // Wait for branch revisions to be ready
+    waitForNotThrowing(timeout = 10_000, pollTime = 250) {
+      testData.featureBranch
+        .refresh()
+        .revision.assert
+        .isGreaterThan(0)
+      testData.mainBranch
+        .refresh()
+        .revision.assert
+        .isGreaterThan(0)
+    }
 
     // Create merge with conflict resolved as SOURCE (feature branch wins)
     val change =
@@ -130,25 +136,6 @@ class QaBranchMergeTest : ProjectAuthControllerTest("/v2/projects/") {
         val qaJobs = jobs.filter { it.type == BatchJobType.QA_CHECK }
         qaJobs.assert.isNotEmpty
       }
-    }
-  }
-
-  private fun waitForRevisionsToStabilize() {
-    var lastSourceRevision = -1L
-    var lastTargetRevision = -1L
-    waitForNotThrowing(timeout = 15_000, pollTime = 500) {
-      val sourceRevision = testData.featureBranch.refresh().revision
-      val targetRevision = testData.mainBranch.refresh().revision
-      assertThat(sourceRevision).isGreaterThan(0)
-      assertThat(targetRevision).isGreaterThan(0)
-      // Fail if revisions changed since last poll — waitForNotThrowing will retry.
-      // Update tracked values before asserting so the next poll sees the latest values.
-      val prevSource = lastSourceRevision
-      val prevTarget = lastTargetRevision
-      lastSourceRevision = sourceRevision
-      lastTargetRevision = targetRevision
-      assertThat(sourceRevision).isEqualTo(prevSource)
-      assertThat(targetRevision).isEqualTo(prevTarget)
     }
   }
 

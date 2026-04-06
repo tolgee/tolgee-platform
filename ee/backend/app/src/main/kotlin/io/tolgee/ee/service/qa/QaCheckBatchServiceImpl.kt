@@ -102,6 +102,10 @@ class QaCheckBatchServiceImpl(
       if (checkTypes == null) {
         translation.qaChecksStale = false
       }
+      // Disable activity logging for the translation — no content changes are happening here.
+      // Without this, when we create a new empty translation (so we can reference it from QA issues),
+      // it gets logged.
+      translation.disableActivityLogging = true
       translationService.save(translation)
 
       qaIssueService.publishQaIssuesUpdated(translation)
