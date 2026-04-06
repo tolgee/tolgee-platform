@@ -232,6 +232,11 @@ class QaBranchMergeTest : ProjectAuthControllerTest("/v2/projects/") {
               branchMerge.changes.add(this)
             }.self
         }.self
+    // Disable activity logging on the entities to prevent the save from bumping
+    // branch revisions (BranchMergeChange falls through to defaultBranchId in
+    // resolveBranchId, which incorrectly bumps the target branch revision)
+    branchMerge.disableActivityLogging = true
+    change.disableActivityLogging = true
     branchMergeRepository.save(branchMerge)
     branchMergeChangeRepository.save(change)
     return change
