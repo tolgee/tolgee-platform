@@ -47,8 +47,8 @@ describe('QA settings', () => {
     // Settings rows should be disabled (grayed out) when QA is off
     gcy('qa-settings-row')
       .first()
-      .find('select, [role="combobox"]')
-      .should('be.disabled');
+      .find('[role="combobox"]')
+      .should('have.attr', 'aria-disabled', 'true');
 
     // Toggle back on
     gcy('qa-enabled-toggle').click();
@@ -87,9 +87,8 @@ describe('QA settings', () => {
     // Dialog should open with inherited banner
     gcy('qa-language-dialog-inherited-banner').should('exist');
 
-    // Save the dialog
-    gcy('qa-language-dialog-save').click();
-    waitForGlobalLoading();
+    // Close the dialog (no changes were made, so Save is disabled)
+    cy.get('body').type('{esc}');
   });
 
   it('resets language settings to global', () => {
@@ -99,8 +98,10 @@ describe('QA settings', () => {
     // Open language settings and make a change
     gcy('qa-language-settings-button').first().click();
 
-    // Change a setting to create an override
-    gcy('qa-settings-row').first().findDcy('qa-settings-select').click();
+    // Change a setting to create an override (scope within dialog)
+    cy.get('[role="dialog"]').within(() => {
+      gcy('qa-settings-row').first().findDcy('qa-settings-select').click();
+    });
     cy.get('[role="listbox"]').contains('Off').click();
 
     gcy('qa-language-dialog-save').click();

@@ -50,8 +50,8 @@ class QaE2eTestData : BaseTestData() {
             type = QaCheckType.PUNCTUATION_MISMATCH
             message = QaIssueMessage.QA_PUNCTUATION_ADD
             state = QaIssueState.OPEN
-            positionStart = 17
-            positionEnd = 17
+            positionStart = 16
+            positionEnd = 16
             replacement = "!"
           }
         }
