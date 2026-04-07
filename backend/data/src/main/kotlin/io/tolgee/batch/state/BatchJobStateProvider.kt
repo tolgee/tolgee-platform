@@ -77,7 +77,7 @@ interface BatchJobStateProvider {
 
   fun getCached(jobId: Long): MutableMap<Long, ExecutionState>?
 
-  fun removeJobState(jobId: Long): MutableMap<Long, ExecutionState>?
+  fun removeJobState(jobId: Long)
 
   fun hasCachedJobState(jobId: Long): Boolean
 

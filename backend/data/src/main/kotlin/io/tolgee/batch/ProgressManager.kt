@@ -398,8 +398,8 @@ class ProgressManager(
    * we have to unlock the project, otherwise it will be locked forever
    */
   fun finalizeIfCompleted(jobId: Long) {
-    val cached = batchJobStateProvider.getCached(jobId)
-    logger.debug("Checking if job $jobId is completed, has cached value: ${cached != null}")
+    val hasCached = batchJobStateProvider.hasCachedJobState(jobId)
+    logger.debug("Checking if job $jobId is completed, has cached value: $hasCached")
     // Use getJobDtoNoCache to avoid race condition where cache gets stale data
     // during another transaction's commit window
     val jobDto = batchJobService.getJobDtoNoCache(jobId)
