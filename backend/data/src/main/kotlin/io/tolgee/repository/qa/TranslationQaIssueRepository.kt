@@ -20,24 +20,34 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     from TranslationQaIssue i
     join i.translation t
     join t.key k
+    left join k.branch b
     where k.project.id = :projectId
     and i.state = io.tolgee.model.enums.qa.QaIssueState.OPEN
+    and ((b.id = :branchId and b.deletedAt is null) or (:branchId is null and (b is null or b.isDefault)))
     group by t.language.id
     """,
   )
-  fun getOpenIssueCountsByLanguageId(projectId: Long): List<LanguageQaIssueCount>
+  fun getOpenIssueCountsByLanguageId(
+    projectId: Long,
+    branchId: Long?,
+  ): List<LanguageQaIssueCount>
 
   @Query(
     """
     select t.language.id as languageId, count(t) as count
     from Translation t
     join t.key k
+    left join k.branch b
     where k.project.id = :projectId
     and t.qaChecksStale = true
+    and ((b.id = :branchId and b.deletedAt is null) or (:branchId is null and (b is null or b.isDefault)))
     group by t.language.id
     """,
   )
-  fun getStaleCountsByLanguageId(projectId: Long): List<LanguageQaIssueCount>
+  fun getStaleCountsByLanguageId(
+    projectId: Long,
+    branchId: Long?,
+  ): List<LanguageQaIssueCount>
 
   @Query(
     """
@@ -45,15 +55,18 @@ interface TranslationQaIssueRepository : JpaRepository<TranslationQaIssue, Long>
     from TranslationQaIssue i
     join i.translation t
     join t.key k
+    left join k.branch b
     where k.project.id = :projectId
     and t.language.id = :languageId
     and i.state = io.tolgee.model.enums.qa.QaIssueState.OPEN
+    and ((b.id = :branchId and b.deletedAt is null) or (:branchId is null and (b is null or b.isDefault)))
     group by i.type
     """,
   )
   fun getOpenIssueCountsByCheckType(
     projectId: Long,
     languageId: Long,
+    branchId: Long?,
   ): List<QaIssueCountByCheckType>
 
   @Query(

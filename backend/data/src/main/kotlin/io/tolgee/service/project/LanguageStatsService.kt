@@ -62,13 +62,13 @@ class LanguageStatsService(
           val qaEnabled = projectFeatureGuard.isFeatureEnabled(Feature.QA_CHECKS, project)
           val qaIssueCounts =
             if (qaEnabled) {
-              translationQaIssueService.getOpenIssueCountsByLanguageId(projectId)
+              translationQaIssueService.getOpenIssueCountsByLanguageId(projectId, branchId)
             } else {
               emptyMap()
             }
           val qaChecksStaleCountMap =
             if (qaEnabled) {
-              translationQaIssueService.getStaleCountsByLanguageId(projectId)
+              translationQaIssueService.getStaleCountsByLanguageId(projectId, branchId)
             } else {
               emptyMap()
             }

@@ -8,24 +8,31 @@ import org.springframework.stereotype.Service
 class TranslationQaIssueService(
   private val translationQaIssueRepository: TranslationQaIssueRepository,
 ) {
-  fun getOpenIssueCountsByLanguageId(projectId: Long): Map<Long, Long> {
+  fun getOpenIssueCountsByLanguageId(
+    projectId: Long,
+    branchId: Long? = null,
+  ): Map<Long, Long> {
     return translationQaIssueRepository
-      .getOpenIssueCountsByLanguageId(projectId)
+      .getOpenIssueCountsByLanguageId(projectId, branchId)
       .associate { it.languageId to it.count }
   }
 
-  fun getStaleCountsByLanguageId(projectId: Long): Map<Long, Long> {
+  fun getStaleCountsByLanguageId(
+    projectId: Long,
+    branchId: Long? = null,
+  ): Map<Long, Long> {
     return translationQaIssueRepository
-      .getStaleCountsByLanguageId(projectId)
+      .getStaleCountsByLanguageId(projectId, branchId)
       .associate { it.languageId to it.count }
   }
 
   fun getOpenIssueCountsByCheckType(
     projectId: Long,
     languageId: Long,
+    branchId: Long? = null,
   ): Map<QaCheckType, Long> {
     return translationQaIssueRepository
-      .getOpenIssueCountsByCheckType(projectId, languageId)
+      .getOpenIssueCountsByCheckType(projectId, languageId, branchId)
       .associate { it.checkType to it.count }
   }
 

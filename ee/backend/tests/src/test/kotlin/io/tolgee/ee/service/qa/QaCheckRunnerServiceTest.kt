@@ -6,6 +6,7 @@ import io.tolgee.model.enums.qa.QaIssueMessage
 import io.tolgee.model.qa.ProjectQaConfig
 import io.tolgee.repository.qa.LanguageQaConfigRepository
 import io.tolgee.repository.qa.ProjectQaConfigRepository
+import io.tolgee.service.language.LanguageService
 import io.tolgee.service.project.LanguageStatsService
 import io.tolgee.service.project.ProjectService
 import jakarta.persistence.EntityManager
@@ -34,7 +35,8 @@ class QaCheckRunnerServiceTest {
     Mockito.`when`(repo.findByProjectId(Mockito.anyLong())).thenReturn(config)
     val qaRecheckService = Mockito.mock(QaRecheckService::class.java)
     val languageStatsService = Mockito.mock(LanguageStatsService::class.java)
-    return ProjectQaConfigService(repo, langRepo, projectService, entityManager, qaRecheckService, languageStatsService)
+    val languageService = Mockito.mock(LanguageService::class.java)
+    return ProjectQaConfigService(repo, langRepo, projectService, entityManager, qaRecheckService, languageStatsService, languageService)
   }
 
   @Test

@@ -99,9 +99,12 @@ class ProjectStatsController(
   @RequiresFeatures(Feature.QA_CHECKS)
   fun getQaIssueCountsByCheckType(
     @RequestParam(name = "languageId") languageId: Long,
+    @RequestParam(name = "branch", required = false) branchName: String? = null,
   ): Map<QaCheckType, Long> {
+    projectFeatureGuard.checkIfUsed(Feature.BRANCHING, branchName)
+    val branch = branchService.getActiveOrDefault(projectHolder.project.id, branchName)
     return translationQaIssueService
-      .getOpenIssueCountsByCheckType(projectHolder.project.id, languageId)
+      .getOpenIssueCountsByCheckType(projectHolder.project.id, languageId, branch?.id)
   }
 
   @Operation(summary = "Get project daily amount of events")
