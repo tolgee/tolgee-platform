@@ -111,7 +111,7 @@ class BatchJobManagementControllerTest :
         dtos.forEach {
           val state = batchJobStateProvider.getCached(it.id)
           println(
-            "Job ${it.id} status ${it.status} progress: ${state?.values?.sumOf { it.successTargets.size }}",
+            "Job ${it.id} status ${it.status} progress: ${state?.values?.sumOf { it.successTargetsCount }}",
           )
         }
         dtos.count { it.status == BatchJobStatus.SUCCESS }.assert.isEqualTo(2)
