@@ -61,6 +61,13 @@ class QaBatchOperationTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   @Test
   fun `copy translations batch job triggers QA checks via OnBatchJobFinalized`() {
+    val initialQaJobCount =
+      executeInNewTransaction(platformTransactionManager) {
+        batchJobService
+          .getAllByProjectId(testData.project.id)
+          .count { it.type == BatchJobType.QA_CHECK }
+      }
+
     // Copy English translations to French — this modifies French translation text
     // through a batch job, which goes through OnBatchJobFinalized path
     performProjectAuthPost(
@@ -85,9 +92,11 @@ class QaBatchOperationTest : ProjectAuthControllerTest("/v2/projects/") {
     // QA_CHECK batch job should be created (from onBatchJobFinalized after copy completes)
     waitForNotThrowing(timeout = 30_000, pollTime = 500) {
       executeInNewTransaction(platformTransactionManager) {
-        val jobs = batchJobService.getAllByProjectId(testData.project.id)
-        val qaJobs = jobs.filter { it.type == BatchJobType.QA_CHECK }
-        qaJobs.assert.isNotEmpty
+        val qaJobCount =
+          batchJobService
+            .getAllByProjectId(testData.project.id)
+            .count { it.type == BatchJobType.QA_CHECK }
+        assertThat(qaJobCount).isGreaterThan(initialQaJobCount)
       }
     }
   }
