@@ -18,6 +18,16 @@ class InconsistentPlaceholdersCheck : QaCheck {
     }
   }
 
+  /**
+   * Args from nested select/plural branches (null positions) represent the same logical
+   * placeholder repeated across branches — deduplicate them by name so counting works correctly.
+   * Top-level args (with positions) are kept as-is since each occurrence is meaningful.
+   */
+  private fun deduplicateNestedArgs(args: List<ArgInfo>): List<ArgInfo> {
+    val (positioned, nested) = args.partition { it.positionStart != null }
+    return positioned + nested.distinctBy { it.name }
+  }
+
   private fun checkVariant(
     text: String,
     baseText: String?,
@@ -26,41 +36,49 @@ class InconsistentPlaceholdersCheck : QaCheck {
     if (base.isBlank()) return emptyList()
     if (text.isBlank()) return emptyList()
 
-    val baseArgs = extractArgs(base) ?: return emptyList()
-    val textArgs = extractArgs(text) ?: return emptyList()
+    val baseArgs = deduplicateNestedArgs(extractArgs(base) ?: return emptyList())
+    val textArgs = deduplicateNestedArgs(extractArgs(text) ?: return emptyList())
 
-    val baseNames = baseArgs.map { it.name }.toSet()
-    val textNames = textArgs.map { it.name }.toSet()
+    val baseCounts = baseArgs.groupingBy { it.name }.eachCount()
+    val textCounts = textArgs.groupingBy { it.name }.eachCount()
 
     val results = mutableListOf<QaCheckResult>()
 
-    val missingNames = baseNames - textNames
-    for (name in missingNames) {
-      results.add(
-        QaCheckResult(
-          type = QaCheckType.INCONSISTENT_PLACEHOLDERS,
-          message = QaIssueMessage.QA_PLACEHOLDERS_MISSING,
-          replacement = null,
-          positionStart = null,
-          positionEnd = null,
-          params = mapOf("placeholder" to name),
-        ),
-      )
+    for ((name, baseCount) in baseCounts) {
+      val textCount = textCounts[name] ?: 0
+      repeat(maxOf(0, baseCount - textCount)) {
+        results.add(
+          QaCheckResult(
+            type = QaCheckType.INCONSISTENT_PLACEHOLDERS,
+            message = QaIssueMessage.QA_PLACEHOLDERS_MISSING,
+            replacement = null,
+            positionStart = null,
+            positionEnd = null,
+            params = mapOf("placeholder" to name),
+          ),
+        )
+      }
     }
 
-    val extraNames = textNames - baseNames
-    for (arg in textArgs.filter { it.name in extraNames }) {
-      val hasPosition = arg.positionStart != null && arg.positionEnd != null
-      results.add(
-        QaCheckResult(
-          type = QaCheckType.INCONSISTENT_PLACEHOLDERS,
-          message = QaIssueMessage.QA_PLACEHOLDERS_EXTRA,
-          replacement = if (hasPosition) "" else null,
-          positionStart = arg.positionStart,
-          positionEnd = arg.positionEnd,
-          params = mapOf("placeholder" to arg.name),
-        ),
-      )
+    for ((name, textCount) in textCounts) {
+      val baseCount = baseCounts[name] ?: 0
+      val extraCount = maxOf(0, textCount - baseCount)
+      if (extraCount > 0) {
+        val extraArgs = textArgs.filter { it.name == name }.takeLast(extraCount)
+        for (arg in extraArgs) {
+          val hasPosition = arg.positionStart != null && arg.positionEnd != null
+          results.add(
+            QaCheckResult(
+              type = QaCheckType.INCONSISTENT_PLACEHOLDERS,
+              message = QaIssueMessage.QA_PLACEHOLDERS_EXTRA,
+              replacement = if (hasPosition) "" else null,
+              positionStart = arg.positionStart,
+              positionEnd = arg.positionEnd,
+              params = mapOf("placeholder" to arg.name),
+            ),
+          )
+        }
+      }
     }
 
     return results

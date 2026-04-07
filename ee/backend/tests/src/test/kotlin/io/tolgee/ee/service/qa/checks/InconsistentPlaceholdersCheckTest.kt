@@ -109,6 +109,25 @@ class InconsistentPlaceholdersCheckTest {
   }
 
   @Test
+  fun `detects missing duplicate placeholder`() {
+    check.check(params("Ahoj {name}", "Hello {name} and {name}")).assertSingleIssue {
+      message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
+      param("placeholder", "name")
+      noReplacement()
+    }
+  }
+
+  @Test
+  fun `detects extra duplicate placeholder`() {
+    check.check(params("Ahoj {name} a {name}", "Hello {name}")).assertSingleIssue {
+      message(QaIssueMessage.QA_PLACEHOLDERS_EXTRA)
+      param("placeholder", "name")
+      position(14, 20)
+      replacement("")
+    }
+  }
+
+  @Test
   fun `handles numbered placeholders`() {
     check.check(params("Ahoj {1}", "Hello {0} and {1}")).assertSingleIssue {
       message(QaIssueMessage.QA_PLACEHOLDERS_MISSING)
