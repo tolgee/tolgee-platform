@@ -47,6 +47,8 @@ class QaActivityListener(
   private val qaRecheckService: QaRecheckService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
 ) {
+  // region Event listeners
+
   @EventListener
   fun onActivity(event: OnProjectActivityEvent) {
     runSentryCatching {
@@ -56,6 +58,8 @@ class QaActivityListener(
       // Mark translations stale unconditionally - even when QA is disabled and even when processing batch chunks
       markTranslationsQaChecksStale(event, projectId)
       markMaxCharLimitTranslationsQaChecksStale(event)
+      markLanguageTagChangedTranslationsStale(event, projectId)
+      markBaseLanguageChangedTranslationsStale(event, projectId)
 
       // If this activity is part of a batch chunk, we'll handle it when the batch job is finalized
       if (isBatchChunk) return
@@ -89,6 +93,10 @@ class QaActivityListener(
     }
   }
 
+  // endregion
+
+  // region Batch job processing (feature-gated)
+
   private fun processModifiedEntities(
     projectId: Long,
     entities: List<ActivityModifiedEntity>,
@@ -98,6 +106,46 @@ class QaActivityListener(
 
     val allTargets = (translationTargets + maxCharLimitTargets).distinct()
     startQaCheckBatchJob(projectId, allTargets)
+  }
+
+  private fun startQaCheckBatchJob(
+    projectId: Long,
+    targets: List<BatchTranslationTargetItem>,
+  ) {
+    if (targets.isEmpty()) return
+    val project = entityManager.getReference(Project::class.java, projectId)
+    for (chunk in targets.chunked(QaRecheckService.MAX_BATCH_JOB_TARGET_SIZE)) {
+      batchJobService.startJob(
+        request = QaCheckRequest(target = chunk),
+        project = project,
+        author = null,
+        type = BatchJobType.QA_CHECK,
+        isHidden = true,
+      )
+    }
+  }
+
+  // endregion
+
+  // region Translation text changes
+
+  private fun markTranslationsQaChecksStale(
+    event: OnProjectActivityEvent,
+    projectId: Long,
+  ) {
+    val textChangedTranslationIds =
+      getTextChangedTranslations(event.modifiedEntities.values.flatMap { it.values }).map { it.entityId }
+    if (textChangedTranslationIds.isEmpty()) return
+
+    // Mark direct translations as stale
+    translationService.setQaChecksStale(textChangedTranslationIds)
+
+    // Mark siblings of base language changes as stale
+    val baseLanguage = languageService.getProjectBaseLanguage(projectId)
+    translationService.setQaChecksStaleForBaseTranslationKeys(
+      translationIds = textChangedTranslationIds,
+      baseLanguageId = baseLanguage.id,
+    )
   }
 
   private fun getTranslationChangeTargets(
@@ -142,6 +190,24 @@ class QaActivityListener(
     return directTargets + siblingTargets
   }
 
+  private fun getTextChangedTranslations(entities: List<ActivityModifiedEntity>): List<ActivityModifiedEntity> {
+    return entities.filter { entity ->
+      entity.entityClass == Translation::class.simpleName &&
+        entity.revisionType != RevisionType.DEL &&
+        entity.modifications.containsKey("text")
+    }
+  }
+
+  // endregion
+
+  // region Max char limit changes
+
+  private fun markMaxCharLimitTranslationsQaChecksStale(event: OnProjectActivityEvent) {
+    val keyIds = getMaxCharLimitChangedKeyIds(event.modifiedEntities.values.flatMap { it.values })
+    if (keyIds.isEmpty()) return
+    translationService.setQaChecksStaleByKeyIds(keyIds)
+  }
+
   private fun getMaxCharLimitChangeTargets(
     projectId: Long,
     entities: List<ActivityModifiedEntity>,
@@ -155,35 +221,33 @@ class QaActivityListener(
     }
   }
 
-  private fun markTranslationsQaChecksStale(
+  private fun getMaxCharLimitChangedKeyIds(entities: List<ActivityModifiedEntity>): List<Long> {
+    return entities
+      .filter { entity ->
+        entity.entityClass == Key::class.simpleName &&
+          entity.revisionType != RevisionType.DEL &&
+          entity.modifications.containsKey("maxCharLimit")
+      }.map { it.entityId }
+  }
+
+  // endregion
+
+  // region Language tag changes
+
+  private fun markLanguageTagChangedTranslationsStale(
     event: OnProjectActivityEvent,
     projectId: Long,
   ) {
-    val textChangedTranslationIds =
-      getTextChangedTranslations(event.modifiedEntities.values.flatMap { it.values }).map { it.entityId }
-    if (textChangedTranslationIds.isEmpty()) return
-
-    // Mark direct translations as stale
-    translationService.setQaChecksStale(textChangedTranslationIds)
-
-    // Mark siblings of base language changes as stale
-    val baseLanguage = languageService.getProjectBaseLanguage(projectId)
-    translationService.setQaChecksStaleForBaseTranslationKeys(
-      translationIds = textChangedTranslationIds,
-      baseLanguageId = baseLanguage.id,
-    )
+    val changedLanguageIds = getLanguageTagChangedIds(event)
+    if (changedLanguageIds.isEmpty()) return
+    translationService.setQaChecksStaleByProjectIdAndLanguageIds(projectId, changedLanguageIds)
   }
 
   private fun handleLanguageTagChanged(
     event: OnProjectActivityEvent,
     projectId: Long,
   ) {
-    val languageEntities = event.modifiedEntities[Language::class] ?: return
-    val changedLanguageIds =
-      languageEntities
-        .filter { (_, entity) -> entity.modifications.containsKey("tag") }
-        .map { (id, _) -> id }
-
+    val changedLanguageIds = getLanguageTagChangedIds(event)
     if (changedLanguageIds.isEmpty()) return
 
     qaRecheckService.recheckTranslations(
@@ -192,20 +256,43 @@ class QaActivityListener(
     )
   }
 
+  private fun getLanguageTagChangedIds(event: OnProjectActivityEvent): List<Long> {
+    val languageEntities = event.modifiedEntities[Language::class] ?: return emptyList()
+    return languageEntities
+      .filter { (_, entity) -> entity.modifications.containsKey("tag") }
+      .map { (id, _) -> id }
+  }
+
+  // endregion
+
+  // region Base language changes
+
+  private fun markBaseLanguageChangedTranslationsStale(
+    event: OnProjectActivityEvent,
+    projectId: Long,
+  ) {
+    if (!isBaseLanguageChanged(event)) return
+    translationService.setQaChecksStaleByProjectId(projectId)
+  }
+
   private fun handleBaseLanguageChanged(
     event: OnProjectActivityEvent,
     projectId: Long,
   ) {
-    val projectEntities = event.modifiedEntities[Project::class] ?: return
-    val baseLanguageChanged =
-      projectEntities.values.any { entity ->
-        entity.modifications.containsKey("baseLanguage")
-      }
-
-    if (!baseLanguageChanged) return
-
+    if (!isBaseLanguageChanged(event)) return
     qaRecheckService.recheckTranslations(projectId = projectId)
   }
+
+  private fun isBaseLanguageChanged(event: OnProjectActivityEvent): Boolean {
+    val projectEntities = event.modifiedEntities[Project::class] ?: return false
+    return projectEntities.values.any { entity ->
+      entity.modifications.containsKey("baseLanguage")
+    }
+  }
+
+  // endregion
+
+  // region Project creation
 
   /**
    * Enables QA checks for new projects if the feature is available.
@@ -225,43 +312,5 @@ class QaActivityListener(
     }
   }
 
-  private fun markMaxCharLimitTranslationsQaChecksStale(event: OnProjectActivityEvent) {
-    val keyIds = getMaxCharLimitChangedKeyIds(event.modifiedEntities.values.flatMap { it.values })
-    if (keyIds.isEmpty()) return
-    translationService.setQaChecksStaleByKeyIds(keyIds)
-  }
-
-  private fun getMaxCharLimitChangedKeyIds(entities: List<ActivityModifiedEntity>): List<Long> {
-    return entities
-      .filter { entity ->
-        entity.entityClass == Key::class.simpleName &&
-          entity.revisionType != RevisionType.DEL &&
-          entity.modifications.containsKey("maxCharLimit")
-      }.map { it.entityId }
-  }
-
-  private fun getTextChangedTranslations(entities: List<ActivityModifiedEntity>): List<ActivityModifiedEntity> {
-    return entities.filter { entity ->
-      entity.entityClass == Translation::class.simpleName &&
-        entity.revisionType != RevisionType.DEL &&
-        entity.modifications.containsKey("text")
-    }
-  }
-
-  private fun startQaCheckBatchJob(
-    projectId: Long,
-    targets: List<BatchTranslationTargetItem>,
-  ) {
-    if (targets.isEmpty()) return
-    val project = entityManager.getReference(Project::class.java, projectId)
-    for (chunk in targets.chunked(QaRecheckService.MAX_BATCH_JOB_TARGET_SIZE)) {
-      batchJobService.startJob(
-        request = QaCheckRequest(target = chunk),
-        project = project,
-        author = null,
-        type = BatchJobType.QA_CHECK,
-        isHidden = true,
-      )
-    }
-  }
+  // endregion
 }
