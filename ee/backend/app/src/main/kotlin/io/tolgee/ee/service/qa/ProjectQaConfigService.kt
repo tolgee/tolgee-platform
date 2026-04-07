@@ -57,9 +57,7 @@ class ProjectQaConfigService(
   fun getSettings(projectId: Long): Map<QaCheckType, QaCheckSeverity> {
     val config = projectQaConfigRepository.findByProjectId(projectId)
     val stored = config?.settings ?: emptyMap()
-    return QaCheckType.entries.associateWith { type ->
-      stored[type] ?: type.defaultSeverity
-    }
+    return resolveEffectiveSettings(stored)
   }
 
   fun getEnabledCheckTypesForProject(projectId: Long): Set<QaCheckType> {
@@ -91,24 +89,11 @@ class ProjectQaConfigService(
     val langConfig =
       languageQaConfigRepository.findByLanguageProjectIdAndLanguageId(projectId, languageId)
         ?: return globalSettings
-    val languageSettings = langConfig.settings.toMutableMap()
-    for (type in QaCheckType.entries) {
-      languageSettings[type] = languageSettings[type] ?: globalSettings[type] ?: type.defaultSeverity
-    }
-    return languageSettings.toMap()
+    return resolveEffectiveSettings(globalSettings, langConfig.settings)
   }
 
   fun getSettingsForAllLanguages(projectId: Long): List<LanguageQaConfig> {
     return languageQaConfigRepository.findAllByLanguageProjectId(projectId)
-  }
-
-  // Config changes while QA is disabled would not trigger a recheck, so the
-  // persisted QA issues would silently go out of sync with the new settings.
-  private fun requireQaEnabled(projectId: Long) {
-    val project = projectService.get(projectId)
-    if (!project.useQaChecks) {
-      throw BadRequestException(Message.QA_CHECKS_NOT_ENABLED)
-    }
   }
 
   @Transactional
@@ -129,12 +114,8 @@ class ProjectQaConfigService(
     }
     projectQaConfigRepository.save(config)
 
-    val newEffective =
-      QaCheckType.entries.associateWith { type ->
-        config.settings[type] ?: type.defaultSeverity
-      }
-    val changedTypes = QaCheckType.entries.filter { oldEffective[it] != newEffective[it] }
-    recheckIfEnabled(projectId, changedTypes)
+    val newEffective = resolveEffectiveSettings(config.settings)
+    recheckChangedIfEnabled(projectId, oldEffective, newEffective)
   }
 
   @Transactional
@@ -154,10 +135,7 @@ class ProjectQaConfigService(
         )
 
     val globalSettings = getSettings(projectId)
-    val oldResolved =
-      QaCheckType.entries.associateWith { type ->
-        langConfig.settings[type] ?: globalSettings[type] ?: type.defaultSeverity
-      }
+    val oldResolved = resolveEffectiveSettings(globalSettings, langConfig.settings)
 
     for ((type, severity) in settings) {
       if (severity == null) {
@@ -168,12 +146,8 @@ class ProjectQaConfigService(
     }
     languageQaConfigRepository.save(langConfig)
 
-    val newResolved =
-      QaCheckType.entries.associateWith { type ->
-        langConfig.settings[type] ?: globalSettings[type] ?: type.defaultSeverity
-      }
-    val changedTypes = QaCheckType.entries.filter { oldResolved[it] != newResolved[it] }
-    recheckIfEnabled(projectId, changedTypes, listOf(languageId))
+    val newResolved = resolveEffectiveSettings(globalSettings, langConfig.settings)
+    recheckChangedIfEnabled(projectId, oldResolved, newResolved, listOf(languageId))
   }
 
   @Transactional
@@ -187,10 +161,28 @@ class ProjectQaConfigService(
 
     languageQaConfigRepository.delete(langConfig)
 
-    // After deletion, language inherits all global settings
+    // After deletion, the language inherits global settings
     val newResolved = getSettings(projectId)
-    val changedTypes = QaCheckType.entries.filter { oldResolved[it] != newResolved[it] }
-    recheckIfEnabled(projectId, changedTypes, listOf(languageId))
+    recheckChangedIfEnabled(projectId, oldResolved, newResolved, listOf(languageId))
+  }
+
+  // Config changes while QA is disabled would not trigger a recheck, so the
+  // persisted QA issues would silently go out of sync with the new settings.
+  private fun requireQaEnabled(projectId: Long) {
+    val project = projectService.get(projectId)
+    if (!project.useQaChecks) {
+      throw BadRequestException(Message.QA_CHECKS_NOT_ENABLED)
+    }
+  }
+
+  private fun recheckChangedIfEnabled(
+    projectId: Long,
+    oldSettings: Map<QaCheckType, QaCheckSeverity>,
+    newSettings: Map<QaCheckType, QaCheckSeverity>,
+    languageIds: List<Long>? = null,
+  ) {
+    val changedTypes = QaCheckType.entries.filter { oldSettings[it] != newSettings[it] }
+    recheckIfEnabled(projectId, changedTypes, languageIds)
   }
 
   private fun recheckIfEnabled(
@@ -201,6 +193,15 @@ class ProjectQaConfigService(
     val project = projectService.get(projectId)
     if (project.useQaChecks) {
       qaRecheckService.recheckTranslations(projectId, checkTypes = checkTypes, languageIds = languageIds)
+    }
+  }
+
+  private fun resolveEffectiveSettings(
+    projectSettings: Map<QaCheckType, QaCheckSeverity>,
+    languageSettings: Map<QaCheckType, QaCheckSeverity> = emptyMap(),
+  ): Map<QaCheckType, QaCheckSeverity> {
+    return QaCheckType.entries.associateWith { type ->
+      languageSettings[type] ?: projectSettings[type] ?: type.defaultSeverity
     }
   }
 }
