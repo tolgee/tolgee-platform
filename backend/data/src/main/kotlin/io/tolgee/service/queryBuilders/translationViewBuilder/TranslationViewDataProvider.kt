@@ -5,7 +5,6 @@ import io.tolgee.dtos.cacheable.LanguageDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.repository.qa.TranslationQaIssueRepository
-import io.tolgee.security.authentication.AuthenticationFacade
 import io.tolgee.service.key.TagService
 import io.tolgee.service.label.LabelService
 import io.tolgee.service.project.ProjectFeatureGuard
@@ -23,7 +22,6 @@ class TranslationViewDataProvider(
   private val em: EntityManager,
   private val tagService: TagService,
   private val labelService: LabelService,
-  private val authenticationFacade: AuthenticationFacade,
   private val qaIssueRepository: TranslationQaIssueRepository,
   private val projectFeatureGuard: ProjectFeatureGuard,
   private val projectService: ProjectService,
@@ -142,7 +140,6 @@ class TranslationViewDataProvider(
         params = params,
         sort = Sort.by(Sort.Order.asc(KeyWithTranslationsView::keyId.name)),
         entityManager = em,
-        authenticationFacade = authenticationFacade,
         qaEnabled = qaEnabled,
       )
     val result = em.createQuery(translationsViewQueryBuilder.keyIdsQuery).resultList
@@ -165,7 +162,6 @@ class TranslationViewDataProvider(
     sort = pageable.sort,
     cursor = cursor?.let { CursorUtil.parseCursor(it) },
     entityManager = em,
-    authenticationFacade = authenticationFacade,
     qaEnabled = qaEnabled,
   )
 }

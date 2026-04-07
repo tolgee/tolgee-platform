@@ -248,7 +248,7 @@ private fun buildUnmatchedDescription(
   sb.appendLine("Mismatch details (each spec vs each result):")
   specs.forEachIndexed { specIdx, spec ->
     val candidates =
-      actual.mapIndexedNotNull { resultIdx, result ->
+      actual.mapIndexed { resultIdx, result ->
         val mismatch = spec.describeMismatch(result)
         if (mismatch.isEmpty()) {
           "  spec[$specIdx] matches result[$resultIdx]"

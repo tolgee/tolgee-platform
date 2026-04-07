@@ -14,7 +14,7 @@ fun extractArgs(text: String): List<ArgInfo>? {
     val args = mutableListOf<ArgInfo>()
     collectArgsWithPositions(node, 0, args)
     args
-  } catch (e: Exception) {
+  } catch (_: Exception) {
     // Broad catch is intentional — parsing failures are surfaced by IcuSyntaxCheck,
     // so this extractor can silently return null for malformed text.
     null

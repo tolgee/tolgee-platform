@@ -2,11 +2,13 @@ package io.tolgee.ee.service.qa.checks
 
 private val URL_REGEX =
   Regex(
-    """(?:https?|ftp)://[^\s<>"\])}]+|www\.[^\s<>"\])}]+""",
+    """(?:https?|ftp)://[^\s<>"]+|www\.[^\s<>"]+""",
     RegexOption.IGNORE_CASE,
   )
 
 private val TRAILING_STRIP_CHARS = setOf('.', ',', '!', '?', ';', ':')
+
+private val BRACKET_PAIRS = mapOf(')' to '(', ']' to '[', '}' to '{')
 
 data class UrlMatch(
   val url: String,
@@ -18,14 +20,27 @@ fun extractUrls(text: String): List<UrlMatch> {
   return URL_REGEX
     .findAll(text)
     .mapNotNull { match ->
-      var value = match.value
-      while (value.isNotEmpty() && value.last() in TRAILING_STRIP_CHARS) {
-        value = value.dropLast(1)
+      var url = match.value
+      while (url.isNotEmpty() && (url.last() in BRACKET_PAIRS || url.last() in TRAILING_STRIP_CHARS)) {
+        if (url.last() in TRAILING_STRIP_CHARS) {
+          url = url.dropLast(1)
+          continue
+        }
+        val closer = url.last()
+        val opener = BRACKET_PAIRS.getValue(closer)
+        if (url.count { it == closer } > url.count { it == opener }) {
+          url = url.dropLast(1)
+          continue
+        }
+
+        // This one is balanced within the scope of the URL
+        break
       }
-      if (value.isEmpty()) {
-        null
-      } else {
-        UrlMatch(url = value, start = match.range.first, end = match.range.first + value.length)
+
+      if (url.isEmpty()) {
+        return@mapNotNull null
       }
+
+      UrlMatch(url = url, start = match.range.first, end = match.range.first + url.length)
     }.toList()
 }

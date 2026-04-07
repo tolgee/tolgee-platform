@@ -161,6 +161,94 @@ class DifferentUrlsCheckTest {
   }
 
   @Test
+  fun `handles URL with balanced parentheses in path`() {
+    check
+      .check(
+        params(
+          "Siehe https://en.wikipedia.org/wiki/Fish_(disambiguation) hier",
+          "See https://en.wikipedia.org/wiki/Fish_(disambiguation) here",
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `handles URL with balanced parens inside sentence parens`() {
+    check
+      .check(
+        params(
+          "Info (https://en.wikipedia.org/wiki/Fish_(disambiguation)) hier",
+          "Info (https://en.wikipedia.org/wiki/Fish_(disambiguation)) here",
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `strips trailing unbalanced closing paren`() {
+    check
+      .check(
+        params(
+          "Visit https://example.com/path) here",
+          "Besuche https://example.com/path) hier",
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `handles balanced parens with trailing punctuation`() {
+    check
+      .check(
+        params(
+          "See https://en.wikipedia.org/wiki/Fish_(disambiguation).",
+          "Siehe https://en.wikipedia.org/wiki/Fish_(disambiguation).",
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `handles URL with square brackets in query params`() {
+    check
+      .check(
+        params(
+          "API: https://example.com/api?filter[name]=foo",
+          "API: https://example.com/api?filter[name]=foo",
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `strips trailing unbalanced square bracket`() {
+    check
+      .check(
+        params(
+          "Link [https://example.com] hier",
+          "Link [https://example.com] here",
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `handles URL with curly braces in path`() {
+    check
+      .check(
+        params(
+          "API: https://example.com/api/{id}/details",
+          "API: https://example.com/api/{id}/details",
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
+  fun `strips multiple trailing unbalanced closing parens`() {
+    check
+      .check(
+        params(
+          "Info ((https://example.com)) hier",
+          "Info ((https://example.com)) here",
+        ),
+      ).assertNoIssues()
+  }
+
+  @Test
   fun `strips trailing sentence punctuation from URL`() {
     check
       .check(

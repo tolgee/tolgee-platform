@@ -52,7 +52,6 @@ class QueryBase<T>(
   private val languages: Set<LanguageDto>,
   private val params: TranslationFilters,
   private val entityManager: EntityManager,
-  private val authenticationFacade: AuthenticationFacade,
   private val qaEnabled: Boolean,
 ) {
   val whereConditions: MutableSet<Predicate> = HashSet()
