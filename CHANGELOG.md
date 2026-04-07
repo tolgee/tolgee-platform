@@ -1,3 +1,15 @@
+# [3.178.0](https://github.com/tolgee/tolgee-platform/compare/v3.177.1...v3.178.0) (2026-04-07)
+
+
+### Bug Fixes
+
+* don't retry batch items when entity is deleted ([#3592](https://github.com/tolgee/tolgee-platform/issues/3592)) ([a6d261d](https://github.com/tolgee/tolgee-platform/commit/a6d261d39710a3536bc512f20eb1427d578a1af4))
+
+
+### Features
+
+* add announcement for Branching feature ([#3588](https://github.com/tolgee/tolgee-platform/issues/3588)) ([e6d6002](https://github.com/tolgee/tolgee-platform/commit/e6d6002e3cbc43c70ffac49327198c5e440951e8))
+
 ## [3.177.1](https://github.com/tolgee/tolgee-platform/compare/v3.177.0...v3.177.1) (2026-04-02)
 
 
