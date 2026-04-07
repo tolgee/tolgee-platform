@@ -223,6 +223,8 @@ export function useErrorTranslation() {
           collidingKey: params?.[1] || '',
           suffix: params?.[2] || '',
         });
+      case 'qa_checks_not_enabled':
+        return t('qa_checks_not_enabled');
       default:
         return code;
     }

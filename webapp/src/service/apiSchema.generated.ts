@@ -2996,7 +2996,8 @@ export interface components {
         | "feature_not_enabled_for_project"
         | "export_key_plural_suffix_collision"
         | "translation_exceeds_char_limit"
-        | "url_not_valid";
+        | "url_not_valid"
+        | "qa_checks_not_enabled";
       params?: unknown[];
     };
     ExistenceEntityDescription: {
@@ -6656,7 +6657,8 @@ export interface components {
         | "feature_not_enabled_for_project"
         | "export_key_plural_suffix_collision"
         | "translation_exceeds_char_limit"
-        | "url_not_valid";
+        | "url_not_valid"
+        | "qa_checks_not_enabled";
       params?: unknown[];
       success: boolean;
     };
