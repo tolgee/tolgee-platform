@@ -1223,7 +1223,8 @@ export interface components {
         | "FEATURE_GLOSSARIES_AND_PLAYGROUND"
         | "FEATURE_LABELS"
         | "FEATURE_SUGGESTIONS_AND_LABELS"
-        | "FEATURE_IMPROVED_FIGMA_ANDROID_AND_IOS";
+        | "FEATURE_IMPROVED_FIGMA_ANDROID_AND_IOS"
+        | "FEATURE_BRANCHING";
     };
     ApiKeyModel: {
       /** @description Description */
