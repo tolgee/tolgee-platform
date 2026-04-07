@@ -100,6 +100,8 @@ export const useQaPreviewWebsocket = ({
     };
 
     return () => {
+      sendText.cancel();
+      pendingTextUpdateRef.current = false;
       ws.close();
       wsRef.current?.close();
       if (wsRef.current === ws) {
