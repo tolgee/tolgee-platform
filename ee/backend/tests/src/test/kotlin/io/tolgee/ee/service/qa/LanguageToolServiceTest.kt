@@ -43,9 +43,7 @@ class LanguageToolServiceTest {
     service = LanguageToolService(tolgeeProperties, builder)
   }
 
-  private fun mockLanguagesResponse(
-    vararg languages: LanguageToolLanguageInfo,
-  ) {
+  private fun mockLanguagesResponse(vararg languages: LanguageToolLanguageInfo) {
     val json = objectMapper.writeValueAsString(languages)
     mockServer
       .expect(requestTo("http://localhost:8010/v2/languages"))
@@ -53,9 +51,7 @@ class LanguageToolServiceTest {
       .andRespond(withSuccess(json, MediaType.APPLICATION_JSON))
   }
 
-  private fun mockCheckResponse(
-    vararg matches: LanguageToolMatch,
-  ) {
+  private fun mockCheckResponse(vararg matches: LanguageToolMatch) {
     val response = LanguageToolResponse(matches = matches.toList())
     val json = objectMapper.writeValueAsString(response)
     mockServer
