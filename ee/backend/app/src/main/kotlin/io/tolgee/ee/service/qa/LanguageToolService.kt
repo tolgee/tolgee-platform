@@ -23,11 +23,12 @@ class LanguageToolService(
   private val tolgeeProperties: TolgeeProperties,
   private val restTemplateBuilder: RestTemplateBuilder,
 ) {
-  private val restTemplate: RestTemplate =
+  private val restTemplate: RestTemplate by lazy {
     restTemplateBuilder
       .connectTimeout(Duration.ofSeconds(5))
       .readTimeout(Duration.ofSeconds(30))
       .build()
+  }
 
   private val resultCache: Cache<LanguageToolCacheKey, List<LanguageToolMatch>> =
     Caffeine
