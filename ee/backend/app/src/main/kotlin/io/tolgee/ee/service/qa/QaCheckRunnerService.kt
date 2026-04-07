@@ -16,13 +16,9 @@ class QaCheckRunnerService(
     params: QaCheckParams,
     checkTypes: List<QaCheckType>? = null,
     languageId: Long? = null,
+    enabledCheckTypes: Set<QaCheckType>? = null,
   ): List<QaCheckResult> {
-    val enabledTypes =
-      if (languageId != null) {
-        projectQaConfigService.getEnabledCheckTypesForLanguage(projectId, languageId)
-      } else {
-        projectQaConfigService.getEnabledCheckTypesForProject(projectId)
-      }
+    val enabledTypes = enabledCheckTypes ?: getEnabledCheckTypes(projectId, languageId)
     val typesToRun = filterByCheckTypes(enabledTypes, checkTypes)
     return checks
       .filter { it.type in typesToRun }
@@ -58,7 +54,7 @@ class QaCheckRunnerService(
     try {
       return check.check(params)
     } catch (e: Exception) {
-      logger.error("QA check ${check.type} failed", e)
+      logger.error("QA check {} failed", check.type, e)
       return listOf(
         QaCheckResult(
           type = check.type,
@@ -81,6 +77,16 @@ class QaCheckRunnerService(
 
   private fun findCheck(type: QaCheckType): QaCheck {
     return checks.find { it.type == type } ?: throw IllegalStateException("Check $type not found")
+  }
+
+  private fun getEnabledCheckTypes(
+    projectId: Long,
+    languageId: Long?,
+  ): Set<QaCheckType> {
+    if (languageId != null) {
+      return projectQaConfigService.getEnabledCheckTypesForLanguage(projectId, languageId)
+    }
+    return projectQaConfigService.getEnabledCheckTypesForProject(projectId)
   }
 
   companion object {

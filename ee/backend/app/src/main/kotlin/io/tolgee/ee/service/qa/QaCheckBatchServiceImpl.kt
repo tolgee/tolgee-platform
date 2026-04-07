@@ -37,6 +37,7 @@ class QaCheckBatchServiceImpl(
   private val projectService: ProjectService,
   private val glossaryTermService: GlossaryTermService,
   private val enabledFeaturesProvider: EnabledFeaturesProvider,
+  private val projectQaConfigService: ProjectQaConfigService,
 ) : QaCheckBatchService {
   @Transactional
   override fun runChecksAndPersist(
@@ -44,6 +45,7 @@ class QaCheckBatchServiceImpl(
     keyId: Long,
     languageId: Long,
     checkTypes: List<QaCheckType>?,
+    enabledCheckTypes: Set<QaCheckType>?,
   ) {
     val project = projectService.getDto(projectId)
 
@@ -105,6 +107,7 @@ class QaCheckBatchServiceImpl(
         params,
         checkTypes,
         languageId = languageId,
+        enabledCheckTypes = enabledCheckTypes,
       )
 
     if (results.isEmpty() && existingTranslation == null) return
@@ -129,6 +132,11 @@ class QaCheckBatchServiceImpl(
     publishBusinessEvent(projectId)
   }
 
+  override fun getEnabledCheckTypesForLanguage(
+    projectId: Long,
+    languageId: Long,
+  ): Set<QaCheckType> = projectQaConfigService.getEnabledCheckTypesForLanguage(projectId, languageId)
+
   private fun findGlossaryTerms(
     organizationOwnerId: Long,
     projectId: Long,
@@ -147,10 +155,6 @@ class QaCheckBatchServiceImpl(
     }
   }
 
-  companion object {
-    private val logger = LoggerFactory.getLogger(QaCheckBatchServiceImpl::class.java)
-  }
-
   private fun publishBusinessEvent(projectId: Long) {
     businessEventPublisher.publishOnceInTime(
       OnBusinessEventToCaptureEvent(
@@ -161,5 +165,9 @@ class QaCheckBatchServiceImpl(
     ) {
       "QA_CHECK_RUN_$projectId"
     }
+  }
+
+  companion object {
+    private val logger = LoggerFactory.getLogger(QaCheckBatchServiceImpl::class.java)
   }
 }

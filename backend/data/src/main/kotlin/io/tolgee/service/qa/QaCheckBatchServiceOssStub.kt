@@ -10,7 +10,13 @@ class QaCheckBatchServiceOssStub : QaCheckBatchService {
     keyId: Long,
     languageId: Long,
     checkTypes: List<QaCheckType>?,
+    enabledCheckTypes: Set<QaCheckType>?,
   ) {
     // No-op: QA checks are an EE feature
   }
+
+  override fun getEnabledCheckTypesForLanguage(
+    projectId: Long,
+    languageId: Long,
+  ): Set<QaCheckType> = emptySet()
 }
