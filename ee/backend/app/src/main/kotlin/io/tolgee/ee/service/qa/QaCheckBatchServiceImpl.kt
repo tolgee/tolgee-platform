@@ -117,7 +117,10 @@ class QaCheckBatchServiceImpl(
 
       qaIssueService.replaceIssuesForTranslation(translation, results, checkTypes)
 
-      if (checkTypes == null) {
+      // Only clear stale flag if the translation text hasn't changed since we collected inputs.
+      // If it changed, QaActivityListener already marked it stale again and a new batch job
+      // will re-check with the updated text.
+      if (checkTypes == null && (translation.text ?: "") == translationText) {
         translation.qaChecksStale = false
       }
       // Disable activity logging for the translation — no content changes are happening here.
