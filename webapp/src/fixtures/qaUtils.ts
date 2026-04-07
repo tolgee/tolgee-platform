@@ -1,3 +1,5 @@
+import { getPluralVariants } from '@tginternal/editor';
+
 export type QaReplacementParams = {
   positionStart?: number;
   positionEnd?: number;
@@ -47,4 +49,15 @@ export function adjustQaIssuesForVariant<T extends QaVariantIssue>(
       positionEnd:
         i.positionEnd != null ? i.positionEnd - variantOffset : i.positionEnd,
     }));
+}
+
+export function getFirstPluralVariantWithQaIssues(
+  qaIssues: Array<{ pluralVariant?: string }> | undefined,
+  languageTag: string
+): string | undefined {
+  if (!qaIssues?.length) return undefined;
+  const variants = getPluralVariants(languageTag);
+  return variants.find((v) =>
+    qaIssues.some((issue) => issue.pluralVariant === v)
+  );
 }

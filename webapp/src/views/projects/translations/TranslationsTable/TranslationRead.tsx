@@ -9,6 +9,7 @@ import { AiPlaygroundPreview } from '../translationVisual/AiPlaygroundPreview';
 import { TranslationLabels } from 'tg.views/projects/translations/TranslationsList/TranslationLabels';
 import { SuggestionsFirst } from '../Suggestions/SuggestionsFirst';
 import { useEnabledFeatures } from 'tg.globalContext/helpers';
+import { getFirstPluralVariantWithQaIssues } from 'tg.fixtures/qaUtils';
 
 const StyledContainer = styled('div')`
   display: grid;
@@ -152,7 +153,17 @@ export const TranslationRead: React.FC<Props> = ({
         <ControlsTranslation
           onEdit={() => handleOpen()}
           onComments={() => handleOpen('comments')}
-          onQaIssues={() => handleOpen('qa_checks')}
+          onQaIssues={() =>
+            handleOpen(
+              'qa_checks',
+              keyData.keyIsPlural
+                ? getFirstPluralVariantWithQaIssues(
+                    translation?.qaIssues,
+                    language.tag
+                  )
+                : undefined
+            )
+          }
           commentsCount={translation?.commentCount}
           unresolvedCommentCount={translation?.unresolvedCommentCount}
           qaIssueCount={translation?.qaIssueCount}
