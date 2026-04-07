@@ -19762,6 +19762,7 @@ export interface operations {
     parameters: {
       query: {
         languageId: number;
+        branch?: string;
       };
       path: {
         projectId: number;

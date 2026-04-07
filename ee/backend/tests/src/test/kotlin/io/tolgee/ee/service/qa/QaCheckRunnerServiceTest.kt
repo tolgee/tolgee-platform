@@ -36,7 +36,15 @@ class QaCheckRunnerServiceTest {
     val qaRecheckService = Mockito.mock(QaRecheckService::class.java)
     val languageStatsService = Mockito.mock(LanguageStatsService::class.java)
     val languageService = Mockito.mock(LanguageService::class.java)
-    return ProjectQaConfigService(repo, langRepo, projectService, entityManager, qaRecheckService, languageStatsService, languageService)
+    return ProjectQaConfigService(
+      repo,
+      langRepo,
+      projectService,
+      entityManager,
+      qaRecheckService,
+      languageStatsService,
+      languageService,
+    )
   }
 
   @Test
